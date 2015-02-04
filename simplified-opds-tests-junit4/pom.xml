@@ -10,28 +10,25 @@
     <artifactId>simplified</artifactId>
     <version>0.1.0</version>
   </parent>
-  <artifactId>simplified-opds-core</artifactId>
+  <artifactId>simplified-opds-tests-junit4</artifactId>
 
   <packaging>jar</packaging>
-  <name>simplified-opds-core</name>
-  <description>Simplified (OPDS feed core)</description>
+  <name>simplified-opds-tests-junit4</name>
+  <description>Simplified (JUnit4 test suite for OPDS feed tests)</description>
   <url>https://github.com/NYPL/Simplified-Android</url>
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.jnull</groupId>
-      <artifactId>io7m-jnull-core</artifactId>
-      <version>[1.0.0, 2.0.0)</version>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-opds-tests</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.io7m.junreachable</groupId>
-      <artifactId>io7m-junreachable-core</artifactId>
-      <version>[1.0.0, 2.0.0)</version>
-    </dependency>
-    <dependency>
-      <groupId>com.io7m.jfunctional</groupId>
-      <artifactId>io7m-jfunctional-core</artifactId>
-      <version>[1.0.0, 2.0.0)</version>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -69,26 +66,53 @@
         </configuration>
       </plugin>
 
-      <!-- Produce custom manifest in jar files -->
+      <!-- Produce jar files -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.4</version>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Specification-Title>${project.name}</Specification-Title>
-              <Specification-Version>${project.version}</Specification-Version>
-              <Specification-Vendor>NYPL Labs</Specification-Vendor>
-              <Implementation-Title>${project.name}</Implementation-Title>
-              <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-              <Built-By>NYPL Labs</Built-By>
-              <Sealed>true</Sealed>
-            </manifestEntries>
-          </archive>
-        </configuration>
+        <executions>
+          <!-- Produce custom manifest in jar files -->
+          <execution>
+            <id>code-jar</id>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Specification-Title>${project.name}</Specification-Title>
+                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Vendor>NYPL Labs</Specification-Vendor>
+                  <Implementation-Title>${project.name}</Implementation-Title>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
+                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Built-By>NYPL Labs</Built-By>
+                  <Sealed>true</Sealed>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+          <!-- Produce jar file of tests -->
+          <execution>
+            <id>test-jar</id>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <Specification-Title>${project.name}</Specification-Title>
+                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Vendor>NYPL Labs</Specification-Vendor>
+                  <Implementation-Title>${project.name}</Implementation-Title>
+                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
+                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Built-By>NYPL Labs</Built-By>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Create source jars -->
@@ -121,35 +145,14 @@
         </executions>
       </plugin>
 
-      <!-- Create javadoc jars -->
+      <!-- Instruct the surefire plugin to redirect test output to files. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <bottom><![CDATA[Copyright &#169; {currentYear} &lt;NYPL Labs&gt; http://labs.nypl.org]]></bottom>
-              <archive>
-                <manifestEntries>
-                  <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
-                  <Specification-Vendor>NYPL Labs</Specification-Vendor>
-                  <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
-                  <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-                  <Built-By>NYPL Labs</Built-By>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.15</version>
+        <configuration>
+          <redirectTestOutputToFile>true</redirectTestOutputToFile>
+        </configuration>
       </plugin>
     </plugins>
 

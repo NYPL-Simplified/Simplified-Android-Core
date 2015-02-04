@@ -3,7 +3,13 @@ package org.nypl.simplified.opds.core;
 import java.net.URI;
 
 /**
+ * <p>
  * The type of asynchronous OPDS feed loaders.
+ * </p>
+ * <p>
+ * Implementations are required to be able to accept requests from any number
+ * of threads simultaneously.
+ * </p>
  */
 
 public interface OPDSFeedLoaderType

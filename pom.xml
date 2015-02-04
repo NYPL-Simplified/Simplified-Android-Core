@@ -16,6 +16,8 @@
 
   <modules>
     <module>simplified-opds-core</module>
+    <module>simplified-opds-tests</module>
+    <module>simplified-opds-tests-junit4</module>
   </modules>
 
   <properties>

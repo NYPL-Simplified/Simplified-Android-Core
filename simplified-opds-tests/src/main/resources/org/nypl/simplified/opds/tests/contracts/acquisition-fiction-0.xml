@@ -1,0 +1,466 @@
+<feed xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:schema="http://schema.org/" xmlns:app="http://www.w3.org/2007/app" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:opds41="http://opds-spec.org/2014/catalog" xmlns:simplified="http://library-simplified.com/" xmlns="http://www.w3.org/2005/Atom">
+  <id>http://library-simplified.herokuapp.com/feed/Fiction</id>
+  <title>Fiction: featured</title>
+  <updated>2015-02-03T18:26:29Z</updated>
+  <link href="http://library-simplified.herokuapp.com/feed/Fiction"/>
+  <link rel="self" href="http://library-simplified.herokuapp.com/feed/Fiction"/>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/7153</id>
+    <title>Elder Conklin</title>
+    <author>
+      <name>Frank Harris</name>
+    </author>
+    <summary>Elder Conklin.--The sheriff and his partner.--A modern idyll.--Eatin' crow.--The best man in Garotte.--Gulmore, the boss.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/7153/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/7153/checkout"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
+    <published>2014-04-01</published>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/1aeea301-0460-46b8-84d1-1279b7a11d82</id>
+    <title>That Part Was True</title>
+    <alternativeHeadline>A Novel</alternativeHeadline>
+    <author>
+      <name>Deborah Mckinlay</name>
+    </author>
+    <summary>&lt;p&gt;The Bridges of Madison County meets Sleepless in Seattle. A lonely British woman's letter to a successful American author sparks a relationship that changes both their lives.&lt;p&gt;When Eve Petworth writes to Jackson Cooper to praise a scene in one of his books, they discover a mutual love of cookery and food. Their friendship blossoms against the backdrop of Jackson's colorful but ultimately unsatisfying love life and Eve's tense relationship with her soon-to-be married daughter. As each of them offers, from behind the veils of semi-anonymity and distance, wise and increasingly affectionate counsel to the other, they both begin to confront their problems and plan a celebratory meeting in Paris&amp;#8212;a meeting that Eve fears can never happen.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 1.0&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/1aeea301-0460-46b8-84d1-1279b7a11d82/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/1aeea301-0460-46b8-84d1-1279b7a11d82/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1ae/1aeea301-0460-46b8-84d1-1279b7a11d82.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1ae/1aeea301-0460-46b8-84d1-1279b7a11d82.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Blackstone Audio, Inc.</dcterms:publisher>
+    <published>2014-11-14</published>
+    <dcterms:dateCopyrighted>2014-02-04</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/21597</id>
+    <title>Jersey Street and Jersey Lane: Urban and Suburban Sketches</title>
+    <author>
+      <name>H. C. Bunner</name>
+    </author>
+    <summary>Jersey and Mulberry.--Tiemann's to Tubby Hook.--The Bowery and Bohemia.--The story of a path.--The lost child.--A letter to town.&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 0.6&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/21597/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/21597/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/21597/cover_21597_49.png"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/21597/cover_21597_49.png"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
+    <published>2014-04-01</published>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/e40007ce-5d06-4f1a-b6c1-65070e108931</id>
+    <title>This Charming Man</title>
+    <author>
+      <name>Marian Keyes</name>
+    </author>
+    <summary>&lt;p&gt;The lives of four very different women have been shaped&amp;#8212;and battered&amp;#8212;by one charming man. . . .&lt;p&gt;Ireland's debonair politician Paddy de Courcy&amp;#8212;the &amp;#34;John F. Kennedy Jr. of Dublin&amp;#34;&amp;#8212;has captured tabloid headlines and the imagination of his country with his charm and charisma. But the crushed hearts he's left behind him reveal more about his character than his winning, votegetting smile. Lola, Grace, Marnie, and Alicia have all suffered from his selfishness and cruelty. But with Paddy's political star ascending, the time is finally ripe for redemption . . . and perhaps a bit of revenge.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/e40007ce-5d06-4f1a-b6c1-65070e108931/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/e40007ce-5d06-4f1a-b6c1-65070e108931/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e40/e40007ce-5d06-4f1a-b6c1-65070e108931.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e40/e40007ce-5d06-4f1a-b6c1-65070e108931.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>HarperCollins</dcterms:publisher>
+    <published>2014-11-16</published>
+    <dcterms:dateCopyrighted>2013-12-31</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/54e72c35-098c-4059-986d-4589189f5775</id>
+    <title>Young Turk</title>
+    <alternativeHeadline>A Novel</alternativeHeadline>
+    <author>
+      <name>Moris Farhi</name>
+    </author>
+    <summary>&lt;p&gt;From a writer whose international acclaim can now spread to US shores comes a wise, craftily spun, and spine-tinglingly erotic tale of love, courage, and the forging of conscience-'a novel of startling integrity and beauty' (Independent on Sunday). In the beginning there is death, says one narrator in this enthralling 'treasure of a novel' (Alan Silletoe), but after that there is life: robust, riotous, nave, sensual, tragic, and profound. Through a series of 13 linked stories connected by a circle of young friends, Moris Farhi writes of the trials and joys of children coming of age in an increasingly dangerous and politicized world: Turkey just before, during, and after World War II. The death at the beginning is that of a girl endowed with second sight, who sees the war and the Holocaust coming and can't bear the gift of life. For Musa, a boy allowed into the women's bath like a fly in a bowl of naked fruit, the change comes when one woman notices his manhood. Bilal, a Jew, sets off for occupied Greece to rescue his relatives and never comes back. Davut participates in a plot to save a poet who is a national hero and anathema to the ruling party, and finds his innocence abused by the plotters. Here is a novel that captures the richness of a moment in history and the timeless aspirations of youth.&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/54e72c35-098c-4059-986d-4589189f5775/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/54e72c35-098c-4059-986d-4589189f5775/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/54e/54e72c35-098c-4059-986d-4589189f5775.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/54e/54e72c35-098c-4059-986d-4589189f5775.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Skyhorse Publishing, Inc.</dcterms:publisher>
+    <published>2014-08-10</published>
+    <dcterms:dateCopyrighted>2012-03-15</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/43216</id>
+    <title>Zut and Other Parisians</title>
+    <author>
+      <name>Guy Wetmore Carryl</name>
+    </author>
+    <summary>Zut.--Caffiard, deus ex machina.--The next corner.--The only son of his mother.--The tuition of Dodo Chapuis.--Le pochard.--A Latter-day Lucifer.--Poire!--Papa Labesse.--In the absence of Monsieur.--Little Tapin.&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/43216/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/43216/checkout"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
+    <published>2014-04-01</published>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/411cd6c6-d545-46d7-b63c-05c32d548bbd</id>
+    <title>Westward the Tide</title>
+    <author>
+      <name>Louis L'Amour</name>
+    </author>
+    <summary>&lt;p&gt;Matt Bardoul was a good man to have as a friend and a bad one to make trouble with. He was also a single-minded drifter--until he met his match in an outspoken beauty named Jacquine Coyle. She was headed into the Bighorn Mountains with her father and an expedition in search of gold. After Matt signs on to join them, he discovers that there is a group of outlaws in the party--gunfighters and thieves that Matt wouldn't trust for a minute. At first it's unclear what they are planning, but before long Matt realizes that he's the only man standing between innocent people and a brutal conspiracy of greed, lust, and cold-blooded murder.&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;From the Paperback edition.&lt;/i&gt;&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.3&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/411cd6c6-d545-46d7-b63c-05c32d548bbd/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/411cd6c6-d545-46d7-b63c-05c32d548bbd/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/411/411cd6c6-d545-46d7-b63c-05c32d548bbd.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/411/411cd6c6-d545-46d7-b63c-05c32d548bbd.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Books on Tape</dcterms:publisher>
+    <published>2014-11-14</published>
+    <dcterms:dateCopyrighted>2010-05-04</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/62b6d439-54da-4c9f-90fa-74bb9012374d</id>
+    <title>Fly Away</title>
+    <author>
+      <name>Kristin Hannah</name>
+    </author>
+    <summary>&lt;p&gt;Kristin Hannah's FIREFLY LANE became a touchstone novel in women's lives. Across the world, women embraced the story of Tully and Kate's enduring friendship. They laughed with Tully and cried with Kate and anguished over Tully's fractured relationship with her mother. Now, five years later, in FLY AWAY, Kristin Hannah returns to the world of these unforgettable characters and asks the question...How do you hold yourself together when your world has fallen apart...FLY AWAY is the story of three women who have lost their way and need each other&amp;#8212;plus a miracle&amp;#8212;to transform their lives. An emotionally-complex, heartwrenching novel about love, family, motherhood, loss, and redemption, FLY AWAY reminds us that where there is life, there is hope and where there is love, there is forgiveness. Told with her trademark visceral storytelling and illuminating prose, Kristin Hannah reveals why she is one of the most beloved writers of our day. Includes a Reading Group Guide Read by Kristin Hannah&lt;ul&gt;&lt;li&gt;Work quality: 1.0&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/62b6d439-54da-4c9f-90fa-74bb9012374d/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/62b6d439-54da-4c9f-90fa-74bb9012374d/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/62b/62b6d439-54da-4c9f-90fa-74bb9012374d.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/62b/62b6d439-54da-4c9f-90fa-74bb9012374d.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Macmillan Audio</dcterms:publisher>
+    <published>2014-11-14</published>
+    <dcterms:dateCopyrighted>2013-04-23</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>3</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/e11bae84-bfd5-4390-a471-77e2a8d84194</id>
+    <title>Big Girls Don't Cry</title>
+    <alternativeHeadline>A Novel</alternativeHeadline>
+    <author>
+      <name>Fay Weldon</name>
+    </author>
+    <summary>&lt;p&gt;First-wave feminism takes front and center in this fearless novel, a New York Times Notable Book of the Year, about women determined to succeed in a man's world&amp;#8212;only to be foiled by their own ambitionA Woman Needs a Man Like a Fish Needs a Bicycle.&#160;It's the 1970s, and the sexual revolution is just beginning. Four women have decided to open a feminist publishing house. Named in honor of the gorgon who turned men's hearts to stone, MedusaPublishing gives the so-called Four Furies a platform for speaking out against female oppression. &#160;&#160; &#160;&#160;Layla is a wealthy, fundamental radical, intolerant of anyone whose ideals deviate, even slightly, from her own&amp;#8212;that is, until she finds herself seduced by a married man; tiny Alice is all mind and very little matter, until she discovers the dangerous New Age practice of goddess worship; Stephanie leaves her unfaithful husband in pursuit of sexual fulfillment with other men&amp;#8212;and women; and Nancy, tired of washing her fianc's socks, discovers she has a remarkable mind for business.&#160;Big Girls Don't Cry is the story of four women who are determined to change the world, and who, over the course of two-and-a-half decades, ultimately transform themselves.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.4&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/e11bae84-bfd5-4390-a471-77e2a8d84194/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/e11bae84-bfd5-4390-a471-77e2a8d84194/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e11/e11bae84-bfd5-4390-a471-77e2a8d84194.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/e11/e11bae84-bfd5-4390-a471-77e2a8d84194.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Open Road Media</dcterms:publisher>
+    <published>2014-08-10</published>
+    <dcterms:dateCopyrighted>2013-05-14</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/7d97477b-fce3-4c89-afe2-f819d85be528</id>
+    <title>Random Acts of Kindness</title>
+    <author>
+      <name>Lisa Verge Higgins</name>
+    </author>
+    <summary>&lt;p&gt;A new novel of women's friendship from the author of The Proper Care and Maintenance of Friendship and Friendship Makes the Heart Grow Fonder.&lt;p&gt;With the remnants of her past rattling in the trunk of her Chevy, Jenna Elliott abandons her Seattle home, determined to start life fresh. Her journey compels her to the door of two friends: Claire, an ex&amp;#8211;Buddhist nun and cancer survivor, eager to escape her overbearing family for what may be her last chance to fulfill a dusty dream; and Nicole, a professional life coach who can't even control her own teenage son. But what starts out as an impulsive road trip soon becomes an inexorable journey to their past as the women grapple with who they were, who they are, and the strange twists that have now set them on the road to their hometown of Pine Lake.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/7d97477b-fce3-4c89-afe2-f819d85be528/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/7d97477b-fce3-4c89-afe2-f819d85be528/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/7d9/7d97477b-fce3-4c89-afe2-f819d85be528.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/7d9/7d97477b-fce3-4c89-afe2-f819d85be528.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Blackstone Audio, Inc.</dcterms:publisher>
+    <published>2014-11-16</published>
+    <dcterms:dateCopyrighted>2014-03-25</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/24876</id>
+    <title>Lucy Maud Montgomery Short Stories, 1905 to 1906</title>
+    <author>
+      <name>L. M. Montgomery</name>
+    </author>
+    <summary>A correspondence and a climax -- An adventure on Island Rock -- At five o'clock in the morning -- Aunt Susanna's birthday celebration -- Bertie's New Year -- Between the hill and the valley -- Clorinda's gifts -- Cyrilla's inspiration -- Dorinda's desperate deed -- Her own people -- Ida's New Year cake -- In the old valley -- Jane Lavinia -- Mackereling out in the gulf -- Millicent's double -- The blue north room -- The Christmas surprise at Enderly Road -- The dissipation of Miss Ponsonby -- The Falsoms' Christmas dinner -- The Fraser Scholarship -- The girl at the gate -- The light on the Big Dipper -- The prodigal brother -- The redemption of John Churchill -- The schoolmaster's letter -- The story of Uncle Dick -- The understanding of Sister Sara -- The unforgotten one -- The wooing of Bessy -- Their girl Josie -- When Jack and Jill took a hand.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 0.6&lt;/li&gt;&lt;li&gt;Summary quality: 0.0&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/24876/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/24876/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/24876/cover_24876_0.png"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/24876/cover_24876_0.png"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
+    <published>2014-04-01</published>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/2f642608-60e0-4ba4-8a08-3c53e01824d1</id>
+    <title>Whippoorwill</title>
+    <alternativeHeadline>Letty and Eulis Series, Book 1</alternativeHeadline>
+    <author>
+      <name>Sharon Sala</name>
+    </author>
+    <summary>&lt;p&gt;Leticia Murphy never planned on becoming a saloon girl. But the Kansas Territories are a difficult place, and Lettie, orphaned at the age of twelve, had to do whatever it took to survive. When she comes to the rough-and-tumble town of Lizard Flats, she wants nothing more than a second chance&amp;#8212;although she knows the likelihood of getting one is slim.&lt;p&gt;Until, that is, a stranger comes to Lizard Flats, a preacher from the East, arriving to perform a wedding. But the man of God isn't quite as holy as he seems. And when he turns up dead in Lettie's bed, it sets off a chain of events nobody could have predicted that will ultimately lead to change not just for Lizard Flats, but for Lettie herself.&lt;p&gt;The first in the best-selling Whippoorwill&lt;i&gt;&lt;/i&gt; trilogy by renowned romance novelist Sharon Sala, Whippoorwill&lt;i&gt;&lt;/i&gt; is sure to leave you spellbound and wanting more.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/2f642608-60e0-4ba4-8a08-3c53e01824d1/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/2f642608-60e0-4ba4-8a08-3c53e01824d1/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/2f6/2f642608-60e0-4ba4-8a08-3c53e01824d1.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/2f6/2f642608-60e0-4ba4-8a08-3c53e01824d1.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>RosettaBooks</dcterms:publisher>
+    <published>2014-08-31</published>
+    <dcterms:dateCopyrighted>2014-01-21</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/ceea0f9f-4201-4858-8208-e36c868b2c48</id>
+    <title>The Death of Lucy Kyte</title>
+    <alternativeHeadline>A New Mystery Featuring Josephine Tey</alternativeHeadline>
+    <author>
+      <name>Nicola Upson</name>
+    </author>
+    <summary>&lt;p&gt;An unexpected inheritance plunges beloved British mystery author Josephine Tey into a disturbing puzzle of dark secrets connecting the present and the past in this intriguing historical mystery brimming with psychological tension.&lt;/p&gt;&lt;p&gt;When Josephine Tey unexpectedly inherits Red Barn Cottage from a godmother she barely knows, the will stipulates that she must personally claim the house in the Suffolk countryside. But Josephine is not the only benefactor&amp;#8212;a woman named Lucy Kyte is also in Hester's will. Sorting through the artifacts of her godmother's life, Josephine is intrigued by an infamous murder committed on the cottage's grounds a century before. This old crime&amp;#8212;dubbed the Red Barn murder&amp;#8212;still haunts the tight-knit village and its remote inhabitants. Is it superstition, or is there a very real threat that is frightening the locals? And is the truth related to the mysterious Lucy Kyte, whom no one in the village admits to knowing? Surrounded by the shadows of obsession, abuse, and deceit, with a palpable sense of evil thickening around her, Josephine must untangle historic tragedy from present danger to prevent a deadly cycle from beginning once again. &lt;/p&gt;&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/ceea0f9f-4201-4858-8208-e36c868b2c48/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/ceea0f9f-4201-4858-8208-e36c868b2c48/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/cee/ceea0f9f-4201-4858-8208-e36c868b2c48.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/cee/ceea0f9f-4201-4858-8208-e36c868b2c48.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>HarperCollins</dcterms:publisher>
+    <published>2014-06-13</published>
+    <dcterms:dateCopyrighted>2014-06-10</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/11354afd-8b04-4a76-b6f0-67458330380b</id>
+    <title>The Tin Horse</title>
+    <alternativeHeadline>A Novel</alternativeHeadline>
+    <author>
+      <name>Janice Steinberg</name>
+    </author>
+    <summary>&lt;p&gt;&lt;b&gt;In the stunning tradition of Lisa See, Maeve Binchy, and Alice Hoffman, &lt;i&gt;The Tin Horse &lt;/i&gt;is  a rich multigenerational story about the intense, often fraught bond sisters share and the dreams and sorrows that lay at the heart of the immigrant experience. &lt;/b&gt;&lt;br&gt;&lt;br&gt;It has been more than sixty years since Elaine Greenstein's twin sister, Barbara, ran away, cutting off contact with her family forever. Elaine has made peace with that loss. But while sifting through old papers as she prepares to move to Rancho Ma&amp;ntilde;ana--or the "Ranch of No Tomorrow" as she refers to the retirement community--she  is stunned to find a possible hint to Barbara's whereabouts all these years later. And it pushes her to confront the fierce love and bitter rivalry of their youth during the 1920s and '30s, in the Jewish neighborhood of Boyle Heights, Los Angeles.&lt;br&gt;&lt;br&gt;Though raised together in Boyle Heights, where kosher delis and storefront signs in Yiddish lined the streets, Elaine and Barbara staked out very different personal territories. Elaine was thoughtful and studious, encouraged to dream of going to college, while Barbara was a bold rule-breaker whose hopes fastened on nearby Hollywood. In the fall of 1939, when the girls were eighteen, Barbara's recklessness took an alarming turn. Leaving only a cryptic note, she left. &lt;br&gt;&lt;br&gt;In an unforgettable voice layered with humor and insight, Elaine delves into the past. She recalls growing up with her spirited family: her &lt;i&gt;luftmensch&lt;/i&gt; of a grandfather, a former tinsmith with tales from the Old Country; her papa, who preaches the American Dream even as it eludes him; her mercurial mother whose own secret grief colors her moods--and of course audacious Barbara and their younger sisters, Audrey and Harriet. As Elaine looks back on the momentous events of history and on the personal dramas of the Greenstein clan, she must finally face the truth of her own childhood, and that of the twin sister she once knew. &lt;br&gt;&lt;br&gt;In &lt;i&gt;The Tin Horse,&lt;/i&gt; Janice Steinberg exquisitely unfolds a rich multigenerational story about the intense, often fraught bonds between sisters, mothers, and daughters and the profound and surprising ways we are shaped by those we love. At its core, it is a book not only about the stories we tell but, more important, those we believe, especially the ones about ourselves.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.0&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/11354afd-8b04-4a76-b6f0-67458330380b/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/11354afd-8b04-4a76-b6f0-67458330380b/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/113/11354afd-8b04-4a76-b6f0-67458330380b.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/113/11354afd-8b04-4a76-b6f0-67458330380b.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Books on Tape</dcterms:publisher>
+    <published>2014-11-14</published>
+    <dcterms:dateCopyrighted>2013-01-29</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>5</simplified:total_licenses>
+    <simplified:available_licenses>4</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/29932</id>
+    <title>The Harbor</title>
+    <author>
+      <name>Ernest Poole</name>
+    </author>
+    <summary>"For Billy, an aspiring writer struggling to reconcile his sympathy for the workingman with his middle-class allegiance to capitalist progress, the New York waterfront becomes a window on the world. There he bears witness to the explosive tensions between labor and capital, falling under the influence of two divergent mentors: Dillon, an accomplished engineer and friend of the establishment; and Kramer, who has forsaken every comfort to live in the slums and preach the gospel of unionism. When the Harbor erupts in violence, Billy must choose for himself which path to follow."--Page 4 of cover.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 0.6&lt;/li&gt;&lt;li&gt;Summary quality: 0.8&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/29932/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/29932/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/29932/cover_29932_3.png"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/29932/cover_29932_3.png"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
+    <published>2014-04-01</published>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8</id>
+    <title>The Color Master</title>
+    <alternativeHeadline>Stories</alternativeHeadline>
+    <author>
+      <name>Aimee Bender</name>
+    </author>
+    <summary>&lt;p&gt;&lt;b&gt;The bestselling author of &lt;i&gt;The Particular Sadness of Lemon Cake&lt;/i&gt; returns with a wondrous collection of dreamy, strange, and magical stories.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Truly beloved by readers and critics alike, Aimee Bender has become known as something of an enchantress whose lush prose is "moving, fanciful, and gorgeously strange" (&lt;i&gt;People&lt;/i&gt;), "richly imagined and bittersweet" (&lt;i&gt;Vanity Fair&lt;/i&gt;), and "full of provocative ideas" (&lt;i&gt;The Boston Globe&lt;/i&gt;). In her deft hands, "relationships and mundane activities take on mythic qualities" (&lt;i&gt;The Wall Street Journal&lt;/i&gt;).&lt;br&gt;&lt;br&gt;In this collection, Bender's unique talents sparkle brilliantly in stories about people searching for connection through love, sex, and family--while navigating the often painful realities of their lives. A traumatic event unfolds when a girl with flowing hair of golden wheat appears in an apple orchard, where a group of people await her. A woman plays out a prostitution fantasy with her husband and finds she cannot go back to her old sex life. An ugly woman marries an ogre and struggles to decide if she should stay with him after he mistakenly eats their children. Two sisters travel deep into Malaysia, where one learns the art of mending tigers who have been ripped to shreds.&lt;br&gt;&lt;br&gt;In these deeply resonant stories--evocative, funny, beautiful, and sad--we see ourselves reflected as if in a funhouse mirror. Aimee Bender has once again proven herself to be among the most imaginative, exciting, and intelligent writers of our time.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.2&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/b78/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/b78/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Books on Tape</dcterms:publisher>
+    <published>2014-11-17</published>
+    <dcterms:dateCopyrighted>2013-08-13</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/1f83e9c4-9a53-4a9c-95c2-3280a576892f</id>
+    <title>John Irving Reads The Pension Grillparzer</title>
+    <alternativeHeadline>A Complete Story from The World According to Garp</alternativeHeadline>
+    <author>
+      <name>John Irving</name>
+    </author>
+    <summary>&lt;p&gt;&lt;I&gt;The World According to Garp&lt;/I&gt; established John Irving's reputation as one of the greatest writers of our time, a master of narrative and characterization that is both comic and profound. "The Pension Grillparzer" is quintessentially Irving - the self-contained story-within-a-story that becomes the hero's masterpiece in &lt;I&gt;The World According to Garp&lt;/I&gt;. Like the novel as a whole, it tells a vivid and engaging tale. The Grillparzer Hotel, inhabited by odd circus performers including a bear and a frighteningly accurate teller of dreams, wants a better rating to attract more tourists - and thus must undergo the scrutiny of an idiosyncratic family of inspectors for the Austrian Tourist Bureau. This valuable recording lends both immediacy and perspective to an understanding of the richly textured story as well as the novel as a whole.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/1f83e9c4-9a53-4a9c-95c2-3280a576892f/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/1f83e9c4-9a53-4a9c-95c2-3280a576892f/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1f8/1f83e9c4-9a53-4a9c-95c2-3280a576892f.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1f8/1f83e9c4-9a53-4a9c-95c2-3280a576892f.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>The Audio Partners Publishing Corporation</dcterms:publisher>
+    <published>2014-11-14</published>
+    <dcterms:dateCopyrighted>1988-01-01</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/40569</id>
+    <title>Tales of Mean Streets</title>
+    <author>
+      <name>Arthur Morrison</name>
+    </author>
+    <summary>Lizerunt.--Without visible means.--To Bow bridge.--That brute Simmons.--Behind the shade.--Three rounds.--In business.--The red cow group.--On the stairs.--Squire Napper.--"A poor stick."--A conversion.--"All that messuage."&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/40569/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/40569/checkout"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
+    <published>2014-04-01</published>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/ca6e0a53-f5bc-4a56-b382-724533c52894</id>
+    <title>The Music Teacher</title>
+    <author>
+      <name>Barbara Hall</name>
+    </author>
+    <summary>&lt;p&gt;In &lt;i&gt;The Music Teacher&lt;/i&gt;, a penetrating and richly entertaining look into the heart and mind of a woman who has failed both as an artist and as a wife, Barbara Hall, award-winning creator and writer of such hit television series as &lt;i&gt;Judging Amy&lt;/i&gt; and &lt;i&gt;Joan of Arcadia&lt;/i&gt;, tells the story of a violinist who has accepted the limitations of her talent and looks for the casual satisfaction of trying to instill her passion for music in others. She gets more than she bargains for, however, when a young girl named Hallie enters her life. For here at last is the real thing: someone with the talent and potential to be truly great. In her drive to shape this young girl into the artist the teacher could never be, she makes one terrible mistake. As a result she is forced to reevaluate her whole life and come to terms with her future.&lt;p&gt;Hall has crafted a thoroughly engrossing novel that examines the pitfalls of failure and holds up a mirror to the face of a culture that places success and achievement above all else&lt;ul&gt;&lt;li&gt;Work quality: 0.9&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/ca6e0a53-f5bc-4a56-b382-724533c52894/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/ca6e0a53-f5bc-4a56-b382-724533c52894/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/ca6/ca6e0a53-f5bc-4a56-b382-724533c52894.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/ca6/ca6e0a53-f5bc-4a56-b382-724533c52894.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Algonquin Books</dcterms:publisher>
+    <published>2014-08-10</published>
+    <dcterms:dateCopyrighted>2009-02-10</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>3</simplified:total_licenses>
+    <simplified:available_licenses>3</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <entry>
+    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/d7131544-a4f3-4041-8936-892e782c3908</id>
+    <title>The Shell Seekers</title>
+    <author>
+      <name>Rosamunde Pilcher</name>
+    </author>
+    <summary>&lt;p&gt;Artist's daughter Penelope Keeling can look back on a full and varied life, yet she is far too energetic and independent to settle sweetly into pensioned-off old age. Now she is faced with a decision which could tear her family apart.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
+    <link href="http://library-simplified.herokuapp.com/works/Overdrive/d7131544-a4f3-4041-8936-892e782c3908/checkout"/>
+    <updated>2015-02-03T18:26:29Z</updated>
+    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/d7131544-a4f3-4041-8936-892e782c3908/checkout"/>
+    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/d71/d7131544-a4f3-4041-8936-892e782c3908.jpg"/>
+    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/d71/d7131544-a4f3-4041-8936-892e782c3908.jpg"/>
+    <category term="Fiction"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>AudioGO Ltd</dcterms:publisher>
+    <published>2014-11-14</published>
+    <dcterms:dateCopyrighted>2005-06-06</dcterms:dateCopyrighted>
+    <schema:audience>
+      <schema:name>Adult</schema:name>
+    </schema:audience>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+  </entry>
+  <link rel="search" type="application/opensearchdescription+xml" href="http://library-simplified.herokuapp.com/search/Fiction"/>
+</feed>

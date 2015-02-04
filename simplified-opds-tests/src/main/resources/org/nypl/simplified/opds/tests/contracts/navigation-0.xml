@@ -1,0 +1,234 @@
+<feed xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:schema="http://schema.org/" xmlns:app="http://www.w3.org/2007/app" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:opds41="http://opds-spec.org/2014/catalog" xmlns:simplified="http://library-simplified.com/" xmlns="http://www.w3.org/2005/Atom">
+  <id>http://library-simplified.herokuapp.com/lanes/</id>
+  <title>Navigation feed</title>
+  <updated>2015-02-03T13:39:40Z</updated>
+  <link href="http://library-simplified.herokuapp.com/lanes/"/>
+  <link rel="self" href="http://library-simplified.herokuapp.com/lanes/"/>
+  <link rel="start" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/"/>
+  <entry>
+    <id>tag:Fiction</id>
+    <title>Fiction</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Fiction"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Fiction"/>
+    <link rel="subsection" title="Look inside Fiction" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Fiction"/>
+  </entry>
+  <entry>
+    <id>tag:Biography &amp; Memoir</id>
+    <title>Biography &amp; Memoir</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir"/>
+    <link title="Look inside Biography &amp; Memoir" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Crime, Thrillers &amp; Mystery</id>
+    <title>Crime, Thrillers &amp; Mystery</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Crime%2C%20Thrillers%20%26%20Mystery"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Crime%2C%20Thrillers%20%26%20Mystery"/>
+    <link rel="subsection" title="Look inside Crime, Thrillers &amp; Mystery" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Crime%2C%20Thrillers%20%26%20Mystery"/>
+  </entry>
+  <entry>
+    <id>tag:Fantasy</id>
+    <title>Fantasy</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Fantasy"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Fantasy"/>
+    <link title="Look inside Fantasy" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Fantasy?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Science Fiction</id>
+    <title>Science Fiction</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Science%20Fiction"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Science%20Fiction"/>
+    <link title="Look inside Science Fiction" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Science%20Fiction?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Historical Fiction</id>
+    <title>Historical Fiction</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Historical%20Fiction"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Historical%20Fiction"/>
+    <link title="Look inside Historical Fiction" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Historical%20Fiction?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Horror</id>
+    <title>Horror</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Horror"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Horror"/>
+    <link title="Look inside Horror" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Horror?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Food and Health</id>
+    <title>Food and Health</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Food%20and%20Health"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Food%20and%20Health"/>
+    <link rel="subsection" title="Look inside Food and Health" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Food%20and%20Health"/>
+  </entry>
+  <entry>
+    <id>tag:Romance</id>
+    <title>Romance</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Romance"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Romance"/>
+    <link rel="subsection" title="Look inside Romance" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Romance"/>
+  </entry>
+  <entry>
+    <id>tag:Science &amp; Tech</id>
+    <title>Science &amp; Tech</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Science%20%26%20Tech"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Science%20%26%20Tech"/>
+    <link rel="subsection" title="Look inside Science &amp; Tech" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Science%20%26%20Tech"/>
+  </entry>
+  <entry>
+    <id>tag:Self-Help</id>
+    <title>Self-Help</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Self-Help"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Self-Help"/>
+    <link title="Look inside Self-Help" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Self-Help?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Graphic Novels &amp; Comics</id>
+    <title>Graphic Novels &amp; Comics</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Graphic%20Novels%20%26%20Comics"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Graphic%20Novels%20%26%20Comics"/>
+    <link title="Look inside Graphic Novels &amp; Comics" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Graphic%20Novels%20%26%20Comics?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Reference &amp; Study Aids</id>
+    <title>Reference &amp; Study Aids</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Reference%20%26%20Study%20Aids"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Reference%20%26%20Study%20Aids"/>
+    <link rel="subsection" title="Look inside Reference &amp; Study Aids" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Reference%20%26%20Study%20Aids"/>
+  </entry>
+  <entry>
+    <id>tag:Young Adult</id>
+    <title>Young Adult</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Young%20Adult"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Young%20Adult"/>
+    <link rel="subsection" title="Look inside Young Adult" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Young%20Adult"/>
+  </entry>
+  <entry>
+    <id>tag:Children</id>
+    <title>Children</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Children"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Children"/>
+    <link rel="subsection" title="Look inside Children" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Children"/>
+  </entry>
+  <entry>
+    <id>tag:African-American</id>
+    <title>African-American</title>
+    <link href="http://library-simplified.herokuapp.com/feed/African-American"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/African-American"/>
+    <link title="Look inside African-American" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/African-American?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Art &amp; Design</id>
+    <title>Art &amp; Design</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Art%20%26%20Design"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Art%20%26%20Design"/>
+    <link title="Look inside Art &amp; Design" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Art%20%26%20Design?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Hobbies &amp; Home</id>
+    <title>Hobbies &amp; Home</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Hobbies%20%26%20Home"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Hobbies%20%26%20Home"/>
+    <link rel="subsection" title="Look inside Hobbies &amp; Home" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Hobbies%20%26%20Home"/>
+  </entry>
+  <entry>
+    <id>tag:Humor &amp; Entertainment</id>
+    <title>Humor &amp; Entertainment</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Humor%20%26%20Entertainment"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Humor%20%26%20Entertainment"/>
+    <link rel="subsection" title="Look inside Humor &amp; Entertainment" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Humor%20%26%20Entertainment"/>
+  </entry>
+  <entry>
+    <id>tag:Parenting &amp; Family</id>
+    <title>Parenting &amp; Family</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Parenting%20%26%20Family"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Parenting%20%26%20Family"/>
+    <link rel="subsection" title="Look inside Parenting &amp; Family" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Parenting%20%26%20Family"/>
+  </entry>
+  <entry>
+    <id>tag:Religion &amp; Spirituality</id>
+    <title>Religion &amp; Spirituality</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Religion%20%26%20Spirituality"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Religion%20%26%20Spirituality"/>
+    <link rel="subsection" title="Look inside Religion &amp; Spirituality" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Religion%20%26%20Spirituality"/>
+  </entry>
+  <entry>
+    <id>tag:Criticism &amp; Philosophy</id>
+    <title>Criticism &amp; Philosophy</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Criticism%20%26%20Philosophy"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Criticism%20%26%20Philosophy"/>
+    <link rel="subsection" title="Look inside Criticism &amp; Philosophy" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Criticism%20%26%20Philosophy"/>
+  </entry>
+  <entry>
+    <id>tag:Personal Finance &amp; Business</id>
+    <title>Personal Finance &amp; Business</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Personal%20Finance%20%26%20Business"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Personal%20Finance%20%26%20Business"/>
+    <link rel="subsection" title="Look inside Personal Finance &amp; Business" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Personal%20Finance%20%26%20Business"/>
+  </entry>
+  <entry>
+    <id>tag:Politics &amp; Current Events</id>
+    <title>Politics &amp; Current Events</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Politics%20%26%20Current%20Events"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Politics%20%26%20Current%20Events"/>
+    <link title="Look inside Politics &amp; Current Events" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Politics%20%26%20Current%20Events?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Travel, Adventure &amp; Sports</id>
+    <title>Travel, Adventure &amp; Sports</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Travel%2C%20Adventure%20%26%20Sports"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Travel%2C%20Adventure%20%26%20Sports"/>
+    <link rel="subsection" title="Look inside Travel, Adventure &amp; Sports" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Travel%2C%20Adventure%20%26%20Sports"/>
+  </entry>
+  <entry>
+    <id>tag:Poetry &amp; Drama</id>
+    <title>Poetry &amp; Drama</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Poetry%20%26%20Drama"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Poetry%20%26%20Drama"/>
+    <link rel="subsection" title="Look inside Poetry &amp; Drama" type="application/atom+xml;profile=opds-catalog;kind=navigation" href="http://library-simplified.herokuapp.com/lanes/Poetry%20%26%20Drama"/>
+  </entry>
+  <entry>
+    <id>tag:Unclassified Nonfiction</id>
+    <title>Unclassified Nonfiction</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Unclassified%20Nonfiction"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Unclassified%20Nonfiction"/>
+    <link title="Look inside Unclassified Nonfiction" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Unclassified%20Nonfiction?order=author"/>
+  </entry>
+  <entry>
+    <id>tag:Unclassified General</id>
+    <title>Unclassified General</title>
+    <link href="http://library-simplified.herokuapp.com/feed/Unclassified%20General"/>
+    <updated>2015-02-03T13:39:40Z</updated>
+    <link rel="http://opds-spec.org/featured" title="Featured" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Unclassified%20General"/>
+    <link title="Look inside Unclassified General" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="http://library-simplified.herokuapp.com/feed/Unclassified%20General?order=author"/>
+  </entry>
+  <link rel="search" type="application/opensearchdescription+xml" href="http://library-simplified.herokuapp.com/search/"/>
+  <link rel="http://opds-spec.org/shelf" href="http://library-simplified.herokuapp.com/loans/"/>
+</feed>
