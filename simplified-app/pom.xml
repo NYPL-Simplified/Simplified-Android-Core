@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.nypl.simplified</groupId>
+    <artifactId>simplified</artifactId>
+    <version>0.1.0</version>
+  </parent>
+  <artifactId>simplified-app</artifactId>
+
+  <packaging>apk</packaging>
+  <name>simplified-app</name>
+  <description>Simplified (App frontend)</description>
+  <url>https://github.com/NYPL/Simplified-Android</url>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-opds-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  
+    <!-- This is the latest version available on Maven Central -->
+    <!-- If necessary, a newer version can be deployed to a local repository. -->
+    <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>android</artifactId>
+      <version>4.1.1.4</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.io7m.jnull</groupId>
+      <artifactId>io7m-jnull-core</artifactId>
+      <version>[1.0.0, 2.0.0)</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.simpligility.maven.plugins</groupId>
+          <artifactId>android-maven-plugin</artifactId>
+          <version>4.1.1</version>
+          <extensions>true</extensions>
+        </plugin>
+        
+        <!--Mark certain plugin goals as ignored by Eclipse. Does not affect the build.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>com.simpligility.maven.plugins</groupId>
+                    <artifactId>android-maven-plugin</artifactId>
+                    <versionRange>[4.1.1,)</versionRange>
+                    <goals>
+                      <goal>emma</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.7</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.6</version>
+      </plugin>
+
+      <!-- Require JDK >= 1.6 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+
+      <!-- Android plugin configuration -->
+      <plugin>
+        <groupId>com.simpligility.maven.plugins</groupId>
+        <artifactId>android-maven-plugin</artifactId>
+        <configuration>
+          <sdk>
+            <platform>15</platform>
+          </sdk>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <!-- Allow deployment over ssh -->
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh-external</artifactId>
+        <version>2.2</version>
+      </extension>
+    </extensions>
+  </build>
+
+</project>
