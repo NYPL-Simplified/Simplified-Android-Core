@@ -1,0 +1,8 @@
+.classpath
+.project
+.settings
+simplified-*/.classpath
+simplified-*/.project
+simplified-*/.settings
+simplified-*/bin
+simplified-*/target
