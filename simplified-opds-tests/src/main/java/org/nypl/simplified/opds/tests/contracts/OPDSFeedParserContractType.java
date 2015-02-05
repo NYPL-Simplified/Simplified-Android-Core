@@ -2,6 +2,12 @@ package org.nypl.simplified.opds.tests.contracts;
 
 public interface OPDSFeedParserContractType
 {
+  void testAcquisitionFeedFiction0()
+    throws Exception;
+
+  void testDOMException()
+    throws Exception;
+
   void testNavigationFeed0()
     throws Exception;
 
@@ -15,5 +21,14 @@ public interface OPDSFeedParserContractType
     throws Exception;
 
   void testNavigationFeedBadEntrySubsectionLinkWithoutHref()
+    throws Exception;
+
+  void testNotXMLException()
+    throws Exception;
+
+  void testParserURISyntaxException()
+    throws Exception;
+
+  void testStreamIOException()
     throws Exception;
 }

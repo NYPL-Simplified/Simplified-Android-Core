@@ -19,9 +19,9 @@ public final class OPDSFeedLoader implements OPDSFeedLoaderType
   {
     return new OPDSFeedLoader(e, p, t);
   }
+
   private final ExecutorService       exec;
   private final OPDSFeedParserType    parser;
-
   private final OPDSFeedTransportType transport;
 
   private OPDSFeedLoader(

@@ -17,6 +17,23 @@ public final class TestUtilities
     }
   }
 
+  public static void assertGreater(
+    final int x,
+    final int y)
+  {
+    if (x <= y) {
+      throw new AssertionError(String.format("%d <= %d", x, y));
+    }
+  }
+
+  public static void assertTrue(
+    final boolean c)
+  {
+    if (c == false) {
+      throw new AssertionError(c + " is unexpectedly false");
+    }
+  }
+
   public static void expectException(
     final Class<? extends Exception> c,
     final PartialProcedureType<Unit, Exception> p)

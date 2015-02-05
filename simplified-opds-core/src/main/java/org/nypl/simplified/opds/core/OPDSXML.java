@@ -76,6 +76,39 @@ final class OPDSXML
     return xs;
   }
 
+  static String getFirstChildElementTextWithName(
+    final Node node,
+    final URI namespace,
+    final String name)
+    throws OPDSFeedParseException
+  {
+    return NullCheck.notNull(OPDSXML
+      .getFirstChildElementWithName(node, namespace, name)
+      .getTextContent()
+      .trim());
+  }
+
+  static OptionType<String> getFirstChildElementTextWithNameOptional(
+    final Node node,
+    final URI namespace,
+    final String name)
+  {
+    NullCheck.notNull(node);
+    NullCheck.notNull(namespace);
+    NullCheck.notNull(name);
+
+    final NodeList children = node.getChildNodes();
+    for (int index = 0; index < children.getLength(); ++index) {
+      final Node child = children.item(index);
+      assert child != null;
+      if (OPDSXML.nodeHasName(child, namespace, name)) {
+        return Option.some(child.getTextContent().trim());
+      }
+    }
+
+    return Option.none();
+  }
+
   static Element getFirstChildElementWithName(
     final Node node,
     final URI namespace,

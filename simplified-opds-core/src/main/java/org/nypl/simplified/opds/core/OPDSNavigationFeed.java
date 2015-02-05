@@ -40,10 +40,6 @@ import com.io7m.jnull.NullCheck;
 
     @Override public OPDSNavigationFeed build()
     {
-      if (this.entries.size() < 1) {
-        throw new IllegalStateException("No entries were added to the feed");
-      }
-
       return new OPDSNavigationFeed(
         this.id,
         this.updated,

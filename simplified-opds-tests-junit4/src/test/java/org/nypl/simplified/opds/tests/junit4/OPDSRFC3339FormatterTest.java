@@ -14,12 +14,6 @@ public final class OPDSRFC3339FormatterTest implements
     this.contract = new OPDSRFC3339FormatterContract();
   }
 
-  @Override @Test public void testNull()
-    throws Exception
-  {
-    this.contract.testNull();
-  }
-
   @Override @Test public void testDate0()
     throws Exception
   {
@@ -42,5 +36,11 @@ public final class OPDSRFC3339FormatterTest implements
     throws Exception
   {
     this.contract.testDate3();
+  }
+
+  @Override @Test public void testNull()
+    throws Exception
+  {
+    this.contract.testNull();
   }
 }
