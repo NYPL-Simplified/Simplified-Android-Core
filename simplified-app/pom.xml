@@ -27,9 +27,15 @@
     <!-- This is the latest version available on Maven Central -->
     <!-- If necessary, a newer version can be deployed to a local repository. -->
     <dependency>
-      <groupId>com.google.android</groupId>
+      <groupId>android</groupId>
       <artifactId>android</artifactId>
-      <version>4.1.1.4</version>
+      <version>4.0.3_r5</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>android.support</groupId>
+      <artifactId>compatibility-v4</artifactId>
+      <version>21.0.3</version>
       <scope>provided</scope>
     </dependency>
 
@@ -116,6 +122,7 @@
         <groupId>com.simpligility.maven.plugins</groupId>
         <artifactId>android-maven-plugin</artifactId>
         <configuration>
+          <failOnNonStandardStructure>false</failOnNonStandardStructure>
           <sdk>
             <platform>15</platform>
           </sdk>

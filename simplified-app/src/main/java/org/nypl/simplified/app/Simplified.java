@@ -59,9 +59,14 @@ public final class Simplified extends Application
   }
 
   private @Nullable ExecutorService       executor;
+  private @Nullable OPDSFeedLoaderType    feed_loader;
   private @Nullable OPDSFeedParserType    feed_parser;
   private @Nullable OPDSFeedTransportType feed_transport;
-  private @Nullable OPDSFeedLoaderType    feed_loader;
+
+  public OPDSFeedLoaderType getFeedLoader()
+  {
+    return NullCheck.notNull(this.feed_loader);
+  }
 
   @Override public void onCreate()
   {

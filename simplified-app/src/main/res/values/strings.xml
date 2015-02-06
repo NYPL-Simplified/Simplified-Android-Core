@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">Simplified</string>
+  <string name="catalog">Catalog</string>
+  <string name="holds">Holds</string>
   <string name="unknown_feed">Unknown</string>
+  <string name="books">Books</string>
+  <string name="settings">Settings</string>
 </resources>
