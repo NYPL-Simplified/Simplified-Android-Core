@@ -25,6 +25,6 @@ public final class SettingsFragment extends Fragment
     if (container == null) {
       return null;
     }
-    return inflater.inflate(R.layout.catalog, container, false);
+    return inflater.inflate(R.layout.settings, container, false);
   }
 }

@@ -25,6 +25,6 @@ public final class HoldsFragment extends Fragment
     if (container == null) {
       return null;
     }
-    return inflater.inflate(R.layout.catalog, container, false);
+    return inflater.inflate(R.layout.holds, container, false);
   }
 }

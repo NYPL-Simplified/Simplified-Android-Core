@@ -22,12 +22,7 @@ public final class MainActivity extends FragmentActivity
 
     final FragmentTabHost h =
       (FragmentTabHost) this.findViewById(android.R.id.tabhost);
-    h.setup(this, this.getSupportFragmentManager(), R.id.realcontent);
-
-    final String books_name = rr.getString(R.string.books);
-    final TabSpec books_tab = h.newTabSpec(books_name);
-    books_tab.setIndicator(books_name);
-    h.addTab(books_tab, BooksFragment.class, null);
+    h.setup(this, this.getSupportFragmentManager(), android.R.id.tabcontent);
 
     final String catalog_name = rr.getString(R.string.catalog);
     final TabSpec catalog_tab = h.newTabSpec(catalog_name);
@@ -38,6 +33,11 @@ public final class MainActivity extends FragmentActivity
     final TabSpec holds_tab = h.newTabSpec(holds_name);
     holds_tab.setIndicator(holds_name);
     h.addTab(holds_tab, HoldsFragment.class, null);
+
+    final String books_name = rr.getString(R.string.books);
+    final TabSpec books_tab = h.newTabSpec(books_name);
+    books_tab.setIndicator(books_name);
+    h.addTab(books_tab, BooksFragment.class, null);
 
     final String settings_name = rr.getString(R.string.settings);
     final TabSpec settings_tab = h.newTabSpec(settings_name);
