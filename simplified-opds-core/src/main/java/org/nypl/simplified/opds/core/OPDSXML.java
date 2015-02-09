@@ -64,11 +64,11 @@ final class OPDSXML
 
     if (xs.size() < 1) {
       final StringBuilder m = new StringBuilder();
-      m.append("Expected at least one required element:\n");
-      m.append("  Namespace: ");
+      m.append("Missing at least one required element.\n");
+      m.append("Expected namespace: ");
       m.append(namespace);
       m.append("\n");
-      m.append("  Local:     ");
+      m.append("Expected name:      ");
       m.append(name);
       m.append("\n");
       throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
@@ -129,11 +129,11 @@ final class OPDSXML
     }
 
     final StringBuilder m = new StringBuilder();
-    m.append("Expected required element:\n");
-    m.append("  Namespace: ");
+    m.append("Expected required element.\n");
+    m.append("Expected namespace: ");
     m.append(namespace);
     m.append("\n");
-    m.append("  Local:     ");
+    m.append("Expected name:      ");
     m.append(name);
     m.append("\n");
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
@@ -170,18 +170,18 @@ final class OPDSXML
     }
 
     final StringBuilder m = new StringBuilder();
-    m.append("Expected element:\n");
-    m.append("  Namespace: ");
+    m.append("Missing required element.\n");
+    m.append("Expected namespace: ");
     m.append(namespace);
     m.append("\n");
-    m.append("  Local:     ");
+    m.append("Expected name:      ");
     m.append(name);
-    m.append("Got: ");
-    m.append("  Namespace: ");
-    m.append(e.getNamespaceURI());
     m.append("\n");
-    m.append("  Local:     ");
-    m.append(e.getLocalName());
+    m.append("Got namespace:      ");
+    m.append(OPDSXML.getNodeNamespace(e));
+    m.append("\n");
+    m.append("Got name:           ");
+    m.append(e.getNodeName());
     m.append("\n");
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
   }
@@ -208,11 +208,9 @@ final class OPDSXML
   {
     final NamedNodeMap attrs = node.getAttributes();
     if (attrs != null) {
-      for (int index = 0; index < attrs.getLength(); ++index) {
-        final Attr attr = (Attr) attrs.getNamedItemNS(null, "xmlns");
-        if (attr != null) {
-          return Option.some(attr.getNodeValue());
-        }
+      final Attr attr = (Attr) attrs.getNamedItem("xmlns");
+      if (attr != null) {
+        return Option.some(attr.getNodeValue());
       }
     }
 
@@ -229,12 +227,27 @@ final class OPDSXML
     final URI namespace,
     final String name)
   {
+    final OptionType<String> node_namespace = OPDSXML.getNodeNamespace(node);
+    if (node_namespace.isNone()) {
+      return false;
+    }
+
+    final Some<String> some = (Some<String>) node_namespace;
+    final boolean ns_ok = some.get().equals(namespace.toString());
+    final String got_local = node.getNodeName();
+    final boolean lo_ok = got_local.equals(name);
+    return ns_ok && lo_ok;
+  }
+
+  private static OptionType<String> getNodeNamespace(
+    final Node node)
+  {
     final String node_namespace;
     final String node_prefix = node.getPrefix();
     if (node_prefix == null) {
       final OptionType<String> r = OPDSXML.nodeGetDefaultNamespace(node);
       if (r.isNone()) {
-        return false;
+        return r;
       }
       final Some<String> s = (Some<String>) r;
       node_namespace = s.get();
@@ -242,9 +255,10 @@ final class OPDSXML
       node_namespace = node.lookupNamespaceURI(node_prefix);
     }
 
-    final boolean ns_ok = node_namespace.equals(namespace.toString());
-    final String got_local = node.getNodeName();
-    final boolean lo_ok = got_local.equals(name);
-    return ns_ok && lo_ok;
+    if (node_namespace == null) {
+      return Option.none();
+    }
+
+    return Option.some(node_namespace);
   }
 }
