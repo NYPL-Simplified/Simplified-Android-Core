@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -21,14 +22,18 @@ public final class OPDSRFC3339Formatter
     NullCheck.notNull(text);
 
     Date d = new Date();
+
+    final TimeZone utc = TimeZone.getTimeZone("UTC");
     if (text.endsWith("Z")) {
       final SimpleDateFormat df0 =
         new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+      df0.setTimeZone(utc);
       try {
         d = df0.parse(text);
       } catch (final java.text.ParseException pe) {
         final SimpleDateFormat df1 =
           new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+        df1.setTimeZone(utc);
         df1.setLenient(true);
         d = df1.parse(text);
       }
@@ -53,11 +58,13 @@ public final class OPDSRFC3339Formatter
     final String new_date = pre + post;
     final SimpleDateFormat df0 =
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    df0.setTimeZone(utc);
     try {
       d = df0.parse(new_date);
     } catch (final java.text.ParseException pe) {
       final SimpleDateFormat df1 =
         new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+      df1.setTimeZone(utc);
       df1.setLenient(true);
       d = df1.parse(new_date);
     }
@@ -68,7 +75,7 @@ public final class OPDSRFC3339Formatter
   private static Calendar toCal(
     final Date d)
   {
-    final Calendar cal = Calendar.getInstance();
+    final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     cal.setTime(d);
     return cal;
   }
