@@ -23,20 +23,24 @@
       <artifactId>simplified-opds-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-  
-    <!-- This is the latest version available on Maven Central -->
-    <!-- If necessary, a newer version can be deployed to a local repository. -->
+
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
-      <version>4.0.3_r5</version>
+      <version>${org.nypl.android.packageVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>android.support</groupId>
       <artifactId>compatibility-v4</artifactId>
-      <version>21.0.3</version>
+      <version>${org.nypl.android.compatSupportVersion}</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.nostra13.universalimageloader</groupId>
+      <artifactId>universal-image-loader</artifactId>
+      <version>1.9.3</version>
     </dependency>
 
     <dependency>
@@ -124,7 +128,7 @@
         <configuration>
           <failOnNonStandardStructure>false</failOnNonStandardStructure>
           <sdk>
-            <platform>15</platform>
+            <platform>${org.nypl.android.sdkVersion}</platform>
           </sdk>
         </configuration>
       </plugin>
