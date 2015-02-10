@@ -4,8 +4,10 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentManager.BackStackEntry;
 import android.app.FragmentManager.OnBackStackChangedListener;
 import android.app.FragmentTransaction;
+import android.content.res.Resources;
 import android.os.Bundle;
 
 import com.io7m.jnull.Nullable;
@@ -13,10 +15,19 @@ import com.io7m.jnull.Nullable;
 public final class TestActivity extends Activity
 {
   private static void displayOrHideUpCaretAsNecessary(
+    final Resources rr,
     final FragmentManager fm,
     final ActionBar bar)
   {
-    final boolean stack_nonempty = fm.getBackStackEntryCount() > 0;
+    final int count = fm.getBackStackEntryCount();
+    final boolean stack_nonempty = count > 0;
+    if (stack_nonempty) {
+      final BackStackEntry e = fm.getBackStackEntryAt(count - 1);
+      bar.setTitle(String.format("You are at: %s", e.getName()));
+    } else {
+      bar.setTitle(rr.getString(R.string.app_name));
+    }
+
     bar.setDisplayHomeAsUpEnabled(stack_nonempty);
   }
 
@@ -26,13 +37,15 @@ public final class TestActivity extends Activity
     super.onCreate(state);
     this.setContentView(R.layout.test);
 
+    final Resources rr = this.getResources();
     final FragmentManager fm = this.getFragmentManager();
-
     final ActionBar bar = this.getActionBar();
+    bar.setDisplayShowTitleEnabled(true);
+
     fm.addOnBackStackChangedListener(new OnBackStackChangedListener() {
       @Override public void onBackStackChanged()
       {
-        TestActivity.displayOrHideUpCaretAsNecessary(fm, bar);
+        TestActivity.displayOrHideUpCaretAsNecessary(rr, fm, bar);
       }
     });
 
@@ -45,6 +58,6 @@ public final class TestActivity extends Activity
       ft.commit();
     }
 
-    TestActivity.displayOrHideUpCaretAsNecessary(fm, bar);
+    TestActivity.displayOrHideUpCaretAsNecessary(rr, fm, bar);
   }
 }
