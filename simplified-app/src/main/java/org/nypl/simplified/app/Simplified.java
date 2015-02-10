@@ -16,6 +16,8 @@ import android.util.Log;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 /**
  * Global application state.
@@ -39,22 +41,30 @@ public final class Simplified extends Application
     return Simplified.checkInitialized();
   }
 
+  private static int megabytes(
+    final int m)
+  {
+    return (int) (m * Math.pow(10, 7));
+  }
+
   private static ExecutorService namedThreadPool()
   {
     final ThreadFactory tf = Executors.defaultThreadFactory();
-    final ExecutorService pool =
-      Executors.newCachedThreadPool(new ThreadFactory() {
-        private int id = 0;
+    final ThreadFactory named = new ThreadFactory() {
+      private int id = 0;
 
-        @SuppressWarnings("boxing") @Override public Thread newThread(
-          final @Nullable Runnable r)
-        {
-          final Thread t = tf.newThread(r);
-          t.setName(String.format("simplified-tasks-%d", this.id));
-          ++this.id;
-          return t;
-        }
-      });
+      @SuppressWarnings("boxing") @Override public Thread newThread(
+        final @Nullable Runnable r)
+      {
+        final Thread t = tf.newThread(r);
+        t.setName(String.format("simplified-tasks-%d", this.id));
+        ++this.id;
+        return t;
+      }
+    };
+
+    final int count = Runtime.getRuntime().availableProcessors();
+    final ExecutorService pool = Executors.newFixedThreadPool(count, named);
     return NullCheck.notNull(pool);
   }
 
@@ -62,10 +72,18 @@ public final class Simplified extends Application
   private @Nullable OPDSFeedLoaderType    feed_loader;
   private @Nullable OPDSFeedParserType    feed_parser;
   private @Nullable OPDSFeedTransportType feed_transport;
+  private @Nullable ImageLoader           thumbnail_loader;
 
   public OPDSFeedLoaderType getFeedLoader()
   {
+    Simplified.checkInitialized();
     return NullCheck.notNull(this.feed_loader);
+  }
+
+  public ImageLoader getImageThumbnailLoader()
+  {
+    Simplified.checkInitialized();
+    return NullCheck.notNull(this.thumbnail_loader);
   }
 
   @Override public void onCreate()
@@ -75,10 +93,31 @@ public final class Simplified extends Application
     Log.d("simplified", "initializing application context");
 
     final ExecutorService e = Simplified.namedThreadPool();
+
+    /**
+     * Global image cache.
+     */
+
+    final ImageLoaderConfiguration.Builder icb =
+      new ImageLoaderConfiguration.Builder(this);
+    icb.taskExecutor(e);
+    icb.diskCacheSize(Simplified.megabytes(32));
+    icb.memoryCacheSizePercentage(15);
+    icb.writeDebugLogs();
+    final ImageLoaderConfiguration c = icb.build();
+
+    final ImageLoader il = ImageLoader.getInstance();
+    il.init(c);
+
+    /**
+     * Asynchronous feed loader.
+     */
+
     final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
     final OPDSFeedLoaderType fl = OPDSFeedLoader.newLoader(e, p, t);
 
+    this.thumbnail_loader = il;
     this.executor = e;
     this.feed_parser = p;
     this.feed_transport = t;
