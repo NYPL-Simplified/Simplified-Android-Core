@@ -27,7 +27,22 @@ public final class TestFragment extends Fragment
       "org.nypl.simplified.app.TestFragment.parent_id";
   }
 
+  public static TestFragment newFragment(
+    final @Nullable TestFragment parent,
+    final int container)
+  {
+    final int pid = parent != null ? parent.id : 0;
+
+    final Bundle args = new Bundle();
+    args.putInt(TestFragment.TEST_FRAGMENT_CONTAINER_ID, container);
+    args.putInt(TestFragment.TEST_FRAGMENT_PARENT_ID, pid);
+
+    final TestFragment fn = new TestFragment();
+    fn.setArguments(args);
+    return fn;
+  }
   private int         container_id;
+
   private int         id;
 
   @Override public void onCreate(
@@ -44,25 +59,6 @@ public final class TestFragment extends Fragment
     this.id = pid + 1;
 
     this.setHasOptionsMenu(true);
-  }
-
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item)
-  {
-    assert item != null;
-    switch (item.getItemId()) {
-      case android.R.id.home:
-      {
-        Log.d("test-fragment", "received home button");
-        final FragmentManager fm = this.getFragmentManager();
-        fm.popBackStack();
-        return true;
-      }
-      default:
-      {
-        return super.onOptionsItemSelected(item);
-      }
-    }
   }
 
   @Override public View onCreateView(
@@ -100,18 +96,22 @@ public final class TestFragment extends Fragment
     return view;
   }
 
-  public static TestFragment newFragment(
-    final @Nullable TestFragment parent,
-    final int container)
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item)
   {
-    final int pid = parent != null ? parent.id : 0;
-
-    final Bundle args = new Bundle();
-    args.putInt(TestFragment.TEST_FRAGMENT_CONTAINER_ID, container);
-    args.putInt(TestFragment.TEST_FRAGMENT_PARENT_ID, pid);
-
-    final TestFragment fn = new TestFragment();
-    fn.setArguments(args);
-    return fn;
+    assert item != null;
+    switch (item.getItemId()) {
+      case android.R.id.home:
+      {
+        Log.d("test-fragment", "received home button");
+        final FragmentManager fm = this.getFragmentManager();
+        fm.popBackStack();
+        return true;
+      }
+      default:
+      {
+        return super.onOptionsItemSelected(item);
+      }
+    }
   }
 }
