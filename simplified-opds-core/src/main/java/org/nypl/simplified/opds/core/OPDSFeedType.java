@@ -1,12 +1,13 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 /**
  * The type of OPDS feeds.
  */
 
-public interface OPDSFeedType
+public interface OPDSFeedType extends Serializable
 {
   String getFeedID();
 

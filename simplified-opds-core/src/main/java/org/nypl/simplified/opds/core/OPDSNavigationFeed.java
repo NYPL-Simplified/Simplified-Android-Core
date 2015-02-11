@@ -14,6 +14,8 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") public final class OPDSNavigationFeed implements
   OPDSFeedType
 {
+  private static final long serialVersionUID = 2410830597217814161L;
+
   private static final class Builder implements OPDSNavigationFeedBuilderType
   {
     private final List<OPDSNavigationFeedEntry> entries;

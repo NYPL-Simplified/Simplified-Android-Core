@@ -14,6 +14,8 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeed implements
   OPDSFeedType
 {
+  private static final long serialVersionUID = -7962463871020194252L;
+
   private static final class Builder implements
     OPDSAcquisitionFeedBuilderType
   {
