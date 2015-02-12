@@ -55,7 +55,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final LinearLayout images =
       (LinearLayout) container.findViewById(R.id.feed_images_linear);
-    images.removeAllViews();
     images.setVisibility(View.VISIBLE);
 
     final OptionType<URI> featured_opt = e.getFeaturedURI();
@@ -81,7 +80,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     progress.setVisibility(View.GONE);
     images.setVisibility(View.GONE);
-    images.removeAllViews();
   }
 
   private static void feedFailedPost(
