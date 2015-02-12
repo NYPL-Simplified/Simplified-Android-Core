@@ -76,7 +76,9 @@ public final class CatalogImageSet
         CatalogImageSet.TAG,
         "too many imageviews for entries, removing views");
       while (this.imageviews.size() > this.entries.size()) {
-        final Button last = this.imageviews.get(this.imageviews.size() - 1);
+        final int last_index = this.imageviews.size() - 1;
+        final Button last = this.imageviews.get(last_index);
+        this.imageviews.remove(last_index);
         container.removeView(last);
       }
     }
