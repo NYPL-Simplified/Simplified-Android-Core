@@ -72,15 +72,16 @@ public final class CatalogNavigationFeedFragment extends NavigableFragment
 
     final OPDSNavigationFeed f = NullCheck.notNull(this.feed);
     final Activity act = NullCheck.notNull(this.getActivity());
-    final CatalogNavigationFeedAdapter adapter =
-      new CatalogNavigationFeedAdapter(act, f.getFeedEntries());
 
     final ListView lv =
       (ListView) view.findViewById(R.id.catalog_nav_feed_list);
-    lv.setAdapter(adapter);
     lv.setVerticalScrollBarEnabled(false);
     lv.setDividerHeight(0);
 
+    final CatalogNavigationFeedAdapter adapter =
+      new CatalogNavigationFeedAdapter(act, lv, f.getFeedEntries());
+
+    lv.setAdapter(adapter);
     return view;
   }
 }

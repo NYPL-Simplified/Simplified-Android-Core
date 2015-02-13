@@ -44,6 +44,8 @@ public final class CatalogImageSet
     NullCheck.notNull(container);
     NullCheck.notNull(on_images_loaded);
 
+    UIThread.checkIsUIThread();
+
     this.done.set(0);
     this.imageviews.clear();
 
@@ -87,7 +89,7 @@ public final class CatalogImageSet
 
     for (int index = 0; index < this.entries.size(); ++index) {
       final OPDSAcquisitionFeedEntry e = this.entries.get(index);
-      // final Button view = this.imageviews.get(index);
+      final Button view = this.imageviews.get(index);
       final OptionType<URI> thumb = e.getThumbnail();
       thumb.accept(new OptionVisitorType<URI, Unit>() {
         @Override public Unit none(
@@ -105,7 +107,7 @@ public final class CatalogImageSet
           final Some<URI> some)
         {
           final URI thumb_uri = some.get();
-          // view.setVisibility(View.VISIBLE);
+          view.setVisibility(View.VISIBLE);
           CatalogImageSet.this.imageDone(on_images_loaded);
           return Unit.unit();
         }
