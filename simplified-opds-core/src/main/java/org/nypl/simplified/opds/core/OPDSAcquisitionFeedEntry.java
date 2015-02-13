@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,12 +11,14 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * The type of entries in acquisition feeds.
  */
 
-@SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeedEntry
+@SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeedEntry implements
+  Serializable
 {
   private static final class Builder implements
     OPDSAcquisitionFeedEntryBuilderType
@@ -105,6 +108,8 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
+  private static final long serialVersionUID = -8647949453454680335L;
+
   public static OPDSAcquisitionFeedEntryBuilderType newBuilder(
     final String in_id,
     final String in_title,
@@ -145,6 +150,30 @@ import com.io7m.jnull.NullCheck;
     this.updated = NullCheck.notNull(in_updated);
     this.subtitle = NullCheck.notNull(in_subtitle);
     this.summary = NullCheck.notNull(in_summary);
+  }
+
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final OPDSAcquisitionFeedEntry other = (OPDSAcquisitionFeedEntry) obj;
+    return this.acquisitions.equals(other.acquisitions)
+      && this.authors.equals(other.authors)
+      && this.cover.equals(other.cover)
+      && this.id.equals(other.id)
+      && this.subtitle.equals(other.subtitle)
+      && this.summary.equals(other.summary)
+      && this.thumbnail.equals(other.thumbnail)
+      && this.title.equals(other.title)
+      && this.updated.equals(other.updated);
   }
 
   public List<OPDSAcquisition> getAcquisitions()
@@ -190,5 +219,21 @@ import com.io7m.jnull.NullCheck;
   public Calendar getUpdated()
   {
     return this.updated;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.acquisitions.hashCode();
+    result = (prime * result) + this.authors.hashCode();
+    result = (prime * result) + this.cover.hashCode();
+    result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + this.subtitle.hashCode();
+    result = (prime * result) + this.summary.hashCode();
+    result = (prime * result) + this.thumbnail.hashCode();
+    result = (prime * result) + this.title.hashCode();
+    result = (prime * result) + this.updated.hashCode();
+    return result;
   }
 }

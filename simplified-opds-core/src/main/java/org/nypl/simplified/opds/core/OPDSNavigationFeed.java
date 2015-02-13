@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * The type of OPDS navigation feeds.
@@ -14,8 +15,6 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") public final class OPDSNavigationFeed implements
   OPDSFeedType
 {
-  private static final long serialVersionUID = 2410830597217814161L;
-
   private static final class Builder implements OPDSNavigationFeedBuilderType
   {
     private final List<OPDSNavigationFeedEntry> entries;
@@ -50,6 +49,8 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
+  private static final long serialVersionUID = 2410830597217814161L;
+
   public static OPDSNavigationFeedBuilderType newBuilder(
     final String in_id,
     final Calendar in_updated,
@@ -76,6 +77,25 @@ import com.io7m.jnull.NullCheck;
       NullCheck.notNull(Collections.unmodifiableList(in_entries));
   }
 
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final OPDSNavigationFeed other = (OPDSNavigationFeed) obj;
+    return this.entries.equals(other.entries)
+      && this.id.equals(other.id)
+      && this.title.equals(other.title)
+      && this.updated.equals(other.updated);
+  }
+
   public List<OPDSNavigationFeedEntry> getFeedEntries()
   {
     return this.entries;
@@ -94,6 +114,17 @@ import com.io7m.jnull.NullCheck;
   @Override public Calendar getFeedUpdated()
   {
     return this.updated;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.entries.hashCode();
+    result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + this.title.hashCode();
+    result = (prime * result) + this.updated.hashCode();
+    return result;
   }
 
   @Override public <A, E extends Exception> A matchFeedType(

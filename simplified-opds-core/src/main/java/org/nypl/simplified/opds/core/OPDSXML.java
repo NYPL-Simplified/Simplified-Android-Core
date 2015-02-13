@@ -139,6 +139,29 @@ final class OPDSXML
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
   }
 
+  private static OptionType<String> getNodeNamespace(
+    final Node node)
+  {
+    final String node_namespace;
+    final String node_prefix = node.getPrefix();
+    if (node_prefix == null) {
+      final OptionType<String> r = OPDSXML.nodeGetDefaultNamespace(node);
+      if (r.isNone()) {
+        return r;
+      }
+      final Some<String> s = (Some<String>) r;
+      node_namespace = s.get();
+    } else {
+      node_namespace = node.lookupNamespaceURI(node_prefix);
+    }
+
+    if (node_namespace == null) {
+      return Option.none();
+    }
+
+    return Option.some(node_namespace);
+  }
+
   static Element nodeAsElement(
     final Node node)
     throws OPDSFeedParseException
@@ -237,28 +260,5 @@ final class OPDSXML
     final String got_local = node.getNodeName();
     final boolean lo_ok = got_local.equals(name);
     return ns_ok && lo_ok;
-  }
-
-  private static OptionType<String> getNodeNamespace(
-    final Node node)
-  {
-    final String node_namespace;
-    final String node_prefix = node.getPrefix();
-    if (node_prefix == null) {
-      final OptionType<String> r = OPDSXML.nodeGetDefaultNamespace(node);
-      if (r.isNone()) {
-        return r;
-      }
-      final Some<String> s = (Some<String>) r;
-      node_namespace = s.get();
-    } else {
-      node_namespace = node.lookupNamespaceURI(node_prefix);
-    }
-
-    if (node_namespace == null) {
-      return Option.none();
-    }
-
-    return Option.some(node_namespace);
   }
 }

@@ -1,17 +1,21 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.Calendar;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * The type of entries in navigation feeds.
  */
 
-public final class OPDSNavigationFeedEntry
+public final class OPDSNavigationFeedEntry implements Serializable
 {
+  private static final long serialVersionUID = 5962627554241694950L;
+
   public static OPDSNavigationFeedEntry newEntry(
     final String in_id,
     final String in_title,
@@ -47,6 +51,26 @@ public final class OPDSNavigationFeedEntry
     this.target = NullCheck.notNull(in_target);
   }
 
+  @Override public boolean equals(
+    final @Nullable Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (this.getClass() != obj.getClass()) {
+      return false;
+    }
+    final OPDSNavigationFeedEntry other = (OPDSNavigationFeedEntry) obj;
+    return this.featured.equals(other.featured)
+      && this.id.equals(other.id)
+      && this.target.equals(other.target)
+      && this.title.equals(other.title)
+      && this.updated.equals(other.updated);
+  }
+
   public OptionType<URI> getFeaturedURI()
   {
     return this.featured;
@@ -70,5 +94,17 @@ public final class OPDSNavigationFeedEntry
   public Calendar getUpdated()
   {
     return this.updated;
+  }
+
+  @Override public int hashCode()
+  {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + this.featured.hashCode();
+    result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + this.target.hashCode();
+    result = (prime * result) + this.title.hashCode();
+    result = (prime * result) + this.updated.hashCode();
+    return result;
   }
 }
