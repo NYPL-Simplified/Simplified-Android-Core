@@ -1,8 +1,11 @@
 package org.nypl.simplified.app;
 
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
+import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,13 +76,45 @@ public final class CatalogNavigationFeedFragment extends NavigableFragment
     final OPDSNavigationFeed f = NullCheck.notNull(this.feed);
     final Activity act = NullCheck.notNull(this.getActivity());
 
+    /**
+     * Construct a new list view to hold the elements of the navigation feed.
+     */
+
     final ListView lv =
       (ListView) view.findViewById(R.id.catalog_nav_feed_list);
     lv.setVerticalScrollBarEnabled(false);
     lv.setDividerHeight(0);
 
+    /**
+     * Construct a listener that will open the target feed in a new catalog
+     * loading fragment whenever a user clicks on the title of a feed entry.
+     */
+
+    final FragmentManager fm = this.getFragmentManager();
+    final int cid =
+      CatalogNavigationFeedFragment.this.getNavigableContainerID();
+
+    final CatalogNavigationFeedTitleClickListener listener =
+      new CatalogNavigationFeedTitleClickListener() {
+        @Override public void onClick(
+          final OPDSNavigationFeedEntry e)
+        {
+          final NavigableFragment fn =
+            CatalogLoadingFragment.newInstance(e.getTargetURI(), cid);
+
+          final FragmentTransaction ft = fm.beginTransaction();
+          ft.addToBackStack(e.getTitle());
+          ft.replace(cid, fn);
+          ft.commit();
+        }
+      };
+
+    /**
+     * Construct a list adapter that ties everything together.
+     */
+
     final CatalogNavigationFeedAdapter adapter =
-      new CatalogNavigationFeedAdapter(act, lv, f.getFeedEntries());
+      new CatalogNavigationFeedAdapter(act, lv, f.getFeedEntries(), listener);
 
     lv.setAdapter(adapter);
     return view;
