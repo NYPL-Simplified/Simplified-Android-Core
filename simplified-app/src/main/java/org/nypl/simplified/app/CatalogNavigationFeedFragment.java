@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,9 +57,12 @@ public final class CatalogNavigationFeedFragment extends NavigableFragment
     super.onCreate(state);
 
     final Bundle a = NullCheck.notNull(this.getArguments());
-    this.feed =
-      (OPDSNavigationFeed) NullCheck.notNull(a
+    final OPDSNavigationFeed f =
+      NullCheck.notNull((OPDSNavigationFeed) a
         .getSerializable(CatalogNavigationFeedFragment.NAVIGATION_FEED_ID));
+    this.feed = f;
+
+    Log.d("CatalogNavigationFeedFragment", "onCreate: " + f.getFeedTitle());
   }
 
   @Override public View onCreateView(
@@ -91,8 +95,8 @@ public final class CatalogNavigationFeedFragment extends NavigableFragment
      */
 
     final FragmentManager fm = this.getFragmentManager();
-    final int cid =
-      CatalogNavigationFeedFragment.this.getNavigableContainerID();
+    final int cid = this.getNavigableContainerID();
+    final OPDSNavigationFeed closure_feed = NullCheck.notNull(this.feed);
 
     final CatalogNavigationFeedTitleClickListener listener =
       new CatalogNavigationFeedTitleClickListener() {
@@ -100,10 +104,13 @@ public final class CatalogNavigationFeedFragment extends NavigableFragment
           final OPDSNavigationFeedEntry e)
         {
           final NavigableFragment fn =
-            CatalogLoadingFragment.newInstance(e.getTargetURI(), cid);
+            CatalogLoadingFragment.newInstanceWithParent(
+              e.getTargetURI(),
+              CatalogNavigationFeedFragment.this,
+              cid);
 
           final FragmentTransaction ft = fm.beginTransaction();
-          ft.addToBackStack(e.getTitle());
+          ft.addToBackStack(closure_feed.getFeedTitle());
           ft.replace(cid, fn);
           ft.commit();
         }

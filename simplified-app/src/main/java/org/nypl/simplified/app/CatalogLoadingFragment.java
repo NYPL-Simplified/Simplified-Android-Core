@@ -43,7 +43,7 @@ public final class CatalogLoadingFragment extends NavigableFragment
    * @return A new instance
    */
 
-  public static NavigableFragment newInstance(
+  public static NavigableFragment newInstanceWithoutParent(
     final URI feed_uri,
     final int container)
   {
@@ -58,11 +58,50 @@ public final class CatalogLoadingFragment extends NavigableFragment
     return f;
   }
 
+  /**
+   * Construct a new instance with a parent.
+   *
+   * @param feed_uri
+   *          The URI of the feed
+   * @param container
+   *          The container
+   * @return A new instance
+   */
+
+  public static NavigableFragment newInstanceWithParent(
+    final URI feed_uri,
+    final NavigableFragment parent,
+    final int container)
+  {
+    NullCheck.notNull(feed_uri);
+
+    final CatalogLoadingFragment f = new CatalogLoadingFragment();
+    NavigableFragment.setFragmentArguments(
+      f,
+      NullCheck.notNull(parent),
+      container);
+    final Bundle a = f.getArguments();
+    a.putSerializable(
+      CatalogLoadingFragment.CATALOG_LOADING_FRAGMENT_URI_ID,
+      feed_uri);
+    return f;
+  }
+
   @Override public void onCreate(
     final @Nullable Bundle state)
   {
     super.onCreate(state);
+  }
 
+  @Override public void onResume()
+  {
+    super.onResume();
+    Log.d(CatalogLoadingFragment.TAG, "onResume: " + this);
+    this.loadFeed();
+  }
+
+  private void loadFeed()
+  {
     Log.d(CatalogLoadingFragment.TAG, "id: " + this.getNavigableID());
 
     final Bundle a = NullCheck.notNull(this.getArguments());
@@ -76,15 +115,6 @@ public final class CatalogLoadingFragment extends NavigableFragment
     final Simplified app = (Simplified) act.getApplication();
     final OPDSFeedLoaderType loader = app.getFeedLoader();
     final int cid = this.getNavigableContainerID();
-
-    /**
-     * If this fragment is the root (in other words, the user has just opened
-     * the catalog and wants to view the root of the catalog), then do not
-     * push the current fragment onto the stack when a new fragment is
-     * displayed.
-     */
-
-    final boolean add_to_stack = this.isNavigableRoot() == false;
 
     /**
      * Asynchronously download and parse the feed at the given URI, displaying
@@ -101,10 +131,7 @@ public final class CatalogLoadingFragment extends NavigableFragment
           CatalogLoadingErrorFragment.newInstance(u, cid);
 
         final FragmentTransaction ft = fm.beginTransaction();
-        if (add_to_stack) {
-          ft.addToBackStack("Error");
-        }
-        ft.replace(cid, fn);
+        ft.replace(cid, fn, "Error");
         ft.commit();
       }
 
@@ -131,10 +158,7 @@ public final class CatalogLoadingFragment extends NavigableFragment
                 CatalogAcquisitionFeedFragment.newInstance(af, cid);
               final FragmentTransaction ft = fm.beginTransaction();
 
-              if (add_to_stack) {
-                ft.addToBackStack(af.getFeedTitle());
-              }
-              ft.replace(cid, ff);
+              ft.replace(cid, ff, af.getFeedTitle());
               ft.commit();
               return Unit.unit();
             }
@@ -150,10 +174,7 @@ public final class CatalogLoadingFragment extends NavigableFragment
                 CatalogNavigationFeedFragment.newInstance(nf, cid);
               final FragmentTransaction ft = fm.beginTransaction();
 
-              if (add_to_stack) {
-                ft.addToBackStack(nf.getFeedTitle());
-              }
-              ft.replace(cid, ff);
+              ft.replace(cid, ff, nf.getFeedTitle());
               ft.commit();
               return Unit.unit();
             }

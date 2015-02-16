@@ -3,6 +3,7 @@ package org.nypl.simplified.app;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.io7m.jnull.NullCheck;
@@ -10,14 +11,16 @@ import com.io7m.jnull.Nullable;
 
 abstract class NavigableFragment extends Fragment
 {
-  static final String NAVIGABLE_FRAGMENT_CONTAINER_ID;
-  static final String NAVIGABLE_FRAGMENT_PARENT_ID;
+  static final String         NAVIGABLE_FRAGMENT_CONTAINER_ID;
+  static final String         NAVIGABLE_FRAGMENT_PARENT_ID;
+  private static final String TAG;
 
   static {
     NAVIGABLE_FRAGMENT_CONTAINER_ID =
       "org.nypl.simplified.app.NavigableFragment.container_id";
     NAVIGABLE_FRAGMENT_PARENT_ID =
       "org.nypl.simplified.app.NavigableFragment.parent_id";
+    TAG = "NavigableFragment";
   }
 
   private static Bundle newArguments(
@@ -72,6 +75,18 @@ abstract class NavigableFragment extends Fragment
     final int pid = a.getInt(NavigableFragment.NAVIGABLE_FRAGMENT_PARENT_ID);
     this.id = pid + 1;
     this.setHasOptionsMenu(true);
+
+    Log.d(
+      NavigableFragment.TAG,
+      String.format("onCreate: " + this + ": " + this.getNavigableID()));
+  }
+
+  @Override public void onResume()
+  {
+    super.onResume();
+    Log.d(
+      NavigableFragment.TAG,
+      String.format("onResume: " + this + ": " + this.getNavigableID()));
   }
 
   @Override public boolean onOptionsItemSelected(
@@ -81,8 +96,9 @@ abstract class NavigableFragment extends Fragment
     switch (item.getItemId()) {
       case android.R.id.home:
       {
+        Log.d(NavigableFragment.TAG, "Popping backstack");
         final FragmentManager fm = this.getFragmentManager();
-        fm.popBackStack();
+        fm.popBackStackImmediate();
         return true;
       }
       default:
