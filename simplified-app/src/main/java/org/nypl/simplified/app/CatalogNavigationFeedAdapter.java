@@ -20,6 +20,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.HorizontalScrollView;
@@ -82,6 +83,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final ViewState state,
     final Context context,
     final Map<URI, OPDSAcquisitionFeed> cached_feeds,
+    final CatalogNavigationFeedTitleClickListener title_listener,
     final LinearLayout container)
   {
     final TextView title =
@@ -103,13 +105,15 @@ import com.io7m.junreachable.UnreachableCodeException;
      */
 
     title.setText(e.getTitle());
+    title.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        title_listener.onClick(e);
+      }
+    });
     progress.setVisibility(View.VISIBLE);
     images.setVisibility(View.GONE);
-
-    Log.d(CatalogNavigationFeedAdapter.TAG, String.format(
-      "Loading view for lane %d, position %d",
-      state.getIndex(),
-      state.getScrollHorizontal()));
     scroller.setScrollX(state.getScrollHorizontal());
 
     /**
@@ -279,21 +283,24 @@ import com.io7m.junreachable.UnreachableCodeException;
     CatalogNavigationFeedAdapter.feedFailedPost(progress, images);
   }
 
-  private final Map<URI, OPDSAcquisitionFeed> cached_feeds;
-  private final List<OPDSNavigationFeedEntry> entries;
-  private final ListView                      list_view;
-  private final List<ViewState>               states;
+  private final Map<URI, OPDSAcquisitionFeed>           cached_feeds;
+  private final List<OPDSNavigationFeedEntry>           entries;
+  private final ListView                                list_view;
+  private final List<ViewState>                         states;
+  private final CatalogNavigationFeedTitleClickListener title_listener;
 
   public CatalogNavigationFeedAdapter(
     final Context context,
     final ListView in_list_view,
-    final List<OPDSNavigationFeedEntry> in_entries)
+    final List<OPDSNavigationFeedEntry> in_entries,
+    final CatalogNavigationFeedTitleClickListener in_title_listener)
   {
     super(NullCheck.notNull(context), 0, NullCheck.notNull(in_entries));
     this.entries = NullCheck.notNull(in_entries);
     this.cached_feeds = new WeakHashMap<URI, OPDSAcquisitionFeed>();
     this.states = new ArrayList<ViewState>(in_entries.size());
     this.list_view = NullCheck.notNull(in_list_view);
+    this.title_listener = NullCheck.notNull(in_title_listener);
 
     for (int index = 0; index < in_entries.size(); ++index) {
       this.states.add(new ViewState(index));
@@ -351,6 +358,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       state,
       context,
       this.cached_feeds,
+      this.title_listener,
       container);
 
     return container;
