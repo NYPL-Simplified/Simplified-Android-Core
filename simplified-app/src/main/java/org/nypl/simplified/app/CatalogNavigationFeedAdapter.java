@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView.RecyclerListener;
 import android.widget.ArrayAdapter;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
@@ -39,30 +38,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class CatalogNavigationFeedAdapter extends
   ArrayAdapter<OPDSNavigationFeedEntry>
 {
-  /**
-   * A {@link RecyclerListener} that saves the positions of scroll views as
-   * they move offscreen.
-   */
-
-  private static final class ScrollViewSaver implements RecyclerListener
-  {
-    @Override public void onMovedToScrapHeap(
-      final @Nullable View view)
-    {
-      assert view != null;
-      if (view instanceof LinearLayout) {
-        final LinearLayout ll = (LinearLayout) view;
-        final Object state_raw = ll.getTag();
-        if ((state_raw != null) && (state_raw instanceof ViewState)) {
-          final ViewState state = (ViewState) state_raw;
-          final HorizontalScrollView scroller =
-            (HorizontalScrollView) ll.findViewById(R.id.feed_scroller);
-          CatalogNavigationFeedAdapter.scrollViewSaveState(state, scroller);
-        }
-      }
-    }
-  }
-
   /**
    * Stored state for a given view.
    */
@@ -130,7 +105,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     title.setText(e.getTitle());
     progress.setVisibility(View.VISIBLE);
     images.setVisibility(View.GONE);
-    CatalogNavigationFeedAdapter.scrollViewRestoreState(state, scroller);
+
+    Log.d(CatalogNavigationFeedAdapter.TAG, String.format(
+      "Loading view for lane %d, position %d",
+      state.getIndex(),
+      state.getScrollHorizontal()));
+    scroller.setScrollX(state.getScrollHorizontal());
 
     /**
      * Set up the featured covers.
@@ -230,16 +210,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     UIThread.checkIsUIThread();
 
     final String entry_id = e.getID();
-    Log.d(
-      CatalogNavigationFeedAdapter.TAG,
-      String.format("Entry %s has featured feed %s", entry_id, featured_uri));
-
     if (cached_feeds.containsKey(featured_uri)) {
-      Log.d(CatalogNavigationFeedAdapter.TAG, String.format(
-        "Got cached acquisition feed %s for entry %s",
-        featured_uri,
-        entry_id));
-
       final OPDSAcquisitionFeed feed =
         NullCheck.notNull(cached_feeds.get(featured_uri));
       CatalogNavigationFeedAdapter.feedOK(
@@ -261,7 +232,6 @@ import com.io7m.junreachable.UnreachableCodeException;
             "Unable to load feed %s for entry %s",
             featured_uri,
             entry_id), ex);
-
           CatalogNavigationFeedAdapter.feedFailedPost(progress, images);
         }
 
@@ -273,11 +243,6 @@ import com.io7m.junreachable.UnreachableCodeException;
               @Override public Unit acquisition(
                 final OPDSAcquisitionFeed a)
               {
-                Log.d(CatalogNavigationFeedAdapter.TAG, String.format(
-                  "Got acquisition feed %s for entry %s",
-                  featured_uri,
-                  entry_id));
-
                 cached_feeds.put(featured_uri, a);
                 CatalogNavigationFeedAdapter.feedOKPost(
                   e,
@@ -311,47 +276,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final LinearLayout images)
   {
     UIThread.checkIsUIThread();
-
-    final String entry_id = e.getID();
-    Log.d(
-      CatalogNavigationFeedAdapter.TAG,
-      String.format("Entry %s has no featured feed", entry_id));
     CatalogNavigationFeedAdapter.feedFailedPost(progress, images);
-  }
-
-  /**
-   * Restore the scroll position of the given scroll view from the given
-   * state.
-   */
-
-  private static void scrollViewRestoreState(
-    final ViewState state,
-    final HorizontalScrollView scroller)
-  {
-    final int sx = state.getScrollHorizontal();
-    Log.d(CatalogNavigationFeedAdapter.TAG, String.format(
-      "restoring scroll position %d for scroll view %d",
-      sx,
-      state.getIndex()));
-    scroller.setScrollX(sx);
-  }
-
-  /**
-   * Save the scroll position of the given scroll view to the given state.
-   */
-
-  private static void scrollViewSaveState(
-    final ViewState state,
-    final HorizontalScrollView scroller)
-  {
-    final int sx = scroller.getScrollX();
-    Log.d(
-      CatalogNavigationFeedAdapter.TAG,
-      String.format(
-        "saving scroll position %d for scroll view %d",
-        sx,
-        state.getIndex()));
-    state.setScrollHorizontal(sx);
   }
 
   private final Map<URI, OPDSAcquisitionFeed> cached_feeds;
@@ -373,13 +298,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     for (int index = 0; index < in_entries.size(); ++index) {
       this.states.add(new ViewState(index));
     }
-
-    /**
-     * Register a listener to save the scroll position of the scroll view in
-     * each lane whenever that lane is moved offscreen.
-     */
-
-    this.list_view.setRecyclerListener(new ScrollViewSaver());
   }
 
   @Override public View getView(
@@ -405,6 +323,20 @@ import com.io7m.junreachable.UnreachableCodeException;
     LinearLayout container;
     if (reused != null) {
       container = (LinearLayout) NullCheck.notNull(reused);
+
+      /**
+       * If reusing a view, save the scroll position of whatever lane was
+       * being rendered by that view.
+       */
+
+      final HorizontalScrollView scroller =
+        NullCheck.notNull((HorizontalScrollView) container
+          .findViewById(R.id.feed_scroller));
+      final ViewState state_old =
+        NullCheck.notNull((ViewState) container.getTag());
+      final int sx = scroller.getScrollX();
+      state_old.setScrollHorizontal(sx);
+
     } else {
       container =
         (LinearLayout) NullCheck.notNull(inflater.inflate(
