@@ -17,7 +17,6 @@
     android:icon="@drawable/simplified"
     android:label="@string/app_name"
     android:theme="@style/SimplifiedTheme">
-    
     <activity
       android:name=".CatalogActivity"
       android:label="@string/app_name">
@@ -27,9 +26,16 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    
     <activity
-      android:name=".TestActivity"
+      android:name=".BooksActivity"
+      android:label="@string/app_name">
+    </activity>
+    <activity
+      android:name=".SettingsActivity"
+      android:label="@string/app_name">
+    </activity>
+    <activity
+      android:name=".HoldsActivity"
       android:label="@string/app_name">
     </activity>
   </application>

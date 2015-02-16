@@ -7,13 +7,12 @@
     android:id="@+id/content_area"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_weight="0.95">
+    android:layout_weight="1.0">
   </FrameLayout>
 
   <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_weight="0.05"
+    android:layout_height="64dp"
     android:background="@drawable/navbar_drawable"
     android:gravity="center"
     android:orientation="horizontal">
