@@ -8,6 +8,7 @@ import android.app.FragmentManager.OnBackStackChangedListener;
 import android.app.FragmentTransaction;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -26,18 +27,26 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("synthetic-access") abstract class NavigableFragmentActivity extends
   PartActivity
 {
+  private static final String TAG = "NavigableFragmentActivity";
+
   private static void displayOrHideUpCaretAsNecessary(
     final Resources rr,
     final FragmentManager fm,
     final ActionBar bar)
   {
+    Log.d(NavigableFragmentActivity.TAG, "Backstack changed");
+
     final int count = fm.getBackStackEntryCount();
     final boolean stack_nonempty = count > 0;
     if (stack_nonempty) {
-      final BackStackEntry e = fm.getBackStackEntryAt(count - 1);
-      bar.setTitle(e.getName());
+      for (int index = 0; index < count; ++index) {
+        final BackStackEntry e = fm.getBackStackEntryAt(index);
+        Log.d(
+          NavigableFragmentActivity.TAG,
+          String.format("Backstack [%d]: %s", index, e));
+      }
     } else {
-      bar.setTitle(rr.getString(R.string.app_name));
+      Log.d(NavigableFragmentActivity.TAG, "Backstack is empty");
     }
 
     bar.setDisplayHomeAsUpEnabled(stack_nonempty);
@@ -76,7 +85,7 @@ import com.io7m.jnull.Nullable;
     if (f == null) {
       final NavigableFragment fn = this.newInitialFragment(R.id.content_area);
       final FragmentTransaction ft = fm.beginTransaction();
-      ft.add(R.id.content_area, fn);
+      ft.add(R.id.content_area, fn, "Initial");
       ft.commit();
     }
 

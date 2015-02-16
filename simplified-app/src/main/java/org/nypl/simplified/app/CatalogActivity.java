@@ -21,7 +21,7 @@ public final class CatalogActivity extends NavigableFragmentActivity
     final Resources rr = this.getResources();
     final URI u =
       NullCheck.notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
-    return CatalogLoadingFragment.newInstance(u, container);
+    return CatalogLoadingFragment.newInstanceWithoutParent(u, container);
   }
 
   @Override protected void onCreate(

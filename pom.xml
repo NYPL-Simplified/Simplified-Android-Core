@@ -27,7 +27,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     
     <org.nypl.android.packageVersion>4.0.3_r5</org.nypl.android.packageVersion>
-    <org.nypl.android.sdkVersion>15</org.nypl.android.sdkVersion>
+    <org.nypl.android.sdkVersion>19</org.nypl.android.sdkVersion>
   </properties>
 
   <scm>
