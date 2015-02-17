@@ -10,15 +10,6 @@ import android.os.Looper;
 final class UIThread
 {
   /**
-   * @return <code>true</code> iff the current thread is the UI thread.
-   */
-
-  static boolean isUIThread()
-  {
-    return Looper.getMainLooper().getThread() == Thread.currentThread();
-  }
-
-  /**
    * Check that the current thread is the UI thread and raise
    * {@link IllegalStateException} if it isn't.
    */
@@ -30,5 +21,14 @@ final class UIThread
         "Current thread '%s' is not the Android UI thread",
         Thread.currentThread()));
     }
+  }
+
+  /**
+   * @return <code>true</code> iff the current thread is the UI thread.
+   */
+
+  static boolean isUIThread()
+  {
+    return Looper.getMainLooper().getThread() == Thread.currentThread();
   }
 }

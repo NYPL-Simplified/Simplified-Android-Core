@@ -26,68 +26,24 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings("synthetic-access") abstract class PartActivity extends
   Activity implements PartActivityType
 {
-  @Override protected void onCreate(
-    final @Nullable Bundle state)
+  private void buttonToBooks(
+    final Button b)
   {
-    super.onCreate(state);
-    this.setContentView(R.layout.part);
+    b.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        final Intent i = new Intent(PartActivity.this, BooksActivity.class);
 
-    Log.d("PartActivity", "onCreate: " + this);
+        int flags = 0;
+        flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
+        flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
+        flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
-    final Button catalog_button =
-      NullCheck.notNull((Button) this.findViewById(R.id.catalog_button));
-    final Button holds_button =
-      NullCheck.notNull((Button) this.findViewById(R.id.holds_button));
-    final Button books_button =
-      NullCheck.notNull((Button) this.findViewById(R.id.books_button));
-    final Button settings_button =
-      NullCheck.notNull((Button) this.findViewById(R.id.settings_button));
-
-    this
-      .matchPartActivity(new PartActivityMatcherType<Unit, UnreachableCodeException>() {
-        @Override public Unit catalog(
-          final CatalogActivity a)
-          throws UnreachableCodeException
-        {
-          PartActivity.this.buttonToBooks(books_button);
-          catalog_button.setEnabled(false);
-          PartActivity.this.buttonToHolds(holds_button);
-          PartActivity.this.buttonToSettings(settings_button);
-          return Unit.unit();
-        }
-
-        @Override public Unit settings(
-          final SettingsActivity a)
-          throws UnreachableCodeException
-        {
-          PartActivity.this.buttonToBooks(books_button);
-          PartActivity.this.buttonToCatalog(catalog_button);
-          PartActivity.this.buttonToHolds(holds_button);
-          settings_button.setEnabled(false);
-          return Unit.unit();
-        }
-
-        @Override public Unit books(
-          final BooksActivity a)
-          throws UnreachableCodeException
-        {
-          books_button.setEnabled(false);
-          PartActivity.this.buttonToCatalog(catalog_button);
-          PartActivity.this.buttonToHolds(holds_button);
-          PartActivity.this.buttonToSettings(settings_button);
-          return Unit.unit();
-        }
-
-        @Override public Unit holds(
-          final HoldsActivity a)
-        {
-          PartActivity.this.buttonToBooks(books_button);
-          PartActivity.this.buttonToCatalog(catalog_button);
-          holds_button.setEnabled(false);
-          PartActivity.this.buttonToSettings(settings_button);
-          return Unit.unit();
-        }
-      });
+        i.setFlags(flags);
+        PartActivity.this.startActivity(i);
+      }
+    });
   }
 
   protected void buttonToCatalog(
@@ -151,23 +107,67 @@ import com.io7m.junreachable.UnreachableCodeException;
     });
   }
 
-  private void buttonToBooks(
-    final Button b)
+  @Override protected void onCreate(
+    final @Nullable Bundle state)
   {
-    b.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
-      {
-        final Intent i = new Intent(PartActivity.this, BooksActivity.class);
+    super.onCreate(state);
+    this.setContentView(R.layout.part);
 
-        int flags = 0;
-        flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-        flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
-        flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
+    Log.d("PartActivity", "onCreate: " + this);
 
-        i.setFlags(flags);
-        PartActivity.this.startActivity(i);
-      }
-    });
+    final Button catalog_button =
+      NullCheck.notNull((Button) this.findViewById(R.id.catalog_button));
+    final Button holds_button =
+      NullCheck.notNull((Button) this.findViewById(R.id.holds_button));
+    final Button books_button =
+      NullCheck.notNull((Button) this.findViewById(R.id.books_button));
+    final Button settings_button =
+      NullCheck.notNull((Button) this.findViewById(R.id.settings_button));
+
+    this
+      .matchPartActivity(new PartActivityMatcherType<Unit, UnreachableCodeException>() {
+        @Override public Unit books(
+          final BooksActivity a)
+          throws UnreachableCodeException
+        {
+          books_button.setEnabled(false);
+          PartActivity.this.buttonToCatalog(catalog_button);
+          PartActivity.this.buttonToHolds(holds_button);
+          PartActivity.this.buttonToSettings(settings_button);
+          return Unit.unit();
+        }
+
+        @Override public Unit catalog(
+          final CatalogActivity a)
+          throws UnreachableCodeException
+        {
+          PartActivity.this.buttonToBooks(books_button);
+          catalog_button.setEnabled(false);
+          PartActivity.this.buttonToHolds(holds_button);
+          PartActivity.this.buttonToSettings(settings_button);
+          return Unit.unit();
+        }
+
+        @Override public Unit holds(
+          final HoldsActivity a)
+        {
+          PartActivity.this.buttonToBooks(books_button);
+          PartActivity.this.buttonToCatalog(catalog_button);
+          holds_button.setEnabled(false);
+          PartActivity.this.buttonToSettings(settings_button);
+          return Unit.unit();
+        }
+
+        @Override public Unit settings(
+          final SettingsActivity a)
+          throws UnreachableCodeException
+        {
+          PartActivity.this.buttonToBooks(books_button);
+          PartActivity.this.buttonToCatalog(catalog_button);
+          PartActivity.this.buttonToHolds(holds_button);
+          settings_button.setEnabled(false);
+          return Unit.unit();
+        }
+      });
   }
 }

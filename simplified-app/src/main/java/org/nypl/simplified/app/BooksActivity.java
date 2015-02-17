@@ -10,6 +10,20 @@ import com.io7m.jnull.Nullable;
 
 public final class BooksActivity extends PartActivity
 {
+  @Override public <A, E extends Exception> A matchPartActivity(
+    final PartActivityMatcherType<A, E> m)
+    throws E
+  {
+    return m.books(this);
+  }
+
+  @Override public void onBackPressed()
+  {
+    super.onBackPressed();
+    this.finish();
+    this.overridePendingTransition(0, 0);
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -28,19 +42,5 @@ public final class BooksActivity extends PartActivity
 
     ca.addView(s);
     ca.requestLayout();
-  }
-
-  @Override public void onBackPressed()
-  {
-    super.onBackPressed();
-    this.finish();
-    this.overridePendingTransition(0, 0);
-  }
-
-  @Override public <A, E extends Exception> A matchPartActivity(
-    final PartActivityMatcherType<A, E> m)
-    throws E
-  {
-    return m.books(this);
   }
 }

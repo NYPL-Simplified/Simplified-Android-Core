@@ -38,6 +38,9 @@ public interface CatalogFeedStackType
 
   /**
    * Push a URI onto the stack.
+   *
+   * @param uri
+   *          The URI to add
    */
 
   void catalogFeedsPush(

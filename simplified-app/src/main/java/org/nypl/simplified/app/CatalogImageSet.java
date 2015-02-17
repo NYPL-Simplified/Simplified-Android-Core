@@ -23,8 +23,8 @@ import com.io7m.jnull.NullCheck;
 public final class CatalogImageSet
 {
   private static final String                  TAG = "CatalogImageSet";
-  private final List<OPDSAcquisitionFeedEntry> entries;
   private final AtomicInteger                  done;
+  private final List<OPDSAcquisitionFeedEntry> entries;
   private final ArrayList<Button>              imageviews;
 
   public CatalogImageSet(

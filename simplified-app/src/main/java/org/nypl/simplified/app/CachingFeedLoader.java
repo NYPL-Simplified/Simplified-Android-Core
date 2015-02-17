@@ -14,8 +14,27 @@ import org.nypl.simplified.opds.core.OPDSFeedType;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * An implementation of {@link OPDSFeedLoaderType} that caches successful
+ * fetches.
+ */
+
 public final class CachingFeedLoader implements OPDSFeedLoaderType
 {
+  /**
+   * Construct a new loader.
+   * 
+   * @param a
+   *          The original loader
+   * @return A new loader
+   */
+
+  public static OPDSFeedLoaderType newLoader(
+    final OPDSFeedLoaderType a)
+  {
+    return new CachingFeedLoader(a);
+  }
+
   private final OPDSFeedLoaderType     actual;
   private final Map<URI, OPDSFeedType> cache;
 
@@ -31,12 +50,6 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
     this.cache = NullCheck.notNull(m);
   }
 
-  public static OPDSFeedLoaderType newLoader(
-    final OPDSFeedLoaderType a)
-  {
-    return new CachingFeedLoader(a);
-  }
-
   @Override public void fromURI(
     final URI uri,
     final OPDSFeedLoadListenerType p)
@@ -47,17 +60,17 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
       p.onSuccess(r);
     } else {
       this.actual.fromURI(uri, new OPDSFeedLoadListenerType() {
+        @Override public void onFailure(
+          final Exception e)
+        {
+          p.onFailure(e);
+        }
+
         @Override public void onSuccess(
           final OPDSFeedType f)
         {
           c.put(uri, f);
           p.onSuccess(f);
-        }
-
-        @Override public void onFailure(
-          final Exception e)
-        {
-          p.onFailure(e);
         }
       });
     }
