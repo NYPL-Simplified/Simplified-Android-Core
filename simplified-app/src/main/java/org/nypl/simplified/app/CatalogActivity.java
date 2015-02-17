@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import java.io.Serializable;
 import java.net.URI;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
@@ -30,6 +31,181 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings("synthetic-access") public final class CatalogActivity extends
   PartActivity
 {
+  private static final class StateAcquisition implements
+    Serializable,
+    StateType
+  {
+    private static final long         serialVersionUID = 12398712937189238L;
+    private final ViewGroup           content_area;
+    private final OPDSAcquisitionFeed feed;
+    private final LinearLayout        layout;
+    private final ViewGroup           loading;
+    private final boolean             root;
+    private final URI                 uri;
+
+    private StateAcquisition(
+      final ViewGroup in_content_area,
+      final ViewGroup in_loading,
+      final LinearLayout in_layout,
+      final boolean in_root,
+      final OPDSAcquisitionFeed in_feed,
+      final URI in_uri)
+    {
+      this.content_area = in_content_area;
+      this.loading = in_loading;
+      this.layout = in_layout;
+      this.root = in_root;
+      this.feed = in_feed;
+      this.uri = in_uri;
+    }
+
+    @Override public ViewGroup getContentArea()
+    {
+      return this.content_area;
+    }
+
+    @Override public LinearLayout getLayout()
+    {
+      return this.layout;
+    }
+
+    @Override public ViewGroup getProgressBar()
+    {
+      return this.loading;
+    }
+
+    @Override public void matchState(
+      final StateTypeMatcherType m)
+    {
+      m.acquisition(this);
+    }
+  }
+
+  private static final class StateError implements Serializable, StateType
+  {
+    private static final long  serialVersionUID = 12398712937189238L;
+    private final ViewGroup    content_area;
+    private final Exception    error;
+    private final LinearLayout layout;
+    private final ViewGroup    loading;
+    private final boolean      root;
+    private final URI          uri;
+
+    private StateError(
+      final ViewGroup in_content_area,
+      final ViewGroup in_loading,
+      final LinearLayout in_layout,
+      final boolean in_root,
+      final Exception in_error,
+      final URI in_uri)
+    {
+      this.content_area = in_content_area;
+      this.loading = in_loading;
+      this.layout = in_layout;
+      this.root = in_root;
+      this.error = in_error;
+      this.uri = in_uri;
+    }
+
+    @Override public ViewGroup getContentArea()
+    {
+      return this.content_area;
+    }
+
+    @Override public LinearLayout getLayout()
+    {
+      return this.layout;
+    }
+
+    @Override public ViewGroup getProgressBar()
+    {
+      return this.loading;
+    }
+
+    @Override public void matchState(
+      final StateTypeMatcherType m)
+    {
+      m.error(this);
+    }
+  }
+
+  private static final class StateNavigation implements
+    Serializable,
+    StateType
+  {
+    private static final long        serialVersionUID = 1567589930716465962L;
+    private final ViewGroup          content_area;
+    private final OPDSNavigationFeed feed;
+    private final LinearLayout       layout;
+    private final ListView           list;
+    private final ViewGroup          loading;
+    private final boolean            root;
+    private final URI                uri;
+
+    private StateNavigation(
+      final ViewGroup in_content_area,
+      final ViewGroup in_loading,
+      final LinearLayout in_layout,
+      final ListView in_list,
+      final boolean in_root,
+      final OPDSNavigationFeed in_feed,
+      final URI in_uri)
+    {
+      this.content_area = in_content_area;
+      this.loading = in_loading;
+      this.layout = in_layout;
+      this.list = in_list;
+      this.root = in_root;
+      this.feed = in_feed;
+      this.uri = in_uri;
+    }
+
+    @Override public ViewGroup getContentArea()
+    {
+      return this.content_area;
+    }
+
+    @Override public LinearLayout getLayout()
+    {
+      return this.layout;
+    }
+
+    @Override public ViewGroup getProgressBar()
+    {
+      return this.loading;
+    }
+
+    @Override public void matchState(
+      final StateTypeMatcherType m)
+    {
+      m.navigation(this);
+    }
+  }
+
+  private static interface StateType
+  {
+    ViewGroup getContentArea();
+
+    LinearLayout getLayout();
+
+    ViewGroup getProgressBar();
+
+    void matchState(
+      final StateTypeMatcherType m);
+  }
+
+  private static interface StateTypeMatcherType
+  {
+    void acquisition(
+      StateAcquisition s);
+
+    void error(
+      StateError s);
+
+    void navigation(
+      StateNavigation s);
+  }
+
   private static final int    FADE_TIME = 100;
   private static final String TAG       = "CatalogActivity";
 
@@ -51,6 +227,40 @@ import com.io7m.junreachable.UnreachableCodeException;
       .withEndAction(r);
   }
 
+  private static void onShowLayout(
+    final StateType s)
+  {
+    final ViewGroup loading = s.getProgressBar();
+    final LinearLayout layout = s.getLayout();
+    final ViewGroup content_area = s.getContentArea();
+
+    /**
+     * If the progress bar is visible, then the layout has never been faded
+     * in. Add the layout to the content area and fade it in whilst fading out
+     * the progress bar.
+     *
+     * Otherwise, if the progress bar isn't visible, then the content area
+     * should be faded back in.
+     */
+
+    if (loading.getVisibility() == View.VISIBLE) {
+      CatalogActivity.doFadeOutWithRunnable(layout, new Runnable() {
+        @Override public void run()
+        {
+          content_area.removeView(loading);
+          content_area.requestLayout();
+          loading.setVisibility(View.GONE);
+
+          content_area.addView(layout);
+          content_area.requestLayout();
+          CatalogActivity.doFadeIn(layout);
+        }
+      });
+    } else {
+      CatalogActivity.doFadeIn(layout);
+    }
+  }
+
   private static void requestedPop()
   {
     final Simplified app = Simplified.get();
@@ -58,39 +268,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogActivity.TAG, String.format("Popped: %s", u));
   }
 
-  private @Nullable ViewGroup content_area;
-  private @Nullable ViewGroup loading;
-
-  private boolean             root;
-
-  private void goUp()
-  {
-    if (this.root) {
-      this.finish();
-    } else {
-      CatalogActivity.requestedPop();
-
-      final Intent i = new Intent(this, CatalogActivity.class);
-      int flags = 0;
-      flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-      flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
-      flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
-      i.setFlags(flags);
-
-      final CatalogActivity a = this;
-      final ViewGroup ca = NullCheck.notNull(this.content_area);
-      final View ll = NullCheck.notNull(ca.getChildAt(0));
-
-      CatalogActivity.doFadeOutWithRunnable(ll, new Runnable() {
-        @Override public void run()
-        {
-          a.startActivity(i);
-          a.finish();
-          a.overridePendingTransition(0, 0);
-        }
-      });
-    }
-  }
+  private @Nullable StateType current_state;
 
   @Override public <A, E extends Exception> A matchPartActivity(
     final PartActivityMatcherType<A, E> m)
@@ -102,7 +280,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public void onBackPressed()
   {
     super.onBackPressed();
-    this.goUp();
+    CatalogActivity.requestedPop();
+    this.finish();
+    this.overridePendingTransition(0, 0);
   }
 
   @Override protected void onCreate(
@@ -113,33 +293,29 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final Simplified app = Simplified.get();
     final OPDSFeedLoaderType loader = app.getFeedLoader();
-
-    this.root = app.catalogFeedsCount() == 0;
     final URI feed_uri = app.catalogFeedsPeek();
 
     final LayoutInflater inflater =
-      (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    final ViewGroup ca =
+      NullCheck.notNull((LayoutInflater) this
+        .getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+    final ViewGroup content_area =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.content_area));
-    final ViewGroup la =
+    final ViewGroup loading =
       NullCheck.notNull((ViewGroup) inflater.inflate(
         R.layout.catalog_loading,
-        ca,
+        content_area,
         false));
 
-    ca.addView(la);
-    ca.requestLayout();
-    CatalogActivity.doFadeIn(la);
+    content_area.addView(loading);
+    content_area.requestLayout();
+    CatalogActivity.doFadeIn(loading);
 
     final ActionBar bar = this.getActionBar();
-    if (this.root) {
-      bar.setDisplayHomeAsUpEnabled(false);
-    } else {
+    if (app.catalogFeedsCount() > 0) {
       bar.setDisplayHomeAsUpEnabled(true);
+    } else {
+      bar.setDisplayHomeAsUpEnabled(false);
     }
-
-    this.content_area = NullCheck.notNull(ca);
-    this.loading = NullCheck.notNull(la);
 
     loader.fromURI(feed_uri, new OPDSFeedLoadListenerType() {
       @Override public void onFailure(
@@ -148,7 +324,12 @@ import com.io7m.junreachable.UnreachableCodeException;
         CatalogActivity.this.runOnUiThread(new Runnable() {
           @Override public void run()
           {
-            CatalogActivity.this.onReceiveFeedError(e);
+            CatalogActivity.this.onReceiveFeedError(
+              inflater,
+              content_area,
+              loading,
+              e,
+              feed_uri);
           }
         });
       }
@@ -160,12 +341,16 @@ import com.io7m.junreachable.UnreachableCodeException;
           .matchFeedType(new OPDSFeedMatcherType<Unit, UnreachableCodeException>() {
             @Override public Unit acquisition(
               final OPDSAcquisitionFeed af)
-              throws UnreachableCodeException
             {
               CatalogActivity.this.runOnUiThread(new Runnable() {
                 @Override public void run()
                 {
-                  CatalogActivity.this.onReceiveAcquisitionFeed(af);
+                  CatalogActivity.this.onReceiveAcquisitionFeed(
+                    inflater,
+                    content_area,
+                    loading,
+                    af,
+                    feed_uri);
                 }
               });
               return Unit.unit();
@@ -173,12 +358,16 @@ import com.io7m.junreachable.UnreachableCodeException;
 
             @Override public Unit navigation(
               final OPDSNavigationFeed nf)
-              throws UnreachableCodeException
             {
               CatalogActivity.this.runOnUiThread(new Runnable() {
                 @Override public void run()
                 {
-                  CatalogActivity.this.onReceiveNavigationFeed(nf);
+                  CatalogActivity.this.onReceiveNavigationFeed(
+                    inflater,
+                    content_area,
+                    loading,
+                    nf,
+                    feed_uri);
                 }
               });
               return Unit.unit();
@@ -196,7 +385,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     switch (item.getItemId()) {
       case android.R.id.home:
       {
-        this.goUp();
+        CatalogActivity.requestedPop();
+        this.finish();
+        this.overridePendingTransition(0, 0);
         return true;
       }
       default:
@@ -207,96 +398,71 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private void onReceiveAcquisitionFeed(
-    final OPDSAcquisitionFeed af)
+    final LayoutInflater inflater,
+    final ViewGroup content_area,
+    final ViewGroup loading,
+    final OPDSAcquisitionFeed af,
+    final URI feed_uri)
   {
     Log.d(CatalogActivity.TAG, "Got acquisition feed: " + af);
 
-    final ViewGroup ca = NullCheck.notNull(this.content_area);
-    final ViewGroup la = NullCheck.notNull(this.loading);
-
-    final LayoutInflater inflater =
-      (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-    final LinearLayout ll =
+    final LinearLayout layout =
       NullCheck.notNull((LinearLayout) inflater.inflate(
         R.layout.catalog_acquisition_feed,
-        ca,
+        content_area,
         false));
+    layout.setAlpha(0.0f);
 
-    /**
-     * Fade out progress, fade in layout.
-     */
-
-    CatalogActivity.doFadeOutWithRunnable(la, new Runnable() {
-      @Override public void run()
-      {
-        ca.removeView(la);
-        ca.requestLayout();
-        la.setVisibility(View.GONE);
-
-        ca.addView(ll);
-        ca.requestLayout();
-        CatalogActivity.doFadeIn(ll);
-      }
-    });
+    final StateAcquisition sa =
+      new StateAcquisition(content_area, loading, layout, false, af, feed_uri);
+    this.current_state = sa;
+    CatalogActivity.onShowLayout(sa);
   }
 
-  protected void onReceiveFeedError(
-    final Exception e)
+  private void onReceiveFeedError(
+    final LayoutInflater inflater,
+    final ViewGroup content_area,
+    final ViewGroup loading,
+    final Exception e,
+    final URI feed_uri)
   {
     Log.e(CatalogActivity.TAG, "Failed to get feed: " + e, e);
 
-    final ViewGroup ca = NullCheck.notNull(this.content_area);
-    final ViewGroup la = NullCheck.notNull(this.loading);
-
-    final LayoutInflater inflater =
-      (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-    final LinearLayout ll =
+    final LinearLayout layout =
       NullCheck.notNull((LinearLayout) inflater.inflate(
         R.layout.catalog_loading_error,
-        ca,
+        content_area,
         false));
+    layout.setAlpha(0.0f);
 
-    /**
-     * Fade out progress, fade in layout.
-     */
-
-    CatalogActivity.doFadeOutWithRunnable(la, new Runnable() {
-      @Override public void run()
-      {
-        ca.removeView(la);
-        ca.requestLayout();
-        la.setVisibility(View.GONE);
-
-        ca.addView(ll);
-        ca.requestLayout();
-        CatalogActivity.doFadeIn(ll);
-      }
-    });
+    final StateError se =
+      new StateError(content_area, loading, layout, false, e, feed_uri);
+    this.current_state = se;
+    CatalogActivity.onShowLayout(se);
   }
 
   private void onReceiveNavigationFeed(
-    final OPDSNavigationFeed nf)
+    final LayoutInflater inflater,
+    final ViewGroup content_area,
+    final ViewGroup loading,
+    final OPDSNavigationFeed nf,
+    final URI feed_uri)
   {
     Log.d(CatalogActivity.TAG, "Got navigation feed: " + nf);
 
-    final ViewGroup ca = NullCheck.notNull(this.content_area);
-    final ViewGroup la = NullCheck.notNull(this.loading);
-
-    final LayoutInflater inflater =
-      (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-    final LinearLayout ll =
-      (LinearLayout) inflater.inflate(
+    final LinearLayout layout =
+      NullCheck.notNull((LinearLayout) inflater.inflate(
         R.layout.catalog_navigation_feed,
-        ca,
-        false);
+        content_area,
+        false));
+    layout.setAlpha(0.0f);
 
-    final ListView lv =
-      (ListView) ll.findViewById(R.id.catalog_nav_feed_list);
-    lv.setVerticalScrollBarEnabled(false);
-    lv.setDividerHeight(0);
+    final ListView list_view =
+      NullCheck.notNull((ListView) layout
+        .findViewById(R.id.catalog_nav_feed_list));
+
+    list_view.setVerticalScrollBarEnabled(false);
+    list_view.setDividerHeight(0);
 
     /**
      * Construct a listener that will open the target feed in a new activity
@@ -313,7 +479,7 @@ import com.io7m.junreachable.UnreachableCodeException;
            * Fade out layout.
            */
 
-          CatalogActivity.doFadeOutWithRunnable(ll, new Runnable() {
+          CatalogActivity.doFadeOutWithRunnable(layout, new Runnable() {
             @Override public void run()
             {
               final Intent i = new Intent();
@@ -321,14 +487,10 @@ import com.io7m.junreachable.UnreachableCodeException;
               i.setClass(CatalogActivity.this, CatalogActivity.class);
 
               int flags = 0;
-              flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-              flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
               flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
-              flags |= Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 
               i.setFlags(flags);
               CatalogActivity.this.startActivity(i);
-              CatalogActivity.this.overridePendingTransition(0, 0);
             }
           });
         }
@@ -341,27 +503,75 @@ import com.io7m.junreachable.UnreachableCodeException;
     final CatalogNavigationFeedAdapter adapter =
       new CatalogNavigationFeedAdapter(
         this,
-        lv,
+        list_view,
         nf.getFeedEntries(),
         listener);
+    list_view.setAdapter(adapter);
 
-    lv.setAdapter(adapter);
+    final StateNavigation sn =
+      new StateNavigation(
+        content_area,
+        loading,
+        layout,
+        list_view,
+        false,
+        nf,
+        feed_uri);
+    this.current_state = sn;
+    CatalogActivity.onShowLayout(sn);
+  }
+
+  @Override protected void onResume()
+  {
+    super.onResume();
+    Log.d(CatalogActivity.TAG, "onResume");
 
     /**
-     * Fade out progress, fade in layout.
+     * If the current state is unset, then it means that the activity is
+     * "resuming" having not yet actually received a feed.
      */
 
-    CatalogActivity.doFadeOutWithRunnable(la, new Runnable() {
-      @Override public void run()
-      {
-        ca.removeView(la);
-        ca.requestLayout();
-        la.setVisibility(View.GONE);
+    final StateType s = this.current_state;
+    if (s != null) {
+      CatalogActivity.onShowLayout(s);
+    }
+  }
 
-        ca.addView(ll);
-        ca.requestLayout();
-        CatalogActivity.doFadeIn(ll);
-      }
-    });
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[CatalogActivity@");
+    b.append(this.hashCode());
+    b.append(" ");
+    final StateType s = this.current_state;
+    if (s != null) {
+      s.matchState(new StateTypeMatcherType() {
+        @Override public void acquisition(
+          final StateAcquisition ss)
+        {
+          b.append(" (Acquisition ");
+          b.append(ss.uri);
+          b.append(")");
+        }
+
+        @Override public void error(
+          final StateError se)
+        {
+          b.append(" (Error ");
+          b.append(se.uri);
+          b.append(")");
+        }
+
+        @Override public void navigation(
+          final StateNavigation sn)
+        {
+          b.append(" (Navigation ");
+          b.append(sn.uri);
+          b.append(")");
+        }
+      });
+    }
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }

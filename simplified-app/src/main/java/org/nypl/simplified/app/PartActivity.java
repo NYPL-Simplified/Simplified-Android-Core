@@ -36,8 +36,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         final Intent i = new Intent(PartActivity.this, BooksActivity.class);
 
         int flags = 0;
-        flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-        flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
         flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
         i.setFlags(flags);
@@ -56,8 +54,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         final Intent i = new Intent(PartActivity.this, CatalogActivity.class);
 
         int flags = 0;
-        flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-        flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
         flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
         i.setFlags(flags);
@@ -76,8 +72,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         final Intent i = new Intent(PartActivity.this, HoldsActivity.class);
 
         int flags = 0;
-        flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-        flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
         flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
         i.setFlags(flags);
@@ -97,8 +91,6 @@ import com.io7m.junreachable.UnreachableCodeException;
           new Intent(PartActivity.this, SettingsActivity.class);
 
         int flags = 0;
-        flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-        flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
         flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
 
         i.setFlags(flags);
@@ -169,5 +161,17 @@ import com.io7m.junreachable.UnreachableCodeException;
           return Unit.unit();
         }
       });
+  }
+
+  @Override protected void onDestroy()
+  {
+    super.onDestroy();
+    Log.d("PartActivity", "onDestroy: " + this);
+  }
+
+  @Override protected void onResume()
+  {
+    super.onResume();
+    Log.d("PartActivity", "onResume: " + this);
   }
 }
