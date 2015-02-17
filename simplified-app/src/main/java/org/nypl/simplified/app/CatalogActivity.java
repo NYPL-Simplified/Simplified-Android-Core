@@ -51,8 +51,16 @@ import com.io7m.junreachable.UnreachableCodeException;
       .withEndAction(r);
   }
 
+  private static void requestedPop()
+  {
+    final Simplified app = Simplified.get();
+    final URI u = app.catalogFeedsPop();
+    Log.d(CatalogActivity.TAG, String.format("Popped: %s", u));
+  }
+
   private @Nullable ViewGroup content_area;
   private @Nullable ViewGroup loading;
+
   private boolean             root;
 
   private void goUp()
@@ -60,7 +68,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (this.root) {
       this.finish();
     } else {
-      this.requestedPop();
+      CatalogActivity.requestedPop();
 
       final Intent i = new Intent(this, CatalogActivity.class);
       int flags = 0;
@@ -82,16 +90,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         }
       });
     }
-  }
-
-  private ViewGroup hideProgressAndGetContentArea()
-  {
-    final ViewGroup ca = NullCheck.notNull(this.content_area);
-    final ViewGroup la = NullCheck.notNull(this.loading);
-    ca.removeView(la);
-    ca.requestLayout();
-    la.setVisibility(View.GONE);
-    return ca;
   }
 
   @Override public <A, E extends Exception> A matchPartActivity(
@@ -220,10 +218,10 @@ import com.io7m.junreachable.UnreachableCodeException;
       (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     final LinearLayout ll =
-      (LinearLayout) inflater.inflate(
+      NullCheck.notNull((LinearLayout) inflater.inflate(
         R.layout.catalog_acquisition_feed,
         ca,
-        false);
+        false));
 
     /**
      * Fade out progress, fade in layout.
@@ -255,10 +253,10 @@ import com.io7m.junreachable.UnreachableCodeException;
       (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     final LinearLayout ll =
-      (LinearLayout) inflater.inflate(
+      NullCheck.notNull((LinearLayout) inflater.inflate(
         R.layout.catalog_loading_error,
         ca,
-        false);
+        false));
 
     /**
      * Fade out progress, fade in layout.
@@ -365,12 +363,5 @@ import com.io7m.junreachable.UnreachableCodeException;
         CatalogActivity.doFadeIn(ll);
       }
     });
-  }
-
-  private void requestedPop()
-  {
-    final Simplified app = Simplified.get();
-    final URI u = app.catalogFeedsPop();
-    Log.d(CatalogActivity.TAG, String.format("Popped: %s", u));
   }
 }
