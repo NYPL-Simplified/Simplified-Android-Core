@@ -27,13 +27,28 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class CatalogActivity extends PartActivity
+@SuppressWarnings("synthetic-access") public final class CatalogActivity extends
+  PartActivity
 {
-  private static final String FEED_URI_ID;
-  private static final String TAG = "CatalogActivity";
+  private static final int    FADE_TIME = 100;
+  private static final String TAG       = "CatalogActivity";
 
-  static {
-    FEED_URI_ID = "org.nypl.simplified.app.CatalogActivity.uri";
+  private static void doFadeIn(
+    final View v)
+  {
+    v.setAlpha(0.0f);
+    v.animate().setDuration(CatalogActivity.FADE_TIME).alpha(1.0f);
+  }
+
+  private static void doFadeOutWithRunnable(
+    final View v,
+    final Runnable r)
+  {
+    v
+      .animate()
+      .alpha(0.0f)
+      .setDuration(CatalogActivity.FADE_TIME)
+      .withEndAction(r);
   }
 
   private @Nullable ViewGroup content_area;
@@ -46,15 +61,26 @@ public final class CatalogActivity extends PartActivity
       this.finish();
     } else {
       this.requestedPop();
+
       final Intent i = new Intent(this, CatalogActivity.class);
       int flags = 0;
       flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
       flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
       flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
       i.setFlags(flags);
-      this.startActivity(i);
-      this.finish();
-      this.overridePendingTransition(0, 0);
+
+      final CatalogActivity a = this;
+      final ViewGroup ca = NullCheck.notNull(this.content_area);
+      final View ll = NullCheck.notNull(ca.getChildAt(0));
+
+      CatalogActivity.doFadeOutWithRunnable(ll, new Runnable() {
+        @Override public void run()
+        {
+          a.startActivity(i);
+          a.finish();
+          a.overridePendingTransition(0, 0);
+        }
+      });
     }
   }
 
@@ -105,6 +131,7 @@ public final class CatalogActivity extends PartActivity
 
     ca.addView(la);
     ca.requestLayout();
+    CatalogActivity.doFadeIn(la);
 
     final ActionBar bar = this.getActionBar();
     if (this.root) {
@@ -186,7 +213,8 @@ public final class CatalogActivity extends PartActivity
   {
     Log.d(CatalogActivity.TAG, "Got acquisition feed: " + af);
 
-    final ViewGroup ca = this.hideProgressAndGetContentArea();
+    final ViewGroup ca = NullCheck.notNull(this.content_area);
+    final ViewGroup la = NullCheck.notNull(this.loading);
 
     final LayoutInflater inflater =
       (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -197,8 +225,22 @@ public final class CatalogActivity extends PartActivity
         ca,
         false);
 
-    ca.addView(ll);
-    ca.requestLayout();
+    /**
+     * Fade out progress, fade in layout.
+     */
+
+    CatalogActivity.doFadeOutWithRunnable(la, new Runnable() {
+      @Override public void run()
+      {
+        ca.removeView(la);
+        ca.requestLayout();
+        la.setVisibility(View.GONE);
+
+        ca.addView(ll);
+        ca.requestLayout();
+        CatalogActivity.doFadeIn(ll);
+      }
+    });
   }
 
   protected void onReceiveFeedError(
@@ -206,7 +248,8 @@ public final class CatalogActivity extends PartActivity
   {
     Log.e(CatalogActivity.TAG, "Failed to get feed: " + e, e);
 
-    final ViewGroup ca = this.hideProgressAndGetContentArea();
+    final ViewGroup ca = NullCheck.notNull(this.content_area);
+    final ViewGroup la = NullCheck.notNull(this.loading);
 
     final LayoutInflater inflater =
       (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -217,8 +260,22 @@ public final class CatalogActivity extends PartActivity
         ca,
         false);
 
-    ca.addView(ll);
-    ca.requestLayout();
+    /**
+     * Fade out progress, fade in layout.
+     */
+
+    CatalogActivity.doFadeOutWithRunnable(la, new Runnable() {
+      @Override public void run()
+      {
+        ca.removeView(la);
+        ca.requestLayout();
+        la.setVisibility(View.GONE);
+
+        ca.addView(ll);
+        ca.requestLayout();
+        CatalogActivity.doFadeIn(ll);
+      }
+    });
   }
 
   private void onReceiveNavigationFeed(
@@ -226,7 +283,8 @@ public final class CatalogActivity extends PartActivity
   {
     Log.d(CatalogActivity.TAG, "Got navigation feed: " + nf);
 
-    final ViewGroup ca = this.hideProgressAndGetContentArea();
+    final ViewGroup ca = NullCheck.notNull(this.content_area);
+    final ViewGroup la = NullCheck.notNull(this.loading);
 
     final LayoutInflater inflater =
       (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -253,19 +311,28 @@ public final class CatalogActivity extends PartActivity
         @Override public void onClick(
           final OPDSNavigationFeedEntry e)
         {
-          final Intent i = new Intent();
-          app.catalogFeedsPush(e.getTargetURI());
-          i.setClass(CatalogActivity.this, CatalogActivity.class);
+          /**
+           * Fade out layout.
+           */
 
-          int flags = 0;
-          flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
-          flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
-          flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
-          flags |= Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+          CatalogActivity.doFadeOutWithRunnable(ll, new Runnable() {
+            @Override public void run()
+            {
+              final Intent i = new Intent();
+              app.catalogFeedsPush(e.getTargetURI());
+              i.setClass(CatalogActivity.this, CatalogActivity.class);
 
-          i.setFlags(flags);
-          CatalogActivity.this.startActivity(i);
-          CatalogActivity.this.overridePendingTransition(0, 0);
+              int flags = 0;
+              flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
+              flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
+              flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
+              flags |= Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+
+              i.setFlags(flags);
+              CatalogActivity.this.startActivity(i);
+              CatalogActivity.this.overridePendingTransition(0, 0);
+            }
+          });
         }
       };
 
@@ -282,8 +349,22 @@ public final class CatalogActivity extends PartActivity
 
     lv.setAdapter(adapter);
 
-    ca.addView(ll);
-    ca.requestLayout();
+    /**
+     * Fade out progress, fade in layout.
+     */
+
+    CatalogActivity.doFadeOutWithRunnable(la, new Runnable() {
+      @Override public void run()
+      {
+        ca.removeView(la);
+        ca.requestLayout();
+        la.setVisibility(View.GONE);
+
+        ca.addView(ll);
+        ca.requestLayout();
+        CatalogActivity.doFadeIn(ll);
+      }
+    });
   }
 
   private void requestedPop()
