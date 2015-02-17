@@ -15,12 +15,31 @@ import java.net.URI;
 
 public interface CatalogFeedStackType
 {
+  /**
+   * @return The number of URIs on the stack. Will be 0 iff no URIs have been
+   *         pushed prior to calling.
+   */
+
+  int catalogFeedsCount();
+
+  /**
+   * @return The URI at the top of the stack.
+   */
+
   URI catalogFeedsPeek();
 
-  void catalogFeedsPush(
-    URI uri);
+  /**
+   * Pop a URI from the stack.
+   *
+   * @return The URI removed from the stack.
+   */
 
   URI catalogFeedsPop();
 
-  int catalogFeedsCount();
+  /**
+   * Push a URI onto the stack.
+   */
+
+  void catalogFeedsPush(
+    URI uri);
 }
