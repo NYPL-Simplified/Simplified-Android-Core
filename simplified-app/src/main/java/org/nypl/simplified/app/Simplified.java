@@ -61,6 +61,7 @@ public final class Simplified extends Application implements
         final @Nullable Runnable r)
       {
         final Thread t = tf.newThread(r);
+        t.setPriority(Thread.MIN_PRIORITY);
         t.setName(String.format("simplified-tasks-%d", this.id));
         ++this.id;
         return t;
@@ -159,7 +160,8 @@ public final class Simplified extends Application implements
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
-    final OPDSFeedLoaderType fl = OPDSFeedLoader.newLoader(e, p, t);
+    final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(e, p, t);
+    final OPDSFeedLoaderType fl = CachingFeedLoader.newLoader(flx);
 
     /**
      * Feed stack.

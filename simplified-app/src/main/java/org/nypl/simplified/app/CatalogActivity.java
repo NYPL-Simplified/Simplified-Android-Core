@@ -13,7 +13,6 @@ import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,28 +36,9 @@ public final class CatalogActivity extends PartActivity
     FEED_URI_ID = "org.nypl.simplified.app.CatalogActivity.uri";
   }
 
-  private static boolean getActivityIsRoot(
-    final Bundle ex)
-  {
-    return ex.get(CatalogActivity.FEED_URI_ID) == null;
-  }
-
-  private static URI getArgumentsURI(
-    final Resources rr,
-    final Bundle ex)
-  {
-    final URI u = (URI) ex.get(CatalogActivity.FEED_URI_ID);
-    if (u != null) {
-      return u;
-    }
-    return NullCheck.notNull(URI.create(rr
-      .getString(R.string.catalog_start_uri)));
-  }
-
   private @Nullable ViewGroup content_area;
   private @Nullable ViewGroup loading;
   private boolean             root;
-  private @Nullable URI       uri;
 
   private void goUp()
   {
@@ -115,6 +95,26 @@ public final class CatalogActivity extends PartActivity
 
     final LayoutInflater inflater =
       (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    final ViewGroup ca =
+      NullCheck.notNull((ViewGroup) this.findViewById(R.id.content_area));
+    final ViewGroup la =
+      NullCheck.notNull((ViewGroup) inflater.inflate(
+        R.layout.catalog_loading,
+        ca,
+        false));
+
+    ca.addView(la);
+    ca.requestLayout();
+
+    final ActionBar bar = this.getActionBar();
+    if (this.root) {
+      bar.setDisplayHomeAsUpEnabled(false);
+    } else {
+      bar.setDisplayHomeAsUpEnabled(true);
+    }
+
+    this.content_area = NullCheck.notNull(ca);
+    this.loading = NullCheck.notNull(la);
 
     loader.fromURI(feed_uri, new OPDSFeedLoadListenerType() {
       @Override public void onFailure(
@@ -161,28 +161,6 @@ public final class CatalogActivity extends PartActivity
           });
       }
     });
-
-    final ViewGroup ca =
-      NullCheck.notNull((ViewGroup) this.findViewById(R.id.content_area));
-    final ViewGroup la =
-      NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.catalog_loading,
-        ca,
-        false));
-
-    ca.addView(la);
-    ca.requestLayout();
-
-    final ActionBar bar = this.getActionBar();
-    if (this.root) {
-      bar.setDisplayHomeAsUpEnabled(false);
-    } else {
-      bar.setDisplayHomeAsUpEnabled(true);
-    }
-
-    this.content_area = ca;
-    this.loading = la;
-    this.uri = feed_uri;
   }
 
   @Override public boolean onOptionsItemSelected(
@@ -278,8 +256,16 @@ public final class CatalogActivity extends PartActivity
           final Intent i = new Intent();
           app.catalogFeedsPush(e.getTargetURI());
           i.setClass(CatalogActivity.this, CatalogActivity.class);
-          i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+          int flags = 0;
+          flags |= Intent.FLAG_ACTIVITY_CLEAR_TOP;
+          flags |= Intent.FLAG_ACTIVITY_NO_HISTORY;
+          flags |= Intent.FLAG_ACTIVITY_NO_ANIMATION;
+          flags |= Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+
+          i.setFlags(flags);
           CatalogActivity.this.startActivity(i);
+          CatalogActivity.this.overridePendingTransition(0, 0);
         }
       };
 
