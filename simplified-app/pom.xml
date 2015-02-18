@@ -30,6 +30,12 @@
       <version>${org.nypl.android.packageVersion}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>android.support</groupId>
+      <artifactId>compatibility-v13</artifactId>
+      <version>${org.nypl.android.support-v13.packageVersion}</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>com.nostra13.universalimageloader</groupId>

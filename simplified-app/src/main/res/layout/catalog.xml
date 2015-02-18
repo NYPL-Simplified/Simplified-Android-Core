@@ -2,12 +2,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
+  android:background="#0ff"
   android:orientation="vertical">
 
-  <ImageView
-    android:id="@+id/imageView1"
+  <LinearLayout
+    android:id="@+id/catalog_progress_container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#0ff"
+    android:gravity="center">
+
+    <ProgressBar
+      android:id="@+id/catalog_progress"
+      style="?android:attr/progressBarStyleLarge"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+  </LinearLayout>
+
+  <ListView
+    android:id="@+id/catalog_nav_feed_list"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:src="@drawable/catalog"/>
+    android:layout_height="wrap_content"/>
 
 </LinearLayout>

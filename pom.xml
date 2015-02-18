@@ -25,6 +25,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <org.nypl.android.support-v13.packageVersion>21.0.3</org.nypl.android.support-v13.packageVersion>
     <org.nypl.android.packageVersion>4.4.2_r4</org.nypl.android.packageVersion>
     <org.nypl.android.sdkVersion>19</org.nypl.android.sdkVersion>
   </properties>

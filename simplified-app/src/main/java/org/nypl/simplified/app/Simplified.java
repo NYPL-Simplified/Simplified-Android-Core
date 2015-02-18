@@ -16,10 +16,9 @@ import android.app.Application;
 import android.content.res.Resources;
 import android.util.Log;
 
+import com.google.common.eventbus.EventBus;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 /**
  * Global application state.
@@ -71,23 +70,29 @@ public final class Simplified extends Application
     return NullCheck.notNull(pool);
   }
 
+  private @Nullable EventBus              catalog_bus;
   private @Nullable ExecutorService       executor;
   private @Nullable URI                   feed_initial_uri;
   private @Nullable OPDSFeedLoaderType    feed_loader;
   private @Nullable OPDSFeedParserType    feed_parser;
   private @Nullable OPDSFeedTransportType feed_transport;
-  private @Nullable ImageLoader           thumbnail_loader;
+
+  public EventBus getCatalogEventBus()
+  {
+    Simplified.checkInitialized();
+    return NullCheck.notNull(this.catalog_bus);
+  }
+
+  public URI getFeedInitialURI()
+  {
+    Simplified.checkInitialized();
+    return NullCheck.notNull(this.feed_initial_uri);
+  }
 
   public OPDSFeedLoaderType getFeedLoader()
   {
     Simplified.checkInitialized();
     return NullCheck.notNull(this.feed_loader);
-  }
-
-  public ImageLoader getImageThumbnailLoader()
-  {
-    Simplified.checkInitialized();
-    return NullCheck.notNull(this.thumbnail_loader);
   }
 
   @Override public void onCreate()
@@ -99,21 +104,6 @@ public final class Simplified extends Application
     final ExecutorService e = Simplified.namedThreadPool();
 
     /**
-     * Global image cache.
-     */
-
-    final ImageLoaderConfiguration.Builder icb =
-      new ImageLoaderConfiguration.Builder(this);
-    icb.taskExecutor(e);
-    icb.diskCacheSize(Simplified.megabytes(32));
-    icb.memoryCacheSizePercentage(15);
-    icb.writeDebugLogs();
-    final ImageLoaderConfiguration c = icb.build();
-
-    final ImageLoader il = ImageLoader.getInstance();
-    il.init(c);
-
-    /**
      * Asynchronous feed loader.
      */
 
@@ -123,14 +113,20 @@ public final class Simplified extends Application
     final OPDSFeedLoaderType fl = CachingFeedLoader.newLoader(flx);
 
     /**
-     * Feed stack.
+     * Catalog event bus.
+     */
+
+    final EventBus ceb = new EventBus("catalog");
+
+    /**
+     * Catalog URIs.
      */
 
     final Resources rr = this.getResources();
     this.feed_initial_uri =
       URI.create(rr.getString(R.string.catalog_start_uri));
 
-    this.thumbnail_loader = il;
+    this.catalog_bus = ceb;
     this.executor = e;
     this.feed_parser = p;
     this.feed_transport = t;

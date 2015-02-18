@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import android.os.Handler;
 import android.os.Looper;
 
 /**
@@ -30,5 +31,18 @@ final class UIThread
   static boolean isUIThread()
   {
     return Looper.getMainLooper().getThread() == Thread.currentThread();
+  }
+
+  /**
+   * Run the given Runnable on the UI thread.
+   * 
+   * @param r
+   *          The runnable
+   */
+
+  static void runOnUIThread(
+    final Runnable r)
+  {
+    new Handler(Looper.getMainLooper()).post(r);
   }
 }
