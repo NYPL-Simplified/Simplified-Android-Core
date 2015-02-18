@@ -1,7 +1,6 @@
 package org.nypl.simplified.app;
 
 import java.net.URI;
-import java.util.ArrayDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -26,8 +25,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
  * Global application state.
  */
 
-public final class Simplified extends Application implements
-  CatalogFeedStackType
+public final class Simplified extends Application
 {
   private static volatile @Nullable Simplified INSTANCE;
 
@@ -77,47 +75,8 @@ public final class Simplified extends Application implements
   private @Nullable URI                   feed_initial_uri;
   private @Nullable OPDSFeedLoaderType    feed_loader;
   private @Nullable OPDSFeedParserType    feed_parser;
-  private @Nullable ArrayDeque<URI>       feed_stack;
   private @Nullable OPDSFeedTransportType feed_transport;
   private @Nullable ImageLoader           thumbnail_loader;
-
-  @Override public int catalogFeedsCount()
-  {
-    Simplified.checkInitialized();
-    final ArrayDeque<URI> s = NullCheck.notNull(this.feed_stack);
-    return s.size();
-  }
-
-  @Override public URI catalogFeedsPeek()
-  {
-    Simplified.checkInitialized();
-
-    final ArrayDeque<URI> s = NullCheck.notNull(this.feed_stack);
-    if (s.size() > 0) {
-      return NullCheck.notNull(s.peek());
-    }
-    return NullCheck.notNull(this.feed_initial_uri);
-  }
-
-  @Override public URI catalogFeedsPop()
-  {
-    Simplified.checkInitialized();
-
-    final ArrayDeque<URI> s = NullCheck.notNull(this.feed_stack);
-    if (s.size() > 0) {
-      return NullCheck.notNull(s.pop());
-    }
-    return NullCheck.notNull(this.feed_initial_uri);
-  }
-
-  @Override public void catalogFeedsPush(
-    final URI uri)
-  {
-    Simplified.checkInitialized();
-
-    final ArrayDeque<URI> s = NullCheck.notNull(this.feed_stack);
-    s.push(NullCheck.notNull(uri));
-  }
 
   public OPDSFeedLoaderType getFeedLoader()
   {
@@ -168,7 +127,6 @@ public final class Simplified extends Application implements
      */
 
     final Resources rr = this.getResources();
-    this.feed_stack = new ArrayDeque<URI>();
     this.feed_initial_uri =
       URI.create(rr.getString(R.string.catalog_start_uri));
 

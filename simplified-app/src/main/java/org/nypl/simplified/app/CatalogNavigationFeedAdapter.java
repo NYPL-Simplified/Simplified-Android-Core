@@ -230,7 +230,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final OPDSFeedLoaderType loader = app.getFeedLoader();
       loader.fromURI(featured_uri, new OPDSFeedLoadListenerType() {
         @Override public void onFailure(
-          final Exception ex)
+          final Throwable ex)
         {
           Log.e(CatalogNavigationFeedAdapter.TAG, String.format(
             "Unable to load feed %s for entry %s",

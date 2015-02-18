@@ -57,7 +57,7 @@ public final class OPDSFeedLoaderContract implements
         new URI("http://example.com"),
         new OPDSFeedLoadListenerType() {
           @Override public void onFailure(
-            final Exception supplied)
+            final Throwable supplied)
           {
             System.err.println("Caught: " + supplied);
             TestUtilities.assertEquals(ex, supplied);
@@ -112,7 +112,7 @@ public final class OPDSFeedLoaderContract implements
         new URI("http://example.com"),
         new OPDSFeedLoadListenerType() {
           @Override public void onFailure(
-            final Exception supplied)
+            final Throwable supplied)
           {
             throw new UnreachableCodeException();
           }

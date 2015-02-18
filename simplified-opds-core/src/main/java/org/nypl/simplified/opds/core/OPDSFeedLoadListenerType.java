@@ -14,7 +14,7 @@ public interface OPDSFeedLoadListenerType
    */
 
   void onFailure(
-    final Exception e);
+    final Throwable e);
 
   /**
    * The feed was successfully parsed.

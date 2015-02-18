@@ -12,6 +12,8 @@ import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
 import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -23,7 +25,7 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
 {
   /**
    * Construct a new loader.
-   * 
+   *
    * @param a
    *          The original loader
    * @return A new loader
@@ -50,30 +52,32 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
     this.cache = NullCheck.notNull(m);
   }
 
-  @Override public void fromURI(
+  @Override public ListenableFuture<OPDSFeedType> fromURI(
     final URI uri,
     final OPDSFeedLoadListenerType p)
   {
     final Map<URI, OPDSFeedType> c = this.cache;
     if (c.containsKey(uri)) {
       final OPDSFeedType r = NullCheck.notNull(c.get(uri));
+      final ListenableFuture<OPDSFeedType> f = Futures.immediateFuture(r);
       p.onSuccess(r);
-    } else {
-      this.actual.fromURI(uri, new OPDSFeedLoadListenerType() {
-        @Override public void onFailure(
-          final Exception e)
-        {
-          p.onFailure(e);
-        }
-
-        @Override public void onSuccess(
-          final OPDSFeedType f)
-        {
-          c.put(uri, f);
-          p.onSuccess(f);
-        }
-      });
+      return f;
     }
+
+    return this.actual.fromURI(uri, new OPDSFeedLoadListenerType() {
+      @Override public void onFailure(
+        final Throwable e)
+      {
+        p.onFailure(e);
+      }
+
+      @Override public void onSuccess(
+        final OPDSFeedType f)
+      {
+        c.put(uri, f);
+        p.onSuccess(f);
+      }
+    });
   }
 
 }
