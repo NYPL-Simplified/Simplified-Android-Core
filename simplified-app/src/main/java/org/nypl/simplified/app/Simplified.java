@@ -70,18 +70,11 @@ public final class Simplified extends Application
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable EventBus              catalog_bus;
   private @Nullable ExecutorService       executor;
   private @Nullable URI                   feed_initial_uri;
   private @Nullable OPDSFeedLoaderType    feed_loader;
   private @Nullable OPDSFeedParserType    feed_parser;
   private @Nullable OPDSFeedTransportType feed_transport;
-
-  public EventBus getCatalogEventBus()
-  {
-    Simplified.checkInitialized();
-    return NullCheck.notNull(this.catalog_bus);
-  }
 
   public URI getFeedInitialURI()
   {
@@ -126,7 +119,6 @@ public final class Simplified extends Application
     this.feed_initial_uri =
       URI.create(rr.getString(R.string.catalog_start_uri));
 
-    this.catalog_bus = ceb;
     this.executor = e;
     this.feed_parser = p;
     this.feed_transport = t;
