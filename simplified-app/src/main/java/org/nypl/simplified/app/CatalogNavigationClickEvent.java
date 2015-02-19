@@ -2,30 +2,23 @@ package org.nypl.simplified.app;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayDeque;
 
 import com.io7m.jnull.NullCheck;
 
 public final class CatalogNavigationClickEvent implements Serializable
 {
-  private static final long serialVersionUID = 8959538411228451109L;
-  private final URI         from;
-  private final URI         target;
+  private static final long     serialVersionUID = 8959538411228451109L;
+  private final ArrayDeque<URI> stack;
 
   public CatalogNavigationClickEvent(
-    final URI in_target,
-    final URI in_from)
+    final ArrayDeque<URI> in_stack)
   {
-    this.target = NullCheck.notNull(in_target);
-    this.from = NullCheck.notNull(in_from);
+    this.stack = NullCheck.notNull(in_stack);
   }
 
-  public URI getFrom()
+  public ArrayDeque<URI> getStack()
   {
-    return this.from;
-  }
-
-  public URI getTarget()
-  {
-    return this.target;
+    return this.stack;
   }
 }

@@ -1,6 +1,9 @@
 package org.nypl.simplified.app;
 
+import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
@@ -25,8 +28,6 @@ import android.widget.ListView;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -46,12 +47,10 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private static final int    FADE_TIME;
-  private static final String URI_BACK_ID;
-  private static final String URI_START_ID;
+  private static final String URI_STACK_ID;
 
   static {
-    URI_START_ID = "org.nypl.simplified.app.PartCatalog.uri_start";
-    URI_BACK_ID = "org.nypl.simplified.app.PartCatalog.uri_back";
+    URI_STACK_ID = "org.nypl.simplified.app.PartCatalog.uri_stack";
     FADE_TIME = 1000;
   }
 
@@ -78,29 +77,17 @@ import com.io7m.junreachable.UnreachableCodeException;
     vp.withEndAction(r);
   }
 
-  public static CatalogFeedFragment newFragment(
-    final URI target,
-    final URI from)
+  public static
+    <E, T extends ArrayDeque<E> & Serializable>
+    CatalogFeedFragment
+    newFragment(
+      final T uris)
   {
     final CatalogFeedFragment f = new CatalogFeedFragment();
     final Bundle args = new Bundle();
     args.putSerializable(
-      CatalogFeedFragment.URI_START_ID,
-      NullCheck.notNull(target));
-    args.putSerializable(CatalogFeedFragment.URI_BACK_ID, Option.some(from));
-    f.setArguments(args);
-    return f;
-  }
-
-  public static CatalogFeedFragment newFragmentAtRoot(
-    final URI uri)
-  {
-    final CatalogFeedFragment f = new CatalogFeedFragment();
-    final Bundle args = new Bundle();
-    args.putSerializable(
-      CatalogFeedFragment.URI_START_ID,
-      NullCheck.notNull(uri));
-    args.putSerializable(CatalogFeedFragment.URI_BACK_ID, Option.none());
+      CatalogFeedFragment.URI_STACK_ID,
+      NullCheck.notNull(uris));
     f.setArguments(args);
     return f;
   }
@@ -109,9 +96,8 @@ import com.io7m.junreachable.UnreachableCodeException;
   private @Nullable Throwable                      error;
   private @Nullable OPDSFeedType                   feed;
   private @Nullable ListenableFuture<OPDSFeedType> future;
-  private CatalogFeedFragment.Status               status;
-  private @Nullable OptionType<URI>                uri_back;
-  private @Nullable URI                            uri_start;
+  private Status                                   status;
+  private @Nullable Deque<URI>                     uri_stack;
   private @Nullable LinearLayout                   view;
   private @Nullable ListView                       view_navigation_list;
   private @Nullable ViewGroup                      view_progress_container;
@@ -140,7 +126,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Context ctx = NullCheck.notNull(this.getActivity());
     final ListView nl = NullCheck.notNull(this.view_navigation_list);
     final EventBus eb = NullCheck.notNull(this.catalog_bus);
-    final URI start = NullCheck.notNull(this.uri_start);
+    final Deque<URI> stack = NullCheck.notNull(this.uri_stack);
 
     f
       .matchFeedType(new OPDSFeedMatcherType<Unit, UnreachableCodeException>() {
@@ -160,9 +146,9 @@ import com.io7m.junreachable.UnreachableCodeException;
                 final OPDSNavigationFeedEntry e)
               {
                 Log.d("CatalogFeedFragment", "Clicked: " + e.getTitle());
-                eb.post(new CatalogNavigationClickEvent(
-                  e.getTargetURI(),
-                  start));
+                final ArrayDeque<URI> new_stack = new ArrayDeque<URI>(stack);
+                new_stack.push(e.getTargetURI());
+                eb.post(new CatalogNavigationClickEvent(new_stack));
               }
             };
 
@@ -278,16 +264,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d("CatalogFeedFragment", "onCreate: " + this);
 
     final Bundle args = this.getArguments();
-    final URI in_uri_start =
-      NullCheck.notNull((URI) args
-        .getSerializable(CatalogFeedFragment.URI_START_ID));
-    final OptionType<URI> in_uri_back =
-      NullCheck.notNull((OptionType<URI>) args
-        .getSerializable(CatalogFeedFragment.URI_BACK_ID));
+    final ArrayDeque<URI> in_uri_stack =
+      NullCheck.notNull((ArrayDeque<URI>) args
+        .getSerializable(CatalogFeedFragment.URI_STACK_ID));
+    this.uri_stack = in_uri_stack;
 
-    this.uri_start = in_uri_start;
-    this.uri_back = in_uri_back;
-
+    final URI in_uri_start = NullCheck.notNull(in_uri_stack.peek());
     final Simplified app = Simplified.get();
     this.catalog_bus = app.getCatalogEventBus();
 

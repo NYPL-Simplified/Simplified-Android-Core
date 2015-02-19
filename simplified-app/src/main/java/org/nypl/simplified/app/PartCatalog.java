@@ -1,5 +1,8 @@
 package org.nypl.simplified.app;
 
+import java.net.URI;
+import java.util.ArrayDeque;
+
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -30,8 +33,9 @@ public final class PartCatalog implements PartType
     this.event_bus = app.getCatalogEventBus();
     this.event_bus.register(this);
 
-    this.current_fragment =
-      CatalogFeedFragment.newFragmentAtRoot(app.getFeedInitialURI());
+    final ArrayDeque<URI> stack = new ArrayDeque<URI>();
+    stack.push(app.getFeedInitialURI());
+    this.current_fragment = CatalogFeedFragment.newFragment(stack);
   }
 
   @Override public Fragment getCurrentFragment()
@@ -50,8 +54,9 @@ public final class PartCatalog implements PartType
     final CatalogNavigationClickEvent e)
   {
     Log.d("PartCatalog", "Received click event: " + e);
-    this.current_fragment =
-      CatalogFeedFragment.newFragment(e.getTarget(), e.getFrom());
+
+    final ArrayDeque<URI> stack = e.getStack();
+    this.current_fragment = CatalogFeedFragment.newFragment(stack);
 
     final FragmentTransaction ft = this.fm.beginTransaction();
     ft.replace(R.id.content_frame, this.current_fragment);
