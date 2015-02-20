@@ -34,7 +34,6 @@
       <groupId>android.support</groupId>
       <artifactId>compatibility-v13</artifactId>
       <version>${org.nypl.android.support-v13.packageVersion}</version>
-      <scope>provided</scope>
     </dependency>
 
     <dependency>
