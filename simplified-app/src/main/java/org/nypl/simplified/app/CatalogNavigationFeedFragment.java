@@ -220,10 +220,11 @@ public final class CatalogNavigationFeedFragment extends Fragment implements
     NullCheck.notNull(in_feed);
     Log.d(CatalogNavigationFeedFragment.TAG, "onSelectFeed: " + in_feed);
 
-    final MainActivity act = (MainActivity) this.getActivity();
+    final FragmentControllerType act =
+      (FragmentControllerType) this.getActivity();
     final CatalogLoadingFragment f =
       CatalogLoadingFragment.newInstance(in_feed.getTargetURI());
-    act.replaceFragmentWithBackstack(f);
+    act.setContentFragmentWithBackReturn(this, f);
   }
 
   @Override public void onStop()

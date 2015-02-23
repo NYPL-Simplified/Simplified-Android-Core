@@ -61,11 +61,12 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private void onAcquisitionFeedShow()
   {
-    final MainActivity act = (MainActivity) this.getActivity();
+    final FragmentControllerType act =
+      (FragmentControllerType) this.getActivity();
     final OPDSAcquisitionFeed af = NullCheck.notNull(this.feed_acq);
     final CatalogAcquisitionFeedFragment f =
       CatalogAcquisitionFeedFragment.newInstance(af);
-    act.replaceFragmentWithoutBackstack(f);
+    act.setContentFragmentWithoutBack(f);
   }
 
   @Override public void onCreate(
@@ -161,11 +162,12 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private void onNavigationFeedShow()
   {
-    final MainActivity act = (MainActivity) this.getActivity();
+    final FragmentControllerType act =
+      (FragmentControllerType) this.getActivity();
     final OPDSNavigationFeed nf = NullCheck.notNull(this.feed_nav);
     final CatalogNavigationFeedFragment f =
       CatalogNavigationFeedFragment.newInstance(nf);
-    act.replaceFragmentWithoutBackstack(f);
+    act.setContentFragmentWithoutBack(f);
   }
 
   @Override public void onResume()
