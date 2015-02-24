@@ -25,8 +25,14 @@ public final class OPDSNavigationFeedContract implements
   @Override public void testSerialization()
     throws Exception
   {
+    final URI uri = URI.create("http://example.com/base");
+
     final OPDSNavigationFeedBuilderType fb =
-      OPDSNavigationFeed.newBuilder("id", Calendar.getInstance(), "Title");
+      OPDSNavigationFeed.newBuilder(
+        uri,
+        "id",
+        Calendar.getInstance(),
+        "Title");
     fb.addEntry(OPDSNavigationFeedEntry.newEntry(
       "id",
       "title",
@@ -40,6 +46,7 @@ public final class OPDSNavigationFeedContract implements
       Option.some(URI.create("http://example.com")),
       URI.create("http://example.com")));
     final OPDSNavigationFeed f0 = fb.build();
+    TestUtilities.assertEquals(uri, f0.getFeedURI());
 
     final ByteArrayOutputStream bo = new ByteArrayOutputStream(8192);
     final ObjectOutputStream os = new ObjectOutputStream(bo);

@@ -33,7 +33,9 @@ public final class CatalogBookDetailFragment extends CatalogFragment
   {
     final Bundle b = new Bundle();
 
-    b.putSerializable(CatalogBookDetailFragment.FEED_ENTRY_ID, NullCheck.notNull(e));
+    b.putSerializable(
+      CatalogBookDetailFragment.FEED_ENTRY_ID,
+      NullCheck.notNull(e));
     b.putSerializable(
       CatalogFragment.FEED_UP_STACK,
       NullCheck.notNull(up_stack));
@@ -55,6 +57,8 @@ public final class CatalogBookDetailFragment extends CatalogFragment
     final TextView text_view =
       (TextView) layout.findViewById(R.id.book_title);
 
+    text_view
+      .setText("You are on a small device. Therefore, you're seeing a new page here.");
     return layout;
   }
 }

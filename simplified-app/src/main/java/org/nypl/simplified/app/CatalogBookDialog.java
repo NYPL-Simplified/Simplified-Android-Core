@@ -36,6 +36,8 @@ public final class CatalogBookDialog extends DialogFragment
     final TextView text_view =
       (TextView) layout.findViewById(R.id.book_title);
 
+    text_view
+      .setText("You are on a large device. Therefore, you're seeing a dialog here.");
     return layout;
   }
 }

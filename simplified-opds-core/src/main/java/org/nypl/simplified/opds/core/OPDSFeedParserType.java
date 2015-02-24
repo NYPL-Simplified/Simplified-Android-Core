@@ -1,6 +1,7 @@
 package org.nypl.simplified.opds.core;
 
 import java.io.InputStream;
+import java.net.URI;
 
 /**
  * <p>
@@ -15,7 +16,21 @@ import java.io.InputStream;
 
 public interface OPDSFeedParserType
 {
+  /**
+   * Parse the feed associated with the given stream <code>s</code>. The feed
+   * is assumed to exist at <code>uri</code>.
+   * 
+   * @param uri
+   *          The URI of the feed
+   * @param s
+   *          The input stream
+   * @return A parsed feed
+   * @throws OPDSFeedParseException
+   *           On errors
+   */
+
   OPDSFeedType parse(
+    final URI uri,
     final InputStream s)
     throws OPDSFeedParseException;
 }

@@ -300,6 +300,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   }
 
   private static OPDSFeedType parseAcquisition(
+    final URI uri,
     final Element e_feed,
     final String id,
     final String title,
@@ -311,7 +312,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       URISyntaxException
   {
     final OPDSAcquisitionFeedBuilderType b =
-      OPDSAcquisitionFeed.newBuilder(id, updated, title);
+      OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
 
     for (final Element ee : entries) {
       b.addEntry(OPDSFeedParser.parseAcquisitionEntry(ee));
@@ -353,6 +354,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   }
 
   private static OPDSFeedType parseNavigation(
+    final URI uri,
     final Element e_feed,
     final String id,
     final String title,
@@ -364,7 +366,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       URISyntaxException
   {
     final OPDSNavigationFeedBuilderType b =
-      OPDSNavigationFeed.newBuilder(id, updated, title);
+      OPDSNavigationFeed.newBuilder(uri, id, updated, title);
 
     for (final Element ee : entries) {
       b.addEntry(OPDSFeedParser.parseNavigationEntry(ee));
@@ -420,6 +422,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   }
 
   @Override public OPDSFeedType parse(
+    final URI uri,
     final InputStream s)
     throws OPDSFeedParseException
   {
@@ -456,6 +459,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       final Element e0 = NullCheck.notNull(entries.get(0));
       if (OPDSFeedParser.entryIsFromAcquisitionFeed(e0)) {
         return OPDSFeedParser.parseAcquisition(
+          uri,
           e_feed,
           id,
           title,
@@ -465,6 +469,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       }
 
       return OPDSFeedParser.parseNavigation(
+        uri,
         e_feed,
         id,
         title,

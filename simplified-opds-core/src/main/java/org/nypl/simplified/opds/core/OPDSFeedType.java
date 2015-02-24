@@ -1,6 +1,7 @@
 package org.nypl.simplified.opds.core;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Calendar;
 
 /**
@@ -14,6 +15,8 @@ public interface OPDSFeedType extends Serializable
   String getFeedTitle();
 
   Calendar getFeedUpdated();
+
+  URI getFeedURI();
 
   /**
    * Match on the actual type of feed.

@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -21,12 +22,15 @@ import com.io7m.jnull.Nullable;
     private final String                        id;
     private final String                        title;
     private final Calendar                      updated;
+    private final URI                           uri;
 
     private Builder(
+      final URI in_uri,
       final String in_title,
       final Calendar in_updated,
       final String in_id)
     {
+      this.uri = NullCheck.notNull(in_uri);
       this.title = NullCheck.notNull(in_title);
       this.updated = NullCheck.notNull(in_updated);
       this.id = NullCheck.notNull(in_id);
@@ -42,6 +46,7 @@ import com.io7m.jnull.Nullable;
     @Override public OPDSNavigationFeed build()
     {
       return new OPDSNavigationFeed(
+        this.uri,
         this.id,
         this.updated,
         this.title,
@@ -52,24 +57,28 @@ import com.io7m.jnull.Nullable;
   private static final long serialVersionUID = 2410830597217814161L;
 
   public static OPDSNavigationFeedBuilderType newBuilder(
+    final URI in_uri,
     final String in_id,
     final Calendar in_updated,
     final String in_title)
   {
-    return new Builder(in_title, in_updated, in_id);
+    return new Builder(in_uri, in_title, in_updated, in_id);
   }
 
   private final List<OPDSNavigationFeedEntry> entries;
   private final String                        id;
   private final String                        title;
   private final Calendar                      updated;
+  private final URI                           uri;
 
   private OPDSNavigationFeed(
+    final URI in_uri,
     final String in_id,
     final Calendar in_updated,
     final String in_title,
     final List<OPDSNavigationFeedEntry> in_entries)
   {
+    this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
     this.updated = NullCheck.notNull(in_updated);
     this.title = NullCheck.notNull(in_title);
@@ -90,7 +99,8 @@ import com.io7m.jnull.Nullable;
       return false;
     }
     final OPDSNavigationFeed other = (OPDSNavigationFeed) obj;
-    return this.entries.equals(other.entries)
+    return this.uri.equals(other.uri)
+      && this.entries.equals(other.entries)
       && this.id.equals(other.id)
       && this.title.equals(other.title)
       && this.updated.equals(other.updated);
@@ -116,10 +126,16 @@ import com.io7m.jnull.Nullable;
     return this.updated;
   }
 
+  @Override public URI getFeedURI()
+  {
+    return this.uri;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.uri.hashCode();
     result = (prime * result) + this.entries.hashCode();
     result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.title.hashCode();

@@ -26,8 +26,14 @@ import org.nypl.simplified.opds.tests.utilities.TestUtilities;
   @Override public void testSerialization()
     throws Exception
   {
+    final URI uri = URI.create("http://example.com/base");
+
     final OPDSAcquisitionFeedBuilderType fb =
-      OPDSAcquisitionFeed.newBuilder("id", Calendar.getInstance(), "Title");
+      OPDSAcquisitionFeed.newBuilder(
+        uri,
+        "id",
+        Calendar.getInstance(),
+        "Title");
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -42,6 +48,7 @@ import org.nypl.simplified.opds.tests.utilities.TestUtilities;
     fb.addEntry(eb.build());
 
     final OPDSAcquisitionFeed f0 = fb.build();
+    TestUtilities.assertEquals(uri, f0.getFeedURI());
 
     final ByteArrayOutputStream bo = new ByteArrayOutputStream(8192);
     final ObjectOutputStream os = new ObjectOutputStream(bo);

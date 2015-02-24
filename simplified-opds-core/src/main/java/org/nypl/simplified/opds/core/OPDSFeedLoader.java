@@ -61,7 +61,7 @@ public final class OPDSFeedLoader implements OPDSFeedLoaderType
           InputStream s = null;
           try {
             s = ref_t.getStream(uri);
-            return ref_p.parse(s);
+            return ref_p.parse(uri, s);
           } finally {
             if (s != null) {
               s.close();

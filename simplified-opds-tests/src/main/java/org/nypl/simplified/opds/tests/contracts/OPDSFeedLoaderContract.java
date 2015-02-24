@@ -36,6 +36,7 @@ public final class OPDSFeedLoaderContract implements
 
       final OPDSFeedParserType p = new OPDSFeedParserType() {
         @Override public OPDSFeedType parse(
+          final URI uri,
           final InputStream s)
           throws OPDSFeedParseException
         {
@@ -81,16 +82,21 @@ public final class OPDSFeedLoaderContract implements
   @Override public void testLoaderSuccessCorrect()
     throws Exception
   {
+    final URI uri = URI.create("http://example.com/base");
+
     final AtomicBoolean succeeded = new AtomicBoolean(false);
     final OPDSAcquisitionFeed feed =
-      OPDSAcquisitionFeed
-        .newBuilder("id", Calendar.getInstance(), "title")
-        .build();
+      OPDSAcquisitionFeed.newBuilder(
+        uri,
+        "id",
+        Calendar.getInstance(),
+        "title").build();
     final ExecutorService e = Executors.newCachedThreadPool();
 
     try {
       final OPDSFeedParserType p = new OPDSFeedParserType() {
         @Override public OPDSFeedType parse(
+          final URI u,
           final InputStream s)
           throws OPDSFeedParseException
         {
@@ -100,7 +106,7 @@ public final class OPDSFeedLoaderContract implements
 
       final OPDSFeedTransportType t = new OPDSFeedTransportType() {
         @Override public InputStream getStream(
-          final URI uri)
+          final URI u)
           throws IOException
         {
           return new ByteArrayInputStream("text".getBytes());
