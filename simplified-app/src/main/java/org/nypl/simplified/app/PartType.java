@@ -2,7 +2,7 @@ package org.nypl.simplified.app;
 
 public interface PartType
 {
-  void partBegin();
+  void partSwitchTo();
 
   <A, E extends Exception> A partMatch(
     final PartMatcherType<A, E> m)

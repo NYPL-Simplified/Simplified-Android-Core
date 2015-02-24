@@ -19,7 +19,7 @@ public final class PartSettings implements PartType
     return m.matchSettings(this);
   }
 
-  @Override public void partBegin()
+  @Override public void partSwitchTo()
   {
     final SettingsFragment sf = new SettingsFragment();
     this.activity.fragControllerSetContentFragmentWithBackOptionalReturn(

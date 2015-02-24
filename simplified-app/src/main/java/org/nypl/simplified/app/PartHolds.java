@@ -19,7 +19,7 @@ public final class PartHolds implements PartType
     return m.matchHolds(this);
   }
 
-  @Override public void partBegin()
+  @Override public void partSwitchTo()
   {
     final HoldsFragment f = new HoldsFragment();
     this.activity.fragControllerSetContentFragmentWithBackOptionalReturn(

@@ -70,7 +70,7 @@ public final class Parts implements DrawerListener, OnItemClickListener
       this.drawer_items));
     drawer_list.setOnItemClickListener(this);
 
-    this.part_catalog.partBegin();
+    this.part_catalog.partSwitchTo();
   }
 
   @Override public void onDrawerClosed(
@@ -106,6 +106,6 @@ public final class Parts implements DrawerListener, OnItemClickListener
   {
     final String name = NullCheck.notNull(this.drawer_items.get(position));
     final PartType part = NullCheck.notNull(this.parts.get(name));
-    part.partBegin();
+    part.partSwitchTo();
   }
 }

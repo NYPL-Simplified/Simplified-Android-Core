@@ -24,7 +24,7 @@ public final class PartCatalog implements PartType
     return m.matchCatalog(this);
   }
 
-  @Override public void partBegin()
+  @Override public void partSwitchTo()
   {
     final Simplified app = Simplified.get();
     final URI uri = app.getFeedInitialURI();

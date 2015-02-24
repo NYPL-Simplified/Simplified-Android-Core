@@ -19,7 +19,7 @@ public final class PartBooks implements PartType
     return m.matchBooks(this);
   }
 
-  @Override public void partBegin()
+  @Override public void partSwitchTo()
   {
     final BooksFragment f = new BooksFragment();
     this.activity.fragControllerSetContentFragmentWithBackOptionalReturn(
