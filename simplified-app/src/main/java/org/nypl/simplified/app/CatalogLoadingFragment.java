@@ -66,7 +66,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSAcquisitionFeed af = NullCheck.notNull(this.feed_acq);
     final CatalogAcquisitionFeedFragment f =
       CatalogAcquisitionFeedFragment.newInstance(af);
-    act.setContentFragmentWithoutBack(f);
+    act.fragControllerSetContentFragmentWithoutBack(f);
   }
 
   @Override public void onCreate(
@@ -167,7 +167,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSNavigationFeed nf = NullCheck.notNull(this.feed_nav);
     final CatalogNavigationFeedFragment f =
       CatalogNavigationFeedFragment.newInstance(nf);
-    act.setContentFragmentWithoutBack(f);
+    act.fragControllerSetContentFragmentWithoutBack(f);
   }
 
   @Override public void onResume()

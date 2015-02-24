@@ -215,10 +215,10 @@ public final class CatalogNavigationFeedFragment extends Fragment implements
 
     if (act.hasLargeScreen()) {
       final CatalogBookDialog df = new CatalogBookDialog();
-      act.setAndShowDialog(df);
+      act.fragControllerSetAndShowDialog(df);
     } else {
       final CatalogBookDetail df = new CatalogBookDetail();
-      act.setContentFragmentWithBackReturn(this, df);
+      act.fragControllerSetContentFragmentWithBackReturn(this, df);
     }
   }
 
@@ -234,7 +234,7 @@ public final class CatalogNavigationFeedFragment extends Fragment implements
       (FragmentControllerType) this.getActivity();
     final CatalogLoadingFragment f =
       CatalogLoadingFragment.newInstance(in_feed.getTargetURI());
-    act.setContentFragmentWithBackReturn(this, f);
+    act.fragControllerSetContentFragmentWithBackReturn(this, f);
   }
 
   @Override public void onStop()
