@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.ArrayDeque;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -123,5 +124,12 @@ public final class MainActivity extends Activity implements
     ft.add(R.id.content_frame, fnn);
     ft.commit();
     this.fragment_current = fnn;
+  }
+
+  @Override public void setAndShowDialog(
+    final DialogFragment f)
+  {
+    final FragmentManager fm = this.getFragmentManager();
+    f.show(fm, "dialog");
   }
 }
