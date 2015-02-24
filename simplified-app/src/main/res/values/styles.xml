@@ -3,7 +3,7 @@
 
   <style name="SimplifiedTheme" parent="android:Theme.Holo.Light"></style>
 
-  <style name="SimplifiedBookDialog" parent="android:Theme">
+  <style name="SimplifiedBookDialog" parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>
