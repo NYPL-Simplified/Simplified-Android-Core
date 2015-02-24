@@ -211,11 +211,15 @@ public final class CatalogNavigationFeedFragment extends Fragment implements
     NullCheck.notNull(in_book);
     Log.d(CatalogNavigationFeedFragment.TAG, "onSelectBook: " + in_book);
 
-    final CatalogBookFragment df = new CatalogBookFragment();
+    final MainActivityType act = (MainActivityType) this.getActivity();
 
-    final FragmentControllerType act =
-      (FragmentControllerType) this.getActivity();
-    act.setAndShowDialog(df);
+    if (act.hasLargeScreen()) {
+      final CatalogBookDialog df = new CatalogBookDialog();
+      act.setAndShowDialog(df);
+    } else {
+      final CatalogBookDetail df = new CatalogBookDetail();
+      act.setContentFragmentWithBackReturn(this, df);
+    }
   }
 
   @Override public void onSelectFeed(

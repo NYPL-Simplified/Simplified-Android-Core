@@ -8,14 +8,15 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class MainActivity extends Activity implements
-  FragmentControllerType
+public final class MainActivity extends Activity implements MainActivityType
 {
   private static final String            TAG;
 
@@ -25,6 +26,19 @@ public final class MainActivity extends Activity implements
 
   private @Nullable ArrayDeque<Fragment> fragment_backstack;
   private @Nullable Fragment             fragment_current;
+
+  @Override public boolean hasLargeScreen()
+  {
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final Configuration c = NullCheck.notNull(rr.getConfiguration());
+    final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+    boolean large = false;
+    large |=
+      (s & Configuration.SCREENLAYOUT_SIZE_LARGE) == Configuration.SCREENLAYOUT_SIZE_LARGE;
+    large |=
+      (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    return large;
+  }
 
   @Override public void onBackPressed()
   {
@@ -72,6 +86,13 @@ public final class MainActivity extends Activity implements
   {
     super.onDestroy();
     Log.d(MainActivity.TAG, "onDestroy: " + this);
+  }
+
+  @Override public void setAndShowDialog(
+    final DialogFragment f)
+  {
+    final FragmentManager fm = this.getFragmentManager();
+    f.show(fm, "dialog");
   }
 
   @Override public void setContentFragmentWithBackReturn(
@@ -124,12 +145,5 @@ public final class MainActivity extends Activity implements
     ft.add(R.id.content_frame, fnn);
     ft.commit();
     this.fragment_current = fnn;
-  }
-
-  @Override public void setAndShowDialog(
-    final DialogFragment f)
-  {
-    final FragmentManager fm = this.getFragmentManager();
-    f.show(fm, "dialog");
   }
 }
