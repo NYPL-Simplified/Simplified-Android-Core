@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import java.net.URI;
 import java.util.List;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -7,7 +8,6 @@ import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,34 +20,53 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogNavigationFeedFragment extends Fragment implements
+public final class CatalogNavigationFeedFragment extends CatalogFragment implements
   CatalogLaneViewListenerType,
   ListAdapter,
   RecyclerListener
 {
   private static final String FEED_ID;
   private static final String TAG;
+  private static final String TAG_UPSTACK;
 
   static {
-    TAG = "CatalogNavigationFeedFragment";
+    TAG = "CNavFeed";
+    TAG_UPSTACK = CatalogNavigationFeedFragment.TAG + ".UpStack";
     FEED_ID = "org.nypl.simplified.app.CatalogNavigationFeedFragment.feed";
   }
 
   public static CatalogNavigationFeedFragment newInstance(
-    final OPDSNavigationFeed feed)
+    final OPDSNavigationFeed feed,
+    final ImmutableList<URI> up_stack)
   {
     final Bundle b = new Bundle();
+
     b.putSerializable(
       CatalogNavigationFeedFragment.FEED_ID,
       NullCheck.notNull(feed));
+    b.putSerializable(
+      CatalogFragment.FEED_UP_STACK,
+      NullCheck.notNull(up_stack));
 
     final CatalogNavigationFeedFragment f =
       new CatalogNavigationFeedFragment();
     f.setArguments(b);
     return f;
+  }
+
+  private static ImmutableList<URI> stackPlus(
+    final ImmutableList<URI> current_up,
+    final URI u)
+  {
+    final Builder<URI> b = ImmutableList.builder();
+    b.addAll(current_up);
+    b.add(u);
+    return NullCheck.notNull(b.build());
   }
 
   private @Nullable ArrayAdapter<OPDSNavigationFeedEntry> adapter;
@@ -138,6 +157,12 @@ public final class CatalogNavigationFeedFragment extends Fragment implements
     final OPDSNavigationFeed in_feed =
       NullCheck.notNull((OPDSNavigationFeed) args
         .getSerializable(CatalogNavigationFeedFragment.FEED_ID));
+
+    this.up_stack =
+      NullCheck.notNull((ImmutableList<URI>) args
+        .getSerializable(CatalogFragment.FEED_UP_STACK));
+    this.debugShowUpStack();
+
     final Activity act = NullCheck.notNull(this.getActivity());
     final ArrayAdapter<OPDSNavigationFeedEntry> in_adapter =
       new ArrayAdapter<OPDSNavigationFeedEntry>(
@@ -211,13 +236,28 @@ public final class CatalogNavigationFeedFragment extends Fragment implements
     NullCheck.notNull(in_book);
     Log.d(CatalogNavigationFeedFragment.TAG, "onSelectBook: " + in_book);
 
-    final MainActivityType act = (MainActivityType) this.getActivity();
+    /**
+     * Push the URI of the current feed onto a new up stack for the new
+     * fragment.
+     */
 
+    final OPDSNavigationFeed f = NullCheck.notNull(this.feed);
+    final ImmutableList<URI> current_up = NullCheck.notNull(this.up_stack);
+    final ImmutableList<URI> new_up =
+      CatalogNavigationFeedFragment.stackPlus(current_up, f.getFeedURI());
+
+    /**
+     * Create a new fragment or dialog based on the current device screen
+     * size.
+     */
+
+    final MainActivityType act = (MainActivityType) this.getActivity();
     if (act.hasLargeScreen()) {
       final CatalogBookDialog df = new CatalogBookDialog();
       act.fragControllerSetAndShowDialog(df);
     } else {
-      final CatalogBookDetail df = new CatalogBookDetail();
+      final CatalogBookDetailFragment df =
+        CatalogBookDetailFragment.newInstance(in_book, new_up);
       act.fragControllerSetContentFragmentWithBackReturn(this, df);
     }
   }
@@ -230,11 +270,21 @@ public final class CatalogNavigationFeedFragment extends Fragment implements
     NullCheck.notNull(in_feed);
     Log.d(CatalogNavigationFeedFragment.TAG, "onSelectFeed: " + in_feed);
 
-    final FragmentControllerType act =
-      (FragmentControllerType) this.getActivity();
-    final CatalogLoadingFragment f =
-      CatalogLoadingFragment.newInstance(in_feed.getTargetURI());
-    act.fragControllerSetContentFragmentWithBackReturn(this, f);
+    final MainActivityType act = (MainActivityType) this.getActivity();
+
+    /**
+     * Push the URI of the current feed onto a new up stack for the new
+     * fragment.
+     */
+
+    final OPDSNavigationFeed f = NullCheck.notNull(this.feed);
+    final ImmutableList<URI> current_up = NullCheck.notNull(this.up_stack);
+    final ImmutableList<URI> new_up =
+      CatalogNavigationFeedFragment.stackPlus(current_up, f.getFeedURI());
+
+    final CatalogLoadingFragment nf =
+      CatalogLoadingFragment.newInstance(in_feed.getTargetURI(), new_up);
+    act.fragControllerSetContentFragmentWithBackReturn(this, nf);
   }
 
   @Override public void onStop()

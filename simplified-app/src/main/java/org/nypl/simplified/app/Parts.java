@@ -20,11 +20,11 @@ public final class Parts implements DrawerListener, OnItemClickListener
 {
   private final MainActivity          activity;
   private final ArrayList<String>     drawer_items;
-  private final Map<String, PartType> parts;
+  private final PartBooks             part_books;
   private final PartCatalog           part_catalog;
   private final PartHolds             part_holds;
-  private final PartBooks             part_books;
   private final PartSettings          part_settings;
+  private final Map<String, PartType> parts;
 
   public Parts(
     final MainActivity act)

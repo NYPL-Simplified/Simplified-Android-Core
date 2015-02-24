@@ -24,7 +24,7 @@ import com.io7m.jnull.Nullable;
 
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class CatalogImageSet
 {
-  private static final String                  TAG = "CatalogImageSet";
+  private static final String                  TAG = "CImages";
   private final AtomicInteger                  done;
   private final List<OPDSAcquisitionFeedEntry> entries;
   private final ArrayList<Button>              imageviews;

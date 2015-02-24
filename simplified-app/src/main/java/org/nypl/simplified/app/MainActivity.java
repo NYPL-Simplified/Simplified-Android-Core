@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import java.net.URI;
 import java.util.ArrayDeque;
 
 import android.app.Activity;
@@ -23,9 +24,10 @@ public final class MainActivity extends Activity implements MainActivityType
   private static final String            TAG;
 
   static {
-    TAG = "MainActivity";
+    TAG = "Main";
   }
 
+  private @Nullable ArrayDeque<URI>      catalog_upstack;
   private @Nullable ArrayDeque<Fragment> fragment_backstack;
   private @Nullable Fragment             fragment_current;
   private @Nullable Parts                parts;

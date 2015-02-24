@@ -1,8 +1,9 @@
 package org.nypl.simplified.app;
 
+import java.net.URI;
+
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,10 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.google.common.collect.ImmutableList;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogAcquisitionFeedFragment extends Fragment
+public final class CatalogAcquisitionFeedFragment extends CatalogFragment
 {
   private static final String FEED_ID;
   private static final String TAG;
@@ -24,12 +26,17 @@ public final class CatalogAcquisitionFeedFragment extends Fragment
   }
 
   public static CatalogAcquisitionFeedFragment newInstance(
-    final OPDSAcquisitionFeed feed)
+    final OPDSAcquisitionFeed feed,
+    final ImmutableList<URI> up_stack)
   {
     final Bundle b = new Bundle();
+
     b.putSerializable(
       CatalogAcquisitionFeedFragment.FEED_ID,
       NullCheck.notNull(feed));
+    b.putSerializable(
+      CatalogFragment.FEED_UP_STACK,
+      NullCheck.notNull(up_stack));
 
     final CatalogAcquisitionFeedFragment f =
       new CatalogAcquisitionFeedFragment();
@@ -50,6 +57,10 @@ public final class CatalogAcquisitionFeedFragment extends Fragment
     final OPDSAcquisitionFeed in_feed =
       NullCheck.notNull((OPDSAcquisitionFeed) args
         .getSerializable(CatalogAcquisitionFeedFragment.FEED_ID));
+    this.up_stack =
+      NullCheck.notNull((ImmutableList<URI>) args
+        .getSerializable(CatalogFragment.FEED_UP_STACK));
+    this.debugShowUpStack();
 
     this.feed = in_feed;
   }

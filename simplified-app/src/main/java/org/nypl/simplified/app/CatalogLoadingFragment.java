@@ -9,7 +9,6 @@ import org.nypl.simplified.opds.core.OPDSFeedMatcherType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -25,23 +25,29 @@ import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("synthetic-access") public final class CatalogLoadingFragment extends
-  Fragment
+  CatalogFragment
 {
   private static final String FEED_URI_ID;
   private static final String TAG;
 
   static {
     FEED_URI_ID = "org.nypl.simplified.app.CatalogLoadingFragment.feed";
-    TAG = "CatalogLoadingFragment";
+    TAG = "CLoad";
   }
 
   public static CatalogLoadingFragment newInstance(
-    final URI feed_uri)
+    final URI feed_uri,
+    final ImmutableList<URI> up_stack)
   {
     final Bundle b = new Bundle();
+
     b.putSerializable(
       CatalogLoadingFragment.FEED_URI_ID,
       NullCheck.notNull(feed_uri));
+    b.putSerializable(
+      CatalogFragment.FEED_UP_STACK,
+      NullCheck.notNull(up_stack));
+
     final CatalogLoadingFragment f = new CatalogLoadingFragment();
     f.setArguments(b);
     return f;
@@ -64,8 +70,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final FragmentControllerType act =
       (FragmentControllerType) this.getActivity();
     final OPDSAcquisitionFeed af = NullCheck.notNull(this.feed_acq);
+    final ImmutableList<URI> us = NullCheck.notNull(this.up_stack);
     final CatalogAcquisitionFeedFragment f =
-      CatalogAcquisitionFeedFragment.newInstance(af);
+      CatalogAcquisitionFeedFragment.newInstance(af, us);
     act.fragControllerSetContentFragmentWithoutBack(f);
   }
 
@@ -76,9 +83,14 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogLoadingFragment.TAG, "onCreate: " + this);
 
     final Bundle a = NullCheck.notNull(this.getArguments());
+
     final URI uri =
       NullCheck.notNull((URI) a
         .getSerializable(CatalogLoadingFragment.FEED_URI_ID));
+    this.up_stack =
+      NullCheck.notNull((ImmutableList<URI>) a
+        .getSerializable(CatalogFragment.FEED_UP_STACK));
+    this.debugShowUpStack();
 
     final Simplified app = Simplified.get();
     final OPDSFeedLoaderType loader = app.getFeedLoader();
@@ -165,8 +177,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final FragmentControllerType act =
       (FragmentControllerType) this.getActivity();
     final OPDSNavigationFeed nf = NullCheck.notNull(this.feed_nav);
+    final ImmutableList<URI> us = NullCheck.notNull(this.up_stack);
     final CatalogNavigationFeedFragment f =
-      CatalogNavigationFeedFragment.newInstance(nf);
+      CatalogNavigationFeedFragment.newInstance(nf, us);
     act.fragControllerSetContentFragmentWithoutBack(f);
   }
 

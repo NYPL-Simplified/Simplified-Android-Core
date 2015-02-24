@@ -4,6 +4,7 @@ import java.net.URI;
 
 import android.app.Fragment;
 
+import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
@@ -28,8 +29,9 @@ public final class PartCatalog implements PartType
   {
     final Simplified app = Simplified.get();
     final URI uri = app.getFeedInitialURI();
+    final ImmutableList<URI> stack = ImmutableList.of();
     final CatalogLoadingFragment clf =
-      CatalogLoadingFragment.newInstance(uri);
+      CatalogLoadingFragment.newInstance(uri, NullCheck.notNull(stack));
 
     final OptionType<Fragment> current =
       this.activity.fragControllerGetContentFragmentCurrent();

@@ -61,14 +61,14 @@ import com.io7m.junreachable.UnreachableCodeException;
   private static final String                      TAG;
 
   static {
-    TAG = "CatalogLaneView";
+    TAG = "CLane";
   }
 
   private @Nullable OPDSNavigationFeedEntry        entry;
   private final RelativeLayout                     header;
   private @Nullable CatalogImageSet                image_set;
   private final LinearLayout                       images;
-  private CatalogLaneViewListenerType                     listener;
+  private CatalogLaneViewListenerType              listener;
   private @Nullable ListenableFuture<OPDSFeedType> loading;
   private final ProgressBar                        progress;
   private final HorizontalScrollView               scroller;
