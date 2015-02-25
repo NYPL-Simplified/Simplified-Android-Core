@@ -32,11 +32,9 @@ public final class CatalogNavigationFeedFragment extends CatalogFragment impleme
 {
   private static final String FEED_ID;
   private static final String TAG;
-  private static final String TAG_UPSTACK;
 
   static {
     TAG = "CNavFeed";
-    TAG_UPSTACK = CatalogNavigationFeedFragment.TAG + ".UpStack";
     FEED_ID = "org.nypl.simplified.app.CatalogNavigationFeedFragment.feed";
   }
 

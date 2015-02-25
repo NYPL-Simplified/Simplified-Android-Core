@@ -5,13 +5,13 @@ import java.util.ArrayDeque;
 
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -21,19 +21,19 @@ import com.io7m.jnull.Nullable;
 
 public final class MainActivity extends Activity implements MainActivityType
 {
-  private static final String            TAG;
+  private static final String                      TAG;
 
   static {
     TAG = "Main";
   }
 
-  private @Nullable ArrayDeque<URI>      catalog_upstack;
-  private @Nullable ArrayDeque<Fragment> fragment_backstack;
-  private @Nullable Fragment             fragment_current;
-  private @Nullable Parts                parts;
+  private @Nullable ArrayDeque<URI>                catalog_upstack;
+  private @Nullable ArrayDeque<SimplifiedFragment> fragment_backstack;
+  private @Nullable SimplifiedFragment             fragment_current;
+  private @Nullable Parts                          parts;
 
   @Override public
-    OptionType<Fragment>
+    OptionType<SimplifiedFragment>
     fragControllerGetContentFragmentCurrent()
   {
     return Option.of(this.fragment_current);
@@ -49,11 +49,12 @@ public final class MainActivity extends Activity implements MainActivityType
   @Override public
     void
     fragControllerSetContentFragmentWithBackOptionalReturn(
-      final OptionType<Fragment> return_to,
-      final Fragment f)
+      final OptionType<SimplifiedFragment> return_to,
+      final SimplifiedFragment f)
   {
     if (return_to.isSome()) {
-      final Some<Fragment> some = (Some<Fragment>) return_to;
+      final Some<SimplifiedFragment> some =
+        (Some<SimplifiedFragment>) return_to;
       this.fragControllerSetContentFragmentWithBackReturn(some.get(), f);
     } else {
       this.fragControllerSetContentFragmentWithoutBack(f);
@@ -61,22 +62,23 @@ public final class MainActivity extends Activity implements MainActivityType
   }
 
   @Override public void fragControllerSetContentFragmentWithBackReturn(
-    final Fragment return_to,
-    final Fragment f)
+    final SimplifiedFragment return_to,
+    final SimplifiedFragment f)
   {
     Log.d(MainActivity.TAG, String.format(
       "Setting content to %s with back return point %s",
       f,
       return_to));
 
-    final Fragment fnn = NullCheck.notNull(f);
-    final Fragment rnn = NullCheck.notNull(return_to);
-    final ArrayDeque<Fragment> fbs =
+    final SimplifiedFragment fnn = NullCheck.notNull(f);
+    final SimplifiedFragment rnn = NullCheck.notNull(return_to);
+    final ArrayDeque<SimplifiedFragment> fbs =
       NullCheck.notNull(this.fragment_backstack);
 
     final FragmentManager fm = this.getFragmentManager();
     final FragmentTransaction ft = fm.beginTransaction();
-    final Fragment old_current = NullCheck.notNull(this.fragment_current);
+    final SimplifiedFragment old_current =
+      NullCheck.notNull(this.fragment_current);
 
     Log.d(MainActivity.TAG, String.format("Removing %s", old_current));
     ft.remove(old_current);
@@ -90,16 +92,16 @@ public final class MainActivity extends Activity implements MainActivityType
   }
 
   @Override public void fragControllerSetContentFragmentWithoutBack(
-    final Fragment f)
+    final SimplifiedFragment f)
   {
     Log.d(
       MainActivity.TAG,
       String.format("Setting content to %s without back return point", f));
 
-    final Fragment fnn = NullCheck.notNull(f);
+    final SimplifiedFragment fnn = NullCheck.notNull(f);
     final FragmentManager fm = this.getFragmentManager();
     final FragmentTransaction ft = fm.beginTransaction();
-    final Fragment old_current = this.fragment_current;
+    final SimplifiedFragment old_current = this.fragment_current;
 
     if (old_current != null) {
       Log.d(MainActivity.TAG, String.format("Removing %s", old_current));
@@ -130,12 +132,12 @@ public final class MainActivity extends Activity implements MainActivityType
     Log.d(MainActivity.TAG, "onBackPressed: " + this);
 
     final FragmentManager fm = this.getFragmentManager();
-    final ArrayDeque<Fragment> fbs =
+    final ArrayDeque<SimplifiedFragment> fbs =
       NullCheck.notNull(this.fragment_backstack);
 
     if (fbs.size() > 0) {
-      final Fragment fc = NullCheck.notNull(this.fragment_current);
-      final Fragment f_return = NullCheck.notNull(fbs.pop());
+      final SimplifiedFragment fc = NullCheck.notNull(this.fragment_current);
+      final SimplifiedFragment f_return = NullCheck.notNull(fbs.pop());
       final FragmentTransaction ft = fm.beginTransaction();
 
       Log.d(MainActivity.TAG, String.format("Removing %s", fc));
@@ -157,7 +159,7 @@ public final class MainActivity extends Activity implements MainActivityType
     Log.d(MainActivity.TAG, "onCreate: " + this);
     this.setContentView(R.layout.main);
 
-    this.fragment_backstack = new ArrayDeque<Fragment>();
+    this.fragment_backstack = new ArrayDeque<SimplifiedFragment>();
     this.parts = new Parts(this);
   }
 
@@ -165,5 +167,33 @@ public final class MainActivity extends Activity implements MainActivityType
   {
     super.onDestroy();
     Log.d(MainActivity.TAG, "onDestroy: " + this);
+  }
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item)
+  {
+    assert item != null;
+    switch (item.getItemId()) {
+      case android.R.id.home:
+      {
+        Log.d(
+          MainActivity.TAG,
+          "home pressed, dispatching to current fragment");
+
+        final OptionType<SimplifiedFragment> opt =
+          this.fragControllerGetContentFragmentCurrent();
+        if (opt.isSome()) {
+          final Some<SimplifiedFragment> some =
+            (Some<SimplifiedFragment>) opt;
+          final SimplifiedFragment f = some.get();
+          f.onUpButtonPressed();
+        }
+        return true;
+      }
+      default:
+      {
+        return super.onOptionsItemSelected(item);
+      }
+    }
   }
 }
