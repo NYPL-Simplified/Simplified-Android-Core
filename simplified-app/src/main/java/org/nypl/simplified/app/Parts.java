@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.content.res.Resources;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.view.View;
@@ -37,6 +38,7 @@ public final class Parts implements DrawerListener, OnItemClickListener
       NullCheck.notNull((DrawerLayout) this.activity
         .findViewById(R.id.drawer_layout));
     drawer_layout.setDrawerListener(this);
+    drawer_layout.openDrawer(GravityCompat.START);
 
     final ListView drawer_list =
       NullCheck.notNull((ListView) this.activity
