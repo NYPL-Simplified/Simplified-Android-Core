@@ -16,15 +16,15 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("boxing") public abstract class CatalogFragment extends
   SimplifiedFragment
 {
-  protected static final String          FEED_UP_STACK;
-  private static final String            TAG;
+  protected static final String        FEED_UP_STACK;
+  private static final String          TAG;
 
   static {
     TAG = "CFrag";
     FEED_UP_STACK = "org.nypl.simplified.app.CatalogFragment.up_stack";
   }
 
-  protected @Nullable ImmutableList<URI> up_stack;
+  private @Nullable ImmutableList<URI> up_stack;
 
   /**
    * Log the current up stack.
@@ -87,5 +87,18 @@ import com.io7m.jnull.Nullable;
     final CatalogLoadingFragment clf =
       CatalogLoadingFragment.newInstance(previous, new_stack);
     act.fragControllerSetContentFragmentWithBackReturn(this, clf);
+  }
+
+  /**
+   * Set the up stack.
+   *
+   * @param u
+   *          The stack
+   */
+
+  protected final void setUpStack(
+    final ImmutableList<URI> u)
+  {
+    this.up_stack = NullCheck.notNull(u);
   }
 }

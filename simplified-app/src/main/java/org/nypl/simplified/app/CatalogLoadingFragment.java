@@ -70,7 +70,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final FragmentControllerType act =
       (FragmentControllerType) this.getActivity();
     final OPDSAcquisitionFeed af = NullCheck.notNull(this.feed_acq);
-    final ImmutableList<URI> us = NullCheck.notNull(this.up_stack);
+    final ImmutableList<URI> us = this.getUpStack();
     final CatalogAcquisitionFeedFragment f =
       CatalogAcquisitionFeedFragment.newInstance(af, us);
     act.fragControllerSetContentFragmentWithoutBack(f);
@@ -87,9 +87,11 @@ import com.io7m.junreachable.UnreachableCodeException;
     final URI uri =
       NullCheck.notNull((URI) a
         .getSerializable(CatalogLoadingFragment.FEED_URI_ID));
-    this.up_stack =
+    final ImmutableList<URI> u =
       NullCheck.notNull((ImmutableList<URI>) a
         .getSerializable(CatalogFragment.FEED_UP_STACK));
+
+    this.setUpStack(u);
     this.debugShowUpStack();
 
     final Simplified app = Simplified.get();
@@ -177,7 +179,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final FragmentControllerType act =
       (FragmentControllerType) this.getActivity();
     final OPDSNavigationFeed nf = NullCheck.notNull(this.feed_nav);
-    final ImmutableList<URI> us = NullCheck.notNull(this.up_stack);
+    final ImmutableList<URI> us = this.getUpStack();
     final CatalogNavigationFeedFragment f =
       CatalogNavigationFeedFragment.newInstance(nf, us);
     act.fragControllerSetContentFragmentWithoutBack(f);

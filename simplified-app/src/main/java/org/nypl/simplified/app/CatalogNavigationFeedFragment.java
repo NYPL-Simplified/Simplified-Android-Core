@@ -156,9 +156,10 @@ public final class CatalogNavigationFeedFragment extends CatalogFragment impleme
       NullCheck.notNull((OPDSNavigationFeed) args
         .getSerializable(CatalogNavigationFeedFragment.FEED_ID));
 
-    this.up_stack =
+    final ImmutableList<URI> u =
       NullCheck.notNull((ImmutableList<URI>) args
         .getSerializable(CatalogFragment.FEED_UP_STACK));
+    this.setUpStack(u);
     this.debugShowUpStack();
 
     final Activity act = NullCheck.notNull(this.getActivity());
@@ -240,7 +241,7 @@ public final class CatalogNavigationFeedFragment extends CatalogFragment impleme
      */
 
     final OPDSNavigationFeed f = NullCheck.notNull(this.feed);
-    final ImmutableList<URI> current_up = NullCheck.notNull(this.up_stack);
+    final ImmutableList<URI> current_up = this.getUpStack();
     final ImmutableList<URI> new_up =
       CatalogNavigationFeedFragment.stackPlus(current_up, f.getFeedURI());
 
@@ -276,7 +277,7 @@ public final class CatalogNavigationFeedFragment extends CatalogFragment impleme
      */
 
     final OPDSNavigationFeed f = NullCheck.notNull(this.feed);
-    final ImmutableList<URI> current_up = NullCheck.notNull(this.up_stack);
+    final ImmutableList<URI> current_up = this.getUpStack();
     final ImmutableList<URI> new_up =
       CatalogNavigationFeedFragment.stackPlus(current_up, f.getFeedURI());
 

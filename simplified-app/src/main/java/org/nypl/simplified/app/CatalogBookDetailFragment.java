@@ -45,6 +45,18 @@ public final class CatalogBookDetailFragment extends CatalogFragment
     return f;
   }
 
+  @Override public void onCreate(
+    final @Nullable Bundle state)
+  {
+    super.onCreate(state);
+
+    final Bundle args = NullCheck.notNull(this.getArguments());
+    final ImmutableList<URI> u =
+      NullCheck.notNull((ImmutableList<URI>) args
+        .getSerializable(CatalogFragment.FEED_UP_STACK));
+    this.setUpStack(u);
+  }
+
   @Override public View onCreateView(
     final @Nullable LayoutInflater inflater,
     final @Nullable ViewGroup container,

@@ -57,12 +57,13 @@ public final class CatalogAcquisitionFeedFragment extends CatalogFragment
     final OPDSAcquisitionFeed in_feed =
       NullCheck.notNull((OPDSAcquisitionFeed) args
         .getSerializable(CatalogAcquisitionFeedFragment.FEED_ID));
-    this.up_stack =
+    final ImmutableList<URI> us =
       NullCheck.notNull((ImmutableList<URI>) args
         .getSerializable(CatalogFragment.FEED_UP_STACK));
     this.debugShowUpStack();
 
     this.feed = in_feed;
+    this.setUpStack(us);
   }
 
   @Override public View onCreateView(
