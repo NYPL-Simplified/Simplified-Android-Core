@@ -16,7 +16,6 @@ import android.app.Application;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.google.common.eventbus.EventBus;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -104,12 +103,6 @@ public final class Simplified extends Application
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
     final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(e, p, t);
     final OPDSFeedLoaderType fl = CachingFeedLoader.newLoader(flx);
-
-    /**
-     * Catalog event bus.
-     */
-
-    final EventBus ceb = new EventBus("catalog");
 
     /**
      * Catalog URIs.
