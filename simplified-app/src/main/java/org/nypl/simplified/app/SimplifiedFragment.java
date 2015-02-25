@@ -15,12 +15,6 @@ import android.app.Fragment;
 public abstract class SimplifiedFragment extends Fragment implements
   UpButtonListenerType
 {
-  private static final String TAG;
-
-  static {
-    TAG = "SFrag";
-  }
-
   @Override public void onResume()
   {
     super.onResume();

@@ -61,7 +61,7 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
       final OPDSFeedType r = NullCheck.notNull(c.get(uri));
       final ListenableFuture<OPDSFeedType> f = Futures.immediateFuture(r);
       p.onSuccess(r);
-      return f;
+      return NullCheck.notNull(f);
     }
 
     return this.actual.fromURI(uri, new OPDSFeedLoadListenerType() {

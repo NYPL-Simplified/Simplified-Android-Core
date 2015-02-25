@@ -94,7 +94,8 @@ import com.io7m.jnull.Nullable;
     assert this.imageviews.size() == this.entries.size();
 
     for (int index = 0; index < this.entries.size(); ++index) {
-      final OPDSAcquisitionFeedEntry e = this.entries.get(index);
+      final OPDSAcquisitionFeedEntry e =
+        NullCheck.notNull(this.entries.get(index));
       final Button view = this.imageviews.get(index);
       view.setOnClickListener(new OnClickListener() {
         @Override public void onClick(
