@@ -1,6 +1,7 @@
 package org.nypl.simplified.app;
 
 import android.app.DialogFragment;
+import android.os.Bundle;
 
 import com.io7m.jfunctional.OptionType;
 
@@ -11,10 +12,43 @@ import com.io7m.jfunctional.OptionType;
 public interface FragmentControllerType
 {
   /**
+   * Pop the back stack, calling <code>on_empty</code> if the back stack is
+   * actually empty.
+   *
+   * @param on_empty
+   *          The procedure to be called on an empty stack
+   */
+
+  void fragControllerPopBackStack(
+    final Runnable on_empty);
+
+  /**
+   * Deserialize the state of all fragments from the given bundle, which was
+   * expected to be populated by {@link #fragControllerSerialize(Bundle)}.
+   *
+   * @param b
+   *          The bundle
+   */
+
+  void fragControllerDeserialize(
+    final Bundle b);
+
+  /**
    * @return The current fragment in the content frame, if any.
    */
 
   OptionType<SimplifiedFragment> fragControllerGetContentFragmentCurrent();
+
+  /**
+   * Serialize the state of all fragments into the given bundle, for later
+   * deserialization with {@link #fragControllerDeserialize(Bundle)}.
+   *
+   * @param b
+   *          The bundle
+   */
+
+  void fragControllerSerialize(
+    final Bundle b);
 
   /**
    * Display the given dialog.
@@ -62,7 +96,7 @@ public interface FragmentControllerType
   /**
    * Set the given fragment <code>f</code> as the current fragment in the
    * content frame.
-   * 
+   *
    * @param f
    *          The new fragment
    */

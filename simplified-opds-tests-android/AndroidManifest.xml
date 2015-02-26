@@ -11,5 +11,7 @@
     android:name="android.test.InstrumentationTestRunner"
     android:targetPackage="org.nypl.simplified.opds.tests.android"
     android:label="Tests."/>
-  <uses-sdk android:minSdkVersion="15" />
+  <uses-sdk
+    android:minSdkVersion="19"
+    android:targetSdkVersion="21"/>
 </manifest>

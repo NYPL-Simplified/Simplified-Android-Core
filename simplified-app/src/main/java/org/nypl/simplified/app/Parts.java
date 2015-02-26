@@ -71,8 +71,11 @@ public final class Parts implements DrawerListener, OnItemClickListener
       R.layout.drawer_item,
       this.drawer_items));
     drawer_list.setOnItemClickListener(this);
+  }
 
-    this.part_catalog.partSwitchTo();
+  public PartCatalog getPartCatalog()
+  {
+    return this.part_catalog;
   }
 
   @Override public void onDrawerClosed(
