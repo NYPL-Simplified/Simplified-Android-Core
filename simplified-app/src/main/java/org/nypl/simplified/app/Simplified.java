@@ -13,6 +13,7 @@ import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 
 import android.app.Application;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 
@@ -23,7 +24,8 @@ import com.io7m.jnull.Nullable;
  * Global application state.
  */
 
-public final class Simplified extends Application
+public final class Simplified extends Application implements
+  ScreenSizeControllerType
 {
   private static volatile @Nullable Simplified INSTANCE;
 
@@ -85,6 +87,21 @@ public final class Simplified extends Application
   {
     Simplified.checkInitialized();
     return NullCheck.notNull(this.feed_loader);
+  }
+
+  @Override public boolean hasLargeScreen()
+  {
+    Simplified.checkInitialized();
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final Configuration c = NullCheck.notNull(rr.getConfiguration());
+    final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+    boolean large = false;
+    large |=
+      (s & Configuration.SCREENLAYOUT_SIZE_LARGE) == Configuration.SCREENLAYOUT_SIZE_LARGE;
+    large |=
+      (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    return large;
   }
 
   @Override public void onCreate()
