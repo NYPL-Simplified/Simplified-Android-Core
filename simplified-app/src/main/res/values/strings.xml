@@ -3,7 +3,6 @@
 
   <string name="app_name">Simplified</string>
   <string name="holds">Holds</string>
-  <string name="unknown_feed">Unknown</string>
   <string name="books">Books</string>
   <string name="settings">Settings</string>
 
@@ -12,5 +11,6 @@
   <string name="catalog_load_error_title">Error</string>
   <string name="catalog_load_error_text">An error occurred whilst loading the catalog. Please try again.</string>
   <string name="catalog_start_uri">http://library-simplified.herokuapp.com</string>
+  <string name="catalog_unknown_feed">Unknown</string>
 
 </resources>

@@ -14,7 +14,7 @@
       android:id="@+id/feed_title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="@string/unknown_feed"/>
+      android:text="@string/catalog_unknown_feed"/>
 
     <ProgressBar
       android:id="@+id/feed_progress"

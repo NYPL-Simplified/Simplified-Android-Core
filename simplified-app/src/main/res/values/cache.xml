@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <integer name="image_disk_cache_megabytes">32</integer>
+  <integer name="image_memory_cache_megabytes">32</integer>
+</resources>

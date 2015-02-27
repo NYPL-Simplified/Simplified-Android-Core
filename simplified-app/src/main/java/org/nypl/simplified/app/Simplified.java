@@ -1,5 +1,8 @@
 package org.nypl.simplified.app;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,10 +18,13 @@ import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import android.app.Application;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.util.Log;
 
+import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Global application state.
@@ -43,7 +49,7 @@ public final class Simplified extends Application implements
     return Simplified.checkInitialized();
   }
 
-  private static int megabytes(
+  private static int megabytesToBytes(
     final int m)
   {
     return (int) (m * Math.pow(10, 7));
@@ -76,6 +82,7 @@ public final class Simplified extends Application implements
   private @Nullable OPDSFeedLoaderType    feed_loader;
   private @Nullable OPDSFeedParserType    feed_parser;
   private @Nullable OPDSFeedTransportType feed_transport;
+  private @Nullable BitmapCacheType       image_loader;
 
   public URI getFeedInitialURI()
   {
@@ -87,6 +94,12 @@ public final class Simplified extends Application implements
   {
     Simplified.checkInitialized();
     return NullCheck.notNull(this.feed_loader);
+  }
+
+  public BitmapCacheType getImageLoader()
+  {
+    Simplified.checkInitialized();
+    return NullCheck.notNull(this.image_loader);
   }
 
   @Override public boolean hasLargeScreen()
@@ -106,33 +119,63 @@ public final class Simplified extends Application implements
 
   @Override public void onCreate()
   {
-    super.onCreate();
+    try {
+      super.onCreate();
 
-    Log.d("simplified", "initializing application context");
+      Log.d("simplified", "initializing application context");
 
-    final ExecutorService e = Simplified.namedThreadPool();
+      final ExecutorService e = Simplified.namedThreadPool();
+      final Resources rr = NullCheck.notNull(this.getResources());
 
-    /**
-     * Asynchronous feed loader.
-     */
+      /**
+       * Asynchronous feed loader.
+       */
 
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
-    final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
-    final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(e, p, t);
-    final OPDSFeedLoaderType fl = CachingFeedLoader.newLoader(flx);
+      final OPDSFeedParserType p = OPDSFeedParser.newParser();
+      final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
+      final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(e, p, t);
+      final OPDSFeedLoaderType fl = CachingFeedLoader.newLoader(flx);
 
-    /**
-     * Catalog URIs.
-     */
+      /**
+       * Asynchronous image loader.
+       */
 
-    final Resources rr = this.getResources();
-    this.feed_initial_uri =
-      URI.create(rr.getString(R.string.catalog_start_uri));
+      final PartialFunctionType<URI, InputStream, IOException> it =
+        BitmapTransport.get();
+      final File cd = new File(this.getExternalCacheDir(), "thumbnails");
+      cd.mkdirs();
 
-    this.executor = e;
-    this.feed_parser = p;
-    this.feed_transport = t;
-    this.feed_loader = fl;
-    Simplified.INSTANCE = this;
+      final int disk_size =
+        Simplified.megabytesToBytes(rr
+          .getInteger(R.integer.image_disk_cache_megabytes));
+      final int mem_size =
+        Simplified.megabytesToBytes(rr
+          .getInteger(R.integer.image_memory_cache_megabytes));
+
+      final BitmapCacheType bcf =
+        BitmapFileCache.newCache(e, it, cd, disk_size);
+      final BitmapCacheType bc =
+        BitmapMemoryProxyCache.newCache(e, bcf, mem_size);
+
+      /**
+       * Catalog URIs.
+       */
+
+      this.feed_initial_uri =
+        URI.create(rr.getString(R.string.catalog_start_uri));
+
+      this.executor = e;
+      this.feed_parser = p;
+      this.feed_transport = t;
+      this.feed_loader = fl;
+      this.image_loader = bc;
+
+      Simplified.INSTANCE = this;
+
+    } catch (final NotFoundException e) {
+      throw new UnreachableCodeException(e);
+    } catch (final IOException e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 }
