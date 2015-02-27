@@ -46,6 +46,8 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
     throws IOException
   {
     final Options o = new Options();
+
+    o.inPreferredConfig = Bitmap.Config.RGB_565;
     switch (opts.getType()) {
       case TYPE_SCALE_PRESERVE:
       {
@@ -133,7 +135,7 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
     final int want_width,
     final int want_height)
   {
-    return 8;
+    return 4;
   }
 
   /**
