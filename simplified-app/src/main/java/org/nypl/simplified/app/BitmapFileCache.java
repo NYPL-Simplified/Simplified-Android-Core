@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -43,6 +44,119 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BitmapFileCache implements
   BitmapCacheType
 {
+  private static final String TAG;
+
+  static {
+    TAG = "BFC";
+  }
+
+  /**
+   * Attempt to decode a cached image. If the image is in the cache but cannot
+   * be decoded, delete it.
+   *
+   * @param hash
+   *          The hash of the URI
+   * @return <code>null</code> if the image is not in the cache, or cannot be
+   *         decoded.
+   * @throws IOException
+   *           On errors
+   */
+
+  private static @Nullable Bitmap decodeCachedImage(
+    final DiskLruCache c,
+    final String hash)
+    throws IOException
+  {
+    final Snapshot s = c.get(hash);
+    try {
+      if (s == null) {
+        return null;
+      }
+
+      final Bitmap r = BitmapFactory.decodeStream(s.getInputStream(0));
+      if (r == null) {
+        c.remove(hash);
+        return null;
+      }
+      return r;
+    } finally {
+      if (s != null) {
+        s.close();
+      }
+    }
+  }
+
+  /**
+   * Fetch and cache the given file, raising errors on I/O errors.
+   *
+   * @param hash
+   *          The hash of the URI.
+   * @throws IOException
+   *           On errors
+   */
+
+  private static void fetchAndCacheFile(
+    final DiskLruCache c,
+    final PartialFunctionType<URI, InputStream, IOException> transport,
+    final URI uri,
+    final String hash)
+    throws IOException
+  {
+    final Editor e = c.edit(hash);
+    final OutputStream os = e.newOutputStream(0);
+    try {
+      final InputStream is = transport.call(uri);
+      try {
+        final byte[] b = new byte[8192];
+        while (true) {
+          final int r = is.read(b, 0, 8192);
+          if (r == -1) {
+            break;
+          }
+          os.write(b, 0, r);
+        }
+        e.commit();
+      } finally {
+        is.close();
+      }
+    } finally {
+      os.close();
+    }
+  }
+
+  private static Bitmap getSynchronousActual(
+    final URI uri,
+    final PartialFunctionType<URI, InputStream, IOException> ref_t,
+    final DiskLruCache c)
+    throws IOException
+  {
+    final String hash = BitmapFileCache.hashURI(uri);
+
+    Log.d(BitmapFileCache.TAG, String.format("fetching %s (%s)", uri, hash));
+
+    /**
+     * 1. If the image is already in the disk cache, attempt to decode it.
+     *
+     * 2. If it can be decoded, return it. Otherwise, if it cannot be decoded,
+     * delete it.
+     *
+     * 3. Fetch and cache the file at the given URI.
+     *
+     * 4. If it can be decoded, return it. Otherwise, raise an error.
+     */
+
+    final Bitmap i0 = BitmapFileCache.decodeCachedImage(c, hash);
+    if (i0 == null) {
+      BitmapFileCache.fetchAndCacheFile(c, ref_t, uri, hash);
+      final Bitmap i1 = BitmapFileCache.decodeCachedImage(c, hash);
+      if (i1 == null) {
+        throw new IOException("Could not decode cached file");
+      }
+      return i1;
+    }
+
+    return i0;
+  }
   private static String hashURI(
     final URI uri)
   {
@@ -58,7 +172,6 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
       throw new UnreachableCodeException(e);
     }
   }
-
   public static BitmapCacheType newCache(
     final ExecutorService in_e,
     final PartialFunctionType<URI, InputStream, IOException> in_transport,
@@ -70,7 +183,9 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
   }
 
   private final DiskLruCache                                       cache;
+
   private final ListeningExecutorService                           exec;
+
   private final PartialFunctionType<URI, InputStream, IOException> transport;
 
   private BitmapFileCache(
@@ -103,102 +218,7 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
         @Override public Bitmap call()
           throws Exception
         {
-          final String hash = BitmapFileCache.hashURI(uri);
-
-          /**
-           * 1. If the image is already in the disk cache, attempt to decode
-           * it.
-           *
-           * 2. If it can be decoded, return it. Otherwise, if it cannot be
-           * decoded, delete it.
-           *
-           * 3. Fetch and cache the file at the given URI.
-           *
-           * 4. If it can be decoded, return it. Otherwise, raise an error.
-           */
-
-          final Bitmap i0 = this.decodeCachedImage(hash);
-          if (i0 == null) {
-            this.fetchAndCacheFile(hash);
-
-            final Bitmap i1 = this.decodeCachedImage(hash);
-            if (i1 == null) {
-              throw new IOException("Could not decode cached file");
-            }
-            return i1;
-          }
-
-          return i0;
-        }
-
-        /**
-         * Attempt to decode a cached image. If the image is in the cache but
-         * cannot be decoded, delete it.
-         *
-         * @param hash
-         *          The hash of the URI
-         * @return <code>null</code> if the image is not in the cache, or
-         *         cannot be decoded.
-         * @throws IOException
-         *           On errors
-         */
-
-        private @Nullable Bitmap decodeCachedImage(
-          final String hash)
-          throws IOException
-        {
-          final Snapshot s = c.get(hash);
-          try {
-            if (s == null) {
-              return null;
-            }
-
-            final Bitmap r = BitmapFactory.decodeStream(s.getInputStream(0));
-            if (r == null) {
-              c.remove(hash);
-              return null;
-            }
-            return r;
-          } finally {
-            if (s != null) {
-              s.close();
-            }
-          }
-        }
-
-        /**
-         * Fetch and cache the given file, raising errors on I/O errors.
-         *
-         * @param hash
-         *          The hash of the URI.
-         * @throws IOException
-         *           On errors
-         */
-
-        private void fetchAndCacheFile(
-          final String hash)
-          throws IOException
-        {
-          final Editor e = c.edit(hash);
-          final OutputStream os = e.newOutputStream(0);
-          try {
-            final InputStream is = ref_t.call(uri);
-            try {
-              final byte[] b = new byte[8192];
-              while (true) {
-                final int r = is.read(b, 0, 8192);
-                if (r == -1) {
-                  break;
-                }
-                os.write(b, 0, r);
-              }
-              e.commit();
-            } finally {
-              is.close();
-            }
-          } finally {
-            os.close();
-          }
+          return BitmapFileCache.getSynchronousActual(uri, ref_t, c);
         }
       });
 
@@ -217,5 +237,25 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
     }, this.exec);
 
     return NullCheck.notNull(f);
+  }
+
+  @Override public long getSizeCurrent()
+  {
+    return this.cache.size();
+  }
+
+  @Override public long getSizeMaximum()
+  {
+    return this.cache.getMaxSize();
+  }
+
+  @Override public Bitmap getSynchronous(
+    final URI uri)
+    throws IOException
+  {
+    return BitmapFileCache.getSynchronousActual(
+      uri,
+      this.transport,
+      this.cache);
   }
 }

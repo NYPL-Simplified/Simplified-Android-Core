@@ -16,6 +16,7 @@ import junit.framework.Assert;
 import org.nypl.simplified.app.BitmapCacheListenerType;
 import org.nypl.simplified.app.BitmapCacheType;
 import org.nypl.simplified.app.BitmapFileCache;
+import org.nypl.simplified.app.BitmapMemoryProxyCache;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -27,12 +28,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class BitmapCacheTest extends InstrumentationTestCase
+@SuppressWarnings({ "boxing", "null", "unused", "synthetic-access" }) public final class BitmapMemoryProxyCacheTest extends
+  InstrumentationTestCase
 {
   private static final String TAG;
 
   static {
-    TAG = "BCT";
+    TAG = "BMPCT";
   }
 
   private File prepareCacheDirectory()
@@ -41,14 +43,14 @@ public final class BitmapCacheTest extends InstrumentationTestCase
     final File in_file = ctx.getExternalCacheDir();
 
     if (in_file.isDirectory() == false) {
-      Log.d(BitmapCacheTest.TAG, "creating cache directory");
+      Log.d(BitmapMemoryProxyCacheTest.TAG, "creating cache directory");
       final boolean created = in_file.mkdirs();
       Assert.assertTrue(created);
     }
 
-    Log.d(BitmapCacheTest.TAG, "clearing cache directory");
+    Log.d(BitmapMemoryProxyCacheTest.TAG, "clearing cache directory");
     for (final File name : in_file.listFiles()) {
-      Log.d(BitmapCacheTest.TAG, "deleting " + name);
+      Log.d(BitmapMemoryProxyCacheTest.TAG, "deleting " + name);
       name.delete();
     }
 
@@ -75,7 +77,7 @@ public final class BitmapCacheTest extends InstrumentationTestCase
           throws IOException
         {
           final int cc = count.get();
-          Log.d(BitmapCacheTest.TAG, "call count: " + cc);
+          Log.d(BitmapMemoryProxyCacheTest.TAG, "call count: " + cc);
           if (cc == 0) {
             count.incrementAndGet();
             return new ByteArrayInputStream(new byte[8]);
@@ -85,8 +87,10 @@ public final class BitmapCacheTest extends InstrumentationTestCase
       };
 
     final ExecutorService in_e = Executors.newFixedThreadPool(1);
-    final BitmapCacheType bc =
+    final BitmapCacheType bfc =
       BitmapFileCache.newCache(in_e, in_transport, in_file, in_bytes);
+    final BitmapCacheType bc =
+      BitmapMemoryProxyCache.newCache(in_e, bfc, in_bytes);
 
     final AtomicBoolean error = new AtomicBoolean(false);
     final AtomicBoolean ok = new AtomicBoolean(false);
@@ -96,7 +100,7 @@ public final class BitmapCacheTest extends InstrumentationTestCase
         @Override public void onFailure(
           final Throwable e)
         {
-          Log.d(BitmapCacheTest.TAG, "Exception: " + e, e);
+          Log.d(BitmapMemoryProxyCacheTest.TAG, "Exception: " + e, e);
           error.set(true);
         }
 
@@ -120,7 +124,7 @@ public final class BitmapCacheTest extends InstrumentationTestCase
         @Override public void onSuccess(
           final Bitmap b)
         {
-          Log.d(BitmapCacheTest.TAG, "Bitmap: " + b);
+          Log.d(BitmapMemoryProxyCacheTest.TAG, "Bitmap: " + b);
           Assert.assertEquals(b.getWidth(), 120);
           Assert.assertEquals(b.getHeight(), 120);
           ok.set(true);
@@ -134,6 +138,19 @@ public final class BitmapCacheTest extends InstrumentationTestCase
 
     Assert.assertTrue(error.get());
     Assert.assertTrue(ok.get());
+
+    Log.d(
+      BitmapMemoryProxyCacheTest.TAG,
+      String.format(
+        "cache size: (bfc) (%d/%d)",
+        bfc.getSizeCurrent(),
+        bfc.getSizeMaximum()));
+    Log.d(
+      BitmapMemoryProxyCacheTest.TAG,
+      String.format(
+        "cache size: (bc) (%d/%d)",
+        bc.getSizeCurrent(),
+        bc.getSizeMaximum()));
   }
 
   /**
@@ -146,13 +163,8 @@ public final class BitmapCacheTest extends InstrumentationTestCase
     final Context ctx = this.getInstrumentation().getContext();
     final Resources rr = ctx.getResources();
     final File in_file = this.prepareCacheDirectory();
-
-    if (in_file.isDirectory() == false) {
-      final boolean created = in_file.mkdirs();
-      Assert.assertTrue(created);
-    }
-
     final int in_bytes = (int) (8 * Math.pow(10, 7));
+
     final PartialFunctionType<URI, InputStream, IOException> in_transport =
       new PartialFunctionType<URI, InputStream, IOException>() {
         @Override public InputStream call(
@@ -164,8 +176,10 @@ public final class BitmapCacheTest extends InstrumentationTestCase
       };
 
     final ExecutorService in_e = Executors.newFixedThreadPool(1);
-    final BitmapCacheType bc =
+    final BitmapCacheType bfc =
       BitmapFileCache.newCache(in_e, in_transport, in_file, in_bytes);
+    final BitmapCacheType bc =
+      BitmapMemoryProxyCache.newCache(in_e, bfc, in_bytes);
 
     final AtomicBoolean ok = new AtomicBoolean(false);
     final ListenableFuture<Bitmap> f =
@@ -173,13 +187,13 @@ public final class BitmapCacheTest extends InstrumentationTestCase
         @Override public void onFailure(
           final Throwable e)
         {
-          Log.d(BitmapCacheTest.TAG, "Exception: " + e, e);
+          Log.d(BitmapMemoryProxyCacheTest.TAG, "Exception: " + e, e);
         }
 
         @Override public void onSuccess(
           final Bitmap b)
         {
-          Log.d(BitmapCacheTest.TAG, "Bitmap: " + b);
+          Log.d(BitmapMemoryProxyCacheTest.TAG, "Bitmap: " + b);
           Assert.assertEquals(b.getWidth(), 120);
           Assert.assertEquals(b.getHeight(), 120);
           ok.set(true);
@@ -191,5 +205,18 @@ public final class BitmapCacheTest extends InstrumentationTestCase
     in_e.shutdown();
     in_e.awaitTermination(10, TimeUnit.SECONDS);
     Assert.assertTrue(ok.get());
+
+    Log.d(
+      BitmapMemoryProxyCacheTest.TAG,
+      String.format(
+        "cache size: (bfc) (%d/%d)",
+        bfc.getSizeCurrent(),
+        bfc.getSizeMaximum()));
+    Log.d(
+      BitmapMemoryProxyCacheTest.TAG,
+      String.format(
+        "cache size: (bc) (%d/%d)",
+        bc.getSizeCurrent(),
+        bc.getSizeMaximum()));
   }
 }
