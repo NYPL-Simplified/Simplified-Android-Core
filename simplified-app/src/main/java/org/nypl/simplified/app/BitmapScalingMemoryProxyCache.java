@@ -7,7 +7,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.util.LruCache;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -17,105 +16,117 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 
-/**
- * A fixed-size in-memory cached intended to cache the results of a slower
- * (disk-based, for example) cache.
- */
-
-public final class BitmapMemoryProxyCache implements BitmapCacheType
+public final class BitmapScalingMemoryProxyCache implements
+  BitmapCacheScalingType
 {
-  private static final class Cache extends LruCache<URI, Bitmap>
+  private static final class Cache extends LruCache<Key, Bitmap>
   {
-    private final BitmapCacheType             base;
+    private final BitmapCacheScalingType      base;
     private final WeakHashMap<URI, Throwable> errors;
 
     public Cache(
-      final int maxSize,
-      final BitmapCacheType in_base)
+      final int in_size,
+      final BitmapCacheScalingType in_base)
     {
-      super(maxSize);
-      this.base = NullCheck.notNull(in_base);
+      super(in_size);
       this.errors = new WeakHashMap<URI, Throwable>();
+      this.base = NullCheck.notNull(in_base);
     }
 
     @Override protected @Nullable Bitmap create(
-      final @Nullable URI uri)
+      final @Nullable Key key)
     {
-      Log.d(BitmapMemoryProxyCache.TAG, String.format("creating %s", uri));
       try {
-        return this.base.getSynchronous(NullCheck.notNull(uri));
+        assert key != null;
+        return this.base.getSynchronous(key.uri, key.opts);
       } catch (final IOException e) {
-        this.errors.put(uri, e);
+        this.errors.put(key.uri, e);
         return null;
       }
     }
 
     @Override protected int sizeOf(
-      final @Nullable URI key,
+      final @Nullable Key key,
       final @Nullable Bitmap value)
     {
-      assert key != null;
-      assert value != null;
-      return value.getAllocationByteCount();
-    }
-
-    public Throwable takeRecordedError(
-      final URI uri)
-    {
-      return NullCheck.notNull(this.errors.get(uri));
+      NullCheck.notNull(key);
+      return NullCheck.notNull(value).getAllocationByteCount();
     }
   }
 
-  private static final String TAG;
-
-  static {
-    TAG = "BMPC";
-  }
-
-  public static BitmapCacheType newCache(
-    final ExecutorService e,
-    final BitmapCacheType in_base,
-    final int in_size)
+  private static final class Key
   {
-    return new BitmapMemoryProxyCache(e, in_base, in_size);
+    private final BitmapScalingOptions opts;
+    private final URI                  uri;
+
+    private Key(
+      final URI in_uri,
+      final BitmapScalingOptions in_opts)
+    {
+      this.uri = NullCheck.notNull(in_uri);
+      this.opts = NullCheck.notNull(in_opts);
+    }
+
+    @Override public boolean equals(
+      final @Nullable Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (this.getClass() != obj.getClass()) {
+        return false;
+      }
+      final Key other = (Key) obj;
+      return this.uri.equals(other.uri);
+    }
+
+    @Override public int hashCode()
+    {
+      return this.uri.hashCode();
+    }
+  }
+
+  public static BitmapCacheScalingType newCache(
+    final ExecutorService e,
+    final BitmapCacheScalingType in_base,
+    final int size)
+  {
+    return new BitmapScalingMemoryProxyCache(in_base, e, size);
   }
 
   private final Cache                    cache;
   private final ListeningExecutorService exec;
 
-  private BitmapMemoryProxyCache(
-    final ExecutorService e,
-    final BitmapCacheType in_base,
+  private BitmapScalingMemoryProxyCache(
+    final BitmapCacheScalingType in_base,
+    final ExecutorService in_exec,
     final int in_size)
   {
     this.exec =
-      NullCheck
-        .notNull(MoreExecutors.listeningDecorator(NullCheck.notNull(e)));
+      NullCheck.notNull(MoreExecutors.listeningDecorator(NullCheck
+        .notNull(in_exec)));
     this.cache = new Cache(in_size, NullCheck.notNull(in_base));
   }
 
   @Override public ListenableFuture<Bitmap> get(
     final URI uri,
+    final BitmapScalingOptions opts,
     final BitmapCacheListenerType p)
   {
     NullCheck.notNull(uri);
+    NullCheck.notNull(opts);
     NullCheck.notNull(p);
 
-    Log.d(BitmapMemoryProxyCache.TAG, String.format("fetching %s", uri));
-
-    final Cache c = this.cache;
     final ListenableFuture<Bitmap> f =
       this.exec.submit(new Callable<Bitmap>() {
         @Override public Bitmap call()
           throws Exception
         {
-          final Bitmap r = c.get(uri);
-          if (r == null) {
-            throw new Exception(c.takeRecordedError(uri));
-          }
-          return r;
+          return BitmapScalingMemoryProxyCache.this.getSynchronous(uri, opts);
         }
       });
 
@@ -147,9 +158,15 @@ public final class BitmapMemoryProxyCache implements BitmapCacheType
   }
 
   @Override public Bitmap getSynchronous(
-    final URI uri)
+    final URI uri,
+    final BitmapScalingOptions opts)
     throws IOException
   {
-    throw new UnimplementedCodeException();
+    final Bitmap r = this.cache.get(new Key(uri, opts));
+    if (r == null) {
+      throw new IOException(this.cache.errors.get(uri));
+    }
+    return r;
   }
+
 }

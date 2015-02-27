@@ -117,12 +117,23 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (f != null) {
       f.cancel(true);
     }
+    final CatalogImageSet is = this.image_set;
+    if (is != null) {
+      is.cancel();
+    }
+  }
+
+  public int getScrollViewHeightInPixels()
+  {
+    return this.scroller.getHeight();
   }
 
   private void onAcquisitionFeedReceived(
     final OPDSAcquisitionFeed af)
   {
-    final CatalogImageSet is = new CatalogImageSet(af.getFeedEntries());
+    final Simplified app = Simplified.get();
+    final CatalogImageSet is =
+      new CatalogImageSet(app.getImageLoader(), af.getFeedEntries());
     final LinearLayout closure_images = this.images;
     final ProgressBar closure_progress = this.progress;
     final Context ctx = NullCheck.notNull(this.getContext());

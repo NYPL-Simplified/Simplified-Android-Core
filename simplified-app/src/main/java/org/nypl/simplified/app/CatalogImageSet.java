@@ -8,33 +8,51 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 
-import com.io7m.jfunctional.None;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) public final class CatalogImageSet
+@SuppressWarnings({ "synthetic-access" }) public final class CatalogImageSet implements
+  CancellableType
 {
   private static final String                  TAG = "CImages";
+  private final BitmapCacheScalingType         cache;
   private final AtomicInteger                  done;
   private final List<OPDSAcquisitionFeedEntry> entries;
-  private final ArrayList<Button>              imageviews;
+  private final List<ImageView>                imageviews;
+  private final List<ListenableFuture<Bitmap>> loading;
+  private boolean                              cancelled;
 
   public CatalogImageSet(
+    final BitmapCacheScalingType in_cache,
     final List<OPDSAcquisitionFeedEntry> in_entries)
   {
     this.entries = NullCheck.notNull(in_entries);
-    this.imageviews = new ArrayList<Button>();
+    this.imageviews = new ArrayList<ImageView>();
+    this.loading = new ArrayList<ListenableFuture<Bitmap>>();
     this.done = new AtomicInteger();
+    this.cache = NullCheck.notNull(in_cache);
+    this.cancelled = false;
+  }
+
+  @Override public void cancel()
+  {
+    UIThread.checkIsUIThread();
+
+    for (int index = 0; index < this.loading.size(); ++index) {
+      final ListenableFuture<Bitmap> f = this.loading.get(index);
+      f.cancel(true);
+    }
+    this.cancelled = true;
   }
 
   public void configureView(
@@ -55,83 +73,108 @@ import com.io7m.jnull.Nullable;
     this.done.set(0);
     this.imageviews.clear();
 
-    final int count = container.getChildCount();
-    for (int index = 0; index < count; ++index) {
-      final View v = container.getChildAt(index);
-      if (v instanceof Button) {
-        this.imageviews.add((Button) v);
-      }
+    container.removeAllViews();
+
+    for (int index = 0; index < this.entries.size(); ++index) {
+      final ImageView v = new ImageView(context);
+      container.addView(v);
+      this.imageviews.add(v);
     }
-
-    Log.d(CatalogImageSet.TAG, String.format(
-      "views: %d, entries %d",
-      this.imageviews.size(),
-      this.entries.size()));
-
-    if (this.imageviews.size() < this.entries.size()) {
-      Log.d(
-        CatalogImageSet.TAG,
-        "too few imageviews for entries, creating new views");
-      while (this.imageviews.size() < this.entries.size()) {
-        final Button b = new Button(context);
-        this.imageviews.add(b);
-        container.addView(b);
-      }
-    }
-
-    if (this.imageviews.size() > this.entries.size()) {
-      Log.d(
-        CatalogImageSet.TAG,
-        "too many imageviews for entries, removing views");
-      while (this.imageviews.size() > this.entries.size()) {
-        final int last_index = this.imageviews.size() - 1;
-        final Button last = this.imageviews.get(last_index);
-        this.imageviews.remove(last_index);
-        container.removeView(last);
-      }
-    }
-
-    assert this.imageviews.size() == this.entries.size();
 
     for (int index = 0; index < this.entries.size(); ++index) {
       final OPDSAcquisitionFeedEntry e =
         NullCheck.notNull(this.entries.get(index));
-      final Button view = this.imageviews.get(index);
-      view.setOnClickListener(new OnClickListener() {
-        @Override public void onClick(
-          final @Nullable View actual)
-        {
-          listener.onSelectBook(lane_view, e);
-        }
-      });
-
-      final OptionType<URI> thumb = e.getThumbnail();
-      thumb.accept(new OptionVisitorType<URI, Unit>() {
-        @Override public Unit none(
-          final None<URI> none)
-        {
-          /**
-           * TODO: Generate a cover.
-           */
-
-          CatalogImageSet.this.imageDone(on_images_loaded);
-          return Unit.unit();
-        }
-
-        @Override public Unit some(
-          final Some<URI> some)
-        {
-          view.setVisibility(View.VISIBLE);
-          CatalogImageSet.this.imageDone(on_images_loaded);
-          return Unit.unit();
-        }
-      });
+      this.configureSingleView(
+        lane_view,
+        listener,
+        on_images_loaded,
+        index,
+        e);
     }
+  }
+
+  private void configureSingleView(
+    final CatalogLaneView lane_view,
+    final CatalogLaneViewListenerType listener,
+    final Runnable on_images_loaded,
+    final int index,
+    final OPDSAcquisitionFeedEntry e)
+  {
+    final ImageView view = this.imageviews.get(index);
+    view.setAdjustViewBounds(true);
+    view.setMaxHeight(lane_view.getScrollViewHeightInPixels());
+    view.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View actual)
+      {
+        listener.onSelectBook(lane_view, e);
+      }
+    });
+
+    final OptionType<URI> thumb = e.getThumbnail();
+    if (thumb.isNone()) {
+
+      /**
+       * TODO: Generate a cover.
+       */
+
+      this.imageDone(on_images_loaded);
+      return;
+    }
+
+    final Some<URI> some = (Some<URI>) thumb;
+    final URI thumb_uri = some.get();
+
+    final BitmapScalingOptions options =
+      BitmapScalingOptions.scaleSizeHint(
+        lane_view.getScrollViewHeightInPixels(),
+        lane_view.getScrollViewHeightInPixels());
+
+    final ListenableFuture<Bitmap> f =
+      CatalogImageSet.this.cache.get(
+        thumb_uri,
+        options,
+        new BitmapCacheListenerType() {
+          @Override public void onFailure(
+            final Throwable ex)
+          {
+            UIThread.runOnUIThread(new Runnable() {
+              @Override public void run()
+              {
+                CatalogImageSet.this.imageDone(on_images_loaded);
+              }
+            });
+          }
+
+          @Override public void onSuccess(
+            final Bitmap b)
+          {
+            Log.d(CatalogImageSet.TAG, String.format(
+              "returned image (%s) is (%d x %d) (%d bytes)",
+              thumb_uri,
+              b.getWidth(),
+              b.getHeight(),
+              b.getAllocationByteCount()));
+
+            UIThread.runOnUIThread(new Runnable() {
+              @Override public void run()
+              {
+                view.setImageBitmap(b);
+                view.setVisibility(View.VISIBLE);
+                CatalogImageSet.this.imageDone(on_images_loaded);
+              }
+            });
+          }
+        });
+
+    this.loading.add(f);
   }
 
   private void imageDone(
     final Runnable on_images_loaded)
   {
+    UIThread.checkIsUIThread();
+
     this.done.incrementAndGet();
     if (this.done.get() >= this.entries.size()) {
       Log.d(CatalogImageSet.TAG, "all images loaded");

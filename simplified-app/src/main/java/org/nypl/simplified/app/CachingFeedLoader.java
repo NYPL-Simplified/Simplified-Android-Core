@@ -12,6 +12,8 @@ import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
 import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 
+import android.util.Log;
+
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jnull.NullCheck;
@@ -23,6 +25,12 @@ import com.io7m.jnull.NullCheck;
 
 public final class CachingFeedLoader implements OPDSFeedLoaderType
 {
+  private static final String TAG;
+
+  static {
+    TAG = "CFL";
+  }
+
   /**
    * Construct a new loader.
    *
@@ -44,7 +52,6 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
     final OPDSFeedLoaderType a)
   {
     this.actual = NullCheck.notNull(a);
-
     final Builder<Object, Object> b = ExpiringMap.builder();
     b.expirationPolicy(ExpirationPolicy.ACCESSED);
     b.expiration(5, TimeUnit.MINUTES);
@@ -56,6 +63,8 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
     final URI uri,
     final OPDSFeedLoadListenerType p)
   {
+    Log.d(CachingFeedLoader.TAG, String.format("get %s", uri));
+
     final Map<URI, OPDSFeedType> c = this.cache;
     if (c.containsKey(uri)) {
       final OPDSFeedType r = NullCheck.notNull(c.get(uri));

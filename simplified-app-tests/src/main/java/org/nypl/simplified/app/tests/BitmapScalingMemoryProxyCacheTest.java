@@ -14,9 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.Assert;
 
 import org.nypl.simplified.app.BitmapCacheListenerType;
-import org.nypl.simplified.app.BitmapCacheType;
-import org.nypl.simplified.app.BitmapFileCache;
-import org.nypl.simplified.app.BitmapMemoryProxyCache;
+import org.nypl.simplified.app.BitmapCacheScalingType;
+import org.nypl.simplified.app.BitmapScalingDiskCache;
+import org.nypl.simplified.app.BitmapScalingMemoryProxyCache;
+import org.nypl.simplified.app.BitmapScalingOptions;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -28,13 +29,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.junreachable.UnreachableCodeException;
 
-@SuppressWarnings({ "boxing", "null", "unused", "synthetic-access" }) public final class BitmapMemoryProxyCacheTest extends
+@SuppressWarnings({ "boxing", "null", "unused", "synthetic-access" }) public final class BitmapScalingMemoryProxyCacheTest extends
   InstrumentationTestCase
 {
   private static final String TAG;
 
   static {
-    TAG = "BMPCT";
+    TAG = "BFCT";
   }
 
   private File prepareCacheDirectory()
@@ -43,14 +44,15 @@ import com.io7m.junreachable.UnreachableCodeException;
     final File in_file = ctx.getExternalCacheDir();
 
     if (in_file.isDirectory() == false) {
-      Log.d(BitmapMemoryProxyCacheTest.TAG, "creating cache directory");
+      Log
+        .d(BitmapScalingMemoryProxyCacheTest.TAG, "creating cache directory");
       final boolean created = in_file.mkdirs();
       Assert.assertTrue(created);
     }
 
-    Log.d(BitmapMemoryProxyCacheTest.TAG, "clearing cache directory");
+    Log.d(BitmapScalingMemoryProxyCacheTest.TAG, "clearing cache directory");
     for (final File name : in_file.listFiles()) {
-      Log.d(BitmapMemoryProxyCacheTest.TAG, "deleting " + name);
+      Log.d(BitmapScalingMemoryProxyCacheTest.TAG, "deleting " + name);
       name.delete();
     }
 
@@ -77,7 +79,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           throws IOException
         {
           final int cc = count.get();
-          Log.d(BitmapMemoryProxyCacheTest.TAG, "call count: " + cc);
+          Log.d(BitmapScalingMemoryProxyCacheTest.TAG, "call count: " + cc);
           if (cc == 0) {
             count.incrementAndGet();
             return new ByteArrayInputStream(new byte[8]);
@@ -87,49 +89,57 @@ import com.io7m.junreachable.UnreachableCodeException;
       };
 
     final ExecutorService in_e = Executors.newFixedThreadPool(1);
-    final BitmapCacheType bfc =
-      BitmapFileCache.newCache(in_e, in_transport, in_file, in_bytes);
-    final BitmapCacheType bc =
-      BitmapMemoryProxyCache.newCache(in_e, bfc, in_bytes);
+    final BitmapCacheScalingType bcf =
+      BitmapScalingDiskCache.newCache(in_e, in_transport, in_file, in_bytes);
+    final BitmapCacheScalingType bc =
+      BitmapScalingMemoryProxyCache.newCache(in_e, bcf, in_bytes);
+    final BitmapScalingOptions opts = BitmapScalingOptions.scaleNone();
 
     final AtomicBoolean error = new AtomicBoolean(false);
     final AtomicBoolean ok = new AtomicBoolean(false);
 
     final ListenableFuture<Bitmap> f0 =
-      bc.get(URI.create("http://example.com"), new BitmapCacheListenerType() {
-        @Override public void onFailure(
-          final Throwable e)
-        {
-          Log.d(BitmapMemoryProxyCacheTest.TAG, "Exception: " + e, e);
-          error.set(true);
-        }
+      bc.get(
+        URI.create("http://example.com"),
+        opts,
+        new BitmapCacheListenerType() {
+          @Override public void onFailure(
+            final Throwable e)
+          {
+            Log
+              .d(BitmapScalingMemoryProxyCacheTest.TAG, "Exception: " + e, e);
+            error.set(true);
+          }
 
-        @Override public void onSuccess(
-          final Bitmap b)
-        {
-          throw new UnreachableCodeException();
-        }
-      });
+          @Override public void onSuccess(
+            final Bitmap b)
+          {
+            throw new UnreachableCodeException();
+          }
+        });
 
     Thread.sleep(1000);
 
     final ListenableFuture<Bitmap> f1 =
-      bc.get(URI.create("http://example.com"), new BitmapCacheListenerType() {
-        @Override public void onFailure(
-          final Throwable e)
-        {
-          throw new UnreachableCodeException();
-        }
+      bc.get(
+        URI.create("http://example.com"),
+        opts,
+        new BitmapCacheListenerType() {
+          @Override public void onFailure(
+            final Throwable e)
+          {
+            throw new UnreachableCodeException();
+          }
 
-        @Override public void onSuccess(
-          final Bitmap b)
-        {
-          Log.d(BitmapMemoryProxyCacheTest.TAG, "Bitmap: " + b);
-          Assert.assertEquals(b.getWidth(), 120);
-          Assert.assertEquals(b.getHeight(), 120);
-          ok.set(true);
-        }
-      });
+          @Override public void onSuccess(
+            final Bitmap b)
+          {
+            Log.d(BitmapScalingMemoryProxyCacheTest.TAG, "Bitmap: " + b);
+            Assert.assertEquals(b.getWidth(), 120);
+            Assert.assertEquals(b.getHeight(), 120);
+            ok.set(true);
+          }
+        });
 
     Thread.sleep(1000);
 
@@ -140,15 +150,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     Assert.assertTrue(ok.get());
 
     Log.d(
-      BitmapMemoryProxyCacheTest.TAG,
+      BitmapScalingMemoryProxyCacheTest.TAG,
       String.format(
-        "cache size: (bfc) (%d/%d)",
-        bfc.getSizeCurrent(),
-        bfc.getSizeMaximum()));
-    Log.d(
-      BitmapMemoryProxyCacheTest.TAG,
-      String.format(
-        "cache size: (bc) (%d/%d)",
+        "cache size: (%d/%d)",
         bc.getSizeCurrent(),
         bc.getSizeMaximum()));
   }
@@ -176,29 +180,34 @@ import com.io7m.junreachable.UnreachableCodeException;
       };
 
     final ExecutorService in_e = Executors.newFixedThreadPool(1);
-    final BitmapCacheType bfc =
-      BitmapFileCache.newCache(in_e, in_transport, in_file, in_bytes);
-    final BitmapCacheType bc =
-      BitmapMemoryProxyCache.newCache(in_e, bfc, in_bytes);
+    final BitmapCacheScalingType bcf =
+      BitmapScalingDiskCache.newCache(in_e, in_transport, in_file, in_bytes);
+    final BitmapCacheScalingType bc =
+      BitmapScalingMemoryProxyCache.newCache(in_e, bcf, in_bytes);
+    final BitmapScalingOptions opts = BitmapScalingOptions.scaleNone();
 
     final AtomicBoolean ok = new AtomicBoolean(false);
     final ListenableFuture<Bitmap> f =
-      bc.get(URI.create("http://example.com"), new BitmapCacheListenerType() {
-        @Override public void onFailure(
-          final Throwable e)
-        {
-          Log.d(BitmapMemoryProxyCacheTest.TAG, "Exception: " + e, e);
-        }
+      bc.get(
+        URI.create("http://example.com"),
+        opts,
+        new BitmapCacheListenerType() {
+          @Override public void onFailure(
+            final Throwable e)
+          {
+            Log
+              .d(BitmapScalingMemoryProxyCacheTest.TAG, "Exception: " + e, e);
+          }
 
-        @Override public void onSuccess(
-          final Bitmap b)
-        {
-          Log.d(BitmapMemoryProxyCacheTest.TAG, "Bitmap: " + b);
-          Assert.assertEquals(b.getWidth(), 120);
-          Assert.assertEquals(b.getHeight(), 120);
-          ok.set(true);
-        }
-      });
+          @Override public void onSuccess(
+            final Bitmap b)
+          {
+            Log.d(BitmapScalingMemoryProxyCacheTest.TAG, "Bitmap: " + b);
+            Assert.assertEquals(b.getWidth(), 120);
+            Assert.assertEquals(b.getHeight(), 120);
+            ok.set(true);
+          }
+        });
 
     Thread.sleep(1000);
 
@@ -207,15 +216,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     Assert.assertTrue(ok.get());
 
     Log.d(
-      BitmapMemoryProxyCacheTest.TAG,
+      BitmapScalingMemoryProxyCacheTest.TAG,
       String.format(
-        "cache size: (bfc) (%d/%d)",
-        bfc.getSizeCurrent(),
-        bfc.getSizeMaximum()));
-    Log.d(
-      BitmapMemoryProxyCacheTest.TAG,
-      String.format(
-        "cache size: (bc) (%d/%d)",
+        "cache size: (%d/%d)",
         bc.getSizeCurrent(),
         bc.getSizeMaximum()));
   }

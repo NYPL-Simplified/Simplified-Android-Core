@@ -77,12 +77,12 @@ public final class Simplified extends Application implements
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable ExecutorService       executor;
-  private @Nullable URI                   feed_initial_uri;
-  private @Nullable OPDSFeedLoaderType    feed_loader;
-  private @Nullable OPDSFeedParserType    feed_parser;
-  private @Nullable OPDSFeedTransportType feed_transport;
-  private @Nullable BitmapCacheType       image_loader;
+  private @Nullable ExecutorService        executor;
+  private @Nullable URI                    feed_initial_uri;
+  private @Nullable OPDSFeedLoaderType     feed_loader;
+  private @Nullable OPDSFeedParserType     feed_parser;
+  private @Nullable OPDSFeedTransportType  feed_transport;
+  private @Nullable BitmapCacheScalingType image_loader;
 
   public URI getFeedInitialURI()
   {
@@ -96,7 +96,7 @@ public final class Simplified extends Application implements
     return NullCheck.notNull(this.feed_loader);
   }
 
-  public BitmapCacheType getImageLoader()
+  public BitmapCacheScalingType getImageLoader()
   {
     Simplified.checkInitialized();
     return NullCheck.notNull(this.image_loader);
@@ -152,10 +152,10 @@ public final class Simplified extends Application implements
         Simplified.megabytesToBytes(rr
           .getInteger(R.integer.image_memory_cache_megabytes));
 
-      final BitmapCacheType bcf =
-        BitmapFileCache.newCache(e, it, cd, disk_size);
-      final BitmapCacheType bc =
-        BitmapMemoryProxyCache.newCache(e, bcf, mem_size);
+      final BitmapCacheScalingType bcf =
+        BitmapScalingDiskCache.newCache(e, it, cd, disk_size);
+      final BitmapCacheScalingType bc =
+        BitmapScalingMemoryProxyCache.newCache(e, bcf, mem_size);
 
       /**
        * Catalog URIs.
