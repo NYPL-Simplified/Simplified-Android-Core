@@ -15,6 +15,7 @@
   <url>https://github.com/NYPL/Simplified-Android</url>
 
   <modules>
+    <module>simplified-app-tests</module>
     <module>simplified-app</module>
     <module>simplified-opds-core</module>
     <module>simplified-opds-tests-android</module>
