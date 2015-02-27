@@ -61,12 +61,6 @@ public abstract class CatalogActivity extends SimplifiedActivity
     super.onCreate(state);
   }
 
-  @Override protected void onResume()
-  {
-    super.onResume();
-    this.configureUpButton(this.getUpStack());
-  }
-
   @Override public boolean onOptionsItemSelected(
     final @Nullable MenuItem item)
   {
@@ -86,5 +80,11 @@ public abstract class CatalogActivity extends SimplifiedActivity
         return super.onOptionsItemSelected(item);
       }
     }
+  }
+
+  @Override protected void onResume()
+  {
+    super.onResume();
+    this.configureUpButton(this.getUpStack());
   }
 }

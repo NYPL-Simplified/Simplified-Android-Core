@@ -61,6 +61,19 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     CatalogActivity.setActivityArguments(b, up_stack);
   }
 
+  public static void startNewActivity(
+    final Activity from,
+    final ImmutableList<URI> up_stack,
+    final URI target)
+  {
+    final Bundle b = new Bundle();
+    CatalogFeedActivity.setActivityArguments(b, false, up_stack, target);
+    final Intent i = new Intent(from, CatalogFeedActivity.class);
+    i.putExtras(b);
+    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    from.startActivity(i);
+  }
+
   private @Nullable ListenableFuture<OPDSFeedType> loading;
   private @Nullable ViewGroup                      progress_layout;
 
@@ -161,19 +174,6 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     pl.setVisibility(View.GONE);
   }
 
-  public static void startNewActivity(
-    final Activity from,
-    final ImmutableList<URI> up_stack,
-    final URI target)
-  {
-    final Bundle b = new Bundle();
-    CatalogFeedActivity.setActivityArguments(b, false, up_stack, target);
-    final Intent i = new Intent(from, CatalogFeedActivity.class);
-    i.putExtras(b);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-    from.startActivity(i);
-  }
-
   private void onReceiveFeedError(
     final Throwable e,
     final URI feed_uri)
@@ -241,17 +241,6 @@ public final class CatalogFeedActivity extends CatalogActivity implements
         nf,
         this,
         new CatalogLaneViewListenerType() {
-          @Override public void onSelectFeed(
-            final CatalogLaneView v,
-            final OPDSNavigationFeedEntry feed)
-          {
-            Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
-            CatalogFeedActivity.startNewActivity(
-              CatalogFeedActivity.this,
-              new_up_stack,
-              feed.getTargetURI());
-          }
-
           @Override public void onSelectBook(
             final CatalogLaneView v,
             final OPDSAcquisitionFeedEntry e)
@@ -269,6 +258,17 @@ public final class CatalogFeedActivity extends CatalogActivity implements
                 new_up_stack,
                 e);
             }
+          }
+
+          @Override public void onSelectFeed(
+            final CatalogLaneView v,
+            final OPDSNavigationFeedEntry feed)
+          {
+            Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
+            CatalogFeedActivity.startNewActivity(
+              CatalogFeedActivity.this,
+              new_up_stack,
+              feed.getTargetURI());
           }
         });
 
@@ -299,6 +299,20 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     this.loading = this.getFeed(this.getURI(), loader);
   }
 
+  @Override public void onSelectBook(
+    final CatalogLaneView v,
+    final OPDSAcquisitionFeedEntry e)
+  {
+    Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + e);
+  }
+
+  @Override public void onSelectFeed(
+    final CatalogLaneView v,
+    final OPDSNavigationFeedEntry feed)
+  {
+    Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + feed);
+  }
+
   @Override protected void onStop()
   {
     super.onStop();
@@ -317,19 +331,5 @@ public final class CatalogFeedActivity extends CatalogActivity implements
         l.cancel(true);
       }
     }
-  }
-
-  @Override public void onSelectBook(
-    final CatalogLaneView v,
-    final OPDSAcquisitionFeedEntry e)
-  {
-    Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + e);
-  }
-
-  @Override public void onSelectFeed(
-    final CatalogLaneView v,
-    final OPDSNavigationFeedEntry feed)
-  {
-    Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + feed);
   }
 }

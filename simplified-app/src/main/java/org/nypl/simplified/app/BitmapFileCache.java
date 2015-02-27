@@ -26,12 +26,38 @@ import com.jakewharton.disklrucache.DiskLruCache;
 import com.jakewharton.disklrucache.DiskLruCache.Editor;
 import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
 
+/**
+ * <p>
+ * A file-cache based implementation of {@link BitmapCacheType}.
+ * </p>
+ * <p>
+ * The cache is a fixed-size disk-based LRU cache that saves downloaded
+ * images. Note that calling {@link #get(URI, BitmapCacheListenerType)}
+ * multiple times for the same URI will (assuming the image downloaded
+ * correctly) decode the image multiple times. In order to prevent repeated
+ * decoding for frequently accessed images, an additional separate in-memory
+ * cache should be used.
+ * </p>
+ */
+
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BitmapFileCache implements
   BitmapCacheType
 {
-  private final ListeningExecutorService                           exec;
-  private final DiskLruCache                                       cache;
-  private final PartialFunctionType<URI, InputStream, IOException> transport;
+  private static String hashURI(
+    final URI uri)
+  {
+    try {
+      final MessageDigest d = MessageDigest.getInstance("SHA1");
+      final byte[] r = d.digest(uri.toString().getBytes());
+      final StringBuilder sb = new StringBuilder();
+      for (final byte b : r) {
+        sb.append(String.format("%02x", b));
+      }
+      return NullCheck.notNull(sb.toString());
+    } catch (final NoSuchAlgorithmException e) {
+      throw new UnreachableCodeException(e);
+    }
+  }
 
   public static BitmapCacheType newCache(
     final ExecutorService in_e,
@@ -42,6 +68,10 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
   {
     return new BitmapFileCache(in_e, in_transport, in_file, in_bytes);
   }
+
+  private final DiskLruCache                                       cache;
+  private final ListeningExecutorService                           exec;
+  private final PartialFunctionType<URI, InputStream, IOException> transport;
 
   private BitmapFileCache(
     final ExecutorService e,
@@ -187,21 +217,5 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
     }, this.exec);
 
     return NullCheck.notNull(f);
-  }
-
-  private static String hashURI(
-    final URI uri)
-  {
-    try {
-      final MessageDigest d = MessageDigest.getInstance("SHA1");
-      final byte[] r = d.digest(uri.toString().getBytes());
-      final StringBuilder sb = new StringBuilder();
-      for (final byte b : r) {
-        sb.append(String.format("%02x", b));
-      }
-      return NullCheck.notNull(sb.toString());
-    } catch (final NoSuchAlgorithmException e) {
-      throw new UnreachableCodeException(e);
-    }
   }
 }

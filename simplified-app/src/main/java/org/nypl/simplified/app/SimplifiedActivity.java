@@ -37,6 +37,7 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("boxing") public abstract class SimplifiedActivity extends
   Activity implements DrawerListener, OnItemClickListener
 {
+  private static int          activity_count;
   private static final String NAVIGATION_DRAWER_OPEN_ID;
   private static final String TAG;
 
@@ -62,7 +63,6 @@ import com.io7m.jnull.Nullable;
   private @Nullable ListView                                drawer_list;
   private boolean                                           finishing;
   private int                                               selected;
-  private static int                                        activity_count;
 
   protected final FrameLayout getContentFrame()
   {
