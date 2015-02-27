@@ -304,6 +304,9 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     super.onStop();
     Log.d(CatalogFeedActivity.TAG, "onStop: " + this);
     this.stopDownloading();
+
+    final FrameLayout content_area = this.getContentFrame();
+    content_area.removeAllViews();
   }
 
   private void stopDownloading()

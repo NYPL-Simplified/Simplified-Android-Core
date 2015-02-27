@@ -106,6 +106,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.images =
       NullCheck.notNull((LinearLayout) this
         .findViewById(R.id.feed_images_linear));
+
+    this.scroller.setHorizontalScrollBarEnabled(false);
   }
 
   @Override public void cancel()
