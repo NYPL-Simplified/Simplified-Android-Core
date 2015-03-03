@@ -1,11 +1,13 @@
 package org.nypl.simplified.app;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,17 +26,32 @@ public final class CatalogNavigationFeed implements
   private final ArrayAdapter<OPDSNavigationFeedEntry> adapter;
   private final OPDSNavigationFeed                    feed;
   private final CatalogLaneViewListenerType           listener;
+  private final List<CatalogLaneView>                 lanes;
 
   public CatalogNavigationFeed(
+    final Context in_context,
     final ArrayAdapter<OPDSNavigationFeedEntry> in_adapter,
     final OPDSNavigationFeed in_feed,
     final Activity in_activity,
     final CatalogLaneViewListenerType in_listener)
   {
+    NullCheck.notNull(in_context);
+
     this.adapter = NullCheck.notNull(in_adapter);
     this.feed = NullCheck.notNull(in_feed);
     this.activity = NullCheck.notNull(in_activity);
     this.listener = NullCheck.notNull(in_listener);
+
+    final List<OPDSNavigationFeedEntry> entries = in_feed.getFeedEntries();
+    final int size = entries.size();
+    this.lanes = new ArrayList<CatalogLaneView>(size);
+
+    for (int index = 0; index < size; ++index) {
+      final OPDSNavigationFeedEntry e = NullCheck.notNull(entries.get(index));
+      final CatalogLaneView cv =
+        new CatalogLaneView(in_context, e, in_listener);
+      this.lanes.add(cv);
+    }
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -72,13 +89,8 @@ public final class CatalogNavigationFeed implements
     final @Nullable View convertView,
     final @Nullable ViewGroup parent)
   {
-    final OPDSNavigationFeed f = NullCheck.notNull(this.feed);
-    final List<OPDSNavigationFeedEntry> es =
-      NullCheck.notNull(f.getFeedEntries());
-    final OPDSNavigationFeedEntry e = NullCheck.notNull(es.get(position));
-
-    final CatalogLaneView v = new CatalogLaneView(this.activity);
-    v.setLaneViewFeedAndListener(e, this.listener);
+    final CatalogLaneView v = NullCheck.notNull(this.lanes.get(position));
+    v.laneViewRequestDisplay();
     return v;
   }
 
@@ -107,7 +119,7 @@ public final class CatalogNavigationFeed implements
     final @Nullable View view)
   {
     final CatalogLaneView lv = NullCheck.notNull((CatalogLaneView) view);
-    lv.cancel();
+    lv.laneViewRequestStopDisplaying();
   }
 
   @Override public void registerDataSetObserver(

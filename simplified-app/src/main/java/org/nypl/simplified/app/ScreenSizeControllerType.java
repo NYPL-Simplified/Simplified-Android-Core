@@ -1,10 +1,15 @@
 package org.nypl.simplified.app;
 
 /**
- * An unambiguous indicator of whether or not a device has a large screen.
+ * Information about the device screen.
  */
 
 public interface ScreenSizeControllerType
 {
-  boolean hasLargeScreen();
+  double screenDPToPixels(
+    final int dp);
+
+  double screenGetDPI();
+
+  boolean screenIsLarge();
 }

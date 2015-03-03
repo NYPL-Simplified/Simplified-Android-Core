@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import android.graphics.Bitmap;
@@ -16,20 +15,20 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.jtensors.VectorM2I;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.jakewharton.disklrucache.DiskLruCache.Editor;
 import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
 
-public final class BitmapScalingDiskCache implements BitmapCacheScalingType
+public final class BitmapCacheScalingDisk implements
+  BitmapCacheScalingDiskType
 {
   private static final class CachedImage
   {
@@ -39,8 +38,9 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
   }
 
   private static Bitmap decode(
+    final MemoryControllerType mem,
     final URI uri,
-    final BitmapScalingOptions opts,
+    final BitmapDisplaySizeType opts,
     final String hash,
     final CachedImage ci)
     throws IOException
@@ -48,32 +48,67 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
     final Options o = new Options();
 
     o.inPreferredConfig = Bitmap.Config.RGB_565;
-    switch (opts.getType()) {
-      case TYPE_SCALE_PRESERVE:
-      {
-        break;
-      }
-      case TYPE_SCALE_SIZE_HINT:
-      {
-        o.inSampleSize =
-          BitmapScalingDiskCache.getSampleSize(
-            ci,
-            opts.getWidth(),
-            opts.getHeight());
-        break;
-      }
-    }
+    o.inSampleSize = BitmapCacheScalingDisk.getSampleSize(ci, opts);
 
     final InputStream is = NullCheck.notNull(ci.stream);
     try {
-      final Bitmap b = BitmapFactory.decodeStream(is, null, o);
-      if (b == null) {
-        throw BitmapScalingDiskCache.decodeFailed(uri, hash);
+      final Bitmap b_large = BitmapFactory.decodeStream(is, null, o);
+      if (b_large == null) {
+        throw BitmapCacheScalingDisk.decodeFailed(uri, hash);
       }
-      return b;
+
+      final VectorM2I new_size = new VectorM2I();
+      BitmapCacheScalingDisk.getScaledSize(
+        mem,
+        new_size,
+        b_large.getWidth(),
+        b_large.getHeight(),
+        opts);
+
+      final Bitmap b_small =
+        NullCheck.notNull(Bitmap.createScaledBitmap(
+          b_large,
+          new_size.getXI(),
+          new_size.getYI(),
+          true));
+
+      return b_small;
     } finally {
       is.close();
     }
+  }
+
+  private static void getScaledSize(
+    final MemoryControllerType mem,
+    final VectorM2I new_size,
+    final int current_width,
+    final int current_height,
+    final BitmapDisplaySizeType size)
+  {
+    size
+      .matchSize(new BitmapDisplaySizeMatcherType<Unit, UnreachableCodeException>() {
+        @Override public Unit matchHeightAspectPreserving(
+          final BitmapDisplayHeightPreserveAspect dh)
+        {
+          final double req_height = dh.getHeight();
+          final double cur_height = current_height;
+          final double ratio = req_height / cur_height;
+          final double res_width = current_width * ratio;
+
+          final int iw;
+          final int ih;
+          if (mem.memoryIsSmall()) {
+            iw = (int) res_width;
+            ih = (int) req_height;
+          } else {
+            iw = (int) res_width;
+            ih = (int) req_height;
+          }
+
+          new_size.set2I(iw, ih);
+          return Unit.unit();
+        }
+      });
   }
 
   private static IOException decodeFailed(
@@ -102,6 +137,10 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
     final String hash)
     throws IOException
   {
+    Log.d(
+      BitmapCacheScalingDisk.TAG,
+      String.format("fetch %s (%s)", uri, hash));
+
     final Editor e = c.edit(hash);
     final OutputStream os = e.newOutputStream(0);
     try {
@@ -132,10 +171,34 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
 
   private static int getSampleSize(
     final CachedImage ci,
-    final int want_width,
-    final int want_height)
+    final BitmapDisplaySizeType opts)
   {
-    return 4;
+    return opts.matchSize(
+      new BitmapDisplaySizeMatcherType<Integer, UnreachableCodeException>() {
+        @Override public Integer matchHeightAspectPreserving(
+          final BitmapDisplayHeightPreserveAspect dh)
+        {
+          /**
+           * Note that the image may be smaller than the requested display
+           * height.
+           */
+
+          final int req_height = dh.getHeight();
+          final int height = ci.height;
+          int ss = 1;
+
+          if (height > req_height) {
+            for (;;) {
+              if ((height / (ss * 2)) <= req_height) {
+                break;
+              }
+              ss *= 2;
+            }
+          }
+
+          return Integer.valueOf(ss);
+        }
+      }).intValue();
   }
 
   /**
@@ -158,17 +221,19 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
     }
   }
 
-  public static BitmapCacheScalingType newCache(
+  public static BitmapCacheScalingDiskType newCache(
     final ExecutorService e,
     final PartialFunctionType<URI, InputStream, IOException> in_transport,
+    final MemoryControllerType in_mem,
     final File in_file,
     final long size)
     throws IOException
   {
     final DiskLruCache in_cache = DiskLruCache.open(in_file, 1, 1, size);
-    return new BitmapScalingDiskCache(e, in_cache, in_transport);
+    return new BitmapCacheScalingDisk(e, in_cache, in_transport, in_mem);
   }
 
+  private final MemoryControllerType                               memory;
   private final DiskLruCache                                       cache;
   private final ListeningExecutorService                           exec;
   private final PartialFunctionType<URI, InputStream, IOException> transport;
@@ -178,51 +243,18 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
     TAG = "BSDC";
   }
 
-  private BitmapScalingDiskCache(
+  private BitmapCacheScalingDisk(
     final ExecutorService e,
     final DiskLruCache in_cache,
-    final PartialFunctionType<URI, InputStream, IOException> in_transport)
+    final PartialFunctionType<URI, InputStream, IOException> in_transport,
+    final MemoryControllerType in_mem)
   {
     this.exec =
       NullCheck
         .notNull(MoreExecutors.listeningDecorator(NullCheck.notNull(e)));
     this.cache = NullCheck.notNull(in_cache);
     this.transport = NullCheck.notNull(in_transport);
-  }
-
-  @Override public ListenableFuture<Bitmap> get(
-    final URI uri,
-    final BitmapScalingOptions opts,
-    final BitmapCacheListenerType p)
-  {
-    NullCheck.notNull(uri);
-    NullCheck.notNull(opts);
-    NullCheck.notNull(p);
-
-    final ListenableFuture<Bitmap> f =
-      this.exec.submit(new Callable<Bitmap>() {
-        @Override public Bitmap call()
-          throws Exception
-        {
-          return BitmapScalingDiskCache.this.getSynchronous(uri, opts);
-        }
-      });
-
-    Futures.addCallback(f, new FutureCallback<Bitmap>() {
-      @Override public void onFailure(
-        final @Nullable Throwable t)
-      {
-        p.onFailure(NullCheck.notNull(t));
-      }
-
-      @Override public void onSuccess(
-        final @Nullable Bitmap result)
-      {
-        p.onSuccess(NullCheck.notNull(result));
-      }
-    }, this.exec);
-
-    return NullCheck.notNull(f);
+    this.memory = NullCheck.notNull(in_mem);
   }
 
   @Override public long getSizeCurrent()
@@ -237,16 +269,16 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
 
   @Override public Bitmap getSynchronous(
     final URI uri,
-    final BitmapScalingOptions opts)
+    final BitmapDisplaySizeType size)
     throws IOException
   {
-    final String hash = BitmapScalingDiskCache.hashURI(uri);
+    final String hash = BitmapCacheScalingDisk.hashURI(uri);
     Log
-      .d(BitmapScalingDiskCache.TAG, String.format("get %s (%s)", uri, hash));
+      .d(BitmapCacheScalingDisk.TAG, String.format("get %s (%s)", uri, hash));
 
     final CachedImage ci0 = this.isCached(hash);
     if (ci0 == null) {
-      BitmapScalingDiskCache.fetchAndCacheFile(
+      BitmapCacheScalingDisk.fetchAndCacheFile(
         this.cache,
         this.transport,
         uri,
@@ -254,13 +286,13 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
 
       final CachedImage ci1 = this.isCached(hash);
       if (ci1 == null) {
-        throw BitmapScalingDiskCache.decodeFailed(uri, hash);
+        throw BitmapCacheScalingDisk.decodeFailed(uri, hash);
       }
 
-      return BitmapScalingDiskCache.decode(uri, opts, hash, ci1);
+      return BitmapCacheScalingDisk.decode(this.memory, uri, size, hash, ci1);
     }
 
-    return BitmapScalingDiskCache.decode(uri, opts, hash, ci0);
+    return BitmapCacheScalingDisk.decode(this.memory, uri, size, hash, ci0);
   }
 
   private @Nullable CachedImage isCached(
@@ -272,19 +304,22 @@ public final class BitmapScalingDiskCache implements BitmapCacheScalingType
       return null;
     }
 
+    final int buffer_size = (int) (Math.pow(10, 3) * 64);
+
     /**
      * It's necessary to parse the headers of the image to determine the image
      * bounds, and then seek the stream back to the beginning to parse the
      * actual image.
      *
      * For PNG images, the IHDR chunk holds the image bounds and is required
-     * to appear at the start of the file, so will be within the 8192 byte
-     * region. Unfortunately, this is not guaranteed to be true of JPEG files.
+     * to appear at the start of the file, so will be within the
+     * <tt>buffer_size</tt> byte region. Unfortunately, this is not guaranteed
+     * to be true of JPEG files.
      */
 
     final BufferedInputStream is =
-      new BufferedInputStream(s.getInputStream(0), 8192);
-    is.mark(8192);
+      new BufferedInputStream(s.getInputStream(0), buffer_size);
+    is.mark(buffer_size);
 
     final Options os = new Options();
     os.inJustDecodeBounds = true;

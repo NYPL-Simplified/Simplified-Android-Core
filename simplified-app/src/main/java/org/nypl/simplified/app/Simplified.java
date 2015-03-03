@@ -15,12 +15,17 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 
+import android.app.ActivityManager;
 import android.app.Application;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -31,8 +36,15 @@ import com.io7m.junreachable.UnreachableCodeException;
  */
 
 public final class Simplified extends Application implements
-  ScreenSizeControllerType
+  ScreenSizeControllerType,
+  MemoryControllerType
 {
+  private static final String                  TAG;
+
+  static {
+    TAG = "simplified";
+  }
+
   private static volatile @Nullable Simplified INSTANCE;
 
   private static Simplified checkInitialized()
@@ -77,12 +89,22 @@ public final class Simplified extends Application implements
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable ExecutorService        executor;
-  private @Nullable URI                    feed_initial_uri;
-  private @Nullable OPDSFeedLoaderType     feed_loader;
-  private @Nullable OPDSFeedParserType     feed_parser;
-  private @Nullable OPDSFeedTransportType  feed_transport;
-  private @Nullable BitmapCacheScalingType image_loader;
+  private @Nullable CatalogAcquisitionImageCacheType catalog_acquisition_image_loader;
+  private @Nullable ListeningExecutorService         exec_decor;
+  private @Nullable ExecutorService                  executor;
+  private @Nullable URI                              feed_initial_uri;
+  private @Nullable OPDSFeedLoaderType               feed_loader;
+  private @Nullable OPDSFeedParserType               feed_parser;
+  private @Nullable OPDSFeedTransportType            feed_transport;
+  private @Nullable BitmapCacheScalingType           image_loader;
+  private int                                        memory;
+  private boolean                                    memory_small;
+
+  public CatalogAcquisitionImageCacheType getCatalogAcquisitionImageLoader()
+  {
+    Simplified.checkInitialized();
+    return NullCheck.notNull(this.catalog_acquisition_image_loader);
+  }
 
   public URI getFeedInitialURI()
   {
@@ -102,19 +124,22 @@ public final class Simplified extends Application implements
     return NullCheck.notNull(this.image_loader);
   }
 
-  @Override public boolean hasLargeScreen()
+  public ListeningExecutorService getListeningExecutorService()
   {
     Simplified.checkInitialized();
+    return NullCheck.notNull(this.exec_decor);
+  }
 
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final Configuration c = NullCheck.notNull(rr.getConfiguration());
-    final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-    boolean large = false;
-    large |=
-      (s & Configuration.SCREENLAYOUT_SIZE_LARGE) == Configuration.SCREENLAYOUT_SIZE_LARGE;
-    large |=
-      (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
-    return large;
+  @Override public int memoryGetSize()
+  {
+    Simplified.checkInitialized();
+    return this.memory;
+  }
+
+  @Override public boolean memoryIsSmall()
+  {
+    Simplified.checkInitialized();
+    return this.memory_small;
   }
 
   @Override public void onCreate()
@@ -122,10 +147,23 @@ public final class Simplified extends Application implements
     try {
       super.onCreate();
 
-      Log.d("simplified", "initializing application context");
+      Log.d(Simplified.TAG, "initializing application context");
 
       final ExecutorService e = Simplified.namedThreadPool();
       final Resources rr = NullCheck.notNull(this.getResources());
+
+      /**
+       * Determine memory conditions.
+       */
+
+      final ActivityManager am =
+        (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+      this.memory = am.getMemoryClass();
+      this.memory_small = this.memory <= 32;
+      Log.d(Simplified.TAG, String.format(
+        "available memory: %dmb (small: %s)",
+        this.memory,
+        this.memory_small));
 
       /**
        * Asynchronous feed loader.
@@ -152,10 +190,21 @@ public final class Simplified extends Application implements
         Simplified.megabytesToBytes(rr
           .getInteger(R.integer.image_memory_cache_megabytes));
 
-      final BitmapCacheScalingType bcf =
-        BitmapScalingDiskCache.newCache(e, it, cd, disk_size);
-      final BitmapCacheScalingType bc =
-        BitmapScalingMemoryProxyCache.newCache(e, bcf, mem_size);
+      final BitmapCacheScalingDiskType bcf =
+        BitmapCacheScalingDisk.newCache(e, it, this, cd, disk_size);
+
+      BitmapCacheScalingType bc;
+      if (this.memory_small) {
+        bc = bcf;
+      } else {
+        Log.d(
+          Simplified.TAG,
+          "non-small heap detected, using extra in-memory bitmap cache");
+        bc = BitmapCacheScalingMemoryProxy.newCache(bcf, mem_size);
+      }
+
+      final CatalogAcquisitionImageCacheType cai =
+        CatalogAcquisitionImageCache.newCache(bc);
 
       /**
        * Catalog URIs.
@@ -165,10 +214,13 @@ public final class Simplified extends Application implements
         URI.create(rr.getString(R.string.catalog_start_uri));
 
       this.executor = e;
+      this.exec_decor =
+        NullCheck.notNull(MoreExecutors.listeningDecorator(e));
       this.feed_parser = p;
       this.feed_transport = t;
       this.feed_loader = fl;
-      this.image_loader = bc;
+      this.image_loader = bcf;
+      this.catalog_acquisition_image_loader = cai;
 
       Simplified.INSTANCE = this;
 
@@ -177,5 +229,35 @@ public final class Simplified extends Application implements
     } catch (final IOException e) {
       throw new UnreachableCodeException(e);
     }
+  }
+
+  @Override public double screenDPToPixels(
+    final int dp)
+  {
+    Simplified.checkInitialized();
+    final float scale = this.getResources().getDisplayMetrics().density;
+    return ((dp * scale) + 0.5);
+  }
+
+  @Override public double screenGetDPI()
+  {
+    Simplified.checkInitialized();
+    final DisplayMetrics metrics = this.getResources().getDisplayMetrics();
+    return metrics.densityDpi;
+  }
+
+  @Override public boolean screenIsLarge()
+  {
+    Simplified.checkInitialized();
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final Configuration c = NullCheck.notNull(rr.getConfiguration());
+    final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+    boolean large = false;
+    large |=
+      (s & Configuration.SCREENLAYOUT_SIZE_LARGE) == Configuration.SCREENLAYOUT_SIZE_LARGE;
+    large |=
+      (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    return large;
   }
 }

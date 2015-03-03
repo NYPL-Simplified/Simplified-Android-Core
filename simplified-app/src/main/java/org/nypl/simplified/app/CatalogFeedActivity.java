@@ -235,44 +235,49 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     final ImmutableList<URI> new_up_stack =
       NullCheck.notNull(new_up_stack_b.build());
 
+    final CatalogLaneViewListenerType lane_view_listener =
+      new CatalogLaneViewListenerType() {
+        @Override public void onSelectBook(
+          final CatalogLaneView v,
+          final OPDSAcquisitionFeedEntry e)
+        {
+          Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
+
+          if (app.screenIsLarge()) {
+            final CatalogBookDialog df = new CatalogBookDialog();
+            final FragmentManager fm =
+              CatalogFeedActivity.this.getFragmentManager();
+            df.show(fm, "book-detail");
+          } else {
+            CatalogBookDetailActivity.startNewActivity(
+              CatalogFeedActivity.this,
+              new_up_stack,
+              e);
+          }
+        }
+
+        @Override public void onSelectFeed(
+          final CatalogLaneView v,
+          final OPDSNavigationFeedEntry feed)
+        {
+          Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
+          CatalogFeedActivity.startNewActivity(
+            CatalogFeedActivity.this,
+            new_up_stack,
+            feed.getTargetURI());
+        }
+      };
+
     final CatalogNavigationFeed f =
       new CatalogNavigationFeed(
+        this,
         in_adapter,
         nf,
         this,
-        new CatalogLaneViewListenerType() {
-          @Override public void onSelectBook(
-            final CatalogLaneView v,
-            final OPDSAcquisitionFeedEntry e)
-          {
-            Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
-
-            if (app.hasLargeScreen()) {
-              final CatalogBookDialog df = new CatalogBookDialog();
-              final FragmentManager fm =
-                CatalogFeedActivity.this.getFragmentManager();
-              df.show(fm, "book-detail");
-            } else {
-              CatalogBookDetailActivity.startNewActivity(
-                CatalogFeedActivity.this,
-                new_up_stack,
-                e);
-            }
-          }
-
-          @Override public void onSelectFeed(
-            final CatalogLaneView v,
-            final OPDSNavigationFeedEntry feed)
-          {
-            Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
-            CatalogFeedActivity.startNewActivity(
-              CatalogFeedActivity.this,
-              new_up_stack,
-              feed.getTargetURI());
-          }
-        });
+        lane_view_listener);
 
     list_view.setAdapter(f);
+    list_view.setRecyclerListener(f);
 
     content_area.addView(layout);
     content_area.requestLayout();
