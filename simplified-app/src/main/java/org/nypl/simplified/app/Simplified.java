@@ -203,8 +203,10 @@ public final class Simplified extends Application implements
         bc = BitmapCacheScalingMemoryProxy.newCache(bcf, mem_size);
       }
 
+      final CatalogAcquisitionImageGenerator cgen =
+        new CatalogAcquisitionImageGenerator();
       final CatalogAcquisitionImageCacheType cai =
-        CatalogAcquisitionImageCache.newCache(bc);
+        CatalogAcquisitionImageCache.newCache(cgen, bc);
 
       /**
        * Catalog URIs.

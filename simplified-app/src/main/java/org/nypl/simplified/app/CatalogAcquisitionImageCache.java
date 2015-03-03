@@ -6,12 +6,12 @@ import java.net.URI;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.util.Log;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogAcquisitionImageCache implements
   CatalogAcquisitionImageCacheType
@@ -22,38 +22,44 @@ public final class CatalogAcquisitionImageCache implements
     TAG = "CAIC";
   }
 
-  public static CatalogAcquisitionImageCacheType newCache(
-    final BitmapCacheScalingType in_cache)
+  private static int getHeight(
+    final BitmapDisplaySizeType size)
   {
-    return new CatalogAcquisitionImageCache(in_cache);
+    return size.matchSize(
+      new BitmapDisplaySizeMatcherType<Integer, UnreachableCodeException>() {
+        @Override public Integer matchHeightAspectPreserving(
+          final BitmapDisplayHeightPreserveAspect s)
+        {
+          return Integer.valueOf(s.getHeight());
+        }
+      }).intValue();
   }
 
-  private final BitmapCacheScalingType cache;
-
-  private CatalogAcquisitionImageCache(
+  public static CatalogAcquisitionImageCacheType newCache(
+    final CatalogAcquisitionImageGeneratorType in_gen,
     final BitmapCacheScalingType in_cache)
   {
+    return new CatalogAcquisitionImageCache(in_gen, in_cache);
+  }
+
+  private final BitmapCacheScalingType               cache;
+  private final CatalogAcquisitionImageGeneratorType gen;
+
+  private CatalogAcquisitionImageCache(
+    final CatalogAcquisitionImageGeneratorType in_gen,
+    final BitmapCacheScalingType in_cache)
+  {
+    this.gen = NullCheck.notNull(in_gen);
     this.cache = NullCheck.notNull(in_cache);
   }
 
   private Bitmap generate(
-    final OPDSAcquisitionFeedEntry e)
-  {
-    Log.d(
-      CatalogAcquisitionImageCache.TAG,
-      String.format("generating %s", e.getID()));
-
-    final Bitmap b = Bitmap.createBitmap(64, 64, Config.RGB_565);
-    return b;
-  }
-
-  @Override public Bitmap getSynchronous(
     final OPDSAcquisitionFeedEntry e,
     final BitmapDisplaySizeType size)
   {
-    NullCheck.notNull(e);
-    NullCheck.notNull(size);
-    return this.getActual(e, size);
+    return this.gen.generateImage(
+      e,
+      CatalogAcquisitionImageCache.getHeight(size));
   }
 
   private Bitmap getActual(
@@ -62,7 +68,7 @@ public final class CatalogAcquisitionImageCache implements
   {
     final OptionType<URI> thumb_opt = e.getThumbnail();
     if (thumb_opt.isNone()) {
-      return this.generate(e);
+      return this.generate(e, size);
     }
 
     final Some<URI> some = (Some<URI>) thumb_opt;
@@ -74,8 +80,17 @@ public final class CatalogAcquisitionImageCache implements
         CatalogAcquisitionImageCache.TAG,
         String.format("failed to load image (%s), generating instead", uri),
         x);
-      return this.generate(e);
+      return this.generate(e, size);
     }
+  }
+
+  @Override public Bitmap getSynchronous(
+    final OPDSAcquisitionFeedEntry e,
+    final BitmapDisplaySizeType size)
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(size);
+    return this.getActual(e, size);
   }
 
   private Bitmap load(
