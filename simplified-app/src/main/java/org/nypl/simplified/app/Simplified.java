@@ -21,9 +21,11 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.PartialFunctionType;
@@ -142,6 +144,28 @@ public final class Simplified extends Application implements
     return this.memory_small;
   }
 
+  private static File getDiskCacheDir(
+    final Context context)
+  {
+    /**
+     * If external storage is mounted and is on a device that doesn't allow
+     * the storage to be removed, use the external storage for caching.
+     */
+
+    if (Environment.MEDIA_MOUNTED.equals(Environment
+      .getExternalStorageState())) {
+      if (Environment.isExternalStorageRemovable() == false) {
+        return context.getExternalCacheDir();
+      }
+    }
+
+    /**
+     * Otherwise, use internal storage.
+     */
+
+    return context.getCacheDir();
+  }
+
   @Override public void onCreate()
   {
     try {
@@ -180,8 +204,12 @@ public final class Simplified extends Application implements
 
       final PartialFunctionType<URI, InputStream, IOException> it =
         BitmapTransport.get();
-      final File cd = new File(this.getExternalCacheDir(), "thumbnails");
+      final File cd =
+        new File(Simplified.getDiskCacheDir(this), "thumbnails");
+      Log.d(Simplified.TAG, "thumbnail cache: " + cd);
       cd.mkdirs();
+      Preconditions.checkArgument(cd.exists());
+      Preconditions.checkArgument(cd.isDirectory());
 
       final int disk_size =
         Simplified.megabytesToBytes(rr
