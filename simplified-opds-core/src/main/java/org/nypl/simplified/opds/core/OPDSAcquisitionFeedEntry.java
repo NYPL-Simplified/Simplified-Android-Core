@@ -25,8 +25,11 @@ import com.io7m.jnull.Nullable;
   {
     private final List<OPDSAcquisition> acquisitions;
     private final List<String>          authors;
+    private final List<String>          categories;
     private OptionType<URI>             cover;
     private final String                id;
+    private final String                published;
+    private OptionType<String>          publisher;
     private String                      subtitle;
     private String                      summary;
     private OptionType<URI>             thumbnail;
@@ -36,7 +39,8 @@ import com.io7m.jnull.Nullable;
     private Builder(
       final String in_id,
       final String in_title,
-      final Calendar in_updated)
+      final Calendar in_updated,
+      final String in_published)
     {
       this.id = NullCheck.notNull(in_id);
       this.title = NullCheck.notNull(in_title);
@@ -47,6 +51,9 @@ import com.io7m.jnull.Nullable;
       this.acquisitions = new ArrayList<OPDSAcquisition>();
       this.subtitle = "";
       this.authors = new ArrayList<String>();
+      this.published = NullCheck.notNull(in_published);
+      this.publisher = Option.none();
+      this.categories = new ArrayList<String>();
     }
 
     @Override public void addAcquisition(
@@ -61,6 +68,12 @@ import com.io7m.jnull.Nullable;
       this.authors.add(NullCheck.notNull(name));
     }
 
+    @Override public void addCategory(
+      final String c)
+    {
+      this.categories.add(NullCheck.notNull(c));
+    }
+
     @Override public OPDSAcquisitionFeedEntry build()
     {
       return new OPDSAcquisitionFeedEntry(
@@ -72,13 +85,22 @@ import com.io7m.jnull.Nullable;
         this.thumbnail,
         this.updated,
         this.subtitle,
-        this.summary);
+        this.summary,
+        this.published,
+        this.publisher,
+        this.categories);
     }
 
     @Override public void setCoverOption(
       final OptionType<URI> uri)
     {
       this.cover = NullCheck.notNull(uri);
+    }
+
+    @Override public void setPublisherOption(
+      final OptionType<String> pub)
+    {
+      this.publisher = NullCheck.notNull(pub);
     }
 
     @Override public void setSubtitleOption(
@@ -113,15 +135,19 @@ import com.io7m.jnull.Nullable;
   public static OPDSAcquisitionFeedEntryBuilderType newBuilder(
     final String in_id,
     final String in_title,
-    final Calendar in_updated)
+    final Calendar in_updated,
+    final String in_published)
   {
-    return new Builder(in_id, in_title, in_updated);
+    return new Builder(in_id, in_title, in_updated, in_published);
   }
 
   private final List<OPDSAcquisition> acquisitions;
   private final List<String>          authors;
+  private final List<String>          categories;
   private final OptionType<URI>       cover;
   private final String                id;
+  private final String                published;
+  private final OptionType<String>    publisher;
   private final String                subtitle;
   private final String                summary;
   private final OptionType<URI>       thumbnail;
@@ -137,7 +163,10 @@ import com.io7m.jnull.Nullable;
     final OptionType<URI> in_thumbnail,
     final Calendar in_updated,
     final String in_subtitle,
-    final String in_summary)
+    final String in_summary,
+    final String in_published,
+    final OptionType<String> in_publisher,
+    final List<String> in_categories)
   {
     this.authors =
       NullCheck.notNull(Collections.unmodifiableList(in_authors));
@@ -150,6 +179,9 @@ import com.io7m.jnull.Nullable;
     this.updated = NullCheck.notNull(in_updated);
     this.subtitle = NullCheck.notNull(in_subtitle);
     this.summary = NullCheck.notNull(in_summary);
+    this.published = NullCheck.notNull(in_published);
+    this.publisher = NullCheck.notNull(in_publisher);
+    this.categories = NullCheck.notNull(in_categories);
   }
 
   @Override public boolean equals(
@@ -167,13 +199,16 @@ import com.io7m.jnull.Nullable;
     final OPDSAcquisitionFeedEntry other = (OPDSAcquisitionFeedEntry) obj;
     return this.acquisitions.equals(other.acquisitions)
       && this.authors.equals(other.authors)
+      && this.categories.equals(other.categories)
       && this.cover.equals(other.cover)
       && this.id.equals(other.id)
       && this.subtitle.equals(other.subtitle)
       && this.summary.equals(other.summary)
       && this.thumbnail.equals(other.thumbnail)
       && this.title.equals(other.title)
-      && this.updated.equals(other.updated);
+      && this.updated.equals(other.updated)
+      && this.published.equals(other.published)
+      && this.publisher.equals(other.publisher);
   }
 
   public List<OPDSAcquisition> getAcquisitions()
@@ -186,6 +221,11 @@ import com.io7m.jnull.Nullable;
     return this.authors;
   }
 
+  public List<String> getCategories()
+  {
+    return this.categories;
+  }
+
   public OptionType<URI> getCover()
   {
     return this.cover;
@@ -194,6 +234,16 @@ import com.io7m.jnull.Nullable;
   public String getID()
   {
     return this.id;
+  }
+
+  public String getPublished()
+  {
+    return this.published;
+  }
+
+  public OptionType<String> getPublisher()
+  {
+    return this.publisher;
   }
 
   public String getSubtitle()
@@ -228,12 +278,15 @@ import com.io7m.jnull.Nullable;
     result = (prime * result) + this.acquisitions.hashCode();
     result = (prime * result) + this.authors.hashCode();
     result = (prime * result) + this.cover.hashCode();
+    result = (prime * result) + this.categories.hashCode();
     result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.subtitle.hashCode();
     result = (prime * result) + this.summary.hashCode();
     result = (prime * result) + this.thumbnail.hashCode();
     result = (prime * result) + this.title.hashCode();
     result = (prime * result) + this.updated.hashCode();
+    result = (prime * result) + this.published.hashCode();
+    result = (prime * result) + this.publisher.hashCode();
     return result;
   }
 }

@@ -38,12 +38,15 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 {
   private static final URI ACQUISITION_URI_PREFIX;
   private static final URI ATOM_URI;
+  private static final URI DUBLIN_CORE_TERMS_URI;
   private static final URI FEATURED_URI_PREFIX;
   private static final URI IMAGE_URI;
   private static final URI THUMBNAIL_URI;
 
   static {
     ATOM_URI = NullCheck.notNull(URI.create("http://www.w3.org/2005/Atom"));
+    DUBLIN_CORE_TERMS_URI =
+      NullCheck.notNull(URI.create("http://purl.org/dc/terms/"));
     ACQUISITION_URI_PREFIX =
       NullCheck.notNull(URI.create("http://opds-spec.org/acquisition"));
     FEATURED_URI_PREFIX =
@@ -239,6 +242,25 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
   }
 
+  private static String findPublished(
+    final Element e)
+    throws OPDSFeedParseException
+  {
+    return OPDSXML.getFirstChildElementTextWithName(
+      e,
+      OPDSFeedParser.ATOM_URI,
+      "published");
+  }
+
+  private static OptionType<String> findPublisher(
+    final Element e)
+  {
+    return OPDSXML.getFirstChildElementTextWithNameOptional(
+      e,
+      OPDSFeedParser.DUBLIN_CORE_TERMS_URI,
+      "publisher");
+  }
+
   private static OptionType<String> findSubtitle(
     final Element e)
   {
@@ -330,9 +352,10 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final String id = OPDSFeedParser.findID(e);
     final String title = OPDSFeedParser.findTitle(e);
     final Calendar updated = OPDSFeedParser.findUpdated(e);
+    final String published = OPDSFeedParser.findPublished(e);
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
-      OPDSAcquisitionFeedEntry.newBuilder(id, title, updated);
+      OPDSAcquisitionFeedEntry.newBuilder(id, title, updated, published);
 
     final List<Element> e_links =
       OPDSXML.getChildElementsWithNameNonEmpty(
@@ -344,6 +367,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     OPDSFeedParser.findAcquisitionRelations(e_links, eb);
     eb.setThumbnailOption(OPDSFeedParser.findAcquisitionThumbnail(e_links));
     eb.setCoverOption(OPDSFeedParser.findAcquisitionCover(e_links));
+    eb.setPublisherOption(OPDSFeedParser.findPublisher(e));
     eb.setSubtitleOption(OPDSFeedParser.findSubtitle(e));
     eb.setSummaryOption(OPDSXML.getFirstChildElementTextWithNameOptional(
       e,
@@ -411,6 +435,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       IOException
   {
     final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    dbf.setNamespaceAware(true);
     final DocumentBuilder db = dbf.newDocumentBuilder();
     final Document d = NullCheck.notNull(db.parse(s));
     return d;

@@ -1,0 +1,4 @@
+<feed xmlns:dcterms="http://purl.org/dc/terms/" xmlns="http://www.w3.org/2005/Atom">
+  <id>http://library-simplified.herokuapp.com/feed/Fiction</id>
+  <dcterms:publisher>Project Gutenberg</dcterms:publisher>
+</feed>

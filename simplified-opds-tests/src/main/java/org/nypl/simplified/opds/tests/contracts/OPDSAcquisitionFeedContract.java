@@ -39,7 +39,8 @@ import org.nypl.simplified.opds.tests.utilities.TestUtilities;
       OPDSAcquisitionFeedEntry.newBuilder(
         "id",
         "title",
-        Calendar.getInstance());
+        Calendar.getInstance(),
+        "published");
     eb.addAuthor("Author");
     eb.addAcquisition(new OPDSAcquisition(Type.ACQUISITION_BUY, URI
       .create("http://example.com")));

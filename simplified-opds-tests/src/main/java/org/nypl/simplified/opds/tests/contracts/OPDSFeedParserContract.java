@@ -90,6 +90,7 @@ public final class OPDSFeedParserContract implements
       System.out.println("thumbnail: " + e_thumb);
       System.out.println("cover: " + e_cover);
 
+      TestUtilities.assertTrue(e.getPublisher().isSome());
       TestUtilities.assertGreater(e_authors.size(), 0);
       TestUtilities.assertGreater(e_acq.size(), 0);
       TestUtilities.assertEquals(u, e.getUpdated());

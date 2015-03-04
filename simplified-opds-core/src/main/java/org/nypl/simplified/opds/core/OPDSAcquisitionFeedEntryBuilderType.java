@@ -16,10 +16,16 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void addAuthor(
     final String name);
 
+  void addCategory(
+    final String c);
+
   OPDSAcquisitionFeedEntry build();
 
   void setCoverOption(
     OptionType<URI> uri);
+
+  void setPublisherOption(
+    OptionType<String> pub);
 
   void setSubtitleOption(
     OptionType<String> text);
