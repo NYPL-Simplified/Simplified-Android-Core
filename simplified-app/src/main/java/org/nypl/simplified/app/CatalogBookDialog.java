@@ -212,6 +212,10 @@ public final class CatalogBookDialog extends DialogFragment
       NullCheck.notNull((WebView) summary
         .findViewById(R.id.book_summary_text));
 
+    final ViewGroup related_layout =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.book_related_layout));
+
     CatalogBookDialog.configureSummaryPublisher(e, summary_publisher);
     CatalogBookDialog.configureSummaryWebView(e, summary_text);
 
@@ -227,6 +231,8 @@ public final class CatalogBookDialog extends DialogFragment
 
     CatalogBookDialog.configureViewTextAuthor(e, header_authors);
     CatalogBookDialog.configureViewTextMeta(rr, e, header_meta);
+
+    related_layout.setVisibility(View.GONE);
     return layout;
   }
 
