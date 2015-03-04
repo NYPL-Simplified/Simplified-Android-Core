@@ -24,7 +24,7 @@
   <HorizontalScrollView
     android:id="@+id/feed_scroller"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="120dp"
     android:layout_marginBottom="8dp"
     android:fillViewport="true">
   </HorizontalScrollView>

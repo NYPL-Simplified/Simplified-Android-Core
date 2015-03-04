@@ -177,6 +177,14 @@ public final class Simplified extends Application implements
       final Resources rr = NullCheck.notNull(this.getResources());
 
       /**
+       * Log layout selection based on screen size.
+       */
+
+      final String name =
+        NullCheck.notNull(rr.getString(R.string.layout_type));
+      Log.d(Simplified.TAG, "using layout type: " + name);
+
+      /**
        * Determine memory conditions.
        */
 
