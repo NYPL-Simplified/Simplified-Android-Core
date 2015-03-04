@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="navbar_background">#eee</color>
-  <color name="navbar_border">#ccc</color>
+
+  <color name="notification_background">#f0731f</color>
+  <color name="notification_foreground">#ffffff</color>
+  <color name="normal_background">#ffffff</color>
+  <color name="normal_text_major">#000000</color>
+  <color name="normal_text_minor">#a0a0a0</color>
+
 </resources>

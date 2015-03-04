@@ -12,5 +12,9 @@
   <string name="catalog_load_error_text">An error occurred whilst loading the catalog. Please try again.</string>
   <string name="catalog_start_uri">http://library-simplified.herokuapp.com</string>
   <string name="catalog_unknown_feed">Unknown</string>
+  <string name="catalog_detail_related">Related books</string>
+  <string name="catalog_publication_date">Published</string>
+  <string name="catalog_publisher">Publisher</string>
+  <string name="catalog_categories">Categories</string>
 
 </resources>

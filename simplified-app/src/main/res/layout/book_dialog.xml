@@ -1,15 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/book_dialog"
-  android:layout_width="wrap_content"
+  android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:layout_gravity="center"
   android:orientation="vertical">
 
-  <TextView
-    android:id="@+id/book_title"
-    android:layout_width="wrap_content"
+  <RelativeLayout
+    android:id="@+id/book_header"
+    android:layout_width="match_parent"
+    android:layout_height="160dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="16dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp">
+
+    <ImageView
+      android:id="@+id/book_header_cover"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:src="@drawable/simplified"/>
+
+    <TextView
+      android:id="@+id/book_header_title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="8dp"
+      android:layout_toRightOf="@id/book_header_cover"
+      android:text="Book"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:textColor="@color/normal_text_major"/>
+
+    <TextView
+      android:id="@+id/book_header_subtitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/book_header_title"
+      android:layout_marginLeft="8dp"
+      android:layout_toRightOf="@id/book_header_cover"
+      android:text="Book subtitle"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:textColor="@color/normal_text_major"/>
+
+    <TextView
+      android:id="@+id/book_header_authors"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/book_header_subtitle"
+      android:layout_marginLeft="8dp"
+      android:layout_toRightOf="@id/book_header_cover"
+      android:inputType="textMultiLine|textNoSuggestions"
+      android:maxLines="8"
+      android:minLines="1"
+      android:text="Authors"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:textColor="@color/normal_text_major"/>
+
+    <TextView
+      android:id="@+id/book_header_meta"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_marginLeft="8dp"
+      android:layout_toRightOf="@id/book_header_cover"
+      android:inputType="textMultiLine|textNoSuggestions"
+      android:maxLines="8"
+      android:minLines="1"
+      android:text="Meta"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:textColor="@color/normal_text_minor"/>
+  </RelativeLayout>
+
+  <LinearLayout
+    android:id="@+id/book_hold_notification"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Book"/>
+    android:layout_marginBottom="16dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:background="@color/notification_background"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/book_hold_notification_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:layout_toRightOf="@id/book_header_cover"
+      android:padding="8dp"
+      android:text="This hold will be automatically cancelled in 1 hour"
+      android:textColor="@color/notification_foreground"/>
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/book_buttons"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:layout_marginBottom="16dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:orientation="horizontal">
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/book_summary_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:orientation="vertical">
+
+    <View
+      android:layout_width="fill_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="8dp"
+      android:background="@android:color/darker_gray"/>
+
+    <TextView
+      android:id="@+id/book_summary_publisher"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="Book publisher"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:textColor="@color/normal_text_major"/>
+
+    <WebView
+      android:id="@+id/book_summary_text"
+      android:layout_width="wrap_content"
+      android:layout_height="200dp"
+      android:layout_marginBottom="8dp">
+    </WebView>
+
+    <View
+      android:layout_width="fill_parent"
+      android:layout_height="1dp"
+      android:background="@android:color/darker_gray"/>
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/book_related_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/book_related_title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="@string/catalog_detail_related"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:textColor="@color/normal_text_major"/>
+  </LinearLayout>
 
 </LinearLayout>

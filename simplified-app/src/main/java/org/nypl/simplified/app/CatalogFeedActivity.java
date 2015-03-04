@@ -244,7 +244,7 @@ public final class CatalogFeedActivity extends CatalogActivity implements
           Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
 
           if (app.screenIsLarge()) {
-            final CatalogBookDialog df = new CatalogBookDialog();
+            final CatalogBookDialog df = CatalogBookDialog.newDialog(e);
             final FragmentManager fm =
               CatalogFeedActivity.this.getFragmentManager();
             df.show(fm, "book-detail");
