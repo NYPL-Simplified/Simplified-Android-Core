@@ -6,15 +6,19 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.DialogFragment;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -25,12 +29,15 @@ import com.io7m.jnull.Nullable;
  * screens.
  */
 
-public final class CatalogBookDialog extends DialogFragment
+@SuppressWarnings("synthetic-access") public final class CatalogBookDialog extends
+  DialogFragment
 {
   private static final String ACQUISITION_ENTRY_ID;
+  private static final String TAG;
 
   static {
     ACQUISITION_ENTRY_ID = "org.nypl.simplified.app.CatalogBookDialog.entry";
+    TAG = "CBD";
   }
 
   private static void configureSummaryPublisher(
@@ -180,6 +187,7 @@ public final class CatalogBookDialog extends DialogFragment
   }
 
   private @Nullable OPDSAcquisitionFeedEntry entry;
+  private @Nullable ListenableFuture<Bitmap> loading_cover;
 
   public CatalogBookDialog()
   {
@@ -193,9 +201,11 @@ public final class CatalogBookDialog extends DialogFragment
     this.setStyle(DialogFragment.STYLE_NORMAL, R.style.SimplifiedBookDialog);
 
     final Bundle b = NullCheck.notNull(this.getArguments());
-    this.entry =
+    final OPDSAcquisitionFeedEntry e =
       NullCheck.notNull((OPDSAcquisitionFeedEntry) b
         .getSerializable(CatalogBookDialog.ACQUISITION_ENTRY_ID));
+    Log.d(CatalogBookDialog.TAG, "showing dialog for " + e.getID());
+    this.entry = e;
   }
 
   @Override public View onCreateView(
@@ -222,6 +232,9 @@ public final class CatalogBookDialog extends DialogFragment
     final TextView header_subtitle =
       NullCheck.notNull((TextView) header
         .findViewById(R.id.book_header_subtitle));
+    final ImageView header_cover =
+      NullCheck.notNull((ImageView) header
+        .findViewById(R.id.book_header_cover));
     final TextView header_authors =
       NullCheck.notNull((TextView) header
         .findViewById(R.id.book_header_authors));
@@ -267,34 +280,53 @@ public final class CatalogBookDialog extends DialogFragment
     CatalogBookDialog.configureViewTextMeta(rr, e, header_meta);
 
     related_layout.setVisibility(View.GONE);
+
+    final Simplified app = Simplified.get();
+    final CatalogAcquisitionCoverCacheType cover_loader =
+      app.getCatalogAcquisitionCoverLoader();
+    final int cover_height = header_cover.getLayoutParams().height;
+
+    this.loading_cover =
+      cover_loader.getCoverAsynchronous(
+        e,
+        new BitmapDisplayHeightPreserveAspect(cover_height),
+        new BitmapCacheListenerType() {
+          @Override public void onFailure(
+            final Throwable x)
+          {
+            Log.e(CatalogBookDialog.TAG, x.getMessage(), x);
+          }
+
+          @Override public void onSuccess(
+            final Bitmap b)
+          {
+            Log.d(
+              CatalogBookDialog.TAG,
+              String.format(
+                "returned image is (%d x %d)",
+                b.getWidth(),
+                b.getHeight()));
+
+            UIThread.runOnUIThread(new Runnable() {
+              @Override public void run()
+              {
+                header_cover.setImageBitmap(b);
+              }
+            });
+          }
+        });
+
     return layout;
   }
 
-  private static void configureSummaryWebView(
-    final OPDSAcquisitionFeedEntry e,
-    final WebView summary_text)
+  @Override public void onDestroyView()
   {
-    final StringBuilder text = new StringBuilder();
-    text.append("<html>");
-    text.append("<head>");
-    text.append("<style>body {");
-    text.append("padding: 0;");
-    text.append("padding-right: 2em;");
-    text.append("margin: 0;");
-    text.append("}</style>");
-    text.append("</head>");
-    text.append("<body>");
-    text.append(e.getSummary());
-    text.append("</body>");
-    text.append("</html>");
+    super.onDestroyView();
 
-    final WebSettings summary_text_settings = summary_text.getSettings();
-    summary_text_settings.setAllowContentAccess(false);
-    summary_text_settings.setAllowFileAccess(false);
-    summary_text_settings.setAllowFileAccessFromFileURLs(false);
-    summary_text_settings.setAllowUniversalAccessFromFileURLs(false);
-    summary_text_settings.setBlockNetworkLoads(true);
-    summary_text_settings.setBlockNetworkImage(true);
-    summary_text.loadData(text.toString(), "text/html", "UTF-8");
+    final ListenableFuture<Bitmap> f = this.loading_cover;
+    if (f != null) {
+      f.cancel(true);
+      this.loading_cover = null;
+    }
   }
 }
