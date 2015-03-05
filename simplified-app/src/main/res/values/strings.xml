@@ -17,4 +17,12 @@
   <string name="catalog_publisher">Publisher</string>
   <string name="catalog_categories">Categories</string>
 
+  <!-- Catalog book detail strings -->
+  <string name="catalog_book_borrow">Borrow</string>
+  <string name="catalog_book_buy">Buy</string>
+  <string name="catalog_book_generic">Download</string>
+  <string name="catalog_book_open_access">Download</string>
+  <string name="catalog_book_sample">Sample</string>
+  <string name="catalog_book_subscribe">Subscribe</string>
+
 </resources>

@@ -108,6 +108,7 @@
   <LinearLayout
     android:id="@+id/book_buttons"
     android:layout_width="match_parent"
+    android:gravity="center"
     android:layout_height="48dp"
     android:layout_marginBottom="16dp"
     android:layout_marginLeft="16dp"
@@ -118,7 +119,7 @@
   <LinearLayout
     android:id="@+id/book_summary_layout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_marginBottom="16dp"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"

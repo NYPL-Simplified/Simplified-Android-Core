@@ -2,10 +2,12 @@ package org.nypl.simplified.app;
 
 import java.util.List;
 
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -266,8 +268,11 @@ import com.io7m.jnull.Nullable;
 
     CatalogBookDialog.configureSummaryPublisher(e, summary_publisher);
     CatalogBookDialog.configureSummaryWebView(e, summary_text);
+    CatalogBookDialog.configureAcquisitions(
+      NullCheck.notNull(this.getActivity()),
+      e,
+      acquisitions);
 
-    acquisitions.setVisibility(View.GONE);
     hold_notification.setVisibility(View.GONE);
     header_title.setText(e.getTitle());
 
@@ -322,6 +327,24 @@ import com.io7m.jnull.Nullable;
       d.setCanceledOnTouchOutside(true);
     }
     return layout;
+  }
+
+  private static void configureAcquisitions(
+    final Context ctx,
+    final OPDSAcquisitionFeedEntry e,
+    final ViewGroup acquisitions)
+  {
+    final List<OPDSAcquisition> aqs = e.getAcquisitions();
+    if (aqs.isEmpty() == false) {
+      for (int index = 0; index < aqs.size(); ++index) {
+        final OPDSAcquisition a = NullCheck.notNull(aqs.get(index));
+        final CatalogAcquisitionButton b =
+          new CatalogAcquisitionButton(ctx, a);
+        acquisitions.addView(b);
+      }
+    } else {
+      acquisitions.setVisibility(View.GONE);
+    }
   }
 
   @Override public void onDestroyView()
