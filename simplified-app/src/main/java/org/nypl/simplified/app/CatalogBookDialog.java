@@ -359,10 +359,9 @@ import com.io7m.jnull.Nullable;
     display.getMetrics(m);
 
     final int width = (int) (m.widthPixels * 0.75);
-    final int height = (int) (m.heightPixels * 0.75);
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
-    window.setLayout(width, height);
+    window.setLayout(width, window.getAttributes().height);
   }
 
   private static void configureAcquisitions(
