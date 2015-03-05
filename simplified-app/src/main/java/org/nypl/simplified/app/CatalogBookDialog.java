@@ -1,6 +1,7 @@
 package org.nypl.simplified.app;
 
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -300,6 +301,10 @@ import com.io7m.jnull.Nullable;
           @Override public void onFailure(
             final Throwable x)
           {
+            if (x instanceof CancellationException) {
+              return;
+            }
+
             Log.e(CatalogBookDialog.TAG, x.getMessage(), x);
           }
 
