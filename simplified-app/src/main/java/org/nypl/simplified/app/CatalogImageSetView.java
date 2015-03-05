@@ -41,6 +41,7 @@ import com.io7m.jnull.Nullable;
   private final ListenableFuture<Unit>           loading;
   private final AtomicBoolean                    want_cancel;
   private final CatalogLaneView                  lane;
+  private final String                           id;
 
   public CatalogImageSetView(
     final Context in_context,
@@ -50,6 +51,7 @@ import com.io7m.jnull.Nullable;
     final List<OPDSAcquisitionFeedEntry> in_entries,
     final CatalogLaneViewListenerType in_listener,
     final int in_image_height,
+    final String in_id,
     final Runnable in_done)
   {
     super(NullCheck.notNull(in_context));
@@ -62,6 +64,7 @@ import com.io7m.jnull.Nullable;
     this.done_proc = NullCheck.notNull(in_done);
     this.lane = NullCheck.notNull(in_lane);
     this.listener = NullCheck.notNull(in_listener);
+    this.id = NullCheck.notNull(in_id);
 
     this.imageviews = new ArrayList<ImageView>();
     this.want_cancel = new AtomicBoolean(false);
@@ -95,13 +98,14 @@ import com.io7m.jnull.Nullable;
 
   @Override public void cancel()
   {
-    Log.d(CatalogImageSetView.TAG, this + ": images cancelled");
+    Log.d(CatalogImageSetView.TAG, this.id + ": images cancelled");
+    this.want_cancel.set(true);
     this.loading.cancel(true);
   }
 
   private void done()
   {
-    Log.d(CatalogImageSetView.TAG, this + ": images done");
+    Log.d(CatalogImageSetView.TAG, this.id + ": images done");
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
@@ -115,6 +119,7 @@ import com.io7m.jnull.Nullable;
   {
     for (int index = 0; index < this.entries.size(); ++index) {
       if (this.want_cancel.get()) {
+        Log.d(CatalogImageSetView.TAG, this.id + ": noticed cancellation");
         return;
       }
 

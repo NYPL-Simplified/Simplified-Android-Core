@@ -244,6 +244,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         af.getFeedEntries(),
         this.listener,
         slp.height,
+        af.getFeedID(),
         new Runnable() {
           @Override public void run()
           {
