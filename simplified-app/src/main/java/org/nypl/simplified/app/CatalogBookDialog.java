@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -316,6 +317,10 @@ import com.io7m.jnull.Nullable;
           }
         });
 
+    final Dialog d = this.getDialog();
+    if (d != null) {
+      d.setCanceledOnTouchOutside(true);
+    }
     return layout;
   }
 
