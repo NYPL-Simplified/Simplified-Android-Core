@@ -138,7 +138,7 @@ import com.io7m.jnull.Nullable;
       });
 
       final int height = this.image_height;
-      final Bitmap bi = this.cache.getSynchronous(e, this.image_opts);
+      final Bitmap bi = this.cache.getThumbnailSynchronous(e, this.image_opts);
 
       UIThread.runOnUIThread(new Runnable() {
         @Override public void run()

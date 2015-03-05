@@ -240,7 +240,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         ctx,
         this,
         app.getListeningExecutorService(),
-        app.getCatalogAcquisitionImageLoader(),
+        app.getCatalogAcquisitionThumbnailLoader(),
         af.getFeedEntries(),
         this.listener,
         slp.height,

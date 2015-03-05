@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.ExecutorService;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,7 +15,6 @@ import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -222,7 +220,7 @@ public final class BitmapCacheScalingDisk implements
   }
 
   public static BitmapCacheScalingDiskType newCache(
-    final ExecutorService e,
+    final ListeningExecutorService e,
     final PartialFunctionType<URI, InputStream, IOException> in_transport,
     final MemoryControllerType in_mem,
     final File in_file,
@@ -244,14 +242,12 @@ public final class BitmapCacheScalingDisk implements
   }
 
   private BitmapCacheScalingDisk(
-    final ExecutorService e,
+    final ListeningExecutorService e,
     final DiskLruCache in_cache,
     final PartialFunctionType<URI, InputStream, IOException> in_transport,
     final MemoryControllerType in_mem)
   {
-    this.exec =
-      NullCheck
-        .notNull(MoreExecutors.listeningDecorator(NullCheck.notNull(e)));
+    this.exec = NullCheck.notNull(e);
     this.cache = NullCheck.notNull(in_cache);
     this.transport = NullCheck.notNull(in_transport);
     this.memory = NullCheck.notNull(in_mem);

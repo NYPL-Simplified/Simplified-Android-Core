@@ -18,7 +18,7 @@ public interface CatalogAcquisitionThumbnailCacheType
    *           On I/O errors
    */
 
-  Bitmap getSynchronous(
+  Bitmap getThumbnailSynchronous(
     final OPDSAcquisitionFeedEntry e,
     final BitmapDisplaySizeType size);
 }

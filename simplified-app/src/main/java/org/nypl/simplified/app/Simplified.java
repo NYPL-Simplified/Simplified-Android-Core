@@ -41,13 +41,13 @@ public final class Simplified extends Application implements
   ScreenSizeControllerType,
   MemoryControllerType
 {
+  private static volatile @Nullable Simplified INSTANCE;
+
   private static final String                  TAG;
 
   static {
     TAG = "simplified";
   }
-
-  private static volatile @Nullable Simplified INSTANCE;
 
   private static Simplified checkInitialized()
   {
@@ -61,6 +61,114 @@ public final class Simplified extends Application implements
   public static Simplified get()
   {
     return Simplified.checkInitialized();
+  }
+
+  private static File getDiskCacheDir(
+    final Context context)
+  {
+    /**
+     * If external storage is mounted and is on a device that doesn't allow
+     * the storage to be removed, use the external storage for caching.
+     */
+
+    if (Environment.MEDIA_MOUNTED.equals(Environment
+      .getExternalStorageState())) {
+      if (Environment.isExternalStorageRemovable() == false) {
+        return context.getExternalCacheDir();
+      }
+    }
+
+    /**
+     * Otherwise, use internal storage.
+     */
+
+    return context.getCacheDir();
+  }
+
+  private static CatalogAcquisitionCoverCacheType makeCoverCache(
+    final ListeningExecutorService list_exec,
+    final MemoryControllerType mem,
+    final Context ctx,
+    final Resources rr)
+    throws IOException
+  {
+    final PartialFunctionType<URI, InputStream, IOException> it =
+      BitmapTransport.get();
+    final File cd = new File(Simplified.getDiskCacheDir(ctx), "covers");
+    Log.d(Simplified.TAG, "cover cache: " + cd);
+    cd.mkdirs();
+    Preconditions.checkArgument(cd.exists());
+    Preconditions.checkArgument(cd.isDirectory());
+
+    final int disk_thumbnail_size =
+      Simplified.megabytesToBytes(rr
+        .getInteger(R.integer.image_cover_disk_cache_megabytes));
+
+    final BitmapCacheScalingDiskType bcf =
+      BitmapCacheScalingDisk.newCache(
+        list_exec,
+        it,
+        mem,
+        cd,
+        disk_thumbnail_size);
+    final CatalogAcquisitionCoverGenerator cgen =
+      new CatalogAcquisitionCoverGenerator();
+    return CatalogAcquisitionImageCache.newCoverCache(list_exec, cgen, bcf);
+  }
+
+  private static OPDSFeedLoaderType makeFeedLoader(
+    final ExecutorService exec)
+  {
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
+    final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(exec, p, t);
+    return CachingFeedLoader.newLoader(flx);
+  }
+
+  private static CatalogAcquisitionThumbnailCacheType makeThumbnailCache(
+    final ListeningExecutorService list_exec,
+    final MemoryControllerType mem,
+    final Context ctx,
+    final Resources rr)
+    throws IOException
+  {
+    final PartialFunctionType<URI, InputStream, IOException> it =
+      BitmapTransport.get();
+    final File cd = new File(Simplified.getDiskCacheDir(ctx), "thumbnails");
+    Log.d(Simplified.TAG, "thumbnail cache: " + cd);
+    cd.mkdirs();
+    Preconditions.checkArgument(cd.exists());
+    Preconditions.checkArgument(cd.isDirectory());
+
+    final int disk_thumbnail_size =
+      Simplified.megabytesToBytes(rr
+        .getInteger(R.integer.image_thumbnail_disk_cache_megabytes));
+    final int mem_size =
+      Simplified.megabytesToBytes(rr
+        .getInteger(R.integer.image_memory_cache_megabytes));
+
+    final BitmapCacheScalingDiskType bcf =
+      BitmapCacheScalingDisk.newCache(
+        list_exec,
+        it,
+        mem,
+        cd,
+        disk_thumbnail_size);
+
+    BitmapCacheScalingType bc;
+    if (mem.memoryIsSmall()) {
+      bc = bcf;
+    } else {
+      Log.d(
+        Simplified.TAG,
+        "non-small heap detected, using extra in-memory bitmap cache");
+      bc = BitmapCacheScalingMemoryProxy.newCache(bcf, mem_size);
+    }
+
+    final CatalogAcquisitionCoverGenerator cgen =
+      new CatalogAcquisitionCoverGenerator();
+    return CatalogAcquisitionImageCache
+      .newThumbnailCache(list_exec, cgen, bc);
   }
 
   private static int megabytesToBytes(
@@ -91,79 +199,50 @@ public final class Simplified extends Application implements
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_acquisition_image_loader;
-  private @Nullable ListeningExecutorService         exec_decor;
-  private @Nullable ExecutorService                  executor;
-  private @Nullable URI                              feed_initial_uri;
-  private @Nullable OPDSFeedLoaderType               feed_loader;
-  private @Nullable OPDSFeedParserType               feed_parser;
-  private @Nullable OPDSFeedTransportType            feed_transport;
-  private @Nullable BitmapCacheScalingType           image_loader;
-  private int                                        memory;
-  private boolean                                    memory_small;
+  private @Nullable CatalogAcquisitionCoverCacheType     catalog_acquisition_cover_loader;
+  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_acquisition_thumbnail_loader;
+  private @Nullable ListeningExecutorService             exec_decor;
+  private @Nullable ExecutorService                      executor;
+  private @Nullable URI                                  feed_initial_uri;
+  private @Nullable OPDSFeedLoaderType                   feed_loader;
+  private int                                            memory;
+  private boolean                                        memory_small;
 
-  public CatalogAcquisitionThumbnailCacheType getCatalogAcquisitionImageLoader()
+  public CatalogAcquisitionCoverCacheType getCatalogAcquisitionCoverLoader()
   {
-    Simplified.checkInitialized();
-    return NullCheck.notNull(this.catalog_acquisition_image_loader);
+    return NullCheck.notNull(this.catalog_acquisition_cover_loader);
+  }
+
+  public
+    CatalogAcquisitionThumbnailCacheType
+    getCatalogAcquisitionThumbnailLoader()
+  {
+    return NullCheck.notNull(this.catalog_acquisition_thumbnail_loader);
   }
 
   public URI getFeedInitialURI()
   {
-    Simplified.checkInitialized();
     return NullCheck.notNull(this.feed_initial_uri);
   }
 
   public OPDSFeedLoaderType getFeedLoader()
   {
-    Simplified.checkInitialized();
     return NullCheck.notNull(this.feed_loader);
-  }
-
-  public BitmapCacheScalingType getImageLoader()
-  {
-    Simplified.checkInitialized();
-    return NullCheck.notNull(this.image_loader);
   }
 
   public ListeningExecutorService getListeningExecutorService()
   {
-    Simplified.checkInitialized();
     return NullCheck.notNull(this.exec_decor);
   }
 
   @Override public int memoryGetSize()
   {
-    Simplified.checkInitialized();
     return this.memory;
   }
 
   @Override public boolean memoryIsSmall()
   {
-    Simplified.checkInitialized();
     return this.memory_small;
-  }
-
-  private static File getDiskCacheDir(
-    final Context context)
-  {
-    /**
-     * If external storage is mounted and is on a device that doesn't allow
-     * the storage to be removed, use the external storage for caching.
-     */
-
-    if (Environment.MEDIA_MOUNTED.equals(Environment
-      .getExternalStorageState())) {
-      if (Environment.isExternalStorageRemovable() == false) {
-        return context.getExternalCacheDir();
-      }
-    }
-
-    /**
-     * Otherwise, use internal storage.
-     */
-
-    return context.getCacheDir();
   }
 
   @Override public void onCreate()
@@ -174,6 +253,8 @@ public final class Simplified extends Application implements
       Log.d(Simplified.TAG, "initializing application context");
 
       final ExecutorService e = Simplified.namedThreadPool();
+      final ListeningExecutorService le =
+        NullCheck.notNull(MoreExecutors.listeningDecorator(e));
       final Resources rr = NullCheck.notNull(this.getResources());
 
       /**
@@ -198,53 +279,6 @@ public final class Simplified extends Application implements
         this.memory_small));
 
       /**
-       * Asynchronous feed loader.
-       */
-
-      final OPDSFeedParserType p = OPDSFeedParser.newParser();
-      final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
-      final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(e, p, t);
-      final OPDSFeedLoaderType fl = CachingFeedLoader.newLoader(flx);
-
-      /**
-       * Asynchronous image loader.
-       */
-
-      final PartialFunctionType<URI, InputStream, IOException> it =
-        BitmapTransport.get();
-      final File cd =
-        new File(Simplified.getDiskCacheDir(this), "thumbnails");
-      Log.d(Simplified.TAG, "thumbnail cache: " + cd);
-      cd.mkdirs();
-      Preconditions.checkArgument(cd.exists());
-      Preconditions.checkArgument(cd.isDirectory());
-
-      final int disk_size =
-        Simplified.megabytesToBytes(rr
-          .getInteger(R.integer.image_disk_cache_megabytes));
-      final int mem_size =
-        Simplified.megabytesToBytes(rr
-          .getInteger(R.integer.image_memory_cache_megabytes));
-
-      final BitmapCacheScalingDiskType bcf =
-        BitmapCacheScalingDisk.newCache(e, it, this, cd, disk_size);
-
-      BitmapCacheScalingType bc;
-      if (this.memory_small) {
-        bc = bcf;
-      } else {
-        Log.d(
-          Simplified.TAG,
-          "non-small heap detected, using extra in-memory bitmap cache");
-        bc = BitmapCacheScalingMemoryProxy.newCache(bcf, mem_size);
-      }
-
-      final CatalogAcquisitionCoverGenerator cgen =
-        new CatalogAcquisitionCoverGenerator();
-      final CatalogAcquisitionThumbnailCacheType cai =
-        CatalogAcquisitionThumbnailCache.newCache(cgen, bc);
-
-      /**
        * Catalog URIs.
        */
 
@@ -252,13 +286,12 @@ public final class Simplified extends Application implements
         URI.create(rr.getString(R.string.catalog_start_uri));
 
       this.executor = e;
-      this.exec_decor =
-        NullCheck.notNull(MoreExecutors.listeningDecorator(e));
-      this.feed_parser = p;
-      this.feed_transport = t;
-      this.feed_loader = fl;
-      this.image_loader = bcf;
-      this.catalog_acquisition_image_loader = cai;
+      this.exec_decor = le;
+      this.feed_loader = Simplified.makeFeedLoader(e);
+      this.catalog_acquisition_thumbnail_loader =
+        Simplified.makeThumbnailCache(le, this, this, rr);
+      this.catalog_acquisition_cover_loader =
+        Simplified.makeCoverCache(le, this, this, rr);
 
       Simplified.INSTANCE = this;
 
@@ -272,22 +305,18 @@ public final class Simplified extends Application implements
   @Override public double screenDPToPixels(
     final int dp)
   {
-    Simplified.checkInitialized();
     final float scale = this.getResources().getDisplayMetrics().density;
     return ((dp * scale) + 0.5);
   }
 
   @Override public double screenGetDPI()
   {
-    Simplified.checkInitialized();
     final DisplayMetrics metrics = this.getResources().getDisplayMetrics();
     return metrics.densityDpi;
   }
 
   @Override public boolean screenIsLarge()
   {
-    Simplified.checkInitialized();
-
     final Resources rr = NullCheck.notNull(this.getResources());
     final Configuration c = NullCheck.notNull(rr.getConfiguration());
     final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
