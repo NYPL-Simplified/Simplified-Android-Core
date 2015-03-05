@@ -13,8 +13,8 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class CatalogAcquisitionImageCache implements
-  CatalogAcquisitionImageCacheType
+public final class CatalogAcquisitionThumbnailCache implements
+  CatalogAcquisitionThumbnailCacheType
 {
   private static final String TAG;
 
@@ -35,18 +35,18 @@ public final class CatalogAcquisitionImageCache implements
       }).intValue();
   }
 
-  public static CatalogAcquisitionImageCacheType newCache(
-    final CatalogAcquisitionImageGeneratorType in_gen,
+  public static CatalogAcquisitionThumbnailCacheType newCache(
+    final CatalogAcquisitionCoverGeneratorType in_gen,
     final BitmapCacheScalingType in_cache)
   {
-    return new CatalogAcquisitionImageCache(in_gen, in_cache);
+    return new CatalogAcquisitionThumbnailCache(in_gen, in_cache);
   }
 
   private final BitmapCacheScalingType               cache;
-  private final CatalogAcquisitionImageGeneratorType gen;
+  private final CatalogAcquisitionCoverGeneratorType gen;
 
-  private CatalogAcquisitionImageCache(
-    final CatalogAcquisitionImageGeneratorType in_gen,
+  private CatalogAcquisitionThumbnailCache(
+    final CatalogAcquisitionCoverGeneratorType in_gen,
     final BitmapCacheScalingType in_cache)
   {
     this.gen = NullCheck.notNull(in_gen);
@@ -59,7 +59,7 @@ public final class CatalogAcquisitionImageCache implements
   {
     return this.gen.generateImage(
       e,
-      CatalogAcquisitionImageCache.getHeight(size));
+      CatalogAcquisitionThumbnailCache.getHeight(size));
   }
 
   private Bitmap getActual(
@@ -77,7 +77,7 @@ public final class CatalogAcquisitionImageCache implements
       return this.load(uri, size);
     } catch (final Exception x) {
       Log.e(
-        CatalogAcquisitionImageCache.TAG,
+        CatalogAcquisitionThumbnailCache.TAG,
         String.format("failed to load image (%s), generating instead", uri),
         x);
       return this.generate(e, size);
@@ -98,10 +98,10 @@ public final class CatalogAcquisitionImageCache implements
     final BitmapDisplaySizeType size)
     throws IOException
   {
-    Log.d(CatalogAcquisitionImageCache.TAG, String.format("loading %s", uri));
+    Log.d(CatalogAcquisitionThumbnailCache.TAG, String.format("loading %s", uri));
     final Bitmap r = this.cache.getSynchronous(uri, size);
     Log.d(
-      CatalogAcquisitionImageCache.TAG,
+      CatalogAcquisitionThumbnailCache.TAG,
       String.format(
         "returned image (%s) is (%d x %d)",
         uri,

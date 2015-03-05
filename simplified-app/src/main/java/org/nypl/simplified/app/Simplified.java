@@ -91,7 +91,7 @@ public final class Simplified extends Application implements
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable CatalogAcquisitionImageCacheType catalog_acquisition_image_loader;
+  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_acquisition_image_loader;
   private @Nullable ListeningExecutorService         exec_decor;
   private @Nullable ExecutorService                  executor;
   private @Nullable URI                              feed_initial_uri;
@@ -102,7 +102,7 @@ public final class Simplified extends Application implements
   private int                                        memory;
   private boolean                                    memory_small;
 
-  public CatalogAcquisitionImageCacheType getCatalogAcquisitionImageLoader()
+  public CatalogAcquisitionThumbnailCacheType getCatalogAcquisitionImageLoader()
   {
     Simplified.checkInitialized();
     return NullCheck.notNull(this.catalog_acquisition_image_loader);
@@ -239,10 +239,10 @@ public final class Simplified extends Application implements
         bc = BitmapCacheScalingMemoryProxy.newCache(bcf, mem_size);
       }
 
-      final CatalogAcquisitionImageGenerator cgen =
-        new CatalogAcquisitionImageGenerator();
-      final CatalogAcquisitionImageCacheType cai =
-        CatalogAcquisitionImageCache.newCache(cgen, bc);
+      final CatalogAcquisitionCoverGenerator cgen =
+        new CatalogAcquisitionCoverGenerator();
+      final CatalogAcquisitionThumbnailCacheType cai =
+        CatalogAcquisitionThumbnailCache.newCache(cgen, bc);
 
       /**
        * Catalog URIs.

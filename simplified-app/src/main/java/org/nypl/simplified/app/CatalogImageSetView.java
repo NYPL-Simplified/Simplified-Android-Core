@@ -30,7 +30,7 @@ import com.io7m.jnull.Nullable;
     TAG = "CImagesView";
   }
 
-  private final CatalogAcquisitionImageCacheType cache;
+  private final CatalogAcquisitionThumbnailCacheType cache;
   private final Runnable                         done_proc;
   private final List<OPDSAcquisitionFeedEntry>   entries;
   private final ListeningExecutorService         exec;
@@ -47,7 +47,7 @@ import com.io7m.jnull.Nullable;
     final Context in_context,
     final CatalogLaneView in_lane,
     final ListeningExecutorService in_exec,
-    final CatalogAcquisitionImageCacheType in_cache,
+    final CatalogAcquisitionThumbnailCacheType in_cache,
     final List<OPDSAcquisitionFeedEntry> in_entries,
     final CatalogLaneViewListenerType in_listener,
     final int in_image_height,

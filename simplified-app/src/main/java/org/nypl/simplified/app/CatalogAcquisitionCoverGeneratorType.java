@@ -6,7 +6,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.graphics.Bitmap;
 
-public interface CatalogAcquisitionImageGeneratorType
+public interface CatalogAcquisitionCoverGeneratorType
 {
   /**
    * Generate an image synchronously.

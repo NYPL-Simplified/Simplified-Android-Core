@@ -6,7 +6,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.graphics.Bitmap;
 
-public interface CatalogAcquisitionImageCacheType
+public interface CatalogAcquisitionThumbnailCacheType
 {
   /**
    * Fetch or generate an image synchronously.

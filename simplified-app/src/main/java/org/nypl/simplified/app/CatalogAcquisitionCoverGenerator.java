@@ -11,8 +11,8 @@ import android.util.Log;
 
 import com.io7m.jnull.NullCheck;
 
-public final class CatalogAcquisitionImageGenerator implements
-  CatalogAcquisitionImageGeneratorType
+public final class CatalogAcquisitionCoverGenerator implements
+  CatalogAcquisitionCoverGeneratorType
 {
   private static final String TAG;
 
@@ -20,7 +20,7 @@ public final class CatalogAcquisitionImageGenerator implements
     TAG = "CAIG";
   }
 
-  public CatalogAcquisitionImageGenerator()
+  public CatalogAcquisitionCoverGenerator()
   {
     // Nothing
   }
@@ -30,7 +30,7 @@ public final class CatalogAcquisitionImageGenerator implements
     final int height)
   {
     Log.d(
-      CatalogAcquisitionImageGenerator.TAG,
+      CatalogAcquisitionCoverGenerator.TAG,
       String.format("generating %s", e.getID()));
 
     final int width = (height / 4) * 3;
