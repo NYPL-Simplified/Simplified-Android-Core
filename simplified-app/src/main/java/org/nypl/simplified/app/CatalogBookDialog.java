@@ -44,6 +44,40 @@ public final class CatalogBookDialog extends DialogFragment
     }
   }
 
+  private static void configureSummaryWebView(
+    final OPDSAcquisitionFeedEntry e,
+    final WebView summary_text)
+  {
+    final StringBuilder text = new StringBuilder();
+    text.append("<html>");
+    text.append("<head>");
+    text.append("<style>body {");
+    text.append("padding: 0;");
+    text.append("padding-right: 2em;");
+    text.append("margin: 0;");
+    text.append("}</style>");
+    text.append("</head>");
+    text.append("<body>");
+    text.append(e.getSummary());
+    text.append("</body>");
+    text.append("</html>");
+
+    final WebSettings summary_text_settings = summary_text.getSettings();
+    summary_text_settings.setAllowContentAccess(false);
+    summary_text_settings.setAllowFileAccess(false);
+    summary_text_settings.setAllowFileAccessFromFileURLs(false);
+    summary_text_settings.setAllowUniversalAccessFromFileURLs(false);
+    summary_text_settings.setBlockNetworkLoads(true);
+    summary_text_settings.setBlockNetworkImage(true);
+    summary_text_settings.setDefaultTextEncodingName("UTF-8");
+    summary_text.loadDataWithBaseURL(
+      null,
+      text.toString(),
+      "text/html",
+      "UTF-8",
+      null);
+  }
+
   private static void configureViewTextAuthor(
     final OPDSAcquisitionFeedEntry e,
     final TextView authors)
