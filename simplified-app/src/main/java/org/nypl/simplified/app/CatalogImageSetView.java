@@ -24,24 +24,24 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("synthetic-access") public final class CatalogImageSetView extends
   LinearLayout implements CancellableType
 {
-  private static final String                    TAG;
+  private static final String                        TAG;
 
   static {
     TAG = "CImagesView";
   }
 
   private final CatalogAcquisitionThumbnailCacheType cache;
-  private final Runnable                         done_proc;
-  private final List<OPDSAcquisitionFeedEntry>   entries;
-  private final ListeningExecutorService         exec;
-  private int                                    image_height;
-  private final BitmapDisplaySizeType            image_opts;
-  private final List<ImageView>                  imageviews;
-  private final CatalogLaneViewListenerType      listener;
-  private final ListenableFuture<Unit>           loading;
-  private final AtomicBoolean                    want_cancel;
-  private final CatalogLaneView                  lane;
-  private final String                           id;
+  private final Runnable                             done_proc;
+  private final List<OPDSAcquisitionFeedEntry>       entries;
+  private final ListeningExecutorService             exec;
+  private int                                        image_height;
+  private final BitmapDisplaySizeType                image_opts;
+  private final List<ImageView>                      imageviews;
+  private final CatalogLaneViewListenerType          listener;
+  private final ListenableFuture<Unit>               loading;
+  private final AtomicBoolean                        want_cancel;
+  private final CatalogLaneView                      lane;
+  private final String                               id;
 
   public CatalogImageSetView(
     final Context in_context,
@@ -106,11 +106,13 @@ import com.io7m.jnull.Nullable;
   private void done()
   {
     Log.d(CatalogImageSetView.TAG, this.id + ": images done");
+
+    final CatalogImageSetView sv = this;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        CatalogImageSetView.this.setVisibility(View.VISIBLE);
-        CatalogImageSetView.this.done_proc.run();
+        Fade.fadeIn(sv, 100);
+        sv.done_proc.run();
       }
     });
   }
@@ -138,7 +140,8 @@ import com.io7m.jnull.Nullable;
       });
 
       final int height = this.image_height;
-      final Bitmap bi = this.cache.getThumbnailSynchronous(e, this.image_opts);
+      final Bitmap bi =
+        this.cache.getThumbnailSynchronous(e, this.image_opts);
 
       UIThread.runOnUIThread(new Runnable() {
         @Override public void run()
