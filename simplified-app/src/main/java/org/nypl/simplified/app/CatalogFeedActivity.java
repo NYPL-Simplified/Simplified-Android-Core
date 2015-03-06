@@ -36,7 +36,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogFeedActivity extends CatalogActivity implements
-  CatalogLaneViewListenerType
+  CatalogNavigationLaneViewListenerType
 {
   private static final String CATALOG_URI;
   private static final String TAG;
@@ -237,10 +237,10 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     final ImmutableList<URI> new_up_stack =
       NullCheck.notNull(new_up_stack_b.build());
 
-    final CatalogLaneViewListenerType lane_view_listener =
-      new CatalogLaneViewListenerType() {
+    final CatalogNavigationLaneViewListenerType lane_view_listener =
+      new CatalogNavigationLaneViewListenerType() {
         @Override public void onSelectBook(
-          final CatalogLaneView v,
+          final CatalogNavigationLaneView v,
           final OPDSAcquisitionFeedEntry e)
         {
           Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
@@ -259,7 +259,7 @@ public final class CatalogFeedActivity extends CatalogActivity implements
         }
 
         @Override public void onSelectFeed(
-          final CatalogLaneView v,
+          final CatalogNavigationLaneView v,
           final OPDSNavigationFeedEntry feed)
         {
           Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
@@ -318,14 +318,14 @@ public final class CatalogFeedActivity extends CatalogActivity implements
   }
 
   @Override public void onSelectBook(
-    final CatalogLaneView v,
+    final CatalogNavigationLaneView v,
     final OPDSAcquisitionFeedEntry e)
   {
     Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + e);
   }
 
   @Override public void onSelectFeed(
-    final CatalogLaneView v,
+    final CatalogNavigationLaneView v,
     final OPDSNavigationFeedEntry feed)
   {
     Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + feed);

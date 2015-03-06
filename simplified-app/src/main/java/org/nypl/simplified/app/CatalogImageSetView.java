@@ -37,20 +37,20 @@ import com.io7m.jnull.Nullable;
   private int                                        image_height;
   private final BitmapDisplaySizeType                image_opts;
   private final List<ImageView>                      imageviews;
-  private final CatalogLaneViewListenerType          listener;
+  private final CatalogNavigationLaneViewListenerType          listener;
   private final ListenableFuture<Unit>               loading;
   private final AtomicBoolean                        want_cancel;
-  private final CatalogLaneView                      lane;
+  private final CatalogNavigationLaneView                      lane;
   private final String                               id;
 
   public CatalogImageSetView(
     final Context in_context,
     final ScreenSizeControllerType in_screen,
-    final CatalogLaneView in_lane,
+    final CatalogNavigationLaneView in_lane,
     final ListeningExecutorService in_exec,
     final CatalogAcquisitionThumbnailCacheType in_cache,
     final List<OPDSAcquisitionFeedEntry> in_entries,
-    final CatalogLaneViewListenerType in_listener,
+    final CatalogNavigationLaneViewListenerType in_listener,
     final int in_image_height,
     final String in_id,
     final Runnable in_done)
@@ -138,8 +138,8 @@ import com.io7m.jnull.Nullable;
 
       final OPDSAcquisitionFeedEntry e =
         NullCheck.notNull(this.entries.get(index));
-      final CatalogLaneViewListenerType closure_listener = this.listener;
-      final CatalogLaneView closure_lane = this.lane;
+      final CatalogNavigationLaneViewListenerType closure_listener = this.listener;
+      final CatalogNavigationLaneView closure_lane = this.lane;
 
       final ImageView i = NullCheck.notNull(this.imageviews.get(index));
       i.setOnClickListener(new OnClickListener() {

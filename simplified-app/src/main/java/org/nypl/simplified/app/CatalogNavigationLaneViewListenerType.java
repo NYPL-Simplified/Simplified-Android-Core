@@ -3,13 +3,13 @@ package org.nypl.simplified.app;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 
-public interface CatalogLaneViewListenerType
+public interface CatalogNavigationLaneViewListenerType
 {
   void onSelectBook(
-    final CatalogLaneView v,
+    final CatalogNavigationLaneView v,
     final OPDSAcquisitionFeedEntry e);
 
   void onSelectFeed(
-    final CatalogLaneView v,
+    final CatalogNavigationLaneView v,
     final OPDSNavigationFeedEntry feed);
 }

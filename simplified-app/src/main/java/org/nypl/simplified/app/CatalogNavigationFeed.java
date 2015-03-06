@@ -25,8 +25,8 @@ public final class CatalogNavigationFeed implements
   private final Activity                              activity;
   private final ArrayAdapter<OPDSNavigationFeedEntry> adapter;
   private final OPDSNavigationFeed                    feed;
-  private final CatalogLaneViewListenerType           listener;
-  private final List<CatalogLaneView>                 lanes;
+  private final CatalogNavigationLaneViewListenerType           listener;
+  private final List<CatalogNavigationLaneView>                 lanes;
 
   public CatalogNavigationFeed(
     final Context in_context,
@@ -34,7 +34,7 @@ public final class CatalogNavigationFeed implements
     final ScreenSizeControllerType in_screen,
     final OPDSNavigationFeed in_feed,
     final Activity in_activity,
-    final CatalogLaneViewListenerType in_listener)
+    final CatalogNavigationLaneViewListenerType in_listener)
   {
     NullCheck.notNull(in_context);
 
@@ -45,12 +45,12 @@ public final class CatalogNavigationFeed implements
 
     final List<OPDSNavigationFeedEntry> entries = in_feed.getFeedEntries();
     final int size = entries.size();
-    this.lanes = new ArrayList<CatalogLaneView>(size);
+    this.lanes = new ArrayList<CatalogNavigationLaneView>(size);
 
     for (int index = 0; index < size; ++index) {
       final OPDSNavigationFeedEntry e = NullCheck.notNull(entries.get(index));
-      final CatalogLaneView cv =
-        new CatalogLaneView(in_context, in_screen, e, in_listener);
+      final CatalogNavigationLaneView cv =
+        new CatalogNavigationLaneView(in_context, in_screen, e, in_listener);
       this.lanes.add(cv);
     }
   }
@@ -90,7 +90,7 @@ public final class CatalogNavigationFeed implements
     final @Nullable View convertView,
     final @Nullable ViewGroup parent)
   {
-    final CatalogLaneView v = NullCheck.notNull(this.lanes.get(position));
+    final CatalogNavigationLaneView v = NullCheck.notNull(this.lanes.get(position));
     v.laneViewRequestDisplay();
     return v;
   }
@@ -119,7 +119,7 @@ public final class CatalogNavigationFeed implements
   @Override public void onMovedToScrapHeap(
     final @Nullable View view)
   {
-    final CatalogLaneView lv = NullCheck.notNull((CatalogLaneView) view);
+    final CatalogNavigationLaneView lv = NullCheck.notNull((CatalogNavigationLaneView) view);
     lv.laneViewRequestStopDisplaying();
   }
 

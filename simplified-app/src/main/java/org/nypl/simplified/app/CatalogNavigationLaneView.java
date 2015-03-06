@@ -31,7 +31,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-@SuppressWarnings("synthetic-access") public final class CatalogLaneView extends
+@SuppressWarnings("synthetic-access") public final class CatalogNavigationLaneView extends
   LinearLayout
 {
   private static final String                               TAG;
@@ -44,19 +44,19 @@ import com.io7m.junreachable.UnreachableCodeException;
   private @Nullable OPDSAcquisitionFeed                     feed_received;
   private final RelativeLayout                              header;
   private volatile @Nullable CatalogImageSetView            images;
-  private final CatalogLaneViewListenerType                 listener;
+  private final CatalogNavigationLaneViewListenerType                 listener;
   private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
   private final ProgressBar                                 progress;
   private final HorizontalScrollView                        scroller;
   private final TextView                                    title;
   private int                                               scroller_position;
 
-  public CatalogLaneView(
+  public CatalogNavigationLaneView(
     final Context context,
     final @Nullable AttributeSet attrs,
     final ScreenSizeControllerType screen,
     final OPDSNavigationFeedEntry e,
-    final CatalogLaneViewListenerType in_listener)
+    final CatalogNavigationLaneViewListenerType in_listener)
   {
     super(context, attrs);
 
@@ -105,16 +105,16 @@ import com.io7m.junreachable.UnreachableCodeException;
       @Override public void onClick(
         final @Nullable View view_title)
       {
-        in_listener.onSelectFeed(CatalogLaneView.this, e);
+        in_listener.onSelectFeed(CatalogNavigationLaneView.this, e);
       }
     });
   }
 
-  public CatalogLaneView(
+  public CatalogNavigationLaneView(
     final Context context,
     final ScreenSizeControllerType screen,
     final OPDSNavigationFeedEntry e,
-    final CatalogLaneViewListenerType in_listener)
+    final CatalogNavigationLaneViewListenerType in_listener)
   {
     this(context, null, screen, e, in_listener);
   }
@@ -123,7 +123,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     UIThread.checkIsUIThread();
 
-    Log.d(CatalogLaneView.TAG, "request start displaying");
+    Log.d(CatalogNavigationLaneView.TAG, "request start displaying");
 
     this.progress.setVisibility(View.VISIBLE);
     final OPDSAcquisitionFeed fr = this.feed_received;
@@ -138,7 +138,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     UIThread.checkIsUIThread();
 
-    Log.d(CatalogLaneView.TAG, "request stop displaying");
+    Log.d(CatalogNavigationLaneView.TAG, "request stop displaying");
     this.scroller_position = this.scroller.getScrollX();
 
     if (this.images != null) {
@@ -182,19 +182,19 @@ import com.io7m.junreachable.UnreachableCodeException;
             final Throwable ex)
           {
             if (ex instanceof CancellationException) {
-              Log.d(CatalogLaneView.TAG, "Loading cancelled");
+              Log.d(CatalogNavigationLaneView.TAG, "Loading cancelled");
               return;
             }
 
             Log.e(
-              CatalogLaneView.TAG,
+              CatalogNavigationLaneView.TAG,
               "Failed to load featured feed: " + ex.getMessage(),
               ex);
 
             UIThread.runOnUIThread(new Runnable() {
               @Override public void run()
               {
-                CatalogLaneView.this.onFeedFailed();
+                CatalogNavigationLaneView.this.onFeedFailed();
               }
             });
           }
@@ -210,7 +210,7 @@ import com.io7m.junreachable.UnreachableCodeException;
                   UIThread.runOnUIThread(new Runnable() {
                     @Override public void run()
                     {
-                      CatalogLaneView.this.onAcquisitionFeedReceived(af);
+                      CatalogNavigationLaneView.this.onAcquisitionFeedReceived(af);
                     }
                   });
                   return Unit.unit();
@@ -222,7 +222,7 @@ import com.io7m.junreachable.UnreachableCodeException;
                   UIThread.runOnUIThread(new Runnable() {
                     @Override public void run()
                     {
-                      CatalogLaneView.this.onNavigationFeedReceived();
+                      CatalogNavigationLaneView.this.onNavigationFeedReceived();
                     }
                   });
                   return Unit.unit();
@@ -234,7 +234,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       UIThread.runOnUIThread(new Runnable() {
         @Override public void run()
         {
-          CatalogLaneView.this.onFeedFailed();
+          CatalogNavigationLaneView.this.onFeedFailed();
         }
       });
     }
@@ -299,8 +299,8 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     UIThread.checkIsUIThread();
     Log.e(
-      CatalogLaneView.TAG,
+      CatalogNavigationLaneView.TAG,
       "Expected an acquisition feed but received a navigation feed");
-    CatalogLaneView.this.onFeedFailed();
+    CatalogNavigationLaneView.this.onFeedFailed();
   }
 }
