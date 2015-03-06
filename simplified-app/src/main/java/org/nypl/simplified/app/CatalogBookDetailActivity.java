@@ -19,6 +19,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -36,6 +37,20 @@ public final class CatalogBookDetailActivity extends CatalogActivity
     CATALOG_BOOK_DETAIL_FEED_ENTRY_ID =
       "org.nypl.simplified.app.CatalogBookDetailActivity.feed_entry";
     TAG = "CBDA";
+  }
+
+  /**
+   * Configure the given web view to match the height of the rendered content.
+   */
+
+  private static void configureSummaryWebViewHeight(
+    final WebView summary_text)
+  {
+    final LinearLayout.LayoutParams q =
+      new LinearLayout.LayoutParams(
+        LayoutParams.MATCH_PARENT,
+        LayoutParams.WRAP_CONTENT);
+    summary_text.setLayoutParams(q);
   }
 
   public static void setActivityArguments(
@@ -167,8 +182,9 @@ public final class CatalogBookDetailActivity extends CatalogActivity
         .findViewById(R.id.book_related_layout));
 
     CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
-    CatalogBookDetail.configureSummaryWebView(e, summary_text);
     CatalogBookDetail.configureAcquisitions(this, e, acquisitions);
+    CatalogBookDetail.configureSummaryWebView(e, summary_text);
+    CatalogBookDetailActivity.configureSummaryWebViewHeight(summary_text);
 
     hold_notification.setVisibility(View.GONE);
     header_title.setText(e.getTitle());
