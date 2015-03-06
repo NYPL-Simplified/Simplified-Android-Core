@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:text="Book"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textStyle="bold"
         android:textColor="@color/normal_text_major"/>
 
       <TextView
@@ -54,7 +54,6 @@
         android:layout_below="@id/book_header_title"
         android:layout_marginLeft="8dp"
         android:text="Book subtitle"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/normal_text_major"/>
 
       <TextView
@@ -67,7 +66,6 @@
         android:maxLines="8"
         android:minLines="1"
         android:text="Authors"
-        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/normal_text_major"/>
 
       <TextView
@@ -81,7 +79,6 @@
         android:maxLines="8"
         android:minLines="1"
         android:text="Meta"
-        android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/normal_text_minor"/>
     </RelativeLayout>
   </LinearLayout>
