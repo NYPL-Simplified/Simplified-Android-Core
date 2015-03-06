@@ -111,7 +111,7 @@ import com.io7m.jnull.Nullable;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        Fade.fadeIn(sv, 100);
+        Fade.fadeIn(sv, Fade.DEFAULT_FADE_DURATION);
         sv.done_proc.run();
       }
     });

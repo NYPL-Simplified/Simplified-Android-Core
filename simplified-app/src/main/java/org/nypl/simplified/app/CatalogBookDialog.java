@@ -327,6 +327,7 @@ import com.io7m.jnull.Nullable;
               @Override public void run()
               {
                 header_cover.setImageBitmap(b);
+                Fade.fadeIn(header_cover, Fade.DEFAULT_FADE_DURATION);
               }
             });
           }
