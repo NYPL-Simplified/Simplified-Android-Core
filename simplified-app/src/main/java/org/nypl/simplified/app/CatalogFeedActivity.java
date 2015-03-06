@@ -205,6 +205,8 @@ public final class CatalogFeedActivity extends CatalogActivity implements
   {
     Log.d(CatalogFeedActivity.TAG, "received navigation feed: " + nf);
 
+    this.configureUpButtonTitle(nf.getFeedTitle(), this.getUpStack());
+
     final Simplified app = Simplified.get();
 
     final FrameLayout content_area = this.getContentFrame();
@@ -281,6 +283,16 @@ public final class CatalogFeedActivity extends CatalogActivity implements
 
     content_area.addView(layout);
     content_area.requestLayout();
+  }
+
+  private void configureUpButtonTitle(
+    final String title,
+    final List<URI> up_stack)
+  {
+    final ActionBar bar = this.getActionBar();
+    if (up_stack.isEmpty() == false) {
+      bar.setTitle(title);
+    }
   }
 
   @Override protected void onResume()
