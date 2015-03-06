@@ -281,6 +281,7 @@ import com.io7m.jnull.Nullable;
 
       final Intent i = new Intent();
       i.setClass(this, c);
+      i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
       i.putExtras(b);
       this.startActivity(i);
     }
