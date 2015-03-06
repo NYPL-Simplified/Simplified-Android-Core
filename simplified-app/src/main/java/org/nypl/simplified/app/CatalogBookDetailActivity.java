@@ -1,27 +1,41 @@
 package org.nypl.simplified.app;
 
 import java.net.URI;
+import java.util.concurrent.CancellationException;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLayoutChangeListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 public final class CatalogBookDetailActivity extends CatalogActivity
 {
   private static final String CATALOG_BOOK_DETAIL_FEED_ENTRY_ID;
+  private static final String TAG;
 
   static {
     CATALOG_BOOK_DETAIL_FEED_ENTRY_ID =
       "org.nypl.simplified.app.CatalogBookDetailActivity.feed_entry";
+    TAG = "CBDA";
   }
 
   public static void setActivityArguments(
@@ -52,6 +66,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
   }
 
   private @Nullable OPDSAcquisitionFeedEntry entry;
+  private @Nullable ListenableFuture<Bitmap> loading_cover;
 
   private OPDSAcquisitionFeedEntry getFeedEntry()
   {
@@ -72,21 +87,146 @@ public final class CatalogBookDetailActivity extends CatalogActivity
   @Override protected void onDestroy()
   {
     super.onDestroy();
+
+    final ListenableFuture<Bitmap> lc = this.loading_cover;
+    if (lc != null) {
+      lc.cancel(true);
+    }
   }
 
   @Override protected void onResume()
   {
     super.onResume();
 
-    final FrameLayout content_area = this.getContentFrame();
+    final ScrollView sv = new ScrollView(this);
+    final LayoutParams p =
+      new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+    sv.setLayoutParams(p);
+    sv.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+      @Override public void onLayoutChange(
+        final @Nullable View v,
+        final int left,
+        final int top,
+        final int right,
+        final int bottom,
+        final int oldLeft,
+        final int oldTop,
+        final int oldRight,
+        final int oldBottom)
+      {
+        sv.setScrollY(0);
+      }
+    });
 
     final LayoutInflater inflater =
       NullCheck.notNull(this.getLayoutInflater());
-    final View layout =
-      inflater.inflate(R.layout.book_detail, content_area, false);
 
+    final View layout = inflater.inflate(R.layout.book_dialog, sv, false);
+    sv.addView(layout);
+
+    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
+    final Resources rr = NullCheck.notNull(this.getResources());
+
+    final ViewGroup header =
+      NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_header));
+    final TextView header_title =
+      NullCheck.notNull((TextView) header
+        .findViewById(R.id.book_header_title));
+    final TextView header_subtitle =
+      NullCheck.notNull((TextView) header
+        .findViewById(R.id.book_header_subtitle));
+    final ImageView header_cover =
+      NullCheck.notNull((ImageView) header
+        .findViewById(R.id.book_header_cover));
+    final TextView header_authors =
+      NullCheck.notNull((TextView) header
+        .findViewById(R.id.book_header_authors));
+    final TextView header_meta =
+      NullCheck
+        .notNull((TextView) header.findViewById(R.id.book_header_meta));
+
+    final ViewGroup hold_notification =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.book_hold_notification));
+
+    final ViewGroup acquisitions =
+      NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_buttons));
+
+    final ViewGroup summary =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.book_summary_layout));
+    final TextView summary_publisher =
+      NullCheck.notNull((TextView) summary
+        .findViewById(R.id.book_summary_publisher));
+    final WebView summary_text =
+      NullCheck.notNull((WebView) summary
+        .findViewById(R.id.book_summary_text));
+
+    final ViewGroup related_layout =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.book_related_layout));
+
+    CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
+    CatalogBookDetail.configureSummaryWebView(e, summary_text);
+    CatalogBookDetail.configureAcquisitions(this, e, acquisitions);
+
+    hold_notification.setVisibility(View.GONE);
+    header_title.setText(e.getTitle());
+
+    if (e.getSubtitle().isEmpty() == false) {
+      header_subtitle.setText(e.getSubtitle());
+    } else {
+      header_subtitle.setVisibility(View.GONE);
+    }
+
+    CatalogBookDetail.configureViewTextAuthor(e, header_authors);
+    CatalogBookDetail.configureViewTextMeta(rr, e, header_meta);
+
+    related_layout.setVisibility(View.GONE);
+
+    final Simplified app = Simplified.get();
+    final CatalogAcquisitionCoverCacheType cover_loader =
+      app.getCatalogAcquisitionCoverLoader();
+    final int cover_height = header_cover.getLayoutParams().height;
+
+    this.loading_cover =
+      cover_loader.getCoverAsynchronous(
+        e,
+        new BitmapDisplayHeightPreserveAspect(cover_height),
+        new BitmapCacheListenerType() {
+          @Override public void onFailure(
+            final Throwable x)
+          {
+            if (x instanceof CancellationException) {
+              return;
+            }
+
+            Log.e(CatalogBookDetailActivity.TAG, x.getMessage(), x);
+          }
+
+          @Override public void onSuccess(
+            final Bitmap b)
+          {
+            Log.d(
+              CatalogBookDetailActivity.TAG,
+              String.format(
+                "returned image is (%d x %d)",
+                b.getWidth(),
+                b.getHeight()));
+
+            UIThread.runOnUIThread(new Runnable() {
+              @Override public void run()
+              {
+                header_cover.setImageBitmap(b);
+                Fade.fadeIn(header_cover, Fade.DEFAULT_FADE_DURATION);
+              }
+            });
+          }
+        });
+
+    final FrameLayout content_area = this.getContentFrame();
     content_area.removeAllViews();
-    content_area.addView(layout);
+    content_area.addView(sv);
     content_area.requestLayout();
   }
 }

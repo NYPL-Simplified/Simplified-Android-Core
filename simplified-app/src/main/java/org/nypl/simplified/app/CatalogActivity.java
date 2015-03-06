@@ -7,6 +7,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 
 import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.Pair;
@@ -86,5 +87,8 @@ public abstract class CatalogActivity extends SimplifiedActivity
   {
     super.onResume();
     this.configureUpButton(this.getUpStack());
+
+    final FrameLayout content_area = this.getContentFrame();
+    Fade.fadeIn(content_area, Fade.DEFAULT_FADE_DURATION);
   }
 }

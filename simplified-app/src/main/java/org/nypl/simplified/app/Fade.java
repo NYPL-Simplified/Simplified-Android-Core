@@ -5,7 +5,7 @@ import android.view.ViewPropertyAnimator;
 
 public final class Fade
 {
-  public static final int DEFAULT_FADE_DURATION = 100;
+  public static final int DEFAULT_FADE_DURATION = 250;
 
   /**
    * Set the given view to <i>visible</i>, and fade in the view from zero to

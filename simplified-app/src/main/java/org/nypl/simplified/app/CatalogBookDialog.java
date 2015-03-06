@@ -1,9 +1,7 @@
 package org.nypl.simplified.app;
 
-import java.util.List;
 import java.util.concurrent.CancellationException;
 
-import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
@@ -21,15 +19,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -47,140 +42,6 @@ import com.io7m.jnull.Nullable;
   static {
     ACQUISITION_ENTRY_ID = "org.nypl.simplified.app.CatalogBookDialog.entry";
     TAG = "CBD";
-  }
-
-  private static void configureSummaryPublisher(
-    final OPDSAcquisitionFeedEntry e,
-    final TextView summary_publisher)
-  {
-    final OptionType<String> pub = e.getPublisher();
-    if (pub.isSome()) {
-      final Some<String> some = (Some<String>) pub;
-      summary_publisher.setText(some.get());
-    }
-  }
-
-  private static void configureSummaryWebView(
-    final OPDSAcquisitionFeedEntry e,
-    final WebView summary_text)
-  {
-    final StringBuilder text = new StringBuilder();
-    text.append("<html>");
-    text.append("<head>");
-    text.append("<style>body {");
-    text.append("padding: 0;");
-    text.append("padding-right: 2em;");
-    text.append("margin: 0;");
-    text.append("}</style>");
-    text.append("</head>");
-    text.append("<body>");
-    text.append(e.getSummary());
-    text.append("</body>");
-    text.append("</html>");
-
-    final WebSettings summary_text_settings = summary_text.getSettings();
-    summary_text_settings.setAllowContentAccess(false);
-    summary_text_settings.setAllowFileAccess(false);
-    summary_text_settings.setAllowFileAccessFromFileURLs(false);
-    summary_text_settings.setAllowUniversalAccessFromFileURLs(false);
-    summary_text_settings.setBlockNetworkLoads(true);
-    summary_text_settings.setBlockNetworkImage(true);
-    summary_text_settings.setDefaultTextEncodingName("UTF-8");
-    summary_text.loadDataWithBaseURL(
-      null,
-      text.toString(),
-      "text/html",
-      "UTF-8",
-      null);
-  }
-
-  private static void configureViewTextAuthor(
-    final OPDSAcquisitionFeedEntry e,
-    final TextView authors)
-  {
-    final StringBuilder buffer = new StringBuilder();
-    final List<String> as = e.getAuthors();
-    for (int index = 0; index < as.size(); ++index) {
-      final String a = NullCheck.notNull(as.get(index));
-      if (index > 0) {
-        buffer.append("\n");
-      }
-      buffer.append(a);
-    }
-    authors.setText(NullCheck.notNull(buffer.toString()));
-  }
-
-  private static void configureViewTextMeta(
-    final Resources rr,
-    final OPDSAcquisitionFeedEntry e,
-    final TextView meta)
-  {
-    final StringBuilder buffer = new StringBuilder();
-    CatalogBookDialog.createViewTextPublicationDate(rr, e, buffer);
-    CatalogBookDialog.createViewTextPublisher(rr, e, buffer);
-    CatalogBookDialog.createViewTextCategories(rr, e, buffer);
-    meta.setText(NullCheck.notNull(buffer.toString()));
-  }
-
-  private static void createViewTextCategories(
-    final Resources rr,
-    final OPDSAcquisitionFeedEntry e,
-    final StringBuilder buffer)
-  {
-    final List<String> cats = e.getCategories();
-    if (cats.isEmpty() == false) {
-      if (buffer.length() > 0) {
-        buffer.append("\n");
-      }
-
-      buffer.append(NullCheck.notNull(rr
-        .getString(R.string.catalog_categories)));
-      buffer.append(": ");
-
-      for (int index = 0; index < cats.size(); ++index) {
-        final String c = NullCheck.notNull(cats.get(index));
-        buffer.append(c);
-        if ((index + 1) <= cats.size()) {
-          buffer.append(", ");
-        }
-      }
-    }
-  }
-
-  private static String createViewTextPublicationDate(
-    final Resources rr,
-    final OPDSAcquisitionFeedEntry e,
-    final StringBuilder buffer)
-  {
-    if (buffer.length() > 0) {
-      buffer.append("\n");
-    }
-
-    buffer.append(NullCheck.notNull(rr
-      .getString(R.string.catalog_publication_date)));
-    buffer.append(": ");
-    buffer.append(e.getPublished());
-    return NullCheck.notNull(buffer.toString());
-  }
-
-  private static void createViewTextPublisher(
-    final Resources rr,
-    final OPDSAcquisitionFeedEntry e,
-    final StringBuilder buffer)
-  {
-    final OptionType<String> pub = e.getPublisher();
-    if (pub.isSome()) {
-      final Some<String> some = (Some<String>) pub;
-
-      if (buffer.length() > 0) {
-        buffer.append("\n");
-      }
-
-      buffer.append(NullCheck.notNull(rr
-        .getString(R.string.catalog_publisher)));
-      buffer.append(": ");
-      buffer.append(some.get());
-    }
   }
 
   public static CatalogBookDialog newDialog(
@@ -272,9 +133,9 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull((ViewGroup) layout
         .findViewById(R.id.book_related_layout));
 
-    CatalogBookDialog.configureSummaryPublisher(e, summary_publisher);
-    CatalogBookDialog.configureSummaryWebView(e, summary_text);
-    CatalogBookDialog.configureAcquisitions(
+    CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
+    CatalogBookDetail.configureSummaryWebView(e, summary_text);
+    CatalogBookDetail.configureAcquisitions(
       NullCheck.notNull(this.getActivity()),
       e,
       acquisitions);
@@ -288,8 +149,8 @@ import com.io7m.jnull.Nullable;
       header_subtitle.setVisibility(View.GONE);
     }
 
-    CatalogBookDialog.configureViewTextAuthor(e, header_authors);
-    CatalogBookDialog.configureViewTextMeta(rr, e, header_meta);
+    CatalogBookDetail.configureViewTextAuthor(e, header_authors);
+    CatalogBookDetail.configureViewTextMeta(rr, e, header_meta);
 
     related_layout.setVisibility(View.GONE);
 
@@ -363,24 +224,6 @@ import com.io7m.jnull.Nullable;
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);
-  }
-
-  private static void configureAcquisitions(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry e,
-    final ViewGroup acquisitions)
-  {
-    final List<OPDSAcquisition> aqs = e.getAcquisitions();
-    if (aqs.isEmpty() == false) {
-      for (int index = 0; index < aqs.size(); ++index) {
-        final OPDSAcquisition a = NullCheck.notNull(aqs.get(index));
-        final CatalogAcquisitionButton b =
-          new CatalogAcquisitionButton(ctx, a);
-        acquisitions.addView(b);
-      }
-    } else {
-      acquisitions.setVisibility(View.GONE);
-    }
   }
 
   @Override public void onDestroyView()
