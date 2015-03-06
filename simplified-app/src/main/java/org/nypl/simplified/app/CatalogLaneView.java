@@ -238,6 +238,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final CatalogImageSetView i =
       new CatalogImageSetView(
         ctx,
+        app,
         this,
         app.getListeningExecutorService(),
         app.getCatalogAcquisitionThumbnailLoader(),

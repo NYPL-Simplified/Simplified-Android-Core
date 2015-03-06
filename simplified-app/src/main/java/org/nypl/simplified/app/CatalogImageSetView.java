@@ -45,6 +45,7 @@ import com.io7m.jnull.Nullable;
 
   public CatalogImageSetView(
     final Context in_context,
+    final ScreenSizeControllerType in_screen,
     final CatalogLaneView in_lane,
     final ListeningExecutorService in_exec,
     final CatalogAcquisitionThumbnailCacheType in_cache,
@@ -84,6 +85,15 @@ import com.io7m.jnull.Nullable;
       final ImageView i = new ImageView(in_context);
       this.imageviews.add(i);
       this.addView(i);
+
+      final View spacer = new View(in_context);
+      final android.view.ViewGroup.LayoutParams q =
+        new LayoutParams(
+          (int) in_screen.screenDPToPixels(8),
+          this.image_height);
+      spacer.setLayoutParams(q);
+      spacer.setVisibility(View.INVISIBLE);
+      this.addView(spacer);
     }
 
     this.loading = NullCheck.notNull(in_exec.submit(new Callable<Unit>() {
