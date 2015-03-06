@@ -149,6 +149,43 @@ public final class CatalogAcquisitionImageCache implements
     return this.getActual(e, size);
   }
 
+  @Override public ListenableFuture<Bitmap> getThumbnailAsynchronous(
+    final OPDSAcquisitionFeedEntry e,
+    final BitmapDisplaySizeType size,
+    final BitmapCacheListenerType listener)
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(size);
+    NullCheck.notNull(listener);
+
+    final ListenableFuture<Bitmap> f =
+      this.exec.submit(new Callable<Bitmap>() {
+        @Override public Bitmap call()
+          throws Exception
+        {
+          return CatalogAcquisitionImageCache.this.getCoverSynchronous(
+            e,
+            size);
+        }
+      });
+
+    Futures.addCallback(f, new FutureCallback<Bitmap>() {
+      @Override public void onFailure(
+        final @Nullable Throwable t)
+      {
+        listener.onFailure(NullCheck.notNull(t));
+      }
+
+      @Override public void onSuccess(
+        final @Nullable Bitmap result)
+      {
+        listener.onSuccess(NullCheck.notNull(result));
+      }
+    });
+
+    return NullCheck.notNull(f);
+  }
+
   @Override public Bitmap getThumbnailSynchronous(
     final OPDSAcquisitionFeedEntry e,
     final BitmapDisplaySizeType size)

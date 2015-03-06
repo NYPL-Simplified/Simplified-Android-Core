@@ -74,12 +74,12 @@ import com.io7m.jnull.Nullable;
         return false;
       }
       final Key other = (Key) obj;
-      return this.uri.equals(other.uri);
+      return this.uri.equals(other.uri) && this.opts.equals(other.opts);
     }
 
     @Override public int hashCode()
     {
-      return this.uri.hashCode();
+      return this.uri.hashCode() + this.opts.hashCode();
     }
   }
 

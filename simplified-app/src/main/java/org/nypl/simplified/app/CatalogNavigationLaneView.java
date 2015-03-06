@@ -32,7 +32,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("synthetic-access") public final class CatalogNavigationLaneView extends
-  LinearLayout
+  LinearLayout implements ExpensiveDisplayableType
 {
   private static final String                               TAG;
 
@@ -44,12 +44,12 @@ import com.io7m.junreachable.UnreachableCodeException;
   private @Nullable OPDSAcquisitionFeed                     feed_received;
   private final RelativeLayout                              header;
   private volatile @Nullable CatalogImageSetView            images;
-  private final CatalogNavigationLaneViewListenerType                 listener;
+  private final CatalogNavigationLaneViewListenerType       listener;
   private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
   private final ProgressBar                                 progress;
   private final HorizontalScrollView                        scroller;
-  private final TextView                                    title;
   private int                                               scroller_position;
+  private final TextView                                    title;
 
   public CatalogNavigationLaneView(
     final Context context,
@@ -83,21 +83,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.scroller.setHorizontalScrollBarEnabled(false);
 
     /**
-     * Scale the height of the scroll view such that roughly five lanes are
-     * visible onscreen regardless of the type of device screen. This tends to
-     * show fewer lanes on extremely small screens (which may not matter; how
-     * many QVGA devices are there that support Android 4.4?).
-     *
-     * The scaling value was found via experimentation and does not have any
-     * particular meaning.
+     * Adjust scrollview height based on thumbnail size.
      */
 
-    final double scale = 7.45;
-    final int height = (int) (screen.screenGetHeightPixels() / scale);
     final android.view.ViewGroup.LayoutParams p =
       new LayoutParams(
         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-        height);
+        CatalogImageSizeEstimates.navigationFeedThumbnailHeight(screen));
     this.scroller.setLayoutParams(p);
 
     this.title.setText(e.getTitle());
@@ -119,7 +111,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     this(context, null, screen, e, in_listener);
   }
 
-  public void laneViewRequestDisplay()
+  @Override public void expensiveRequestDisplay()
   {
     UIThread.checkIsUIThread();
 
@@ -134,7 +126,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  public void laneViewRequestStopDisplaying()
+  @Override public void expensiveRequestStopDisplaying()
   {
     UIThread.checkIsUIThread();
 
@@ -210,7 +202,8 @@ import com.io7m.junreachable.UnreachableCodeException;
                   UIThread.runOnUIThread(new Runnable() {
                     @Override public void run()
                     {
-                      CatalogNavigationLaneView.this.onAcquisitionFeedReceived(af);
+                      CatalogNavigationLaneView.this
+                        .onAcquisitionFeedReceived(af);
                     }
                   });
                   return Unit.unit();
@@ -222,7 +215,8 @@ import com.io7m.junreachable.UnreachableCodeException;
                   UIThread.runOnUIThread(new Runnable() {
                     @Override public void run()
                     {
-                      CatalogNavigationLaneView.this.onNavigationFeedReceived();
+                      CatalogNavigationLaneView.this
+                        .onNavigationFeedReceived();
                     }
                   });
                   return Unit.unit();

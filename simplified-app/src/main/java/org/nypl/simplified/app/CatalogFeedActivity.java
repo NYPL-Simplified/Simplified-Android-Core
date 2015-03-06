@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
@@ -170,8 +171,41 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     final OPDSAcquisitionFeed af)
   {
     Log.d(CatalogFeedActivity.TAG, "received acquisition feed: " + af);
-    final ViewGroup pl = NullCheck.notNull(this.progress_layout);
-    pl.setVisibility(View.GONE);
+
+    this.configureUpButtonTitle(af.getFeedTitle(), this.getUpStack());
+
+    final FrameLayout content_area = this.getContentFrame();
+    final ViewGroup progress = NullCheck.notNull(this.progress_layout);
+    progress.setVisibility(View.GONE);
+    content_area.removeAllViews();
+
+    final LayoutInflater inflater = this.getLayoutInflater();
+    final LinearLayout layout =
+      NullCheck.notNull((LinearLayout) inflater.inflate(
+        R.layout.catalog_acquisition_feed,
+        content_area,
+        false));
+
+    final GridView grid_view =
+      NullCheck.notNull((GridView) layout
+        .findViewById(R.id.catalog_acq_feed_grid));
+
+    final ArrayAdapter<OPDSAcquisitionFeedEntry> in_adapter =
+      new ArrayAdapter<OPDSAcquisitionFeedEntry>(this, 0, af.getFeedEntries());
+
+    final URI feed_uri = af.getFeedURI();
+    final ImmutableList<URI> new_up_stack = this.newUpStack(feed_uri);
+
+    final Simplified app = Simplified.get();
+
+    final CatalogAcquisitionFeed f =
+      new CatalogAcquisitionFeed(this, in_adapter, app, af, this);
+
+    grid_view.setAdapter(f);
+    grid_view.setRecyclerListener(f);
+
+    content_area.addView(layout);
+    content_area.requestLayout();
   }
 
   private void onReceiveFeedError(
@@ -230,12 +264,8 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     final ArrayAdapter<OPDSNavigationFeedEntry> in_adapter =
       new ArrayAdapter<OPDSNavigationFeedEntry>(this, 0, nf.getFeedEntries());
 
-    final List<URI> up_stack = this.getUpStack();
-    final Builder<URI> new_up_stack_b = ImmutableList.builder();
-    new_up_stack_b.addAll(up_stack);
-    new_up_stack_b.add(nf.getFeedURI());
-    final ImmutableList<URI> new_up_stack =
-      NullCheck.notNull(new_up_stack_b.build());
+    final URI feed_uri = nf.getFeedURI();
+    final ImmutableList<URI> new_up_stack = this.newUpStack(feed_uri);
 
     final CatalogNavigationLaneViewListenerType lane_view_listener =
       new CatalogNavigationLaneViewListenerType() {
@@ -284,6 +314,18 @@ public final class CatalogFeedActivity extends CatalogActivity implements
 
     content_area.addView(layout);
     content_area.requestLayout();
+  }
+
+  private ImmutableList<URI> newUpStack(
+    final URI feed_uri)
+  {
+    final List<URI> up_stack = this.getUpStack();
+    final Builder<URI> new_up_stack_b = ImmutableList.builder();
+    new_up_stack_b.addAll(up_stack);
+    new_up_stack_b.add(feed_uri);
+    final ImmutableList<URI> new_up_stack =
+      NullCheck.notNull(new_up_stack_b.build());
+    return new_up_stack;
   }
 
   private void configureUpButtonTitle(

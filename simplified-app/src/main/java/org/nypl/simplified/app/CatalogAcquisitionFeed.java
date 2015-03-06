@@ -1,10 +1,7 @@
 package org.nypl.simplified.app;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.nypl.simplified.opds.core.OPDSNavigationFeed;
-import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
 import android.content.Context;
@@ -18,41 +15,29 @@ import android.widget.ListAdapter;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogNavigationFeed implements
+public final class CatalogAcquisitionFeed implements
   ListAdapter,
   RecyclerListener
 {
-  private final Activity                              activity;
-  private final ArrayAdapter<OPDSNavigationFeedEntry> adapter;
-  private final OPDSNavigationFeed                    feed;
-  private final CatalogNavigationLaneViewListenerType listener;
-  private final List<CatalogNavigationLaneView>       lanes;
+  private final Activity                               activity;
+  private final ArrayAdapter<OPDSAcquisitionFeedEntry> adapter;
+  private final OPDSAcquisitionFeed                    feed;
+  private final ScreenSizeControllerType               screen;
 
-  public CatalogNavigationFeed(
+  public CatalogAcquisitionFeed(
     final Context in_context,
-    final ArrayAdapter<OPDSNavigationFeedEntry> in_adapter,
+    final ArrayAdapter<OPDSAcquisitionFeedEntry> in_adapter,
     final ScreenSizeControllerType in_screen,
-    final OPDSNavigationFeed in_feed,
-    final Activity in_activity,
-    final CatalogNavigationLaneViewListenerType in_listener)
+    final OPDSAcquisitionFeed in_feed,
+    final Activity in_activity)
   {
     NullCheck.notNull(in_context);
 
     this.adapter = NullCheck.notNull(in_adapter);
+    NullCheck.notNull(in_screen);
     this.feed = NullCheck.notNull(in_feed);
     this.activity = NullCheck.notNull(in_activity);
-    this.listener = NullCheck.notNull(in_listener);
-
-    final List<OPDSNavigationFeedEntry> entries = in_feed.getFeedEntries();
-    final int size = entries.size();
-    this.lanes = new ArrayList<CatalogNavigationLaneView>(size);
-
-    for (int index = 0; index < size; ++index) {
-      final OPDSNavigationFeedEntry e = NullCheck.notNull(entries.get(index));
-      final CatalogNavigationLaneView cv =
-        new CatalogNavigationLaneView(in_context, in_screen, e, in_listener);
-      this.lanes.add(cv);
-    }
+    this.screen = NullCheck.notNull(in_screen);
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -90,10 +75,21 @@ public final class CatalogNavigationFeed implements
     final @Nullable View convertView,
     final @Nullable ViewGroup parent)
   {
-    final CatalogNavigationLaneView v =
-      NullCheck.notNull(this.lanes.get(position));
-    v.expensiveRequestDisplay();
-    return v;
+    final int row_height =
+      CatalogImageSizeEstimates
+        .acquisitionFeedLargeThumbnailHeight(this.screen);
+    final OPDSAcquisitionFeedEntry e =
+      NullCheck.notNull(this.feed.getFeedEntries().get(position));
+
+    final CatalogAcquisitionCellView cv =
+      new CatalogAcquisitionCellView(
+        this.activity,
+        this.screen,
+        e,
+        row_height);
+
+    cv.expensiveRequestDisplay();
+    return cv;
   }
 
   @Override public int getViewTypeCount()
