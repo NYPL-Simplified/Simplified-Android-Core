@@ -31,6 +31,7 @@ public final class CatalogNavigationFeed implements
   public CatalogNavigationFeed(
     final Context in_context,
     final ArrayAdapter<OPDSNavigationFeedEntry> in_adapter,
+    final ScreenSizeControllerType in_screen,
     final OPDSNavigationFeed in_feed,
     final Activity in_activity,
     final CatalogLaneViewListenerType in_listener)
@@ -49,7 +50,7 @@ public final class CatalogNavigationFeed implements
     for (int index = 0; index < size; ++index) {
       final OPDSNavigationFeedEntry e = NullCheck.notNull(entries.get(index));
       final CatalogLaneView cv =
-        new CatalogLaneView(in_context, e, in_listener);
+        new CatalogLaneView(in_context, in_screen, e, in_listener);
       this.lanes.add(cv);
     }
   }

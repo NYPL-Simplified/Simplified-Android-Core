@@ -11,5 +11,9 @@ public interface ScreenSizeControllerType
 
   double screenGetDPI();
 
+  int screenGetHeightPixels();
+
+  int screenGetWidthPixels();
+
   boolean screenIsLarge();
 }

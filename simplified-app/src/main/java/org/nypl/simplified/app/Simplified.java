@@ -258,25 +258,36 @@ public final class Simplified extends Application implements
       final Resources rr = NullCheck.notNull(this.getResources());
 
       /**
-       * Log layout selection based on screen size.
-       */
-
-      final String name =
-        NullCheck.notNull(rr.getString(R.string.layout_type));
-      Log.d(Simplified.TAG, "using layout type: " + name);
-
-      /**
        * Determine memory conditions.
        */
 
-      final ActivityManager am =
-        (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
-      this.memory = am.getMemoryClass();
-      this.memory_small = this.memory <= 32;
-      Log.d(Simplified.TAG, String.format(
-        "available memory: %dmb (small: %s)",
-        this.memory,
-        this.memory_small));
+      {
+        final ActivityManager am =
+          (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
+        this.memory = am.getMemoryClass();
+        this.memory_small = this.memory <= 32;
+        Log.d(Simplified.TAG, String.format(
+          "available memory: %dmb (small: %s)",
+          this.memory,
+          this.memory_small));
+      }
+
+      /**
+       * Determine screen details.
+       */
+
+      {
+        final DisplayMetrics dm = rr.getDisplayMetrics();
+        final float dp_height = dm.heightPixels / dm.density;
+        final float dp_width = dm.widthPixels / dm.density;
+        Log.d(
+          Simplified.TAG,
+          String.format("screen (%.2fdp x %.2fdp)", dp_width, dp_height));
+        Log.d(Simplified.TAG, String.format(
+          "screen (%dpx x %dpx)",
+          dm.widthPixels,
+          dm.heightPixels));
+      }
 
       /**
        * Catalog URIs.
@@ -313,6 +324,20 @@ public final class Simplified extends Application implements
   {
     final DisplayMetrics metrics = this.getResources().getDisplayMetrics();
     return metrics.densityDpi;
+  }
+
+  @Override public int screenGetHeightPixels()
+  {
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final DisplayMetrics dm = rr.getDisplayMetrics();
+    return dm.heightPixels;
+  }
+
+  @Override public int screenGetWidthPixels()
+  {
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final DisplayMetrics dm = rr.getDisplayMetrics();
+    return dm.widthPixels;
   }
 
   @Override public boolean screenIsLarge()

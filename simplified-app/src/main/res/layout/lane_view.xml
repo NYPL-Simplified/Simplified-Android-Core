@@ -21,12 +21,19 @@
       android:layout_alignParentRight="true"/>
   </RelativeLayout>
 
+  <!-- The height of this scroll view is modified at run-time -->
+
   <HorizontalScrollView
     android:id="@+id/feed_scroller"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
-    android:layout_marginBottom="8dp"
+    android:layout_height="wrap_content"
     android:fillViewport="true">
   </HorizontalScrollView>
+
+  <!-- Invisible padding element -->
+  
+  <View
+    android:layout_width="match_parent"
+    android:layout_height="8dp"/>
 
 </merge>

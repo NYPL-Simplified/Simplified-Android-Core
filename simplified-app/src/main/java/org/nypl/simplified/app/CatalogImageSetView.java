@@ -59,13 +59,14 @@ import com.io7m.jnull.Nullable;
 
     UIThread.checkIsUIThread();
 
+    NullCheck.notNull(in_screen);
+    this.lane = NullCheck.notNull(in_lane);
     this.exec = NullCheck.notNull(in_exec);
     this.cache = NullCheck.notNull(in_cache);
     this.entries = NullCheck.notNull(in_entries);
-    this.done_proc = NullCheck.notNull(in_done);
-    this.lane = NullCheck.notNull(in_lane);
     this.listener = NullCheck.notNull(in_listener);
     this.id = NullCheck.notNull(in_id);
+    this.done_proc = NullCheck.notNull(in_done);
 
     this.imageviews = new ArrayList<ImageView>();
     this.want_cancel = new AtomicBoolean(false);
@@ -150,6 +151,7 @@ import com.io7m.jnull.Nullable;
       });
 
       final int height = this.image_height;
+
       final Bitmap bi =
         this.cache.getThumbnailSynchronous(e, this.image_opts);
 

@@ -274,6 +274,7 @@ public final class CatalogFeedActivity extends CatalogActivity implements
       new CatalogNavigationFeed(
         this,
         in_adapter,
+        app,
         nf,
         this,
         lane_view_listener);

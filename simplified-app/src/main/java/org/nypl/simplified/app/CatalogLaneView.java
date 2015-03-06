@@ -54,11 +54,13 @@ import com.io7m.junreachable.UnreachableCodeException;
   public CatalogLaneView(
     final Context context,
     final @Nullable AttributeSet attrs,
+    final ScreenSizeControllerType screen,
     final OPDSNavigationFeedEntry e,
     final CatalogLaneViewListenerType in_listener)
   {
     super(context, attrs);
 
+    NullCheck.notNull(screen);
     this.entry = NullCheck.notNull(e);
     this.listener = NullCheck.notNull(in_listener);
 
@@ -80,6 +82,24 @@ import com.io7m.junreachable.UnreachableCodeException;
         .findViewById(R.id.feed_scroller));
     this.scroller.setHorizontalScrollBarEnabled(false);
 
+    /**
+     * Scale the height of the scroll view such that roughly five lanes are
+     * visible onscreen regardless of the type of device screen. This tends to
+     * show fewer lanes on extremely small screens (which may not matter; how
+     * many QVGA devices are there that support Android 4.4?).
+     *
+     * The scaling value was found via experimentation and does not have any
+     * particular meaning.
+     */
+
+    final double scale = 7.45;
+    final int height = (int) (screen.screenGetHeightPixels() / scale);
+    final android.view.ViewGroup.LayoutParams p =
+      new LayoutParams(
+        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+        height);
+    this.scroller.setLayoutParams(p);
+
     this.title.setText(e.getTitle());
     this.title.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
@@ -92,10 +112,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   public CatalogLaneView(
     final Context context,
+    final ScreenSizeControllerType screen,
     final OPDSNavigationFeedEntry e,
     final CatalogLaneViewListenerType in_listener)
   {
-    this(context, null, e, in_listener);
+    this(context, null, screen, e, in_listener);
   }
 
   public void laneViewRequestDisplay()
