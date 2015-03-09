@@ -104,8 +104,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OptionType<URI> findAcquisitionCover(
     final List<Element> e_links)
-    throws URISyntaxException,
-      OPDSFeedParseException
+    throws URISyntaxException
   {
     return OPDSFeedParser.findLinkWithURIRel(
       e_links,
@@ -115,8 +114,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   private static void findAcquisitionRelations(
     final List<Element> e_links,
     final OPDSAcquisitionFeedEntryBuilderType eb)
-    throws OPDSFeedParseException,
-      URISyntaxException
+    throws URISyntaxException
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
@@ -126,7 +124,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         for (final Type v : OPDSAcquisition.Type.values()) {
           final String uri_text = NullCheck.notNull(v.getURI().toString());
           if (text.equals(uri_text)) {
-            final URI href = OPDSFeedParser.getLinkHref(e, uri_text);
+            final URI href = new URI(e.getAttribute("href"));
             eb.addAcquisition(new OPDSAcquisition(v, href));
           }
         }
@@ -136,8 +134,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OptionType<URI> findAcquisitionThumbnail(
     final List<Element> e_links)
-    throws URISyntaxException,
-      OPDSFeedParseException
+    throws URISyntaxException
   {
     return OPDSFeedParser.findLinkWithURIRel(
       e_links,
@@ -157,15 +154,14 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   private static OptionType<URI> findLinkWithURIRel(
     final List<Element> e_links,
     final URI uri)
-    throws OPDSFeedParseException,
-      URISyntaxException
+    throws URISyntaxException
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
         final String rel = e.getAttribute("rel");
         final String uri_text = NullCheck.notNull(uri.toString());
         if (rel.equals(uri_text)) {
-          return Option.some(OPDSFeedParser.getLinkHref(e, uri_text));
+          return Option.some(new URI(e.getAttribute("href")));
         }
       }
     }
@@ -175,8 +171,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OptionType<URI> findNavigationFeatured(
     final List<Element> e_links)
-    throws URISyntaxException,
-      OPDSFeedParseException
+    throws URISyntaxException
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
@@ -185,7 +180,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         final String uri_text =
           NullCheck.notNull(OPDSFeedParser.FEATURED_URI_PREFIX.toString());
         if (text.equals(uri_text)) {
-          return Option.some(OPDSFeedParser.getLinkHref(e, uri_text));
+          return Option.some(new URI(e.getAttribute("href")));
         }
       }
     }
@@ -204,28 +199,47 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       URISyntaxException
   {
     /**
-     * First, look for a link that has a rel attribute with a value equal to
-     * "subsection". Use the value of the href attribute if one exists.
+     * Look for a link that has a <i>type</i> attribute that designates it as
+     * some sort of feed, and has a <i>rel</i> attribute that designates the
+     * feed as a <tt>subsection</tt>.
      */
 
     for (final Element e : e_links) {
-      if (e.hasAttribute("rel")) {
-        final String text = e.getAttribute("rel");
-        assert text != null;
-        if (text.equals("subsection")) {
-          return OPDSFeedParser.getLinkHref(e, "subsection");
+      if (e.hasAttribute("type")) {
+        final String type_text = e.getAttribute("type");
+        assert type_text != null;
+
+        /**
+         * Acquisition feeds are often missing <tt>rel</tt> attributes, and
+         * the links that are missing them are typically the link that should
+         * be followed.
+         */
+
+        if ("application/atom+xml;profile=opds-catalog;kind=acquisition"
+          .equals(type_text)) {
+          if (e.hasAttribute("rel")) {
+            final String rel_text = e.getAttribute("rel");
+            if (rel_text.equals("subsection")) {
+              return new URI(e.getAttribute("href"));
+            }
+          } else {
+            return new URI(e.getAttribute("href"));
+          }
         }
-      }
-    }
 
-    /**
-     * Otherwise, look for a link that contains a single href attribute.
-     */
+        /**
+         * Navigation feeds are supposed to be designated with
+         * <tt>rel=subsection</tt>.
+         */
 
-    for (final Element e : e_links) {
-      if (e.getAttributes().getLength() == 1) {
-        if (e.hasAttribute("href")) {
-          return new URI(e.getAttribute("href"));
+        if ("application/atom+xml;profile=opds-catalog;kind=navigation"
+          .equals(type_text)) {
+          if (e.hasAttribute("rel")) {
+            final String rel_text = e.getAttribute("rel");
+            if (rel_text.equals("subsection")) {
+              return new URI(e.getAttribute("href"));
+            }
+          }
         }
       }
     }
@@ -291,29 +305,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         OPDSFeedParser.ATOM_URI,
         "updated");
     return OPDSRFC3339Formatter.parseRFC3339Date(e_updated_raw);
-  }
-
-  /**
-   * Fetch the contents of the <code>href</code> attribute from the given
-   * element, assuming that the <code>rel</code> attribute contained
-   * <code>rel</code>.
-   */
-
-  private static URI getLinkHref(
-    final Element e,
-    final String rel)
-    throws OPDSFeedParseException,
-      URISyntaxException
-  {
-    if (e.hasAttribute("href") == false) {
-      final StringBuilder m = new StringBuilder();
-      m.append("A link was given with a rel attribute of '");
-      m.append(rel);
-      m.append("' but without a href attribute");
-      throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
-    }
-
-    return new URI(e.getAttribute("href"));
   }
 
   public static OPDSFeedParserType newParser()
