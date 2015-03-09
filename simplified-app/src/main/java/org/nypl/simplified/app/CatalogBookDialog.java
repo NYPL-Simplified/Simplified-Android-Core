@@ -17,6 +17,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
@@ -96,6 +97,9 @@ import com.io7m.jnull.Nullable;
 
     final ViewGroup header =
       NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_header));
+    final ViewGroup header_left =
+      NullCheck.notNull((ViewGroup) header
+        .findViewById(R.id.book_header_left));
     final TextView header_title =
       NullCheck.notNull((TextView) header
         .findViewById(R.id.book_header_title));
@@ -133,6 +137,21 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull((ViewGroup) layout
         .findViewById(R.id.book_related_layout));
 
+    /**
+     * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
+     * ratio and set the width of the cover layout.
+     */
+
+    final int cover_height = header_cover.getLayoutParams().height;
+    final int cover_width = (int) ((cover_height / 4.0) * 3.0);
+    final LinearLayout.LayoutParams cp =
+      new LinearLayout.LayoutParams(cover_width, LayoutParams.WRAP_CONTENT);
+    header_left.setLayoutParams(cp);
+
+    /**
+     * Configure detail texts.
+     */
+
     CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
     CatalogBookDetail.configureSummaryWebView(e, summary_text);
     CatalogBookDetail.configureAcquisitions(
@@ -157,7 +176,6 @@ import com.io7m.jnull.Nullable;
     final Simplified app = Simplified.get();
     final CatalogAcquisitionCoverCacheType cover_loader =
       app.getCatalogAcquisitionCoverLoader();
-    final int cover_height = header_cover.getLayoutParams().height;
 
     this.loading_cover =
       cover_loader.getCoverAsynchronous(
