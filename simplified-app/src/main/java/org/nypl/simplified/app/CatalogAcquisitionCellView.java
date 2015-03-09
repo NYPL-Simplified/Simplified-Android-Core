@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -59,19 +60,37 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     final TextView cell_authors =
       NullCheck.notNull((TextView) this.findViewById(R.id.cell_authors));
 
-    this.cell_cover_layout =
-      NullCheck
-        .notNull((ViewGroup) this.findViewById(R.id.cell_cover_layout));
-    this.cell_cover = new ImageView(this.getContext());
-
-    cell_title.setText(in_entry.getTitle());
-    CatalogBookDetail.configureViewTextAuthor(in_entry, cell_authors);
+    /**
+     * Set the height of the row.
+     */
 
     final AbsListView.LayoutParams p =
       new AbsListView.LayoutParams(
         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
         in_row_height);
     this.setLayoutParams(p);
+
+    /**
+     * The height of the row is known, so assume a roughly 4:3 aspect ratio
+     * for cover images and calculate the width of the cover layout in pixels.
+     */
+
+    final ViewGroup ccl =
+      NullCheck
+        .notNull((ViewGroup) this.findViewById(R.id.cell_cover_layout));
+    final int cover_width = (int) ((in_row_height / 4.0) * 3.0);
+    final LinearLayout.LayoutParams ccl_p =
+      new LinearLayout.LayoutParams(cover_width, in_row_height);
+    ccl.setLayoutParams(ccl_p);
+    this.cell_cover_layout = ccl;
+    this.cell_cover = new ImageView(this.getContext());
+
+    /**
+     * Set the cell texts.
+     */
+
+    cell_title.setText(in_entry.getTitle());
+    CatalogBookDetail.configureViewTextAuthor(in_entry, cell_authors);
 
     this.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
