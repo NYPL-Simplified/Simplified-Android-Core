@@ -79,6 +79,8 @@ final class CatalogBookDetail
     summary_text_settings.setBlockNetworkLoads(true);
     summary_text_settings.setBlockNetworkImage(true);
     summary_text_settings.setDefaultTextEncodingName("UTF-8");
+    summary_text_settings.setDefaultFixedFontSize(12);
+    summary_text_settings.setDefaultFontSize(12);
     summary_text.loadDataWithBaseURL(
       null,
       text.toString(),

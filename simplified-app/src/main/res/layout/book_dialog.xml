@@ -136,7 +136,6 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
       android:text="Book publisher"
-      android:textAppearance="?android:attr/textAppearanceLarge"
       android:textColor="@color/normal_text_major"/>
 
     <WebView
