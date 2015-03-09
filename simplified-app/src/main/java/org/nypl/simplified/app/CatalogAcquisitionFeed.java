@@ -23,13 +23,15 @@ public final class CatalogAcquisitionFeed implements
   private final ArrayAdapter<OPDSAcquisitionFeedEntry> adapter;
   private final OPDSAcquisitionFeed                    feed;
   private final ScreenSizeControllerType               screen;
+  private final CatalogAcquisitionFeedListenerType     listener;
 
   public CatalogAcquisitionFeed(
     final Context in_context,
     final ArrayAdapter<OPDSAcquisitionFeedEntry> in_adapter,
     final ScreenSizeControllerType in_screen,
     final OPDSAcquisitionFeed in_feed,
-    final Activity in_activity)
+    final Activity in_activity,
+    final CatalogAcquisitionFeedListenerType in_listener)
   {
     NullCheck.notNull(in_context);
 
@@ -38,6 +40,7 @@ public final class CatalogAcquisitionFeed implements
     this.feed = NullCheck.notNull(in_feed);
     this.activity = NullCheck.notNull(in_activity);
     this.screen = NullCheck.notNull(in_screen);
+    this.listener = NullCheck.notNull(in_listener);
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -86,7 +89,8 @@ public final class CatalogAcquisitionFeed implements
         this.activity,
         this.screen,
         e,
-        row_height);
+        row_height,
+        this.listener);
 
     cv.expensiveRequestDisplay();
     return cv;

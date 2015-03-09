@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
@@ -38,13 +39,15 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     final Context context,
     final ScreenSizeControllerType screen,
     final OPDSAcquisitionFeedEntry in_entry,
-    final int in_row_height)
+    final int in_row_height,
+    final CatalogAcquisitionFeedListenerType in_listener)
   {
     super(context, null);
 
     NullCheck.notNull(screen);
     this.entry = NullCheck.notNull(in_entry);
     this.row_height = in_row_height;
+    NullCheck.notNull(in_listener);
 
     final LayoutInflater inflater =
       (LayoutInflater) context
@@ -69,6 +72,14 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
         android.view.ViewGroup.LayoutParams.MATCH_PARENT,
         in_row_height);
     this.setLayoutParams(p);
+
+    this.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        in_listener.onSelectBook(CatalogAcquisitionCellView.this, in_entry);
+      }
+    });
   }
 
   @Override public void expensiveRequestDisplay()

@@ -36,8 +36,8 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class CatalogFeedActivity extends CatalogActivity implements
-  CatalogNavigationLaneViewListenerType
+@SuppressWarnings("synthetic-access") public final class CatalogFeedActivity extends
+  CatalogActivity
 {
   private static final String CATALOG_URI;
   private static final String TAG;
@@ -198,8 +198,18 @@ public final class CatalogFeedActivity extends CatalogActivity implements
 
     final Simplified app = Simplified.get();
 
+    final CatalogAcquisitionFeedListenerType listener =
+      new CatalogAcquisitionFeedListenerType() {
+        @Override public void onSelectBook(
+          final CatalogAcquisitionCellView v,
+          final OPDSAcquisitionFeedEntry e)
+        {
+          CatalogFeedActivity.this.onSelectedBook(app, new_up_stack, e);
+        }
+      };
+
     final CatalogAcquisitionFeed f =
-      new CatalogAcquisitionFeed(this, in_adapter, app, af, this);
+      new CatalogAcquisitionFeed(this, in_adapter, app, af, this, listener);
 
     grid_view.setAdapter(f);
     grid_view.setRecyclerListener(f);
@@ -273,30 +283,14 @@ public final class CatalogFeedActivity extends CatalogActivity implements
           final CatalogNavigationLaneView v,
           final OPDSAcquisitionFeedEntry e)
         {
-          Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
-
-          if (app.screenIsLarge()) {
-            final CatalogBookDialog df = CatalogBookDialog.newDialog(e);
-            final FragmentManager fm =
-              CatalogFeedActivity.this.getFragmentManager();
-            df.show(fm, "book-detail");
-          } else {
-            CatalogBookDetailActivity.startNewActivity(
-              CatalogFeedActivity.this,
-              new_up_stack,
-              e);
-          }
+          CatalogFeedActivity.this.onSelectedBook(app, new_up_stack, e);
         }
 
         @Override public void onSelectFeed(
           final CatalogNavigationLaneView v,
           final OPDSNavigationFeedEntry feed)
         {
-          Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
-          CatalogFeedActivity.startNewActivity(
-            CatalogFeedActivity.this,
-            new_up_stack,
-            feed.getTargetURI());
+          CatalogFeedActivity.this.onSelectedFeed(new_up_stack, feed);
         }
       };
 
@@ -359,20 +353,6 @@ public final class CatalogFeedActivity extends CatalogActivity implements
     this.loading = this.getFeed(this.getURI(), loader);
   }
 
-  @Override public void onSelectBook(
-    final CatalogNavigationLaneView v,
-    final OPDSAcquisitionFeedEntry e)
-  {
-    Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + e);
-  }
-
-  @Override public void onSelectFeed(
-    final CatalogNavigationLaneView v,
-    final OPDSNavigationFeedEntry feed)
-  {
-    Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + feed);
-  }
-
   @Override protected void onStop()
   {
     super.onStop();
@@ -391,5 +371,36 @@ public final class CatalogFeedActivity extends CatalogActivity implements
         l.cancel(true);
       }
     }
+  }
+
+  private void onSelectedBook(
+    final Simplified app,
+    final ImmutableList<URI> new_up_stack,
+    final OPDSAcquisitionFeedEntry e)
+  {
+    Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
+
+    if (app.screenIsLarge()) {
+      final CatalogBookDialog df = CatalogBookDialog.newDialog(e);
+      final FragmentManager fm =
+        CatalogFeedActivity.this.getFragmentManager();
+      df.show(fm, "book-detail");
+    } else {
+      CatalogBookDetailActivity.startNewActivity(
+        CatalogFeedActivity.this,
+        new_up_stack,
+        e);
+    }
+  }
+
+  private void onSelectedFeed(
+    final ImmutableList<URI> new_up_stack,
+    final OPDSNavigationFeedEntry feed)
+  {
+    Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
+    CatalogFeedActivity.startNewActivity(
+      CatalogFeedActivity.this,
+      new_up_stack,
+      feed.getTargetURI());
   }
 }
