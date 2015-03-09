@@ -21,12 +21,10 @@
       android:layout_alignParentRight="true"/>
   </RelativeLayout>
 
-  <!-- The height of this scroll view is modified at run-time -->
-
   <HorizontalScrollView
     android:id="@+id/feed_scroller"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="110dp"
     android:fillViewport="true">
   </HorizontalScrollView>
 

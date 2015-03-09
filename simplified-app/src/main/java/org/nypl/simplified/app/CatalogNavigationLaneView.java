@@ -82,16 +82,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         .findViewById(R.id.feed_scroller));
     this.scroller.setHorizontalScrollBarEnabled(false);
 
-    /**
-     * Adjust scrollview height based on thumbnail size.
-     */
-
-    final android.view.ViewGroup.LayoutParams p =
-      new LayoutParams(
-        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-        CatalogImageSizeEstimates.navigationFeedThumbnailHeight(screen));
-    this.scroller.setLayoutParams(p);
-
     this.title.setText(e.getTitle());
     this.title.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
@@ -256,7 +246,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         app,
         this,
         app.getListeningExecutorService(),
-        app.getCatalogAcquisitionThumbnailLoader(),
+        app.getCatalogThumbnailLoader(),
         af.getFeedEntries(),
         this.listener,
         slp.height,

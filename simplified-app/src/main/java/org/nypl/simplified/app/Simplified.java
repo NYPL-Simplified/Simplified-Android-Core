@@ -200,7 +200,7 @@ public final class Simplified extends Application implements
   }
 
   private @Nullable CatalogAcquisitionCoverCacheType     catalog_acquisition_cover_loader;
-  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_acquisition_thumbnail_loader;
+  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_thumbnail_loader;
   private @Nullable ListeningExecutorService             exec_decor;
   private @Nullable ExecutorService                      executor;
   private @Nullable URI                                  feed_initial_uri;
@@ -213,11 +213,9 @@ public final class Simplified extends Application implements
     return NullCheck.notNull(this.catalog_acquisition_cover_loader);
   }
 
-  public
-    CatalogAcquisitionThumbnailCacheType
-    getCatalogAcquisitionThumbnailLoader()
+  public CatalogAcquisitionThumbnailCacheType getCatalogThumbnailLoader()
   {
-    return NullCheck.notNull(this.catalog_acquisition_thumbnail_loader);
+    return NullCheck.notNull(this.catalog_thumbnail_loader);
   }
 
   public URI getFeedInitialURI()
@@ -299,7 +297,7 @@ public final class Simplified extends Application implements
       this.executor = e;
       this.exec_decor = le;
       this.feed_loader = Simplified.makeFeedLoader(e);
-      this.catalog_acquisition_thumbnail_loader =
+      this.catalog_thumbnail_loader =
         Simplified.makeThumbnailCache(le, this, this, rr);
       this.catalog_acquisition_cover_loader =
         Simplified.makeCoverCache(le, this, this, rr);

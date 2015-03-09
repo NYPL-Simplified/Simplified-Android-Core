@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,20 +33,17 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
   private boolean                            displayed;
   private final OPDSAcquisitionFeedEntry     entry;
   private @Nullable ListenableFuture<Bitmap> loading;
-  private final int                          row_height;
 
   public CatalogAcquisitionCellView(
     final Context context,
     final ScreenSizeControllerType screen,
     final OPDSAcquisitionFeedEntry in_entry,
-    final int in_row_height,
     final CatalogAcquisitionFeedListenerType in_listener)
   {
     super(context, null);
 
     NullCheck.notNull(screen);
     this.entry = NullCheck.notNull(in_entry);
-    this.row_height = in_row_height;
     NullCheck.notNull(in_listener);
 
     final LayoutInflater inflater =
@@ -61,16 +57,6 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
       NullCheck.notNull((TextView) this.findViewById(R.id.cell_authors));
 
     /**
-     * Set the height of the row.
-     */
-
-    final AbsListView.LayoutParams p =
-      new AbsListView.LayoutParams(
-        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-        in_row_height);
-    this.setLayoutParams(p);
-
-    /**
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
      * for cover images and calculate the width of the cover layout in pixels.
      */
@@ -78,9 +64,10 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     final ViewGroup ccl =
       NullCheck
         .notNull((ViewGroup) this.findViewById(R.id.cell_cover_layout));
-    final int cover_width = (int) ((in_row_height / 4.0) * 3.0);
+    final int cover_height = ccl.getLayoutParams().height;
+    final int cover_width = (int) ((cover_height / 4.0) * 3.0);
     final LinearLayout.LayoutParams ccl_p =
-      new LinearLayout.LayoutParams(cover_width, in_row_height);
+      new LinearLayout.LayoutParams(cover_width, cover_height);
     ccl.setLayoutParams(ccl_p);
     this.cell_cover_layout = ccl;
     this.cell_cover = new ImageView(this.getContext());
@@ -121,13 +108,14 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
 
     final Simplified app = Simplified.get();
     final CatalogAcquisitionThumbnailCacheType loader =
-      app.getCatalogAcquisitionThumbnailLoader();
+      app.getCatalogThumbnailLoader();
 
     final ImageView image_view = this.cell_cover;
     final ViewGroup image_container = this.cell_cover_layout;
 
     final BitmapDisplaySizeType size =
-      new BitmapDisplayHeightPreserveAspect(this.row_height);
+      new BitmapDisplayHeightPreserveAspect(
+        image_container.getLayoutParams().height);
 
     this.loading =
       loader.getThumbnailAsynchronous(

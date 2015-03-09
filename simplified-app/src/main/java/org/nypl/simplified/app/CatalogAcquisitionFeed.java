@@ -78,9 +78,6 @@ public final class CatalogAcquisitionFeed implements
     final @Nullable View convertView,
     final @Nullable ViewGroup parent)
   {
-    final int row_height =
-      CatalogImageSizeEstimates
-        .acquisitionFeedLargeThumbnailHeight(this.screen);
     final OPDSAcquisitionFeedEntry e =
       NullCheck.notNull(this.feed.getFeedEntries().get(position));
 
@@ -89,7 +86,6 @@ public final class CatalogAcquisitionFeed implements
         this.activity,
         this.screen,
         e,
-        row_height,
         this.listener);
 
     cv.expensiveRequestDisplay();
