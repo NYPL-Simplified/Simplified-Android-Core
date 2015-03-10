@@ -111,6 +111,13 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       OPDSFeedParser.IMAGE_URI);
   }
 
+  private static OptionType<URI> findAcquisitionNext(
+    final List<Element> e_links)
+    throws URISyntaxException
+  {
+    return OPDSFeedParser.findLinkWithURIRelText(e_links, "next");
+  }
+
   private static void findAcquisitionRelations(
     final List<Element> e_links,
     final OPDSAcquisitionFeedEntryBuilderType eb)
@@ -156,11 +163,19 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final URI uri)
     throws URISyntaxException
   {
+    final String uri_text = NullCheck.notNull(uri.toString());
+    return OPDSFeedParser.findLinkWithURIRelText(e_links, uri_text);
+  }
+
+  private static OptionType<URI> findLinkWithURIRelText(
+    final List<Element> e_links,
+    final String text)
+    throws URISyntaxException
+  {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
         final String rel = e.getAttribute("rel");
-        final String uri_text = NullCheck.notNull(uri.toString());
-        if (rel.equals(uri_text)) {
+        if (rel.equals(text)) {
           return Option.some(new URI(e.getAttribute("href")));
         }
       }
@@ -331,6 +346,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       b.addEntry(OPDSFeedParser.parseAcquisitionEntry(ee));
     }
 
+    b.setNextOption(OPDSFeedParser.findAcquisitionNext(links));
     return b.build();
   }
 

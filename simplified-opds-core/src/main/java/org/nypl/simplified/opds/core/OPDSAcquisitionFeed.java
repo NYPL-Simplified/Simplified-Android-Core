@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -21,6 +23,7 @@ import com.io7m.jnull.Nullable;
   {
     private final List<OPDSAcquisitionFeedEntry> entries;
     private final String                         id;
+    private OptionType<URI>                      next;
     private final String                         title;
     private final Calendar                       updated;
     private final URI                            uri;
@@ -36,6 +39,7 @@ import com.io7m.jnull.Nullable;
       this.id = NullCheck.notNull(in_id);
       this.updated = NullCheck.notNull(in_updated);
       this.entries = new ArrayList<OPDSAcquisitionFeedEntry>();
+      this.next = Option.none();
     }
 
     @Override public void addEntry(
@@ -51,7 +55,14 @@ import com.io7m.jnull.Nullable;
         this.entries,
         this.id,
         this.updated,
-        this.title);
+        this.title,
+        this.next);
+    }
+
+    @Override public void setNextOption(
+      final OptionType<URI> in_next)
+    {
+      this.next = NullCheck.notNull(in_next);
     }
   }
 
@@ -68,6 +79,7 @@ import com.io7m.jnull.Nullable;
 
   private final List<OPDSAcquisitionFeedEntry> entries;
   private final String                         id;
+  private final OptionType<URI>                next;
   private final String                         title;
   private final Calendar                       updated;
   private final URI                            uri;
@@ -77,7 +89,8 @@ import com.io7m.jnull.Nullable;
     final List<OPDSAcquisitionFeedEntry> in_entries,
     final String in_id,
     final Calendar in_updated,
-    final String in_title)
+    final String in_title,
+    final OptionType<URI> in_next)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.entries =
@@ -85,6 +98,7 @@ import com.io7m.jnull.Nullable;
     this.id = NullCheck.notNull(in_id);
     this.updated = NullCheck.notNull(in_updated);
     this.title = NullCheck.notNull(in_title);
+    this.next = NullCheck.notNull(in_next);
   }
 
   @Override public boolean equals(
@@ -104,7 +118,8 @@ import com.io7m.jnull.Nullable;
       && this.entries.equals(other.entries)
       && this.id.equals(other.id)
       && this.title.equals(other.title)
-      && this.updated.equals(other.updated);
+      && this.updated.equals(other.updated)
+      && this.next.equals(other.next);
   }
 
   public List<OPDSAcquisitionFeedEntry> getFeedEntries()
@@ -132,6 +147,11 @@ import com.io7m.jnull.Nullable;
     return this.uri;
   }
 
+  public OptionType<URI> getNext()
+  {
+    return this.next;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -141,6 +161,7 @@ import com.io7m.jnull.Nullable;
     result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.title.hashCode();
     result = (prime * result) + this.updated.hashCode();
+    result = (prime * result) + this.next.hashCode();
     return result;
   }
 

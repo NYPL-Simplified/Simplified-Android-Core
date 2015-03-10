@@ -21,6 +21,7 @@ import org.w3c.dom.DOMException;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialProcedureType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
@@ -107,6 +108,36 @@ public final class OPDSFeedParserContract implements
 
       System.out.println("--");
     }
+  }
+
+  @Override public void testAcquisitionFeedPaginated0()
+    throws Exception
+  {
+    final URI uri =
+      URI
+        .create("http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author");
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final InputStream d =
+      OPDSFeedParserContract.getResource("acquisition-paginated-0.xml");
+    final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(uri, d);
+    d.close();
+
+    TestUtilities
+      .assertEquals(
+        "http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author",
+        f.getFeedID());
+    TestUtilities.assertEquals(
+      "Biography & Memoir: By author",
+      f.getFeedTitle());
+    TestUtilities.assertEquals(50, f.getFeedEntries().size());
+    final Calendar u = f.getFeedUpdated();
+
+    final Some<URI> next_opt = (Some<URI>) f.getNext();
+
+    TestUtilities
+      .assertEquals(
+        "http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?after=155057&order=author",
+        next_opt.get().toString());
   }
 
   @Override public void testDOMException()

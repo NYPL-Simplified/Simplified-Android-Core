@@ -21,6 +21,12 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
     this.contract.testAcquisitionFeedFiction0();
   }
 
+  @Override public void testAcquisitionFeedPaginated0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedPaginated0();
+  }
+
   @Override public void testDOMException()
     throws Exception
   {
