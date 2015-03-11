@@ -114,7 +114,7 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     this.entry = new AtomicReference<OPDSAcquisitionFeedEntry>();
   }
 
-  @Override public void onFailure(
+  @Override public void onBitmapLoadingFailure(
     final OPDSAcquisitionFeedEntry key,
     final Throwable x)
   {
@@ -125,7 +125,7 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     Log.e(CatalogAcquisitionCellView.TAG, x.getMessage(), x);
   }
 
-  @Override public void onSuccess(
+  @Override public void onBitmapLoadingSuccess(
     final OPDSAcquisitionFeedEntry key,
     final Bitmap b)
   {

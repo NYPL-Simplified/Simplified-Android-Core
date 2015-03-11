@@ -57,7 +57,7 @@ public final class OPDSFeedLoaderContract implements
       fl.fromURI(
         new URI("http://example.com"),
         new OPDSFeedLoadListenerType() {
-          @Override public void onFailure(
+          @Override public void onFeedLoadingFailure(
             final Throwable supplied)
           {
             System.err.println("Caught: " + supplied);
@@ -65,7 +65,7 @@ public final class OPDSFeedLoaderContract implements
             caught.set(true);
           }
 
-          @Override public void onSuccess(
+          @Override public void onFeedLoadingSuccess(
             final OPDSFeedType f)
           {
             throw new UnreachableCodeException();
@@ -117,13 +117,13 @@ public final class OPDSFeedLoaderContract implements
       fl.fromURI(
         new URI("http://example.com"),
         new OPDSFeedLoadListenerType() {
-          @Override public void onFailure(
+          @Override public void onFeedLoadingFailure(
             final Throwable supplied)
           {
             throw new UnreachableCodeException();
           }
 
-          @Override public void onSuccess(
+          @Override public void onFeedLoadingSuccess(
             final OPDSFeedType f)
           {
             TestUtilities.assertEquals(f, feed);

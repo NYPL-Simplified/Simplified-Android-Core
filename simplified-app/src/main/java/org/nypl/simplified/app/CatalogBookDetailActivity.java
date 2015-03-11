@@ -227,7 +227,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
         e,
         new BitmapDisplayHeightPreserveAspect(cover_height),
         new BitmapCacheListenerType<OPDSAcquisitionFeedEntry>() {
-          @Override public void onFailure(
+          @Override public void onBitmapLoadingFailure(
             final OPDSAcquisitionFeedEntry key,
             final Throwable x)
           {
@@ -238,7 +238,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
             Log.e(CatalogBookDetailActivity.TAG, x.getMessage(), x);
           }
 
-          @Override public void onSuccess(
+          @Override public void onBitmapLoadingSuccess(
             final OPDSAcquisitionFeedEntry key,
             final Bitmap b)
           {

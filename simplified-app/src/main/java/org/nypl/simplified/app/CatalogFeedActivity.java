@@ -107,7 +107,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSFeedLoaderType loader)
   {
     return loader.fromURI(uri, new OPDSFeedLoadListenerType() {
-      @Override public void onFailure(
+      @Override public void onFeedLoadingFailure(
         final Throwable e)
       {
         CatalogFeedActivity.this.runOnUiThread(new Runnable() {
@@ -118,12 +118,12 @@ import com.io7m.junreachable.UnreachableCodeException;
         });
       }
 
-      @Override public void onSuccess(
+      @Override public void onFeedLoadingSuccess(
         final OPDSFeedType f)
       {
         f
           .matchFeedType(new OPDSFeedMatcherType<Unit, UnreachableCodeException>() {
-            @Override public Unit acquisition(
+            @Override public Unit onAcquisitionFeed(
               final OPDSAcquisitionFeed af)
             {
               CatalogFeedActivity.this.runOnUiThread(new Runnable() {
@@ -135,7 +135,7 @@ import com.io7m.junreachable.UnreachableCodeException;
               return Unit.unit();
             }
 
-            @Override public Unit navigation(
+            @Override public Unit onNavigationFeed(
               final OPDSNavigationFeed nf)
             {
               CatalogFeedActivity.this.runOnUiThread(new Runnable() {

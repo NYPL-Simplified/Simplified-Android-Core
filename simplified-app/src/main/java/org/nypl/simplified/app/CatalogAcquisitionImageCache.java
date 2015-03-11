@@ -127,13 +127,13 @@ public final class CatalogAcquisitionImageCache implements
       @Override public void onFailure(
         final @Nullable Throwable t)
       {
-        listener.onFailure(e, NullCheck.notNull(t));
+        listener.onBitmapLoadingFailure(e, NullCheck.notNull(t));
       }
 
       @Override public void onSuccess(
         final @Nullable Bitmap result)
       {
-        listener.onSuccess(e, NullCheck.notNull(result));
+        listener.onBitmapLoadingSuccess(e, NullCheck.notNull(result));
       }
     });
 
@@ -173,13 +173,13 @@ public final class CatalogAcquisitionImageCache implements
       @Override public void onFailure(
         final @Nullable Throwable t)
       {
-        listener.onFailure(e, NullCheck.notNull(t));
+        listener.onBitmapLoadingFailure(e, NullCheck.notNull(t));
       }
 
       @Override public void onSuccess(
         final @Nullable Bitmap result)
       {
-        listener.onSuccess(e, NullCheck.notNull(result));
+        listener.onBitmapLoadingSuccess(e, NullCheck.notNull(result));
       }
     });
 

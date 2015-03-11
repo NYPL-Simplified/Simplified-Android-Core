@@ -182,7 +182,7 @@ import com.io7m.jnull.Nullable;
         e,
         new BitmapDisplayHeightPreserveAspect(cover_height),
         new BitmapCacheListenerType<OPDSAcquisitionFeedEntry>() {
-          @Override public void onFailure(
+          @Override public void onBitmapLoadingFailure(
             final OPDSAcquisitionFeedEntry key,
             final Throwable x)
           {
@@ -193,7 +193,7 @@ import com.io7m.jnull.Nullable;
             Log.e(CatalogBookDialog.TAG, x.getMessage(), x);
           }
 
-          @Override public void onSuccess(
+          @Override public void onBitmapLoadingSuccess(
             final OPDSAcquisitionFeedEntry key,
             final Bitmap b)
           {
@@ -221,6 +221,17 @@ import com.io7m.jnull.Nullable;
     return layout;
   }
 
+  @Override public void onDestroyView()
+  {
+    super.onDestroyView();
+
+    final ListenableFuture<Bitmap> f = this.loading_cover;
+    if (f != null) {
+      f.cancel(true);
+      this.loading_cover = null;
+    }
+  }
+
   @Override public void onResume()
   {
     super.onResume();
@@ -244,16 +255,5 @@ import com.io7m.jnull.Nullable;
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);
-  }
-
-  @Override public void onDestroyView()
-  {
-    super.onDestroyView();
-
-    final ListenableFuture<Bitmap> f = this.loading_cover;
-    if (f != null) {
-      f.cancel(true);
-      this.loading_cover = null;
-    }
   }
 }

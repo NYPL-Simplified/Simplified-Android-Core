@@ -35,6 +35,12 @@ public final class BitmapCacheScalingDisk implements
     int                   width;
   }
 
+  private static final String                                      TAG;
+
+  static {
+    TAG = "BSDC";
+  }
+
   private static Bitmap decode(
     final MemoryControllerType mem,
     final URI uri,
@@ -74,39 +80,6 @@ public final class BitmapCacheScalingDisk implements
     } finally {
       is.close();
     }
-  }
-
-  private static void getScaledSize(
-    final MemoryControllerType mem,
-    final VectorM2I new_size,
-    final int current_width,
-    final int current_height,
-    final BitmapDisplaySizeType size)
-  {
-    size
-      .matchSize(new BitmapDisplaySizeMatcherType<Unit, UnreachableCodeException>() {
-        @Override public Unit matchHeightAspectPreserving(
-          final BitmapDisplayHeightPreserveAspect dh)
-        {
-          final double req_height = dh.getHeight();
-          final double cur_height = current_height;
-          final double ratio = req_height / cur_height;
-          final double res_width = current_width * ratio;
-
-          final int iw;
-          final int ih;
-          if (mem.memoryIsSmall()) {
-            iw = (int) res_width;
-            ih = (int) req_height;
-          } else {
-            iw = (int) res_width;
-            ih = (int) req_height;
-          }
-
-          new_size.set2I(iw, ih);
-          return Unit.unit();
-        }
-      });
   }
 
   private static IOException decodeFailed(
@@ -199,6 +172,39 @@ public final class BitmapCacheScalingDisk implements
       }).intValue();
   }
 
+  private static void getScaledSize(
+    final MemoryControllerType mem,
+    final VectorM2I new_size,
+    final int current_width,
+    final int current_height,
+    final BitmapDisplaySizeType size)
+  {
+    size
+      .matchSize(new BitmapDisplaySizeMatcherType<Unit, UnreachableCodeException>() {
+        @Override public Unit matchHeightAspectPreserving(
+          final BitmapDisplayHeightPreserveAspect dh)
+        {
+          final double req_height = dh.getHeight();
+          final double cur_height = current_height;
+          final double ratio = req_height / cur_height;
+          final double res_width = current_width * ratio;
+
+          final int iw;
+          final int ih;
+          if (mem.memoryIsSmall()) {
+            iw = (int) res_width;
+            ih = (int) req_height;
+          } else {
+            iw = (int) res_width;
+            ih = (int) req_height;
+          }
+
+          new_size.set2I(iw, ih);
+          return Unit.unit();
+        }
+      });
+  }
+
   /**
    * @return The SHA1 hash of the given URI.
    */
@@ -218,7 +224,6 @@ public final class BitmapCacheScalingDisk implements
       throw new UnreachableCodeException(e);
     }
   }
-
   public static BitmapCacheScalingDiskType newCache(
     final ListeningExecutorService e,
     final PartialFunctionType<URI, InputStream, IOException> in_transport,
@@ -230,16 +235,11 @@ public final class BitmapCacheScalingDisk implements
     final DiskLruCache in_cache = DiskLruCache.open(in_file, 1, 1, size);
     return new BitmapCacheScalingDisk(e, in_cache, in_transport, in_mem);
   }
-
-  private final MemoryControllerType                               memory;
   private final DiskLruCache                                       cache;
   private final ListeningExecutorService                           exec;
-  private final PartialFunctionType<URI, InputStream, IOException> transport;
-  private static final String                                      TAG;
+  private final MemoryControllerType                               memory;
 
-  static {
-    TAG = "BSDC";
-  }
+  private final PartialFunctionType<URI, InputStream, IOException> transport;
 
   private BitmapCacheScalingDisk(
     final ListeningExecutorService e,

@@ -69,22 +69,22 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
     if (c.containsKey(uri)) {
       final OPDSFeedType r = NullCheck.notNull(c.get(uri));
       final ListenableFuture<OPDSFeedType> f = Futures.immediateFuture(r);
-      p.onSuccess(r);
+      p.onFeedLoadingSuccess(r);
       return NullCheck.notNull(f);
     }
 
     return this.actual.fromURI(uri, new OPDSFeedLoadListenerType() {
-      @Override public void onFailure(
+      @Override public void onFeedLoadingFailure(
         final Throwable e)
       {
-        p.onFailure(e);
+        p.onFeedLoadingFailure(e);
       }
 
-      @Override public void onSuccess(
+      @Override public void onFeedLoadingSuccess(
         final OPDSFeedType f)
       {
         c.put(uri, f);
-        p.onSuccess(f);
+        p.onFeedLoadingSuccess(f);
       }
     });
   }

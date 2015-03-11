@@ -25,8 +25,8 @@ public final class CatalogNavigationFeed implements
   private final Activity                              activity;
   private final ArrayAdapter<OPDSNavigationFeedEntry> adapter;
   private final OPDSNavigationFeed                    feed;
-  private final CatalogNavigationLaneViewListenerType listener;
   private final List<CatalogNavigationLaneView>       lanes;
+  private final CatalogNavigationLaneViewListenerType listener;
 
   public CatalogNavigationFeed(
     final Context in_context,

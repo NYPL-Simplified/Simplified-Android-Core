@@ -89,36 +89,6 @@ public final class CatalogAcquisitionFeed implements
     this.loading = this.loadNext(this.uri_next);
   }
 
-  @Override public Unit acquisition(
-    final OPDSAcquisitionFeed af)
-    throws UnreachableCodeException
-  {
-    Log.d(
-      CatalogAcquisitionFeed.TAG,
-      String.format("received %s", af.getFeedID()));
-
-    this.uri_next.set(af.getNext());
-
-    final Map<String, Unit> entries = this.entries_received;
-    final ArrayAdapter<OPDSAcquisitionFeedEntry> a = this.adapter;
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        for (final OPDSAcquisitionFeedEntry e : af.getFeedEntries()) {
-          if (entries.containsKey(e.getID())) {
-            continue;
-          }
-          entries.put(e.getID(), Unit.unit());
-          a.add(e);
-        }
-
-        a.notifyDataSetChanged();
-      }
-    });
-
-    return Unit.unit();
-  }
-
   @Override public boolean areAllItemsEnabled()
   {
     return NullCheck.notNull(this.adapter).areAllItemsEnabled();
@@ -217,18 +187,37 @@ public final class CatalogAcquisitionFeed implements
     return null;
   }
 
-  @Override public Unit navigation(
-    final OPDSNavigationFeed nf)
+  @Override public Unit onAcquisitionFeed(
+    final OPDSAcquisitionFeed af)
     throws UnreachableCodeException
   {
-    Log.e(CatalogAcquisitionFeed.TAG, String.format(
-      "received navigation feed instead of acquisition feed (%s)",
-      nf.getFeedID()));
+    Log.d(
+      CatalogAcquisitionFeed.TAG,
+      String.format("received %s", af.getFeedID()));
+
+    this.uri_next.set(af.getNext());
+
+    final Map<String, Unit> entries = this.entries_received;
+    final ArrayAdapter<OPDSAcquisitionFeedEntry> a = this.adapter;
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        for (final OPDSAcquisitionFeedEntry e : af.getFeedEntries()) {
+          if (entries.containsKey(e.getID())) {
+            continue;
+          }
+          entries.put(e.getID(), Unit.unit());
+          a.add(e);
+        }
+
+        a.notifyDataSetChanged();
+      }
+    });
 
     return Unit.unit();
   }
 
-  @Override public void onFailure(
+  @Override public void onFeedLoadingFailure(
     final Throwable e)
   {
     this.loading = null;
@@ -238,6 +227,24 @@ public final class CatalogAcquisitionFeed implements
     }
 
     Log.e(CatalogAcquisitionFeed.TAG, e.getMessage(), e);
+  }
+
+  @Override public void onFeedLoadingSuccess(
+    final OPDSFeedType f)
+  {
+    this.loading = null;
+    f.matchFeedType(this);
+  }
+
+  @Override public Unit onNavigationFeed(
+    final OPDSNavigationFeed nf)
+    throws UnreachableCodeException
+  {
+    Log.e(CatalogAcquisitionFeed.TAG, String.format(
+      "received navigation feed instead of acquisition feed (%s)",
+      nf.getFeedID()));
+
+    return Unit.unit();
   }
 
   @Override public void onScroll(
@@ -265,13 +272,6 @@ public final class CatalogAcquisitionFeed implements
     final int state)
   {
     // Nothing
-  }
-
-  @Override public void onSuccess(
-    final OPDSFeedType f)
-  {
-    this.loading = null;
-    f.matchFeedType(this);
   }
 
   @Override public void registerDataSetObserver(

@@ -169,6 +169,6 @@ import com.io7m.jnull.Nullable;
     final OPDSFeedMatcherType<A, E> m)
     throws E
   {
-    return m.acquisition(this);
+    return m.onAcquisitionFeed(this);
   }
 }

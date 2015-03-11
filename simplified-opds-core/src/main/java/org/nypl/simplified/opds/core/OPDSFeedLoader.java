@@ -74,13 +74,13 @@ public final class OPDSFeedLoader implements OPDSFeedLoaderType
       @Override public void onFailure(
         final @Nullable Throwable t)
       {
-        p.onFailure(NullCheck.notNull(t));
+        p.onFeedLoadingFailure(NullCheck.notNull(t));
       }
 
       @Override public void onSuccess(
         final @Nullable OPDSFeedType result)
       {
-        p.onSuccess(NullCheck.notNull(result));
+        p.onFeedLoadingSuccess(NullCheck.notNull(result));
       }
     }, this.exec);
     return NullCheck.notNull(f);

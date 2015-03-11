@@ -22,26 +22,26 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 @SuppressWarnings("synthetic-access") public final class CatalogImageSetView extends
-  LinearLayout implements CancellableType
+  LinearLayout implements ExpensiveStoppableType
 {
-  private static final String                        TAG;
+  private static final String                         TAG;
 
   static {
     TAG = "CImagesView";
   }
 
-  private final CatalogAcquisitionThumbnailCacheType cache;
-  private final Runnable                             done_proc;
-  private final List<OPDSAcquisitionFeedEntry>       entries;
-  private final ListeningExecutorService             exec;
-  private int                                        image_height;
-  private final BitmapDisplaySizeType                image_opts;
-  private final List<ImageView>                      imageviews;
-  private final CatalogNavigationLaneViewListenerType          listener;
-  private final ListenableFuture<Unit>               loading;
-  private final AtomicBoolean                        want_cancel;
-  private final CatalogNavigationLaneView                      lane;
-  private final String                               id;
+  private final CatalogAcquisitionThumbnailCacheType  cache;
+  private final Runnable                              done_proc;
+  private final List<OPDSAcquisitionFeedEntry>        entries;
+  private final ListeningExecutorService              exec;
+  private final String                                id;
+  private int                                         image_height;
+  private final BitmapDisplaySizeType                 image_opts;
+  private final List<ImageView>                       imageviews;
+  private final CatalogNavigationLaneView             lane;
+  private final CatalogNavigationLaneViewListenerType listener;
+  private final ListenableFuture<Unit>                loading;
+  private final AtomicBoolean                         want_cancel;
 
   public CatalogImageSetView(
     final Context in_context,
@@ -107,13 +107,6 @@ import com.io7m.jnull.Nullable;
     }));
   }
 
-  @Override public void cancel()
-  {
-    Log.d(CatalogImageSetView.TAG, this.id + ": images cancelled");
-    this.want_cancel.set(true);
-    this.loading.cancel(true);
-  }
-
   private void done()
   {
     Log.d(CatalogImageSetView.TAG, this.id + ": images done");
@@ -128,6 +121,13 @@ import com.io7m.jnull.Nullable;
     });
   }
 
+  @Override public void expensiveStop()
+  {
+    Log.d(CatalogImageSetView.TAG, this.id + ": images cancelled");
+    this.want_cancel.set(true);
+    this.loading.cancel(true);
+  }
+
   private void load()
   {
     for (int index = 0; index < this.entries.size(); ++index) {
@@ -138,7 +138,8 @@ import com.io7m.jnull.Nullable;
 
       final OPDSAcquisitionFeedEntry e =
         NullCheck.notNull(this.entries.get(index));
-      final CatalogNavigationLaneViewListenerType closure_listener = this.listener;
+      final CatalogNavigationLaneViewListenerType closure_listener =
+        this.listener;
       final CatalogNavigationLaneView closure_lane = this.lane;
 
       final ImageView i = NullCheck.notNull(this.imageviews.get(index));

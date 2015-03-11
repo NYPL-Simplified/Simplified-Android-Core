@@ -124,7 +124,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.scroller_position = this.scroller.getScrollX();
 
     if (this.images != null) {
-      this.images.cancel();
+      this.images.expensiveStop();
     }
 
     this.scroller.setVisibility(View.INVISIBLE);
@@ -160,7 +160,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final OPDSFeedLoaderType loader = app.getFeedLoader();
       this.loading =
         loader.fromURI(some.get(), new OPDSFeedLoadListenerType() {
-          @Override public void onFailure(
+          @Override public void onFeedLoadingFailure(
             final Throwable ex)
           {
             if (ex instanceof CancellationException) {
@@ -181,12 +181,12 @@ import com.io7m.junreachable.UnreachableCodeException;
             });
           }
 
-          @Override public void onSuccess(
+          @Override public void onFeedLoadingSuccess(
             final OPDSFeedType f)
           {
             f
               .matchFeedType(new OPDSFeedMatcherType<Unit, UnreachableCodeException>() {
-                @Override public Unit acquisition(
+                @Override public Unit onAcquisitionFeed(
                   final OPDSAcquisitionFeed af)
                 {
                   UIThread.runOnUIThread(new Runnable() {
@@ -199,7 +199,7 @@ import com.io7m.junreachable.UnreachableCodeException;
                   return Unit.unit();
                 }
 
-                @Override public Unit navigation(
+                @Override public Unit onNavigationFeed(
                   final OPDSNavigationFeed nf)
                 {
                   UIThread.runOnUIThread(new Runnable() {
