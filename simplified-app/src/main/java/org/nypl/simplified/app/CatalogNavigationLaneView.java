@@ -32,7 +32,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("synthetic-access") public final class CatalogNavigationLaneView extends
-  LinearLayout implements ExpensiveDisplayableType
+  LinearLayout implements ExpensiveType
 {
   private static final String                               TAG;
 
@@ -101,7 +101,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     this(context, null, screen, e, in_listener);
   }
 
-  @Override public void expensiveRequestDisplay()
+  @Override public void expensiveStart()
   {
     UIThread.checkIsUIThread();
 
@@ -116,7 +116,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  @Override public void expensiveRequestStopDisplaying()
+  @Override public void expensiveStop()
   {
     UIThread.checkIsUIThread();
 

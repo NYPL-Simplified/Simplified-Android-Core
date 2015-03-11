@@ -75,6 +75,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     from.startActivity(i);
   }
 
+  private @Nullable ExpensiveStoppableType         cancellable;
   private @Nullable ListenableFuture<OPDSFeedType> loading;
   private @Nullable ViewGroup                      progress_layout;
 
@@ -88,6 +89,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     } else {
       bar.setDisplayHomeAsUpEnabled(false);
       bar.setHomeButtonEnabled(false);
+    }
+  }
+
+  private void configureUpButtonTitle(
+    final String title,
+    final List<URI> up_stack)
+  {
+    final ActionBar bar = this.getActionBar();
+    if (up_stack.isEmpty() == false) {
+      bar.setTitle(title);
     }
   }
 
@@ -152,6 +163,18 @@ import com.io7m.junreachable.UnreachableCodeException;
     return app.getFeedInitialURI();
   }
 
+  private ImmutableList<URI> newUpStack(
+    final URI feed_uri)
+  {
+    final List<URI> up_stack = this.getUpStack();
+    final Builder<URI> new_up_stack_b = ImmutableList.builder();
+    new_up_stack_b.addAll(up_stack);
+    new_up_stack_b.add(feed_uri);
+    final ImmutableList<URI> new_up_stack =
+      NullCheck.notNull(new_up_stack_b.build());
+    return new_up_stack;
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -190,9 +213,6 @@ import com.io7m.junreachable.UnreachableCodeException;
       NullCheck.notNull((GridView) layout
         .findViewById(R.id.catalog_acq_feed_grid));
 
-    final ArrayAdapter<OPDSAcquisitionFeedEntry> in_adapter =
-      new ArrayAdapter<OPDSAcquisitionFeedEntry>(this, 0, af.getFeedEntries());
-
     final URI feed_uri = af.getFeedURI();
     final ImmutableList<URI> new_up_stack = this.newUpStack(feed_uri);
 
@@ -209,13 +229,20 @@ import com.io7m.junreachable.UnreachableCodeException;
       };
 
     final CatalogAcquisitionFeed f =
-      new CatalogAcquisitionFeed(this, in_adapter, app, af, this, listener);
+      new CatalogAcquisitionFeed(
+        this,
+        af,
+        this,
+        listener,
+        app.getFeedLoader());
 
     grid_view.setAdapter(f);
-    grid_view.setRecyclerListener(f);
+    grid_view.setOnScrollListener(f);
 
     content_area.addView(layout);
     content_area.requestLayout();
+
+    this.cancellable = f;
   }
 
   private void onReceiveFeedError(
@@ -310,28 +337,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     content_area.requestLayout();
   }
 
-  private ImmutableList<URI> newUpStack(
-    final URI feed_uri)
-  {
-    final List<URI> up_stack = this.getUpStack();
-    final Builder<URI> new_up_stack_b = ImmutableList.builder();
-    new_up_stack_b.addAll(up_stack);
-    new_up_stack_b.add(feed_uri);
-    final ImmutableList<URI> new_up_stack =
-      NullCheck.notNull(new_up_stack_b.build());
-    return new_up_stack;
-  }
-
-  private void configureUpButtonTitle(
-    final String title,
-    final List<URI> up_stack)
-  {
-    final ActionBar bar = this.getActionBar();
-    if (up_stack.isEmpty() == false) {
-      bar.setTitle(title);
-    }
-  }
-
   @Override protected void onResume()
   {
     super.onResume();
@@ -351,26 +356,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Simplified app = Simplified.get();
     final OPDSFeedLoaderType loader = app.getFeedLoader();
     this.loading = this.getFeed(this.getURI(), loader);
-  }
-
-  @Override protected void onStop()
-  {
-    super.onStop();
-    Log.d(CatalogFeedActivity.TAG, "onStop: " + this);
-    this.stopDownloading();
-
-    final FrameLayout content_area = this.getContentFrame();
-    content_area.removeAllViews();
-  }
-
-  private void stopDownloading()
-  {
-    final ListenableFuture<OPDSFeedType> l = this.loading;
-    if (l != null) {
-      if (l.isDone() == false) {
-        l.cancel(true);
-      }
-    }
   }
 
   private void onSelectedBook(
@@ -402,5 +387,30 @@ import com.io7m.junreachable.UnreachableCodeException;
       CatalogFeedActivity.this,
       new_up_stack,
       feed.getTargetURI());
+  }
+
+  @Override protected void onStop()
+  {
+    super.onStop();
+    Log.d(CatalogFeedActivity.TAG, "onStop: " + this);
+    this.stopDownloading();
+
+    final FrameLayout content_area = this.getContentFrame();
+    content_area.removeAllViews();
+  }
+
+  private void stopDownloading()
+  {
+    final ListenableFuture<OPDSFeedType> l = this.loading;
+    if (l != null) {
+      if (l.isDone() == false) {
+        l.cancel(true);
+      }
+    }
+
+    final ExpensiveStoppableType c = this.cancellable;
+    if (c != null) {
+      c.expensiveStop();
+    }
   }
 }

@@ -1,51 +1,102 @@
 package org.nypl.simplified.app;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
+import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
+import org.nypl.simplified.opds.core.OPDSFeedMatcherType;
+import org.nypl.simplified.opds.core.OPDSFeedType;
+import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 
 import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView.RecyclerListener;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogAcquisitionFeed implements
   ListAdapter,
-  RecyclerListener
+  ExpensiveStoppableType,
+  OnScrollListener,
+  OPDSFeedLoadListenerType,
+  OPDSFeedMatcherType<Unit, UnreachableCodeException>
 {
-  private final Activity                               activity;
-  private final ArrayAdapter<OPDSAcquisitionFeedEntry> adapter;
-  private final OPDSAcquisitionFeed                    feed;
-  private final ScreenSizeControllerType               screen;
-  private final CatalogAcquisitionFeedListenerType     listener;
+  private static final String                               TAG;
+
+  static {
+    TAG = "CAF";
+  }
+
+  private final Activity                                    activity;
+  private final ArrayAdapter<OPDSAcquisitionFeedEntry>      adapter;
+  private final Map<String, Unit>                           ids;
+  private final CatalogAcquisitionFeedListenerType          listener;
+  private final OPDSFeedLoaderType                          loader;
+  private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
+  private final AtomicReference<OptionType<URI>>            uri_next;
 
   public CatalogAcquisitionFeed(
     final Context in_context,
-    final ArrayAdapter<OPDSAcquisitionFeedEntry> in_adapter,
-    final ScreenSizeControllerType in_screen,
     final OPDSAcquisitionFeed in_feed,
     final Activity in_activity,
-    final CatalogAcquisitionFeedListenerType in_listener)
+    final CatalogAcquisitionFeedListenerType in_listener,
+    final OPDSFeedLoaderType in_feed_loader)
   {
     NullCheck.notNull(in_context);
+    NullCheck.notNull(in_feed);
 
-    this.adapter = NullCheck.notNull(in_adapter);
-    NullCheck.notNull(in_screen);
-    this.feed = NullCheck.notNull(in_feed);
     this.activity = NullCheck.notNull(in_activity);
-    this.screen = NullCheck.notNull(in_screen);
     this.listener = NullCheck.notNull(in_listener);
+
+    final ArrayAdapter<OPDSAcquisitionFeedEntry> in_adapter =
+      new ArrayAdapter<OPDSAcquisitionFeedEntry>(
+        in_context,
+        0,
+        new ArrayList<OPDSAcquisitionFeedEntry>());
+    in_adapter.addAll(in_feed.getFeedEntries());
+
+    this.ids = new ConcurrentHashMap<String, Unit>();
+    this.adapter = in_adapter;
+    this.loader = NullCheck.notNull(in_feed_loader);
+    this.uri_next = new AtomicReference<OptionType<URI>>(in_feed.getNext());
+    this.loading =
+
+    this.loadNext(this.uri_next);
   }
 
   @Override public boolean areAllItemsEnabled()
   {
     return NullCheck.notNull(this.adapter).areAllItemsEnabled();
+  }
+
+  @Override public void expensiveStop()
+  {
+    final ListenableFuture<OPDSFeedType> l = this.loading;
+    if (l != null) {
+      l.cancel(true);
+      this.loading = null;
+    }
   }
 
   @Override public int getCount()
@@ -75,20 +126,21 @@ public final class CatalogAcquisitionFeed implements
 
   @Override public View getView(
     final int position,
-    final @Nullable View convertView,
+    final @Nullable View reused,
     final @Nullable ViewGroup parent)
   {
     final OPDSAcquisitionFeedEntry e =
-      NullCheck.notNull(this.feed.getFeedEntries().get(position));
+      NullCheck.notNull(this.adapter.getItem(position));
 
-    final CatalogAcquisitionCellView cv =
-      new CatalogAcquisitionCellView(
-        this.activity,
-        this.screen,
-        e,
-        this.listener);
+    final CatalogAcquisitionCellView cv;
+    if (reused != null) {
+      cv = (CatalogAcquisitionCellView) reused;
+    } else {
+      cv = new CatalogAcquisitionCellView(this.activity);
+    }
 
-    cv.expensiveRequestDisplay();
+    final Simplified app = Simplified.get();
+    cv.viewConfigure(e, app.getCatalogThumbnailLoader(), this.listener);
     return cv;
   }
 
@@ -113,12 +165,44 @@ public final class CatalogAcquisitionFeed implements
     return NullCheck.notNull(this.adapter).isEnabled(position);
   }
 
-  @Override public void onMovedToScrapHeap(
-    final @Nullable View view)
+  private @Nullable ListenableFuture<OPDSFeedType> loadNext(
+    final AtomicReference<OptionType<URI>> next_ref)
   {
-    final ExpensiveDisplayableType lv =
-      NullCheck.notNull((ExpensiveDisplayableType) view);
-    lv.expensiveRequestStopDisplaying();
+    final OptionType<URI> next_opt = next_ref.get();
+    if (next_opt.isSome()) {
+      final Some<URI> next_some = (Some<URI>) next_opt;
+      final URI next = next_some.get();
+
+      Log.d(
+        CatalogAcquisitionFeed.TAG,
+        String.format("loading next feed (%s)", next));
+
+      return this.loader.fromURI(next, this);
+    }
+
+    return null;
+  }
+
+  @Override public void onScroll(
+    final @Nullable AbsListView view,
+    final int first_visible_item,
+    final int visible_count,
+    final int total_count)
+  {
+    if (CatalogAcquisitionFeed
+      .shouldLoadNext(first_visible_item, total_count)) {
+      final ListenableFuture<OPDSFeedType> l = this.loading;
+      if (l == null) {
+        this.loading = this.loadNext(this.uri_next);
+      }
+    }
+  }
+
+  @Override public void onScrollStateChanged(
+    final @Nullable AbsListView view,
+    final int state)
+  {
+    // Nothing
   }
 
   @Override public void registerDataSetObserver(
@@ -127,9 +211,74 @@ public final class CatalogAcquisitionFeed implements
     NullCheck.notNull(this.adapter).registerDataSetObserver(observer);
   }
 
+  private static boolean shouldLoadNext(
+    final int first_visible_item,
+    final int total_count)
+  {
+    return (total_count - first_visible_item) <= 50;
+  }
+
   @Override public void unregisterDataSetObserver(
     final @Nullable DataSetObserver observer)
   {
     NullCheck.notNull(this.adapter).unregisterDataSetObserver(observer);
+  }
+
+  @Override public void onFailure(
+    final Throwable e)
+  {
+    this.loading = null;
+
+    if (e instanceof CancellationException) {
+      return;
+    }
+
+    Log.e(CatalogAcquisitionFeed.TAG, e.getMessage(), e);
+  }
+
+  @Override public void onSuccess(
+    final OPDSFeedType f)
+  {
+    this.loading = null;
+    f.matchFeedType(this);
+  }
+
+  @Override public Unit acquisition(
+    final OPDSAcquisitionFeed af)
+    throws UnreachableCodeException
+  {
+    Log.d(
+      CatalogAcquisitionFeed.TAG,
+      String.format("received %s", af.getFeedID()));
+
+    this.uri_next.set(af.getNext());
+
+    final Map<String, Unit> id_map = this.ids;
+    final ArrayAdapter<OPDSAcquisitionFeedEntry> a = this.adapter;
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        for (final OPDSAcquisitionFeedEntry e : af.getFeedEntries()) {
+          Preconditions.checkArgument(id_map.containsKey(e.getID()) == false);
+          id_map.put(e.getID(), Unit.unit());
+          a.add(e);
+        }
+        a.notifyDataSetChanged();
+      }
+    });
+
+    return Unit.unit();
+  }
+
+  @Override public Unit navigation(
+    final OPDSNavigationFeed nf)
+    throws UnreachableCodeException
+  {
+    Log.e(CatalogAcquisitionFeed.TAG, String.format(
+      "received navigation feed instead of acquisition feed (%s)",
+      nf.getFeedID()));
+
+    return Unit.unit();
   }
 }

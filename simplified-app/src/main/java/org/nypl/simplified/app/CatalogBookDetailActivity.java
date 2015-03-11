@@ -226,8 +226,9 @@ public final class CatalogBookDetailActivity extends CatalogActivity
       cover_loader.getCoverAsynchronous(
         e,
         new BitmapDisplayHeightPreserveAspect(cover_height),
-        new BitmapCacheListenerType() {
+        new BitmapCacheListenerType<OPDSAcquisitionFeedEntry>() {
           @Override public void onFailure(
+            final OPDSAcquisitionFeedEntry key,
             final Throwable x)
           {
             if (x instanceof CancellationException) {
@@ -238,6 +239,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
           }
 
           @Override public void onSuccess(
+            final OPDSAcquisitionFeedEntry key,
             final Bitmap b)
           {
             Log.d(

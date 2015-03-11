@@ -181,8 +181,9 @@ import com.io7m.jnull.Nullable;
       cover_loader.getCoverAsynchronous(
         e,
         new BitmapDisplayHeightPreserveAspect(cover_height),
-        new BitmapCacheListenerType() {
+        new BitmapCacheListenerType<OPDSAcquisitionFeedEntry>() {
           @Override public void onFailure(
+            final OPDSAcquisitionFeedEntry key,
             final Throwable x)
           {
             if (x instanceof CancellationException) {
@@ -193,6 +194,7 @@ import com.io7m.jnull.Nullable;
           }
 
           @Override public void onSuccess(
+            final OPDSAcquisitionFeedEntry key,
             final Bitmap b)
           {
             Log.d(

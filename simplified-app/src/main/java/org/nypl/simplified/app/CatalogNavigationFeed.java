@@ -92,7 +92,7 @@ public final class CatalogNavigationFeed implements
   {
     final CatalogNavigationLaneView v =
       NullCheck.notNull(this.lanes.get(position));
-    v.expensiveRequestDisplay();
+    v.expensiveStart();
     return v;
   }
 
@@ -120,9 +120,8 @@ public final class CatalogNavigationFeed implements
   @Override public void onMovedToScrapHeap(
     final @Nullable View view)
   {
-    final ExpensiveDisplayableType lv =
-      NullCheck.notNull((ExpensiveDisplayableType) view);
-    lv.expensiveRequestStopDisplaying();
+    final ExpensiveStoppableType lv = NullCheck.notNull((ExpensiveType) view);
+    lv.expensiveStop();
   }
 
   @Override public void registerDataSetObserver(

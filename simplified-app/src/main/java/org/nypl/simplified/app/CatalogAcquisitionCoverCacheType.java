@@ -23,7 +23,7 @@ public interface CatalogAcquisitionCoverCacheType
   ListenableFuture<Bitmap> getCoverAsynchronous(
     final OPDSAcquisitionFeedEntry e,
     final BitmapDisplaySizeType size,
-    final BitmapCacheListenerType listener);
+    final BitmapCacheListenerType<OPDSAcquisitionFeedEntry> listener);
 
   /**
    * Fetch or generate an image synchronously.
