@@ -105,12 +105,7 @@ public final class Simplified extends Application implements
         .getInteger(R.integer.image_cover_disk_cache_megabytes));
 
     final BitmapCacheScalingDiskType bcf =
-      BitmapCacheScalingDisk.newCache(
-        list_exec,
-        it,
-        mem,
-        cd,
-        disk_thumbnail_size);
+      BitmapCacheScalingDisk.newCache(it, mem, cd, disk_thumbnail_size);
     final CatalogAcquisitionCoverGenerator cgen =
       new CatalogAcquisitionCoverGenerator();
     return CatalogAcquisitionImageCache.newCoverCache(list_exec, cgen, bcf);
@@ -148,12 +143,7 @@ public final class Simplified extends Application implements
         .getInteger(R.integer.image_memory_cache_megabytes));
 
     final BitmapCacheScalingDiskType bcf =
-      BitmapCacheScalingDisk.newCache(
-        list_exec,
-        it,
-        mem,
-        cd,
-        disk_thumbnail_size);
+      BitmapCacheScalingDisk.newCache(it, mem, cd, disk_thumbnail_size);
 
     BitmapCacheScalingType bc;
     if (mem.memoryIsSmall()) {

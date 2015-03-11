@@ -14,7 +14,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -25,17 +24,16 @@ import com.jakewharton.disklrucache.DiskLruCache;
 import com.jakewharton.disklrucache.DiskLruCache.Editor;
 import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
 
-public final class BitmapCacheScalingDisk implements
+@SuppressWarnings("synthetic-access") public final class BitmapCacheScalingDisk implements
   BitmapCacheScalingDiskType
 {
   private static final class CachedImage
   {
     int                   height;
     @Nullable InputStream stream;
-    int                   width;
   }
 
-  private static final String                                      TAG;
+  private static final String TAG;
 
   static {
     TAG = "BSDC";
@@ -167,7 +165,7 @@ public final class BitmapCacheScalingDisk implements
             }
           }
 
-          return Integer.valueOf(ss);
+          return NullCheck.notNull(Integer.valueOf(ss));
         }
       }).intValue();
   }
@@ -217,37 +215,37 @@ public final class BitmapCacheScalingDisk implements
       final byte[] r = d.digest(uri.toString().getBytes());
       final StringBuilder sb = new StringBuilder();
       for (final byte b : r) {
-        sb.append(String.format("%02x", b));
+        sb.append(String.format("%02x", Byte.valueOf(b)));
       }
       return NullCheck.notNull(sb.toString());
     } catch (final NoSuchAlgorithmException e) {
       throw new UnreachableCodeException(e);
     }
   }
-  public static BitmapCacheScalingDiskType newCache(
-    final ListeningExecutorService e,
-    final PartialFunctionType<URI, InputStream, IOException> in_transport,
-    final MemoryControllerType in_mem,
-    final File in_file,
-    final long size)
-    throws IOException
-  {
-    final DiskLruCache in_cache = DiskLruCache.open(in_file, 1, 1, size);
-    return new BitmapCacheScalingDisk(e, in_cache, in_transport, in_mem);
-  }
-  private final DiskLruCache                                       cache;
-  private final ListeningExecutorService                           exec;
-  private final MemoryControllerType                               memory;
 
+  @SuppressWarnings("resource") public static
+    BitmapCacheScalingDiskType
+    newCache(
+      final PartialFunctionType<URI, InputStream, IOException> in_transport,
+      final MemoryControllerType in_mem,
+      final File in_file,
+      final long size)
+      throws IOException
+  {
+    final DiskLruCache in_cache =
+      NullCheck.notNull(DiskLruCache.open(in_file, 1, 1, size));
+    return new BitmapCacheScalingDisk(in_cache, in_transport, in_mem);
+  }
+
+  private final DiskLruCache                                       cache;
+  private final MemoryControllerType                               memory;
   private final PartialFunctionType<URI, InputStream, IOException> transport;
 
   private BitmapCacheScalingDisk(
-    final ListeningExecutorService e,
     final DiskLruCache in_cache,
     final PartialFunctionType<URI, InputStream, IOException> in_transport,
     final MemoryControllerType in_mem)
   {
-    this.exec = NullCheck.notNull(e);
     this.cache = NullCheck.notNull(in_cache);
     this.transport = NullCheck.notNull(in_transport);
     this.memory = NullCheck.notNull(in_mem);
@@ -321,13 +319,13 @@ public final class BitmapCacheScalingDisk implements
     os.inJustDecodeBounds = true;
     BitmapFactory.decodeStream(is, null, os);
     if (os.outHeight == -1) {
+      s.close();
       return null;
     }
 
     is.reset();
     final CachedImage ci = new CachedImage();
     ci.height = os.outHeight;
-    ci.width = os.outWidth;
     ci.stream = is;
     return ci;
   }
