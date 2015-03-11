@@ -33,7 +33,6 @@ import com.io7m.jnull.Nullable;
   private final CatalogAcquisitionThumbnailCacheType  cache;
   private final Runnable                              done_proc;
   private final List<OPDSAcquisitionFeedEntry>        entries;
-  private final ListeningExecutorService              exec;
   private final String                                id;
   private int                                         image_height;
   private final BitmapDisplaySizeType                 image_opts;
@@ -61,7 +60,6 @@ import com.io7m.jnull.Nullable;
 
     NullCheck.notNull(in_screen);
     this.lane = NullCheck.notNull(in_lane);
-    this.exec = NullCheck.notNull(in_exec);
     this.cache = NullCheck.notNull(in_cache);
     this.entries = NullCheck.notNull(in_entries);
     this.listener = NullCheck.notNull(in_listener);
