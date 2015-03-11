@@ -67,6 +67,7 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
 
     final Map<URI, OPDSFeedType> c = this.cache;
     if (c.containsKey(uri)) {
+      Log.d(CachingFeedLoader.TAG, String.format("already-cached %s", uri));
       final OPDSFeedType r = NullCheck.notNull(c.get(uri));
       final ListenableFuture<OPDSFeedType> f = Futures.immediateFuture(r);
       p.onFeedLoadingSuccess(r);
@@ -77,12 +78,16 @@ public final class CachingFeedLoader implements OPDSFeedLoaderType
       @Override public void onFeedLoadingFailure(
         final Throwable e)
       {
+        Log.d(
+          CachingFeedLoader.TAG,
+          String.format("failed %s (%s)", uri, e.getMessage()));
         p.onFeedLoadingFailure(e);
       }
 
       @Override public void onFeedLoadingSuccess(
         final OPDSFeedType f)
       {
+        Log.d(CachingFeedLoader.TAG, String.format("received %s", uri));
         c.put(uri, f);
         p.onFeedLoadingSuccess(f);
       }
