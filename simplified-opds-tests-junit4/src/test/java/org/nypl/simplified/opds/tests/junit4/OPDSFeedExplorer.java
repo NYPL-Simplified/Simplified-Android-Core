@@ -24,9 +24,10 @@ import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class OPDSFeedExplorer
+@SuppressWarnings("boxing") public final class OPDSFeedExplorer
 {
   public static void main(
     final String args[])
@@ -35,7 +36,8 @@ public final class OPDSFeedExplorer
     final BufferedReader r =
       new BufferedReader(new InputStreamReader(System.in));
 
-    final ExecutorService e = Executors.newFixedThreadPool(1);
+    final ExecutorService e =
+      NullCheck.notNull(Executors.newFixedThreadPool(1));
     final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
     final OPDSFeedLoaderType loader = OPDSFeedLoader.newLoader(e, p, t);
@@ -48,18 +50,19 @@ public final class OPDSFeedExplorer
         break;
       }
 
+      final URI uri = NullCheck.notNull(URI.create(line));
       final ListenableFuture<OPDSFeedType> f =
-        loader.fromURI(URI.create(line), new OPDSFeedLoadListenerType() {
-          @Override public void onFeedLoadingSuccess(
-            final OPDSFeedType ff)
-          {
-
-          }
-
+        loader.fromURI(uri, new OPDSFeedLoadListenerType() {
           @Override public void onFeedLoadingFailure(
             final Throwable x)
           {
+            // Nothing
+          }
 
+          @Override public void onFeedLoadingSuccess(
+            final OPDSFeedType ff)
+          {
+            // Nothing
           }
         });
 
