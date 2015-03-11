@@ -376,10 +376,10 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     eb.setCoverOption(OPDSFeedParser.findAcquisitionCover(e_links));
     eb.setPublisherOption(OPDSFeedParser.findPublisher(e));
     eb.setSubtitleOption(OPDSFeedParser.findSubtitle(e));
-    eb.setSummaryOption(OPDSXML.getFirstChildElementTextWithNameOptional(
+    eb.setContentOption(OPDSXML.getFirstChildElementTextWithNameOptional(
       e,
       OPDSFeedParser.ATOM_URI,
-      "summary"));
+      "content"));
 
     return eb.build();
   }
