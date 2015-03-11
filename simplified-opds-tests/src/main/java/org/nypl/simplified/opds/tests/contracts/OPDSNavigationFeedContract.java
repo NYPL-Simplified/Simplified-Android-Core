@@ -14,7 +14,7 @@ import org.nypl.simplified.opds.tests.utilities.TestUtilities;
 
 import com.io7m.jfunctional.Option;
 
-public final class OPDSNavigationFeedContract implements
+@SuppressWarnings({ "null" }) public final class OPDSNavigationFeedContract implements
   OPDSNavigationFeedContractType
 {
   public OPDSNavigationFeedContract()

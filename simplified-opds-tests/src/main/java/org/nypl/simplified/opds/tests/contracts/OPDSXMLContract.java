@@ -18,7 +18,8 @@ import org.xml.sax.SAXException;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
-public final class OPDSXMLContract implements OPDSXMLContractType
+@SuppressWarnings({ "boxing", "null" }) public final class OPDSXMLContract implements
+  OPDSXMLContractType
 {
   public OPDSXMLContract()
   {
@@ -71,10 +72,9 @@ public final class OPDSXMLContract implements OPDSXMLContractType
       URI.create("http://purl.org/dc/terms/"),
       "publisher"));
 
-    final Element pub =
-      OPDSXML.getFirstChildElementWithName(
-        r,
-        URI.create("http://purl.org/dc/terms/"),
-        "publisher");
+    OPDSXML.getFirstChildElementWithName(
+      r,
+      URI.create("http://purl.org/dc/terms/"),
+      "publisher");
   }
 }

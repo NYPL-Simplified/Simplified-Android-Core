@@ -25,7 +25,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
-public final class OPDSFeedParserContract implements
+@SuppressWarnings({ "boxing", "null", "resource" }) public final class OPDSFeedParserContract implements
   OPDSFeedParserContractType
 {
   public static InputStream getResource(
@@ -130,7 +130,6 @@ public final class OPDSFeedParserContract implements
       "Biography & Memoir: By author",
       f.getFeedTitle());
     TestUtilities.assertEquals(50, f.getFeedEntries().size());
-    final Calendar u = f.getFeedUpdated();
 
     final Some<URI> next_opt = (Some<URI>) f.getNext();
 

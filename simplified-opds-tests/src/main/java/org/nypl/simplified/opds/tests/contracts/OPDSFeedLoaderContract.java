@@ -22,7 +22,7 @@ import org.nypl.simplified.opds.tests.utilities.TestUtilities;
 
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class OPDSFeedLoaderContract implements
+@SuppressWarnings({ "null" }) public final class OPDSFeedLoaderContract implements
   OPDSFeedLoaderContractType
 {
   @Override public void testLoaderErrorCorrect()
