@@ -10,11 +10,27 @@ import java.util.Calendar;
 
 public interface OPDSFeedType extends Serializable
 {
+  /**
+   * @return The unique identifier of the feed
+   */
+
   String getFeedID();
+
+  /**
+   * @return The title of the feed
+   */
 
   String getFeedTitle();
 
+  /**
+   * @return The last time the feed was updated
+   */
+
   Calendar getFeedUpdated();
+
+  /**
+   * @return The URI of the feed
+   */
 
   URI getFeedURI();
 
