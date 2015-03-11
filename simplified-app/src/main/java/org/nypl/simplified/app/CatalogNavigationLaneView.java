@@ -240,6 +240,30 @@ import com.io7m.junreachable.UnreachableCodeException;
     final android.view.ViewGroup.LayoutParams slp = cs.getLayoutParams();
     Preconditions.checkArgument(slp.height > 0);
 
+    /**
+     * Execute some code when all of the images in the set have been loaded.
+     */
+
+    final Runnable on_done = new Runnable() {
+      @Override public void run()
+      {
+        /**
+         * Restore whatever was the last known scroll position by posting a
+         * message to be executed on the UI thread. This appears to be the
+         * only correct way to set scroll positions.
+         */
+
+        cs.post(new Runnable() {
+          @Override public void run()
+          {
+            cs.setScrollX(scroll_x);
+          }
+        });
+
+        cp.setVisibility(View.INVISIBLE);
+      }
+    };
+
     final CatalogImageSetView i =
       new CatalogImageSetView(
         ctx,
@@ -251,20 +275,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.listener,
         slp.height,
         af.getFeedID(),
-        new Runnable() {
-          @Override public void run()
-          {
-            /*
-             * XXX: This is not the correct place to set the scroll position,
-             * unfortunately. The position (apparently) needs to be set when
-             * the view contained within the scroll view has been measured
-             * (which won't occur until the scroll view is visible).
-             */
-
-            cs.setScrollX(scroll_x);
-            cp.setVisibility(View.INVISIBLE);
-          }
-        });
+        on_done);
 
     cs.removeAllViews();
     cs.addView(i);
