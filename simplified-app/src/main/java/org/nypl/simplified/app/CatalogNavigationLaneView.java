@@ -69,7 +69,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final LayoutInflater inflater =
       (LayoutInflater) context
         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    inflater.inflate(R.layout.lane_view, this, true);
+    inflater.inflate(R.layout.catalog_navigation_lane_view, this, true);
 
     this.header =
       NullCheck.notNull((RelativeLayout) this.findViewById(R.id.feed_header));
