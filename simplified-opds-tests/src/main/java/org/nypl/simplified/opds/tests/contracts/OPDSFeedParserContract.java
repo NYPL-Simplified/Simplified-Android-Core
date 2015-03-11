@@ -16,6 +16,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
+import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.opds.tests.utilities.TestUtilities;
 import org.w3c.dom.DOMException;
 
@@ -57,8 +58,18 @@ import com.io7m.jnull.NullCheck;
       f.getFeedID());
     TestUtilities.assertEquals("Fiction: featured", f.getFeedTitle());
     TestUtilities.assertEquals(20, f.getFeedEntries().size());
-    final Calendar u = f.getFeedUpdated();
 
+    final Some<OPDSSearchLink> search_opt =
+      (Some<OPDSSearchLink>) f.getFeedSearchURI();
+    final OPDSSearchLink search = search_opt.get();
+    TestUtilities.assertEquals(
+      URI.create("http://library-simplified.herokuapp.com/search/Fiction"),
+      search.getURI());
+    TestUtilities.assertEquals(
+      "application/opensearchdescription+xml",
+      search.getType());
+
+    final Calendar u = f.getFeedUpdated();
     final Set<String> ids = new HashSet<String>();
     final Set<String> titles = new HashSet<String>();
 
@@ -182,6 +193,16 @@ import com.io7m.jnull.NullCheck;
       f.getFeedID());
     TestUtilities.assertEquals("Navigation feed", f.getFeedTitle());
     TestUtilities.assertEquals(28, f.getFeedEntries().size());
+
+    final Some<OPDSSearchLink> search_opt =
+      (Some<OPDSSearchLink>) f.getFeedSearchURI();
+    final OPDSSearchLink search = search_opt.get();
+    TestUtilities.assertEquals(
+      URI.create("http://library-simplified.herokuapp.com/search/"),
+      search.getURI());
+    TestUtilities.assertEquals(
+      "application/opensearchdescription+xml",
+      search.getType());
 
     final Set<String> ids = new HashSet<String>();
     final Set<String> titles = new HashSet<String>();

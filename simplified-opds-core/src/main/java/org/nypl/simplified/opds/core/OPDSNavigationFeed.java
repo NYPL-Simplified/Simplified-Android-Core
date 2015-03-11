@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -20,6 +22,7 @@ import com.io7m.jnull.Nullable;
   {
     private final List<OPDSNavigationFeedEntry> entries;
     private final String                        id;
+    private OptionType<OPDSSearchLink>          search;
     private final String                        title;
     private final Calendar                      updated;
     private final URI                           uri;
@@ -35,6 +38,7 @@ import com.io7m.jnull.Nullable;
       this.updated = NullCheck.notNull(in_updated);
       this.id = NullCheck.notNull(in_id);
       this.entries = new ArrayList<OPDSNavigationFeedEntry>();
+      this.search = Option.none();
     }
 
     @Override public void addEntry(
@@ -50,7 +54,14 @@ import com.io7m.jnull.Nullable;
         this.id,
         this.updated,
         this.title,
-        this.entries);
+        this.entries,
+        this.search);
+    }
+
+    @Override public void setSearchOption(
+      final OptionType<OPDSSearchLink> s)
+    {
+      this.search = NullCheck.notNull(s);
     }
   }
 
@@ -67,6 +78,7 @@ import com.io7m.jnull.Nullable;
 
   private final List<OPDSNavigationFeedEntry> entries;
   private final String                        id;
+  private final OptionType<OPDSSearchLink>    search;
   private final String                        title;
   private final Calendar                      updated;
   private final URI                           uri;
@@ -76,7 +88,8 @@ import com.io7m.jnull.Nullable;
     final String in_id,
     final Calendar in_updated,
     final String in_title,
-    final List<OPDSNavigationFeedEntry> in_entries)
+    final List<OPDSNavigationFeedEntry> in_entries,
+    final OptionType<OPDSSearchLink> in_search)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -84,6 +97,7 @@ import com.io7m.jnull.Nullable;
     this.title = NullCheck.notNull(in_title);
     this.entries =
       NullCheck.notNull(Collections.unmodifiableList(in_entries));
+    this.search = NullCheck.notNull(in_search);
   }
 
   @Override public boolean equals(
@@ -103,6 +117,7 @@ import com.io7m.jnull.Nullable;
       && this.entries.equals(other.entries)
       && this.id.equals(other.id)
       && this.title.equals(other.title)
+      && this.search.equals(other.search)
       && this.updated.equals(other.updated);
   }
 
@@ -114,6 +129,11 @@ import com.io7m.jnull.Nullable;
   @Override public String getFeedID()
   {
     return this.id;
+  }
+
+  @Override public OptionType<OPDSSearchLink> getFeedSearchURI()
+  {
+    return this.search;
   }
 
   @Override public String getFeedTitle()
@@ -140,6 +160,7 @@ import com.io7m.jnull.Nullable;
     result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.title.hashCode();
     result = (prime * result) + this.updated.hashCode();
+    result = (prime * result) + this.search.hashCode();
     return result;
   }
 

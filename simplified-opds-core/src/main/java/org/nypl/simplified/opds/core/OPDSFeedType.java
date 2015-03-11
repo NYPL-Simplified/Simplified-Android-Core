@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.Calendar;
 
+import com.io7m.jfunctional.OptionType;
+
 /**
  * The type of OPDS feeds.
  */
@@ -15,6 +17,12 @@ public interface OPDSFeedType extends Serializable
    */
 
   String getFeedID();
+
+  /**
+   * @return The search URI for the feed
+   */
+
+  OptionType<OPDSSearchLink> getFeedSearchURI();
 
   /**
    * @return The title of the feed

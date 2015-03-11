@@ -20,6 +20,7 @@ public interface OPDSFeedLoaderType
    * Load the feed at <code>uri</code>, passing the resulting feed to
    * <code>p</code>.
    *
+   * @return A future representing the loading in progress
    * @param uri
    *          The URI
    * @param p

@@ -341,6 +341,8 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final OPDSAcquisitionFeedBuilderType b =
       OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
 
+    b.setSearchOption(OPDSFeedParser.parseSearchLinks(links));
+
     for (final Element ee : entries) {
       b.addEntry(OPDSFeedParser.parseAcquisitionEntry(NullCheck.notNull(ee)));
     }
@@ -397,6 +399,8 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final OPDSNavigationFeedBuilderType b =
       OPDSNavigationFeed.newBuilder(uri, id, updated, title);
 
+    b.setSearchOption(OPDSFeedParser.parseSearchLinks(links));
+
     for (final Element ee : entries) {
       b.addEntry(OPDSFeedParser.parseNavigationEntry(NullCheck.notNull(ee)));
     }
@@ -431,6 +435,37 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       updated,
       featured,
       target);
+  }
+
+  private static OptionType<OPDSSearchLink> parseSearchLinks(
+    final List<Element> links)
+    throws URISyntaxException
+  {
+    for (final Element e : links) {
+      assert OPDSXML.nodeHasName(
+        NullCheck.notNull(e),
+        OPDSFeedParser.ATOM_URI,
+        "link");
+
+      final boolean has_everything =
+        e.hasAttribute("type")
+          && e.hasAttribute("rel")
+          && e.hasAttribute("href");
+
+      if (has_everything) {
+        final String t = NullCheck.notNull(e.getAttribute("type"));
+        final String r = NullCheck.notNull(e.getAttribute("rel"));
+        final String h = NullCheck.notNull(e.getAttribute("href"));
+
+        if ("search".equals(r)) {
+          final URI u = NullCheck.notNull(new URI(h));
+          final OPDSSearchLink sl = new OPDSSearchLink(t, u);
+          return Option.some(sl);
+        }
+      }
+    }
+
+    return Option.none();
   }
 
   private static Document parseStream(
