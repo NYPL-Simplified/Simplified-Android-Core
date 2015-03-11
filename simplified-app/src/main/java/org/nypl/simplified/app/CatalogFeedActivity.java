@@ -325,7 +325,6 @@ import com.io7m.junreachable.UnreachableCodeException;
       new CatalogNavigationFeed(
         this,
         in_adapter,
-        app,
         nf,
         this,
         lane_view_listener);

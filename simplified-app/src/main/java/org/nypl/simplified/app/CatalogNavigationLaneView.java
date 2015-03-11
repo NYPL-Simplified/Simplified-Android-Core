@@ -19,7 +19,6 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.common.base.Preconditions;
@@ -32,7 +31,10 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("synthetic-access") public final class CatalogNavigationLaneView extends
-  LinearLayout implements ExpensiveType
+  LinearLayout implements
+  ExpensiveType,
+  OPDSFeedLoadListenerType,
+  OPDSFeedMatcherType<Unit, UnreachableCodeException>
 {
   private static final String                               TAG;
 
@@ -42,7 +44,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private final OPDSNavigationFeedEntry                     entry;
   private @Nullable OPDSAcquisitionFeed                     feed_received;
-  private final RelativeLayout                              header;
   private volatile @Nullable CatalogImageSetView            images;
   private final CatalogNavigationLaneViewListenerType       listener;
   private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
@@ -54,13 +55,11 @@ import com.io7m.junreachable.UnreachableCodeException;
   public CatalogNavigationLaneView(
     final Context context,
     final @Nullable AttributeSet attrs,
-    final ScreenSizeControllerType screen,
     final OPDSNavigationFeedEntry e,
     final CatalogNavigationLaneViewListenerType in_listener)
   {
     super(context, attrs);
 
-    NullCheck.notNull(screen);
     this.entry = NullCheck.notNull(e);
     this.listener = NullCheck.notNull(in_listener);
 
@@ -71,8 +70,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.catalog_navigation_lane_view, this, true);
 
-    this.header =
-      NullCheck.notNull((RelativeLayout) this.findViewById(R.id.feed_header));
     this.title =
       NullCheck.notNull((TextView) this.findViewById(R.id.feed_title));
     this.progress =
@@ -94,11 +91,10 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   public CatalogNavigationLaneView(
     final Context context,
-    final ScreenSizeControllerType screen,
     final OPDSNavigationFeedEntry e,
     final CatalogNavigationLaneViewListenerType in_listener)
   {
-    this(context, null, screen, e, in_listener);
+    this(context, null, e, in_listener);
   }
 
   @Override public void expensiveStart()
@@ -110,7 +106,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.progress.setVisibility(View.VISIBLE);
     final OPDSAcquisitionFeed fr = this.feed_received;
     if (fr != null) {
-      this.onAcquisitionFeedReceived(fr);
+      this.onAcquisitionFeed(fr);
     } else {
       this.loadFeed();
     }
@@ -158,73 +154,26 @@ import com.io7m.junreachable.UnreachableCodeException;
       final Some<URI> some = (Some<URI>) featured_opt;
       final Simplified app = Simplified.get();
       final OPDSFeedLoaderType loader = app.getFeedLoader();
-      this.loading =
-        loader.fromURI(some.get(), new OPDSFeedLoadListenerType() {
-          @Override public void onFeedLoadingFailure(
-            final Throwable ex)
-          {
-            if (ex instanceof CancellationException) {
-              Log.d(CatalogNavigationLaneView.TAG, "Loading cancelled");
-              return;
-            }
 
-            Log.e(
-              CatalogNavigationLaneView.TAG,
-              "Failed to load featured feed: " + ex.getMessage(),
-              ex);
-
-            UIThread.runOnUIThread(new Runnable() {
-              @Override public void run()
-              {
-                CatalogNavigationLaneView.this.onFeedFailed();
-              }
-            });
-          }
-
-          @Override public void onFeedLoadingSuccess(
-            final OPDSFeedType f)
-          {
-            f
-              .matchFeedType(new OPDSFeedMatcherType<Unit, UnreachableCodeException>() {
-                @Override public Unit onAcquisitionFeed(
-                  final OPDSAcquisitionFeed af)
-                {
-                  UIThread.runOnUIThread(new Runnable() {
-                    @Override public void run()
-                    {
-                      CatalogNavigationLaneView.this
-                        .onAcquisitionFeedReceived(af);
-                    }
-                  });
-                  return Unit.unit();
-                }
-
-                @Override public Unit onNavigationFeed(
-                  final OPDSNavigationFeed nf)
-                {
-                  UIThread.runOnUIThread(new Runnable() {
-                    @Override public void run()
-                    {
-                      CatalogNavigationLaneView.this
-                        .onNavigationFeedReceived();
-                    }
-                  });
-                  return Unit.unit();
-                }
-              });
-          }
-        });
+      this.loading = loader.fromURI(some.get(), this);
     } else {
       UIThread.runOnUIThread(new Runnable() {
         @Override public void run()
         {
-          CatalogNavigationLaneView.this.onFeedFailed();
+          CatalogNavigationLaneView.this.onFeedLoadingFailureOnUI();
         }
       });
     }
   }
 
-  private void onAcquisitionFeedReceived(
+  @Override public Unit onAcquisitionFeed(
+    final OPDSAcquisitionFeed af)
+  {
+    this.onAcquisitionFeedReceivedOnUI(af);
+    return Unit.unit();
+  }
+
+  private void onAcquisitionFeedReceivedOnUI(
     final OPDSAcquisitionFeed af)
   {
     UIThread.checkIsUIThread();
@@ -283,19 +232,53 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.images = i;
   }
 
-  private void onFeedFailed()
+  @Override public void onFeedLoadingFailure(
+    final Throwable ex)
+  {
+    if (ex instanceof CancellationException) {
+      Log.d(CatalogNavigationLaneView.TAG, "Loading cancelled");
+      return;
+    }
+
+    Log.e(CatalogNavigationLaneView.TAG, "Failed to load featured feed: "
+      + ex.getMessage(), ex);
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogNavigationLaneView.this.onFeedLoadingFailureOnUI();
+      }
+    });
+  }
+
+  private void onFeedLoadingFailureOnUI()
   {
     UIThread.checkIsUIThread();
     this.scroller.setVisibility(View.INVISIBLE);
     this.progress.setVisibility(View.INVISIBLE);
   }
 
-  private void onNavigationFeedReceived()
+  @Override public void onFeedLoadingSuccess(
+    final OPDSFeedType f)
+  {
+    f.matchFeedType(this);
+  }
+
+  @Override public Unit onNavigationFeed(
+    final OPDSNavigationFeed nf)
   {
     UIThread.checkIsUIThread();
     Log.e(
       CatalogNavigationLaneView.TAG,
       "Expected an acquisition feed but received a navigation feed");
-    CatalogNavigationLaneView.this.onFeedFailed();
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogNavigationLaneView.this.onFeedLoadingFailureOnUI();
+      }
+    });
+
+    return Unit.unit();
   }
 }
