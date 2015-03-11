@@ -97,7 +97,6 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
-      android:layout_toRightOf="@id/book_header_cover"
       android:padding="8dp"
       android:text="This hold will be automatically cancelled in 1 hour"
       android:textColor="@color/notification_foreground"/>
