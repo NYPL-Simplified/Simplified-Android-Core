@@ -10,8 +10,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:layout_marginTop="16dp"
     android:minHeight="160dp"
     android:orientation="horizontal">
@@ -41,7 +41,7 @@
         android:id="@+id/book_header_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:text="Book"
         android:textColor="@color/normal_text_major"
         android:textStyle="bold"/>
@@ -51,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/book_header_title"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:text="Book subtitle"
         android:textColor="@color/normal_text_major"/>
 
@@ -60,7 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/book_header_subtitle"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="8"
         android:minLines="1"
@@ -72,7 +72,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/book_header_authors"
-        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="8"
@@ -87,8 +87,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:background="@color/notification_background"
     android:orientation="vertical">
 
@@ -107,8 +107,8 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:layout_marginBottom="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:gravity="center"
     android:orientation="horizontal">
   </LinearLayout>
@@ -118,8 +118,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:orientation="vertical">
 
     <View
@@ -155,8 +155,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:orientation="vertical">
 
     <TextView
