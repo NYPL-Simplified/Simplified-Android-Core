@@ -37,12 +37,11 @@ import com.io7m.junreachable.UnreachableCodeException;
  * Global application state.
  */
 
-public final class Simplified extends Application implements
+@SuppressWarnings("boxing") public final class Simplified extends Application implements
   ScreenSizeControllerType,
   MemoryControllerType
 {
   private static volatile @Nullable Simplified INSTANCE;
-
   private static final String                  TAG;
 
   static {
@@ -74,7 +73,7 @@ public final class Simplified extends Application implements
     if (Environment.MEDIA_MOUNTED.equals(Environment
       .getExternalStorageState())) {
       if (Environment.isExternalStorageRemovable() == false) {
-        return context.getExternalCacheDir();
+        return NullCheck.notNull(context.getExternalCacheDir());
       }
     }
 
@@ -82,7 +81,7 @@ public final class Simplified extends Application implements
      * Otherwise, use internal storage.
      */
 
-    return context.getCacheDir();
+    return NullCheck.notNull(context.getCacheDir());
   }
 
   private static CatalogAcquisitionCoverCacheType makeCoverCache(
@@ -173,7 +172,7 @@ public final class Simplified extends Application implements
     final ThreadFactory named = new ThreadFactory() {
       private int id = 0;
 
-      @SuppressWarnings("boxing") @Override public Thread newThread(
+      @Override public Thread newThread(
         final @Nullable Runnable r)
       {
         final Thread t = tf.newThread(r);

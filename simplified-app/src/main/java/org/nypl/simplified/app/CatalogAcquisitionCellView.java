@@ -22,6 +22,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A single cell in an acquisition list or grid.
+ */
+
 public final class CatalogAcquisitionCellView extends FrameLayout implements
   BitmapCacheListenerType<OPDSAcquisitionFeedEntry>
 {
@@ -140,14 +144,22 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
       current_id = "(null)";
     }
 
-    final boolean should_set = current_id.equals(key.getID());
+    /**
+     * If the received acquisition entry ID matches that of the current ID,
+     * then the cell is being reused for the same entry and so the bitmap
+     * should not be replaced.
+     */
+
+    final Boolean should_set =
+      Boolean.valueOf(current_id.equals(key.getID()));
+
     Log.d(CatalogAcquisitionCellView.TAG, String.format(
       "image received, setting: %s (current '%s' / received '%s')",
       should_set,
       current_name,
       key.getTitle()));
 
-    if (should_set) {
+    if (should_set.booleanValue()) {
       final ImageView image_view = this.cell_cover_image;
       final ProgressBar progress = this.cell_cover_progress;
 
@@ -173,9 +185,9 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     NullCheck.notNull(in_listener);
 
     this.cell_title.setText(CatalogAcquisitionCellView.makeTitleText(in_e));
-
     this.cell_authors
       .setText(CatalogAcquisitionCellView.makeAuthorText(in_e));
+
     this.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)

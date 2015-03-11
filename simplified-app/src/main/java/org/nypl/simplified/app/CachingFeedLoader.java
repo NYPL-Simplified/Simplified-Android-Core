@@ -23,7 +23,8 @@ import com.io7m.jnull.NullCheck;
  * fetches.
  */
 
-public final class CachingFeedLoader implements OPDSFeedLoaderType
+@SuppressWarnings("synthetic-access") public final class CachingFeedLoader implements
+  OPDSFeedLoaderType
 {
   private static final String TAG;
 

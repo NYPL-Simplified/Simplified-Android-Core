@@ -329,7 +329,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OPDSFeedType parseAcquisition(
     final URI uri,
-    final Element e_feed,
     final String id,
     final String title,
     final Calendar updated,
@@ -343,7 +342,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
 
     for (final Element ee : entries) {
-      b.addEntry(OPDSFeedParser.parseAcquisitionEntry(ee));
+      b.addEntry(OPDSFeedParser.parseAcquisitionEntry(NullCheck.notNull(ee)));
     }
 
     b.setNextOption(OPDSFeedParser.findAcquisitionNext(links));
@@ -386,7 +385,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OPDSFeedType parseNavigation(
     final URI uri,
-    final Element e_feed,
     final String id,
     final String title,
     final Calendar updated,
@@ -400,7 +398,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       OPDSNavigationFeed.newBuilder(uri, id, updated, title);
 
     for (final Element ee : entries) {
-      b.addEntry(OPDSFeedParser.parseNavigationEntry(ee));
+      b.addEntry(OPDSFeedParser.parseNavigationEntry(NullCheck.notNull(ee)));
     }
 
     return b.build();
@@ -492,7 +490,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       if (OPDSFeedParser.entryIsFromAcquisitionFeed(e0)) {
         return OPDSFeedParser.parseAcquisition(
           uri,
-          e_feed,
           id,
           title,
           updated,
@@ -502,7 +499,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
       return OPDSFeedParser.parseNavigation(
         uri,
-        e_feed,
         id,
         title,
         updated,

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
@@ -53,7 +54,9 @@ public abstract class CatalogActivity extends SimplifiedActivity
       return (List<URI>) NullCheck.notNull(a
         .getSerializable(CatalogActivity.CATALOG_UP_STACK_ID));
     }
-    return ImmutableList.of();
+
+    final ImmutableList<URI> empty = ImmutableList.of();
+    return NullCheck.notNull(empty);
   }
 
   @Override protected void onCreate(
@@ -70,7 +73,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
       case android.R.id.home:
       {
         final List<URI> us = this.getUpStack();
-        assert us.isEmpty() == false;
+        Preconditions.checkArgument(us.isEmpty() == false);
         final Pair<URI, ImmutableList<URI>> p = StackUtilities.stackPop(us);
         CatalogFeedActivity.startNewActivity(this, p.getRight(), p.getLeft());
         return true;

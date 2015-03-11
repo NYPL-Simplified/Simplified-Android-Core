@@ -169,7 +169,12 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public Unit onAcquisitionFeed(
     final OPDSAcquisitionFeed af)
   {
-    this.onAcquisitionFeedReceivedOnUI(af);
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogNavigationLaneView.this.onAcquisitionFeedReceivedOnUI(af);
+      }
+    });
     return Unit.unit();
   }
 

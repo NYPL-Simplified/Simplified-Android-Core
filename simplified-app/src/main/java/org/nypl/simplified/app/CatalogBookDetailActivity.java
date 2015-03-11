@@ -28,7 +28,12 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogBookDetailActivity extends CatalogActivity
+/**
+ * An activity showing a full-screen book detail page.
+ */
+
+@SuppressWarnings({ "boxing", "synthetic-access" }) public final class CatalogBookDetailActivity extends
+  CatalogActivity
 {
   private static final String CATALOG_BOOK_DETAIL_FEED_ENTRY_ID;
   private static final String TAG;

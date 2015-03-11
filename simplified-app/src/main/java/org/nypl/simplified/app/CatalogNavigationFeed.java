@@ -18,15 +18,16 @@ import android.widget.ListAdapter;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A controller for a navigation feed.
+ */
+
 public final class CatalogNavigationFeed implements
   ListAdapter,
   RecyclerListener
 {
-  private final Activity                              activity;
   private final ArrayAdapter<OPDSNavigationFeedEntry> adapter;
-  private final OPDSNavigationFeed                    feed;
   private final List<CatalogNavigationLaneView>       lanes;
-  private final CatalogNavigationLaneViewListenerType listener;
 
   public CatalogNavigationFeed(
     final Context in_context,
@@ -38,9 +39,9 @@ public final class CatalogNavigationFeed implements
     NullCheck.notNull(in_context);
 
     this.adapter = NullCheck.notNull(in_adapter);
-    this.feed = NullCheck.notNull(in_feed);
-    this.activity = NullCheck.notNull(in_activity);
-    this.listener = NullCheck.notNull(in_listener);
+    NullCheck.notNull(in_feed);
+    NullCheck.notNull(in_activity);
+    NullCheck.notNull(in_listener);
 
     final List<OPDSNavigationFeedEntry> entries = in_feed.getFeedEntries();
     final int size = entries.size();

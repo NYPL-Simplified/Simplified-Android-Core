@@ -113,7 +113,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         CatalogFeedActivity.this.runOnUiThread(new Runnable() {
           @Override public void run()
           {
-            CatalogFeedActivity.this.onReceiveFeedError(e, uri);
+            CatalogFeedActivity.this.onReceiveFeedError(e);
           }
         });
       }
@@ -246,8 +246,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private void onReceiveFeedError(
-    final Throwable e,
-    final URI feed_uri)
+    final Throwable e)
   {
     if (e instanceof CancellationException) {
       Log.d(CatalogFeedActivity.TAG, "Cancelled feed");

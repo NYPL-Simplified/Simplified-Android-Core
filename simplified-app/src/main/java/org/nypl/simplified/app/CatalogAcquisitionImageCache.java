@@ -19,7 +19,11 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class CatalogAcquisitionImageCache implements
+/**
+ * The type of caches for acquisition images.
+ */
+
+@SuppressWarnings("boxing") public final class CatalogAcquisitionImageCache implements
   CatalogAcquisitionThumbnailCacheType,
   CatalogAcquisitionCoverCacheType
 {
@@ -37,7 +41,7 @@ public final class CatalogAcquisitionImageCache implements
         @Override public Integer matchHeightAspectPreserving(
           final BitmapDisplayHeightPreserveAspect s)
         {
-          return Integer.valueOf(s.getHeight());
+          return NullCheck.notNull(Integer.valueOf(s.getHeight()));
         }
       }).intValue();
   }
