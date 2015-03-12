@@ -21,8 +21,8 @@ import com.io7m.jnull.Nullable;
 
 public abstract class CatalogActivity extends SimplifiedActivity
 {
-  private static final String TAG;
   private static final String CATALOG_UP_STACK_ID;
+  private static final String TAG;
 
   static {
     CATALOG_UP_STACK_ID = "org.nypl.simplified.app.CatalogActivity.up_stack";
@@ -71,6 +71,14 @@ public abstract class CatalogActivity extends SimplifiedActivity
     super.onCreate(state);
   }
 
+  @Override public boolean onCreateOptionsMenu(
+    final @Nullable Menu menu)
+  {
+    final MenuInflater inflater = this.getMenuInflater();
+    inflater.inflate(R.menu.catalog, menu);
+    return true;
+  }
+
   @Override public boolean onOptionsItemSelected(
     final @Nullable MenuItem item)
   {
@@ -110,14 +118,6 @@ public abstract class CatalogActivity extends SimplifiedActivity
         return super.onOptionsItemSelected(item);
       }
     }
-  }
-
-  @Override public boolean onCreateOptionsMenu(
-    final @Nullable Menu menu)
-  {
-    final MenuInflater inflater = this.getMenuInflater();
-    inflater.inflate(R.menu.catalog, menu);
-    return true;
   }
 
   @Override protected void onResume()
