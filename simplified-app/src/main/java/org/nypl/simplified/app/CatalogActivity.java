@@ -5,7 +5,11 @@ import java.util.List;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
@@ -17,10 +21,12 @@ import com.io7m.jnull.Nullable;
 
 public abstract class CatalogActivity extends SimplifiedActivity
 {
+  private static final String TAG;
   private static final String CATALOG_UP_STACK_ID;
 
   static {
     CATALOG_UP_STACK_ID = "org.nypl.simplified.app.CatalogActivity.up_stack";
+    TAG = "CA";
   }
 
   public static void setActivityArguments(
@@ -79,11 +85,39 @@ public abstract class CatalogActivity extends SimplifiedActivity
         return true;
       }
 
+      /**
+       * Rotate the screen, for debugging purposes.
+       */
+
+      case R.id.tilt:
+      {
+        Log.d(CatalogActivity.TAG, "flipping orientation");
+        final int o = this.getRequestedOrientation();
+        Log.d(CatalogActivity.TAG, "current orientation: " + o);
+        if ((o == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+          || (o == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
+          this
+            .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+          this
+            .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+        return true;
+      }
+
       default:
       {
         return super.onOptionsItemSelected(item);
       }
     }
+  }
+
+  @Override public boolean onCreateOptionsMenu(
+    final @Nullable Menu menu)
+  {
+    final MenuInflater inflater = this.getMenuInflater();
+    inflater.inflate(R.menu.catalog, menu);
+    return true;
   }
 
   @Override protected void onResume()

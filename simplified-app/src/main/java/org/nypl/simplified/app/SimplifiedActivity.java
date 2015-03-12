@@ -7,16 +7,12 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -227,14 +223,6 @@ import com.io7m.jnull.Nullable;
       + SimplifiedActivity.activity_count);
   }
 
-  @Override public boolean onCreateOptionsMenu(
-    final @Nullable Menu menu)
-  {
-    final MenuInflater inflater = this.getMenuInflater();
-    inflater.inflate(R.menu.main, menu);
-    return true;
-  }
-
   @Override protected void onDestroy()
   {
     super.onDestroy();
@@ -321,34 +309,6 @@ import com.io7m.jnull.Nullable;
     final DrawerLayout d = NullCheck.notNull(this.drawer);
     d.closeDrawer(GravityCompat.START);
     this.selected = position;
-  }
-
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item)
-  {
-    assert item != null;
-    switch (item.getItemId()) {
-      case R.id.tilt:
-      {
-        Log.d(SimplifiedActivity.TAG, "flipping orientation");
-        final int o = this.getRequestedOrientation();
-        Log.d(SimplifiedActivity.TAG, "current orientation: " + o);
-        if ((o == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-          || (o == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
-          this
-            .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-          this
-            .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-        return true;
-      }
-
-      default:
-      {
-        return super.onOptionsItemSelected(item);
-      }
-    }
   }
 
   @Override protected void onSaveInstanceState(
