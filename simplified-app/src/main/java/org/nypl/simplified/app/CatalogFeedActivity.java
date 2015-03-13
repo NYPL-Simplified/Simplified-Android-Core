@@ -367,6 +367,16 @@ import com.io7m.junreachable.UnreachableCodeException;
       sv.setSubmitButtonEnabled(true);
 
       /**
+       * Set some placeholder text
+       */
+
+      if (this.getUpStack().isEmpty()) {
+        sv.setQueryHint("Search");
+      } else {
+        sv.setQueryHint("Search " + this.getTitleForDisplay());
+      }
+
+      /**
        * Check that the search URI is of an understood type.
        */
 
