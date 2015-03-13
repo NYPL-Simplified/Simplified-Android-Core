@@ -3,12 +3,13 @@
 
   <RelativeLayout
     android:id="@+id/feed_header"
+    android:gravity="center_vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:layout_marginBottom="8dp">
+    android:layout_height="50dp">
 
     <TextView
       android:id="@+id/feed_title"
+      android:textAppearance="@style/SimplifiedTheme.LaneTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="@string/catalog_unknown_feed"/>
