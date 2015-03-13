@@ -26,7 +26,7 @@ import com.io7m.jnull.Nullable;
     private final List<OPDSAcquisition> acquisitions;
     private final List<String>          authors;
     private final List<String>          categories;
-    private String                      content;
+    private String                      summary;
     private OptionType<URI>             cover;
     private final String                id;
     private final String                published;
@@ -45,7 +45,7 @@ import com.io7m.jnull.Nullable;
       this.id = NullCheck.notNull(in_id);
       this.title = NullCheck.notNull(in_title);
       this.updated = NullCheck.notNull(in_updated);
-      this.content = "";
+      this.summary = "";
       this.thumbnail = Option.none();
       this.cover = Option.none();
       this.acquisitions = new ArrayList<OPDSAcquisition>();
@@ -85,19 +85,19 @@ import com.io7m.jnull.Nullable;
         this.thumbnail,
         this.updated,
         this.subtitle,
-        this.content,
+        this.summary,
         this.published,
         this.publisher,
         this.categories);
     }
 
-    @Override public void setContentOption(
+    @Override public void setSummaryOption(
       final OptionType<String> text)
     {
       if (text.isNone()) {
-        this.content = "";
+        this.summary = "";
       } else {
-        this.content = ((Some<String>) text).get();
+        this.summary = ((Some<String>) text).get();
       }
     }
 
@@ -144,7 +144,7 @@ import com.io7m.jnull.Nullable;
   private final List<OPDSAcquisition> acquisitions;
   private final List<String>          authors;
   private final List<String>          categories;
-  private final String                content;
+  private final String                summary;
   private final OptionType<URI>       cover;
   private final String                id;
   private final String                published;
@@ -163,7 +163,7 @@ import com.io7m.jnull.Nullable;
     final OptionType<URI> in_thumbnail,
     final Calendar in_updated,
     final String in_subtitle,
-    final String in_content,
+    final String in_summary,
     final String in_published,
     final OptionType<String> in_publisher,
     final List<String> in_categories)
@@ -178,7 +178,7 @@ import com.io7m.jnull.Nullable;
     this.thumbnail = NullCheck.notNull(in_thumbnail);
     this.updated = NullCheck.notNull(in_updated);
     this.subtitle = NullCheck.notNull(in_subtitle);
-    this.content = NullCheck.notNull(in_content);
+    this.summary = NullCheck.notNull(in_summary);
     this.published = NullCheck.notNull(in_published);
     this.publisher = NullCheck.notNull(in_publisher);
     this.categories = NullCheck.notNull(in_categories);
@@ -203,7 +203,7 @@ import com.io7m.jnull.Nullable;
       && this.cover.equals(other.cover)
       && this.id.equals(other.id)
       && this.subtitle.equals(other.subtitle)
-      && this.content.equals(other.content)
+      && this.summary.equals(other.summary)
       && this.thumbnail.equals(other.thumbnail)
       && this.title.equals(other.title)
       && this.updated.equals(other.updated)
@@ -226,9 +226,9 @@ import com.io7m.jnull.Nullable;
     return this.categories;
   }
 
-  public String getContent()
+  public String getSummary()
   {
-    return this.content;
+    return this.summary;
   }
 
   public OptionType<URI> getCover()
@@ -281,7 +281,7 @@ import com.io7m.jnull.Nullable;
     result = (prime * result) + this.categories.hashCode();
     result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.subtitle.hashCode();
-    result = (prime * result) + this.content.hashCode();
+    result = (prime * result) + this.summary.hashCode();
     result = (prime * result) + this.thumbnail.hashCode();
     result = (prime * result) + this.title.hashCode();
     result = (prime * result) + this.updated.hashCode();

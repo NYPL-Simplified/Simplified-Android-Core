@@ -67,7 +67,7 @@ final class CatalogBookDetail
     text.append("}</style>");
     text.append("</head>");
     text.append("<body>");
-    text.append(e.getContent());
+    text.append(e.getSummary());
     text.append("</body>");
     text.append("</html>");
 

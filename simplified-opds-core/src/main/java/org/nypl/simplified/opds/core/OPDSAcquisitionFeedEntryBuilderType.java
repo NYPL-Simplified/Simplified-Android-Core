@@ -30,7 +30,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void setSubtitleOption(
     OptionType<String> text);
 
-  void setContentOption(
+  void setSummaryOption(
     OptionType<String> text);
 
   void setThumbnailOption(
