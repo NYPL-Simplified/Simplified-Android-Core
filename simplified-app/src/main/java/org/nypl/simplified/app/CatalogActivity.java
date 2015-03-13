@@ -1,6 +1,5 @@
 package org.nypl.simplified.app;
 
-import java.net.URI;
 import java.util.List;
 
 import android.app.ActionBar;
@@ -29,7 +28,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
   public static void setActivityArguments(
     final Bundle b,
-    final ImmutableList<URI> up_stack)
+    final ImmutableList<CatalogUpStackEntry> up_stack)
   {
     NullCheck.notNull(b);
     b.putSerializable(
@@ -38,7 +37,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
   }
 
   private void configureUpButton(
-    final List<URI> up_stack)
+    final List<CatalogUpStackEntry> up_stack)
   {
     Log.d(CatalogActivity.TAG, String.format("up stack: %s", up_stack));
 
@@ -52,16 +51,18 @@ public abstract class CatalogActivity extends SimplifiedActivity
     }
   }
 
-  @SuppressWarnings("unchecked") protected final List<URI> getUpStack()
+  @SuppressWarnings("unchecked") protected final
+    List<CatalogUpStackEntry>
+    getUpStack()
   {
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = i.getExtras();
     if (a != null) {
-      return (List<URI>) NullCheck.notNull(a
+      return (List<CatalogUpStackEntry>) NullCheck.notNull(a
         .getSerializable(CatalogActivity.CATALOG_UP_STACK_ID));
     }
 
-    final ImmutableList<URI> empty = ImmutableList.of();
+    final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
     return NullCheck.notNull(empty);
   }
 
@@ -84,15 +85,23 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
       case android.R.id.home:
       {
-        final List<URI> us = this.getUpStack();
+        final List<CatalogUpStackEntry> us = this.getUpStack();
         Preconditions.checkArgument(us.isEmpty() == false);
 
         Log.d(
           CatalogActivity.TAG,
           String.format("up stack before pop: " + us));
 
-        final Pair<URI, ImmutableList<URI>> p = StackUtilities.stackPop(us);
-        CatalogFeedActivity.startNewActivity(this, p.getRight(), p.getLeft());
+        final Pair<CatalogUpStackEntry, ImmutableList<CatalogUpStackEntry>> p =
+          StackUtilities.stackPop(us);
+
+        final ImmutableList<CatalogUpStackEntry> stack = p.getRight();
+        final CatalogUpStackEntry top = p.getLeft();
+        CatalogFeedActivity.startNewActivity(
+          this,
+          stack,
+          top.getTitle(),
+          top.getURI());
         return true;
       }
 

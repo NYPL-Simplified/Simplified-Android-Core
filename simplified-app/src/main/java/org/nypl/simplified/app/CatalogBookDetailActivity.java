@@ -1,6 +1,5 @@
 package org.nypl.simplified.app;
 
-import java.net.URI;
 import java.util.concurrent.CancellationException;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -61,7 +60,7 @@ import com.io7m.jnull.Nullable;
   public static void setActivityArguments(
     final Bundle b,
     final boolean drawer_open,
-    final ImmutableList<URI> up_stack,
+    final ImmutableList<CatalogUpStackEntry> up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
     NullCheck.notNull(b);
@@ -74,7 +73,7 @@ import com.io7m.jnull.Nullable;
 
   public static void startNewActivity(
     final Activity from,
-    final ImmutableList<URI> up_stack,
+    final ImmutableList<CatalogUpStackEntry> up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
     final Bundle b = new Bundle();

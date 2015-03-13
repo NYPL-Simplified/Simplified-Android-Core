@@ -20,6 +20,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -87,15 +88,13 @@ import com.io7m.junreachable.UnreachableCodeException;
             "q=" + Uri.encode(qnn),
             null));
 
-        final OPDSFeedType f =
-          NullCheck.notNull(CatalogFeedActivity.this.feed);
-        final ImmutableList<URI> us =
-          CatalogFeedActivity.this.newUpStack(f.getFeedURI());
+        final CatalogFeedActivity cfa = CatalogFeedActivity.this;
+        final OPDSFeedType f = NullCheck.notNull(cfa.feed);
 
-        CatalogFeedActivity.startNewActivity(
-          CatalogFeedActivity.this,
-          us,
-          target);
+        final ImmutableList<CatalogUpStackEntry> us =
+          cfa.newUpStack(f.getFeedURI(), cfa.getTitleForDisplay());
+
+        CatalogFeedActivity.startNewActivity(cfa, us, "Search", target);
 
       } catch (final URISyntaxException e) {
         Log.e(CatalogFeedActivity.TAG, e.getMessage(), e);
@@ -105,18 +104,21 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
+  private static final String CATALOG_TITLE;
   private static final String CATALOG_URI;
   private static final String TAG;
 
   static {
     TAG = "CFA";
     CATALOG_URI = "org.nypl.simplified.app.CatalogFeedActivity.uri";
+    CATALOG_TITLE = "org.nypl.simplified.app.CatalogFeedActivity.title";
   }
 
   public static void setActivityArguments(
     final Bundle b,
     final boolean drawer_open,
-    final ImmutableList<URI> up_stack,
+    final ImmutableList<CatalogUpStackEntry> up_stack,
+    final String title,
     final URI uri)
   {
     NullCheck.notNull(b);
@@ -125,6 +127,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       .putSerializable(
         CatalogFeedActivity.CATALOG_URI,
         NullCheck.notNull(uri));
+    b.putString(CatalogFeedActivity.CATALOG_TITLE, NullCheck.notNull(title));
     CatalogActivity.setActivityArguments(b, up_stack);
   }
 
@@ -137,17 +140,25 @@ import com.io7m.junreachable.UnreachableCodeException;
    *          The previous activity
    * @param up_stack
    *          The up stack for the new activity
+   * @param title
+   *          The title of the feed
    * @param target
    *          The URI of the feed
    */
 
   public static void startNewActivity(
     final Activity from,
-    final ImmutableList<URI> up_stack,
+    final ImmutableList<CatalogUpStackEntry> up_stack,
+    final String title,
     final URI target)
   {
     final Bundle b = new Bundle();
-    CatalogFeedActivity.setActivityArguments(b, false, up_stack, target);
+    CatalogFeedActivity.setActivityArguments(
+      b,
+      false,
+      up_stack,
+      title,
+      target);
     final Intent i = new Intent(from, CatalogFeedActivity.class);
     i.putExtras(b);
     i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -160,7 +171,8 @@ import com.io7m.junreachable.UnreachableCodeException;
   private @Nullable ViewGroup                      progress_layout;
 
   private void configureUpButton(
-    final List<URI> up_stack)
+    final List<CatalogUpStackEntry> up_stack,
+    final String title)
   {
     final ActionBar bar = this.getActionBar();
     if (up_stack.isEmpty() == false) {
@@ -170,16 +182,20 @@ import com.io7m.junreachable.UnreachableCodeException;
       bar.setDisplayHomeAsUpEnabled(false);
       bar.setHomeButtonEnabled(false);
     }
+
+    bar.setTitle(title);
   }
 
-  private void configureUpButtonTitle(
-    final String title,
-    final List<URI> up_stack)
+  private String getTitleForDisplay()
   {
-    final ActionBar bar = this.getActionBar();
-    if (up_stack.isEmpty() == false) {
-      bar.setTitle(title);
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final Intent i = NullCheck.notNull(this.getIntent());
+    final Bundle a = i.getExtras();
+    if (a != null) {
+      return NullCheck
+        .notNull(a.getString(CatalogFeedActivity.CATALOG_TITLE));
     }
+    return NullCheck.notNull(rr.getString(R.string.app_name));
   }
 
   private URI getURI()
@@ -194,14 +210,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     return app.getFeedInitialURI();
   }
 
-  private ImmutableList<URI> newUpStack(
-    final URI feed_uri)
+  private ImmutableList<CatalogUpStackEntry> newUpStack(
+    final URI feed_uri,
+    final String feed_title)
   {
-    final List<URI> up_stack = this.getUpStack();
-    final Builder<URI> new_up_stack_b = ImmutableList.builder();
+    final List<CatalogUpStackEntry> up_stack = this.getUpStack();
+    final Builder<CatalogUpStackEntry> new_up_stack_b =
+      ImmutableList.builder();
     new_up_stack_b.addAll(up_stack);
-    new_up_stack_b.add(feed_uri);
-    final ImmutableList<URI> new_up_stack =
+    new_up_stack_b.add(new CatalogUpStackEntry(feed_uri, feed_title));
+    final ImmutableList<CatalogUpStackEntry> new_up_stack =
       NullCheck.notNull(new_up_stack_b.build());
     return new_up_stack;
   }
@@ -224,7 +242,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     Log.d(CatalogFeedActivity.TAG, "received acquisition feed: " + af);
 
-    this.configureUpButtonTitle(af.getFeedTitle(), this.getUpStack());
     this.invalidateOptionsMenu();
 
     final FrameLayout content_area = this.getContentFrame();
@@ -270,7 +287,8 @@ import com.io7m.junreachable.UnreachableCodeException;
         .findViewById(R.id.catalog_acq_feed_grid));
 
     final URI feed_uri = af.getFeedURI();
-    final ImmutableList<URI> new_up_stack = this.newUpStack(feed_uri);
+    final ImmutableList<CatalogUpStackEntry> new_up_stack =
+      this.newUpStack(feed_uri, this.getTitleForDisplay());
     final Simplified app = Simplified.get();
 
     final CatalogAcquisitionFeedListenerType listener =
@@ -307,7 +325,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       CatalogFeedActivity.TAG,
       String.format("onCreate: %s (%s)", this, u));
 
-    this.configureUpButton(this.getUpStack());
+    this.configureUpButton(this.getUpStack(), this.getTitleForDisplay());
   }
 
   @Override public boolean onCreateOptionsMenu(
@@ -450,7 +468,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     Log.d(CatalogFeedActivity.TAG, "received navigation feed: " + nf);
 
-    this.configureUpButtonTitle(nf.getFeedTitle(), this.getUpStack());
     this.invalidateOptionsMenu();
 
     final Simplified app = Simplified.get();
@@ -477,7 +494,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       new ArrayAdapter<OPDSNavigationFeedEntry>(this, 0, nf.getFeedEntries());
 
     final URI feed_uri = nf.getFeedURI();
-    final ImmutableList<URI> new_up_stack = this.newUpStack(feed_uri);
+    final ImmutableList<CatalogUpStackEntry> new_up_stack =
+      this.newUpStack(feed_uri, this.getTitleForDisplay());
 
     final CatalogNavigationLaneViewListenerType lane_view_listener =
       new CatalogNavigationLaneViewListenerType() {
@@ -538,7 +556,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private void onSelectedBook(
     final Simplified app,
-    final ImmutableList<URI> new_up_stack,
+    final ImmutableList<CatalogUpStackEntry> new_up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
     Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
@@ -557,13 +575,14 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private void onSelectedFeed(
-    final ImmutableList<URI> new_up_stack,
+    final ImmutableList<CatalogUpStackEntry> new_up_stack,
     final OPDSNavigationFeedEntry f)
   {
     Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
     CatalogFeedActivity.startNewActivity(
       CatalogFeedActivity.this,
       new_up_stack,
+      f.getTitle(),
       f.getTargetURI());
   }
 

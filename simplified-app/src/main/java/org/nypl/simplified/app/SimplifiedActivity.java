@@ -1,6 +1,5 @@
 package org.nypl.simplified.app;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,10 +130,14 @@ import com.io7m.jnull.Nullable;
     d.setDrawerListener(this);
     dl.setOnItemClickListener(this);
 
-    final String catalog_name = rr.getString(R.string.catalog);
-    final String holds_name = rr.getString(R.string.holds);
-    final String books_name = rr.getString(R.string.books);
-    final String settings_name = rr.getString(R.string.settings);
+    final String app_name =
+      NullCheck.notNull(rr.getString(R.string.app_name));
+    final String catalog_name =
+      NullCheck.notNull(rr.getString(R.string.catalog));
+    final String holds_name = NullCheck.notNull(rr.getString(R.string.holds));
+    final String books_name = NullCheck.notNull(rr.getString(R.string.books));
+    final String settings_name =
+      NullCheck.notNull(rr.getString(R.string.settings));
 
     final ArrayList<String> di = new ArrayList<String>();
     di.add(catalog_name);
@@ -175,11 +178,12 @@ import com.io7m.jnull.Nullable;
       @Override public Unit call(
         final Bundle b)
       {
-        final ImmutableList<URI> empty = ImmutableList.of();
+        final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
         CatalogFeedActivity.setActivityArguments(
           b,
           false,
           NullCheck.notNull(empty),
+          app_name,
           app.getFeedInitialURI());
         return Unit.unit();
       }
