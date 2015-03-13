@@ -5,7 +5,13 @@ public interface OPDSFeedParserContractType
   void testAcquisitionFeedFiction0()
     throws Exception;
 
+  void testAcquisitionFeedPaginated0()
+    throws Exception;
+
   void testDOMException()
+    throws Exception;
+
+  void testEmpty0()
     throws Exception;
 
   void testNavigationFeed0()
@@ -30,8 +36,5 @@ public interface OPDSFeedParserContractType
     throws Exception;
 
   void testStreamIOException()
-    throws Exception;
-
-  void testAcquisitionFeedPaginated0()
     throws Exception;
 }

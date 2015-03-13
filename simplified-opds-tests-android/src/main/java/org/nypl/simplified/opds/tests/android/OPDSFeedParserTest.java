@@ -33,6 +33,12 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
     this.contract.testDOMException();
   }
 
+  @Override public void testEmpty0()
+    throws Exception
+  {
+    this.contract.testEmpty0();
+  }
+
   @Override public void testNavigationFeed0()
     throws Exception
   {

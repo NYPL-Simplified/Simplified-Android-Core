@@ -176,6 +176,17 @@ import com.io7m.jnull.NullCheck;
       });
   }
 
+  @Override public void testEmpty0()
+    throws Exception
+  {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final InputStream d = OPDSFeedParserContract.getResource("empty-0.xml");
+    final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(uri, d);
+    d.close();
+  }
+
   @Override public void testNavigationFeed0()
     throws Exception
   {

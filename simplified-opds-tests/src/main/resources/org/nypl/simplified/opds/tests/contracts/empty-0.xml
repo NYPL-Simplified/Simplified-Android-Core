@@ -1,0 +1,16 @@
+<feed 
+  xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:schema="http://schema.org/"
+  xmlns:app="http://www.w3.org/2007/app"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:opds41="http://opds-spec.org/2014/catalog"
+  xmlns:simplified="http://library-simplified.com/"
+  xmlns="http://www.w3.org/2005/Atom">
+
+  <id>http://library-simplified.herokuapp.com/feed/Fiction</id>
+  <title>Fiction: featured</title>
+  <updated>2015-02-03T18:26:29Z</updated>
+  <link href="http://library-simplified.herokuapp.com/feed/Fiction"/>
+  <link rel="self" href="http://library-simplified.herokuapp.com/feed/Fiction"/>
+  <link rel="search" type="application/opensearchdescription+xml" href="http://library-simplified.herokuapp.com/search/Fiction"/>
+</feed>

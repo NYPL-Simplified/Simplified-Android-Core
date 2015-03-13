@@ -132,7 +132,7 @@ import com.io7m.junreachable.UnreachableCodeException;
    * Start a new catalog feed activity, assuming that the user came from
    * <tt>from</tt>, with up stack <tt>up_stack</tt>, attempting to load the
    * feed at <tt>target</tt>.
-   * 
+   *
    * @param from
    *          The previous activity
    * @param up_stack
@@ -232,13 +232,39 @@ import com.io7m.junreachable.UnreachableCodeException;
     progress.setVisibility(View.GONE);
     content_area.removeAllViews();
 
+    /**
+     * If the feed is empty, show a simple message instead of a list.
+     */
+
+    final boolean empty_feed = af.getFeedEntries().isEmpty();
+    final int layout_id;
+    if (empty_feed) {
+      layout_id = R.layout.catalog_acquisition_feed_empty;
+    } else {
+      layout_id = R.layout.catalog_acquisition_feed;
+    }
+
     final LayoutInflater inflater = this.getLayoutInflater();
-    final LinearLayout layout =
-      NullCheck.notNull((LinearLayout) inflater.inflate(
-        R.layout.catalog_acquisition_feed,
+    final ViewGroup layout =
+      NullCheck.notNull((ViewGroup) inflater.inflate(
+        layout_id,
         content_area,
         false));
 
+    content_area.addView(layout);
+    content_area.requestLayout();
+
+    if (empty_feed) {
+      return;
+    }
+
+    this.onAcquisitionFeedUINonEmpty(af, layout);
+  }
+
+  private void onAcquisitionFeedUINonEmpty(
+    final OPDSAcquisitionFeed af,
+    final ViewGroup layout)
+  {
     final GridView grid_view =
       NullCheck.notNull((GridView) layout
         .findViewById(R.id.catalog_acq_feed_grid));
@@ -267,9 +293,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     grid_view.setAdapter(f);
     grid_view.setOnScrollListener(f);
-
-    content_area.addView(layout);
-    content_area.requestLayout();
 
     this.cancellable = f;
   }

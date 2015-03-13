@@ -31,6 +31,12 @@ public final class OPDSFeedParserTest implements OPDSFeedParserContractType
     this.contract.testDOMException();
   }
 
+  @Override @Test public void testEmpty0()
+    throws Exception
+  {
+    this.contract.testEmpty0();
+  }
+
   @Override @Test public void testNavigationFeed0()
     throws Exception
   {

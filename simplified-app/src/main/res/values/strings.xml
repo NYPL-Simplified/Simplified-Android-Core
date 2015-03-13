@@ -17,6 +17,7 @@
   <string name="catalog_publisher">Publisher</string>
   <string name="catalog_categories">Categories</string>
   <string name="catalog_search">Search</string>
+  <string name="catalog_empty_feed">No results found.</string>
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Borrow</string>

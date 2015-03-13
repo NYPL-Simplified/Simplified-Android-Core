@@ -509,7 +509,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           OPDSFeedParser.ATOM_URI,
           "link");
       final List<Element> entries =
-        OPDSXML.getChildElementsWithNameNonEmpty(
+        OPDSXML.getChildElementsWithName(
           e_feed,
           OPDSFeedParser.ATOM_URI,
           "entry");
@@ -519,7 +519,21 @@ public final class OPDSFeedParser implements OPDSFeedParserType
        * it's necessary to examine the entries in the feed to determine if the
        * feed is a Navigation or Acquisition feed. The first entry in the list
        * decides what type the feed is.
+       *
+       * If there aren't any entries in the feed, then the feed is assumed to
+       * be an acquisition feed. The justification for this is that search
+       * results are acquisition feeds, any may be empty.
        */
+
+      if (entries.size() == 0) {
+        return OPDSFeedParser.parseAcquisition(
+          uri,
+          id,
+          title,
+          updated,
+          links,
+          entries);
+      }
 
       final Element e0 = NullCheck.notNull(entries.get(0));
       if (OPDSFeedParser.entryIsFromAcquisitionFeed(e0)) {
