@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
@@ -42,6 +40,8 @@ public abstract class CatalogActivity extends SimplifiedActivity
   private void configureUpButton(
     final List<URI> up_stack)
   {
+    Log.d(CatalogActivity.TAG, String.format("up stack: %s", up_stack));
+
     final ActionBar bar = this.getActionBar();
     if (up_stack.isEmpty() == false) {
       bar.setDisplayHomeAsUpEnabled(true);
@@ -71,23 +71,26 @@ public abstract class CatalogActivity extends SimplifiedActivity
     super.onCreate(state);
   }
 
-  @Override public boolean onCreateOptionsMenu(
-    final @Nullable Menu menu)
-  {
-    final MenuInflater inflater = this.getMenuInflater();
-    inflater.inflate(R.menu.catalog, menu);
-    return true;
-  }
-
   @Override public boolean onOptionsItemSelected(
     final @Nullable MenuItem item)
   {
     assert item != null;
     switch (item.getItemId()) {
+
+    /**
+     * Configure the home button to start a new activity with a popped
+     * up-stack.
+     */
+
       case android.R.id.home:
       {
         final List<URI> us = this.getUpStack();
         Preconditions.checkArgument(us.isEmpty() == false);
+
+        Log.d(
+          CatalogActivity.TAG,
+          String.format("up stack before pop: " + us));
+
         final Pair<URI, ImmutableList<URI>> p = StackUtilities.stackPop(us);
         CatalogFeedActivity.startNewActivity(this, p.getRight(), p.getLeft());
         return true;

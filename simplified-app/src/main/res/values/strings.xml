@@ -16,6 +16,7 @@
   <string name="catalog_publication_date">Published</string>
   <string name="catalog_publisher">Publisher</string>
   <string name="catalog_categories">Categories</string>
+  <string name="catalog_search">Search</string>
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Borrow</string>

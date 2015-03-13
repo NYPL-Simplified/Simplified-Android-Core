@@ -1,9 +1,11 @@
 package org.nypl.simplified.app;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
+import org.apache.http.client.utils.URIUtils;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
@@ -12,14 +14,19 @@ import org.nypl.simplified.opds.core.OPDSFeedMatcherType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
+import org.nypl.simplified.opds.core.OPDSSearchLink;
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -27,23 +34,82 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("synthetic-access") public final class CatalogFeedActivity extends
-  CatalogActivity
+  CatalogActivity implements
+  OPDSFeedLoadListenerType,
+  OPDSFeedMatcherType<Unit, UnreachableCodeException>
 {
+  /**
+   * A handler for OpenSearch 1.1 searches.
+   */
+
+  private final class OpenSearchQueryHandler implements OnQueryTextListener
+  {
+    private final URI base;
+
+    OpenSearchQueryHandler(
+      final URI in_base)
+    {
+      this.base = NullCheck.notNull(in_base);
+    }
+
+    @Override public boolean onQueryTextChange(
+      final @Nullable String s)
+    {
+      return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(
+      final @Nullable String query)
+    {
+      try {
+        final String qnn = NullCheck.notNull(query);
+
+        final URI target =
+          NullCheck.notNull(URIUtils.createURI(
+            this.base.getScheme(),
+            this.base.getHost(),
+            this.base.getPort(),
+            this.base.getPath(),
+            "q=" + Uri.encode(qnn),
+            null));
+
+        final OPDSFeedType f =
+          NullCheck.notNull(CatalogFeedActivity.this.feed);
+        final ImmutableList<URI> us =
+          CatalogFeedActivity.this.newUpStack(f.getFeedURI());
+
+        CatalogFeedActivity.startNewActivity(
+          CatalogFeedActivity.this,
+          us,
+          target);
+
+      } catch (final URISyntaxException e) {
+        Log.e(CatalogFeedActivity.TAG, e.getMessage(), e);
+      }
+
+      return true;
+    }
+  }
+
   private static final String CATALOG_URI;
   private static final String TAG;
 
   static {
-    TAG = "CAct";
+    TAG = "CFA";
     CATALOG_URI = "org.nypl.simplified.app.CatalogFeedActivity.uri";
   }
 
@@ -62,6 +128,19 @@ import com.io7m.junreachable.UnreachableCodeException;
     CatalogActivity.setActivityArguments(b, up_stack);
   }
 
+  /**
+   * Start a new catalog feed activity, assuming that the user came from
+   * <tt>from</tt>, with up stack <tt>up_stack</tt>, attempting to load the
+   * feed at <tt>target</tt>.
+   * 
+   * @param from
+   *          The previous activity
+   * @param up_stack
+   *          The up stack for the new activity
+   * @param target
+   *          The URI of the feed
+   */
+
   public static void startNewActivity(
     final Activity from,
     final ImmutableList<URI> up_stack,
@@ -76,6 +155,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private @Nullable ExpensiveStoppableType         cancellable;
+  private @Nullable OPDSFeedType                   feed;
   private @Nullable ListenableFuture<OPDSFeedType> loading;
   private @Nullable ViewGroup                      progress_layout;
 
@@ -102,55 +182,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  private ListenableFuture<OPDSFeedType> getFeed(
-    final URI uri,
-    final OPDSFeedLoaderType loader)
-  {
-    return loader.fromURI(uri, new OPDSFeedLoadListenerType() {
-      @Override public void onFeedLoadingFailure(
-        final Throwable e)
-      {
-        CatalogFeedActivity.this.runOnUiThread(new Runnable() {
-          @Override public void run()
-          {
-            CatalogFeedActivity.this.onReceiveFeedError(e);
-          }
-        });
-      }
-
-      @Override public void onFeedLoadingSuccess(
-        final OPDSFeedType f)
-      {
-        f
-          .matchFeedType(new OPDSFeedMatcherType<Unit, UnreachableCodeException>() {
-            @Override public Unit onAcquisitionFeed(
-              final OPDSAcquisitionFeed af)
-            {
-              CatalogFeedActivity.this.runOnUiThread(new Runnable() {
-                @Override public void run()
-                {
-                  CatalogFeedActivity.this.onReceiveFeedAcquisition(af);
-                }
-              });
-              return Unit.unit();
-            }
-
-            @Override public Unit onNavigationFeed(
-              final OPDSNavigationFeed nf)
-            {
-              CatalogFeedActivity.this.runOnUiThread(new Runnable() {
-                @Override public void run()
-                {
-                  CatalogFeedActivity.this.onReceiveFeedNavigation(nf);
-                }
-              });
-              return Unit.unit();
-            }
-          });
-      }
-    });
-  }
-
   private URI getURI()
   {
     final Simplified app = Simplified.get();
@@ -175,27 +206,26 @@ import com.io7m.junreachable.UnreachableCodeException;
     return new_up_stack;
   }
 
-  @Override protected void onCreate(
-    final @Nullable Bundle state)
+  @Override public Unit onAcquisitionFeed(
+    final OPDSAcquisitionFeed f)
   {
-    super.onCreate(state);
-    Log.d(CatalogFeedActivity.TAG, "onCreate: " + this);
-    this.configureUpButton(this.getUpStack());
+    CatalogFeedActivity.this.runOnUiThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogFeedActivity.this.onAcquisitionFeedUI(f);
+      }
+    });
+
+    return Unit.unit();
   }
 
-  @Override protected void onDestroy()
-  {
-    super.onDestroy();
-    Log.d(CatalogFeedActivity.TAG, "onDestroy: " + this);
-    this.stopDownloading();
-  }
-
-  private void onReceiveFeedAcquisition(
+  private void onAcquisitionFeedUI(
     final OPDSAcquisitionFeed af)
   {
     Log.d(CatalogFeedActivity.TAG, "received acquisition feed: " + af);
 
     this.configureUpButtonTitle(af.getFeedTitle(), this.getUpStack());
+    this.invalidateOptionsMenu();
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup progress = NullCheck.notNull(this.progress_layout);
@@ -215,7 +245,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final URI feed_uri = af.getFeedURI();
     final ImmutableList<URI> new_up_stack = this.newUpStack(feed_uri);
-
     final Simplified app = Simplified.get();
 
     final CatalogAcquisitionFeedListenerType listener =
@@ -245,7 +274,99 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.cancellable = f;
   }
 
-  private void onReceiveFeedError(
+  @Override protected void onCreate(
+    final @Nullable Bundle state)
+  {
+    super.onCreate(state);
+
+    final URI u = this.getURI();
+    Log.d(
+      CatalogFeedActivity.TAG,
+      String.format("onCreate: %s (%s)", this, u));
+
+    this.configureUpButton(this.getUpStack());
+  }
+
+  @Override public boolean onCreateOptionsMenu(
+    final @Nullable Menu in_menu)
+  {
+    assert in_menu != null;
+
+    if (this.feed == null) {
+      Log.d(
+        CatalogFeedActivity.TAG,
+        "menu creation requested but feed is not present");
+      return true;
+    }
+
+    Log.d(
+      CatalogFeedActivity.TAG,
+      "menu creation requested and feed is present");
+
+    final MenuInflater inflater = this.getMenuInflater();
+    inflater.inflate(R.menu.catalog, in_menu);
+
+    final MenuItem search_item = in_menu.findItem(R.id.catalog_action_search);
+
+    /**
+     * If the feed actually has a search URI, then show the search field.
+     * Otherwise, disable and hide it.
+     */
+
+    final OPDSFeedType feed_actual = NullCheck.notNull(this.feed);
+    final OptionType<OPDSSearchLink> search_opt =
+      feed_actual.getFeedSearchURI();
+
+    boolean search_ok = false;
+    if (search_opt.isSome()) {
+      final Some<OPDSSearchLink> search_some =
+        (Some<OPDSSearchLink>) search_opt;
+
+      final SearchView sv = (SearchView) search_item.getActionView();
+      sv.setSubmitButtonEnabled(true);
+
+      /**
+       * Check that the search URI is of an understood type.
+       */
+
+      final OPDSSearchLink search = search_some.get();
+      if ("application/opensearchdescription+xml".equals(search.getType())) {
+        sv
+          .setOnQueryTextListener(new OpenSearchQueryHandler(search.getURI()));
+        search_ok = true;
+      } else {
+
+        /**
+         * The application doesn't understand the search type.
+         */
+
+        Log.e(
+          CatalogFeedActivity.TAG,
+          String.format("unknown search type '%s'", search.getType()));
+      }
+    }
+
+    if (search_ok == false) {
+      search_item.setEnabled(false);
+      search_item.setVisible(false);
+    }
+
+    return true;
+  }
+
+  @Override protected void onDestroy()
+  {
+    super.onDestroy();
+
+    final URI u = this.getURI();
+    Log.d(
+      CatalogFeedActivity.TAG,
+      String.format("onDestroy: %s (%s)", this, u));
+
+    this.stopDownloading();
+  }
+
+  @Override public void onFeedLoadingFailure(
     final Throwable e)
   {
     if (e instanceof CancellationException) {
@@ -253,6 +374,17 @@ import com.io7m.junreachable.UnreachableCodeException;
       return;
     }
 
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogFeedActivity.this.onFeedLoadingFailureUI(e);
+      }
+    });
+  }
+
+  private void onFeedLoadingFailureUI(
+    final Throwable e)
+  {
     Log.e(CatalogFeedActivity.TAG, "Failed to get feed: " + e, e);
 
     final FrameLayout content_area = this.getContentFrame();
@@ -270,12 +402,33 @@ import com.io7m.junreachable.UnreachableCodeException;
     content_area.requestLayout();
   }
 
-  private void onReceiveFeedNavigation(
+  @Override public void onFeedLoadingSuccess(
+    final OPDSFeedType f)
+  {
+    this.feed = f;
+    f.matchFeedType(this);
+  }
+
+  @Override public Unit onNavigationFeed(
+    final OPDSNavigationFeed f)
+  {
+    CatalogFeedActivity.this.runOnUiThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogFeedActivity.this.onNavigationFeedUI(f);
+      }
+    });
+
+    return Unit.unit();
+  }
+
+  private void onNavigationFeedUI(
     final OPDSNavigationFeed nf)
   {
     Log.d(CatalogFeedActivity.TAG, "received navigation feed: " + nf);
 
     this.configureUpButtonTitle(nf.getFeedTitle(), this.getUpStack());
+    this.invalidateOptionsMenu();
 
     final Simplified app = Simplified.get();
 
@@ -314,9 +467,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 
         @Override public void onSelectFeed(
           final CatalogNavigationLaneView v,
-          final OPDSNavigationFeedEntry feed)
+          final OPDSNavigationFeedEntry f)
         {
-          CatalogFeedActivity.this.onSelectedFeed(new_up_stack, feed);
+          CatalogFeedActivity.this.onSelectedFeed(new_up_stack, f);
         }
       };
 
@@ -338,7 +491,11 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override protected void onResume()
   {
     super.onResume();
-    Log.d(CatalogFeedActivity.TAG, "onResume: " + this);
+
+    final URI u = this.getURI();
+    Log.d(
+      CatalogFeedActivity.TAG,
+      String.format("onResume: %s (%s)", this, u));
 
     final LayoutInflater inflater = this.getLayoutInflater();
     final FrameLayout content_area = this.getContentFrame();
@@ -353,7 +510,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final Simplified app = Simplified.get();
     final OPDSFeedLoaderType loader = app.getFeedLoader();
-    this.loading = this.getFeed(this.getURI(), loader);
+    this.loading = loader.fromURI(u, this);
   }
 
   private void onSelectedBook(
@@ -378,21 +535,23 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private void onSelectedFeed(
     final ImmutableList<URI> new_up_stack,
-    final OPDSNavigationFeedEntry feed)
+    final OPDSNavigationFeedEntry f)
   {
     Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
     CatalogFeedActivity.startNewActivity(
       CatalogFeedActivity.this,
       new_up_stack,
-      feed.getTargetURI());
+      f.getTargetURI());
   }
 
   @Override protected void onStop()
   {
     super.onStop();
-    Log.d(CatalogFeedActivity.TAG, "onStop: " + this);
-    this.stopDownloading();
 
+    final URI u = this.getURI();
+    Log.d(CatalogFeedActivity.TAG, String.format("onStop: %s (%s)", this, u));
+
+    this.stopDownloading();
     final FrameLayout content_area = this.getContentFrame();
     content_area.removeAllViews();
   }
