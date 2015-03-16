@@ -6,11 +6,11 @@ package org.nypl.simplified.opds.core;
 
 public interface OPDSFeedMatcherType<A, E extends Exception>
 {
-  A acquisition(
+  A onAcquisitionFeed(
     final OPDSAcquisitionFeed f)
     throws E;
 
-  A navigation(
+  A onNavigationFeed(
     final OPDSNavigationFeed f)
     throws E;
 }

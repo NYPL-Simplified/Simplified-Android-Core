@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="SimplifiedTheme" parent="android:Theme.Light">
+
+  <style name="SimplifiedTheme" parent="android:Theme.Holo.Light"></style>
+
+  <style name="SimplifiedTheme.LaneTitle">
+    <item name="android:textSize">21sp</item>
+    <item name="android:textColor">#000</item>
+    <item name="android:textStyle">normal</item>
+    <item name="android:typeface">sans</item>
   </style>
+
+  <style name="SimplifiedBookDialog" parent="SimplifiedTheme">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowIsFloating">true</item>
+  </style>
+
 </resources>

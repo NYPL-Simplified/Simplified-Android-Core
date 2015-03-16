@@ -1,18 +1,46 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
+import java.net.URI;
 import java.util.Calendar;
+
+import com.io7m.jfunctional.OptionType;
 
 /**
  * The type of OPDS feeds.
  */
 
-public interface OPDSFeedType
+public interface OPDSFeedType extends Serializable
 {
+  /**
+   * @return The unique identifier of the feed
+   */
+
   String getFeedID();
+
+  /**
+   * @return The search URI for the feed
+   */
+
+  OptionType<OPDSSearchLink> getFeedSearchURI();
+
+  /**
+   * @return The title of the feed
+   */
 
   String getFeedTitle();
 
+  /**
+   * @return The last time the feed was updated
+   */
+
   Calendar getFeedUpdated();
+
+  /**
+   * @return The URI of the feed
+   */
+
+  URI getFeedURI();
 
   /**
    * Match on the actual type of feed.

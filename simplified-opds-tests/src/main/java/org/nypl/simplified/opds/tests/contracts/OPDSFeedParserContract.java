@@ -16,15 +16,17 @@ import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
+import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.opds.tests.utilities.TestUtilities;
 import org.w3c.dom.DOMException;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialProcedureType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
-public final class OPDSFeedParserContract implements
+@SuppressWarnings({ "boxing", "null", "resource" }) public final class OPDSFeedParserContract implements
   OPDSFeedParserContractType
 {
   public static InputStream getResource(
@@ -43,10 +45,12 @@ public final class OPDSFeedParserContract implements
   @Override public void testAcquisitionFeedFiction0()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
     final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final InputStream d =
       OPDSFeedParserContract.getResource("acquisition-fiction-0.xml");
-    final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(d);
+    final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(uri, d);
     d.close();
 
     TestUtilities.assertEquals(
@@ -54,8 +58,18 @@ public final class OPDSFeedParserContract implements
       f.getFeedID());
     TestUtilities.assertEquals("Fiction: featured", f.getFeedTitle());
     TestUtilities.assertEquals(20, f.getFeedEntries().size());
-    final Calendar u = f.getFeedUpdated();
 
+    final Some<OPDSSearchLink> search_opt =
+      (Some<OPDSSearchLink>) f.getFeedSearchURI();
+    final OPDSSearchLink search = search_opt.get();
+    TestUtilities.assertEquals(
+      URI.create("http://library-simplified.herokuapp.com/search/Fiction"),
+      search.getURI());
+    TestUtilities.assertEquals(
+      "application/opensearchdescription+xml",
+      search.getType());
+
+    final Calendar u = f.getFeedUpdated();
     final Set<String> ids = new HashSet<String>();
     final Set<String> titles = new HashSet<String>();
 
@@ -88,6 +102,7 @@ public final class OPDSFeedParserContract implements
       System.out.println("thumbnail: " + e_thumb);
       System.out.println("cover: " + e_cover);
 
+      TestUtilities.assertTrue(e.getPublisher().isSome());
       TestUtilities.assertGreater(e_authors.size(), 0);
       TestUtilities.assertGreater(e_acq.size(), 0);
       TestUtilities.assertEquals(u, e.getUpdated());
@@ -106,9 +121,41 @@ public final class OPDSFeedParserContract implements
     }
   }
 
+  @Override public void testAcquisitionFeedPaginated0()
+    throws Exception
+  {
+    final URI uri =
+      URI
+        .create("http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author");
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final InputStream d =
+      OPDSFeedParserContract.getResource("acquisition-paginated-0.xml");
+    final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(uri, d);
+    d.close();
+
+    TestUtilities
+      .assertEquals(
+        "http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author",
+        f.getFeedID());
+    TestUtilities.assertEquals(
+      "Biography & Memoir: By author",
+      f.getFeedTitle());
+    TestUtilities.assertEquals(50, f.getFeedEntries().size());
+
+    final Some<URI> next_opt = (Some<URI>) f.getNext();
+
+    TestUtilities
+      .assertEquals(
+        "http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?after=155057&order=author",
+        next_opt.get().toString());
+  }
+
   @Override public void testDOMException()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -124,18 +171,32 @@ public final class OPDSFeedParserContract implements
               throw new DOMException((short) 0, "Bad news");
             }
           };
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
+  }
+
+  @Override public void testEmpty0()
+    throws Exception
+  {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final InputStream d = OPDSFeedParserContract.getResource("empty-0.xml");
+    final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(uri, d);
+    d.close();
   }
 
   @Override public void testNavigationFeed0()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final InputStream d =
       OPDSFeedParserContract.getResource("navigation-0.xml");
-    final OPDSNavigationFeed f = (OPDSNavigationFeed) p.parse(d);
+    final OPDSNavigationFeed f = (OPDSNavigationFeed) p.parse(uri, d);
     d.close();
 
     TestUtilities.assertEquals(
@@ -143,6 +204,16 @@ public final class OPDSFeedParserContract implements
       f.getFeedID());
     TestUtilities.assertEquals("Navigation feed", f.getFeedTitle());
     TestUtilities.assertEquals(28, f.getFeedEntries().size());
+
+    final Some<OPDSSearchLink> search_opt =
+      (Some<OPDSSearchLink>) f.getFeedSearchURI();
+    final OPDSSearchLink search = search_opt.get();
+    TestUtilities.assertEquals(
+      URI.create("http://library-simplified.herokuapp.com/search/"),
+      search.getURI());
+    TestUtilities.assertEquals(
+      "application/opensearchdescription+xml",
+      search.getType());
 
     final Set<String> ids = new HashSet<String>();
     final Set<String> titles = new HashSet<String>();
@@ -186,6 +257,9 @@ public final class OPDSFeedParserContract implements
   @Override public void testNavigationFeedBadEntryFeaturedLinkWithoutHref()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -197,7 +271,7 @@ public final class OPDSFeedParserContract implements
           final InputStream d =
             OPDSFeedParserContract
               .getResource("navigation-bad-entry-featured-link-without-href.xml");
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
   }
@@ -205,6 +279,9 @@ public final class OPDSFeedParserContract implements
   @Override public void testNavigationFeedBadEntryLinkWithoutHref()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -216,7 +293,7 @@ public final class OPDSFeedParserContract implements
           final InputStream d =
             OPDSFeedParserContract
               .getResource("navigation-bad-entry-link-without-href.xml");
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
   }
@@ -224,6 +301,9 @@ public final class OPDSFeedParserContract implements
   @Override public void testNavigationFeedBadEntryNoLinks()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -235,7 +315,7 @@ public final class OPDSFeedParserContract implements
           final InputStream d =
             OPDSFeedParserContract
               .getResource("navigation-bad-entry-no-links.xml");
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
   }
@@ -243,6 +323,9 @@ public final class OPDSFeedParserContract implements
   @Override public void testNavigationFeedBadEntrySubsectionLinkWithoutHref()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -254,7 +337,7 @@ public final class OPDSFeedParserContract implements
           final InputStream d =
             OPDSFeedParserContract
               .getResource("navigation-bad-entry-subsection-link-without-href.xml");
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
   }
@@ -262,6 +345,9 @@ public final class OPDSFeedParserContract implements
   @Override public void testNotXMLException()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -272,7 +358,7 @@ public final class OPDSFeedParserContract implements
           final OPDSFeedParserType p = OPDSFeedParser.newParser();
           final InputStream d =
             OPDSFeedParserContract.getResource("bad-not-xml.xml");
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
   }
@@ -280,6 +366,9 @@ public final class OPDSFeedParserContract implements
   @Override public void testParserURISyntaxException()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -290,7 +379,7 @@ public final class OPDSFeedParserContract implements
           final OPDSFeedParserType p = OPDSFeedParser.newParser();
           final InputStream d =
             OPDSFeedParserContract.getResource("bad-uri-syntax.xml");
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
   }
@@ -298,6 +387,9 @@ public final class OPDSFeedParserContract implements
   @Override public void testStreamIOException()
     throws Exception
   {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+
     TestUtilities.expectException(
       OPDSFeedParseException.class,
       new PartialProcedureType<Unit, Exception>() {
@@ -313,7 +405,7 @@ public final class OPDSFeedParserContract implements
               throw new IOException();
             }
           };
-          p.parse(d);
+          p.parse(uri, d);
         }
       });
   }

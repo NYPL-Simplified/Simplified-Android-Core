@@ -38,12 +38,15 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 {
   private static final URI ACQUISITION_URI_PREFIX;
   private static final URI ATOM_URI;
+  private static final URI DUBLIN_CORE_TERMS_URI;
   private static final URI FEATURED_URI_PREFIX;
   private static final URI IMAGE_URI;
   private static final URI THUMBNAIL_URI;
 
   static {
     ATOM_URI = NullCheck.notNull(URI.create("http://www.w3.org/2005/Atom"));
+    DUBLIN_CORE_TERMS_URI =
+      NullCheck.notNull(URI.create("http://purl.org/dc/terms/"));
     ACQUISITION_URI_PREFIX =
       NullCheck.notNull(URI.create("http://opds-spec.org/acquisition"));
     FEATURED_URI_PREFIX =
@@ -101,19 +104,24 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OptionType<URI> findAcquisitionCover(
     final List<Element> e_links)
-    throws URISyntaxException,
-      OPDSFeedParseException
+    throws URISyntaxException
   {
     return OPDSFeedParser.findLinkWithURIRel(
       e_links,
       OPDSFeedParser.IMAGE_URI);
   }
 
+  private static OptionType<URI> findAcquisitionNext(
+    final List<Element> e_links)
+    throws URISyntaxException
+  {
+    return OPDSFeedParser.findLinkWithURIRelText(e_links, "next");
+  }
+
   private static void findAcquisitionRelations(
     final List<Element> e_links,
     final OPDSAcquisitionFeedEntryBuilderType eb)
-    throws OPDSFeedParseException,
-      URISyntaxException
+    throws URISyntaxException
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
@@ -123,7 +131,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         for (final Type v : OPDSAcquisition.Type.values()) {
           final String uri_text = NullCheck.notNull(v.getURI().toString());
           if (text.equals(uri_text)) {
-            final URI href = OPDSFeedParser.getLinkHref(e, uri_text);
+            final URI href = new URI(e.getAttribute("href"));
             eb.addAcquisition(new OPDSAcquisition(v, href));
           }
         }
@@ -133,8 +141,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OptionType<URI> findAcquisitionThumbnail(
     final List<Element> e_links)
-    throws URISyntaxException,
-      OPDSFeedParseException
+    throws URISyntaxException
   {
     return OPDSFeedParser.findLinkWithURIRel(
       e_links,
@@ -154,15 +161,22 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   private static OptionType<URI> findLinkWithURIRel(
     final List<Element> e_links,
     final URI uri)
-    throws OPDSFeedParseException,
-      URISyntaxException
+    throws URISyntaxException
+  {
+    final String uri_text = NullCheck.notNull(uri.toString());
+    return OPDSFeedParser.findLinkWithURIRelText(e_links, uri_text);
+  }
+
+  private static OptionType<URI> findLinkWithURIRelText(
+    final List<Element> e_links,
+    final String text)
+    throws URISyntaxException
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
         final String rel = e.getAttribute("rel");
-        final String uri_text = NullCheck.notNull(uri.toString());
-        if (rel.equals(uri_text)) {
-          return Option.some(OPDSFeedParser.getLinkHref(e, uri_text));
+        if (rel.equals(text)) {
+          return Option.some(new URI(e.getAttribute("href")));
         }
       }
     }
@@ -172,8 +186,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OptionType<URI> findNavigationFeatured(
     final List<Element> e_links)
-    throws URISyntaxException,
-      OPDSFeedParseException
+    throws URISyntaxException
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
@@ -182,7 +195,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         final String uri_text =
           NullCheck.notNull(OPDSFeedParser.FEATURED_URI_PREFIX.toString());
         if (text.equals(uri_text)) {
-          return Option.some(OPDSFeedParser.getLinkHref(e, uri_text));
+          return Option.some(new URI(e.getAttribute("href")));
         }
       }
     }
@@ -201,28 +214,47 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       URISyntaxException
   {
     /**
-     * First, look for a link that has a rel attribute with a value equal to
-     * "subsection". Use the value of the href attribute if one exists.
+     * Look for a link that has a <i>type</i> attribute that designates it as
+     * some sort of feed, and has a <i>rel</i> attribute that designates the
+     * feed as a <tt>subsection</tt>.
      */
 
     for (final Element e : e_links) {
-      if (e.hasAttribute("rel")) {
-        final String text = e.getAttribute("rel");
-        assert text != null;
-        if (text.equals("subsection")) {
-          return OPDSFeedParser.getLinkHref(e, "subsection");
+      if (e.hasAttribute("type")) {
+        final String type_text = e.getAttribute("type");
+        assert type_text != null;
+
+        /**
+         * Acquisition feeds are often missing <tt>rel</tt> attributes, and
+         * the links that are missing them are typically the link that should
+         * be followed.
+         */
+
+        if ("application/atom+xml;profile=opds-catalog;kind=acquisition"
+          .equals(type_text)) {
+          if (e.hasAttribute("rel")) {
+            final String rel_text = e.getAttribute("rel");
+            if (rel_text.equals("subsection")) {
+              return new URI(e.getAttribute("href"));
+            }
+          } else {
+            return new URI(e.getAttribute("href"));
+          }
         }
-      }
-    }
 
-    /**
-     * Otherwise, look for a link that contains a single href attribute.
-     */
+        /**
+         * Navigation feeds are supposed to be designated with
+         * <tt>rel=subsection</tt>.
+         */
 
-    for (final Element e : e_links) {
-      if (e.getAttributes().getLength() == 1) {
-        if (e.hasAttribute("href")) {
-          return new URI(e.getAttribute("href"));
+        if ("application/atom+xml;profile=opds-catalog;kind=navigation"
+          .equals(type_text)) {
+          if (e.hasAttribute("rel")) {
+            final String rel_text = e.getAttribute("rel");
+            if (rel_text.equals("subsection")) {
+              return new URI(e.getAttribute("href"));
+            }
+          }
         }
       }
     }
@@ -237,6 +269,25 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     m.append(id);
     m.append("'");
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
+  }
+
+  private static String findPublished(
+    final Element e)
+    throws OPDSFeedParseException
+  {
+    return OPDSXML.getFirstChildElementTextWithName(
+      e,
+      OPDSFeedParser.ATOM_URI,
+      "published");
+  }
+
+  private static OptionType<String> findPublisher(
+    final Element e)
+  {
+    return OPDSXML.getFirstChildElementTextWithNameOptional(
+      e,
+      OPDSFeedParser.DUBLIN_CORE_TERMS_URI,
+      "publisher");
   }
 
   private static OptionType<String> findSubtitle(
@@ -271,36 +322,13 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     return OPDSRFC3339Formatter.parseRFC3339Date(e_updated_raw);
   }
 
-  /**
-   * Fetch the contents of the <code>href</code> attribute from the given
-   * element, assuming that the <code>rel</code> attribute contained
-   * <code>rel</code>.
-   */
-
-  private static URI getLinkHref(
-    final Element e,
-    final String rel)
-    throws OPDSFeedParseException,
-      URISyntaxException
-  {
-    if (e.hasAttribute("href") == false) {
-      final StringBuilder m = new StringBuilder();
-      m.append("A link was given with a rel attribute of '");
-      m.append(rel);
-      m.append("' but without a href attribute");
-      throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
-    }
-
-    return new URI(e.getAttribute("href"));
-  }
-
   public static OPDSFeedParserType newParser()
   {
     return new OPDSFeedParser();
   }
 
   private static OPDSFeedType parseAcquisition(
-    final Element e_feed,
+    final URI uri,
     final String id,
     final String title,
     final Calendar updated,
@@ -311,12 +339,15 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       URISyntaxException
   {
     final OPDSAcquisitionFeedBuilderType b =
-      OPDSAcquisitionFeed.newBuilder(id, updated, title);
+      OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
+
+    b.setSearchOption(OPDSFeedParser.parseSearchLinks(links));
 
     for (final Element ee : entries) {
-      b.addEntry(OPDSFeedParser.parseAcquisitionEntry(ee));
+      b.addEntry(OPDSFeedParser.parseAcquisitionEntry(NullCheck.notNull(ee)));
     }
 
+    b.setNextOption(OPDSFeedParser.findAcquisitionNext(links));
     return b.build();
   }
 
@@ -329,9 +360,10 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final String id = OPDSFeedParser.findID(e);
     final String title = OPDSFeedParser.findTitle(e);
     final Calendar updated = OPDSFeedParser.findUpdated(e);
+    final String published = OPDSFeedParser.findPublished(e);
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
-      OPDSAcquisitionFeedEntry.newBuilder(id, title, updated);
+      OPDSAcquisitionFeedEntry.newBuilder(id, title, updated, published);
 
     final List<Element> e_links =
       OPDSXML.getChildElementsWithNameNonEmpty(
@@ -343,6 +375,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     OPDSFeedParser.findAcquisitionRelations(e_links, eb);
     eb.setThumbnailOption(OPDSFeedParser.findAcquisitionThumbnail(e_links));
     eb.setCoverOption(OPDSFeedParser.findAcquisitionCover(e_links));
+    eb.setPublisherOption(OPDSFeedParser.findPublisher(e));
     eb.setSubtitleOption(OPDSFeedParser.findSubtitle(e));
     eb.setSummaryOption(OPDSXML.getFirstChildElementTextWithNameOptional(
       e,
@@ -353,7 +386,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   }
 
   private static OPDSFeedType parseNavigation(
-    final Element e_feed,
+    final URI uri,
     final String id,
     final String title,
     final Calendar updated,
@@ -364,10 +397,12 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       URISyntaxException
   {
     final OPDSNavigationFeedBuilderType b =
-      OPDSNavigationFeed.newBuilder(id, updated, title);
+      OPDSNavigationFeed.newBuilder(uri, id, updated, title);
+
+    b.setSearchOption(OPDSFeedParser.parseSearchLinks(links));
 
     for (final Element ee : entries) {
-      b.addEntry(OPDSFeedParser.parseNavigationEntry(ee));
+      b.addEntry(OPDSFeedParser.parseNavigationEntry(NullCheck.notNull(ee)));
     }
 
     return b.build();
@@ -402,6 +437,37 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       target);
   }
 
+  private static OptionType<OPDSSearchLink> parseSearchLinks(
+    final List<Element> links)
+    throws URISyntaxException
+  {
+    for (final Element e : links) {
+      assert OPDSXML.nodeHasName(
+        NullCheck.notNull(e),
+        OPDSFeedParser.ATOM_URI,
+        "link");
+
+      final boolean has_everything =
+        e.hasAttribute("type")
+          && e.hasAttribute("rel")
+          && e.hasAttribute("href");
+
+      if (has_everything) {
+        final String t = NullCheck.notNull(e.getAttribute("type"));
+        final String r = NullCheck.notNull(e.getAttribute("rel"));
+        final String h = NullCheck.notNull(e.getAttribute("href"));
+
+        if ("search".equals(r)) {
+          final URI u = NullCheck.notNull(new URI(h));
+          final OPDSSearchLink sl = new OPDSSearchLink(t, u);
+          return Option.some(sl);
+        }
+      }
+    }
+
+    return Option.none();
+  }
+
   private static Document parseStream(
     final InputStream s)
     throws ParserConfigurationException,
@@ -409,6 +475,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       IOException
   {
     final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    dbf.setNamespaceAware(true);
     final DocumentBuilder db = dbf.newDocumentBuilder();
     final Document d = NullCheck.notNull(db.parse(s));
     return d;
@@ -420,6 +487,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   }
 
   @Override public OPDSFeedType parse(
+    final URI uri,
     final InputStream s)
     throws OPDSFeedParseException
   {
@@ -441,7 +509,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           OPDSFeedParser.ATOM_URI,
           "link");
       final List<Element> entries =
-        OPDSXML.getChildElementsWithNameNonEmpty(
+        OPDSXML.getChildElementsWithName(
           e_feed,
           OPDSFeedParser.ATOM_URI,
           "entry");
@@ -451,12 +519,26 @@ public final class OPDSFeedParser implements OPDSFeedParserType
        * it's necessary to examine the entries in the feed to determine if the
        * feed is a Navigation or Acquisition feed. The first entry in the list
        * decides what type the feed is.
+       *
+       * If there aren't any entries in the feed, then the feed is assumed to
+       * be an acquisition feed. The justification for this is that search
+       * results are acquisition feeds, any may be empty.
        */
+
+      if (entries.size() == 0) {
+        return OPDSFeedParser.parseAcquisition(
+          uri,
+          id,
+          title,
+          updated,
+          links,
+          entries);
+      }
 
       final Element e0 = NullCheck.notNull(entries.get(0));
       if (OPDSFeedParser.entryIsFromAcquisitionFeed(e0)) {
         return OPDSFeedParser.parseAcquisition(
-          e_feed,
+          uri,
           id,
           title,
           updated,
@@ -465,7 +547,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       }
 
       return OPDSFeedParser.parseNavigation(
-        e_feed,
+        uri,
         id,
         title,
         updated,

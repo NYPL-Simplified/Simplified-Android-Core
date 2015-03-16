@@ -13,8 +13,8 @@ public interface OPDSFeedLoadListenerType
    *          The error, if any
    */
 
-  void onFailure(
-    final Exception e);
+  void onFeedLoadingFailure(
+    final Throwable e);
 
   /**
    * The feed was successfully parsed.
@@ -23,6 +23,6 @@ public interface OPDSFeedLoadListenerType
    *          The resulting feed
    */
 
-  void onSuccess(
+  void onFeedLoadingSuccess(
     final OPDSFeedType f);
 }

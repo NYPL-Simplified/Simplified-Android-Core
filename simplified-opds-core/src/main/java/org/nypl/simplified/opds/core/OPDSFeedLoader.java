@@ -2,9 +2,16 @@ package org.nypl.simplified.opds.core;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * The default implementation of the {@link OPDSFeedLoaderType}.
@@ -20,43 +27,62 @@ public final class OPDSFeedLoader implements OPDSFeedLoaderType
     return new OPDSFeedLoader(e, p, t);
   }
 
-  private final ExecutorService       exec;
-  private final OPDSFeedParserType    parser;
-  private final OPDSFeedTransportType transport;
+  private final ListeningExecutorService exec;
+  private final OPDSFeedParserType       parser;
+  private final OPDSFeedTransportType    transport;
 
   private OPDSFeedLoader(
     final ExecutorService e,
     final OPDSFeedParserType p,
     final OPDSFeedTransportType t)
   {
-    this.exec = NullCheck.notNull(e);
+    this.exec =
+      NullCheck
+        .notNull(MoreExecutors.listeningDecorator(NullCheck.notNull(e)));
     this.parser = NullCheck.notNull(p);
     this.transport = NullCheck.notNull(t);
   }
 
-  @Override public void fromURI(
+  @Override public ListenableFuture<OPDSFeedType> fromURI(
     final URI uri,
     final OPDSFeedLoadListenerType p)
   {
+    NullCheck.notNull(uri);
+    NullCheck.notNull(p);
+
     final OPDSFeedTransportType ref_t = this.transport;
     final OPDSFeedParserType ref_p = this.parser;
-    this.exec.execute(new Runnable() {
-      @Override public void run()
-      {
-        try {
+
+    final ListenableFuture<OPDSFeedType> f =
+      this.exec.submit(new Callable<OPDSFeedType>() {
+        @Override public OPDSFeedType call()
+          throws Exception
+        {
           InputStream s = null;
           try {
             s = ref_t.getStream(uri);
-            p.onSuccess(ref_p.parse(s));
+            return ref_p.parse(uri, s);
           } finally {
             if (s != null) {
               s.close();
             }
           }
-        } catch (final Exception e) {
-          p.onFailure(e);
         }
+      });
+
+    Futures.addCallback(f, new FutureCallback<OPDSFeedType>() {
+      @Override public void onFailure(
+        final @Nullable Throwable t)
+      {
+        p.onFeedLoadingFailure(NullCheck.notNull(t));
       }
-    });
+
+      @Override public void onSuccess(
+        final @Nullable OPDSFeedType result)
+      {
+        p.onFeedLoadingSuccess(NullCheck.notNull(result));
+      }
+    }, this.exec);
+    return NullCheck.notNull(f);
   }
 }

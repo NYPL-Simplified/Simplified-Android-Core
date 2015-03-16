@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nypl.simplified</groupId>
   <artifactId>simplified</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.10</version>
 
   <packaging>pom</packaging>
   <name>simplified</name>
@@ -15,6 +15,7 @@
   <url>https://github.com/NYPL/Simplified-Android</url>
 
   <modules>
+    <module>simplified-app-tests</module>
     <module>simplified-app</module>
     <module>simplified-opds-core</module>
     <module>simplified-opds-tests-android</module>
@@ -25,10 +26,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    
-    <org.nypl.android.packageVersion>4.0.3_r5</org.nypl.android.packageVersion>
-    <org.nypl.android.compatSupportVersion>21.0.3</org.nypl.android.compatSupportVersion>
-    <org.nypl.android.sdkVersion>15</org.nypl.android.sdkVersion>
+    <org.nypl.android.support-v13.packageVersion>21.0.3</org.nypl.android.support-v13.packageVersion>
+    <org.nypl.android.packageVersion>4.4.2_r4</org.nypl.android.packageVersion>
+    <org.nypl.android.sdkVersion>19</org.nypl.android.sdkVersion>
   </properties>
 
   <scm>

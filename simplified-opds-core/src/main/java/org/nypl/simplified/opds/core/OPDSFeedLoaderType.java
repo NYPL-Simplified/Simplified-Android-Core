@@ -2,6 +2,8 @@ package org.nypl.simplified.opds.core;
 
 import java.net.URI;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 /**
  * <p>
  * The type of asynchronous OPDS feed loaders.
@@ -18,13 +20,14 @@ public interface OPDSFeedLoaderType
    * Load the feed at <code>uri</code>, passing the resulting feed to
    * <code>p</code>.
    *
+   * @return A future representing the loading in progress
    * @param uri
    *          The URI
    * @param p
    *          The listener to receive the feed
    */
 
-  void fromURI(
+  ListenableFuture<OPDSFeedType> fromURI(
     final URI uri,
     final OPDSFeedLoadListenerType p);
 }

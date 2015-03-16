@@ -22,7 +22,7 @@ import org.nypl.simplified.opds.tests.utilities.TestUtilities;
 
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class OPDSFeedLoaderContract implements
+@SuppressWarnings({ "null" }) public final class OPDSFeedLoaderContract implements
   OPDSFeedLoaderContractType
 {
   @Override public void testLoaderErrorCorrect()
@@ -36,6 +36,7 @@ public final class OPDSFeedLoaderContract implements
 
       final OPDSFeedParserType p = new OPDSFeedParserType() {
         @Override public OPDSFeedType parse(
+          final URI uri,
           final InputStream s)
           throws OPDSFeedParseException
         {
@@ -56,15 +57,15 @@ public final class OPDSFeedLoaderContract implements
       fl.fromURI(
         new URI("http://example.com"),
         new OPDSFeedLoadListenerType() {
-          @Override public void onFailure(
-            final Exception supplied)
+          @Override public void onFeedLoadingFailure(
+            final Throwable supplied)
           {
             System.err.println("Caught: " + supplied);
             TestUtilities.assertEquals(ex, supplied);
             caught.set(true);
           }
 
-          @Override public void onSuccess(
+          @Override public void onFeedLoadingSuccess(
             final OPDSFeedType f)
           {
             throw new UnreachableCodeException();
@@ -81,16 +82,21 @@ public final class OPDSFeedLoaderContract implements
   @Override public void testLoaderSuccessCorrect()
     throws Exception
   {
+    final URI uri = URI.create("http://example.com/base");
+
     final AtomicBoolean succeeded = new AtomicBoolean(false);
     final OPDSAcquisitionFeed feed =
-      OPDSAcquisitionFeed
-        .newBuilder("id", Calendar.getInstance(), "title")
-        .build();
+      OPDSAcquisitionFeed.newBuilder(
+        uri,
+        "id",
+        Calendar.getInstance(),
+        "title").build();
     final ExecutorService e = Executors.newCachedThreadPool();
 
     try {
       final OPDSFeedParserType p = new OPDSFeedParserType() {
         @Override public OPDSFeedType parse(
+          final URI u,
           final InputStream s)
           throws OPDSFeedParseException
         {
@@ -100,7 +106,7 @@ public final class OPDSFeedLoaderContract implements
 
       final OPDSFeedTransportType t = new OPDSFeedTransportType() {
         @Override public InputStream getStream(
-          final URI uri)
+          final URI u)
           throws IOException
         {
           return new ByteArrayInputStream("text".getBytes());
@@ -111,13 +117,13 @@ public final class OPDSFeedLoaderContract implements
       fl.fromURI(
         new URI("http://example.com"),
         new OPDSFeedLoadListenerType() {
-          @Override public void onFailure(
-            final Exception supplied)
+          @Override public void onFeedLoadingFailure(
+            final Throwable supplied)
           {
             throw new UnreachableCodeException();
           }
 
-          @Override public void onSuccess(
+          @Override public void onFeedLoadingSuccess(
             final OPDSFeedType f)
           {
             TestUtilities.assertEquals(f, feed);
