@@ -118,6 +118,7 @@ public final class DownloadSnapshot implements Serializable
       case STATUS_CANCELLED:
       case STATUS_COMPLETED:
       case STATUS_IN_PROGRESS:
+      case STATUS_IN_PROGRESS_RESUMED:
       case STATUS_PAUSED:
       {
         final String m =

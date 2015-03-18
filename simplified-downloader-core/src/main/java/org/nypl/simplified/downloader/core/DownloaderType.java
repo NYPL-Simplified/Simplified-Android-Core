@@ -47,12 +47,16 @@ public interface DownloaderType
    *          The URI
    * @param title
    *          A human-readable name for the download
+   * @param listener
+   *          A listener that will be notified of download state changes
+   * 
    * @return The unique identifier of the download in progress
    */
 
   long downloadEnqueue(
     final URI uri,
-    final String title);
+    final String title,
+    final DownloadListenerType listener);
 
   /**
    * Pause the given download. Has no effect if the download is already

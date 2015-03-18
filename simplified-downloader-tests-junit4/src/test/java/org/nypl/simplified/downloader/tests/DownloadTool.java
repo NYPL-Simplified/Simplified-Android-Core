@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
@@ -40,24 +41,78 @@ public final class DownloadTool
     final BufferedReader reader =
       new BufferedReader(new InputStreamReader(System.in));
 
+    final DownloadListenerType listener = new DownloadListenerType() {
+      @Override public void downloadStarted(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadResumed(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadPaused(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadFailed(
+        final DownloadSnapshot snap,
+        final Throwable e)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadCompleted(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadCancelled(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadCleanedUp(
+        final DownloadSnapshot snap)
+      {
+
+      }
+
+      @Override public void downloadStartedReceivingData(
+        final DownloadSnapshot snap)
+      {
+
+      }
+    };
+
     final Thread t = new Thread(new Runnable() {
       @Override public void run()
       {
         for (;;) {
-          final Map<Long, DownloadSnapshot> stats =
-            d.downloadStatusSnapshotAll();
-          for (final Long id : stats.keySet()) {
-            final DownloadSnapshot status = stats.get(id);
-            System.out.printf(
-              "[%d] (%d/%d) %s: %s\n",
-              id,
-              status.statusGetCurrentBytes(),
-              status.statusGetMaximumBytes(),
-              status.statusGet(),
-              status.statusGetURI());
-
-            if (status.statusGet().isComplete()) {
-              d.downloadAcknowledge(id);
+          final Map<Long, DownloadSnapshot> s = d.downloadStatusSnapshotAll();
+          for (final Long lid : s.keySet()) {
+            final DownloadSnapshot snap = s.get(lid);
+            switch (snap.statusGet()) {
+              case STATUS_CANCELLED:
+              case STATUS_COMPLETED:
+              case STATUS_FAILED:
+              case STATUS_PAUSED:
+              {
+                break;
+              }
+              case STATUS_IN_PROGRESS:
+              case STATUS_IN_PROGRESS_RESUMED:
+              {
+                System.out.println(snap);
+                break;
+              }
             }
           }
 
@@ -92,7 +147,7 @@ public final class DownloadTool
             continue;
           }
           final URI uri = new URI(segments[1]);
-          final long id = d.downloadEnqueue(uri, "Title");
+          final long id = d.downloadEnqueue(uri, "Title", listener);
           System.out.println("info: download queued " + id);
         }
 
@@ -126,9 +181,23 @@ public final class DownloadTool
           System.out.println("info: download resumed " + id);
         }
 
+        if ("s".equals(command)) {
+          DownloadTool.showStatus(d);
+        }
+
       } catch (final URISyntaxException e) {
         System.err.println("error: invalid uri: " + e.getMessage());
       }
+    }
+  }
+
+  private static void showStatus(
+    final DownloaderType d)
+  {
+    final Map<Long, DownloadSnapshot> s = d.downloadStatusSnapshotAll();
+    for (final Long lid : s.keySet()) {
+      final DownloadSnapshot snap = s.get(lid);
+      System.out.println(snap);
     }
   }
 }

@@ -8,6 +8,7 @@ public enum DownloadStatus
   STATUS_COMPLETED,
   STATUS_FAILED,
   STATUS_IN_PROGRESS,
+  STATUS_IN_PROGRESS_RESUMED,
   STATUS_PAUSED;
 
   public boolean isComplete()
@@ -18,6 +19,7 @@ public enum DownloadStatus
       case STATUS_FAILED:
         return true;
       case STATUS_IN_PROGRESS:
+      case STATUS_IN_PROGRESS_RESUMED:
       case STATUS_PAUSED:
         return false;
     }
@@ -33,6 +35,7 @@ public enum DownloadStatus
       case STATUS_FAILED:
         return false;
       case STATUS_IN_PROGRESS:
+      case STATUS_IN_PROGRESS_RESUMED:
       case STATUS_PAUSED:
         return true;
     }

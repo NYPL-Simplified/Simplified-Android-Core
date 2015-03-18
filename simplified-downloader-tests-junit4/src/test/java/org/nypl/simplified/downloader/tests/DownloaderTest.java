@@ -13,6 +13,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
+import org.nypl.simplified.downloader.core.DownloadEmptyListener;
+import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.downloader.core.DownloadStatus;
 import org.nypl.simplified.downloader.core.Downloader;
@@ -25,14 +27,61 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 
-/**
- * Note: These tests are unfortunately time-dependent. The right way to fix
- * this is to hide all HTTP communication behind an interface so that tests
- * can hijack communication.
- */
-
 @SuppressWarnings("static-method") public final class DownloaderTest
 {
+  private static abstract class LoggingListener implements
+    DownloadListenerType
+  {
+    @Override public void downloadCancelled(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("CANCELLED: " + snap);
+    }
+
+    @Override public void downloadCleanedUp(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("CLEANUP: " + snap);
+    }
+
+    @Override public void downloadCompleted(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("COMPLETED: " + snap);
+    }
+
+    @Override public void downloadFailed(
+      final DownloadSnapshot snap,
+      final Throwable e)
+    {
+      System.out.println("FAILED: " + snap);
+    }
+
+    @Override public void downloadPaused(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("PAUSED: " + snap);
+    }
+
+    @Override public void downloadResumed(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("RESUMED: " + snap);
+    }
+
+    @Override public void downloadStarted(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("STARTED: " + snap);
+    }
+
+    @Override public void downloadStartedReceivingData(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("STARTED DATA: " + snap);
+    }
+  }
+
   private static int   SERVER_PORT;
 
   @Rule public Timeout globalTimeout = new Timeout(10000);
@@ -69,10 +118,10 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadCancel()
     throws Exception
   {
-    final ExecutorService e = Executors.newFixedThreadPool(8);
+    final ExecutorService exec = Executors.newFixedThreadPool(8);
     final CountDownLatch latch = new CountDownLatch(1);
     final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
-    e.submit(new Runnable() {
+    exec.submit(new Runnable() {
       @Override public void run()
       {
         try {
@@ -86,19 +135,29 @@ import com.io7m.jnull.NullCheck;
     latch.await();
 
     try {
-
       final File tmp = this.makeTempDir();
       final DownloaderConfigurationBuilderType cb =
         DownloaderConfiguration.newBuilder(tmp);
       final DownloaderConfiguration c = cb.build();
-      final DownloaderType d = Downloader.newDownloader(e, c);
+      final DownloaderType d = Downloader.newDownloader(exec, c);
+
+      final CountDownLatch cancel_latch = new CountDownLatch(1);
+      final DownloadListenerType listener = new LoggingListener() {
+        @Override public void downloadCancelled(
+          final DownloadSnapshot snap)
+        {
+          super.downloadCancelled(snap);
+          cancel_latch.countDown();
+        }
+      };
 
       final long id =
         d
           .downloadEnqueue(
             this
               .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-            "Hello");
+            "Hello",
+            listener);
 
       {
         final Some<DownloadSnapshot> some_snapshot =
@@ -110,8 +169,7 @@ import com.io7m.jnull.NullCheck;
       }
 
       d.downloadCancel(id);
-
-      Thread.sleep(1000);
+      cancel_latch.await();
 
       {
         final Some<DownloadSnapshot> some_snapshot =
@@ -123,7 +181,128 @@ import com.io7m.jnull.NullCheck;
       }
 
     } finally {
-      e.shutdown();
+      exec.shutdown();
+      s.stop();
+    }
+  }
+
+  @Test public void testDownloadDestroyAll()
+    throws Exception
+  {
+    final File tmp = this.makeTempDir();
+    final DownloaderConfigurationBuilderType cb =
+      DownloaderConfiguration.newBuilder(tmp);
+    final DownloaderConfiguration c = cb.build();
+
+    final ExecutorService exec = Executors.newFixedThreadPool(8);
+    final CountDownLatch latch = new CountDownLatch(1);
+    final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
+    exec.submit(new Runnable() {
+      @Override public void run()
+      {
+        try {
+          s.call();
+          latch.countDown();
+        } catch (final Exception x) {
+          x.printStackTrace();
+        }
+      }
+    });
+    latch.await();
+
+    final CountDownLatch complete_latch = new CountDownLatch(3);
+    final CountDownLatch cleanup_latch = new CountDownLatch(3);
+    final DownloadListenerType listener = new LoggingListener() {
+      @Override public void downloadCleanedUp(
+        final DownloadSnapshot snap)
+      {
+        super.downloadCleanedUp(snap);
+        cleanup_latch.countDown();
+      }
+
+      @Override public void downloadCompleted(
+        final DownloadSnapshot snap)
+      {
+        super.downloadCompleted(snap);
+        complete_latch.countDown();
+      }
+    };
+
+    try {
+      final DownloaderType d = Downloader.newDownloader(exec, c);
+      final long id_0 =
+        d
+          .downloadEnqueue(
+            this
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+            "Hello",
+            listener);
+      final long id_1 =
+        d
+          .downloadEnqueue(
+            this
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+            "Hello",
+            listener);
+      final long id_2 =
+        d
+          .downloadEnqueue(
+            this
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+            "Hello",
+            listener);
+
+      complete_latch.await();
+
+      final Some<DownloadSnapshot> some_0 =
+        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id_0);
+      final Some<DownloadSnapshot> some_1 =
+        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id_1);
+      final Some<DownloadSnapshot> some_2 =
+        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id_2);
+
+      Assert.assertEquals(
+        some_0.get().statusGet(),
+        DownloadStatus.STATUS_COMPLETED);
+      Assert.assertEquals(
+        some_1.get().statusGet(),
+        DownloadStatus.STATUS_COMPLETED);
+      Assert.assertEquals(
+        some_2.get().statusGet(),
+        DownloadStatus.STATUS_COMPLETED);
+
+      Assert.assertTrue(new File(tmp, "1.data").exists());
+      Assert.assertTrue(new File(tmp, "2.data").exists());
+      Assert.assertTrue(new File(tmp, "3.data").exists());
+
+      d.downloadDestroyAll();
+
+      cleanup_latch.await();
+
+      Assert.assertFalse(new File(tmp, "1.data").exists());
+      Assert.assertFalse(new File(tmp, "2.data").exists());
+      Assert.assertFalse(new File(tmp, "3.data").exists());
+      Assert.assertTrue(tmp.list().length == 0);
+
+      d.downloadAcknowledge(id_0);
+      d.downloadAcknowledge(id_1);
+      d.downloadAcknowledge(id_2);
+
+      final Map<Long, DownloadSnapshot> all = d.downloadStatusSnapshotAll();
+      Assert.assertTrue(all.isEmpty());
+
+    } finally {
+      exec.shutdown();
+      s.stop();
+    }
+
+    try {
+      final DownloaderType d = Downloader.newDownloader(exec, c);
+      final Map<Long, DownloadSnapshot> all = d.downloadStatusSnapshotAll();
+      Assert.assertTrue(all.isEmpty());
+
+    } finally {
+      exec.shutdown();
       s.stop();
     }
   }
@@ -153,26 +332,30 @@ import com.io7m.jnull.NullCheck;
     final DownloaderConfiguration c = cb.build();
     final DownloaderType d = Downloader.newDownloader(e, c);
 
-    final long id =
-      d.downloadEnqueue(this.serverAddress("/nonexistent"), "Nonexistent");
-
-    final Long lid = Long.valueOf(id);
-    DownloadStatus status;
-
-    for (;;) {
-      final Map<Long, DownloadSnapshot> stats = d.downloadStatusSnapshotAll();
-      Assert.assertTrue(stats.containsKey(lid));
-      final DownloadSnapshot snap = stats.get(lid);
-      status = snap.statusGet();
-      System.out.println(snap);
-
-      if (status != DownloadStatus.STATUS_IN_PROGRESS) {
-        break;
+    final CountDownLatch fail_latch = new CountDownLatch(1);
+    final DownloadListenerType listener = new LoggingListener() {
+      @Override public void downloadFailed(
+        final DownloadSnapshot snap,
+        final Throwable x)
+      {
+        super.downloadFailed(snap, x);
+        fail_latch.countDown();
       }
-      Thread.sleep(100);
-    }
+    };
 
-    Assert.assertEquals(DownloadStatus.STATUS_FAILED, status);
+    final long id =
+      d.downloadEnqueue(
+        this.serverAddress("/nonexistent"),
+        "Nonexistent",
+        listener);
+
+    fail_latch.await();
+
+    final Some<DownloadSnapshot> some_snap =
+      (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
+    Assert.assertEquals(DownloadStatus.STATUS_FAILED, some_snap
+      .get()
+      .statusGet());
 
     e.shutdown();
     s.stop();
@@ -209,7 +392,9 @@ import com.io7m.jnull.NullCheck;
 
       d.downloadEnqueue(
         URI.create("nothttp://example.com/nonexistent"),
-        "Something");
+        "Something",
+        new DownloadEmptyListener());
+
     } finally {
       e.shutdown();
       s.stop();
@@ -241,32 +426,31 @@ import com.io7m.jnull.NullCheck;
     final DownloaderConfiguration c = cb.build();
     final DownloaderType d = Downloader.newDownloader(e, c);
 
+    final CountDownLatch success_latch = new CountDownLatch(1);
+    final DownloadListenerType listener = new LoggingListener() {
+      @Override public void downloadCompleted(
+        final DownloadSnapshot snap)
+      {
+        super.downloadCompleted(snap);
+        success_latch.countDown();
+      }
+    };
+
     final long id =
       d
         .downloadEnqueue(
           this
             .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-          "Hello");
+          "Hello",
+          listener);
 
-    Assert.assertEquals(1L, id);
+    success_latch.await();
 
-    final Long lid = Long.valueOf(id);
-    DownloadStatus status;
-
-    for (;;) {
-      final Map<Long, DownloadSnapshot> stats = d.downloadStatusSnapshotAll();
-      Assert.assertTrue(stats.containsKey(lid));
-      final DownloadSnapshot snap = stats.get(lid);
-      status = snap.statusGet();
-      System.out.println(snap);
-
-      if (status != DownloadStatus.STATUS_IN_PROGRESS) {
-        break;
-      }
-      Thread.sleep(100);
-    }
-
-    Assert.assertEquals(DownloadStatus.STATUS_COMPLETED, status);
+    final Some<DownloadSnapshot> some_snap =
+      (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
+    Assert.assertEquals(DownloadStatus.STATUS_COMPLETED, some_snap
+      .get()
+      .statusGet());
 
     final File file = new File(tmp, "1.data");
     final String text = Files.toString(file, Charset.forName("UTF-8"));
@@ -301,17 +485,43 @@ import com.io7m.jnull.NullCheck;
     final DownloaderConfiguration c = cb.build();
     final DownloaderType d = Downloader.newDownloader(e, c);
 
+    final CountDownLatch pause_latch = new CountDownLatch(1);
+    final CountDownLatch resume_latch = new CountDownLatch(1);
+    final CountDownLatch complete_latch = new CountDownLatch(1);
+
+    final DownloadListenerType listener = new LoggingListener() {
+      @Override public void downloadCompleted(
+        final DownloadSnapshot snap)
+      {
+        super.downloadCompleted(snap);
+        complete_latch.countDown();
+      }
+
+      @Override public void downloadPaused(
+        final DownloadSnapshot snap)
+      {
+        super.downloadPaused(snap);
+        pause_latch.countDown();
+      }
+
+      @Override public void downloadResumed(
+        final DownloadSnapshot snap)
+      {
+        super.downloadResumed(snap);
+        resume_latch.countDown();
+      }
+    };
+
     final long id =
       d
         .downloadEnqueue(
           this
             .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-          "Hello");
+          "Hello",
+          listener);
+
     d.downloadPause(id);
-
-    Assert.assertEquals(1L, id);
-
-    Thread.sleep(1000);
+    pause_latch.await();
 
     {
       final Some<DownloadSnapshot> some_snapshot =
@@ -321,17 +531,18 @@ import com.io7m.jnull.NullCheck;
     }
 
     d.downloadResume(id);
+    resume_latch.await();
 
     {
       final Some<DownloadSnapshot> some_snapshot =
         (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
       final DownloadSnapshot snapshot = some_snapshot.get();
       Assert.assertEquals(
-        DownloadStatus.STATUS_IN_PROGRESS,
+        DownloadStatus.STATUS_IN_PROGRESS_RESUMED,
         snapshot.statusGet());
     }
 
-    Thread.sleep(1000);
+    complete_latch.await();
 
     {
       final Some<DownloadSnapshot> some_snapshot =
@@ -360,6 +571,25 @@ import com.io7m.jnull.NullCheck;
 
     long id;
 
+    final CountDownLatch start_latch = new CountDownLatch(1);
+    final CountDownLatch pause_latch = new CountDownLatch(1);
+    final CountDownLatch resume_latch = new CountDownLatch(1);
+    final DownloadListenerType listener = new LoggingListener() {
+      @Override public void downloadResumed(
+        final DownloadSnapshot snap)
+      {
+        super.downloadResumed(snap);
+        resume_latch.countDown();
+      }
+
+      @Override public void downloadPaused(
+        final DownloadSnapshot snap)
+      {
+        super.downloadPaused(snap);
+        pause_latch.countDown();
+      }
+    };
+
     {
       final ExecutorService e = Executors.newFixedThreadPool(8);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -384,9 +614,10 @@ import com.io7m.jnull.NullCheck;
             .downloadEnqueue(
               this
                 .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-              "Hello");
-
-        Thread.sleep(1000);
+              "Hello",
+              listener);
+        d.downloadPause(id);
+        pause_latch.await();
 
       } finally {
         e.shutdown();
@@ -412,7 +643,10 @@ import com.io7m.jnull.NullCheck;
       latch.await();
 
       try {
-        final DownloaderType d = Downloader.newDownloader(e, c);
+        final DownloaderType d =
+          Downloader.newDownloaderWithListener(e, c, listener);
+        d.downloadResume(id);
+        resume_latch.await();
 
         final Some<DownloadSnapshot> some_snap =
           (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
@@ -456,105 +690,5 @@ import com.io7m.jnull.NullCheck;
 
     e.shutdown();
     s.stop();
-  }
-
-  @Test public void testDownloadDestroyAll()
-    throws Exception
-  {
-    final File tmp = this.makeTempDir();
-    final DownloaderConfigurationBuilderType cb =
-      DownloaderConfiguration.newBuilder(tmp);
-    final DownloaderConfiguration c = cb.build();
-
-    final ExecutorService e = Executors.newFixedThreadPool(8);
-    final CountDownLatch latch = new CountDownLatch(1);
-    final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
-    e.submit(new Runnable() {
-      @Override public void run()
-      {
-        try {
-          s.call();
-          latch.countDown();
-        } catch (final Exception x) {
-          x.printStackTrace();
-        }
-      }
-    });
-    latch.await();
-
-    try {
-      final DownloaderType d = Downloader.newDownloader(e, c);
-      final long id_0 =
-        d
-          .downloadEnqueue(
-            this
-              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-            "Hello");
-      final long id_1 =
-        d
-          .downloadEnqueue(
-            this
-              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-            "Hello");
-      final long id_2 =
-        d
-          .downloadEnqueue(
-            this
-              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-            "Hello");
-
-      Thread.sleep(1000);
-
-      final Some<DownloadSnapshot> some_0 =
-        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id_0);
-      final Some<DownloadSnapshot> some_1 =
-        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id_1);
-      final Some<DownloadSnapshot> some_2 =
-        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id_2);
-
-      Assert.assertEquals(
-        some_0.get().statusGet(),
-        DownloadStatus.STATUS_COMPLETED);
-      Assert.assertEquals(
-        some_1.get().statusGet(),
-        DownloadStatus.STATUS_COMPLETED);
-      Assert.assertEquals(
-        some_2.get().statusGet(),
-        DownloadStatus.STATUS_COMPLETED);
-
-      Assert.assertTrue(new File(tmp, "1.data").exists());
-      Assert.assertTrue(new File(tmp, "2.data").exists());
-      Assert.assertTrue(new File(tmp, "3.data").exists());
-
-      d.downloadDestroyAll();
-
-      Thread.sleep(1000);
-
-      Assert.assertFalse(new File(tmp, "1.data").exists());
-      Assert.assertFalse(new File(tmp, "2.data").exists());
-      Assert.assertFalse(new File(tmp, "3.data").exists());
-      Assert.assertTrue(tmp.list().length == 0);
-
-      d.downloadAcknowledge(id_0);
-      d.downloadAcknowledge(id_1);
-      d.downloadAcknowledge(id_2);
-
-      final Map<Long, DownloadSnapshot> all = d.downloadStatusSnapshotAll();
-      Assert.assertTrue(all.isEmpty());
-
-    } finally {
-      e.shutdown();
-      s.stop();
-    }
-
-    try {
-      final DownloaderType d = Downloader.newDownloader(e, c);
-      final Map<Long, DownloadSnapshot> all = d.downloadStatusSnapshotAll();
-      Assert.assertTrue(all.isEmpty());
-
-    } finally {
-      e.shutdown();
-      s.stop();
-    }
   }
 }

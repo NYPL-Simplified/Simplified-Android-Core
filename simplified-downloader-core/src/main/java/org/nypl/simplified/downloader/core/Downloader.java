@@ -121,6 +121,7 @@ import com.io7m.jnull.Nullable;
     private final File                    file_info;
     private final File                    file_info_tmp;
     private final long                    id;
+    private final DownloadListenerType    listener;
     private volatile DownloadStatus       status;
     private final String                  title;
     private final URI                     uri;
@@ -132,13 +133,16 @@ import com.io7m.jnull.Nullable;
       final URI in_uri,
       final String in_title,
       final DownloadStatus in_status,
-      final DownloaderConfiguration in_config)
+      final DownloaderConfiguration in_config,
+      final DownloadListenerType in_listener)
     {
       this.id = in_id;
       this.uri = NullCheck.notNull(in_uri);
       this.title = NullCheck.notNull(in_title);
       this.config = NullCheck.notNull(in_config);
       this.status = NullCheck.notNull(in_status);
+      this.listener = NullCheck.notNull(in_listener);
+
       this.buffer = new byte[this.config.getBufferSize()];
       this.bytes_max = -1;
       this.bytes_cur = 0;
@@ -288,6 +292,12 @@ import com.io7m.jnull.Nullable;
 
         this.downloadSaveState();
 
+        try {
+          this.listener.downloadStartedReceivingData(this.getStatus());
+        } catch (final Throwable x) {
+          // Ignore
+        }
+
         final InputStream s = conn.getInputStream();
         try {
           for (;;) {
@@ -341,23 +351,72 @@ import com.io7m.jnull.Nullable;
 
       switch (this.status) {
         case STATUS_IN_PROGRESS:
+        case STATUS_IN_PROGRESS_RESUMED:
         {
           try {
+            switch (this.status) {
+              case STATUS_IN_PROGRESS:
+              {
+                try {
+                  this.listener.downloadStarted(this.getStatus());
+                } catch (final Throwable e) {
+                  // Ignored
+                }
+                break;
+              }
+              case STATUS_IN_PROGRESS_RESUMED:
+              {
+                try {
+                  this.listener.downloadResumed(this.getStatus());
+                } catch (final Throwable e) {
+                  // Ignored
+                }
+                break;
+              }
+              case STATUS_CANCELLED:
+              case STATUS_COMPLETED:
+              case STATUS_FAILED:
+              case STATUS_PAUSED:
+              {
+                break;
+              }
+            }
+
             this.downloadMakeDirectory();
             this.downloadGetRemoteSize();
             this.downloadFile();
 
             if (this.want_cancel.get()) {
               this.status = DownloadStatus.STATUS_CANCELLED;
+              try {
+                this.listener.downloadCancelled(this.getStatus());
+              } catch (final Throwable e) {
+                // Ignored
+              }
             } else if (this.want_pause.get()) {
               this.status = DownloadStatus.STATUS_PAUSED;
+              try {
+                this.listener.downloadPaused(this.getStatus());
+              } catch (final Throwable e) {
+                // Ignored
+              }
             } else {
               this.status = DownloadStatus.STATUS_COMPLETED;
+              try {
+                this.listener.downloadCompleted(this.getStatus());
+              } catch (final Throwable e) {
+                // Ignored
+              }
             }
 
           } catch (final Throwable e) {
             this.status = DownloadStatus.STATUS_FAILED;
             this.error = e;
+            try {
+              this.listener.downloadFailed(this.getStatus(), e);
+            } catch (final Throwable x) {
+              // Ignored
+            }
           } finally {
             try {
               this.downloadSaveState();
@@ -389,6 +448,13 @@ import com.io7m.jnull.Nullable;
           this.file_data_tmp.delete();
           this.file_info.delete();
           this.file_info_tmp.delete();
+
+          try {
+            this.listener.downloadCleanedUp(this.getStatus());
+          } catch (final Throwable x) {
+            // Ignore
+          }
+
           return;
         }
         case STATUS_COMPLETED:
@@ -397,6 +463,7 @@ import com.io7m.jnull.Nullable;
           return;
         }
         case STATUS_IN_PROGRESS:
+        case STATUS_IN_PROGRESS_RESUMED:
         case STATUS_PAUSED:
         {
           break;
@@ -442,7 +509,15 @@ import com.io7m.jnull.Nullable;
     final ExecutorService in_exec,
     final DownloaderConfiguration in_config)
   {
-    return new Downloader(in_exec, in_config);
+    return new Downloader(in_exec, in_config, new DownloadEmptyListener());
+  }
+
+  public static DownloaderType newDownloaderWithListener(
+    final ExecutorService in_exec,
+    final DownloaderConfiguration in_config,
+    final DownloadListenerType in_default_listener)
+  {
+    return new Downloader(in_exec, in_config, in_default_listener);
   }
 
   private final DownloaderConfiguration config;
@@ -450,13 +525,17 @@ import com.io7m.jnull.Nullable;
   private final Map<Long, Future<?>>    futures;
   private final AtomicLong              id_pool;
   private final Map<Long, DownloadTask> tasks;
+  private final DownloadListenerType    default_listener;
 
   private Downloader(
     final ExecutorService in_exec,
-    final DownloaderConfiguration in_config)
+    final DownloaderConfiguration in_config,
+    final DownloadListenerType in_default_listener)
   {
     this.config = NullCheck.notNull(in_config);
     this.exec = NullCheck.notNull(in_exec);
+    this.default_listener = NullCheck.notNull(in_default_listener);
+
     this.id_pool = new AtomicLong(0);
     this.tasks = new HashMap<Long, DownloadTask>();
     this.futures = new HashMap<Long, Future<?>>();
@@ -478,7 +557,31 @@ import com.io7m.jnull.Nullable;
         final Some<DownloadInfo> some = (Some<DownloadInfo>) iopt;
         final DownloadInfo i = some.get();
         this.id_pool.set(Long.max(this.id_pool.get(), i.id));
-        this.downloadEnqueueWithID(i.id, i.uri, i.title, i.status);
+
+        DownloadStatus s = null;
+        switch (i.status) {
+          case STATUS_CANCELLED:
+          case STATUS_COMPLETED:
+          case STATUS_FAILED:
+          case STATUS_PAUSED:
+          {
+            s = i.status;
+            break;
+          }
+          case STATUS_IN_PROGRESS:
+          case STATUS_IN_PROGRESS_RESUMED:
+          {
+            s = DownloadStatus.STATUS_IN_PROGRESS_RESUMED;
+            break;
+          }
+        }
+
+        this.downloadEnqueueWithID(
+          i.id,
+          i.uri,
+          i.title,
+          NullCheck.notNull(s),
+          in_default_listener);
       }
     }
   }
@@ -525,15 +628,21 @@ import com.io7m.jnull.Nullable;
           task.id,
           task.uri,
           task.title,
-          DownloadStatus.STATUS_CANCELLED);
+          DownloadStatus.STATUS_CANCELLED,
+          task.listener);
       }
     }
   }
 
   @Override public long downloadEnqueue(
     final URI uri,
-    final String title)
+    final String title,
+    final DownloadListenerType listener)
   {
+    NullCheck.notNull(uri);
+    NullCheck.notNull(title);
+    NullCheck.notNull(listener);
+
     final String scheme = uri.getScheme();
     if ("http".equals(scheme) || "https".equals(scheme)) {
       final long id = this.id_pool.incrementAndGet();
@@ -541,7 +650,8 @@ import com.io7m.jnull.Nullable;
         id,
         uri,
         title,
-        DownloadStatus.STATUS_IN_PROGRESS);
+        DownloadStatus.STATUS_IN_PROGRESS,
+        listener);
       return id;
     }
 
@@ -558,11 +668,12 @@ import com.io7m.jnull.Nullable;
     final long id,
     final URI uri,
     final String title,
-    final DownloadStatus status)
+    final DownloadStatus status,
+    final DownloadListenerType listener)
   {
     synchronized (this.tasks) {
       final DownloadTask d =
-        new DownloadTask(id, uri, title, status, this.config);
+        new DownloadTask(id, uri, title, status, this.config, listener);
       this.tasks.put(Long.valueOf(id), d);
       final Future<?> f = this.exec.submit(d);
       this.futures.put(Long.valueOf(id), f);
@@ -593,7 +704,8 @@ import com.io7m.jnull.Nullable;
             t.id,
             t.uri,
             t.title,
-            DownloadStatus.STATUS_IN_PROGRESS);
+            DownloadStatus.STATUS_IN_PROGRESS_RESUMED,
+            t.listener);
         }
       }
     }

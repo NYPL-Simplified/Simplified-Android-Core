@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.Callable;
 
 import org.simpleframework.http.Request;
@@ -35,7 +36,8 @@ public final class FileServer implements Container, Callable<Unit>
   @Override public Unit call()
     throws Exception
   {
-    this.connection.connect(this.address);
+    final SocketAddress r = this.connection.connect(this.address);
+    System.out.println("info: server started on " + r);
     return Unit.unit();
   }
 
