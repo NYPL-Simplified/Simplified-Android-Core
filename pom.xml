@@ -17,6 +17,10 @@
   <modules>
     <module>simplified-app-tests</module>
     <module>simplified-app</module>
+    <module>simplified-books-core</module>
+    <module>simplified-books-tests-android</module>
+    <module>simplified-books-tests-junit4</module>
+    <module>simplified-books-tests</module>
     <module>simplified-downloader-core</module>
     <module>simplified-downloader-tests-junit4</module>
     <module>simplified-opds-core</module>
