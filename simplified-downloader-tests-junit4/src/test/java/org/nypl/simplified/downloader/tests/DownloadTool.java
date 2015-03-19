@@ -16,6 +16,12 @@ import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.http.core.HTTP;
+import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPType;
+
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 
 public final class DownloadTool
 {
@@ -30,13 +36,14 @@ public final class DownloadTool
 
     final File dir = new File(args[0]);
     final ExecutorService exec = Executors.newFixedThreadPool(4);
+    final HTTPType h = HTTP.newHTTP();
 
     final DownloaderConfigurationBuilderType cb =
       DownloaderConfiguration.newBuilder(dir);
     cb.setBufferSize(2 << 4);
 
     final DownloaderConfiguration c = cb.build();
-    final DownloaderType d = Downloader.newDownloader(exec, c);
+    final DownloaderType d = Downloader.newDownloader(exec, h, c);
 
     final BufferedReader reader =
       new BufferedReader(new InputStreamReader(System.in));
@@ -147,7 +154,8 @@ public final class DownloadTool
             continue;
           }
           final URI uri = new URI(segments[1]);
-          final long id = d.downloadEnqueue(uri, "Title", listener);
+          final OptionType<HTTPAuthType> none = Option.none();
+          final long id = d.downloadEnqueue(none, uri, "Title", listener);
           System.out.println("info: download queued " + id);
         }
 

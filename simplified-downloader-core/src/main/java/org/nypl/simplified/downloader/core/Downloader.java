@@ -10,9 +10,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +20,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPResultError;
+import org.nypl.simplified.http.core.HTTPResultException;
+import org.nypl.simplified.http.core.HTTPResultMatcherType;
+import org.nypl.simplified.http.core.HTTPResultOKType;
+import org.nypl.simplified.http.core.HTTPResultType;
+import org.nypl.simplified.http.core.HTTPType;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -39,12 +45,36 @@ import com.io7m.jnull.Nullable;
  * </p>
  */
 
-@SuppressWarnings("synthetic-access") public final class Downloader implements
+@SuppressWarnings({ "boxing", "synthetic-access" }) public final class Downloader implements
   DownloaderType
 {
+  private abstract static class DownloadErrorFlattener<A, B> implements
+    HTTPResultMatcherType<A, B, Exception>
+  {
+    public DownloadErrorFlattener()
+    {
+
+    }
+
+    @Override public B onHTTPError(
+      final HTTPResultError<A> e)
+      throws Exception
+    {
+      final String m = String.format("%d: %s", e.getStatus(), e.getMessage());
+      throw new IOException(NullCheck.notNull(m));
+    }
+
+    @Override public B onHTTPException(
+      final HTTPResultException<A> e)
+      throws Exception
+    {
+      throw e.getError();
+    }
+  }
+
   private final static class DownloadInfo implements Serializable
   {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     public static OptionType<DownloadInfo> loadFromFile(
       final File file)
@@ -68,20 +98,23 @@ import com.io7m.jnull.Nullable;
       }
     }
 
-    private final long           bytes_max;
-    private final long           id;
-    private final DownloadStatus status;
-    private final String         title;
-    private final URI            uri;
+    private final OptionType<HTTPAuthType> auth;
+    private final long                     bytes_max;
+    private final long                     id;
+    private final DownloadStatus           status;
+    private final String                   title;
+    private final URI                      uri;
 
     public DownloadInfo(
       final long in_id,
+      final OptionType<HTTPAuthType> in_auth,
       final String in_title,
       final URI in_uri,
       final long in_bytes_max,
       final DownloadStatus in_status)
     {
       this.id = in_id;
+      this.auth = NullCheck.notNull(in_auth);
       this.title = NullCheck.notNull(in_title);
       this.uri = NullCheck.notNull(in_uri);
       this.bytes_max = in_bytes_max;
@@ -111,25 +144,29 @@ import com.io7m.jnull.Nullable;
 
   private final static class DownloadTask implements Runnable
   {
-    private final byte[]                  buffer;
-    private volatile long                 bytes_cur;
-    private volatile long                 bytes_max;
-    private final DownloaderConfiguration config;
-    private volatile @Nullable Throwable  error;
-    private final File                    file_data;
-    private final File                    file_data_tmp;
-    private final File                    file_info;
-    private final File                    file_info_tmp;
-    private final long                    id;
-    private final DownloadListenerType    listener;
-    private volatile DownloadStatus       status;
-    private final String                  title;
-    private final URI                     uri;
-    private final AtomicBoolean           want_cancel;
-    private final AtomicBoolean           want_pause;
+    private final OptionType<HTTPAuthType> auth;
+    private final byte[]                   buffer;
+    private volatile long                  bytes_cur;
+    private volatile long                  bytes_max;
+    private final DownloaderConfiguration  config;
+    private volatile @Nullable Throwable   error;
+    private final File                     file_data;
+    private final File                     file_data_tmp;
+    private final File                     file_info;
+    private final File                     file_info_tmp;
+    private final HTTPType                 http;
+    private final long                     id;
+    private final DownloadListenerType     listener;
+    private volatile DownloadStatus        status;
+    private final String                   title;
+    private final URI                      uri;
+    private final AtomicBoolean            want_cancel;
+    private final AtomicBoolean            want_pause;
 
     public DownloadTask(
+      final HTTPType in_http,
       final long in_id,
+      final OptionType<HTTPAuthType> in_auth,
       final URI in_uri,
       final String in_title,
       final DownloadStatus in_status,
@@ -137,6 +174,8 @@ import com.io7m.jnull.Nullable;
       final DownloadListenerType in_listener)
     {
       this.id = in_id;
+      this.auth = NullCheck.notNull(in_auth);
+      this.http = NullCheck.notNull(in_http);
       this.uri = NullCheck.notNull(in_uri);
       this.title = NullCheck.notNull(in_title);
       this.config = NullCheck.notNull(in_config);
@@ -201,28 +240,20 @@ import com.io7m.jnull.Nullable;
     private void downloadGetRemoteSize()
       throws Exception
     {
-      final URL url = NullCheck.notNull(this.uri.toURL());
-      final HttpURLConnection conn =
-        NullCheck.notNull((HttpURLConnection) url.openConnection());
+      final HTTPResultType<Long> r =
+        this.http.getContentLength(this.auth, this.uri);
 
-      try {
-        conn.setRequestMethod("HEAD");
-        conn.setReadTimeout(10000);
-        conn.connect();
+      this.bytes_max =
+        r.matchResult(new DownloadErrorFlattener<Long, Long>() {
+          @Override public Long onHTTPOK(
+            final HTTPResultOKType<Long> e)
+            throws Exception
+          {
+            return e.getValue();
+          }
+        });
 
-        if (conn.getResponseCode() >= 400) {
-          final String m =
-            String.format(
-              "Error fetching file: %s",
-              conn.getResponseMessage());
-          throw new IOException(NullCheck.notNull(m));
-        }
-
-        this.bytes_max = conn.getContentLength();
-        this.downloadSaveState();
-      } finally {
-        conn.disconnect();
-      }
+      this.downloadSaveState();
     }
 
     private void downloadLoadSize()
@@ -260,6 +291,7 @@ import com.io7m.jnull.Nullable;
       final DownloadInfo state =
         new DownloadInfo(
           this.id,
+          this.auth,
           this.title,
           this.uri,
           this.bytes_max,
@@ -271,26 +303,22 @@ import com.io7m.jnull.Nullable;
       final BufferedOutputStream out)
       throws Exception
     {
-      final URL url = NullCheck.notNull(this.uri.toURL());
-      final HttpURLConnection conn =
-        NullCheck.notNull((HttpURLConnection) url.openConnection());
+      final HTTPResultType<InputStream> fetch_result =
+        this.http.get(this.auth, this.uri, this.bytes_cur);
+      final HTTPResultOKType<InputStream> ok =
+        fetch_result
+          .matchResult(new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>() {
+            @Override public HTTPResultOKType<InputStream> onHTTPOK(
+              final HTTPResultOKType<InputStream> e)
+              throws Exception
+            {
+              return e;
+            }
+          });
+
+      this.downloadSaveState();
 
       try {
-        conn.setRequestMethod("GET");
-        conn.setDoInput(true);
-        conn.setReadTimeout(10000);
-        conn.setRequestProperty("Range", "bytes=" + this.bytes_cur + "-");
-        conn.connect();
-
-        if (conn.getResponseCode() >= 400) {
-          final String m =
-            String.format(
-              "Error fetching file: %s",
-              conn.getResponseMessage());
-          throw new IOException(NullCheck.notNull(m));
-        }
-
-        this.downloadSaveState();
 
         try {
           this.listener.downloadStartedReceivingData(this.getStatus());
@@ -298,7 +326,7 @@ import com.io7m.jnull.Nullable;
           // Ignore
         }
 
-        final InputStream s = conn.getInputStream();
+        final InputStream s = ok.getValue();
         try {
           for (;;) {
             if (this.wantPauseOrCancel()) {
@@ -316,7 +344,7 @@ import com.io7m.jnull.Nullable;
           s.close();
         }
       } finally {
-        conn.disconnect();
+        ok.close();
       }
     }
 
@@ -507,32 +535,41 @@ import com.io7m.jnull.Nullable;
 
   public static DownloaderType newDownloader(
     final ExecutorService in_exec,
+    final HTTPType in_http,
     final DownloaderConfiguration in_config)
   {
-    return new Downloader(in_exec, in_config, new DownloadEmptyListener());
+    return new Downloader(
+      in_exec,
+      in_http,
+      in_config,
+      new DownloadEmptyListener());
   }
 
   public static DownloaderType newDownloaderWithListener(
     final ExecutorService in_exec,
+    final HTTPType in_http,
     final DownloaderConfiguration in_config,
     final DownloadListenerType in_default_listener)
   {
-    return new Downloader(in_exec, in_config, in_default_listener);
+    return new Downloader(in_exec, in_http, in_config, in_default_listener);
   }
 
   private final DownloaderConfiguration config;
+  private final DownloadListenerType    default_listener;
   private final ExecutorService         exec;
   private final Map<Long, Future<?>>    futures;
+  private final HTTPType                http;
   private final AtomicLong              id_pool;
   private final Map<Long, DownloadTask> tasks;
-  private final DownloadListenerType    default_listener;
 
   private Downloader(
     final ExecutorService in_exec,
+    final HTTPType in_http,
     final DownloaderConfiguration in_config,
     final DownloadListenerType in_default_listener)
   {
     this.config = NullCheck.notNull(in_config);
+    this.http = NullCheck.notNull(in_http);
     this.exec = NullCheck.notNull(in_exec);
     this.default_listener = NullCheck.notNull(in_default_listener);
 
@@ -578,6 +615,7 @@ import com.io7m.jnull.Nullable;
 
         this.downloadEnqueueWithID(
           i.id,
+          i.auth,
           i.uri,
           i.title,
           NullCheck.notNull(s),
@@ -626,6 +664,7 @@ import com.io7m.jnull.Nullable;
         f.cancel(true);
         this.downloadEnqueueWithID(
           task.id,
+          task.auth,
           task.uri,
           task.title,
           DownloadStatus.STATUS_CANCELLED,
@@ -635,37 +674,30 @@ import com.io7m.jnull.Nullable;
   }
 
   @Override public long downloadEnqueue(
+    final OptionType<HTTPAuthType> auth,
     final URI uri,
     final String title,
     final DownloadListenerType listener)
   {
+    NullCheck.notNull(auth);
     NullCheck.notNull(uri);
     NullCheck.notNull(title);
     NullCheck.notNull(listener);
 
-    final String scheme = uri.getScheme();
-    if ("http".equals(scheme) || "https".equals(scheme)) {
-      final long id = this.id_pool.incrementAndGet();
-      this.downloadEnqueueWithID(
-        id,
-        uri,
-        title,
-        DownloadStatus.STATUS_IN_PROGRESS,
-        listener);
-      return id;
-    }
-
-    final StringBuilder m = new StringBuilder();
-    m.append("Unsupported URI scheme.\n");
-    m.append("  URI scheme: ");
-    m.append(scheme);
-    m.append("\n");
-    m.append("  Supported schemes: http https\n");
-    throw new IllegalArgumentException(m.toString());
+    final long id = this.id_pool.incrementAndGet();
+    this.downloadEnqueueWithID(
+      id,
+      auth,
+      uri,
+      title,
+      DownloadStatus.STATUS_IN_PROGRESS,
+      listener);
+    return id;
   }
 
   private void downloadEnqueueWithID(
     final long id,
+    final OptionType<HTTPAuthType> auth,
     final URI uri,
     final String title,
     final DownloadStatus status,
@@ -673,7 +705,15 @@ import com.io7m.jnull.Nullable;
   {
     synchronized (this.tasks) {
       final DownloadTask d =
-        new DownloadTask(id, uri, title, status, this.config, listener);
+        new DownloadTask(
+          this.http,
+          id,
+          auth,
+          uri,
+          title,
+          status,
+          this.config,
+          listener);
       this.tasks.put(Long.valueOf(id), d);
       final Future<?> f = this.exec.submit(d);
       this.futures.put(Long.valueOf(id), f);
@@ -702,6 +742,7 @@ import com.io7m.jnull.Nullable;
         if (t.status == DownloadStatus.STATUS_PAUSED) {
           this.downloadEnqueueWithID(
             t.id,
+            t.auth,
             t.uri,
             t.title,
             DownloadStatus.STATUS_IN_PROGRESS_RESUMED,

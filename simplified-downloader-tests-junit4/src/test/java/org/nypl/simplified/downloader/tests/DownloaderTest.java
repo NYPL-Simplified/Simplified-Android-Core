@@ -7,13 +7,14 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
-import org.nypl.simplified.downloader.core.DownloadEmptyListener;
+import org.nypl.simplified.downloader.core.DownloadAbstractListener;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.downloader.core.DownloadStatus;
@@ -21,8 +22,13 @@ import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.http.core.HTTP;
+import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPType;
 
 import com.google.common.io.Files;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
@@ -118,6 +124,7 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadCancel()
     throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final ExecutorService exec = Executors.newFixedThreadPool(8);
     final CountDownLatch latch = new CountDownLatch(1);
     final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
@@ -139,7 +146,7 @@ import com.io7m.jnull.NullCheck;
       final DownloaderConfigurationBuilderType cb =
         DownloaderConfiguration.newBuilder(tmp);
       final DownloaderConfiguration c = cb.build();
-      final DownloaderType d = Downloader.newDownloader(exec, c);
+      final DownloaderType d = Downloader.newDownloader(exec, h, c);
 
       final CountDownLatch cancel_latch = new CountDownLatch(1);
       final DownloadListenerType listener = new LoggingListener() {
@@ -151,9 +158,11 @@ import com.io7m.jnull.NullCheck;
         }
       };
 
+      final OptionType<HTTPAuthType> none = Option.none();
       final long id =
         d
           .downloadEnqueue(
+            none,
             this
               .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
             "Hello",
@@ -189,6 +198,7 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadDestroyAll()
     throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final File tmp = this.makeTempDir();
     final DownloaderConfigurationBuilderType cb =
       DownloaderConfiguration.newBuilder(tmp);
@@ -229,10 +239,13 @@ import com.io7m.jnull.NullCheck;
     };
 
     try {
-      final DownloaderType d = Downloader.newDownloader(exec, c);
+      final DownloaderType d = Downloader.newDownloader(exec, h, c);
+
+      final OptionType<HTTPAuthType> none = Option.none();
       final long id_0 =
         d
           .downloadEnqueue(
+            none,
             this
               .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
             "Hello",
@@ -240,6 +253,7 @@ import com.io7m.jnull.NullCheck;
       final long id_1 =
         d
           .downloadEnqueue(
+            none,
             this
               .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
             "Hello",
@@ -247,6 +261,7 @@ import com.io7m.jnull.NullCheck;
       final long id_2 =
         d
           .downloadEnqueue(
+            none,
             this
               .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
             "Hello",
@@ -297,7 +312,7 @@ import com.io7m.jnull.NullCheck;
     }
 
     try {
-      final DownloaderType d = Downloader.newDownloader(exec, c);
+      final DownloaderType d = Downloader.newDownloader(exec, h, c);
       final Map<Long, DownloadSnapshot> all = d.downloadStatusSnapshotAll();
       Assert.assertTrue(all.isEmpty());
 
@@ -310,6 +325,7 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadNonexistent()
     throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final ExecutorService e = Executors.newFixedThreadPool(8);
     final CountDownLatch latch = new CountDownLatch(1);
     final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
@@ -330,7 +346,7 @@ import com.io7m.jnull.NullCheck;
     final DownloaderConfigurationBuilderType cb =
       DownloaderConfiguration.newBuilder(tmp);
     final DownloaderConfiguration c = cb.build();
-    final DownloaderType d = Downloader.newDownloader(e, c);
+    final DownloaderType d = Downloader.newDownloader(e, h, c);
 
     final CountDownLatch fail_latch = new CountDownLatch(1);
     final DownloadListenerType listener = new LoggingListener() {
@@ -343,8 +359,10 @@ import com.io7m.jnull.NullCheck;
       }
     };
 
+    final OptionType<HTTPAuthType> none = Option.none();
     final long id =
       d.downloadEnqueue(
+        none,
         this.serverAddress("/nonexistent"),
         "Nonexistent",
         listener);
@@ -361,11 +379,10 @@ import com.io7m.jnull.NullCheck;
     s.stop();
   }
 
-  @Test(expected = IllegalArgumentException.class) public
-    void
-    testDownloadNotHTTP()
-      throws Exception
+  @Test public void testDownloadNotHTTP()
+    throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final ExecutorService e = Executors.newFixedThreadPool(8);
     final CountDownLatch latch = new CountDownLatch(1);
     final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
@@ -383,17 +400,37 @@ import com.io7m.jnull.NullCheck;
     latch.await();
 
     try {
-
       final File tmp = this.makeTempDir();
       final DownloaderConfigurationBuilderType cb =
         DownloaderConfiguration.newBuilder(tmp);
       final DownloaderConfiguration c = cb.build();
-      final DownloaderType d = Downloader.newDownloader(e, c);
+      final DownloaderType d = Downloader.newDownloader(e, h, c);
 
+      final CountDownLatch error_latch = new CountDownLatch(1);
+      final AtomicReference<Throwable> e_ref =
+        new AtomicReference<Throwable>();
+      final DownloadAbstractListener listener =
+        new DownloadAbstractListener() {
+          @Override public void downloadFailed(
+            final DownloadSnapshot snap,
+            final Throwable ex)
+          {
+            e_ref.set(ex);
+            error_latch.countDown();
+          }
+        };
+
+      final OptionType<HTTPAuthType> none = Option.none();
       d.downloadEnqueue(
+        none,
         URI.create("nothttp://example.com/nonexistent"),
         "Something",
-        new DownloadEmptyListener());
+        listener);
+
+      error_latch.await();
+
+      final Throwable ex = e_ref.get();
+      Assert.assertTrue(ex instanceof IllegalArgumentException);
 
     } finally {
       e.shutdown();
@@ -404,6 +441,7 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadOK()
     throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final ExecutorService e = Executors.newFixedThreadPool(8);
     final CountDownLatch latch = new CountDownLatch(1);
     final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
@@ -424,7 +462,7 @@ import com.io7m.jnull.NullCheck;
     final DownloaderConfigurationBuilderType cb =
       DownloaderConfiguration.newBuilder(tmp);
     final DownloaderConfiguration c = cb.build();
-    final DownloaderType d = Downloader.newDownloader(e, c);
+    final DownloaderType d = Downloader.newDownloader(e, h, c);
 
     final CountDownLatch success_latch = new CountDownLatch(1);
     final DownloadListenerType listener = new LoggingListener() {
@@ -436,9 +474,11 @@ import com.io7m.jnull.NullCheck;
       }
     };
 
+    final OptionType<HTTPAuthType> none = Option.none();
     final long id =
       d
         .downloadEnqueue(
+          none,
           this
             .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
           "Hello",
@@ -463,6 +503,7 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadPauseOK()
     throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final ExecutorService e = Executors.newFixedThreadPool(8);
     final CountDownLatch latch = new CountDownLatch(1);
     final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
@@ -483,7 +524,7 @@ import com.io7m.jnull.NullCheck;
     final DownloaderConfigurationBuilderType cb =
       DownloaderConfiguration.newBuilder(tmp);
     final DownloaderConfiguration c = cb.build();
-    final DownloaderType d = Downloader.newDownloader(e, c);
+    final DownloaderType d = Downloader.newDownloader(e, h, c);
 
     final CountDownLatch pause_latch = new CountDownLatch(1);
     final CountDownLatch resume_latch = new CountDownLatch(1);
@@ -512,9 +553,11 @@ import com.io7m.jnull.NullCheck;
       }
     };
 
+    final OptionType<HTTPAuthType> none = Option.none();
     final long id =
       d
         .downloadEnqueue(
+          none,
           this
             .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
           "Hello",
@@ -564,6 +607,7 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadSerialized()
     throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final File tmp = this.makeTempDir();
     final DownloaderConfigurationBuilderType cb =
       DownloaderConfiguration.newBuilder(tmp);
@@ -608,10 +652,12 @@ import com.io7m.jnull.NullCheck;
       latch.await();
 
       try {
-        final DownloaderType d = Downloader.newDownloader(e, c);
+        final OptionType<HTTPAuthType> none = Option.none();
+        final DownloaderType d = Downloader.newDownloader(e, h, c);
         id =
           d
             .downloadEnqueue(
+              none,
               this
                 .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
               "Hello",
@@ -644,7 +690,7 @@ import com.io7m.jnull.NullCheck;
 
       try {
         final DownloaderType d =
-          Downloader.newDownloaderWithListener(e, c, listener);
+          Downloader.newDownloaderWithListener(e, h, c, listener);
         d.downloadResume(id);
         resume_latch.await();
 
@@ -664,6 +710,7 @@ import com.io7m.jnull.NullCheck;
   @Test public void testDownloadStatusNonexistent()
     throws Exception
   {
+    final HTTPType h = HTTP.newHTTP();
     final ExecutorService e = Executors.newFixedThreadPool(8);
     final CountDownLatch latch = new CountDownLatch(1);
     final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
@@ -684,7 +731,7 @@ import com.io7m.jnull.NullCheck;
     final DownloaderConfigurationBuilderType cb =
       DownloaderConfiguration.newBuilder(tmp);
     final DownloaderConfiguration c = cb.build();
-    final DownloaderType d = Downloader.newDownloader(e, c);
+    final DownloaderType d = Downloader.newDownloader(e, h, c);
 
     Assert.assertTrue(d.downloadStatusSnapshot(0).isNone());
 

@@ -3,6 +3,8 @@ package org.nypl.simplified.downloader.core;
 import java.net.URI;
 import java.util.Map;
 
+import org.nypl.simplified.http.core.HTTPAuthType;
+
 import com.io7m.jfunctional.OptionType;
 
 /**
@@ -43,17 +45,20 @@ public interface DownloaderType
   /**
    * Queue a URI for downloading.
    *
+   * @param auth
+   *          Authentication details
    * @param uri
    *          The URI
    * @param title
    *          A human-readable name for the download
    * @param listener
    *          A listener that will be notified of download state changes
-   * 
+   *
    * @return The unique identifier of the download in progress
    */
 
   long downloadEnqueue(
+    final OptionType<HTTPAuthType> auth,
     final URI uri,
     final String title,
     final DownloadListenerType listener);
