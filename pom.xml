@@ -23,6 +23,7 @@
     <module>simplified-books-tests</module>
     <module>simplified-downloader-core</module>
     <module>simplified-downloader-tests-junit4</module>
+    <module>simplified-http-core</module>
     <module>simplified-opds-core</module>
     <module>simplified-opds-tests-android</module>
     <module>simplified-opds-tests-junit4</module>
