@@ -1,19 +1,20 @@
 package org.nypl.simplified.http.core;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 public final class HTTPResultException<A> implements HTTPResultType<A>
 {
-  private final Throwable error;
+  private final Exception error;
 
   public HTTPResultException(
-    final Throwable in_error)
+    final Exception in_error)
   {
     this.error = NullCheck.notNull(in_error);
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
@@ -28,7 +29,7 @@ public final class HTTPResultException<A> implements HTTPResultType<A>
     return this.error.equals(other.error);
   }
 
-  public Throwable getError()
+  public Exception getError()
   {
     return this.error;
   }

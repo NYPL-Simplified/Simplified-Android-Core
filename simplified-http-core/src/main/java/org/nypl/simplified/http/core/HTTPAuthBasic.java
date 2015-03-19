@@ -3,12 +3,14 @@ package org.nypl.simplified.http.core;
 import java.net.HttpURLConnection;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
 
 public final class HTTPAuthBasic implements HTTPAuthType
 {
-  private final String password;
-  private final String user;
+  private static final long serialVersionUID = 1L;
+  private final String      password;
+  private final String      user;
 
   public HTTPAuthBasic(
     final String in_user,
@@ -19,7 +21,7 @@ public final class HTTPAuthBasic implements HTTPAuthType
   }
 
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;

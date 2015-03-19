@@ -1,6 +1,7 @@
 package org.nypl.simplified.http.core;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 public final class HTTPResultError<A> implements HTTPResultType<A>
 {
@@ -15,8 +16,18 @@ public final class HTTPResultError<A> implements HTTPResultType<A>
     this.message = NullCheck.notNull(in_message);
   }
 
+  public String getMessage()
+  {
+    return this.message;
+  }
+
+  public int getStatus()
+  {
+    return this.status;
+  }
+
   @Override public boolean equals(
-    final Object obj)
+    final @Nullable Object obj)
   {
     if (this == obj) {
       return true;
