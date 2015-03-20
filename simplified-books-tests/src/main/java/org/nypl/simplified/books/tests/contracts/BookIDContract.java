@@ -5,7 +5,7 @@ import java.util.Calendar;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
-import org.nypl.simplified.opds.tests.utilities.TestUtilities;
+import org.nypl.simplified.test.utilities.TestUtilities;
 
 public final class BookIDContract implements BookIDContractType
 {

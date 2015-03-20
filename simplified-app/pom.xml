@@ -20,6 +20,11 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-http-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>simplified-opds-core</artifactId>
       <version>${project.version}</version>
     </dependency>

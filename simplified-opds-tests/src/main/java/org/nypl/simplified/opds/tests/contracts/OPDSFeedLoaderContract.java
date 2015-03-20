@@ -18,7 +18,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParseException;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
-import org.nypl.simplified.opds.tests.utilities.TestUtilities;
+import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.io7m.junreachable.UnreachableCodeException;
 

@@ -17,7 +17,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
-import org.nypl.simplified.opds.tests.utilities.TestUtilities;
+import org.nypl.simplified.test.utilities.TestUtilities;
 import org.w3c.dom.DOMException;
 
 import com.io7m.jfunctional.OptionType;

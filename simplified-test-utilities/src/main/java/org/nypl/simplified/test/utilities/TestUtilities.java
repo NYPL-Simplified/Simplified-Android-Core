@@ -1,4 +1,4 @@
-package org.nypl.simplified.opds.tests.utilities;
+package org.nypl.simplified.test.utilities;
 
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;

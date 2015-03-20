@@ -1,11 +1,12 @@
 package org.nypl.simplified.app;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
 
-import org.apache.http.client.utils.URIUtils;
+import org.nypl.simplified.http.core.URIQueryBuilder;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
@@ -21,7 +22,6 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -76,30 +76,20 @@ import com.io7m.junreachable.UnreachableCodeException;
     @Override public boolean onQueryTextSubmit(
       final @Nullable String query)
     {
-      try {
-        final String qnn = NullCheck.notNull(query);
+      final String qnn = NullCheck.notNull(query);
 
-        final URI target =
-          NullCheck.notNull(URIUtils.createURI(
-            this.base.getScheme(),
-            this.base.getHost(),
-            this.base.getPort(),
-            this.base.getPath(),
-            "q=" + Uri.encode(qnn),
-            null));
+      final SortedMap<String, String> parameters =
+        new TreeMap<String, String>();
+      parameters.put("q", qnn);
+      final URI target = URIQueryBuilder.encodeQuery(this.base, parameters);
 
-        final CatalogFeedActivity cfa = CatalogFeedActivity.this;
-        final OPDSFeedType f = NullCheck.notNull(cfa.feed);
+      final CatalogFeedActivity cfa = CatalogFeedActivity.this;
+      final OPDSFeedType f = NullCheck.notNull(cfa.feed);
 
-        final ImmutableList<CatalogUpStackEntry> us =
-          cfa.newUpStack(f.getFeedURI(), cfa.getTitleForDisplay());
+      final ImmutableList<CatalogUpStackEntry> us =
+        cfa.newUpStack(f.getFeedURI(), cfa.getTitleForDisplay());
 
-        CatalogFeedActivity.startNewActivity(cfa, us, "Search", target);
-
-      } catch (final URISyntaxException e) {
-        Log.e(CatalogFeedActivity.TAG, e.getMessage(), e);
-      }
-
+      CatalogFeedActivity.startNewActivity(cfa, us, "Search", target);
       return true;
     }
   }

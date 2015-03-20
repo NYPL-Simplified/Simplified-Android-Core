@@ -13,7 +13,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedBuilderType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
-import org.nypl.simplified.opds.tests.utilities.TestUtilities;
+import org.nypl.simplified.test.utilities.TestUtilities;
 
 @SuppressWarnings("null") public final class OPDSAcquisitionFeedContract implements
   OPDSAcquisitionFeedContractType

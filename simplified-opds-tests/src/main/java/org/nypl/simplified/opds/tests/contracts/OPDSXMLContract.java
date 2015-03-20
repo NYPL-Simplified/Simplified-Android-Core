@@ -9,7 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.nypl.simplified.opds.core.OPDSXML;
-import org.nypl.simplified.opds.tests.utilities.TestUtilities;
+import org.nypl.simplified.test.utilities.TestUtilities;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

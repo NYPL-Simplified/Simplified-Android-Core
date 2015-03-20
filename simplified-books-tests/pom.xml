@@ -25,7 +25,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>simplified-opds-tests</artifactId>
+      <artifactId>simplified-test-utilities</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

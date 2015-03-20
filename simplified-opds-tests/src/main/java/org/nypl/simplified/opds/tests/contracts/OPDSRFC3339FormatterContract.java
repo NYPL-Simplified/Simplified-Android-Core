@@ -3,7 +3,7 @@ package org.nypl.simplified.opds.tests.contracts;
 import java.util.Calendar;
 
 import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
-import org.nypl.simplified.opds.tests.utilities.TestUtilities;
+import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.io7m.jnull.NullCheckException;
 

@@ -10,7 +10,7 @@ import java.util.Calendar;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedBuilderType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
-import org.nypl.simplified.opds.tests.utilities.TestUtilities;
+import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.io7m.jfunctional.Option;
 
