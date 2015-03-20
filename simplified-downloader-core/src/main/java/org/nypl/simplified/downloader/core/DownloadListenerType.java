@@ -2,17 +2,18 @@ package org.nypl.simplified.downloader.core;
 
 public interface DownloadListenerType
 {
-  void downloadStarted(
+  void downloadCancelled(
     final DownloadSnapshot snap);
 
-  void downloadStartedReceivingData(
+  void downloadCleanedUp(
     final DownloadSnapshot snap);
 
   void downloadCompleted(
     final DownloadSnapshot snap);
 
-  void downloadCancelled(
-    final DownloadSnapshot snap);
+  void downloadFailed(
+    final DownloadSnapshot snap,
+    final Throwable e);
 
   void downloadPaused(
     final DownloadSnapshot snap);
@@ -20,10 +21,9 @@ public interface DownloadListenerType
   void downloadResumed(
     final DownloadSnapshot snap);
 
-  void downloadFailed(
-    final DownloadSnapshot snap,
-    final Throwable e);
+  void downloadStarted(
+    final DownloadSnapshot snap);
 
-  void downloadCleanedUp(
+  void downloadStartedReceivingData(
     final DownloadSnapshot snap);
 }

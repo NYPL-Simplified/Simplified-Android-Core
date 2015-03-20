@@ -6,9 +6,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -17,12 +20,26 @@ import com.io7m.jnull.NullCheck;
 
 public final class HTTP implements HTTPType
 {
+  private static String userAgent()
+  {
+    final Package p = HTTP.class.getPackage();
+    if (p != null) {
+      final String v = p.getImplementationVersion();
+      if (v != null) {
+        return NullCheck.notNull(String.format("simplified-http %s", v));
+      }
+    }
+    return "simplified-http";
+  }
+
   private static final class OK implements HTTPResultOKType<InputStream>
   {
-    private final HttpURLConnection conn;
-    private final String            message;
-    private final int               status;
-    private final InputStream       stream;
+    private final HttpURLConnection         conn;
+    private final long                      content_length;
+    private final Map<String, List<String>> headers;
+    private final String                    message;
+    private final int                       status;
+    private final InputStream               stream;
 
     OK(
       final HttpURLConnection c)
@@ -32,6 +49,8 @@ public final class HTTP implements HTTPType
       this.message = NullCheck.notNull(this.conn.getResponseMessage());
       this.status = this.conn.getResponseCode();
       this.stream = NullCheck.notNull(this.conn.getInputStream());
+      this.headers = NullCheck.notNull(this.conn.getHeaderFields());
+      this.content_length = c.getContentLength();
     }
 
     @Override public void close()
@@ -41,9 +60,19 @@ public final class HTTP implements HTTPType
       this.stream.close();
     }
 
+    @Override public long getContentLength()
+    {
+      return this.content_length;
+    }
+
     @Override public String getMessage()
     {
       return this.message;
+    }
+
+    @Override public Map<String, List<String>> getResponseHeaders()
+    {
+      return this.headers;
     }
 
     @Override public int getStatus()
@@ -86,9 +115,11 @@ public final class HTTP implements HTTPType
     return new HTTP();
   }
 
+  private final String user_agent;
+
   private HTTP()
   {
-    // Nothing
+    this.user_agent = HTTP.userAgent();
   }
 
   @Override public HTTPResultType<InputStream> get(
@@ -104,11 +135,12 @@ public final class HTTP implements HTTPType
       final HttpURLConnection conn =
         NullCheck.notNull((HttpURLConnection) url.openConnection());
 
+      conn.setInstanceFollowRedirects(false);
       conn.setRequestMethod("GET");
       conn.setDoInput(true);
       conn.setReadTimeout(10000);
       conn.setRequestProperty("Range", "bytes=" + offset + "-");
-      conn.connect();
+      conn.setRequestProperty("User-Agent", this.user_agent);
 
       if (auth_opt.isSome()) {
         final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
@@ -121,7 +153,9 @@ public final class HTTP implements HTTPType
       if (conn.getResponseCode() >= 400) {
         return new HTTPResultError<InputStream>(
           conn.getResponseCode(),
-          conn.getResponseMessage());
+          conn.getResponseMessage(),
+          conn.getContentLength(),
+          conn.getHeaderFields());
       }
 
       return new OK(conn);
@@ -132,7 +166,7 @@ public final class HTTP implements HTTPType
     }
   }
 
-  @Override public HTTPResultType<Long> getContentLength(
+  @Override public HTTPResultType<Unit> head(
     final OptionType<HTTPAuthType> auth_opt,
     final URI uri)
   {
@@ -144,37 +178,37 @@ public final class HTTP implements HTTPType
       final HttpURLConnection conn =
         NullCheck.notNull((HttpURLConnection) url.openConnection());
 
-      try {
-        conn.setRequestMethod("HEAD");
-        conn.setReadTimeout(10000);
+      conn.setInstanceFollowRedirects(false);
+      conn.setRequestMethod("HEAD");
+      conn.setRequestProperty("User-Agent", this.user_agent);
+      conn.setReadTimeout(10000);
 
-        if (auth_opt.isSome()) {
-          final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
-          final HTTPAuthType auth = some.get();
-          auth.setConnectionParameters(conn);
-        }
-
-        conn.connect();
-
-        if (conn.getResponseCode() >= 400) {
-          return new HTTPResultError<Long>(
-            conn.getResponseCode(),
-            conn.getResponseMessage());
-        }
-
-        return new HTTPResultOK<Long>(
-          conn.getResponseMessage(),
-          conn.getResponseCode(),
-          Long.valueOf(conn.getContentLength()));
-
-      } finally {
-        conn.disconnect();
+      if (auth_opt.isSome()) {
+        final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
+        final HTTPAuthType auth = some.get();
+        auth.setConnectionParameters(conn);
       }
 
+      conn.connect();
+
+      if (conn.getResponseCode() >= 400) {
+        return new HTTPResultError<Unit>(
+          conn.getResponseCode(),
+          conn.getResponseMessage(),
+          conn.getContentLength(),
+          conn.getHeaderFields());
+      }
+
+      return new HTTPResultOK<Unit>(
+        conn.getResponseMessage(),
+        conn.getResponseCode(),
+        Unit.unit(),
+        conn.getContentLength(),
+        conn.getHeaderFields());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {
-      return new HTTPResultException<Long>(e);
+      return new HTTPResultException<Unit>(e);
     }
   }
 }

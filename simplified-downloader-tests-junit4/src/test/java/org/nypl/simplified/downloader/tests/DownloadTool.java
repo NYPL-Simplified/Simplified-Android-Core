@@ -17,6 +17,7 @@ import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTP;
+import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
 
@@ -72,6 +73,7 @@ public final class DownloadTool
         final Throwable e)
       {
         System.out.println(snap);
+        e.printStackTrace();
       }
 
       @Override public void downloadCompleted(
@@ -134,6 +136,8 @@ public final class DownloadTool
 
     t.start();
 
+    OptionType<HTTPAuthType> auth = Option.none();
+
     for (;;) {
       final String line = reader.readLine();
       if (line == null) {
@@ -148,50 +152,72 @@ public final class DownloadTool
       try {
         final String command = segments[0];
 
-        if ("d".equals(command)) {
+        if ("download".equals(command)) {
           if (segments.length < 2) {
-            System.err.println("error: usage: d uri");
+            System.err.println("error: usage: download uri");
             continue;
           }
           final URI uri = new URI(segments[1]);
-          final OptionType<HTTPAuthType> none = Option.none();
-          final long id = d.downloadEnqueue(none, uri, "Title", listener);
+          final long id = d.downloadEnqueue(auth, uri, "Title", listener);
           System.out.println("info: download queued " + id);
+          continue;
         }
 
-        if ("c".equals(command)) {
+        if ("cancel".equals(command)) {
           if (segments.length < 2) {
-            System.err.println("error: usage: c id");
+            System.err.println("error: usage: cancel id");
             continue;
           }
           final long id = Long.valueOf(segments[1]);
           d.downloadCancel(id);
           System.out.println("info: download cancelled " + id);
+          continue;
         }
 
-        if ("p".equals(command)) {
+        if ("pause".equals(command)) {
           if (segments.length < 2) {
-            System.err.println("error: usage: p id");
+            System.err.println("error: usage: pause id");
             continue;
           }
           final long id = Long.valueOf(segments[1]);
           d.downloadPause(id);
           System.out.println("info: download paused " + id);
+          continue;
         }
 
-        if ("r".equals(command)) {
+        if ("resume".equals(command)) {
           if (segments.length < 2) {
-            System.err.println("error: usage: r id");
+            System.err.println("error: usage: resume id");
             continue;
           }
           final long id = Long.valueOf(segments[1]);
           d.downloadResume(id);
           System.out.println("info: download resumed " + id);
+          continue;
         }
 
-        if ("s".equals(command)) {
+        if ("status".equals(command)) {
           DownloadTool.showStatus(d);
+          continue;
         }
+
+        if ("auth-basic".equals(command)) {
+          if (segments.length < 3) {
+            System.err.println("error: usage: auth-basic user pass");
+            continue;
+          }
+          final String name = segments[1];
+          final String pass = segments[2];
+          auth = Option.some((HTTPAuthType) new HTTPAuthBasic(name, pass));
+          continue;
+        }
+
+        if ("auth-none".equals(command)) {
+          auth = Option.none();
+          continue;
+        }
+
+        System.err.println("error: unknown command: " + command);
 
       } catch (final URISyntaxException e) {
         System.err.println("error: invalid uri: " + e.getMessage());

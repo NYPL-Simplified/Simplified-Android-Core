@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
 
 /**
  * Mindlessly simple synchronous HTTP requests.
@@ -31,11 +32,7 @@ public interface HTTPType
     final long offset);
 
   /**
-   * Retrieve the size in bytes of the content at <tt>uri</tt>, using
-   * authentication details <tt>auth</tt>. Note that the size of the content
-   * can obviously change between subsequent requests, so the value returned
-   * by this function should only be used as an estimate (for displaying
-   * download progress, for example).
+   * Peek at the URI <tt>uri</tt>, using authentication details <tt>auth</tt>.
    *
    * @param auth
    *          The authentication details, if any
@@ -45,7 +42,7 @@ public interface HTTPType
    * @return A result
    */
 
-  HTTPResultType<Long> getContentLength(
+  HTTPResultType<Unit> head(
     final OptionType<HTTPAuthType> auth,
     final URI uri);
 }

@@ -2,11 +2,9 @@ package org.nypl.simplified.http.core;
 
 import java.io.Closeable;
 
-public interface HTTPResultOKType<A> extends Closeable, HTTPResultType<A>
+public interface HTTPResultOKType<A> extends
+  Closeable,
+  HTTPResultConnectedType<A>
 {
-  String getMessage();
-
-  int getStatus();
-
   A getValue();
 }

@@ -1,10 +1,13 @@
 package org.nypl.simplified.http.core;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
+
+import net.iharder.Base64;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 
 public final class HTTPAuthBasic implements HTTPAuthType
 {
@@ -48,8 +51,14 @@ public final class HTTPAuthBasic implements HTTPAuthType
 
   @Override public void setConnectionParameters(
     final HttpURLConnection c)
+    throws IOException
   {
     NullCheck.notNull(c);
-    throw new UnimplementedCodeException();
+
+    final String text = this.user + ":" + this.password;
+    final String encoded =
+      Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+
+    c.addRequestProperty("Authorization", "Basic " + encoded);
   }
 }

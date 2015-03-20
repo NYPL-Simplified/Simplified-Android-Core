@@ -10,12 +10,17 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.channels.FileChannel;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,6 +37,7 @@ import org.nypl.simplified.http.core.HTTPType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -56,7 +62,7 @@ import com.io7m.jnull.Nullable;
 
     }
 
-    @Override public B onHTTPError(
+    @Override public final B onHTTPError(
       final HTTPResultError<A> e)
       throws Exception
     {
@@ -64,7 +70,7 @@ import com.io7m.jnull.Nullable;
       throw new IOException(NullCheck.notNull(m));
     }
 
-    @Override public B onHTTPException(
+    @Override public final B onHTTPException(
       final HTTPResultException<A> e)
       throws Exception
     {
@@ -144,6 +150,14 @@ import com.io7m.jnull.Nullable;
 
   private final static class DownloadTask implements Runnable
   {
+    @SuppressWarnings("resource") private static long fileStreamSize(
+      final FileOutputStream fs)
+      throws IOException
+    {
+      final FileChannel channel = fs.getChannel();
+      return channel.size();
+    }
+
     private final OptionType<HTTPAuthType> auth;
     private final byte[]                   buffer;
     private volatile long                  bytes_cur;
@@ -206,54 +220,85 @@ import com.io7m.jnull.Nullable;
     private void downloadFile()
       throws Exception
     {
-      final FileOutputStream fs =
-        new FileOutputStream(this.file_data_tmp, true);
-      final FileChannel channel = fs.getChannel();
-      this.bytes_cur = channel.size();
-
-      final BufferedOutputStream out =
-        new BufferedOutputStream(fs, this.config.getBufferSize());
-
+      final HTTPResultOKType<InputStream> result =
+        this.downloadFileFollowingRedirects();
       try {
-        this.downloadToStream(out);
+
+        final InputStream is = result.getValue();
+
+        try {
+          final FileOutputStream fs =
+            new FileOutputStream(this.file_data_tmp, true);
+
+          try {
+            this.bytes_cur = DownloadTask.fileStreamSize(fs);
+
+            final BufferedOutputStream out =
+              new BufferedOutputStream(fs, this.config.getBufferSize());
+
+            try {
+              this.listener.downloadStartedReceivingData(this.getStatus());
+            } catch (final Throwable x) {
+              // Ignore
+            }
+
+            try {
+              for (;;) {
+                if (this.wantPauseOrCancel()) {
+                  return;
+                }
+
+                final int r = is.read(this.buffer);
+                if (r == -1) {
+                  break;
+                }
+                this.bytes_cur += r;
+                out.write(this.buffer, 0, r);
+              }
+            } finally {
+              out.flush();
+              out.close();
+            }
+
+          } finally {
+            fs.flush();
+            fs.close();
+          }
+
+        } finally {
+          is.close();
+        }
+
+        if (this.wantPauseOrCancel()) {
+          return;
+        }
+
+        if (this.file_data_tmp.renameTo(this.file_data) == false) {
+          this.file_data_tmp.delete();
+          this.file_data.delete();
+          final String m =
+            String.format(
+              "Could not rename %s to %s",
+              this.file_data_tmp,
+              this.file_data);
+          throw new IOException(NullCheck.notNull(m));
+        }
+
       } finally {
-        out.flush();
-        out.close();
-      }
-
-      if (this.wantPauseOrCancel()) {
-        return;
-      }
-
-      if (this.file_data_tmp.renameTo(this.file_data) == false) {
-        this.file_data_tmp.delete();
-        this.file_data.delete();
-        final String m =
-          String.format(
-            "Could not rename %s to %s",
-            this.file_data_tmp,
-            this.file_data);
-        throw new IOException(NullCheck.notNull(m));
+        result.close();
       }
     }
 
-    private void downloadGetRemoteSize()
+    private HTTPResultOKType<InputStream> downloadFileFollowingRedirects()
       throws Exception
     {
-      final HTTPResultType<Long> r =
-        this.http.getContentLength(this.auth, this.uri);
+      final HTTPResultOKType<InputStream> result =
+        new LinkFollower(this.http, this.auth, 5, this.uri, this.bytes_cur)
+          .call();
 
-      this.bytes_max =
-        r.matchResult(new DownloadErrorFlattener<Long, Long>() {
-          @Override public Long onHTTPOK(
-            final HTTPResultOKType<Long> e)
-            throws Exception
-          {
-            return e.getValue();
-          }
-        });
-
+      this.bytes_max = result.getContentLength();
       this.downloadSaveState();
+      return result;
     }
 
     private void downloadLoadSize()
@@ -297,55 +342,6 @@ import com.io7m.jnull.Nullable;
           this.bytes_max,
           this.status);
       state.save(this.config.getDirectory());
-    }
-
-    private void downloadToStream(
-      final BufferedOutputStream out)
-      throws Exception
-    {
-      final HTTPResultType<InputStream> fetch_result =
-        this.http.get(this.auth, this.uri, this.bytes_cur);
-      final HTTPResultOKType<InputStream> ok =
-        fetch_result
-          .matchResult(new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>() {
-            @Override public HTTPResultOKType<InputStream> onHTTPOK(
-              final HTTPResultOKType<InputStream> e)
-              throws Exception
-            {
-              return e;
-            }
-          });
-
-      this.downloadSaveState();
-
-      try {
-
-        try {
-          this.listener.downloadStartedReceivingData(this.getStatus());
-        } catch (final Throwable x) {
-          // Ignore
-        }
-
-        final InputStream s = ok.getValue();
-        try {
-          for (;;) {
-            if (this.wantPauseOrCancel()) {
-              return;
-            }
-
-            final int r = s.read(this.buffer);
-            if (r == -1) {
-              break;
-            }
-            this.bytes_cur += r;
-            out.write(this.buffer, 0, r);
-          }
-        } finally {
-          s.close();
-        }
-      } finally {
-        ok.close();
-      }
     }
 
     public DownloadSnapshot getStatus()
@@ -411,7 +407,6 @@ import com.io7m.jnull.Nullable;
             }
 
             this.downloadMakeDirectory();
-            this.downloadGetRemoteSize();
             this.downloadFile();
 
             if (this.want_cancel.get()) {
@@ -502,6 +497,141 @@ import com.io7m.jnull.Nullable;
     private boolean wantPauseOrCancel()
     {
       return this.want_cancel.get() || this.want_pause.get();
+    }
+  }
+
+  private final static class LinkFollower implements
+    Callable<HTTPResultOKType<InputStream>>,
+    HTTPResultMatcherType<Unit, Unit, Exception>
+  {
+    private final long                     byte_offset;
+    private int                            cur_redirects;
+    private OptionType<HTTPAuthType>       current_auth;
+    private URI                            current_uri;
+    private final HTTPType                 http;
+    private final int                      max_redirects;
+    private final OptionType<HTTPAuthType> target_auth;
+    private final Set<URI>                 tried_auth;
+
+    public LinkFollower(
+      final HTTPType in_http,
+      final OptionType<HTTPAuthType> in_auth,
+      final int in_max_redirects,
+      final URI in_uri,
+      final long in_byte_offset)
+    {
+      this.http = NullCheck.notNull(in_http);
+      this.target_auth = NullCheck.notNull(in_auth);
+      this.current_auth = Option.none();
+      this.current_uri = NullCheck.notNull(in_uri);
+      this.max_redirects = in_max_redirects;
+      this.cur_redirects = 0;
+      this.byte_offset = in_byte_offset;
+      this.tried_auth = new HashSet<URI>();
+    }
+
+    @Override public HTTPResultOKType<InputStream> call()
+      throws Exception
+    {
+      this.processURI();
+
+      final HTTPResultType<InputStream> r =
+        this.http.get(this.current_auth, this.current_uri, this.byte_offset);
+
+      return r
+        .matchResult(new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>() {
+          @Override public HTTPResultOKType<InputStream> onHTTPOK(
+            final HTTPResultOKType<InputStream> e)
+            throws Exception
+          {
+            return e;
+          }
+        });
+    }
+
+    @Override public Unit onHTTPError(
+      final HTTPResultError<Unit> e)
+      throws Exception
+    {
+      switch (e.getStatus()) {
+        case HttpURLConnection.HTTP_UNAUTHORIZED:
+        {
+          if (this.tried_auth.contains(this.current_uri)) {
+            final String m =
+              String.format("%d: %s", e.getStatus(), e.getMessage());
+            throw new DownloadAuthenticationError(NullCheck.notNull(m));
+          }
+
+          this.current_auth = this.target_auth;
+          this.tried_auth.add(this.current_uri);
+          this.processURI();
+          return Unit.unit();
+        }
+      }
+
+      final String m = String.format("%d: %s", e.getStatus(), e.getMessage());
+      throw new IOException(NullCheck.notNull(m));
+    }
+
+    @Override public Unit onHTTPException(
+      final HTTPResultException<Unit> e)
+      throws Exception
+    {
+      throw e.getError();
+    }
+
+    @Override public Unit onHTTPOK(
+      final HTTPResultOKType<Unit> e)
+      throws Exception
+    {
+      switch (e.getStatus()) {
+        case HttpURLConnection.HTTP_OK:
+        {
+          return Unit.unit();
+        }
+
+        case HttpURLConnection.HTTP_MOVED_PERM:
+        case HttpURLConnection.HTTP_MOVED_TEMP:
+        case 307:
+        case 308:
+        {
+          this.current_auth = Option.none();
+
+          final Map<String, List<String>> headers =
+            NullCheck.notNull(e.getResponseHeaders());
+          final List<String> locations =
+            NullCheck.notNull(headers.get("Location"));
+
+          if (locations.size() != 1) {
+            throw new IOException(
+              "Malformed server response: Expected exactly one Location header");
+          }
+
+          final String location = NullCheck.notNull(locations.get(0));
+          this.cur_redirects = this.cur_redirects + 1;
+          this.current_uri = NullCheck.notNull(URI.create(location));
+          this.processURI();
+          return Unit.unit();
+        }
+      }
+
+      throw new IOException(String.format(
+        "Unhandled http code (%d: %s)",
+        e.getStatus(),
+        e.getMessage()));
+    }
+
+    private void processURI()
+      throws IOException,
+        Exception
+    {
+      if (this.cur_redirects >= this.max_redirects) {
+        throw new IOException("Reached redirect limit");
+      }
+
+      final HTTPResultType<Unit> r =
+        this.http.head(this.current_auth, this.current_uri);
+      r.matchResult(this);
     }
   }
 
