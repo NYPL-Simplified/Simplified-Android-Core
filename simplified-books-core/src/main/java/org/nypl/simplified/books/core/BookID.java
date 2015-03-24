@@ -13,6 +13,12 @@ public final class BookID implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
+  public static BookID fromString(
+    final String id)
+  {
+    return new BookID(id);
+  }
+
   public static BookID newIDFromEntry(
     final OPDSAcquisitionFeedEntry e)
   {

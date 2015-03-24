@@ -1,13 +1,10 @@
 package org.nypl.simplified.books.core;
 
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-
 /**
  * Book management interface.
  */
 
-public interface BooksType
+public interface BooksType extends AccountsType, BooksRegistryType
 {
-  BookID bookAdd(
-    final OPDSAcquisitionFeedEntry e);
+  // No extra functions
 }

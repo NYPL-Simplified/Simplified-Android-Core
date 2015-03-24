@@ -11,12 +11,16 @@ public interface HTTPResultType<A>
 {
   /**
    * Match a result value
-   * 
+   *
    * @param e
    *          The matcher
    * @return The value returned by the matcher
    * @throws E
    *           If the matcher raises <code>E</code>
+   * @param <B>
+   *          The type of transformed results
+   * @param <E>
+   *          The type of raised exceptions
    */
 
   <B, E extends Exception> B matchResult(
