@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -524,9 +525,10 @@ import com.io7m.jnull.Nullable;
     final ExecutorService in_exec,
     final OPDSFeedParserType in_feeds,
     final HTTPType in_http,
+    final DownloaderType in_downloader,
     final BooksConfiguration in_config)
   {
-    return new Books(in_exec, in_feeds, in_http, in_config);
+    return new Books(in_exec, in_feeds, in_http, in_downloader, in_config);
   }
 
   /**
@@ -618,17 +620,20 @@ import com.io7m.jnull.Nullable;
   private final OPDSFeedParserType              feed_parser;
   private final HTTPType                        http;
   private final List<Future<?>>                 tasks;
+  private final DownloaderType                  downloader;
 
   private Books(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_feeds,
     final HTTPType in_http,
+    final DownloaderType in_downloader,
     final BooksConfiguration in_config)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.feed_parser = NullCheck.notNull(in_feeds);
     this.http = NullCheck.notNull(in_http);
     this.config = NullCheck.notNull(in_config);
+    this.downloader = NullCheck.notNull(in_downloader);
     this.books = new ConcurrentHashMap<BookID, Book>();
     this.tasks = new ArrayList<Future<?>>();
   }

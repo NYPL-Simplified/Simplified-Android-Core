@@ -18,6 +18,9 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.Books;
 import org.nypl.simplified.books.core.BooksConfiguration;
 import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
+import org.nypl.simplified.downloader.core.Downloader;
+import org.nypl.simplified.downloader.core.DownloaderConfiguration;
+import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
@@ -46,9 +49,14 @@ public final class BookTool
       .setLoansURI(URI
         .create("http://10.1.3.1:9999/org/nypl/simplified/downloader/tests/loans.xml"));
 
+    final DownloaderType d =
+      Downloader.newDownloader(exec, http, DownloaderConfiguration
+        .newBuilder(new File("/tmp/downloads"))
+        .build());
+
     final BooksConfiguration books_config = books_config_builder.build();
     final AccountsType books =
-      Books.newBooks(exec, parser, http, books_config);
+      Books.newBooks(exec, parser, http, d, books_config);
 
     final AccountBarcode barcode = new AccountBarcode("4545499");
     final AccountPIN pin = new AccountPIN("4444");
