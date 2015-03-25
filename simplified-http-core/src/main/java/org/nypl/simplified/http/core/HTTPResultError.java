@@ -70,7 +70,7 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
     int result = 1;
     result = (prime * result) + this.message.hashCode();
     result = (prime * result) + this.status;
-    result = (prime * result) + Long.hashCode(this.content_length);
+    result = (prime * result) + Long.valueOf(this.content_length).hashCode();
     return result;
   }
 
