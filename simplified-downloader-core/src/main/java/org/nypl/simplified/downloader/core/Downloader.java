@@ -460,7 +460,9 @@ import com.io7m.jnull.Nullable;
 
       /**
        * Clean up any temporary files based on the final task status. If the
-       * task was cancelled or failed, delete everything.
+       * task was cancelled or failed, delete everything. If the file was
+       * completed and the data is still there, offer to allow the user to
+       * take it.
        */
 
       switch (this.status) {
@@ -483,6 +485,22 @@ import com.io7m.jnull.Nullable;
         case STATUS_COMPLETED:
         {
           this.file_data_tmp.delete();
+
+          if (this.file_data.isFile()) {
+            try {
+              this.listener.downloadCompletedTake(
+                this.getStatus(),
+                this.file_data);
+            } catch (final Throwable x) {
+              try {
+                this.listener
+                  .downloadCompletedTakeFailed(this.getStatus(), x);
+              } catch (final Throwable xe) {
+                // Ignore
+              }
+            }
+          }
+
           return;
         }
         case STATUS_IN_PROGRESS:

@@ -1,5 +1,7 @@
 package org.nypl.simplified.downloader.core;
 
+import java.io.File;
+
 public abstract class DownloadAbstractListener implements
   DownloadListenerType
 {
@@ -22,6 +24,20 @@ public abstract class DownloadAbstractListener implements
 
   @Override public void downloadCompleted(
     final DownloadSnapshot snap)
+  {
+    // Nothing
+  }
+
+  @Override public void downloadCompletedTake(
+    final DownloadSnapshot snap,
+    final File file_data)
+  {
+    // Nothing
+  }
+
+  @Override public void downloadCompletedTakeFailed(
+    final DownloadSnapshot snap,
+    final Throwable x)
   {
     // Nothing
   }

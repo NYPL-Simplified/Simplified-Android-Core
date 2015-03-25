@@ -43,12 +43,6 @@ public final class DownloadTool
       DownloaderConfiguration.newBuilder(dir);
     cb.setBufferSize(2 << 4);
 
-    final DownloaderConfiguration c = cb.build();
-    final DownloaderType d = Downloader.newDownloader(exec, h, c);
-
-    final BufferedReader reader =
-      new BufferedReader(new InputStreamReader(System.in));
-
     final DownloadListenerType listener = new DownloadListenerType() {
       @Override public void downloadStarted(
         final DownloadSnapshot snap)
@@ -91,7 +85,7 @@ public final class DownloadTool
       @Override public void downloadCleanedUp(
         final DownloadSnapshot snap)
       {
-
+        System.out.println(snap);
       }
 
       @Override public void downloadStartedReceivingData(
@@ -99,7 +93,43 @@ public final class DownloadTool
       {
 
       }
+
+      @Override public void downloadCompletedTake(
+        final DownloadSnapshot snap,
+        final File file_data)
+      {
+        System.out.println("info: "
+          + snap.statusGetID()
+          + " ready for taking: "
+          + file_data);
+
+        final File completed = new File("/tmp/completed");
+        completed.mkdirs();
+        if (completed.isDirectory() == false) {
+          throw new IllegalStateException(completed + ": Not a directory");
+        }
+
+        final File target = new File(completed, file_data.getName());
+        final boolean ok = file_data.renameTo(target);
+        if (ok == false) {
+          throw new IllegalStateException(target + ": Could not rename file");
+        }
+      }
+
+      @Override public void downloadCompletedTakeFailed(
+        final DownloadSnapshot snap,
+        final Throwable x)
+      {
+        x.printStackTrace();
+      }
     };
+
+    final DownloaderConfiguration c = cb.build();
+    final DownloaderType d =
+      Downloader.newDownloaderWithListener(exec, h, c, listener);
+
+    final BufferedReader reader =
+      new BufferedReader(new InputStreamReader(System.in));
 
     final Thread t = new Thread(new Runnable() {
       @Override public void run()

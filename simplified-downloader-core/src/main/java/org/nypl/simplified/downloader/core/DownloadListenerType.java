@@ -1,29 +1,39 @@
 package org.nypl.simplified.downloader.core;
 
+import java.io.File;
+
 public interface DownloadListenerType
 {
   void downloadCancelled(
-    final DownloadSnapshot snap);
+    DownloadSnapshot snap);
 
   void downloadCleanedUp(
-    final DownloadSnapshot snap);
+    DownloadSnapshot snap);
 
   void downloadCompleted(
-    final DownloadSnapshot snap);
+    DownloadSnapshot snap);
+
+  void downloadCompletedTake(
+    DownloadSnapshot snap,
+    File file_data);
+
+  void downloadCompletedTakeFailed(
+    DownloadSnapshot snap,
+    Throwable x);
 
   void downloadFailed(
-    final DownloadSnapshot snap,
-    final Throwable e);
+    DownloadSnapshot snap,
+    Throwable e);
 
   void downloadPaused(
-    final DownloadSnapshot snap);
+    DownloadSnapshot snap);
 
   void downloadResumed(
-    final DownloadSnapshot snap);
+    DownloadSnapshot snap);
 
   void downloadStarted(
-    final DownloadSnapshot snap);
+    DownloadSnapshot snap);
 
   void downloadStartedReceivingData(
-    final DownloadSnapshot snap);
+    DownloadSnapshot snap);
 }

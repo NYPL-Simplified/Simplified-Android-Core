@@ -56,6 +56,20 @@ import com.io7m.jnull.NullCheck;
       System.out.println("COMPLETED: " + snap);
     }
 
+    @Override public void downloadCompletedTake(
+      final DownloadSnapshot snap,
+      final File file_data)
+    {
+      System.out.println("DOWNLOAD TAKE: " + snap + " " + file_data);
+    }
+
+    @Override public void downloadCompletedTakeFailed(
+      final DownloadSnapshot snap,
+      final Throwable x)
+    {
+      System.out.println("DOWNLOAD TAKE FAILED: " + snap + " " + x);
+    }
+
     @Override public void downloadFailed(
       final DownloadSnapshot snap,
       final Throwable e)
@@ -619,18 +633,18 @@ import com.io7m.jnull.NullCheck;
     final CountDownLatch pause_latch = new CountDownLatch(1);
     final CountDownLatch resume_latch = new CountDownLatch(1);
     final DownloadListenerType listener = new LoggingListener() {
-      @Override public void downloadResumed(
-        final DownloadSnapshot snap)
-      {
-        super.downloadResumed(snap);
-        resume_latch.countDown();
-      }
-
       @Override public void downloadPaused(
         final DownloadSnapshot snap)
       {
         super.downloadPaused(snap);
         pause_latch.countDown();
+      }
+
+      @Override public void downloadResumed(
+        final DownloadSnapshot snap)
+      {
+        super.downloadResumed(snap);
+        resume_latch.countDown();
       }
     };
 
