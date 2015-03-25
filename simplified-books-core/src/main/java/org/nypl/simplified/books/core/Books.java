@@ -520,7 +520,7 @@ import com.io7m.jnull.Nullable;
     return pin;
   }
 
-  public static AccountsType newBooks(
+  public static BooksType newBooks(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_feeds,
     final HTTPType in_http,

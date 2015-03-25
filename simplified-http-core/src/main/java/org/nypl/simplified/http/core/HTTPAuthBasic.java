@@ -40,6 +40,16 @@ public final class HTTPAuthBasic implements HTTPAuthType
       && this.user.equals(other.user);
   }
 
+  public String getPassword()
+  {
+    return this.password;
+  }
+
+  public String getUser()
+  {
+    return this.user;
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;
@@ -60,5 +70,12 @@ public final class HTTPAuthBasic implements HTTPAuthType
       Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
 
     c.addRequestProperty("Authorization", "Basic " + encoded);
+  }
+
+  @Override public <A, E extends Exception> A matchAuthType(
+    final HTTPAuthMatcherType<A, E> m)
+    throws E
+  {
+    return m.onAuthBasic(this);
   }
 }
