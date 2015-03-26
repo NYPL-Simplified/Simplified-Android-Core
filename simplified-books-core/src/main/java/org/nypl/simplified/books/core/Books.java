@@ -128,7 +128,6 @@ import com.io7m.jnull.Nullable;
     {
       try {
         FileUtilities.createDirectory(this.base);
-        this.barcode.writeToFile(this.file_barcode, this.file_barcode_tmp);
         this.listener.onAccountDataSetupSuccess();
       } catch (final Throwable x) {
         this.listener.onAccountDataSetupFailure(
