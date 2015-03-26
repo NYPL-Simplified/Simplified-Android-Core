@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.content.Context;
@@ -70,9 +71,11 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
   }
 
   private final TextView                                  cell_authors;
+  private final ViewGroup                                 cell_buttons;
   private final ImageView                                 cell_cover_image;
   private final ViewGroup                                 cell_cover_layout;
   private final ProgressBar                               cell_cover_progress;
+  private final ViewGroup                                 cell_text_layout;
   private final TextView                                  cell_title;
   private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
   private @Nullable ListenableFuture<Bitmap>              loading;
@@ -87,10 +90,17 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.catalog_acquisition_cell, this, true);
 
+    this.cell_text_layout =
+      NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_text_layout));
     this.cell_title =
-      NullCheck.notNull((TextView) this.findViewById(R.id.cell_title));
+      NullCheck.notNull((TextView) this.cell_text_layout
+        .findViewById(R.id.cell_title));
     this.cell_authors =
-      NullCheck.notNull((TextView) this.findViewById(R.id.cell_authors));
+      NullCheck.notNull((TextView) this.cell_text_layout
+        .findViewById(R.id.cell_authors));
+    this.cell_buttons =
+      NullCheck.notNull((ViewGroup) this.cell_text_layout
+        .findViewById(R.id.cell_buttons));
 
     final ViewGroup ccl =
       NullCheck
@@ -111,10 +121,10 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     final LinearLayout.LayoutParams ccl_p =
       new LinearLayout.LayoutParams(cover_width, cover_height);
     ccl.setLayoutParams(ccl_p);
+
     this.cell_cover_layout = ccl;
     this.cell_cover_image = cc;
     this.cell_cover_progress = pb;
-
     this.entry = new AtomicReference<OPDSAcquisitionFeedEntry>();
   }
 
@@ -184,6 +194,8 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
     NullCheck.notNull(in_image_loader);
     NullCheck.notNull(in_listener);
 
+    UIThread.checkIsUIThread();
+
     this.cell_title.setText(CatalogAcquisitionCellView.makeTitleText(in_e));
     this.cell_authors
       .setText(CatalogAcquisitionCellView.makeAuthorText(in_e));
@@ -213,6 +225,15 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
       this.cell_cover_progress.setVisibility(View.VISIBLE);
       this.loading =
         in_image_loader.getThumbnailAsynchronous(in_e, size, this);
+
+      final Context ctx = NullCheck.notNull(this.getContext());
+      this.cell_buttons.removeAllViews();
+      for (final OPDSAcquisition a : in_e.getAcquisitions()) {
+        final CatalogAcquisitionButton b =
+          new CatalogAcquisitionButton(ctx, NullCheck.notNull(a));
+        b.setTextSize(12.0f);
+        this.cell_buttons.addView(b);
+      }
     }
   }
 }
