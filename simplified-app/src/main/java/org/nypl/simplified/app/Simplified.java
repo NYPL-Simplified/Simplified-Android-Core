@@ -8,6 +8,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import org.nypl.simplified.books.core.AccountDataLoadListenerType;
+import org.nypl.simplified.books.core.Book;
+import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.Books;
+import org.nypl.simplified.books.core.BooksConfiguration;
+import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.downloader.core.Downloader;
+import org.nypl.simplified.downloader.core.DownloaderConfiguration;
+import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
+import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.http.core.HTTP;
+import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSFeedLoader;
 import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
@@ -28,7 +41,9 @@ import android.util.Log;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -43,9 +58,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 {
   private static volatile @Nullable Simplified INSTANCE;
   private static final String                  TAG;
+  private static final String                  TAG_BOOKS;
 
   static {
-    TAG = "simplified";
+    TAG = "S";
+    TAG_BOOKS = "S.B";
   }
 
   private static Simplified checkInitialized()
@@ -84,6 +101,28 @@ import com.io7m.junreachable.UnreachableCodeException;
     return NullCheck.notNull(context.getCacheDir());
   }
 
+  private static File getDiskDataDir(
+    final Context context)
+  {
+    /**
+     * If external storage is mounted and is on a device that doesn't allow
+     * the storage to be removed, use the external storage for data.
+     */
+
+    if (Environment.MEDIA_MOUNTED.equals(Environment
+      .getExternalStorageState())) {
+      if (Environment.isExternalStorageRemovable() == false) {
+        return NullCheck.notNull(context.getExternalFilesDir(null));
+      }
+    }
+
+    /**
+     * Otherwise, use internal storage.
+     */
+
+    return NullCheck.notNull(context.getFilesDir());
+  }
+
   private static CatalogAcquisitionCoverCacheType makeCoverCache(
     final ListeningExecutorService list_exec,
     final MemoryControllerType mem,
@@ -111,9 +150,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private static OPDSFeedLoaderType makeFeedLoader(
-    final ExecutorService exec)
+    final ExecutorService exec,
+    final OPDSFeedParserType p)
   {
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
     final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(exec, p, t);
     return CachingFeedLoader.newLoader(flx);
@@ -166,7 +205,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     return (int) (m * Math.pow(10, 7));
   }
 
-  private static ExecutorService namedThreadPool()
+  private static ExecutorService namedThreadPool(
+    final int count,
+    final String base)
   {
     final ThreadFactory tf = Executors.defaultThreadFactory();
     final ThreadFactory named = new ThreadFactory() {
@@ -175,27 +216,45 @@ import com.io7m.junreachable.UnreachableCodeException;
       @Override public Thread newThread(
         final @Nullable Runnable r)
       {
-        final Thread t = tf.newThread(r);
-        t.setPriority(Thread.MIN_PRIORITY);
-        t.setName(String.format("simplified-tasks-%d", this.id));
+        /**
+         * Apparently, it's necessary to use {@link android.os.Process} to set
+         * the thread priority, rather than the standard Java thread
+         * functions. All worker threads are set to the lowest priority (19).
+         */
+
+        final Thread t = tf.newThread(new Runnable() {
+          @Override public void run()
+          {
+            assert r != null;
+            android.os.Process.setThreadPriority(19);
+            r.run();
+          }
+        });
+        t.setName(String.format("simplified-%s-tasks-%d", base, this.id));
         ++this.id;
         return t;
       }
     };
 
-    final int count = Runtime.getRuntime().availableProcessors();
     final ExecutorService pool = Executors.newFixedThreadPool(count, named);
     return NullCheck.notNull(pool);
   }
 
+  private @Nullable BooksType                            books;
   private @Nullable CatalogAcquisitionCoverCacheType     catalog_acquisition_cover_loader;
   private @Nullable CatalogAcquisitionThumbnailCacheType catalog_thumbnail_loader;
-  private @Nullable ListeningExecutorService             exec_decor;
-  private @Nullable ExecutorService                      executor;
+  private @Nullable ListeningExecutorService             catalog_exec_decor;
+  private @Nullable ExecutorService                      catalog_executor;
   private @Nullable URI                                  feed_initial_uri;
   private @Nullable OPDSFeedLoaderType                   feed_loader;
+  private @Nullable HTTPType                             http;
   private int                                            memory;
   private boolean                                        memory_small;
+
+  public BooksType getBooks()
+  {
+    return NullCheck.notNull(this.books);
+  }
 
   public CatalogAcquisitionCoverCacheType getCatalogAcquisitionCoverLoader()
   {
@@ -217,9 +276,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     return NullCheck.notNull(this.feed_loader);
   }
 
-  public ListeningExecutorService getListeningExecutorService()
+  public ListeningExecutorService getCatalogListeningExecutorService()
   {
-    return NullCheck.notNull(this.exec_decor);
+    return NullCheck.notNull(this.catalog_exec_decor);
   }
 
   @Override public int memoryGetSize()
@@ -239,9 +298,19 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       Log.d(Simplified.TAG, "initializing application context");
 
-      final ExecutorService e = Simplified.namedThreadPool();
+      {
+        final int cores = Runtime.getRuntime().availableProcessors();
+        Log.d(Simplified.TAG, String.format("%d cores available", cores));
+      }
+
+      final ExecutorService in_catalog_executor =
+        Simplified.namedThreadPool(3, "catalog");
+      final ExecutorService in_books_executor =
+        Simplified.namedThreadPool(1, "books");
+
       final ListeningExecutorService le =
-        NullCheck.notNull(MoreExecutors.listeningDecorator(e));
+        NullCheck.notNull(MoreExecutors
+          .listeningDecorator(in_catalog_executor));
       final Resources rr = NullCheck.notNull(this.getResources());
 
       /**
@@ -283,16 +352,79 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.feed_initial_uri =
         URI.create(rr.getString(R.string.catalog_start_uri));
 
-      this.executor = e;
-      this.exec_decor = le;
-      this.feed_loader = Simplified.makeFeedLoader(e);
+      this.catalog_executor = in_catalog_executor;
+      this.catalog_exec_decor = le;
+
+      final OPDSFeedParserType p = OPDSFeedParser.newParser();
+      this.feed_loader = Simplified.makeFeedLoader(in_catalog_executor, p);
       this.catalog_thumbnail_loader =
         Simplified.makeThumbnailCache(le, this, this, rr);
       this.catalog_acquisition_cover_loader =
         Simplified.makeCoverCache(le, this, this, rr);
 
-      Simplified.INSTANCE = this;
+      /**
+       * Book management.
+       */
 
+      final File data_dir = Simplified.getDiskDataDir(this);
+      final File downloads_dir = new File(data_dir, "downloads");
+      final File books_dir = new File(data_dir, "books");
+
+      Log.d(Simplified.TAG, "data: " + data_dir);
+      Log.d(Simplified.TAG, "downloads: " + downloads_dir);
+      Log.d(Simplified.TAG, "books: " + books_dir);
+
+      final DownloaderConfigurationBuilderType dcb =
+        DownloaderConfiguration.newBuilder(downloads_dir);
+      final DownloaderConfiguration downloader_config = dcb.build();
+
+      final HTTPType h = HTTP.newHTTP();
+      final DownloaderType d =
+        Downloader.newDownloader(in_books_executor, h, downloader_config);
+
+      final BooksConfigurationBuilderType bcb =
+        BooksConfiguration.newBuilder(books_dir);
+      final BooksConfiguration books_config = bcb.build();
+
+      final BooksType b =
+        Books.newBooks(in_books_executor, p, h, d, books_config);
+
+      b.accountLoadBooks(new AccountDataLoadListenerType() {
+        @Override public void onAccountDataBookLoadFailed(
+          final BookID id,
+          final OptionType<Throwable> error,
+          final String message)
+        {
+          final String s =
+            NullCheck.notNull(String.format(
+              "failed to load books: %s",
+              message));
+          if (error.isSome()) {
+            final Some<Throwable> some = (Some<Throwable>) error;
+            Log.e(Simplified.TAG_BOOKS, s, some.get());
+          } else {
+            Log.e(Simplified.TAG_BOOKS, s);
+          }
+        }
+
+        @Override public void onAccountDataBookLoadSucceeded(
+          final Book book)
+        {
+          Log.d(
+            Simplified.TAG_BOOKS,
+            String.format("loaded book: %s", book.getID()));
+        }
+
+        @Override public void onAccountUnavailable()
+        {
+          Log.d(Simplified.TAG_BOOKS, "not logged in, not loading books");
+        }
+      });
+
+      this.http = h;
+      this.books = b;
+
+      Simplified.INSTANCE = this;
     } catch (final NotFoundException e) {
       throw new UnreachableCodeException(e);
     } catch (final IOException e) {

@@ -41,24 +41,6 @@ public final class BooksTest implements BooksContractType
     this.contract.testBooksLoginFileNotDirectory();
   }
 
-  @Override @Test public void testBooksLoginNoPINGiven()
-    throws Exception
-  {
-    this.contract.testBooksLoginNoPINGiven();
-  }
-
-  @Override @Test public void testBooksLoginRejectedFirstAcceptedSecond()
-    throws Exception
-  {
-    this.contract.testBooksLoginRejectedFirstAcceptedSecond();
-  }
-
-  @Override @Test public void testBooksLoginRejectedFirstGaveUpSecond()
-    throws Exception
-  {
-    this.contract.testBooksLoginRejectedFirstGaveUpSecond();
-  }
-
   @Override @Test public void testBooksSyncFileNotDirectory()
     throws Exception
   {

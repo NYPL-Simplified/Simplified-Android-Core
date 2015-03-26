@@ -735,39 +735,41 @@ import com.io7m.jnull.Nullable;
         }
       });
 
-    for (final File f : files) {
-      assert f != null;
-      final OptionType<DownloadInfo> iopt = DownloadInfo.loadFromFile(f);
-      if (iopt.isSome()) {
-        final Some<DownloadInfo> some = (Some<DownloadInfo>) iopt;
-        final DownloadInfo i = some.get();
-        this.id_pool.set(Long.max(this.id_pool.get(), i.id));
+    if (files != null) {
+      for (final File f : files) {
+        assert f != null;
+        final OptionType<DownloadInfo> iopt = DownloadInfo.loadFromFile(f);
+        if (iopt.isSome()) {
+          final Some<DownloadInfo> some = (Some<DownloadInfo>) iopt;
+          final DownloadInfo i = some.get();
+          this.id_pool.set(Long.max(this.id_pool.get(), i.id));
 
-        DownloadStatus s = null;
-        switch (i.status) {
-          case STATUS_CANCELLED:
-          case STATUS_COMPLETED:
-          case STATUS_FAILED:
-          case STATUS_PAUSED:
-          {
-            s = i.status;
-            break;
+          DownloadStatus s = null;
+          switch (i.status) {
+            case STATUS_CANCELLED:
+            case STATUS_COMPLETED:
+            case STATUS_FAILED:
+            case STATUS_PAUSED:
+            {
+              s = i.status;
+              break;
+            }
+            case STATUS_IN_PROGRESS:
+            case STATUS_IN_PROGRESS_RESUMED:
+            {
+              s = DownloadStatus.STATUS_IN_PROGRESS_RESUMED;
+              break;
+            }
           }
-          case STATUS_IN_PROGRESS:
-          case STATUS_IN_PROGRESS_RESUMED:
-          {
-            s = DownloadStatus.STATUS_IN_PROGRESS_RESUMED;
-            break;
-          }
+
+          this.downloadEnqueueWithID(
+            i.id,
+            i.auth,
+            i.uri,
+            i.title,
+            NullCheck.notNull(s),
+            in_default_listener);
         }
-
-        this.downloadEnqueueWithID(
-          i.id,
-          i.auth,
-          i.uri,
-          i.title,
-          NullCheck.notNull(s),
-          in_default_listener);
       }
     }
   }

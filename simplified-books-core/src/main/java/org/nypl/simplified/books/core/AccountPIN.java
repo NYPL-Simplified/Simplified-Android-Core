@@ -2,13 +2,15 @@ package org.nypl.simplified.books.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class AccountPIN
+public final class AccountPIN implements Serializable
 {
-  private final String value;
+  private static final long serialVersionUID = 1L;
+  private final String      value;
 
   public AccountPIN(
     final String in_value)

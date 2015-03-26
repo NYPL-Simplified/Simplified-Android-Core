@@ -5,9 +5,10 @@ import com.io7m.jfunctional.OptionType;
 public interface AccountLoginListenerType
 {
   void onAccountLoginFailure(
-    final OptionType<Throwable> error,
-    final String message);
+    OptionType<Throwable> error,
+    String message);
 
   void onAccountLoginSuccess(
-    final AccountBarcode barcode);
+    AccountBarcode barcode,
+    AccountPIN pin);
 }

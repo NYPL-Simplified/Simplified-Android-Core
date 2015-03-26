@@ -3,6 +3,8 @@ package org.nypl.simplified.app;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.io7m.jnull.NullCheck;
+
 /**
  * Some trivial functions for asserting that code is running on the expected
  * thread.
@@ -35,7 +37,7 @@ final class UIThread
 
   /**
    * Run the given Runnable on the UI thread.
-   * 
+   *
    * @param r
    *          The runnable
    */
@@ -43,6 +45,9 @@ final class UIThread
   static void runOnUIThread(
     final Runnable r)
   {
-    new Handler(Looper.getMainLooper()).post(r);
+    NullCheck.notNull(r);
+    final Looper looper = NullCheck.notNull(Looper.getMainLooper());
+    final Handler h = new Handler(looper);
+    h.post(r);
   }
 }

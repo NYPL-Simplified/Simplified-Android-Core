@@ -10,7 +10,6 @@ import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
-import org.nypl.simplified.books.core.AccountPINListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AccountsType;
 import org.nypl.simplified.books.core.Book;
@@ -26,7 +25,6 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -61,20 +59,6 @@ public final class BookTool
     final AccountBarcode barcode = new AccountBarcode("4545499");
     final AccountPIN pin = new AccountPIN("4444");
 
-    final AccountPINListenerType pin_listener = new AccountPINListenerType() {
-      @Override public OptionType<AccountPIN> onAccountPINRequested()
-      {
-        System.err.println("info: pin requested");
-        return Option.some(pin);
-      }
-
-      @Override public OptionType<AccountPIN> onAccountPINRejected()
-      {
-        System.err.println("info: pin rejected");
-        return Option.none();
-      }
-    };
-
     System.err.println("info: loading books, if any");
     books.accountLoadBooks(new AccountDataLoadListenerType() {
       @Override public void onAccountDataBookLoadSucceeded(
@@ -101,6 +85,7 @@ public final class BookTool
       @Override public void onAccountUnavailable()
       {
         System.err.println("info: account-load: not logged in");
+
       }
     });
 
@@ -154,16 +139,24 @@ public final class BookTool
           System.err.println("info: account-sync: synced book "
             + book.getID());
         }
+
+        @Override public void onAccountSyncAuthenticationFailure(
+          final String message)
+        {
+          System.err.println("error: account-sync: could not sync books: "
+            + message);
+        }
       };
 
     final AccountLoginListenerType login_listener =
       new AccountLoginListenerType() {
         @Override public void onAccountLoginSuccess(
-          final AccountBarcode b)
+          final AccountBarcode b,
+          final AccountPIN p)
         {
           System.err.println("info: account-login: logged in");
           System.err.println("info: account-login: sync requested");
-          books.accountSync(pin_listener, sync_listener);
+          books.accountSync(sync_listener);
         }
 
         @Override public void onAccountLoginFailure(
@@ -179,6 +172,6 @@ public final class BookTool
         }
       };
 
-    books.accountLogin(barcode, pin_listener, login_listener);
+    books.accountLogin(barcode, pin, login_listener);
   }
 }

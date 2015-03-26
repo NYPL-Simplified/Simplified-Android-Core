@@ -39,24 +39,6 @@ public final class BooksTest extends InstrumentationTestCase implements
     this.contract.testBooksLoginFileNotDirectory();
   }
 
-  @Override public void testBooksLoginNoPINGiven()
-    throws Exception
-  {
-    this.contract.testBooksLoginNoPINGiven();
-  }
-
-  @Override public void testBooksLoginRejectedFirstAcceptedSecond()
-    throws Exception
-  {
-    this.contract.testBooksLoginRejectedFirstAcceptedSecond();
-  }
-
-  @Override public void testBooksLoginRejectedFirstGaveUpSecond()
-    throws Exception
-  {
-    this.contract.testBooksLoginRejectedFirstGaveUpSecond();
-  }
-
   @Override public void testBooksSyncFileNotDirectory()
     throws Exception
   {

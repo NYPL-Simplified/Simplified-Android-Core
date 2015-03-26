@@ -16,4 +16,10 @@
     <item name="android:windowIsFloating">true</item>
   </style>
 
+  <style name="SimplifiedLoginDialog" parent="SimplifiedTheme">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowIsFloating">true</item>
+  </style>
+
 </resources>

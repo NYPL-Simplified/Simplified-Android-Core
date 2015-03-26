@@ -2,14 +2,17 @@ package org.nypl.simplified.books.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 
 import com.google.common.io.Files;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class AccountBarcode
+public final class AccountBarcode implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   public static AccountBarcode readFromFile(
     final File f)
     throws IOException

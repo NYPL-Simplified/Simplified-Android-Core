@@ -4,12 +4,15 @@ import com.io7m.jfunctional.OptionType;
 
 public interface AccountSyncListenerType
 {
+  void onAccountSyncAuthenticationFailure(
+    String message);
+
   void onAccountSyncBook(
-    final Book book);
+    Book book);
 
   void onAccountSyncFailure(
-    final OptionType<Throwable> error,
-    final String message);
+    OptionType<Throwable> error,
+    String message);
 
   void onAccountSyncSuccess();
 }

@@ -223,7 +223,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         ctx,
         app,
         this,
-        app.getListeningExecutorService(),
+        app.getCatalogListeningExecutorService(),
         app.getCatalogThumbnailLoader(),
         af.getFeedEntries(),
         this.listener,

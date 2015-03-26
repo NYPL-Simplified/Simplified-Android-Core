@@ -19,7 +19,6 @@ import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
-import org.nypl.simplified.books.core.AccountPINListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.Book;
 import org.nypl.simplified.books.core.BookID;
@@ -42,7 +41,6 @@ import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.google.common.io.Files;
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -365,32 +363,9 @@ import com.io7m.junreachable.UnreachableCodeException;
           d,
           in_config);
 
-      final AtomicBoolean requested = new AtomicBoolean(false);
       final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
-
-      final CountDownLatch latch = new CountDownLatch(2);
-
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            rejected.set(true);
-            return Option.some(pin);
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            try {
-              System.out
-                .println("testBooksLoginAcceptedFirst: pin requested");
-              requested.set(true);
-              return Option.some(pin);
-            } finally {
-              latch.countDown();
-            }
-          }
-        };
+      final CountDownLatch latch = new CountDownLatch(1);
 
       final AccountLoginListenerType listener =
         new AccountLoginListenerType() {
@@ -402,7 +377,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
 
           @Override public void onAccountLoginSuccess(
-            final AccountBarcode used)
+            final AccountBarcode used_barcode,
+            final AccountPIN used_pin)
           {
             try {
               System.out.println("testBooksLoginAcceptedFirst: logged in");
@@ -413,10 +389,9 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
         };
 
-      b.accountLogin(barcode, pin_listener, listener);
+      b.accountLogin(barcode, pin, listener);
 
       latch.await();
-      TestUtilities.assertEquals(requested.get(), true);
       TestUtilities.assertEquals(rejected.get(), false);
       TestUtilities.assertEquals(succeeded.get(), true);
 
@@ -459,19 +434,6 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
 
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            return Option.some(pin);
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            return Option.some(pin);
-          }
-        };
-
       final AccountLoginListenerType login_listener =
         new AccountLoginListenerType() {
           @Override public void onAccountLoginFailure(
@@ -490,304 +452,17 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
 
           @Override public void onAccountLoginSuccess(
-            final AccountBarcode actual)
+            final AccountBarcode used_barcode,
+            final AccountPIN used_pin)
           {
             throw new UnreachableCodeException();
           }
         };
 
-      b.accountLogin(barcode, pin_listener, login_listener);
+      b.accountLogin(barcode, pin, login_listener);
 
       latch.await();
       TestUtilities.assertEquals(failed.get(), true);
-
-    } finally {
-      exec.shutdown();
-    }
-  }
-
-  @Override public void testBooksLoginNoPINGiven()
-    throws Exception
-  {
-    final ExecutorService exec = Executors.newFixedThreadPool(4);
-    try {
-      final File tmp = Files.createTempDir();
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksConfiguration in_config = bcb.build();
-
-      final AccountBarcode barcode = new AccountBarcode("barcode");
-      final AccountPIN pin = new AccountPIN("pin");
-
-      final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
-
-      final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
-          .build());
-
-      final BooksType b =
-        Books.newBooks(
-          exec,
-          OPDSFeedParser.newParser(),
-          in_http,
-          d,
-          in_config);
-
-      final AtomicBoolean requested = new AtomicBoolean(false);
-      final AtomicBoolean rejected = new AtomicBoolean(false);
-      final AtomicBoolean succeeded = new AtomicBoolean(false);
-
-      final CountDownLatch latch = new CountDownLatch(2);
-
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            rejected.set(true);
-            return Option.some(pin);
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            try {
-              System.out.println("testBooksLoginNoPINGiven: pin requested");
-              requested.set(true);
-              return Option.none();
-            } finally {
-              latch.countDown();
-            }
-          }
-        };
-
-      final AccountLoginListenerType listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-            try {
-              System.out
-                .println("testBooksLoginNoPINGiven: failed to log in");
-            } finally {
-              latch.countDown();
-            }
-          }
-
-          @Override public void onAccountLoginSuccess(
-            final AccountBarcode used)
-          {
-            try {
-              System.out.println("testBooksLoginNoPINGiven: logged in");
-              succeeded.set(true);
-            } finally {
-              latch.countDown();
-            }
-          }
-        };
-
-      b.accountLogin(barcode, pin_listener, listener);
-
-      latch.await();
-      TestUtilities.assertEquals(requested.get(), true);
-      TestUtilities.assertEquals(rejected.get(), false);
-      TestUtilities.assertEquals(succeeded.get(), false);
-
-    } finally {
-      exec.shutdown();
-    }
-  }
-
-  @Override public void testBooksLoginRejectedFirstAcceptedSecond()
-    throws Exception
-  {
-    final ExecutorService exec = Executors.newFixedThreadPool(4);
-    try {
-      final File tmp = Files.createTempDir();
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksConfiguration in_config = bcb.build();
-
-      final AccountBarcode barcode = new AccountBarcode("barcode");
-      final AccountPIN pin = new AccountPIN("pin");
-
-      final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
-
-      final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
-          .build());
-
-      final BooksType b =
-        Books.newBooks(
-          exec,
-          OPDSFeedParser.newParser(),
-          in_http,
-          d,
-          in_config);
-
-      final AtomicBoolean requested = new AtomicBoolean(false);
-      final AtomicBoolean rejected = new AtomicBoolean(false);
-      final AtomicBoolean succeeded = new AtomicBoolean(false);
-
-      final CountDownLatch latch = new CountDownLatch(3);
-
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            try {
-              System.out
-                .println("testBooksLoginRejectedFirstAcceptedSecond: pin rejected");
-              rejected.set(true);
-              return Option.some(pin);
-            } finally {
-              latch.countDown();
-            }
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            try {
-              System.out
-                .println("testBooksLoginRejectedFirstAcceptedSecond: pin requested");
-              requested.set(true);
-              return Option.some(new AccountPIN("wrong"));
-            } finally {
-              latch.countDown();
-            }
-          }
-        };
-
-      final AccountLoginListenerType listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-
-          }
-
-          @Override public void onAccountLoginSuccess(
-            final AccountBarcode used)
-          {
-            try {
-              System.out
-                .println("testBooksLoginRejectedFirstAcceptedSecond: logged in");
-              succeeded.set(true);
-            } finally {
-              latch.countDown();
-            }
-          }
-        };
-
-      b.accountLogin(barcode, pin_listener, listener);
-
-      latch.await();
-      TestUtilities.assertEquals(requested.get(), true);
-      TestUtilities.assertEquals(rejected.get(), true);
-      TestUtilities.assertEquals(succeeded.get(), true);
-
-    } finally {
-      exec.shutdown();
-    }
-  }
-
-  @Override public void testBooksLoginRejectedFirstGaveUpSecond()
-    throws Exception
-  {
-    final ExecutorService exec = Executors.newFixedThreadPool(4);
-    try {
-      final File tmp = Files.createTempDir();
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksConfiguration in_config = bcb.build();
-
-      final AccountBarcode barcode = new AccountBarcode("barcode");
-      final AccountPIN pin = new AccountPIN("pin");
-
-      final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
-
-      final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
-          .build());
-
-      final BooksType b =
-        Books.newBooks(
-          exec,
-          OPDSFeedParser.newParser(),
-          in_http,
-          d,
-          in_config);
-
-      final AtomicBoolean requested = new AtomicBoolean(false);
-      final AtomicBoolean rejected = new AtomicBoolean(false);
-      final AtomicBoolean succeeded = new AtomicBoolean(false);
-
-      final CountDownLatch latch = new CountDownLatch(3);
-
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            try {
-              System.out
-                .println("testBooksLoginRejectedFirstGaveUpSecond: pin rejected");
-              rejected.set(true);
-              return Option.none();
-            } finally {
-              latch.countDown();
-            }
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            try {
-              System.out
-                .println("testBooksLoginRejectedFirstGaveUpSecond: pin requested");
-              requested.set(true);
-              return Option.some(new AccountPIN("wrong"));
-            } finally {
-              latch.countDown();
-            }
-          }
-        };
-
-      final AccountLoginListenerType listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-            try {
-              System.out
-                .println("testBooksLoginRejectedFirstGaveUpSecond: failed to log in");
-              succeeded.set(false);
-            } finally {
-              latch.countDown();
-            }
-          }
-
-          @Override public void onAccountLoginSuccess(
-            final AccountBarcode used)
-          {
-            latch.countDown();
-          }
-        };
-
-      b.accountLogin(barcode, pin_listener, listener);
-
-      latch.await();
-      TestUtilities.assertEquals(requested.get(), true);
-      TestUtilities.assertEquals(rejected.get(), true);
-      TestUtilities.assertEquals(succeeded.get(), false);
 
     } finally {
       exec.shutdown();
@@ -824,18 +499,6 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            return Option.some(pin);
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            return Option.some(pin);
-          }
-        };
 
       final AccountLoginListenerType login_listener =
         new AccountLoginListenerType() {
@@ -854,7 +517,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
 
           @Override public void onAccountLoginSuccess(
-            final AccountBarcode actual)
+            final AccountBarcode used_barcode,
+            final AccountPIN used_pin)
           {
             try {
               System.err
@@ -865,7 +529,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
         };
 
-      b.accountLogin(barcode, pin_listener, login_listener);
+      b.accountLogin(barcode, pin, login_listener);
 
       latch0.await();
 
@@ -909,9 +573,22 @@ import com.io7m.junreachable.UnreachableCodeException;
           {
             System.err.println("testBooksSyncFileNotDirectory: synced");
           }
+
+          @Override public void onAccountSyncAuthenticationFailure(
+            final String message)
+          {
+            try {
+              failed.set(true);
+              System.err
+                .println("testBooksSyncFileNotDirectory: login failed: "
+                  + message);
+            } finally {
+              latch1.countDown();
+            }
+          }
         };
 
-      b.accountSync(pin_listener, sync_listener);
+      b.accountSync(sync_listener);
       latch1.await();
       TestUtilities.assertEquals(failed.get(), true);
 
@@ -950,18 +627,6 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            return Option.some(pin);
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            return Option.some(pin);
-          }
-        };
 
       final AccountLoginListenerType login_listener =
         new AccountLoginListenerType() {
@@ -978,7 +643,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
 
           @Override public void onAccountLoginSuccess(
-            final AccountBarcode actual)
+            final AccountBarcode used_barcode,
+            final AccountPIN used_pin)
           {
             try {
               System.err.println("testBooksSyncOK: login succeeded");
@@ -988,7 +654,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
         };
 
-      b.accountLogin(barcode, pin_listener, login_listener);
+      b.accountLogin(barcode, pin, login_listener);
 
       latch0.await();
 
@@ -1022,9 +688,20 @@ import com.io7m.junreachable.UnreachableCodeException;
             ok.set(true);
             latch1.countDown();
           }
+
+          @Override public void onAccountSyncAuthenticationFailure(
+            final String message)
+          {
+            try {
+              ok.set(false);
+              System.err.println("testBooksSyncOK: login failed: " + message);
+            } finally {
+              latch1.countDown();
+            }
+          }
         };
 
-      b.accountSync(pin_listener, sync_listener);
+      b.accountSync(sync_listener);
       latch1.await();
 
       TestUtilities.assertEquals(ok.get(), true);
@@ -1065,18 +742,6 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
-      final AccountPINListenerType pin_listener =
-        new AccountPINListenerType() {
-          @Override public OptionType<AccountPIN> onAccountPINRejected()
-          {
-            return Option.some(pin);
-          }
-
-          @Override public OptionType<AccountPIN> onAccountPINRequested()
-          {
-            return Option.some(pin);
-          }
-        };
 
       final AccountLoginListenerType login_listener =
         new AccountLoginListenerType() {
@@ -1094,7 +759,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
 
           @Override public void onAccountLoginSuccess(
-            final AccountBarcode actual)
+            final AccountBarcode used_barcode,
+            final AccountPIN used_pin)
           {
             try {
               System.err.println("testBooksSyncLoadOK: login succeeded");
@@ -1104,7 +770,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
         };
 
-      b.accountLogin(barcode, pin_listener, login_listener);
+      b.accountLogin(barcode, pin, login_listener);
 
       latch0.await();
 
@@ -1139,9 +805,21 @@ import com.io7m.junreachable.UnreachableCodeException;
             ok.set(true);
             latch1.countDown();
           }
+
+          @Override public void onAccountSyncAuthenticationFailure(
+            final String message)
+          {
+            try {
+              ok.set(false);
+              System.err.println("testBooksSyncLoadOK: login failed: "
+                + message);
+            } finally {
+              latch1.countDown();
+            }
+          }
         };
 
-      b.accountSync(pin_listener, sync_listener);
+      b.accountSync(sync_listener);
       latch1.await();
 
       TestUtilities.assertEquals(ok.get(), true);

@@ -5,13 +5,7 @@ public interface BooksContractType
   void testBooksLoadNotLoggedIn()
     throws Exception;
 
-  void testBooksLoginRejectedFirstAcceptedSecond()
-    throws Exception;
-
   void testBooksLoginAcceptedFirst()
-    throws Exception;
-
-  void testBooksLoginNoPINGiven()
     throws Exception;
 
   void testBooksLoadFileNotDirectory()
@@ -27,8 +21,5 @@ public interface BooksContractType
     throws Exception;
 
   void testBooksSyncLoadLogoutOK()
-    throws Exception;
-
-  void testBooksLoginRejectedFirstGaveUpSecond()
     throws Exception;
 }

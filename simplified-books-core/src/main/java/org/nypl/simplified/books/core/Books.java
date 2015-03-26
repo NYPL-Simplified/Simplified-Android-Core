@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
@@ -39,7 +39,6 @@ import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -153,22 +152,25 @@ import com.io7m.jnull.Nullable;
     private final File                     file_pin_tmp;
     private final HTTPType                 http;
     private final AccountLoginListenerType listener;
-    private final AccountPINListenerType   pin_listener;
+    private final AtomicBoolean            logged_in;
+    private final AccountPIN               pin;
 
     public LoginTask(
       final Books in_books,
       final HTTPType in_http,
       final BooksConfiguration in_config,
       final AccountBarcode in_barcode,
-      final AccountPINListenerType in_pin_listener,
-      final AccountLoginListenerType in_listener)
+      final AccountPIN in_pin,
+      final AccountLoginListenerType in_listener,
+      final AtomicBoolean in_logged_in)
     {
       this.books = NullCheck.notNull(in_books);
       this.http = NullCheck.notNull(in_http);
       this.config = NullCheck.notNull(in_config);
       this.barcode = NullCheck.notNull(in_barcode);
-      this.pin_listener = NullCheck.notNull(in_pin_listener);
+      this.pin = NullCheck.notNull(in_pin);
       this.listener = NullCheck.notNull(in_listener);
+      this.logged_in = NullCheck.notNull(in_logged_in);
 
       this.base = new File(this.config.getDirectory(), "data");
       this.file_barcode = new File(this.base, "barcode.txt");
@@ -180,47 +182,55 @@ import com.io7m.jnull.Nullable;
     private void loginCheckCredentials()
       throws Exception
     {
-      /**
-       * Always request a PIN when doing an explicit login.
-       */
+      final HTTPAuthType auth =
+        new HTTPAuthBasic(this.barcode.toString(), this.pin.toString());
+      final HTTPResultType<Unit> r =
+        this.http.head(Option.some(auth), this.config.getLoansURI());
 
-      final OptionType<File> no_file = Option.none();
-      final AccountPIN pin = Books.getInitialPIN(no_file, this.pin_listener);
+      r.matchResult(new HTTPResultMatcherType<Unit, Unit, Exception>() {
+        @Override public Unit onHTTPError(
+          final HTTPResultError<Unit> e)
+          throws Exception
+        {
+          final String m =
+            NullCheck.notNull(String.format(
+              "%d: %s",
+              e.getStatus(),
+              e.getMessage()));
 
-      /**
-       * Try hitting the loans URI to see if the credentials are valid. Loop
-       * until either the given credentials are valid, or the user gives up.
-       */
-
-      final HTTPType h = LoginTask.this.http;
-      final BooksConfiguration c = LoginTask.this.config;
-      final AtomicReference<AccountPIN> chosen_pin =
-        new AtomicReference<AccountPIN>();
-
-      final PartialFunctionType<HTTPAuthType, HTTPResultType<Unit>, Exception> request =
-        new PartialFunctionType<HTTPAuthType, HTTPResultType<Unit>, Exception>() {
-          @Override public HTTPResultType<Unit> call(
-            final HTTPAuthType auth)
-            throws Exception
-          {
-            return h.head(Option.some(auth), c.getLoansURI());
+          switch (e.getStatus()) {
+            case HttpURLConnection.HTTP_UNAUTHORIZED:
+            {
+              throw new AccountAuthenticationPINRejectedError(
+                "Invalid barcode or PIN");
+            }
+            default:
+            {
+              throw new IOException(m);
+            }
           }
-        };
+        }
 
-      final HTTPResultOKType<Unit> r =
-        Books.requestAuthenticationLoop(
-          request,
-          this.pin_listener,
-          this.barcode,
-          pin,
-          chosen_pin);
-      r.close();
+        @Override public Unit onHTTPException(
+          final HTTPResultException<Unit> e)
+          throws Exception
+        {
+          throw e.getError();
+        }
 
-      /**
-       * Credentials were accepted, write them to files.
-       */
+        @Override public Unit onHTTPOK(
+          final HTTPResultOKType<Unit> e)
+          throws Exception
+        {
+          /**
+           * Credentials were accepted, write them to files.
+           */
 
-      this.saveCredentials(NullCheck.notNull(chosen_pin.get()));
+          LoginTask.this.saveCredentials(LoginTask.this.pin);
+          LoginTask.this.logged_in.set(true);
+          return Unit.unit();
+        }
+      });
     }
 
     @Override public void onAccountDataSetupFailure(
@@ -234,7 +244,7 @@ import com.io7m.jnull.Nullable;
     {
       try {
         this.loginCheckCredentials();
-        this.listener.onAccountLoginSuccess(this.barcode);
+        this.listener.onAccountLoginSuccess(this.barcode, this.pin);
       } catch (final Throwable e) {
         this.listener.onAccountLoginFailure(Option.some(e), e.getMessage());
       }
@@ -262,29 +272,38 @@ import com.io7m.jnull.Nullable;
     private final File                      base;
     private final BooksConfiguration        config;
     private final AccountLogoutListenerType listener;
+    private final AtomicBoolean             logged_in;
 
     public LogoutTask(
       final BooksConfiguration in_config,
+      final AtomicBoolean in_logged_in,
       final AccountLogoutListenerType in_listener)
     {
       this.config = NullCheck.notNull(in_config);
       this.listener = NullCheck.notNull(in_listener);
+      this.logged_in = NullCheck.notNull(in_logged_in);
       this.base = new File(this.config.getDirectory(), "data");
     }
 
     @Override public void run()
     {
       try {
-        final TreeTraverser<File> trav = Files.fileTreeTraverser();
-        final ImmutableList<File> list =
-          trav.postOrderTraversal(this.base).toList();
+        this.logged_in.set(false);
 
-        for (int index = 0; index < list.size(); ++index) {
-          final File file = list.get(index);
-          final boolean ok = file.delete();
-          if (ok == false) {
-            throw new IOException("Unable to delete: " + file);
+        if (this.base.isDirectory()) {
+          final TreeTraverser<File> trav = Files.fileTreeTraverser();
+          final ImmutableList<File> list =
+            trav.postOrderTraversal(this.base).toList();
+
+          for (int index = 0; index < list.size(); ++index) {
+            final File file = list.get(index);
+            final boolean ok = file.delete();
+            if (ok == false) {
+              throw new IOException("Unable to delete: " + file);
+            }
           }
+        } else {
+          throw new IllegalStateException("Not logged in");
         }
 
         this.listener.onAccountLogoutSuccess();
@@ -368,14 +387,12 @@ import com.io7m.jnull.Nullable;
     private final File                    file_pin;
     private final HTTPType                http;
     private final AccountSyncListenerType listener;
-    private final AccountPINListenerType  pin_listener;
 
     public SyncTask(
       final BooksConfiguration in_config,
       final BooksRegistryType in_books,
       final HTTPType in_http,
       final OPDSFeedParserType in_feed_parser,
-      final AccountPINListenerType in_pin_listener,
       final AccountSyncListenerType in_listener)
     {
       this.books = NullCheck.notNull(in_books);
@@ -383,7 +400,6 @@ import com.io7m.jnull.Nullable;
       this.http = NullCheck.notNull(in_http);
       this.feed_parser = NullCheck.notNull(in_feed_parser);
       this.listener = NullCheck.notNull(in_listener);
-      this.pin_listener = NullCheck.notNull(in_pin_listener);
 
       this.base = new File(this.config.getDirectory(), "data");
       this.file_barcode = new File(this.base, "barcode.txt");
@@ -405,37 +421,61 @@ import com.io7m.jnull.Nullable;
     {
       final AccountBarcode barcode =
         new AccountBarcode(FileUtilities.fileReadUTF8(this.file_barcode));
-
       final AccountPIN pin =
-        Books.getInitialPIN(Option.some(this.file_pin), this.pin_listener);
+        new AccountPIN(FileUtilities.fileReadUTF8(this.file_pin));
+
+      final AccountSyncListenerType in_listener = this.listener;
       final URI loans_uri = this.config.getLoansURI();
 
-      final PartialFunctionType<HTTPAuthType, HTTPResultType<InputStream>, Exception> r_feed_req =
-        new PartialFunctionType<HTTPAuthType, HTTPResultType<InputStream>, Exception>() {
-          @Override public HTTPResultType<InputStream> call(
-            final HTTPAuthType auth)
+      final HTTPAuthType auth =
+        new HTTPAuthBasic(barcode.toString(), pin.toString());
+      final HTTPResultType<InputStream> r =
+        this.http.get(Option.some(auth), this.config.getLoansURI(), 0);
+
+      r
+        .matchResult(new HTTPResultMatcherType<InputStream, Unit, Exception>() {
+          @Override public Unit onHTTPError(
+            final HTTPResultError<InputStream> e)
             throws Exception
           {
-            return SyncTask.this.http.get(Option.some(auth), loans_uri, 0);
+            final String m =
+              NullCheck.notNull(String.format(
+                "%d: %s",
+                e.getStatus(),
+                e.getMessage()));
+
+            switch (e.getStatus()) {
+              case HttpURLConnection.HTTP_UNAUTHORIZED:
+              {
+                in_listener.onAccountSyncAuthenticationFailure("Invalid PIN");
+                return Unit.unit();
+              }
+              default:
+              {
+                throw new IOException(m);
+              }
+            }
           }
-        };
 
-      final AtomicReference<AccountPIN> chosen_pin =
-        new AtomicReference<AccountPIN>();
+          @Override public Unit onHTTPException(
+            final HTTPResultException<InputStream> e)
+            throws Exception
+          {
+            throw e.getError();
+          }
 
-      final HTTPResultOKType<InputStream> r_feed =
-        Books.requestAuthenticationLoop(
-          r_feed_req,
-          this.pin_listener,
-          barcode,
-          pin,
-          chosen_pin);
-
-      try {
-        this.syncFeedEntries(loans_uri, r_feed);
-      } finally {
-        r_feed.close();
-      }
+          @Override public Unit onHTTPOK(
+            final HTTPResultOKType<InputStream> e)
+            throws Exception
+          {
+            try {
+              SyncTask.this.syncFeedEntries(loans_uri, e);
+              return Unit.unit();
+            } finally {
+              e.close();
+            }
+          }
+        });
     }
 
     private void syncFeedEntries(
@@ -483,44 +523,6 @@ import com.io7m.jnull.Nullable;
     }
   }
 
-  private static AccountPIN getInitialPIN(
-    final OptionType<File> file_pin_opt,
-    final AccountPINListenerType pin_listener)
-    throws AccountAuthenticationPINNotGivenError
-  {
-    OptionType<AccountPIN> pin_opt;
-
-    /**
-     * Try reading the PIN from the given file, if any. Otherwise, request a
-     * PIN. Request a PIN if reading the file fails.
-     */
-
-    if (file_pin_opt.isSome()) {
-      final Some<File> some = (Some<File>) file_pin_opt;
-      final File file_pin = some.get();
-      if (file_pin.isFile()) {
-        try {
-          pin_opt =
-            Option.some(new AccountPIN(FileUtilities.fileReadUTF8(file_pin)));
-        } catch (final IOException e) {
-          pin_opt = pin_listener.onAccountPINRequested();
-        }
-      } else {
-        pin_opt = pin_listener.onAccountPINRequested();
-      }
-    } else {
-      pin_opt = pin_listener.onAccountPINRequested();
-    }
-
-    if (pin_opt.isNone()) {
-      throw new AccountAuthenticationPINNotGivenError("No PIN given");
-    }
-
-    final Some<AccountPIN> pin_some = (Some<AccountPIN>) pin_opt;
-    final AccountPIN pin = pin_some.get();
-    return pin;
-  }
-
   public static BooksType newBooks(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_feeds,
@@ -531,96 +533,14 @@ import com.io7m.jnull.Nullable;
     return new Books(in_exec, in_feeds, in_http, in_downloader, in_config);
   }
 
-  /**
-   * Repeatedly try to perform the given http request <tt>c</tt>, using the
-   * initial pin <tt>pin_initial</tt> and barcode <tt>barcode</tt>. The
-   * request will be repeated until either the request succeeds, fails due to
-   * a server or connection error unrelated to authentication, or the pin
-   * listener fails to return a pin (typically because the user gave up trying
-   * to provide one).
-   */
-
-  private static <T> HTTPResultOKType<T> requestAuthenticationLoop(
-    final PartialFunctionType<HTTPAuthType, HTTPResultType<T>, Exception> c,
-    final AccountPINListenerType pin_listener,
-    final AccountBarcode barcode,
-    final AccountPIN pin_initial,
-    final AtomicReference<AccountPIN> chosen_pin)
-    throws Exception
-  {
-    chosen_pin.set(pin_initial);
-
-    final AtomicReference<HTTPResultOKType<T>> success =
-      new AtomicReference<HTTPResultOKType<T>>();
-
-    while (success.get() == null) {
-      final AccountPIN pin = chosen_pin.get();
-      if (pin == null) {
-        throw new AccountAuthenticationPINNotGivenError("No PIN given");
-      }
-
-      final HTTPAuthBasic auth =
-        new HTTPAuthBasic(barcode.toString(), pin.toString());
-      final HTTPResultType<T> r = c.call(auth);
-
-      r.matchResult(new HTTPResultMatcherType<T, Unit, Exception>() {
-        @Override public Unit onHTTPError(
-          final HTTPResultError<T> e)
-          throws Exception
-        {
-          final String m =
-            NullCheck.notNull(String.format(
-              "%d: %s",
-              e.getStatus(),
-              e.getMessage()));
-
-          switch (e.getStatus()) {
-            case HttpURLConnection.HTTP_UNAUTHORIZED:
-            {
-              final OptionType<AccountPIN> pin_opt =
-                pin_listener.onAccountPINRejected();
-              if (pin_opt.isNone()) {
-                chosen_pin.set(null);
-              } else {
-                final Some<AccountPIN> some = (Some<AccountPIN>) pin_opt;
-                chosen_pin.set(some.get());
-              }
-              return Unit.unit();
-            }
-            default:
-            {
-              throw new IOException(m);
-            }
-          }
-        }
-
-        @Override public Unit onHTTPException(
-          final HTTPResultException<T> e)
-          throws Exception
-        {
-          throw e.getError();
-        }
-
-        @Override public Unit onHTTPOK(
-          final HTTPResultOKType<T> e)
-          throws Exception
-        {
-          success.set(e);
-          return Unit.unit();
-        }
-      });
-    }
-
-    return NullCheck.notNull(success.get());
-  }
-
   private final ConcurrentHashMap<BookID, Book> books;
   private final BooksConfiguration              config;
+  private final DownloaderType                  downloader;
   private final ExecutorService                 exec;
   private final OPDSFeedParserType              feed_parser;
   private final HTTPType                        http;
+  private final AtomicBoolean                   logged_in;
   private final List<Future<?>>                 tasks;
-  private final DownloaderType                  downloader;
 
   private Books(
     final ExecutorService in_exec,
@@ -636,6 +556,12 @@ import com.io7m.jnull.Nullable;
     this.downloader = NullCheck.notNull(in_downloader);
     this.books = new ConcurrentHashMap<BookID, Book>();
     this.tasks = new ArrayList<Future<?>>();
+    this.logged_in = new AtomicBoolean(false);
+  }
+
+  @Override public boolean accountIsLoggedIn()
+  {
+    return this.logged_in.get();
   }
 
   @Override public void accountLoadBooks(
@@ -647,11 +573,11 @@ import com.io7m.jnull.Nullable;
 
   @Override public void accountLogin(
     final AccountBarcode barcode,
-    final AccountPINListenerType pin_listener,
+    final AccountPIN pin,
     final AccountLoginListenerType listener)
   {
     NullCheck.notNull(barcode);
-    NullCheck.notNull(pin_listener);
+    NullCheck.notNull(pin);
     NullCheck.notNull(listener);
 
     this.submitRunnable(new LoginTask(
@@ -659,8 +585,9 @@ import com.io7m.jnull.Nullable;
       this.http,
       this.config,
       barcode,
-      pin_listener,
-      listener));
+      pin,
+      listener,
+      this.logged_in));
   }
 
   @Override public void accountLogout(
@@ -669,11 +596,13 @@ import com.io7m.jnull.Nullable;
     NullCheck.notNull(listener);
 
     this.stopAllTasks();
-    this.submitRunnable(new LogoutTask(this.config, listener));
+    this.books.clear();
+    this.downloader.downloadDestroyAll();
+    this
+      .submitRunnable(new LogoutTask(this.config, this.logged_in, listener));
   }
 
   @Override public void accountSync(
-    final AccountPINListenerType pin_listener,
     final AccountSyncListenerType listener)
   {
     NullCheck.notNull(listener);
@@ -682,7 +611,6 @@ import com.io7m.jnull.Nullable;
       this,
       this.http,
       this.feed_parser,
-      pin_listener,
       listener));
   }
 

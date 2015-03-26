@@ -4,7 +4,6 @@
   <string name="app_name">Simplified</string>
   <string name="holds">Holds</string>
   <string name="books">Books</string>
-  <string name="settings">Settings</string>
 
   <!-- Catalog strings -->
   <string name="catalog">Catalog</string>
@@ -26,5 +25,11 @@
   <string name="catalog_book_open_access">Download</string>
   <string name="catalog_book_sample">Sample</string>
   <string name="catalog_book_subscribe">Subscribe</string>
+
+  <!-- Settings strings -->
+  <string name="settings">Settings</string>
+  <string name="settings_barcode">Barcode</string>
+  <string name="settings_pin">PIN</string>
+  <string name="settings_log_in">Log in</string>
 
 </resources>
