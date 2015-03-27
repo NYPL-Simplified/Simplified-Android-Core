@@ -229,10 +229,28 @@ public final class CatalogAcquisitionCellView extends FrameLayout implements
       final Context ctx = NullCheck.notNull(this.getContext());
       this.cell_buttons.removeAllViews();
       for (final OPDSAcquisition a : in_e.getAcquisitions()) {
-        final CatalogAcquisitionButton b =
-          new CatalogAcquisitionButton(ctx, NullCheck.notNull(a));
-        b.setTextSize(12.0f);
-        this.cell_buttons.addView(b);
+        switch (a.getType()) {
+          case ACQUISITION_BORROW:
+          case ACQUISITION_OPEN_ACCESS:
+          {
+            final CatalogAcquisitionButton b =
+              new CatalogAcquisitionButton(ctx, NullCheck.notNull(a));
+            b.setTextSize(12.0f);
+            this.cell_buttons.addView(b);
+            break;
+          }
+          case ACQUISITION_SAMPLE:
+          case ACQUISITION_SUBSCRIBE:
+          case ACQUISITION_BUY:
+          case ACQUISITION_GENERIC:
+          {
+            /**
+             * TODO: Not yet supported.
+             */
+
+            break;
+          }
+        }
       }
     }
   }
