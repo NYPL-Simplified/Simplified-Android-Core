@@ -203,6 +203,20 @@ import com.io7m.jnull.NullCheck;
           snapshot.statusGet());
       }
 
+      /**
+       * Check that cancelling does not cause IDs to be re-used.
+       */
+
+      final long id2 =
+        d
+          .downloadEnqueue(
+            none,
+            this
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+            "Hello",
+            listener);
+      Assert.assertNotEquals(id, id2);
+
     } finally {
       exec.shutdown();
       s.stop();
@@ -578,6 +592,22 @@ import com.io7m.jnull.NullCheck;
     pause_latch.await();
 
     {
+      /**
+       * Check that pausing reuses IDs instead of creating new downloads.
+       */
+
+      final long id2 =
+        d
+          .downloadEnqueue(
+            none,
+            this
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+            "Hello",
+            listener);
+      Assert.assertEquals(id, id2);
+    }
+
+    {
       final Some<DownloadSnapshot> some_snapshot =
         (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
       final DownloadSnapshot snapshot = some_snapshot.get();
@@ -586,6 +616,22 @@ import com.io7m.jnull.NullCheck;
 
     d.downloadResume(id);
     resume_latch.await();
+
+    {
+      /**
+       * Check that resuming reuses IDs instead of creating new downloads.
+       */
+
+      final long id2 =
+        d
+          .downloadEnqueue(
+            none,
+            this
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+            "Hello",
+            listener);
+      Assert.assertEquals(id, id2);
+    }
 
     {
       final Some<DownloadSnapshot> some_snapshot =
@@ -610,6 +656,23 @@ import com.io7m.jnull.NullCheck;
     final File file = new File(tmp, "1.data");
     final String text = Files.toString(file, Charset.forName("UTF-8"));
     Assert.assertEquals("Hello.", text);
+
+    {
+      /**
+       * Check that completed downloads reuse IDs instead of creating new
+       * downloads.
+       */
+
+      final long id2 =
+        d
+          .downloadEnqueue(
+            none,
+            this
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+            "Hello",
+            listener);
+      Assert.assertEquals(id, id2);
+    }
 
     e.shutdown();
     s.stop();
