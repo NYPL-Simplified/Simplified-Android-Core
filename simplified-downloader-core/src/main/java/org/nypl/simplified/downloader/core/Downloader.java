@@ -709,6 +709,7 @@ import com.io7m.jnull.Nullable;
   private final HTTPType                http;
   private final AtomicLong              id_pool;
   private final Map<Long, DownloadTask> tasks;
+  private final Map<URI, Long>          uris_in_progress;
 
   private Downloader(
     final ExecutorService in_exec,
@@ -723,6 +724,7 @@ import com.io7m.jnull.Nullable;
 
     this.id_pool = new AtomicLong(0);
     this.tasks = new HashMap<Long, DownloadTask>();
+    this.uris_in_progress = new HashMap<URI, Long>();
     this.futures = new HashMap<Long, Future<?>>();
 
     final File[] files =
@@ -758,6 +760,7 @@ import com.io7m.jnull.Nullable;
             case STATUS_IN_PROGRESS_RESUMED:
             {
               s = DownloadStatus.STATUS_IN_PROGRESS_RESUMED;
+              this.uris_in_progress.put(i.uri, Long.valueOf(i.id));
               break;
             }
           }
@@ -799,6 +802,7 @@ import com.io7m.jnull.Nullable;
       if (this.tasks.containsKey(lid)) {
         final DownloadTask t = NullCheck.notNull(this.tasks.get(lid));
         t.cancel();
+        this.uris_in_progress.remove(t.uri);
       }
     }
   }
@@ -812,6 +816,7 @@ import com.io7m.jnull.Nullable;
         final Future<?> f = this.futures.get(id);
         final DownloadTask task = this.tasks.get(id);
         f.cancel(true);
+        this.uris_in_progress.remove(Long.valueOf(task.id));
         this.downloadEnqueueWithID(
           task.id,
           task.auth,
@@ -834,15 +839,22 @@ import com.io7m.jnull.Nullable;
     NullCheck.notNull(title);
     NullCheck.notNull(listener);
 
-    final long id = this.id_pool.incrementAndGet();
-    this.downloadEnqueueWithID(
-      id,
-      auth,
-      uri,
-      title,
-      DownloadStatus.STATUS_IN_PROGRESS,
-      listener);
-    return id;
+    synchronized (this.tasks) {
+      if (this.uris_in_progress.containsKey(uri)) {
+        return this.uris_in_progress.get(uri);
+      }
+
+      final long id = this.id_pool.incrementAndGet();
+      this.uris_in_progress.put(uri, Long.valueOf(id));
+      this.downloadEnqueueWithID(
+        id,
+        auth,
+        uri,
+        title,
+        DownloadStatus.STATUS_IN_PROGRESS,
+        listener);
+      return id;
+    }
   }
 
   private void downloadEnqueueWithID(
@@ -864,9 +876,10 @@ import com.io7m.jnull.Nullable;
           status,
           this.config,
           listener);
-      this.tasks.put(Long.valueOf(id), d);
+      final Long lid = Long.valueOf(id);
+      this.tasks.put(lid, d);
       final Future<?> f = this.exec.submit(d);
-      this.futures.put(Long.valueOf(id), f);
+      this.futures.put(lid, f);
     }
   }
 

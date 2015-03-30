@@ -261,7 +261,7 @@ import com.io7m.jnull.NullCheck;
           .downloadEnqueue(
             none,
             this
-              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello-0.txt"),
             "Hello",
             listener);
       final long id_1 =
@@ -269,7 +269,7 @@ import com.io7m.jnull.NullCheck;
           .downloadEnqueue(
             none,
             this
-              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello-1.txt"),
             "Hello",
             listener);
       final long id_2 =
@@ -277,7 +277,7 @@ import com.io7m.jnull.NullCheck;
           .downloadEnqueue(
             none,
             this
-              .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
+              .serverAddress("/org/nypl/simplified/downloader/tests/hello-2.txt"),
             "Hello",
             listener);
 
@@ -489,14 +489,11 @@ import com.io7m.jnull.NullCheck;
     };
 
     final OptionType<HTTPAuthType> none = Option.none();
-    final long id =
-      d
-        .downloadEnqueue(
-          none,
-          this
-            .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
-          "Hello",
-          listener);
+    final URI uri =
+      this.serverAddress("/org/nypl/simplified/downloader/tests/hello.txt");
+    final long id = d.downloadEnqueue(none, uri, "Hello", listener);
+    final long id2 = d.downloadEnqueue(none, uri, "Hello", listener);
+    Assert.assertEquals(id, id2);
 
     success_latch.await();
 

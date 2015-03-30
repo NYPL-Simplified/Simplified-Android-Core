@@ -43,7 +43,8 @@ public interface DownloaderType
   void downloadDestroyAll();
 
   /**
-   * Queue a URI for downloading.
+   * Queue a URI for downloading. If the URI is already in progress, return
+   * the identifier of the download.
    *
    * @param auth
    *          Authentication details
