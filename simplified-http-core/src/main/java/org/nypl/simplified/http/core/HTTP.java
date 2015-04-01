@@ -141,6 +141,7 @@ public final class HTTP implements HTTPType
       conn.setReadTimeout(10000);
       conn.setRequestProperty("Range", "bytes=" + offset + "-");
       conn.setRequestProperty("User-Agent", this.user_agent);
+      conn.setRequestProperty("Accept-Encoding", "identity");
 
       if (auth_opt.isSome()) {
         final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
@@ -182,6 +183,7 @@ public final class HTTP implements HTTPType
       conn.setRequestMethod("HEAD");
       conn.setRequestProperty("User-Agent", this.user_agent);
       conn.setReadTimeout(10000);
+      conn.setRequestProperty("Accept-Encoding", "identity");
 
       if (auth_opt.isSome()) {
         final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
