@@ -2,7 +2,10 @@ package org.nypl.simplified.app;
 
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BookStatusFailed;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.downloader.core.DownloadSnapshot;
+import org.nypl.simplified.downloader.core.DownloadStatus;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 
 import android.app.Activity;
@@ -84,6 +87,22 @@ public final class CatalogAcquisitionController implements
     } else {
       Log.e(CatalogAcquisitionController.TAG, m);
     }
+
+    final DownloadStatus status = DownloadStatus.STATUS_FAILED;
+    final DownloadSnapshot snap =
+      new DownloadSnapshot(
+        0,
+        0,
+        -1,
+        this.title,
+        this.acq.getURI(),
+        status,
+        error);
+
+    this.books.booksStatusUpdate(this.id, new BookStatusFailed(
+      this.id,
+      snap,
+      error));
   }
 
   @Override public void onAccountSyncSuccess()

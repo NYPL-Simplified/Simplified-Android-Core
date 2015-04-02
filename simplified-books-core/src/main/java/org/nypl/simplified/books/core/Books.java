@@ -200,7 +200,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusCancelled status =
         new BookStatusCancelled(this.book_id, snap);
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadCleanedUp(
@@ -215,7 +214,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusDownloading status =
         new BookStatusDownloading(this.book_id, snap);
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadCompletedTake(
@@ -226,7 +224,6 @@ import com.io7m.jnull.NullCheck;
         this.book_directory.copyInBook(file_data);
         final BookStatusDone status = new BookStatusDone(this.book_id);
         this.registry.booksStatusUpdate(this.book_id, status);
-        this.observable.booksNotifyObserversUnconditionally(status);
       } catch (final IOException e) {
         throw new IOError(e);
       }
@@ -239,7 +236,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusFailed status =
         new BookStatusFailed(this.book_id, snap, Option.some(x));
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadFailed(
@@ -249,7 +245,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusFailed status =
         new BookStatusFailed(this.book_id, snap, Option.some(e));
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadPaused(
@@ -258,7 +253,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusPaused status =
         new BookStatusPaused(this.book_id, snap);
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadReceivedData(
@@ -267,7 +261,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusDownloading status =
         new BookStatusDownloading(this.book_id, snap);
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadResumed(
@@ -276,7 +269,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusDownloading status =
         new BookStatusDownloading(this.book_id, snap);
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadStarted(
@@ -285,7 +277,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusDownloading status =
         new BookStatusDownloading(this.book_id, snap);
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void downloadStartedReceivingData(
@@ -294,7 +285,6 @@ import com.io7m.jnull.NullCheck;
       final BookStatusDownloading status =
         new BookStatusDownloading(this.book_id, snap);
       this.registry.booksStatusUpdate(this.book_id, status);
-      this.observable.booksNotifyObserversUnconditionally(status);
     }
 
     @Override public void run()
@@ -849,6 +839,7 @@ import com.io7m.jnull.NullCheck;
     final BookStatusType s)
   {
     this.books_status.booksStatusUpdate(id, s);
+    this.booksNotifyObserversUnconditionally(s);
   }
 
   @Override public void booksStatusUpdateOwned(

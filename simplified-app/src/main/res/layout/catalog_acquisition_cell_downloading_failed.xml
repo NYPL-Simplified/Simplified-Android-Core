@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- The cell contents shown when a book failed to download -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/cell_downloading_failed"
+  android:layout_width="match_parent"
+  android:layout_height="110dp"
+  android:orientation="vertical"
+  android:padding="8dp">
+
+  <TextView
+    android:id="@+id/cell_downloading_failed_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Title"
+    android:textStyle="bold"/>
+
+  <TextView
+    android:id="@+id/cell_downloading_failed_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Text"
+    android:textSize="10sp"/>
+
+</LinearLayout>

@@ -92,6 +92,8 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final ViewGroup                                 cell_downloading;
   private final TextView                                  cell_downloading_authors;
   private final Button                                    cell_downloading_cancel;
+  private final ViewGroup                                 cell_downloading_failed;
+  private final TextView                                  cell_downloading_failed_text;
   private final TextView                                  cell_downloading_percent_text;
   private final ProgressBar                               cell_downloading_progress;
   private final TextView                                  cell_downloading_title;
@@ -99,6 +101,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final TextView                                  cell_title;
   private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
   private @Nullable ListenableFuture<Bitmap>              loading;
+  private final TextView                                  cell_downloading_failed_title;
 
   public CatalogAcquisitionCellView(
     final Activity in_activity,
@@ -138,6 +141,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.cell_downloading_cancel =
       NullCheck.notNull((Button) this.cell_downloading
         .findViewById(R.id.cell_downloading_cancel));
+
+    this.cell_downloading_failed =
+      NullCheck.notNull((ViewGroup) this
+        .findViewById(R.id.cell_downloading_failed));
+    this.cell_downloading_failed_text =
+      NullCheck.notNull((TextView) this.cell_downloading_failed
+        .findViewById(R.id.cell_downloading_failed_text));
+    this.cell_downloading_failed_title =
+      NullCheck.notNull((TextView) this.cell_downloading_failed
+        .findViewById(R.id.cell_downloading_failed_title));
 
     this.cell_book =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_book));
@@ -493,6 +506,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogAcquisitionCellView.TAG, "status done");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
 
     this.cell_buttons.removeAllViews();
     final Button b = new Button(ctx);
@@ -510,6 +524,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogAcquisitionCellView.TAG, "status downloading");
     this.cell_downloading.setVisibility(View.VISIBLE);
     this.cell_book.setVisibility(View.GONE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+
     this.cell_downloading_title.setText(CatalogAcquisitionCellView
       .makeTitleText(in_e));
     this.cell_downloading_authors.setText(CatalogAcquisitionCellView
@@ -549,7 +565,21 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogAcquisitionCellView.TAG, "status failed");
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_book.setVisibility(View.INVISIBLE);
-    throw new UnimplementedCodeException();
+    this.cell_downloading_failed.setVisibility(View.VISIBLE);
+
+    final String text;
+    final DownloadSnapshot snap = f.getSnapshot();
+    if (snap.getError().isSome()) {
+      final Some<Throwable> some = (Some<Throwable>) snap.getError();
+      final Throwable e = some.get();
+      text = String.format("Download failed: %s", e);
+    } else {
+      text = "Unknown error";
+    }
+
+    this.cell_downloading_failed_title.setText(CatalogAcquisitionCellView
+      .makeTitleText(in_e));
+    this.cell_downloading_failed_text.setText(text);
   }
 
   private void viewConfigureCellViewForStatusNone(
@@ -560,6 +590,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogAcquisitionCellView.TAG, "status none");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+
     this.viewConfigureCellAcquisitionButtons(ctx, in_e, book_id);
   }
 
@@ -572,6 +604,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogAcquisitionCellView.TAG, "status owned");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+
     this.viewConfigureCellAcquisitionButtons(ctx, in_e, book_id);
   }
 
@@ -584,6 +618,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     Log.d(CatalogAcquisitionCellView.TAG, "status paused");
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+
     throw new UnimplementedCodeException();
   }
 }
