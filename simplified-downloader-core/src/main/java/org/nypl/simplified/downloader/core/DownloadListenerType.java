@@ -28,6 +28,9 @@ public interface DownloadListenerType
   void downloadPaused(
     DownloadSnapshot snap);
 
+  void downloadReceivedData(
+    DownloadSnapshot snap);
+
   void downloadResumed(
     DownloadSnapshot snap);
 

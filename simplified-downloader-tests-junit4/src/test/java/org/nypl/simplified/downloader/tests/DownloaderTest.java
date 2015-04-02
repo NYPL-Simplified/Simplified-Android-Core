@@ -50,6 +50,12 @@ import com.io7m.jnull.NullCheck;
       System.out.println("CLEANUP: " + snap);
     }
 
+    @Override public void downloadReceivedData(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("RECEIVED DATA: " + snap);
+    }
+
     @Override public void downloadCompleted(
       final DownloadSnapshot snap)
     {

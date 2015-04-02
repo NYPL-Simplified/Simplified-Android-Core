@@ -9,8 +9,11 @@ public interface AccountDataLoadListenerType
     final OptionType<Throwable> error,
     final String message);
 
+  void onAccountDataBookLoadFinished();
+
   void onAccountDataBookLoadSucceeded(
-    final Book book);
+    final BookID book,
+    final BookSnapshot snap);
 
   void onAccountUnavailable();
 }

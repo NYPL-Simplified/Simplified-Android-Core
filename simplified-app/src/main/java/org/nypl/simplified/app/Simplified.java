@@ -9,8 +9,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
-import org.nypl.simplified.books.core.Book;
+import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.Books;
 import org.nypl.simplified.books.core.BooksConfiguration;
 import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
@@ -54,7 +55,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("boxing") public final class Simplified extends Application implements
   ScreenSizeControllerType,
-  MemoryControllerType
+  MemoryControllerType,
+  AccountDataLoadListenerType,
+  AccountSyncListenerType
 {
   private static volatile @Nullable Simplified INSTANCE;
   private static final String                  TAG;
@@ -242,9 +245,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private @Nullable BooksType                            books;
   private @Nullable CatalogAcquisitionCoverCacheType     catalog_acquisition_cover_loader;
-  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_thumbnail_loader;
   private @Nullable ListeningExecutorService             catalog_exec_decor;
   private @Nullable ExecutorService                      catalog_executor;
+  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_thumbnail_loader;
   private @Nullable URI                                  feed_initial_uri;
   private @Nullable OPDSFeedLoaderType                   feed_loader;
   private @Nullable HTTPType                             http;
@@ -259,6 +262,11 @@ import com.io7m.junreachable.UnreachableCodeException;
   public CatalogAcquisitionCoverCacheType getCatalogAcquisitionCoverLoader()
   {
     return NullCheck.notNull(this.catalog_acquisition_cover_loader);
+  }
+
+  public ListeningExecutorService getCatalogListeningExecutorService()
+  {
+    return NullCheck.notNull(this.catalog_exec_decor);
   }
 
   public CatalogAcquisitionThumbnailCacheType getCatalogThumbnailLoader()
@@ -276,11 +284,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     return NullCheck.notNull(this.feed_loader);
   }
 
-  public ListeningExecutorService getCatalogListeningExecutorService()
-  {
-    return NullCheck.notNull(this.catalog_exec_decor);
-  }
-
   @Override public int memoryGetSize()
   {
     return this.memory;
@@ -289,6 +292,73 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public boolean memoryIsSmall()
   {
     return this.memory_small;
+  }
+
+  @Override public void onAccountDataBookLoadFailed(
+    final BookID id,
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    final String s =
+      NullCheck.notNull(String.format("failed to load books: %s", message));
+    if (error.isSome()) {
+      final Some<Throwable> some = (Some<Throwable>) error;
+      Log.e(Simplified.TAG_BOOKS, s, some.get());
+    } else {
+      Log.e(Simplified.TAG_BOOKS, s);
+    }
+  }
+
+  @Override public void onAccountDataBookLoadFinished()
+  {
+    Log.d(Simplified.TAG_BOOKS, "finished loading books, syncing account");
+    final BooksType b = NullCheck.notNull(this.books);
+    b.accountSync(this);
+  }
+
+  @Override public void onAccountDataBookLoadSucceeded(
+    final BookID book,
+    final BookSnapshot snap)
+  {
+    Log.d(Simplified.TAG_BOOKS, String.format("loaded book: %s", book));
+  }
+
+  @Override public void onAccountSyncAuthenticationFailure(
+    final String message)
+  {
+    Log.d(
+      Simplified.TAG_BOOKS,
+      "failed to sync account due to authentication failure: " + message);
+  }
+
+  @Override public void onAccountSyncBook(
+    final BookID book)
+  {
+    Log.d(Simplified.TAG_BOOKS, "synced book " + book);
+  }
+
+  @Override public void onAccountSyncFailure(
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    final String s =
+      NullCheck.notNull(String.format("failed to sync account: %s", message));
+    if (error.isSome()) {
+      final Some<Throwable> some = (Some<Throwable>) error;
+      Log.e(Simplified.TAG_BOOKS, s, some.get());
+    } else {
+      Log.e(Simplified.TAG_BOOKS, s);
+    }
+  }
+
+  @Override public void onAccountSyncSuccess()
+  {
+    Log.d(Simplified.TAG_BOOKS, "synced account");
+  }
+
+  @Override public void onAccountUnavailable()
+  {
+    Log.d(Simplified.TAG_BOOKS, "not logged in, not loading books");
   }
 
   @Override public void onCreate()
@@ -376,9 +446,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final DownloaderConfigurationBuilderType dcb =
         DownloaderConfiguration.newBuilder(downloads_dir);
+      dcb.setReadSleepTime(1000);
       final DownloaderConfiguration downloader_config = dcb.build();
 
       final HTTPType h = HTTP.newHTTP();
+      this.http = h;
       final DownloaderType d =
         Downloader.newDownloader(in_books_executor, h, downloader_config);
 
@@ -388,41 +460,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final BooksType b =
         Books.newBooks(in_books_executor, p, h, d, books_config);
-
-      b.accountLoadBooks(new AccountDataLoadListenerType() {
-        @Override public void onAccountDataBookLoadFailed(
-          final BookID id,
-          final OptionType<Throwable> error,
-          final String message)
-        {
-          final String s =
-            NullCheck.notNull(String.format(
-              "failed to load books: %s",
-              message));
-          if (error.isSome()) {
-            final Some<Throwable> some = (Some<Throwable>) error;
-            Log.e(Simplified.TAG_BOOKS, s, some.get());
-          } else {
-            Log.e(Simplified.TAG_BOOKS, s);
-          }
-        }
-
-        @Override public void onAccountDataBookLoadSucceeded(
-          final Book book)
-        {
-          Log.d(
-            Simplified.TAG_BOOKS,
-            String.format("loaded book: %s", book.getID()));
-        }
-
-        @Override public void onAccountUnavailable()
-        {
-          Log.d(Simplified.TAG_BOOKS, "not logged in, not loading books");
-        }
-      });
-
-      this.http = h;
       this.books = b;
+      b.accountLoadBooks(this);
 
       Simplified.INSTANCE = this;
     } catch (final NotFoundException e) {

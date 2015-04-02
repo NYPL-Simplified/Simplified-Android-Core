@@ -1,12 +1,17 @@
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.OptionType;
+import java.net.URI;
 
-public interface BooksRegistryType
+public interface BooksRegistryType extends BooksStatusCacheType
 {
-  OptionType<Book> bookGet(
+  void bookDownloadOpenAccess(
+    BookID id,
+    String title,
+    URI uri);
+
+  void bookDownloadCancel(
     BookID id);
 
-  void bookUpdate(
-    Book b);
+  void bookDownloadAcknowledge(
+    BookID id);
 }

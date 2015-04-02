@@ -7,6 +7,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
@@ -56,6 +57,7 @@ public final class CatalogAcquisitionFeed implements
 
   private final Activity                                    activity;
   private final ArrayAdapter<OPDSAcquisitionFeedEntry>      adapter;
+  private final BooksType                                   books;
   private final Map<String, Unit>                           entries_received;
   private final CatalogAcquisitionFeedListenerType          listener;
   private final OPDSFeedLoaderType                          loader;
@@ -67,13 +69,15 @@ public final class CatalogAcquisitionFeed implements
     final OPDSAcquisitionFeed in_feed,
     final Activity in_activity,
     final CatalogAcquisitionFeedListenerType in_listener,
-    final OPDSFeedLoaderType in_feed_loader)
+    final OPDSFeedLoaderType in_feed_loader,
+    final BooksType in_books)
   {
     NullCheck.notNull(in_context);
     NullCheck.notNull(in_feed);
 
     this.activity = NullCheck.notNull(in_activity);
     this.listener = NullCheck.notNull(in_listener);
+    this.books = NullCheck.notNull(in_books);
 
     final ArrayAdapter<OPDSAcquisitionFeedEntry> in_adapter =
       new ArrayAdapter<OPDSAcquisitionFeedEntry>(
@@ -140,7 +144,7 @@ public final class CatalogAcquisitionFeed implements
     if (reused != null) {
       cv = (CatalogAcquisitionCellView) reused;
     } else {
-      cv = new CatalogAcquisitionCellView(this.activity);
+      cv = new CatalogAcquisitionCellView(this.activity, this.books);
     }
 
     final Simplified app = Simplified.get();

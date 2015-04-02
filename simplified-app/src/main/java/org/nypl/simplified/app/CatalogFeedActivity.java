@@ -297,7 +297,8 @@ import com.io7m.junreachable.UnreachableCodeException;
         af,
         this,
         listener,
-        app.getFeedLoader());
+        app.getFeedLoader(),
+        app.getBooks());
 
     grid_view.setAdapter(f);
     grid_view.setOnScrollListener(f);

@@ -44,38 +44,6 @@ public final class DownloadTool
     cb.setBufferSize(2 << 4);
 
     final DownloadListenerType listener = new DownloadListenerType() {
-      @Override public void downloadStarted(
-        final DownloadSnapshot snap)
-      {
-        System.out.println(snap);
-      }
-
-      @Override public void downloadResumed(
-        final DownloadSnapshot snap)
-      {
-        System.out.println(snap);
-      }
-
-      @Override public void downloadPaused(
-        final DownloadSnapshot snap)
-      {
-        System.out.println(snap);
-      }
-
-      @Override public void downloadFailed(
-        final DownloadSnapshot snap,
-        final Throwable e)
-      {
-        System.out.println(snap);
-        e.printStackTrace();
-      }
-
-      @Override public void downloadCompleted(
-        final DownloadSnapshot snap)
-      {
-        System.out.println(snap);
-      }
-
       @Override public void downloadCancelled(
         final DownloadSnapshot snap)
       {
@@ -88,10 +56,10 @@ public final class DownloadTool
         System.out.println(snap);
       }
 
-      @Override public void downloadStartedReceivingData(
+      @Override public void downloadCompleted(
         final DownloadSnapshot snap)
       {
-
+        System.out.println(snap);
       }
 
       @Override public void downloadCompletedTake(
@@ -121,6 +89,44 @@ public final class DownloadTool
         final Throwable x)
       {
         x.printStackTrace();
+      }
+
+      @Override public void downloadFailed(
+        final DownloadSnapshot snap,
+        final Throwable e)
+      {
+        System.out.println(snap);
+        e.printStackTrace();
+      }
+
+      @Override public void downloadPaused(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadReceivedData(
+        final DownloadSnapshot snap)
+      {
+
+      }
+
+      @Override public void downloadResumed(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadStarted(
+        final DownloadSnapshot snap)
+      {
+        System.out.println(snap);
+      }
+
+      @Override public void downloadStartedReceivingData(
+        final DownloadSnapshot snap)
+      {
+
       }
     };
 

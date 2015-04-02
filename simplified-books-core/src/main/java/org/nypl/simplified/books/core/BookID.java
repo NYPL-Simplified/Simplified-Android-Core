@@ -13,19 +13,18 @@ public final class BookID implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
-  public static BookID fromString(
+  public static BookID exactString(
     final String id)
   {
     return new BookID(id);
   }
 
-  public static BookID newIDFromEntry(
-    final OPDSAcquisitionFeedEntry e)
+  public static BookID newFromText(
+    final String text)
   {
     try {
-      NullCheck.notNull(e);
       final MessageDigest md = MessageDigest.getInstance("SHA-256");
-      md.update(e.getID().getBytes());
+      md.update(text.getBytes());
       final byte[] dg = md.digest();
 
       final StringBuilder b = new StringBuilder();
@@ -35,9 +34,16 @@ public final class BookID implements Serializable
       }
 
       return new BookID(NullCheck.notNull(b.toString()));
-    } catch (final NoSuchAlgorithmException x) {
-      throw new IllegalStateException(x);
+    } catch (final NoSuchAlgorithmException e) {
+      throw new IllegalStateException(e);
     }
+  }
+
+  public static BookID newIDFromEntry(
+    final OPDSAcquisitionFeedEntry e)
+  {
+    NullCheck.notNull(e);
+    return BookID.newFromText(e.getID());
   }
 
   private final String id;

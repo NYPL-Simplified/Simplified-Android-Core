@@ -12,8 +12,8 @@ import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AccountsType;
-import org.nypl.simplified.books.core.Book;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.Books;
 import org.nypl.simplified.books.core.BooksConfiguration;
 import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
@@ -61,11 +61,6 @@ public final class BookTool
 
     System.err.println("info: loading books, if any");
     books.accountLoadBooks(new AccountDataLoadListenerType() {
-      @Override public void onAccountDataBookLoadSucceeded(
-        final Book book)
-      {
-        System.err.println("info: account-load: loaded book: " + book.getID());
-      }
 
       @Override public void onAccountDataBookLoadFailed(
         final BookID id,
@@ -86,6 +81,18 @@ public final class BookTool
       {
         System.err.println("info: account-load: not logged in");
 
+      }
+
+      @Override public void onAccountDataBookLoadFinished()
+      {
+
+      }
+
+      @Override public void onAccountDataBookLoadSucceeded(
+        final BookID book,
+        final BookSnapshot snap)
+      {
+        System.err.println("info: account-load: loaded book: " + book);
       }
     });
 
@@ -114,6 +121,7 @@ public final class BookTool
 
     final AccountSyncListenerType sync_listener =
       new AccountSyncListenerType() {
+
         @Override public void onAccountSyncSuccess()
         {
           System.err.println("info: account-sync: synced books");
@@ -133,18 +141,17 @@ public final class BookTool
           }
         }
 
-        @Override public void onAccountSyncBook(
-          final Book book)
-        {
-          System.err.println("info: account-sync: synced book "
-            + book.getID());
-        }
-
         @Override public void onAccountSyncAuthenticationFailure(
           final String message)
         {
           System.err.println("error: account-sync: could not sync books: "
             + message);
+        }
+
+        @Override public void onAccountSyncBook(
+          final BookID book)
+        {
+          System.err.println("info: account-sync: synced book " + book);
         }
       };
 

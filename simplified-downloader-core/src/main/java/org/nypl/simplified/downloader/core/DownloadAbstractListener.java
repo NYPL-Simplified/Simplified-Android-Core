@@ -55,6 +55,12 @@ public abstract class DownloadAbstractListener implements
     // Nothing
   }
 
+  @Override public void downloadReceivedData(
+    final DownloadSnapshot snap)
+  {
+    // Nothing
+  }
+
   @Override public void downloadResumed(
     final DownloadSnapshot snap)
   {

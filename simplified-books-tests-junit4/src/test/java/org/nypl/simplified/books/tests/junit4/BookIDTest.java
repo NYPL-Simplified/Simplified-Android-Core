@@ -17,4 +17,9 @@ public final class BookIDTest implements BookIDContractType
   {
     this.contract.testBookIDNew();
   }
+
+  @Override @Test public void testBookID_0()
+  {
+    this.contract.testBookID_0();
+  }
 }

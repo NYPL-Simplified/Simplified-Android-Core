@@ -30,4 +30,12 @@ public final class BookIDContract implements BookIDContractType
       "7a99601f479c30f66f0949c51bbed2adac0e12eb79ad1319db638e16604400bf",
       b.toString());
   }
+
+  @Override public void testBookID_0()
+  {
+    final BookID b =
+      BookID
+        .newFromText("http://circulation.alpha.librarysimplified.org/loans/Gutenberg/18405");
+    System.out.println(b);
+  }
 }

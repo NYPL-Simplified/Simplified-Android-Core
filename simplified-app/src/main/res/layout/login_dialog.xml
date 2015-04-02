@@ -5,7 +5,7 @@
   android:layout_height="match_parent"
   android:gravity="center"
   android:orientation="vertical"
-  android:padding="8dp">
+  android:padding="16dp">
 
   <TextView
     android:id="@+id/login_dialog_text"
@@ -16,7 +16,8 @@
     android:id="@+id/login_dialog_table"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    android:layout_marginBottom="16dp">
 
     <TableRow
       android:layout_width="wrap_content"
@@ -26,13 +27,13 @@
         android:id="@+id/login_dialog_barcode_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="right"
         android:text="@string/settings_barcode"/>
 
       <EditText
         android:id="@+id/login_dialog_barcode_text_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
         android:maxLength="14"
         android:maxLines="1">
@@ -47,13 +48,13 @@
         android:id="@+id/login_dialog_pin_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="right"
         android:text="@string/settings_pin"/>
 
       <EditText
         android:id="@+id/login_dialog_pin_text_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
         android:maxLength="4"
         android:maxLines="1">
@@ -70,8 +71,8 @@
       android:id="@+id/login_dialog_ok"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="@string/settings_log_in"/>
+      android:text="@string/settings_log_in"
+      android:textAppearance="?android:attr/textAppearanceSmall"/>
 
     <ProgressBar
       android:id="@+id/login_progress"

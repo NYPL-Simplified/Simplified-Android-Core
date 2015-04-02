@@ -8,7 +8,7 @@ public interface AccountSyncListenerType
     String message);
 
   void onAccountSyncBook(
-    Book book);
+    BookID book);
 
   void onAccountSyncFailure(
     OptionType<Throwable> error,

@@ -3,6 +3,8 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
+  <!-- The cell contents shown when a book is not downloading -->
+
   <LinearLayout
     android:id="@+id/cell_book"
     android:layout_width="match_parent"
@@ -33,8 +35,8 @@
       android:layout_width="wrap_content"
       android:layout_height="match_parent"
       android:layout_weight="1"
-      android:paddingTop="8dp"
-      android:paddingLeft="8dp">
+      android:paddingLeft="8dp"
+      android:paddingTop="8dp">
 
       <TextView
         android:id="@+id/cell_title"
@@ -58,6 +60,71 @@
         android:layout_alignParentRight="true"
         android:orientation="horizontal"/>
     </RelativeLayout>
+  </LinearLayout>
+
+  <!-- The cell contents shown when a book is downloading -->
+
+  <LinearLayout
+    android:id="@+id/cell_downloading"
+    android:layout_width="match_parent"
+    android:layout_height="110dp"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+      android:id="@+id/cell_downloading_title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Title"
+      android:textStyle="bold"/>
+
+    <TextView
+      android:id="@+id/cell_downloading_authors"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:paddingBottom="16dp"
+      android:text="Authors"
+      android:textSize="10sp"/>
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal">
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/catalog_downloading"
+        android:textSize="10sp"/>
+
+      <ProgressBar
+        android:id="@+id/cell_downloading_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="10"/>
+
+      <TextView
+        android:id="@+id/cell_downloading_percent_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="right"
+        android:paddingLeft="16dp"
+        android:text="0%"
+        android:textAlignment="gravity"
+        android:textSize="10sp"/>
+    </LinearLayout>
+
+    <Button
+      android:id="@+id/cell_downloading_cancel"
+      style="?android:attr/buttonStyleSmall"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:text="@string/catalog_cancel_downloading"
+      android:textSize="10sp"/>
   </LinearLayout>
 
 </merge>

@@ -254,6 +254,20 @@ import com.io7m.jnull.Nullable;
                 }
                 this.bytes_cur += r;
                 out.write(this.buffer, 0, r);
+
+                if (this.config.getSleepTime() > 0) {
+                  try {
+                    Thread.sleep(this.config.getSleepTime());
+                  } catch (final Throwable x) {
+                    // Ignore, don't care
+                  }
+                }
+
+                try {
+                  this.listener.downloadResumed(this.getStatus());
+                } catch (final Throwable e) {
+                  // Ignored
+                }
               }
             } finally {
               out.flush();
@@ -744,7 +758,7 @@ import com.io7m.jnull.Nullable;
         if (iopt.isSome()) {
           final Some<DownloadInfo> some = (Some<DownloadInfo>) iopt;
           final DownloadInfo i = some.get();
-          this.id_pool.set(Long.max(this.id_pool.get(), i.id));
+          this.id_pool.set(Math.max(this.id_pool.get(), i.id));
 
           DownloadStatus s = null;
           switch (i.status) {

@@ -20,8 +20,10 @@ import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
-import org.nypl.simplified.books.core.Book;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BookSnapshot;
+import org.nypl.simplified.books.core.BookStatusOwned;
+import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.Books;
 import org.nypl.simplified.books.core.BooksConfiguration;
 import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
@@ -252,8 +254,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           ok.set(false);
         }
 
+        @Override public void onAccountDataBookLoadFinished()
+        {
+          System.out.println("testBooksLoadFileNotDirectory: load finished");
+        }
+
         @Override public void onAccountDataBookLoadSucceeded(
-          final Book book)
+          final BookID book,
+          final BookSnapshot snap)
         {
           System.out.println("testBooksLoadFileNotDirectory: load succeeded");
           ok.set(false);
@@ -312,8 +320,15 @@ import com.io7m.junreachable.UnreachableCodeException;
           ok.set(false);
         }
 
+        @Override public void onAccountDataBookLoadFinished()
+        {
+          System.out.println("testBooksLoadNotLoggedIn: load succeeded");
+          ok.set(false);
+        }
+
         @Override public void onAccountDataBookLoadSucceeded(
-          final Book book)
+          final BookID book,
+          final BookSnapshot snap)
         {
           System.out.println("testBooksLoadNotLoggedIn: load succeeded");
           ok.set(false);
@@ -534,8 +549,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       latch0.await();
 
       final File data = new File(tmp, "data");
-      new File(data, "barcode.txt").delete();
-      new File(data, "pin.txt").delete();
+      new File(data, "credentials.txt").delete();
       data.delete();
       tmp.delete();
       tmp.createNewFile();
@@ -547,8 +561,21 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final AccountSyncListenerType sync_listener =
         new AccountSyncListenerType() {
+          @Override public void onAccountSyncAuthenticationFailure(
+            final String message)
+          {
+            try {
+              failed.set(true);
+              System.err
+                .println("testBooksSyncFileNotDirectory: login failed: "
+                  + message);
+            } finally {
+              latch1.countDown();
+            }
+          }
+
           @Override public void onAccountSyncBook(
-            final Book book)
+            final BookID book)
           {
             System.err.println("testBooksSyncFileNotDirectory: synced book: "
               + book);
@@ -573,139 +600,11 @@ import com.io7m.junreachable.UnreachableCodeException;
           {
             System.err.println("testBooksSyncFileNotDirectory: synced");
           }
-
-          @Override public void onAccountSyncAuthenticationFailure(
-            final String message)
-          {
-            try {
-              failed.set(true);
-              System.err
-                .println("testBooksSyncFileNotDirectory: login failed: "
-                  + message);
-            } finally {
-              latch1.countDown();
-            }
-          }
         };
 
       b.accountSync(sync_listener);
       latch1.await();
       TestUtilities.assertEquals(failed.get(), true);
-
-    } finally {
-      exec.shutdown();
-    }
-  }
-
-  @Override public void testBooksSyncOK()
-    throws Exception
-  {
-    final ExecutorService exec = Executors.newFixedThreadPool(4);
-    try {
-      final File tmp = Files.createTempDir();
-
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksConfiguration in_config = bcb.build();
-      final AccountBarcode barcode = new AccountBarcode("barcode");
-      final AccountPIN pin = new AccountPIN("pin");
-      final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
-
-      final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
-          .build());
-
-      final BooksType b =
-        Books.newBooks(
-          exec,
-          OPDSFeedParser.newParser(),
-          in_http,
-          d,
-          in_config);
-
-      final CountDownLatch latch0 = new CountDownLatch(1);
-
-      final AccountLoginListenerType login_listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-            try {
-              System.err.println("testBooksSyncOK: login failed: " + message);
-              ((Some<Throwable>) error).get().printStackTrace();
-            } finally {
-              latch0.countDown();
-            }
-          }
-
-          @Override public void onAccountLoginSuccess(
-            final AccountBarcode used_barcode,
-            final AccountPIN used_pin)
-          {
-            try {
-              System.err.println("testBooksSyncOK: login succeeded");
-            } finally {
-              latch0.countDown();
-            }
-          }
-        };
-
-      b.accountLogin(barcode, pin, login_listener);
-
-      latch0.await();
-
-      final CountDownLatch latch1 = new CountDownLatch(1);
-      final AtomicBoolean ok = new AtomicBoolean(false);
-      final AtomicInteger count = new AtomicInteger(0);
-
-      final AccountSyncListenerType sync_listener =
-        new AccountSyncListenerType() {
-          @Override public void onAccountSyncBook(
-            final Book book)
-          {
-            count.incrementAndGet();
-          }
-
-          @Override public void onAccountSyncFailure(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-            try {
-              ok.set(false);
-              System.err.println("testBooksSyncOK: login failed: " + message);
-              ((Some<Throwable>) error).get().printStackTrace();
-            } finally {
-              latch1.countDown();
-            }
-          }
-
-          @Override public void onAccountSyncSuccess()
-          {
-            ok.set(true);
-            latch1.countDown();
-          }
-
-          @Override public void onAccountSyncAuthenticationFailure(
-            final String message)
-          {
-            try {
-              ok.set(false);
-              System.err.println("testBooksSyncOK: login failed: " + message);
-            } finally {
-              latch1.countDown();
-            }
-          }
-        };
-
-      b.accountSync(sync_listener);
-      latch1.await();
-
-      TestUtilities.assertEquals(ok.get(), true);
-      TestUtilities.assertEquals(count.get(), 4);
 
     } finally {
       exec.shutdown();
@@ -780,8 +679,21 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final AccountSyncListenerType sync_listener =
         new AccountSyncListenerType() {
+
+          @Override public void onAccountSyncAuthenticationFailure(
+            final String message)
+          {
+            try {
+              ok.set(false);
+              System.err.println("testBooksSyncLoadOK: login failed: "
+                + message);
+            } finally {
+              latch1.countDown();
+            }
+          }
+
           @Override public void onAccountSyncBook(
-            final Book book)
+            final BookID book)
           {
             count.incrementAndGet();
           }
@@ -805,18 +717,6 @@ import com.io7m.junreachable.UnreachableCodeException;
             ok.set(true);
             latch1.countDown();
           }
-
-          @Override public void onAccountSyncAuthenticationFailure(
-            final String message)
-          {
-            try {
-              ok.set(false);
-              System.err.println("testBooksSyncLoadOK: login failed: "
-                + message);
-            } finally {
-              latch1.countDown();
-            }
-          }
         };
 
       b.accountSync(sync_listener);
@@ -831,13 +731,23 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final AccountDataLoadListenerType load_listener =
         new AccountDataLoadListenerType() {
-          @Override public void onAccountUnavailable()
+
+          @Override public void onAccountDataBookLoadFailed(
+            final BookID id,
+            final OptionType<Throwable> error,
+            final String message)
           {
             ok.set(false);
           }
 
+          @Override public void onAccountDataBookLoadFinished()
+          {
+
+          }
+
           @Override public void onAccountDataBookLoadSucceeded(
-            final Book book)
+            final BookID book,
+            final BookSnapshot snap)
           {
             try {
               count.incrementAndGet();
@@ -847,10 +757,7 @@ import com.io7m.junreachable.UnreachableCodeException;
             }
           }
 
-          @Override public void onAccountDataBookLoadFailed(
-            final BookID id,
-            final OptionType<Throwable> error,
-            final String message)
+          @Override public void onAccountUnavailable()
           {
             ok.set(false);
           }
@@ -866,14 +773,14 @@ import com.io7m.junreachable.UnreachableCodeException;
       final CountDownLatch latch3 = new CountDownLatch(1);
       final AccountLogoutListenerType logout_listener =
         new AccountLogoutListenerType() {
-          @Override public void onAccountLogoutSuccess()
+          @Override public void onAccountLogoutFailure(
+            final OptionType<Throwable> error,
+            final String message)
           {
             latch3.countDown();
           }
 
-          @Override public void onAccountLogoutFailure(
-            final OptionType<Throwable> error,
-            final String message)
+          @Override public void onAccountLogoutSuccess()
           {
             latch3.countDown();
           }
@@ -885,6 +792,163 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final File data = new File(tmp, "data");
       TestUtilities.assertTrue(data.exists() == false);
+
+    } finally {
+      exec.shutdown();
+    }
+  }
+
+  @Override public void testBooksSyncOK()
+    throws Exception
+  {
+    final ExecutorService exec = Executors.newFixedThreadPool(4);
+    try {
+      final File tmp = Files.createTempDir();
+
+      final BooksConfigurationBuilderType bcb =
+        BooksConfiguration.newBuilder(tmp);
+      bcb.setLoansURI(BooksContract.LOANS_URI);
+
+      final BooksConfiguration in_config = bcb.build();
+      final AccountBarcode barcode = new AccountBarcode("barcode");
+      final AccountPIN pin = new AccountPIN("pin");
+      final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
+
+      final DownloaderType d =
+        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
+          .newBuilder(Files.createTempDir())
+          .build());
+
+      final BooksType b =
+        Books.newBooks(
+          exec,
+          OPDSFeedParser.newParser(),
+          in_http,
+          d,
+          in_config);
+
+      final CountDownLatch latch0 = new CountDownLatch(1);
+
+      final AccountLoginListenerType login_listener =
+        new AccountLoginListenerType() {
+          @Override public void onAccountLoginFailure(
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            try {
+              System.err.println("testBooksSyncOK: login failed: " + message);
+              ((Some<Throwable>) error).get().printStackTrace();
+            } finally {
+              latch0.countDown();
+            }
+          }
+
+          @Override public void onAccountLoginSuccess(
+            final AccountBarcode used_barcode,
+            final AccountPIN used_pin)
+          {
+            try {
+              System.err.println("testBooksSyncOK: login succeeded");
+            } finally {
+              latch0.countDown();
+            }
+          }
+        };
+
+      b.accountLogin(barcode, pin, login_listener);
+
+      latch0.await();
+
+      final CountDownLatch latch1 = new CountDownLatch(1);
+      final AtomicBoolean ok = new AtomicBoolean(false);
+      final AtomicInteger count = new AtomicInteger(0);
+
+      final AccountSyncListenerType sync_listener =
+        new AccountSyncListenerType() {
+
+          @Override public void onAccountSyncAuthenticationFailure(
+            final String message)
+          {
+            try {
+              ok.set(false);
+              System.err.println("testBooksSyncOK: sync failed: " + message);
+            } finally {
+              latch1.countDown();
+            }
+          }
+
+          @Override public void onAccountSyncBook(
+            final BookID book)
+          {
+            System.err.println("testBooksSyncOK: sync: " + book);
+            count.incrementAndGet();
+          }
+
+          @Override public void onAccountSyncFailure(
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            try {
+              ok.set(false);
+              System.err.println("testBooksSyncOK: sync failed: " + message);
+              ((Some<Throwable>) error).get().printStackTrace();
+            } finally {
+              latch1.countDown();
+            }
+          }
+
+          @Override public void onAccountSyncSuccess()
+          {
+            ok.set(true);
+            latch1.countDown();
+          }
+        };
+
+      b.accountSync(sync_listener);
+      latch1.await();
+
+      TestUtilities.assertEquals(ok.get(), true);
+      TestUtilities.assertEquals(count.get(), 4);
+
+      /**
+       * Assert status of each book.
+       */
+
+      {
+        final OptionType<BookStatusType> opt =
+          b
+            .booksStatusGet(BookID
+              .exactString("561c5ecf0d3020e18ff66e17db27ca232898d409e1d7b0a0432dbea848a1abfe"));
+        final Some<BookStatusType> some = (Some<BookStatusType>) opt;
+        final BookStatusOwned o = (BookStatusOwned) some.get();
+      }
+
+      {
+        final OptionType<BookStatusType> opt =
+          b
+            .booksStatusGet(BookID
+              .exactString("28a0d7122f93e0e052e9e50b35531d01d55056d8fbd3c853e307a0455888150e"));
+        final Some<BookStatusType> some = (Some<BookStatusType>) opt;
+        final BookStatusOwned o = (BookStatusOwned) some.get();
+      }
+
+      {
+        final OptionType<BookStatusType> opt =
+          b
+            .booksStatusGet(BookID
+              .exactString("8e697815fb146a0ffd0bb3776b8197cea1bd6cb75a95a34053bf2b65e0b7e7e7"));
+        final Some<BookStatusType> some = (Some<BookStatusType>) opt;
+        final BookStatusOwned o = (BookStatusOwned) some.get();
+      }
+
+      {
+        final OptionType<BookStatusType> opt =
+          b
+            .booksStatusGet(BookID
+              .exactString("284a2dc4e2852f1a69665aa28949e8659cf9d7d53ca11c7bf096403261368ade"));
+        final Some<BookStatusType> some = (Some<BookStatusType>) opt;
+        final BookStatusOwned o = (BookStatusOwned) some.get();
+      }
 
     } finally {
       exec.shutdown();

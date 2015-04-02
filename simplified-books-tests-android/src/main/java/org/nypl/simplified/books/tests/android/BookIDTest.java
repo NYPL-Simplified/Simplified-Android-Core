@@ -19,4 +19,9 @@ public final class BookIDTest extends InstrumentationTestCase implements
   {
     this.contract.testBookIDNew();
   }
+
+  @Override public void testBookID_0()
+  {
+    this.contract.testBookID_0();
+  }
 }

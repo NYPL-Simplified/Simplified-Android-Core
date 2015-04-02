@@ -6,4 +6,7 @@ public interface DownloaderConfigurationBuilderType
 
   void setBufferSize(
     int s);
+
+  void setReadSleepTime(
+    long ms);
 }

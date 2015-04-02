@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -33,10 +34,10 @@ import com.io7m.jnull.Nullable;
 public final class LoginDialog extends DialogFragment implements
   AccountLoginListenerType
 {
-  private static final String                TAG;
-  private static final String                BARCODE_ID;
-  private static final String                PIN_ID;
-  private static final String                TEXT_ID;
+  private static final String                   TAG;
+  private static final String                   BARCODE_ID;
+  private static final String                   PIN_ID;
+  private static final String                   TEXT_ID;
 
   static {
     TAG = "LD";
@@ -45,12 +46,12 @@ public final class LoginDialog extends DialogFragment implements
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
   }
 
-  private @Nullable EditText                 barcode_edit;
-  private @Nullable EditText                 pin_edit;
-  private @Nullable Button                   login;
-  private @Nullable ProgressBar              login_progress;
-  private @Nullable TextView                 text;
-  private @Nullable AccountLoginListenerType listener;
+  private @Nullable EditText                    barcode_edit;
+  private @Nullable EditText                    pin_edit;
+  private @Nullable Button                      login;
+  private @Nullable ProgressBar                 login_progress;
+  private @Nullable TextView                    text;
+  private @Nullable LoginControllerListenerType listener;
 
   public LoginDialog()
   {
@@ -216,10 +217,10 @@ public final class LoginDialog extends DialogFragment implements
       }
     });
 
-    final AccountLoginListenerType ls = this.listener;
+    final LoginControllerListenerType ls = this.listener;
     if (ls != null) {
       try {
-        ls.onAccountLoginFailure(error, message);
+        ls.onLoginFailure(error, message);
       } catch (final Throwable e) {
         Log.d(LoginDialog.TAG, e.getMessage(), e);
       }
@@ -230,7 +231,7 @@ public final class LoginDialog extends DialogFragment implements
     final AccountBarcode barcode,
     final AccountPIN pin)
   {
-    Log.d(LoginDialog.TAG, "logged in");
+    Log.d(LoginDialog.TAG, "login succeeded");
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
@@ -239,10 +240,25 @@ public final class LoginDialog extends DialogFragment implements
       }
     });
 
-    final AccountLoginListenerType ls = this.listener;
+    final LoginControllerListenerType ls = this.listener;
     if (ls != null) {
       try {
-        ls.onAccountLoginSuccess(barcode, pin);
+        ls.onLoginSuccess();
+      } catch (final Throwable e) {
+        Log.d(LoginDialog.TAG, e.getMessage(), e);
+      }
+    }
+  }
+
+  @Override public void onCancel(
+    final @Nullable DialogInterface dialog)
+  {
+    Log.d(LoginDialog.TAG, "login aborted");
+
+    final LoginControllerListenerType ls = this.listener;
+    if (ls != null) {
+      try {
+        ls.onLoginAborted();
       } catch (final Throwable e) {
         Log.d(LoginDialog.TAG, e.getMessage(), e);
       }
@@ -250,7 +266,7 @@ public final class LoginDialog extends DialogFragment implements
   }
 
   public void setLoginListener(
-    final AccountLoginListenerType in_listener)
+    final LoginControllerListenerType in_listener)
   {
     this.listener = NullCheck.notNull(in_listener);
   }
