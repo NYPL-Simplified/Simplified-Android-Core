@@ -110,8 +110,8 @@ import com.jakewharton.disklrucache.DiskLruCache.Snapshot;
       BitmapCacheScalingDisk.TAG,
       String.format("fetch %s (%s)", uri, hash));
 
-    final Editor e = c.edit(hash);
-    final OutputStream os = e.newOutputStream(0);
+    final Editor e = NullCheck.notNull(c.edit(hash));
+    final OutputStream os = NullCheck.notNull(e.newOutputStream(0));
     try {
       final InputStream is = transport.call(uri);
       try {
