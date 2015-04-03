@@ -27,7 +27,6 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -52,7 +51,6 @@ import com.squareup.picasso.Picasso;
 
 @SuppressWarnings("boxing") public final class Simplified extends Application implements
   ScreenSizeControllerType,
-  MemoryControllerType,
   AccountDataLoadListenerType,
   AccountSyncListenerType
 {
@@ -151,8 +149,6 @@ import com.squareup.picasso.Picasso;
   private @Nullable URI                      feed_initial_uri;
   private @Nullable OPDSFeedLoaderType       feed_loader;
   private @Nullable HTTPType                 http;
-  private int                                memory;
-  private boolean                            memory_small;
   private @Nullable Picasso                  picasso;
 
   public BooksType getBooks()
@@ -178,16 +174,6 @@ import com.squareup.picasso.Picasso;
   public Picasso getPicasso()
   {
     return NullCheck.notNull(this.picasso);
-  }
-
-  @Override public int memoryGetSize()
-  {
-    return this.memory;
-  }
-
-  @Override public boolean memoryIsSmall()
-  {
-    return this.memory_small;
   }
 
   @Override public void onAccountDataBookLoadFailed(
@@ -278,21 +264,6 @@ import com.squareup.picasso.Picasso;
         NullCheck.notNull(MoreExecutors
           .listeningDecorator(in_catalog_executor));
       final Resources rr = NullCheck.notNull(this.getResources());
-
-      /**
-       * Determine memory conditions.
-       */
-
-      {
-        final ActivityManager am =
-          (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
-        this.memory = am.getMemoryClass();
-        this.memory_small = this.memory <= 32;
-        Log.d(Simplified.TAG, String.format(
-          "available memory: %dmb (small: %s)",
-          this.memory,
-          this.memory_small));
-      }
 
       /**
        * Configure picasso for image caching.
