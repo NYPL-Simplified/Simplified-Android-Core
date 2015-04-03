@@ -18,6 +18,17 @@ public final class BookStatusDownloading implements
     this.snap = NullCheck.notNull(in_snap);
   }
 
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[BookStatusDownloading ");
+    b.append(this.id);
+    b.append(" [");
+    b.append(this.snap);
+    b.append("]]");
+    return NullCheck.notNull(b.toString());
+  }
+
   @Override public BookID getID()
   {
     return this.id;

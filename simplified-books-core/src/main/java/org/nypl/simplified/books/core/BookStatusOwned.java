@@ -28,4 +28,13 @@ public final class BookStatusOwned implements BookStatusType
   {
     return m.onBookStatusOwned(this);
   }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[BookStatusOwned ");
+    b.append(this.id);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
+  }
 }
