@@ -1,7 +1,5 @@
 package org.nypl.simplified.app;
 
-import java.util.concurrent.CancellationException;
-
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
@@ -9,7 +7,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,9 +22,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.squareup.picasso.Picasso;
 
 /**
  * A book detail dialog fragment used on tablets or devices with large
@@ -58,7 +55,6 @@ import com.io7m.jnull.Nullable;
   }
 
   private @Nullable OPDSAcquisitionFeedEntry entry;
-  private @Nullable ListenableFuture<Bitmap> loading_cover;
 
   public CatalogBookDialog()
   {
@@ -174,62 +170,19 @@ import com.io7m.jnull.Nullable;
     related_layout.setVisibility(View.GONE);
 
     final Simplified app = Simplified.get();
-    final CatalogAcquisitionCoverCacheType cover_loader =
-      app.getCatalogAcquisitionCoverLoader();
-
-    this.loading_cover =
-      cover_loader.getCoverAsynchronous(
-        e,
-        new BitmapDisplayHeightPreserveAspect(cover_height),
-        new BitmapCacheListenerType<OPDSAcquisitionFeedEntry>() {
-          @Override public void onBitmapLoadingFailure(
-            final OPDSAcquisitionFeedEntry key,
-            final Throwable x)
-          {
-            if (x instanceof CancellationException) {
-              return;
-            }
-
-            Log.e(CatalogBookDialog.TAG, x.getMessage(), x);
-          }
-
-          @Override public void onBitmapLoadingSuccess(
-            final OPDSAcquisitionFeedEntry key,
-            final Bitmap b)
-          {
-            Log.d(
-              CatalogBookDialog.TAG,
-              String.format(
-                "returned image is (%d x %d)",
-                b.getWidth(),
-                b.getHeight()));
-
-            UIThread.runOnUIThread(new Runnable() {
-              @Override public void run()
-              {
-                header_cover.setImageBitmap(b);
-                Fade.fadeIn(header_cover, Fade.DEFAULT_FADE_DURATION);
-              }
-            });
-          }
-        });
+    final Picasso picasso = app.getPicasso();
+    PicassoUtilities.loadCoverInto(
+      picasso,
+      e,
+      header_cover,
+      cover_width,
+      cover_height);
 
     final Dialog d = this.getDialog();
     if (d != null) {
       d.setCanceledOnTouchOutside(true);
     }
     return layout;
-  }
-
-  @Override public void onDestroyView()
-  {
-    super.onDestroyView();
-
-    final ListenableFuture<Bitmap> f = this.loading_cover;
-    if (f != null) {
-      f.cancel(true);
-      this.loading_cover = null;
-    }
   }
 
   @Override public void onResume()
