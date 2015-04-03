@@ -1,6 +1,7 @@
 package org.nypl.simplified.app;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.CancellationException;
@@ -102,14 +103,19 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
   private @Nullable ListenableFuture<Bitmap>              loading;
   private final TextView                                  cell_downloading_failed_title;
+  private final Map<BookID, Unit>                         requesting;
 
   public CatalogAcquisitionCellView(
     final Activity in_activity,
-    final BooksType in_books)
+    final BooksType in_books,
+    final Map<BookID, Unit> in_requesting)
   {
     super(in_activity.getApplicationContext(), null);
 
     this.activity = NullCheck.notNull(in_activity);
+    this.requesting = NullCheck.notNull(in_requesting);
+    this.books = NullCheck.notNull(in_books);
+
     final Context context =
       NullCheck.notNull(in_activity.getApplicationContext());
     final LayoutInflater inflater =
@@ -121,7 +127,6 @@ import com.io7m.junreachable.UnreachableCodeException;
      * Receive book status updates.
      */
 
-    this.books = NullCheck.notNull(in_books);
     this.books.addObserver(this);
 
     this.cell_downloading =
@@ -378,7 +383,17 @@ import com.io7m.junreachable.UnreachableCodeException;
             a,
             e.getTitle());
 
-        b.setOnClickListener(b_controller);
+        b.setOnClickListener(new OnClickListener() {
+          @Override public void onClick(
+            final @Nullable View v)
+          {
+            CatalogAcquisitionCellView.this.requestingAdd(id);
+            b.setEnabled(false);
+            b_controller.onClick(v);
+          }
+        });
+
+        b.setEnabled(this.requestingGet(id) == false);
         this.cell_buttons.addView(b);
         break;
       }
@@ -487,6 +502,32 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
+  private boolean requestingGet(
+    final BookID id)
+  {
+    final boolean r = this.requesting.containsKey(id);
+    Log.d(CatalogAcquisitionCellView.TAG, String.format("requesting: %s", r));
+    return r;
+  }
+
+  private void requestingAdd(
+    final BookID id)
+  {
+    Log.d(
+      CatalogAcquisitionCellView.TAG,
+      String.format("request added %s", id));
+    this.requesting.put(id, Unit.unit());
+  }
+
+  private void requestingRemove(
+    final BookID id)
+  {
+    Log.d(
+      CatalogAcquisitionCellView.TAG,
+      String.format("request removed %s", id));
+    this.requesting.remove(id);
+  }
+
   private void viewConfigureCellViewForStatusCancelled(
     final Context ctx,
     final OPDSAcquisitionFeedEntry in_e,
@@ -494,6 +535,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final BookStatusCancelled c)
   {
     this.books.bookDownloadAcknowledge(book_id);
+    this.requestingRemove(book_id);
     this.viewConfigureCellViewForStatusNone(ctx, in_e, book_id);
   }
 
@@ -507,6 +549,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
+
+    this.requestingRemove(book_id);
 
     this.cell_buttons.removeAllViews();
     final Button b = new Button(ctx);

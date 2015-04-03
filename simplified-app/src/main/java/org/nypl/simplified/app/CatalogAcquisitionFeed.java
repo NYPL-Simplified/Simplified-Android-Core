@@ -7,6 +7,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -63,6 +64,7 @@ public final class CatalogAcquisitionFeed implements
   private final OPDSFeedLoaderType                          loader;
   private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
   private final AtomicReference<OptionType<URI>>            uri_next;
+  private final Map<BookID, Unit>                           requesting;
 
   public CatalogAcquisitionFeed(
     final Context in_context,
@@ -86,6 +88,7 @@ public final class CatalogAcquisitionFeed implements
         new ArrayList<OPDSAcquisitionFeedEntry>());
     in_adapter.addAll(in_feed.getFeedEntries());
 
+    this.requesting = new ConcurrentHashMap<BookID, Unit>();
     this.entries_received = new ConcurrentHashMap<String, Unit>();
     this.adapter = in_adapter;
     this.loader = NullCheck.notNull(in_feed_loader);
@@ -144,7 +147,11 @@ public final class CatalogAcquisitionFeed implements
     if (reused != null) {
       cv = (CatalogAcquisitionCellView) reused;
     } else {
-      cv = new CatalogAcquisitionCellView(this.activity, this.books);
+      cv =
+        new CatalogAcquisitionCellView(
+          this.activity,
+          this.books,
+          this.requesting);
     }
 
     final Simplified app = Simplified.get();
