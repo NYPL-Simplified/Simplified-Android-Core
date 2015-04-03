@@ -1,6 +1,7 @@
 package org.nypl.simplified.app;
 
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.BookBorrowListenerType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusFailed;
 import org.nypl.simplified.books.core.BooksType;
@@ -17,11 +18,13 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 
 public final class CatalogAcquisitionController implements
   OnClickListener,
   LoginControllerListenerType,
-  AccountSyncListenerType
+  AccountSyncListenerType,
+  BookBorrowListenerType
 {
   private static final String   TAG;
 
@@ -52,6 +55,38 @@ public final class CatalogAcquisitionController implements
       new LoginController(this.activity, this.books, this);
   }
 
+  private void failure(
+    final String where,
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    final String m =
+      NullCheck.notNull(String.format("%s failed: %s", where, message));
+
+    if (error.isSome()) {
+      final Some<Throwable> some = (Some<Throwable>) error;
+      Log.e(CatalogAcquisitionController.TAG, m, some.get());
+    } else {
+      Log.e(CatalogAcquisitionController.TAG, m);
+    }
+
+    final DownloadStatus status = DownloadStatus.STATUS_FAILED;
+    final DownloadSnapshot snap =
+      new DownloadSnapshot(
+        0,
+        0,
+        -1,
+        this.title,
+        this.acq.getURI(),
+        status,
+        error);
+
+    this.books.booksStatusUpdate(this.id, new BookStatusFailed(
+      this.id,
+      snap,
+      error));
+  }
+
   @Override public void onAccountSyncAuthenticationFailure(
     final String message)
   {
@@ -79,30 +114,7 @@ public final class CatalogAcquisitionController implements
     final OptionType<Throwable> error,
     final String message)
   {
-    final String m =
-      NullCheck.notNull(String.format("account sync failed: %s", message));
-    if (error.isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) error;
-      Log.e(CatalogAcquisitionController.TAG, m, some.get());
-    } else {
-      Log.e(CatalogAcquisitionController.TAG, m);
-    }
-
-    final DownloadStatus status = DownloadStatus.STATUS_FAILED;
-    final DownloadSnapshot snap =
-      new DownloadSnapshot(
-        0,
-        0,
-        -1,
-        this.title,
-        this.acq.getURI(),
-        status,
-        error);
-
-    this.books.booksStatusUpdate(this.id, new BookStatusFailed(
-      this.id,
-      snap,
-      error));
+    this.failure("account sync", error, message);
   }
 
   @Override public void onAccountSyncSuccess()
@@ -115,6 +127,20 @@ public final class CatalogAcquisitionController implements
         this.books.booksStatusGet(this.id)));
 
     this.runDownload();
+  }
+
+  @Override public void onBookBorrowFailure(
+    final BookID in_id,
+    final OptionType<Throwable> in_e)
+  {
+    this.failure("borrow", in_e, "");
+  }
+
+  @Override public void onBookBorrowSuccess(
+    final BookID in_id)
+  {
+    Log.d(CatalogAcquisitionController.TAG, "borrow succeeded");
+    this.books.accountSync(this);
   }
 
   @Override public void onClick(
@@ -138,7 +164,7 @@ public final class CatalogAcquisitionController implements
   @Override public void onLoginSuccess()
   {
     Log.d(CatalogAcquisitionController.TAG, "login succeeded");
-    this.books.accountSync(this);
+    this.books.bookBorrow(this.id, this.acq, this);
   }
 
   private void runDownload()
@@ -152,7 +178,7 @@ public final class CatalogAcquisitionController implements
     switch (this.acq.getType()) {
       case ACQUISITION_BORROW:
       {
-        break;
+        throw new UnimplementedCodeException();
       }
       case ACQUISITION_OPEN_ACCESS:
       {

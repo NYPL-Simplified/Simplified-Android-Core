@@ -27,6 +27,7 @@ import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultToException;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -43,10 +44,100 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnimplementedCodeException;
 
 @SuppressWarnings("synthetic-access") public final class Books extends
   Observable implements BooksType
 {
+
+  private static final class BorrowTask implements Runnable
+  {
+    private final OPDSAcquisition        acq;
+    private final BooksDirectory         books_directory;
+    private final BooksRegistryType      books_registry;
+    private final BooksConfiguration     config;
+    private final HTTPType               http;
+    private final BookID                 id;
+    private final BookBorrowListenerType listener;
+
+    public BorrowTask(
+      final BooksConfiguration in_config,
+      final BooksDirectory in_books_directory,
+      final BooksRegistryType in_books_registry,
+      final HTTPType in_http,
+      final BookID in_id,
+      final OPDSAcquisition in_acq,
+      final BookBorrowListenerType in_listener)
+    {
+      this.http = NullCheck.notNull(in_http);
+      this.id = NullCheck.notNull(in_id);
+      this.acq = NullCheck.notNull(in_acq);
+      this.listener = NullCheck.notNull(in_listener);
+      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.books_registry = NullCheck.notNull(in_books_registry);
+      this.config = NullCheck.notNull(in_config);
+    }
+
+    @Override public void run()
+    {
+      try {
+        this.runAcquisition();
+        this.listener.onBookBorrowSuccess(this.id);
+      } catch (final Throwable x) {
+        this.listener.onBookBorrowFailure(this.id, Option.some(x));
+      }
+    }
+
+    private void runAcquisition()
+      throws Exception
+    {
+      switch (this.acq.getType()) {
+        case ACQUISITION_BORROW:
+        {
+          throw new UnimplementedCodeException();
+        }
+        case ACQUISITION_OPEN_ACCESS:
+        {
+          this.runAcquisitionOpenAccess();
+          break;
+        }
+        case ACQUISITION_BUY:
+        case ACQUISITION_GENERIC:
+        case ACQUISITION_SAMPLE:
+        case ACQUISITION_SUBSCRIBE:
+        {
+          throw new UnimplementedCodeException();
+        }
+      }
+    }
+
+    private void runAcquisitionOpenAccess()
+      throws Exception
+    {
+      final Pair<AccountBarcode, AccountPIN> p =
+        this.books_directory.credentialsGet();
+      final AccountBarcode barcode = p.getLeft();
+      final AccountPIN pin = p.getRight();
+
+      final HTTPAuthType auth =
+        new HTTPAuthBasic(barcode.toString(), pin.toString());
+
+      final HTTPResultType<Unit> r =
+        this.http.head(Option.some(auth), this.acq.getURI());
+
+      r.matchResult(new ResultAuthExceptional<Unit>() {
+        @Override public HTTPResultOKType<Unit> onHTTPOK(
+          final HTTPResultOKType<Unit> e)
+          throws Exception
+        {
+          return e;
+        }
+      });
+
+      this.books_registry.booksStatusUpdateOwned(this.id);
+    }
+  }
+
   private static final class DataLoadTask implements Runnable
   {
     private final BooksRegistryType           books;
@@ -338,38 +429,8 @@ import com.io7m.jnull.NullCheck;
       final HTTPResultType<Unit> r =
         this.http.head(Option.some(auth), this.config.getLoansURI());
 
-      r.matchResult(new HTTPResultMatcherType<Unit, Unit, Exception>() {
-        @Override public Unit onHTTPError(
-          final HTTPResultError<Unit> e)
-          throws Exception
-        {
-          final String m =
-            NullCheck.notNull(String.format(
-              "%d: %s",
-              e.getStatus(),
-              e.getMessage()));
-
-          switch (e.getStatus()) {
-            case HttpURLConnection.HTTP_UNAUTHORIZED:
-            {
-              throw new AccountAuthenticationPINRejectedError(
-                "Invalid barcode or PIN");
-            }
-            default:
-            {
-              throw new IOException(m);
-            }
-          }
-        }
-
-        @Override public Unit onHTTPException(
-          final HTTPResultException<Unit> e)
-          throws Exception
-        {
-          throw e.getError();
-        }
-
-        @Override public Unit onHTTPOK(
+      r.matchResult(new ResultAuthExceptional<Unit>() {
+        @Override public HTTPResultOKType<Unit> onHTTPOK(
           final HTTPResultOKType<Unit> e)
           throws Exception
         {
@@ -379,7 +440,7 @@ import com.io7m.jnull.NullCheck;
 
           LoginTask.this.saveCredentials(LoginTask.this.pin);
           LoginTask.this.logged_in.set(true);
-          return Unit.unit();
+          return e;
         }
       });
     }
@@ -460,6 +521,45 @@ import com.io7m.jnull.NullCheck;
       } catch (final Throwable e) {
         this.listener.onAccountLogoutFailure(Option.some(e), e.getMessage());
       }
+    }
+  }
+
+  private static abstract class ResultAuthExceptional<A> implements
+    HTTPResultMatcherType<A, HTTPResultOKType<A>, Exception>
+  {
+    public ResultAuthExceptional()
+    {
+
+    }
+
+    @Override public final HTTPResultOKType<A> onHTTPError(
+      final HTTPResultError<A> e)
+      throws Exception
+    {
+      final String m =
+        NullCheck.notNull(String.format(
+          "%d: %s",
+          e.getStatus(),
+          e.getMessage()));
+
+      switch (e.getStatus()) {
+        case HttpURLConnection.HTTP_UNAUTHORIZED:
+        {
+          throw new AccountAuthenticationPINRejectedError(
+            "Invalid barcode or PIN");
+        }
+        default:
+        {
+          throw new IOException(m);
+        }
+      }
+    }
+
+    @Override public final HTTPResultOKType<A> onHTTPException(
+      final HTTPResultException<A> e)
+      throws Exception
+    {
+      throw e.getError();
     }
   }
 
@@ -758,6 +858,25 @@ import com.io7m.jnull.NullCheck;
       this.http,
       this.feed_parser,
       this.downloader,
+      listener));
+  }
+
+  @Override public void bookBorrow(
+    final BookID id,
+    final OPDSAcquisition acq,
+    final BookBorrowListenerType listener)
+  {
+    NullCheck.notNull(id);
+    NullCheck.notNull(acq);
+    NullCheck.notNull(listener);
+
+    this.submitRunnable(new BorrowTask(
+      this.config,
+      this.books_directory,
+      this,
+      this.http,
+      id,
+      acq,
       listener));
   }
 
