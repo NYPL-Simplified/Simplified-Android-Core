@@ -4,6 +4,8 @@ import com.io7m.jfunctional.OptionType;
 
 public interface BooksStatusCacheType
 {
+  void booksStatusClearAll();
+
   OptionType<BookStatusType> booksStatusGet(
     BookID id);
 
@@ -13,6 +15,4 @@ public interface BooksStatusCacheType
 
   void booksStatusUpdateOwned(
     BookID id);
-
-  void booksStatusClearAll();
 }
