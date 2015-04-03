@@ -7,13 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.nypl.simplified.downloader.core.DownloadAbstractListener;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
@@ -771,7 +773,8 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private final OPDSFeedParserType   feed_parser;
   private final HTTPType             http;
   private final AtomicBoolean        logged_in;
-  private final List<Future<?>>      tasks;
+  private Map<Integer, Future<?>>    tasks;
+  private final AtomicInteger        task_id;
 
   private Books(
     final ExecutorService in_exec,
@@ -785,11 +788,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
     this.http = NullCheck.notNull(in_http);
     this.config = NullCheck.notNull(in_config);
     this.downloader = NullCheck.notNull(in_downloader);
-    this.tasks = new ArrayList<Future<?>>();
+    this.tasks = new ConcurrentHashMap<Integer, Future<?>>();
     this.logged_in = new AtomicBoolean(false);
     this.books_status = BooksStatusCache.newStatusCache();
     this.data_directory = new File(this.config.getDirectory(), "data");
     this.books_directory = new BooksDirectory(this.data_directory);
+    this.task_id = new AtomicInteger(0);
   }
 
   @Override public boolean accountIsLoggedIn()
@@ -970,7 +974,10 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private void stopAllTasks()
   {
     synchronized (this) {
-      final Iterator<Future<?>> iter = this.tasks.iterator();
+      final Map<Integer, Future<?>> t_old = this.tasks;
+      this.tasks = new ConcurrentHashMap<Integer, Future<?>>();
+
+      final Iterator<Future<?>> iter = t_old.values().iterator();
       while (iter.hasNext()) {
         try {
           final Future<?> f = iter.next();
@@ -987,7 +994,18 @@ import com.io7m.junreachable.UnimplementedCodeException;
     final Runnable r)
   {
     synchronized (this) {
-      this.tasks.add(this.exec.submit(r));
+      final int id = Integer.valueOf(this.task_id.incrementAndGet());
+      final Runnable rb = new Runnable() {
+        @Override public void run()
+        {
+          try {
+            r.run();
+          } finally {
+            Books.this.tasks.remove(id);
+          }
+        }
+      };
+      this.tasks.put(id, this.exec.submit(rb));
     }
   }
 }
