@@ -73,13 +73,13 @@ import com.io7m.junreachable.UnreachableCodeException;
         sb.append(", ");
       }
     }
-    return TextUtilities.ellipsize(NullCheck.notNull(sb.toString()), 48);
+    return TextUtilities.ellipsize(NullCheck.notNull(sb.toString()), 32);
   }
 
   private static String makeTitleText(
     final OPDSAcquisitionFeedEntry in_e)
   {
-    return TextUtilities.ellipsize(in_e.getTitle(), 48);
+    return TextUtilities.ellipsize(in_e.getTitle(), 32);
   }
 
   private final Activity                                  activity;
@@ -223,6 +223,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         in_e.getID(),
         BookID.newFromText(i_id),
         in_e.getTitle()));
+
     return false;
   }
 
