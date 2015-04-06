@@ -7,12 +7,12 @@ import java.util.concurrent.ExecutorService;
 
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
-import org.nypl.simplified.books.core.BookSnapshotListenerType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.io7m.jfunctional.OptionType;
@@ -25,6 +25,7 @@ import com.squareup.picasso.RequestCreator;
 @SuppressWarnings("synthetic-access") public final class CoverProvider implements
   CoverProviderType
 {
+  private static final String                        TAG;
   private static final Callback                      EMPTY_CALLBACK;
 
   static {
@@ -36,9 +37,11 @@ import com.squareup.picasso.RequestCreator;
 
       @Override public void onError()
       {
-        // Nothing
+        Log.e(CoverProvider.TAG, "failed to load image");
       }
     };
+
+    TAG = "CProvider";
   }
 
   private final Picasso                              picasso;
@@ -93,58 +96,55 @@ import com.squareup.picasso.RequestCreator;
     final int h,
     final Callback c)
   {
-    final Picasso p = this.picasso;
-    final CatalogAcquisitionCoverGeneratorType cg = this.cover_gen;
+    Log.d(CoverProvider.TAG, String.format("%s: load", e.getID()));
 
-    final BookSnapshotListenerType listener = new BookSnapshotListenerType() {
-      @Override public void onBookSnapshotSuccess(
-        final BookID id,
-        final BookSnapshot snap)
-      {
-        /**
-         * On receipt of a book snapshot, construct a URI from the location of
-         * the cover image, if any. If there is no cover, generate one as
-         * normal.
-         */
+    final URI uri;
+    final BookID id = BookID.newIDFromEntry(e);
+    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
+    if (snap_opt.isSome()) {
+      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
 
-        final URI uri;
-        final OptionType<File> cover_opt = snap.getCover();
-        if (cover_opt.isSome()) {
-          final Some<File> some = (Some<File>) cover_opt;
-          uri = some.get().toURI();
-        } else {
-          uri = CoverProvider.generateCoverURI(e, cg);
-        }
+      /**
+       * On receipt of a book snapshot, construct a URI from the location of
+       * the cover image, if any. If there is no cover, generate one as
+       * normal.
+       */
 
-        final RequestCreator r = p.load(uri.toString());
-        r.resize(w, h);
-        r.into(i, c);
+      final OptionType<File> cover_opt = snap.getCover();
+      if (cover_opt.isSome()) {
+        final Some<File> some = (Some<File>) cover_opt;
+        uri = some.get().toURI();
+      } else {
+        uri = CoverProvider.generateCoverURI(e, this.cover_gen);
       }
+
+    } else {
 
       /**
        * If no snapshot is received, either fetch or generate a cover as with
        * ordinary books.
        */
 
-      @Override public void onBookSnapshotFailure(
-        final Throwable x)
-      {
-        final URI uri;
-        final OptionType<URI> cover_opt = e.getCover();
-        if (cover_opt.isSome()) {
-          final Some<URI> some = (Some<URI>) cover_opt;
-          uri = some.get();
-        } else {
-          uri = CoverProvider.generateCoverURI(e, cg);
-        }
+      final OptionType<URI> cover_opt = e.getCover();
+      if (cover_opt.isSome()) {
+        final Some<URI> some = (Some<URI>) cover_opt;
+        uri = some.get();
+      } else {
+        uri = CoverProvider.generateCoverURI(e, this.cover_gen);
+      }
+    }
 
+    Log.d(CoverProvider.TAG, String.format("%s: uri %s", e.getID(), uri));
+
+    final Picasso p = this.picasso;
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
         final RequestCreator r = p.load(uri.toString());
         r.resize(w, h);
         r.into(i, c);
       }
-    };
-
-    this.books.bookSnapshot(BookID.newIDFromEntry(e), listener);
+    });
   }
 
   @Override public void loadThumbnailInto(
@@ -168,58 +168,55 @@ import com.squareup.picasso.RequestCreator;
     final int h,
     final Callback c)
   {
-    final Picasso p = this.picasso;
-    final CatalogAcquisitionCoverGeneratorType cg = this.cover_gen;
+    Log.d(CoverProvider.TAG, String.format("%s: load", e.getID()));
 
-    final BookSnapshotListenerType listener = new BookSnapshotListenerType() {
-      @Override public void onBookSnapshotSuccess(
-        final BookID id,
-        final BookSnapshot snap)
-      {
-        /**
-         * On receipt of a book snapshot, construct a URI from the location of
-         * the cover image, if any. If there is no cover, generate one as
-         * normal.
-         */
-
-        final URI uri;
-        final OptionType<File> cover_opt = snap.getCover();
-        if (cover_opt.isSome()) {
-          final Some<File> some = (Some<File>) cover_opt;
-          uri = some.get().toURI();
-        } else {
-          uri = CoverProvider.generateCoverURI(e, cg);
-        }
-
-        final RequestCreator r = p.load(uri.toString());
-        r.resize(w, h);
-        r.into(i, c);
-      }
+    final URI uri;
+    final BookID id = BookID.newIDFromEntry(e);
+    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
+    if (snap_opt.isSome()) {
+      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
 
       /**
-       * If no snapshot is received, either fetch or generate a thumbnail as
-       * with ordinary books.
+       * On receipt of a book snapshot, construct a URI from the location of
+       * the cover image, if any. If there is no cover, generate one as
+       * normal.
        */
 
-      @Override public void onBookSnapshotFailure(
-        final Throwable x)
-      {
-        final URI uri;
-        final OptionType<URI> thumb_opt = e.getThumbnail();
-        if (thumb_opt.isSome()) {
-          final Some<URI> some = (Some<URI>) thumb_opt;
-          uri = some.get();
-        } else {
-          uri = CoverProvider.generateCoverURI(e, cg);
-        }
+      final OptionType<File> cover_opt = snap.getCover();
+      if (cover_opt.isSome()) {
+        final Some<File> some = (Some<File>) cover_opt;
+        uri = some.get().toURI();
+      } else {
+        uri = CoverProvider.generateCoverURI(e, this.cover_gen);
+      }
 
+    } else {
+
+      /**
+       * If no snapshot is received, either fetch or generate a cover as with
+       * ordinary books.
+       */
+
+      final OptionType<URI> thumb_opt = e.getThumbnail();
+      if (thumb_opt.isSome()) {
+        final Some<URI> some = (Some<URI>) thumb_opt;
+        uri = some.get();
+      } else {
+        uri = CoverProvider.generateCoverURI(e, this.cover_gen);
+      }
+    }
+
+    Log.d(CoverProvider.TAG, String.format("%s: uri %s", e.getID(), uri));
+
+    final Picasso p = this.picasso;
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
         final RequestCreator r = p.load(uri.toString());
         r.resize(w, h);
         r.into(i, c);
       }
-    };
-
-    this.books.bookSnapshot(BookID.newIDFromEntry(e), listener);
+    });
   }
 
   private static URI generateCoverURI(

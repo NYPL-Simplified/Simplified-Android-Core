@@ -1,7 +1,6 @@
 package org.nypl.simplified.books.core;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOError;
 import java.io.IOException;
@@ -52,41 +51,6 @@ import com.io7m.junreachable.UnimplementedCodeException;
 @SuppressWarnings("synthetic-access") public final class Books extends
   Observable implements BooksType
 {
-
-  private static final class BookSnapshotTask implements Runnable
-  {
-    private final BooksDirectory           books_directory;
-    private final BookID                   id;
-    private final BookSnapshotListenerType listener;
-
-    public BookSnapshotTask(
-      final BookID in_id,
-      final BooksDirectory in_books_directory,
-      final BookSnapshotListenerType in_listener)
-    {
-      this.id = NullCheck.notNull(in_id);
-      this.books_directory = NullCheck.notNull(in_books_directory);
-      this.listener = NullCheck.notNull(in_listener);
-    }
-
-    @Override public void run()
-    {
-      try {
-        this.listener.onBookSnapshotSuccess(this.id, this.snapshot());
-      } catch (final Throwable x) {
-        this.listener.onBookSnapshotFailure(x);
-      }
-    }
-
-    private BookSnapshot snapshot()
-      throws IOException
-    {
-      final BookDirectory dir =
-        this.books_directory.getBookDirectory(this.id);
-      return dir.getSnapshot();
-    }
-  }
-
   private static final class BorrowTask implements Runnable
   {
     private final OPDSAcquisition        acq;
@@ -220,6 +184,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
           final BookStatusType status =
             BookStatus.fromBookSnapshot(this.downloader, id, snap);
           this.books.booksStatusUpdate(id, status);
+          this.books.booksSnapshotUpdate(id, snap);
           this.listener.onAccountDataBookLoadSucceeded(id, snap);
         } catch (final Throwable e) {
           this.listener.onAccountDataBookLoadFailed(
@@ -265,14 +230,15 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private static final class DownloadOpenAccessTask extends
     DownloadAbstractListener implements Runnable
   {
-    private final BookDirectory       book_directory;
-    private final BookID              book_id;
-    private final BooksDirectory      books_directory;
-    private final BooksConfiguration  config;
-    private final DownloaderType      downloader;
-    private final BooksObservableType observable;
-    private final BooksRegistryType   registry;
-    private final URI                 uri;
+    private final BookDirectory        book_directory;
+    private final BookID               book_id;
+    private final BooksDirectory       books_directory;
+    private final BooksConfiguration   config;
+    private final DownloaderType       downloader;
+    private final BooksObservableType  observable;
+    private final BooksRegistryType    registry;
+    private final URI                  uri;
+    private final BooksStatusCacheType status_cache;
 
     DownloadOpenAccessTask(
       final BookID in_book_id,
@@ -280,6 +246,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       final BooksConfiguration in_config,
       final BooksDirectory in_books_directory,
       final BooksObservableType in_observable,
+      final BooksStatusCacheType in_status_cache,
       final BooksRegistryType in_registry,
       final DownloaderType in_downloader)
     {
@@ -290,6 +257,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       this.config = NullCheck.notNull(in_config);
       this.registry = NullCheck.notNull(in_registry);
       this.downloader = NullCheck.notNull(in_downloader);
+      this.status_cache = NullCheck.notNull(in_status_cache);
       this.book_directory =
         this.books_directory.getBookDirectory(this.book_id);
     }
@@ -348,6 +316,9 @@ import com.io7m.junreachable.UnimplementedCodeException;
       try {
         this.book_directory.copyInBook(file_data);
         final BookStatusDone status = new BookStatusDone(this.book_id);
+        this.status_cache.booksSnapshotUpdate(
+          this.book_id,
+          this.book_directory.getSnapshot());
         this.registry.booksStatusUpdate(this.book_id, status);
       } catch (final IOException e) {
         throw new IOError(e);
@@ -648,10 +619,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
     private final OPDSFeedParserType      feed_parser;
     private final HTTPType                http;
     private final AccountSyncListenerType listener;
+    private final BooksStatusCacheType    status_cache;
 
     public SyncTask(
       final BooksConfiguration in_config,
       final BooksRegistryType in_books,
+      final BooksStatusCacheType in_status_cache,
       final BooksDirectory in_books_directory,
       final HTTPType in_http,
       final OPDSFeedParserType in_feed_parser,
@@ -660,6 +633,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     {
       this.books = NullCheck.notNull(in_books);
       this.books_directory = NullCheck.notNull(in_books_directory);
+      this.status_cache = NullCheck.notNull(in_status_cache);
       this.config = NullCheck.notNull(in_config);
       this.http = NullCheck.notNull(in_http);
       this.feed_parser = NullCheck.notNull(in_feed_parser);
@@ -782,6 +756,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       final BookStatusType status =
         BookStatus.fromBookSnapshot(this.downloader, book_id, snap);
       this.books.booksStatusUpdate(book_id, status);
+      this.status_cache.booksSnapshotUpdate(book_id, snap);
       this.listener.onAccountSyncBook(book_id);
     }
   }
@@ -890,6 +865,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     this.submitRunnable(new SyncTask(
       this.config,
       this,
+      this,
       this.books_directory,
       this.http,
       this.feed_parser,
@@ -965,28 +941,10 @@ import com.io7m.junreachable.UnimplementedCodeException;
         this.books_directory,
         this,
         this,
+        this,
         this.downloader));
     } else {
       throw new IllegalStateException("Unknown book");
-    }
-  }
-
-  @Override public void bookSnapshot(
-    final BookID id,
-    final BookSnapshotListenerType listener)
-  {
-    NullCheck.notNull(id);
-    NullCheck.notNull(listener);
-
-    synchronized (this) {
-      if (this.books_status.booksStatusGet(id).isSome()) {
-        this.submitRunnable(new BookSnapshotTask(
-          id,
-          this.books_directory,
-          listener));
-      } else {
-        listener.onBookSnapshotFailure(new FileNotFoundException());
-      }
     }
   }
 
@@ -1058,5 +1016,18 @@ import com.io7m.junreachable.UnimplementedCodeException;
       };
       this.tasks.put(id, this.exec.submit(rb));
     }
+  }
+
+  @Override public void booksSnapshotUpdate(
+    final BookID id,
+    final BookSnapshot snap)
+  {
+    this.books_status.booksSnapshotUpdate(id, snap);
+  }
+
+  @Override public OptionType<BookSnapshot> booksSnapshotGet(
+    final BookID id)
+  {
+    return this.books_status.booksSnapshotGet(id);
   }
 }
