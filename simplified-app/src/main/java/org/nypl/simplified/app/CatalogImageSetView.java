@@ -2,52 +2,42 @@ package org.nypl.simplified.app;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 @SuppressWarnings("synthetic-access") public final class CatalogImageSetView extends
   LinearLayout implements ExpensiveStoppableType
 {
-  private static final String                         TAG;
+  private static final String                  TAG;
 
   static {
     TAG = "CImagesView";
   }
 
-  private final CatalogAcquisitionThumbnailCacheType  cache;
-  private final Runnable                              done_proc;
-  private final List<OPDSAcquisitionFeedEntry>        entries;
-  private final String                                id;
-  private int                                         image_height;
-  private final BitmapDisplaySizeType                 image_opts;
-  private final List<ImageView>                       imageviews;
-  private final CatalogNavigationLaneView             lane;
-  private final CatalogNavigationLaneViewListenerType listener;
-  private final ListenableFuture<Unit>                loading;
-  private final AtomicBoolean                         want_cancel;
+  private final Runnable                       done_proc;
+  private final List<OPDSAcquisitionFeedEntry> entries;
+  private final String                         id;
+  private final int                            image_height;
+  private final List<ImageView>                imageviews;
+  private final Picasso                        picasso;
 
   public CatalogImageSetView(
     final Context in_context,
     final ScreenSizeControllerType in_screen,
+    final Picasso in_picasso,
     final CatalogNavigationLaneView in_lane,
-    final ListeningExecutorService in_exec,
-    final CatalogAcquisitionThumbnailCacheType in_cache,
     final List<OPDSAcquisitionFeedEntry> in_entries,
     final CatalogNavigationLaneViewListenerType in_listener,
     final int in_image_height,
@@ -59,18 +49,15 @@ import com.io7m.jnull.Nullable;
     UIThread.checkIsUIThread();
 
     NullCheck.notNull(in_screen);
-    this.lane = NullCheck.notNull(in_lane);
-    this.cache = NullCheck.notNull(in_cache);
+    NullCheck.notNull(in_lane);
     this.entries = NullCheck.notNull(in_entries);
-    this.listener = NullCheck.notNull(in_listener);
+    NullCheck.notNull(in_listener);
     this.id = NullCheck.notNull(in_id);
     this.done_proc = NullCheck.notNull(in_done);
+    this.picasso = NullCheck.notNull(in_picasso);
 
     this.imageviews = new ArrayList<ImageView>();
-    this.want_cancel = new AtomicBoolean(false);
     this.image_height = in_image_height;
-    this.image_opts =
-      new BitmapDisplayHeightPreserveAspect(this.image_height);
     this.setOrientation(LinearLayout.HORIZONTAL);
 
     final LayoutParams p =
@@ -80,8 +67,45 @@ import com.io7m.jnull.Nullable;
     this.setLayoutParams(p);
     this.setVisibility(View.INVISIBLE);
 
+    final AtomicInteger done_count = new AtomicInteger(0);
     for (int index = 0; index < in_entries.size(); ++index) {
+      final OPDSAcquisitionFeedEntry e =
+        NullCheck.notNull(this.entries.get(index));
+
       final ImageView i = new ImageView(in_context);
+      i.setOnClickListener(new OnClickListener() {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          in_listener.onSelectBook(in_lane, e);
+        }
+      });
+
+      final int h = in_image_height;
+      final int w = (int) (h * 0.75);
+
+      PicassoUtilities.loadThumbnailIntoWithCallback(
+        in_picasso,
+        e,
+        i,
+        w,
+        h,
+        new Callback() {
+          @Override public void onSuccess()
+          {
+            if (done_count.incrementAndGet() >= in_entries.size()) {
+              CatalogImageSetView.this.done();
+            }
+          }
+
+          @Override public void onError()
+          {
+            if (done_count.incrementAndGet() >= in_entries.size()) {
+              CatalogImageSetView.this.done();
+            }
+          }
+        });
+
       this.imageviews.add(i);
       this.addView(i);
 
@@ -94,15 +118,6 @@ import com.io7m.jnull.Nullable;
       spacer.setVisibility(View.INVISIBLE);
       this.addView(spacer);
     }
-
-    this.loading = NullCheck.notNull(in_exec.submit(new Callable<Unit>() {
-      @Override public Unit call()
-        throws Exception
-      {
-        CatalogImageSetView.this.load();
-        return Unit.unit();
-      }
-    }));
   }
 
   private void done()
@@ -122,54 +137,5 @@ import com.io7m.jnull.Nullable;
   @Override public void expensiveStop()
   {
     Log.d(CatalogImageSetView.TAG, this.id + ": images cancelled");
-    this.want_cancel.set(true);
-    this.loading.cancel(true);
-  }
-
-  private void load()
-  {
-    for (int index = 0; index < this.entries.size(); ++index) {
-      if (this.want_cancel.get()) {
-        Log.d(CatalogImageSetView.TAG, this.id + ": noticed cancellation");
-        return;
-      }
-
-      final OPDSAcquisitionFeedEntry e =
-        NullCheck.notNull(this.entries.get(index));
-      final CatalogNavigationLaneViewListenerType closure_listener =
-        this.listener;
-      final CatalogNavigationLaneView closure_lane = this.lane;
-
-      final ImageView i = NullCheck.notNull(this.imageviews.get(index));
-      i.setOnClickListener(new OnClickListener() {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          closure_listener.onSelectBook(closure_lane, e);
-        }
-      });
-
-      final int height = this.image_height;
-
-      final Bitmap bi =
-        this.cache.getThumbnailSynchronous(e, this.image_opts);
-
-      UIThread.runOnUIThread(new Runnable() {
-        @Override public void run()
-        {
-          final double ratio =
-            (double) bi.getHeight() / (double) bi.getWidth();
-          final int w = (int) (height / ratio);
-
-          final android.view.ViewGroup.LayoutParams p =
-            new LayoutParams(w, height);
-          i.setLayoutParams(p);
-          i.setScaleType(ScaleType.FIT_CENTER);
-          i.setImageBitmap(bi);
-        }
-      });
-    }
-
-    this.done();
   }
 }

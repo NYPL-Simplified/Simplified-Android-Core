@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.nypl.simplified.books.core.BookID;
@@ -23,7 +22,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +33,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -44,15 +41,14 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.squareup.picasso.Picasso;
 
 /**
  * A single cell in an acquisition list or grid.
  */
 
 @SuppressWarnings("synthetic-access") public final class CatalogAcquisitionCellView extends
-  FrameLayout implements
-  BitmapCacheListenerType<OPDSAcquisitionFeedEntry>,
-  Observer
+  FrameLayout implements Observer
 {
   private static final String TAG;
 
@@ -95,24 +91,26 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final Button                                    cell_downloading_cancel;
   private final ViewGroup                                 cell_downloading_failed;
   private final TextView                                  cell_downloading_failed_text;
+  private final TextView                                  cell_downloading_failed_title;
   private final TextView                                  cell_downloading_percent_text;
   private final ProgressBar                               cell_downloading_progress;
   private final TextView                                  cell_downloading_title;
   private final ViewGroup                                 cell_text_layout;
   private final TextView                                  cell_title;
   private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
-  private @Nullable ListenableFuture<Bitmap>              loading;
-  private final TextView                                  cell_downloading_failed_title;
+  private final Picasso                                   picasso;
   private final Map<BookID, Unit>                         requesting;
 
   public CatalogAcquisitionCellView(
     final Activity in_activity,
+    final Picasso in_picasso,
     final BooksType in_books,
     final Map<BookID, Unit> in_requesting)
   {
     super(in_activity.getApplicationContext(), null);
 
     this.activity = NullCheck.notNull(in_activity);
+    this.picasso = NullCheck.notNull(in_picasso);
     this.requesting = NullCheck.notNull(in_requesting);
     this.books = NullCheck.notNull(in_books);
 
@@ -227,61 +225,30 @@ import com.io7m.junreachable.UnreachableCodeException;
     return false;
   }
 
-  @Override public void onBitmapLoadingFailure(
-    final OPDSAcquisitionFeedEntry key,
-    final Throwable x)
+  private void requestingAdd(
+    final BookID id)
   {
-    if (x instanceof CancellationException) {
-      return;
-    }
-
-    Log.e(CatalogAcquisitionCellView.TAG, x.getMessage(), x);
+    Log.d(
+      CatalogAcquisitionCellView.TAG,
+      String.format("request added %s", id));
+    this.requesting.put(id, Unit.unit());
   }
 
-  @Override public void onBitmapLoadingSuccess(
-    final OPDSAcquisitionFeedEntry key,
-    final Bitmap b)
+  private boolean requestingGet(
+    final BookID id)
   {
-    final OPDSAcquisitionFeedEntry current = this.entry.get();
-    final String current_name;
-    final String current_id;
-    if (current != null) {
-      current_name = current.getTitle();
-      current_id = current.getID();
-    } else {
-      current_name = "(null)";
-      current_id = "(null)";
-    }
+    final boolean r = this.requesting.containsKey(id);
+    Log.d(CatalogAcquisitionCellView.TAG, String.format("requesting: %s", r));
+    return r;
+  }
 
-    /**
-     * If the received acquisition entry ID matches that of the current ID,
-     * then the cell is being reused for the same entry and so the bitmap
-     * should not be replaced.
-     */
-
-    final Boolean should_set =
-      Boolean.valueOf(current_id.equals(key.getID()));
-
-    Log.d(CatalogAcquisitionCellView.TAG, String.format(
-      "image received, setting: %s (current '%s' / received '%s')",
-      should_set,
-      current_name,
-      key.getTitle()));
-
-    if (should_set.booleanValue()) {
-      final ImageView image_view = this.cell_cover_image;
-      final ProgressBar progress = this.cell_cover_progress;
-
-      UIThread.runOnUIThread(new Runnable() {
-        @Override public void run()
-        {
-          image_view.setImageBitmap(b);
-          image_view.setVisibility(View.VISIBLE);
-          Fade.fadeIn(image_view, Fade.DEFAULT_FADE_DURATION);
-          progress.setVisibility(View.INVISIBLE);
-        }
-      });
-    }
+  private void requestingRemove(
+    final BookID id)
+  {
+    Log.d(
+      CatalogAcquisitionCellView.TAG,
+      String.format("request removed %s", id));
+    this.requesting.remove(id);
   }
 
   @Override public void update(
@@ -317,11 +284,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   public void viewConfigure(
     final OPDSAcquisitionFeedEntry in_e,
-    final CatalogAcquisitionThumbnailCacheType in_image_loader,
     final CatalogAcquisitionFeedListenerType in_listener)
   {
     NullCheck.notNull(in_e);
-    NullCheck.notNull(in_image_loader);
     NullCheck.notNull(in_listener);
 
     UIThread.checkIsUIThread();
@@ -338,21 +303,11 @@ import com.io7m.junreachable.UnreachableCodeException;
       }
     });
 
-    final BitmapDisplaySizeType size =
-      new BitmapDisplayHeightPreserveAspect(
-        this.cell_cover_layout.getLayoutParams().height);
-
-    final boolean cell_being_reused = this.isCellBeingReusedForSame(in_e);
-    if (cell_being_reused == false) {
+    final boolean reusing = this.isCellBeingReusedForSame(in_e);
+    if (reusing == false) {
       this.entry.set(in_e);
-      final ListenableFuture<Bitmap> l = this.loading;
-      if (l != null) {
-        l.cancel(true);
-      }
       this.cell_cover_image.setVisibility(View.INVISIBLE);
       this.cell_cover_progress.setVisibility(View.VISIBLE);
-      this.loading =
-        in_image_loader.getThumbnailAsynchronous(in_e, size, this);
 
       final BookID book_id = BookID.newIDFromEntry(in_e);
       final OptionType<BookStatusType> stat =
@@ -503,32 +458,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  private boolean requestingGet(
-    final BookID id)
-  {
-    final boolean r = this.requesting.containsKey(id);
-    Log.d(CatalogAcquisitionCellView.TAG, String.format("requesting: %s", r));
-    return r;
-  }
-
-  private void requestingAdd(
-    final BookID id)
-  {
-    Log.d(
-      CatalogAcquisitionCellView.TAG,
-      String.format("request added %s", id));
-    this.requesting.put(id, Unit.unit());
-  }
-
-  private void requestingRemove(
-    final BookID id)
-  {
-    Log.d(
-      CatalogAcquisitionCellView.TAG,
-      String.format("request removed %s", id));
-    this.requesting.remove(id);
-  }
-
   private void viewConfigureCellViewForStatusCancelled(
     final Context ctx,
     final OPDSAcquisitionFeedEntry in_e,
@@ -551,6 +480,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
 
+    this.loadImage(in_e);
     this.requestingRemove(book_id);
 
     this.cell_buttons.removeAllViews();
@@ -558,6 +488,20 @@ import com.io7m.junreachable.UnreachableCodeException;
     b.setText("Read");
     b.setTextSize(12.0f);
     this.cell_buttons.addView(b);
+  }
+
+  private void loadImage(
+    final OPDSAcquisitionFeedEntry in_e)
+  {
+    final int in_image_height =
+      this.cell_cover_layout.getLayoutParams().height;
+
+    PicassoUtilities.loadThumbnailInto(
+      this.picasso,
+      in_e,
+      this.cell_cover_image,
+      (int) (in_image_height * 0.75),
+      in_image_height);
   }
 
   private void viewConfigureCellViewForStatusDownloading(
@@ -637,6 +581,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
 
+    this.cell_cover_image.setVisibility(View.VISIBLE);
+    this.cell_cover_progress.setVisibility(View.INVISIBLE);
+    this.loadImage(in_e);
     this.viewConfigureCellAcquisitionButtons(ctx, in_e, book_id);
   }
 
@@ -651,6 +598,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
 
+    this.cell_cover_image.setVisibility(View.VISIBLE);
+    this.cell_cover_progress.setVisibility(View.INVISIBLE);
+    this.loadImage(in_e);
     this.viewConfigureCellAcquisitionButtons(ctx, in_e, book_id);
   }
 

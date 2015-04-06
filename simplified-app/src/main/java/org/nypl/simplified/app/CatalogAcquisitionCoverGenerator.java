@@ -1,6 +1,13 @@
 package org.nypl.simplified.app;
 
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -20,42 +27,58 @@ public final class CatalogAcquisitionCoverGenerator implements
     TAG = "CAIG";
   }
 
+  private static Map<String, String> getParameters(
+    final URI u)
+  {
+    final Map<String, String> m = new HashMap<String, String>();
+    final List<NameValuePair> p = URLEncodedUtils.parse(u, "UTF-8");
+    final Iterator<NameValuePair> iter = p.iterator();
+    while (iter.hasNext()) {
+      final NameValuePair nvp = iter.next();
+      m.put(nvp.getName(), nvp.getValue());
+    }
+    return m;
+  }
+
   public CatalogAcquisitionCoverGenerator()
   {
     // Nothing
   }
 
   @Override public Bitmap generateImage(
-    final OPDSAcquisitionFeedEntry e,
+    final URI u,
+    final int width,
     final int height)
   {
     Log.d(
       CatalogAcquisitionCoverGenerator.TAG,
-      String.format("generating %s", e.getID()));
+      String.format("generating %s", u));
 
-    final int width = (height / 4) * 3;
+    final Map<String, String> params =
+      CatalogAcquisitionCoverGenerator.getParameters(u);
+    final String title = NullCheck.notNull(params.get("title"));
+
     final Bitmap b =
       Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 
     final Canvas c = new Canvas(b);
     final Paint p = new Paint();
 
-    final int c0 =
-      Color.argb(
-        0xff,
-        (int) (Math.random() * 0xff),
-        (int) (Math.random() * 0xff),
-        (int) (Math.random() * 0xff));
-    final int c1 = 0xffffffff ^ c0;
+    final int hash = title.hashCode();
 
     p.setStyle(Style.FILL);
-    p.setColor(c0);
+    p.setColor(hash);
     p.setAlpha(0xff);
     c.drawRect(0, 0, width, height, p);
 
-    p.setColor(c1);
+    p.setColor(Color.WHITE);
     p.setAlpha(0xff);
-    c.drawText(e.getTitle(), 8, 16, p);
+    c.drawRect(4, 4, width - 4, height / 4, p);
+
+    p.setColor(Color.BLACK);
+    p.setAlpha(0xff);
+    p.setAntiAlias(true);
+    c.drawText(TextUtilities.ellipsize(title, 16), 8, 16, p);
 
     return NullCheck.notNull(b);
   }

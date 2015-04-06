@@ -143,6 +143,7 @@ public final class CatalogAcquisitionFeed implements
     final OPDSAcquisitionFeedEntry e =
       NullCheck.notNull(this.adapter.getItem(position));
 
+    final Simplified app = Simplified.get();
     final CatalogAcquisitionCellView cv;
     if (reused != null) {
       cv = (CatalogAcquisitionCellView) reused;
@@ -150,12 +151,12 @@ public final class CatalogAcquisitionFeed implements
       cv =
         new CatalogAcquisitionCellView(
           this.activity,
+          app.getPicasso(),
           this.books,
           this.requesting);
     }
 
-    final Simplified app = Simplified.get();
-    cv.viewConfigure(e, app.getCatalogThumbnailLoader(), this.listener);
+    cv.viewConfigure(e, this.listener);
     return cv;
   }
 

@@ -1,8 +1,7 @@
 package org.nypl.simplified.app;
 
 import java.io.IOException;
-
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import java.net.URI;
 
 import android.graphics.Bitmap;
 
@@ -11,14 +10,15 @@ public interface CatalogAcquisitionCoverGeneratorType
   /**
    * Generate an image synchronously.
    *
-   * @param e
-   *          The acquisition feed entry
+   * @param u
+   *          The image URI
    * @return A loaded bitmap
    * @throws IOException
    *           On I/O errors
    */
 
   Bitmap generateImage(
-    final OPDSAcquisitionFeedEntry e,
-    final int height);
+    URI u,
+    int width,
+    int height);
 }

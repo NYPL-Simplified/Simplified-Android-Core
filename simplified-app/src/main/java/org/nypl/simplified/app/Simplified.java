@@ -1,8 +1,6 @@
 package org.nypl.simplified.app;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,25 +27,23 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
+import android.graphics.Bitmap;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.squareup.picasso.Picasso;
 
 /**
  * Global application state.
@@ -55,7 +51,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("boxing") public final class Simplified extends Application implements
   ScreenSizeControllerType,
-  MemoryControllerType,
   AccountDataLoadListenerType,
   AccountSyncListenerType
 {
@@ -82,28 +77,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     return Simplified.checkInitialized();
   }
 
-  private static File getDiskCacheDir(
-    final Context context)
-  {
-    /**
-     * If external storage is mounted and is on a device that doesn't allow
-     * the storage to be removed, use the external storage for caching.
-     */
-
-    if (Environment.MEDIA_MOUNTED.equals(Environment
-      .getExternalStorageState())) {
-      if (Environment.isExternalStorageRemovable() == false) {
-        return NullCheck.notNull(context.getExternalCacheDir());
-      }
-    }
-
-    /**
-     * Otherwise, use internal storage.
-     */
-
-    return NullCheck.notNull(context.getCacheDir());
-  }
-
   private static File getDiskDataDir(
     final Context context)
   {
@@ -126,32 +99,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     return NullCheck.notNull(context.getFilesDir());
   }
 
-  private static CatalogAcquisitionCoverCacheType makeCoverCache(
-    final ListeningExecutorService list_exec,
-    final MemoryControllerType mem,
-    final Context ctx,
-    final Resources rr)
-    throws IOException
-  {
-    final PartialFunctionType<URI, InputStream, IOException> it =
-      BitmapTransport.get();
-    final File cd = new File(Simplified.getDiskCacheDir(ctx), "covers");
-    Log.d(Simplified.TAG, "cover cache: " + cd);
-    cd.mkdirs();
-    Preconditions.checkArgument(cd.exists());
-    Preconditions.checkArgument(cd.isDirectory());
-
-    final int disk_thumbnail_size =
-      Simplified.megabytesToBytes(rr
-        .getInteger(R.integer.image_cover_disk_cache_megabytes));
-
-    final BitmapCacheScalingDiskType bcf =
-      BitmapCacheScalingDisk.newCache(it, mem, cd, disk_thumbnail_size);
-    final CatalogAcquisitionCoverGenerator cgen =
-      new CatalogAcquisitionCoverGenerator();
-    return CatalogAcquisitionImageCache.newCoverCache(list_exec, cgen, bcf);
-  }
-
   private static OPDSFeedLoaderType makeFeedLoader(
     final ExecutorService exec,
     final OPDSFeedParserType p)
@@ -159,53 +106,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
     final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(exec, p, t);
     return CachingFeedLoader.newLoader(flx);
-  }
-
-  private static CatalogAcquisitionThumbnailCacheType makeThumbnailCache(
-    final ListeningExecutorService list_exec,
-    final MemoryControllerType mem,
-    final Context ctx,
-    final Resources rr)
-    throws IOException
-  {
-    final PartialFunctionType<URI, InputStream, IOException> it =
-      BitmapTransport.get();
-    final File cd = new File(Simplified.getDiskCacheDir(ctx), "thumbnails");
-    Log.d(Simplified.TAG, "thumbnail cache: " + cd);
-    cd.mkdirs();
-    Preconditions.checkArgument(cd.exists());
-    Preconditions.checkArgument(cd.isDirectory());
-
-    final int disk_thumbnail_size =
-      Simplified.megabytesToBytes(rr
-        .getInteger(R.integer.image_thumbnail_disk_cache_megabytes));
-    final int mem_size =
-      Simplified.megabytesToBytes(rr
-        .getInteger(R.integer.image_memory_cache_megabytes));
-
-    final BitmapCacheScalingDiskType bcf =
-      BitmapCacheScalingDisk.newCache(it, mem, cd, disk_thumbnail_size);
-
-    BitmapCacheScalingType bc;
-    if (mem.memoryIsSmall()) {
-      bc = bcf;
-    } else {
-      Log.d(
-        Simplified.TAG,
-        "non-small heap detected, using extra in-memory bitmap cache");
-      bc = BitmapCacheScalingMemoryProxy.newCache(bcf, mem_size);
-    }
-
-    final CatalogAcquisitionCoverGenerator cgen =
-      new CatalogAcquisitionCoverGenerator();
-    return CatalogAcquisitionImageCache
-      .newThumbnailCache(list_exec, cgen, bc);
-  }
-
-  private static int megabytesToBytes(
-    final int m)
-  {
-    return (int) (m * Math.pow(10, 7));
   }
 
   private static ExecutorService namedThreadPool(
@@ -243,35 +143,22 @@ import com.io7m.junreachable.UnreachableCodeException;
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable BooksType                            books;
-  private @Nullable CatalogAcquisitionCoverCacheType     catalog_acquisition_cover_loader;
-  private @Nullable ListeningExecutorService             catalog_exec_decor;
-  private @Nullable ExecutorService                      catalog_executor;
-  private @Nullable CatalogAcquisitionThumbnailCacheType catalog_thumbnail_loader;
-  private @Nullable URI                                  feed_initial_uri;
-  private @Nullable OPDSFeedLoaderType                   feed_loader;
-  private @Nullable HTTPType                             http;
-  private int                                            memory;
-  private boolean                                        memory_small;
+  private @Nullable BooksType                books;
+  private @Nullable ListeningExecutorService catalog_exec_decor;
+  private @Nullable ExecutorService          catalog_executor;
+  private @Nullable URI                      feed_initial_uri;
+  private @Nullable OPDSFeedLoaderType       feed_loader;
+  private @Nullable HTTPType                 http;
+  private @Nullable Picasso                  picasso;
 
   public BooksType getBooks()
   {
     return NullCheck.notNull(this.books);
   }
 
-  public CatalogAcquisitionCoverCacheType getCatalogAcquisitionCoverLoader()
-  {
-    return NullCheck.notNull(this.catalog_acquisition_cover_loader);
-  }
-
   public ListeningExecutorService getCatalogListeningExecutorService()
   {
     return NullCheck.notNull(this.catalog_exec_decor);
-  }
-
-  public CatalogAcquisitionThumbnailCacheType getCatalogThumbnailLoader()
-  {
-    return NullCheck.notNull(this.catalog_thumbnail_loader);
   }
 
   public URI getFeedInitialURI()
@@ -284,14 +171,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     return NullCheck.notNull(this.feed_loader);
   }
 
-  @Override public int memoryGetSize()
+  public Picasso getPicasso()
   {
-    return this.memory;
-  }
-
-  @Override public boolean memoryIsSmall()
-  {
-    return this.memory_small;
+    return NullCheck.notNull(this.picasso);
   }
 
   @Override public void onAccountDataBookLoadFailed(
@@ -384,18 +266,20 @@ import com.io7m.junreachable.UnreachableCodeException;
       final Resources rr = NullCheck.notNull(this.getResources());
 
       /**
-       * Determine memory conditions.
+       * Configure picasso for image caching.
        */
 
       {
-        final ActivityManager am =
-          (ActivityManager) this.getSystemService(Context.ACTIVITY_SERVICE);
-        this.memory = am.getMemoryClass();
-        this.memory_small = this.memory <= 32;
-        Log.d(Simplified.TAG, String.format(
-          "available memory: %dmb (small: %s)",
-          this.memory,
-          this.memory_small));
+        final Picasso.Builder pb = new Picasso.Builder(this);
+        pb.defaultBitmapConfig(Bitmap.Config.RGB_565);
+        pb.indicatorsEnabled(true);
+        pb.loggingEnabled(true);
+        pb
+          .addRequestHandler(new CatalogAcquisitionCoverGeneratorRequestHandler(
+            new CatalogAcquisitionCoverGenerator()));
+        pb.executor(in_catalog_executor);
+        final Picasso p = pb.build();
+        this.picasso = p;
       }
 
       /**
@@ -427,10 +311,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final OPDSFeedParserType p = OPDSFeedParser.newParser();
       this.feed_loader = Simplified.makeFeedLoader(in_catalog_executor, p);
-      this.catalog_thumbnail_loader =
-        Simplified.makeThumbnailCache(le, this, this, rr);
-      this.catalog_acquisition_cover_loader =
-        Simplified.makeCoverCache(le, this, this, rr);
 
       /**
        * Book management.
@@ -464,9 +344,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       b.accountLoadBooks(this);
 
       Simplified.INSTANCE = this;
-    } catch (final NotFoundException e) {
-      throw new UnreachableCodeException(e);
-    } catch (final IOException e) {
+    } catch (final Exception e) {
       throw new UnreachableCodeException(e);
     }
   }
