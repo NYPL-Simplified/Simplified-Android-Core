@@ -18,7 +18,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 
 public final class CatalogAcquisitionController implements
   OnClickListener,
@@ -178,16 +177,13 @@ public final class CatalogAcquisitionController implements
     switch (this.acq.getType()) {
       case ACQUISITION_BORROW:
       {
-        throw new UnimplementedCodeException();
-      }
-      case ACQUISITION_OPEN_ACCESS:
-      {
         this.books.bookDownloadOpenAccess(
           this.id,
           this.title,
           this.acq.getURI());
         break;
       }
+      case ACQUISITION_OPEN_ACCESS:
       case ACQUISITION_BUY:
       case ACQUISITION_GENERIC:
       case ACQUISITION_SAMPLE:

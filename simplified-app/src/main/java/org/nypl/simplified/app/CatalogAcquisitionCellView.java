@@ -324,7 +324,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     switch (a.getType()) {
       case ACQUISITION_BORROW:
-      case ACQUISITION_OPEN_ACCESS:
       {
         final CatalogAcquisitionButton b =
           new CatalogAcquisitionButton(ctx, NullCheck.notNull(a));
@@ -352,6 +351,8 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.cell_buttons.addView(b);
         break;
       }
+
+      case ACQUISITION_OPEN_ACCESS:
       case ACQUISITION_SAMPLE:
       case ACQUISITION_SUBSCRIBE:
       case ACQUISITION_BUY:

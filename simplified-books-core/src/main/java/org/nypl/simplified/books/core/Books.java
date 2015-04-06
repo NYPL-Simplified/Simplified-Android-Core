@@ -131,13 +131,10 @@ import com.io7m.junreachable.UnimplementedCodeException;
       switch (this.acq.getType()) {
         case ACQUISITION_BORROW:
         {
-          throw new UnimplementedCodeException();
-        }
-        case ACQUISITION_OPEN_ACCESS:
-        {
-          this.runAcquisitionOpenAccess();
+          this.runAcquisitionBorrow();
           break;
         }
+        case ACQUISITION_OPEN_ACCESS:
         case ACQUISITION_BUY:
         case ACQUISITION_GENERIC:
         case ACQUISITION_SAMPLE:
@@ -148,7 +145,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       }
     }
 
-    private void runAcquisitionOpenAccess()
+    private void runAcquisitionBorrow()
       throws Exception
     {
       final Pair<AccountBarcode, AccountPIN> p =
