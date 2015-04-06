@@ -1,5 +1,7 @@
 package org.nypl.simplified.app;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
 import org.nypl.simplified.opds.core.OPDSAcquisition;
@@ -151,10 +153,12 @@ final class CatalogBookDetail
       buffer.append("\n");
     }
 
+    final Calendar p = e.getPublished();
+    final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
     buffer.append(NullCheck.notNull(rr
       .getString(R.string.catalog_publication_date)));
     buffer.append(": ");
-    buffer.append(e.getPublished());
+    buffer.append(fmt.format(p.getTime()));
     return NullCheck.notNull(buffer.toString());
   }
 

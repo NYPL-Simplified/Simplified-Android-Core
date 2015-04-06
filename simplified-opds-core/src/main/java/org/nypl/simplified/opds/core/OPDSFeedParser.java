@@ -271,14 +271,18 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
   }
 
-  private static String findPublished(
+  private static Calendar findPublished(
     final Element e)
-    throws OPDSFeedParseException
+    throws OPDSFeedParseException,
+      DOMException,
+      ParseException
   {
-    return OPDSXML.getFirstChildElementTextWithName(
-      e,
-      OPDSFeedParser.ATOM_URI,
-      "published");
+    final Element er =
+      OPDSXML.getFirstChildElementWithName(
+        e,
+        OPDSFeedParser.ATOM_URI,
+        "published");
+    return OPDSRFC3339Formatter.parseRFC3339Date(er.getTextContent().trim());
   }
 
   private static OptionType<String> findPublisher(
@@ -360,7 +364,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final String id = OPDSFeedParser.findID(e);
     final String title = OPDSFeedParser.findTitle(e);
     final Calendar updated = OPDSFeedParser.findUpdated(e);
-    final String published = OPDSFeedParser.findPublished(e);
+    final Calendar published = OPDSFeedParser.findPublished(e);
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
       OPDSAcquisitionFeedEntry.newBuilder(id, title, updated, published);

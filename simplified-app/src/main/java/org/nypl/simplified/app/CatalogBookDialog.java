@@ -30,8 +30,7 @@ import com.io7m.jnull.Nullable;
  * screens.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) public final class CatalogBookDialog extends
-  DialogFragment
+public final class CatalogBookDialog extends DialogFragment
 {
   private static final String ACQUISITION_ENTRY_ID;
   private static final String TAG;

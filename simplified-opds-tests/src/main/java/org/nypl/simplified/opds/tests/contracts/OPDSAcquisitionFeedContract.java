@@ -28,19 +28,12 @@ import org.nypl.simplified.test.utilities.TestUtilities;
   {
     final URI uri = URI.create("http://example.com/base");
 
+    final Calendar cal = Calendar.getInstance();
     final OPDSAcquisitionFeedBuilderType fb =
-      OPDSAcquisitionFeed.newBuilder(
-        uri,
-        "id",
-        Calendar.getInstance(),
-        "Title");
+      OPDSAcquisitionFeed.newBuilder(uri, "id", cal, "Title");
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
-      OPDSAcquisitionFeedEntry.newBuilder(
-        "id",
-        "title",
-        Calendar.getInstance(),
-        "published");
+      OPDSAcquisitionFeedEntry.newBuilder("id", "title", cal, cal);
     eb.addAuthor("Author");
     eb.addAcquisition(new OPDSAcquisition(Type.ACQUISITION_BUY, URI
       .create("http://example.com")));

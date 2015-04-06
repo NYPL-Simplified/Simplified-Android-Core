@@ -19,7 +19,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Hyperion Audiobooks</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2010-12-28</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -46,7 +46,7 @@
     <category term="Social Science"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Penguin Group US</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <dcterms:dateCopyrighted>2012-02-01</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -74,7 +74,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Dreamscape Media, LLC</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2011-12-13</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -101,7 +101,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Questar Home Video</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2007-05-22</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -126,7 +126,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2006-05-02</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -151,7 +151,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Blackstone Audio, Inc.</dcterms:publisher>
-    <published>2014-11-16</published>
+    <published>2014-11-16T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -174,7 +174,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Hachette Audiobooks</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2005-12-01</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -199,7 +199,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Hachette Audiobooks</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2007-05-09</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -225,7 +225,7 @@
     <category term="Medical"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Skyhorse Publishing, Inc.</dcterms:publisher>
-    <published>2014-08-05</published>
+    <published>2014-08-05T00:00:00Z</published>
     <dcterms:dateCopyrighted>2012-07-01</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -249,7 +249,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>BlogHer</dcterms:publisher>
-    <published>2014-07-25</published>
+    <published>2014-07-25T00:00:00Z</published>
     <dcterms:dateCopyrighted>2012-10-30</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -273,7 +273,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Hachette Audiobooks</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2005-06-01</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -298,7 +298,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Macmillan Audio</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2010-06-22</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -321,7 +321,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -341,7 +341,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Virgil Films and Entertainment</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2005-10-18</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -365,7 +365,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -385,7 +385,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Blackstone Audio, Inc.</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2006-02-01</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -410,7 +410,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Penguin Audio</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2010-08-10</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -435,7 +435,7 @@
     <category term="Literary Criticism"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>University Press of Mississippi</dcterms:publisher>
-    <published>2014-08-10</published>
+    <published>2014-08-10T00:00:00Z</published>
     <dcterms:dateCopyrighted>2012-03-13</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -461,7 +461,7 @@
     <category term="Performing Arts"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>University Press of Mississippi</dcterms:publisher>
-    <published>2014-10-24</published>
+    <published>2014-10-24T00:00:00Z</published>
     <dcterms:dateCopyrighted>2014-09-02</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -487,7 +487,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2006-05-23</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -512,7 +512,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2007-03-13</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -537,7 +537,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Hachette Audiobooks</dcterms:publisher>
-    <published>2014-11-16</published>
+    <published>2014-11-16T00:00:00Z</published>
     <dcterms:dateCopyrighted>2006-10-11</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -562,7 +562,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Vanguard Cinema</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -586,7 +586,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>IFC TV</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2004-09-10</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -613,7 +613,7 @@
     <category term="History"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>New Press, The</dcterms:publisher>
-    <published>2014-09-11</published>
+    <published>2014-09-11T00:00:00Z</published>
     <dcterms:dateCopyrighted>2014-10-14</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -638,7 +638,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Listen &amp; Live Audio, Inc.</dcterms:publisher>
-    <published>2014-11-16</published>
+    <published>2014-11-16T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -662,7 +662,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Hyperion Audiobooks</dcterms:publisher>
-    <published>2014-11-16</published>
+    <published>2014-11-16T00:00:00Z</published>
     <dcterms:dateCopyrighted>2006-10-11</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -686,7 +686,7 @@
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Brilliance Audio</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2005-01-25</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -712,7 +712,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -734,7 +734,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -756,7 +756,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -778,7 +778,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -800,7 +800,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -822,7 +822,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -843,7 +843,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -865,7 +865,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -886,7 +886,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Skyhorse Publishing, Inc.</dcterms:publisher>
-    <published>2014-08-10</published>
+    <published>2014-08-10T00:00:00Z</published>
     <dcterms:dateCopyrighted>2012-02-08</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -913,7 +913,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Art"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Verso Books</dcterms:publisher>
-    <published>2014-08-07</published>
+    <published>2014-08-07T00:00:00Z</published>
     <dcterms:dateCopyrighted>2014-06-03</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -940,7 +940,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2006-04-18</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -964,7 +964,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Music"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Chicago Review Press</dcterms:publisher>
-    <published>2014-09-01</published>
+    <published>2014-09-01T00:00:00Z</published>
     <dcterms:dateCopyrighted>2014-09-01</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -989,7 +989,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Hachette Audiobooks</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2005-09-28</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -1013,7 +1013,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Macmillan Audio</dcterms:publisher>
-    <published>2014-11-16</published>
+    <published>2014-11-16T00:00:00Z</published>
     <dcterms:dateCopyrighted>2010-11-23</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -1040,7 +1040,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Knitting Out Loud</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2007-09-19</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -1066,7 +1066,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Dreamscape Media, LLC</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2010-12-14</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -1093,7 +1093,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-11-16</published>
+    <published>2014-11-16T00:00:00Z</published>
     <dcterms:dateCopyrighted>2010-09-29</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -1120,7 +1120,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="True Crime"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -1139,7 +1139,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -1163,7 +1163,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Science"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Beacon Press</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <dcterms:dateCopyrighted>2012-08-20</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>
@@ -1188,7 +1188,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="United States History"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01</published>
+    <published>2014-04-01T00:00:00Z</published>
     <schema:audience>
       <schema:name>Adult</schema:name>
     </schema:audience>
@@ -1209,7 +1209,7 @@ than 200 of the most prominent personages in History</alternativeHeadline>
     <category term="Biography &amp; Memoir"/>
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Blackstone Audio, Inc.</dcterms:publisher>
-    <published>2014-11-14</published>
+    <published>2014-11-14T00:00:00Z</published>
     <dcterms:dateCopyrighted>2010-01-13</dcterms:dateCopyrighted>
     <schema:audience>
       <schema:name>Adult</schema:name>

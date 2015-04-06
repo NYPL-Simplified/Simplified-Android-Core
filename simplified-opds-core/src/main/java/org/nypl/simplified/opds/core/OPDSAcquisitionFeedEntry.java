@@ -29,7 +29,7 @@ import com.io7m.jnull.Nullable;
     private String                      summary;
     private OptionType<URI>             cover;
     private final String                id;
-    private final String                published;
+    private final Calendar              published;
     private OptionType<String>          publisher;
     private String                      subtitle;
     private OptionType<URI>             thumbnail;
@@ -40,7 +40,7 @@ import com.io7m.jnull.Nullable;
       final String in_id,
       final String in_title,
       final Calendar in_updated,
-      final String in_published)
+      final Calendar in_published)
     {
       this.id = NullCheck.notNull(in_id);
       this.title = NullCheck.notNull(in_title);
@@ -136,7 +136,7 @@ import com.io7m.jnull.Nullable;
     final String in_id,
     final String in_title,
     final Calendar in_updated,
-    final String in_published)
+    final Calendar in_published)
   {
     return new Builder(in_id, in_title, in_updated, in_published);
   }
@@ -147,7 +147,7 @@ import com.io7m.jnull.Nullable;
   private final String                summary;
   private final OptionType<URI>       cover;
   private final String                id;
-  private final String                published;
+  private final Calendar              published;
   private final OptionType<String>    publisher;
   private final String                subtitle;
   private final OptionType<URI>       thumbnail;
@@ -164,7 +164,7 @@ import com.io7m.jnull.Nullable;
     final Calendar in_updated,
     final String in_subtitle,
     final String in_summary,
-    final String in_published,
+    final Calendar in_published,
     final OptionType<String> in_publisher,
     final List<String> in_categories)
   {
@@ -241,7 +241,7 @@ import com.io7m.jnull.Nullable;
     return this.id;
   }
 
-  public String getPublished()
+  public Calendar getPublished()
   {
     return this.published;
   }
