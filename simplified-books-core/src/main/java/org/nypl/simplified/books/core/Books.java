@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.core;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOError;
 import java.io.IOException;
@@ -51,6 +52,40 @@ import com.io7m.junreachable.UnimplementedCodeException;
 @SuppressWarnings("synthetic-access") public final class Books extends
   Observable implements BooksType
 {
+
+  private static final class BookSnapshotTask implements Runnable
+  {
+    private final BooksDirectory           books_directory;
+    private final BookID                   id;
+    private final BookSnapshotListenerType listener;
+
+    public BookSnapshotTask(
+      final BookID in_id,
+      final BooksDirectory in_books_directory,
+      final BookSnapshotListenerType in_listener)
+    {
+      this.id = NullCheck.notNull(in_id);
+      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.listener = NullCheck.notNull(in_listener);
+    }
+
+    @Override public void run()
+    {
+      try {
+        this.listener.onBookSnapshotSuccess(this.id, this.snapshot());
+      } catch (final Throwable x) {
+        this.listener.onBookSnapshotFailure(x);
+      }
+    }
+
+    private BookSnapshot snapshot()
+      throws IOException
+    {
+      final BookDirectory dir =
+        this.books_directory.getBookDirectory(this.id);
+      return dir.getSnapshot();
+    }
+  }
 
   private static final class BorrowTask implements Runnable
   {
@@ -773,8 +808,8 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private final OPDSFeedParserType   feed_parser;
   private final HTTPType             http;
   private final AtomicBoolean        logged_in;
-  private Map<Integer, Future<?>>    tasks;
   private final AtomicInteger        task_id;
+  private Map<Integer, Future<?>>    tasks;
 
   private Books(
     final ExecutorService in_exec,
@@ -936,6 +971,25 @@ import com.io7m.junreachable.UnimplementedCodeException;
         this.downloader));
     } else {
       throw new IllegalStateException("Unknown book");
+    }
+  }
+
+  @Override public void bookSnapshot(
+    final BookID id,
+    final BookSnapshotListenerType listener)
+  {
+    NullCheck.notNull(id);
+    NullCheck.notNull(listener);
+
+    synchronized (this) {
+      if (this.books_status.booksStatusGet(id).isSome()) {
+        this.submitRunnable(new BookSnapshotTask(
+          id,
+          this.books_directory,
+          listener));
+      } else {
+        listener.onBookSnapshotFailure(new FileNotFoundException());
+      }
     }
   }
 

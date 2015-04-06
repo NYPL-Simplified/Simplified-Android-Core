@@ -151,7 +151,7 @@ public final class CatalogAcquisitionFeed implements
       cv =
         new CatalogAcquisitionCellView(
           this.activity,
-          app.getPicasso(),
+          app.getCoverProvider(),
           this.books,
           this.requesting);
     }

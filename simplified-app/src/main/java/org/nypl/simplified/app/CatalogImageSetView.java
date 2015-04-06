@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 @SuppressWarnings("synthetic-access") public final class CatalogImageSetView extends
   LinearLayout implements ExpensiveStoppableType
@@ -31,12 +30,12 @@ import com.squareup.picasso.Picasso;
   private final String                         id;
   private final int                            image_height;
   private final List<ImageView>                imageviews;
-  private final Picasso                        picasso;
+  private final CoverProviderType              cover_provider;
 
   public CatalogImageSetView(
     final Context in_context,
     final ScreenSizeControllerType in_screen,
-    final Picasso in_picasso,
+    final CoverProviderType in_cover_provider,
     final CatalogNavigationLaneView in_lane,
     final List<OPDSAcquisitionFeedEntry> in_entries,
     final CatalogNavigationLaneViewListenerType in_listener,
@@ -54,7 +53,7 @@ import com.squareup.picasso.Picasso;
     NullCheck.notNull(in_listener);
     this.id = NullCheck.notNull(in_id);
     this.done_proc = NullCheck.notNull(in_done);
-    this.picasso = NullCheck.notNull(in_picasso);
+    this.cover_provider = NullCheck.notNull(in_cover_provider);
 
     this.imageviews = new ArrayList<ImageView>();
     this.image_height = in_image_height;
@@ -84,27 +83,28 @@ import com.squareup.picasso.Picasso;
       final int h = in_image_height;
       final int w = (int) (h * 0.75);
 
-      PicassoUtilities.loadThumbnailIntoWithCallback(
-        in_picasso,
+      final Callback cover_callback = new Callback() {
+        @Override public void onSuccess()
+        {
+          if (done_count.incrementAndGet() >= in_entries.size()) {
+            CatalogImageSetView.this.done();
+          }
+        }
+
+        @Override public void onError()
+        {
+          if (done_count.incrementAndGet() >= in_entries.size()) {
+            CatalogImageSetView.this.done();
+          }
+        }
+      };
+
+      this.cover_provider.loadThumbnailIntoWithCallback(
         e,
         i,
         w,
         h,
-        new Callback() {
-          @Override public void onSuccess()
-          {
-            if (done_count.incrementAndGet() >= in_entries.size()) {
-              CatalogImageSetView.this.done();
-            }
-          }
-
-          @Override public void onError()
-          {
-            if (done_count.incrementAndGet() >= in_entries.size()) {
-              CatalogImageSetView.this.done();
-            }
-          }
-        });
+        cover_callback);
 
       this.imageviews.add(i);
       this.addView(i);

@@ -5,9 +5,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.nypl.simplified.http.core.URIQueryBuilder;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -81,5 +84,17 @@ public final class CatalogAcquisitionCoverGenerator implements
     c.drawText(TextUtilities.ellipsize(title, 16), 8, 16, p);
 
     return NullCheck.notNull(b);
+  }
+
+  @Override public URI generateURIForTitleAuthor(
+    final String title,
+    final String author)
+  {
+    final SortedMap<String, String> params = new TreeMap<String, String>();
+    params.put("title", title);
+    params.put("author", author);
+    return URIQueryBuilder.encodeQuery(
+      URI.create("generated-cover://localhost/"),
+      params);
   }
 }

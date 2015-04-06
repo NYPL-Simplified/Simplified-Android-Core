@@ -41,7 +41,6 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.squareup.picasso.Picasso;
 
 /**
  * A single cell in an acquisition list or grid.
@@ -98,19 +97,19 @@ import com.squareup.picasso.Picasso;
   private final ViewGroup                                 cell_text_layout;
   private final TextView                                  cell_title;
   private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
-  private final Picasso                                   picasso;
+  private final CoverProviderType                         cover_provider;
   private final Map<BookID, Unit>                         requesting;
 
   public CatalogAcquisitionCellView(
     final Activity in_activity,
-    final Picasso in_picasso,
+    final CoverProviderType in_picasso,
     final BooksType in_books,
     final Map<BookID, Unit> in_requesting)
   {
     super(in_activity.getApplicationContext(), null);
 
     this.activity = NullCheck.notNull(in_activity);
-    this.picasso = NullCheck.notNull(in_picasso);
+    this.cover_provider = NullCheck.notNull(in_picasso);
     this.requesting = NullCheck.notNull(in_requesting);
     this.books = NullCheck.notNull(in_books);
 
@@ -496,8 +495,7 @@ import com.squareup.picasso.Picasso;
     final int in_image_height =
       this.cell_cover_layout.getLayoutParams().height;
 
-    PicassoUtilities.loadThumbnailInto(
-      this.picasso,
+    this.cover_provider.loadThumbnailInto(
       in_e,
       this.cell_cover_image,
       (int) (in_image_height * 0.75),

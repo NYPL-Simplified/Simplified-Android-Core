@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.squareup.picasso.Picasso;
 
 /**
  * An activity showing a full-screen book detail page.
@@ -221,13 +220,8 @@ import com.squareup.picasso.Picasso;
     related_layout.setVisibility(View.GONE);
 
     final Simplified app = Simplified.get();
-    final Picasso picasso = app.getPicasso();
-    PicassoUtilities.loadCoverInto(
-      picasso,
-      e,
-      header_cover,
-      cover_width,
-      cover_height);
+    final CoverProviderType cover_provider = app.getCoverProvider();
+    cover_provider.loadCoverInto(e, header_cover, cover_width, cover_height);
 
     final FrameLayout content_area = this.getContentFrame();
     content_area.removeAllViews();

@@ -21,4 +21,19 @@ public interface CatalogAcquisitionCoverGeneratorType
     URI u,
     int width,
     int height);
+
+  /**
+   * Generate a URI from the given title and author, suitable for use in cover
+   * generation.
+   * 
+   * @param title
+   *          The title
+   * @param author
+   *          The author
+   * @return A URI
+   */
+
+  URI generateURIForTitleAuthor(
+    String title,
+    String author);
 }

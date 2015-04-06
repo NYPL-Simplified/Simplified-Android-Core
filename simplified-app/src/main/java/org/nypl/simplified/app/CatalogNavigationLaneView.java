@@ -222,7 +222,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       new CatalogImageSetView(
         ctx,
         app,
-        app.getPicasso(),
+        app.getCoverProvider(),
         this,
         af.getFeedEntries(),
         this.listener,

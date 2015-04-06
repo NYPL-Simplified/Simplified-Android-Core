@@ -31,7 +31,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -43,7 +42,6 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
-import com.squareup.picasso.Picasso;
 
 /**
  * Global application state.
@@ -146,10 +144,10 @@ import com.squareup.picasso.Picasso;
   private @Nullable BooksType                books;
   private @Nullable ListeningExecutorService catalog_exec_decor;
   private @Nullable ExecutorService          catalog_executor;
+  private @Nullable CoverProviderType        cover_provider;
   private @Nullable URI                      feed_initial_uri;
   private @Nullable OPDSFeedLoaderType       feed_loader;
   private @Nullable HTTPType                 http;
-  private @Nullable Picasso                  picasso;
 
   public BooksType getBooks()
   {
@@ -161,6 +159,11 @@ import com.squareup.picasso.Picasso;
     return NullCheck.notNull(this.catalog_exec_decor);
   }
 
+  public CoverProviderType getCoverProvider()
+  {
+    return NullCheck.notNull(this.cover_provider);
+  }
+
   public URI getFeedInitialURI()
   {
     return NullCheck.notNull(this.feed_initial_uri);
@@ -169,11 +172,6 @@ import com.squareup.picasso.Picasso;
   public OPDSFeedLoaderType getFeedLoader()
   {
     return NullCheck.notNull(this.feed_loader);
-  }
-
-  public Picasso getPicasso()
-  {
-    return NullCheck.notNull(this.picasso);
   }
 
   @Override public void onAccountDataBookLoadFailed(
@@ -266,23 +264,6 @@ import com.squareup.picasso.Picasso;
       final Resources rr = NullCheck.notNull(this.getResources());
 
       /**
-       * Configure picasso for image caching.
-       */
-
-      {
-        final Picasso.Builder pb = new Picasso.Builder(this);
-        pb.defaultBitmapConfig(Bitmap.Config.RGB_565);
-        pb.indicatorsEnabled(true);
-        pb.loggingEnabled(true);
-        pb
-          .addRequestHandler(new CatalogAcquisitionCoverGeneratorRequestHandler(
-            new CatalogAcquisitionCoverGenerator()));
-        pb.executor(in_catalog_executor);
-        final Picasso p = pb.build();
-        this.picasso = p;
-      }
-
-      /**
        * Determine screen details.
        */
 
@@ -342,6 +323,16 @@ import com.squareup.picasso.Picasso;
         Books.newBooks(in_books_executor, p, h, d, books_config);
       this.books = b;
       b.accountLoadBooks(this);
+
+      /**
+       * Configure cover provider.
+       */
+
+      {
+        final CoverProviderType cp =
+          CoverProvider.newCoverProvider(this, b, in_catalog_executor);
+        this.cover_provider = cp;
+      }
 
       Simplified.INSTANCE = this;
     } catch (final Exception e) {

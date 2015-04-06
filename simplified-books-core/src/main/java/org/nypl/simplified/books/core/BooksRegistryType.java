@@ -6,6 +6,10 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 
 public interface BooksRegistryType extends BooksStatusCacheType
 {
+  void bookSnapshot(
+    BookID id,
+    BookSnapshotListenerType listener);
+
   void bookBorrow(
     BookID id,
     OPDSAcquisition acq,
