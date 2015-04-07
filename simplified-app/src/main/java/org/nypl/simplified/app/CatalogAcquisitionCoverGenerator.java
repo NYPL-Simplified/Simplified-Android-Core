@@ -91,8 +91,8 @@ public final class CatalogAcquisitionCoverGenerator implements
     final String author)
   {
     final SortedMap<String, String> params = new TreeMap<String, String>();
-    params.put("title", title);
-    params.put("author", author);
+    params.put("title", NullCheck.notNull(title));
+    params.put("author", NullCheck.notNull(author));
     return URIQueryBuilder.encodeQuery(
       URI.create("generated-cover://localhost/"),
       params);

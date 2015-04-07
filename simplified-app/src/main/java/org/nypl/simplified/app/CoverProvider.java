@@ -76,7 +76,7 @@ import com.squareup.picasso.RequestCreator;
     pb.addRequestHandler(new CatalogAcquisitionCoverGeneratorRequestHandler(
       cover_gen));
     pb.executor(in_exec);
-    final Picasso p = pb.build();
+    final Picasso p = NullCheck.notNull(pb.build());
     return new CoverProvider(p, in_books, cover_gen, in_exec);
   }
 
