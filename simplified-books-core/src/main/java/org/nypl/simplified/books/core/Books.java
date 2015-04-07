@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedBuilderType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
@@ -51,6 +53,61 @@ import com.io7m.junreachable.UnimplementedCodeException;
 @SuppressWarnings("synthetic-access") public final class Books extends
   Observable implements BooksType
 {
+  private static final class AcquisitionFeedTask implements Runnable
+  {
+    private final BooksDirectory                  books_directory;
+    private final String                          id;
+    private final BookAcquisitionFeedListenerType listener;
+    private final String                          title;
+    private final Calendar                        updated;
+    private final URI                             uri;
+
+    public AcquisitionFeedTask(
+      final BooksDirectory in_books_directory,
+      final URI in_uri,
+      final String in_id,
+      final Calendar in_updated,
+      final String in_title,
+      final BookAcquisitionFeedListenerType in_listener)
+    {
+      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.uri = NullCheck.notNull(in_uri);
+      this.id = NullCheck.notNull(in_id);
+      this.updated = NullCheck.notNull(in_updated);
+      this.title = NullCheck.notNull(in_title);
+      this.listener = NullCheck.notNull(in_listener);
+    }
+
+    private OPDSAcquisitionFeed feed()
+      throws IOException
+    {
+      final OPDSAcquisitionFeedBuilderType b =
+        OPDSAcquisitionFeed.newBuilder(
+          this.uri,
+          this.id,
+          this.updated,
+          this.title);
+
+      final List<BookDirectory> dirs = this.books_directory.getBooks();
+      for (int index = 0; index < dirs.size(); ++index) {
+        final BookDirectory dir = NullCheck.notNull(dirs.get(index));
+        final OPDSAcquisitionFeedEntry e = dir.getData();
+        b.addEntry(e);
+      }
+
+      return b.build();
+    }
+
+    @Override public void run()
+    {
+      try {
+        this.listener.onBookAcquisitionFeedSuccess(this.feed());
+      } catch (final Throwable x) {
+        this.listener.onBookAcquisitionFeedFailure(x);
+      }
+    }
+  }
+
   private static final class BorrowTask implements Runnable
   {
     private final OPDSAcquisition        acq;
@@ -237,8 +294,8 @@ import com.io7m.junreachable.UnimplementedCodeException;
     private final DownloaderType       downloader;
     private final BooksObservableType  observable;
     private final BooksRegistryType    registry;
-    private final URI                  uri;
     private final BooksStatusCacheType status_cache;
+    private final URI                  uri;
 
     DownloadOpenAccessTask(
       final BookID in_book_id,
@@ -948,11 +1005,46 @@ import com.io7m.junreachable.UnimplementedCodeException;
     }
   }
 
+  @Override public void booksGetAcquisitionFeed(
+    final URI in_uri,
+    final String in_id,
+    final Calendar in_updated,
+    final String in_title,
+    final BookAcquisitionFeedListenerType in_listener)
+  {
+    NullCheck.notNull(in_uri);
+    NullCheck.notNull(in_id);
+    NullCheck.notNull(in_updated);
+    NullCheck.notNull(in_title);
+    NullCheck.notNull(in_listener);
+
+    this.submitRunnable(new AcquisitionFeedTask(
+      this.books_directory,
+      in_uri,
+      in_id,
+      in_updated,
+      in_title,
+      in_listener));
+  }
+
   @Override public void booksNotifyObserversUnconditionally(
     final BookStatusType status)
   {
     super.setChanged();
     super.notifyObservers(status);
+  }
+
+  @Override public OptionType<BookSnapshot> booksSnapshotGet(
+    final BookID id)
+  {
+    return this.books_status.booksSnapshotGet(id);
+  }
+
+  @Override public void booksSnapshotUpdate(
+    final BookID id,
+    final BookSnapshot snap)
+  {
+    this.books_status.booksSnapshotUpdate(id, snap);
   }
 
   @Override public void booksStatusClearAll()
@@ -1016,18 +1108,5 @@ import com.io7m.junreachable.UnimplementedCodeException;
       };
       this.tasks.put(id, this.exec.submit(rb));
     }
-  }
-
-  @Override public void booksSnapshotUpdate(
-    final BookID id,
-    final BookSnapshot snap)
-  {
-    this.books_status.booksSnapshotUpdate(id, snap);
-  }
-
-  @Override public OptionType<BookSnapshot> booksSnapshotGet(
-    final BookID id)
-  {
-    return this.books_status.booksSnapshotGet(id);
   }
 }

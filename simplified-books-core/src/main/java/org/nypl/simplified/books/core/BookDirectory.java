@@ -141,6 +141,37 @@ import com.io7m.jnull.NullCheck;
     return Option.none();
   }
 
+  public OPDSAcquisitionFeedEntry getData()
+    throws IOException
+  {
+    return FileLocking.withFileLocked(
+      this.file_lock,
+      10,
+      1000,
+      new PartialFunctionType<Unit, OPDSAcquisitionFeedEntry, IOException>() {
+        @Override public OPDSAcquisitionFeedEntry call(
+          final Unit x)
+          throws IOException
+        {
+          return BookDirectory.this.getDataLocked();
+        }
+      });
+  }
+
+  private OPDSAcquisitionFeedEntry getDataLocked()
+    throws IOException
+  {
+    final ObjectInputStream is =
+      new ObjectInputStream(new FileInputStream(this.file_meta));
+    try {
+      return NullCheck.notNull((OPDSAcquisitionFeedEntry) is.readObject());
+    } catch (final ClassNotFoundException e) {
+      throw new IOException(e);
+    } finally {
+      is.close();
+    }
+  }
+
   public File getDirectory()
   {
     return this.directory;

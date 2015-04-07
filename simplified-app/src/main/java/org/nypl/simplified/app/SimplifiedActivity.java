@@ -152,7 +152,7 @@ import com.io7m.jnull.Nullable;
 
     final Map<String, Class<? extends Activity>> dc =
       new HashMap<String, Class<? extends Activity>>();
-    dc.put(books_name, BooksActivity.class);
+    dc.put(books_name, CatalogFeedActivity.class);
     dc.put(catalog_name, CatalogFeedActivity.class);
     dc.put(holds_name, HoldsActivity.class);
     dc.put(settings_name, SettingsActivity.class);
@@ -169,7 +169,9 @@ import com.io7m.jnull.Nullable;
       @Override public Unit call(
         final Bundle b)
       {
-        SimplifiedActivity.setActivityArguments(b, false);
+        final CatalogFeedArgumentsLocalBooks local =
+          new CatalogFeedArgumentsLocalBooks(books_name);
+        CatalogFeedActivity.setActivityArguments(b, local);
         return Unit.unit();
       }
     });
@@ -179,12 +181,13 @@ import com.io7m.jnull.Nullable;
         final Bundle b)
       {
         final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
-        CatalogFeedActivity.setActivityArguments(
-          b,
-          false,
-          NullCheck.notNull(empty),
-          app_name,
-          app.getFeedInitialURI());
+        final CatalogFeedArgumentsRemote remote =
+          new CatalogFeedArgumentsRemote(
+            false,
+            NullCheck.notNull(empty),
+            app_name,
+            app.getFeedInitialURI());
+        CatalogFeedActivity.setActivityArguments(b, remote);
         return Unit.unit();
       }
     });

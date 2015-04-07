@@ -97,11 +97,14 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
         final ImmutableList<CatalogUpStackEntry> stack = p.getRight();
         final CatalogUpStackEntry top = p.getLeft();
-        CatalogFeedActivity.startNewActivity(
-          this,
-          stack,
-          top.getTitle(),
-          top.getURI());
+
+        final CatalogFeedArgumentsRemote remote =
+          new CatalogFeedArgumentsRemote(
+            false,
+            stack,
+            top.getTitle(),
+            top.getURI());
+        CatalogFeedActivity.startNewActivity(this, remote);
         return true;
       }
 
