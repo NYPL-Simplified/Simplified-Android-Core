@@ -1,7 +1,6 @@
 package org.nypl.simplified.app;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicReference;
@@ -11,13 +10,15 @@ import org.nypl.simplified.books.core.BookStatusCancelled;
 import org.nypl.simplified.books.core.BookStatusDone;
 import org.nypl.simplified.books.core.BookStatusDownloading;
 import org.nypl.simplified.books.core.BookStatusFailed;
+import org.nypl.simplified.books.core.BookStatusLoaned;
+import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
+import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
-import org.nypl.simplified.books.core.BookStatusOwned;
 import org.nypl.simplified.books.core.BookStatusPaused;
+import org.nypl.simplified.books.core.BookStatusRequesting;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
-import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
@@ -33,13 +34,11 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 
@@ -48,7 +47,10 @@ import com.squareup.picasso.Callback;
  */
 
 @SuppressWarnings("synthetic-access") public final class CatalogAcquisitionCellView extends
-  FrameLayout implements Observer
+  FrameLayout implements
+  Observer,
+  BookStatusMatcherType<Unit, UnreachableCodeException>,
+  BookStatusLoanedMatcherType<Unit, UnreachableCodeException>
 {
   private static final String TAG;
 
@@ -97,21 +99,18 @@ import com.squareup.picasso.Callback;
   private final TextView                                  cell_downloading_title;
   private final ViewGroup                                 cell_text_layout;
   private final TextView                                  cell_title;
-  private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
   private final CoverProviderType                         cover_provider;
-  private final Map<BookID, Unit>                         requesting;
+  private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
 
   public CatalogAcquisitionCellView(
     final Activity in_activity,
     final CoverProviderType in_cover_provider,
-    final BooksType in_books,
-    final Map<BookID, Unit> in_requesting)
+    final BooksType in_books)
   {
     super(in_activity.getApplicationContext(), null);
 
     this.activity = NullCheck.notNull(in_activity);
     this.cover_provider = NullCheck.notNull(in_cover_provider);
-    this.requesting = NullCheck.notNull(in_requesting);
     this.books = NullCheck.notNull(in_books);
 
     final Context context =
@@ -225,30 +224,37 @@ import com.squareup.picasso.Callback;
     return false;
   }
 
-  private void requestingAdd(
-    final BookID id)
+  private void loadImageAndSetVisibility(
+    final OPDSAcquisitionFeedEntry in_e)
   {
-    Log.d(
-      CatalogAcquisitionCellView.TAG,
-      String.format("request added %s", id));
-    this.requesting.put(id, Unit.unit());
-  }
+    final int in_image_height =
+      this.cell_cover_layout.getLayoutParams().height;
 
-  private boolean requestingGet(
-    final BookID id)
-  {
-    final boolean r = this.requesting.containsKey(id);
-    Log.d(CatalogAcquisitionCellView.TAG, String.format("requesting: %s", r));
-    return r;
-  }
+    final ImageView ci = this.cell_cover_image;
+    final ProgressBar cp = this.cell_cover_progress;
 
-  private void requestingRemove(
-    final BookID id)
-  {
-    Log.d(
-      CatalogAcquisitionCellView.TAG,
-      String.format("request removed %s", id));
-    this.requesting.remove(id);
+    ci.setVisibility(View.INVISIBLE);
+    cp.setVisibility(View.VISIBLE);
+
+    final Callback callback = new Callback() {
+      @Override public void onError()
+      {
+        Log.e(CatalogAcquisitionCellView.TAG, "unable to load image");
+      }
+
+      @Override public void onSuccess()
+      {
+        ci.setVisibility(View.VISIBLE);
+        cp.setVisibility(View.INVISIBLE);
+      }
+    };
+
+    this.cover_provider.loadThumbnailIntoWithCallback(
+      in_e,
+      this.cell_cover_image,
+      (int) (in_image_height * 0.75),
+      in_image_height,
+      callback);
   }
 
   @Override public void update(
@@ -271,16 +277,18 @@ import com.squareup.picasso.Callback;
         UIThread.runOnUIThread(new Runnable() {
           @Override public void run()
           {
-            CatalogAcquisitionCellView.this.viewConfigureCellViewForStatus(
-              CatalogAcquisitionCellView.this.activity,
-              in_entry,
-              id,
-              Option.some(status));
+            status.matchBookStatus(CatalogAcquisitionCellView.this);
           }
         });
       }
     }
   }
+
+  /**
+   * Configure the overall status of the cell. The cell displays a number of
+   * different layouts depending on whether the current book is loaned, fully
+   * downloaded, currently downloading, not loaned, etc.
+   */
 
   public void viewConfigure(
     final OPDSAcquisitionFeedEntry in_e,
@@ -313,166 +321,64 @@ import com.squareup.picasso.Callback;
       final OptionType<BookStatusType> stat =
         this.books.booksStatusGet(book_id);
 
-      this.viewConfigureCellViewForStatus(this.activity, in_e, book_id, stat);
-    }
-  }
-
-  private void viewConfigureCellAcquisitionButton(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry e,
-    final BookID id,
-    final OPDSAcquisition a)
-  {
-    switch (a.getType()) {
-      case ACQUISITION_BORROW:
-      {
-        final CatalogAcquisitionButton b =
-          new CatalogAcquisitionButton(ctx, NullCheck.notNull(a));
-        b.setTextSize(12.0f);
-
-        final CatalogAcquisitionController b_controller =
-          new CatalogAcquisitionController(
-            this.activity,
-            this.books,
-            id,
-            a,
-            e.getTitle());
-
-        b.setOnClickListener(new OnClickListener() {
-          @Override public void onClick(
-            final @Nullable View v)
-          {
-            CatalogAcquisitionCellView.this.requestingAdd(id);
-            b.setEnabled(false);
-            b_controller.onClick(v);
-          }
-        });
-
-        b.setEnabled(this.requestingGet(id) == false);
-        this.cell_buttons.addView(b);
-        break;
-      }
-
-      case ACQUISITION_OPEN_ACCESS:
-      case ACQUISITION_SAMPLE:
-      case ACQUISITION_SUBSCRIBE:
-      case ACQUISITION_BUY:
-      case ACQUISITION_GENERIC:
-      {
-        /**
-         * TODO: Not yet supported.
-         */
-
-        break;
+      if (stat.isSome()) {
+        final BookStatusType some = ((Some<BookStatusType>) stat).get();
+        some.matchBookStatus(this);
+      } else {
+        this.onBookStatusNone(in_e, book_id);
       }
     }
   }
 
-  private void viewConfigureCellAcquisitionButtons(
-    final Context ctx,
+  private void onBookStatusNone(
     final OPDSAcquisitionFeedEntry e,
     final BookID id)
   {
-    UIThread.checkIsUIThread();
+    Log.d(CatalogAcquisitionCellView.TAG, "status none");
+    this.cell_downloading.setVisibility(View.GONE);
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
 
-    this.cell_buttons.removeAllViews();
+    this.loadImageAndSetVisibility(e);
 
-    for (final OPDSAcquisition a : e.getAcquisitions()) {
-      this.viewConfigureCellAcquisitionButton(ctx, e, id, a);
-    }
+    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
+      this.activity,
+      this.books,
+      this.cell_buttons,
+      e,
+      id);
   }
 
-  /**
-   * Configure the overall status of the cell. The cell displays a number of
-   * different layouts depending on whether the current book is loaned, fully
-   * downloaded, currently downloading, not loaned, etc.
-   */
-
-  private void viewConfigureCellViewForStatus(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id,
-    final OptionType<BookStatusType> in_stat_opt)
+  @Override public Unit onBookStatusLoanedType(
+    final BookStatusLoanedType o)
   {
-    UIThread.checkIsUIThread();
-
-    if (in_stat_opt.isSome()) {
-      final Some<BookStatusType> some = (Some<BookStatusType>) in_stat_opt;
-      final BookStatusType status = some.get();
-      status
-        .matchBookStatus(new BookStatusMatcherType<Unit, UnreachableCodeException>() {
-          @Override public Unit onBookStatusCancelled(
-            final BookStatusCancelled c)
-          {
-            CatalogAcquisitionCellView.this
-              .viewConfigureCellViewForStatusCancelled(ctx, in_e, book_id, c);
-            return Unit.unit();
-          }
-
-          @Override public Unit onBookStatusDone(
-            final BookStatusDone d)
-          {
-            CatalogAcquisitionCellView.this
-              .viewConfigureCellViewForStatusDone(ctx, in_e, book_id, d);
-            return Unit.unit();
-          }
-
-          @Override public Unit onBookStatusDownloading(
-            final BookStatusDownloading d)
-          {
-            CatalogAcquisitionCellView.this
-              .viewConfigureCellViewForStatusDownloading(
-                ctx,
-                in_e,
-                book_id,
-                d);
-            return Unit.unit();
-          }
-
-          @Override public Unit onBookStatusFailed(
-            final BookStatusFailed f)
-          {
-            CatalogAcquisitionCellView.this
-              .viewConfigureCellViewForStatusFailed(ctx, in_e, book_id, f);
-            return Unit.unit();
-          }
-
-          @Override public Unit onBookStatusOwned(
-            final BookStatusOwned o)
-          {
-            CatalogAcquisitionCellView.this
-              .viewConfigureCellViewForStatusOwned(ctx, in_e, book_id, o);
-            return Unit.unit();
-          }
-
-          @Override public Unit onBookStatusPaused(
-            final BookStatusPaused p)
-          {
-            CatalogAcquisitionCellView.this
-              .viewConfigureCellViewForStatusPaused(ctx, in_e, book_id, p);
-            return Unit.unit();
-          }
-        });
-    } else {
-      this.viewConfigureCellViewForStatusNone(ctx, in_e, book_id);
-    }
+    return o.matchBookLoanedStatus(this);
   }
 
-  private void viewConfigureCellViewForStatusCancelled(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id,
+  @Override public Unit onBookStatusRequesting(
+    final BookStatusRequesting s)
+  {
+    Log.d(CatalogAcquisitionCellView.TAG, "status requesting");
+    this.cell_downloading.setVisibility(View.GONE);
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+
+    this.loadImageAndSetVisibility(NullCheck.notNull(this.entry.get()));
+    this.cell_buttons.removeAllViews();
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusCancelled(
     final BookStatusCancelled c)
   {
-    this.books.bookDownloadAcknowledge(book_id);
-    this.requestingRemove(book_id);
-    this.viewConfigureCellViewForStatusNone(ctx, in_e, book_id);
+    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
+    final BookID id = c.getID();
+    this.books.bookDownloadAcknowledge(id);
+    this.onBookStatusNone(e, id);
+    return Unit.unit();
   }
 
-  private void viewConfigureCellViewForStatusDone(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id,
+  @Override public Unit onBookStatusDone(
     final BookStatusDone d)
   {
     Log.d(CatalogAcquisitionCellView.TAG, "status done");
@@ -480,49 +386,19 @@ import com.squareup.picasso.Callback;
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
 
-    this.loadImage(in_e);
-    this.requestingRemove(book_id);
+    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(e);
 
+    this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
-    final Button b = new Button(ctx);
+    final Button b = new Button(this.activity);
     b.setText("Read");
     b.setTextSize(12.0f);
     this.cell_buttons.addView(b);
+    return Unit.unit();
   }
 
-  private void loadImage(
-    final OPDSAcquisitionFeedEntry in_e)
-  {
-    final int in_image_height =
-      this.cell_cover_layout.getLayoutParams().height;
-
-    final ImageView ci = this.cell_cover_image;
-    final ProgressBar cp = this.cell_cover_progress;
-    final Callback callback = new Callback() {
-      @Override public void onSuccess()
-      {
-        ci.setVisibility(View.VISIBLE);
-        cp.setVisibility(View.INVISIBLE);
-      }
-
-      @Override public void onError()
-      {
-        Log.e(CatalogAcquisitionCellView.TAG, "unable to load image");
-      }
-    };
-
-    this.cover_provider.loadThumbnailIntoWithCallback(
-      in_e,
-      this.cell_cover_image,
-      (int) (in_image_height * 0.75),
-      in_image_height,
-      callback);
-  }
-
-  private void viewConfigureCellViewForStatusDownloading(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id,
+  @Override public Unit onBookStatusDownloading(
     final BookStatusDownloading d)
   {
     Log.d(CatalogAcquisitionCellView.TAG, "status downloading");
@@ -530,40 +406,32 @@ import com.squareup.picasso.Callback;
     this.cell_book.setVisibility(View.GONE);
     this.cell_downloading_failed.setVisibility(View.GONE);
 
+    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
+    final BookID id = d.getID();
+
     this.cell_downloading_title.setText(CatalogAcquisitionCellView
-      .makeTitleText(in_e));
+      .makeTitleText(e));
     this.cell_downloading_authors.setText(CatalogAcquisitionCellView
-      .makeAuthorText(in_e));
+      .makeAuthorText(e));
 
     final DownloadSnapshot snap = d.getSnapshot();
-    final long max = snap.statusGetMaximumBytes();
-    final long cur = snap.statusGetCurrentBytes();
-
-    if (max < 0) {
-      this.cell_downloading_progress.setIndeterminate(true);
-    } else {
-      final double perc = ((double) cur / (double) max) * 100.0;
-      final int iperc = (int) perc;
-      this.cell_downloading_progress.setIndeterminate(false);
-      this.cell_downloading_progress.setMax(100);
-      this.cell_downloading_progress.setProgress(iperc);
-      this.cell_downloading_percent_text
-        .setText(String.format("%d%%", iperc));
-    }
+    CatalogAcquisitionDownloadProgressBar.setProgressBar(
+      snap,
+      this.cell_downloading_percent_text,
+      this.cell_downloading_progress);
 
     this.cell_downloading_cancel.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)
       {
-        CatalogAcquisitionCellView.this.books.bookDownloadCancel(book_id);
+        CatalogAcquisitionCellView.this.books.bookDownloadCancel(id);
       }
     });
+
+    return Unit.unit();
   }
 
-  private void viewConfigureCellViewForStatusFailed(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id,
+  @Override public Unit onBookStatusFailed(
     final BookStatusFailed f)
   {
     Log.d(CatalogAcquisitionCellView.TAG, "status failed");
@@ -571,58 +439,35 @@ import com.squareup.picasso.Callback;
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.VISIBLE);
 
-    final String text;
     final DownloadSnapshot snap = f.getSnapshot();
-    if (snap.getError().isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) snap.getError();
-      final Throwable e = some.get();
-      text = String.format("Download failed: %s", e);
-    } else {
-      text = "Unknown error";
-    }
-
-    this.cell_downloading_failed_title.setText(CatalogAcquisitionCellView
-      .makeTitleText(in_e));
-    this.cell_downloading_failed_text.setText(text);
+    this.cell_downloading_failed_title.setText("Download failed");
+    this.cell_downloading_failed_text.setText(snap.getError().toString());
+    return Unit.unit();
   }
 
-  private void viewConfigureCellViewForStatusNone(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id)
+  @Override public Unit onBookStatusLoaned(
+    final BookStatusLoaned o)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status none");
+    Log.d(CatalogAcquisitionCellView.TAG, "status loaned");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
 
-    this.cell_cover_image.setVisibility(View.VISIBLE);
-    this.cell_cover_progress.setVisibility(View.INVISIBLE);
-    this.loadImage(in_e);
-    this.viewConfigureCellAcquisitionButtons(ctx, in_e, book_id);
+    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(e);
+
+    this.cell_buttons.setVisibility(View.VISIBLE);
+    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
+      this.activity,
+      this.books,
+      this.cell_buttons,
+      e,
+      o.getID());
+
+    return Unit.unit();
   }
 
-  private void viewConfigureCellViewForStatusOwned(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id,
-    final BookStatusOwned o)
-  {
-    Log.d(CatalogAcquisitionCellView.TAG, "status owned");
-    this.cell_downloading.setVisibility(View.GONE);
-    this.cell_book.setVisibility(View.VISIBLE);
-    this.cell_downloading_failed.setVisibility(View.GONE);
-
-    this.cell_cover_image.setVisibility(View.VISIBLE);
-    this.cell_cover_progress.setVisibility(View.INVISIBLE);
-    this.loadImage(in_e);
-    this.viewConfigureCellAcquisitionButtons(ctx, in_e, book_id);
-  }
-
-  private void viewConfigureCellViewForStatusPaused(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry in_e,
-    final BookID book_id,
+  @Override public Unit onBookStatusPaused(
     final BookStatusPaused p)
   {
     Log.d(CatalogAcquisitionCellView.TAG, "status paused");
@@ -630,6 +475,6 @@ import com.squareup.picasso.Callback;
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
 
-    throw new UnimplementedCodeException();
+    return Unit.unit();
   }
 }

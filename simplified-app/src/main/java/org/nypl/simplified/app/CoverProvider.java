@@ -72,7 +72,7 @@ import com.squareup.picasso.RequestCreator;
     final Picasso.Builder pb = new Picasso.Builder(in_c);
     pb.defaultBitmapConfig(Bitmap.Config.RGB_565);
     pb.indicatorsEnabled(true);
-    pb.loggingEnabled(true);
+    pb.loggingEnabled(false);
     pb.addRequestHandler(new CatalogAcquisitionCoverGeneratorRequestHandler(
       cover_gen));
     pb.executor(in_exec);

@@ -150,14 +150,23 @@ import com.io7m.junreachable.UnimplementedCodeException;
       throws Exception
     {
       switch (this.acq.getType()) {
+        case ACQUISITION_GENERIC:
+        case ACQUISITION_OPEN_ACCESS:
+        {
+          /*
+           * Nothing to do: If the book is open access, it doesn't need to be
+           * borrowed. If we've reached a generic acquisition, the book is
+           * already borrowed.
+           */
+
+          break;
+        }
         case ACQUISITION_BORROW:
         {
           this.runAcquisitionBorrow();
           break;
         }
-        case ACQUISITION_OPEN_ACCESS:
         case ACQUISITION_BUY:
-        case ACQUISITION_GENERIC:
         case ACQUISITION_SAMPLE:
         case ACQUISITION_SUBSCRIBE:
         {
@@ -189,7 +198,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
         }
       });
 
-      this.books_registry.booksStatusUpdateOwned(this.id);
+      this.books_registry.booksStatusUpdateLoaned(this.id);
     }
   }
 
@@ -238,7 +247,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
         final BookID id = book_dir.getID();
         try {
           final BookSnapshot snap = book_dir.getSnapshot();
-          final BookStatusType status =
+          final BookStatusLoanedType status =
             BookStatus.fromBookSnapshot(this.downloader, id, snap);
           this.books.booksStatusUpdate(id, status);
           this.books.booksSnapshotUpdate(id, snap);
@@ -810,7 +819,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       book_dir.setData(cover, e);
 
       final BookSnapshot snap = book_dir.getSnapshot();
-      final BookStatusType status =
+      final BookStatusLoanedType status =
         BookStatus.fromBookSnapshot(this.downloader, book_id, snap);
       this.books.booksStatusUpdate(book_id, status);
       this.status_cache.booksSnapshotUpdate(book_id, snap);
@@ -1060,16 +1069,16 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   @Override public void booksStatusUpdate(
     final BookID id,
-    final BookStatusType s)
+    final BookStatusLoanedType s)
   {
     this.books_status.booksStatusUpdate(id, s);
     this.booksNotifyObserversUnconditionally(s);
   }
 
-  @Override public void booksStatusUpdateOwned(
+  @Override public void booksStatusUpdateLoaned(
     final BookID id)
   {
-    this.books_status.booksStatusUpdateOwned(id);
+    this.books_status.booksStatusUpdateLoaned(id);
   }
 
   private void stopAllTasks()
@@ -1108,5 +1117,11 @@ import com.io7m.junreachable.UnimplementedCodeException;
       };
       this.tasks.put(id, this.exec.submit(rb));
     }
+  }
+
+  @Override public void booksStatusUpdateRequesting(
+    final BookID id)
+  {
+    this.books_status.booksStatusUpdateRequesting(id);
   }
 }

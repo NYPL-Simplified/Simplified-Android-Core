@@ -150,14 +150,14 @@ public final class CatalogAcquisitionController implements
 
   @Override public void onLoginAborted()
   {
-    // Nothing to do
+    // Nothing
   }
 
   @Override public void onLoginFailure(
     final OptionType<Throwable> error,
     final String message)
   {
-    // Nothing to do
+    // Nothing
   }
 
   @Override public void onLoginSuccess()
@@ -175,6 +175,7 @@ public final class CatalogAcquisitionController implements
     Log.d(CatalogAcquisitionController.TAG, m);
 
     switch (this.acq.getType()) {
+      case ACQUISITION_GENERIC:
       case ACQUISITION_BORROW:
       {
         this.books.bookDownloadOpenAccess(
@@ -185,7 +186,6 @@ public final class CatalogAcquisitionController implements
       }
       case ACQUISITION_OPEN_ACCESS:
       case ACQUISITION_BUY:
-      case ACQUISITION_GENERIC:
       case ACQUISITION_SAMPLE:
       case ACQUISITION_SUBSCRIBE:
       {

@@ -10,8 +10,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
     android:minHeight="160dp"
     android:orientation="horizontal">
@@ -87,8 +87,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
     android:background="@color/notification_background"
     android:orientation="vertical">
 
@@ -102,13 +102,65 @@
       android:textColor="@color/notification_foreground"/>
   </LinearLayout>
 
+  <RelativeLayout
+    android:id="@+id/book_downloading"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+      android:id="@+id/book_downloading_inner"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:orientation="horizontal">
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/catalog_downloading"
+        android:textSize="10sp"/>
+
+      <ProgressBar
+        android:id="@+id/book_downloading_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="10"/>
+
+      <TextView
+        android:id="@+id/book_downloading_percent_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="right"
+        android:paddingLeft="16dp"
+        android:text="0%"
+        android:textAlignment="gravity"
+        android:textSize="10sp"/>
+    </LinearLayout>
+
+    <Button
+      android:id="@+id/book_downloading_cancel"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_below="@id/book_downloading_inner"
+      android:layout_centerHorizontal="true"
+      android:text="@string/catalog_cancel_downloading"
+      android:textSize="10sp"/>
+  </RelativeLayout>
+
   <LinearLayout
     android:id="@+id/book_buttons"
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:layout_marginBottom="16dp"
-    android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
     android:gravity="center"
     android:orientation="horizontal">
   </LinearLayout>
@@ -118,8 +170,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="16dp"
-    android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
     android:orientation="vertical">
 
     <View
@@ -155,8 +207,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
     android:orientation="vertical">
 
     <TextView

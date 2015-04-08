@@ -64,7 +64,7 @@ public final class CatalogAcquisitionFeed implements
   private final OPDSFeedLoaderType                          loader;
   private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
   private final AtomicReference<OptionType<URI>>            uri_next;
-  private final Map<BookID, Unit>                           requesting;
+  private final Map<BookID, CatalogAcquisitionController>   acq_controllers;
 
   public CatalogAcquisitionFeed(
     final Context in_context,
@@ -88,7 +88,8 @@ public final class CatalogAcquisitionFeed implements
         new ArrayList<OPDSAcquisitionFeedEntry>());
     in_adapter.addAll(in_feed.getFeedEntries());
 
-    this.requesting = new ConcurrentHashMap<BookID, Unit>();
+    this.acq_controllers =
+      new ConcurrentHashMap<BookID, CatalogAcquisitionController>();
     this.entries_received = new ConcurrentHashMap<String, Unit>();
     this.adapter = in_adapter;
     this.loader = NullCheck.notNull(in_feed_loader);
@@ -152,8 +153,7 @@ public final class CatalogAcquisitionFeed implements
         new CatalogAcquisitionCellView(
           this.activity,
           app.getCoverProvider(),
-          this.books,
-          this.requesting);
+          this.books);
     }
 
     cv.viewConfigure(e, this.listener);

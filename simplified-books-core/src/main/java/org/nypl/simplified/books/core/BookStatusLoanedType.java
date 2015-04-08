@@ -1,20 +1,14 @@
 package org.nypl.simplified.books.core;
 
 /**
- * The type of book status.
+ * The given book is owned/loaned.
  */
 
-public interface BookStatusType
+public interface BookStatusLoanedType extends BookStatusType
 {
   /**
-   * @return The unique identifier of the book
-   */
-
-  BookID getID();
-
-  /**
    * Match on the type of status.
-   * 
+   *
    * @param m
    *          The matcher
    * @return The value returned by the matcher
@@ -22,7 +16,7 @@ public interface BookStatusType
    *           If the matcher raises <tt>E</tt>
    */
 
-  <A, E extends Exception> A matchBookStatus(
-    final BookStatusMatcherType<A, E> m)
+  <A, E extends Exception> A matchBookLoanedStatus(
+    final BookStatusLoanedMatcherType<A, E> m)
     throws E;
 }

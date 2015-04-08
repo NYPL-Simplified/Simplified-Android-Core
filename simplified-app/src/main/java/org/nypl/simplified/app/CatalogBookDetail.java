@@ -4,13 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
-import android.content.Context;
 import android.content.res.Resources;
-import android.view.View;
-import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
@@ -26,24 +22,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 final class CatalogBookDetail
 {
-  static void configureAcquisitions(
-    final Context ctx,
-    final OPDSAcquisitionFeedEntry e,
-    final ViewGroup acquisitions)
-  {
-    final List<OPDSAcquisition> aqs = e.getAcquisitions();
-    if (aqs.isEmpty() == false) {
-      for (int index = 0; index < aqs.size(); ++index) {
-        final OPDSAcquisition a = NullCheck.notNull(aqs.get(index));
-        final CatalogAcquisitionButton b =
-          new CatalogAcquisitionButton(ctx, a);
-        acquisitions.addView(b);
-      }
-    } else {
-      acquisitions.setVisibility(View.GONE);
-    }
-  }
-
   static void configureSummaryPublisher(
     final OPDSAcquisitionFeedEntry e,
     final TextView summary_publisher)

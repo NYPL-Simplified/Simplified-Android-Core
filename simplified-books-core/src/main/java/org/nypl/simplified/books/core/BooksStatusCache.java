@@ -58,20 +58,30 @@ public final class BooksStatusCache implements BooksStatusCacheType
 
   @Override public synchronized void booksStatusUpdate(
     final BookID id,
-    final BookStatusType s)
+    final BookStatusLoanedType s)
   {
     final BookID nid = NullCheck.notNull(id);
-    final BookStatusType ns = NullCheck.notNull(s);
+    final BookStatusLoanedType ns = NullCheck.notNull(s);
     this.status.put(nid, ns);
   }
 
-  @Override public synchronized void booksStatusUpdateOwned(
+  @Override public synchronized void booksStatusUpdateLoaned(
     final BookID id)
   {
     final BookID nid = NullCheck.notNull(id);
     if (this.status.containsKey(nid)) {
       return;
     }
-    this.status.put(nid, new BookStatusOwned(nid));
+    this.status.put(nid, new BookStatusLoaned(nid));
+  }
+
+  @Override public synchronized void booksStatusUpdateRequesting(
+    final BookID id)
+  {
+    final BookID nid = NullCheck.notNull(id);
+    if (this.status.containsKey(nid)) {
+      return;
+    }
+    this.status.put(nid, new BookStatusRequesting(nid));
   }
 }

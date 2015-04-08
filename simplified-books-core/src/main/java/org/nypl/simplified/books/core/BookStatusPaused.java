@@ -4,6 +4,10 @@ import org.nypl.simplified.downloader.core.DownloadSnapshot;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * The given book was downloading but the download is paused.
+ */
+
 public final class BookStatusPaused implements BookStatusWithSnapshotType
 {
   private final BookID           id;
@@ -17,20 +21,27 @@ public final class BookStatusPaused implements BookStatusWithSnapshotType
     this.snap = NullCheck.notNull(in_snap);
   }
 
+  @Override public BookID getID()
+  {
+    return this.id;
+  }
+
   @Override public DownloadSnapshot getSnapshot()
   {
     return this.snap;
   }
 
-  @Override public BookID getID()
+  @Override public <A, E extends Exception> A matchBookLoanedStatus(
+    final BookStatusLoanedMatcherType<A, E> m)
+    throws E
   {
-    return this.id;
+    return m.onBookStatusPaused(this);
   }
 
   @Override public <A, E extends Exception> A matchBookStatus(
     final BookStatusMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusPaused(this);
+    return m.onBookStatusLoanedType(this);
   }
 }

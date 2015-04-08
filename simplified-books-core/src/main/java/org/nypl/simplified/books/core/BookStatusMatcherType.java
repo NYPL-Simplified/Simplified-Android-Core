@@ -1,28 +1,21 @@
 package org.nypl.simplified.books.core;
 
+/**
+ * The type of matchers for status types.
+ *
+ * @param <A>
+ *          The type of returned values
+ * @param <E>
+ *          The type of raised exceptions
+ */
+
 public interface BookStatusMatcherType<A, E extends Exception>
 {
-  A onBookStatusCancelled(
-    BookStatusCancelled c)
+  A onBookStatusLoanedType(
+    BookStatusLoanedType o)
     throws E;
 
-  A onBookStatusDone(
-    BookStatusDone d)
-    throws E;
-
-  A onBookStatusDownloading(
-    BookStatusDownloading d)
-    throws E;
-
-  A onBookStatusFailed(
-    BookStatusFailed f)
-    throws E;
-
-  A onBookStatusOwned(
-    BookStatusOwned o)
-    throws E;
-
-  A onBookStatusPaused(
-    BookStatusPaused p)
+  A onBookStatusRequesting(
+    BookStatusRequesting s)
     throws E;
 }

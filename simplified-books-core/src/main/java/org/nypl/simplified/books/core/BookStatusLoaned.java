@@ -7,11 +7,11 @@ import com.io7m.jnull.NullCheck;
  * ready for reading.
  */
 
-public final class BookStatusOwned implements BookStatusType
+public final class BookStatusLoaned implements BookStatusLoanedType
 {
   private final BookID id;
 
-  public BookStatusOwned(
+  public BookStatusLoaned(
     final BookID in_id)
   {
     this.id = NullCheck.notNull(in_id);
@@ -22,17 +22,24 @@ public final class BookStatusOwned implements BookStatusType
     return this.id;
   }
 
+  @Override public <A, E extends Exception> A matchBookLoanedStatus(
+    final BookStatusLoanedMatcherType<A, E> m)
+    throws E
+  {
+    return m.onBookStatusLoaned(this);
+  }
+
   @Override public <A, E extends Exception> A matchBookStatus(
     final BookStatusMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusOwned(this);
+    return m.onBookStatusLoanedType(this);
   }
 
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[BookStatusOwned ");
+    b.append("[BookStatusLoaned ");
     b.append(this.id);
     b.append("]");
     return NullCheck.notNull(b.toString());

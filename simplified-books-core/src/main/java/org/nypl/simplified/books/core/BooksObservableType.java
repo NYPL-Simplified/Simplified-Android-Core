@@ -11,11 +11,11 @@ public interface BooksObservableType
   void addObserver(
     Observer o);
 
+  void booksNotifyObserversUnconditionally(
+    BookStatusType status);
+
   void deleteObserver(
     Observer o);
 
   void deleteObservers();
-
-  void booksNotifyObserversUnconditionally(
-    BookStatusType status);
 }

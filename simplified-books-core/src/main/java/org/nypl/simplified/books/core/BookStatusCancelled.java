@@ -5,7 +5,7 @@ import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import com.io7m.jnull.NullCheck;
 
 /**
- * The given failed to download properly.
+ * The given book was cancelled during the download.
  */
 
 public final class BookStatusCancelled implements BookStatusWithSnapshotType
@@ -31,10 +31,17 @@ public final class BookStatusCancelled implements BookStatusWithSnapshotType
     return this.snap;
   }
 
+  @Override public <A, E extends Exception> A matchBookLoanedStatus(
+    final BookStatusLoanedMatcherType<A, E> m)
+    throws E
+  {
+    return m.onBookStatusCancelled(this);
+  }
+
   @Override public <A, E extends Exception> A matchBookStatus(
     final BookStatusMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusCancelled(this);
+    return m.onBookStatusLoanedType(this);
   }
 }

@@ -11,12 +11,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class BookStatus
 {
-  private BookStatus()
-  {
-    throw new UnreachableCodeException();
-  }
-
-  public static BookStatusType fromBookSnapshot(
+  public static BookStatusLoanedType fromBookSnapshot(
     final DownloaderType downloader,
     final BookID id,
     final BookSnapshot snap)
@@ -50,13 +45,13 @@ public final class BookStatus
 
     /**
      * If there was no book, no valid download, then the book is simply
-     * "owned".
+     * "loaned".
      */
 
-    return new BookStatusOwned(id);
+    return new BookStatusLoaned(id);
   }
 
-  public static BookStatusType fromDownloadStatus(
+  public static BookStatusLoanedType fromDownloadStatus(
     final BookID id,
     final DownloadSnapshot status)
   {
@@ -75,6 +70,11 @@ public final class BookStatus
         return new BookStatusPaused(id, status);
     }
 
+    throw new UnreachableCodeException();
+  }
+
+  private BookStatus()
+  {
     throw new UnreachableCodeException();
   }
 }

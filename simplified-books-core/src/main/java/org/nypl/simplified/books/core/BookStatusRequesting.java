@@ -3,14 +3,15 @@ package org.nypl.simplified.books.core;
 import com.io7m.jnull.NullCheck;
 
 /**
- * The given book is downloaded and available for reading.
+ * The given book is being requested but it is not yet known if the book is
+ * loaned or not.
  */
 
-public final class BookStatusDone implements BookStatusLoanedType
+public final class BookStatusRequesting implements BookStatusType
 {
   private final BookID id;
 
-  public BookStatusDone(
+  public BookStatusRequesting(
     final BookID in_id)
   {
     this.id = NullCheck.notNull(in_id);
@@ -21,17 +22,10 @@ public final class BookStatusDone implements BookStatusLoanedType
     return this.id;
   }
 
-  @Override public <A, E extends Exception> A matchBookLoanedStatus(
-    final BookStatusLoanedMatcherType<A, E> m)
-    throws E
-  {
-    return m.onBookStatusDone(this);
-  }
-
   @Override public <A, E extends Exception> A matchBookStatus(
     final BookStatusMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusLoanedType(this);
+    return m.onBookStatusRequesting(this);
   }
 }

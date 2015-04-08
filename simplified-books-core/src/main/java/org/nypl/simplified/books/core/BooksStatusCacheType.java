@@ -18,8 +18,11 @@ public interface BooksStatusCacheType
 
   void booksStatusUpdate(
     BookID id,
-    BookStatusType s);
+    BookStatusLoanedType s);
 
-  void booksStatusUpdateOwned(
+  void booksStatusUpdateLoaned(
+    BookID id);
+
+  void booksStatusUpdateRequesting(
     BookID id);
 }
