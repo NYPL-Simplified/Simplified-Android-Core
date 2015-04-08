@@ -41,6 +41,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import com.squareup.picasso.Callback;
 
 /**
  * A single cell in an acquisition list or grid.
@@ -102,14 +103,14 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   public CatalogAcquisitionCellView(
     final Activity in_activity,
-    final CoverProviderType in_picasso,
+    final CoverProviderType in_cover_provider,
     final BooksType in_books,
     final Map<BookID, Unit> in_requesting)
   {
     super(in_activity.getApplicationContext(), null);
 
     this.activity = NullCheck.notNull(in_activity);
-    this.cover_provider = NullCheck.notNull(in_picasso);
+    this.cover_provider = NullCheck.notNull(in_cover_provider);
     this.requesting = NullCheck.notNull(in_requesting);
     this.books = NullCheck.notNull(in_books);
 
@@ -403,7 +404,6 @@ import com.io7m.junreachable.UnreachableCodeException;
           @Override public Unit onBookStatusCancelled(
             final BookStatusCancelled c)
           {
-
             CatalogAcquisitionCellView.this
               .viewConfigureCellViewForStatusCancelled(ctx, in_e, book_id, c);
             return Unit.unit();
@@ -496,11 +496,27 @@ import com.io7m.junreachable.UnreachableCodeException;
     final int in_image_height =
       this.cell_cover_layout.getLayoutParams().height;
 
-    this.cover_provider.loadThumbnailInto(
+    final ImageView ci = this.cell_cover_image;
+    final ProgressBar cp = this.cell_cover_progress;
+    final Callback callback = new Callback() {
+      @Override public void onSuccess()
+      {
+        ci.setVisibility(View.VISIBLE);
+        cp.setVisibility(View.INVISIBLE);
+      }
+
+      @Override public void onError()
+      {
+        Log.e(CatalogAcquisitionCellView.TAG, "unable to load image");
+      }
+    };
+
+    this.cover_provider.loadThumbnailIntoWithCallback(
       in_e,
       this.cell_cover_image,
       (int) (in_image_height * 0.75),
-      in_image_height);
+      in_image_height,
+      callback);
   }
 
   private void viewConfigureCellViewForStatusDownloading(
