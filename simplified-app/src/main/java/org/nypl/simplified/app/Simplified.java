@@ -248,11 +248,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       Log.d(Simplified.TAG, "initializing application context");
 
-      {
-        final int cores = Runtime.getRuntime().availableProcessors();
-        Log.d(Simplified.TAG, String.format("%d cores available", cores));
-      }
-
       final ExecutorService in_catalog_executor =
         Simplified.namedThreadPool(3, "catalog");
       final ExecutorService in_books_executor =
