@@ -112,9 +112,11 @@ public final class CatalogBookDialog extends DialogFragment implements
     bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
 
+    final Resources rr = NullCheck.notNull(this.getResources());
     final Button b = new Button(this.getActivity());
-    b.setText("Read");
+    b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
     b.setTextSize(12.0f);
+    b.setOnClickListener(new CatalogBookRead(this.getActivity(), d.getID()));
     bb.addView(b);
     return Unit.unit();
   }

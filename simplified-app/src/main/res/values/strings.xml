@@ -27,6 +27,7 @@
   <string name="catalog_book_open_access">Download</string>
   <string name="catalog_book_sample">Sample</string>
   <string name="catalog_book_subscribe">Subscribe</string>
+  <string name="catalog_book_read">Read</string>
 
   <!-- Settings strings -->
   <string name="settings">Settings</string>

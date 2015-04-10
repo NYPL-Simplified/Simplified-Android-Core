@@ -23,6 +23,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -391,9 +392,13 @@ import com.squareup.picasso.Callback;
 
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
+
+    final Resources rr = NullCheck.notNull(this.getResources());
     final Button b = new Button(this.activity);
-    b.setText("Read");
+    b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
     b.setTextSize(12.0f);
+    b.setOnClickListener(new CatalogBookRead(this.activity, d.getID()));
+
     this.cell_buttons.addView(b);
     return Unit.unit();
   }

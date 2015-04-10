@@ -43,6 +43,11 @@
       android:name=".SettingsActivity"
       android:exported="false">
     </activity>
+    <activity
+      android:name=".ReaderActivity"
+      android:process=".ReaderActivityProcess"
+      android:exported="false">
+    </activity>
   </application>
 
 </manifest>
