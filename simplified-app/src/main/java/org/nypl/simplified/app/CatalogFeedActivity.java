@@ -63,8 +63,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private final class OpenSearchQueryHandler implements OnQueryTextListener
   {
-    private final URI                      base;
     private final CatalogFeedArgumentsType args;
+    private final URI                      base;
 
     OpenSearchQueryHandler(
       final CatalogFeedArgumentsType in_args,
@@ -189,6 +189,39 @@ import com.io7m.junreachable.UnreachableCodeException;
     bar.setTitle(title);
   }
 
+  private CatalogFeedArgumentsType getArguments()
+  {
+    /**
+     * Attempt to fetch arguments.
+     */
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final Intent i = NullCheck.notNull(this.getIntent());
+    final Bundle a = i.getExtras();
+    if (a != null) {
+      return NullCheck.notNull((CatalogFeedArgumentsType) a
+        .getSerializable(CatalogFeedActivity.CATALOG_ARGS));
+    }
+
+    /**
+     * If there were no arguments (because, for example, this activity is the
+     * initial one started for the app), synthesize some.
+     */
+
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final boolean in_drawer_open = true;
+    final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
+    final String in_title =
+      NullCheck.notNull(rr.getString(R.string.app_name));
+    final URI in_uri = app.getFeedInitialURI();
+
+    return new CatalogFeedArgumentsRemote(
+      in_drawer_open,
+      NullCheck.notNull(empty),
+      in_title,
+      in_uri);
+  }
+
   private ImmutableList<CatalogUpStackEntry> newUpStack(
     final URI feed_uri,
     final String feed_title)
@@ -269,7 +302,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final URI feed_uri = af.getFeedURI();
     final ImmutableList<CatalogUpStackEntry> new_up_stack =
       this.newUpStack(feed_uri, args.getTitle());
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
 
     final CatalogAcquisitionFeedListenerType listener =
       new CatalogAcquisitionFeedListenerType() {
@@ -296,12 +329,45 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.cancellable = f;
   }
 
+  @Override public void onBookAcquisitionFeedFailure(
+    final Throwable e)
+  {
+    if (e instanceof CancellationException) {
+      Log.d(CatalogFeedActivity.TAG, "Cancelled feed");
+      return;
+    }
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogFeedActivity.this.onFeedLoadingFailureUI(e);
+      }
+    });
+  }
+
+  @Override public void onBookAcquisitionFeedSuccess(
+    final OPDSAcquisitionFeed f)
+  {
+    this.onAcquisitionFeed(f);
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
     super.onCreate(state);
     final CatalogFeedArgumentsType args = this.getArguments();
-    this.configureUpButton(this.getUpStack(), args.getTitle());
+    final List<CatalogUpStackEntry> stack = this.getUpStack();
+    this.configureUpButton(stack, args.getTitle());
+
+    /**
+     * If this is the root of the catalog, attempt the initial load/login/sync
+     * of books.
+     */
+
+    if (stack.isEmpty()) {
+      final SimplifiedAppServicesType app = Simplified.getAppServices();
+      app.syncInitial();
+    }
   }
 
   @Override public boolean onCreateOptionsMenu(
@@ -451,7 +517,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     this.invalidateOptionsMenu();
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup progress = NullCheck.notNull(this.progress_layout);
@@ -527,7 +593,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.progress_layout = layout;
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final CatalogFeedArgumentsType args = this.getArguments();
     args
       .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
@@ -561,41 +627,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       });
   }
 
-  private CatalogFeedArgumentsType getArguments()
-  {
-    /**
-     * Attempt to fetch arguments.
-     */
-
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final Intent i = NullCheck.notNull(this.getIntent());
-    final Bundle a = i.getExtras();
-    if (a != null) {
-      return NullCheck.notNull((CatalogFeedArgumentsType) a
-        .getSerializable(CatalogFeedActivity.CATALOG_ARGS));
-    }
-
-    /**
-     * If there were no arguments (because, for example, this activity is the
-     * initial one started for the app), synthesize some.
-     */
-
-    final Simplified app = Simplified.get();
-    final boolean in_drawer_open = true;
-    final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
-    final String in_title =
-      NullCheck.notNull(rr.getString(R.string.app_name));
-    final URI in_uri = app.getFeedInitialURI();
-
-    return new CatalogFeedArgumentsRemote(
-      in_drawer_open,
-      NullCheck.notNull(empty),
-      in_title,
-      in_uri);
-  }
-
   private void onSelectedBook(
-    final Simplified app,
+    final SimplifiedAppServicesType app,
     final ImmutableList<CatalogUpStackEntry> new_up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
@@ -650,27 +683,5 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (c != null) {
       c.expensiveStop();
     }
-  }
-
-  @Override public void onBookAcquisitionFeedSuccess(
-    final OPDSAcquisitionFeed f)
-  {
-    this.onAcquisitionFeed(f);
-  }
-
-  @Override public void onBookAcquisitionFeedFailure(
-    final Throwable e)
-  {
-    if (e instanceof CancellationException) {
-      Log.d(CatalogFeedActivity.TAG, "Cancelled feed");
-      return;
-    }
-
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        CatalogFeedActivity.this.onFeedLoadingFailureUI(e);
-      }
-    });
   }
 }

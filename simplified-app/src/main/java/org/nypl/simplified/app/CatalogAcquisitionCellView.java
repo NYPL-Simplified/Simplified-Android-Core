@@ -258,117 +258,6 @@ import com.squareup.picasso.Callback;
       callback);
   }
 
-  @Override public void update(
-    final @Nullable Observable observable,
-    final @Nullable Object data)
-  {
-    assert observable == this.books;
-    assert data instanceof BookStatusType;
-
-    Log.d(
-      CatalogAcquisitionCellView.TAG,
-      String.format("update %s %s", observable, data));
-
-    final BookStatusType status = (BookStatusType) data;
-    final OPDSAcquisitionFeedEntry in_entry = this.entry.get();
-
-    if (in_entry != null) {
-      final BookID id = BookID.newIDFromEntry(in_entry);
-      if (id.equals(status.getID())) {
-        UIThread.runOnUIThread(new Runnable() {
-          @Override public void run()
-          {
-            status.matchBookStatus(CatalogAcquisitionCellView.this);
-          }
-        });
-      }
-    }
-  }
-
-  /**
-   * Configure the overall status of the cell. The cell displays a number of
-   * different layouts depending on whether the current book is loaned, fully
-   * downloaded, currently downloading, not loaned, etc.
-   */
-
-  public void viewConfigure(
-    final OPDSAcquisitionFeedEntry in_e,
-    final CatalogAcquisitionFeedListenerType in_listener)
-  {
-    NullCheck.notNull(in_e);
-    NullCheck.notNull(in_listener);
-
-    UIThread.checkIsUIThread();
-
-    this.cell_title.setText(CatalogAcquisitionCellView.makeTitleText(in_e));
-    this.cell_authors
-      .setText(CatalogAcquisitionCellView.makeAuthorText(in_e));
-
-    this.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
-      {
-        in_listener.onSelectBook(CatalogAcquisitionCellView.this, in_e);
-      }
-    });
-
-    final boolean reusing = this.isCellBeingReusedForSame(in_e);
-    if (reusing == false) {
-      this.entry.set(in_e);
-      this.cell_cover_image.setVisibility(View.INVISIBLE);
-      this.cell_cover_progress.setVisibility(View.VISIBLE);
-
-      final BookID book_id = BookID.newIDFromEntry(in_e);
-      final OptionType<BookStatusType> stat =
-        this.books.booksStatusGet(book_id);
-
-      if (stat.isSome()) {
-        final BookStatusType some = ((Some<BookStatusType>) stat).get();
-        some.matchBookStatus(this);
-      } else {
-        this.onBookStatusNone(in_e, book_id);
-      }
-    }
-  }
-
-  private void onBookStatusNone(
-    final OPDSAcquisitionFeedEntry e,
-    final BookID id)
-  {
-    Log.d(CatalogAcquisitionCellView.TAG, "status none");
-    this.cell_downloading.setVisibility(View.GONE);
-    this.cell_book.setVisibility(View.VISIBLE);
-    this.cell_downloading_failed.setVisibility(View.GONE);
-
-    this.loadImageAndSetVisibility(e);
-
-    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-      this.activity,
-      this.books,
-      this.cell_buttons,
-      e,
-      id);
-  }
-
-  @Override public Unit onBookStatusLoanedType(
-    final BookStatusLoanedType o)
-  {
-    return o.matchBookLoanedStatus(this);
-  }
-
-  @Override public Unit onBookStatusRequesting(
-    final BookStatusRequesting s)
-  {
-    Log.d(CatalogAcquisitionCellView.TAG, "status requesting");
-    this.cell_downloading.setVisibility(View.GONE);
-    this.cell_book.setVisibility(View.VISIBLE);
-    this.cell_downloading_failed.setVisibility(View.GONE);
-
-    this.loadImageAndSetVisibility(NullCheck.notNull(this.entry.get()));
-    this.cell_buttons.removeAllViews();
-    return Unit.unit();
-  }
-
   @Override public Unit onBookStatusCancelled(
     final BookStatusCancelled c)
   {
@@ -472,6 +361,31 @@ import com.squareup.picasso.Callback;
     return Unit.unit();
   }
 
+  @Override public Unit onBookStatusLoanedType(
+    final BookStatusLoanedType o)
+  {
+    return o.matchBookLoanedStatus(this);
+  }
+
+  private void onBookStatusNone(
+    final OPDSAcquisitionFeedEntry e,
+    final BookID id)
+  {
+    Log.d(CatalogAcquisitionCellView.TAG, "status none");
+    this.cell_downloading.setVisibility(View.GONE);
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+
+    this.loadImageAndSetVisibility(e);
+
+    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
+      this.activity,
+      this.books,
+      this.cell_buttons,
+      e,
+      id);
+  }
+
   @Override public Unit onBookStatusPaused(
     final BookStatusPaused p)
   {
@@ -481,5 +395,91 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_failed.setVisibility(View.GONE);
 
     return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusRequesting(
+    final BookStatusRequesting s)
+  {
+    Log.d(CatalogAcquisitionCellView.TAG, "status requesting");
+    this.cell_downloading.setVisibility(View.GONE);
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+
+    this.loadImageAndSetVisibility(NullCheck.notNull(this.entry.get()));
+    this.cell_buttons.removeAllViews();
+    return Unit.unit();
+  }
+
+  @Override public void update(
+    final @Nullable Observable observable,
+    final @Nullable Object data)
+  {
+    assert observable == this.books;
+    assert data instanceof BookStatusType;
+
+    Log.d(
+      CatalogAcquisitionCellView.TAG,
+      String.format("update %s %s", observable, data));
+
+    final BookStatusType status = (BookStatusType) data;
+    final OPDSAcquisitionFeedEntry in_entry = this.entry.get();
+
+    if (in_entry != null) {
+      final BookID id = BookID.newIDFromEntry(in_entry);
+      if (id.equals(status.getID())) {
+        UIThread.runOnUIThread(new Runnable() {
+          @Override public void run()
+          {
+            status.matchBookStatus(CatalogAcquisitionCellView.this);
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * Configure the overall status of the cell. The cell displays a number of
+   * different layouts depending on whether the current book is loaned, fully
+   * downloaded, currently downloading, not loaned, etc.
+   */
+
+  public void viewConfigure(
+    final OPDSAcquisitionFeedEntry in_e,
+    final CatalogAcquisitionFeedListenerType in_listener)
+  {
+    NullCheck.notNull(in_e);
+    NullCheck.notNull(in_listener);
+
+    UIThread.checkIsUIThread();
+
+    this.cell_title.setText(CatalogAcquisitionCellView.makeTitleText(in_e));
+    this.cell_authors
+      .setText(CatalogAcquisitionCellView.makeAuthorText(in_e));
+
+    this.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        in_listener.onSelectBook(CatalogAcquisitionCellView.this, in_e);
+      }
+    });
+
+    final boolean reusing = this.isCellBeingReusedForSame(in_e);
+    if (reusing == false) {
+      this.entry.set(in_e);
+      this.cell_cover_image.setVisibility(View.INVISIBLE);
+      this.cell_cover_progress.setVisibility(View.VISIBLE);
+
+      final BookID book_id = BookID.newIDFromEntry(in_e);
+      final OptionType<BookStatusType> stat =
+        this.books.booksStatusGet(book_id);
+
+      if (stat.isSome()) {
+        final BookStatusType some = ((Some<BookStatusType>) stat).get();
+        some.matchBookStatus(this);
+      } else {
+        this.onBookStatusNone(in_e, book_id);
+      }
+    }
   }
 }

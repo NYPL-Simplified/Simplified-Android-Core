@@ -152,7 +152,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OptionType<URI> featured_opt = this.entry.getFeaturedURI();
     if (featured_opt.isSome()) {
       final Some<URI> some = (Some<URI>) featured_opt;
-      final Simplified app = Simplified.get();
+      final SimplifiedAppServicesType app = Simplified.getAppServices();
       final OPDSFeedLoaderType loader = app.getFeedLoader();
 
       this.loading = loader.fromURI(some.get(), this);
@@ -185,7 +185,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     this.feed_received = NullCheck.notNull(af);
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final int scroll_x = this.scroller_position;
     final HorizontalScrollView cs = this.scroller;
     final ProgressBar cp = this.progress;

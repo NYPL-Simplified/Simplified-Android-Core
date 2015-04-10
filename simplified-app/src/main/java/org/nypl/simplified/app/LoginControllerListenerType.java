@@ -4,11 +4,11 @@ import com.io7m.jfunctional.OptionType;
 
 public interface LoginControllerListenerType
 {
-  void onLoginSuccess();
+  void onLoginAborted();
 
   void onLoginFailure(
     OptionType<Throwable> error,
     String message);
 
-  void onLoginAborted();
+  void onLoginSuccess();
 }

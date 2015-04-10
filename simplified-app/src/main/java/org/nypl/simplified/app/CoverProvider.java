@@ -25,42 +25,39 @@ import com.squareup.picasso.RequestCreator;
 @SuppressWarnings("synthetic-access") public final class CoverProvider implements
   CoverProviderType
 {
-  private static final String                        TAG;
   private static final Callback                      EMPTY_CALLBACK;
+  private static final String                        TAG;
 
   static {
     EMPTY_CALLBACK = new Callback() {
-      @Override public void onSuccess()
-      {
-        // Nothing
-      }
-
       @Override public void onError()
       {
         Log.e(CoverProvider.TAG, "failed to load image");
+      }
+
+      @Override public void onSuccess()
+      {
+        // Nothing
       }
     };
 
     TAG = "CProvider";
   }
 
-  private final Picasso                              picasso;
-  private final ExecutorService                      exec;
-  private final BooksType                            books;
-  private final CatalogAcquisitionCoverGeneratorType cover_gen;
-
-  private CoverProvider(
-    final Picasso in_p,
-    final BooksType in_books,
-    final CatalogAcquisitionCoverGeneratorType in_cover_gen,
-    final ExecutorService in_exec)
+  private static URI generateCoverURI(
+    final OPDSAcquisitionFeedEntry e,
+    final CatalogAcquisitionCoverGeneratorType cg)
   {
-    this.picasso = NullCheck.notNull(in_p);
-    this.books = NullCheck.notNull(in_books);
-    this.cover_gen = NullCheck.notNull(in_cover_gen);
-    this.exec = NullCheck.notNull(in_exec);
+    final String title = e.getTitle();
+    final String author;
+    final List<String> authors = e.getAuthors();
+    if (authors.isEmpty()) {
+      author = "";
+    } else {
+      author = NullCheck.notNull(authors.get(0));
+    }
+    return cg.generateURIForTitleAuthor(title, author);
   }
-
   public static CoverProviderType newCoverProvider(
     final Context in_c,
     final BooksType in_books,
@@ -78,6 +75,24 @@ import com.squareup.picasso.RequestCreator;
     pb.executor(in_exec);
     final Picasso p = NullCheck.notNull(pb.build());
     return new CoverProvider(p, in_books, cover_gen, in_exec);
+  }
+  private final BooksType                            books;
+  private final CatalogAcquisitionCoverGeneratorType cover_gen;
+
+  private final ExecutorService                      exec;
+
+  private final Picasso                              picasso;
+
+  private CoverProvider(
+    final Picasso in_p,
+    final BooksType in_books,
+    final CatalogAcquisitionCoverGeneratorType in_cover_gen,
+    final ExecutorService in_exec)
+  {
+    this.picasso = NullCheck.notNull(in_p);
+    this.books = NullCheck.notNull(in_books);
+    this.cover_gen = NullCheck.notNull(in_cover_gen);
+    this.exec = NullCheck.notNull(in_exec);
   }
 
   @Override public void loadCoverInto(
@@ -217,20 +232,5 @@ import com.squareup.picasso.RequestCreator;
         r.into(i, c);
       }
     });
-  }
-
-  private static URI generateCoverURI(
-    final OPDSAcquisitionFeedEntry e,
-    final CatalogAcquisitionCoverGeneratorType cg)
-  {
-    final String title = e.getTitle();
-    final String author;
-    final List<String> authors = e.getAuthors();
-    if (authors.isEmpty()) {
-      author = "";
-    } else {
-      author = NullCheck.notNull(authors.get(0));
-    }
-    return cg.generateURIForTitleAuthor(title, author);
   }
 }

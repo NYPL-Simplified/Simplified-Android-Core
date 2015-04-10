@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
@@ -35,23 +36,260 @@ import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Global application state.
  */
 
-@SuppressWarnings("boxing") public final class Simplified extends Application implements
-  ScreenSizeControllerType,
-  AccountDataLoadListenerType,
-  AccountSyncListenerType
+@SuppressWarnings({ "boxing", "synthetic-access" }) public final class Simplified extends
+  Application
 {
+  private static final class AppServices implements
+    SimplifiedAppServicesType,
+    AccountDataLoadListenerType,
+    AccountSyncListenerType
+  {
+    private final BooksType          books;
+    private final ExecutorService    books_executor;
+    private final ExecutorService    catalog_executor;
+    private final CoverProviderType  cover_provider;
+    private final DownloaderType     downloader;
+    private final URI                feed_initial_uri;
+    private final OPDSFeedLoaderType feed_loader;
+    private final HTTPType           http;
+    private final Resources          resources;
+    private final AtomicBoolean      synced;
+
+    public AppServices(
+      final Context context,
+      final Resources rr)
+    {
+      this.resources = NullCheck.notNull(rr);
+      this.catalog_executor = Simplified.namedThreadPool(3, "catalog");
+      this.books_executor = Simplified.namedThreadPool(1, "books");
+
+      /**
+       * Determine screen details.
+       */
+
+      {
+        final DisplayMetrics dm = rr.getDisplayMetrics();
+        final float dp_height = dm.heightPixels / dm.density;
+        final float dp_width = dm.widthPixels / dm.density;
+        Log.d(
+          Simplified.TAG,
+          String.format("screen (%.2fdp x %.2fdp)", dp_width, dp_height));
+        Log.d(Simplified.TAG, String.format(
+          "screen (%dpx x %dpx)",
+          dm.widthPixels,
+          dm.heightPixels));
+      }
+
+      /**
+       * Catalog URIs.
+       */
+
+      this.feed_initial_uri =
+        NullCheck
+          .notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
+
+      final OPDSFeedParserType p = OPDSFeedParser.newParser();
+      this.feed_loader = Simplified.makeFeedLoader(this.catalog_executor, p);
+
+      /**
+       * Book management.
+       */
+
+      final File data_dir = Simplified.getDiskDataDir(context);
+      final File downloads_dir = new File(data_dir, "downloads");
+      final File books_dir = new File(data_dir, "books");
+
+      Log.d(Simplified.TAG, "data: " + data_dir);
+      Log.d(Simplified.TAG, "downloads: " + downloads_dir);
+      Log.d(Simplified.TAG, "books: " + books_dir);
+
+      final DownloaderConfigurationBuilderType dcb =
+        DownloaderConfiguration.newBuilder(downloads_dir);
+      dcb.setReadSleepTime(1000);
+      final DownloaderConfiguration downloader_config = dcb.build();
+
+      this.http = HTTP.newHTTP();
+      this.downloader =
+        Downloader.newDownloader(
+          this.books_executor,
+          this.http,
+          downloader_config);
+
+      final BooksConfigurationBuilderType bcb =
+        BooksConfiguration.newBuilder(books_dir);
+      final BooksConfiguration books_config = bcb.build();
+
+      this.books =
+        Books.newBooks(
+          this.books_executor,
+          p,
+          this.http,
+          this.downloader,
+          books_config);
+
+      /**
+       * Configure cover provider.
+       */
+
+      this.cover_provider =
+        CoverProvider.newCoverProvider(
+          context,
+          this.books,
+          this.catalog_executor);
+
+      this.synced = new AtomicBoolean(false);
+    }
+
+    @Override public BooksType getBooks()
+    {
+      return this.books;
+    }
+
+    @Override public CoverProviderType getCoverProvider()
+    {
+      return this.cover_provider;
+    }
+
+    @Override public URI getFeedInitialURI()
+    {
+      return this.feed_initial_uri;
+    }
+
+    @Override public OPDSFeedLoaderType getFeedLoader()
+    {
+      return this.feed_loader;
+    }
+
+    @Override public void onAccountDataBookLoadFailed(
+      final BookID id,
+      final OptionType<Throwable> error,
+      final String message)
+    {
+      final String s =
+        NullCheck.notNull(String.format("failed to load books: %s", message));
+      if (error.isSome()) {
+        final Some<Throwable> some = (Some<Throwable>) error;
+        Log.e(Simplified.TAG_BOOKS, s, some.get());
+      } else {
+        Log.e(Simplified.TAG_BOOKS, s);
+      }
+    }
+
+    @Override public void onAccountDataBookLoadFinished()
+    {
+      Log.d(Simplified.TAG_BOOKS, "finished loading books, syncing account");
+      final BooksType b = NullCheck.notNull(this.books);
+      b.accountSync(this);
+    }
+
+    @Override public void onAccountDataBookLoadSucceeded(
+      final BookID book,
+      final BookSnapshot snap)
+    {
+      Log.d(Simplified.TAG_BOOKS, String.format("loaded book: %s", book));
+    }
+
+    @Override public void onAccountSyncAuthenticationFailure(
+      final String message)
+    {
+      Log.d(
+        Simplified.TAG_BOOKS,
+        "failed to sync account due to authentication failure: " + message);
+    }
+
+    @Override public void onAccountSyncBook(
+      final BookID book)
+    {
+      Log.d(Simplified.TAG_BOOKS, "synced book " + book);
+    }
+
+    @Override public void onAccountSyncFailure(
+      final OptionType<Throwable> error,
+      final String message)
+    {
+      final String s =
+        NullCheck.notNull(String
+          .format("failed to sync account: %s", message));
+      if (error.isSome()) {
+        final Some<Throwable> some = (Some<Throwable>) error;
+        Log.e(Simplified.TAG_BOOKS, s, some.get());
+      } else {
+        Log.e(Simplified.TAG_BOOKS, s);
+      }
+    }
+
+    @Override public void onAccountSyncSuccess()
+    {
+      Log.d(Simplified.TAG_BOOKS, "synced account");
+    }
+
+    @Override public void onAccountUnavailable()
+    {
+      Log.d(Simplified.TAG_BOOKS, "not logged in, not loading books");
+    }
+
+    @Override public double screenDPToPixels(
+      final int dp)
+    {
+      final float scale = this.resources.getDisplayMetrics().density;
+      return ((dp * scale) + 0.5);
+    }
+
+    @Override public double screenGetDPI()
+    {
+      final DisplayMetrics metrics = this.resources.getDisplayMetrics();
+      return metrics.densityDpi;
+    }
+
+    @Override public int screenGetHeightPixels()
+    {
+      final Resources rr = NullCheck.notNull(this.resources);
+      final DisplayMetrics dm = rr.getDisplayMetrics();
+      return dm.heightPixels;
+    }
+
+    @Override public int screenGetWidthPixels()
+    {
+      final Resources rr = NullCheck.notNull(this.resources);
+      final DisplayMetrics dm = rr.getDisplayMetrics();
+      return dm.widthPixels;
+    }
+
+    @Override public boolean screenIsLarge()
+    {
+      final Resources rr = NullCheck.notNull(this.resources);
+      final Configuration c = NullCheck.notNull(rr.getConfiguration());
+      final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+      boolean large = false;
+      large |=
+        (s & Configuration.SCREENLAYOUT_SIZE_LARGE) == Configuration.SCREENLAYOUT_SIZE_LARGE;
+      large |=
+        (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+      return large;
+    }
+
+    @Override public void syncInitial()
+    {
+      if (this.synced.compareAndSet(false, true)) {
+        Log.d(Simplified.TAG, "performing initial sync");
+        this.books.accountLoadBooks(this);
+      } else {
+        Log.d(
+          Simplified.TAG,
+          "initial sync already attempted, not syncing again");
+      }
+    }
+  }
+
   private static volatile @Nullable Simplified INSTANCE;
   private static final String                  TAG;
   private static final String                  TAG_BOOKS;
@@ -70,9 +308,10 @@ import com.io7m.junreachable.UnreachableCodeException;
     return i;
   }
 
-  public static Simplified get()
+  public static SimplifiedAppServicesType getAppServices()
   {
-    return Simplified.checkInitialized();
+    final Simplified i = Simplified.checkInitialized();
+    return i.getActualAppServices();
   }
 
   private static File getDiskDataDir(
@@ -141,237 +380,24 @@ import com.io7m.junreachable.UnreachableCodeException;
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable BooksType                books;
-  private @Nullable ListeningExecutorService catalog_exec_decor;
-  private @Nullable ExecutorService          catalog_executor;
-  private @Nullable CoverProviderType        cover_provider;
-  private @Nullable URI                      feed_initial_uri;
-  private @Nullable OPDSFeedLoaderType       feed_loader;
-  private @Nullable HTTPType                 http;
+  private @Nullable AppServices app_services;
 
-  public BooksType getBooks()
+  private synchronized SimplifiedAppServicesType getActualAppServices()
   {
-    return NullCheck.notNull(this.books);
-  }
-
-  public ListeningExecutorService getCatalogListeningExecutorService()
-  {
-    return NullCheck.notNull(this.catalog_exec_decor);
-  }
-
-  public CoverProviderType getCoverProvider()
-  {
-    return NullCheck.notNull(this.cover_provider);
-  }
-
-  public URI getFeedInitialURI()
-  {
-    return NullCheck.notNull(this.feed_initial_uri);
-  }
-
-  public OPDSFeedLoaderType getFeedLoader()
-  {
-    return NullCheck.notNull(this.feed_loader);
-  }
-
-  @Override public void onAccountDataBookLoadFailed(
-    final BookID id,
-    final OptionType<Throwable> error,
-    final String message)
-  {
-    final String s =
-      NullCheck.notNull(String.format("failed to load books: %s", message));
-    if (error.isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) error;
-      Log.e(Simplified.TAG_BOOKS, s, some.get());
-    } else {
-      Log.e(Simplified.TAG_BOOKS, s);
+    AppServices as = this.app_services;
+    if (as != null) {
+      return as;
     }
-  }
-
-  @Override public void onAccountDataBookLoadFinished()
-  {
-    Log.d(Simplified.TAG_BOOKS, "finished loading books, syncing account");
-    final BooksType b = NullCheck.notNull(this.books);
-    b.accountSync(this);
-  }
-
-  @Override public void onAccountDataBookLoadSucceeded(
-    final BookID book,
-    final BookSnapshot snap)
-  {
-    Log.d(Simplified.TAG_BOOKS, String.format("loaded book: %s", book));
-  }
-
-  @Override public void onAccountSyncAuthenticationFailure(
-    final String message)
-  {
-    Log.d(
-      Simplified.TAG_BOOKS,
-      "failed to sync account due to authentication failure: " + message);
-  }
-
-  @Override public void onAccountSyncBook(
-    final BookID book)
-  {
-    Log.d(Simplified.TAG_BOOKS, "synced book " + book);
-  }
-
-  @Override public void onAccountSyncFailure(
-    final OptionType<Throwable> error,
-    final String message)
-  {
-    final String s =
-      NullCheck.notNull(String.format("failed to sync account: %s", message));
-    if (error.isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) error;
-      Log.e(Simplified.TAG_BOOKS, s, some.get());
-    } else {
-      Log.e(Simplified.TAG_BOOKS, s);
-    }
-  }
-
-  @Override public void onAccountSyncSuccess()
-  {
-    Log.d(Simplified.TAG_BOOKS, "synced account");
-  }
-
-  @Override public void onAccountUnavailable()
-  {
-    Log.d(Simplified.TAG_BOOKS, "not logged in, not loading books");
+    as = new AppServices(this, NullCheck.notNull(this.getResources()));
+    this.app_services = as;
+    return as;
   }
 
   @Override public void onCreate()
   {
-    try {
-      super.onCreate();
-
-      Log.d(Simplified.TAG, "initializing application context");
-
-      final ExecutorService in_catalog_executor =
-        Simplified.namedThreadPool(3, "catalog");
-      final ExecutorService in_books_executor =
-        Simplified.namedThreadPool(1, "books");
-
-      final ListeningExecutorService le =
-        NullCheck.notNull(MoreExecutors
-          .listeningDecorator(in_catalog_executor));
-      final Resources rr = NullCheck.notNull(this.getResources());
-
-      /**
-       * Determine screen details.
-       */
-
-      {
-        final DisplayMetrics dm = rr.getDisplayMetrics();
-        final float dp_height = dm.heightPixels / dm.density;
-        final float dp_width = dm.widthPixels / dm.density;
-        Log.d(
-          Simplified.TAG,
-          String.format("screen (%.2fdp x %.2fdp)", dp_width, dp_height));
-        Log.d(Simplified.TAG, String.format(
-          "screen (%dpx x %dpx)",
-          dm.widthPixels,
-          dm.heightPixels));
-      }
-
-      /**
-       * Catalog URIs.
-       */
-
-      this.feed_initial_uri =
-        URI.create(rr.getString(R.string.catalog_start_uri));
-
-      this.catalog_executor = in_catalog_executor;
-      this.catalog_exec_decor = le;
-
-      final OPDSFeedParserType p = OPDSFeedParser.newParser();
-      this.feed_loader = Simplified.makeFeedLoader(in_catalog_executor, p);
-
-      /**
-       * Book management.
-       */
-
-      final File data_dir = Simplified.getDiskDataDir(this);
-      final File downloads_dir = new File(data_dir, "downloads");
-      final File books_dir = new File(data_dir, "books");
-
-      Log.d(Simplified.TAG, "data: " + data_dir);
-      Log.d(Simplified.TAG, "downloads: " + downloads_dir);
-      Log.d(Simplified.TAG, "books: " + books_dir);
-
-      final DownloaderConfigurationBuilderType dcb =
-        DownloaderConfiguration.newBuilder(downloads_dir);
-      dcb.setReadSleepTime(1000);
-      final DownloaderConfiguration downloader_config = dcb.build();
-
-      final HTTPType h = HTTP.newHTTP();
-      this.http = h;
-      final DownloaderType d =
-        Downloader.newDownloader(in_books_executor, h, downloader_config);
-
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(books_dir);
-      final BooksConfiguration books_config = bcb.build();
-
-      final BooksType b =
-        Books.newBooks(in_books_executor, p, h, d, books_config);
-      this.books = b;
-      b.accountLoadBooks(this);
-
-      /**
-       * Configure cover provider.
-       */
-
-      {
-        final CoverProviderType cp =
-          CoverProvider.newCoverProvider(this, b, in_catalog_executor);
-        this.cover_provider = cp;
-      }
-
-      Simplified.INSTANCE = this;
-    } catch (final Exception e) {
-      throw new UnreachableCodeException(e);
-    }
-  }
-
-  @Override public double screenDPToPixels(
-    final int dp)
-  {
-    final float scale = this.getResources().getDisplayMetrics().density;
-    return ((dp * scale) + 0.5);
-  }
-
-  @Override public double screenGetDPI()
-  {
-    final DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-    return metrics.densityDpi;
-  }
-
-  @Override public int screenGetHeightPixels()
-  {
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final DisplayMetrics dm = rr.getDisplayMetrics();
-    return dm.heightPixels;
-  }
-
-  @Override public int screenGetWidthPixels()
-  {
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final DisplayMetrics dm = rr.getDisplayMetrics();
-    return dm.widthPixels;
-  }
-
-  @Override public boolean screenIsLarge()
-  {
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final Configuration c = NullCheck.notNull(rr.getConfiguration());
-    final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-    boolean large = false;
-    large |=
-      (s & Configuration.SCREENLAYOUT_SIZE_LARGE) == Configuration.SCREENLAYOUT_SIZE_LARGE;
-    large |=
-      (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
-    return large;
+    Log.d(
+      Simplified.TAG,
+      String.format("starting app: pid %d", android.os.Process.myPid()));
+    Simplified.INSTANCE = this;
   }
 }

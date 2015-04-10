@@ -25,12 +25,12 @@ import com.squareup.picasso.Callback;
     TAG = "CImagesView";
   }
 
+  private final CoverProviderType              cover_provider;
   private final Runnable                       done_proc;
   private final List<OPDSAcquisitionFeedEntry> entries;
   private final String                         id;
   private final int                            image_height;
   private final List<ImageView>                imageviews;
-  private final CoverProviderType              cover_provider;
 
   public CatalogImageSetView(
     final Context in_context,
@@ -84,14 +84,14 @@ import com.squareup.picasso.Callback;
       final int w = (int) (h * 0.75);
 
       final Callback cover_callback = new Callback() {
-        @Override public void onSuccess()
+        @Override public void onError()
         {
           if (done_count.incrementAndGet() >= in_entries.size()) {
             CatalogImageSetView.this.done();
           }
         }
 
-        @Override public void onError()
+        @Override public void onSuccess()
         {
           if (done_count.incrementAndGet() >= in_entries.size()) {
             CatalogImageSetView.this.done();

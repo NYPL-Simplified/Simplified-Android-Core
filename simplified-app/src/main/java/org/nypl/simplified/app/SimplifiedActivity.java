@@ -113,7 +113,7 @@ import com.io7m.jnull.Nullable;
           open_drawer);
     }
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
 
     /**

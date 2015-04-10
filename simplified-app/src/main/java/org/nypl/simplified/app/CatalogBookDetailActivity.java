@@ -122,13 +122,130 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
         .getSerializable(CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_FEED_ENTRY_ID));
   }
 
+  @Override public Unit onBookStatusCancelled(
+    final BookStatusCancelled c)
+  {
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final BooksType books = app.getBooks();
+    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
+    final BookID id = c.getID();
+    books.bookDownloadAcknowledge(id);
+    this.onStatusNone(books, id, e);
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusDone(
+    final BookStatusDone d)
+  {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.VISIBLE);
+    bd.setVisibility(View.GONE);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final Button b = new Button(this);
+    b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
+    b.setTextSize(12.0f);
+    b.setOnClickListener(new CatalogBookRead(this, d.getID()));
+    bb.addView(b);
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusDownloading(
+    final BookStatusDownloading d)
+  {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.GONE);
+    bd.setVisibility(View.VISIBLE);
+
+    final DownloadSnapshot snap = d.getSnapshot();
+    CatalogAcquisitionDownloadProgressBar.setProgressBar(
+      snap,
+      NullCheck.notNull(this.book_downloading_percent_text),
+      NullCheck.notNull(this.book_downloading_progress));
+
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final BooksType books = app.getBooks();
+
+    final Button dc = NullCheck.notNull(this.book_downloading_cancel);
+    dc.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        books.bookDownloadCancel(d.getID());
+      }
+    });
+
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusFailed(
+    final BookStatusFailed f)
+  {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.GONE);
+    bd.setVisibility(View.GONE);
+
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusLoaned(
+    final BookStatusLoaned o)
+  {
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final BooksType books = app.getBooks();
+
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.VISIBLE);
+    bd.setVisibility(View.GONE);
+
+    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
+      this,
+      books,
+      bb,
+      NullCheck.notNull(this.entry),
+      o.getID());
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusLoanedType(
+    final BookStatusLoanedType o)
+  {
+    return o.matchBookLoanedStatus(this);
+  }
+
+  @Override public Unit onBookStatusPaused(
+    final BookStatusPaused p)
+  {
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusRequesting(
+    final BookStatusRequesting s)
+  {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.GONE);
+    bd.setVisibility(View.GONE);
+    bb.removeAllViews();
+    return Unit.unit();
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
     super.onCreate(state);
     this.entry = this.getFeedEntry();
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     books.addObserver(this);
   }
@@ -137,7 +254,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     super.onDestroy();
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     books.deleteObserver(this);
   }
@@ -248,7 +365,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
 
     CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     final BookID book_id = BookID.newIDFromEntry(e);
     final OptionType<BookStatusType> status_opt =
@@ -306,123 +423,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
         e,
         book_id);
     }
-  }
-
-  @Override public Unit onBookStatusCancelled(
-    final BookStatusCancelled c)
-  {
-    final Simplified app = Simplified.get();
-    final BooksType books = app.getBooks();
-    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
-    final BookID id = c.getID();
-    books.bookDownloadAcknowledge(id);
-    this.onStatusNone(books, id, e);
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusDone(
-    final BookStatusDone d)
-  {
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-
-    bb.setVisibility(View.VISIBLE);
-    bd.setVisibility(View.GONE);
-
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final Button b = new Button(this);
-    b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
-    b.setTextSize(12.0f);
-    b.setOnClickListener(new CatalogBookRead(this, d.getID()));
-    bb.addView(b);
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusDownloading(
-    final BookStatusDownloading d)
-  {
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-
-    bb.setVisibility(View.GONE);
-    bd.setVisibility(View.VISIBLE);
-
-    final DownloadSnapshot snap = d.getSnapshot();
-    CatalogAcquisitionDownloadProgressBar.setProgressBar(
-      snap,
-      NullCheck.notNull(this.book_downloading_percent_text),
-      NullCheck.notNull(this.book_downloading_progress));
-
-    final Simplified app = Simplified.get();
-    final BooksType books = app.getBooks();
-
-    final Button dc = NullCheck.notNull(this.book_downloading_cancel);
-    dc.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
-      {
-        books.bookDownloadCancel(d.getID());
-      }
-    });
-
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusFailed(
-    final BookStatusFailed f)
-  {
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-
-    bb.setVisibility(View.GONE);
-    bd.setVisibility(View.GONE);
-
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusLoaned(
-    final BookStatusLoaned o)
-  {
-    final Simplified app = Simplified.get();
-    final BooksType books = app.getBooks();
-
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-
-    bb.setVisibility(View.VISIBLE);
-    bd.setVisibility(View.GONE);
-
-    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-      this,
-      books,
-      bb,
-      NullCheck.notNull(this.entry),
-      o.getID());
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusPaused(
-    final BookStatusPaused p)
-  {
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusLoanedType(
-    final BookStatusLoanedType o)
-  {
-    return o.matchBookLoanedStatus(this);
-  }
-
-  @Override public Unit onBookStatusRequesting(
-    final BookStatusRequesting s)
-  {
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-
-    bb.setVisibility(View.GONE);
-    bd.setVisibility(View.GONE);
-    bb.removeAllViews();
-    return Unit.unit();
   }
 
   @Override public void update(

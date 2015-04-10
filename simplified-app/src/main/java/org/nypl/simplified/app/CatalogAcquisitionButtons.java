@@ -16,11 +16,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogAcquisitionButtons
 {
-  private CatalogAcquisitionButtons()
-  {
-    throw new UnreachableCodeException();
-  }
-
   public static void configureAllAcquisitionButtonsForLayout(
     final Activity in_activity,
     final BooksType in_books,
@@ -91,6 +86,11 @@ public final class CatalogAcquisitionButtons
         break;
       }
     }
+  }
+
+  private CatalogAcquisitionButtons()
+  {
+    throw new UnreachableCodeException();
   }
 
 }

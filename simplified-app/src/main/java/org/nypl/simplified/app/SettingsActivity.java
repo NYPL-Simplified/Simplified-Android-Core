@@ -52,7 +52,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
       Log.e(SettingsActivity.TAG, message);
     }
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 
@@ -74,7 +74,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
   {
     Log.d(SettingsActivity.TAG, "onAccountLogoutSuccess");
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 
@@ -109,7 +109,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
     content_area.addView(layout);
     content_area.requestLayout();
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
 
     final TextView t_login =
@@ -143,7 +143,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
   @Override public void onLoginAborted()
   {
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 

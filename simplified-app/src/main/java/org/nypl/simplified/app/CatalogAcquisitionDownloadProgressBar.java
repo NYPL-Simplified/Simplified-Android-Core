@@ -10,11 +10,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogAcquisitionDownloadProgressBar
 {
-  private CatalogAcquisitionDownloadProgressBar()
-  {
-    throw new UnreachableCodeException();
-  }
-
   public static void setProgressBar(
     final DownloadSnapshot snap,
     final TextView text,
@@ -36,5 +31,10 @@ public final class CatalogAcquisitionDownloadProgressBar
       bar.setProgress(iperc);
       text.setText(String.format("%d%%", iperc));
     }
+  }
+
+  private CatalogAcquisitionDownloadProgressBar()
+  {
+    throw new UnreachableCodeException();
   }
 }

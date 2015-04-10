@@ -94,7 +94,7 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusCancelled(
     final BookStatusCancelled c)
   {
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
     final BookID id = c.getID();
@@ -113,10 +113,11 @@ public final class CatalogBookDialog extends DialogFragment implements
     bd.setVisibility(View.GONE);
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final Button b = new Button(this.getActivity());
+    final Activity act = NullCheck.notNull(this.getActivity());
+    final Button b = new Button(act);
     b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
     b.setTextSize(12.0f);
-    b.setOnClickListener(new CatalogBookRead(this.getActivity(), d.getID()));
+    b.setOnClickListener(new CatalogBookRead(act, d.getID()));
     bb.addView(b);
     return Unit.unit();
   }
@@ -136,7 +137,7 @@ public final class CatalogBookDialog extends DialogFragment implements
       NullCheck.notNull(this.book_downloading_percent_text),
       NullCheck.notNull(this.book_downloading_progress));
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
 
     final Button dc = NullCheck.notNull(this.book_downloading_cancel);
@@ -166,7 +167,7 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
 
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
@@ -221,7 +222,7 @@ public final class CatalogBookDialog extends DialogFragment implements
     Log.d(CatalogBookDialog.TAG, "showing dialog for " + e.getID());
     this.entry = e;
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     books.addObserver(this);
   }
@@ -316,7 +317,7 @@ public final class CatalogBookDialog extends DialogFragment implements
     CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
     CatalogBookDetail.configureSummaryWebView(e, summary_text);
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     final BookID book_id = BookID.newIDFromEntry(e);
     final OptionType<BookStatusType> status_opt =
@@ -356,7 +357,7 @@ public final class CatalogBookDialog extends DialogFragment implements
   {
     super.onDestroy();
 
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     books.deleteObserver(this);
   }

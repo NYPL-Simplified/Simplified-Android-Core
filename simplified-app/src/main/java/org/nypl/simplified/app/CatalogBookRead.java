@@ -17,8 +17,8 @@ import com.io7m.jnull.Nullable;
 
 public final class CatalogBookRead implements OnClickListener
 {
-  private final BookID   id;
   private final Activity activity;
+  private final BookID   id;
 
   public CatalogBookRead(
     final Activity in_activity,
@@ -31,7 +31,7 @@ public final class CatalogBookRead implements OnClickListener
   @Override public void onClick(
     final @Nullable View v)
   {
-    final Simplified app = Simplified.get();
+    final SimplifiedAppServicesType app = Simplified.getAppServices();
     final BooksType books = app.getBooks();
     final Activity a = this.activity;
 
