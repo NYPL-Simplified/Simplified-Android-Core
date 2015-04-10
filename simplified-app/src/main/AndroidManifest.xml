@@ -14,9 +14,9 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:largeHeap="true"
     android:icon="@drawable/simplified"
     android:label="@string/app_name"
+    android:largeHeap="true"
     android:theme="@style/SimplifiedTheme">
     <activity
       android:name=".CatalogFeedActivity"
@@ -27,13 +27,21 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    <activity android:name=".CatalogBookDetailActivity">
+    <activity
+      android:name=".CatalogBookDetailActivity"
+      android:exported="false">
     </activity>
-    <activity android:name=".BooksActivity">
+    <activity
+      android:name=".BooksActivity"
+      android:exported="false">
     </activity>
-    <activity android:name=".HoldsActivity">
+    <activity
+      android:name=".HoldsActivity"
+      android:exported="false">
     </activity>
-    <activity android:name=".SettingsActivity">
+    <activity
+      android:name=".SettingsActivity"
+      android:exported="false">
     </activity>
   </application>
 
