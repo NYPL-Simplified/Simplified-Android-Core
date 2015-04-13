@@ -52,6 +52,19 @@
     </dependency>
 
     <dependency>
+      <groupId>org.readium</groupId>
+      <artifactId>readium-sdk-android-runtime</artifactId>
+      <version>0.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.readium</groupId>
+      <artifactId>libepub3</artifactId>
+      <classifier>armeabi-v7a</classifier>
+      <type>so</type>
+      <version>0.17.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>net.jodah</groupId>
       <artifactId>expiringmap</artifactId>
       <version>0.4.0</version>
