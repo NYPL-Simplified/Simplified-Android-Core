@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.nypl.simplified.app.catalog.CachingFeedLoader;
+import org.nypl.simplified.app.reader.ReaderHTTPServer;
+import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
@@ -291,6 +293,26 @@ import com.io7m.jnull.Nullable;
     }
   }
 
+  private static final class ReaderAppServices implements
+    SimplifiedReaderAppServicesType
+  {
+    private final ExecutorService      http_executor;
+    private final ReaderHTTPServerType httpd;
+
+    public ReaderAppServices(
+      final Context context,
+      final Resources rr)
+    {
+      this.http_executor = Simplified.namedThreadPool(1, "httpd");
+      this.httpd = ReaderHTTPServer.newServer(this.http_executor, 8080);
+    }
+
+    @Override public ReaderHTTPServerType getHTTPServer()
+    {
+      return this.httpd;
+    }
+  }
+
   private static volatile @Nullable Simplified INSTANCE;
   private static final String                  TAG;
   private static final String                  TAG_BOOKS;
@@ -335,6 +357,12 @@ import com.io7m.jnull.Nullable;
      */
 
     return NullCheck.notNull(context.getFilesDir());
+  }
+
+  public static SimplifiedReaderAppServicesType getReaderAppServices()
+  {
+    final Simplified i = Simplified.checkInitialized();
+    return i.getActualReaderAppServices();
   }
 
   private static OPDSFeedLoaderType makeFeedLoader(
@@ -383,7 +411,11 @@ import com.io7m.jnull.Nullable;
 
   private @Nullable CatalogAppServices app_services;
 
-  private synchronized SimplifiedCatalogAppServicesType getActualAppServices()
+  private @Nullable ReaderAppServices  reader_services;
+
+  private synchronized
+    SimplifiedCatalogAppServicesType
+    getActualAppServices()
   {
     CatalogAppServices as = this.app_services;
     if (as != null) {
@@ -391,6 +423,17 @@ import com.io7m.jnull.Nullable;
     }
     as = new CatalogAppServices(this, NullCheck.notNull(this.getResources()));
     this.app_services = as;
+    return as;
+  }
+
+  private SimplifiedReaderAppServicesType getActualReaderAppServices()
+  {
+    ReaderAppServices as = this.reader_services;
+    if (as != null) {
+      return as;
+    }
+    as = new ReaderAppServices(this, NullCheck.notNull(this.getResources()));
+    this.reader_services = as;
     return as;
   }
 
