@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.nypl.simplified.app.catalog.CachingFeedLoader;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
@@ -48,8 +49,8 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class Simplified extends
   Application
 {
-  private static final class AppServices implements
-    SimplifiedAppServicesType,
+  private static final class CatalogAppServices implements
+    SimplifiedCatalogAppServicesType,
     AccountDataLoadListenerType,
     AccountSyncListenerType
   {
@@ -64,7 +65,7 @@ import com.io7m.jnull.Nullable;
     private final Resources          resources;
     private final AtomicBoolean      synced;
 
-    public AppServices(
+    public CatalogAppServices(
       final Context context,
       final Resources rr)
     {
@@ -308,7 +309,7 @@ import com.io7m.jnull.Nullable;
     return i;
   }
 
-  public static SimplifiedAppServicesType getAppServices()
+  public static SimplifiedCatalogAppServicesType getCatalogAppServices()
   {
     final Simplified i = Simplified.checkInitialized();
     return i.getActualAppServices();
@@ -380,15 +381,15 @@ import com.io7m.jnull.Nullable;
     return NullCheck.notNull(pool);
   }
 
-  private @Nullable AppServices app_services;
+  private @Nullable CatalogAppServices app_services;
 
-  private synchronized SimplifiedAppServicesType getActualAppServices()
+  private synchronized SimplifiedCatalogAppServicesType getActualAppServices()
   {
-    AppServices as = this.app_services;
+    CatalogAppServices as = this.app_services;
     if (as != null) {
       return as;
     }
-    as = new AppServices(this, NullCheck.notNull(this.getResources()));
+    as = new CatalogAppServices(this, NullCheck.notNull(this.getResources()));
     this.app_services = as;
     return as;
   }

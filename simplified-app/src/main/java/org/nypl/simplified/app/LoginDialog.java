@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
@@ -201,7 +202,7 @@ public final class LoginDialog extends DialogFragment implements
       NullCheck.notNull((ProgressBar) layout
         .findViewById(R.id.login_progress));
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     in_text.setText(initial_txt);

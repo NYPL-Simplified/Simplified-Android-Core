@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountsType;

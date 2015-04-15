@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.nypl.simplified.app.catalog.CatalogFeedActivity;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
+import org.nypl.simplified.app.catalog.CatalogUpStackEntry;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -113,7 +118,7 @@ import com.io7m.jnull.Nullable;
           open_drawer);
     }
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
 
     /**

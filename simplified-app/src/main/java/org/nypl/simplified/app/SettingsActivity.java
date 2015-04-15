@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.BooksType;
 
@@ -52,7 +53,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
       Log.e(SettingsActivity.TAG, message);
     }
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 
@@ -74,7 +75,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
   {
     Log.d(SettingsActivity.TAG, "onAccountLogoutSuccess");
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 
@@ -109,7 +110,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
     content_area.addView(layout);
     content_area.requestLayout();
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     final TextView t_login =
@@ -143,7 +144,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
   @Override public void onLoginAborted()
   {
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 

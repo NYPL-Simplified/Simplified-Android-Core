@@ -5,6 +5,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import org.nypl.simplified.app.catalog.CatalogAcquisitionCoverGenerator;
+import org.nypl.simplified.app.catalog.CatalogAcquisitionCoverGeneratorRequestHandler;
+import org.nypl.simplified.app.catalog.CatalogAcquisitionCoverGeneratorType;
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksType;
