@@ -6,10 +6,11 @@ package org.nypl.simplified.app.reader;
 
 public interface ReaderHTTPServerStartListenerType
 {
-  void onServerStartSucceeded(
-    ReaderHTTPServerType hs);
-
   void onServerStartFailed(
     ReaderHTTPServerType hs,
     Throwable x);
+
+  void onServerStartSucceeded(
+    ReaderHTTPServerType hs,
+    boolean first);
 }

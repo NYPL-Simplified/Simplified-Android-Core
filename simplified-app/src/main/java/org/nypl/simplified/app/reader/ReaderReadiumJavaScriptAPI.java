@@ -1,0 +1,72 @@
+package org.nypl.simplified.app.reader;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.nypl.simplified.app.utilities.UIThread;
+
+import android.webkit.WebView;
+
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.NullCheck;
+
+/**
+ * The default implementation of the {@link ReaderReadiumJavaScriptAPIType}
+ * interface.
+ */
+
+public final class ReaderReadiumJavaScriptAPI implements
+  ReaderReadiumJavaScriptAPIType
+{
+  public static ReaderReadiumJavaScriptAPIType newAPI(
+    final WebView wv)
+  {
+    return new ReaderReadiumJavaScriptAPI(wv);
+  }
+
+  private final WebView web_view;
+
+  private ReaderReadiumJavaScriptAPI(
+    final WebView wv)
+  {
+    this.web_view = NullCheck.notNull(wv);
+  }
+
+  @Override public void openBook(
+    final org.readium.sdk.android.Package p,
+    final ReaderViewerSettings vs,
+    final OptionType<ReaderOpenPageRequest> r)
+  {
+    try {
+      final JSONObject o = new JSONObject();
+      o.put("package", p.toJSON());
+      o.put("settings", vs.toJSON());
+
+      if (r.isSome()) {
+        final Some<ReaderOpenPageRequest> some =
+          (Some<ReaderOpenPageRequest>) r;
+        o.put("openPageRequest", some.get().toJSON());
+      }
+
+      this.evaluateOnReady(NullCheck.notNull(String.format(
+        "ReadiumSDK.reader.openBook(%s)",
+        o)));
+    } catch (final JSONException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  private void evaluateOnReady(
+    final String text)
+  {
+    final WebView wv = this.web_view;
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        wv.evaluateJavascript(
+          String.format("$(document).ready(function () { %s });", text),
+          null);
+      }
+    });
+  }
+}
