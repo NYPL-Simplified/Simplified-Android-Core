@@ -51,13 +51,13 @@
 
   <issueManagement>
     <url>https://github.com/NYPL/Simplified-Android/issues</url>
-    <system>Github</system>
+    <system>GitHub</system>
   </issueManagement>
 
   <distributionManagement>
     <site>
-      <id>io7m</id>
-      <name>io7m.com</name>
+      <id>GitHub</id>
+      <name>GitHub</name>
       <url>${project.url}</url>
     </site>
   </distributionManagement>
