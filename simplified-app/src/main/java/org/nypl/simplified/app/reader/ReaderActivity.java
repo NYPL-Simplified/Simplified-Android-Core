@@ -18,10 +18,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -65,6 +67,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable ReaderReadiumJavaScriptAPIType js_api;
   private @Nullable ReaderViewerSettings           viewer_settings;
   private @Nullable WebView                        web_view;
+  private @Nullable ProgressBar                    loading;
 
   private void makeInitialReadiumRequest(
     final ReaderHTTPServerType hs)
@@ -102,8 +105,14 @@ public final class ReaderActivity extends Activity implements
     final ReaderSimplifiedFeedbackDispatcherType sd =
       ReaderSimplifiedFeedbackDispatcher.newDispatcher();
 
+    final ProgressBar pb =
+      NullCheck.notNull((ProgressBar) this.findViewById(R.id.reader_loading));
+    pb.setVisibility(View.VISIBLE);
+    this.loading = pb;
+
     final WebView wv =
       NullCheck.notNull((WebView) this.findViewById(R.id.reader_webview));
+    wv.setVisibility(View.INVISIBLE);
     wv.setWebViewClient(new WebViewClient() {
       @Override public boolean shouldOverrideUrlLoading(
         final @Nullable WebView view,
@@ -207,6 +216,11 @@ public final class ReaderActivity extends Activity implements
 
     final OptionType<ReaderOpenPageRequest> no_request = Option.none();
     js.openBook(p, vs, no_request);
+
+    final WebView wv = NullCheck.notNull(this.web_view);
+    wv.setVisibility(View.VISIBLE);
+    final ProgressBar pb = NullCheck.notNull(this.loading);
+    pb.setVisibility(View.GONE);
 
     Log.d(ReaderActivity.TAG, "requested openBook");
   }

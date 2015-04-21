@@ -24,9 +24,10 @@ public final class ReaderHTTPMimeMap implements ReaderHTTPMimeMapType
   {
     this.default_type = NullCheck.notNull(in_default_type);
     this.types = new ConcurrentHashMap<String, String>();
-    this.types.put("html", "text/html");
     this.types.put("css", "text/css");
+    this.types.put("html", "text/html");
     this.types.put("js", "application/javascript");
+    this.types.put("png", "image/png");
   }
 
   @Override public String getDefaultMimeType()
