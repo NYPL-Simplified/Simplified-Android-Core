@@ -74,7 +74,7 @@ public final class FileLocking
             try {
               return p.call(Unit.unit());
             } finally {
-              lock.close();
+              lock.release();
             }
           } finally {
             fc.close();
