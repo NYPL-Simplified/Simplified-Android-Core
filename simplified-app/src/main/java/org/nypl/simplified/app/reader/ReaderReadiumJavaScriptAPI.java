@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.UIThread;
 
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.io7m.jfunctional.OptionType;
@@ -18,6 +19,8 @@ import com.io7m.jnull.NullCheck;
 public final class ReaderReadiumJavaScriptAPI implements
   ReaderReadiumJavaScriptAPIType
 {
+  private static final String TAG = "RRJSA";
+
   public static ReaderReadiumJavaScriptAPIType newAPI(
     final WebView wv)
   {
@@ -59,13 +62,20 @@ public final class ReaderReadiumJavaScriptAPI implements
   private void evaluateOnReady(
     final String text)
   {
+    final String script =
+      NullCheck.notNull(String.format(
+        "$(document).ready(function () { %s });",
+        text));
+
+    Log.d(
+      ReaderReadiumJavaScriptAPI.TAG,
+      String.format("sending js: %s", script));
+
     final WebView wv = this.web_view;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        wv.evaluateJavascript(
-          String.format("$(document).ready(function () { %s });", text),
-          null);
+        wv.evaluateJavascript(script, null);
       }
     });
   }
