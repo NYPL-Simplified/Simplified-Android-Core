@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:section
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:id="org.nypl.simplified.documentation.implementation.http">
+  <s:section-title>HTTP</s:section-title>
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.http.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:link-external
+        s:target="apidocs/org/nypl/simplified/http/core/package-summary.html">simplified-http-core</s:link-external>
+      package implements a simple synchronous API for making HTTP
+      <s:term s:type="constant">GET</s:term>
+      and <s:term s:type="constant">HEAD</s:term>
+      requests with optional authentication. It is built upon
+      <s:term s:type="type">java.net.HttpURLConnection</s:term>
+      and provides a slightly more pleasant interface.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

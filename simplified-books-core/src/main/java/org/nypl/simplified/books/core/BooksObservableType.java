@@ -8,14 +8,30 @@ import java.util.Observer;
 
 public interface BooksObservableType
 {
+  /**
+   * Register an observer.
+   */
+
   void addObserver(
     Observer o);
+
+  /**
+   * Notify all observers of the book status.
+   */
 
   void booksNotifyObserversUnconditionally(
     BookStatusType status);
 
+  /**
+   * Remove an observer.
+   */
+
   void deleteObserver(
     Observer o);
+
+  /**
+   * Remove all observers.
+   */
 
   void deleteObservers();
 }

@@ -1,5 +1,9 @@
 package org.nypl.simplified.books.core;
 
+/**
+ * The given PIN was rejected.
+ */
+
 public final class AccountAuthenticationPINRejectedError extends
   AccountAuthenticationError
 {

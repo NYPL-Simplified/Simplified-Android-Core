@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:section
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:id="org.nypl.simplified.documentation.implementation.app">
+  <s:section-title>App</s:section-title>
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The
+      <s:link-external
+        s:target="apidocs/org/nypl/simplified/app/package-summary.html">simplified-app</s:link-external>
+      package implements the main Android application.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

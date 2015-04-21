@@ -9,6 +9,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.junreachable.UnreachableCodeException;
 
+/**
+ * Utility functions for producing values of the {@link BookStatusType} types.
+ */
+
 public final class BookStatus
 {
   public static BookStatusLoanedType fromBookSnapshot(

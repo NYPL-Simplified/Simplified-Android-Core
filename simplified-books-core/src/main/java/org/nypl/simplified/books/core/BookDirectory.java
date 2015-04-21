@@ -19,17 +19,31 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
+/**
+ * A single book directory.
+ *
+ * All operations on the directory are serialized by acquiring a mandatory
+ * lock on a <tt>lock</tt> file inside the directory for the duration of the
+ * changes. Due to limitations in the Android and Java APIs, threads must
+ * busy-wait on acquiring file locks. Threads contending for the locks will
+ * try for at most {@link #WAIT_MAXIMUM_MILLISECONDS} milliseconds, pausing
+ * for {@link #WAIT_PAUSE_MILLISECONDS} between lock attempts before failing.
+ */
+
 @SuppressWarnings("synthetic-access") public final class BookDirectory
 {
-  private final File   directory;
-  private final File   file_book;
-  private final File   file_cover;
-  private final File   file_download_id;
-  private final File   file_download_id_tmp;
-  private final File   file_lock;
-  private final File   file_meta;
-  private final File   file_meta_tmp;
-  private final BookID id;
+  public static final int WAIT_MAXIMUM_MILLISECONDS = 1000;
+  public static final int WAIT_PAUSE_MILLISECONDS   = 10;
+
+  private final File      directory;
+  private final File      file_book;
+  private final File      file_cover;
+  private final File      file_download_id;
+  private final File      file_download_id_tmp;
+  private final File      file_lock;
+  private final File      file_meta;
+  private final File      file_meta_tmp;
+  private final BookID    id;
 
   public BookDirectory(
     final File parent,
@@ -52,14 +66,22 @@ import com.io7m.jnull.NullCheck;
       new File(this.directory, "download_id.txt.tmp");
   }
 
+  /**
+   * Copy the given file into the directory as the book data. Typically, this
+   * will be an EPUB file.
+   *
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
   public void copyInBook(
     final File file)
     throws IOException
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      10,
-      1000,
+      BookDirectory.WAIT_PAUSE_MILLISECONDS,
+      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)
@@ -76,7 +98,21 @@ import com.io7m.jnull.NullCheck;
     throws IOException
   {
     FileUtilities.fileRename(file, this.file_book);
+
+    this.file_download_id.delete();
+    if (this.file_download_id.exists()) {
+      throw new IOException(String.format(
+        "Could not delete '%s'",
+        this.file_download_id));
+    }
   }
+
+  /**
+   * Create the book directory if it does not exist.
+   *
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
 
   public void create()
     throws IOException
@@ -84,13 +120,20 @@ import com.io7m.jnull.NullCheck;
     FileUtilities.createDirectory(this.directory);
   }
 
+  /**
+   * Destroy the book directory and all of its contents.
+   *
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
   public void destroy()
     throws IOException
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      10,
-      1000,
+      BookDirectory.WAIT_PAUSE_MILLISECONDS,
+      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)
@@ -120,6 +163,10 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
+  /**
+   * @return <tt>true</tt> if the book directory exists.
+   */
+
   public boolean exists()
   {
     return this.file_meta.isFile();
@@ -141,13 +188,19 @@ import com.io7m.jnull.NullCheck;
     return Option.none();
   }
 
+  /**
+   * @return The acquisition feed entry associated with the book
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
   public OPDSAcquisitionFeedEntry getData()
     throws IOException
   {
     return FileLocking.withFileLocked(
       this.file_lock,
-      10,
-      1000,
+      BookDirectory.WAIT_PAUSE_MILLISECONDS,
+      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, OPDSAcquisitionFeedEntry, IOException>() {
         @Override public OPDSAcquisitionFeedEntry call(
           final Unit x)
@@ -177,13 +230,19 @@ import com.io7m.jnull.NullCheck;
     return this.directory;
   }
 
+  /**
+   * @return The download ID associated with the book, if any
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
   public OptionType<Long> getDownloadID()
     throws IOException
   {
     return FileLocking.withFileLocked(
       this.file_lock,
-      10,
-      1000,
+      BookDirectory.WAIT_PAUSE_MILLISECONDS,
+      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, OptionType<Long>, IOException>() {
         @Override public OptionType<Long> call(
           final Unit x)
@@ -221,18 +280,28 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
+  /**
+   * @return The ID of the book
+   */
+
   public BookID getID()
   {
     return this.id;
   }
+
+  /**
+   * @return A snapshot of the current book state
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
 
   public BookSnapshot getSnapshot()
     throws IOException
   {
     return FileLocking.withFileLocked(
       this.file_lock,
-      10,
-      1000,
+      BookDirectory.WAIT_PAUSE_MILLISECONDS,
+      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, BookSnapshot, IOException>() {
         @Override public BookSnapshot call(
           final Unit x)
@@ -253,6 +322,13 @@ import com.io7m.jnull.NullCheck;
     return new BookSnapshot(in_cover, in_book, in_download_id, in_entry);
   }
 
+  /**
+   * Set the cover and acquisition feed entry of the book
+   *
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
   public void setData(
     final OptionType<File> in_cover,
     final OPDSAcquisitionFeedEntry in_entry)
@@ -260,8 +336,8 @@ import com.io7m.jnull.NullCheck;
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      10,
-      1000,
+      BookDirectory.WAIT_PAUSE_MILLISECONDS,
+      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)
@@ -299,34 +375,12 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  public void setDownloadFinished()
-    throws IOException
-  {
-    FileLocking.withFileLocked(
-      this.file_lock,
-      10,
-      1000,
-      new PartialFunctionType<Unit, Unit, IOException>() {
-        @Override public Unit call(
-          final Unit x)
-          throws IOException
-        {
-          BookDirectory.this.setDownloadFinishedLocked();
-          return Unit.unit();
-        }
-      });
-  }
-
-  private void setDownloadFinishedLocked()
-    throws IOException
-  {
-    this.file_download_id.delete();
-    if (this.file_download_id.exists()) {
-      throw new IOException(String.format(
-        "Could not delete '%s'",
-        this.file_download_id));
-    }
-  }
+  /**
+   * Set the download ID of the book.
+   * 
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
 
   public void setDownloadID(
     final long did)
@@ -334,8 +388,8 @@ import com.io7m.jnull.NullCheck;
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      10,
-      1000,
+      BookDirectory.WAIT_PAUSE_MILLISECONDS,
+      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)

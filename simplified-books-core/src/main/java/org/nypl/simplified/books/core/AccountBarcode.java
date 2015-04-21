@@ -9,6 +9,13 @@ import com.google.common.io.Files;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * The type of account barcodes.
+ *
+ * Account barcodes are expected to be 5-14 digit numbers, but the type does
+ * not (currently) enforce this fact.
+ */
+
 public final class AccountBarcode implements Serializable
 {
   private static final long serialVersionUID = 1L;

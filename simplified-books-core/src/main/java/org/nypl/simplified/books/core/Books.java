@@ -50,6 +50,10 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnimplementedCodeException;
 
+/**
+ * The default implementation of the {@link BooksType} interface.
+ */
+
 @SuppressWarnings("synthetic-access") public final class Books extends
   Observable implements BooksType
 {

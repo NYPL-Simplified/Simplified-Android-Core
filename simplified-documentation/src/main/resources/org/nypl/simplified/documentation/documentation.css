@@ -1,0 +1,92 @@
+.brand
+{
+  font-size: 75%;
+  font-family: monospace;
+}
+
+.brand_left
+{
+  float: left;
+}
+
+.brand_right
+{
+  text-align: right;
+}
+
+.package
+{
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.emphasis,
+.term
+{
+  font-style: italic;
+}
+
+.actor,
+.actor_system,
+.attribute,
+.class,
+.command,
+.constant,
+.element,
+.expression,
+.file,
+.function,
+.index_term,
+.role,
+.schema,
+.type,
+.variable
+{
+  font-family: monospace;
+}
+
+.example, .license, .terminal
+{
+  font-family:    monospace;
+  border:         1px solid #ccc;
+  padding-top:    1.0em;
+  padding-left:   1.0em;
+  padding-bottom: 1.0em;
+  margin-top:     1.2em;
+  overflow:       auto;
+}
+
+.dependencies table td
+{
+  padding-right: 3.0em;
+  font-family:   monospace;
+  font-size:     9pt;
+}
+
+.platforms table td
+{
+  padding-right: 2.0em;
+  white-space: nowrap;
+}
+.platforms table tbody,
+.platforms table thead
+{
+  font-size:     8pt;
+  font-family:   monospace;
+}
+
+.feature_mapping td
+{
+  padding-right: 2em;
+}
+
+.implications table thead
+{
+  padding-right: 2.0em;
+  vertical-align: top;
+}
+
+.implications table
+{
+  text-align: left;
+}
