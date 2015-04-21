@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:section
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:id="org.nypl.simplified.documentation.implementation.books">
+  <s:section-title>Books</s:section-title>
+  <s:subsection
+    xml:id="org.nypl.simplified.documentation.implementation.books.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The
+      <s:link-external
+        s:target="apidocs/org/nypl/simplified/books/core/package-summary.html">simplified-books-core</s:link-external>
+      package implements all of the code to manage books.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

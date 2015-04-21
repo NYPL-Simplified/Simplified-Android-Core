@@ -13,6 +13,10 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A directory containing {@link BookDirectory}s.
+ */
+
 public final class BooksDirectory
 {
   private final File directory;

@@ -7,6 +7,10 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+/**
+ * The default implementation of the {@link BooksStatusCacheType} interface.
+ */
+
 public final class BooksStatusCache implements BooksStatusCacheType
 {
   public static BooksStatusCacheType newStatusCache()

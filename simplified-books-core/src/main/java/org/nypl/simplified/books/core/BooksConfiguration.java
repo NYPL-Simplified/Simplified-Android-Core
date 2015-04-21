@@ -5,6 +5,10 @@ import java.net.URI;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * Immutable configuration data for the books database.
+ */
+
 @SuppressWarnings("synthetic-access") public final class BooksConfiguration
 {
   private static final class Builder implements BooksConfigurationBuilderType
