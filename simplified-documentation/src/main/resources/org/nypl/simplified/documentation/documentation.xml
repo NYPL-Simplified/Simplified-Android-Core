@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:document
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:document-title>${project.parent.name} ${project.version} Documentation
+  </s:document-title>
+  <s:document-style>documentation.css</s:document-style>
+  <s:document-contents />
+
+  <s:part xml:id="org.nypl.simplified.documentation.implementation">
+    <s:part-title>Implementation</s:part-title>
+    <s:part-contents />
+
+    <s:section xml:id="org.nypl.simplified.documentation.implementation.books">
+      <s:section-title>Books</s:section-title>
+      <s:paragraph>
+        Books.
+      </s:paragraph>
+    </s:section>
+
+    <s:section xml:id="org.nypl.simplified.documentation.implementation.downloader">
+      <s:section-title>Downloader</s:section-title>
+      <s:paragraph>
+        Downloader.
+      </s:paragraph>
+    </s:section>
+
+    <s:section xml:id="org.nypl.simplified.documentation.implementation.http">
+      <s:section-title>HTTP</s:section-title>
+      <s:paragraph>
+        HTTP.
+      </s:paragraph>
+    </s:section>
+
+    <s:section xml:id="org.nypl.simplified.documentation.implementation.opds">
+      <s:section-title>OPDS</s:section-title>
+      <s:paragraph>
+        OPDS.
+      </s:paragraph>
+    </s:section>
+
+    <s:section xml:id="org.nypl.simplified.documentation.implementation.app">
+      <s:section-title>App</s:section-title>
+      <s:paragraph>
+        App.
+      </s:paragraph>
+    </s:section>
+  </s:part>
+
+</s:document>

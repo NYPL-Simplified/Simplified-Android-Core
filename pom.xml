@@ -21,6 +21,7 @@
     <module>simplified-books-tests-android</module>
     <module>simplified-books-tests-junit4</module>
     <module>simplified-books-tests</module>
+    <module>simplified-documentation</module>
     <module>simplified-downloader-core</module>
     <module>simplified-downloader-tests-junit4</module>
     <module>simplified-http-core</module>

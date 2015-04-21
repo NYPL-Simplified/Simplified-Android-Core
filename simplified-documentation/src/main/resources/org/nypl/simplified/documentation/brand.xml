@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div class="brand" xmlns="http://www.w3.org/1999/xhtml">
+  <div class="brand_left">
+    <a href="http://labs.nypl.org/">NYPL Labs</a>
+  </div>
+  <div class="brand_right">
+    <a href="${project.parent.url}">${project.parent.name}</a> ${project.version}
+  </div>
+</div>
