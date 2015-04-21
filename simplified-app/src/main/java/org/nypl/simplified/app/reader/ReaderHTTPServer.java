@@ -122,14 +122,46 @@ import fi.iki.elonen.NanoHTTPD;
       .d(ReaderHTTPServer.TAG, String.format("request: %s %s", method, path));
 
     final String type = this.guessMimeTime(path);
-    final InputStream stream =
-      ReaderHTTPServer.class.getResourceAsStream(path);
 
-    if (stream != null) {
-      return ReaderHTTPServer.loggedResponse(path, new Response(
-        Response.Status.OK,
-        type,
-        stream));
+    /**
+     * Try looking at the included Java resources first. This includes all of
+     * the readium shared javascript content.
+     */
+
+    {
+      final InputStream stream =
+        ReaderHTTPServer.class.getResourceAsStream(path);
+
+      if (stream != null) {
+        return ReaderHTTPServer.loggedResponse(path, new Response(
+          Response.Status.OK,
+          type,
+          stream));
+      }
+    }
+
+    /**
+     * Otherwise, try serving it from the package.
+     */
+
+    {
+      final Package pack = NullCheck.notNull(this.epub_package);
+
+      final String relative = path.replaceFirst("^[/]+", "");
+      final String package_path =
+        String.format("%s%s", pack.getBasePath(), relative);
+
+      Log.d(
+        ReaderHTTPServer.TAG,
+        String.format("request: trying package path: %s", relative));
+
+      final InputStream stream = pack.getInputStream(relative, false);
+      if (stream != null) {
+        return ReaderHTTPServer.loggedResponse(path, new Response(
+          Response.Status.OK,
+          type,
+          stream));
+      }
     }
 
     return ReaderHTTPServer.loggedResponse(path, new Response(

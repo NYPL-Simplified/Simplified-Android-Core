@@ -105,7 +105,7 @@ public final class ReaderActivity extends Activity implements
     final WebView wv =
       NullCheck.notNull((WebView) this.findViewById(R.id.reader_webview));
     wv.setWebViewClient(new WebViewClient() {
-      @Override public WebResourceResponse shouldInterceptRequest(
+      @Override public boolean shouldOverrideUrlLoading(
         final @Nullable WebView view,
         final @Nullable String url)
       {
@@ -116,15 +116,15 @@ public final class ReaderActivity extends Activity implements
 
         if (nu.startsWith("simplified:")) {
           sd.dispatch(uu, ReaderActivity.this);
-          return ReaderActivity.emptyResponse();
+          return true;
         }
 
-        if (nu.startsWith("readium" + ":")) {
+        if (nu.startsWith("readium:")) {
           rd.dispatch(uu, ReaderActivity.this);
-          return ReaderActivity.emptyResponse();
+          return true;
         }
 
-        return super.shouldInterceptRequest(view, url);
+        return super.shouldOverrideUrlLoading(view, url);
       }
     });
 

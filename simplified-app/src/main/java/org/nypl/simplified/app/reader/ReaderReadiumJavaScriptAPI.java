@@ -60,13 +60,8 @@ public final class ReaderReadiumJavaScriptAPI implements
   }
 
   private void evaluateOnReady(
-    final String text)
+    final String script)
   {
-    final String script =
-      NullCheck.notNull(String.format(
-        "$(document).ready(function () { %s });",
-        text));
-
     Log.d(
       ReaderReadiumJavaScriptAPI.TAG,
       String.format("sending js: %s", script));
