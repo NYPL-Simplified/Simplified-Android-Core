@@ -288,9 +288,39 @@ public final class ReaderActivity extends Activity implements
     this.makeInitialReadiumRequest(hs);
   }
 
-  @Override public void onSimplifiedUnknownFunction(
+  @Override public void onSimplifiedFunctionUnknown(
     final String text)
   {
     Log.e(ReaderActivity.TAG, String.format("unknown function: %s", text));
+  }
+
+  @Override public void onSimplifiedFunctionDispatchError(
+    final Throwable x)
+  {
+    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+  }
+
+  @Override public void onSimplifiedGestureLeft()
+  {
+    final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
+    js.pagePrevious();
+  }
+
+  @Override public void onSimplifiedGestureLeftError(
+    final Throwable x)
+  {
+    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+  }
+
+  @Override public void onSimplifiedGestureRight()
+  {
+    final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
+    js.pageNext();
+  }
+
+  @Override public void onSimplifiedGestureRightError(
+    final Throwable x)
+  {
+    Log.e(ReaderActivity.TAG, x.getMessage(), x);
   }
 }

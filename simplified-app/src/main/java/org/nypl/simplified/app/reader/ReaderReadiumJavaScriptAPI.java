@@ -35,6 +35,22 @@ public final class ReaderReadiumJavaScriptAPI implements
     this.web_view = NullCheck.notNull(wv);
   }
 
+  private void evaluate(
+    final String script)
+  {
+    Log.d(
+      ReaderReadiumJavaScriptAPI.TAG,
+      String.format("sending js: %s", script));
+
+    final WebView wv = this.web_view;
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        wv.evaluateJavascript(script, null);
+      }
+    });
+  }
+
   @Override public void openBook(
     final org.readium.sdk.android.Package p,
     final ReaderViewerSettings vs,
@@ -51,7 +67,7 @@ public final class ReaderReadiumJavaScriptAPI implements
         o.put("openPageRequest", some.get().toJSON());
       }
 
-      this.evaluateOnReady(NullCheck.notNull(String.format(
+      this.evaluate(NullCheck.notNull(String.format(
         "ReadiumSDK.reader.openBook(%s)",
         o)));
     } catch (final JSONException e) {
@@ -59,19 +75,13 @@ public final class ReaderReadiumJavaScriptAPI implements
     }
   }
 
-  private void evaluateOnReady(
-    final String script)
+  @Override public void pageNext()
   {
-    Log.d(
-      ReaderReadiumJavaScriptAPI.TAG,
-      String.format("sending js: %s", script));
+    this.evaluate("ReadiumSDK.reader.openPageRight();");
+  }
 
-    final WebView wv = this.web_view;
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        wv.evaluateJavascript(script, null);
-      }
-    });
+  @Override public void pagePrevious()
+  {
+    this.evaluate("ReadiumSDK.reader.openPageLeft();");
   }
 }
