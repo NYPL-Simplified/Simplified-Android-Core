@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.reader;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
 
@@ -19,7 +18,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -41,14 +39,6 @@ public final class ReaderActivity extends Activity implements
 
   static {
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
-  }
-
-  private static WebResourceResponse emptyResponse()
-  {
-    return new WebResourceResponse(
-      "text/plain",
-      "UTF-8",
-      new ByteArrayInputStream(new byte[0]));
   }
 
   public static void startActivity(
