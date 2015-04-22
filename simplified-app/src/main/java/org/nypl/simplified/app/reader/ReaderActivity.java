@@ -31,6 +31,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * The main reader activity for reading an EPUB.
+ */
+
 public final class ReaderActivity extends Activity implements
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,

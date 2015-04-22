@@ -7,6 +7,11 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
+/**
+ * A request for a specific page in a book. This request is serialized to JSON
+ * and passed to Readium's javascript API.
+ */
+
 public final class ReaderOpenPageRequest implements
   ReaderJSONSerializableType
 {

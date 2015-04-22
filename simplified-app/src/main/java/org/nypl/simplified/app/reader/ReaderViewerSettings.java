@@ -5,6 +5,10 @@ import org.json.JSONObject;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * The current viewer settings.
+ */
+
 public final class ReaderViewerSettings implements ReaderJSONSerializableType
 {
   public enum ScrollMode
