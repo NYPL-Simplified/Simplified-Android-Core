@@ -25,6 +25,13 @@ public interface ReaderReadiumJavaScriptAPIType
     OptionType<ReaderOpenPageRequest> r);
 
   /**
+   * Retrieve the current page.
+   */
+
+  void getCurrentPage(
+    ReaderCurrentPageListenerType l);
+
+  /**
    * Go to the previous page in the current book.
    */
 

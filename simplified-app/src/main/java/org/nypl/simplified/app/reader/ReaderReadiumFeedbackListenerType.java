@@ -31,7 +31,8 @@ public interface ReaderReadiumFeedbackListenerType
    * Called on receipt of a <tt>readium:pagination-changed</tt> request.
    */
 
-  void onReadiumFunctionPaginationChanged();
+  void onReadiumFunctionPaginationChanged(
+    ReaderPaginationChangedEvent e);
 
   /**
    * Called when {@link #onReadiumFunctionPaginationChanged()} raises an

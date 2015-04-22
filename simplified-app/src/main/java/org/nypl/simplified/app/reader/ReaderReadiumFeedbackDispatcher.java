@@ -1,6 +1,9 @@
 package org.nypl.simplified.app.reader;
 
 import java.net.URI;
+import java.net.URLDecoder;
+
+import org.json.JSONObject;
 
 import android.util.Log;
 
@@ -66,7 +69,7 @@ public final class ReaderReadiumFeedbackDispatcher implements
         }
 
         if ("pagination-changed".equals(function)) {
-          ReaderReadiumFeedbackDispatcher.onPaginationChanged(l);
+          ReaderReadiumFeedbackDispatcher.onPaginationChanged(l, parts);
           return;
         }
       }
@@ -82,10 +85,23 @@ public final class ReaderReadiumFeedbackDispatcher implements
   }
 
   private static void onPaginationChanged(
-    final ReaderReadiumFeedbackListenerType l)
+    final ReaderReadiumFeedbackListenerType l,
+    final String[] parts)
   {
     try {
-      l.onReadiumFunctionPaginationChanged();
+      if (parts.length < 2) {
+        throw new IllegalArgumentException(
+          "Expected pagination data, but got nothing");
+      }
+
+      final String encoded = NullCheck.notNull(parts[1]);
+      final String decoded =
+        NullCheck.notNull(URLDecoder.decode(encoded, "UTF-8"));
+      final JSONObject json = new JSONObject(decoded);
+      final ReaderPaginationChangedEvent e =
+        ReaderPaginationChangedEvent.fromJSON(json);
+
+      l.onReadiumFunctionPaginationChanged(e);
     } catch (final Throwable e) {
       try {
         l.onReadiumFunctionPaginationChangedError(e);

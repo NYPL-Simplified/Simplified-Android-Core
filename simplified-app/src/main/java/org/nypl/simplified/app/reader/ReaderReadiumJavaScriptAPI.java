@@ -2,14 +2,17 @@ package org.nypl.simplified.app.reader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 
 import android.util.Log;
+import android.webkit.ValueCallback;
 import android.webkit.WebView;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 /**
  * The default implementation of the {@link ReaderReadiumJavaScriptAPIType}
@@ -51,6 +54,23 @@ public final class ReaderReadiumJavaScriptAPI implements
     });
   }
 
+  private void evaluateWithResult(
+    final String script,
+    final ValueCallback<String> callback)
+  {
+    Log.d(
+      ReaderReadiumJavaScriptAPI.TAG,
+      String.format("sending js: %s", script));
+
+    final WebView wv = this.web_view;
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        wv.evaluateJavascript(script, callback);
+      }
+    });
+  }
+
   @Override public void openBook(
     final org.readium.sdk.android.Package p,
     final ReaderViewerSettings vs,
@@ -83,5 +103,32 @@ public final class ReaderReadiumJavaScriptAPI implements
   @Override public void pagePrevious()
   {
     this.evaluate("ReadiumSDK.reader.openPageLeft();");
+  }
+
+  @Override public void getCurrentPage(
+    final ReaderCurrentPageListenerType l)
+  {
+    NullCheck.notNull(l);
+
+    this.evaluateWithResult(
+      "ReadiumSDK.reader.bookmarkCurrentPage()",
+      new ValueCallback<String>() {
+        @Override public void onReceiveValue(
+          final @Nullable String value)
+        {
+          try {
+            final JSONObject o =
+              new JSONObject(TextUtilities.unquote(NullCheck.notNull(value)));
+            final ReaderBookLocation loc = ReaderBookLocation.fromJSON(o);
+            l.onCurrentPageReceived(loc);
+          } catch (final Throwable x) {
+            try {
+              l.onCurrentPageError(x);
+            } catch (final Throwable x1) {
+              Log.e(ReaderReadiumJavaScriptAPI.TAG, x1.getMessage(), x1);
+            }
+          }
+        }
+      });
   }
 }

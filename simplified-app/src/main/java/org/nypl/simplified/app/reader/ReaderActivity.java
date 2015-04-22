@@ -39,7 +39,8 @@ public final class ReaderActivity extends Activity implements
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,
   ReaderReadiumFeedbackListenerType,
-  ReaderReadiumEPUBLoadListenerType
+  ReaderReadiumEPUBLoadListenerType,
+  ReaderCurrentPageListenerType
 {
   private static final String FILE_ID;
   private static final String TAG = "RA";
@@ -82,6 +83,16 @@ public final class ReaderActivity extends Activity implements
         wv.loadUrl(reader_uri.toString());
       }
     });
+  }
+
+  @Override public void onConfigurationChanged(
+    final @Nullable Configuration c)
+  {
+    super.onConfigurationChanged(c);
+
+    Log.d(ReaderActivity.TAG, "configuration changed");
+    final WebView in_web_view = NullCheck.notNull(this.web_view);
+    in_web_view.setVisibility(View.INVISIBLE);
   }
 
   @Override protected void onCreate(
@@ -166,6 +177,18 @@ public final class ReaderActivity extends Activity implements
     pl.loadEPUB(epub_file, this);
   }
 
+  @Override public void onCurrentPageError(
+    final Throwable x)
+  {
+    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+  }
+
+  @Override public void onCurrentPageReceived(
+    final ReaderBookLocation l)
+  {
+    Log.d(ReaderActivity.TAG, "received book location: " + l);
+  }
+
   @Override protected void onDestroy()
   {
     super.onDestroy();
@@ -241,16 +264,6 @@ public final class ReaderActivity extends Activity implements
     Log.d(ReaderActivity.TAG, "requested openBook");
   }
 
-  @Override public void onConfigurationChanged(
-    final @Nullable Configuration c)
-  {
-    super.onConfigurationChanged(c);
-
-    Log.d(ReaderActivity.TAG, "configuration changed");
-    final WebView in_web_view = NullCheck.notNull(this.web_view);
-    in_web_view.setVisibility(View.INVISIBLE);
-  }
-
   @Override public void onReadiumFunctionInitializeError(
     final Throwable e)
   {
@@ -264,6 +277,51 @@ public final class ReaderActivity extends Activity implements
           ReaderActivity.this.finish();
         }
       });
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * When the device orientation changes, the configuration change handler
+   * {@link #onConfigurationChanged(Configuration)} makes the web view
+   * invisible so that the user does not see the now incorrectly-paginated
+   * content. When Readium tells the app that the content pagination has
+   * changed, it makes the web view visible again.
+   */
+
+  @Override public void onReadiumFunctionPaginationChanged(
+    final ReaderPaginationChangedEvent e)
+  {
+    Log.d(ReaderActivity.TAG, "pagination changed");
+    final WebView in_web_view = NullCheck.notNull(this.web_view);
+
+    final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
+    js.getCurrentPage(this);
+
+    /**
+     * Make the web view visible with a slight delay (as sometimes a
+     * pagination-change event will be sent even though the content has not
+     * yet been laid out in the web view).
+     */
+
+    final Handler handler = new Handler();
+    handler.postDelayed(new Runnable() {
+      @Override public void run()
+      {
+        UIThread.runOnUIThread(new Runnable() {
+          @Override public void run()
+          {
+            in_web_view.setVisibility(View.VISIBLE);
+          }
+        });
+      }
+    }, 200);
+  }
+
+  @Override public void onReadiumFunctionPaginationChangedError(
+    final Throwable x)
+  {
+    Log.e(ReaderActivity.TAG, x.getMessage(), x);
   }
 
   @Override public void onReadiumFunctionUnknown(
@@ -345,47 +403,6 @@ public final class ReaderActivity extends Activity implements
   }
 
   @Override public void onSimplifiedGestureRightError(
-    final Throwable x)
-  {
-    Log.e(ReaderActivity.TAG, x.getMessage(), x);
-  }
-
-  /**
-   * {@inheritDoc}
-   *
-   * When the device orientation changes, the configuration change handler
-   * {@link #onConfigurationChanged(Configuration)} makes the web view
-   * invisible so that the user does not see the now incorrectly-paginated
-   * content. When Readium tells the app that the content pagination has
-   * changed, it makes the web view visible again.
-   */
-
-  @Override public void onReadiumFunctionPaginationChanged()
-  {
-    Log.d(ReaderActivity.TAG, "pagination changed");
-    final WebView in_web_view = NullCheck.notNull(this.web_view);
-
-    /**
-     * Make the web view visible with a slight delay (as sometimes a
-     * pagination-change event will be sent even though the content has not
-     * yet been laid out in the web view).
-     */
-
-    final Handler handler = new Handler();
-    handler.postDelayed(new Runnable() {
-      @Override public void run()
-      {
-        UIThread.runOnUIThread(new Runnable() {
-          @Override public void run()
-          {
-            in_web_view.setVisibility(View.VISIBLE);
-          }
-        });
-      }
-    }, 200);
-  }
-
-  @Override public void onReadiumFunctionPaginationChangedError(
     final Throwable x)
   {
     Log.e(ReaderActivity.TAG, x.getMessage(), x);
