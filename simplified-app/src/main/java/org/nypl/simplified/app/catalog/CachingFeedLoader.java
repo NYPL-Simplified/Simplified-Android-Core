@@ -8,11 +8,11 @@ import net.jodah.expiringmap.ExpiringMap;
 import net.jodah.expiringmap.ExpiringMap.Builder;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
 
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
 import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
-
-import android.util.Log;
+import org.slf4j.Logger;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -26,10 +26,10 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") public final class CachingFeedLoader implements
   OPDSFeedLoaderType
 {
-  private static final String TAG;
+  private static final Logger LOG;
 
   static {
-    TAG = "CFL";
+    LOG = LogUtilities.getLog(CachingFeedLoader.class);
   }
 
   /**
@@ -64,11 +64,12 @@ import com.io7m.jnull.NullCheck;
     final URI uri,
     final OPDSFeedLoadListenerType p)
   {
-    Log.d(CachingFeedLoader.TAG, String.format("get %s", uri));
+    CachingFeedLoader.LOG.debug("get: {}", uri);
 
     final Map<URI, OPDSFeedType> c = this.cache;
     if (c.containsKey(uri)) {
-      Log.d(CachingFeedLoader.TAG, String.format("already-cached %s", uri));
+      CachingFeedLoader.LOG.debug("already-cached: {}", uri);
+
       final OPDSFeedType r = NullCheck.notNull(c.get(uri));
       final ListenableFuture<OPDSFeedType> f = Futures.immediateFuture(r);
       p.onFeedLoadingSuccess(r);
@@ -79,16 +80,14 @@ import com.io7m.jnull.NullCheck;
       @Override public void onFeedLoadingFailure(
         final Throwable e)
       {
-        Log.d(
-          CachingFeedLoader.TAG,
-          String.format("failed %s (%s)", uri, e.getMessage()));
+        CachingFeedLoader.LOG.debug("failed: {} ({})", uri, e.getMessage());
         p.onFeedLoadingFailure(e);
       }
 
       @Override public void onFeedLoadingSuccess(
         final OPDSFeedType f)
       {
-        Log.d(CachingFeedLoader.TAG, String.format("received %s", uri));
+        CachingFeedLoader.LOG.debug("received: {}", uri);
         c.put(uri, f);
         p.onFeedLoadingSuccess(f);
       }

@@ -8,15 +8,16 @@ import java.util.concurrent.ExecutorService;
 import org.nypl.simplified.app.catalog.CatalogAcquisitionCoverGenerator;
 import org.nypl.simplified.app.catalog.CatalogAcquisitionCoverGeneratorRequestHandler;
 import org.nypl.simplified.app.catalog.CatalogAcquisitionCoverGeneratorType;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.slf4j.Logger;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.io7m.jfunctional.OptionType;
@@ -29,14 +30,16 @@ import com.squareup.picasso.RequestCreator;
 @SuppressWarnings("synthetic-access") public final class CoverProvider implements
   CoverProviderType
 {
-  private static final Callback                      EMPTY_CALLBACK;
-  private static final String                        TAG;
+  private static final Logger   LOG;
+  private static final Callback EMPTY_CALLBACK;
 
   static {
+    LOG = LogUtilities.getLog(CoverProvider.class);
+
     EMPTY_CALLBACK = new Callback() {
       @Override public void onError()
       {
-        Log.e(CoverProvider.TAG, "failed to load image");
+        CoverProvider.LOG.error("failed to load image");
       }
 
       @Override public void onSuccess()
@@ -44,8 +47,6 @@ import com.squareup.picasso.RequestCreator;
         // Nothing
       }
     };
-
-    TAG = "CProvider";
   }
 
   private static URI generateCoverURI(
@@ -62,6 +63,7 @@ import com.squareup.picasso.RequestCreator;
     }
     return cg.generateURIForTitleAuthor(title, author);
   }
+
   public static CoverProviderType newCoverProvider(
     final Context in_c,
     final BooksType in_books,
@@ -78,25 +80,21 @@ import com.squareup.picasso.RequestCreator;
       cover_gen));
     pb.executor(in_exec);
     final Picasso p = NullCheck.notNull(pb.build());
-    return new CoverProvider(p, in_books, cover_gen, in_exec);
+    return new CoverProvider(p, in_books, cover_gen);
   }
+
   private final BooksType                            books;
   private final CatalogAcquisitionCoverGeneratorType cover_gen;
-
-  private final ExecutorService                      exec;
-
   private final Picasso                              picasso;
 
   private CoverProvider(
     final Picasso in_p,
     final BooksType in_books,
-    final CatalogAcquisitionCoverGeneratorType in_cover_gen,
-    final ExecutorService in_exec)
+    final CatalogAcquisitionCoverGeneratorType in_cover_gen)
   {
     this.picasso = NullCheck.notNull(in_p);
     this.books = NullCheck.notNull(in_books);
     this.cover_gen = NullCheck.notNull(in_cover_gen);
-    this.exec = NullCheck.notNull(in_exec);
   }
 
   @Override public void loadCoverInto(
@@ -115,7 +113,7 @@ import com.squareup.picasso.RequestCreator;
     final int h,
     final Callback c)
   {
-    Log.d(CoverProvider.TAG, String.format("%s: load", e.getID()));
+    CoverProvider.LOG.debug("{}: load", e.getID());
 
     final URI uri;
     final BookID id = BookID.newIDFromEntry(e);
@@ -153,7 +151,7 @@ import com.squareup.picasso.RequestCreator;
       }
     }
 
-    Log.d(CoverProvider.TAG, String.format("%s: uri %s", e.getID(), uri));
+    CoverProvider.LOG.debug("{}: uri {}", e.getID(), uri);
 
     final Picasso p = this.picasso;
     UIThread.runOnUIThread(new Runnable() {
@@ -187,7 +185,7 @@ import com.squareup.picasso.RequestCreator;
     final int h,
     final Callback c)
   {
-    Log.d(CoverProvider.TAG, String.format("%s: load", e.getID()));
+    CoverProvider.LOG.debug("{}: load", e.getID());
 
     final URI uri;
     final BookID id = BookID.newIDFromEntry(e);
@@ -225,7 +223,7 @@ import com.squareup.picasso.RequestCreator;
       }
     }
 
-    Log.d(CoverProvider.TAG, String.format("%s: uri %s", e.getID(), uri));
+    CoverProvider.LOG.debug("{}: uri {}", e.getID(), uri);
 
     final Picasso p = this.picasso;
     UIThread.runOnUIThread(new Runnable() {

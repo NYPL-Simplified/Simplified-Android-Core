@@ -2,7 +2,8 @@ package org.nypl.simplified.app.reader;
 
 import java.net.URI;
 
-import android.util.Log;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
 
 import com.io7m.jnull.NullCheck;
 
@@ -14,7 +15,11 @@ import com.io7m.jnull.NullCheck;
 public final class ReaderSimplifiedFeedbackDispatcher implements
   ReaderSimplifiedFeedbackDispatcherType
 {
-  private static final String TAG = "RSFD";
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(ReaderSimplifiedFeedbackDispatcher.class);
+  }
 
   public static ReaderSimplifiedFeedbackDispatcherType newDispatcher()
   {
@@ -30,7 +35,10 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
       try {
         l.onSimplifiedGestureLeftError(e);
       } catch (final Throwable x1) {
-        Log.e(ReaderSimplifiedFeedbackDispatcher.TAG, x1.getMessage(), x1);
+        ReaderSimplifiedFeedbackDispatcher.LOG.error(
+          "{}",
+          x1.getMessage(),
+          x1);
       }
     }
   }
@@ -44,7 +52,10 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
       try {
         l.onSimplifiedGestureRightError(e);
       } catch (final Throwable x1) {
-        Log.e(ReaderSimplifiedFeedbackDispatcher.TAG, x1.getMessage(), x1);
+        ReaderSimplifiedFeedbackDispatcher.LOG.error(
+          "{}",
+          x1.getMessage(),
+          x1);
       }
     }
   }
@@ -61,7 +72,7 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
     NullCheck.notNull(uri);
     NullCheck.notNull(l);
 
-    Log.d(ReaderSimplifiedFeedbackDispatcher.TAG, "dispatching: " + uri);
+    ReaderSimplifiedFeedbackDispatcher.LOG.debug("dispatching: {}", uri);
 
     /**
      * Note that all exceptions are caught here, as any exceptions raised
@@ -89,7 +100,10 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
       try {
         l.onSimplifiedFunctionDispatchError(x);
       } catch (final Throwable x1) {
-        Log.e(ReaderSimplifiedFeedbackDispatcher.TAG, x1.getMessage(), x1);
+        ReaderSimplifiedFeedbackDispatcher.LOG.error(
+          "{}",
+          x1.getMessage(),
+          x1);
       }
     }
   }

@@ -7,6 +7,7 @@ import org.nypl.simplified.app.ExpensiveType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
@@ -15,10 +16,10 @@ import org.nypl.simplified.opds.core.OPDSFeedMatcherType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
+import org.slf4j.Logger;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.HorizontalScrollView;
@@ -41,10 +42,10 @@ import com.io7m.junreachable.UnreachableCodeException;
   OPDSFeedLoadListenerType,
   OPDSFeedMatcherType<Unit, UnreachableCodeException>
 {
-  private static final String                               TAG;
+  private static final Logger                               LOG;
 
   static {
-    TAG = "CLane";
+    LOG = LogUtilities.getLog(CatalogNavigationLaneView.class);
   }
 
   private final OPDSNavigationFeedEntry                     entry;
@@ -106,7 +107,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     UIThread.checkIsUIThread();
 
-    Log.d(CatalogNavigationLaneView.TAG, "request start displaying");
+    CatalogNavigationLaneView.LOG.debug("request start displaying");
 
     this.progress.setVisibility(View.VISIBLE);
     final OPDSAcquisitionFeed fr = this.feed_received;
@@ -121,7 +122,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     UIThread.checkIsUIThread();
 
-    Log.d(CatalogNavigationLaneView.TAG, "request stop displaying");
+    CatalogNavigationLaneView.LOG.debug("request stop displaying");
     this.scroller_position = this.scroller.getScrollX();
 
     if (this.images != null) {
@@ -157,7 +158,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OptionType<URI> featured_opt = this.entry.getFeaturedURI();
     if (featured_opt.isSome()) {
       final Some<URI> some = (Some<URI>) featured_opt;
-      final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+      final SimplifiedCatalogAppServicesType app =
+        Simplified.getCatalogAppServices();
       final OPDSFeedLoaderType loader = app.getFeedLoader();
 
       this.loading = loader.fromURI(some.get(), this);
@@ -190,7 +192,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     this.feed_received = NullCheck.notNull(af);
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final int scroll_x = this.scroller_position;
     final HorizontalScrollView cs = this.scroller;
     final ProgressBar cp = this.progress;
@@ -245,12 +248,14 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Throwable ex)
   {
     if (ex instanceof CancellationException) {
-      Log.d(CatalogNavigationLaneView.TAG, "Loading cancelled");
+      CatalogNavigationLaneView.LOG.debug("Loading cancelled");
       return;
     }
 
-    Log.e(CatalogNavigationLaneView.TAG, "Failed to load featured feed: "
-      + ex.getMessage(), ex);
+    CatalogNavigationLaneView.LOG.error(
+      "Failed to load featured feed: {}",
+      ex.getMessage(),
+      ex);
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
@@ -277,9 +282,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSNavigationFeed nf)
   {
     UIThread.checkIsUIThread();
-    Log.e(
-      CatalogNavigationLaneView.TAG,
-      "Expected an acquisition feed but received a navigation feed");
+
+    CatalogNavigationLaneView.LOG
+      .error("Expected an acquisition feed but received a navigation feed");
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()

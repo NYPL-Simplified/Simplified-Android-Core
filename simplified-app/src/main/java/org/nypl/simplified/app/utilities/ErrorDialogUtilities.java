@@ -1,10 +1,11 @@
 package org.nypl.simplified.app.utilities;
 
+import org.slf4j.Logger;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
-import android.util.Log;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -17,10 +18,11 @@ public final class ErrorDialogUtilities
 {
   public static void showError(
     final Activity ctx,
+    final Logger log,
     final String message,
     final @Nullable Throwable x)
   {
-    Log.e("ERROR", message, x);
+    log.error("{}", message, x);
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
@@ -47,11 +49,12 @@ public final class ErrorDialogUtilities
 
   public static void showErrorWithRunnable(
     final Activity ctx,
+    final Logger log,
     final String message,
     final @Nullable Throwable x,
     final Runnable r)
   {
-    Log.e("ERROR", message, x);
+    log.error("{}", message, x);
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()

@@ -10,25 +10,26 @@ import java.util.TreeMap;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.http.core.URIQueryBuilder;
+import org.slf4j.Logger;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.util.Log;
 
 import com.io7m.jnull.NullCheck;
 
 public final class CatalogAcquisitionCoverGenerator implements
   CatalogAcquisitionCoverGeneratorType
 {
-  private static final String TAG;
+  private static final Logger LOG;
 
   static {
-    TAG = "CAIG";
+    LOG = LogUtilities.getLog(CatalogAcquisitionCoverGenerator.class);
   }
 
   private static Map<String, String> getParameters(
@@ -54,9 +55,7 @@ public final class CatalogAcquisitionCoverGenerator implements
     final int width,
     final int height)
   {
-    Log.d(
-      CatalogAcquisitionCoverGenerator.TAG,
-      String.format("generating %s", u));
+    CatalogAcquisitionCoverGenerator.LOG.debug("generating: {}", u);
 
     final Map<String, String> params =
       CatalogAcquisitionCoverGenerator.getParameters(u);

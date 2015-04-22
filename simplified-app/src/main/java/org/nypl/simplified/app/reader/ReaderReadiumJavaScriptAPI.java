@@ -2,10 +2,11 @@ package org.nypl.simplified.app.reader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.slf4j.Logger;
 
-import android.util.Log;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
 
@@ -22,7 +23,11 @@ import com.io7m.jnull.Nullable;
 public final class ReaderReadiumJavaScriptAPI implements
   ReaderReadiumJavaScriptAPIType
 {
-  private static final String TAG = "RRJSA";
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(ReaderReadiumJavaScriptAPI.class);
+  }
 
   public static ReaderReadiumJavaScriptAPIType newAPI(
     final WebView wv)
@@ -41,9 +46,7 @@ public final class ReaderReadiumJavaScriptAPI implements
   private void evaluate(
     final String script)
   {
-    Log.d(
-      ReaderReadiumJavaScriptAPI.TAG,
-      String.format("sending js: %s", script));
+    ReaderReadiumJavaScriptAPI.LOG.debug("sending javascript: {}", script);
 
     final WebView wv = this.web_view;
     UIThread.runOnUIThread(new Runnable() {
@@ -58,9 +61,7 @@ public final class ReaderReadiumJavaScriptAPI implements
     final String script,
     final ValueCallback<String> callback)
   {
-    Log.d(
-      ReaderReadiumJavaScriptAPI.TAG,
-      String.format("sending js: %s", script));
+    ReaderReadiumJavaScriptAPI.LOG.debug("sending javascript: {}", script);
 
     final WebView wv = this.web_view;
     UIThread.runOnUIThread(new Runnable() {
@@ -91,7 +92,7 @@ public final class ReaderReadiumJavaScriptAPI implements
             try {
               l.onCurrentPageError(x);
             } catch (final Throwable x1) {
-              Log.e(ReaderReadiumJavaScriptAPI.TAG, x1.getMessage(), x1);
+              ReaderReadiumJavaScriptAPI.LOG.error("{}", x1.getMessage(), x1);
             }
           }
         }

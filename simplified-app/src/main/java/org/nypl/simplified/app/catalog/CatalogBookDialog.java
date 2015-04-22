@@ -7,6 +7,7 @@ import org.nypl.simplified.app.CoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusCancelled;
@@ -23,6 +24,7 @@ import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -31,7 +33,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,12 +65,16 @@ public final class CatalogBookDialog extends DialogFragment implements
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(CatalogBookDialog.class);
+  }
+
   private static final String ACQUISITION_ENTRY_ID;
-  private static final String TAG;
 
   static {
     ACQUISITION_ENTRY_ID = "org.nypl.simplified.app.CatalogBookDialog.entry";
-    TAG = "CBD";
   }
 
   public static CatalogBookDialog newDialog(
@@ -99,7 +104,8 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusCancelled(
     final BookStatusCancelled c)
   {
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
     final BookID id = c.getID();
@@ -142,7 +148,8 @@ public final class CatalogBookDialog extends DialogFragment implements
       NullCheck.notNull(this.book_downloading_percent_text),
       NullCheck.notNull(this.book_downloading_progress));
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     final Button dc = NullCheck.notNull(this.book_downloading_cancel);
@@ -172,7 +179,8 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
@@ -224,10 +232,12 @@ public final class CatalogBookDialog extends DialogFragment implements
     final OPDSAcquisitionFeedEntry e =
       NullCheck.notNull((OPDSAcquisitionFeedEntry) b
         .getSerializable(CatalogBookDialog.ACQUISITION_ENTRY_ID));
-    Log.d(CatalogBookDialog.TAG, "showing dialog for " + e.getID());
+
+    CatalogBookDialog.LOG.debug("showing dialog for id: {}", e.getID());
     this.entry = e;
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     books.addObserver(this);
   }
@@ -322,7 +332,8 @@ public final class CatalogBookDialog extends DialogFragment implements
     CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
     CatalogBookDetail.configureSummaryWebView(e, summary_text);
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final BookID book_id = BookID.newIDFromEntry(e);
     final OptionType<BookStatusType> status_opt =
@@ -362,7 +373,8 @@ public final class CatalogBookDialog extends DialogFragment implements
   {
     super.onDestroy();
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     books.deleteObserver(this);
   }
@@ -420,9 +432,7 @@ public final class CatalogBookDialog extends DialogFragment implements
   {
     NullCheck.notNull(observable);
 
-    Log.d(
-      CatalogBookDialog.TAG,
-      String.format("update %s %s", observable, data));
+    CatalogBookDialog.LOG.debug("update: {} {}", observable, data);
 
     final BookStatusType status = NullCheck.notNull((BookStatusType) data);
     final OPDSAcquisitionFeedEntry e = this.entry;

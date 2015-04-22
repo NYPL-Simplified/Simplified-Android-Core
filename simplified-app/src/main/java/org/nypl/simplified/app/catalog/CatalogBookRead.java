@@ -6,9 +6,11 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.reader.ReaderActivity;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksType;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.view.View;
@@ -21,8 +23,14 @@ import com.io7m.jnull.Nullable;
 
 public final class CatalogBookRead implements OnClickListener
 {
-  private final Activity activity;
-  private final BookID   id;
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(CatalogBookRead.class);
+  }
+
+  private final Activity      activity;
+  private final BookID        id;
 
   public CatalogBookRead(
     final Activity in_activity,
@@ -35,7 +43,8 @@ public final class CatalogBookRead implements OnClickListener
   @Override public void onClick(
     final @Nullable View v)
   {
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final Activity a = this.activity;
 
@@ -53,11 +62,16 @@ public final class CatalogBookRead implements OnClickListener
         ErrorDialogUtilities
           .showError(
             a,
+            CatalogBookRead.LOG,
             "Bug: book claimed to be downloaded but no book file exists in storage",
             null);
       }
     } else {
-      ErrorDialogUtilities.showError(a, "Book no longer exists!", null);
+      ErrorDialogUtilities.showError(
+        a,
+        CatalogBookRead.LOG,
+        "Book no longer exists!",
+        null);
     }
   }
 }

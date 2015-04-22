@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import org.nypl.simplified.app.LoginController;
 import org.nypl.simplified.app.LoginControllerListenerType;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookBorrowListenerType;
 import org.nypl.simplified.books.core.BookID;
@@ -10,14 +11,13 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.downloader.core.DownloadStatus;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
+import org.slf4j.Logger;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -27,10 +27,10 @@ public final class CatalogAcquisitionController implements
   AccountSyncListenerType,
   BookBorrowListenerType
 {
-  private static final String   TAG;
+  private static final Logger   LOG;
 
   static {
-    TAG = "CAC";
+    LOG = LogUtilities.getLog(CatalogAcquisitionController.class);
   }
 
   private final OPDSAcquisition acq;
@@ -63,13 +63,10 @@ public final class CatalogAcquisitionController implements
   {
     final String m =
       NullCheck.notNull(String.format("%s failed: %s", where, message));
-
-    if (error.isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) error;
-      Log.e(CatalogAcquisitionController.TAG, m, some.get());
-    } else {
-      Log.e(CatalogAcquisitionController.TAG, m);
-    }
+    LogUtilities.errorWithOptionalException(
+      CatalogAcquisitionController.LOG,
+      m,
+      error);
 
     final DownloadStatus status = DownloadStatus.STATUS_FAILED;
     final DownloadSnapshot snap =
@@ -95,20 +92,18 @@ public final class CatalogAcquisitionController implements
      * XXX: What's the correct thing to do here? Log in again?
      */
 
-    Log.d(
-      CatalogAcquisitionController.TAG,
-      "account sync authentication failed: " + message);
+    CatalogAcquisitionController.LOG.debug(
+      "account sync authentication failed: {}",
+      message);
   }
 
   @Override public void onAccountSyncBook(
     final BookID book)
   {
-    Log.d(
-      CatalogAcquisitionController.TAG,
-      String.format(
-        "synced book %s (%s)",
-        book,
-        this.books.booksStatusGet(book)));
+    CatalogAcquisitionController.LOG.debug(
+      "synced book: {} ({})",
+      book,
+      this.books.booksStatusGet(book));
   }
 
   @Override public void onAccountSyncFailure(
@@ -120,13 +115,10 @@ public final class CatalogAcquisitionController implements
 
   @Override public void onAccountSyncSuccess()
   {
-    Log.d(
-      CatalogAcquisitionController.TAG,
-      String.format(
-        "book %s (%s)",
-        this.id,
-        this.books.booksStatusGet(this.id)));
-
+    CatalogAcquisitionController.LOG.debug(
+      "book: {} ({})",
+      this.id,
+      this.books.booksStatusGet(this.id));
     this.runDownload();
   }
 
@@ -140,7 +132,7 @@ public final class CatalogAcquisitionController implements
   @Override public void onBookBorrowSuccess(
     final BookID in_id)
   {
-    Log.d(CatalogAcquisitionController.TAG, "borrow succeeded");
+    CatalogAcquisitionController.LOG.debug("borrow succeeded");
     this.books.accountSync(this);
   }
 
@@ -164,17 +156,15 @@ public final class CatalogAcquisitionController implements
 
   @Override public void onLoginSuccess()
   {
-    Log.d(CatalogAcquisitionController.TAG, "login succeeded");
+    CatalogAcquisitionController.LOG.debug("login succeeded");
     this.books.bookBorrow(this.id, this.acq, this);
   }
 
   private void runDownload()
   {
-    final String m =
-      NullCheck.notNull(String.format(
-        "starting type %s download",
-        this.acq.getType()));
-    Log.d(CatalogAcquisitionController.TAG, m);
+    CatalogAcquisitionController.LOG.debug(
+      "starting type {} download",
+      this.acq.getType());
 
     switch (this.acq.getType()) {
       case ACQUISITION_GENERIC:

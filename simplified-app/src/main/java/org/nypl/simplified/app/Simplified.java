@@ -14,6 +14,7 @@ import org.nypl.simplified.app.reader.ReaderHTTPServer;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
@@ -34,6 +35,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
+import org.slf4j.Logger;
 
 import android.app.Application;
 import android.content.Context;
@@ -41,10 +43,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Environment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -55,11 +55,23 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class Simplified extends
   Application
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(Simplified.class);
+  }
+
   private static final class CatalogAppServices implements
     SimplifiedCatalogAppServicesType,
     AccountDataLoadListenerType,
     AccountSyncListenerType
   {
+    private static final Logger      LOG_CA;
+
+    static {
+      LOG_CA = LogUtilities.getLog(CatalogAppServices.class);
+    }
+
     private final BooksType          books;
     private final ExecutorService    books_executor;
     private final ExecutorService    catalog_executor;
@@ -87,13 +99,14 @@ import com.io7m.jnull.Nullable;
         final DisplayMetrics dm = rr.getDisplayMetrics();
         final float dp_height = dm.heightPixels / dm.density;
         final float dp_width = dm.widthPixels / dm.density;
-        Log.d(
-          Simplified.TAG,
-          String.format("screen (%.2fdp x %.2fdp)", dp_width, dp_height));
-        Log.d(Simplified.TAG, String.format(
-          "screen (%dpx x %dpx)",
+        CatalogAppServices.LOG_CA.debug(
+          "screen ({} x {})",
+          dp_width,
+          dp_height);
+        CatalogAppServices.LOG_CA.debug(
+          "screen ({} x {})",
           dm.widthPixels,
-          dm.heightPixels));
+          dm.heightPixels);
       }
 
       /**
@@ -115,9 +128,9 @@ import com.io7m.jnull.Nullable;
       final File downloads_dir = new File(data_dir, "downloads");
       final File books_dir = new File(data_dir, "books");
 
-      Log.d(Simplified.TAG, "data: " + data_dir);
-      Log.d(Simplified.TAG, "downloads: " + downloads_dir);
-      Log.d(Simplified.TAG, "books: " + books_dir);
+      CatalogAppServices.LOG_CA.debug("data: {}", data_dir);
+      CatalogAppServices.LOG_CA.debug("downloads: {}", downloads_dir);
+      CatalogAppServices.LOG_CA.debug("books: {}", books_dir);
 
       final DownloaderConfigurationBuilderType dcb =
         DownloaderConfiguration.newBuilder(downloads_dir);
@@ -183,17 +196,16 @@ import com.io7m.jnull.Nullable;
     {
       final String s =
         NullCheck.notNull(String.format("failed to load books: %s", message));
-      if (error.isSome()) {
-        final Some<Throwable> some = (Some<Throwable>) error;
-        Log.e(Simplified.TAG_BOOKS, s, some.get());
-      } else {
-        Log.e(Simplified.TAG_BOOKS, s);
-      }
+      LogUtilities.errorWithOptionalException(
+        CatalogAppServices.LOG_CA,
+        s,
+        error);
     }
 
     @Override public void onAccountDataBookLoadFinished()
     {
-      Log.d(Simplified.TAG_BOOKS, "finished loading books, syncing account");
+      CatalogAppServices.LOG_CA
+        .debug("finished loading books, syncing account");
       final BooksType b = NullCheck.notNull(this.books);
       b.accountSync(this);
     }
@@ -202,21 +214,21 @@ import com.io7m.jnull.Nullable;
       final BookID book,
       final BookSnapshot snap)
     {
-      Log.d(Simplified.TAG_BOOKS, String.format("loaded book: %s", book));
+      CatalogAppServices.LOG_CA.debug("loaded book: {}", book);
     }
 
     @Override public void onAccountSyncAuthenticationFailure(
       final String message)
     {
-      Log.d(
-        Simplified.TAG_BOOKS,
-        "failed to sync account due to authentication failure: " + message);
+      CatalogAppServices.LOG_CA.debug(
+        "failed to sync account due to authentication failure: {}",
+        message);
     }
 
     @Override public void onAccountSyncBook(
       final BookID book)
     {
-      Log.d(Simplified.TAG_BOOKS, "synced book " + book);
+      CatalogAppServices.LOG_CA.debug("synced book: {}", book);
     }
 
     @Override public void onAccountSyncFailure(
@@ -226,22 +238,20 @@ import com.io7m.jnull.Nullable;
       final String s =
         NullCheck.notNull(String
           .format("failed to sync account: %s", message));
-      if (error.isSome()) {
-        final Some<Throwable> some = (Some<Throwable>) error;
-        Log.e(Simplified.TAG_BOOKS, s, some.get());
-      } else {
-        Log.e(Simplified.TAG_BOOKS, s);
-      }
+      LogUtilities.errorWithOptionalException(
+        CatalogAppServices.LOG_CA,
+        s,
+        error);
     }
 
     @Override public void onAccountSyncSuccess()
     {
-      Log.d(Simplified.TAG_BOOKS, "synced account");
+      CatalogAppServices.LOG_CA.debug("synced account");
     }
 
     @Override public void onAccountUnavailable()
     {
-      Log.d(Simplified.TAG_BOOKS, "not logged in, not loading books");
+      CatalogAppServices.LOG_CA.debug("not logged in, not loading books");
     }
 
     @Override public double screenDPToPixels(
@@ -287,12 +297,11 @@ import com.io7m.jnull.Nullable;
     @Override public void syncInitial()
     {
       if (this.synced.compareAndSet(false, true)) {
-        Log.d(Simplified.TAG, "performing initial sync");
+        CatalogAppServices.LOG_CA.debug("performing initial sync");
         this.books.accountLoadBooks(this);
       } else {
-        Log.d(
-          Simplified.TAG,
-          "initial sync already attempted, not syncing again");
+        CatalogAppServices.LOG_CA
+          .debug("initial sync already attempted, not syncing again");
       }
     }
   }
@@ -331,13 +340,6 @@ import com.io7m.jnull.Nullable;
   }
 
   private static volatile @Nullable Simplified INSTANCE;
-  private static final String                  TAG;
-  private static final String                  TAG_BOOKS;
-
-  static {
-    TAG = "S";
-    TAG_BOOKS = "S.B";
-  }
 
   private static Simplified checkInitialized()
   {
@@ -427,7 +429,6 @@ import com.io7m.jnull.Nullable;
   }
 
   private @Nullable CatalogAppServices app_services;
-
   private @Nullable ReaderAppServices  reader_services;
 
   private synchronized
@@ -456,9 +457,7 @@ import com.io7m.jnull.Nullable;
 
   @Override public void onCreate()
   {
-    Log.d(
-      Simplified.TAG,
-      String.format("starting app: pid %d", android.os.Process.myPid()));
+    Simplified.LOG.debug("starting app: pid {}", android.os.Process.myPid());
     Simplified.INSTANCE = this;
   }
 }
