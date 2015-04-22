@@ -1087,6 +1087,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
     this.books_status.booksStatusUpdateLoaned(id);
   }
 
+  @Override public void booksStatusUpdateRequesting(
+    final BookID id)
+  {
+    this.books_status.booksStatusUpdateRequesting(id);
+  }
+
   private void stopAllTasks()
   {
     synchronized (this) {
@@ -1123,11 +1129,5 @@ import com.io7m.junreachable.UnimplementedCodeException;
       };
       this.tasks.put(id, this.exec.submit(rb));
     }
-  }
-
-  @Override public void booksStatusUpdateRequesting(
-    final BookID id)
-  {
-    this.books_status.booksStatusUpdateRequesting(id);
   }
 }

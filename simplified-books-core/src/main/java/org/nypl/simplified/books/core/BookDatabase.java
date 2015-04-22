@@ -19,10 +19,6 @@ import com.io7m.jnull.Nullable;
 
 public final class BookDatabase implements BookDatabaseType
 {
-  private final File directory;
-  private final File file_credentials;
-  private final File file_credentials_tmp;
-
   /**
    * Open a database at the given directory.
    *
@@ -36,6 +32,10 @@ public final class BookDatabase implements BookDatabaseType
   {
     return new BookDatabase(in_directory);
   }
+  private final File directory;
+  private final File file_credentials;
+
+  private final File file_credentials_tmp;
 
   private BookDatabase(
     final File in_directory)
@@ -104,12 +104,6 @@ public final class BookDatabase implements BookDatabaseType
     }
   }
 
-  @Override public BookDatabaseEntryType getBookDatabaseEntry(
-    final BookID book_id)
-  {
-    return new BookDatabaseEntry(this.directory, NullCheck.notNull(book_id));
-  }
-
   @Override public List<BookDatabaseEntryType> getBookDatabaseEntries()
   {
     final List<BookDatabaseEntryType> xs =
@@ -132,6 +126,12 @@ public final class BookDatabase implements BookDatabaseType
     }
 
     return xs;
+  }
+
+  @Override public BookDatabaseEntryType getBookDatabaseEntry(
+    final BookID book_id)
+  {
+    return new BookDatabaseEntry(this.directory, NullCheck.notNull(book_id));
   }
 
   @Override public File getLocation()
