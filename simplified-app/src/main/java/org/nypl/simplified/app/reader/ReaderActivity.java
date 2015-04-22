@@ -22,6 +22,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -55,9 +56,11 @@ public final class ReaderActivity extends Activity implements
 
   private @Nullable Container                      container;
   private @Nullable ReaderReadiumJavaScriptAPIType js_api;
+  private @Nullable ProgressBar                    loading;
+  private @Nullable ProgressBar                    progress_bar;
+  private @Nullable TextView                       progress_text;
   private @Nullable ReaderViewerSettings           viewer_settings;
   private @Nullable WebView                        web_view;
-  private @Nullable ProgressBar                    loading;
 
   private void makeInitialReadiumRequest(
     final ReaderHTTPServerType hs)
@@ -95,15 +98,28 @@ public final class ReaderActivity extends Activity implements
     final ReaderSimplifiedFeedbackDispatcherType sd =
       ReaderSimplifiedFeedbackDispatcher.newDispatcher();
 
-    final ProgressBar pb =
+    final TextView in_progress_text =
+      NullCheck.notNull((TextView) this
+        .findViewById(R.id.reader_position_text));
+    final ProgressBar in_progress_bar =
+      NullCheck.notNull((ProgressBar) this
+        .findViewById(R.id.reader_position_progress));
+    final ProgressBar in_loading =
       NullCheck.notNull((ProgressBar) this.findViewById(R.id.reader_loading));
-    pb.setVisibility(View.VISIBLE);
-    this.loading = pb;
-
-    final WebView wv =
+    final WebView in_webview =
       NullCheck.notNull((WebView) this.findViewById(R.id.reader_webview));
-    wv.setVisibility(View.INVISIBLE);
-    wv.setWebViewClient(new WebViewClient() {
+
+    in_loading.setVisibility(View.VISIBLE);
+    in_progress_bar.setVisibility(View.INVISIBLE);
+    in_progress_text.setVisibility(View.INVISIBLE);
+    in_webview.setVisibility(View.INVISIBLE);
+
+    this.loading = in_loading;
+    this.progress_text = in_progress_text;
+    this.progress_bar = in_progress_bar;
+    this.web_view = in_webview;
+
+    in_webview.setWebViewClient(new WebViewClient() {
       @Override public boolean shouldOverrideUrlLoading(
         final @Nullable WebView view,
         final @Nullable String url)
@@ -127,7 +143,7 @@ public final class ReaderActivity extends Activity implements
       }
     });
 
-    final WebSettings s = NullCheck.notNull(wv.getSettings());
+    final WebSettings s = NullCheck.notNull(in_webview.getSettings());
     s.setAppCacheEnabled(false);
     s.setAllowFileAccess(false);
     s.setAllowFileAccessFromFileURLs(false);
@@ -135,8 +151,7 @@ public final class ReaderActivity extends Activity implements
     s.setCacheMode(WebSettings.LOAD_NO_CACHE);
     s.setGeolocationEnabled(false);
     s.setJavaScriptEnabled(true);
-    this.web_view = wv;
-    this.js_api = ReaderReadiumJavaScriptAPI.newAPI(wv);
+    this.js_api = ReaderReadiumJavaScriptAPI.newAPI(in_webview);
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
@@ -207,10 +222,15 @@ public final class ReaderActivity extends Activity implements
     final OptionType<ReaderOpenPageRequest> no_request = Option.none();
     js.openBook(p, vs, no_request);
 
-    final WebView wv = NullCheck.notNull(this.web_view);
-    wv.setVisibility(View.VISIBLE);
-    final ProgressBar pb = NullCheck.notNull(this.loading);
-    pb.setVisibility(View.GONE);
+    final WebView in_web_view = NullCheck.notNull(this.web_view);
+    final ProgressBar in_loading = NullCheck.notNull(this.loading);
+    final ProgressBar in_progress_bar = NullCheck.notNull(this.progress_bar);
+    final TextView in_progress_text = NullCheck.notNull(this.progress_text);
+
+    in_loading.setVisibility(View.GONE);
+    in_web_view.setVisibility(View.VISIBLE);
+    in_progress_bar.setVisibility(View.VISIBLE);
+    in_progress_text.setVisibility(View.VISIBLE);
 
     Log.d(ReaderActivity.TAG, "requested openBook");
   }
@@ -278,16 +298,16 @@ public final class ReaderActivity extends Activity implements
     this.makeInitialReadiumRequest(hs);
   }
 
-  @Override public void onSimplifiedFunctionUnknown(
-    final String text)
-  {
-    Log.e(ReaderActivity.TAG, String.format("unknown function: %s", text));
-  }
-
   @Override public void onSimplifiedFunctionDispatchError(
     final Throwable x)
   {
     Log.e(ReaderActivity.TAG, x.getMessage(), x);
+  }
+
+  @Override public void onSimplifiedFunctionUnknown(
+    final String text)
+  {
+    Log.e(ReaderActivity.TAG, String.format("unknown function: %s", text));
   }
 
   @Override public void onSimplifiedGestureLeft()

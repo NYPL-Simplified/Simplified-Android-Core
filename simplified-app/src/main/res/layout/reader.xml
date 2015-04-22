@@ -4,7 +4,29 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
+  <TextView
+    android:id="@+id/reader_position_text"
+    android:textAppearance="?android:attr/textAppearanceSmall"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_centerHorizontal="true"
+    android:layout_marginBottom="8dp"
+    android:text="Progress" />
+
+  <ProgressBar
+    android:id="@+id/reader_position_progress"
+    style="?android:attr/progressBarStyleHorizontal"
+    android:layout_width="match_parent"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:layout_marginBottom="8dp"
+    android:layout_height="wrap_content"
+    android:layout_above="@id/reader_position_text"
+    android:layout_centerHorizontal="true" />
+
   <WebView
+    android:layout_above="@id/reader_position_progress"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/reader_webview" />
