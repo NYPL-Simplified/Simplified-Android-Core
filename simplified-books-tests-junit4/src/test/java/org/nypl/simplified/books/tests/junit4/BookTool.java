@@ -14,9 +14,9 @@ import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AccountsType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
-import org.nypl.simplified.books.core.Books;
-import org.nypl.simplified.books.core.BooksConfiguration;
-import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksController;
+import org.nypl.simplified.books.core.BooksControllerConfiguration;
+import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderType;
@@ -40,8 +40,8 @@ public final class BookTool
 
     final OPDSFeedParserType parser = OPDSFeedParser.newParser();
 
-    final BooksConfigurationBuilderType books_config_builder =
-      BooksConfiguration.newBuilder(new File("/tmp/books"));
+    final BooksControllerConfigurationBuilderType books_config_builder =
+      BooksControllerConfiguration.newBuilder(new File("/tmp/books"));
 
     books_config_builder
       .setLoansURI(URI
@@ -52,9 +52,9 @@ public final class BookTool
         .newBuilder(new File("/tmp/downloads"))
         .build());
 
-    final BooksConfiguration books_config = books_config_builder.build();
+    final BooksControllerConfiguration books_config = books_config_builder.build();
     final AccountsType books =
-      Books.newBooks(exec, parser, http, d, books_config);
+      BooksController.newBooks(exec, parser, http, d, books_config);
 
     final AccountBarcode barcode = new AccountBarcode("4545499");
     final AccountPIN pin = new AccountPIN("4444");

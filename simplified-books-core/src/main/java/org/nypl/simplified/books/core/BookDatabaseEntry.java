@@ -30,7 +30,8 @@ import com.io7m.jnull.NullCheck;
  * for {@link #WAIT_PAUSE_MILLISECONDS} between lock attempts before failing.
  */
 
-@SuppressWarnings("synthetic-access") public final class BookDirectory
+@SuppressWarnings("synthetic-access") public final class BookDatabaseEntry implements
+  BookDatabaseEntryType
 {
   public static final int WAIT_MAXIMUM_MILLISECONDS = 1000;
   public static final int WAIT_PAUSE_MILLISECONDS   = 10;
@@ -45,7 +46,7 @@ import com.io7m.jnull.NullCheck;
   private final File      file_meta_tmp;
   private final BookID    id;
 
-  public BookDirectory(
+  public BookDatabaseEntry(
     final File parent,
     final BookID book_id)
   {
@@ -66,28 +67,20 @@ import com.io7m.jnull.NullCheck;
       new File(this.directory, "download_id.txt.tmp");
   }
 
-  /**
-   * Copy the given file into the directory as the book data. Typically, this
-   * will be an EPUB file.
-   *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public void copyInBook(
+  @Override public void copyInBook(
     final File file)
     throws IOException
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      BookDirectory.WAIT_PAUSE_MILLISECONDS,
-      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)
           throws IOException
         {
-          BookDirectory.this.copyInBookLocked(file);
+          BookDatabaseEntry.this.copyInBookLocked(file);
           return Unit.unit();
         }
       });
@@ -107,39 +100,25 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  /**
-   * Create the book directory if it does not exist.
-   *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public void create()
+  @Override public void create()
     throws IOException
   {
     FileUtilities.createDirectory(this.directory);
   }
 
-  /**
-   * Destroy the book directory and all of its contents.
-   *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public void destroy()
+  @Override public void destroy()
     throws IOException
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      BookDirectory.WAIT_PAUSE_MILLISECONDS,
-      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)
           throws IOException
         {
-          BookDirectory.this.destroyLocked();
+          BookDatabaseEntry.this.destroyLocked();
           return Unit.unit();
         }
       });
@@ -163,11 +142,7 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  /**
-   * @return <tt>true</tt> if the book directory exists.
-   */
-
-  public boolean exists()
+  @Override public boolean exists()
   {
     return this.file_meta.isFile();
   }
@@ -188,25 +163,19 @@ import com.io7m.jnull.NullCheck;
     return Option.none();
   }
 
-  /**
-   * @return The acquisition feed entry associated with the book
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public OPDSAcquisitionFeedEntry getData()
+  @Override public OPDSAcquisitionFeedEntry getData()
     throws IOException
   {
     return FileLocking.withFileLocked(
       this.file_lock,
-      BookDirectory.WAIT_PAUSE_MILLISECONDS,
-      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, OPDSAcquisitionFeedEntry, IOException>() {
         @Override public OPDSAcquisitionFeedEntry call(
           final Unit x)
           throws IOException
         {
-          return BookDirectory.this.getDataLocked();
+          return BookDatabaseEntry.this.getDataLocked();
         }
       });
   }
@@ -225,30 +194,24 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  public File getDirectory()
+  @Override public File getDirectory()
   {
     return this.directory;
   }
 
-  /**
-   * @return The download ID associated with the book, if any
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public OptionType<Long> getDownloadID()
+  @Override public OptionType<Long> getDownloadID()
     throws IOException
   {
     return FileLocking.withFileLocked(
       this.file_lock,
-      BookDirectory.WAIT_PAUSE_MILLISECONDS,
-      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, OptionType<Long>, IOException>() {
         @Override public OptionType<Long> call(
           final Unit x)
           throws IOException
         {
-          return BookDirectory.this.getDownloadIDLocked();
+          return BookDatabaseEntry.this.getDownloadIDLocked();
         }
       });
   }
@@ -280,34 +243,24 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  /**
-   * @return The ID of the book
-   */
-
-  public BookID getID()
+  @Override public BookID getID()
   {
     return this.id;
   }
 
-  /**
-   * @return A snapshot of the current book state
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public BookSnapshot getSnapshot()
+  @Override public BookSnapshot getSnapshot()
     throws IOException
   {
     return FileLocking.withFileLocked(
       this.file_lock,
-      BookDirectory.WAIT_PAUSE_MILLISECONDS,
-      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, BookSnapshot, IOException>() {
         @Override public BookSnapshot call(
           final Unit x)
           throws IOException
         {
-          return BookDirectory.this.getSnapshotLocked();
+          return BookDatabaseEntry.this.getSnapshotLocked();
         }
       });
   }
@@ -322,28 +275,21 @@ import com.io7m.jnull.NullCheck;
     return new BookSnapshot(in_cover, in_book, in_download_id, in_entry);
   }
 
-  /**
-   * Set the cover and acquisition feed entry of the book
-   *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public void setData(
+  @Override public void setData(
     final OptionType<File> in_cover,
     final OPDSAcquisitionFeedEntry in_entry)
     throws IOException
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      BookDirectory.WAIT_PAUSE_MILLISECONDS,
-      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)
           throws IOException
         {
-          BookDirectory.this.setDataLocked(in_cover, in_entry);
+          BookDatabaseEntry.this.setDataLocked(in_cover, in_entry);
           return Unit.unit();
         }
       });
@@ -375,27 +321,20 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  /**
-   * Set the download ID of the book.
-   * 
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  public void setDownloadID(
+  @Override public void setDownloadID(
     final long did)
     throws IOException
   {
     FileLocking.withFileLocked(
       this.file_lock,
-      BookDirectory.WAIT_PAUSE_MILLISECONDS,
-      BookDirectory.WAIT_MAXIMUM_MILLISECONDS,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
       new PartialFunctionType<Unit, Unit, IOException>() {
         @Override public Unit call(
           final Unit x)
           throws IOException
         {
-          BookDirectory.this.setDownloadIDLocked(did);
+          BookDatabaseEntry.this.setDownloadIDLocked(did);
           return Unit.unit();
         }
       });

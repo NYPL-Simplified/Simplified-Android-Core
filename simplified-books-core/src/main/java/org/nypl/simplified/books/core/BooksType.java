@@ -6,7 +6,7 @@ package org.nypl.simplified.books.core;
 
 public interface BooksType extends
   AccountsType,
-  BooksRegistryType,
+  BooksControllerType,
   BooksObservableType
 {
   // No extra functions

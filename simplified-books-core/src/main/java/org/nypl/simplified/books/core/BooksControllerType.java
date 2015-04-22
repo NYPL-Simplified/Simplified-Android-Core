@@ -6,10 +6,10 @@ import java.util.Calendar;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 
 /**
- * Interface to the book registry.
+ * Interface to the book management functions.
  */
 
-public interface BooksRegistryType extends BooksStatusCacheType
+public interface BooksControllerType extends BooksStatusCacheType
 {
   /**
    * Borrow the given book, delivering the results to the given

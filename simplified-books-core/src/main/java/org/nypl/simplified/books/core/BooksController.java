@@ -54,12 +54,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
  * The default implementation of the {@link BooksType} interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class Books extends
+@SuppressWarnings("synthetic-access") public final class BooksController extends
   Observable implements BooksType
 {
   private static final class AcquisitionFeedTask implements Runnable
   {
-    private final BooksDirectory                  books_directory;
+    private final BookDatabaseType                books_directory;
     private final String                          id;
     private final BookAcquisitionFeedListenerType listener;
     private final String                          title;
@@ -67,7 +67,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     private final URI                             uri;
 
     public AcquisitionFeedTask(
-      final BooksDirectory in_books_directory,
+      final BookDatabaseType in_books_directory,
       final URI in_uri,
       final String in_id,
       final Calendar in_updated,
@@ -92,9 +92,10 @@ import com.io7m.junreachable.UnimplementedCodeException;
           this.updated,
           this.title);
 
-      final List<BookDirectory> dirs = this.books_directory.getBooks();
+      final List<BookDatabaseEntryType> dirs =
+        this.books_directory.getBookDatabaseEntries();
       for (int index = 0; index < dirs.size(); ++index) {
-        final BookDirectory dir = NullCheck.notNull(dirs.get(index));
+        final BookDatabaseEntryType dir = NullCheck.notNull(dirs.get(index));
         final OPDSAcquisitionFeedEntry e = dir.getData();
         b.addEntry(e);
       }
@@ -115,17 +116,17 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private static final class BorrowTask implements Runnable
   {
     private final OPDSAcquisition        acq;
-    private final BooksDirectory         books_directory;
-    private final BooksRegistryType      books_registry;
-    private final BooksConfiguration     config;
+    private final BookDatabaseType       books_directory;
+    private final BooksControllerType    books_registry;
+    private final BooksControllerConfiguration     config;
     private final HTTPType               http;
     private final BookID                 id;
     private final BookBorrowListenerType listener;
 
     public BorrowTask(
-      final BooksConfiguration in_config,
-      final BooksDirectory in_books_directory,
-      final BooksRegistryType in_books_registry,
+      final BooksControllerConfiguration in_config,
+      final BookDatabaseType in_books_directory,
+      final BooksControllerType in_books_registry,
       final HTTPType in_http,
       final BookID in_id,
       final OPDSAcquisition in_acq,
@@ -208,21 +209,21 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   private static final class DataLoadTask implements Runnable
   {
-    private final BooksRegistryType           books;
-    private final BooksDirectory              books_directory;
+    private final BooksControllerType         books;
+    private final BookDatabaseType            books_directory;
     private final BooksStatusCacheType        books_status;
-    private final BooksConfiguration          config;
+    private final BooksControllerConfiguration          config;
     private final DownloaderType              downloader;
     private final AccountDataLoadListenerType listener;
     private final AtomicBoolean               logged_in;
 
     public DataLoadTask(
-      final BooksRegistryType in_books,
-      final BooksDirectory in_books_directory,
+      final BooksControllerType in_books,
+      final BookDatabaseType in_books_directory,
       final BooksStatusCacheType in_books_status,
       final DownloaderType in_downloader,
       final AccountDataLoadListenerType in_listener,
-      final BooksConfiguration in_config,
+      final BooksControllerConfiguration in_config,
       final AtomicBoolean in_logged_in)
     {
       this.books = NullCheck.notNull(in_books);
@@ -246,8 +247,9 @@ import com.io7m.junreachable.UnimplementedCodeException;
         return;
       }
 
-      final List<BookDirectory> book_list = this.books_directory.getBooks();
-      for (final BookDirectory book_dir : book_list) {
+      final List<BookDatabaseEntryType> book_list =
+        this.books_directory.getBookDatabaseEntries();
+      for (final BookDatabaseEntryType book_dir : book_list) {
         final BookID id = book_dir.getID();
         try {
           final BookSnapshot snap = book_dir.getSnapshot();
@@ -270,13 +272,13 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   private static final class DataSetupTask implements Runnable
   {
-    private final BooksDirectory               books_directory;
-    private final BooksConfiguration           config;
+    private final BookDatabaseType             books_directory;
+    private final BooksControllerConfiguration           config;
     private final AccountDataSetupListenerType listener;
 
     public DataSetupTask(
-      final BooksConfiguration in_config,
-      final BooksDirectory in_books_directory,
+      final BooksControllerConfiguration in_config,
+      final BookDatabaseType in_books_directory,
       final AccountDataSetupListenerType in_listener)
     {
       this.books_directory = NullCheck.notNull(in_books_directory);
@@ -300,24 +302,24 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private static final class DownloadOpenAccessTask extends
     DownloadAbstractListener implements Runnable
   {
-    private final BookDirectory        book_directory;
-    private final BookID               book_id;
-    private final BooksDirectory       books_directory;
-    private final BooksConfiguration   config;
-    private final DownloaderType       downloader;
-    private final BooksObservableType  observable;
-    private final BooksRegistryType    registry;
-    private final BooksStatusCacheType status_cache;
-    private final URI                  uri;
+    private final BookDatabaseEntryType book_directory;
+    private final BookID                book_id;
+    private final BookDatabaseType      books_directory;
+    private final BooksControllerConfiguration    config;
+    private final DownloaderType        downloader;
+    private final BooksObservableType   observable;
+    private final BooksControllerType   registry;
+    private final BooksStatusCacheType  status_cache;
+    private final URI                   uri;
 
     DownloadOpenAccessTask(
       final BookID in_book_id,
       final URI in_uri,
-      final BooksConfiguration in_config,
-      final BooksDirectory in_books_directory,
+      final BooksControllerConfiguration in_config,
+      final BookDatabaseType in_books_directory,
       final BooksObservableType in_observable,
       final BooksStatusCacheType in_status_cache,
-      final BooksRegistryType in_registry,
+      final BooksControllerType in_registry,
       final DownloaderType in_downloader)
     {
       this.book_id = NullCheck.notNull(in_book_id);
@@ -329,7 +331,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       this.downloader = NullCheck.notNull(in_downloader);
       this.status_cache = NullCheck.notNull(in_status_cache);
       this.book_directory =
-        this.books_directory.getBookDirectory(this.book_id);
+        this.books_directory.getBookDatabaseEntry(this.book_id);
     }
 
     private void download()
@@ -468,19 +470,19 @@ import com.io7m.junreachable.UnimplementedCodeException;
     AccountDataSetupListenerType
   {
     private final AccountBarcode           barcode;
-    private final Books                    books;
-    private final BooksDirectory           books_directory;
-    private final BooksConfiguration       config;
+    private final BooksController                    books;
+    private final BookDatabaseType         books_directory;
+    private final BooksControllerConfiguration       config;
     private final HTTPType                 http;
     private final AccountLoginListenerType listener;
     private final AtomicBoolean            logged_in;
     private final AccountPIN               pin;
 
     public LoginTask(
-      final Books in_books,
-      final BooksDirectory in_books_directory,
+      final BooksController in_books,
+      final BookDatabaseType in_books_directory,
       final HTTPType in_http,
-      final BooksConfiguration in_config,
+      final BooksControllerConfiguration in_config,
       final AccountBarcode in_barcode,
       final AccountPIN in_pin,
       final AccountLoginListenerType in_listener,
@@ -556,12 +558,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private static final class LogoutTask implements Runnable
   {
     private final File                      base;
-    private final BooksConfiguration        config;
+    private final BooksControllerConfiguration        config;
     private final AccountLogoutListenerType listener;
     private final AtomicBoolean             logged_in;
 
     public LogoutTask(
-      final BooksConfiguration in_config,
+      final BooksControllerConfiguration in_config,
       final AtomicBoolean in_logged_in,
       final AccountLogoutListenerType in_listener)
     {
@@ -682,9 +684,9 @@ import com.io7m.junreachable.UnimplementedCodeException;
       }
     }
 
-    private final BooksRegistryType       books;
-    private final BooksDirectory          books_directory;
-    private final BooksConfiguration      config;
+    private final BooksControllerType     books;
+    private final BookDatabaseType        books_directory;
+    private final BooksControllerConfiguration      config;
     private final DownloaderType          downloader;
     private final OPDSFeedParserType      feed_parser;
     private final HTTPType                http;
@@ -692,10 +694,10 @@ import com.io7m.junreachable.UnimplementedCodeException;
     private final BooksStatusCacheType    status_cache;
 
     public SyncTask(
-      final BooksConfiguration in_config,
-      final BooksRegistryType in_books,
+      final BooksControllerConfiguration in_config,
+      final BooksControllerType in_books,
       final BooksStatusCacheType in_status_cache,
-      final BooksDirectory in_books_directory,
+      final BookDatabaseType in_books_directory,
       final HTTPType in_http,
       final OPDSFeedParserType in_feed_parser,
       final DownloaderType in_downloader,
@@ -810,8 +812,8 @@ import com.io7m.junreachable.UnimplementedCodeException;
       throws Exception
     {
       final BookID book_id = BookID.newIDFromEntry(e);
-      final BookDirectory book_dir =
-        new BookDirectory(this.books_directory.getDirectory(), book_id);
+      final BookDatabaseEntryType book_dir =
+        new BookDatabaseEntry(this.books_directory.getLocation(), book_id);
 
       final OptionType<File> cover =
         SyncTask.makeCover(this.http, e.getCover());
@@ -836,14 +838,14 @@ import com.io7m.junreachable.UnimplementedCodeException;
     final OPDSFeedParserType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
-    final BooksConfiguration in_config)
+    final BooksControllerConfiguration in_config)
   {
-    return new Books(in_exec, in_feeds, in_http, in_downloader, in_config);
+    return new BooksController(in_exec, in_feeds, in_http, in_downloader, in_config);
   }
 
-  private final BooksDirectory       books_directory;
+  private final BookDatabaseType     book_database;
   private final BooksStatusCacheType books_status;
-  private final BooksConfiguration   config;
+  private final BooksControllerConfiguration   config;
   private final File                 data_directory;
   private final DownloaderType       downloader;
   private final ExecutorService      exec;
@@ -853,12 +855,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private final AtomicInteger        task_id;
   private Map<Integer, Future<?>>    tasks;
 
-  private Books(
+  private BooksController(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
-    final BooksConfiguration in_config)
+    final BooksControllerConfiguration in_config)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.feed_parser = NullCheck.notNull(in_feeds);
@@ -869,7 +871,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     this.logged_in = new AtomicBoolean(false);
     this.books_status = BooksStatusCache.newStatusCache();
     this.data_directory = new File(this.config.getDirectory(), "data");
-    this.books_directory = new BooksDirectory(this.data_directory);
+    this.book_database = BookDatabase.newDatabase(this.data_directory);
     this.task_id = new AtomicInteger(0);
   }
 
@@ -884,7 +886,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     NullCheck.notNull(listener);
     this.submitRunnable(new DataLoadTask(
       this,
-      this.books_directory,
+      this.book_database,
       this.books_status,
       this.downloader,
       listener,
@@ -903,7 +905,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
     this.submitRunnable(new LoginTask(
       this,
-      this.books_directory,
+      this.book_database,
       this.http,
       this.config,
       barcode,
@@ -936,7 +938,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       this.config,
       this,
       this,
-      this.books_directory,
+      this.book_database,
       this.http,
       this.feed_parser,
       this.downloader,
@@ -954,7 +956,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
     this.submitRunnable(new BorrowTask(
       this.config,
-      this.books_directory,
+      this.book_database,
       this,
       this.http,
       id,
@@ -1008,7 +1010,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
         id,
         uri,
         this.config,
-        this.books_directory,
+        this.book_database,
         this,
         this,
         this,
@@ -1032,7 +1034,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     NullCheck.notNull(in_listener);
 
     this.submitRunnable(new AcquisitionFeedTask(
-      this.books_directory,
+      this.book_database,
       in_uri,
       in_id,
       in_updated,
@@ -1115,7 +1117,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
           try {
             r.run();
           } finally {
-            Books.this.tasks.remove(id);
+            BooksController.this.tasks.remove(id);
           }
         }
       };

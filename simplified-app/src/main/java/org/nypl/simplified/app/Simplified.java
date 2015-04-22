@@ -18,9 +18,9 @@ import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
-import org.nypl.simplified.books.core.Books;
-import org.nypl.simplified.books.core.BooksConfiguration;
-import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksController;
+import org.nypl.simplified.books.core.BooksControllerConfiguration;
+import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
@@ -131,12 +131,12 @@ import com.io7m.jnull.Nullable;
           this.http,
           downloader_config);
 
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(books_dir);
-      final BooksConfiguration books_config = bcb.build();
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(books_dir);
+      final BooksControllerConfiguration books_config = bcb.build();
 
       this.books =
-        Books.newBooks(
+        BooksController.newBooks(
           this.books_executor,
           p,
           this.http,

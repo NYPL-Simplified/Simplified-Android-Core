@@ -14,16 +14,30 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 /**
- * A directory containing {@link BookDirectory}s.
+ * A file-based book database.
  */
 
-public final class BooksDirectory
+public final class BookDatabase implements BookDatabaseType
 {
   private final File directory;
   private final File file_credentials;
   private final File file_credentials_tmp;
 
-  public BooksDirectory(
+  /**
+   * Open a database at the given directory.
+   *
+   * @param in_directory
+   *          The directory
+   * @return A reference to the database
+   */
+
+  public static BookDatabaseType newDatabase(
+    final File in_directory)
+  {
+    return new BookDatabase(in_directory);
+  }
+
+  private BookDatabase(
     final File in_directory)
   {
     this.directory = NullCheck.notNull(in_directory);
@@ -32,18 +46,18 @@ public final class BooksDirectory
       new File(this.directory, "credentials.txt.tmp");
   }
 
-  public void create()
+  @Override public void create()
     throws IOException
   {
     FileUtilities.createDirectory(this.directory);
   }
 
-  public boolean credentialsExist()
+  @Override public boolean credentialsExist()
   {
     return this.file_credentials.isFile();
   }
 
-  public Pair<AccountBarcode, AccountPIN> credentialsGet()
+  @Override public Pair<AccountBarcode, AccountPIN> credentialsGet()
     throws IOException
   {
     final String text = FileUtilities.fileReadUTF8(this.file_credentials);
@@ -54,7 +68,7 @@ public final class BooksDirectory
     return Pair.pair(b, p);
   }
 
-  public void credentialsSet(
+  @Override public void credentialsSet(
     final AccountBarcode barcode,
     final AccountPIN pin)
     throws IOException
@@ -70,7 +84,7 @@ public final class BooksDirectory
       text);
   }
 
-  public void destroy()
+  @Override public void destroy()
     throws IOException
   {
     if (this.directory.isDirectory()) {
@@ -90,15 +104,16 @@ public final class BooksDirectory
     }
   }
 
-  public BookDirectory getBookDirectory(
+  @Override public BookDatabaseEntryType getBookDatabaseEntry(
     final BookID book_id)
   {
-    return new BookDirectory(this.directory, NullCheck.notNull(book_id));
+    return new BookDatabaseEntry(this.directory, NullCheck.notNull(book_id));
   }
 
-  public List<BookDirectory> getBooks()
+  @Override public List<BookDatabaseEntryType> getBookDatabaseEntries()
   {
-    final List<BookDirectory> xs = new ArrayList<BookDirectory>();
+    final List<BookDatabaseEntryType> xs =
+      new ArrayList<BookDatabaseEntryType>();
 
     if (this.directory.isDirectory()) {
       final File[] book_list = this.directory.listFiles(new FileFilter() {
@@ -112,14 +127,14 @@ public final class BooksDirectory
 
       for (final File f : book_list) {
         final BookID id = BookID.exactString(NullCheck.notNull(f.getName()));
-        xs.add(new BookDirectory(this.directory, id));
+        xs.add(new BookDatabaseEntry(this.directory, id));
       }
     }
 
     return xs;
   }
 
-  public File getDirectory()
+  @Override public File getLocation()
   {
     return this.directory;
   }

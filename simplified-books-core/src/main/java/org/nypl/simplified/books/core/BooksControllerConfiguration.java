@@ -9,9 +9,9 @@ import com.io7m.jnull.NullCheck;
  * Immutable configuration data for the books database.
  */
 
-@SuppressWarnings("synthetic-access") public final class BooksConfiguration
+@SuppressWarnings("synthetic-access") public final class BooksControllerConfiguration
 {
-  private static final class Builder implements BooksConfigurationBuilderType
+  private static final class Builder implements BooksControllerConfigurationBuilderType
   {
     private File directory;
     private URI  loans_uri;
@@ -25,9 +25,9 @@ import com.io7m.jnull.NullCheck;
           .create("http://circulation.alpha.librarysimplified.org/loans/"));
     }
 
-    @Override public BooksConfiguration build()
+    @Override public BooksControllerConfiguration build()
     {
-      return new BooksConfiguration(this.directory, this.loans_uri);
+      return new BooksControllerConfiguration(this.directory, this.loans_uri);
     }
 
     @Override public void setDirectory(
@@ -43,7 +43,7 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  public static BooksConfigurationBuilderType newBuilder(
+  public static BooksControllerConfigurationBuilderType newBuilder(
     final File in_directory)
   {
     return new Builder(in_directory);
@@ -52,7 +52,7 @@ import com.io7m.jnull.NullCheck;
   private final URI  auth_uri;
   private final File directory;
 
-  private BooksConfiguration(
+  private BooksControllerConfiguration(
     final File in_directory,
     final URI in_auth_uri)
   {

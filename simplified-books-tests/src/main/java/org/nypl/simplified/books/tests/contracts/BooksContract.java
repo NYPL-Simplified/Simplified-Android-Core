@@ -24,9 +24,9 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusType;
-import org.nypl.simplified.books.core.Books;
-import org.nypl.simplified.books.core.BooksConfiguration;
-import org.nypl.simplified.books.core.BooksConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksController;
+import org.nypl.simplified.books.core.BooksControllerConfiguration;
+import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
@@ -224,9 +224,9 @@ import com.io7m.junreachable.UnreachableCodeException;
       tmp.delete();
       tmp.createNewFile();
 
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
-      final BooksConfiguration in_config = bcb.build();
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(tmp);
+      final BooksControllerConfiguration in_config = bcb.build();
       final HTTPType in_http = this.makeExceptionHTTP();
 
       final DownloaderType d =
@@ -235,7 +235,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           .build());
 
       final BooksType b =
-        Books.newBooks(
+        BooksController.newBooks(
           exec,
           OPDSFeedParser.newParser(),
           in_http,
@@ -290,9 +290,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = Files.createTempDir();
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
-      final BooksConfiguration in_config = bcb.build();
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(tmp);
+      final BooksControllerConfiguration in_config = bcb.build();
       final HTTPType in_http = this.makeExceptionHTTP();
 
       final DownloaderType d =
@@ -301,7 +301,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           .build());
 
       final BooksType b =
-        Books.newBooks(
+        BooksController.newBooks(
           exec,
           OPDSFeedParser.newParser(),
           in_http,
@@ -356,11 +356,11 @@ import com.io7m.junreachable.UnreachableCodeException;
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = Files.createTempDir();
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(tmp);
       bcb.setLoansURI(BooksContract.LOANS_URI);
 
-      final BooksConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration in_config = bcb.build();
 
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
@@ -371,7 +371,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           .newBuilder(Files.createTempDir())
           .build());
       final BooksType b =
-        Books.newBooks(
+        BooksController.newBooks(
           exec,
           OPDSFeedParser.newParser(),
           in_http,
@@ -424,11 +424,11 @@ import com.io7m.junreachable.UnreachableCodeException;
       tmp.delete();
       tmp.createNewFile();
 
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(tmp);
       bcb.setLoansURI(BooksContract.LOANS_URI);
 
-      final BooksConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration in_config = bcb.build();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -439,7 +439,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           .build());
 
       final BooksType b =
-        Books.newBooks(
+        BooksController.newBooks(
           exec,
           OPDSFeedParser.newParser(),
           in_http,
@@ -491,11 +491,11 @@ import com.io7m.junreachable.UnreachableCodeException;
     try {
       final File tmp = Files.createTempDir();
 
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(tmp);
       bcb.setLoansURI(BooksContract.LOANS_URI);
 
-      final BooksConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration in_config = bcb.build();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -506,7 +506,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           .build());
 
       final BooksType b =
-        Books.newBooks(
+        BooksController.newBooks(
           exec,
           OPDSFeedParser.newParser(),
           in_http,
@@ -618,11 +618,11 @@ import com.io7m.junreachable.UnreachableCodeException;
     try {
       final File tmp = Files.createTempDir();
 
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(tmp);
       bcb.setLoansURI(BooksContract.LOANS_URI);
 
-      final BooksConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration in_config = bcb.build();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -633,7 +633,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           .build());
 
       final BooksType b =
-        Books.newBooks(
+        BooksController.newBooks(
           exec,
           OPDSFeedParser.newParser(),
           in_http,
@@ -805,11 +805,11 @@ import com.io7m.junreachable.UnreachableCodeException;
     try {
       final File tmp = Files.createTempDir();
 
-      final BooksConfigurationBuilderType bcb =
-        BooksConfiguration.newBuilder(tmp);
+      final BooksControllerConfigurationBuilderType bcb =
+        BooksControllerConfiguration.newBuilder(tmp);
       bcb.setLoansURI(BooksContract.LOANS_URI);
 
-      final BooksConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration in_config = bcb.build();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -820,7 +820,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           .build());
 
       final BooksType b =
-        Books.newBooks(
+        BooksController.newBooks(
           exec,
           OPDSFeedParser.newParser(),
           in_http,

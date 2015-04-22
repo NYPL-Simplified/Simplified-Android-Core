@@ -7,13 +7,13 @@ import java.net.URI;
  * The type of mutable builders for book database configurations.
  */
 
-public interface BooksConfigurationBuilderType
+public interface BooksControllerConfigurationBuilderType
 {
   /**
    * @return A configuration based on the parameters given so far.
    */
 
-  BooksConfiguration build();
+  BooksControllerConfiguration build();
 
   /**
    * Set the book database directory.
