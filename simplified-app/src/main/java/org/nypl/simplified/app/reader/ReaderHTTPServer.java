@@ -30,7 +30,7 @@ import fi.iki.elonen.NanoHTTPD;
   {
     final int i = path.lastIndexOf('.');
     if (i > 0) {
-      return Option.some(path.substring(i + 1));
+      return Option.some(NullCheck.notNull(path.substring(i + 1)));
     }
     return Option.none();
   }
