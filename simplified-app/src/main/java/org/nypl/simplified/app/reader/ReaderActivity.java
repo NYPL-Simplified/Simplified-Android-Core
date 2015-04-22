@@ -9,7 +9,6 @@ import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
-import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
@@ -18,6 +17,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -361,14 +361,24 @@ public final class ReaderActivity extends Activity implements
     Log.d(ReaderActivity.TAG, "pagination changed");
     final WebView in_web_view = NullCheck.notNull(this.web_view);
 
-    UIThread.runOnUIThread(new Runnable() {
+    /**
+     * Make the web view visible with a slight delay (as sometimes a
+     * pagination-change event will be sent even though the content has not
+     * yet been laid out in the web view).
+     */
+
+    final Handler handler = new Handler();
+    handler.postDelayed(new Runnable() {
       @Override public void run()
       {
-        in_web_view.setVisibility(View.VISIBLE);
-        FadeUtilities
-          .fadeIn(in_web_view, FadeUtilities.DEFAULT_FADE_DURATION);
+        UIThread.runOnUIThread(new Runnable() {
+          @Override public void run()
+          {
+            in_web_view.setVisibility(View.VISIBLE);
+          }
+        });
       }
-    });
+    }, 200);
   }
 
   @Override public void onReadiumFunctionPaginationChangedError(
