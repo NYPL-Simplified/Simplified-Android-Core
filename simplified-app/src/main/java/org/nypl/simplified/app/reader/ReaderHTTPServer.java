@@ -4,9 +4,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.readium.sdk.android.Package;
-
-import android.util.Log;
+import org.slf4j.Logger;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -23,7 +23,11 @@ import fi.iki.elonen.NanoHTTPD;
 @SuppressWarnings("synthetic-access") public final class ReaderHTTPServer extends
   NanoHTTPD implements ReaderHTTPServerType
 {
-  private static final String TAG = "RHS";
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(ReaderHTTPServer.class);
+  }
 
   private static OptionType<String> getSuffix(
     final String path)
@@ -39,13 +43,11 @@ import fi.iki.elonen.NanoHTTPD;
     final String path,
     final Response r)
   {
-    Log.d(
-      ReaderHTTPServer.TAG,
-      String.format(
-        "response: %s %s %s",
-        r.getStatus(),
-        path,
-        r.getMimeType()));
+    ReaderHTTPServer.LOG.debug(
+      "response: {} {} {}",
+      r.getStatus(),
+      path,
+      r.getMimeType());
     return r;
   }
 
@@ -60,7 +62,7 @@ import fi.iki.elonen.NanoHTTPD;
   private static Response serveError(
     final Throwable x)
   {
-    Log.e(ReaderHTTPServer.TAG, x.getMessage(), x);
+    ReaderHTTPServer.LOG.error("{}", x.getMessage(), x);
     return new Response(
       Response.Status.INTERNAL_ERROR,
       "text/plain",
@@ -118,8 +120,7 @@ import fi.iki.elonen.NanoHTTPD;
     final Method method = NullCheck.notNull(nns.getMethod());
     final String path = NullCheck.notNull(nns.getUri());
 
-    Log
-      .d(ReaderHTTPServer.TAG, String.format("request: %s %s", method, path));
+    ReaderHTTPServer.LOG.debug("request: {} {}", method, path);
 
     final String type = this.guessMimeTime(path);
 
@@ -146,14 +147,10 @@ import fi.iki.elonen.NanoHTTPD;
 
     {
       final Package pack = NullCheck.notNull(this.epub_package);
-
       final String relative = path.replaceFirst("^[/]+", "");
-      final String package_path =
-        String.format("%s%s", pack.getBasePath(), relative);
 
-      Log.d(
-        ReaderHTTPServer.TAG,
-        String.format("request: trying package path: %s", relative));
+      ReaderHTTPServer.LOG
+        .debug("request: trying package path: {}", relative);
 
       final InputStream stream = pack.getInputStream(relative, false);
       if (stream != null) {

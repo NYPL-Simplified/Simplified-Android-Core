@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.nypl.simplified.app.CoverProviderType;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
@@ -24,11 +25,11 @@ import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,10 +58,10 @@ import com.squareup.picasso.Callback;
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>
 {
-  private static final String TAG;
+  private static final Logger LOG;
 
   static {
-    TAG = "CACV";
+    LOG = LogUtilities.getLog(CatalogAcquisitionCellView.class);
   }
 
   private static String makeAuthorText(
@@ -207,25 +208,20 @@ import com.squareup.picasso.Callback;
     if (cell_e != null) {
       final String c_id = cell_e.getID();
       if (c_id.equals(i_id)) {
-        Log.d(
-          CatalogAcquisitionCellView.TAG,
-          String.format(
-            "cell same %s : %s (%s)",
-            i_id,
-            BookID.newFromText(i_id),
-            in_e.getTitle()));
+        CatalogAcquisitionCellView.LOG.debug(
+          "cell same {}: {} ({})",
+          i_id,
+          BookID.newFromText(i_id),
+          in_e.getTitle());
         return true;
       }
     }
 
-    Log.d(
-      CatalogAcquisitionCellView.TAG,
-      String.format(
-        "cell new  %s : %s (%s)",
-        in_e.getID(),
-        BookID.newFromText(i_id),
-        in_e.getTitle()));
-
+    CatalogAcquisitionCellView.LOG.debug(
+      "cell new {}: {} ({})",
+      in_e.getID(),
+      BookID.newFromText(i_id),
+      in_e.getTitle());
     return false;
   }
 
@@ -244,7 +240,7 @@ import com.squareup.picasso.Callback;
     final Callback callback = new Callback() {
       @Override public void onError()
       {
-        Log.e(CatalogAcquisitionCellView.TAG, "unable to load image");
+        CatalogAcquisitionCellView.LOG.error("unable to load image");
       }
 
       @Override public void onSuccess()
@@ -275,7 +271,7 @@ import com.squareup.picasso.Callback;
   @Override public Unit onBookStatusDone(
     final BookStatusDone d)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status done");
+    CatalogAcquisitionCellView.LOG.debug("status done");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
@@ -299,7 +295,7 @@ import com.squareup.picasso.Callback;
   @Override public Unit onBookStatusDownloading(
     final BookStatusDownloading d)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status downloading");
+    CatalogAcquisitionCellView.LOG.debug("status downloading");
     this.cell_downloading.setVisibility(View.VISIBLE);
     this.cell_book.setVisibility(View.GONE);
     this.cell_downloading_failed.setVisibility(View.GONE);
@@ -332,7 +328,7 @@ import com.squareup.picasso.Callback;
   @Override public Unit onBookStatusFailed(
     final BookStatusFailed f)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status failed");
+    CatalogAcquisitionCellView.LOG.debug("status failed");
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.VISIBLE);
@@ -346,7 +342,7 @@ import com.squareup.picasso.Callback;
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status loaned");
+    CatalogAcquisitionCellView.LOG.debug("status loaned");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
@@ -375,7 +371,7 @@ import com.squareup.picasso.Callback;
     final OPDSAcquisitionFeedEntry e,
     final BookID id)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status none");
+    CatalogAcquisitionCellView.LOG.debug("status none");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
@@ -393,7 +389,7 @@ import com.squareup.picasso.Callback;
   @Override public Unit onBookStatusPaused(
     final BookStatusPaused p)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status paused");
+    CatalogAcquisitionCellView.LOG.debug("status paused");
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
@@ -404,7 +400,7 @@ import com.squareup.picasso.Callback;
   @Override public Unit onBookStatusRequesting(
     final BookStatusRequesting s)
   {
-    Log.d(CatalogAcquisitionCellView.TAG, "status requesting");
+    CatalogAcquisitionCellView.LOG.debug("status requesting");
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
@@ -421,9 +417,7 @@ import com.squareup.picasso.Callback;
     assert observable == this.books;
     assert data instanceof BookStatusType;
 
-    Log.d(
-      CatalogAcquisitionCellView.TAG,
-      String.format("update %s %s", observable, data));
+    CatalogAcquisitionCellView.LOG.debug("update: {} {}", observable, data);
 
     final BookStatusType status = (BookStatusType) data;
     final OPDSAcquisitionFeedEntry in_entry = this.entry.get();

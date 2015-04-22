@@ -1,14 +1,15 @@
 package org.nypl.simplified.app;
 
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountsType;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
@@ -22,10 +23,10 @@ public final class LoginController implements
   OnClickListener,
   LoginControllerListenerType
 {
-  private static final String               TAG;
+  private static final Logger               LOG;
 
   static {
-    TAG = "LC";
+    LOG = LogUtilities.getLog(LoginController.class);
   }
 
   private final AccountsType                accounts;
@@ -66,13 +67,13 @@ public final class LoginController implements
     final OptionType<Throwable> error,
     final String message)
   {
-    Log.d(LoginController.TAG, "onLoginFailure");
+    LoginController.LOG.debug("onLoginFailure");
 
     if (error.isSome()) {
       final Some<Throwable> some = (Some<Throwable>) error;
-      Log.e(LoginController.TAG, message, some.get());
+      LoginController.LOG.error("{}: {}", message, some.get());
     } else {
-      Log.e(LoginController.TAG, message);
+      LoginController.LOG.error(message);
     }
 
     UIThread.runOnUIThread(new Runnable() {
@@ -92,7 +93,7 @@ public final class LoginController implements
 
   @Override public void onLoginSuccess()
   {
-    Log.d(LoginController.TAG, "onLoginSuccess");
+    LoginController.LOG.debug("onLoginSuccess");
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()

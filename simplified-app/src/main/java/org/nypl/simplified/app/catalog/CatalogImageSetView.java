@@ -8,11 +8,12 @@ import org.nypl.simplified.app.CoverProviderType;
 import org.nypl.simplified.app.ExpensiveStoppableType;
 import org.nypl.simplified.app.ScreenSizeControllerType;
 import org.nypl.simplified.app.utilities.FadeUtilities;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.slf4j.Logger;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,10 +25,10 @@ import com.squareup.picasso.Callback;
 @SuppressWarnings("synthetic-access") public final class CatalogImageSetView extends
   LinearLayout implements ExpensiveStoppableType
 {
-  private static final String                  TAG;
+  private static final Logger                  LOG;
 
   static {
-    TAG = "CImagesView";
+    LOG = LogUtilities.getLog(CatalogImageSetView.class);
   }
 
   private final CoverProviderType              cover_provider;
@@ -127,7 +128,7 @@ import com.squareup.picasso.Callback;
 
   private void done()
   {
-    Log.d(CatalogImageSetView.TAG, this.id + ": images done");
+    CatalogImageSetView.LOG.debug("{}: images done", this.id);
 
     final CatalogImageSetView sv = this;
     UIThread.runOnUIThread(new Runnable() {
@@ -141,6 +142,6 @@ import com.squareup.picasso.Callback;
 
   @Override public void expensiveStop()
   {
-    Log.d(CatalogImageSetView.TAG, this.id + ": images cancelled");
+    CatalogImageSetView.LOG.debug("{}: images cancelled", this.id);
   }
 }

@@ -5,13 +5,14 @@ import java.util.List;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.StackUtilities;
+import org.slf4j.Logger;
 
 import android.app.ActionBar;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
@@ -23,12 +24,16 @@ import com.io7m.jnull.Nullable;
 
 public abstract class CatalogActivity extends SimplifiedActivity
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(CatalogActivity.class);
+  }
+
   private static final String CATALOG_UP_STACK_ID;
-  private static final String TAG;
 
   static {
     CATALOG_UP_STACK_ID = "org.nypl.simplified.app.CatalogActivity.up_stack";
-    TAG = "CA";
   }
 
   public static void setActivityArguments(
@@ -44,7 +49,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
   private void configureUpButton(
     final List<CatalogUpStackEntry> up_stack)
   {
-    Log.d(CatalogActivity.TAG, String.format("up stack: %s", up_stack));
+    CatalogActivity.LOG.debug("up stack: {}", up_stack);
 
     final ActionBar bar = this.getActionBar();
     if (up_stack.isEmpty() == false) {
@@ -93,9 +98,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
         final List<CatalogUpStackEntry> us = this.getUpStack();
         Preconditions.checkArgument(us.isEmpty() == false);
 
-        Log.d(
-          CatalogActivity.TAG,
-          String.format("up stack before pop: " + us));
+        CatalogActivity.LOG.debug("up stack before pop: {}", us);
 
         final Pair<CatalogUpStackEntry, ImmutableList<CatalogUpStackEntry>> p =
           StackUtilities.stackPop(us);
@@ -119,9 +122,9 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
       case R.id.tilt:
       {
-        Log.d(CatalogActivity.TAG, "flipping orientation");
+        CatalogActivity.LOG.debug("flipping orientation");
         final int o = this.getRequestedOrientation();
-        Log.d(CatalogActivity.TAG, "current orientation: " + o);
+        CatalogActivity.LOG.debug("current orientation: {}", o);
         if ((o == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
           || (o == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
           this

@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.EPub3;
 import org.readium.sdk.android.Package;
 import org.readium.sdk.android.SdkErrorHandler;
-
-import android.util.Log;
+import org.slf4j.Logger;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -24,7 +24,11 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("synthetic-access") public class ReaderReadiumEPUBLoader implements
   ReaderReadiumEPUBLoaderType
 {
-  private static final String TAG = "RREL";
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(ReaderReadiumEPUBLoader.class);
+  }
 
   private static Container loadFromFile(
     final File f)
@@ -49,7 +53,7 @@ import com.io7m.jnull.Nullable;
         final @Nullable String message,
         final boolean isSevereEpubError)
       {
-        Log.d(ReaderReadiumEPUBLoader.TAG, message);
+        ReaderReadiumEPUBLoader.LOG.debug("{}", message);
         return true;
       }
     };
@@ -117,7 +121,7 @@ import com.io7m.jnull.Nullable;
           try {
             l.onEPUBLoadFailed(x0);
           } catch (final Throwable x1) {
-            Log.e("ERROR", x1.getMessage(), x1);
+            ReaderReadiumEPUBLoader.LOG.error("{}", x1.getMessage(), x1);
           }
         }
       }

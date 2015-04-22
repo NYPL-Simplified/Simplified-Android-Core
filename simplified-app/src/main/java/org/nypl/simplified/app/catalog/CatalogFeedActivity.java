@@ -12,6 +12,7 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookAcquisitionFeedListenerType;
 import org.nypl.simplified.books.core.BooksType;
@@ -25,6 +26,7 @@ import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
+import org.slf4j.Logger;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -32,7 +34,6 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -63,6 +64,12 @@ import com.io7m.junreachable.UnreachableCodeException;
   OPDSFeedMatcherType<Unit, UnreachableCodeException>,
   BookAcquisitionFeedListenerType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(CatalogFeedActivity.class);
+  }
+
   /**
    * A handler for OpenSearch 1.1 searches.
    */
@@ -110,10 +117,8 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private static final String CATALOG_ARGS;
-  private static final String TAG;
 
   static {
-    TAG = "CFA";
     CATALOG_ARGS = "org.nypl.simplified.app.CatalogFeedActivity.arguments";
   }
 
@@ -214,7 +219,8 @@ import com.io7m.junreachable.UnreachableCodeException;
      * initial one started for the app), synthesize some.
      */
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final boolean in_drawer_open = true;
     final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
     final String in_title =
@@ -258,7 +264,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   private void onAcquisitionFeedUI(
     final OPDSAcquisitionFeed af)
   {
-    Log.d(CatalogFeedActivity.TAG, "received acquisition feed: " + af);
+    CatalogFeedActivity.LOG.debug("received acquisition feed: {}", af);
 
     this.invalidateOptionsMenu();
 
@@ -308,7 +314,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     final URI feed_uri = af.getFeedURI();
     final ImmutableList<CatalogUpStackEntry> new_up_stack =
       this.newUpStack(feed_uri, args.getTitle());
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
 
     final CatalogAcquisitionFeedListenerType listener =
       new CatalogAcquisitionFeedListenerType() {
@@ -339,7 +346,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Throwable e)
   {
     if (e instanceof CancellationException) {
-      Log.d(CatalogFeedActivity.TAG, "Cancelled feed");
+      CatalogFeedActivity.LOG.debug("Cancelled feed");
       return;
     }
 
@@ -371,7 +378,8 @@ import com.io7m.junreachable.UnreachableCodeException;
      */
 
     if (stack.isEmpty()) {
-      final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+      final SimplifiedCatalogAppServicesType app =
+        Simplified.getCatalogAppServices();
       app.syncInitial();
     }
   }
@@ -382,15 +390,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     assert in_menu != null;
 
     if (this.feed == null) {
-      Log.d(
-        CatalogFeedActivity.TAG,
-        "menu creation requested but feed is not present");
+      CatalogFeedActivity.LOG
+        .debug("menu creation requested but feed is not present");
       return true;
     }
 
-    Log.d(
-      CatalogFeedActivity.TAG,
-      "menu creation requested and feed is present");
+    CatalogFeedActivity.LOG
+      .debug("menu creation requested and feed is present");
 
     final MenuInflater inflater = this.getMenuInflater();
     inflater.inflate(R.menu.catalog, in_menu);
@@ -440,9 +446,9 @@ import com.io7m.junreachable.UnreachableCodeException;
          * The application doesn't understand the search type.
          */
 
-        Log.e(
-          CatalogFeedActivity.TAG,
-          String.format("unknown search type '%s'", search.getType()));
+        CatalogFeedActivity.LOG.error(
+          "unknown search type: {}",
+          search.getType());
       }
     }
 
@@ -464,7 +470,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Throwable e)
   {
     if (e instanceof CancellationException) {
-      Log.d(CatalogFeedActivity.TAG, "Cancelled feed");
+      CatalogFeedActivity.LOG.debug("Cancelled feed");
       return;
     }
 
@@ -479,7 +485,8 @@ import com.io7m.junreachable.UnreachableCodeException;
   private void onFeedLoadingFailureUI(
     final Throwable e)
   {
-    Log.e(CatalogFeedActivity.TAG, "Failed to get feed: " + e, e);
+    CatalogFeedActivity.LOG
+      .error("Failed to get feed: {}", e.getMessage(), e);
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup progress = NullCheck.notNull(this.progress_layout);
@@ -519,11 +526,12 @@ import com.io7m.junreachable.UnreachableCodeException;
   private void onNavigationFeedUI(
     final OPDSNavigationFeed nf)
   {
-    Log.d(CatalogFeedActivity.TAG, "received navigation feed: " + nf);
+    CatalogFeedActivity.LOG.debug("received navigation feed: {}", nf);
 
     this.invalidateOptionsMenu();
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup progress = NullCheck.notNull(this.progress_layout);
@@ -599,7 +607,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.progress_layout = layout;
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final CatalogFeedArgumentsType args = this.getArguments();
     args
       .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
@@ -638,7 +647,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final ImmutableList<CatalogUpStackEntry> new_up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
-    Log.d(CatalogFeedActivity.TAG, "onSelectBook: " + this);
+    CatalogFeedActivity.LOG.debug("onSelectBook: {}", this);
 
     if (app.screenIsLarge()) {
       final CatalogBookDialog df = CatalogBookDialog.newDialog(e);
@@ -657,7 +666,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final ImmutableList<CatalogUpStackEntry> new_up_stack,
     final OPDSNavigationFeedEntry f)
   {
-    Log.d(CatalogFeedActivity.TAG, "onSelectFeed: " + this);
+    CatalogFeedActivity.LOG.debug("onSelectFeed: {}", this);
 
     final CatalogFeedArgumentsRemote remote =
       new CatalogFeedArgumentsRemote(

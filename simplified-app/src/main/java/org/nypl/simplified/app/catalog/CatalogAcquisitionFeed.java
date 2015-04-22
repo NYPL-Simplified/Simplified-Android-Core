@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.nypl.simplified.app.ExpensiveStoppableType;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
@@ -19,11 +20,11 @@ import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
 import org.nypl.simplified.opds.core.OPDSFeedMatcherType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -46,10 +47,10 @@ public final class CatalogAcquisitionFeed implements
   OPDSFeedLoadListenerType,
   OPDSFeedMatcherType<Unit, UnreachableCodeException>
 {
-  private static final String TAG;
+  private static final Logger LOG;
 
   static {
-    TAG = "CAF";
+    LOG = LogUtilities.getLog(CatalogAcquisitionFeed.class);
   }
 
   private static boolean shouldLoadNext(
@@ -144,7 +145,8 @@ public final class CatalogAcquisitionFeed implements
     final OPDSAcquisitionFeedEntry e =
       NullCheck.notNull(this.adapter.getItem(position));
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final CatalogAcquisitionCellView cv;
     if (reused != null) {
       cv = (CatalogAcquisitionCellView) reused;
@@ -189,9 +191,7 @@ public final class CatalogAcquisitionFeed implements
       final Some<URI> next_some = (Some<URI>) next_opt;
       final URI next = next_some.get();
 
-      Log.d(
-        CatalogAcquisitionFeed.TAG,
-        String.format("loading next feed (%s)", next));
+      CatalogAcquisitionFeed.LOG.debug("loading next feed: %s", next);
 
       return this.loader.fromURI(next, this);
     }
@@ -203,9 +203,7 @@ public final class CatalogAcquisitionFeed implements
     final OPDSAcquisitionFeed af)
     throws UnreachableCodeException
   {
-    Log.d(
-      CatalogAcquisitionFeed.TAG,
-      String.format("received %s", af.getFeedID()));
+    CatalogAcquisitionFeed.LOG.debug("received: {}", af.getFeedID());
 
     this.uri_next.set(af.getNext());
 
@@ -238,7 +236,7 @@ public final class CatalogAcquisitionFeed implements
       return;
     }
 
-    Log.e(CatalogAcquisitionFeed.TAG, e.getMessage(), e);
+    CatalogAcquisitionFeed.LOG.error("{}", e.getMessage(), e);
   }
 
   @Override public void onFeedLoadingSuccess(
@@ -252,10 +250,9 @@ public final class CatalogAcquisitionFeed implements
     final OPDSNavigationFeed nf)
     throws UnreachableCodeException
   {
-    Log.e(CatalogAcquisitionFeed.TAG, String.format(
-      "received navigation feed instead of acquisition feed (%s)",
-      nf.getFeedID()));
-
+    CatalogAcquisitionFeed.LOG.error(
+      "received navigation feed instead of acquisition feed ({})",
+      nf.getFeedID());
     return Unit.unit();
   }
 

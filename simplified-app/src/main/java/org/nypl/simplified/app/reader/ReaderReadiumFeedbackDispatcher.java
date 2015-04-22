@@ -4,8 +4,8 @@ import java.net.URI;
 import java.net.URLDecoder;
 
 import org.json.JSONObject;
-
-import android.util.Log;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
 
 import com.io7m.jnull.NullCheck;
 
@@ -17,7 +17,11 @@ import com.io7m.jnull.NullCheck;
 public final class ReaderReadiumFeedbackDispatcher implements
   ReaderReadiumFeedbackDispatcherType
 {
-  private static final String TAG = "RRFD";
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(ReaderReadiumFeedbackDispatcher.class);
+  }
 
   public static ReaderReadiumFeedbackDispatcherType newDispatcher()
   {
@@ -33,7 +37,7 @@ public final class ReaderReadiumFeedbackDispatcher implements
       try {
         l.onReadiumFunctionInitializeError(e);
       } catch (final Throwable x1) {
-        Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
+        ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
       }
     }
   }
@@ -60,7 +64,7 @@ public final class ReaderReadiumFeedbackDispatcher implements
       try {
         l.onReadiumFunctionPaginationChangedError(e);
       } catch (final Throwable x1) {
-        Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
+        ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
       }
     }
   }
@@ -77,7 +81,7 @@ public final class ReaderReadiumFeedbackDispatcher implements
     NullCheck.notNull(uri);
     NullCheck.notNull(l);
 
-    Log.d(ReaderReadiumFeedbackDispatcher.TAG, "dispatching: " + uri);
+    ReaderReadiumFeedbackDispatcher.LOG.debug("dispatching: {}", uri);
 
     /**
      * Note that all exceptions are caught here, as any exceptions raised
@@ -106,7 +110,7 @@ public final class ReaderReadiumFeedbackDispatcher implements
       try {
         l.onReadiumFunctionDispatchError(x);
       } catch (final Throwable x1) {
-        Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
+        ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
       }
     }
   }

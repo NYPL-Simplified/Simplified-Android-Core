@@ -9,16 +9,17 @@ import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -35,15 +36,21 @@ import com.io7m.jnull.Nullable;
  * The main reader activity for reading an EPUB.
  */
 
-public final class ReaderActivity extends Activity implements
+@SuppressWarnings("synthetic-access") public final class ReaderActivity extends
+  Activity implements
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,
   ReaderReadiumFeedbackListenerType,
   ReaderReadiumEPUBLoadListenerType,
   ReaderCurrentPageListenerType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(ReaderActivity.class);
+  }
+
   private static final String FILE_ID;
-  private static final String TAG = "RA";
 
   static {
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
@@ -77,9 +84,9 @@ public final class ReaderActivity extends Activity implements
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        Log.d(
-          ReaderActivity.TAG,
-          String.format("making initial reader request (%s)", reader_uri));
+        ReaderActivity.LOG.debug(
+          "making initial reader request: {}",
+          reader_uri);
         wv.loadUrl(reader_uri.toString());
       }
     });
@@ -90,7 +97,7 @@ public final class ReaderActivity extends Activity implements
   {
     super.onConfigurationChanged(c);
 
-    Log.d(ReaderActivity.TAG, "configuration changed");
+    ReaderActivity.LOG.debug("configuration changed");
     final WebView in_web_view = NullCheck.notNull(this.web_view);
     in_web_view.setVisibility(View.INVISIBLE);
   }
@@ -144,7 +151,7 @@ public final class ReaderActivity extends Activity implements
         final String nu = NullCheck.notNull(url);
         final URI uu = NullCheck.notNull(URI.create(nu));
 
-        Log.d(ReaderActivity.TAG, "should-intercept: " + nu);
+        ReaderActivity.LOG.debug("should-intercept: {}", nu);
 
         if (nu.startsWith("simplified:")) {
           sd.dispatch(uu, ReaderActivity.this);
@@ -180,13 +187,13 @@ public final class ReaderActivity extends Activity implements
   @Override public void onCurrentPageError(
     final Throwable x)
   {
-    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 
   @Override public void onCurrentPageReceived(
     final ReaderBookLocation l)
   {
-    Log.d(ReaderActivity.TAG, "received book location: " + l);
+    ReaderActivity.LOG.debug("received book location: {}", l);
   }
 
   @Override protected void onDestroy()
@@ -199,6 +206,7 @@ public final class ReaderActivity extends Activity implements
   {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
+      ReaderActivity.LOG,
       "Could not load EPUB file",
       x,
       new Runnable() {
@@ -230,12 +238,12 @@ public final class ReaderActivity extends Activity implements
   @Override public void onReadiumFunctionDispatchError(
     final Throwable x)
   {
-    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 
   @Override public void onReadiumFunctionInitialize()
   {
-    Log.d(ReaderActivity.TAG, "readium initialize requested");
+    ReaderActivity.LOG.debug("readium initialize requested");
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
@@ -261,7 +269,7 @@ public final class ReaderActivity extends Activity implements
     in_progress_bar.setVisibility(View.VISIBLE);
     in_progress_text.setVisibility(View.VISIBLE);
 
-    Log.d(ReaderActivity.TAG, "requested openBook");
+    ReaderActivity.LOG.debug("requested openBook");
   }
 
   @Override public void onReadiumFunctionInitializeError(
@@ -269,6 +277,7 @@ public final class ReaderActivity extends Activity implements
   {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
+      ReaderActivity.LOG,
       "Unable to initialize Readium",
       e,
       new Runnable() {
@@ -292,7 +301,7 @@ public final class ReaderActivity extends Activity implements
   @Override public void onReadiumFunctionPaginationChanged(
     final ReaderPaginationChangedEvent e)
   {
-    Log.d(ReaderActivity.TAG, "pagination changed");
+    ReaderActivity.LOG.debug("pagination changed");
     final WebView in_web_view = NullCheck.notNull(this.web_view);
 
     final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
@@ -321,15 +330,13 @@ public final class ReaderActivity extends Activity implements
   @Override public void onReadiumFunctionPaginationChangedError(
     final Throwable x)
   {
-    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 
   @Override public void onReadiumFunctionUnknown(
     final String text)
   {
-    Log.e(
-      ReaderActivity.TAG,
-      String.format("unknown readium function: %s", text));
+    ReaderActivity.LOG.error("unknown readium function: {}", text);
   }
 
   @Override protected void onResume()
@@ -349,6 +356,7 @@ public final class ReaderActivity extends Activity implements
   {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
+      ReaderActivity.LOG,
       "Could not start http server",
       x,
       new Runnable() {
@@ -364,9 +372,9 @@ public final class ReaderActivity extends Activity implements
     final boolean first)
   {
     if (first) {
-      Log.d(ReaderActivity.TAG, "http server started");
+      ReaderActivity.LOG.debug("http server started");
     } else {
-      Log.d(ReaderActivity.TAG, "http server already running");
+      ReaderActivity.LOG.debug("http server already running");
     }
 
     this.makeInitialReadiumRequest(hs);
@@ -375,13 +383,13 @@ public final class ReaderActivity extends Activity implements
   @Override public void onSimplifiedFunctionDispatchError(
     final Throwable x)
   {
-    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 
   @Override public void onSimplifiedFunctionUnknown(
     final String text)
   {
-    Log.e(ReaderActivity.TAG, String.format("unknown function: %s", text));
+    ReaderActivity.LOG.error("unknown function: {}", text);
   }
 
   @Override public void onSimplifiedGestureLeft()
@@ -393,7 +401,7 @@ public final class ReaderActivity extends Activity implements
   @Override public void onSimplifiedGestureLeftError(
     final Throwable x)
   {
-    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 
   @Override public void onSimplifiedGestureRight()
@@ -405,6 +413,6 @@ public final class ReaderActivity extends Activity implements
   @Override public void onSimplifiedGestureRightError(
     final Throwable x)
   {
-    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 }
