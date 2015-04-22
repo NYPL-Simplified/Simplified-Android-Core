@@ -115,13 +115,13 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   private static final class BorrowTask implements Runnable
   {
-    private final OPDSAcquisition        acq;
-    private final BookDatabaseType       books_directory;
-    private final BooksControllerType    books_registry;
-    private final BooksControllerConfiguration     config;
-    private final HTTPType               http;
-    private final BookID                 id;
-    private final BookBorrowListenerType listener;
+    private final OPDSAcquisition              acq;
+    private final BookDatabaseType             books_directory;
+    private final BooksControllerType          books_registry;
+    private final BooksControllerConfiguration config;
+    private final HTTPType                     http;
+    private final BookID                       id;
+    private final BookBorrowListenerType       listener;
 
     public BorrowTask(
       final BooksControllerConfiguration in_config,
@@ -209,13 +209,13 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   private static final class DataLoadTask implements Runnable
   {
-    private final BooksControllerType         books;
-    private final BookDatabaseType            books_directory;
-    private final BooksStatusCacheType        books_status;
-    private final BooksControllerConfiguration          config;
-    private final DownloaderType              downloader;
-    private final AccountDataLoadListenerType listener;
-    private final AtomicBoolean               logged_in;
+    private final BooksControllerType          books;
+    private final BookDatabaseType             books_directory;
+    private final BooksStatusCacheType         books_status;
+    private final BooksControllerConfiguration config;
+    private final DownloaderType               downloader;
+    private final AccountDataLoadListenerType  listener;
+    private final AtomicBoolean                logged_in;
 
     public DataLoadTask(
       final BooksControllerType in_books,
@@ -273,7 +273,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private static final class DataSetupTask implements Runnable
   {
     private final BookDatabaseType             books_directory;
-    private final BooksControllerConfiguration           config;
+    private final BooksControllerConfiguration config;
     private final AccountDataSetupListenerType listener;
 
     public DataSetupTask(
@@ -302,15 +302,15 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private static final class DownloadOpenAccessTask extends
     DownloadAbstractListener implements Runnable
   {
-    private final BookDatabaseEntryType book_directory;
-    private final BookID                book_id;
-    private final BookDatabaseType      books_directory;
-    private final BooksControllerConfiguration    config;
-    private final DownloaderType        downloader;
-    private final BooksObservableType   observable;
-    private final BooksControllerType   registry;
-    private final BooksStatusCacheType  status_cache;
-    private final URI                   uri;
+    private final BookDatabaseEntryType        book_directory;
+    private final BookID                       book_id;
+    private final BookDatabaseType             books_directory;
+    private final BooksControllerConfiguration config;
+    private final DownloaderType               downloader;
+    private final BooksObservableType          observable;
+    private final BooksControllerType          registry;
+    private final BooksStatusCacheType         status_cache;
+    private final URI                          uri;
 
     DownloadOpenAccessTask(
       final BookID in_book_id,
@@ -469,14 +469,14 @@ import com.io7m.junreachable.UnimplementedCodeException;
     Runnable,
     AccountDataSetupListenerType
   {
-    private final AccountBarcode           barcode;
-    private final BooksController                    books;
-    private final BookDatabaseType         books_directory;
-    private final BooksControllerConfiguration       config;
-    private final HTTPType                 http;
-    private final AccountLoginListenerType listener;
-    private final AtomicBoolean            logged_in;
-    private final AccountPIN               pin;
+    private final AccountBarcode               barcode;
+    private final BooksController              books;
+    private final BookDatabaseType             books_directory;
+    private final BooksControllerConfiguration config;
+    private final HTTPType                     http;
+    private final AccountLoginListenerType     listener;
+    private final AtomicBoolean                logged_in;
+    private final AccountPIN                   pin;
 
     public LoginTask(
       final BooksController in_books,
@@ -557,10 +557,10 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   private static final class LogoutTask implements Runnable
   {
-    private final File                      base;
-    private final BooksControllerConfiguration        config;
-    private final AccountLogoutListenerType listener;
-    private final AtomicBoolean             logged_in;
+    private final File                         base;
+    private final BooksControllerConfiguration config;
+    private final AccountLogoutListenerType    listener;
+    private final AtomicBoolean                logged_in;
 
     public LogoutTask(
       final BooksControllerConfiguration in_config,
@@ -684,14 +684,14 @@ import com.io7m.junreachable.UnimplementedCodeException;
       }
     }
 
-    private final BooksControllerType     books;
-    private final BookDatabaseType        books_directory;
-    private final BooksControllerConfiguration      config;
-    private final DownloaderType          downloader;
-    private final OPDSFeedParserType      feed_parser;
-    private final HTTPType                http;
-    private final AccountSyncListenerType listener;
-    private final BooksStatusCacheType    status_cache;
+    private final BooksControllerType          books;
+    private final BookDatabaseType             books_directory;
+    private final BooksControllerConfiguration config;
+    private final DownloaderType               downloader;
+    private final OPDSFeedParserType           feed_parser;
+    private final HTTPType                     http;
+    private final AccountSyncListenerType      listener;
+    private final BooksStatusCacheType         status_cache;
 
     public SyncTask(
       final BooksControllerConfiguration in_config,
@@ -840,20 +840,25 @@ import com.io7m.junreachable.UnimplementedCodeException;
     final DownloaderType in_downloader,
     final BooksControllerConfiguration in_config)
   {
-    return new BooksController(in_exec, in_feeds, in_http, in_downloader, in_config);
+    return new BooksController(
+      in_exec,
+      in_feeds,
+      in_http,
+      in_downloader,
+      in_config);
   }
 
-  private final BookDatabaseType     book_database;
-  private final BooksStatusCacheType books_status;
-  private final BooksControllerConfiguration   config;
-  private final File                 data_directory;
-  private final DownloaderType       downloader;
-  private final ExecutorService      exec;
-  private final OPDSFeedParserType   feed_parser;
-  private final HTTPType             http;
-  private final AtomicBoolean        logged_in;
-  private final AtomicInteger        task_id;
-  private Map<Integer, Future<?>>    tasks;
+  private final BookDatabaseType             book_database;
+  private final BooksStatusCacheType         books_status;
+  private final BooksControllerConfiguration config;
+  private final File                         data_directory;
+  private final DownloaderType               downloader;
+  private final ExecutorService              exec;
+  private final OPDSFeedParserType           feed_parser;
+  private final HTTPType                     http;
+  private final AtomicBoolean                logged_in;
+  private final AtomicInteger                task_id;
+  private Map<Integer, Future<?>>            tasks;
 
   private BooksController(
     final ExecutorService in_exec,

@@ -32,9 +32,9 @@ public final class BookDatabase implements BookDatabaseType
   {
     return new BookDatabase(in_directory);
   }
+
   private final File directory;
   private final File file_credentials;
-
   private final File file_credentials_tmp;
 
   private BookDatabase(
