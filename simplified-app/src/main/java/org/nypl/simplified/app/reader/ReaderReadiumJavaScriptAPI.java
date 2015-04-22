@@ -71,6 +71,33 @@ public final class ReaderReadiumJavaScriptAPI implements
     });
   }
 
+  @Override public void getCurrentPage(
+    final ReaderCurrentPageListenerType l)
+  {
+    NullCheck.notNull(l);
+
+    this.evaluateWithResult(
+      "ReadiumSDK.reader.bookmarkCurrentPage()",
+      new ValueCallback<String>() {
+        @Override public void onReceiveValue(
+          final @Nullable String value)
+        {
+          try {
+            final JSONObject o =
+              new JSONObject(TextUtilities.unquote(NullCheck.notNull(value)));
+            final ReaderBookLocation loc = ReaderBookLocation.fromJSON(o);
+            l.onCurrentPageReceived(loc);
+          } catch (final Throwable x) {
+            try {
+              l.onCurrentPageError(x);
+            } catch (final Throwable x1) {
+              Log.e(ReaderReadiumJavaScriptAPI.TAG, x1.getMessage(), x1);
+            }
+          }
+        }
+      });
+  }
+
   @Override public void openBook(
     final org.readium.sdk.android.Package p,
     final ReaderViewerSettings vs,
@@ -103,32 +130,5 @@ public final class ReaderReadiumJavaScriptAPI implements
   @Override public void pagePrevious()
   {
     this.evaluate("ReadiumSDK.reader.openPageLeft();");
-  }
-
-  @Override public void getCurrentPage(
-    final ReaderCurrentPageListenerType l)
-  {
-    NullCheck.notNull(l);
-
-    this.evaluateWithResult(
-      "ReadiumSDK.reader.bookmarkCurrentPage()",
-      new ValueCallback<String>() {
-        @Override public void onReceiveValue(
-          final @Nullable String value)
-        {
-          try {
-            final JSONObject o =
-              new JSONObject(TextUtilities.unquote(NullCheck.notNull(value)));
-            final ReaderBookLocation loc = ReaderBookLocation.fromJSON(o);
-            l.onCurrentPageReceived(loc);
-          } catch (final Throwable x) {
-            try {
-              l.onCurrentPageError(x);
-            } catch (final Throwable x1) {
-              Log.e(ReaderReadiumJavaScriptAPI.TAG, x1.getMessage(), x1);
-            }
-          }
-        }
-      });
   }
 }

@@ -9,6 +9,13 @@ import com.io7m.jfunctional.OptionType;
 public interface ReaderReadiumJavaScriptAPIType
 {
   /**
+   * Retrieve the current page.
+   */
+
+  void getCurrentPage(
+    ReaderCurrentPageListenerType l);
+
+  /**
    * Open a book.
    *
    * @param p
@@ -25,21 +32,14 @@ public interface ReaderReadiumJavaScriptAPIType
     OptionType<ReaderOpenPageRequest> r);
 
   /**
-   * Retrieve the current page.
+   * Go to the next page in the current book.
    */
 
-  void getCurrentPage(
-    ReaderCurrentPageListenerType l);
+  void pageNext();
 
   /**
    * Go to the previous page in the current book.
    */
 
   void pagePrevious();
-
-  /**
-   * Go to the next page in the current book.
-   */
-
-  void pageNext();
 }

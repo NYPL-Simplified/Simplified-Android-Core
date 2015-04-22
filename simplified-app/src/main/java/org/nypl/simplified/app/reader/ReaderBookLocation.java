@@ -55,17 +55,6 @@ public final class ReaderBookLocation implements ReaderJSONSerializableType
     return this.id_ref;
   }
 
-  @Override public String toString()
-  {
-    final StringBuilder b = new StringBuilder();
-    b.append("[ReaderBookLocation ");
-    b.append(this.content_cfi);
-    b.append(" ");
-    b.append(this.id_ref);
-    b.append("]");
-    return NullCheck.notNull(b.toString());
-  }
-
   @Override public JSONObject toJSON()
     throws JSONException
   {
@@ -78,5 +67,16 @@ public final class ReaderBookLocation implements ReaderJSONSerializableType
     }
 
     return json;
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[ReaderBookLocation ");
+    b.append(this.content_cfi);
+    b.append(" ");
+    b.append(this.id_ref);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }

@@ -38,6 +38,33 @@ public final class ReaderReadiumFeedbackDispatcher implements
     }
   }
 
+  private static void onPaginationChanged(
+    final ReaderReadiumFeedbackListenerType l,
+    final String[] parts)
+  {
+    try {
+      if (parts.length < 2) {
+        throw new IllegalArgumentException(
+          "Expected pagination data, but got nothing");
+      }
+
+      final String encoded = NullCheck.notNull(parts[1]);
+      final String decoded =
+        NullCheck.notNull(URLDecoder.decode(encoded, "UTF-8"));
+      final JSONObject json = new JSONObject(decoded);
+      final ReaderPaginationChangedEvent e =
+        ReaderPaginationChangedEvent.fromJSON(json);
+
+      l.onReadiumFunctionPaginationChanged(e);
+    } catch (final Throwable e) {
+      try {
+        l.onReadiumFunctionPaginationChangedError(e);
+      } catch (final Throwable x1) {
+        Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
+      }
+    }
+  }
+
   private ReaderReadiumFeedbackDispatcher()
   {
 
@@ -78,33 +105,6 @@ public final class ReaderReadiumFeedbackDispatcher implements
     } catch (final Throwable x) {
       try {
         l.onReadiumFunctionDispatchError(x);
-      } catch (final Throwable x1) {
-        Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
-      }
-    }
-  }
-
-  private static void onPaginationChanged(
-    final ReaderReadiumFeedbackListenerType l,
-    final String[] parts)
-  {
-    try {
-      if (parts.length < 2) {
-        throw new IllegalArgumentException(
-          "Expected pagination data, but got nothing");
-      }
-
-      final String encoded = NullCheck.notNull(parts[1]);
-      final String decoded =
-        NullCheck.notNull(URLDecoder.decode(encoded, "UTF-8"));
-      final JSONObject json = new JSONObject(decoded);
-      final ReaderPaginationChangedEvent e =
-        ReaderPaginationChangedEvent.fromJSON(json);
-
-      l.onReadiumFunctionPaginationChanged(e);
-    } catch (final Throwable e) {
-      try {
-        l.onReadiumFunctionPaginationChangedError(e);
       } catch (final Throwable x1) {
         Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
       }

@@ -21,11 +21,6 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
     return new ReaderSimplifiedFeedbackDispatcher();
   }
 
-  private ReaderSimplifiedFeedbackDispatcher()
-  {
-
-  }
-
   private static void onGestureLeft(
     final ReaderSimplifiedFeedbackListenerType l)
   {
@@ -52,6 +47,11 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
         Log.e(ReaderSimplifiedFeedbackDispatcher.TAG, x1.getMessage(), x1);
       }
     }
+  }
+
+  private ReaderSimplifiedFeedbackDispatcher()
+  {
+
   }
 
   @Override public void dispatch(
