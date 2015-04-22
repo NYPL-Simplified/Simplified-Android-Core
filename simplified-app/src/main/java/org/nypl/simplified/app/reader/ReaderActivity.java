@@ -9,12 +9,14 @@ import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
+import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -235,6 +237,16 @@ public final class ReaderActivity extends Activity implements
     Log.d(ReaderActivity.TAG, "requested openBook");
   }
 
+  @Override public void onConfigurationChanged(
+    final @Nullable Configuration c)
+  {
+    super.onConfigurationChanged(c);
+
+    Log.d(ReaderActivity.TAG, "configuration changed");
+    final WebView in_web_view = NullCheck.notNull(this.web_view);
+    in_web_view.setVisibility(View.INVISIBLE);
+  }
+
   @Override public void onReadiumFunctionInitializeError(
     final Throwable e)
   {
@@ -329,6 +341,37 @@ public final class ReaderActivity extends Activity implements
   }
 
   @Override public void onSimplifiedGestureRightError(
+    final Throwable x)
+  {
+    Log.e(ReaderActivity.TAG, x.getMessage(), x);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * When the device orientation changes, the configuration change handler
+   * {@link #onConfigurationChanged(Configuration)} makes the web view
+   * invisible so that the user does not see the now incorrectly-paginated
+   * content. When Readium tells the app that the content pagination has
+   * changed, it makes the web view visible again.
+   */
+
+  @Override public void onReadiumFunctionPaginationChanged()
+  {
+    Log.d(ReaderActivity.TAG, "pagination changed");
+    final WebView in_web_view = NullCheck.notNull(this.web_view);
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_web_view.setVisibility(View.VISIBLE);
+        FadeUtilities
+          .fadeIn(in_web_view, FadeUtilities.DEFAULT_FADE_DURATION);
+      }
+    });
+  }
+
+  @Override public void onReadiumFunctionPaginationChangedError(
     final Throwable x)
   {
     Log.e(ReaderActivity.TAG, x.getMessage(), x);

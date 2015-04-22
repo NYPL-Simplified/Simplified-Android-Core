@@ -64,12 +64,31 @@ public final class ReaderReadiumFeedbackDispatcher implements
           ReaderReadiumFeedbackDispatcher.onInitialize(l);
           return;
         }
+
+        if ("pagination-changed".equals(function)) {
+          ReaderReadiumFeedbackDispatcher.onPaginationChanged(l);
+          return;
+        }
       }
 
       l.onReadiumFunctionUnknown(NullCheck.notNull(uri.toString()));
     } catch (final Throwable x) {
       try {
         l.onReadiumFunctionDispatchError(x);
+      } catch (final Throwable x1) {
+        Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
+      }
+    }
+  }
+
+  private static void onPaginationChanged(
+    final ReaderReadiumFeedbackListenerType l)
+  {
+    try {
+      l.onReadiumFunctionPaginationChanged();
+    } catch (final Throwable e) {
+      try {
+        l.onReadiumFunctionPaginationChangedError(e);
       } catch (final Throwable x1) {
         Log.e(ReaderReadiumFeedbackDispatcher.TAG, x1.getMessage(), x1);
       }

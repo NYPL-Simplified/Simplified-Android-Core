@@ -28,6 +28,20 @@ public interface ReaderReadiumFeedbackListenerType
     Throwable e);
 
   /**
+   * Called on receipt of a <tt>readium:pagination-changed</tt> request.
+   */
+
+  void onReadiumFunctionPaginationChanged();
+
+  /**
+   * Called when {@link #onReadiumFunctionPaginationChanged()} raises an
+   * exception.
+   */
+
+  void onReadiumFunctionPaginationChangedError(
+    Throwable e);
+
+  /**
    * Called when an unknown request is made.
    */
 
