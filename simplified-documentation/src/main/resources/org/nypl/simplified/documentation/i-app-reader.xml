@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:section
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:id="org.nypl.simplified.documentation.implementation.app.reader">
+  <s:section-title>App (Reader)</s:section-title>
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">reader</s:term> package implements the actual
+      EPUB reader.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.implementation">
+    <s:subsection-title>Implementation</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">reader</s:term> package uses the 
+      <s:link-external s:target="http://readium.org">Readium SDK</s:link-external>
+      to render EPUB documents. The
+      <s:term s:type="package">Readium</s:term> SDK consists of a native
+      library written in C++, with a Javascript API. Applications using
+      <s:term s:type="package">Readium</s:term> essentially communicate
+      with it by evaluating the exposed Javascript functions in a
+      web view.
+    </s:paragraph>
+    <s:paragraph>
+      The main entry point of the reader is
+      the <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderActivity.html">ReaderActivity</s:link-external>
+      class, which receives a single argument 
+      <s:term s:type="variable">path</s:term> representing the on-disk
+      path to the EPUB that will be rendered. All operations performed
+      by the activity are performed asynchronously, with the activity
+      listening for results by implementing various
+      <s:term s:type="term">listener</s:term> interfaces. 
+    </s:paragraph>
+    <s:paragraph>
+      The <s:term s:type="type">ReaderActivity</s:term> performs the
+      following steps to start displaying an EPUB:
+    </s:paragraph>
+    <s:formal-item s:kind="specification">
+      <s:formal-item-title>Loading process</s:formal-item-title>
+      <s:list-ordered>
+        <s:list-item>
+          A web view <s:term s:type="variable">w</s:term> is created. 
+          Execution of javascript is allowed, but all caching and network 
+          access is disabled. The web view is configured such that any
+          URI that has a scheme equal to <s:term s:type="constant">readium</s:term>
+          or <s:term s:type="constant">simplified</s:term> is handled by the
+          <s:term s:type="package">reader</s:term> application rather than
+          being opened as a normal URI by the web view. These URIs are used
+          by <s:term s:type="package">Readium</s:term> to essentially send
+          events to the application that the application can then handle
+          manually. The mapping from Javascript functions to these URIs is
+          given by the Javascript code in the included
+          <s:term s:type="file">host_app_feedback.js</s:term> file 
+          <s:footnote>
+            This file is not part of the <s:term s:type="package">Readium</s:term>
+            SDK but is expected to be implemented by any project using it.
+          </s:footnote>.
+        </s:list-item>
+        <s:list-item>
+          The EPUB file at <s:term s:type="variable">path</s:term>
+          is loaded. If the file does not exist or cannot be loaded,
+          the activity terminates with an error message.
+        </s:list-item>
+        <s:list-item>
+          If the EPUB was loaded successfully, the activity instructs
+          a local web server to bind to <s:term s:type="constant">localhost</s:term>.
+          The server is passed the loaded EPUB so that it can serve files
+          from the EPUB when asked. If the server fails to start, the
+          activity terminates with an error message. The server is also
+          responsible for serving other files required by the 
+          <s:term s:type="package">Readium</s:term> SDK that are not part
+          of the loaded EPUB. These files are included as standard Java
+          resources.
+        </s:list-item>
+        <s:list-item>
+          If the server started successfully, the web view
+          <s:term s:type="variable">w</s:term> is told to request
+          a file named <s:term s:type="file">reader.html</s:term>. This
+          file is responsible for loading the Javascript code used by
+          <s:term s:type="package">Readium</s:term>
+          <s:footnote>
+            As with <s:term s:type="file">host_app_feedback.js</s:term>, 
+            this file is not part of the <s:term s:type="package">Readium</s:term>
+            SDK but is expected to be written by any project using it.
+          </s:footnote>.
+          When all of the
+          Javascript code has finished initializing, it tries to
+          load a URI <s:term s:type="constant">readium:initialize</s:term>.
+          This URI is intercepted by the application as described in the
+          first step above.
+        </s:list-item>
+        <s:list-item>
+          If <s:term s:type="package">Readium</s:term> successfully initialized,
+          the application then instructs <s:term s:type="package">Readium</s:term>
+          to start displaying the book by using the Javascript function
+          <s:term s:type="function">ReadiumSDK.reader.openBook(...)</s:term>.
+        </s:list-item>
+      </s:list-ordered>
+    </s:formal-item>
+  </s:subsection>
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.classes">
+    <s:subsection-title>Classes</s:subsection-title>
+    <s:paragraph>
+      The main entry point of the reader is
+      the <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderActivity.html">ReaderActivity</s:link-external>
+      class.
+    </s:paragraph>
+    <s:paragraph>
+      The server used to serve resources is described by the
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderHTTPServerType.html">ReaderHTTPServerType</s:link-external>
+      interface, with the default implementation given in
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderHTTPServer.html">ReaderHTTPServer</s:link-external>.
+    </s:paragraph>
+    <s:paragraph>
+      Intercepted URIs from the <s:term s:type="package">Readium</s:term>
+      package are dispatched to Java functions via the
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderReadiumFeedbackDispatcherType.html">ReaderReadiumFeedbackDispatcherType</s:link-external>
+      and
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderReadiumFeedbackListenerType.html">ReaderReadiumFeedbackListenerType</s:link-external>
+      types (for <s:term s:type="constant">readium:</s:term> URIs) and
+      the
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderSimplifiedFeedbackDispatcherType.html">ReaderSimplifiedFeedbackDispatcherType</s:link-external>
+      and
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderSimplifiedFeedbackListenerType.html">ReaderSimplifiedFeedbackListenerType</s:link-external>
+      types (for <s:term s:type="constant">simplfied:</s:term> URIs).
+    </s:paragraph>
+    <s:paragraph>
+      The <s:term s:type="package">Readium</s:term> Javascript API is
+      exposed to the application via the
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderReadiumJavaScriptAPIType.html">ReaderReadiumJavaScriptAPIType</s:link-external>,
+      with the default implementation given in
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderReadiumJavaScriptAPI.html">ReaderReadiumJavaScriptAPI</s:link-external>.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

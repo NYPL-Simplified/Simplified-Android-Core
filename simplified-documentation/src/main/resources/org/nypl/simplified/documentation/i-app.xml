@@ -8,9 +8,19 @@
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
       The
-      <s:link-external
-        s:target="apidocs/org/nypl/simplified/app/package-summary.html">simplified-app</s:link-external>
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/package-summary.html">simplified-app</s:link-external>
       package implements the main Android application.
+    </s:paragraph>
+    <s:paragraph>
+      The application is partitioned into
+      <s:link s:target="org.nypl.simplified.documentation.implementation.app.catalog">catalog</s:link>
+      and
+      <s:link s:target="org.nypl.simplified.documentation.implementation.app.reader">reader</s:link>
+      packages (and these separate parts
+      of the application actually run in
+      separate processes to better isolate the
+      native code portion of
+      <s:term s:type="package">Readium</s:term>).
     </s:paragraph>
   </s:subsection>
 </s:section>

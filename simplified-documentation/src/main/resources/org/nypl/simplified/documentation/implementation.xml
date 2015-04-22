@@ -10,5 +10,7 @@
   <xi:include href="i-http.xml"/>
   <xi:include href="i-opds.xml"/>
   <xi:include href="i-app.xml"/>
+  <xi:include href="i-app-catalog.xml"/>
+  <xi:include href="i-app-reader.xml"/>
 
 </s:part>

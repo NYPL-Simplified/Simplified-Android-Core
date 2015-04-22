@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:section
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:id="org.nypl.simplified.documentation.implementation.app.catalog">
+  <s:section-title>App (Catalog)</s:section-title>
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="package">catalog</s:term> package implements the book
+      management interface.
+    </s:paragraph>
+  </s:subsection>
+</s:section>
