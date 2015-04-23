@@ -2,10 +2,12 @@ package org.nypl.simplified.app.reader;
 
 import java.io.File;
 import java.net.URI;
+import java.util.List;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
+import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
@@ -36,7 +38,7 @@ import com.io7m.jnull.Nullable;
  * The main reader activity for reading an EPUB.
  */
 
-@SuppressWarnings("synthetic-access") public final class ReaderActivity extends
+@SuppressWarnings({ "boxing", "synthetic-access" }) public final class ReaderActivity extends
   Activity implements
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,
@@ -75,6 +77,7 @@ import com.io7m.jnull.Nullable;
   private @Nullable TextView                       progress_text;
   private @Nullable ReaderViewerSettings           viewer_settings;
   private @Nullable WebView                        web_view;
+  private boolean                                  orientation_changing;
 
   private void makeInitialReadiumRequest(
     final ReaderHTTPServerType hs)
@@ -100,6 +103,8 @@ import com.io7m.jnull.Nullable;
     ReaderActivity.LOG.debug("configuration changed");
     final WebView in_web_view = NullCheck.notNull(this.web_view);
     in_web_view.setVisibility(View.INVISIBLE);
+
+    this.orientation_changing = true;
   }
 
   @Override protected void onCreate(
@@ -267,7 +272,7 @@ import com.io7m.jnull.Nullable;
     in_loading.setVisibility(View.GONE);
     in_web_view.setVisibility(View.VISIBLE);
     in_progress_bar.setVisibility(View.VISIBLE);
-    in_progress_text.setVisibility(View.VISIBLE);
+    in_progress_text.setVisibility(View.INVISIBLE);
 
     ReaderActivity.LOG.debug("requested openBook");
   }
@@ -301,30 +306,57 @@ import com.io7m.jnull.Nullable;
   @Override public void onReadiumFunctionPaginationChanged(
     final ReaderPaginationChangedEvent e)
   {
-    ReaderActivity.LOG.debug("pagination changed");
+    ReaderActivity.LOG.debug("pagination changed: {}", e);
     final WebView in_web_view = NullCheck.notNull(this.web_view);
 
     final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
     js.getCurrentPage(this);
 
-    /**
-     * Make the web view visible with a slight delay (as sometimes a
-     * pagination-change event will be sent even though the content has not
-     * yet been laid out in the web view).
-     */
-
-    final Handler handler = new Handler();
-    handler.postDelayed(new Runnable() {
+    final TextView in_progress_text = NullCheck.notNull(this.progress_text);
+    final ProgressBar in_progress_bar = NullCheck.notNull(this.progress_bar);
+    UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        UIThread.runOnUIThread(new Runnable() {
-          @Override public void run()
-          {
-            in_web_view.setVisibility(View.VISIBLE);
-          }
-        });
+        final double p = e.getProgressFractional();
+        in_progress_bar.setMax(100);
+        in_progress_bar.setProgress((int) (100 * p));
+
+        final List<OpenPage> pages = e.getOpenPages();
+        if (pages.isEmpty()) {
+          in_progress_text.setVisibility(View.INVISIBLE);
+        } else {
+          final OpenPage page = NullCheck.notNull(pages.get(0));
+          in_progress_text.setVisibility(View.VISIBLE);
+          in_progress_text.setText(NullCheck.notNull(String.format(
+            "Page %d of %d",
+            page.getSpineItemPageIndex() + 1,
+            page.getSpineItemPageCount())));
+        }
       }
-    }, 200);
+    });
+
+    if (this.orientation_changing) {
+      this.orientation_changing = false;
+
+      /**
+       * Make the web view visible with a slight delay (as sometimes a
+       * pagination-change event will be sent even though the content has not
+       * yet been laid out in the web view).
+       */
+
+      final Handler handler = new Handler();
+      handler.postDelayed(new Runnable() {
+        @Override public void run()
+        {
+          UIThread.runOnUIThread(new Runnable() {
+            @Override public void run()
+            {
+              in_web_view.setVisibility(View.VISIBLE);
+            }
+          });
+        }
+      }, 200);
+    }
   }
 
   @Override public void onReadiumFunctionPaginationChangedError(

@@ -13,7 +13,7 @@ import com.io7m.jnull.NullCheck;
  * Data parsed from a <tt>readium:pagination-changed</tt> event.
  */
 
-public final class ReaderPaginationChangedEvent implements
+@SuppressWarnings("synthetic-access") public final class ReaderPaginationChangedEvent implements
   ReaderJSONSerializableType
 {
   public static final class OpenPage implements ReaderJSONSerializableType
@@ -38,7 +38,6 @@ public final class ReaderPaginationChangedEvent implements
     private final String id_ref;
     private final int    spine_item_index;
     private final int    spine_item_page_count;
-
     private final int    spine_item_page_index;
 
     public OpenPage(
@@ -71,6 +70,21 @@ public final class ReaderPaginationChangedEvent implements
     public int getSpineItemPageIndex()
     {
       return this.spine_item_page_index;
+    }
+
+    @Override public String toString()
+    {
+      final StringBuilder b = new StringBuilder();
+      b.append("[OpenPage id_ref=");
+      b.append(this.id_ref);
+      b.append(" spine_item_index=");
+      b.append(this.spine_item_index);
+      b.append(" spine_item_page_count=");
+      b.append(this.spine_item_page_count);
+      b.append(" spine_item_page_index=");
+      b.append(this.spine_item_page_index);
+      b.append("]");
+      return NullCheck.notNull(b.toString());
     }
 
     @Override public JSONObject toJSON()
@@ -146,6 +160,21 @@ public final class ReaderPaginationChangedEvent implements
     return this.right_to_left;
   }
 
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[ReaderPaginationChangedEvent fixed_layout=");
+    b.append(this.fixed_layout);
+    b.append(" open_pages=");
+    b.append(this.open_pages);
+    b.append(" right_to_left=");
+    b.append(this.right_to_left);
+    b.append(" spine_item_count=");
+    b.append(this.spine_item_count);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
+  }
+
   @Override public JSONObject toJSON()
     throws JSONException
   {
@@ -158,5 +187,29 @@ public final class ReaderPaginationChangedEvent implements
       o.accumulate("openPages", NullCheck.notNull(p).toJSON());
     }
     return o;
+  }
+
+  /**
+   * @return The fractional progress throughout the entire book, where
+   *         <tt>0.0</tt> is the start of the book, and <tt>1.0</tt> is the
+   *         end.
+   */
+
+  public double getProgressFractional()
+  {
+    if (this.open_pages.size() < 1) {
+      return 0.0;
+    }
+
+    final OpenPage page = NullCheck.notNull(this.open_pages.get(0));
+    final double major_index = page.spine_item_index;
+    final double major_max = this.spine_item_count;
+    final double major = major_index / major_max;
+
+    final double minor_index = page.spine_item_page_index;
+    final double minor_max = page.spine_item_page_count;
+    final double minor = minor_index / minor_max;
+
+    return major + (minor * 0.1);
   }
 }
