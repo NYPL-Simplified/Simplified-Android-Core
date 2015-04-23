@@ -20,7 +20,7 @@ import com.io7m.jnull.Nullable;
  * interface.
  */
 
-public final class ReaderReadiumJavaScriptAPI implements
+@SuppressWarnings("synthetic-access") public final class ReaderReadiumJavaScriptAPI implements
   ReaderReadiumJavaScriptAPIType
 {
   private static final Logger LOG;
