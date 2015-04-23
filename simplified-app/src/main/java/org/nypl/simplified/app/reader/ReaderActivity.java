@@ -17,6 +17,7 @@ import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -70,14 +71,15 @@ import com.io7m.jnull.Nullable;
     from.startActivity(i);
   }
 
-  private @Nullable Container                      container;
-  private @Nullable ReaderReadiumJavaScriptAPIType js_api;
-  private @Nullable ProgressBar                    loading;
-  private @Nullable ProgressBar                    progress_bar;
-  private @Nullable TextView                       progress_text;
-  private @Nullable ReaderViewerSettings           viewer_settings;
-  private @Nullable WebView                        web_view;
-  private boolean                                  orientation_changing;
+  private @Nullable Container                         container;
+  private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
+  private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
+  private @Nullable ProgressBar                       loading;
+  private @Nullable ProgressBar                       progress_bar;
+  private @Nullable TextView                          progress_text;
+  private @Nullable ReaderViewerSettings              viewer_settings;
+  private @Nullable WebView                           web_view;
+  private boolean                                     orientation_changing;
 
   private void makeInitialReadiumRequest(
     final ReaderHTTPServerType hs)
@@ -112,6 +114,9 @@ import com.io7m.jnull.Nullable;
   {
     super.onCreate(state);
     this.setContentView(R.layout.reader);
+
+    final ActionBar bar = NullCheck.notNull(this.getActionBar());
+    bar.hide();
 
     final File epub_file = new File("/storage/sdcard0/book.epub");
 
@@ -180,7 +185,9 @@ import com.io7m.jnull.Nullable;
     s.setCacheMode(WebSettings.LOAD_NO_CACHE);
     s.setGeolocationEnabled(false);
     s.setJavaScriptEnabled(true);
-    this.js_api = ReaderReadiumJavaScriptAPI.newAPI(in_webview);
+
+    this.readium_js_api = ReaderReadiumJavaScriptAPI.newAPI(in_webview);
+    this.simplified_js_api = ReaderSimplifiedJavaScriptAPI.newAPI(in_webview);
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
@@ -259,7 +266,8 @@ import com.io7m.jnull.Nullable;
     p.setRootUrls(hs.getURIBase().toString(), null);
 
     final ReaderViewerSettings vs = NullCheck.notNull(this.viewer_settings);
-    final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
+    final ReaderReadiumJavaScriptAPIType js =
+      NullCheck.notNull(this.readium_js_api);
 
     final OptionType<ReaderOpenPageRequest> no_request = Option.none();
     js.openBook(p, vs, no_request);
@@ -309,8 +317,23 @@ import com.io7m.jnull.Nullable;
     ReaderActivity.LOG.debug("pagination changed: {}", e);
     final WebView in_web_view = NullCheck.notNull(this.web_view);
 
-    final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
-    js.getCurrentPage(this);
+    /**
+     * Ask for Readium to deliver the unique identifier of the current page,
+     * and tell Simplified that the page has changed and so any Javascript
+     * state should be reconfigured.
+     */
+
+    final ReaderReadiumJavaScriptAPIType readium_js =
+      NullCheck.notNull(this.readium_js_api);
+    final ReaderSimplifiedJavaScriptAPIType simplified_js =
+      NullCheck.notNull(this.simplified_js_api);
+
+    readium_js.getCurrentPage(this);
+    simplified_js.pageHasChanged();
+
+    /**
+     * Configure the progress bar and text.
+     */
 
     final TextView in_progress_text = NullCheck.notNull(this.progress_text);
     final ProgressBar in_progress_bar = NullCheck.notNull(this.progress_bar);
@@ -335,14 +358,15 @@ import com.io7m.jnull.Nullable;
       }
     });
 
+    /**
+     * Make the web view visible with a slight delay (as sometimes a
+     * pagination-change event will be sent even though the content has not
+     * yet been laid out in the web view). Only do this if the screen
+     * orientation has just changed.
+     */
+
     if (this.orientation_changing) {
       this.orientation_changing = false;
-
-      /**
-       * Make the web view visible with a slight delay (as sometimes a
-       * pagination-change event will be sent even though the content has not
-       * yet been laid out in the web view).
-       */
 
       final Handler handler = new Handler();
       handler.postDelayed(new Runnable() {
@@ -426,7 +450,8 @@ import com.io7m.jnull.Nullable;
 
   @Override public void onSimplifiedGestureLeft()
   {
-    final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
+    final ReaderReadiumJavaScriptAPIType js =
+      NullCheck.notNull(this.readium_js_api);
     js.pagePrevious();
   }
 
@@ -438,11 +463,28 @@ import com.io7m.jnull.Nullable;
 
   @Override public void onSimplifiedGestureRight()
   {
-    final ReaderReadiumJavaScriptAPIType js = NullCheck.notNull(this.js_api);
+    final ReaderReadiumJavaScriptAPIType js =
+      NullCheck.notNull(this.readium_js_api);
     js.pageNext();
   }
 
   @Override public void onSimplifiedGestureRightError(
+    final Throwable x)
+  {
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  }
+
+  @Override public void onSimplifiedGestureCenter()
+  {
+    final ActionBar bar = NullCheck.notNull(this.getActionBar());
+    if (bar.isShowing()) {
+      bar.hide();
+    } else {
+      bar.show();
+    }
+  }
+
+  @Override public void onSimplifiedGestureCenterError(
     final Throwable x)
   {
     ReaderActivity.LOG.error("{}", x.getMessage(), x);

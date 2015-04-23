@@ -26,6 +26,23 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
     return new ReaderSimplifiedFeedbackDispatcher();
   }
 
+  private static void onGestureCenter(
+    final ReaderSimplifiedFeedbackListenerType l)
+  {
+    try {
+      l.onSimplifiedGestureCenter();
+    } catch (final Throwable e) {
+      try {
+        l.onSimplifiedGestureCenterError(e);
+      } catch (final Throwable x1) {
+        ReaderSimplifiedFeedbackDispatcher.LOG.error(
+          "{}",
+          x1.getMessage(),
+          x1);
+      }
+    }
+  }
+
   private static void onGestureLeft(
     final ReaderSimplifiedFeedbackListenerType l)
   {
@@ -91,6 +108,10 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
         }
         if ("gesture-right".equals(function)) {
           ReaderSimplifiedFeedbackDispatcher.onGestureRight(l);
+          return;
+        }
+        if ("gesture-center".equals(function)) {
+          ReaderSimplifiedFeedbackDispatcher.onGestureCenter(l);
           return;
         }
       }

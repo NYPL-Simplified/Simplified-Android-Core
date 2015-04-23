@@ -22,6 +22,19 @@ public interface ReaderSimplifiedFeedbackListenerType
     String text);
 
   /**
+   * Called upon receipt of a center gesture.
+   */
+
+  void onSimplifiedGestureCenter();
+
+  /**
+   * Called if {@link #onSimplifiedGestureCenter()} raises an exception.
+   */
+
+  void onSimplifiedGestureCenterError(
+    Throwable x);
+
+  /**
    * Called upon receipt of a leftwards gesture.
    */
 
