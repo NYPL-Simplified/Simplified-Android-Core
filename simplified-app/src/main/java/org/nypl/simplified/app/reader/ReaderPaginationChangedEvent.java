@@ -72,6 +72,17 @@ import com.io7m.jnull.NullCheck;
       return this.spine_item_page_index;
     }
 
+    @Override public JSONObject toJSON()
+      throws JSONException
+    {
+      final JSONObject o = new JSONObject();
+      o.put("spineItemPageIndex", this.spine_item_page_index);
+      o.put("spineItemPageCount", this.spine_item_page_count);
+      o.put("idref", this.id_ref);
+      o.put("spineItemIndex", this.spine_item_index);
+      return o;
+    }
+
     @Override public String toString()
     {
       final StringBuilder b = new StringBuilder();
@@ -85,17 +96,6 @@ import com.io7m.jnull.NullCheck;
       b.append(this.spine_item_page_index);
       b.append("]");
       return NullCheck.notNull(b.toString());
-    }
-
-    @Override public JSONObject toJSON()
-      throws JSONException
-    {
-      final JSONObject o = new JSONObject();
-      o.put("spineItemPageIndex", this.spine_item_page_index);
-      o.put("spineItemPageCount", this.spine_item_page_count);
-      o.put("idref", this.id_ref);
-      o.put("spineItemIndex", this.spine_item_index);
-      return o;
     }
   }
 
@@ -145,50 +145,6 @@ import com.io7m.jnull.NullCheck;
     return this.open_pages;
   }
 
-  public int getSpineItemCount()
-  {
-    return this.spine_item_count;
-  }
-
-  public boolean isFixedLayout()
-  {
-    return this.fixed_layout;
-  }
-
-  public boolean isRightToLeft()
-  {
-    return this.right_to_left;
-  }
-
-  @Override public String toString()
-  {
-    final StringBuilder b = new StringBuilder();
-    b.append("[ReaderPaginationChangedEvent fixed_layout=");
-    b.append(this.fixed_layout);
-    b.append(" open_pages=");
-    b.append(this.open_pages);
-    b.append(" right_to_left=");
-    b.append(this.right_to_left);
-    b.append(" spine_item_count=");
-    b.append(this.spine_item_count);
-    b.append("]");
-    return NullCheck.notNull(b.toString());
-  }
-
-  @Override public JSONObject toJSON()
-    throws JSONException
-  {
-    final JSONObject o = new JSONObject();
-    o.put("isRightToLeft", this.right_to_left);
-    o.put("isFixedLayout", this.fixed_layout);
-    o.put("spineItemCount", this.spine_item_count);
-
-    for (final OpenPage p : this.open_pages) {
-      o.accumulate("openPages", NullCheck.notNull(p).toJSON());
-    }
-    return o;
-  }
-
   /**
    * @return The fractional progress throughout the entire book, where
    *         <tt>0.0</tt> is the start of the book, and <tt>1.0</tt> is the
@@ -211,5 +167,49 @@ import com.io7m.jnull.NullCheck;
     final double minor = minor_index / minor_max;
 
     return major + (minor * 0.1);
+  }
+
+  public int getSpineItemCount()
+  {
+    return this.spine_item_count;
+  }
+
+  public boolean isFixedLayout()
+  {
+    return this.fixed_layout;
+  }
+
+  public boolean isRightToLeft()
+  {
+    return this.right_to_left;
+  }
+
+  @Override public JSONObject toJSON()
+    throws JSONException
+  {
+    final JSONObject o = new JSONObject();
+    o.put("isRightToLeft", this.right_to_left);
+    o.put("isFixedLayout", this.fixed_layout);
+    o.put("spineItemCount", this.spine_item_count);
+
+    for (final OpenPage p : this.open_pages) {
+      o.accumulate("openPages", NullCheck.notNull(p).toJSON());
+    }
+    return o;
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[ReaderPaginationChangedEvent fixed_layout=");
+    b.append(this.fixed_layout);
+    b.append(" open_pages=");
+    b.append(this.open_pages);
+    b.append(" right_to_left=");
+    b.append(this.right_to_left);
+    b.append(" spine_item_count=");
+    b.append(this.spine_item_count);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }
