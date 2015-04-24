@@ -7,7 +7,8 @@ import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
  * Services provided to the reader.
  */
 
-public interface SimplifiedReaderAppServicesType
+public interface SimplifiedReaderAppServicesType extends
+  ScreenSizeControllerType
 {
   ReaderReadiumEPUBLoaderType getEPUBLoader();
 

@@ -50,4 +50,23 @@ public final class UIThread
     final Handler h = new Handler(looper);
     h.post(r);
   }
+
+  /**
+   * Run the given Runnable on the UI thread after the specified delay.
+   *
+   * @param r
+   *          The runnable
+   * @param ms
+   *          The delay in milliseconds
+   */
+
+  public static void runOnUIThreadDelayed(
+    final Runnable r,
+    final long ms)
+  {
+    NullCheck.notNull(r);
+    final Looper looper = NullCheck.notNull(Looper.getMainLooper());
+    final Handler h = new Handler(looper);
+    h.postDelayed(r, ms);
+  }
 }

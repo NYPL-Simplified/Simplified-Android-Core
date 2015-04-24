@@ -8,8 +8,7 @@ function Simplified() {
     singleTouchGesture = event.touches.length == 1;
     
     var touch = event.changedTouches[0];
-    
-    if(touch.target.nodeName === "a") {
+    if(touch.target.nodeName.toUpperCase() === "A") {
       return;
     }
     
@@ -18,18 +17,16 @@ function Simplified() {
   };
   
   var handleTouchEnd = function(event) {
-    if(!singleTouchGesture) return;
-    
-    var touch = event.changedTouches[0];
-    
-    if(touch.target.nodeName === "a") {
+    if(!singleTouchGesture) {
       return;
     }
     
-    var maxScreenX = window.orientation === 0 || window.orientation == 180
-                   ? screen.width
-                   : screen.height;
+    var touch = event.changedTouches[0];
+    if(touch.target.nodeName.toUpperCase() === "A") {
+      return;
+    }
     
+    var maxScreenX = screen.width;
     var relativeDistanceX = (touch.screenX - startX) / maxScreenX;
 
     // Tap to turn.

@@ -17,13 +17,15 @@ import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -47,13 +49,12 @@ import com.io7m.jnull.Nullable;
   ReaderReadiumEPUBLoadListenerType,
   ReaderCurrentPageListenerType
 {
+  private static final String FILE_ID;
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderActivity.class);
   }
-
-  private static final String FILE_ID;
 
   static {
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
@@ -72,14 +73,17 @@ import com.io7m.jnull.Nullable;
   }
 
   private @Nullable Container                         container;
-  private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
-  private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
+  private @Nullable ViewGroup                         hud;
   private @Nullable ProgressBar                       loading;
   private @Nullable ProgressBar                       progress_bar;
   private @Nullable TextView                          progress_text;
+  private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
+  private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
+  private @Nullable TextView                          title_text;
+  private @Nullable View                              toc;
   private @Nullable ReaderViewerSettings              viewer_settings;
   private @Nullable WebView                           web_view;
-  private boolean                                     orientation_changing;
+  private boolean                                     webview_resized;
 
   private void makeInitialReadiumRequest(
     final ReaderHTTPServerType hs)
@@ -97,6 +101,26 @@ import com.io7m.jnull.Nullable;
     });
   }
 
+  @Override protected void onActivityResult(
+    final int request_code,
+    final int result_code,
+    final @Nullable Intent data)
+  {
+    super.onActivityResult(request_code, result_code, data);
+
+    ReaderActivity.LOG.debug(
+      "onActivityResult: {} {} {}",
+      request_code,
+      result_code,
+      data);
+
+    if (request_code == ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE) {
+      if (result_code == Activity.RESULT_OK) {
+
+      }
+    }
+  }
+
   @Override public void onConfigurationChanged(
     final @Nullable Configuration c)
   {
@@ -106,7 +130,7 @@ import com.io7m.jnull.Nullable;
     final WebView in_web_view = NullCheck.notNull(this.web_view);
     in_web_view.setVisibility(View.INVISIBLE);
 
-    this.orientation_changing = true;
+    this.webview_resized = true;
   }
 
   @Override protected void onCreate(
@@ -114,9 +138,6 @@ import com.io7m.jnull.Nullable;
   {
     super.onCreate(state);
     this.setContentView(R.layout.reader);
-
-    final ActionBar bar = NullCheck.notNull(this.getActionBar());
-    bar.hide();
 
     final File epub_file = new File("/storage/sdcard0/book.epub");
 
@@ -132,6 +153,8 @@ import com.io7m.jnull.Nullable;
     final ReaderSimplifiedFeedbackDispatcherType sd =
       ReaderSimplifiedFeedbackDispatcher.newDispatcher();
 
+    final TextView in_title_text =
+      NullCheck.notNull((TextView) this.findViewById(R.id.reader_title_text));
     final TextView in_progress_text =
       NullCheck.notNull((TextView) this
         .findViewById(R.id.reader_position_text));
@@ -142,6 +165,13 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull((ProgressBar) this.findViewById(R.id.reader_loading));
     final WebView in_webview =
       NullCheck.notNull((WebView) this.findViewById(R.id.reader_webview));
+    final ViewGroup in_hud =
+      NullCheck.notNull((ViewGroup) this
+        .findViewById(R.id.reader_hud_container));
+    final View in_toc = NullCheck.notNull(this.findViewById(R.id.reader_toc));
+
+    final View root = NullCheck.notNull(in_hud.getRootView());
+    root.setBackgroundColor(Color.WHITE);
 
     in_loading.setVisibility(View.VISIBLE);
     in_progress_bar.setVisibility(View.INVISIBLE);
@@ -151,9 +181,13 @@ import com.io7m.jnull.Nullable;
     this.loading = in_loading;
     this.progress_text = in_progress_text;
     this.progress_bar = in_progress_bar;
+    this.title_text = in_title_text;
     this.web_view = in_webview;
+    this.hud = in_hud;
+    this.toc = in_toc;
+    this.webview_resized = true;
 
-    in_webview.setWebViewClient(new WebViewClient() {
+    final WebViewClient wv_client = new WebViewClient() {
       @Override public boolean shouldOverrideUrlLoading(
         final @Nullable WebView view,
         final @Nullable String url)
@@ -175,6 +209,15 @@ import com.io7m.jnull.Nullable;
 
         return super.shouldOverrideUrlLoading(view, url);
       }
+    };
+    in_webview.setWebViewClient(wv_client);
+    in_webview.setOnLongClickListener(new OnLongClickListener() {
+      @Override public boolean onLongClick(
+        final @Nullable View v)
+      {
+        ReaderActivity.LOG.debug("ignoring long click on web view");
+        return true;
+      }
     });
 
     final WebSettings s = NullCheck.notNull(in_webview.getSettings());
@@ -189,8 +232,29 @@ import com.io7m.jnull.Nullable;
     this.readium_js_api = ReaderReadiumJavaScriptAPI.newAPI(in_webview);
     this.simplified_js_api = ReaderSimplifiedJavaScriptAPI.newAPI(in_webview);
 
+    in_title_text.setText("");
+
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
+
+    if (rs.screenIsLarge()) {
+      in_toc.setOnClickListener(new OnClickListener() {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          ReaderActivity.LOG.debug("large screen TOC");
+        }
+      });
+    } else {
+      in_toc.setOnClickListener(new OnClickListener() {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          ReaderActivity.LOG.debug("small screen TOC");
+          ReaderTOCActivity.startActivityForResult(ReaderActivity.this);
+        }
+      });
+    }
 
     final ReaderReadiumEPUBLoaderType pl = rs.getEPUBLoader();
     pl.loadEPUB(epub_file, this);
@@ -233,6 +297,15 @@ import com.io7m.jnull.Nullable;
     final Container c)
   {
     this.container = c;
+    final Package p = NullCheck.notNull(c.getDefaultPackage());
+
+    final TextView in_title_text = NullCheck.notNull(this.title_text);
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_title_text.setText(p.getTitle());
+      }
+    });
 
     /**
      * Get a reference to the web server. Start it if necessary (the callbacks
@@ -243,7 +316,6 @@ import com.io7m.jnull.Nullable;
       Simplified.getReaderAppServices();
 
     final ReaderHTTPServerType hs = rs.getHTTPServer();
-    final Package p = NullCheck.notNull(c.getDefaultPackage());
     hs.startIfNecessaryForPackage(p, this);
   }
 
@@ -325,11 +397,7 @@ import com.io7m.jnull.Nullable;
 
     final ReaderReadiumJavaScriptAPIType readium_js =
       NullCheck.notNull(this.readium_js_api);
-    final ReaderSimplifiedJavaScriptAPIType simplified_js =
-      NullCheck.notNull(this.simplified_js_api);
-
     readium_js.getCurrentPage(this);
-    simplified_js.pageHasChanged();
 
     /**
      * Configure the progress bar and text.
@@ -346,10 +414,9 @@ import com.io7m.jnull.Nullable;
 
         final List<OpenPage> pages = e.getOpenPages();
         if (pages.isEmpty()) {
-          in_progress_text.setVisibility(View.INVISIBLE);
+          in_progress_text.setText("");
         } else {
           final OpenPage page = NullCheck.notNull(pages.get(0));
-          in_progress_text.setVisibility(View.VISIBLE);
           in_progress_text.setText(NullCheck.notNull(String.format(
             "Page %d of %d",
             page.getSpineItemPageIndex() + 1,
@@ -358,6 +425,9 @@ import com.io7m.jnull.Nullable;
       }
     });
 
+    final ReaderSimplifiedJavaScriptAPIType simplified_js =
+      NullCheck.notNull(this.simplified_js_api);
+
     /**
      * Make the web view visible with a slight delay (as sometimes a
      * pagination-change event will be sent even though the content has not
@@ -365,21 +435,24 @@ import com.io7m.jnull.Nullable;
      * orientation has just changed.
      */
 
-    if (this.orientation_changing) {
-      this.orientation_changing = false;
-
-      final Handler handler = new Handler();
-      handler.postDelayed(new Runnable() {
+    if (this.webview_resized) {
+      this.webview_resized = false;
+      UIThread.runOnUIThreadDelayed(new Runnable() {
         @Override public void run()
         {
-          UIThread.runOnUIThread(new Runnable() {
-            @Override public void run()
-            {
-              in_web_view.setVisibility(View.VISIBLE);
-            }
-          });
+          in_web_view.setVisibility(View.VISIBLE);
+          in_progress_bar.setVisibility(View.VISIBLE);
+          in_progress_text.setVisibility(View.VISIBLE);
+          simplified_js.pageHasChanged();
         }
       }, 200);
+    } else {
+      UIThread.runOnUIThread(new Runnable() {
+        @Override public void run()
+        {
+          simplified_js.pageHasChanged();
+        }
+      });
     }
   }
 
@@ -448,6 +521,35 @@ import com.io7m.jnull.Nullable;
     ReaderActivity.LOG.error("unknown function: {}", text);
   }
 
+  @Override public void onSimplifiedGestureCenter()
+  {
+    final ViewGroup in_hud = NullCheck.notNull(this.hud);
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        switch (in_hud.getVisibility()) {
+          case View.VISIBLE:
+          {
+            in_hud.setVisibility(View.INVISIBLE);
+            break;
+          }
+          case View.INVISIBLE:
+          case View.GONE:
+          {
+            in_hud.setVisibility(View.VISIBLE);
+            break;
+          }
+        }
+      }
+    });
+  }
+
+  @Override public void onSimplifiedGestureCenterError(
+    final Throwable x)
+  {
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  }
+
   @Override public void onSimplifiedGestureLeft()
   {
     final ReaderReadiumJavaScriptAPIType js =
@@ -469,22 +571,6 @@ import com.io7m.jnull.Nullable;
   }
 
   @Override public void onSimplifiedGestureRightError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
-  }
-
-  @Override public void onSimplifiedGestureCenter()
-  {
-    final ActionBar bar = NullCheck.notNull(this.getActionBar());
-    if (bar.isShowing()) {
-      bar.hide();
-    } else {
-      bar.show();
-    }
-  }
-
-  @Override public void onSimplifiedGestureCenterError(
     final Throwable x)
   {
     ReaderActivity.LOG.error("{}", x.getMessage(), x);

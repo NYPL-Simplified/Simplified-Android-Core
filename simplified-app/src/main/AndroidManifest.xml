@@ -44,13 +44,26 @@
       android:name="org.nypl.simplified.app.reader.ReaderActivity"
       android:exported="true"
       android:configChanges="orientation|screenSize"
+      android:theme="@style/SimplifiedThemeNoActionBar"
       android:process=".ReaderActivityProcess">
 
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
+      android:exported="false"
+      android:configChanges="orientation|screenSize"
+      android:process=".ReaderActivityProcess">
+    </activity>
+    
+    <activity
+      android:name="org.nypl.simplified.app.reader.ReaderTestActivity"
+      android:exported="false"
+      android:configChanges="orientation|screenSize"
+      android:process=".ReaderActivityProcess">
     </activity>
   </application>
 

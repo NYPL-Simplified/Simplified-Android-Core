@@ -1,5 +1,7 @@
 package org.nypl.simplified.app.reader;
 
+import java.io.Serializable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,11 +16,15 @@ import com.io7m.jnull.NullCheck;
  * CFI</i> may not be present.
  */
 
-public final class ReaderBookLocation implements ReaderJSONSerializableType
+public final class ReaderBookLocation implements
+  ReaderJSONSerializableType,
+  Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   public static ReaderBookLocation fromJSON(
     final JSONObject o)
-    throws JSONException
+      throws JSONException
   {
     NullCheck.notNull(o);
 

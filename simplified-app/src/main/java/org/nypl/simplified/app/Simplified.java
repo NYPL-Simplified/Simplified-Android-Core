@@ -55,39 +55,35 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class Simplified extends
   Application
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(Simplified.class);
-  }
-
   private static final class CatalogAppServices implements
     SimplifiedCatalogAppServicesType,
     AccountDataLoadListenerType,
     AccountSyncListenerType
   {
-    private static final Logger      LOG_CA;
+    private static final Logger            LOG_CA;
 
     static {
       LOG_CA = LogUtilities.getLog(CatalogAppServices.class);
     }
 
-    private final BooksType          books;
-    private final ExecutorService    books_executor;
-    private final ExecutorService    catalog_executor;
-    private final CoverProviderType  cover_provider;
-    private final DownloaderType     downloader;
-    private final URI                feed_initial_uri;
-    private final OPDSFeedLoaderType feed_loader;
-    private final HTTPType           http;
-    private final Resources          resources;
-    private final AtomicBoolean      synced;
+    private final BooksType                books;
+    private final ExecutorService          books_executor;
+    private final ExecutorService          catalog_executor;
+    private final CoverProviderType        cover_provider;
+    private final DownloaderType           downloader;
+    private final URI                      feed_initial_uri;
+    private final OPDSFeedLoaderType       feed_loader;
+    private final HTTPType                 http;
+    private final Resources                resources;
+    private final ScreenSizeControllerType screen;
+    private final AtomicBoolean            synced;
 
     public CatalogAppServices(
       final Context context,
       final Resources rr)
     {
       this.resources = NullCheck.notNull(rr);
+      this.screen = new ScreenSizeController(rr);
       this.catalog_executor = Simplified.namedThreadPool(3, "catalog");
       this.books_executor = Simplified.namedThreadPool(1, "books");
 
@@ -257,6 +253,127 @@ import com.io7m.jnull.Nullable;
     @Override public double screenDPToPixels(
       final int dp)
     {
+      return this.screen.screenDPToPixels(dp);
+    }
+
+    @Override public double screenGetDPI()
+    {
+      return this.screen.screenGetDPI();
+    }
+
+    @Override public int screenGetHeightPixels()
+    {
+      return this.screen.screenGetHeightPixels();
+    }
+
+    @Override public int screenGetWidthPixels()
+    {
+      return this.screen.screenGetWidthPixels();
+    }
+
+    @Override public boolean screenIsLarge()
+    {
+      return this.screen.screenIsLarge();
+    }
+
+    @Override public void syncInitial()
+    {
+      if (this.synced.compareAndSet(false, true)) {
+        CatalogAppServices.LOG_CA.debug("performing initial sync");
+        this.books.accountLoadBooks(this);
+      } else {
+        CatalogAppServices.LOG_CA
+          .debug("initial sync already attempted, not syncing again");
+      }
+    }
+  }
+
+  private static final class ReaderAppServices implements
+    SimplifiedReaderAppServicesType
+  {
+    private final ExecutorService             epub_exec;
+    private final ReaderReadiumEPUBLoaderType epub_loader;
+    private final ExecutorService             http_executor;
+    private final ReaderHTTPServerType        httpd;
+    private final ReaderHTTPMimeMapType       mime;
+    private final ScreenSizeControllerType    screen;
+
+    public ReaderAppServices(
+      final Context context,
+      final Resources rr)
+    {
+      this.screen = new ScreenSizeController(rr);
+
+      this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
+      this.http_executor = Simplified.namedThreadPool(1, "httpd");
+      this.httpd =
+        ReaderHTTPServer.newServer(this.http_executor, this.mime, 8080);
+
+      this.epub_exec = Simplified.namedThreadPool(1, "epub");
+      this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
+    }
+
+    @Override public ReaderReadiumEPUBLoaderType getEPUBLoader()
+    {
+      return this.epub_loader;
+    }
+
+    @Override public ReaderHTTPServerType getHTTPServer()
+    {
+      return this.httpd;
+    }
+
+    @Override public double screenDPToPixels(
+      final int dp)
+    {
+      return this.screen.screenDPToPixels(dp);
+    }
+
+    @Override public double screenGetDPI()
+    {
+      return this.screen.screenGetDPI();
+    }
+
+    @Override public int screenGetHeightPixels()
+    {
+      return this.screen.screenGetHeightPixels();
+    }
+
+    @Override public int screenGetWidthPixels()
+    {
+      return this.screen.screenGetWidthPixels();
+    }
+
+    @Override public boolean screenIsLarge()
+    {
+      return this.screen.screenIsLarge();
+    }
+  }
+
+  private static final class ScreenSizeController implements
+  ScreenSizeControllerType
+  {
+    private final Resources resources;
+
+    public ScreenSizeController(
+      final Resources rr)
+    {
+      this.resources = NullCheck.notNull(rr);
+
+      final DisplayMetrics dm = this.resources.getDisplayMetrics();
+      final float dp_height = dm.heightPixels / dm.density;
+      final float dp_width = dm.widthPixels / dm.density;
+      CatalogAppServices.LOG_CA
+        .debug("screen ({} x {})", dp_width, dp_height);
+      CatalogAppServices.LOG_CA.debug(
+        "screen ({} x {})",
+        dm.widthPixels,
+        dm.heightPixels);
+    }
+
+    @Override public double screenDPToPixels(
+      final int dp)
+    {
       final float scale = this.resources.getDisplayMetrics().density;
       return ((dp * scale) + 0.5);
     }
@@ -293,53 +410,14 @@ import com.io7m.jnull.Nullable;
         (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
       return large;
     }
-
-    @Override public void syncInitial()
-    {
-      if (this.synced.compareAndSet(false, true)) {
-        CatalogAppServices.LOG_CA.debug("performing initial sync");
-        this.books.accountLoadBooks(this);
-      } else {
-        CatalogAppServices.LOG_CA
-          .debug("initial sync already attempted, not syncing again");
-      }
-    }
-  }
-
-  private static final class ReaderAppServices implements
-    SimplifiedReaderAppServicesType
-  {
-    private final ExecutorService             epub_exec;
-    private final ReaderReadiumEPUBLoaderType epub_loader;
-    private final ExecutorService             http_executor;
-    private final ReaderHTTPServerType        httpd;
-    private final ReaderHTTPMimeMapType       mime;
-
-    public ReaderAppServices(
-      final Context context,
-      final Resources rr)
-    {
-      this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
-      this.http_executor = Simplified.namedThreadPool(1, "httpd");
-      this.httpd =
-        ReaderHTTPServer.newServer(this.http_executor, this.mime, 8080);
-
-      this.epub_exec = Simplified.namedThreadPool(1, "epub");
-      this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
-    }
-
-    @Override public ReaderReadiumEPUBLoaderType getEPUBLoader()
-    {
-      return this.epub_loader;
-    }
-
-    @Override public ReaderHTTPServerType getHTTPServer()
-    {
-      return this.httpd;
-    }
   }
 
   private static volatile @Nullable Simplified INSTANCE;
+  private static final Logger                  LOG;
+
+  static {
+    LOG = LogUtilities.getLog(Simplified.class);
+  }
 
   private static Simplified checkInitialized()
   {
