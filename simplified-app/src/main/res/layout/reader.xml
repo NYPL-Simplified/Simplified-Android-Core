@@ -8,6 +8,8 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
+  <!-- The main web view container, rendered at the lowest layer -->
+  
   <RelativeLayout
     android:id="@+id/reader_webview_container"
     android:layout_width="match_parent"
@@ -22,12 +24,15 @@
 
   </RelativeLayout>
 
+  <!-- The showable/hideable HUD controls -->
+  
   <RelativeLayout
     android:id="@+id/reader_hud_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
+      android:id="@+id/reader_hud_top_left"
       android:layout_marginLeft="8dp"
       android:layout_marginTop="8dp"
       android:layout_width="wrap_content"
@@ -39,8 +44,9 @@
         android:layout_height="24dp"
         android:src="@drawable/list_8x" />
     </LinearLayout>
-    
+
     <LinearLayout
+      android:id="@+id/reader_hud_top_right"
       android:layout_alignParentRight="true"
       android:layout_marginRight="8dp"
       android:layout_marginTop="8dp"
@@ -63,14 +69,6 @@
       android:layout_centerHorizontal="true"
       android:layout_alignParentTop="true"
       android:text="Title" />
-
-    <ProgressBar
-      android:id="@+id/reader_loading"
-      style="?android:attr/progressBarStyleLarge"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_centerHorizontal="true"
-      android:layout_centerVertical="true" />
 
     <RelativeLayout
       android:id="@+id/reader_progress"
@@ -99,6 +97,22 @@
         android:layout_above="@id/reader_position_text"
         android:layout_centerHorizontal="true" />
     </RelativeLayout>
+  </RelativeLayout>
+
+  <!-- The initial loading progress bar -->
+  
+  <RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <ProgressBar
+      android:id="@+id/reader_loading"
+      style="?android:attr/progressBarStyleLarge"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_centerHorizontal="true"
+      android:layout_centerVertical="true" />
+    
   </RelativeLayout>
 
 </FrameLayout>

@@ -22,9 +22,16 @@ public final class ReaderBookLocation implements
 {
   private static final long serialVersionUID = 1L;
 
+  public static ReaderBookLocation fromIDRef(
+    final String i)
+  {
+    final OptionType<String> none = Option.none();
+    return new ReaderBookLocation(NullCheck.notNull(i), none);
+  }
+
   public static ReaderBookLocation fromJSON(
     final JSONObject o)
-      throws JSONException
+    throws JSONException
   {
     NullCheck.notNull(o);
 

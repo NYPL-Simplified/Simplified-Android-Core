@@ -42,4 +42,14 @@ public interface ReaderReadiumJavaScriptAPIType
    */
 
   void pagePrevious();
+
+  /**
+   * Go to the specific location in the book.
+   * 
+   * @param loc
+   *          The book location
+   */
+
+  void pageSpecific(
+    ReaderBookLocation loc);
 }

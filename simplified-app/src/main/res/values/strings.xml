@@ -35,4 +35,7 @@
   <string name="settings_pin">PIN</string>
   <string name="settings_log_in">Log in</string>
 
+  <!-- Reader strings -->
+  <string name="reader_toc">Table Of Contents</string>
+  
 </resources>

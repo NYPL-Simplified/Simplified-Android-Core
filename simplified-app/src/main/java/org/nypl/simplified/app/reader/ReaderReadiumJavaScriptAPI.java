@@ -132,4 +132,12 @@ import com.io7m.jnull.Nullable;
   {
     this.evaluate("ReadiumSDK.reader.openPageLeft();");
   }
+
+  @Override public void pageSpecific(
+    final ReaderBookLocation loc)
+  {
+    this.evaluate(NullCheck.notNull(String.format(
+      "ReadiumSDK.reader.openSpineItemElementCfi('%s', null, null)",
+      loc.getIDRef())));
+  }
 }

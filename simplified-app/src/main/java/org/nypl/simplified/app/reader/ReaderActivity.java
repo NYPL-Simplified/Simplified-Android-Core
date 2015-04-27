@@ -8,6 +8,7 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
+import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
@@ -47,7 +48,8 @@ import com.io7m.jnull.Nullable;
   ReaderSimplifiedFeedbackListenerType,
   ReaderReadiumFeedbackListenerType,
   ReaderReadiumEPUBLoadListenerType,
-  ReaderCurrentPageListenerType
+  ReaderCurrentPageListenerType,
+  ReaderTOCSelectionListenerType
 {
   private static final String FILE_ID;
   private static final Logger LOG;
@@ -116,7 +118,12 @@ import com.io7m.jnull.Nullable;
 
     if (request_code == ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE) {
       if (result_code == Activity.RESULT_OK) {
-
+        final Intent nnd = NullCheck.notNull(data);
+        final Bundle b = NullCheck.notNull(nnd.getExtras());
+        final TOCElement e =
+          NullCheck.notNull((TOCElement) b
+            .getSerializable(ReaderTOCActivity.TOC_SELECTED_ID));
+        this.onTOCSelectionReceived(e);
       }
     }
   }
@@ -127,8 +134,14 @@ import com.io7m.jnull.Nullable;
     super.onConfigurationChanged(c);
 
     ReaderActivity.LOG.debug("configuration changed");
+
     final WebView in_web_view = NullCheck.notNull(this.web_view);
+    final TextView in_progress_text = NullCheck.notNull(this.progress_text);
+    final ProgressBar in_progress_bar = NullCheck.notNull(this.progress_bar);
+
     in_web_view.setVisibility(View.INVISIBLE);
+    in_progress_text.setVisibility(View.INVISIBLE);
+    in_progress_bar.setVisibility(View.INVISIBLE);
 
     this.webview_resized = true;
   }
@@ -177,6 +190,7 @@ import com.io7m.jnull.Nullable;
     in_progress_bar.setVisibility(View.INVISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
     in_webview.setVisibility(View.INVISIBLE);
+    in_hud.setVisibility(View.INVISIBLE);
 
     this.loading = in_loading;
     this.progress_text = in_progress_text;
@@ -237,25 +251,6 @@ import com.io7m.jnull.Nullable;
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
 
-    if (rs.screenIsLarge()) {
-      in_toc.setOnClickListener(new OnClickListener() {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          ReaderActivity.LOG.debug("large screen TOC");
-        }
-      });
-    } else {
-      in_toc.setOnClickListener(new OnClickListener() {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          ReaderActivity.LOG.debug("small screen TOC");
-          ReaderTOCActivity.startActivityForResult(ReaderActivity.this);
-        }
-      });
-    }
-
     final ReaderReadiumEPUBLoaderType pl = rs.getEPUBLoader();
     pl.loadEPUB(epub_file, this);
   }
@@ -308,12 +303,42 @@ import com.io7m.jnull.Nullable;
     });
 
     /**
-     * Get a reference to the web server. Start it if necessary (the callbacks
-     * will still be executed if the server is already running).
+     * Configure the TOC button.
      */
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
+
+    final View in_toc = NullCheck.notNull(this.toc);
+
+    if (rs.screenIsLarge()) {
+      in_toc.setOnClickListener(new OnClickListener() {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          ReaderActivity.LOG.debug("large screen TOC");
+        }
+      });
+    } else {
+      in_toc.setOnClickListener(new OnClickListener() {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          ReaderActivity.LOG.debug("small screen TOC");
+
+          final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
+          ReaderTOCActivity.startActivityForResult(
+            ReaderActivity.this,
+            sent_toc);
+          ReaderActivity.this.overridePendingTransition(0, 0);
+        }
+      });
+    }
+
+    /**
+     * Get a reference to the web server. Start it if necessary (the callbacks
+     * will still be executed if the server is already running).
+     */
 
     final ReaderHTTPServerType hs = rs.getHTTPServer();
     hs.startIfNecessaryForPackage(p, this);
@@ -574,5 +599,15 @@ import com.io7m.jnull.Nullable;
     final Throwable x)
   {
     ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  }
+
+  @Override public void onTOCSelectionReceived(
+    final TOCElement e)
+  {
+    ReaderActivity.LOG.debug("received TOC selection: {}", e);
+
+    final ReaderReadiumJavaScriptAPIType js =
+      NullCheck.notNull(this.readium_js_api);
+    js.pageSpecific(ReaderBookLocation.fromIDRef(e.getIDRef()));
   }
 }
