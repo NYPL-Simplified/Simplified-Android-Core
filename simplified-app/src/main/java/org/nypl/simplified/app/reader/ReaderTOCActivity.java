@@ -116,6 +116,11 @@ public final class ReaderTOCActivity extends Activity implements ListAdapter
           false);
     }
 
+    /**
+     * Populate the text view and set the left margin based on the desired
+     * indentation level.
+     */
+
     final TextView text_view =
       NullCheck.notNull((TextView) item_view
         .findViewById(R.id.reader_toc_element_text));
