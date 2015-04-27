@@ -3,6 +3,8 @@ package org.nypl.simplified.app.reader;
 import java.util.List;
 
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.io7m.jnull.NullCheck;
@@ -118,6 +121,16 @@ public final class ReaderTOCActivity extends Activity implements ListAdapter
         .findViewById(R.id.reader_toc_element_text));
     final TOCElement e = NullCheck.notNull(this.adapter).getItem(position);
     text_view.setText(e.getTitle());
+
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+
+    final RelativeLayout.LayoutParams p =
+      new RelativeLayout.LayoutParams(
+        android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+        android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+    p.setMargins((int) rs.screenDPToPixels(e.getIndent() * 16), 0, 0, 0);
+    text_view.setLayoutParams(p);
 
     item_view.setOnClickListener(new OnClickListener() {
       @Override public void onClick(

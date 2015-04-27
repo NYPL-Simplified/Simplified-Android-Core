@@ -29,7 +29,18 @@ public interface ReaderReadiumJavaScriptAPIType
   void openBook(
     org.readium.sdk.android.Package p,
     ReaderViewerSettings vs,
-    OptionType<ReaderOpenPageRequest> r);
+    OptionType<ReaderOpenPageRequestType> r);
+
+  /**
+   * Go to the specific location in the book.
+   *
+   * @param r
+   *          The page request
+   */
+
+  void openContentURL(
+    String content_ref,
+    String source_href);
 
   /**
    * Go to the next page in the current book.
@@ -42,14 +53,4 @@ public interface ReaderReadiumJavaScriptAPIType
    */
 
   void pagePrevious();
-
-  /**
-   * Go to the specific location in the book.
-   * 
-   * @param loc
-   *          The book location
-   */
-
-  void pageSpecific(
-    ReaderBookLocation loc);
 }

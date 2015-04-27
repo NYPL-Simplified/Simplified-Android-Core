@@ -374,7 +374,7 @@ import com.io7m.jnull.Nullable;
     final ReaderReadiumJavaScriptAPIType js =
       NullCheck.notNull(this.readium_js_api);
 
-    final OptionType<ReaderOpenPageRequest> no_request = Option.none();
+    final OptionType<ReaderOpenPageRequestType> no_request = Option.none();
     js.openBook(p, vs, no_request);
 
     final WebView in_web_view = NullCheck.notNull(this.web_view);
@@ -617,6 +617,7 @@ import com.io7m.jnull.Nullable;
 
     final ReaderReadiumJavaScriptAPIType js =
       NullCheck.notNull(this.readium_js_api);
-    js.pageSpecific(ReaderBookLocation.fromIDRef(e.getIDRef()));
+
+    js.openContentURL(e.getContentRef(), e.getSourceHref());
   }
 }

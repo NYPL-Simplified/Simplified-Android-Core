@@ -102,7 +102,7 @@ import com.io7m.jnull.Nullable;
   @Override public void openBook(
     final org.readium.sdk.android.Package p,
     final ReaderViewerSettings vs,
-    final OptionType<ReaderOpenPageRequest> r)
+    final OptionType<ReaderOpenPageRequestType> r)
   {
     try {
       final JSONObject o = new JSONObject();
@@ -110,8 +110,8 @@ import com.io7m.jnull.Nullable;
       o.put("settings", vs.toJSON());
 
       if (r.isSome()) {
-        final Some<ReaderOpenPageRequest> some =
-          (Some<ReaderOpenPageRequest>) r;
+        final Some<ReaderOpenPageRequestType> some =
+          (Some<ReaderOpenPageRequestType>) r;
         o.put("openPageRequest", some.get().toJSON());
       }
 
@@ -123,6 +123,19 @@ import com.io7m.jnull.Nullable;
     }
   }
 
+  @Override public void openContentURL(
+    final String content_ref,
+    final String source_href)
+  {
+    NullCheck.notNull(content_ref);
+    NullCheck.notNull(source_href);
+
+    this.evaluate(NullCheck.notNull(String.format(
+      "ReadiumSDK.reader.openContentUrl('%s','%s',null)",
+      content_ref,
+      source_href)));
+  }
+
   @Override public void pageNext()
   {
     this.evaluate("ReadiumSDK.reader.openPageRight();");
@@ -131,13 +144,5 @@ import com.io7m.jnull.Nullable;
   @Override public void pagePrevious()
   {
     this.evaluate("ReadiumSDK.reader.openPageLeft();");
-  }
-
-  @Override public void pageSpecific(
-    final ReaderBookLocation loc)
-  {
-    this.evaluate(NullCheck.notNull(String.format(
-      "ReadiumSDK.reader.openSpineItemElementCfi('%s', null, null)",
-      loc.getIDRef())));
   }
 }
