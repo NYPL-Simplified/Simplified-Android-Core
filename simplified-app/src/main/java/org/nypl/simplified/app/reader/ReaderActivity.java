@@ -12,6 +12,7 @@ import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
+import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.readium.sdk.android.Container;
@@ -555,13 +556,14 @@ import com.io7m.jnull.Nullable;
         switch (in_hud.getVisibility()) {
           case View.VISIBLE:
           {
-            in_hud.setVisibility(View.INVISIBLE);
+            FadeUtilities
+              .fadeOut(in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
             break;
           }
           case View.INVISIBLE:
           case View.GONE:
           {
-            in_hud.setVisibility(View.VISIBLE);
+            FadeUtilities.fadeIn(in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
             break;
           }
         }
