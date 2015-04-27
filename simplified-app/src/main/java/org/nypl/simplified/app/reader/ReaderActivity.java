@@ -203,6 +203,13 @@ import com.io7m.jnull.Nullable;
     this.webview_resized = true;
 
     final WebViewClient wv_client = new WebViewClient() {
+      @Override public void onLoadResource(
+        final @Nullable WebView view,
+        final @Nullable String url)
+      {
+        ReaderActivity.LOG.debug("web-request: {}", url);
+      }
+
       @Override public boolean shouldOverrideUrlLoading(
         final @Nullable WebView view,
         final @Nullable String url)
