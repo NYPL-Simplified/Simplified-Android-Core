@@ -28,7 +28,7 @@ public interface ReaderReadiumJavaScriptAPIType
 
   void openBook(
     org.readium.sdk.android.Package p,
-    ReaderViewerSettings vs,
+    ReaderReadiumViewerSettings vs,
     OptionType<ReaderOpenPageRequestType> r);
 
   /**
@@ -53,4 +53,14 @@ public interface ReaderReadiumJavaScriptAPIType
    */
 
   void pagePrevious();
+
+  /**
+   * Configure the page style based on the given settings.
+   *
+   * @param r
+   *          The settings
+   */
+
+  void setPageStyleSettings(
+    ReaderSettingsType r);
 }

@@ -14,6 +14,8 @@ import org.nypl.simplified.app.reader.ReaderHTTPServer;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
+import org.nypl.simplified.app.reader.ReaderSettings;
+import org.nypl.simplified.app.reader.ReaderSettingsType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
@@ -297,6 +299,7 @@ import com.io7m.jnull.Nullable;
     private final ReaderHTTPServerType        httpd;
     private final ReaderHTTPMimeMapType       mime;
     private final ScreenSizeControllerType    screen;
+    private final ReaderSettingsType          settings;
 
     public ReaderAppServices(
       final Context context,
@@ -311,6 +314,8 @@ import com.io7m.jnull.Nullable;
 
       this.epub_exec = Simplified.namedThreadPool(1, "epub");
       this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
+
+      this.settings = ReaderSettings.openSettings(context);
     }
 
     @Override public ReaderReadiumEPUBLoaderType getEPUBLoader()
@@ -348,10 +353,15 @@ import com.io7m.jnull.Nullable;
     {
       return this.screen.screenIsLarge();
     }
+
+    @Override public ReaderSettingsType getSettings()
+    {
+      return this.settings;
+    }
   }
 
   private static final class ScreenSizeController implements
-  ScreenSizeControllerType
+    ScreenSizeControllerType
   {
     private final Resources resources;
 

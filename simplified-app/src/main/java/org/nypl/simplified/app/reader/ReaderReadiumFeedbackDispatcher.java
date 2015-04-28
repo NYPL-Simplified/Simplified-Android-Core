@@ -69,6 +69,20 @@ public final class ReaderReadiumFeedbackDispatcher implements
     }
   }
 
+  private static void onSettingsApplied(
+    final ReaderReadiumFeedbackListenerType l)
+  {
+    try {
+      l.onReadiumFunctionSettingsApplied();
+    } catch (final Throwable e) {
+      try {
+        l.onReadiumFunctionSettingsAppliedError(e);
+      } catch (final Throwable x1) {
+        ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
+      }
+    }
+  }
+
   private ReaderReadiumFeedbackDispatcher()
   {
 
@@ -101,6 +115,11 @@ public final class ReaderReadiumFeedbackDispatcher implements
 
         if ("pagination-changed".equals(function)) {
           ReaderReadiumFeedbackDispatcher.onPaginationChanged(l, parts);
+          return;
+        }
+
+        if ("settings-applied".equals(function)) {
+          ReaderReadiumFeedbackDispatcher.onSettingsApplied(l);
           return;
         }
       }

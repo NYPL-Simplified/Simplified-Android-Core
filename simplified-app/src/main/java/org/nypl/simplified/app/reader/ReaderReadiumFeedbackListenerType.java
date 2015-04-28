@@ -43,6 +43,20 @@ public interface ReaderReadiumFeedbackListenerType
     Throwable e);
 
   /**
+   * Called on receipt of a <tt>readium:settings-applied</tt> request.
+   */
+
+  void onReadiumFunctionSettingsApplied();
+
+  /**
+   * Called when {@link #onReadiumFunctionSettingsApplied()} raises an
+   * exception.
+   */
+
+  void onReadiumFunctionSettingsAppliedError(
+    Throwable e);
+
+  /**
    * Called when an unknown request is made.
    */
 

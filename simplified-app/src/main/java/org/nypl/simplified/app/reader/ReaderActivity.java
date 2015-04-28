@@ -8,9 +8,9 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
+import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
+import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
-import org.nypl.simplified.app.reader.ReaderViewerSettings.ScrollMode;
-import org.nypl.simplified.app.reader.ReaderViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -22,7 +22,9 @@ import org.slf4j.Logger;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.ColorMatrixColorFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,6 +33,7 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -50,7 +53,8 @@ import com.io7m.jnull.Nullable;
   ReaderReadiumFeedbackListenerType,
   ReaderReadiumEPUBLoadListenerType,
   ReaderCurrentPageListenerType,
-  ReaderTOCSelectionListenerType
+  ReaderTOCSelectionListenerType,
+  ReaderSettingsListenerType
 {
   private static final String FILE_ID;
   private static final Logger LOG;
@@ -61,6 +65,43 @@ import com.io7m.jnull.Nullable;
 
   static {
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
+  }
+
+  /**
+   * Construct a color matrix that inverts a given bitmap and then multiplies
+   * the resulting colors by the current foreground color.
+   */
+
+  private static ColorMatrixColorFilter getImageFilterMatrix(
+    final int c)
+  {
+    final ReaderColorMatrix inversion;
+    final ReaderColorMatrix tint;
+
+    {
+      final float[] row_0 = { -1, 0, 0, 0, 255 };
+      final float[] row_1 = { 0, -1, 0, 0, 255 };
+      final float[] row_2 = { 0, 0, -1, 0, 255 };
+      final float[] row_3 = { 0, 0, 0, 1, 0 };
+      inversion = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
+    }
+
+    {
+      final float r = Color.red(c) / 256.0f;
+      final float g = Color.green(c) / 256.0f;
+      final float b = Color.blue(c) / 256.0f;
+      final float[] row_0 = { r, 0, 0, 0, 0 };
+      final float[] row_1 = { 0, g, 0, 0, 0 };
+      final float[] row_2 = { 0, 0, b, 0, 0 };
+      final float[] row_3 = { 0, 0, 0, 1, 0 };
+      tint = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
+    }
+
+    tint.preConcat(inversion);
+
+    final ColorMatrixColorFilter filter =
+      new ColorMatrixColorFilter(tint.getArray());
+    return filter;
   }
 
   public static void startActivity(
@@ -75,24 +116,61 @@ import com.io7m.jnull.Nullable;
     from.startActivity(i);
   }
 
-  private @Nullable Container                         container;
-  private @Nullable ViewGroup                         hud;
-  private @Nullable ProgressBar                       loading;
-  private @Nullable ProgressBar                       progress_bar;
-  private @Nullable TextView                          progress_text;
+  private @Nullable Container                         epub_container;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
-  private @Nullable TextView                          title_text;
-  private @Nullable View                              toc;
-  private @Nullable ReaderViewerSettings              viewer_settings;
-  private @Nullable WebView                           web_view;
-  private boolean                                     webview_resized;
+  private @Nullable ViewGroup                         view_hud;
+  private @Nullable ProgressBar                       view_loading;
+  private @Nullable ProgressBar                       view_progress_bar;
+  private @Nullable TextView                          view_progress_text;
+  private @Nullable View                              view_root;
+  private @Nullable ImageView                         view_settings;
+  private @Nullable TextView                          view_title_text;
+  private @Nullable ImageView                         view_toc;
+  private @Nullable WebView                           view_web_view;
+  private @Nullable ReaderReadiumViewerSettings       viewer_settings;
+
+  private boolean                                     web_view_resized;
+
+  /**
+   * Apply the given color scheme to all views. Unfortunately, there does not
+   * seem to be a more pleasant way, in the Android API, than manually
+   * applying values to all of the views in the hierarchy.
+   */
+
+  private void applyViewerColorScheme(
+    final ReaderColorScheme cs)
+  {
+    final ViewGroup in_hud = NullCheck.notNull(this.view_hud);
+    final View in_root = NullCheck.notNull(in_hud.getRootView());
+    final TextView in_progress_text =
+      NullCheck.notNull(this.view_progress_text);
+    final TextView in_title_text = NullCheck.notNull(this.view_title_text);
+    final ImageView in_toc = NullCheck.notNull(this.view_toc);
+    final ImageView in_settings = NullCheck.notNull(this.view_settings);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final int main_color = rr.getColor(R.color.main_color);
+    final ColorMatrixColorFilter filter =
+      ReaderActivity.getImageFilterMatrix(main_color);
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_root.setBackgroundColor(cs.getBackgroundColor());
+        in_progress_text.setTextColor(main_color);
+        in_title_text.setTextColor(main_color);
+        in_toc.setColorFilter(filter);
+        in_settings.setColorFilter(filter);
+      }
+    });
+  }
 
   private void makeInitialReadiumRequest(
     final ReaderHTTPServerType hs)
   {
     final URI reader_uri = URI.create(hs.getURIBase() + "reader.html");
-    final WebView wv = NullCheck.notNull(this.web_view);
+    final WebView wv = NullCheck.notNull(this.view_web_view);
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
@@ -136,15 +214,17 @@ import com.io7m.jnull.Nullable;
 
     ReaderActivity.LOG.debug("configuration changed");
 
-    final WebView in_web_view = NullCheck.notNull(this.web_view);
-    final TextView in_progress_text = NullCheck.notNull(this.progress_text);
-    final ProgressBar in_progress_bar = NullCheck.notNull(this.progress_bar);
+    final WebView in_web_view = NullCheck.notNull(this.view_web_view);
+    final TextView in_progress_text =
+      NullCheck.notNull(this.view_progress_text);
+    final ProgressBar in_progress_bar =
+      NullCheck.notNull(this.view_progress_bar);
 
     in_web_view.setVisibility(View.INVISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
     in_progress_bar.setVisibility(View.INVISIBLE);
 
-    this.webview_resized = true;
+    this.web_view_resized = true;
   }
 
   @Override protected void onCreate(
@@ -153,10 +233,16 @@ import com.io7m.jnull.Nullable;
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+
+    final ReaderSettingsType settings = rs.getSettings();
+    settings.addListener(this);
+
     final File epub_file = new File("/storage/sdcard0/book.epub");
 
     this.viewer_settings =
-      new ReaderViewerSettings(
+      new ReaderReadiumViewerSettings(
         SyntheticSpreadMode.AUTO,
         ScrollMode.AUTO,
         100,
@@ -182,10 +268,13 @@ import com.io7m.jnull.Nullable;
     final ViewGroup in_hud =
       NullCheck.notNull((ViewGroup) this
         .findViewById(R.id.reader_hud_container));
-    final View in_toc = NullCheck.notNull(this.findViewById(R.id.reader_toc));
+    final ImageView in_toc =
+      NullCheck.notNull((ImageView) this.findViewById(R.id.reader_toc));
+    final ImageView in_settings =
+      NullCheck.notNull((ImageView) this.findViewById(R.id.reader_settings));
 
-    final View root = NullCheck.notNull(in_hud.getRootView());
-    root.setBackgroundColor(Color.WHITE);
+    final View in_root = NullCheck.notNull(in_hud.getRootView());
+    this.view_root = in_root;
 
     in_loading.setVisibility(View.VISIBLE);
     in_progress_bar.setVisibility(View.INVISIBLE);
@@ -193,14 +282,15 @@ import com.io7m.jnull.Nullable;
     in_webview.setVisibility(View.INVISIBLE);
     in_hud.setVisibility(View.INVISIBLE);
 
-    this.loading = in_loading;
-    this.progress_text = in_progress_text;
-    this.progress_bar = in_progress_bar;
-    this.title_text = in_title_text;
-    this.web_view = in_webview;
-    this.hud = in_hud;
-    this.toc = in_toc;
-    this.webview_resized = true;
+    this.view_loading = in_loading;
+    this.view_progress_text = in_progress_text;
+    this.view_progress_bar = in_progress_bar;
+    this.view_title_text = in_title_text;
+    this.view_web_view = in_webview;
+    this.view_hud = in_hud;
+    this.view_toc = in_toc;
+    this.view_settings = in_settings;
+    this.web_view_resized = true;
 
     final WebViewClient wv_client = new WebViewClient() {
       @Override public void onLoadResource(
@@ -256,9 +346,6 @@ import com.io7m.jnull.Nullable;
 
     in_title_text.setText("");
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
-
     final ReaderReadiumEPUBLoaderType pl = rs.getEPUBLoader();
     pl.loadEPUB(epub_file, this);
   }
@@ -278,6 +365,12 @@ import com.io7m.jnull.Nullable;
   @Override protected void onDestroy()
   {
     super.onDestroy();
+
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+
+    final ReaderSettingsType settings = rs.getSettings();
+    settings.removeListener(this);
   }
 
   @Override public void onEPUBLoadFailed(
@@ -299,10 +392,10 @@ import com.io7m.jnull.Nullable;
   @Override public void onEPUBLoadSucceeded(
     final Container c)
   {
-    this.container = c;
+    this.epub_container = c;
     final Package p = NullCheck.notNull(c.getDefaultPackage());
 
-    final TextView in_title_text = NullCheck.notNull(this.title_text);
+    final TextView in_title_text = NullCheck.notNull(this.view_title_text);
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
@@ -317,7 +410,7 @@ import com.io7m.jnull.Nullable;
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
 
-    final View in_toc = NullCheck.notNull(this.toc);
+    final View in_toc = NullCheck.notNull(this.view_toc);
 
     if (rs.screenIsLarge()) {
       in_toc.setOnClickListener(new OnClickListener() {
@@ -352,6 +445,19 @@ import com.io7m.jnull.Nullable;
     hs.startIfNecessaryForPackage(p, this);
   }
 
+  @Override public void onReaderSettingsChanged(
+    final ReaderSettingsType s)
+  {
+    ReaderActivity.LOG.debug("reader settings changed");
+
+    final ReaderReadiumJavaScriptAPIType js =
+      NullCheck.notNull(this.readium_js_api);
+    js.setPageStyleSettings(s);
+
+    final ReaderColorScheme cs = s.getColorScheme();
+    this.applyViewerColorScheme(cs);
+  }
+
   @Override public void onReadiumFunctionDispatchError(
     final Throwable x)
   {
@@ -366,21 +472,24 @@ import com.io7m.jnull.Nullable;
       Simplified.getReaderAppServices();
 
     final ReaderHTTPServerType hs = rs.getHTTPServer();
-    final Container c = NullCheck.notNull(this.container);
+    final Container c = NullCheck.notNull(this.epub_container);
     final Package p = NullCheck.notNull(c.getDefaultPackage());
     p.setRootUrls(hs.getURIBase().toString(), null);
 
-    final ReaderViewerSettings vs = NullCheck.notNull(this.viewer_settings);
+    final ReaderReadiumViewerSettings vs =
+      NullCheck.notNull(this.viewer_settings);
     final ReaderReadiumJavaScriptAPIType js =
       NullCheck.notNull(this.readium_js_api);
 
     final OptionType<ReaderOpenPageRequestType> no_request = Option.none();
     js.openBook(p, vs, no_request);
 
-    final WebView in_web_view = NullCheck.notNull(this.web_view);
-    final ProgressBar in_loading = NullCheck.notNull(this.loading);
-    final ProgressBar in_progress_bar = NullCheck.notNull(this.progress_bar);
-    final TextView in_progress_text = NullCheck.notNull(this.progress_text);
+    final WebView in_web_view = NullCheck.notNull(this.view_web_view);
+    final ProgressBar in_loading = NullCheck.notNull(this.view_loading);
+    final ProgressBar in_progress_bar =
+      NullCheck.notNull(this.view_progress_bar);
+    final TextView in_progress_text =
+      NullCheck.notNull(this.view_progress_text);
 
     in_loading.setVisibility(View.GONE);
     in_web_view.setVisibility(View.VISIBLE);
@@ -420,7 +529,7 @@ import com.io7m.jnull.Nullable;
     final ReaderPaginationChangedEvent e)
   {
     ReaderActivity.LOG.debug("pagination changed: {}", e);
-    final WebView in_web_view = NullCheck.notNull(this.web_view);
+    final WebView in_web_view = NullCheck.notNull(this.view_web_view);
 
     /**
      * Ask for Readium to deliver the unique identifier of the current page,
@@ -436,8 +545,10 @@ import com.io7m.jnull.Nullable;
      * Configure the progress bar and text.
      */
 
-    final TextView in_progress_text = NullCheck.notNull(this.progress_text);
-    final ProgressBar in_progress_bar = NullCheck.notNull(this.progress_bar);
+    final TextView in_progress_text =
+      NullCheck.notNull(this.view_progress_text);
+    final ProgressBar in_progress_bar =
+      NullCheck.notNull(this.view_progress_bar);
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
@@ -468,8 +579,8 @@ import com.io7m.jnull.Nullable;
      * orientation has just changed.
      */
 
-    if (this.webview_resized) {
-      this.webview_resized = false;
+    if (this.web_view_resized) {
+      this.web_view_resized = false;
       UIThread.runOnUIThreadDelayed(new Runnable() {
         @Override public void run()
         {
@@ -493,6 +604,23 @@ import com.io7m.jnull.Nullable;
     final Throwable x)
   {
     ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  }
+
+  @Override public void onReadiumFunctionSettingsApplied()
+  {
+    ReaderActivity.LOG.debug("received settings applied");
+
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+
+    final ReaderSettingsType settings = rs.getSettings();
+    this.onReaderSettingsChanged(settings);
+  }
+
+  @Override public void onReadiumFunctionSettingsAppliedError(
+    final Throwable e)
+  {
+    ReaderActivity.LOG.error("{}", e.getMessage(), e);
   }
 
   @Override public void onReadiumFunctionUnknown(
@@ -556,7 +684,7 @@ import com.io7m.jnull.Nullable;
 
   @Override public void onSimplifiedGestureCenter()
   {
-    final ViewGroup in_hud = NullCheck.notNull(this.hud);
+    final ViewGroup in_hud = NullCheck.notNull(this.view_hud);
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {

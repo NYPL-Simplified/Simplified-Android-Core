@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <color name="main_color">#f0731f</color>
+  
   <color name="notification_background">#f0731f</color>
   <color name="notification_foreground">#ffffff</color>
   <color name="normal_background">#ffffff</color>

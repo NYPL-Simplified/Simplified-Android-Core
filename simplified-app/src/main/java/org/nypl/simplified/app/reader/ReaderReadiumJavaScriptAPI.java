@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.reader;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -101,7 +102,7 @@ import com.io7m.jnull.Nullable;
 
   @Override public void openBook(
     final org.readium.sdk.android.Package p,
-    final ReaderViewerSettings vs,
+    final ReaderReadiumViewerSettings vs,
     final OptionType<ReaderOpenPageRequestType> r)
   {
     try {
@@ -144,5 +145,62 @@ import com.io7m.jnull.Nullable;
   @Override public void pagePrevious()
   {
     this.evaluate("ReadiumSDK.reader.openPageLeft();");
+  }
+
+  @Override public void setPageStyleSettings(
+    final ReaderSettingsType r)
+  {
+    try {
+      final JSONObject decls = new JSONObject();
+
+      String color = null;
+      String background = null;
+      switch (r.getColorScheme()) {
+        case SCHEME_BLACK_ON_BEIGE:
+        {
+          color = "#000000";
+          background = "#a0a0a0";
+          break;
+        }
+        case SCHEME_BLACK_ON_WHITE:
+        {
+          color = "#000000";
+          background = "#ffffff";
+          break;
+        }
+        case SCHEME_WHITE_ON_BLACK:
+        {
+          color = "#ffffff";
+          background = "#000000";
+          break;
+        }
+      }
+
+      assert color != null;
+      assert background != null;
+
+      decls.put("color", color);
+      decls.put("backgroundColor", background);
+
+      final JSONObject o = new JSONObject();
+      o.put("selector", "body");
+      o.put("declarations", decls);
+
+      final JSONArray a = new JSONArray();
+      a.put(o);
+
+      this
+        .evaluate(NullCheck.notNull(String
+          .format(
+            "ReadiumSDK.reader.setBookStyles(%s); document.body.style.backgroundColor = \"%s\";",
+            a,
+            background)));
+
+    } catch (final JSONException e) {
+      ReaderReadiumJavaScriptAPI.LOG.error(
+        "error constructing json: {}",
+        e.getMessage(),
+        e);
+    }
   }
 }

@@ -9,7 +9,7 @@ import com.io7m.jnull.NullCheck;
  * The current viewer settings.
  */
 
-public final class ReaderViewerSettings implements ReaderJSONSerializableType
+public final class ReaderReadiumViewerSettings implements ReaderJSONSerializableType
 {
   public enum ScrollMode
   {
@@ -56,7 +56,7 @@ public final class ReaderViewerSettings implements ReaderJSONSerializableType
   private final ScrollMode          scroll_mode;
   private final SyntheticSpreadMode synthetic_spread;
 
-  public ReaderViewerSettings(
+  public ReaderReadiumViewerSettings(
     final SyntheticSpreadMode in_synthetic_spread,
     final ScrollMode in_scroll_mode,
     final int in_font_size,
