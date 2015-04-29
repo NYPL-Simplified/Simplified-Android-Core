@@ -75,6 +75,10 @@ public final class ReaderSettings implements ReaderSettingsType
           ReaderColorScheme.SCHEME_BLACK_ON_BEIGE.toString()));
       return NullCheck.notNull(ReaderColorScheme.valueOf(raw));
     } catch (final Throwable x) {
+      ReaderSettings.LOG.error(
+        "failed to parse color scheme: {}",
+        x.getMessage(),
+        x);
       return ReaderColorScheme.SCHEME_BLACK_ON_BEIGE;
     }
   }
@@ -92,6 +96,31 @@ public final class ReaderSettings implements ReaderSettingsType
   {
     final Editor e = this.settings.edit();
     e.putString("color_scheme", NullCheck.notNull(c).toString());
+    e.apply();
+    this.broadcastChanges();
+  }
+
+  @Override public float getFontScale()
+  {
+    try {
+      return this.settings.getFloat("font_scale", 100.0f);
+    } catch (final Throwable x) {
+      ReaderSettings.LOG.error(
+        "failed to parse font scale: {}",
+        x.getMessage(),
+        x);
+      return 100.0f;
+    }
+  }
+
+  @Override public void setFontScale(
+    final float s)
+  {
+    final double x = Math.max(50.0, Math.min(s, 200.0));
+    ReaderSettings.LOG.debug("font size: {}%", x);
+
+    final Editor e = this.settings.edit();
+    e.putFloat("font_scale", (float) x);
     e.apply();
     this.broadcastChanges();
   }

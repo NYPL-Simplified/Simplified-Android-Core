@@ -3,6 +3,8 @@ package org.nypl.simplified.app.reader;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
+import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
@@ -180,6 +182,17 @@ import com.io7m.jnull.Nullable;
             "ReadiumSDK.reader.setBookStyles(%s); document.body.style.backgroundColor = \"%s\";",
             a,
             background)));
+
+      final ReaderReadiumViewerSettings vs =
+        new ReaderReadiumViewerSettings(
+          SyntheticSpreadMode.AUTO,
+          ScrollMode.AUTO,
+          (int) r.getFontScale(),
+          20);
+
+      this.evaluate(NullCheck.notNull(String.format(
+        "ReadiumSDK.reader.updateSettings(%s);",
+        vs.toJSON())));
 
     } catch (final JSONException e) {
       ReaderReadiumJavaScriptAPI.LOG.error(

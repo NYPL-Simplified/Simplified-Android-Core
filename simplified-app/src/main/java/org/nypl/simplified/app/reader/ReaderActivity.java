@@ -20,6 +20,7 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -102,8 +103,9 @@ import com.io7m.jnull.Nullable;
   private void applyViewerColorScheme(
     final ReaderColorScheme cs)
   {
-    final ViewGroup in_hud = NullCheck.notNull(this.view_hud);
-    final View in_root = NullCheck.notNull(in_hud.getRootView());
+    ReaderActivity.LOG.debug("applying color scheme");
+
+    final View in_root = NullCheck.notNull(this.view_root);
     final TextView in_progress_text =
       NullCheck.notNull(this.view_progress_text);
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
@@ -242,6 +244,17 @@ import com.io7m.jnull.Nullable;
     in_progress_text.setVisibility(View.INVISIBLE);
     in_webview.setVisibility(View.INVISIBLE);
     in_hud.setVisibility(View.INVISIBLE);
+
+    in_settings.setOnClickListener(new OnClickListener() {
+
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        final FragmentManager fm = ReaderActivity.this.getFragmentManager();
+        final ReaderSettingsDialog d = new ReaderSettingsDialog();
+        d.show(fm, "settings-dialog");
+      }
+    });
 
     this.view_loading = in_loading;
     this.view_progress_text = in_progress_text;
@@ -458,7 +471,8 @@ import com.io7m.jnull.Nullable;
     in_progress_bar.setVisibility(View.VISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
 
-    ReaderActivity.LOG.debug("requested openBook");
+    final ReaderSettingsType settings = rs.getSettings();
+    this.onReaderSettingsChanged(settings);
   }
 
   @Override public void onReadiumFunctionInitializeError(
@@ -571,12 +585,6 @@ import com.io7m.jnull.Nullable;
   @Override public void onReadiumFunctionSettingsApplied()
   {
     ReaderActivity.LOG.debug("received settings applied");
-
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
-
-    final ReaderSettingsType settings = rs.getSettings();
-    this.onReaderSettingsChanged(settings);
   }
 
   @Override public void onReadiumFunctionSettingsAppliedError(
