@@ -7,7 +7,6 @@ import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -40,16 +39,12 @@ public final class ReaderSettingsDialog extends DialogFragment
   {
     assert inflater != null;
 
-    final Resources rr = NullCheck.notNull(this.getResources());
     final LinearLayout layout =
       NullCheck.notNull((LinearLayout) inflater.inflate(
         R.layout.reader_settings,
         container,
         false));
 
-    final ViewGroup in_view_container =
-      NullCheck.notNull((ViewGroup) layout
-        .findViewById(R.id.reader_settings_container));
     final TextView in_view_black_on_white =
       NullCheck.notNull((TextView) layout
         .findViewById(R.id.reader_settings_black_on_white));
