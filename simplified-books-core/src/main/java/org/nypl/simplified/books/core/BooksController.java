@@ -95,7 +95,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       final List<BookDatabaseEntryType> dirs =
         this.books_directory.getBookDatabaseEntries();
       for (int index = 0; index < dirs.size(); ++index) {
-        final BookDatabaseEntryType dir = NullCheck.notNull(dirs.get(index));
+        final BookDatabaseEntryReadableType dir = NullCheck.notNull(dirs.get(index));
         final OPDSAcquisitionFeedEntry e = dir.getData();
         b.addEntry(e);
       }
@@ -249,7 +249,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
       final List<BookDatabaseEntryType> book_list =
         this.books_directory.getBookDatabaseEntries();
-      for (final BookDatabaseEntryType book_dir : book_list) {
+      for (final BookDatabaseEntryReadableType book_dir : book_list) {
         final BookID id = book_dir.getID();
         try {
           final BookSnapshot snap = book_dir.getSnapshot();

@@ -33,18 +33,19 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") public final class BookDatabaseEntry implements
   BookDatabaseEntryType
 {
-  public static final int WAIT_MAXIMUM_MILLISECONDS = 1000;
-  public static final int WAIT_PAUSE_MILLISECONDS   = 10;
+  private static final long serialVersionUID          = 1L;
+  public static final int   WAIT_MAXIMUM_MILLISECONDS = 1000;
+  public static final int   WAIT_PAUSE_MILLISECONDS   = 10;
 
-  private final File      directory;
-  private final File      file_book;
-  private final File      file_cover;
-  private final File      file_download_id;
-  private final File      file_download_id_tmp;
-  private final File      file_lock;
-  private final File      file_meta;
-  private final File      file_meta_tmp;
-  private final BookID    id;
+  private final File        directory;
+  private final File        file_book;
+  private final File        file_cover;
+  private final File        file_download_id;
+  private final File        file_download_id_tmp;
+  private final File        file_lock;
+  private final File        file_meta;
+  private final File        file_meta_tmp;
+  private final BookID      id;
 
   public BookDatabaseEntry(
     final File parent,
