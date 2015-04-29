@@ -19,7 +19,7 @@ import com.io7m.jfunctional.OptionType;
  * </p>
  */
 
-public interface BookDatabaseEntryWritableType
+public interface BookDatabaseEntryWritableType extends Serializable
 {
   /**
    * Copy the given file into the directory as the book data. Typically, this

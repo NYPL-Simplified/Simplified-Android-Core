@@ -70,6 +70,15 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
+  public static ReaderOpenPageRequestType fromBookLocation(
+    final ReaderBookLocation location)
+  {
+    NullCheck.notNull(location);
+    return new FromElementCFIAndIDRef(
+      location.getIDRef(),
+      location.getContentCFI());
+  }
+
   public static ReaderOpenPageRequestType fromContentAndSourceHref(
     final String in_content,
     final String in_source_href)

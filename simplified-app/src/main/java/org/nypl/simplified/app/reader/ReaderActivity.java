@@ -15,6 +15,7 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.core.BookID;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -56,23 +57,27 @@ import com.io7m.jnull.Nullable;
   ReaderTOCSelectionListenerType,
   ReaderSettingsListenerType
 {
-  private static final String FILE_ID;
   private static final Logger LOG;
+  private static final String FILE_ID;
+  private static final String BOOK_ID;
 
   static {
     LOG = LogUtilities.getLog(ReaderActivity.class);
   }
 
   static {
+    BOOK_ID = "org.nypl.simplified.app.ReaderActivity.book";
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
   }
 
   public static void startActivity(
     final Activity from,
+    final BookID book,
     final File file)
   {
     NullCheck.notNull(file);
     final Bundle b = new Bundle();
+    b.putSerializable(ReaderActivity.BOOK_ID, book);
     b.putSerializable(ReaderActivity.FILE_ID, file);
     final Intent i = new Intent(from, ReaderActivity.class);
     i.putExtras(b);
@@ -196,13 +201,21 @@ import com.io7m.jnull.Nullable;
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
+    final Intent i = NullCheck.notNull(this.getIntent());
+    final Bundle a = NullCheck.notNull(i.getExtras());
+
+    final File epub_file =
+      NullCheck.notNull((File) a.getSerializable(ReaderActivity.FILE_ID));
+    final BookID book_id =
+      NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
+
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
 
     final ReaderSettingsType settings = rs.getSettings();
     settings.addListener(this);
 
-    final File epub_file = new File("/storage/sdcard0/book.epub");
+    final ReaderBookmarksType bookmarks = rs.getBookmarks();
 
     this.viewer_settings =
       new ReaderReadiumViewerSettings(

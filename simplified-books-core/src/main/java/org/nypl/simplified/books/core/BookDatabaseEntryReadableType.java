@@ -2,7 +2,6 @@ package org.nypl.simplified.books.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
@@ -12,20 +11,24 @@ import com.io7m.jfunctional.OptionType;
  * <p>
  * The readable interface supported by book database entries.
  * </p>
- * <p>
- * References are {@link Serializable} and therefore can be passed between
- * processes. However, processes running under different user IDs are not
- * guaranteed to be able to perform any of the operations.
- * </p>
  */
 
-public interface BookDatabaseEntryReadableType extends Serializable
+public interface BookDatabaseEntryReadableType
 {
   /**
    * @return <tt>true</tt> if the book directory exists.
    */
 
   boolean exists();
+
+  /**
+   * @return The most recently saved book location, if any
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
+  OptionType<String> getBookLocation()
+    throws IOException;
 
   /**
    * @return The acquisition feed entry associated with the book
@@ -65,5 +68,4 @@ public interface BookDatabaseEntryReadableType extends Serializable
 
   BookSnapshot getSnapshot()
     throws IOException;
-
 }

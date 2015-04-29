@@ -8,6 +8,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.nypl.simplified.app.catalog.CachingFeedLoader;
+import org.nypl.simplified.app.reader.ReaderBookmarks;
+import org.nypl.simplified.app.reader.ReaderBookmarksType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServer;
@@ -293,6 +295,7 @@ import com.io7m.jnull.Nullable;
   private static final class ReaderAppServices implements
     SimplifiedReaderAppServicesType
   {
+    private final ReaderBookmarksType         bookmarks;
     private final ExecutorService             epub_exec;
     private final ReaderReadiumEPUBLoaderType epub_loader;
     private final ExecutorService             http_executor;
@@ -316,6 +319,12 @@ import com.io7m.jnull.Nullable;
       this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
 
       this.settings = ReaderSettings.openSettings(context);
+      this.bookmarks = ReaderBookmarks.openBookmarks(context);
+    }
+
+    @Override public ReaderBookmarksType getBookmarks()
+    {
+      return this.bookmarks;
     }
 
     @Override public ReaderReadiumEPUBLoaderType getEPUBLoader()
@@ -326,6 +335,11 @@ import com.io7m.jnull.Nullable;
     @Override public ReaderHTTPServerType getHTTPServer()
     {
       return this.httpd;
+    }
+
+    @Override public ReaderSettingsType getSettings()
+    {
+      return this.settings;
     }
 
     @Override public double screenDPToPixels(
@@ -352,11 +366,6 @@ import com.io7m.jnull.Nullable;
     @Override public boolean screenIsLarge()
     {
       return this.screen.screenIsLarge();
-    }
-
-    @Override public ReaderSettingsType getSettings()
-    {
-      return this.settings;
     }
   }
 

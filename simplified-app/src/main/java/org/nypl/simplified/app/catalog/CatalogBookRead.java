@@ -57,7 +57,7 @@ public final class CatalogBookRead implements OnClickListener
       if (book_opt.isSome()) {
         final Some<File> some_book = (Some<File>) book_opt;
         final File book = some_book.get();
-        ReaderActivity.startActivity(a, book);
+        ReaderActivity.startActivity(a, this.id, book);
       } else {
         ErrorDialogUtilities
           .showError(

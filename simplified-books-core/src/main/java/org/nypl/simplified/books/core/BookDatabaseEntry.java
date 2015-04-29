@@ -42,6 +42,8 @@ import com.io7m.jnull.NullCheck;
   private final File        file_cover;
   private final File        file_download_id;
   private final File        file_download_id_tmp;
+  private final File        file_location;
+  private final File        file_location_tmp;
   private final File        file_lock;
   private final File        file_meta;
   private final File        file_meta_tmp;
@@ -66,6 +68,9 @@ import com.io7m.jnull.NullCheck;
     this.file_download_id = new File(this.directory, "download_id.txt");
     this.file_download_id_tmp =
       new File(this.directory, "download_id.txt.tmp");
+
+    this.file_location = new File(this.directory, "location.txt");
+    this.file_location_tmp = new File(this.directory, "location.txt.tmp");
   }
 
   @Override public void copyInBook(
@@ -146,6 +151,33 @@ import com.io7m.jnull.NullCheck;
   @Override public boolean exists()
   {
     return this.file_meta.isFile();
+  }
+
+  @Override public OptionType<String> getBookLocation()
+    throws IOException
+  {
+    return FileLocking.withFileLocked(
+      this.file_lock,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, OptionType<String>, IOException>() {
+        @Override public OptionType<String> call(
+          final Unit x)
+          throws IOException
+        {
+          return BookDatabaseEntry.this.getBookLocationLocked();
+        }
+      });
+  }
+
+  private OptionType<String> getBookLocationLocked()
+    throws IOException
+  {
+    if (this.file_location.isFile()) {
+      final String i = FileUtilities.fileReadUTF8(this.file_location);
+      return Option.some(NullCheck.notNull(i));
+    }
+    return Option.none();
   }
 
   private OptionType<File> getBookLocked()
