@@ -9,7 +9,7 @@
   android:layout_height="match_parent">
 
   <!-- The main web view container, rendered at the lowest layer -->
-  
+
   <RelativeLayout
     android:id="@+id/reader_webview_container"
     android:layout_width="match_parent"
@@ -25,7 +25,7 @@
   </RelativeLayout>
 
   <!-- The showable/hideable HUD controls -->
-  
+
   <RelativeLayout
     android:id="@+id/reader_hud_container"
     android:layout_width="match_parent"
@@ -87,24 +87,25 @@
         android:text="Text" />
 
       <ProgressBar
+        android:progressDrawable="@drawable/reader_progress"
         android:id="@+id/reader_position_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="8dp"
-        android:layout_height="wrap_content"
+        android:layout_height="4dp"
         android:layout_above="@id/reader_position_text"
         android:layout_centerHorizontal="true" />
     </RelativeLayout>
   </RelativeLayout>
 
   <!-- The initial loading progress bar -->
-  
+
   <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    
+
     <ProgressBar
       android:id="@+id/reader_loading"
       style="?android:attr/progressBarStyleLarge"
@@ -112,7 +113,7 @@
       android:layout_height="wrap_content"
       android:layout_centerHorizontal="true"
       android:layout_centerVertical="true" />
-    
+
   </RelativeLayout>
 
 </FrameLayout>
