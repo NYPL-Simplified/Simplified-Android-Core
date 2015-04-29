@@ -1,15 +1,11 @@
 package org.nypl.simplified.app.reader;
 
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 
 public final class ReaderColorMatrix extends ColorMatrix
 {
-  private ReaderColorMatrix(
-    final float[] actual)
-  {
-    super(actual);
-  }
-
   public static ReaderColorMatrix fromRows(
     final float row_0[],
     final float row_1[],
@@ -41,5 +37,51 @@ public final class ReaderColorMatrix extends ColorMatrix
     }
     assert actual_index == (4 * 5);
     return new ReaderColorMatrix(actual);
+  }
+
+  /**
+   * Construct a color matrix that inverts a given bitmap and then multiplies
+   * the resulting colors by the current foreground color.
+   *
+   * @param c
+   *          The base color
+   */
+
+  public static ColorMatrixColorFilter getImageFilterMatrix(
+    final int c)
+  {
+    final ReaderColorMatrix inversion;
+    final ReaderColorMatrix tint;
+
+    {
+      final float[] row_0 = { -1, 0, 0, 0, 255 };
+      final float[] row_1 = { 0, -1, 0, 0, 255 };
+      final float[] row_2 = { 0, 0, -1, 0, 255 };
+      final float[] row_3 = { 0, 0, 0, 1, 0 };
+      inversion = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
+    }
+
+    {
+      final float r = Color.red(c) / 256.0f;
+      final float g = Color.green(c) / 256.0f;
+      final float b = Color.blue(c) / 256.0f;
+      final float[] row_0 = { r, 0, 0, 0, 0 };
+      final float[] row_1 = { 0, g, 0, 0, 0 };
+      final float[] row_2 = { 0, 0, b, 0, 0 };
+      final float[] row_3 = { 0, 0, 0, 1, 0 };
+      tint = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
+    }
+
+    tint.preConcat(inversion);
+
+    final ColorMatrixColorFilter filter =
+      new ColorMatrixColorFilter(tint.getArray());
+    return filter;
+  }
+
+  private ReaderColorMatrix(
+    final float[] actual)
+  {
+    super(actual);
   }
 }

@@ -13,6 +13,10 @@ import android.content.SharedPreferences.Editor;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
+/**
+ * User-configurable reader settings.
+ */
+
 public final class ReaderSettings implements ReaderSettingsType
 {
   private static final Logger LOG;
@@ -68,10 +72,10 @@ public final class ReaderSettings implements ReaderSettingsType
       final String raw =
         NullCheck.notNull(this.settings.getString(
           "color_scheme",
-          ReaderColorScheme.SCHEME_BLACK_ON_WHITE.toString()));
+          ReaderColorScheme.SCHEME_BLACK_ON_BEIGE.toString()));
       return NullCheck.notNull(ReaderColorScheme.valueOf(raw));
     } catch (final Throwable x) {
-      return ReaderColorScheme.SCHEME_BLACK_ON_WHITE;
+      return ReaderColorScheme.SCHEME_BLACK_ON_BEIGE;
     }
   }
 

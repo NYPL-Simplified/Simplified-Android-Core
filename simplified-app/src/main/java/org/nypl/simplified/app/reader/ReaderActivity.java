@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.os.Bundle;
 import android.view.View;
@@ -67,43 +66,6 @@ import com.io7m.jnull.Nullable;
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
   }
 
-  /**
-   * Construct a color matrix that inverts a given bitmap and then multiplies
-   * the resulting colors by the current foreground color.
-   */
-
-  private static ColorMatrixColorFilter getImageFilterMatrix(
-    final int c)
-  {
-    final ReaderColorMatrix inversion;
-    final ReaderColorMatrix tint;
-
-    {
-      final float[] row_0 = { -1, 0, 0, 0, 255 };
-      final float[] row_1 = { 0, -1, 0, 0, 255 };
-      final float[] row_2 = { 0, 0, -1, 0, 255 };
-      final float[] row_3 = { 0, 0, 0, 1, 0 };
-      inversion = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
-    }
-
-    {
-      final float r = Color.red(c) / 256.0f;
-      final float g = Color.green(c) / 256.0f;
-      final float b = Color.blue(c) / 256.0f;
-      final float[] row_0 = { r, 0, 0, 0, 0 };
-      final float[] row_1 = { 0, g, 0, 0, 0 };
-      final float[] row_2 = { 0, 0, b, 0, 0 };
-      final float[] row_3 = { 0, 0, 0, 1, 0 };
-      tint = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
-    }
-
-    tint.preConcat(inversion);
-
-    final ColorMatrixColorFilter filter =
-      new ColorMatrixColorFilter(tint.getArray());
-    return filter;
-  }
-
   public static void startActivity(
     final Activity from,
     final File file)
@@ -129,7 +91,6 @@ import com.io7m.jnull.Nullable;
   private @Nullable ImageView                         view_toc;
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
-
   private boolean                                     web_view_resized;
 
   /**
@@ -152,7 +113,7 @@ import com.io7m.jnull.Nullable;
     final Resources rr = NullCheck.notNull(this.getResources());
     final int main_color = rr.getColor(R.color.main_color);
     final ColorMatrixColorFilter filter =
-      ReaderActivity.getImageFilterMatrix(main_color);
+      ReaderColorMatrix.getImageFilterMatrix(main_color);
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
@@ -322,6 +283,7 @@ import com.io7m.jnull.Nullable;
         return super.shouldOverrideUrlLoading(view, url);
       }
     };
+    in_webview.setBackgroundColor(0x00000000);
     in_webview.setWebViewClient(wv_client);
     in_webview.setOnLongClickListener(new OnLongClickListener() {
       @Override public boolean onLongClick(
@@ -627,17 +589,6 @@ import com.io7m.jnull.Nullable;
     final String text)
   {
     ReaderActivity.LOG.error("unknown readium function: {}", text);
-  }
-
-  @Override protected void onResume()
-  {
-    super.onResume();
-  }
-
-  @Override protected void onSaveInstanceState(
-    final @Nullable Bundle state)
-  {
-    super.onSaveInstanceState(state);
   }
 
   @Override public void onServerStartFailed(

@@ -21,7 +21,7 @@ import com.io7m.jnull.Nullable;
  * interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class ReaderReadiumJavaScriptAPI implements
+@SuppressWarnings({ "boxing", "synthetic-access" }) public final class ReaderReadiumJavaScriptAPI implements
   ReaderReadiumJavaScriptAPIType
 {
   private static final Logger LOG;
@@ -153,31 +153,16 @@ import com.io7m.jnull.Nullable;
     try {
       final JSONObject decls = new JSONObject();
 
-      String color = null;
-      String background = null;
-      switch (r.getColorScheme()) {
-        case SCHEME_BLACK_ON_BEIGE:
-        {
-          color = "#000000";
-          background = "#a0a0a0";
-          break;
-        }
-        case SCHEME_BLACK_ON_WHITE:
-        {
-          color = "#000000";
-          background = "#ffffff";
-          break;
-        }
-        case SCHEME_WHITE_ON_BLACK:
-        {
-          color = "#ffffff";
-          background = "#000000";
-          break;
-        }
-      }
+      final ReaderColorScheme cs = r.getColorScheme();
 
-      assert color != null;
-      assert background != null;
+      final String color =
+        NullCheck.notNull(String.format(
+          "#%06x",
+          cs.getForegroundColor() & 0xffffff));
+      final String background =
+        NullCheck.notNull(String.format(
+          "#%06x",
+          cs.getBackgroundColor() & 0xffffff));
 
       decls.put("color", color);
       decls.put("backgroundColor", background);
