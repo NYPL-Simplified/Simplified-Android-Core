@@ -1,5 +1,7 @@
 package org.nypl.simplified.app.reader;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.slf4j.Logger;
@@ -14,7 +16,7 @@ import com.io7m.jnull.NullCheck;
 
 public final class ReaderBookmarks implements ReaderBookmarksType
 {
-  private static final Logger     LOG;
+  private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderBookmarks.class);
@@ -36,22 +38,54 @@ public final class ReaderBookmarks implements ReaderBookmarksType
       NullCheck.notNull(cc.getSharedPreferences("reader-bookmarks", 0));
   }
 
-  @Override public OptionType<String> getBookmark(
+  @Override public OptionType<ReaderBookLocation> getBookmark(
     final BookID id)
   {
-    final String key = id.toString();
-    if (this.bookmarks.contains(key)) {
-      return Option.of(this.bookmarks.getString(key, null));
+    NullCheck.notNull(id);
+    final String key = NullCheck.notNull(id.toString());
+
+    try {
+      if (this.bookmarks.contains(key)) {
+        final String text = this.bookmarks.getString(key, null);
+        if (text != null) {
+          final JSONObject o = new JSONObject(text);
+          return Option.some(ReaderBookLocation.fromJSON(o));
+        }
+      }
+      return Option.none();
+    } catch (final JSONException e) {
+      ReaderBookmarks.LOG.error(
+        "unable to deserialize bookmark: {}",
+        e.getMessage(),
+        e);
+      return Option.none();
     }
-    return Option.none();
   }
 
   @Override public void setBookmark(
     final BookID id,
-    final String bookmark)
+    final ReaderBookLocation bookmark)
   {
-    final Editor e = this.bookmarks.edit();
-    e.putString(id.toString(), bookmark);
-    e.apply();
+    NullCheck.notNull(id);
+    NullCheck.notNull(bookmark);
+
+    try {
+      ReaderBookmarks.LOG.debug(
+        "saving bookmark for book {}: {}",
+        id,
+        bookmark);
+
+      final JSONObject o = NullCheck.notNull(bookmark.toJSON());
+      final String text = NullCheck.notNull(o.toString());
+      final String key = NullCheck.notNull(id.toString());
+      final Editor e = this.bookmarks.edit();
+      e.putString(key, text);
+      e.apply();
+    } catch (final JSONException e) {
+      ReaderBookmarks.LOG.error(
+        "unable to serialize bookmark: {}",
+        e.getMessage(),
+        e);
+    }
   }
 }

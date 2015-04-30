@@ -6,10 +6,10 @@ import com.io7m.jfunctional.OptionType;
 
 public interface ReaderBookmarksType
 {
-  OptionType<String> getBookmark(
+  OptionType<ReaderBookLocation> getBookmark(
     BookID id);
 
   void setBookmark(
     BookID id,
-    String bookmark);
+    ReaderBookLocation bookmark);
 }

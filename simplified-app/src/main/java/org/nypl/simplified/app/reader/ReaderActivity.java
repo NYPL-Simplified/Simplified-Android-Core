@@ -38,7 +38,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -98,6 +98,7 @@ import com.io7m.jnull.Nullable;
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private boolean                                     web_view_resized;
+  private @Nullable BookID                            book_id;
 
   /**
    * Apply the given color scheme to all views. Unfortunately, there does not
@@ -204,18 +205,17 @@ import com.io7m.jnull.Nullable;
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = NullCheck.notNull(i.getExtras());
 
-    final File epub_file =
+    final File in_epub_file =
       NullCheck.notNull((File) a.getSerializable(ReaderActivity.FILE_ID));
-    final BookID book_id =
+    final BookID in_book_id =
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
+    this.book_id = in_book_id;
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
 
     final ReaderSettingsType settings = rs.getSettings();
     settings.addListener(this);
-
-    final ReaderBookmarksType bookmarks = rs.getBookmarks();
 
     this.viewer_settings =
       new ReaderReadiumViewerSettings(
@@ -335,7 +335,7 @@ import com.io7m.jnull.Nullable;
     in_title_text.setText("");
 
     final ReaderReadiumEPUBLoaderType pl = rs.getEPUBLoader();
-    pl.loadEPUB(epub_file, this);
+    pl.loadEPUB(in_epub_file, this);
   }
 
   @Override public void onCurrentPageError(
@@ -348,6 +348,12 @@ import com.io7m.jnull.Nullable;
     final ReaderBookLocation l)
   {
     ReaderActivity.LOG.debug("received book location: {}", l);
+
+    final BookID in_book_id = NullCheck.notNull(this.book_id);
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+    final ReaderBookmarksType bm = rs.getBookmarks();
+    bm.setBookmark(in_book_id, l);
   }
 
   @Override protected void onDestroy()
@@ -469,8 +475,22 @@ import com.io7m.jnull.Nullable;
     final ReaderReadiumJavaScriptAPIType js =
       NullCheck.notNull(this.readium_js_api);
 
-    final OptionType<ReaderOpenPageRequestType> no_request = Option.none();
-    js.openBook(p, vs, no_request);
+    final BookID in_book_id = NullCheck.notNull(this.book_id);
+    final ReaderBookmarksType bookmarks = rs.getBookmarks();
+    final OptionType<ReaderBookLocation> mark =
+      bookmarks.getBookmark(in_book_id);
+
+    final OptionType<ReaderOpenPageRequestType> page_request =
+      mark
+        .map(new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
+          @Override public ReaderOpenPageRequestType call(
+            final ReaderBookLocation l)
+          {
+            return ReaderOpenPageRequest.fromBookLocation(l);
+          }
+        });
+
+    js.openBook(p, vs, page_request);
 
     final WebView in_web_view = NullCheck.notNull(this.view_web_view);
     final ProgressBar in_loading = NullCheck.notNull(this.view_loading);
