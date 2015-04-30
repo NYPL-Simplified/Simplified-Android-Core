@@ -22,12 +22,12 @@ public interface BookDatabaseEntryReadableType
   boolean exists();
 
   /**
-   * @return The most recently saved book location, if any
+   * @return The cover of the book, if any
    * @throws IOException
    *           On I/O errors or lock acquisition failures
    */
 
-  OptionType<String> getBookLocation()
+  OptionType<File> getCover()
     throws IOException;
 
   /**

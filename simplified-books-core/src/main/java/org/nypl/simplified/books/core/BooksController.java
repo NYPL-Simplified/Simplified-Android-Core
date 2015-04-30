@@ -37,6 +37,8 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.TreeTraverser;
@@ -57,6 +59,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
 @SuppressWarnings("synthetic-access") public final class BooksController extends
   Observable implements BooksType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
+  }
+
   private static final class AcquisitionFeedTask implements Runnable
   {
     private final BookDatabaseType                books_directory;
@@ -83,7 +91,6 @@ import com.io7m.junreachable.UnimplementedCodeException;
     }
 
     private OPDSAcquisitionFeed feed()
-      throws IOException
     {
       final OPDSAcquisitionFeedBuilderType b =
         OPDSAcquisitionFeed.newBuilder(
@@ -94,10 +101,21 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
       final List<BookDatabaseEntryType> dirs =
         this.books_directory.getBookDatabaseEntries();
+
       for (int index = 0; index < dirs.size(); ++index) {
-        final BookDatabaseEntryReadableType dir = NullCheck.notNull(dirs.get(index));
-        final OPDSAcquisitionFeedEntry e = dir.getData();
-        b.addEntry(e);
+        final BookDatabaseEntryReadableType dir =
+          NullCheck.notNull(dirs.get(index));
+        final BookID book_id = dir.getID();
+
+        try {
+          b.addEntry(dir.getData());
+        } catch (final IOException x) {
+          // XXX: See issue 30.
+          BooksController.LOG.error(
+            "unable to load book {} metadata: ",
+            book_id,
+            x);
+        }
       }
 
       return b.build();
