@@ -73,7 +73,7 @@ import com.io7m.jnull.NullCheck;
     this.file_location_tmp = new File(this.directory, "location.txt.tmp");
   }
 
-  @Override public void copyInBook(
+  @Override public void copyInBookFromSameFilesystem(
     final File file)
     throws IOException
   {
@@ -86,13 +86,13 @@ import com.io7m.jnull.NullCheck;
           final Unit x)
           throws IOException
         {
-          BookDatabaseEntry.this.copyInBookLocked(file);
+          BookDatabaseEntry.this.copyInBookFromSameFilesystemLocked(file);
           return Unit.unit();
         }
       });
   }
 
-  private void copyInBookLocked(
+  private void copyInBookFromSameFilesystemLocked(
     final File file)
     throws IOException
   {
@@ -335,7 +335,8 @@ import com.io7m.jnull.NullCheck;
   {
     if (in_cover.isSome()) {
       final Some<File> some = (Some<File>) in_cover;
-      FileUtilities.fileRename(some.get(), this.file_cover);
+      FileUtilities.fileCopy(some.get(), this.file_cover);
+      some.get().delete();
     } else {
       this.file_cover.delete();
     }

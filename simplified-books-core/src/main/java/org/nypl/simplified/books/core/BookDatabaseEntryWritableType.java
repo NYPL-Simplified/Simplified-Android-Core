@@ -23,13 +23,14 @@ public interface BookDatabaseEntryWritableType extends Serializable
 {
   /**
    * Copy the given file into the directory as the book data. Typically, this
-   * will be an EPUB file.
+   * will be an EPUB file. This function will instantly fail if `file` is not
+   * on the same filesystem as the book database.
    *
    * @throws IOException
    *           On I/O errors or lock acquisition failures
    */
 
-  void copyInBook(
+  void copyInBookFromSameFilesystem(
     File file)
     throws IOException;
 

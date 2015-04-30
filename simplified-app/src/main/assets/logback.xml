@@ -10,6 +10,14 @@
     </encoder>
   </appender>
 
+  <logger
+    name="org.nypl.simplified.app.catalog.CatalogAcquisitionCellView"
+    level="WARN" />
+
+  <logger
+    name="org.nypl.simplified.app.CoverProvider"
+    level="WARN" />
+
   <!-- Log level - change this to ERROR on release -->
   <root level="debug">
     <appender-ref ref="LOG_CAT" />

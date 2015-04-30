@@ -1,6 +1,7 @@
 package org.nypl.simplified.app;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,6 +28,7 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FileUtilities;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
@@ -92,24 +94,6 @@ import com.io7m.jnull.Nullable;
       this.books_executor = Simplified.namedThreadPool(1, "books");
 
       /**
-       * Determine screen details.
-       */
-
-      {
-        final DisplayMetrics dm = rr.getDisplayMetrics();
-        final float dp_height = dm.heightPixels / dm.density;
-        final float dp_width = dm.widthPixels / dm.density;
-        CatalogAppServices.LOG_CA.debug(
-          "screen ({} x {})",
-          dp_width,
-          dp_height);
-        CatalogAppServices.LOG_CA.debug(
-          "screen ({} x {})",
-          dm.widthPixels,
-          dm.heightPixels);
-      }
-
-      /**
        * Catalog URIs.
        */
 
@@ -124,13 +108,29 @@ import com.io7m.jnull.Nullable;
        * Book management.
        */
 
-      final File data_dir = Simplified.getDiskDataDir(context);
-      final File downloads_dir = new File(data_dir, "downloads");
-      final File books_dir = new File(data_dir, "books");
+      final File base_dir = Simplified.getDiskDataDir(context);
+      final File downloads_dir = new File(base_dir, "downloads");
+      final File books_dir = new File(base_dir, "books");
 
-      CatalogAppServices.LOG_CA.debug("data: {}", data_dir);
+      /**
+       * Make sure the required directories exist. There is no sane way to
+       * recover if they cannot be created!
+       */
+
+      try {
+        FileUtilities.createDirectory(downloads_dir);
+        FileUtilities.createDirectory(books_dir);
+      } catch (final IOException e) {
+        Simplified.LOG.error(
+          "could not create directories: {}",
+          e.getMessage(),
+          e);
+        throw new IllegalStateException(e);
+      }
+
+      CatalogAppServices.LOG_CA.debug("base:      {}", base_dir);
       CatalogAppServices.LOG_CA.debug("downloads: {}", downloads_dir);
-      CatalogAppServices.LOG_CA.debug("books: {}", books_dir);
+      CatalogAppServices.LOG_CA.debug("books:     {}", books_dir);
 
       final DownloaderConfigurationBuilderType dcb =
         DownloaderConfiguration.newBuilder(downloads_dir);

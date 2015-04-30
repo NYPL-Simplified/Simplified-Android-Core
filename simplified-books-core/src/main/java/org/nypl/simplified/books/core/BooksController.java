@@ -386,7 +386,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       final File file_data)
     {
       try {
-        this.book_directory.copyInBook(file_data);
+        this.book_directory.copyInBookFromSameFilesystem(file_data);
         final BookStatusDone status = new BookStatusDone(this.book_id);
         this.status_cache.booksSnapshotUpdate(
           this.book_id,

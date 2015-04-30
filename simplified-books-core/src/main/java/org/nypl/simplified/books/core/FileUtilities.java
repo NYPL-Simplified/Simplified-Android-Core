@@ -11,10 +11,11 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
-final class FileUtilities
+public final class FileUtilities
 {
-  static void createDirectory(
+  public static void createDirectory(
     final File directory)
     throws IOException
   {
@@ -26,7 +27,47 @@ final class FileUtilities
     }
   }
 
-  static String fileReadUTF8(
+  public static void fileCopy(
+    final File from,
+    final File to)
+    throws IOException
+  {
+    NullCheck.notNull(from);
+    NullCheck.notNull(to);
+
+    final byte[] buffer = new byte[8192];
+
+    FileInputStream in = null;
+    try {
+      in = new FileInputStream(from);
+
+      FileOutputStream out = null;
+      try {
+        out = new FileOutputStream(to);
+
+        for (;;) {
+          final int r = in.read(buffer);
+          if (r == -1) {
+            break;
+          }
+          out.write(buffer, 0, r);
+          out.flush();
+        }
+
+      } finally {
+        if (out != null) {
+          out.flush();
+          out.close();
+        }
+      }
+    } finally {
+      if (in != null) {
+        in.close();
+      }
+    }
+  }
+
+  public static String fileReadUTF8(
     final File file)
     throws IOException
   {
@@ -54,12 +95,34 @@ final class FileUtilities
     return NullCheck.notNull(b.toString());
   }
 
-  static void fileRename(
+  public static void fileRename(
     final File from,
     final File to)
     throws IOException
   {
+    NullCheck.notNull(from);
+    NullCheck.notNull(to);
+
     if (from.renameTo(to) == false) {
+      if (from.isFile() == false) {
+        throw new IOException(
+          String
+            .format(
+              "Could not rename '%s' to '%s' ('%s' does not exist or is not a file)",
+              from,
+              to,
+              from));
+      }
+
+      final File to_parent = to.getParentFile();
+      if (to_parent.isDirectory() == false) {
+        throw new IOException(String.format(
+          "Could not rename '%s' to '%s' ('%s' is not a directory)",
+          from,
+          to,
+          to_parent));
+      }
+
       throw new IOException(String.format(
         "Could not rename '%s' to '%s'",
         from,
@@ -67,7 +130,7 @@ final class FileUtilities
     }
   }
 
-  static void fileWriteUTF8(
+  public static void fileWriteUTF8(
     final File file,
     final String text)
     throws IOException
@@ -88,7 +151,7 @@ final class FileUtilities
     }
   }
 
-  static void fileWriteUTF8Atomically(
+  public static void fileWriteUTF8Atomically(
     final File f,
     final File f_tmp,
     final String text)
@@ -99,5 +162,10 @@ final class FileUtilities
     NullCheck.notNull(text);
     FileUtilities.fileWriteUTF8(f_tmp, text);
     FileUtilities.fileRename(f_tmp, f);
+  }
+
+  private FileUtilities()
+  {
+    throw new UnreachableCodeException();
   }
 }

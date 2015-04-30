@@ -22,7 +22,7 @@ public final class LogUtilities
   {
     if (error.isSome()) {
       final Some<Throwable> some = (Some<Throwable>) error;
-      log.error("{}", message, some.get());
+      log.error(" ", some.get());
     } else {
       log.error("{}", message);
     }
