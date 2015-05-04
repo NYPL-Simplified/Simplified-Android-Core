@@ -11,27 +11,19 @@ package org.nypl.simplified.books.core;
 
 public interface BookStatusLoanedMatcherType<A, E extends Exception>
 {
-  A onBookStatusCancelled(
-    BookStatusCancelled c)
-    throws E;
-
-  A onBookStatusDone(
-    BookStatusDone d)
+  A onBookStatusDownloaded(
+    BookStatusDownloaded d)
     throws E;
 
   A onBookStatusDownloading(
-    BookStatusDownloading d)
-    throws E;
-
-  A onBookStatusFailed(
-    BookStatusFailed f)
+    BookStatusDownloadingType o)
     throws E;
 
   A onBookStatusLoaned(
     BookStatusLoaned o)
     throws E;
 
-  A onBookStatusPaused(
-    BookStatusPaused p)
+  A onBookStatusRequestingDownload(
+    BookStatusRequestingDownload d)
     throws E;
 }

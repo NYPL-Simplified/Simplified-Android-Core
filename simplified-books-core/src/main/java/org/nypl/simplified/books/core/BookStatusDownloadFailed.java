@@ -9,13 +9,14 @@ import com.io7m.jnull.NullCheck;
  * The given book failed to download properly.
  */
 
-public final class BookStatusFailed implements BookStatusWithSnapshotType
+public final class BookStatusDownloadFailed implements
+  BookStatusDownloadingType
 {
   private final OptionType<Throwable> error;
   private final BookID                id;
   private final DownloadSnapshot      snap;
 
-  public BookStatusFailed(
+  public BookStatusDownloadFailed(
     final BookID in_id,
     final DownloadSnapshot in_snap,
     final OptionType<Throwable> x)
@@ -25,21 +26,28 @@ public final class BookStatusFailed implements BookStatusWithSnapshotType
     this.error = NullCheck.notNull(x);
   }
 
+  @Override public DownloadSnapshot getDownloadSnapshot()
+  {
+    return this.snap;
+  }
+
   @Override public BookID getID()
   {
     return this.id;
   }
 
-  @Override public DownloadSnapshot getSnapshot()
+  @Override public <A, E extends Exception> A matchBookDownloadingStatus(
+    final BookStatusDownloadingMatcherType<A, E> m)
+    throws E
   {
-    return this.snap;
+    return m.onBookStatusDownloadFailed(this);
   }
 
   @Override public <A, E extends Exception> A matchBookLoanedStatus(
     final BookStatusLoanedMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusFailed(this);
+    return m.onBookStatusDownloading(this);
   }
 
   @Override public <A, E extends Exception> A matchBookStatus(
@@ -47,5 +55,18 @@ public final class BookStatusFailed implements BookStatusWithSnapshotType
     throws E
   {
     return m.onBookStatusLoanedType(this);
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[BookStatusDownloadFailed ");
+    b.append(this.id);
+    b.append(" [");
+    b.append(this.snap);
+    b.append("] ");
+    b.append(this.error);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }

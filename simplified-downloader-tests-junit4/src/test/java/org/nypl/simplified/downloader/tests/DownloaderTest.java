@@ -50,12 +50,6 @@ import com.io7m.jnull.NullCheck;
       System.out.println("CLEANUP: " + snap);
     }
 
-    @Override public void downloadReceivedData(
-      final DownloadSnapshot snap)
-    {
-      System.out.println("RECEIVED DATA: " + snap);
-    }
-
     @Override public void downloadCompleted(
       final DownloadSnapshot snap)
     {
@@ -76,6 +70,12 @@ import com.io7m.jnull.NullCheck;
       System.out.println("DOWNLOAD TAKE FAILED: " + snap + " " + x);
     }
 
+    @Override public void downloadCompletedTaken(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("COMPLETED TAKEN: " + snap);
+    }
+
     @Override public void downloadFailed(
       final DownloadSnapshot snap,
       final Throwable e)
@@ -87,6 +87,12 @@ import com.io7m.jnull.NullCheck;
       final DownloadSnapshot snap)
     {
       System.out.println("PAUSED: " + snap);
+    }
+
+    @Override public void downloadReceivedData(
+      final DownloadSnapshot snap)
+    {
+      System.out.println("RECEIVED DATA: " + snap);
     }
 
     @Override public void downloadResumed(
@@ -179,7 +185,7 @@ import com.io7m.jnull.NullCheck;
       };
 
       final OptionType<HTTPAuthType> none = Option.none();
-      final long id =
+      final long id0 =
         d
           .downloadEnqueue(
             none,
@@ -190,19 +196,19 @@ import com.io7m.jnull.NullCheck;
 
       {
         final Some<DownloadSnapshot> some_snapshot =
-          (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
+          (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id0);
         final DownloadSnapshot snapshot = some_snapshot.get();
         Assert.assertEquals(
           DownloadStatus.STATUS_IN_PROGRESS,
           snapshot.statusGet());
       }
 
-      d.downloadCancel(id);
+      d.downloadCancel(id0);
       cancel_latch.await();
 
       {
         final Some<DownloadSnapshot> some_snapshot =
-          (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
+          (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id0);
         final DownloadSnapshot snapshot = some_snapshot.get();
         Assert.assertEquals(
           DownloadStatus.STATUS_CANCELLED,
@@ -210,10 +216,11 @@ import com.io7m.jnull.NullCheck;
       }
 
       /**
-       * Check that cancelling does not cause IDs to be re-used.
+       * Check that cancelling does not cause IDs to be re-used, and that the
+       * previously cancelled task stays cancelled.
        */
 
-      final long id2 =
+      final long id1 =
         d
           .downloadEnqueue(
             none,
@@ -221,7 +228,16 @@ import com.io7m.jnull.NullCheck;
               .serverAddress("/org/nypl/simplified/downloader/tests/hello.txt"),
             "Hello",
             listener);
-      Assert.assertNotEquals(id, id2);
+      Assert.assertNotEquals(id0, id1);
+
+      {
+        final Some<DownloadSnapshot> some_snapshot =
+          (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id0);
+        final DownloadSnapshot snapshot = some_snapshot.get();
+        Assert.assertEquals(
+          DownloadStatus.STATUS_CANCELLED,
+          snapshot.statusGet());
+      }
 
     } finally {
       exec.shutdown();
@@ -312,13 +328,13 @@ import com.io7m.jnull.NullCheck;
 
       Assert.assertEquals(
         some_0.get().statusGet(),
-        DownloadStatus.STATUS_COMPLETED);
+        DownloadStatus.STATUS_COMPLETED_NOT_TAKEN);
       Assert.assertEquals(
         some_1.get().statusGet(),
-        DownloadStatus.STATUS_COMPLETED);
+        DownloadStatus.STATUS_COMPLETED_NOT_TAKEN);
       Assert.assertEquals(
         some_2.get().statusGet(),
-        DownloadStatus.STATUS_COMPLETED);
+        DownloadStatus.STATUS_COMPLETED_NOT_TAKEN);
 
       Assert.assertTrue(new File(tmp, "1.data").exists());
       Assert.assertTrue(new File(tmp, "2.data").exists());
@@ -519,7 +535,7 @@ import com.io7m.jnull.NullCheck;
 
     final Some<DownloadSnapshot> some_snap =
       (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
-    Assert.assertEquals(DownloadStatus.STATUS_COMPLETED, some_snap
+    Assert.assertEquals(DownloadStatus.STATUS_COMPLETED_NOT_TAKEN, some_snap
       .get()
       .statusGet());
 
@@ -655,7 +671,7 @@ import com.io7m.jnull.NullCheck;
         (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id);
       final DownloadSnapshot snapshot = some_snapshot.get();
       Assert.assertEquals(
-        DownloadStatus.STATUS_COMPLETED,
+        DownloadStatus.STATUS_COMPLETED_NOT_TAKEN,
         snapshot.statusGet());
     }
 
@@ -818,4 +834,129 @@ import com.io7m.jnull.NullCheck;
     e.shutdown();
     s.stop();
   }
+
+  @Test public void testDownloadTaken()
+    throws Exception
+  {
+    final HTTPType h = HTTP.newHTTP();
+    final ExecutorService e = Executors.newFixedThreadPool(8);
+    final CountDownLatch latch = new CountDownLatch(1);
+    final FileServer s = new FileServer(DownloaderTest.SERVER_PORT);
+    e.submit(new Runnable() {
+      @Override public void run()
+      {
+        try {
+          s.call();
+          latch.countDown();
+        } catch (final Exception x) {
+          x.printStackTrace();
+        }
+      }
+    });
+    latch.await();
+
+    final File tmp = this.makeTempDir();
+    final DownloaderConfigurationBuilderType cb =
+      DownloaderConfiguration.newBuilder(tmp);
+    final DownloaderConfiguration c = cb.build();
+    final DownloaderType d = Downloader.newDownloader(e, h, c);
+
+    final OptionType<HTTPAuthType> none = Option.none();
+    final URI uri =
+      this.serverAddress("/org/nypl/simplified/downloader/tests/hello.txt");
+
+    final long id0;
+    final long id1;
+    final long id2;
+
+    /**
+     * Schedule a download, and then don't take the file when given the
+     * opportunity.
+     */
+
+    {
+      final CountDownLatch success_latch = new CountDownLatch(1);
+      final DownloadListenerType listener = new LoggingListener() {
+        @Override public void downloadCompleted(
+          final DownloadSnapshot snap)
+        {
+          super.downloadCompleted(snap);
+          success_latch.countDown();
+        }
+      };
+
+      id0 = d.downloadEnqueue(none, uri, "Hello", listener);
+      success_latch.await();
+
+      final Some<DownloadSnapshot> some_snap =
+        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id0);
+      Assert.assertEquals(
+        DownloadStatus.STATUS_COMPLETED_NOT_TAKEN,
+        some_snap.get().statusGet());
+    }
+
+    /**
+     * Try to download the same URI again: The task returned will be the
+     * previously completed (but not taken) task.
+     */
+
+    {
+      final CountDownLatch success_latch = new CountDownLatch(2);
+      final DownloadListenerType listener = new LoggingListener() {
+        @Override public void downloadCompletedTake(
+          final DownloadSnapshot snap,
+          final File file_data)
+        {
+          super.downloadCompletedTake(snap, file_data);
+          file_data.delete();
+          success_latch.countDown();
+        }
+
+        @Override public void downloadCompletedTaken(
+          final DownloadSnapshot snap)
+        {
+          super.downloadCompletedTaken(snap);
+          success_latch.countDown();
+        }
+      };
+
+      id1 = d.downloadEnqueue(none, uri, "Hello", listener);
+      success_latch.await();
+    }
+
+    Assert.assertEquals(id0, id1);
+
+    /**
+     * Schedule another download of the same URI. Because the data was taken
+     * last time, an entirely new task will be created.
+     */
+
+    {
+      final CountDownLatch success_latch = new CountDownLatch(1);
+      final DownloadListenerType listener = new LoggingListener() {
+        @Override public void downloadCompleted(
+          final DownloadSnapshot snap)
+        {
+          super.downloadCompleted(snap);
+          success_latch.countDown();
+        }
+      };
+
+      id2 = d.downloadEnqueue(none, uri, "Hello", listener);
+      success_latch.await();
+
+      final Some<DownloadSnapshot> some_snap =
+        (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id2);
+      Assert.assertEquals(
+        DownloadStatus.STATUS_COMPLETED_NOT_TAKEN,
+        some_snap.get().statusGet());
+
+      Assert.assertNotEquals(id0, id2);
+      Assert.assertNotEquals(id1, id2);
+    }
+
+    e.shutdown();
+    s.stop();
+  }
+
 }

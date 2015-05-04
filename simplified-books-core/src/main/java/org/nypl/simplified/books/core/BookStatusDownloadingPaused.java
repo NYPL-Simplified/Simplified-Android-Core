@@ -8,12 +8,13 @@ import com.io7m.jnull.NullCheck;
  * The given book was downloading but the download is paused.
  */
 
-public final class BookStatusPaused implements BookStatusWithSnapshotType
+public final class BookStatusDownloadingPaused implements
+  BookStatusDownloadingType
 {
   private final BookID           id;
   private final DownloadSnapshot snap;
 
-  public BookStatusPaused(
+  public BookStatusDownloadingPaused(
     final BookID in_id,
     final DownloadSnapshot in_snap)
   {
@@ -21,21 +22,28 @@ public final class BookStatusPaused implements BookStatusWithSnapshotType
     this.snap = NullCheck.notNull(in_snap);
   }
 
+  @Override public DownloadSnapshot getDownloadSnapshot()
+  {
+    return this.snap;
+  }
+
   @Override public BookID getID()
   {
     return this.id;
   }
 
-  @Override public DownloadSnapshot getSnapshot()
+  @Override public <A, E extends Exception> A matchBookDownloadingStatus(
+    final BookStatusDownloadingMatcherType<A, E> m)
+    throws E
   {
-    return this.snap;
+    return m.onBookStatusDownloadingPaused(this);
   }
 
   @Override public <A, E extends Exception> A matchBookLoanedStatus(
     final BookStatusLoanedMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusPaused(this);
+    return m.onBookStatusDownloading(this);
   }
 
   @Override public <A, E extends Exception> A matchBookStatus(
@@ -43,5 +51,16 @@ public final class BookStatusPaused implements BookStatusWithSnapshotType
     throws E
   {
     return m.onBookStatusLoanedType(this);
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[BookStatusDownloadingPaused ");
+    b.append(this.id);
+    b.append(" [");
+    b.append(this.snap);
+    b.append("]]");
+    return NullCheck.notNull(b.toString());
   }
 }

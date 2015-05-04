@@ -156,6 +156,23 @@ import com.io7m.jnull.NullCheck;
     return Option.none();
   }
 
+  @Override public OptionType<File> getCover()
+    throws IOException
+  {
+    return FileLocking.withFileLocked(
+      this.file_lock,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, OptionType<File>, IOException>() {
+        @Override public OptionType<File> call(
+          final Unit x)
+          throws IOException
+        {
+          return BookDatabaseEntry.this.getCoverLocked();
+        }
+      });
+  }
+
   private OptionType<File> getCoverLocked()
   {
     if (this.file_cover.isFile()) {
@@ -350,22 +367,5 @@ import com.io7m.jnull.NullCheck;
       this.file_download_id,
       this.file_download_id_tmp,
       NullCheck.notNull(Long.toString(did)));
-  }
-
-  @Override public OptionType<File> getCover()
-    throws IOException
-  {
-    return FileLocking.withFileLocked(
-      this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, OptionType<File>, IOException>() {
-        @Override public OptionType<File> call(
-          final Unit x)
-          throws IOException
-        {
-          return BookDatabaseEntry.this.getCoverLocked();
-        }
-      });
   }
 }

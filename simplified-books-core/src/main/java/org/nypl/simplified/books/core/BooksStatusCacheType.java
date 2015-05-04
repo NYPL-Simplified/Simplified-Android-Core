@@ -10,7 +10,7 @@ import com.io7m.jfunctional.OptionType;
  * I/O).
  */
 
-public interface BooksStatusCacheType
+public interface BooksStatusCacheType extends BooksObservableType
 {
   /**
    * @return A snapshot of the status of the given book.
@@ -41,29 +41,28 @@ public interface BooksStatusCacheType
     BookID id);
 
   /**
-   * Update the status of the given book. The status will be updated
-   * unconditionally. This allows books to return to a less "advanced" status
-   * (such as back to being simply "loaned" when having previously been in the
-   * process of downloading).
+   * Update the status of the book referred to by <tt>s</tt>.
+   *
+   * @param s
+   *          The book status
    */
 
   void booksStatusUpdate(
-    BookID id,
-    BookStatusLoanedType s);
+    BookStatusType s);
 
   /**
-   * Mark the given book as being loaned. If this update has appeared late and
-   * the book is already in a more "advanced" status (such as being in the
-   * process of being downloaded), the update is ignored.
+   * Update the status of the book referred to by <tt>s</tt> if the given
+   * status is <i>more important</i> than the current status.
+   * <i>Importance</i> is essentially defined by a somewhat arbitrary partial
+   * order on the subtypes of {@link BookStatusType}: Values of
+   * {@link BookStatusLoanedType} are less important than values of
+   * {@link BookStatusDownloadingType}, other values of {@link BookStatusType}
+   * are less important than values of {@link BookStatusLoanedType}.
+   *
+   * @param s
+   *          The book status
    */
 
-  void booksStatusUpdateLoaned(
-    BookID id);
-
-  /**
-   * Mark the given book as being requested for downloading.
-   */
-
-  void booksStatusUpdateRequesting(
-    BookID id);
+  void booksStatusUpdateIfMoreImportant(
+    BookStatusType s);
 }

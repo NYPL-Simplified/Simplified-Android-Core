@@ -10,16 +10,19 @@ import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookStatusCancelled;
-import org.nypl.simplified.books.core.BookStatusDone;
-import org.nypl.simplified.books.core.BookStatusDownloading;
-import org.nypl.simplified.books.core.BookStatusFailed;
+import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
+import org.nypl.simplified.books.core.BookStatusDownloadFailed;
+import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
+import org.nypl.simplified.books.core.BookStatusDownloaded;
+import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
+import org.nypl.simplified.books.core.BookStatusDownloadingPaused;
+import org.nypl.simplified.books.core.BookStatusDownloadingType;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
-import org.nypl.simplified.books.core.BookStatusPaused;
-import org.nypl.simplified.books.core.BookStatusRequesting;
+import org.nypl.simplified.books.core.BookStatusRequestingDownload;
+import org.nypl.simplified.books.core.BookStatusRequestingLoan;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
@@ -63,15 +66,16 @@ import com.io7m.junreachable.UnreachableCodeException;
 public final class CatalogBookDialog extends DialogFragment implements
   Observer,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
-  BookStatusLoanedMatcherType<Unit, UnreachableCodeException>
+  BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
+  BookStatusDownloadingMatcherType<Unit, UnreachableCodeException>
 {
+  private static final String ACQUISITION_ENTRY_ID;
+
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(CatalogBookDialog.class);
   }
-
-  private static final String ACQUISITION_ENTRY_ID;
 
   static {
     ACQUISITION_ENTRY_ID = "org.nypl.simplified.app.CatalogBookDialog.entry";
@@ -101,8 +105,8 @@ public final class CatalogBookDialog extends DialogFragment implements
     // Fragments must have no-arg constructors.
   }
 
-  @Override public Unit onBookStatusCancelled(
-    final BookStatusCancelled c)
+  @Override public Unit onBookStatusDownloadCancelled(
+    final BookStatusDownloadCancelled c)
   {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -114,8 +118,8 @@ public final class CatalogBookDialog extends DialogFragment implements
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusDone(
-    final BookStatusDone d)
+  @Override public Unit onBookStatusDownloaded(
+    final BookStatusDownloaded d)
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
@@ -133,8 +137,32 @@ public final class CatalogBookDialog extends DialogFragment implements
     return Unit.unit();
   }
 
+  @Override public Unit onBookStatusDownloadFailed(
+    final BookStatusDownloadFailed f)
+  {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.GONE);
+    bd.setVisibility(View.GONE);
+
+    return Unit.unit();
+  }
+
   @Override public Unit onBookStatusDownloading(
-    final BookStatusDownloading d)
+    final BookStatusDownloadingType o)
+  {
+    return o.matchBookDownloadingStatus(this);
+  }
+
+  @Override public Unit onBookStatusDownloadingPaused(
+    final BookStatusDownloadingPaused p)
+  {
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusDownloadInProgress(
+    final BookStatusDownloadInProgress d)
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
@@ -142,7 +170,7 @@ public final class CatalogBookDialog extends DialogFragment implements
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.VISIBLE);
 
-    final DownloadSnapshot snap = d.getSnapshot();
+    final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogAcquisitionDownloadProgressBar.setProgressBar(
       snap,
       NullCheck.notNull(this.book_downloading_percent_text),
@@ -164,18 +192,6 @@ public final class CatalogBookDialog extends DialogFragment implements
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusFailed(
-    final BookStatusFailed f)
-  {
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-
-    bb.setVisibility(View.GONE);
-    bd.setVisibility(View.GONE);
-
-    return Unit.unit();
-  }
-
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
@@ -186,15 +202,8 @@ public final class CatalogBookDialog extends DialogFragment implements
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
 
-    bb.setVisibility(View.VISIBLE);
+    bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
-
-    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-      NullCheck.notNull(this.getActivity()),
-      books,
-      bb,
-      NullCheck.notNull(this.entry),
-      o.getID());
     return Unit.unit();
   }
 
@@ -204,14 +213,21 @@ public final class CatalogBookDialog extends DialogFragment implements
     return o.matchBookLoanedStatus(this);
   }
 
-  @Override public Unit onBookStatusPaused(
-    final BookStatusPaused p)
+  @Override public Unit onBookStatusRequestingDownload(
+    final BookStatusRequestingDownload d)
+    throws UnreachableCodeException
   {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.GONE);
+    bd.setVisibility(View.GONE);
+    bb.removeAllViews();
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusRequesting(
-    final BookStatusRequesting s)
+  @Override public Unit onBookStatusRequestingLoan(
+    final BookStatusRequestingLoan s)
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
@@ -239,7 +255,7 @@ public final class CatalogBookDialog extends DialogFragment implements
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
-    books.addObserver(this);
+    books.booksObservableAddObserver(this);
   }
 
   @Override public View onCreateView(
@@ -376,7 +392,7 @@ public final class CatalogBookDialog extends DialogFragment implements
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
-    books.deleteObserver(this);
+    books.booksObservableDeleteObserver(this);
   }
 
   @Override public void onResume()
@@ -412,18 +428,7 @@ public final class CatalogBookDialog extends DialogFragment implements
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
     bd.setVisibility(View.GONE);
-
-    if (e.getAcquisitions().isEmpty()) {
-      bb.setVisibility(View.GONE);
-    } else {
-      bb.setVisibility(View.VISIBLE);
-      CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-        NullCheck.notNull(this.getActivity()),
-        books,
-        bb,
-        e,
-        book_id);
-    }
+    bb.setVisibility(View.GONE);
   }
 
   @Override public void update(

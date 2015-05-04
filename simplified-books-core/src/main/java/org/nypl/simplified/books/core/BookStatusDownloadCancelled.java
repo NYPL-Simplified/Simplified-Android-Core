@@ -5,16 +5,16 @@ import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import com.io7m.jnull.NullCheck;
 
 /**
- * The given book is currently downloading.
+ * The given book was cancelled during the download.
  */
 
-public final class BookStatusDownloading implements
-  BookStatusWithSnapshotType
+public final class BookStatusDownloadCancelled implements
+  BookStatusDownloadingType
 {
   private final BookID           id;
   private final DownloadSnapshot snap;
 
-  public BookStatusDownloading(
+  public BookStatusDownloadCancelled(
     final BookID in_id,
     final DownloadSnapshot in_snap)
   {
@@ -22,14 +22,21 @@ public final class BookStatusDownloading implements
     this.snap = NullCheck.notNull(in_snap);
   }
 
+  @Override public DownloadSnapshot getDownloadSnapshot()
+  {
+    return this.snap;
+  }
+
   @Override public BookID getID()
   {
     return this.id;
   }
 
-  @Override public DownloadSnapshot getSnapshot()
+  @Override public <A, E extends Exception> A matchBookDownloadingStatus(
+    final BookStatusDownloadingMatcherType<A, E> m)
+    throws E
   {
-    return this.snap;
+    return m.onBookStatusDownloadCancelled(this);
   }
 
   @Override public <A, E extends Exception> A matchBookLoanedStatus(
@@ -49,7 +56,7 @@ public final class BookStatusDownloading implements
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[BookStatusDownloading ");
+    b.append("[BookStatusDownloadCancelled ");
     b.append(this.id);
     b.append(" [");
     b.append(this.snap);

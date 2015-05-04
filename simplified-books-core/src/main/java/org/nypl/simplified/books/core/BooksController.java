@@ -12,13 +12,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.nypl.simplified.downloader.core.DownloadAbstractListener;
+import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
@@ -51,23 +52,18 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * The default implementation of the {@link BooksType} interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class BooksController extends
+@SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
   Observable implements BooksType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
-  }
-
   private static final class AcquisitionFeedTask implements Runnable
   {
-    private final BookDatabaseType                books_directory;
+    private final BookDatabaseType                books_database;
     private final String                          id;
     private final BookAcquisitionFeedListenerType listener;
     private final String                          title;
@@ -75,14 +71,14 @@ import com.io7m.junreachable.UnimplementedCodeException;
     private final URI                             uri;
 
     public AcquisitionFeedTask(
-      final BookDatabaseType in_books_directory,
+      final BookDatabaseType in_books_database,
       final URI in_uri,
       final String in_id,
       final Calendar in_updated,
       final String in_title,
       final BookAcquisitionFeedListenerType in_listener)
     {
-      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.books_database = NullCheck.notNull(in_books_database);
       this.uri = NullCheck.notNull(in_uri);
       this.id = NullCheck.notNull(in_id);
       this.updated = NullCheck.notNull(in_updated);
@@ -100,7 +96,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
           this.title);
 
       final List<BookDatabaseEntryType> dirs =
-        this.books_directory.getBookDatabaseEntries();
+        this.books_database.getBookDatabaseEntries();
 
       for (int index = 0; index < dirs.size(); ++index) {
         final BookDatabaseEntryReadableType dir =
@@ -131,41 +127,147 @@ import com.io7m.junreachable.UnimplementedCodeException;
     }
   }
 
-  private static final class BorrowTask implements Runnable
+  private static final class BorrowTask implements
+    Runnable,
+    DownloadListenerType
   {
-    private final OPDSAcquisition              acq;
-    private final BookDatabaseType             books_directory;
-    private final BooksControllerType          books_registry;
-    private final BooksControllerConfiguration config;
-    private final HTTPType                     http;
-    private final BookID                       id;
-    private final BookBorrowListenerType       listener;
+    private final OPDSAcquisition        acq;
+    private final BookID                 book_id;
+    private final BookDatabaseType       books_database;
+    private final BooksStatusCacheType   books_status;
+    private final DownloaderType         downloader;
+    private final BookBorrowListenerType listener;
+    private final String                 title;
 
     public BorrowTask(
-      final BooksControllerConfiguration in_config,
-      final BookDatabaseType in_books_directory,
-      final BooksControllerType in_books_registry,
-      final HTTPType in_http,
-      final BookID in_id,
+      final BookDatabaseType in_books_database,
+      final BooksStatusCacheType in_books_status,
+      final DownloaderType in_downloader,
+      final BookID in_book_id,
       final OPDSAcquisition in_acq,
+      final String in_title,
       final BookBorrowListenerType in_listener)
     {
-      this.http = NullCheck.notNull(in_http);
-      this.id = NullCheck.notNull(in_id);
+      this.downloader = NullCheck.notNull(in_downloader);
+      this.book_id = NullCheck.notNull(in_book_id);
       this.acq = NullCheck.notNull(in_acq);
       this.listener = NullCheck.notNull(in_listener);
-      this.books_directory = NullCheck.notNull(in_books_directory);
-      this.books_registry = NullCheck.notNull(in_books_registry);
-      this.config = NullCheck.notNull(in_config);
+      this.books_database = NullCheck.notNull(in_books_database);
+      this.books_status = NullCheck.notNull(in_books_status);
+      this.title = NullCheck.notNull(in_title);
+    }
+
+    @Override public void downloadCancelled(
+      final DownloadSnapshot snap)
+    {
+      final BookStatusDownloadCancelled status =
+        new BookStatusDownloadCancelled(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadCleanedUp(
+      final DownloadSnapshot snap)
+    {
+      // Don't care
+    }
+
+    @Override public void downloadCompleted(
+      final DownloadSnapshot snap)
+    {
+      final BookStatusDownloadInProgress status =
+        new BookStatusDownloadInProgress(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadCompletedTake(
+      final DownloadSnapshot snap,
+      final File file_data)
+    {
+      try {
+        final BookDatabaseEntryType e =
+          this.books_database.getBookDatabaseEntry(this.book_id);
+
+        e.copyInBookFromSameFilesystem(file_data);
+        final BookStatusDownloaded status =
+          new BookStatusDownloaded(this.book_id);
+        this.books_status.booksSnapshotUpdate(this.book_id, e.getSnapshot());
+        this.books_status.booksStatusUpdate(status);
+      } catch (final IOException e) {
+        throw new IOError(e);
+      }
+    }
+
+    @Override public void downloadCompletedTakeFailed(
+      final DownloadSnapshot snap,
+      final Throwable x)
+    {
+      final BookStatusDownloadFailed status =
+        new BookStatusDownloadFailed(this.book_id, snap, Option.some(x));
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadCompletedTaken(
+      final DownloadSnapshot snap)
+    {
+      // Don't care
+    }
+
+    @Override public void downloadFailed(
+      final DownloadSnapshot snap,
+      final Throwable e)
+    {
+      final BookStatusDownloadFailed status =
+        new BookStatusDownloadFailed(this.book_id, snap, Option.some(e));
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadPaused(
+      final DownloadSnapshot snap)
+    {
+      final BookStatusDownloadingPaused status =
+        new BookStatusDownloadingPaused(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadReceivedData(
+      final DownloadSnapshot snap)
+    {
+      final BookStatusDownloadInProgress status =
+        new BookStatusDownloadInProgress(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadResumed(
+      final DownloadSnapshot snap)
+    {
+      final BookStatusDownloadInProgress status =
+        new BookStatusDownloadInProgress(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadStarted(
+      final DownloadSnapshot snap)
+    {
+      final BookStatusDownloadInProgress status =
+        new BookStatusDownloadInProgress(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
+    }
+
+    @Override public void downloadStartedReceivingData(
+      final DownloadSnapshot snap)
+    {
+      final BookStatusDownloadInProgress status =
+        new BookStatusDownloadInProgress(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
     }
 
     @Override public void run()
     {
       try {
         this.runAcquisition();
-        this.listener.onBookBorrowSuccess(this.id);
+        this.listener.onBookBorrowSuccess(this.book_id);
       } catch (final Throwable x) {
-        this.listener.onBookBorrowFailure(this.id, Option.some(x));
+        this.listener.onBookBorrowFailure(this.book_id, Option.some(x));
       }
     }
 
@@ -174,21 +276,13 @@ import com.io7m.junreachable.UnimplementedCodeException;
     {
       switch (this.acq.getType()) {
         case ACQUISITION_GENERIC:
-        case ACQUISITION_OPEN_ACCESS:
-        {
-          /*
-           * Nothing to do: If the book is open access, it doesn't need to be
-           * borrowed. If we've reached a generic acquisition, the book is
-           * already borrowed.
-           */
-
-          break;
-        }
         case ACQUISITION_BORROW:
         {
           this.runAcquisitionBorrow();
           break;
         }
+
+        case ACQUISITION_OPEN_ACCESS:
         case ACQUISITION_BUY:
         case ACQUISITION_SAMPLE:
         case ACQUISITION_SUBSCRIBE:
@@ -201,61 +295,60 @@ import com.io7m.junreachable.UnimplementedCodeException;
     private void runAcquisitionBorrow()
       throws Exception
     {
+      BooksController.LOG.debug(
+        "book {}: creating book database entry",
+        this.book_id);
+
+      final BookDatabaseEntryType e =
+        this.books_database.getBookDatabaseEntry(this.book_id);
+      e.create();
+
+      BooksController.LOG.debug("book {}: starting download", this.book_id);
+
       final Pair<AccountBarcode, AccountPIN> p =
-        this.books_directory.credentialsGet();
+        this.books_database.credentialsGet();
       final AccountBarcode barcode = p.getLeft();
       final AccountPIN pin = p.getRight();
-
       final HTTPAuthType auth =
         new HTTPAuthBasic(barcode.toString(), pin.toString());
 
-      final HTTPResultType<Unit> r =
-        this.http.head(Option.some(auth), this.acq.getURI());
+      final long did =
+        this.downloader.downloadEnqueue(
+          Option.some(auth),
+          this.acq.getURI(),
+          this.title,
+          this);
 
-      r.matchResult(new ResultAuthExceptional<Unit>() {
-        @Override public HTTPResultOKType<Unit> onHTTPOK(
-          final HTTPResultOKType<Unit> e)
-          throws Exception
-        {
-          return e;
-        }
-      });
-
-      this.books_registry.booksStatusUpdateLoaned(this.id);
+      BooksController.LOG.debug("book {}: download id {}", this.book_id, did);
+      e.setDownloadID(did);
     }
   }
 
   private static final class DataLoadTask implements Runnable
   {
-    private final BooksControllerType          books;
-    private final BookDatabaseType             books_directory;
-    private final BooksStatusCacheType         books_status;
-    private final BooksControllerConfiguration config;
-    private final DownloaderType               downloader;
-    private final AccountDataLoadListenerType  listener;
-    private final AtomicBoolean                logged_in;
+    private final BookDatabaseType            books_database;
+    private final BooksStatusCacheType        books_status;
+    private final DownloaderType              downloader;
+    private final AccountDataLoadListenerType listener;
+    private final AtomicBoolean               logged_in;
 
     public DataLoadTask(
-      final BooksControllerType in_books,
-      final BookDatabaseType in_books_directory,
+      final BookDatabaseType in_books_database,
       final BooksStatusCacheType in_books_status,
       final DownloaderType in_downloader,
       final AccountDataLoadListenerType in_listener,
-      final BooksControllerConfiguration in_config,
       final AtomicBoolean in_logged_in)
     {
-      this.books = NullCheck.notNull(in_books);
-      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.books_database = NullCheck.notNull(in_books_database);
       this.books_status = NullCheck.notNull(in_books_status);
       this.downloader = NullCheck.notNull(in_downloader);
-      this.config = NullCheck.notNull(in_config);
       this.listener = NullCheck.notNull(in_listener);
       this.logged_in = NullCheck.notNull(in_logged_in);
     }
 
     @Override public void run()
     {
-      this.logged_in.set(this.books_directory.credentialsExist());
+      this.logged_in.set(this.books_database.credentialsExist());
       if (this.logged_in.get() == false) {
         try {
           this.listener.onAccountUnavailable();
@@ -266,15 +359,16 @@ import com.io7m.junreachable.UnimplementedCodeException;
       }
 
       final List<BookDatabaseEntryType> book_list =
-        this.books_directory.getBookDatabaseEntries();
+        this.books_database.getBookDatabaseEntries();
       for (final BookDatabaseEntryReadableType book_dir : book_list) {
         final BookID id = book_dir.getID();
         try {
           final BookSnapshot snap = book_dir.getSnapshot();
           final BookStatusLoanedType status =
             BookStatus.fromBookSnapshot(this.downloader, id, snap);
-          this.books.booksStatusUpdate(id, status);
-          this.books.booksSnapshotUpdate(id, snap);
+
+          this.books_status.booksStatusUpdate(status);
+          this.books_status.booksSnapshotUpdate(id, snap);
           this.listener.onAccountDataBookLoadSucceeded(id, snap);
         } catch (final Throwable e) {
           this.listener.onAccountDataBookLoadFailed(
@@ -290,16 +384,16 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   private static final class DataSetupTask implements Runnable
   {
-    private final BookDatabaseType             books_directory;
+    private final BookDatabaseType             books_database;
     private final BooksControllerConfiguration config;
     private final AccountDataSetupListenerType listener;
 
     public DataSetupTask(
       final BooksControllerConfiguration in_config,
-      final BookDatabaseType in_books_directory,
+      final BookDatabaseType in_books_database,
       final AccountDataSetupListenerType in_listener)
     {
-      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.books_database = NullCheck.notNull(in_books_database);
       this.config = NullCheck.notNull(in_config);
       this.listener = NullCheck.notNull(in_listener);
     }
@@ -307,178 +401,12 @@ import com.io7m.junreachable.UnimplementedCodeException;
     @Override public void run()
     {
       try {
-        this.books_directory.create();
+        this.books_database.create();
         this.listener.onAccountDataSetupSuccess();
       } catch (final Throwable x) {
         this.listener.onAccountDataSetupFailure(
           Option.some(x),
           x.getMessage());
-      }
-    }
-  }
-
-  private static final class DownloadOpenAccessTask extends
-    DownloadAbstractListener implements Runnable
-  {
-    private final BookDatabaseEntryType        book_directory;
-    private final BookID                       book_id;
-    private final BookDatabaseType             books_directory;
-    private final BooksControllerConfiguration config;
-    private final DownloaderType               downloader;
-    private final BooksObservableType          observable;
-    private final BooksControllerType          registry;
-    private final BooksStatusCacheType         status_cache;
-    private final URI                          uri;
-
-    DownloadOpenAccessTask(
-      final BookID in_book_id,
-      final URI in_uri,
-      final BooksControllerConfiguration in_config,
-      final BookDatabaseType in_books_directory,
-      final BooksObservableType in_observable,
-      final BooksStatusCacheType in_status_cache,
-      final BooksControllerType in_registry,
-      final DownloaderType in_downloader)
-    {
-      this.book_id = NullCheck.notNull(in_book_id);
-      this.books_directory = NullCheck.notNull(in_books_directory);
-      this.observable = NullCheck.notNull(in_observable);
-      this.uri = NullCheck.notNull(in_uri);
-      this.config = NullCheck.notNull(in_config);
-      this.registry = NullCheck.notNull(in_registry);
-      this.downloader = NullCheck.notNull(in_downloader);
-      this.status_cache = NullCheck.notNull(in_status_cache);
-      this.book_directory =
-        this.books_directory.getBookDatabaseEntry(this.book_id);
-    }
-
-    private void download()
-      throws IOException
-    {
-      final BookSnapshot snap = this.book_directory.getSnapshot();
-      final Pair<AccountBarcode, AccountPIN> p =
-        this.books_directory.credentialsGet();
-      final AccountBarcode barcode = p.getLeft();
-      final AccountPIN pin = p.getRight();
-
-      final HTTPAuthType auth =
-        new HTTPAuthBasic(barcode.toString(), pin.toString());
-
-      final OPDSAcquisitionFeedEntry entry = snap.getEntry();
-      final String title = entry.getTitle();
-
-      final long did =
-        this.downloader.downloadEnqueue(
-          Option.some(auth),
-          this.uri,
-          title,
-          this);
-
-      this.book_directory.setDownloadID(did);
-    }
-
-    @Override public void downloadCancelled(
-      final DownloadSnapshot snap)
-    {
-      final BookStatusCancelled status =
-        new BookStatusCancelled(this.book_id, snap);
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadCleanedUp(
-      final DownloadSnapshot snap)
-    {
-
-    }
-
-    @Override public void downloadCompleted(
-      final DownloadSnapshot snap)
-    {
-      final BookStatusDownloading status =
-        new BookStatusDownloading(this.book_id, snap);
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadCompletedTake(
-      final DownloadSnapshot snap,
-      final File file_data)
-    {
-      try {
-        this.book_directory.copyInBookFromSameFilesystem(file_data);
-        final BookStatusDone status = new BookStatusDone(this.book_id);
-        this.status_cache.booksSnapshotUpdate(
-          this.book_id,
-          this.book_directory.getSnapshot());
-        this.registry.booksStatusUpdate(this.book_id, status);
-      } catch (final IOException e) {
-        throw new IOError(e);
-      }
-    }
-
-    @Override public void downloadCompletedTakeFailed(
-      final DownloadSnapshot snap,
-      final Throwable x)
-    {
-      final BookStatusFailed status =
-        new BookStatusFailed(this.book_id, snap, Option.some(x));
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadFailed(
-      final DownloadSnapshot snap,
-      final Throwable e)
-    {
-      final BookStatusFailed status =
-        new BookStatusFailed(this.book_id, snap, Option.some(e));
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadPaused(
-      final DownloadSnapshot snap)
-    {
-      final BookStatusPaused status =
-        new BookStatusPaused(this.book_id, snap);
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadReceivedData(
-      final DownloadSnapshot snap)
-    {
-      final BookStatusDownloading status =
-        new BookStatusDownloading(this.book_id, snap);
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadResumed(
-      final DownloadSnapshot snap)
-    {
-      final BookStatusDownloading status =
-        new BookStatusDownloading(this.book_id, snap);
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadStarted(
-      final DownloadSnapshot snap)
-    {
-      final BookStatusDownloading status =
-        new BookStatusDownloading(this.book_id, snap);
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void downloadStartedReceivingData(
-      final DownloadSnapshot snap)
-    {
-      final BookStatusDownloading status =
-        new BookStatusDownloading(this.book_id, snap);
-      this.registry.booksStatusUpdate(this.book_id, status);
-    }
-
-    @Override public void run()
-    {
-      try {
-        this.download();
-      } catch (final IOException e) {
-        throw new IOError(e);
       }
     }
   }
@@ -489,7 +417,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
   {
     private final AccountBarcode               barcode;
     private final BooksController              books;
-    private final BookDatabaseType             books_directory;
+    private final BookDatabaseType             books_database;
     private final BooksControllerConfiguration config;
     private final HTTPType                     http;
     private final AccountLoginListenerType     listener;
@@ -498,7 +426,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
     public LoginTask(
       final BooksController in_books,
-      final BookDatabaseType in_books_directory,
+      final BookDatabaseType in_books_database,
       final HTTPType in_http,
       final BooksControllerConfiguration in_config,
       final AccountBarcode in_barcode,
@@ -507,7 +435,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       final AtomicBoolean in_logged_in)
     {
       this.books = NullCheck.notNull(in_books);
-      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.books_database = NullCheck.notNull(in_books_database);
       this.http = NullCheck.notNull(in_http);
       this.config = NullCheck.notNull(in_config);
       this.barcode = NullCheck.notNull(in_barcode);
@@ -561,7 +489,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     {
       this.books.submitRunnable(new DataSetupTask(
         this.config,
-        this.books_directory,
+        this.books_database,
         this));
     }
 
@@ -569,7 +497,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       final AccountPIN actual_pin)
       throws IOException
     {
-      this.books_directory.credentialsSet(this.barcode, actual_pin);
+      this.books_database.credentialsSet(this.barcode, actual_pin);
     }
   }
 
@@ -660,50 +588,8 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
   private static final class SyncTask implements Runnable
   {
-    private static OptionType<File> makeCover(
-      final HTTPType http,
-      final OptionType<URI> cover_opt)
-      throws Exception
-    {
-      if (cover_opt.isSome()) {
-        final Some<URI> some = (Some<URI>) cover_opt;
-        final URI cover_uri = some.get();
 
-        final File cover_file_tmp = File.createTempFile("cover", "jpg");
-        cover_file_tmp.deleteOnExit();
-        SyncTask.makeCoverDownload(http, cover_file_tmp, cover_uri);
-        return Option.some(cover_file_tmp);
-      }
-
-      return Option.none();
-    }
-
-    private static void makeCoverDownload(
-      final HTTPType http,
-      final File cover_file_tmp,
-      final URI cover_uri)
-      throws Exception
-    {
-      final OptionType<HTTPAuthType> no_auth = Option.none();
-      final HTTPResultOKType<InputStream> r =
-        http.get(no_auth, cover_uri, 0).matchResult(
-          new HTTPResultToException<InputStream>());
-
-      try {
-        final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
-        try {
-          ByteStreams.copy(r.getValue(), fs);
-          fs.flush();
-        } finally {
-          fs.close();
-        }
-      } finally {
-        r.close();
-      }
-    }
-
-    private final BooksControllerType          books;
-    private final BookDatabaseType             books_directory;
+    private final BookDatabaseType             books_database;
     private final BooksControllerConfiguration config;
     private final DownloaderType               downloader;
     private final OPDSFeedParserType           feed_parser;
@@ -713,16 +599,14 @@ import com.io7m.junreachable.UnimplementedCodeException;
 
     public SyncTask(
       final BooksControllerConfiguration in_config,
-      final BooksControllerType in_books,
       final BooksStatusCacheType in_status_cache,
-      final BookDatabaseType in_books_directory,
+      final BookDatabaseType in_books_database,
       final HTTPType in_http,
       final OPDSFeedParserType in_feed_parser,
       final DownloaderType in_downloader,
       final AccountSyncListenerType in_listener)
     {
-      this.books = NullCheck.notNull(in_books);
-      this.books_directory = NullCheck.notNull(in_books_directory);
+      this.books_database = NullCheck.notNull(in_books_database);
       this.status_cache = NullCheck.notNull(in_status_cache);
       this.config = NullCheck.notNull(in_config);
       this.http = NullCheck.notNull(in_http);
@@ -745,7 +629,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       throws Exception
     {
       final Pair<AccountBarcode, AccountPIN> pair =
-        this.books_directory.credentialsGet();
+        this.books_database.credentialsGet();
       final AccountBarcode barcode = pair.getLeft();
       final AccountPIN pin = pair.getRight();
 
@@ -831,23 +715,105 @@ import com.io7m.junreachable.UnimplementedCodeException;
     {
       final BookID book_id = BookID.newIDFromEntry(e);
       final BookDatabaseEntryType book_dir =
-        new BookDatabaseEntry(this.books_directory.getLocation(), book_id);
+        new BookDatabaseEntry(this.books_database.getLocation(), book_id);
 
       final OptionType<File> cover =
-        SyncTask.makeCover(this.http, e.getCover());
+        BooksController.makeCover(this.http, e.getCover());
 
-      if (book_dir.exists() == false) {
-        book_dir.create();
-      }
-
+      book_dir.create();
       book_dir.setData(cover, e);
 
       final BookSnapshot snap = book_dir.getSnapshot();
       final BookStatusLoanedType status =
         BookStatus.fromBookSnapshot(this.downloader, book_id, snap);
-      this.books.booksStatusUpdate(book_id, status);
+
+      this.status_cache.booksStatusUpdateIfMoreImportant(status);
       this.status_cache.booksSnapshotUpdate(book_id, snap);
       this.listener.onAccountSyncBook(book_id);
+    }
+  }
+
+  private static final class UpdateMetadataTask implements Runnable
+  {
+    private final BookID                   book_id;
+    private final BookDatabaseType         books_database;
+    private final OPDSAcquisitionFeedEntry entry;
+    private final HTTPType                 http;
+
+    public UpdateMetadataTask(
+      final HTTPType in_http,
+      final BookDatabaseType in_book_database,
+      final BookID in_id,
+      final OPDSAcquisitionFeedEntry in_e)
+    {
+      this.http = NullCheck.notNull(in_http);
+      this.books_database = NullCheck.notNull(in_book_database);
+      this.book_id = NullCheck.notNull(in_id);
+      this.entry = NullCheck.notNull(in_e);
+    }
+
+    @Override public void run()
+    {
+      try {
+        final BookDatabaseEntryType e =
+          this.books_database.getBookDatabaseEntry(this.book_id);
+
+        final OptionType<File> cover =
+          BooksController.makeCover(this.http, this.entry.getCover());
+
+        e.create();
+        e.setData(cover, this.entry);
+      } catch (final Exception e) {
+        BooksController.LOG.error("unable to update metadata: ", e);
+      }
+    }
+  }
+
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
+  }
+
+  private static OptionType<File> makeCover(
+    final HTTPType http,
+    final OptionType<URI> cover_opt)
+    throws Exception
+  {
+    if (cover_opt.isSome()) {
+      final Some<URI> some = (Some<URI>) cover_opt;
+      final URI cover_uri = some.get();
+
+      final File cover_file_tmp = File.createTempFile("cover", ".jpg");
+      cover_file_tmp.deleteOnExit();
+      BooksController.makeCoverDownload(http, cover_file_tmp, cover_uri);
+      return Option.some(cover_file_tmp);
+    }
+
+    return Option.none();
+  }
+
+  private static void makeCoverDownload(
+    final HTTPType http,
+    final File cover_file_tmp,
+    final URI cover_uri)
+    throws Exception
+  {
+    final OptionType<HTTPAuthType> no_auth = Option.none();
+    final HTTPResultOKType<InputStream> r =
+      http.get(no_auth, cover_uri, 0).matchResult(
+        new HTTPResultToException<InputStream>());
+
+    try {
+      final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
+      try {
+        ByteStreams.copy(r.getValue(), fs);
+        fs.flush();
+      } finally {
+        fs.close();
+      }
+    } finally {
+      r.close();
     }
   }
 
@@ -908,12 +874,10 @@ import com.io7m.junreachable.UnimplementedCodeException;
   {
     NullCheck.notNull(listener);
     this.submitRunnable(new DataLoadTask(
-      this,
       this.book_database,
       this.books_status,
       this.downloader,
       listener,
-      this.config,
       this.logged_in));
   }
 
@@ -960,7 +924,6 @@ import com.io7m.junreachable.UnimplementedCodeException;
     this.submitRunnable(new SyncTask(
       this.config,
       this,
-      this,
       this.book_database,
       this.http,
       this.feed_parser,
@@ -971,34 +934,41 @@ import com.io7m.junreachable.UnimplementedCodeException;
   @Override public void bookBorrow(
     final BookID id,
     final OPDSAcquisition acq,
+    final String title,
     final BookBorrowListenerType listener)
   {
     NullCheck.notNull(id);
     NullCheck.notNull(acq);
     NullCheck.notNull(listener);
 
+    BooksController.LOG.debug("borrow {}", id);
+
+    this.books_status.booksStatusUpdate(new BookStatusRequestingLoan(id));
     this.submitRunnable(new BorrowTask(
-      this.config,
       this.book_database,
-      this,
-      this.http,
+      this.books_status,
+      this.downloader,
       id,
       acq,
+      title,
       listener));
   }
 
   @Override public void bookDownloadAcknowledge(
     final BookID id)
   {
-    final OptionType<BookStatusType> s_opt = this.booksStatusGet(id);
+    final OptionType<BookStatusType> s_opt =
+      this.books_status.booksStatusGet(id);
     if (s_opt.isSome()) {
       final Some<BookStatusType> some = (Some<BookStatusType>) s_opt;
       final BookStatusType status = some.get();
-      if (status instanceof BookStatusWithSnapshotType) {
-        final BookStatusWithSnapshotType wsnap =
-          (BookStatusWithSnapshotType) status;
-        this.downloader
-          .downloadAcknowledge(wsnap.getSnapshot().statusGetID());
+
+      if (status instanceof BookStatusDownloadingType) {
+        final BookStatusDownloadingType downloading =
+          (BookStatusDownloadingType) status;
+        final DownloadSnapshot dsnap = downloading.getDownloadSnapshot();
+        this.downloader.downloadAcknowledge(dsnap.statusGetID());
+        this.books_status.booksStatusUpdate(new BookStatusLoaned(id));
       }
     }
   }
@@ -1006,40 +976,61 @@ import com.io7m.junreachable.UnimplementedCodeException;
   @Override public void bookDownloadCancel(
     final BookID id)
   {
-    final OptionType<BookStatusType> s_opt = this.booksStatusGet(id);
+    BooksController.LOG.debug("download cancel {}", id);
+
+    final OptionType<BookStatusType> s_opt =
+      this.books_status.booksStatusGet(id);
+
     if (s_opt.isSome()) {
       final Some<BookStatusType> some = (Some<BookStatusType>) s_opt;
       final BookStatusType status = some.get();
-      if (status instanceof BookStatusWithSnapshotType) {
-        final BookStatusWithSnapshotType wsnap =
-          (BookStatusWithSnapshotType) status;
-        this.downloader.downloadCancel(wsnap.getSnapshot().statusGetID());
-      }
-    }
-  }
 
-  @Override public void bookDownloadOpenAccess(
-    final BookID id,
-    final String title,
-    final URI uri)
-  {
-    NullCheck.notNull(id);
-    NullCheck.notNull(title);
-    NullCheck.notNull(uri);
+      BooksController.LOG.debug("download cancel {}: status: {}", id, status);
+      status
+        .matchBookStatus(new BookStatusMatcherType<Unit, UnreachableCodeException>() {
+          @Override public Unit onBookStatusLoanedType(
+            final BookStatusLoanedType loaned)
+          {
+            return loaned
+              .matchBookLoanedStatus(new BookStatusLoanedMatcherType<Unit, UnreachableCodeException>() {
+                @Override public Unit onBookStatusDownloaded(
+                  final BookStatusDownloaded d)
+                {
+                  return Unit.unit();
+                }
 
-    final OptionType<BookStatusType> s = this.books_status.booksStatusGet(id);
-    if (s.isSome()) {
-      this.submitRunnable(new DownloadOpenAccessTask(
-        id,
-        uri,
-        this.config,
-        this.book_database,
-        this,
-        this,
-        this,
-        this.downloader));
+                @Override public Unit onBookStatusDownloading(
+                  final BookStatusDownloadingType o)
+                {
+                  final DownloadSnapshot snap = o.getDownloadSnapshot();
+                  final long did = snap.statusGetID();
+                  BooksController.this.downloader.downloadCancel(did);
+                  BooksController.this.downloader.downloadAcknowledge(did);
+                  return Unit.unit();
+                }
+
+                @Override public Unit onBookStatusLoaned(
+                  final BookStatusLoaned o)
+                {
+                  return Unit.unit();
+                }
+
+                @Override public Unit onBookStatusRequestingDownload(
+                  final BookStatusRequestingDownload d)
+                {
+                  return Unit.unit();
+                }
+              });
+          }
+
+          @Override public Unit onBookStatusRequestingLoan(
+            final BookStatusRequestingLoan s)
+          {
+            return Unit.unit();
+          }
+        });
     } else {
-      throw new IllegalStateException("Unknown book");
+      BooksController.LOG.debug("download cancel {}: no known download", id);
     }
   }
 
@@ -1065,11 +1056,27 @@ import com.io7m.junreachable.UnimplementedCodeException;
       in_listener));
   }
 
-  @Override public void booksNotifyObserversUnconditionally(
-    final BookStatusType status)
+  @Override public synchronized void booksObservableAddObserver(
+    final Observer o)
   {
-    super.setChanged();
-    super.notifyObservers(status);
+    this.books_status.booksObservableAddObserver(o);
+  }
+
+  @Override public synchronized void booksObservableDeleteAllObservers()
+  {
+    this.books_status.booksObservableDeleteAllObservers();
+  }
+
+  @Override public synchronized void booksObservableDeleteObserver(
+    final Observer o)
+  {
+    this.books_status.booksObservableDeleteObserver(o);
+  }
+
+  @Override public void booksObservableNotify(
+    final BookID id)
+  {
+    this.books_status.booksObservableNotify(id);
   }
 
   @Override public OptionType<BookSnapshot> booksSnapshotGet(
@@ -1097,23 +1104,30 @@ import com.io7m.junreachable.UnimplementedCodeException;
   }
 
   @Override public void booksStatusUpdate(
+    final BookStatusType s)
+  {
+    this.books_status.booksStatusUpdate(s);
+  }
+
+  @Override public void booksStatusUpdateIfMoreImportant(
+    final BookStatusType s)
+  {
+    this.books_status.booksStatusUpdateIfMoreImportant(s);
+  }
+
+  @Override public void bookUpdateMetadata(
     final BookID id,
-    final BookStatusLoanedType s)
+    final OPDSAcquisitionFeedEntry e)
   {
-    this.books_status.booksStatusUpdate(id, s);
-    this.booksNotifyObserversUnconditionally(s);
-  }
+    NullCheck.notNull(id);
+    NullCheck.notNull(e);
 
-  @Override public void booksStatusUpdateLoaned(
-    final BookID id)
-  {
-    this.books_status.booksStatusUpdateLoaned(id);
-  }
-
-  @Override public void booksStatusUpdateRequesting(
-    final BookID id)
-  {
-    this.books_status.booksStatusUpdateRequesting(id);
+    BooksController.LOG.debug("update metadata {}: {}", id, e);
+    this.submitRunnable(new UpdateMetadataTask(
+      this.http,
+      this.book_database,
+      id,
+      e));
   }
 
   private void stopAllTasks()
@@ -1153,4 +1167,5 @@ import com.io7m.junreachable.UnimplementedCodeException;
       this.tasks.put(id, this.exec.submit(rb));
     }
   }
+
 }

@@ -64,12 +64,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   OPDSFeedMatcherType<Unit, UnreachableCodeException>,
   BookAcquisitionFeedListenerType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(CatalogFeedActivity.class);
-  }
-
   /**
    * A handler for OpenSearch 1.1 searches.
    */
@@ -117,6 +111,12 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private static final String CATALOG_ARGS;
+
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(CatalogFeedActivity.class);
+  }
 
   static {
     CATALOG_ARGS = "org.nypl.simplified.app.CatalogFeedActivity.arguments";

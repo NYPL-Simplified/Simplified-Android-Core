@@ -6,11 +6,11 @@ import com.io7m.jnull.NullCheck;
  * The given book is downloaded and available for reading.
  */
 
-public final class BookStatusDone implements BookStatusLoanedType
+public final class BookStatusDownloaded implements BookStatusDownloadedType
 {
   private final BookID id;
 
-  public BookStatusDone(
+  public BookStatusDownloaded(
     final BookID in_id)
   {
     this.id = NullCheck.notNull(in_id);
@@ -25,7 +25,7 @@ public final class BookStatusDone implements BookStatusLoanedType
     final BookStatusLoanedMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusDone(this);
+    return m.onBookStatusDownloaded(this);
   }
 
   @Override public <A, E extends Exception> A matchBookStatus(
@@ -33,5 +33,14 @@ public final class BookStatusDone implements BookStatusLoanedType
     throws E
   {
     return m.onBookStatusLoanedType(this);
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[BookStatusDownloaded ");
+    b.append(this.id);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }

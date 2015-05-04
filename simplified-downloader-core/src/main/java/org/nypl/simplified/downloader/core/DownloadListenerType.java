@@ -21,6 +21,9 @@ public interface DownloadListenerType
     DownloadSnapshot snap,
     Throwable x);
 
+  void downloadCompletedTaken(
+    DownloadSnapshot snap);
+
   void downloadFailed(
     DownloadSnapshot snap,
     Throwable e);

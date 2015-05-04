@@ -7,11 +7,11 @@ import com.io7m.jnull.NullCheck;
  * loaned or not.
  */
 
-public final class BookStatusRequesting implements BookStatusType
+public final class BookStatusRequestingLoan implements BookStatusType
 {
   private final BookID id;
 
-  public BookStatusRequesting(
+  public BookStatusRequestingLoan(
     final BookID in_id)
   {
     this.id = NullCheck.notNull(in_id);
@@ -26,6 +26,15 @@ public final class BookStatusRequesting implements BookStatusType
     final BookStatusMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusRequesting(this);
+    return m.onBookStatusRequestingLoan(this);
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[BookStatusRequestingLoan ");
+    b.append(this.id);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }

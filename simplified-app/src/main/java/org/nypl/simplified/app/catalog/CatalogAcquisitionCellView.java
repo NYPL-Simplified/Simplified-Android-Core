@@ -11,19 +11,23 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookStatusCancelled;
-import org.nypl.simplified.books.core.BookStatusDone;
-import org.nypl.simplified.books.core.BookStatusDownloading;
-import org.nypl.simplified.books.core.BookStatusFailed;
+import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
+import org.nypl.simplified.books.core.BookStatusDownloadFailed;
+import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
+import org.nypl.simplified.books.core.BookStatusDownloaded;
+import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
+import org.nypl.simplified.books.core.BookStatusDownloadingPaused;
+import org.nypl.simplified.books.core.BookStatusDownloadingType;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
-import org.nypl.simplified.books.core.BookStatusPaused;
-import org.nypl.simplified.books.core.BookStatusRequesting;
+import org.nypl.simplified.books.core.BookStatusRequestingDownload;
+import org.nypl.simplified.books.core.BookStatusRequestingLoan;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
@@ -56,7 +60,8 @@ import com.squareup.picasso.Callback;
   FrameLayout implements
   Observer,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
-  BookStatusLoanedMatcherType<Unit, UnreachableCodeException>
+  BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
+  BookStatusDownloadingMatcherType<Unit, UnreachableCodeException>
 {
   private static final Logger LOG;
 
@@ -94,6 +99,7 @@ import com.squareup.picasso.Callback;
   private final ImageView                                 cell_cover_image;
   private final ViewGroup                                 cell_cover_layout;
   private final ProgressBar                               cell_cover_progress;
+  private final TextView                                  cell_debug;
   private final ViewGroup                                 cell_downloading;
   private final TextView                                  cell_downloading_authors;
   private final Button                                    cell_downloading_cancel;
@@ -130,7 +136,7 @@ import com.squareup.picasso.Callback;
      * Receive book status updates.
      */
 
-    this.books.addObserver(this);
+    this.books.booksObservableAddObserver(this);
 
     this.cell_downloading =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_downloading));
@@ -162,6 +168,9 @@ import com.squareup.picasso.Callback;
 
     this.cell_book =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_book));
+
+    this.cell_debug =
+      NullCheck.notNull((TextView) this.findViewById(R.id.cell_debug));
 
     this.cell_text_layout =
       NullCheck.notNull((ViewGroup) this.cell_book
@@ -258,23 +267,25 @@ import com.squareup.picasso.Callback;
       callback);
   }
 
-  @Override public Unit onBookStatusCancelled(
-    final BookStatusCancelled c)
+  @Override public Unit onBookStatusDownloadCancelled(
+    final BookStatusDownloadCancelled c)
   {
+    CatalogAcquisitionCellView.LOG.debug("{}: cancelled", c.getID());
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     final BookID id = c.getID();
     this.books.bookDownloadAcknowledge(id);
-    this.onBookStatusNone(e, id);
+    this.onStatus(e, id, this.books.booksStatusGet(id));
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusDone(
-    final BookStatusDone d)
+  @Override public Unit onBookStatusDownloaded(
+    final BookStatusDownloaded d)
   {
-    CatalogAcquisitionCellView.LOG.debug("status done");
+    CatalogAcquisitionCellView.LOG.debug("{}: downloaded", d.getID());
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
+    this.cell_debug.setText("downloaded");
 
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(e);
@@ -292,13 +303,46 @@ import com.squareup.picasso.Callback;
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusDownloading(
-    final BookStatusDownloading d)
+  @Override public Unit onBookStatusDownloadFailed(
+    final BookStatusDownloadFailed f)
   {
-    CatalogAcquisitionCellView.LOG.debug("status downloading");
+    CatalogAcquisitionCellView.LOG.debug("{}: download failed", f.getID());
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.VISIBLE);
+    this.cell_debug.setText("download-failed");
+
+    final DownloadSnapshot snap = f.getDownloadSnapshot();
+    this.cell_downloading_failed_title.setText("Download failed");
+    this.cell_downloading_failed_text.setText(snap.getError().toString());
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusDownloading(
+    final BookStatusDownloadingType o)
+  {
+    return o.matchBookDownloadingStatus(this);
+  }
+
+  @Override public Unit onBookStatusDownloadingPaused(
+    final BookStatusDownloadingPaused p)
+  {
+    CatalogAcquisitionCellView.LOG.debug("{}: paused", p.getID());
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+    this.cell_debug.setText("download-paused");
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusDownloadInProgress(
+    final BookStatusDownloadInProgress d)
+  {
+    CatalogAcquisitionCellView.LOG.debug("{}: downloading", d.getID());
     this.cell_downloading.setVisibility(View.VISIBLE);
     this.cell_book.setVisibility(View.GONE);
     this.cell_downloading_failed.setVisibility(View.GONE);
+    this.cell_debug.setText("download-in-progress");
 
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     final BookID id = d.getID();
@@ -308,7 +352,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_authors.setText(CatalogAcquisitionCellView
       .makeAuthorText(e));
 
-    final DownloadSnapshot snap = d.getSnapshot();
+    final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogAcquisitionDownloadProgressBar.setProgressBar(
       snap,
       this.cell_downloading_percent_text,
@@ -325,38 +369,45 @@ import com.squareup.picasso.Callback;
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusFailed(
-    final BookStatusFailed f)
-  {
-    CatalogAcquisitionCellView.LOG.debug("status failed");
-    this.cell_downloading.setVisibility(View.INVISIBLE);
-    this.cell_book.setVisibility(View.INVISIBLE);
-    this.cell_downloading_failed.setVisibility(View.VISIBLE);
-
-    final DownloadSnapshot snap = f.getSnapshot();
-    this.cell_downloading_failed_title.setText("Download failed");
-    this.cell_downloading_failed_text.setText(snap.getError().toString());
-    return Unit.unit();
-  }
-
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
-    CatalogAcquisitionCellView.LOG.debug("status loaned");
+    CatalogAcquisitionCellView.LOG.debug("{}: loaned", o.getID());
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
+    this.cell_debug.setText("loaned");
 
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(e);
 
     this.cell_buttons.setVisibility(View.VISIBLE);
-    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-      this.activity,
-      this.books,
-      this.cell_buttons,
-      e,
-      o.getID());
+    this.cell_buttons.removeAllViews();
+
+    for (final OPDSAcquisition a : e.getAcquisitions()) {
+      switch (a.getType()) {
+        case ACQUISITION_BORROW:
+        case ACQUISITION_GENERIC:
+        {
+          final CatalogAcquisitionButton b =
+            new CatalogAcquisitionButton(
+              this.activity,
+              this.books,
+              o.getID(),
+              a,
+              e);
+          this.cell_buttons.addView(b);
+          break;
+        }
+        case ACQUISITION_BUY:
+        case ACQUISITION_OPEN_ACCESS:
+        case ACQUISITION_SAMPLE:
+        case ACQUISITION_SUBSCRIBE:
+        {
+          break;
+        }
+      }
+    }
 
     return Unit.unit();
   }
@@ -371,43 +422,73 @@ import com.squareup.picasso.Callback;
     final OPDSAcquisitionFeedEntry e,
     final BookID id)
   {
-    CatalogAcquisitionCellView.LOG.debug("status none");
+    CatalogAcquisitionCellView.LOG.debug("{}: none", id);
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
+    this.cell_debug.setText("none");
 
     this.loadImageAndSetVisibility(e);
 
-    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-      this.activity,
-      this.books,
-      this.cell_buttons,
-      e,
-      id);
+    this.cell_buttons.setVisibility(View.VISIBLE);
+    this.cell_buttons.removeAllViews();
   }
 
-  @Override public Unit onBookStatusPaused(
-    final BookStatusPaused p)
+  @Override public Unit onBookStatusRequestingDownload(
+    final BookStatusRequestingDownload d)
   {
-    CatalogAcquisitionCellView.LOG.debug("status paused");
-    this.cell_downloading.setVisibility(View.INVISIBLE);
-    this.cell_book.setVisibility(View.INVISIBLE);
-    this.cell_downloading_failed.setVisibility(View.GONE);
-
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusRequesting(
-    final BookStatusRequesting s)
-  {
-    CatalogAcquisitionCellView.LOG.debug("status requesting");
+    CatalogAcquisitionCellView.LOG
+      .debug("{}: requesting download", d.getID());
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
+    this.cell_debug.setText("requesting-download");
 
-    this.loadImageAndSetVisibility(NullCheck.notNull(this.entry.get()));
+    final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(e);
+
+    this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
     return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusRequestingLoan(
+    final BookStatusRequestingLoan s)
+  {
+    CatalogAcquisitionCellView.LOG.debug("{}: requesting loan", s.getID());
+    this.cell_downloading.setVisibility(View.GONE);
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.GONE);
+    this.cell_debug.setText("requesting-loan");
+
+    this.loadImageAndSetVisibility(NullCheck.notNull(this.entry.get()));
+
+    this.cell_buttons.setVisibility(View.GONE);
+    this.cell_buttons.removeAllViews();
+    return Unit.unit();
+  }
+
+  private void onStatus(
+    final OPDSAcquisitionFeedEntry in_entry,
+    final BookID id,
+    final OptionType<BookStatusType> status_opt)
+  {
+    if (status_opt.isSome()) {
+      final Some<BookStatusType> some = (Some<BookStatusType>) status_opt;
+      UIThread.runOnUIThread(new Runnable() {
+        @Override public void run()
+        {
+          some.get().matchBookStatus(CatalogAcquisitionCellView.this);
+        }
+      });
+    } else {
+      UIThread.runOnUIThread(new Runnable() {
+        @Override public void run()
+        {
+          CatalogAcquisitionCellView.this.onBookStatusNone(in_entry, id);
+        }
+      });
+    }
   }
 
   @Override public void update(
@@ -415,22 +496,19 @@ import com.squareup.picasso.Callback;
     final @Nullable Object data)
   {
     assert observable == this.books;
-    assert data instanceof BookStatusType;
+    assert data instanceof BookID;
 
-    CatalogAcquisitionCellView.LOG.debug("update: {} {}", observable, data);
+    CatalogAcquisitionCellView.LOG.debug("update: {}", data);
 
-    final BookStatusType status = (BookStatusType) data;
+    final BookID update_id = (BookID) data;
     final OPDSAcquisitionFeedEntry in_entry = this.entry.get();
 
     if (in_entry != null) {
       final BookID id = BookID.newIDFromEntry(in_entry);
-      if (id.equals(status.getID())) {
-        UIThread.runOnUIThread(new Runnable() {
-          @Override public void run()
-          {
-            status.matchBookStatus(CatalogAcquisitionCellView.this);
-          }
-        });
+      if (id.equals(update_id)) {
+        final OptionType<BookStatusType> status_opt =
+          this.books.booksStatusGet(id);
+        this.onStatus(in_entry, id, status_opt);
       }
     }
   }
@@ -471,13 +549,7 @@ import com.squareup.picasso.Callback;
       final BookID book_id = BookID.newIDFromEntry(in_e);
       final OptionType<BookStatusType> stat =
         this.books.booksStatusGet(book_id);
-
-      if (stat.isSome()) {
-        final BookStatusType some = ((Some<BookStatusType>) stat).get();
-        some.matchBookStatus(this);
-      } else {
-        this.onBookStatusNone(in_e, book_id);
-      }
+      this.onStatus(in_e, book_id, stat);
     }
   }
 }

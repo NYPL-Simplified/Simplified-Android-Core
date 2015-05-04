@@ -24,13 +24,13 @@ import com.io7m.jnull.Nullable;
 
 public abstract class CatalogActivity extends SimplifiedActivity
 {
+  private static final String CATALOG_UP_STACK_ID;
+
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(CatalogActivity.class);
   }
-
-  private static final String CATALOG_UP_STACK_ID;
 
   static {
     CATALOG_UP_STACK_ID = "org.nypl.simplified.app.CatalogActivity.up_stack";

@@ -15,7 +15,6 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -68,13 +67,10 @@ public final class LoginController implements
     final String message)
   {
     LoginController.LOG.debug("onLoginFailure");
-
-    if (error.isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) error;
-      LoginController.LOG.error("{}: {}", message, some.get());
-    } else {
-      LoginController.LOG.error(message);
-    }
+    LogUtilities.errorWithOptionalException(
+      LoginController.LOG,
+      message,
+      error);
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()

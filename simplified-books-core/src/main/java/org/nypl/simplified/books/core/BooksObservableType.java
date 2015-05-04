@@ -12,26 +12,27 @@ public interface BooksObservableType
    * Register an observer.
    */
 
-  void addObserver(
-    Observer o);
-
-  /**
-   * Notify all observers of the book status.
-   */
-
-  void booksNotifyObserversUnconditionally(
-    BookStatusType status);
-
-  /**
-   * Remove an observer.
-   */
-
-  void deleteObserver(
+  void booksObservableAddObserver(
     Observer o);
 
   /**
    * Remove all observers.
    */
 
-  void deleteObservers();
+  void booksObservableDeleteAllObservers();
+
+  /**
+   * Remove an observer.
+   */
+
+  void booksObservableDeleteObserver(
+    Observer o);
+
+  /**
+   * Notify all observers that the book with <tt>id</tt> has changed in some
+   * manner.
+   */
+
+  void booksObservableNotify(
+    BookID id);
 }

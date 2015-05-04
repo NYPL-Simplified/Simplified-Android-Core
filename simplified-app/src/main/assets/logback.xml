@@ -12,7 +12,7 @@
 
   <logger
     name="org.nypl.simplified.app.catalog.CatalogAcquisitionCellView"
-    level="WARN" />
+    level="DEBUG" />
 
   <logger
     name="org.nypl.simplified.app.CoverProvider"

@@ -11,16 +11,19 @@ import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookStatusCancelled;
-import org.nypl.simplified.books.core.BookStatusDone;
-import org.nypl.simplified.books.core.BookStatusDownloading;
-import org.nypl.simplified.books.core.BookStatusFailed;
+import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
+import org.nypl.simplified.books.core.BookStatusDownloadFailed;
+import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
+import org.nypl.simplified.books.core.BookStatusDownloaded;
+import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
+import org.nypl.simplified.books.core.BookStatusDownloadingPaused;
+import org.nypl.simplified.books.core.BookStatusDownloadingType;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
-import org.nypl.simplified.books.core.BookStatusPaused;
-import org.nypl.simplified.books.core.BookStatusRequesting;
+import org.nypl.simplified.books.core.BookStatusRequestingDownload;
+import org.nypl.simplified.books.core.BookStatusRequestingLoan;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
@@ -61,15 +64,16 @@ import com.io7m.junreachable.UnreachableCodeException;
 public final class CatalogBookDetailActivity extends CatalogActivity implements
   Observer,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
-  BookStatusLoanedMatcherType<Unit, UnreachableCodeException>
+  BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
+  BookStatusDownloadingMatcherType<Unit, UnreachableCodeException>
 {
+  private static final String CATALOG_BOOK_DETAIL_FEED_ENTRY_ID;
+
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(CatalogBookDetailActivity.class);
   }
-
-  private static final String CATALOG_BOOK_DETAIL_FEED_ENTRY_ID;
 
   static {
     CATALOG_BOOK_DETAIL_FEED_ENTRY_ID =
@@ -122,6 +126,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   private @Nullable Button                   book_downloading_cancel;
   private @Nullable TextView                 book_downloading_percent_text;
   private @Nullable ProgressBar              book_downloading_progress;
+  private @Nullable BooksType                books;
   private @Nullable OPDSAcquisitionFeedEntry entry;
 
   private OPDSAcquisitionFeedEntry getFeedEntry()
@@ -133,21 +138,22 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
         .getSerializable(CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_FEED_ENTRY_ID));
   }
 
-  @Override public Unit onBookStatusCancelled(
-    final BookStatusCancelled c)
+  @Override public Unit onBookStatusDownloadCancelled(
+    final BookStatusDownloadCancelled c)
   {
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
     final BookID id = c.getID();
-    books.bookDownloadAcknowledge(id);
-    this.onStatusNone(books, id, e);
+
+    final BooksType in_books = NullCheck.notNull(this.books);
+    in_books.bookDownloadAcknowledge(id);
+
+    final OptionType<BookStatusType> status_opt = in_books.booksStatusGet(id);
+    this.onStatus(e, id, status_opt);
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusDone(
-    final BookStatusDone d)
+  @Override public Unit onBookStatusDownloaded(
+    final BookStatusDownloaded d)
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
@@ -164,8 +170,33 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     return Unit.unit();
   }
 
+  @Override public Unit onBookStatusDownloadFailed(
+    final BookStatusDownloadFailed f)
+  {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.GONE);
+    bd.setVisibility(View.GONE);
+
+    return Unit.unit();
+  }
+
   @Override public Unit onBookStatusDownloading(
-    final BookStatusDownloading d)
+    final BookStatusDownloadingType o)
+    throws UnreachableCodeException
+  {
+    return o.matchBookDownloadingStatus(this);
+  }
+
+  @Override public Unit onBookStatusDownloadingPaused(
+    final BookStatusDownloadingPaused p)
+  {
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusDownloadInProgress(
+    final BookStatusDownloadInProgress d)
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
@@ -173,36 +204,21 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.VISIBLE);
 
-    final DownloadSnapshot snap = d.getSnapshot();
+    final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogAcquisitionDownloadProgressBar.setProgressBar(
       snap,
       NullCheck.notNull(this.book_downloading_percent_text),
       NullCheck.notNull(this.book_downloading_progress));
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
-
+    final BooksType in_books = NullCheck.notNull(this.books);
     final Button dc = NullCheck.notNull(this.book_downloading_cancel);
     dc.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)
       {
-        books.bookDownloadCancel(d.getID());
+        in_books.bookDownloadCancel(d.getID());
       }
     });
-
-    return Unit.unit();
-  }
-
-  @Override public Unit onBookStatusFailed(
-    final BookStatusFailed f)
-  {
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-
-    bb.setVisibility(View.GONE);
-    bd.setVisibility(View.GONE);
 
     return Unit.unit();
   }
@@ -210,22 +226,12 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
-
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
 
     bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
 
-    CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-      this,
-      books,
-      bb,
-      NullCheck.notNull(this.entry),
-      o.getID());
     return Unit.unit();
   }
 
@@ -235,14 +241,30 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     return o.matchBookLoanedStatus(this);
   }
 
-  @Override public Unit onBookStatusPaused(
-    final BookStatusPaused p)
+  private void onBookStatusNone(
+    final BookID book_id,
+    final OPDSAcquisitionFeedEntry e)
   {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    bd.setVisibility(View.GONE);
+    bb.setVisibility(View.GONE);
+  }
+
+  @Override public Unit onBookStatusRequestingDownload(
+    final BookStatusRequestingDownload d)
+  {
+    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
+    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
+    bb.setVisibility(View.GONE);
+    bd.setVisibility(View.GONE);
+    bb.removeAllViews();
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusRequesting(
-    final BookStatusRequesting s)
+  @Override public Unit onBookStatusRequestingLoan(
+    final BookStatusRequestingLoan s)
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
@@ -261,18 +283,15 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
-    books.addObserver(this);
+    this.books = app.getBooks();
+    this.books.booksObservableAddObserver(this);
   }
 
   @Override protected void onDestroy()
   {
     super.onDestroy();
-
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
-    books.deleteObserver(this);
+    final BooksType in_books = NullCheck.notNull(this.books);
+    in_books.booksObservableDeleteObserver(this);
   }
 
   @Override protected void onResume()
@@ -381,18 +400,11 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
 
     CatalogBookDetail.configureSummaryPublisher(e, summary_publisher);
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
+    final BooksType in_books = NullCheck.notNull(this.books);
     final BookID book_id = BookID.newIDFromEntry(e);
     final OptionType<BookStatusType> status_opt =
-      books.booksStatusGet(book_id);
-    if (status_opt.isSome()) {
-      final BookStatusType status = ((Some<BookStatusType>) status_opt).get();
-      status.matchBookStatus(this);
-    } else {
-      this.onStatusNone(books, book_id, e);
-    }
+      in_books.booksStatusGet(book_id);
+    this.onStatus(e, book_id, status_opt);
 
     CatalogBookDetail.configureSummaryWebView(e, summary_text);
     CatalogBookDetailActivity.configureSummaryWebViewHeight(summary_text);
@@ -411,7 +423,9 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
 
     related_layout.setVisibility(View.GONE);
 
-    final CoverProviderType cover_provider = app.getCoverProvider();
+    final SimplifiedCatalogAppServicesType cs =
+      Simplified.getCatalogAppServices();
+    final CoverProviderType cover_provider = cs.getCoverProvider();
     cover_provider.loadCoverInto(e, header_cover, cover_width, cover_height);
 
     final FrameLayout content_area = this.getContentFrame();
@@ -420,25 +434,26 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     content_area.requestLayout();
   }
 
-  private void onStatusNone(
-    final BooksType books,
-    final BookID book_id,
-    final OPDSAcquisitionFeedEntry e)
+  private void onStatus(
+    final OPDSAcquisitionFeedEntry e,
+    final BookID id,
+    final OptionType<BookStatusType> status_opt)
   {
-    final ViewGroup bb = NullCheck.notNull(this.book_buttons);
-    final ViewGroup bd = NullCheck.notNull(this.book_downloading);
-    bd.setVisibility(View.GONE);
-
-    if (e.getAcquisitions().isEmpty()) {
-      bb.setVisibility(View.GONE);
+    if (status_opt.isSome()) {
+      final Some<BookStatusType> some = (Some<BookStatusType>) status_opt;
+      UIThread.runOnUIThread(new Runnable() {
+        @Override public void run()
+        {
+          some.get().matchBookStatus(CatalogBookDetailActivity.this);
+        }
+      });
     } else {
-      bb.setVisibility(View.VISIBLE);
-      CatalogAcquisitionButtons.configureAllAcquisitionButtonsForLayout(
-        this,
-        books,
-        bb,
-        e,
-        book_id);
+      UIThread.runOnUIThread(new Runnable() {
+        @Override public void run()
+        {
+          CatalogBookDetailActivity.this.onBookStatusNone(id, e);
+        }
+      });
     }
   }
 
@@ -450,18 +465,16 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
 
     CatalogBookDetailActivity.LOG.debug("update: {} {}", observable, data);
 
-    final BookStatusType status = NullCheck.notNull((BookStatusType) data);
+    final BookID update_id = NullCheck.notNull((BookID) data);
     final OPDSAcquisitionFeedEntry e = this.entry;
 
     if (e != null) {
       final BookID id = BookID.newIDFromEntry(e);
-      if (id.equals(status.getID())) {
-        UIThread.runOnUIThread(new Runnable() {
-          @Override public void run()
-          {
-            status.matchBookStatus(CatalogBookDetailActivity.this);
-          }
-        });
+      if (id.equals(update_id)) {
+        final BooksType in_books = NullCheck.notNull(this.books);
+        final OptionType<BookStatusType> status_opt =
+          in_books.booksStatusGet(id);
+        this.onStatus(e, id, status_opt);
       }
     }
   }
