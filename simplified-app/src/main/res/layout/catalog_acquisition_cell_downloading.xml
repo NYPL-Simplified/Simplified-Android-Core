@@ -1,46 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- The cell contents shown when a book is downloading -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/cell_downloading"
   android:layout_width="match_parent"
   android:layout_height="110dp"
   android:orientation="vertical"
+  android:background="@color/downloading_background"
   android:padding="8dp">
 
   <TextView
     android:id="@+id/cell_downloading_title"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:textColor="@color/downloading_foreground"
     android:text="Title"
-    android:textStyle="bold"/>
+    android:textStyle="bold" />
 
   <TextView
     android:id="@+id/cell_downloading_authors"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:paddingBottom="16dp"
+    android:textColor="@color/downloading_foreground"
     android:text="Authors"
-    android:textSize="10sp"/>
+    android:textSize="10sp" />
 
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:orientation="horizontal">
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_weight="1"
+      android:textColor="@color/downloading_foreground"
       android:text="@string/catalog_downloading"
-      android:textSize="10sp"/>
+      android:textSize="10sp" />
 
     <ProgressBar
       android:id="@+id/cell_downloading_progress"
       style="?android:attr/progressBarStyleHorizontal"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_weight="10"/>
+      android:layout_height="3dp"
+      android:layout_weight="10"
+      android:progressDrawable="@drawable/simplified_progress_inverse" />
 
     <TextView
       android:id="@+id/cell_downloading_percent_text"
@@ -50,8 +57,9 @@
       android:gravity="right"
       android:paddingLeft="16dp"
       android:text="0%"
+      android:textColor="@color/downloading_foreground"
       android:textAlignment="gravity"
-      android:textSize="10sp"/>
+      android:textSize="10sp" />
   </LinearLayout>
 
   <Button
@@ -60,7 +68,9 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
+    android:background="@drawable/simplified_button"
     android:text="@string/catalog_cancel_downloading"
-    android:textSize="10sp"/>
+    android:textColor="@drawable/simplified_button_text"
+    android:textSize="10sp" />
 
 </LinearLayout>

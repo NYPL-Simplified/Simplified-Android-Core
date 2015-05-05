@@ -2,27 +2,67 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
 
-public interface BooksStatusCacheType
+/**
+ * The type of book status caches.
+ *
+ * The purpose of the cache is to serve the most recent status of a book
+ * without having to access the on-disk database (requiring expensive blocking
+ * I/O).
+ */
+
+public interface BooksStatusCacheType extends BooksObservableType
 {
+  /**
+   * @return A snapshot of the status of the given book.
+   */
+
   OptionType<BookSnapshot> booksSnapshotGet(
     BookID id);
+
+  /**
+   * Update the status of the given book.
+   */
 
   void booksSnapshotUpdate(
     BookID id,
     BookSnapshot snap);
 
+  /**
+   * Clear the cache.
+   */
+
   void booksStatusClearAll();
+
+  /**
+   * @return The most recent status of the given book, if any.
+   */
 
   OptionType<BookStatusType> booksStatusGet(
     BookID id);
 
+  /**
+   * Update the status of the book referred to by <tt>s</tt>.
+   *
+   * @param s
+   *          The book status
+   */
+
   void booksStatusUpdate(
-    BookID id,
-    BookStatusLoanedType s);
+    BookStatusType s);
 
-  void booksStatusUpdateLoaned(
-    BookID id);
+  /**
+   * Update the status of the book referred to by <tt>s</tt> if the given
+   * status is <i>more important</i> than the current status.
+   * <i>Importance</i> is essentially defined by a somewhat arbitrary partial
+   * order on the subtypes of {@link BookStatusType}: Values of
+   * {@link BookStatusLoanedType} are less important than values of
+   * {@link BookStatusDownloadingType}, other values of {@link BookStatusType}
+   * are less important than values of {@link BookStatusLoanedType}.
+   *
+   * @param s
+   *          The book status
+   */
 
-  void booksStatusUpdateRequesting(
-    BookID id);
+  void booksStatusUpdateIfMoreImportant(
+    BookStatusType s);
 }

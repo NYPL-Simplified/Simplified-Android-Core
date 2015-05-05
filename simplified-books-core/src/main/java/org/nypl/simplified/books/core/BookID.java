@@ -9,6 +9,12 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * The unique identifier for a given book on disk. This is typically a SHA256
+ * hash of the original book URI and is safe for use as a file or directory
+ * name.
+ */
+
 public final class BookID implements Serializable
 {
   private static final long serialVersionUID = 1L;

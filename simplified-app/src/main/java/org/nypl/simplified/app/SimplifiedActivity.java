@@ -4,6 +4,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.nypl.simplified.app.catalog.CatalogFeedActivity;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
+import org.nypl.simplified.app.catalog.CatalogUpStackEntry;
+import org.nypl.simplified.app.catalog.HoldsActivity;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -11,7 +19,6 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -32,12 +39,16 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("boxing") public abstract class SimplifiedActivity extends
   Activity implements DrawerListener, OnItemClickListener
 {
-  private static int          activity_count;
-  private static final String NAVIGATION_DRAWER_OPEN_ID;
-  private static final String TAG;
+  private static final Logger LOG;
 
   static {
-    TAG = "Main";
+    LOG = LogUtilities.getLog(SimplifiedActivity.class);
+  }
+
+  private static int          ACTIVITY_COUNT;
+  private static final String NAVIGATION_DRAWER_OPEN_ID;
+
+  static {
     NAVIGATION_DRAWER_OPEN_ID =
       "org.nypl.simplified.app.SimplifiedActivity.drawer_open";
   }
@@ -66,7 +77,7 @@ import com.io7m.jnull.Nullable;
 
   @Override public void onBackPressed()
   {
-    Log.d(SimplifiedActivity.TAG, "onBackPressed: " + this);
+    SimplifiedActivity.LOG.debug("onBackPressed: {}", this);
 
     final DrawerLayout d = NullCheck.notNull(this.drawer);
     if (d.isDrawerOpen(GravityCompat.START)) {
@@ -80,7 +91,7 @@ import com.io7m.jnull.Nullable;
        * transition animation.
        */
 
-      if (SimplifiedActivity.activity_count > 1) {
+      if (SimplifiedActivity.ACTIVITY_COUNT > 1) {
         this.overridePendingTransition(0, 0);
       }
     }
@@ -90,30 +101,32 @@ import com.io7m.jnull.Nullable;
     final @Nullable Bundle state)
   {
     super.onCreate(state);
-    Log.d(SimplifiedActivity.TAG, "onCreate: " + this);
+
+    SimplifiedActivity.LOG.debug("onCreate: {}", this);
     this.setContentView(R.layout.main);
 
     boolean open_drawer = true;
 
     final Intent i = NullCheck.notNull(this.getIntent());
-    Log.d(SimplifiedActivity.TAG, "non-null intent");
+    SimplifiedActivity.LOG.debug("non-null intent");
     final Bundle a = i.getExtras();
     if (a != null) {
-      Log.d(SimplifiedActivity.TAG, "non-null intent extras");
+      SimplifiedActivity.LOG.debug("non-null intent extras");
       open_drawer =
         a.getBoolean(SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID);
-      Log.d(SimplifiedActivity.TAG, "drawer requested: " + open_drawer);
+      SimplifiedActivity.LOG.debug("drawer requested: {}", open_drawer);
     }
 
     if (state != null) {
-      Log.d(SimplifiedActivity.TAG, "reinitializing");
+      SimplifiedActivity.LOG.debug("reinitializing");
       open_drawer =
         state.getBoolean(
           SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID,
           open_drawer);
     }
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
 
     /**
@@ -225,24 +238,24 @@ import com.io7m.jnull.Nullable;
     this.drawer_list = dl;
     this.content_frame = fl;
     this.selected = -1;
-    SimplifiedActivity.activity_count = SimplifiedActivity.activity_count + 1;
-    Log.d(SimplifiedActivity.TAG, "activity count: "
-      + SimplifiedActivity.activity_count);
+    SimplifiedActivity.ACTIVITY_COUNT = SimplifiedActivity.ACTIVITY_COUNT + 1;
+    SimplifiedActivity.LOG.debug(
+      "activity count: {}",
+      SimplifiedActivity.ACTIVITY_COUNT);
   }
 
   @Override protected void onDestroy()
   {
     super.onDestroy();
-    Log.d(SimplifiedActivity.TAG, "onDestroy: " + this);
-    SimplifiedActivity.activity_count = SimplifiedActivity.activity_count - 1;
+    SimplifiedActivity.LOG.debug("onDestroy: {}", this);
+    SimplifiedActivity.ACTIVITY_COUNT = SimplifiedActivity.ACTIVITY_COUNT - 1;
   }
 
   @Override public final void onDrawerClosed(
     final @Nullable View drawerView)
   {
-    Log.d(
-      SimplifiedActivity.TAG,
-      String.format("drawer closed, selected: %s", this.selected));
+    SimplifiedActivity.LOG
+      .debug("drawer closed, selected: {}", this.selected);
 
     /**
      * If the drawer is closing because the user pressed the back button, then
@@ -309,9 +322,7 @@ import com.io7m.jnull.Nullable;
     final int position,
     final long id)
   {
-    Log.d(
-      SimplifiedActivity.TAG,
-      String.format("selected navigation item %d", position));
+    SimplifiedActivity.LOG.debug("selected navigation item: {}", position);
 
     final DrawerLayout d = NullCheck.notNull(this.drawer);
     d.closeDrawer(GravityCompat.START);

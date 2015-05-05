@@ -7,6 +7,13 @@ import java.io.Serializable;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * The type of account PINs.
+ *
+ * Account PINs are expected to be 4 digit numbers, but the type does not
+ * (currently) enforce this fact.
+ */
+
 public final class AccountPIN implements Serializable
 {
   private static final long serialVersionUID = 1L;

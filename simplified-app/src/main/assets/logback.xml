@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+
+  <!-- Create a logcat appender -->
+  <appender
+    name="LOG_CAT"
+    class="ch.qos.logback.classic.android.LogcatAppender">
+    <encoder>
+      <pattern>%msg</pattern>
+    </encoder>
+  </appender>
+
+  <logger
+    name="org.nypl.simplified.app.catalog.CatalogAcquisitionCellView"
+    level="DEBUG" />
+
+  <logger
+    name="org.nypl.simplified.app.CoverProvider"
+    level="WARN" />
+
+  <!-- Log level - change this to ERROR on release -->
+  <root level="debug">
+    <appender-ref ref="LOG_CAT" />
+  </root>
+
+</configuration>

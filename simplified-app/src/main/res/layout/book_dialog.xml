@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/book_dialog"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:background="@color/normal_background"
   android:orientation="vertical">
 
   <LinearLayout
@@ -16,7 +18,8 @@
     android:minHeight="160dp"
     android:orientation="horizontal">
 
-    <!-- The width of this layout is set at run-time based on the size of the book cover -->
+    <!-- The width of this layout is set at run-time based on the size of the book 
+      cover -->
 
     <LinearLayout
       android:id="@+id/book_header_left"
@@ -29,7 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="160dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/empty"/>
+        android:src="@drawable/empty" />
     </LinearLayout>
 
     <RelativeLayout
@@ -44,7 +47,7 @@
         android:layout_marginStart="8dp"
         android:text="Book"
         android:textColor="@color/normal_text_major"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
 
       <TextView
         android:id="@+id/book_header_subtitle"
@@ -53,7 +56,7 @@
         android:layout_below="@id/book_header_title"
         android:layout_marginStart="8dp"
         android:text="Book subtitle"
-        android:textColor="@color/normal_text_major"/>
+        android:textColor="@color/normal_text_major" />
 
       <TextView
         android:id="@+id/book_header_authors"
@@ -65,7 +68,7 @@
         android:maxLines="8"
         android:minLines="1"
         android:text="Authors"
-        android:textColor="@color/normal_text_major"/>
+        android:textColor="@color/normal_text_major" />
 
       <TextView
         android:id="@+id/book_header_meta"
@@ -78,7 +81,7 @@
         android:maxLines="8"
         android:minLines="1"
         android:text="Meta"
-        android:textColor="@color/normal_text_minor"/>
+        android:textColor="@color/normal_text_minor" />
     </RelativeLayout>
   </LinearLayout>
 
@@ -87,8 +90,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginStart="16dp"
+    android:padding="16dp"
     android:background="@color/notification_background"
     android:orientation="vertical">
 
@@ -97,9 +99,8 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
-      android:padding="8dp"
       android:text="This hold will be automatically cancelled in 1 hour"
-      android:textColor="@color/notification_foreground"/>
+      android:textColor="@color/notification_foreground" />
   </LinearLayout>
 
   <RelativeLayout
@@ -107,8 +108,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginStart="16dp"
+    android:padding="16dp"
+    android:background="@color/downloading_background"
     android:orientation="vertical">
 
     <LinearLayout
@@ -116,21 +117,25 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
+      android:gravity="center_vertical"
       android:orientation="horizontal">
 
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:textColor="@color/downloading_foreground"
         android:text="@string/catalog_downloading"
-        android:textSize="10sp"/>
+        android:textSize="10sp" />
 
       <ProgressBar
         android:id="@+id/book_downloading_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="10"/>
+        android:layout_height="3dp"
+        android:layout_weight="10"
+        android:progress="50"
+        android:progressDrawable="@drawable/simplified_progress_inverse" />
 
       <TextView
         android:id="@+id/book_downloading_percent_text"
@@ -140,8 +145,9 @@
         android:gravity="right"
         android:paddingLeft="16dp"
         android:text="0%"
+        android:textColor="@color/downloading_foreground"
         android:textAlignment="gravity"
-        android:textSize="10sp"/>
+        android:textSize="10sp" />
     </LinearLayout>
 
     <Button
@@ -149,9 +155,11 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_below="@id/book_downloading_inner"
+      android:background="@drawable/simplified_button"
+      android:textColor="@drawable/simplified_button_text"
       android:layout_centerHorizontal="true"
       android:text="@string/catalog_cancel_downloading"
-      android:textSize="10sp"/>
+      android:textSize="10sp" />
   </RelativeLayout>
 
   <LinearLayout
@@ -178,7 +186,7 @@
       android:layout_width="fill_parent"
       android:layout_height="1dp"
       android:layout_marginBottom="8dp"
-      android:background="@android:color/darker_gray"/>
+      android:background="@android:color/darker_gray" />
 
     <TextView
       android:id="@+id/book_summary_publisher"
@@ -186,7 +194,7 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
       android:text="Book publisher"
-      android:textColor="@color/normal_text_major"/>
+      android:textColor="@color/normal_text_major" />
 
     <WebView
       android:id="@+id/book_summary_text"
@@ -199,7 +207,7 @@
       android:layout_width="fill_parent"
       android:layout_height="1dp"
       android:layout_marginTop="16dp"
-      android:background="@android:color/darker_gray"/>
+      android:background="@android:color/darker_gray" />
   </LinearLayout>
 
   <LinearLayout
@@ -218,7 +226,7 @@
       android:layout_marginBottom="16dp"
       android:text="@string/catalog_detail_related"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:textColor="@color/normal_text_major"/>
+      android:textColor="@color/normal_text_major" />
   </LinearLayout>
 
 </LinearLayout>

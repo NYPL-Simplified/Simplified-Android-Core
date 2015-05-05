@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:section
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  xml:id="org.nypl.simplified.documentation.implementation.opds">
+  <s:section-title>OPDS</s:section-title>
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.opds.overview">
+    <s:subsection-title>Overview</s:subsection-title>
+    <s:paragraph>
+      The
+      <s:link-external
+        s:target="apidocs/org/nypl/simplified/opds/core/package-summary.html">simplified-opds-core</s:link-external>
+      package implements OPDS feed fetching and parsing. It essentially provides
+      a typed interface to the contents of feeds.
+    </s:paragraph>
+  </s:subsection>
+</s:section>

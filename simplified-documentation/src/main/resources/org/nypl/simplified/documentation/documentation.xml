@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:document
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:document-title>${project.parent.name} ${project.version} Documentation
+  </s:document-title>
+  <s:document-style>documentation.css</s:document-style>
+  <s:document-contents />
+  <xi:include href="implementation.xml" />
+</s:document>

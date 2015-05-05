@@ -7,6 +7,10 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+/**
+ * A snapshot of the state of a book.
+ */
+
 public final class BookSnapshot
 {
   private final OptionType<File>         book;

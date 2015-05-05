@@ -33,6 +33,8 @@ import org.nypl.simplified.http.core.HTTPResultMatcherType;
 import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -40,6 +42,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * <p>
@@ -217,6 +220,22 @@ import com.io7m.jnull.Nullable;
       this.want_cancel.set(true);
     }
 
+    private void downloadCleanUp()
+    {
+      Downloader.LOG.debug("{}: cleaning up", this.id);
+
+      this.file_data.delete();
+      this.file_data_tmp.delete();
+      this.file_info.delete();
+      this.file_info_tmp.delete();
+
+      try {
+        this.listener.downloadCleanedUp(this.getStatus());
+      } catch (final Throwable x) {
+        Downloader.LOG.error("{}: listener: ", this.id, x);
+      }
+    }
+
     private void downloadFile()
       throws Exception
     {
@@ -239,7 +258,7 @@ import com.io7m.jnull.Nullable;
             try {
               this.listener.downloadStartedReceivingData(this.getStatus());
             } catch (final Throwable x) {
-              // Ignore
+              Downloader.LOG.error("{}: listener: ", this.id, x);
             }
 
             try {
@@ -266,7 +285,7 @@ import com.io7m.jnull.Nullable;
                 try {
                   this.listener.downloadResumed(this.getStatus());
                 } catch (final Throwable e) {
-                  // Ignored
+                  Downloader.LOG.error("{}: listener: ", this.id, e);
                 }
               }
             } finally {
@@ -398,7 +417,7 @@ import com.io7m.jnull.Nullable;
                 try {
                   this.listener.downloadStarted(this.getStatus());
                 } catch (final Throwable e) {
-                  // Ignored
+                  Downloader.LOG.error("{}: listener: ", this.id, e);
                 }
                 break;
               }
@@ -407,12 +426,13 @@ import com.io7m.jnull.Nullable;
                 try {
                   this.listener.downloadResumed(this.getStatus());
                 } catch (final Throwable e) {
-                  // Ignored
+                  Downloader.LOG.error("{}: listener: ", this.id, e);
                 }
                 break;
               }
               case STATUS_CANCELLED:
-              case STATUS_COMPLETED:
+              case STATUS_COMPLETED_NOT_TAKEN:
+              case STATUS_COMPLETED_TAKEN:
               case STATUS_FAILED:
               case STATUS_PAUSED:
               {
@@ -428,21 +448,21 @@ import com.io7m.jnull.Nullable;
               try {
                 this.listener.downloadCancelled(this.getStatus());
               } catch (final Throwable e) {
-                // Ignored
+                Downloader.LOG.error("{}: listener: ", this.id, e);
               }
             } else if (this.want_pause.get()) {
               this.status = DownloadStatus.STATUS_PAUSED;
               try {
                 this.listener.downloadPaused(this.getStatus());
               } catch (final Throwable e) {
-                // Ignored
+                Downloader.LOG.error("{}: listener: ", this.id, e);
               }
             } else {
-              this.status = DownloadStatus.STATUS_COMPLETED;
+              this.status = DownloadStatus.STATUS_COMPLETED_NOT_TAKEN;
               try {
                 this.listener.downloadCompleted(this.getStatus());
               } catch (final Throwable e) {
-                // Ignored
+                Downloader.LOG.error("{}: listener: ", this.id, e);
               }
             }
 
@@ -452,19 +472,20 @@ import com.io7m.jnull.Nullable;
             try {
               this.listener.downloadFailed(this.getStatus(), e);
             } catch (final Throwable x) {
-              // Ignored
+              Downloader.LOG.error("{}: listener: ", this.id, e);
             }
           } finally {
             try {
               this.downloadSaveState();
             } catch (final IOException x) {
-              // Nothing can be done about it...
+              Downloader.LOG.error("{}: error saving state: ", this.id, x);
             }
           }
           break;
         }
         case STATUS_CANCELLED:
-        case STATUS_COMPLETED:
+        case STATUS_COMPLETED_NOT_TAKEN:
+        case STATUS_COMPLETED_TAKEN:
         case STATUS_FAILED:
         case STATUS_PAUSED:
         {
@@ -483,40 +504,63 @@ import com.io7m.jnull.Nullable;
         case STATUS_CANCELLED:
         case STATUS_FAILED:
         {
-          this.file_data.delete();
-          this.file_data_tmp.delete();
-          this.file_info.delete();
-          this.file_info_tmp.delete();
-
-          try {
-            this.listener.downloadCleanedUp(this.getStatus());
-          } catch (final Throwable x) {
-            // Ignore
-          }
-
+          this.downloadCleanUp();
           return;
         }
-        case STATUS_COMPLETED:
+        case STATUS_COMPLETED_NOT_TAKEN:
         {
           this.file_data_tmp.delete();
+
+          /**
+           * If the downloaded file actually exists, give the listener a
+           * chance to take the file.
+           */
 
           if (this.file_data.isFile()) {
             try {
               this.listener.downloadCompletedTake(
                 this.getStatus(),
                 this.file_data);
+
+              /**
+               * If the file is gone after this function call, the listener is
+               * assumed to have taken it.
+               */
+
+              if (this.file_data.isFile() == false) {
+                this.status = DownloadStatus.STATUS_COMPLETED_TAKEN;
+
+                try {
+                  Downloader.LOG.debug("{}: download taken", this.id);
+                  this.listener.downloadCompletedTaken(this.getStatus());
+                } catch (final Throwable x) {
+                  Downloader.LOG.error("{}: listener: ", this.id, x);
+                }
+              } else {
+                Downloader.LOG.debug("{}: download not taken", this.id);
+              }
             } catch (final Throwable x) {
               try {
+                Downloader.LOG
+                  .debug("{}: download take failed: ", this.id, x);
                 this.listener
                   .downloadCompletedTakeFailed(this.getStatus(), x);
               } catch (final Throwable xe) {
-                // Ignore
+                Downloader.LOG.error("listener: ", xe);
               }
             }
+          } else {
+
+            /**
+             * The data file is gone, clean up.
+             */
+
+            this.downloadCleanUp();
           }
 
           return;
         }
+        case STATUS_COMPLETED_TAKEN:
         case STATUS_IN_PROGRESS:
         case STATUS_IN_PROGRESS_RESUMED:
         case STATUS_PAUSED:
@@ -667,6 +711,12 @@ import com.io7m.jnull.Nullable;
     }
   }
 
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(Downloader.class));
+  }
+
   private static File makeFilenameData(
     final File in_directory,
     final long in_id)
@@ -763,7 +813,8 @@ import com.io7m.jnull.Nullable;
           DownloadStatus s = null;
           switch (i.status) {
             case STATUS_CANCELLED:
-            case STATUS_COMPLETED:
+            case STATUS_COMPLETED_NOT_TAKEN:
+            case STATUS_COMPLETED_TAKEN:
             case STATUS_FAILED:
             case STATUS_PAUSED:
             {
@@ -794,6 +845,8 @@ import com.io7m.jnull.Nullable;
   @Override public void downloadAcknowledge(
     final long id)
   {
+    Downloader.LOG.debug("{}: acknowledge", id);
+
     synchronized (this.tasks) {
       final Long lid = Long.valueOf(id);
       if (this.tasks.containsKey(lid)) {
@@ -811,12 +864,16 @@ import com.io7m.jnull.Nullable;
   @Override public void downloadCancel(
     final long id)
   {
+    Downloader.LOG.debug("{}: cancel", id);
+
     synchronized (this.tasks) {
       final Long lid = Long.valueOf(id);
       if (this.tasks.containsKey(lid)) {
         final DownloadTask t = NullCheck.notNull(this.tasks.get(lid));
         t.cancel();
         this.uris_in_progress.remove(t.uri);
+        this.tasks.remove(lid);
+        this.futures.remove(lid);
       }
     }
   }
@@ -855,7 +912,61 @@ import com.io7m.jnull.Nullable;
 
     synchronized (this.tasks) {
       if (this.uris_in_progress.containsKey(uri)) {
-        return this.uris_in_progress.get(uri);
+        final Long rid = this.uris_in_progress.get(uri);
+        final DownloadTask t = this.tasks.get(rid);
+        switch (t.status) {
+
+        /**
+         * A cancelled task cannot be a "URI in progress".
+         */
+
+          case STATUS_CANCELLED:
+          {
+            throw new UnreachableCodeException();
+          }
+
+          /**
+           * Acknowledge completed taken and failed downloads so that they can
+           * be retried.
+           */
+
+          case STATUS_COMPLETED_TAKEN:
+          case STATUS_FAILED:
+          {
+            this.downloadAcknowledge(rid.longValue());
+            break;
+          }
+
+          /**
+           * Completed non-taken downloads should be scheduled to run again to
+           * give the provided listener a chance to take the data.
+           */
+
+          case STATUS_COMPLETED_NOT_TAKEN:
+          {
+            this.downloadAcknowledge(rid.longValue());
+            this.uris_in_progress.put(uri, Long.valueOf(rid));
+            this.downloadEnqueueWithID(
+              rid,
+              t.auth,
+              t.uri,
+              t.title,
+              t.status,
+              listener);
+            return rid;
+          }
+
+          /**
+           * Otherwise, return the ID of the download in progress.
+           */
+
+          case STATUS_IN_PROGRESS:
+          case STATUS_IN_PROGRESS_RESUMED:
+          case STATUS_PAUSED:
+          {
+            return rid;
+          }
+        }
       }
 
       final long id = this.id_pool.incrementAndGet();
@@ -867,6 +978,7 @@ import com.io7m.jnull.Nullable;
         title,
         DownloadStatus.STATUS_IN_PROGRESS,
         listener);
+
       return id;
     }
   }
@@ -879,6 +991,8 @@ import com.io7m.jnull.Nullable;
     final DownloadStatus status,
     final DownloadListenerType listener)
   {
+    Downloader.LOG.debug("enqueue: {} {} {} {}", id, auth, uri, status);
+
     synchronized (this.tasks) {
       final DownloadTask d =
         new DownloadTask(

@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <style name="SimplifiedTheme" parent="android:Theme.Holo.Light"></style>
+  <style
+    name="SimplifiedTheme"
+    parent="android:Theme.Holo.Light"></style>
+
+  <style
+    name="SimplifiedThemeNoActionBar"
+    parent="android:Theme.Holo.Light.NoActionBar">
+    <item name="android:windowActionBar">false</item>
+    <item name="android:windowNoTitle">true</item>
+  </style>
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>
@@ -10,13 +19,17 @@
     <item name="android:typeface">sans</item>
   </style>
 
-  <style name="SimplifiedBookDialog" parent="SimplifiedTheme">
+  <style
+    name="SimplifiedBookDialog"
+    parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>
   </style>
 
-  <style name="SimplifiedLoginDialog" parent="SimplifiedTheme">
+  <style
+    name="SimplifiedLoginDialog"
+    parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>

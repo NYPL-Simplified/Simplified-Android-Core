@@ -128,6 +128,12 @@ public final class DownloadTool
       {
 
       }
+
+      @Override public void downloadCompletedTaken(
+        final DownloadSnapshot snap)
+      {
+
+      }
     };
 
     final DownloaderConfiguration c = cb.build();
@@ -146,7 +152,8 @@ public final class DownloadTool
             final DownloadSnapshot snap = s.get(lid);
             switch (snap.statusGet()) {
               case STATUS_CANCELLED:
-              case STATUS_COMPLETED:
+              case STATUS_COMPLETED_NOT_TAKEN:
+              case STATUS_COMPLETED_TAKEN:
               case STATUS_FAILED:
               case STATUS_PAUSED:
               {

@@ -1,11 +1,13 @@
 package org.nypl.simplified.app;
 
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.BooksType;
+import org.slf4j.Logger;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,7 +17,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -23,10 +24,10 @@ public final class SettingsActivity extends SimplifiedActivity implements
   AccountLogoutListenerType,
   LoginControllerListenerType
 {
-  private static final String TAG;
+  private static final Logger LOG;
 
   static {
-    TAG = "SA";
+    LOG = LogUtilities.getLog(SettingsActivity.class);
   }
 
   private static void setLoggedInText(
@@ -43,17 +44,14 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final OptionType<Throwable> error,
     final String message)
   {
-    Log.d(SettingsActivity.TAG, "onAccountLogoutFailure");
+    SettingsActivity.LOG.debug("onAccountLogoutFailure");
+    LogUtilities.errorWithOptionalException(
+      SettingsActivity.LOG,
+      message,
+      error);
 
-    if (error.isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) error;
-      Log.e(SettingsActivity.TAG, message, some.get());
-    } else {
-      Log.e(SettingsActivity.TAG, message);
-    }
-
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
-    final BooksType books = app.getBooks();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final TextView t_logged = NullCheck.notNull(this.logged);
 
     UIThread.runOnUIThread(new Runnable() {
@@ -72,9 +70,10 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
   @Override public void onAccountLogoutSuccess()
   {
-    Log.d(SettingsActivity.TAG, "onAccountLogoutSuccess");
+    SettingsActivity.LOG.debug("onAccountLogoutSuccess");
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 
@@ -109,7 +108,8 @@ public final class SettingsActivity extends SimplifiedActivity implements
     content_area.addView(layout);
     content_area.requestLayout();
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     final TextView t_login =
@@ -124,7 +124,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
       @Override public void onClick(
         final @Nullable View v)
       {
-        Log.d(SettingsActivity.TAG, "Logging out");
+        SettingsActivity.LOG.debug("Logging out");
         books.accountLogout(SettingsActivity.this);
       }
     });
@@ -143,7 +143,8 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
   @Override public void onLoginAborted()
   {
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     final TextView t_logged = NullCheck.notNull(this.logged);
 

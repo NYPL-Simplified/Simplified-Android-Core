@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/reader_settings_container"
+  android:background="@drawable/reader_settings_bordered"
+  android:orientation="vertical"
+  android:gravity="center"
+  android:padding="1dp"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_height="48dp">
+
+    <TextView
+      android:id="@+id/reader_settings_black_on_white"
+      android:layout_width="48dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:text="A a" />
+
+    <FrameLayout
+      android:layout_height="48dp"
+      android:layout_width="1dp"
+      android:background="#eee" />
+
+    <TextView
+      android:id="@+id/reader_settings_white_on_black"
+      android:layout_width="48dp"
+      android:layout_weight="1"
+      android:layout_height="match_parent"
+      android:gravity="center"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:text="A a" />
+
+    <FrameLayout
+      android:layout_height="48dp"
+      android:layout_width="1dp"
+      android:background="#eee" />
+
+    <TextView
+      android:id="@+id/reader_settings_black_on_beige"
+      android:layout_width="48dp"
+      android:layout_weight="1"
+      android:layout_height="match_parent"
+      android:gravity="center"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:text="A a" />
+  </LinearLayout>
+
+  <FrameLayout
+    android:layout_height="1dp"
+    android:layout_width="match_parent"
+    android:background="#eee" />
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_height="48dp">
+
+    <TextView
+      android:id="@+id/reader_settings_text_smaller"
+      android:layout_width="48dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:textSize="12sp"
+      android:text="A" />
+
+    <FrameLayout
+      android:layout_height="48dp"
+      android:layout_width="1dp"
+      android:background="#eee" />
+
+    <TextView
+      android:id="@+id/reader_settings_text_larger"
+      android:layout_width="48dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:textSize="24sp"
+      android:text="A" />
+
+  </LinearLayout>
+
+  <FrameLayout
+    android:layout_height="1dp"
+    android:layout_width="match_parent"
+    android:background="#eee" />
+
+  <LinearLayout
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+      android:layout_width="16dp"
+      android:layout_height="16dp"
+      android:layout_gravity="center_vertical"
+      android:src="@drawable/brightness_8x" />
+
+    <SeekBar
+      android:id="@+id/reader_settings_brightness"
+      android:layout_marginLeft="8dp"
+      android:layout_marginRight="8dp"
+      android:layout_gravity="center_vertical"
+      android:maxHeight="4dp"
+      android:thumb="@drawable/simplified_progress_thumb"
+      android:progressDrawable="@drawable/simplified_progress"
+      android:layout_width="match_parent"
+      android:layout_weight="1"
+      android:layout_height="wrap_content" />
+
+    <ImageView
+      android:layout_width="24dp"
+      android:layout_height="24dp"
+      android:layout_gravity="center_vertical"
+      android:src="@drawable/brightness_8x" />
+
+  </LinearLayout>
+
+  <FrameLayout
+    android:layout_height="1dp"
+    android:layout_width="match_parent"
+    android:background="#eee" />
+
+</LinearLayout>

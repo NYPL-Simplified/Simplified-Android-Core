@@ -1,0 +1,11 @@
+{
+  "isRightToLeft":false,
+  "isFixedLayout":false,
+  "spineItemCount":10,
+  "openPages":[
+    {"spineItemPageIndex":12,
+      "spineItemPageCount":144,
+      "idref":"item7",
+      "spineItemIndex":2}
+  ]
+}

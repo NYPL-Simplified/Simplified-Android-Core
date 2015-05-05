@@ -1,9 +1,12 @@
 package org.nypl.simplified.app;
 
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BooksType;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -12,7 +15,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,20 +29,23 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 public final class LoginDialog extends DialogFragment implements
   AccountLoginListenerType
 {
-  private static final String                   BARCODE_ID;
-  private static final String                   PIN_ID;
-  private static final String                   TAG;
-  private static final String                   TEXT_ID;
+  private static final Logger LOG;
 
   static {
-    TAG = "LD";
+    LOG = LogUtilities.getLog(DialogFragment.class);
+  }
+
+  private static final String BARCODE_ID;
+  private static final String PIN_ID;
+  private static final String TEXT_ID;
+
+  static {
     BARCODE_ID = "org.nypl.simplified.app.LoginDialog.barcode";
     PIN_ID = "org.nypl.simplified.app.LoginDialog.pin";
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
@@ -64,12 +69,12 @@ public final class LoginDialog extends DialogFragment implements
     d.setArguments(b);
     return d;
   }
+
   private @Nullable EditText                    barcode_edit;
   private @Nullable LoginControllerListenerType listener;
   private @Nullable Button                      login;
   private @Nullable ProgressBar                 login_progress;
   private @Nullable EditText                    pin_edit;
-
   private @Nullable TextView                    text;
 
   public LoginDialog()
@@ -84,12 +89,7 @@ public final class LoginDialog extends DialogFragment implements
     final String s =
       NullCheck.notNull(String.format("login failed: %s", message));
 
-    if (error.isSome()) {
-      final Some<Throwable> some = (Some<Throwable>) error;
-      Log.e(LoginDialog.TAG, s, some.get());
-    } else {
-      Log.e(LoginDialog.TAG, s);
-    }
+    LogUtilities.errorWithOptionalException(LoginDialog.LOG, s, error);
 
     final TextView in_text = NullCheck.notNull(this.text);
     final EditText in_barcode_edit = NullCheck.notNull(this.barcode_edit);
@@ -114,7 +114,7 @@ public final class LoginDialog extends DialogFragment implements
       try {
         ls.onLoginFailure(error, message);
       } catch (final Throwable e) {
-        Log.d(LoginDialog.TAG, e.getMessage(), e);
+        LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
     }
   }
@@ -123,7 +123,7 @@ public final class LoginDialog extends DialogFragment implements
     final AccountBarcode barcode,
     final AccountPIN pin)
   {
-    Log.d(LoginDialog.TAG, "login succeeded");
+    LoginDialog.LOG.debug("login succeeded");
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
@@ -137,7 +137,7 @@ public final class LoginDialog extends DialogFragment implements
       try {
         ls.onLoginSuccess();
       } catch (final Throwable e) {
-        Log.d(LoginDialog.TAG, e.getMessage(), e);
+        LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
     }
   }
@@ -145,14 +145,14 @@ public final class LoginDialog extends DialogFragment implements
   @Override public void onCancel(
     final @Nullable DialogInterface dialog)
   {
-    Log.d(LoginDialog.TAG, "login aborted");
+    LoginDialog.LOG.debug("login aborted");
 
     final LoginControllerListenerType ls = this.listener;
     if (ls != null) {
       try {
         ls.onLoginAborted();
       } catch (final Throwable e) {
-        Log.d(LoginDialog.TAG, e.getMessage(), e);
+        LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
     }
   }
@@ -201,7 +201,8 @@ public final class LoginDialog extends DialogFragment implements
       NullCheck.notNull((ProgressBar) layout
         .findViewById(R.id.login_progress));
 
-    final SimplifiedAppServicesType app = Simplified.getAppServices();
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     in_text.setText(initial_txt);
