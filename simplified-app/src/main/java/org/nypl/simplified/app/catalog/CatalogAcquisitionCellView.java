@@ -112,6 +112,7 @@ import com.squareup.picasso.Callback;
   private final ViewGroup                                 cell_text_layout;
   private final TextView                                  cell_title;
   private final CoverProviderType                         cover_provider;
+  private final boolean                                   debug_cell_state;
   private final AtomicReference<OPDSAcquisitionFeedEntry> entry;
 
   public CatalogAcquisitionCellView(
@@ -127,6 +128,8 @@ import com.squareup.picasso.Callback;
 
     final Context context =
       NullCheck.notNull(in_activity.getApplicationContext());
+    final Resources rr = NullCheck.notNull(context.getResources());
+
     final LayoutInflater inflater =
       (LayoutInflater) context
         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -171,6 +174,11 @@ import com.squareup.picasso.Callback;
 
     this.cell_debug =
       NullCheck.notNull((TextView) this.findViewById(R.id.cell_debug));
+    this.debug_cell_state =
+      rr.getBoolean(R.bool.debug_catalog_cell_view_states);
+    if (this.debug_cell_state == false) {
+      this.cell_debug.setVisibility(View.GONE);
+    }
 
     this.cell_text_layout =
       NullCheck.notNull((ViewGroup) this.cell_book
@@ -285,7 +293,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
-    this.cell_debug.setText("downloaded");
+    this.setDebugCellText("downloaded");
 
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(e);
@@ -310,7 +318,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.VISIBLE);
-    this.cell_debug.setText("download-failed");
+    this.setDebugCellText("download-failed");
 
     final DownloadSnapshot snap = f.getDownloadSnapshot();
     this.cell_downloading_failed_title.setText("Download failed");
@@ -331,7 +339,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
-    this.cell_debug.setText("download-paused");
+    this.setDebugCellText("download-paused");
     return Unit.unit();
   }
 
@@ -342,7 +350,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.VISIBLE);
     this.cell_book.setVisibility(View.GONE);
     this.cell_downloading_failed.setVisibility(View.GONE);
-    this.cell_debug.setText("download-in-progress");
+    this.setDebugCellText("download-in-progress");
 
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     final BookID id = d.getID();
@@ -376,7 +384,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
-    this.cell_debug.setText("loaned");
+    this.setDebugCellText("loaned");
 
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(e);
@@ -426,7 +434,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
-    this.cell_debug.setText("none");
+    this.setDebugCellText("none");
 
     this.loadImageAndSetVisibility(e);
 
@@ -442,7 +450,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
-    this.cell_debug.setText("requesting-download");
+    this.setDebugCellText("requesting-download");
 
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(e);
@@ -459,7 +467,7 @@ import com.squareup.picasso.Callback;
     this.cell_downloading.setVisibility(View.GONE);
     this.cell_book.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.GONE);
-    this.cell_debug.setText("requesting-loan");
+    this.setDebugCellText("requesting-loan");
 
     this.loadImageAndSetVisibility(NullCheck.notNull(this.entry.get()));
 
@@ -488,6 +496,14 @@ import com.squareup.picasso.Callback;
           CatalogAcquisitionCellView.this.onBookStatusNone(in_entry, id);
         }
       });
+    }
+  }
+
+  private void setDebugCellText(
+    final String text)
+  {
+    if (this.debug_cell_state) {
+      this.cell_debug.setText(text);
     }
   }
 

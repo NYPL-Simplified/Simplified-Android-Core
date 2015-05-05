@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <bool name="debug_catalog_cell_view_states">false</bool>
+</resources>
