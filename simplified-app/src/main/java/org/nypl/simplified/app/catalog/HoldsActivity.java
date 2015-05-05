@@ -1,4 +1,7 @@
-package org.nypl.simplified.app;
+package org.nypl.simplified.app.catalog;
+
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.SimplifiedActivity;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

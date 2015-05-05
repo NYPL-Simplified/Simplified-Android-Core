@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:custom="http://schemas.android.com/apk/res/org.nypl.simplified.app.CatalogNavigationLaneView"
   android:id="@+id/drawer_layout"
   android:layout_width="match_parent"
@@ -9,6 +10,7 @@
 
   <FrameLayout
     android:id="@+id/content_frame"
+    android:background="@color/normal_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
   </FrameLayout>
@@ -20,9 +22,9 @@
     android:layout_width="240dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="#111"
+    android:background="@color/normal_background"
     android:choiceMode="singleChoice"
     android:divider="@android:color/transparent"
-    android:dividerHeight="0dp"/>
+    android:dividerHeight="0dp" />
 
 </android.support.v4.widget.DrawerLayout>

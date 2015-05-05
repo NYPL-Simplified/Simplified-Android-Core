@@ -43,7 +43,7 @@
       android:exported="false">
     </activity>
     <activity
-      android:name="org.nypl.simplified.app.catalog.SettingsActivity"
+      android:name="org.nypl.simplified.app.SettingsActivity"
       android:exported="false">
     </activity>
 

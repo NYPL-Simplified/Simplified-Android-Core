@@ -41,6 +41,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:text="Title"
+      android:textColor="@color/normal_text_major"
       android:textStyle="bold" />
 
     <TextView
@@ -48,6 +49,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_below="@id/cell_title"
+      android:textColor="@color/normal_text_major"
       android:text="Authors" />
 
     <LinearLayout

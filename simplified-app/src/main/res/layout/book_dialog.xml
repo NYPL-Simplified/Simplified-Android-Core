@@ -4,6 +4,7 @@
   android:id="@+id/book_dialog"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:background="@color/normal_background"
   android:orientation="vertical">
 
   <LinearLayout
