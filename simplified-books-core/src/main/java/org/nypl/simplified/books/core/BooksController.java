@@ -61,6 +61,40 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
   Observable implements BooksType
 {
+  private static final class DeleteBookDataTask implements Runnable
+  {
+    private final BookDatabaseType     book_database;
+    private final BookID               book_id;
+    private final BooksStatusCacheType books_status;
+
+    public DeleteBookDataTask(
+      final BooksStatusCacheType in_books_status,
+      final BookDatabaseType in_book_database,
+      final BookID in_book_id)
+    {
+      this.books_status = NullCheck.notNull(in_books_status);
+      this.book_database = NullCheck.notNull(in_book_database);
+      this.book_id = NullCheck.notNull(in_book_id);
+    }
+
+    @Override public void run()
+    {
+      try {
+        final BookDatabaseEntryType e =
+          this.book_database.getBookDatabaseEntry(this.book_id);
+        e.destroyBookData();
+
+        this.books_status
+          .booksStatusUpdate(new BookStatusLoaned(this.book_id));
+      } catch (final Throwable e) {
+        BooksController.LOG.error(
+          "could not destroy book data for {}: ",
+          this.book_id,
+          e);
+      }
+    }
+  }
+
   private static final class AcquisitionFeedTask implements Runnable
   {
     private final BookDatabaseType                books_database;
@@ -1166,6 +1200,18 @@ import com.io7m.junreachable.UnreachableCodeException;
       };
       this.tasks.put(id, this.exec.submit(rb));
     }
+  }
+
+  @Override public void bookDeleteData(
+    final BookID id)
+  {
+    NullCheck.notNull(id);
+
+    BooksController.LOG.debug("delete: {}", id);
+    this.submitRunnable(new DeleteBookDataTask(
+      this.books_status,
+      this.book_database,
+      id));
   }
 
 }

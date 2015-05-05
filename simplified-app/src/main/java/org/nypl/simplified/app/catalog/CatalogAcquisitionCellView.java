@@ -308,10 +308,10 @@ import com.squareup.picasso.Callback;
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    final CatalogBookReadButton b =
-      new CatalogBookReadButton(this.activity, d.getID());
-
-    this.cell_buttons.addView(b);
+    this.cell_buttons.addView(new CatalogBookDeleteButton(this.activity, d
+      .getID()));
+    this.cell_buttons.addView(new CatalogBookReadButton(this.activity, d
+      .getID()));
     return Unit.unit();
   }
 

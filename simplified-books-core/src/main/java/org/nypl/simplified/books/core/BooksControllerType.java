@@ -24,6 +24,13 @@ public interface BooksControllerType extends BooksStatusCacheType
     BookBorrowListenerType listener);
 
   /**
+   * Delete the actual book file for the given book, if any.
+   */
+
+  void bookDeleteData(
+    BookID id);
+
+  /**
    * Acknowledge the cancelled or completed download of the book with the
    * given <tt>id</tt> .
    */

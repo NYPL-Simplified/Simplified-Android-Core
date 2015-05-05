@@ -125,6 +125,31 @@ import com.io7m.jnull.NullCheck;
       });
   }
 
+  @Override public void destroyBookData()
+    throws IOException
+  {
+    FileLocking.withFileLocked(
+      this.file_lock,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>() {
+        @Override public Unit call(
+          final Unit x)
+          throws IOException
+        {
+          BookDatabaseEntry.this.destroyBookDataLocked();
+          return Unit.unit();
+        }
+      });
+  }
+
+  private void destroyBookDataLocked()
+  {
+    this.file_book.delete();
+    this.file_download_id.delete();
+    this.file_download_id_tmp.delete();
+  }
+
   private void destroyLocked()
     throws IOException
   {

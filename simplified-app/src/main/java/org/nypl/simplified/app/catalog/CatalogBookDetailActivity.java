@@ -161,9 +161,8 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
 
-    final CatalogBookReadButton b =
-      new CatalogBookReadButton(this, d.getID());
-    bb.addView(b);
+    bb.addView(new CatalogBookDeleteButton(this, d.getID()));
+    bb.addView(new CatalogBookReadButton(this, d.getID()));
     return Unit.unit();
   }
 

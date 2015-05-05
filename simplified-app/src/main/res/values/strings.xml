@@ -24,6 +24,7 @@
   <string name="catalog_book_borrow">Borrow</string>
   <string name="catalog_book_read">Read</string>
   <string name="catalog_book_download">Download</string>
+  <string name="catalog_book_delete">Delete</string>
 
   <!-- Settings strings -->
   <string name="settings">Settings</string>

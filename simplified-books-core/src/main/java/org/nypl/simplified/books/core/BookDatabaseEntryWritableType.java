@@ -55,6 +55,16 @@ public interface BookDatabaseEntryWritableType extends Serializable
     throws IOException;
 
   /**
+   * Destroy the book data, if it exists.
+   *
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
+  void destroyBookData()
+    throws IOException;
+
+  /**
    * Set the cover and acquisition feed entry of the book
    *
    * @throws IOException
