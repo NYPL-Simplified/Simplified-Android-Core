@@ -127,12 +127,10 @@ public final class CatalogBookDialog extends DialogFragment implements
     bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
 
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final Activity act = NullCheck.notNull(this.getActivity());
-    final Button b = new Button(act);
-    b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
-    b.setTextSize(12.0f);
-    b.setOnClickListener(new CatalogBookRead(act, d.getID()));
+    final CatalogBookReadButton b =
+      new CatalogBookReadButton(
+        NullCheck.notNull(this.getActivity()),
+        d.getID());
     bb.addView(b);
     return Unit.unit();
   }
@@ -195,15 +193,20 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
-    final SimplifiedCatalogAppServicesType app =
+    final SimplifiedCatalogAppServicesType cs =
       Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
 
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
 
-    bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
+
+    CatalogAcquisitionButtons.addButtons(
+      NullCheck.notNull(this.getActivity()),
+      bb,
+      cs.getBooks(),
+      o.getID(),
+      NullCheck.notNull(this.entry));
     return Unit.unit();
   }
 
@@ -420,6 +423,31 @@ public final class CatalogBookDialog extends DialogFragment implements
     window.setLayout(width, window.getAttributes().height);
   }
 
+  private void onStatus(
+    final OPDSAcquisitionFeedEntry e,
+    final BookID id,
+    final OptionType<BookStatusType> status_opt)
+  {
+    final BooksType books = Simplified.getCatalogAppServices().getBooks();
+
+    if (status_opt.isSome()) {
+      final Some<BookStatusType> some = (Some<BookStatusType>) status_opt;
+      UIThread.runOnUIThread(new Runnable() {
+        @Override public void run()
+        {
+          some.get().matchBookStatus(CatalogBookDialog.this);
+        }
+      });
+    } else {
+      UIThread.runOnUIThread(new Runnable() {
+        @Override public void run()
+        {
+          CatalogBookDialog.this.onStatusNone(books, id, e);
+        }
+      });
+    }
+  }
+
   private void onStatusNone(
     final BooksType books,
     final BookID book_id,
@@ -427,8 +455,17 @@ public final class CatalogBookDialog extends DialogFragment implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+
     bd.setVisibility(View.GONE);
-    bb.setVisibility(View.GONE);
+    bb.setVisibility(View.VISIBLE);
+    bb.removeAllViews();
+
+    CatalogAcquisitionButtons.addButtons(
+      NullCheck.notNull(this.getActivity()),
+      bb,
+      books,
+      book_id,
+      e);
   }
 
   @Override public void update(
@@ -439,18 +476,16 @@ public final class CatalogBookDialog extends DialogFragment implements
 
     CatalogBookDialog.LOG.debug("update: {} {}", observable, data);
 
-    final BookStatusType status = NullCheck.notNull((BookStatusType) data);
+    final BooksType books = Simplified.getCatalogAppServices().getBooks();
+    final BookID update_id = NullCheck.notNull((BookID) data);
     final OPDSAcquisitionFeedEntry e = this.entry;
 
     if (e != null) {
       final BookID id = BookID.newIDFromEntry(e);
-      if (id.equals(status.getID())) {
-        UIThread.runOnUIThread(new Runnable() {
-          @Override public void run()
-          {
-            status.matchBookStatus(CatalogBookDialog.this);
-          }
-        });
+      if (id.equals(update_id)) {
+        final OptionType<BookStatusType> status_opt =
+          books.booksStatusGet(id);
+        this.onStatus(e, id, status_opt);
       }
     }
   }

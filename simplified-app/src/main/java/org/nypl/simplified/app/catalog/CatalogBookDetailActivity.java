@@ -161,11 +161,8 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
 
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final Button b = new Button(this);
-    b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
-    b.setTextSize(12.0f);
-    b.setOnClickListener(new CatalogBookRead(this, d.getID()));
+    final CatalogBookReadButton b =
+      new CatalogBookReadButton(this, d.getID());
     bb.addView(b);
     return Unit.unit();
   }
@@ -229,9 +226,14 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
 
-    bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
 
+    CatalogAcquisitionButtons.addButtons(
+      this,
+      bb,
+      NullCheck.notNull(this.books),
+      o.getID(),
+      NullCheck.notNull(this.entry));
     return Unit.unit();
   }
 
@@ -247,8 +249,13 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final BooksType in_books = NullCheck.notNull(this.books);
+
     bd.setVisibility(View.GONE);
-    bb.setVisibility(View.GONE);
+    bb.setVisibility(View.VISIBLE);
+    bb.removeAllViews();
+
+    CatalogAcquisitionButtons.addButtons(this, bb, in_books, book_id, e);
   }
 
   @Override public Unit onBookStatusRequestingDownload(

@@ -27,7 +27,6 @@ import org.nypl.simplified.books.core.BookStatusRequestingLoan;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
-import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
@@ -309,11 +308,8 @@ import com.squareup.picasso.Callback;
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final Button b = new Button(this.activity);
-    b.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
-    b.setTextSize(12.0f);
-    b.setOnClickListener(new CatalogBookRead(this.activity, d.getID()));
+    final CatalogBookReadButton b =
+      new CatalogBookReadButton(this.activity, d.getID());
 
     this.cell_buttons.addView(b);
     return Unit.unit();
@@ -397,33 +393,12 @@ import com.squareup.picasso.Callback;
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(e);
 
-    this.cell_buttons.setVisibility(View.VISIBLE);
-    this.cell_buttons.removeAllViews();
-
-    for (final OPDSAcquisition a : e.getAcquisitions()) {
-      switch (a.getType()) {
-        case ACQUISITION_BORROW:
-        case ACQUISITION_GENERIC:
-        {
-          final CatalogAcquisitionButton b =
-            new CatalogAcquisitionButton(
-              this.activity,
-              this.books,
-              o.getID(),
-              a,
-              e);
-          this.cell_buttons.addView(b);
-          break;
-        }
-        case ACQUISITION_BUY:
-        case ACQUISITION_OPEN_ACCESS:
-        case ACQUISITION_SAMPLE:
-        case ACQUISITION_SUBSCRIBE:
-        {
-          break;
-        }
-      }
-    }
+    CatalogAcquisitionButtons.addButtons(
+      this.activity,
+      this.cell_buttons,
+      this.books,
+      o.getID(),
+      e);
 
     return Unit.unit();
   }
@@ -446,8 +421,12 @@ import com.squareup.picasso.Callback;
 
     this.loadImageAndSetVisibility(e);
 
-    this.cell_buttons.setVisibility(View.VISIBLE);
-    this.cell_buttons.removeAllViews();
+    CatalogAcquisitionButtons.addButtons(
+      this.activity,
+      this.cell_buttons,
+      this.books,
+      id,
+      e);
   }
 
   @Override public Unit onBookStatusRequestingDownload(

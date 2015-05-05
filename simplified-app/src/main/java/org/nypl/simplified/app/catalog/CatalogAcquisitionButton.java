@@ -27,6 +27,9 @@ public final class CatalogAcquisitionButton extends Button
     this.setText(NullCheck.notNull(rr
       .getString(R.string.catalog_book_download)));
     this.setTextSize(12.0f);
+    this.setBackground(rr.getDrawable(R.drawable.simplified_button));
+    this
+      .setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
     this.setOnClickListener(new CatalogAcquisitionButtonController(
       in_activity,
       in_books,

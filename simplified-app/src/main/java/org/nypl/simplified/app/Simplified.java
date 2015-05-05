@@ -428,6 +428,23 @@ import com.io7m.jnull.Nullable;
         (s & Configuration.SCREENLAYOUT_SIZE_LARGE) == Configuration.SCREENLAYOUT_SIZE_LARGE;
       large |=
         (s & Configuration.SCREENLAYOUT_SIZE_XLARGE) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+
+      if (rr.getBoolean(R.bool.debug_override_large_screen)) {
+        if (large == false) {
+          Simplified.LOG
+            .debug("screen size overridden to be large by debug_override_large_screen");
+          return true;
+        }
+      }
+
+      if (rr.getBoolean(R.bool.debug_override_small_screen)) {
+        if (large == true) {
+          Simplified.LOG
+            .debug("screen size overridden to be small by debug_override_small_screen");
+          return false;
+        }
+      }
+
       return large;
     }
   }
