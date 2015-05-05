@@ -215,6 +215,14 @@ import com.squareup.picasso.Callback;
     this.cell_cover_layout.setLayoutParams(ccl_p);
 
     this.entry = new AtomicReference<OPDSAcquisitionFeedEntry>();
+
+    /**
+     * Hide everything by default.
+     */
+
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
   }
 
   private boolean isCellBeingReusedForSame(
