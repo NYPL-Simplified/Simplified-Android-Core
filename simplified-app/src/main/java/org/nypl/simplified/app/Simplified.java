@@ -134,7 +134,8 @@ import com.io7m.jnull.Nullable;
 
       final DownloaderConfigurationBuilderType dcb =
         DownloaderConfiguration.newBuilder(downloads_dir);
-      dcb.setReadSleepTime(1000);
+      dcb.setReadSleepTime(rr
+        .getInteger(R.integer.debug_downloader_sleep_time_ms));
       final DownloaderConfiguration downloader_config = dcb.build();
 
       this.http = HTTP.newHTTP();
