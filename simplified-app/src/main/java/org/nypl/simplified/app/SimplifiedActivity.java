@@ -39,14 +39,14 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("boxing") public abstract class SimplifiedActivity extends
   Activity implements DrawerListener, OnItemClickListener
 {
+  private static int          ACTIVITY_COUNT;
+
   private static final Logger LOG;
 
+  private static final String NAVIGATION_DRAWER_OPEN_ID;
   static {
     LOG = LogUtilities.getLog(SimplifiedActivity.class);
   }
-
-  private static int          ACTIVITY_COUNT;
-  private static final String NAVIGATION_DRAWER_OPEN_ID;
 
   static {
     NAVIGATION_DRAWER_OPEN_ID =
@@ -70,6 +70,20 @@ import com.io7m.jnull.Nullable;
   private boolean                                           finishing;
   private int                                               selected;
 
+  private void finishWithConditionalAnimationOverride()
+  {
+    this.finish();
+
+    /**
+     * If this activity is the last activity, do not override the closing
+     * transition animation.
+     */
+
+    if (SimplifiedActivity.ACTIVITY_COUNT > 1) {
+      this.overridePendingTransition(0, 0);
+    }
+  }
+
   protected final FrameLayout getContentFrame()
   {
     return NullCheck.notNull(this.content_frame);
@@ -84,16 +98,13 @@ import com.io7m.jnull.Nullable;
       this.finishing = true;
       d.closeDrawer(GravityCompat.START);
     } else {
-      this.finish();
 
       /**
        * If this activity is the last activity, do not override the closing
        * transition animation.
        */
 
-      if (SimplifiedActivity.ACTIVITY_COUNT > 1) {
-        this.overridePendingTransition(0, 0);
-      }
+      this.finishWithConditionalAnimationOverride();
     }
   }
 
@@ -263,7 +274,7 @@ import com.io7m.jnull.Nullable;
      */
 
     if (this.finishing) {
-      this.finish();
+      this.finishWithConditionalAnimationOverride();
       return;
     }
 
