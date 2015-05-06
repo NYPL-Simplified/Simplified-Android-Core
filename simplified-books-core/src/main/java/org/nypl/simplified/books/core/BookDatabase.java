@@ -114,8 +114,7 @@ public final class BookDatabase implements BookDatabaseType
         @Override public boolean accept(
           final @Nullable File path)
         {
-          assert path != null;
-          return path.isDirectory();
+          return NullCheck.notNull(path).isDirectory();
         }
       });
 

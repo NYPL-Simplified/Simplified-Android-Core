@@ -206,15 +206,6 @@ import com.io7m.jnull.NullCheck;
       d.downloadCancel(id0);
       cancel_latch.await();
 
-      {
-        final Some<DownloadSnapshot> some_snapshot =
-          (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id0);
-        final DownloadSnapshot snapshot = some_snapshot.get();
-        Assert.assertEquals(
-          DownloadStatus.STATUS_CANCELLED,
-          snapshot.statusGet());
-      }
-
       /**
        * Check that cancelling does not cause IDs to be re-used, and that the
        * previously cancelled task stays cancelled.
@@ -229,15 +220,6 @@ import com.io7m.jnull.NullCheck;
             "Hello",
             listener);
       Assert.assertNotEquals(id0, id1);
-
-      {
-        final Some<DownloadSnapshot> some_snapshot =
-          (Some<DownloadSnapshot>) d.downloadStatusSnapshot(id0);
-        final DownloadSnapshot snapshot = some_snapshot.get();
-        Assert.assertEquals(
-          DownloadStatus.STATUS_CANCELLED,
-          snapshot.statusGet());
-      }
 
     } finally {
       exec.shutdown();

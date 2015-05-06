@@ -12,6 +12,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -92,10 +93,9 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final List<Element> e_authors =
       OPDSXML.getChildElementsWithName(e, OPDSFeedParser.ATOM_URI, "author");
     for (final Element ea : e_authors) {
-      assert ea != null;
       final String name =
         OPDSXML.getFirstChildElementTextWithName(
-          ea,
+          NullCheck.notNull(ea),
           OPDSFeedParser.ATOM_URI,
           "name");
       eb.addAuthor(name);
@@ -125,8 +125,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
-        final String text = e.getAttribute("rel");
-        assert text != null;
+        final String text = NullCheck.notNull(e.getAttribute("rel"));
 
         for (final Type v : OPDSAcquisition.Type.values()) {
           final String uri_text = NullCheck.notNull(v.getURI().toString());
@@ -190,8 +189,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   {
     for (final Element e : e_links) {
       if (e.hasAttribute("rel")) {
-        final String text = e.getAttribute("rel");
-        assert text != null;
+        final String text = NullCheck.notNull(e.getAttribute("rel"));
         final String uri_text =
           NullCheck.notNull(OPDSFeedParser.FEATURED_URI_PREFIX.toString());
         if (text.equals(uri_text)) {
@@ -221,8 +219,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
     for (final Element e : e_links) {
       if (e.hasAttribute("type")) {
-        final String type_text = e.getAttribute("type");
-        assert type_text != null;
+        final String type_text = NullCheck.notNull(e.getAttribute("type"));
 
         /**
          * Acquisition feeds are often missing <tt>rel</tt> attributes, and
@@ -446,10 +443,13 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     throws URISyntaxException
   {
     for (final Element e : links) {
-      assert OPDSXML.nodeHasName(
-        NullCheck.notNull(e),
-        OPDSFeedParser.ATOM_URI,
-        "link");
+      final boolean has_name =
+        OPDSXML.nodeHasName(
+          NullCheck.notNull(e),
+          OPDSFeedParser.ATOM_URI,
+          "link");
+
+      Assertions.checkPrecondition(has_name, "Node has name 'link'");
 
       final boolean has_everything =
         e.hasAttribute("type")

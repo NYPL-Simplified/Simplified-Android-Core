@@ -528,9 +528,8 @@ import com.io7m.jnull.Nullable;
         final Thread t = tf.newThread(new Runnable() {
           @Override public void run()
           {
-            assert r != null;
             android.os.Process.setThreadPriority(19);
-            r.run();
+            NullCheck.notNull(r).run();
           }
         });
         t.setName(String.format("simplified-%s-tasks-%d", base, this.id));

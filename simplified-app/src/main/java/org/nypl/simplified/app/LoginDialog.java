@@ -165,12 +165,11 @@ public final class LoginDialog extends DialogFragment implements
   }
 
   @Override public View onCreateView(
-    final @Nullable LayoutInflater inflater,
+    final @Nullable LayoutInflater inflater_mn,
     final @Nullable ViewGroup container,
     final @Nullable Bundle state)
   {
-    assert inflater != null;
-
+    final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
     final Bundle b = this.getArguments();
     final AccountPIN initial_pin =
       NullCheck.notNull((AccountPIN) b.getSerializable(LoginDialog.PIN_ID));

@@ -796,15 +796,15 @@ import com.io7m.junreachable.UnreachableCodeException;
         @Override public boolean accept(
           final @Nullable File f)
         {
-          assert f != null;
-          return f.getName().endsWith(".info");
+          final File fnn = NullCheck.notNull(f);
+          return fnn.getName().endsWith(".info");
         }
       });
 
     if (files != null) {
       for (final File f : files) {
-        assert f != null;
-        final OptionType<DownloadInfo> iopt = DownloadInfo.loadFromFile(f);
+        final File fnn = NullCheck.notNull(f);
+        final OptionType<DownloadInfo> iopt = DownloadInfo.loadFromFile(fnn);
         if (iopt.isSome()) {
           final Some<DownloadInfo> some = (Some<DownloadInfo>) iopt;
           final DownloadInfo i = some.get();

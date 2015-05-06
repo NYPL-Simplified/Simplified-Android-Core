@@ -12,6 +12,10 @@ import com.squareup.picasso.Picasso.LoadedFrom;
 import com.squareup.picasso.Request;
 import com.squareup.picasso.RequestHandler;
 
+/**
+ * A Picasso request handler.
+ */
+
 public final class CatalogAcquisitionCoverGeneratorRequestHandler extends
   RequestHandler
 {
@@ -24,9 +28,9 @@ public final class CatalogAcquisitionCoverGeneratorRequestHandler extends
   }
 
   @Override public boolean canHandleRequest(
-    final @Nullable Request data)
+    final @Nullable Request data_mn)
   {
-    assert data != null;
+    final Request data = NullCheck.notNull(data_mn);
     final Uri u = data.uri;
     final URI uu = URI.create(u.toString());
     if ("generated-cover".equals(uu.getScheme())) {
@@ -36,11 +40,11 @@ public final class CatalogAcquisitionCoverGeneratorRequestHandler extends
   }
 
   @Override public Result load(
-    final @Nullable Request request,
+    final @Nullable Request request_mn,
     final int networkPolicy)
     throws IOException
   {
-    assert request != null;
+    final Request request = NullCheck.notNull(request_mn);
     final Bitmap b =
       this.generator.generateImage(
         URI.create(request.uri.toString()),

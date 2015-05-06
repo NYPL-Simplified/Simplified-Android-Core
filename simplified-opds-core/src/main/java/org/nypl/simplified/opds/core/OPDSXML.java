@@ -30,8 +30,7 @@ public final class OPDSXML
     final List<Element> xs = new ArrayList<Element>();
     final NodeList children = node.getChildNodes();
     for (int index = 0; index < children.getLength(); ++index) {
-      final Node child = children.item(index);
-      assert child != null;
+      final Node child = NullCheck.notNull(children.item(index));
       if (child instanceof Element) {
         if (OPDSXML.nodeHasName((Element) child, namespace, name)) {
           final Element e = OPDSXML.nodeAsElement(child);
@@ -56,8 +55,7 @@ public final class OPDSXML
     final List<Element> xs = new ArrayList<Element>();
     final NodeList children = node.getChildNodes();
     for (int index = 0; index < children.getLength(); ++index) {
-      final Node child = children.item(index);
-      assert child != null;
+      final Node child = NullCheck.notNull(children.item(index));
       if (child instanceof Element) {
         if (OPDSXML.nodeHasName((Element) child, namespace, name)) {
           final Element e = OPDSXML.nodeAsElement(child);
@@ -103,8 +101,7 @@ public final class OPDSXML
 
     final NodeList children = node.getChildNodes();
     for (int index = 0; index < children.getLength(); ++index) {
-      final Node child = children.item(index);
-      assert child != null;
+      final Node child = NullCheck.notNull(children.item(index));
       if (child instanceof Element) {
         if (OPDSXML.nodeHasName((Element) child, namespace, name)) {
           return Option.some(child.getTextContent().trim());
@@ -127,8 +124,7 @@ public final class OPDSXML
 
     final NodeList children = node.getChildNodes();
     for (int index = 0; index < children.getLength(); ++index) {
-      final Node child = children.item(index);
-      assert child != null;
+      final Node child = NullCheck.notNull(children.item(index));
       if (child instanceof Element) {
         if (OPDSXML.nodeHasName((Element) child, namespace, name)) {
           return OPDSXML.nodeAsElement(child);

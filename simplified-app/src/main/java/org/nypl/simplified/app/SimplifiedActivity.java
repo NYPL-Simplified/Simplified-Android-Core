@@ -13,6 +13,7 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
 import org.nypl.simplified.app.catalog.CatalogUpStackEntry;
 import org.nypl.simplified.app.catalog.HoldsActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.assertions.Assertions;
 import org.slf4j.Logger;
 
 import android.app.Activity;
@@ -43,10 +44,9 @@ import com.io7m.jnull.Nullable;
   Activity implements DrawerListener, OnItemClickListener
 {
   private static int          ACTIVITY_COUNT;
-
   private static final Logger LOG;
-
   private static final String NAVIGATION_DRAWER_OPEN_ID;
+
   static {
     LOG = LogUtilities.getLog(SimplifiedActivity.class);
   }
@@ -191,7 +191,13 @@ import com.io7m.jnull.Nullable;
       .entrySet()) {
       final Class<? extends Activity> c = NullCheck.notNull(e.getValue());
       final String n = NullCheck.notNull(e.getKey());
-      assert names_by_class.containsKey(c) == false;
+
+      Assertions.checkPrecondition(
+        names_by_class.containsKey(c) == false,
+        "%s contains key %s",
+        names_by_class,
+        c);
+
       names_by_class.put(c, n);
     }
 
@@ -378,9 +384,9 @@ import com.io7m.jnull.Nullable;
     final @Nullable Bundle state)
   {
     super.onSaveInstanceState(state);
-    assert state != null;
+    final Bundle state_nn = NullCheck.notNull(state);
     final DrawerLayout d = NullCheck.notNull(this.drawer);
-    state.putBoolean(
+    state_nn.putBoolean(
       SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID,
       d.isDrawerOpen(GravityCompat.START));
   }

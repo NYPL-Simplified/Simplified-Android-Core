@@ -387,7 +387,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public boolean onCreateOptionsMenu(
     final @Nullable Menu in_menu)
   {
-    assert in_menu != null;
+    final Menu menu_nn = NullCheck.notNull(in_menu);
 
     if (this.feed == null) {
       CatalogFeedActivity.LOG
@@ -399,9 +399,9 @@ import com.io7m.junreachable.UnreachableCodeException;
       .debug("menu creation requested and feed is present");
 
     final MenuInflater inflater = this.getMenuInflater();
-    inflater.inflate(R.menu.catalog, in_menu);
+    inflater.inflate(R.menu.catalog, menu_nn);
 
-    final MenuItem search_item = in_menu.findItem(R.id.catalog_action_search);
+    final MenuItem search_item = menu_nn.findItem(R.id.catalog_action_search);
 
     /**
      * If the feed actually has a search URI, then show the search field.
