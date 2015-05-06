@@ -370,14 +370,22 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull(this.drawer_names_by_class);
     final List<String> di = NullCheck.notNull(this.drawer_items);
 
-    final String name = NullCheck.notNull(dnbc.get(this.getClass()));
-    SimplifiedActivity.LOG.debug("restored drawer name: {}", name);
-    final int pos = di.indexOf(name);
-    SimplifiedActivity.LOG.debug("restored selected item: {}", pos);
-
     final ListView dl = NullCheck.notNull(this.drawer_list);
-    dl.setSelection(pos);
-    dl.setItemChecked(pos, true);
+    final Class<? extends SimplifiedActivity> c = this.getClass();
+    if (dnbc.containsKey(c)) {
+      final String name = NullCheck.notNull(dnbc.get(c));
+      SimplifiedActivity.LOG.debug("restored drawer name: {}", name);
+      final int pos = di.indexOf(name);
+      SimplifiedActivity.LOG.debug("restored selected item: {}", pos);
+
+      dl.setSelection(pos);
+      dl.setItemChecked(pos, true);
+    } else {
+      for (int index = 0; index < dnbc.size(); ++index) {
+        dl.setSelection(0);
+        dl.setItemChecked(index, false);
+      }
+    }
   }
 
   @Override protected void onSaveInstanceState(
