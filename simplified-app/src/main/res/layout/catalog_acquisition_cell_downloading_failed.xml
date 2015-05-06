@@ -2,18 +2,21 @@
 
 <!-- The cell contents shown when a book failed to download -->
 
-<LinearLayout
+<RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/cell_downloading_failed"
   android:layout_width="match_parent"
   android:layout_height="110dp"
-  android:orientation="vertical"
-  android:padding="8dp">
+  android:orientation="vertical">
 
   <TextView
     android:id="@+id/cell_downloading_failed_title"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentLeft="true"
+    android:layout_marginLeft="8dp"
+    android:layout_marginTop="8dp"
     android:text="Title"
     android:textColor="@color/normal_text_major"
     android:textStyle="bold" />
@@ -22,8 +25,19 @@
     android:id="@+id/cell_downloading_failed_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_below="@id/cell_downloading_failed_title"
+    android:layout_marginLeft="8dp"
+    android:layout_marginTop="8dp"
     android:textColor="@color/normal_text_major"
     android:text="Text"
     android:textSize="10sp" />
 
-</LinearLayout>
+  <LinearLayout
+    android:id="@+id/cell_downloading_failed_buttons"
+    android:layout_width="wrap_content"
+    android:layout_height="35dp"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentRight="true"
+    android:orientation="horizontal" />
+
+</RelativeLayout>

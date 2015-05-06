@@ -25,7 +25,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
@@ -161,24 +163,35 @@ import com.io7m.junreachable.UnreachableCodeException;
       return channel.size();
     }
 
-    private final OptionType<HTTPAuthType> auth;
-    private final byte[]                   buffer;
-    private volatile long                  bytes_cur;
-    private volatile long                  bytes_max;
-    private final DownloaderConfiguration  config;
-    private volatile @Nullable Throwable   error;
-    private final File                     file_data;
-    private final File                     file_data_tmp;
-    private final File                     file_info;
-    private final File                     file_info_tmp;
-    private final HTTPType                 http;
-    private final long                     id;
-    private final DownloadListenerType     listener;
-    private volatile DownloadStatus        status;
-    private final String                   title;
-    private final URI                      uri;
-    private final AtomicBoolean            want_cancel;
-    private final AtomicBoolean            want_pause;
+    private void setStatus(
+      final DownloadStatus s)
+    {
+      this.status.set(NullCheck.notNull(s));
+    }
+
+    private DownloadStatus getStatus()
+    {
+      return NullCheck.notNull(this.status.get());
+    }
+
+    private final OptionType<HTTPAuthType>        auth;
+    private final byte[]                          buffer;
+    private volatile long                         bytes_cur;
+    private volatile long                         bytes_max;
+    private final DownloaderConfiguration         config;
+    private volatile @Nullable Throwable          error;
+    private final File                            file_data;
+    private final File                            file_data_tmp;
+    private final File                            file_info;
+    private final File                            file_info_tmp;
+    private final HTTPType                        http;
+    private final long                            id;
+    private final DownloadListenerType            listener;
+    private final AtomicReference<DownloadStatus> status;
+    private final String                          title;
+    private final URI                             uri;
+    private final AtomicBoolean                   want_cancel;
+    private final AtomicBoolean                   want_pause;
 
     public DownloadTask(
       final HTTPType in_http,
@@ -196,7 +209,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.uri = NullCheck.notNull(in_uri);
       this.title = NullCheck.notNull(in_title);
       this.config = NullCheck.notNull(in_config);
-      this.status = NullCheck.notNull(in_status);
+      this.status =
+        new AtomicReference<DownloadStatus>(NullCheck.notNull(in_status));
       this.listener = NullCheck.notNull(in_listener);
 
       this.buffer = new byte[this.config.getBufferSize()];
@@ -230,7 +244,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.file_info_tmp.delete();
 
       try {
-        this.listener.downloadCleanedUp(this.getStatus());
+        this.listener.downloadCleanedUp(this.getStatusSnapshot());
       } catch (final Throwable x) {
         Downloader.LOG.error("{}: listener: ", this.id, x);
       }
@@ -256,7 +270,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               new BufferedOutputStream(fs, this.config.getBufferSize());
 
             try {
-              this.listener.downloadStartedReceivingData(this.getStatus());
+              this.listener.downloadStartedReceivingData(this
+                .getStatusSnapshot());
             } catch (final Throwable x) {
               Downloader.LOG.error("{}: listener: ", this.id, x);
             }
@@ -283,7 +298,7 @@ import com.io7m.junreachable.UnreachableCodeException;
                 }
 
                 try {
-                  this.listener.downloadResumed(this.getStatus());
+                  this.listener.downloadResumed(this.getStatusSnapshot());
                 } catch (final Throwable e) {
                   Downloader.LOG.error("{}: listener: ", this.id, e);
                 }
@@ -373,11 +388,11 @@ import com.io7m.junreachable.UnreachableCodeException;
           this.title,
           this.uri,
           this.bytes_max,
-          this.status);
+          this.getStatus());
       state.save(this.config.getDirectory());
     }
 
-    public DownloadSnapshot getStatus()
+    public DownloadSnapshot getStatusSnapshot()
     {
       return new DownloadSnapshot(
         this.bytes_max,
@@ -385,7 +400,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.id,
         this.title,
         this.uri,
-        this.status,
+        this.getStatus(),
         Option.of(this.error));
     }
 
@@ -406,16 +421,16 @@ import com.io7m.junreachable.UnreachableCodeException;
        * If there's actually something to do, do it.
        */
 
-      switch (this.status) {
+      switch (this.getStatus()) {
         case STATUS_IN_PROGRESS:
         case STATUS_IN_PROGRESS_RESUMED:
         {
           try {
-            switch (this.status) {
+            switch (this.getStatus()) {
               case STATUS_IN_PROGRESS:
               {
                 try {
-                  this.listener.downloadStarted(this.getStatus());
+                  this.listener.downloadStarted(this.getStatusSnapshot());
                 } catch (final Throwable e) {
                   Downloader.LOG.error("{}: listener: ", this.id, e);
                 }
@@ -424,7 +439,7 @@ import com.io7m.junreachable.UnreachableCodeException;
               case STATUS_IN_PROGRESS_RESUMED:
               {
                 try {
-                  this.listener.downloadResumed(this.getStatus());
+                  this.listener.downloadResumed(this.getStatusSnapshot());
                 } catch (final Throwable e) {
                   Downloader.LOG.error("{}: listener: ", this.id, e);
                 }
@@ -444,33 +459,33 @@ import com.io7m.junreachable.UnreachableCodeException;
             this.downloadFile();
 
             if (this.want_cancel.get()) {
-              this.status = DownloadStatus.STATUS_CANCELLED;
+              this.setStatus(DownloadStatus.STATUS_CANCELLED);
               try {
-                this.listener.downloadCancelled(this.getStatus());
+                this.listener.downloadCancelled(this.getStatusSnapshot());
               } catch (final Throwable e) {
                 Downloader.LOG.error("{}: listener: ", this.id, e);
               }
             } else if (this.want_pause.get()) {
-              this.status = DownloadStatus.STATUS_PAUSED;
+              this.setStatus(DownloadStatus.STATUS_PAUSED);
               try {
-                this.listener.downloadPaused(this.getStatus());
+                this.listener.downloadPaused(this.getStatusSnapshot());
               } catch (final Throwable e) {
                 Downloader.LOG.error("{}: listener: ", this.id, e);
               }
             } else {
-              this.status = DownloadStatus.STATUS_COMPLETED_NOT_TAKEN;
+              this.setStatus(DownloadStatus.STATUS_COMPLETED_NOT_TAKEN);
               try {
-                this.listener.downloadCompleted(this.getStatus());
+                this.listener.downloadCompleted(this.getStatusSnapshot());
               } catch (final Throwable e) {
                 Downloader.LOG.error("{}: listener: ", this.id, e);
               }
             }
 
           } catch (final Throwable e) {
-            this.status = DownloadStatus.STATUS_FAILED;
+            this.setStatus(DownloadStatus.STATUS_FAILED);
             this.error = e;
             try {
-              this.listener.downloadFailed(this.getStatus(), e);
+              this.listener.downloadFailed(this.getStatusSnapshot(), e);
             } catch (final Throwable x) {
               Downloader.LOG.error("{}: listener: ", this.id, e);
             }
@@ -500,7 +515,7 @@ import com.io7m.junreachable.UnreachableCodeException;
        * take it.
        */
 
-      switch (this.status) {
+      switch (this.getStatus()) {
         case STATUS_CANCELLED:
         case STATUS_FAILED:
         {
@@ -519,7 +534,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           if (this.file_data.isFile()) {
             try {
               this.listener.downloadCompletedTake(
-                this.getStatus(),
+                this.getStatusSnapshot(),
                 this.file_data);
 
               /**
@@ -528,11 +543,12 @@ import com.io7m.junreachable.UnreachableCodeException;
                */
 
               if (this.file_data.isFile() == false) {
-                this.status = DownloadStatus.STATUS_COMPLETED_TAKEN;
+                this.setStatus(DownloadStatus.STATUS_COMPLETED_TAKEN);
 
                 try {
                   Downloader.LOG.debug("{}: download taken", this.id);
-                  this.listener.downloadCompletedTaken(this.getStatus());
+                  this.listener.downloadCompletedTaken(this
+                    .getStatusSnapshot());
                 } catch (final Throwable x) {
                   Downloader.LOG.error("{}: listener: ", this.id, x);
                 }
@@ -543,8 +559,9 @@ import com.io7m.junreachable.UnreachableCodeException;
               try {
                 Downloader.LOG
                   .debug("{}: download take failed: ", this.id, x);
-                this.listener
-                  .downloadCompletedTakeFailed(this.getStatus(), x);
+                this.listener.downloadCompletedTakeFailed(
+                  this.getStatusSnapshot(),
+                  x);
               } catch (final Throwable xe) {
                 Downloader.LOG.error("listener: ", xe);
               }
@@ -773,7 +790,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final HTTPType                http;
   private final AtomicLong              id_pool;
   private final Map<Long, DownloadTask> tasks;
-  private final Map<URI, Long>          uris_in_progress;
+  private final Map<URI, Long>          tasks_by_uri;
 
   private Downloader(
     final ExecutorService in_exec,
@@ -788,7 +805,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     this.id_pool = new AtomicLong(0);
     this.tasks = new HashMap<Long, DownloadTask>();
-    this.uris_in_progress = new HashMap<URI, Long>();
+    this.tasks_by_uri = new HashMap<URI, Long>();
     this.futures = new HashMap<Long, Future<?>>();
 
     final File[] files =
@@ -825,7 +842,6 @@ import com.io7m.junreachable.UnreachableCodeException;
             case STATUS_IN_PROGRESS_RESUMED:
             {
               s = DownloadStatus.STATUS_IN_PROGRESS_RESUMED;
-              this.uris_in_progress.put(i.uri, Long.valueOf(i.id));
               break;
             }
           }
@@ -851,13 +867,42 @@ import com.io7m.junreachable.UnreachableCodeException;
       final Long lid = Long.valueOf(id);
       if (this.tasks.containsKey(lid)) {
         final DownloadTask t = NullCheck.notNull(this.tasks.get(lid));
-        final Future<?> f = NullCheck.notNull(this.futures.get(lid));
-        if (t.status.isComplete()) {
-          this.tasks.remove(lid);
-          this.futures.remove(lid);
+        if (t.getStatus().isComplete()) {
+          this.stopAndRemoveTask(t, true);
+        }
+      }
+
+      Assertions.checkInvariant(
+        this.futures.containsKey(lid) == false,
+        "Futures do not contain %s",
+        lid);
+      Assertions.checkInvariant(
+        this.tasks.containsKey(lid) == false,
+        "Tasks do not contain %s",
+        lid);
+      Assertions.checkInvariant(
+        this.tasks_by_uri.values().contains(lid) == false,
+        "URIs do not contain %s",
+        lid);
+    }
+  }
+
+  private void stopAndRemoveTask(
+    final DownloadTask t,
+    final boolean cancel_future)
+  {
+    synchronized (this.tasks) {
+      if (cancel_future) {
+        if (this.futures.containsKey(t.id)) {
+          final Future<?> f = NullCheck.notNull(this.futures.get(t.id));
           f.cancel(true);
         }
       }
+
+      Downloader.LOG.debug("remove: {}", t.id);
+      this.tasks.remove(t.id);
+      this.futures.remove(t.id);
+      this.tasks_by_uri.remove(t.uri);
     }
   }
 
@@ -869,11 +914,14 @@ import com.io7m.junreachable.UnreachableCodeException;
     synchronized (this.tasks) {
       final Long lid = Long.valueOf(id);
       if (this.tasks.containsKey(lid)) {
+        Assertions.checkInvariant(
+          this.futures.containsKey(lid),
+          "Futures contains %s",
+          lid);
+
         final DownloadTask t = NullCheck.notNull(this.tasks.get(lid));
         t.cancel();
-        this.uris_in_progress.remove(t.uri);
-        this.tasks.remove(lid);
-        this.futures.remove(lid);
+        this.stopAndRemoveTask(t, false);
       }
     }
   }
@@ -884,10 +932,16 @@ import com.io7m.junreachable.UnreachableCodeException;
       final Iterator<Long> iter = this.tasks.keySet().iterator();
       while (iter.hasNext()) {
         final Long id = iter.next();
-        final Future<?> f = this.futures.get(id);
-        final DownloadTask task = this.tasks.get(id);
+
+        Assertions.checkInvariant(
+          this.futures.containsKey(id),
+          "Futures contains %s",
+          id);
+
+        final Future<?> f = NullCheck.notNull(this.futures.get(id));
         f.cancel(true);
-        this.uris_in_progress.remove(Long.valueOf(task.id));
+
+        final DownloadTask task = NullCheck.notNull(this.tasks.get(id));
         this.downloadEnqueueWithID(
           task.id,
           task.auth,
@@ -911,10 +965,20 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(listener);
 
     synchronized (this.tasks) {
-      if (this.uris_in_progress.containsKey(uri)) {
-        final Long rid = this.uris_in_progress.get(uri);
+      if (this.tasks_by_uri.containsKey(uri)) {
+        final Long rid = NullCheck.notNull(this.tasks_by_uri.get(uri));
+
+        Assertions.checkPrecondition(
+          this.tasks.containsKey(rid),
+          "Tasks contain %s",
+          rid);
+        Assertions.checkPrecondition(
+          this.futures.containsKey(rid),
+          "Futures contain %s",
+          rid);
+
         final DownloadTask t = this.tasks.get(rid);
-        switch (t.status) {
+        switch (t.getStatus()) {
 
         /**
          * A cancelled task cannot be a "URI in progress".
@@ -945,13 +1009,12 @@ import com.io7m.junreachable.UnreachableCodeException;
           case STATUS_COMPLETED_NOT_TAKEN:
           {
             this.downloadAcknowledge(rid.longValue());
-            this.uris_in_progress.put(uri, Long.valueOf(rid));
             this.downloadEnqueueWithID(
               rid,
               t.auth,
               t.uri,
               t.title,
-              t.status,
+              t.getStatus(),
               listener);
             return rid;
           }
@@ -970,7 +1033,6 @@ import com.io7m.junreachable.UnreachableCodeException;
       }
 
       final long id = this.id_pool.incrementAndGet();
-      this.uris_in_progress.put(uri, Long.valueOf(id));
       this.downloadEnqueueWithID(
         id,
         auth,
@@ -1004,10 +1066,43 @@ import com.io7m.junreachable.UnreachableCodeException;
           status,
           this.config,
           listener);
+
       final Long lid = Long.valueOf(id);
-      this.tasks.put(lid, d);
       final Future<?> f = this.exec.submit(d);
+      this.tasks.put(lid, d);
       this.futures.put(lid, f);
+      this.tasks_by_uri.put(uri, lid);
+
+      Downloader.LOG.debug("enqueue task:   {} → {}", lid, d);
+      Downloader.LOG.debug("enqueue future: {} → {}", lid, f);
+      Downloader.LOG.debug("enqueue uri:    {} → {}", uri, lid);
+
+      this.checkTaskInvariants(id, uri);
+    }
+  }
+
+  private void checkTaskInvariants(
+    final long id,
+    final URI uri)
+  {
+    synchronized (this.tasks) {
+      Assertions.checkInvariant(
+        this.futures.containsKey(id),
+        "Futures contain %s",
+        id);
+      Assertions.checkInvariant(
+        this.tasks.containsKey(id),
+        "Tasks contain %s",
+        id);
+      Assertions.checkInvariant(
+        this.tasks_by_uri.containsKey(uri),
+        "URIs contain %s",
+        uri);
+      Assertions.checkInvariant(
+        this.tasks_by_uri.get(uri) == id,
+        "URI %s == %s",
+        uri,
+        id);
     }
   }
 
@@ -1019,6 +1114,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       if (this.tasks.containsKey(lid)) {
         final DownloadTask t = NullCheck.notNull(this.tasks.get(lid));
         t.pause();
+        this.checkTaskInvariants(id, t.uri);
       }
     }
   }
@@ -1030,7 +1126,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final Long lid = Long.valueOf(id);
       if (this.tasks.containsKey(lid)) {
         final DownloadTask t = NullCheck.notNull(this.tasks.get(lid));
-        if (t.status == DownloadStatus.STATUS_PAUSED) {
+        if (t.getStatus() == DownloadStatus.STATUS_PAUSED) {
           this.downloadEnqueueWithID(
             t.id,
             t.auth,
@@ -1049,8 +1145,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     synchronized (this.tasks) {
       final Long lid = Long.valueOf(id);
       if (this.tasks.containsKey(lid)) {
-        final DownloadTask task = this.tasks.get(id);
-        final DownloadSnapshot status = task.getStatus();
+        final DownloadTask task = NullCheck.notNull(this.tasks.get(id));
+        final DownloadSnapshot status = task.getStatusSnapshot();
         return Option.some(status);
       }
       return Option.none();
@@ -1066,8 +1162,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       final Iterator<Long> iter = this.tasks.keySet().iterator();
       while (iter.hasNext()) {
         final Long id = iter.next();
-        final DownloadTask task = this.tasks.get(id);
-        final DownloadSnapshot status = task.getStatus();
+        final DownloadTask task = NullCheck.notNull(this.tasks.get(id));
+        final DownloadSnapshot status = task.getStatusSnapshot();
         r.put(id, status);
       }
     }

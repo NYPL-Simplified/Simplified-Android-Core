@@ -104,6 +104,7 @@ import com.squareup.picasso.Callback;
   private final TextView                                  cell_downloading_authors;
   private final Button                                    cell_downloading_cancel;
   private final ViewGroup                                 cell_downloading_failed;
+  private final ViewGroup                                 cell_downloading_failed_buttons;
   private final TextView                                  cell_downloading_failed_text;
   private final TextView                                  cell_downloading_failed_title;
   private final TextView                                  cell_downloading_percent_text;
@@ -168,6 +169,9 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_failed_title =
       NullCheck.notNull((TextView) this.cell_downloading_failed
         .findViewById(R.id.cell_downloading_failed_title));
+    this.cell_downloading_failed_buttons =
+      NullCheck.notNull((ViewGroup) this.cell_downloading_failed
+        .findViewById(R.id.cell_downloading_failed_buttons));
 
     this.cell_book =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_book));
@@ -327,7 +331,28 @@ import com.squareup.picasso.Callback;
 
     final DownloadSnapshot snap = f.getDownloadSnapshot();
     this.cell_downloading_failed_title.setText("Download failed");
-    this.cell_downloading_failed_text.setText(snap.getError().toString());
+
+    final OptionType<Throwable> e_opt = snap.getError();
+    if (e_opt.isSome()) {
+      final Throwable e = ((Some<Throwable>) e_opt).get();
+      this.cell_downloading_failed_text.setText(e.getMessage());
+    } else {
+      this.cell_downloading_failed_text.setText("");
+    }
+
+    final CatalogBookDownloadErrorDismissButton dismiss =
+      new CatalogBookDownloadErrorDismissButton(this.activity);
+    dismiss.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        CatalogAcquisitionCellView.this.books.bookDownloadAcknowledge(f
+          .getID());
+      }
+    });
+
+    this.cell_downloading_failed_buttons.removeAllViews();
+    this.cell_downloading_failed_buttons.addView(dismiss);
     return Unit.unit();
   }
 
