@@ -1,8 +1,14 @@
 package org.nypl.simplified.app.reader;
 
+import org.nypl.simplified.assertions.Assertions;
+
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+
+/**
+ * Functions for producing specific color filter matrices.
+ */
 
 public final class ReaderColorMatrix extends ColorMatrix
 {
@@ -12,10 +18,10 @@ public final class ReaderColorMatrix extends ColorMatrix
     final float row_2[],
     final float row_3[])
   {
-    assert row_0.length == 5;
-    assert row_1.length == 5;
-    assert row_2.length == 5;
-    assert row_3.length == 5;
+    Assertions.checkPrecondition(row_0.length == 5, "Row 0 has 5 elements");
+    Assertions.checkPrecondition(row_1.length == 5, "Row 1 has 5 elements");
+    Assertions.checkPrecondition(row_2.length == 5, "Row 2 has 5 elements");
+    Assertions.checkPrecondition(row_3.length == 5, "Row 3 has 5 elements");
 
     final float[] actual = new float[4 * 5];
     int actual_index = 0;
@@ -35,7 +41,12 @@ public final class ReaderColorMatrix extends ColorMatrix
       actual[actual_index] = row_3[index];
       actual_index = actual_index + 1;
     }
-    assert actual_index == (4 * 5);
+
+    Assertions.checkInvariant(
+      actual_index == (4 * 5),
+      "%d == %d",
+      actual_index,
+      4 * 5);
     return new ReaderColorMatrix(actual);
   }
 

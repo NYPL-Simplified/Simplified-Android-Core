@@ -10,6 +10,7 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
@@ -498,8 +499,11 @@ import com.squareup.picasso.Callback;
     final @Nullable Observable observable,
     final @Nullable Object data)
   {
-    assert observable == this.books;
-    assert data instanceof BookID;
+    Assertions.checkPrecondition(
+      data instanceof BookID,
+      "%s instanceof %s",
+      data,
+      BookID.class);
 
     CatalogAcquisitionCellView.LOG.debug("update: {}", data);
 

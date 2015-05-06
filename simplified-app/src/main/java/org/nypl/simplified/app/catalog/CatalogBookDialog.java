@@ -70,7 +70,6 @@ public final class CatalogBookDialog extends DialogFragment implements
   BookStatusDownloadingMatcherType<Unit, UnreachableCodeException>
 {
   private static final String ACQUISITION_ENTRY_ID;
-
   private static final Logger LOG;
 
   static {
@@ -260,12 +259,11 @@ public final class CatalogBookDialog extends DialogFragment implements
   }
 
   @Override public View onCreateView(
-    final @Nullable LayoutInflater inflater,
+    final @Nullable LayoutInflater inflater_mn,
     final @Nullable ViewGroup container,
     final @Nullable Bundle state)
   {
-    assert inflater != null;
-
+    final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
     final Resources rr = NullCheck.notNull(this.getResources());
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
 

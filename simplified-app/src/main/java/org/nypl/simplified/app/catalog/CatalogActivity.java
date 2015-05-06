@@ -83,9 +83,9 @@ public abstract class CatalogActivity extends SimplifiedActivity
   }
 
   @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item)
+    final @Nullable MenuItem item_mn)
   {
-    assert item != null;
+    final MenuItem item = NullCheck.notNull(item_mn);
     switch (item.getItemId()) {
 
     /**

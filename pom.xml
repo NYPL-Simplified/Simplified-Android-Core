@@ -17,6 +17,7 @@
   <modules>
     <module>simplified-app-tests</module>
     <module>simplified-app</module>
+    <module>simplified-assert</module>
     <module>simplified-books-core</module>
     <module>simplified-books-tests-android</module>
     <module>simplified-books-tests-junit4</module>

@@ -33,12 +33,11 @@ public final class ReaderSettingsDialog extends DialogFragment
   }
 
   @Override public View onCreateView(
-    final @Nullable LayoutInflater inflater,
+    final @Nullable LayoutInflater inflater_mn,
     final @Nullable ViewGroup container,
     final @Nullable Bundle state)
   {
-    assert inflater != null;
-
+    final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
     final LinearLayout layout =
       NullCheck.notNull((LinearLayout) inflater.inflate(
         R.layout.reader_settings,
