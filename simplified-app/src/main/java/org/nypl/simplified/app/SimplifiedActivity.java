@@ -2,8 +2,11 @@ package org.nypl.simplified.app;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.nypl.simplified.app.catalog.BooksActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
@@ -64,9 +67,10 @@ import com.io7m.jnull.Nullable;
   private @Nullable FrameLayout                             content_frame;
   private @Nullable DrawerLayout                            drawer;
   private @Nullable Map<String, FunctionType<Bundle, Unit>> drawer_arg_funcs;
-  private @Nullable Map<String, Class<? extends Activity>>  drawer_classes;
+  private @Nullable Map<String, Class<? extends Activity>>  drawer_classes_by_name;
   private @Nullable ArrayList<String>                       drawer_items;
   private @Nullable ListView                                drawer_list;
+  private @Nullable Map<Class<? extends Activity>, String>  drawer_names_by_class;
   private boolean                                           finishing;
   private int                                               selected;
 
@@ -171,15 +175,25 @@ import com.io7m.jnull.Nullable;
     dl.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_item, di));
 
     /**
-     * Set up a map of names to classes.
+     * Set up a map of names ↔ classes.
      */
 
-    final Map<String, Class<? extends Activity>> dc =
+    final Map<String, Class<? extends Activity>> classes_by_name =
       new HashMap<String, Class<? extends Activity>>();
-    dc.put(books_name, CatalogFeedActivity.class);
-    dc.put(catalog_name, CatalogFeedActivity.class);
-    dc.put(holds_name, HoldsActivity.class);
-    dc.put(settings_name, SettingsActivity.class);
+    classes_by_name.put(books_name, BooksActivity.class);
+    classes_by_name.put(catalog_name, CatalogFeedActivity.class);
+    classes_by_name.put(holds_name, HoldsActivity.class);
+    classes_by_name.put(settings_name, SettingsActivity.class);
+
+    final Map<Class<? extends Activity>, String> names_by_class =
+      new HashMap<Class<? extends Activity>, String>();
+    for (final Entry<String, Class<? extends Activity>> e : classes_by_name
+      .entrySet()) {
+      final Class<? extends Activity> c = NullCheck.notNull(e.getValue());
+      final String n = NullCheck.notNull(e.getKey());
+      assert names_by_class.containsKey(c) == false;
+      names_by_class.put(c, n);
+    }
 
     /**
      * Set up a map of part names to functions that configure argument
@@ -243,7 +257,8 @@ import com.io7m.jnull.Nullable;
     }
 
     this.drawer_items = di;
-    this.drawer_classes = dc;
+    this.drawer_classes_by_name = classes_by_name;
+    this.drawer_names_by_class = names_by_class;
     this.drawer_arg_funcs = da;
     this.drawer = d;
     this.drawer_list = dl;
@@ -286,7 +301,7 @@ import com.io7m.jnull.Nullable;
     if (this.selected != -1) {
       final ArrayList<String> di = NullCheck.notNull(this.drawer_items);
       final Map<String, Class<? extends Activity>> dc =
-        NullCheck.notNull(this.drawer_classes);
+        NullCheck.notNull(this.drawer_classes_by_name);
       final Map<String, FunctionType<Bundle, Unit>> fas =
         NullCheck.notNull(this.drawer_arg_funcs);
 
@@ -338,6 +353,25 @@ import com.io7m.jnull.Nullable;
     final DrawerLayout d = NullCheck.notNull(this.drawer);
     d.closeDrawer(GravityCompat.START);
     this.selected = position;
+  }
+
+  @Override protected void onResume()
+  {
+    super.onResume();
+    SimplifiedActivity.LOG.debug("onResume: {}", this);
+
+    final Map<Class<? extends Activity>, String> dnbc =
+      NullCheck.notNull(this.drawer_names_by_class);
+    final List<String> di = NullCheck.notNull(this.drawer_items);
+
+    final String name = NullCheck.notNull(dnbc.get(this.getClass()));
+    SimplifiedActivity.LOG.debug("restored drawer name: {}", name);
+    final int pos = di.indexOf(name);
+    SimplifiedActivity.LOG.debug("restored selected item: {}", pos);
+
+    final ListView dl = NullCheck.notNull(this.drawer_list);
+    dl.setSelection(pos);
+    dl.setItemChecked(pos, true);
   }
 
   @Override protected void onSaveInstanceState(

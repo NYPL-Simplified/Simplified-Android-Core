@@ -58,7 +58,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-@SuppressWarnings("synthetic-access") public final class CatalogFeedActivity extends
+@SuppressWarnings("synthetic-access") public class CatalogFeedActivity extends
   CatalogActivity implements
   OPDSFeedLoadListenerType,
   OPDSFeedMatcherType<Unit, UnreachableCodeException>,
