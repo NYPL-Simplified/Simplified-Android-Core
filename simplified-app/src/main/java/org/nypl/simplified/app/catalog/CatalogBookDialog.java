@@ -95,8 +95,12 @@ public final class CatalogBookDialog extends DialogFragment implements
   private @Nullable ViewGroup                book_buttons;
   private @Nullable ViewGroup                book_downloading;
   private @Nullable Button                   book_downloading_cancel;
+  private @Nullable ViewGroup                book_downloading_failed;
+  private @Nullable Button                   book_downloading_failed_dismiss;
+  private @Nullable TextView                 book_downloading_failed_text;
   private @Nullable TextView                 book_downloading_percent_text;
   private @Nullable ProgressBar              book_downloading_progress;
+  private @Nullable TextView                 debug_status;
   private @Nullable OPDSAcquisitionFeedEntry entry;
 
   public CatalogBookDialog()
@@ -107,6 +111,8 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusDownloadCancelled(
     final BookStatusDownloadCancelled c)
   {
+    this.setStatus("cancelled");
+
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
@@ -120,11 +126,15 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusDownloaded(
     final BookStatusDownloaded d)
   {
+    this.setStatus("downloaded");
+
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.GONE);
 
     final Activity act = NullCheck.notNull(this.getActivity());
     bb.addView(new CatalogBookDeleteButton(act, d.getID()));
@@ -135,11 +145,39 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusDownloadFailed(
     final BookStatusDownloadFailed f)
   {
+    this.setStatus("download-failed");
+
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.VISIBLE);
+
+    final TextView ft = NullCheck.notNull(this.book_downloading_failed_text);
+    final DownloadSnapshot snap = f.getDownloadSnapshot();
+    final OptionType<Throwable> e_opt = snap.getError();
+    if (e_opt.isSome()) {
+      final Throwable e = ((Some<Throwable>) e_opt).get();
+      ft.setText(e.getMessage());
+    } else {
+      ft.setText("");
+    }
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final BooksType books = app.getBooks();
+
+    final Button button =
+      NullCheck.notNull(this.book_downloading_failed_dismiss);
+    button.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        books.bookDownloadAcknowledge(f.getID());
+      }
+    });
 
     return Unit.unit();
   }
@@ -153,17 +191,22 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusDownloadingPaused(
     final BookStatusDownloadingPaused p)
   {
+    this.setStatus("downloading-paused");
     return Unit.unit();
   }
 
   @Override public Unit onBookStatusDownloadInProgress(
     final BookStatusDownloadInProgress d)
   {
+    this.setStatus("download-in-progress");
+
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.VISIBLE);
+    bdf.setVisibility(View.GONE);
 
     final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogAcquisitionDownloadProgressBar.setProgressBar(
@@ -190,13 +233,17 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
+    this.setStatus("loaned");
+
     final SimplifiedCatalogAppServicesType cs =
       Simplified.getCatalogAppServices();
 
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.GONE);
 
     CatalogAcquisitionButtons.addButtons(
       NullCheck.notNull(this.getActivity()),
@@ -215,13 +262,17 @@ public final class CatalogBookDialog extends DialogFragment implements
 
   @Override public Unit onBookStatusRequestingDownload(
     final BookStatusRequestingDownload d)
-    throws UnreachableCodeException
   {
+    this.setStatus("requesting-download");
+
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.GONE);
+
     bb.removeAllViews();
     return Unit.unit();
   }
@@ -229,11 +280,16 @@ public final class CatalogBookDialog extends DialogFragment implements
   @Override public Unit onBookStatusRequestingLoan(
     final BookStatusRequestingLoan s)
   {
+    this.setStatus("requesting-loan");
+
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.GONE);
+
     bb.removeAllViews();
     return Unit.unit();
   }
@@ -273,6 +329,20 @@ public final class CatalogBookDialog extends DialogFragment implements
         container,
         false));
 
+    /**
+     * Show the book status if status debugging is enabled.
+     */
+
+    final TextView in_debug_status =
+      NullCheck.notNull((TextView) layout
+        .findViewById(R.id.book_debug_status));
+    if (rr.getBoolean(R.bool.debug_catalog_cell_view_states)) {
+      in_debug_status.setVisibility(View.VISIBLE);
+    } else {
+      in_debug_status.setVisibility(View.GONE);
+    }
+    this.debug_status = in_debug_status;
+
     final ViewGroup header =
       NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_header));
     final ViewGroup header_left =
@@ -311,6 +381,17 @@ public final class CatalogBookDialog extends DialogFragment implements
     this.book_downloading_cancel =
       NullCheck.notNull((Button) bd
         .findViewById(R.id.book_downloading_cancel));
+
+    final ViewGroup bdf =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.book_downloading_failed));
+    this.book_downloading_failed_text =
+      NullCheck.notNull((TextView) bdf
+        .findViewById(R.id.book_downloading_failed_text));
+    this.book_downloading_failed_dismiss =
+      NullCheck.notNull((Button) bdf
+        .findViewById(R.id.book_downloading_failed_dismiss));
+    this.book_downloading_failed = bdf;
 
     this.book_buttons =
       NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_buttons));
@@ -451,9 +532,11 @@ public final class CatalogBookDialog extends DialogFragment implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bd.setVisibility(View.GONE);
     bb.setVisibility(View.VISIBLE);
+    bdf.setVisibility(View.GONE);
     bb.removeAllViews();
 
     CatalogAcquisitionButtons.addButtons(
@@ -462,6 +545,15 @@ public final class CatalogBookDialog extends DialogFragment implements
       books,
       book_id,
       e);
+  }
+
+  private void setStatus(
+    final String name)
+  {
+    final Resources rr = NullCheck.notNull(this.getResources());
+    if (rr.getBoolean(R.bool.debug_catalog_cell_view_states)) {
+      NullCheck.notNull(this.debug_status).setText(NullCheck.notNull(name));
+    }
   }
 
   @Override public void update(

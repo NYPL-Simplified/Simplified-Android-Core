@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <!-- If true, show the status of books in acquisition feed cells. -->
+  <!-- If true, show the status of books in acquisition feed cells, and book detail 
+    activities/dialogs. -->
   <bool name="debug_catalog_cell_view_states">false</bool>
 
   <!-- Set the time to sleep in milliseconds between attempts to read data from the 

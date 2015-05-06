@@ -124,9 +124,13 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   private @Nullable ViewGroup                book_buttons;
   private @Nullable ViewGroup                book_downloading;
   private @Nullable Button                   book_downloading_cancel;
+  private @Nullable ViewGroup                book_downloading_failed;
+  private @Nullable Button                   book_downloading_failed_dismiss;
+  private @Nullable TextView                 book_downloading_failed_text;
   private @Nullable TextView                 book_downloading_percent_text;
   private @Nullable ProgressBar              book_downloading_progress;
   private @Nullable BooksType                books;
+  private @Nullable TextView                 debug_status;
   private @Nullable OPDSAcquisitionFeedEntry entry;
 
   private OPDSAcquisitionFeedEntry getFeedEntry()
@@ -157,9 +161,11 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.VISIBLE);
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.GONE);
 
     bb.addView(new CatalogBookDeleteButton(this, d.getID()));
     bb.addView(new CatalogBookReadButton(this, d.getID()));
@@ -171,9 +177,32 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.VISIBLE);
+
+    final TextView ft = NullCheck.notNull(this.book_downloading_failed_text);
+    final DownloadSnapshot snap = f.getDownloadSnapshot();
+    final OptionType<Throwable> e_opt = snap.getError();
+    if (e_opt.isSome()) {
+      final Throwable e = ((Some<Throwable>) e_opt).get();
+      ft.setText(e.getMessage());
+    } else {
+      ft.setText("");
+    }
+
+    final BooksType b = NullCheck.notNull(this.books);
+    final Button button =
+      NullCheck.notNull(this.book_downloading_failed_dismiss);
+    button.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        b.bookDownloadAcknowledge(f.getID());
+      }
+    });
 
     return Unit.unit();
   }
@@ -196,9 +225,11 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.VISIBLE);
+    bdf.setVisibility(View.GONE);
 
     final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogAcquisitionDownloadProgressBar.setProgressBar(
@@ -224,8 +255,10 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.GONE);
 
     CatalogAcquisitionButtons.addButtons(
       this,
@@ -248,9 +281,12 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
+
     final BooksType in_books = NullCheck.notNull(this.books);
 
     bd.setVisibility(View.GONE);
+    bdf.setVisibility(View.GONE);
     bb.setVisibility(View.VISIBLE);
     bb.removeAllViews();
 
@@ -262,10 +298,12 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
     bb.removeAllViews();
+    bdf.setVisibility(View.GONE);
     return Unit.unit();
   }
 
@@ -274,10 +312,12 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   {
     final ViewGroup bb = NullCheck.notNull(this.book_buttons);
     final ViewGroup bd = NullCheck.notNull(this.book_downloading);
+    final ViewGroup bdf = NullCheck.notNull(this.book_downloading_failed);
 
     bb.setVisibility(View.GONE);
     bd.setVisibility(View.GONE);
     bb.removeAllViews();
+    bdf.setVisibility(View.GONE);
     return Unit.unit();
   }
 
@@ -333,6 +373,20 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     final OPDSAcquisitionFeedEntry e = NullCheck.notNull(this.entry);
     final Resources rr = NullCheck.notNull(this.getResources());
 
+    /**
+     * Show the book status if status debugging is enabled.
+     */
+
+    final TextView in_debug_status =
+      NullCheck.notNull((TextView) layout
+        .findViewById(R.id.book_debug_status));
+    if (rr.getBoolean(R.bool.debug_catalog_cell_view_states)) {
+      in_debug_status.setVisibility(View.VISIBLE);
+    } else {
+      in_debug_status.setVisibility(View.GONE);
+    }
+    this.debug_status = in_debug_status;
+
     final ViewGroup header =
       NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_header));
     final ViewGroup header_left =
@@ -371,6 +425,17 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     this.book_downloading_cancel =
       NullCheck.notNull((Button) bd
         .findViewById(R.id.book_downloading_cancel));
+
+    final ViewGroup bdf =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.book_downloading_failed));
+    this.book_downloading_failed_text =
+      NullCheck.notNull((TextView) bdf
+        .findViewById(R.id.book_downloading_failed_text));
+    this.book_downloading_failed_dismiss =
+      NullCheck.notNull((Button) bdf
+        .findViewById(R.id.book_downloading_failed_dismiss));
+    this.book_downloading_failed = bdf;
 
     this.book_buttons =
       NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_buttons));

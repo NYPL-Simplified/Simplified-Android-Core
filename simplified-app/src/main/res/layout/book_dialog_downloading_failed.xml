@@ -1,39 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- The cell contents shown when a book failed to download -->
-
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/cell_downloading_failed"
+  android:id="@+id/book_downloading_failed"
+  android:layout_margin="16dp"
   android:layout_width="match_parent"
-  android:layout_height="110dp"
-  android:orientation="vertical">
+  android:layout_height="110dp">
 
   <TextView
-    android:id="@+id/cell_downloading_failed_title"
+    android:id="@+id/book_downloading_failed_title"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
     android:layout_alignParentLeft="true"
-    android:layout_marginLeft="8dp"
-    android:layout_marginTop="8dp"
     android:text="@string/catalog_download_failed"
     android:textColor="@color/normal_text_major"
     android:textStyle="bold" />
 
   <TextView
-    android:id="@+id/cell_downloading_failed_text"
+    android:id="@+id/book_downloading_failed_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@id/cell_downloading_failed_title"
-    android:layout_marginLeft="8dp"
-    android:layout_marginTop="8dp"
+    android:layout_below="@id/book_downloading_failed_title"
     android:textColor="@color/normal_text_major"
     android:text="Text"
     android:textSize="10sp" />
 
   <Button
-    android:id="@+id/cell_downloading_failed_dismiss"
+    android:id="@+id/book_downloading_failed_dismiss"
     android:layout_alignParentRight="true"
     android:layout_alignParentBottom="true"
     android:background="@drawable/simplified_button"
@@ -41,6 +35,6 @@
     android:layout_width="wrap_content"
     android:layout_height="35dp"
     android:textSize="12sp"
-    android:text="@string/catalog_book_error_dismiss"/>
+    android:text="@string/catalog_book_error_dismiss" />
 
 </RelativeLayout>
