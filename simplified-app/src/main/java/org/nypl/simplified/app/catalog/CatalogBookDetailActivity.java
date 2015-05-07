@@ -28,6 +28,7 @@ import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
 import android.app.Activity;
@@ -49,7 +50,6 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -97,7 +97,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   public static void setActivityArguments(
     final Bundle b,
     final boolean drawer_open,
-    final ImmutableList<CatalogUpStackEntry> up_stack,
+    final ImmutableStack<CatalogUpStackEntry> up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
     NullCheck.notNull(b);
@@ -110,7 +110,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
 
   public static void startNewActivity(
     final Activity from,
-    final ImmutableList<CatalogUpStackEntry> up_stack,
+    final ImmutableStack<CatalogUpStackEntry> up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
     final Bundle b = new Bundle();

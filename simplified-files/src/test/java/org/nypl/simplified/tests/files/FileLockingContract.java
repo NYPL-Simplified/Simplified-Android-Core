@@ -1,14 +1,14 @@
-package org.nypl.simplified.books.tests.contracts;
+package org.nypl.simplified.tests.files;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.nypl.simplified.books.core.FileLocking;
+import org.nypl.simplified.files.DirectoryUtilities;
+import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
-import com.google.common.io.Files;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 
@@ -22,8 +22,7 @@ public final class FileLockingContract implements FileLockingContractType
   @Override public void testLocking0()
     throws Exception
   {
-    final File tmp = Files.createTempDir();
-    tmp.mkdirs();
+    final File tmp = DirectoryUtilities.directoryCreateTemporary();
     final File lock = new File(tmp, "lock.txt");
     final AtomicBoolean locked = new AtomicBoolean(false);
 
@@ -47,8 +46,7 @@ public final class FileLockingContract implements FileLockingContractType
   @Override public void testLocking1()
     throws Exception
   {
-    final File tmp = Files.createTempDir();
-    tmp.mkdirs();
+    final File tmp = DirectoryUtilities.directoryCreateTemporary();
     final File lock = new File(tmp, "lock.txt");
 
     final AtomicBoolean failed = new AtomicBoolean(false);

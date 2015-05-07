@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.nypl.simplified.app.ExpensiveStoppableType;
@@ -32,7 +33,6 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -60,14 +60,14 @@ public final class CatalogAcquisitionFeed implements
     return (total_count - first_visible_item) <= 50;
   }
 
-  private final Activity                                    activity;
-  private final ArrayAdapter<OPDSAcquisitionFeedEntry>      adapter;
-  private final BooksType                                   books;
-  private final Map<String, Unit>                           entries_received;
-  private final CatalogAcquisitionFeedListenerType          listener;
-  private final OPDSFeedLoaderType                          loader;
-  private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
-  private final AtomicReference<OptionType<URI>>            uri_next;
+  private final Activity                               activity;
+  private final ArrayAdapter<OPDSAcquisitionFeedEntry> adapter;
+  private final BooksType                              books;
+  private final Map<String, Unit>                      entries_received;
+  private final CatalogAcquisitionFeedListenerType     listener;
+  private final OPDSFeedLoaderType                     loader;
+  private volatile @Nullable Future<Unit>              loading;
+  private final AtomicReference<OptionType<URI>>       uri_next;
 
   public CatalogAcquisitionFeed(
     final Context in_context,
@@ -105,7 +105,7 @@ public final class CatalogAcquisitionFeed implements
 
   @Override public void expensiveStop()
   {
-    final ListenableFuture<OPDSFeedType> l = this.loading;
+    final Future<Unit> l = this.loading;
     if (l != null) {
       l.cancel(true);
       this.loading = null;
@@ -183,7 +183,7 @@ public final class CatalogAcquisitionFeed implements
     return NullCheck.notNull(this.adapter).isEnabled(position);
   }
 
-  private @Nullable ListenableFuture<OPDSFeedType> loadNext(
+  private @Nullable Future<Unit> loadNext(
     final AtomicReference<OptionType<URI>> next_ref)
   {
     final OptionType<URI> next_opt = next_ref.get();
@@ -192,7 +192,6 @@ public final class CatalogAcquisitionFeed implements
       final URI next = next_some.get();
 
       CatalogAcquisitionFeed.LOG.debug("loading next feed: %s", next);
-
       return this.loader.fromURI(next, this);
     }
 
@@ -269,7 +268,7 @@ public final class CatalogAcquisitionFeed implements
 
     if (CatalogAcquisitionFeed
       .shouldLoadNext(first_visible_item, total_count)) {
-      final ListenableFuture<OPDSFeedType> l = this.loading;
+      final Future<Unit> l = this.loading;
       if (l == null) {
         this.loading = this.loadNext(this.uri_next);
       }

@@ -1,12 +1,11 @@
 package org.nypl.simplified.app.catalog;
 
-import java.util.List;
-
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.StackUtilities;
+import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
 import android.app.ActionBar;
@@ -16,8 +15,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -38,7 +35,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
   public static void setActivityArguments(
     final Bundle b,
-    final ImmutableList<CatalogUpStackEntry> up_stack)
+    final ImmutableStack<CatalogUpStackEntry> up_stack)
   {
     NullCheck.notNull(b);
     b.putSerializable(
@@ -47,7 +44,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
   }
 
   private void configureUpButton(
-    final List<CatalogUpStackEntry> up_stack)
+    final ImmutableStack<CatalogUpStackEntry> up_stack)
   {
     CatalogActivity.LOG.debug("up stack: {}", up_stack);
 
@@ -62,17 +59,17 @@ public abstract class CatalogActivity extends SimplifiedActivity
   }
 
   @SuppressWarnings("unchecked") protected final
-    List<CatalogUpStackEntry>
+    ImmutableStack<CatalogUpStackEntry>
     getUpStack()
   {
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = i.getExtras();
     if (a != null) {
-      return (List<CatalogUpStackEntry>) NullCheck.notNull(a
+      return (ImmutableStack<CatalogUpStackEntry>) NullCheck.notNull(a
         .getSerializable(CatalogActivity.CATALOG_UP_STACK_ID));
     }
 
-    final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
+    final ImmutableStack<CatalogUpStackEntry> empty = ImmutableStack.empty();
     return NullCheck.notNull(empty);
   }
 
@@ -95,15 +92,17 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
       case android.R.id.home:
       {
-        final List<CatalogUpStackEntry> us = this.getUpStack();
-        Preconditions.checkArgument(us.isEmpty() == false);
+        final ImmutableStack<CatalogUpStackEntry> us = this.getUpStack();
+        Assertions.checkPrecondition(
+          us.isEmpty() == false,
+          "up stack is not empty");
 
         CatalogActivity.LOG.debug("up stack before pop: {}", us);
 
-        final Pair<CatalogUpStackEntry, ImmutableList<CatalogUpStackEntry>> p =
-          StackUtilities.stackPop(us);
+        final Pair<CatalogUpStackEntry, ImmutableStack<CatalogUpStackEntry>> p =
+          us.pop();
 
-        final ImmutableList<CatalogUpStackEntry> stack = p.getRight();
+        final ImmutableStack<CatalogUpStackEntry> stack = p.getRight();
         final CatalogUpStackEntry top = p.getLeft();
 
         final CatalogFeedArgumentsRemote remote =

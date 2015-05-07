@@ -22,7 +22,6 @@ import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -51,28 +50,20 @@ import com.io7m.junreachable.UnreachableCodeException;
       }
 
       final URI uri = NullCheck.notNull(URI.create(line));
-      final ListenableFuture<OPDSFeedType> f =
-        loader.fromURI(uri, new OPDSFeedLoadListenerType() {
-          @Override public void onFeedLoadingFailure(
-            final Throwable x)
-          {
-            // Nothing
-          }
+      loader.fromURI(uri, new OPDSFeedLoadListenerType() {
+        @Override public void onFeedLoadingFailure(
+          final Throwable x)
+        {
+          System.out.println("info: download failed: " + x.getMessage());
+        }
 
-          @Override public void onFeedLoadingSuccess(
-            final OPDSFeedType ff)
-          {
-            // Nothing
-          }
-        });
-
-      try {
-        final OPDSFeedType ff = f.get();
-        System.out.println("info: download completed: " + ff.getFeedTitle());
-        OPDSFeedExplorer.showFeed(ff);
-      } catch (final Throwable x) {
-        System.out.println("info: download failed: " + x.getMessage());
-      }
+        @Override public void onFeedLoadingSuccess(
+          final OPDSFeedType ff)
+        {
+          System.out.println("info: download completed: " + ff.getFeedTitle());
+          OPDSFeedExplorer.showFeed(ff);
+        }
+      });
     }
   }
 

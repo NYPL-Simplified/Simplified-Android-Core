@@ -1,4 +1,4 @@
-package org.nypl.simplified.books.core;
+package org.nypl.simplified.files;
 
 import java.io.File;
 import java.io.FileOutputStream;

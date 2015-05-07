@@ -2,10 +2,10 @@ package org.nypl.simplified.app.catalog;
 
 import java.net.URI;
 import java.util.Calendar;
-import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.Future;
 
 import org.nypl.simplified.app.ExpensiveStoppableType;
 import org.nypl.simplified.app.R;
@@ -26,6 +26,7 @@ import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSNavigationFeedEntry;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
+import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
 import android.app.ActionBar;
@@ -48,9 +49,6 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -100,7 +98,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
       final OPDSFeedType f = NullCheck.notNull(cfa.feed);
 
-      final ImmutableList<CatalogUpStackEntry> us =
+      final ImmutableStack<CatalogUpStackEntry> us =
         cfa.newUpStack(f.getFeedURI(), this.args.getTitle());
 
       final CatalogFeedArgumentsRemote new_args =
@@ -137,7 +135,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           final CatalogFeedArgumentsLocalBooks c)
         {
           SimplifiedActivity.setActivityArguments(b, false);
-          final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
+          final ImmutableStack<CatalogUpStackEntry> empty =
+            ImmutableStack.empty();
           CatalogActivity.setActivityArguments(b, NullCheck.notNull(empty));
           return Unit.unit();
         }
@@ -179,13 +178,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     from.startActivity(i);
   }
 
-  private @Nullable ExpensiveStoppableType         cancellable;
-  private @Nullable OPDSFeedType                   feed;
-  private @Nullable ListenableFuture<OPDSFeedType> loading;
-  private @Nullable ViewGroup                      progress_layout;
+  private @Nullable ExpensiveStoppableType cancellable;
+  private @Nullable OPDSFeedType           feed;
+  private @Nullable Future<Unit>           loading;
+  private @Nullable ViewGroup              progress_layout;
 
   private void configureUpButton(
-    final List<CatalogUpStackEntry> up_stack,
+    final ImmutableStack<CatalogUpStackEntry> up_stack,
     final String title)
   {
     final ActionBar bar = this.getActionBar();
@@ -222,7 +221,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final boolean in_drawer_open = true;
-    final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
+    final ImmutableStack<CatalogUpStackEntry> empty = ImmutableStack.empty();
     final String in_title =
       NullCheck.notNull(rr.getString(R.string.app_name));
     final URI in_uri = app.getFeedInitialURI();
@@ -234,17 +233,13 @@ import com.io7m.junreachable.UnreachableCodeException;
       in_uri);
   }
 
-  private ImmutableList<CatalogUpStackEntry> newUpStack(
+  private ImmutableStack<CatalogUpStackEntry> newUpStack(
     final URI feed_uri,
     final String feed_title)
   {
-    final List<CatalogUpStackEntry> up_stack = this.getUpStack();
-    final Builder<CatalogUpStackEntry> new_up_stack_b =
-      ImmutableList.builder();
-    new_up_stack_b.addAll(up_stack);
-    new_up_stack_b.add(new CatalogUpStackEntry(feed_uri, feed_title));
-    final ImmutableList<CatalogUpStackEntry> new_up_stack =
-      NullCheck.notNull(new_up_stack_b.build());
+    final ImmutableStack<CatalogUpStackEntry> up_stack = this.getUpStack();
+    final ImmutableStack<CatalogUpStackEntry> new_up_stack =
+      up_stack.push(new CatalogUpStackEntry(feed_uri, feed_title));
     return new_up_stack;
   }
 
@@ -312,7 +307,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final CatalogFeedArgumentsType args = this.getArguments();
     final URI feed_uri = af.getFeedURI();
-    final ImmutableList<CatalogUpStackEntry> new_up_stack =
+    final ImmutableStack<CatalogUpStackEntry> new_up_stack =
       this.newUpStack(feed_uri, args.getTitle());
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -369,7 +364,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     super.onCreate(state);
     final CatalogFeedArgumentsType args = this.getArguments();
-    final List<CatalogUpStackEntry> stack = this.getUpStack();
+    final ImmutableStack<CatalogUpStackEntry> stack = this.getUpStack();
     this.configureUpButton(stack, args.getTitle());
 
     /**
@@ -556,7 +551,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final CatalogFeedArgumentsType args = this.getArguments();
     final URI feed_uri = nf.getFeedURI();
-    final ImmutableList<CatalogUpStackEntry> new_up_stack =
+    final ImmutableStack<CatalogUpStackEntry> new_up_stack =
       this.newUpStack(feed_uri, args.getTitle());
 
     final CatalogNavigationLaneViewListenerType lane_view_listener =
@@ -644,7 +639,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private void onSelectedBook(
     final SimplifiedCatalogAppServicesType app,
-    final ImmutableList<CatalogUpStackEntry> new_up_stack,
+    final ImmutableStack<CatalogUpStackEntry> new_up_stack,
     final OPDSAcquisitionFeedEntry e)
   {
     CatalogFeedActivity.LOG.debug("onSelectBook: {}", this);
@@ -663,7 +658,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private void onSelectedFeed(
-    final ImmutableList<CatalogUpStackEntry> new_up_stack,
+    final ImmutableStack<CatalogUpStackEntry> new_up_stack,
     final OPDSNavigationFeedEntry f)
   {
     CatalogFeedActivity.LOG.debug("onSelectFeed: {}", this);
@@ -687,7 +682,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private void stopDownloading()
   {
-    final ListenableFuture<OPDSFeedType> l = this.loading;
+    final Future<Unit> l = this.loading;
     if (l != null) {
       if (l.isDone() == false) {
         l.cancel(true);

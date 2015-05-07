@@ -14,6 +14,7 @@ import org.nypl.simplified.app.catalog.CatalogUpStackEntry;
 import org.nypl.simplified.app.catalog.HoldsActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
 import android.app.Activity;
@@ -30,7 +31,6 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
-import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -224,7 +224,8 @@ import com.io7m.jnull.Nullable;
       @Override public Unit call(
         final Bundle b)
       {
-        final ImmutableList<CatalogUpStackEntry> empty = ImmutableList.of();
+        final ImmutableStack<CatalogUpStackEntry> empty =
+          ImmutableStack.empty();
         final CatalogFeedArgumentsRemote remote =
           new CatalogFeedArgumentsRemote(
             false,

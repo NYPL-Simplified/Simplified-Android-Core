@@ -1,4 +1,4 @@
-package org.nypl.simplified.books.tests.contracts;
+package org.nypl.simplified.tests.files;
 
 public interface FileLockingContractType
 {

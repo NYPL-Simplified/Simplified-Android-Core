@@ -1,4 +1,4 @@
-package org.nypl.simplified.books.core;
+package org.nypl.simplified.files;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,20 +13,12 @@ import java.io.Writer;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
+/**
+ * File utility functions.
+ */
+
 public final class FileUtilities
 {
-  public static void createDirectory(
-    final File directory)
-    throws IOException
-  {
-    directory.mkdirs();
-    if (directory.isDirectory() == false) {
-      throw new IOException(String.format(
-        "Could not create directory '%s': Not a directory",
-        directory));
-    }
-  }
-
   public static void fileCopy(
     final File from,
     final File to)
@@ -64,6 +56,17 @@ public final class FileUtilities
       if (in != null) {
         in.close();
       }
+    }
+  }
+
+  public static void fileDelete(
+    final File f)
+    throws IOException
+  {
+    NullCheck.notNull(f);
+    f.delete();
+    if (f.exists()) {
+      throw new IOException(String.format("Could not delete '%s'", f));
     }
   }
 

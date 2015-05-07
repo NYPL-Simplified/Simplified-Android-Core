@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import java.net.URI;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.Future;
 
 import org.nypl.simplified.app.ExpensiveType;
 import org.nypl.simplified.app.R;
@@ -9,6 +10,7 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedLoadListenerType;
 import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
@@ -27,8 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -42,21 +42,21 @@ import com.io7m.junreachable.UnreachableCodeException;
   OPDSFeedLoadListenerType,
   OPDSFeedMatcherType<Unit, UnreachableCodeException>
 {
-  private static final Logger                               LOG;
+  private static final Logger                         LOG;
 
   static {
     LOG = LogUtilities.getLog(CatalogNavigationLaneView.class);
   }
 
-  private final OPDSNavigationFeedEntry                     entry;
-  private @Nullable OPDSAcquisitionFeed                     feed_received;
-  private volatile @Nullable CatalogImageSetView            images;
-  private final CatalogNavigationLaneViewListenerType       listener;
-  private volatile @Nullable ListenableFuture<OPDSFeedType> loading;
-  private final ProgressBar                                 progress;
-  private final HorizontalScrollView                        scroller;
-  private int                                               scroller_position;
-  private final TextView                                    title;
+  private final OPDSNavigationFeedEntry               entry;
+  private @Nullable OPDSAcquisitionFeed               feed_received;
+  private volatile @Nullable CatalogImageSetView      images;
+  private final CatalogNavigationLaneViewListenerType listener;
+  private volatile @Nullable Future<Unit>             loading;
+  private final ProgressBar                           progress;
+  private final HorizontalScrollView                  scroller;
+  private int                                         scroller_position;
+  private final TextView                              title;
 
   public CatalogNavigationLaneView(
     final Context context,
@@ -140,7 +140,7 @@ import com.io7m.junreachable.UnreachableCodeException;
      * another.
      */
 
-    final ListenableFuture<OPDSFeedType> lf = this.loading;
+    final Future<Unit> lf = this.loading;
     if (lf != null) {
       if ((lf.isCancelled() == false) && (lf.isDone() == false)) {
         return;
@@ -200,7 +200,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Context ctx = NullCheck.notNull(this.getContext());
 
     final android.view.ViewGroup.LayoutParams slp = cs.getLayoutParams();
-    Preconditions.checkArgument(slp.height > 0);
+    Assertions.checkPrecondition(slp.height > 0, "%d > 0", slp.height);
 
     /**
      * Execute some code when all of the images in the set have been loaded.

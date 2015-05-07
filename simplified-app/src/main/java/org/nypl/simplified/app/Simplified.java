@@ -28,11 +28,11 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.books.core.FileUtilities;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSFeedLoader;
@@ -118,8 +118,8 @@ import com.io7m.jnull.Nullable;
        */
 
       try {
-        FileUtilities.createDirectory(downloads_dir);
-        FileUtilities.createDirectory(books_dir);
+        DirectoryUtilities.directoryCreate(downloads_dir);
+        DirectoryUtilities.directoryCreate(books_dir);
       } catch (final IOException e) {
         Simplified.LOG.error(
           "could not create directories: {}",

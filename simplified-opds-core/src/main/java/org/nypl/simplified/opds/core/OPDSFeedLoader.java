@@ -1,24 +1,31 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 
 /**
  * The default implementation of the {@link OPDSFeedLoaderType}.
  */
 
-public final class OPDSFeedLoader implements OPDSFeedLoaderType
+@SuppressWarnings("synthetic-access") public final class OPDSFeedLoader implements
+  OPDSFeedLoaderType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(OPDSFeedLoader.class));
+  }
+
   public static OPDSFeedLoaderType newLoader(
     final ExecutorService e,
     final OPDSFeedParserType p,
@@ -27,23 +34,21 @@ public final class OPDSFeedLoader implements OPDSFeedLoaderType
     return new OPDSFeedLoader(e, p, t);
   }
 
-  private final ListeningExecutorService exec;
-  private final OPDSFeedParserType       parser;
-  private final OPDSFeedTransportType    transport;
+  private final ExecutorService       exec;
+  private final OPDSFeedParserType    parser;
+  private final OPDSFeedTransportType transport;
 
   private OPDSFeedLoader(
     final ExecutorService e,
     final OPDSFeedParserType p,
     final OPDSFeedTransportType t)
   {
-    this.exec =
-      NullCheck
-        .notNull(MoreExecutors.listeningDecorator(NullCheck.notNull(e)));
+    this.exec = NullCheck.notNull(e);
     this.parser = NullCheck.notNull(p);
     this.transport = NullCheck.notNull(t);
   }
 
-  @Override public ListenableFuture<OPDSFeedType> fromURI(
+  @Override public Future<Unit> fromURI(
     final URI uri,
     final OPDSFeedLoadListenerType p)
   {
@@ -53,36 +58,36 @@ public final class OPDSFeedLoader implements OPDSFeedLoaderType
     final OPDSFeedTransportType ref_t = this.transport;
     final OPDSFeedParserType ref_p = this.parser;
 
-    final ListenableFuture<OPDSFeedType> f =
-      this.exec.submit(new Callable<OPDSFeedType>() {
-        @Override public OPDSFeedType call()
-          throws Exception
-        {
-          InputStream s = null;
+    final Future<Unit> f = this.exec.submit(new Callable<Unit>() {
+      @Override public Unit call()
+      {
+        InputStream s = null;
+        try {
+          s = ref_t.getStream(uri);
+          final OPDSFeedType r = ref_p.parse(uri, s);
+          p.onFeedLoadingSuccess(r);
+        } catch (final Throwable e) {
           try {
-            s = ref_t.getStream(uri);
-            return ref_p.parse(uri, s);
-          } finally {
-            if (s != null) {
+            p.onFeedLoadingFailure(e);
+          } catch (final Throwable ex) {
+            OPDSFeedLoader.LOG.error("listener raised exception: ", ex);
+          }
+        } finally {
+          if (s != null) {
+            try {
               s.close();
+            } catch (final IOException e) {
+              OPDSFeedLoader.LOG.error(
+                "raised exception during stream close: ",
+                s);
             }
           }
         }
-      });
 
-    Futures.addCallback(f, new FutureCallback<OPDSFeedType>() {
-      @Override public void onFailure(
-        final @Nullable Throwable t)
-      {
-        p.onFeedLoadingFailure(NullCheck.notNull(t));
+        return Unit.unit();
       }
+    });
 
-      @Override public void onSuccess(
-        final @Nullable OPDSFeedType result)
-      {
-        p.onFeedLoadingSuccess(NullCheck.notNull(result));
-      }
-    }, this.exec);
     return NullCheck.notNull(f);
   }
 }

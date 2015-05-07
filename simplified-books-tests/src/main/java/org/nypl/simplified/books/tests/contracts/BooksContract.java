@@ -31,6 +31,7 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthMatcherType;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -42,7 +43,6 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
-import com.google.common.io.Files;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -220,9 +220,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
-      final File tmp = Files.createTempDir();
-      tmp.delete();
-      tmp.createNewFile();
+      final File tmp = File.createTempFile("books", "");
 
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
@@ -231,7 +229,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
+          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
           .build());
 
       final BooksType b =
@@ -289,7 +287,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
-      final File tmp = Files.createTempDir();
+      final File tmp = DirectoryUtilities.directoryCreateTemporary();
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
       final BooksControllerConfiguration in_config = bcb.build();
@@ -297,7 +295,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
+          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
           .build());
 
       final BooksType b =
@@ -355,7 +353,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
-      final File tmp = Files.createTempDir();
+      final File tmp = DirectoryUtilities.directoryCreateTemporary();
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
       bcb.setLoansURI(BooksContract.LOANS_URI);
@@ -368,7 +366,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
+          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
           .build());
       final BooksType b =
         BooksController.newBooks(
@@ -420,9 +418,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
-      final File tmp = Files.createTempDir();
-      tmp.delete();
-      tmp.createNewFile();
+      final File tmp = File.createTempFile("books", "");
 
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
@@ -435,7 +431,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
+          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
           .build());
 
       final BooksType b =
@@ -489,7 +485,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
-      final File tmp = Files.createTempDir();
+      final File tmp = DirectoryUtilities.directoryCreateTemporary();
 
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
@@ -502,7 +498,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
+          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
           .build());
 
       final BooksType b =
@@ -616,7 +612,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
-      final File tmp = Files.createTempDir();
+      final File tmp = DirectoryUtilities.directoryCreateTemporary();
 
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
@@ -629,7 +625,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
+          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
           .build());
 
       final BooksType b =
@@ -803,7 +799,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
-      final File tmp = Files.createTempDir();
+      final File tmp = DirectoryUtilities.directoryCreateTemporary();
 
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
@@ -816,7 +812,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(Files.createTempDir())
+          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
           .build());
 
       final BooksType b =

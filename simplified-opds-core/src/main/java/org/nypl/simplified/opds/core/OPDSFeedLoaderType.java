@@ -1,8 +1,9 @@
 package org.nypl.simplified.opds.core;
 
 import java.net.URI;
+import java.util.concurrent.Future;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import com.io7m.jfunctional.Unit;
 
 /**
  * <p>
@@ -27,7 +28,7 @@ public interface OPDSFeedLoaderType
    *          The listener to receive the feed
    */
 
-  ListenableFuture<OPDSFeedType> fromURI(
+  Future<Unit> fromURI(
     final URI uri,
     final OPDSFeedLoadListenerType p);
 }

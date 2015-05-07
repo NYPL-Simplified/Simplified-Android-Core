@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -41,10 +42,6 @@ import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.TreeTraverser;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
@@ -559,17 +556,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.logged_in.set(false);
 
         if (this.base.isDirectory()) {
-          final TreeTraverser<File> trav = Files.fileTreeTraverser();
-          final ImmutableList<File> list =
-            trav.postOrderTraversal(this.base).toList();
-
-          for (int index = 0; index < list.size(); ++index) {
-            final File file = list.get(index);
-            final boolean ok = file.delete();
-            if (ok == false) {
-              throw new IOException("Unable to delete: " + file);
-            }
-          }
+          DirectoryUtilities.directoryDelete(this.base);
         } else {
           throw new IllegalStateException("Not logged in");
         }
@@ -841,7 +828,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     try {
       final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
       try {
-        ByteStreams.copy(r.getValue(), fs);
+        final InputStream in = NullCheck.notNull(r.getValue());
+        final byte[] buffer = new byte[8192];
+        for (;;) {
+          final int rb = in.read(buffer);
+          if (rb == -1) {
+            break;
+          }
+          fs.write(buffer, 0, rb);
+        }
+
         fs.flush();
       } finally {
         fs.close();

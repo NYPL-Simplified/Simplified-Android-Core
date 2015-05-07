@@ -3,9 +3,9 @@ package org.nypl.simplified.books.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 
-import com.google.common.io.Files;
+import org.nypl.simplified.files.FileUtilities;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -24,8 +24,7 @@ public final class AccountBarcode implements Serializable
     final File f)
     throws IOException
   {
-    final String text =
-      Files.readFirstLine(NullCheck.notNull(f), Charset.forName("UTF-8"));
+    final String text = FileUtilities.fileReadUTF8(f);
     return new AccountBarcode(NullCheck.notNull(text));
   }
 

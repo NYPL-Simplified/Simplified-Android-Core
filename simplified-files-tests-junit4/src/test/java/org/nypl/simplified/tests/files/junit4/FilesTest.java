@@ -1,14 +1,14 @@
-package org.nypl.simplified.books.tests.junit4;
+package org.nypl.simplified.tests.files.junit4;
 
 import org.junit.Test;
-import org.nypl.simplified.books.tests.contracts.FileLockingContract;
-import org.nypl.simplified.books.tests.contracts.FileLockingContractType;
+import org.nypl.simplified.tests.files.FileLockingContract;
+import org.nypl.simplified.tests.files.FileLockingContractType;
 
-public final class FileLockingTest implements FileLockingContractType
+public final class FilesTest implements FileLockingContractType
 {
   private final FileLockingContract contract;
 
-  public FileLockingTest()
+  public FilesTest()
   {
     this.contract = new FileLockingContract();
   }
