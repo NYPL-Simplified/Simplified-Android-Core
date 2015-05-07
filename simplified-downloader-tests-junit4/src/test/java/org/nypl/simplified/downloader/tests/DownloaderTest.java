@@ -1,8 +1,8 @@
 package org.nypl.simplified.downloader.tests;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -22,11 +22,12 @@ import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.files.DirectoryUtilities;
+import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
 
-import com.google.common.io.Files;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -119,8 +120,9 @@ import com.io7m.jnull.NullCheck;
   @Rule public Timeout globalTimeout = new Timeout(10000);
 
   private @NonNull File makeTempDir()
+    throws IOException
   {
-    final File dir = Files.createTempDir();
+    final File dir = DirectoryUtilities.directoryCreateTemporary();
     System.out.printf("temporary directory: %s\n", dir);
     return NullCheck.notNull(dir);
   }
@@ -522,7 +524,8 @@ import com.io7m.jnull.NullCheck;
       .statusGet());
 
     final File file = new File(tmp, "1.data");
-    final String text = Files.toString(file, Charset.forName("UTF-8"));
+
+    final String text = FileUtilities.fileReadUTF8(file);
     Assert.assertEquals("Hello.", text);
 
     e.shutdown();
@@ -658,7 +661,7 @@ import com.io7m.jnull.NullCheck;
     }
 
     final File file = new File(tmp, "1.data");
-    final String text = Files.toString(file, Charset.forName("UTF-8"));
+    final String text = FileUtilities.fileReadUTF8(file);
     Assert.assertEquals("Hello.", text);
 
     {
