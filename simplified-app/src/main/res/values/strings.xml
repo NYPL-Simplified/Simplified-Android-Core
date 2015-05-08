@@ -32,9 +32,17 @@
 
   <!-- Settings strings -->
   <string name="settings">Settings</string>
+  <string name="settings_login_title">Library Card</string>
   <string name="settings_barcode">Barcode</string>
   <string name="settings_pin">PIN</string>
   <string name="settings_log_in">Log in</string>
+  <string name="settings_log_out">Log out</string>
+  <string name="settings_login_succeeded">Logged in successfully</string>
+  <string name="settings_logout_succeeded">Logged out successfully</string>
+  <string name="settings_login_failed">Failed to log in!</string>
+  <string name="settings_logout_failed">Failed to log out!</string>
+  <string name="settings_feedback">Feedback</string>
+  <string name="settings_credits">Credits</string>
 
   <!-- Reader strings -->
   <string name="reader_toc">Table Of Contents</string>

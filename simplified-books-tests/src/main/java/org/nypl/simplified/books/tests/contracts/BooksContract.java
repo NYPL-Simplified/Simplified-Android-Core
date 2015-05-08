@@ -272,6 +272,13 @@ import com.io7m.junreachable.UnreachableCodeException;
           ok.set(true);
           latch.countDown();
         }
+
+        @Override public void onAccountDataLoadFailedImmediately(
+          final Throwable error)
+        {
+          System.out.println("testBooksLoadFileNotDirectory: load failed");
+          ok.set(false);
+        }
       });
 
       latch.await();
@@ -337,6 +344,13 @@ import com.io7m.junreachable.UnreachableCodeException;
           System.out.println("testBooksLoadNotLoggedIn: account unavailable");
           ok.set(true);
           latch.countDown();
+        }
+
+        @Override public void onAccountDataLoadFailedImmediately(
+          final Throwable error)
+        {
+          System.out.println("testBooksLoadNotLoggedIn: load failed");
+          ok.set(false);
         }
       });
 
@@ -754,6 +768,12 @@ import com.io7m.junreachable.UnreachableCodeException;
           }
 
           @Override public void onAccountUnavailable()
+          {
+            ok.set(false);
+          }
+
+          @Override public void onAccountDataLoadFailedImmediately(
+            final Throwable error)
           {
             ok.set(false);
           }

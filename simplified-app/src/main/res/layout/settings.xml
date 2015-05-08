@@ -1,23 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent"
-  android:layout_margin="16dp"
-  android:orientation="vertical">
+<ScrollView
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
 
-  <TextView
-    android:id="@+id/settings_login"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="16dp"
+    android:orientation="vertical">
 
-  <TextView
-    android:id="@+id/settings_logout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
+    <TextView
+      android:id="@+id/settings_login_title"
+      android:text="@string/settings_login_title"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content" />
 
-  <TextView
-    android:id="@+id/settings_logged"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
+    <TableLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:layout_marginBottom="16dp">
+      <TableRow
+        android:id="@+id/tableRow1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+          android:text="@string/settings_barcode"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+        <EditText
+          android:id="@+id/settings_barcode_edit"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:layout_marginLeft="16dp"
+          android:inputType="textNoSuggestions|number"
+          android:maxLength="14"
+          android:maxLines="1" />
+      </TableRow>
+      <TableRow
+        android:id="@+id/tableRow2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+          android:text="@string/settings_pin"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" />
+        <EditText
+          android:id="@+id/settings_pin_edit"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:layout_marginLeft="16dp"
+          android:inputType="textNoSuggestions|number"
+          android:maxLength="4"
+          android:maxLines="1" />
+      </TableRow>
+    </TableLayout>
 
-</LinearLayout>
+    <Button
+      android:id="@+id/settings_login"
+      android:background="@drawable/simplified_button"
+      android:layout_gravity="right"
+      android:layout_width="wrap_content"
+      android:layout_height="35dp"
+      android:textColor="@drawable/simplified_button_text"
+      android:textSize="12sp"
+      android:text="@string/settings_log_in" />
+
+    <View
+      android:background="#eee"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
+
+    <TextView
+      android:id="@+id/settings_feedback"
+      android:text="@string/settings_feedback"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
+    <TextView
+      android:id="@+id/settings_credits"
+      android:text="@string/settings_credits"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+  </LinearLayout>
+
+</ScrollView>
