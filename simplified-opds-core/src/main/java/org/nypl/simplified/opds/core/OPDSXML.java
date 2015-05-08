@@ -14,6 +14,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 public final class OPDSXML
 {
@@ -76,6 +77,18 @@ public final class OPDSXML
       throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
     }
     return xs;
+  }
+
+  public static OptionType<String> getElementPrefix(
+    final Element e)
+  {
+    NullCheck.notNull(e);
+    final String name = NullCheck.notNull(e.getNodeName());
+    final String[] segments = name.split(":");
+    if (segments.length > 1) {
+      return Option.some(NullCheck.notNull(segments[0]));
+    }
+    return Option.none();
   }
 
   public static String getFirstChildElementTextWithName(
@@ -141,18 +154,6 @@ public final class OPDSXML
     m.append(name);
     m.append("\n");
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
-  }
-
-  public static OptionType<String> getElementPrefix(
-    final Element e)
-  {
-    NullCheck.notNull(e);
-    final String name = NullCheck.notNull(e.getNodeName());
-    final String[] segments = name.split(":");
-    if (segments.length > 1) {
-      return Option.some(NullCheck.notNull(segments[0]));
-    }
-    return Option.none();
   }
 
   public static OptionType<String> getNodeNamespace(
@@ -281,5 +282,10 @@ public final class OPDSXML
     final String got_local = node.getLocalName();
     final boolean lo_ok = got_local.equals(name);
     return ns_ok && lo_ok;
+  }
+
+  private OPDSXML()
+  {
+    throw new UnreachableCodeException();
   }
 }
