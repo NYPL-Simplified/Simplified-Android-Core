@@ -13,6 +13,13 @@ public interface AccountsType
   boolean accountIsLoggedIn();
 
   /**
+   * Get login details delivering them to the given listener immediately.
+   */
+
+  void accountGetCachedLoginDetails(
+    AccountGetCachedCredentialsListenerType listener);
+
+  /**
    * Start loading books, delivering results to the given <tt>listener</tt>.
    */
 

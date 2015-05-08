@@ -52,7 +52,8 @@ public final class BookTool
         .newBuilder(new File("/tmp/downloads"))
         .build());
 
-    final BooksControllerConfiguration books_config = books_config_builder.build();
+    final BooksControllerConfiguration books_config =
+      books_config_builder.build();
     final AccountsType books =
       BooksController.newBooks(exec, parser, http, d, books_config);
 
@@ -93,6 +94,13 @@ public final class BookTool
         final BookSnapshot snap)
       {
         System.err.println("info: account-load: loaded book: " + book);
+      }
+
+      @Override public void onAccountDataLoadFailedImmediately(
+        final Throwable error)
+      {
+        System.err.println("error: account-load: failed to data: " + error);
+        error.printStackTrace(System.err);
       }
     });
 

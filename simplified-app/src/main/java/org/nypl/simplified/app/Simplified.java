@@ -218,6 +218,12 @@ import com.io7m.jnull.Nullable;
       CatalogAppServices.LOG_CA.debug("loaded book: {}", book);
     }
 
+    @Override public void onAccountDataLoadFailedImmediately(
+      final Throwable error)
+    {
+      CatalogAppServices.LOG_CA.error("failed to load books: ", error);
+    }
+
     @Override public void onAccountSyncAuthenticationFailure(
       final String message)
     {

@@ -15,6 +15,16 @@ import com.io7m.jfunctional.OptionType;
 public interface AccountDataLoadListenerType
 {
   /**
+   * Loading data failed immediately, before any books could be loaded.
+   *
+   * @param error
+   *          The exception
+   */
+
+  void onAccountDataLoadFailedImmediately(
+    Throwable error);
+
+  /**
    * Loading a particular book failed.
    */
 
