@@ -122,6 +122,8 @@ import com.squareup.picasso.RequestCreator;
   {
     BookCoverProvider.LOG.debug("{}: loadCoverInto", e.getBookID());
 
+    UIThread.checkIsUIThread();
+
     final URI uri;
     final BookID id = e.getBookID();
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
@@ -161,15 +163,9 @@ import com.squareup.picasso.RequestCreator;
 
     BookCoverProvider.LOG.debug("{}: uri {}", e.getBookID(), uri);
 
-    final Picasso p = this.picasso;
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        final RequestCreator r = p.load(uri.toString());
-        r.resize(w, h);
-        r.into(i, c);
-      }
-    });
+    final RequestCreator r = this.picasso.load(uri.toString());
+    r.resize(w, h);
+    r.into(i, c);
   }
 
   @Override public void loadThumbnailInto(
@@ -194,6 +190,8 @@ import com.squareup.picasso.RequestCreator;
     final Callback c)
   {
     BookCoverProvider.LOG.debug("{}: loadThumbnailInto", e.getBookID());
+
+    UIThread.checkIsUIThread();
 
     final URI uri;
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
@@ -234,14 +232,8 @@ import com.squareup.picasso.RequestCreator;
 
     BookCoverProvider.LOG.debug("{}: uri {}", e.getBookID(), uri);
 
-    final Picasso p = this.picasso;
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        final RequestCreator r = p.load(uri.toString());
-        r.resize(w, h);
-        r.into(i, c);
-      }
-    });
+    final RequestCreator r = this.picasso.load(uri.toString());
+    r.resize(w, h);
+    r.into(i, c);
   }
 }
