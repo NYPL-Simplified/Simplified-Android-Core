@@ -43,6 +43,7 @@
   <string name="settings_logout_failed">Failed to log out!</string>
   <string name="settings_feedback">Feedback</string>
   <string name="settings_credits">Credits</string>
+  <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
 
   <!-- Reader strings -->
   <string name="reader_toc">Table Of Contents</string>
