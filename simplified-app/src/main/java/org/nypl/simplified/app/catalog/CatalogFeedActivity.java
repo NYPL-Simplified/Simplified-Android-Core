@@ -614,13 +614,20 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     CatalogFeedActivity.LOG.debug("onResume");
 
-    final LayoutInflater inflater = this.getLayoutInflater();
     final FrameLayout content_area = this.getContentFrame();
-    final ViewGroup layout =
-      NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.catalog_loading,
-        content_area,
-        false));
+    final ViewGroup layout;
+    if (this.progress_layout == null) {
+      final LayoutInflater inflater = this.getLayoutInflater();
+      layout =
+        NullCheck.notNull((ViewGroup) inflater.inflate(
+          R.layout.catalog_loading,
+          content_area,
+          false));
+    } else {
+      layout = NullCheck.notNull(this.progress_layout);
+    }
+
+    layout.setVisibility(View.VISIBLE);
     content_area.addView(layout);
     content_area.requestLayout();
     this.progress_layout = layout;
