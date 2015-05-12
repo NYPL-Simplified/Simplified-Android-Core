@@ -8,7 +8,7 @@
   android:gravity="center_vertical"
   android:paddingLeft="16dp"
   android:paddingRight="16dp"
-  android:textColor="@color/normal_text_major"
+  android:textColor="@drawable/drawer_list_text"
   android:text="Item"
   android:background="?android:attr/activatedBackgroundIndicator"
   android:minHeight="?android:attr/listPreferredItemHeightSmall" />
