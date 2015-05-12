@@ -7,6 +7,8 @@ import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.slf4j.Logger;
 
@@ -35,7 +37,8 @@ import com.io7m.jnull.Nullable;
   SimplifiedActivity implements
   AccountLogoutListenerType,
   AccountLoginListenerType,
-  AccountGetCachedCredentialsListenerType
+  AccountGetCachedCredentialsListenerType,
+  AccountSyncListenerType
 {
   private static final Logger LOG;
 
@@ -196,6 +199,10 @@ import com.io7m.jnull.Nullable;
     SettingsActivity.LOG.debug("account login succeeded: {}", barcode);
     this.onAccountIsLoggedIn(barcode, pin);
 
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final BooksType books = app.getBooks();
+
     final Resources rr = NullCheck.notNull(this.getResources());
     final Context context = SettingsActivity.this.getApplicationContext();
     final CharSequence text =
@@ -207,6 +214,7 @@ import com.io7m.jnull.Nullable;
       {
         final Toast toast = Toast.makeText(context, text, duration);
         toast.show();
+        books.accountSync(SettingsActivity.this);
       }
     });
   }
@@ -240,6 +248,33 @@ import com.io7m.jnull.Nullable;
         toast.show();
       }
     });
+  }
+
+  @Override public void onAccountSyncAuthenticationFailure(
+    final String message)
+  {
+    SettingsActivity.LOG.error("failed to sync account: {}", message);
+  }
+
+  @Override public void onAccountSyncBook(
+    final BookID book)
+  {
+    SettingsActivity.LOG.error("synced book: {}", book);
+  }
+
+  @Override public void onAccountSyncFailure(
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    LogUtilities.errorWithOptionalException(
+      SettingsActivity.LOG,
+      message,
+      error);
+  }
+
+  @Override public void onAccountSyncSuccess()
+  {
+    SettingsActivity.LOG.debug("completed sync");
   }
 
   @Override protected void onCreate(
