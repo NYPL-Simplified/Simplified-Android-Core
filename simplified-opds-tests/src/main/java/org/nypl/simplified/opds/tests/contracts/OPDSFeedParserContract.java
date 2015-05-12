@@ -6,11 +6,13 @@ import java.net.URI;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSBlock;
 import org.nypl.simplified.opds.core.OPDSFeedParseException;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -121,6 +123,30 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
+  @Override public void testAcquisitionFeedBlocks0()
+    throws Exception
+  {
+    final URI uri =
+      URI.create("http://circulation.alpha.librarysimplified.org/blocks/");
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final InputStream d =
+      OPDSFeedParserContract.getResource("acquisition-blocks-0.xml");
+    final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(uri, d);
+    d.close();
+
+    TestUtilities.assertTrue(f.getFeedEntries().isEmpty());
+
+    final Map<String, OPDSBlock> blocks = f.getFeedBlocks();
+    TestUtilities.assertEquals(8, blocks.keySet().size());
+
+    for (final String name : blocks.keySet()) {
+      System.out.println(name);
+      final OPDSBlock block = blocks.get(name);
+      TestUtilities.assertEquals(block.getBlockTitle(), name);
+      TestUtilities.assertTrue(block.getBlockEntries().isEmpty() == false);
+    }
+  }
+
   @Override public void testAcquisitionFeedPaginated0()
     throws Exception
   {
@@ -142,7 +168,7 @@ import com.io7m.jnull.NullCheck;
       f.getFeedTitle());
     TestUtilities.assertEquals(50, f.getFeedEntries().size());
 
-    final Some<URI> next_opt = (Some<URI>) f.getNext();
+    final Some<URI> next_opt = (Some<URI>) f.getFeedNext();
 
     TestUtilities
       .assertEquals(

@@ -6,6 +6,7 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookBorrowListenerType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -24,25 +25,25 @@ public final class CatalogAcquisitionButtonController implements
   LoginControllerListenerType,
   BookBorrowListenerType
 {
-  private static final Logger            LOG;
+  private static final Logger   LOG;
 
   static {
     LOG = LogUtilities.getLog(CatalogAcquisitionButtonController.class);
   }
 
-  private final OPDSAcquisition          acq;
-  private final Activity                 activity;
-  private final BooksType                books;
-  private final OPDSAcquisitionFeedEntry entry;
-  private final BookID                   id;
-  private final LoginController          login_controller;
+  private final OPDSAcquisition acq;
+  private final Activity        activity;
+  private final BooksType       books;
+  private final FeedEntryOPDS   entry;
+  private final BookID          id;
+  private final LoginController login_controller;
 
   public CatalogAcquisitionButtonController(
     final Activity in_activity,
     final BooksType in_books,
     final BookID in_id,
     final OPDSAcquisition in_acq,
-    final OPDSAcquisitionFeedEntry in_entry)
+    final FeedEntryOPDS in_entry)
   {
     this.activity = NullCheck.notNull(in_activity);
     this.acq = NullCheck.notNull(in_acq);
@@ -95,8 +96,9 @@ public final class CatalogAcquisitionButtonController implements
       case ACQUISITION_BORROW:
       case ACQUISITION_GENERIC:
       {
-        this.books.bookBorrow(this.id, this.acq, this.entry.getTitle(), this);
-        this.books.bookUpdateMetadata(this.id, this.entry);
+        final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
+        this.books.bookBorrow(this.id, this.acq, eo.getTitle(), this);
+        this.books.bookUpdateMetadata(this.id, eo);
         break;
       }
       case ACQUISITION_BUY:

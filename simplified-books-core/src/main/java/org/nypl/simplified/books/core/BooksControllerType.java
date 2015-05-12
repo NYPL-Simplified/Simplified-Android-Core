@@ -50,12 +50,12 @@ public interface BooksControllerType extends BooksStatusCacheType
    * account, delivering the results to the given <tt>listener</tt>.
    */
 
-  void booksGetAcquisitionFeed(
+  void booksGetFeed(
     URI in_uri,
     String in_id,
     Calendar in_updated,
     String in_title,
-    BookAcquisitionFeedListenerType in_listener);
+    BookFeedListenerType in_listener);
 
   /**
    * Update metadata for the given book.

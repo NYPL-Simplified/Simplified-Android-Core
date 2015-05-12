@@ -39,6 +39,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 {
   private static final URI ACQUISITION_URI_PREFIX;
   private static final URI ATOM_URI;
+  private static final URI BLOCK_URI;
   private static final URI DUBLIN_CORE_TERMS_URI;
   private static final URI FEATURED_URI_PREFIX;
   private static final URI IMAGE_URI;
@@ -52,6 +53,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       NullCheck.notNull(URI.create("http://opds-spec.org/acquisition"));
     FEATURED_URI_PREFIX =
       NullCheck.notNull(URI.create("http://opds-spec.org/featured"));
+    BLOCK_URI = NullCheck.notNull(URI.create("http://opds-spec.org/block"));
     THUMBNAIL_URI =
       NullCheck.notNull(URI.create("http://opds-spec.org/image/thumbnail"));
     IMAGE_URI = NullCheck.notNull(URI.create("http://opds-spec.org/image"));
@@ -374,6 +376,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
     OPDSFeedParser.findAcquisitionAuthors(e, eb);
     OPDSFeedParser.findAcquisitionRelations(e_links, eb);
+    OPDSFeedParser.findBlockLinks(e_links, eb);
     eb.setThumbnailOption(OPDSFeedParser.findAcquisitionThumbnail(e_links));
     eb.setCoverOption(OPDSFeedParser.findAcquisitionCover(e_links));
     eb.setPublisherOption(OPDSFeedParser.findPublisher(e));
@@ -384,6 +387,24 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       "summary"));
 
     return eb.build();
+  }
+
+  private static void findBlockLinks(
+    final List<Element> e_links,
+    final OPDSAcquisitionFeedEntryBuilderType eb)
+  {
+    for (final Element e : e_links) {
+      if (e.hasAttribute("rel")) {
+        final String text = NullCheck.notNull(e.getAttribute("rel"));
+
+        if (text.equals(OPDSFeedParser.BLOCK_URI.toString())) {
+          final String uri_text = NullCheck.notNull(e.getAttribute("href"));
+          final String title = NullCheck.notNull(e.getAttribute("title"));
+          final URI uri = NullCheck.notNull(URI.create(uri_text));
+          eb.addBlock(uri, title);
+        }
+      }
+    }
   }
 
   private static OPDSFeedType parseNavigation(

@@ -5,10 +5,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -23,18 +26,19 @@ import com.io7m.jnull.Nullable;
   private static final class Builder implements
     OPDSAcquisitionFeedEntryBuilderType
   {
-    private final List<OPDSAcquisition> acquisitions;
-    private final List<String>          authors;
-    private final List<String>          categories;
-    private String                      summary;
-    private OptionType<URI>             cover;
-    private final String                id;
-    private final Calendar              published;
-    private OptionType<String>          publisher;
-    private String                      subtitle;
-    private OptionType<URI>             thumbnail;
-    private final String                title;
-    private final Calendar              updated;
+    private final List<OPDSAcquisition>  acquisitions;
+    private final List<String>           authors;
+    private final Set<Pair<String, URI>> blocks;
+    private final List<String>           categories;
+    private OptionType<URI>              cover;
+    private final String                 id;
+    private final Calendar               published;
+    private OptionType<String>           publisher;
+    private String                       subtitle;
+    private String                       summary;
+    private OptionType<URI>              thumbnail;
+    private final String                 title;
+    private final Calendar               updated;
 
     private Builder(
       final String in_id,
@@ -54,6 +58,7 @@ import com.io7m.jnull.Nullable;
       this.published = NullCheck.notNull(in_published);
       this.publisher = Option.none();
       this.categories = new ArrayList<String>();
+      this.blocks = new HashSet<Pair<String, URI>>();
     }
 
     @Override public void addAcquisition(
@@ -68,6 +73,15 @@ import com.io7m.jnull.Nullable;
       this.authors.add(NullCheck.notNull(name));
     }
 
+    @Override public void addBlock(
+      final URI uri,
+      final String b)
+    {
+      NullCheck.notNull(uri);
+      NullCheck.notNull(b);
+      this.blocks.add(Pair.pair(b, uri));
+    }
+
     @Override public void addCategory(
       final String c)
     {
@@ -79,6 +93,7 @@ import com.io7m.jnull.Nullable;
       return new OPDSAcquisitionFeedEntry(
         this.authors,
         this.acquisitions,
+        this.blocks,
         this.cover,
         this.id,
         this.title,
@@ -89,16 +104,6 @@ import com.io7m.jnull.Nullable;
         this.published,
         this.publisher,
         this.categories);
-    }
-
-    @Override public void setSummaryOption(
-      final OptionType<String> text)
-    {
-      if (text.isNone()) {
-        this.summary = "";
-      } else {
-        this.summary = ((Some<String>) text).get();
-      }
     }
 
     @Override public void setCoverOption(
@@ -123,6 +128,16 @@ import com.io7m.jnull.Nullable;
       }
     }
 
+    @Override public void setSummaryOption(
+      final OptionType<String> text)
+    {
+      if (text.isNone()) {
+        this.summary = "";
+      } else {
+        this.summary = ((Some<String>) text).get();
+      }
+    }
+
     @Override public void setThumbnailOption(
       final OptionType<URI> uri)
     {
@@ -141,22 +156,24 @@ import com.io7m.jnull.Nullable;
     return new Builder(in_id, in_title, in_updated, in_published);
   }
 
-  private final List<OPDSAcquisition> acquisitions;
-  private final List<String>          authors;
-  private final List<String>          categories;
-  private final String                summary;
-  private final OptionType<URI>       cover;
-  private final String                id;
-  private final Calendar              published;
-  private final OptionType<String>    publisher;
-  private final String                subtitle;
-  private final OptionType<URI>       thumbnail;
-  private final String                title;
-  private final Calendar              updated;
+  private final List<OPDSAcquisition>  acquisitions;
+  private final List<String>           authors;
+  private final Set<Pair<String, URI>> blocks;
+  private final List<String>           categories;
+  private final OptionType<URI>        cover;
+  private final String                 id;
+  private final Calendar               published;
+  private final OptionType<String>     publisher;
+  private final String                 subtitle;
+  private final String                 summary;
+  private final OptionType<URI>        thumbnail;
+  private final String                 title;
+  private final Calendar               updated;
 
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
     final List<OPDSAcquisition> in_acquisitions,
+    final Set<Pair<String, URI>> in_blocks,
     final OptionType<URI> in_cover,
     final String in_id,
     final String in_title,
@@ -172,6 +189,7 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull(Collections.unmodifiableList(in_authors));
     this.acquisitions =
       NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
+    this.blocks = NullCheck.notNull(in_blocks);
     this.cover = NullCheck.notNull(in_cover);
     this.id = NullCheck.notNull(in_id);
     this.title = NullCheck.notNull(in_title);
@@ -199,6 +217,7 @@ import com.io7m.jnull.Nullable;
     final OPDSAcquisitionFeedEntry other = (OPDSAcquisitionFeedEntry) obj;
     return this.acquisitions.equals(other.acquisitions)
       && this.authors.equals(other.authors)
+      && this.blocks.equals(other.blocks)
       && this.categories.equals(other.categories)
       && this.cover.equals(other.cover)
       && this.id.equals(other.id)
@@ -221,14 +240,14 @@ import com.io7m.jnull.Nullable;
     return this.authors;
   }
 
+  public Set<Pair<String, URI>> getBlocks()
+  {
+    return this.blocks;
+  }
+
   public List<String> getCategories()
   {
     return this.categories;
-  }
-
-  public String getSummary()
-  {
-    return this.summary;
   }
 
   public OptionType<URI> getCover()
@@ -256,6 +275,11 @@ import com.io7m.jnull.Nullable;
     return this.subtitle;
   }
 
+  public String getSummary()
+  {
+    return this.summary;
+  }
+
   public OptionType<URI> getThumbnail()
   {
     return this.thumbnail;
@@ -277,6 +301,7 @@ import com.io7m.jnull.Nullable;
     int result = 1;
     result = (prime * result) + this.acquisitions.hashCode();
     result = (prime * result) + this.authors.hashCode();
+    result = (prime * result) + this.blocks.hashCode();
     result = (prime * result) + this.cover.hashCode();
     result = (prime * result) + this.categories.hashCode();
     result = (prime * result) + this.id.hashCode();

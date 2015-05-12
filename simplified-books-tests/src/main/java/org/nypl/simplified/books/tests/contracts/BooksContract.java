@@ -327,8 +327,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
         @Override public void onAccountDataBookLoadFinished()
         {
-          System.out.println("testBooksLoadNotLoggedIn: load succeeded");
-          ok.set(false);
+          System.out.println("testBooksLoadNotLoggedIn: load finished");
         }
 
         @Override public void onAccountDataBookLoadSucceeded(

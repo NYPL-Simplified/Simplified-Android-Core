@@ -3,7 +3,7 @@ package org.nypl.simplified.app;
 import java.net.URI;
 
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
+import org.nypl.simplified.books.core.FeedLoaderType;
 
 /**
  * Services provided to the main Simplified app.
@@ -23,7 +23,7 @@ public interface SimplifiedCatalogAppServicesType extends
    * @return A cover provider
    */
 
-  CoverProviderType getCoverProvider();
+  BookCoverProviderType getCoverProvider();
 
   /**
    * @return The initial URI for the catalog
@@ -35,6 +35,6 @@ public interface SimplifiedCatalogAppServicesType extends
    * @return An asynchronous feed loader
    */
 
-  OPDSFeedLoaderType getFeedLoader();
+  FeedLoaderType getFeedLoader();
 
 }

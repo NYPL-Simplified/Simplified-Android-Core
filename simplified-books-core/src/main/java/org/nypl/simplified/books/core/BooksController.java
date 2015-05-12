@@ -34,11 +34,11 @@ import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedBuilderType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.nypl.simplified.opds.core.OPDSNavigationFeed;
+import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,72 +58,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
   Observable implements BooksType
 {
-  private static final class AcquisitionFeedTask implements Runnable
-  {
-    private final BookDatabaseType                books_database;
-    private final String                          id;
-    private final BookAcquisitionFeedListenerType listener;
-    private final String                          title;
-    private final Calendar                        updated;
-    private final URI                             uri;
-
-    public AcquisitionFeedTask(
-      final BookDatabaseType in_books_database,
-      final URI in_uri,
-      final String in_id,
-      final Calendar in_updated,
-      final String in_title,
-      final BookAcquisitionFeedListenerType in_listener)
-    {
-      this.books_database = NullCheck.notNull(in_books_database);
-      this.uri = NullCheck.notNull(in_uri);
-      this.id = NullCheck.notNull(in_id);
-      this.updated = NullCheck.notNull(in_updated);
-      this.title = NullCheck.notNull(in_title);
-      this.listener = NullCheck.notNull(in_listener);
-    }
-
-    private OPDSAcquisitionFeed feed()
-    {
-      final OPDSAcquisitionFeedBuilderType b =
-        OPDSAcquisitionFeed.newBuilder(
-          this.uri,
-          this.id,
-          this.updated,
-          this.title);
-
-      final List<BookDatabaseEntryType> dirs =
-        this.books_database.getBookDatabaseEntries();
-
-      for (int index = 0; index < dirs.size(); ++index) {
-        final BookDatabaseEntryReadableType dir =
-          NullCheck.notNull(dirs.get(index));
-        final BookID book_id = dir.getID();
-
-        try {
-          b.addEntry(dir.getData());
-        } catch (final IOException x) {
-          // XXX: See issue 30.
-          BooksController.LOG.error(
-            "unable to load book {} metadata: ",
-            book_id,
-            x);
-        }
-      }
-
-      return b.build();
-    }
-
-    @Override public void run()
-    {
-      try {
-        this.listener.onBookAcquisitionFeedSuccess(this.feed());
-      } catch (final Throwable x) {
-        this.listener.onBookAcquisitionFeedFailure(x);
-      }
-    }
-  }
-
   private static final class BorrowTask implements
     Runnable,
     DownloadListenerType
@@ -451,6 +385,77 @@ import com.io7m.junreachable.UnreachableCodeException;
           "could not destroy book data for {}: ",
           this.book_id,
           e);
+      }
+    }
+  }
+
+  private static final class FeedTask implements Runnable
+  {
+    private final BookDatabaseType     books_database;
+    private final String               id;
+    private final BookFeedListenerType listener;
+    private final String               title;
+    private final Calendar             updated;
+    private final URI                  uri;
+
+    public FeedTask(
+      final BookDatabaseType in_books_database,
+      final URI in_uri,
+      final String in_id,
+      final Calendar in_updated,
+      final String in_title,
+      final BookFeedListenerType in_listener)
+    {
+      this.books_database = NullCheck.notNull(in_books_database);
+      this.uri = NullCheck.notNull(in_uri);
+      this.id = NullCheck.notNull(in_id);
+      this.updated = NullCheck.notNull(in_updated);
+      this.title = NullCheck.notNull(in_title);
+      this.listener = NullCheck.notNull(in_listener);
+    }
+
+    private FeedWithoutBlocks feed()
+    {
+      final OptionType<URI> no_next = Option.none();
+      final OptionType<OPDSSearchLink> no_search = Option.none();
+      final FeedWithoutBlocks f =
+        FeedWithoutBlocks.newEmptyFeed(
+          this.uri,
+          this.id,
+          this.updated,
+          this.title,
+          no_next,
+          no_search);
+
+      final List<BookDatabaseEntryType> dirs =
+        this.books_database.getBookDatabaseEntries();
+
+      for (int index = 0; index < dirs.size(); ++index) {
+        final BookDatabaseEntryReadableType dir =
+          NullCheck.notNull(dirs.get(index));
+        final BookID book_id = dir.getID();
+
+        try {
+          final OPDSAcquisitionFeedEntry data = dir.getData();
+          f.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
+        } catch (final IOException x) {
+          BooksController.LOG.error(
+            "unable to load book {} metadata: ",
+            book_id,
+            x);
+          f.add(FeedEntryCorrupt.fromIDAndError(book_id, x));
+        }
+      }
+
+      return f;
+    }
+
+    @Override public void run()
+    {
+      try {
+        this.listener.onBookFeedSuccess(this.feed());
+      } catch (final Throwable x) {
+        this.listener.onBookFeedFailure(x);
       }
     }
   }
@@ -1107,12 +1112,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  @Override public void booksGetAcquisitionFeed(
+  @Override public void booksGetFeed(
     final URI in_uri,
     final String in_id,
     final Calendar in_updated,
     final String in_title,
-    final BookAcquisitionFeedListenerType in_listener)
+    final BookFeedListenerType in_listener)
   {
     NullCheck.notNull(in_uri);
     NullCheck.notNull(in_id);
@@ -1120,7 +1125,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(in_title);
     NullCheck.notNull(in_listener);
 
-    this.submitRunnable(new AcquisitionFeedTask(
+    this.submitRunnable(new FeedTask(
       this.book_database,
       in_uri,
       in_id,

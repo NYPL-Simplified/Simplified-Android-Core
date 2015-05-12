@@ -3,8 +3,8 @@ package org.nypl.simplified.app.catalog;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import android.app.Activity;
 import android.content.res.Resources;
@@ -19,7 +19,7 @@ public final class CatalogAcquisitionButton extends Button
     final BooksType in_books,
     final BookID in_book_id,
     final OPDSAcquisition in_acq,
-    final OPDSAcquisitionFeedEntry in_entry)
+    final FeedEntryOPDS in_entry)
   {
     super(in_activity);
 

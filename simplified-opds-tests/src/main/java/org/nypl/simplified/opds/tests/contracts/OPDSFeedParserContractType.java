@@ -37,4 +37,7 @@ public interface OPDSFeedParserContractType
 
   void testStreamIOException()
     throws Exception;
+
+  void testAcquisitionFeedBlocks0()
+    throws Exception;
 }

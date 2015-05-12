@@ -28,7 +28,7 @@ public interface OPDSAcquisitionFeedBuilderType
 
   /**
    * Set the URI of the next feed in a paginated feed
-   * 
+   *
    * @param next
    *          The next URI, if any
    */
@@ -38,7 +38,7 @@ public interface OPDSAcquisitionFeedBuilderType
 
   /**
    * Set the URI of the search facilities for the given feed
-   * 
+   *
    * @param s
    *          The search URI, if any
    */

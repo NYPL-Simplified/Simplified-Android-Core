@@ -187,12 +187,6 @@
         <groupId>com.simpligility.maven.plugins</groupId>
         <artifactId>android-maven-plugin</artifactId>
         <configuration>
-          <!-- It's necessary to set these manually as Eclipse wants them -->
-          <!-- in the project root, but the plugin wants them in src/main -->
-          <androidManifestFile>AndroidManifest.xml</androidManifestFile>
-          <resourceDirectory>res</resourceDirectory>
-          <assetsDirectory>assets</assetsDirectory>
-          <genDirectory>gen</genDirectory>
           <sdk>
             <platform>${org.nypl.android.sdkVersion}</platform>
           </sdk>
