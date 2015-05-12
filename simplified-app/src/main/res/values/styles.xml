@@ -3,7 +3,9 @@
 
   <style
     name="SimplifiedTheme"
-    parent="android:Theme.Holo.Light"></style>
+    parent="android:Theme.Holo.Light">
+    <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
+  </style>
 
   <style
     name="SimplifiedThemeNoActionBar"
