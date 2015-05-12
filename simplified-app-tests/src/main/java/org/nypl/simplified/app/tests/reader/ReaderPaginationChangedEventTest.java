@@ -11,6 +11,8 @@ import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
 
 import android.test.InstrumentationTestCase;
 
+import com.io7m.jnull.NullCheck;
+
 public final class ReaderPaginationChangedEventTest extends
   InstrumentationTestCase
 {
@@ -27,7 +29,7 @@ public final class ReaderPaginationChangedEventTest extends
       contents.append(buffer, 0, read);
       read = in.read(buffer);
     } while (read >= 0);
-    return contents.toString();
+    return NullCheck.notNull(contents.toString());
   }
 
   public void testOK_0()

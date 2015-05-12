@@ -80,7 +80,6 @@ import com.io7m.jnull.Nullable;
     private final URI                      feed_initial_uri;
     private final FeedLoaderType           feed_loader;
     private final HTTPType                 http;
-    private final Resources                resources;
     private final ScreenSizeControllerType screen;
     private final AtomicBoolean            synced;
 
@@ -88,7 +87,7 @@ import com.io7m.jnull.Nullable;
       final Context context,
       final Resources rr)
     {
-      this.resources = NullCheck.notNull(rr);
+      NullCheck.notNull(rr);
       this.screen = new ScreenSizeController(rr);
       this.exec_catalog_feeds = Simplified.namedThreadPool(1, "catalog-feed");
       this.exec_covers = Simplified.namedThreadPool(1, "cover");

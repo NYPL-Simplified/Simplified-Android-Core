@@ -101,7 +101,7 @@ public final class CatalogFeedWithoutBlocks implements
   @Override public FeedEntryType getItem(
     final int position)
   {
-    return this.adapter.getItem(position);
+    return NullCheck.notNull(this.adapter.getItem(position));
   }
 
   @Override public long getItemId(

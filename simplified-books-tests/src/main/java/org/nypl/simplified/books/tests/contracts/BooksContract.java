@@ -48,7 +48,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.junreachable.UnreachableCodeException;
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksContract implements
+@SuppressWarnings({ "boxing", "synthetic-access", "null", "resource" }) public final class BooksContract implements
   BooksContractType
 {
   private static final URI LOANS_URI = URI.create("http://example.com/loans");
@@ -195,7 +195,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   }
 
-  private HTTPType makeExceptionHTTP()
+  private static HTTPType makeExceptionHTTP()
   {
     return new HTTPType() {
       @Override public HTTPResultType<InputStream> get(
@@ -225,7 +225,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
       final BooksControllerConfiguration in_config = bcb.build();
-      final HTTPType in_http = this.makeExceptionHTTP();
+      final HTTPType in_http = BooksContract.makeExceptionHTTP();
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
@@ -298,7 +298,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(tmp);
       final BooksControllerConfiguration in_config = bcb.build();
-      final HTTPType in_http = this.makeExceptionHTTP();
+      final HTTPType in_http = BooksContract.makeExceptionHTTP();
 
       final DownloaderType d =
         Downloader.newDownloader(exec, in_http, DownloaderConfiguration
@@ -399,7 +399,7 @@ import com.io7m.junreachable.UnreachableCodeException;
             final OptionType<Throwable> error,
             final String message)
           {
-
+            // Nothing
           }
 
           @Override public void onAccountLoginSuccess(
@@ -751,7 +751,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
           @Override public void onAccountDataBookLoadFinished()
           {
-
+            // Nothing
           }
 
           @Override public void onAccountDataBookLoadSucceeded(
@@ -936,6 +936,7 @@ import com.io7m.junreachable.UnreachableCodeException;
               .exactString("561c5ecf0d3020e18ff66e17db27ca232898d409e1d7b0a0432dbea848a1abfe"));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
+        TestUtilities.assertEquals(o, o);
       }
 
       {
@@ -945,6 +946,7 @@ import com.io7m.junreachable.UnreachableCodeException;
               .exactString("28a0d7122f93e0e052e9e50b35531d01d55056d8fbd3c853e307a0455888150e"));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
+        TestUtilities.assertEquals(o, o);
       }
 
       {
@@ -954,6 +956,7 @@ import com.io7m.junreachable.UnreachableCodeException;
               .exactString("8e697815fb146a0ffd0bb3776b8197cea1bd6cb75a95a34053bf2b65e0b7e7e7"));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
+        TestUtilities.assertEquals(o, o);
       }
 
       {
@@ -963,6 +966,7 @@ import com.io7m.junreachable.UnreachableCodeException;
               .exactString("284a2dc4e2852f1a69665aa28949e8659cf9d7d53ca11c7bf096403261368ade"));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
+        TestUtilities.assertEquals(o, o);
       }
 
     } finally {

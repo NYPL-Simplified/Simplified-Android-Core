@@ -19,7 +19,8 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public abstract class CatalogActivity extends SimplifiedActivity
+@SuppressWarnings("boxing") public abstract class CatalogActivity extends
+  SimplifiedActivity
 {
   private static final String CATALOG_UP_STACK_ID;
 

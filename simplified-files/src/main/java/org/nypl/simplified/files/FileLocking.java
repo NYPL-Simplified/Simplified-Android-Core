@@ -95,7 +95,7 @@ public final class FileLocking
       String.format(
         "Timed out attempting to lock '%s' after %d milliseconds",
         file,
-        milliseconds);
+        Long.valueOf(milliseconds));
     throw new IOException(m);
   }
 

@@ -17,7 +17,7 @@ public final class TestUtilities
     }
   }
 
-  public static void assertGreater(
+  @SuppressWarnings("boxing") public static void assertGreater(
     final int x,
     final int y)
   {

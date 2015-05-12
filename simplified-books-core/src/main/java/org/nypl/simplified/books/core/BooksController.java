@@ -295,7 +295,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           this.listener.onAccountDataBookLoadFailed(
             id,
             Option.some(e),
-            e.getMessage());
+            NullCheck.notNull(e.getMessage()));
         }
       }
     }
@@ -329,16 +329,13 @@ import com.io7m.junreachable.UnreachableCodeException;
   private static final class DataSetupTask implements Runnable
   {
     private final BookDatabaseType             books_database;
-    private final BooksControllerConfiguration config;
     private final AccountDataSetupListenerType listener;
 
     public DataSetupTask(
-      final BooksControllerConfiguration in_config,
       final BookDatabaseType in_books_database,
       final AccountDataSetupListenerType in_listener)
     {
       this.books_database = NullCheck.notNull(in_books_database);
-      this.config = NullCheck.notNull(in_config);
       this.listener = NullCheck.notNull(in_listener);
     }
 
@@ -350,7 +347,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       } catch (final Throwable x) {
         this.listener.onAccountDataSetupFailure(
           Option.some(x),
-          x.getMessage());
+          NullCheck.notNull(x.getMessage()));
       }
     }
   }
@@ -532,16 +529,15 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.loginCheckCredentials();
         this.listener.onAccountLoginSuccess(this.barcode, this.pin);
       } catch (final Throwable e) {
-        this.listener.onAccountLoginFailure(Option.some(e), e.getMessage());
+        this.listener.onAccountLoginFailure(
+          Option.some(e),
+          NullCheck.notNull(e.getMessage()));
       }
     }
 
     @Override public void run()
     {
-      this.books.submitRunnable(new DataSetupTask(
-        this.config,
-        this.books_database,
-        this));
+      this.books.submitRunnable(new DataSetupTask(this.books_database, this));
     }
 
     private void saveCredentials(
@@ -583,7 +579,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 
         this.listener.onAccountLogoutSuccess();
       } catch (final Throwable e) {
-        this.listener.onAccountLogoutFailure(Option.some(e), e.getMessage());
+        this.listener.onAccountLogoutFailure(
+          Option.some(e),
+          NullCheck.notNull(e.getMessage()));
       }
     }
   }
@@ -662,7 +660,9 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.sync();
         this.listener.onAccountSyncSuccess();
       } catch (final Throwable x) {
-        this.listener.onAccountSyncFailure(Option.some(x), x.getMessage());
+        this.listener.onAccountSyncFailure(
+          Option.some(x),
+          NullCheck.notNull(x.getMessage()));
       }
     }
 
@@ -849,13 +849,17 @@ import com.io7m.junreachable.UnreachableCodeException;
       final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
       try {
         final InputStream in = NullCheck.notNull(r.getValue());
-        final byte[] buffer = new byte[8192];
-        for (;;) {
-          final int rb = in.read(buffer);
-          if (rb == -1) {
-            break;
+        try {
+          final byte[] buffer = new byte[8192];
+          for (;;) {
+            final int rb = in.read(buffer);
+            if (rb == -1) {
+              break;
+            }
+            fs.write(buffer, 0, rb);
           }
-          fs.write(buffer, 0, rb);
+        } finally {
+          in.close();
         }
 
         fs.flush();

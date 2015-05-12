@@ -117,7 +117,8 @@ public final class OPDSXML
       final Node child = NullCheck.notNull(children.item(index));
       if (child instanceof Element) {
         if (OPDSXML.nodeHasName((Element) child, namespace, name)) {
-          return Option.some(child.getTextContent().trim());
+          final String text = child.getTextContent();
+          return Option.some(NullCheck.notNull(text.trim()));
         }
       }
     }
@@ -255,7 +256,7 @@ public final class OPDSXML
     if (attrs != null) {
       final Attr attr = (Attr) attrs.getNamedItem("xmlns");
       if (attr != null) {
-        return Option.some(attr.getNodeValue());
+        return Option.some(NullCheck.notNull(attr.getNodeValue()));
       }
     }
 

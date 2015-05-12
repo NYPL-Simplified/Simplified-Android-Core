@@ -31,10 +31,9 @@ import org.nypl.simplified.http.core.HTTPType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 
-@SuppressWarnings("static-method") public final class DownloaderTest
+@SuppressWarnings({ "static-method", "synthetic-access" }) public final class DownloaderTest
 {
   private static abstract class LoggingListener implements
     DownloadListenerType
@@ -119,7 +118,7 @@ import com.io7m.jnull.NullCheck;
 
   @Rule public Timeout globalTimeout = new Timeout(10000);
 
-  private @NonNull File makeTempDir()
+  private File makeTempDir()
     throws IOException
   {
     final File dir = DirectoryUtilities.directoryCreateTemporary();
@@ -127,7 +126,7 @@ import com.io7m.jnull.NullCheck;
     return NullCheck.notNull(dir);
   }
 
-  private @NonNull URI serverAddress(
+  private URI serverAddress(
     final String path)
   {
     final StringBuilder b = new StringBuilder();
@@ -457,7 +456,7 @@ import com.io7m.jnull.NullCheck;
       final OptionType<HTTPAuthType> none = Option.none();
       d.downloadEnqueue(
         none,
-        URI.create("nothttp://example.com/nonexistent"),
+        NullCheck.notNull(URI.create("nothttp://example.com/nonexistent")),
         "Something",
         listener);
 
@@ -696,7 +695,6 @@ import com.io7m.jnull.NullCheck;
 
     long id;
 
-    final CountDownLatch start_latch = new CountDownLatch(1);
     final CountDownLatch pause_latch = new CountDownLatch(1);
     final CountDownLatch resume_latch = new CountDownLatch(1);
     final DownloadListenerType listener = new LoggingListener() {

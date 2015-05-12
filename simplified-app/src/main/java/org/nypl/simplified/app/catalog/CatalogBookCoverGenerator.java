@@ -94,7 +94,7 @@ public final class CatalogBookCoverGenerator implements
     params.put("title", NullCheck.notNull(title));
     params.put("author", NullCheck.notNull(author));
     return URIQueryBuilder.encodeQuery(
-      URI.create("generated-cover://localhost/"),
+      NullCheck.notNull(URI.create("generated-cover://localhost/")),
       params);
   }
 }

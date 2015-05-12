@@ -35,9 +35,8 @@ import com.io7m.jnull.Nullable;
  * screens.
  */
 
-public final class ReaderTOCActivity extends Activity implements
-  ListAdapter,
-  ReaderSettingsListenerType
+@SuppressWarnings("synthetic-access") public final class ReaderTOCActivity extends
+  Activity implements ListAdapter, ReaderSettingsListenerType
 {
   private static final Logger LOG;
   public static final String  TOC_ID;
@@ -69,9 +68,7 @@ public final class ReaderTOCActivity extends Activity implements
   }
 
   private @Nullable ArrayAdapter<TOCElement> adapter;
-  private @Nullable ReaderTOC                toc;
   private @Nullable ImageView                view_back;
-  private @Nullable ListView                 view_list;
   private @Nullable ViewGroup                view_root;
   private @Nullable TextView                 view_title;
 
@@ -112,7 +109,9 @@ public final class ReaderTOCActivity extends Activity implements
   @Override public TOCElement getItem(
     final int position)
   {
-    return NullCheck.notNull(this.adapter).getItem(position);
+    return NullCheck.notNull(NullCheck
+      .notNull(this.adapter)
+      .getItem(position));
   }
 
   @Override public long getItemId(
@@ -247,10 +246,8 @@ public final class ReaderTOCActivity extends Activity implements
     in_list_view.setAdapter(this);
 
     this.view_back = in_back;
-    this.view_list = in_list_view;
     this.view_root = in_root;
     this.view_title = in_title;
-    this.toc = in_toc;
 
     this.applyColorScheme(settings.getColorScheme());
   }

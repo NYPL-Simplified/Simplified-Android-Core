@@ -29,7 +29,7 @@ public final class CatalogDownloadProgressBar
       bar.setIndeterminate(false);
       bar.setMax(100);
       bar.setProgress(iperc);
-      text.setText(String.format("%d%%", iperc));
+      text.setText(String.format("%d%%", Integer.valueOf(iperc)));
     }
   }
 

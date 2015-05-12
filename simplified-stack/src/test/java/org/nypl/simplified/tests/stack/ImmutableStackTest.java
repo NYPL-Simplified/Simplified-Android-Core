@@ -6,7 +6,7 @@ import org.nypl.simplified.stack.ImmutableStack;
 
 import com.io7m.jfunctional.Pair;
 
-@SuppressWarnings("static-method") public final class ImmutableStackTest
+@SuppressWarnings({ "null", "static-method" }) public final class ImmutableStackTest
 {
   @Test public void testEmpty()
   {

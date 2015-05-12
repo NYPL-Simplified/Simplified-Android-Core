@@ -210,6 +210,7 @@ import com.io7m.jnull.NullCheck;
     final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final InputStream d = OPDSFeedParserContract.getResource("empty-0.xml");
     final OPDSAcquisitionFeed f = (OPDSAcquisitionFeed) p.parse(uri, d);
+    NullCheck.notNull(f);
     d.close();
   }
 

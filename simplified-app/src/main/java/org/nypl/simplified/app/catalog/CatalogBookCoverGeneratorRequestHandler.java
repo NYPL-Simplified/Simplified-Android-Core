@@ -47,7 +47,7 @@ public final class CatalogBookCoverGeneratorRequestHandler extends
     final Request request = NullCheck.notNull(request_mn);
     final Bitmap b =
       this.generator.generateImage(
-        URI.create(request.uri.toString()),
+        NullCheck.notNull(URI.create(request.uri.toString())),
         request.targetWidth,
         request.targetHeight);
     return new Result(b, LoadedFrom.MEMORY);

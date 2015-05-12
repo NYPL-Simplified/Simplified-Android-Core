@@ -6,5 +6,5 @@ package org.nypl.simplified.books.core;
 
 public interface BookStatusDownloadedType extends BookStatusLoanedType
 {
-
+  // No extra functions
 }

@@ -153,7 +153,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     in_books.bookDownloadAcknowledge(id);
 
     final OptionType<BookStatusType> status_opt = in_books.booksStatusGet(id);
-    this.onStatus(e, id, status_opt);
+    this.onStatus(e, status_opt);
     return Unit.unit();
   }
 
@@ -475,7 +475,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     final BookID book_id = e.getBookID();
     final OptionType<BookStatusType> status_opt =
       in_books.booksStatusGet(book_id);
-    this.onStatus(e, book_id, status_opt);
+    this.onStatus(e, status_opt);
 
     CatalogBookDetail.configureSummaryWebView(eo, summary_text);
     CatalogBookDetailActivity.configureSummaryWebViewHeight(summary_text);
@@ -507,7 +507,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
 
   private void onStatus(
     final FeedEntryOPDS e,
-    final BookID id,
     final OptionType<BookStatusType> status_opt)
   {
     if (status_opt.isSome()) {
@@ -545,7 +544,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
         final BooksType in_books = NullCheck.notNull(this.books);
         final OptionType<BookStatusType> status_opt =
           in_books.booksStatusGet(current_id);
-        this.onStatus(e, current_id, status_opt);
+        this.onStatus(e, status_opt);
       }
     }
   }

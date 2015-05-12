@@ -2,10 +2,8 @@ package org.nypl.simplified.app.catalog;
 
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
-import org.slf4j.Logger;
 
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,13 +13,7 @@ import com.io7m.jnull.Nullable;
 
 public final class CatalogBookDelete implements OnClickListener
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(CatalogBookDelete.class);
-  }
-
-  private final BookID        id;
+  private final BookID id;
 
   public CatalogBookDelete(
     final BookID in_id)

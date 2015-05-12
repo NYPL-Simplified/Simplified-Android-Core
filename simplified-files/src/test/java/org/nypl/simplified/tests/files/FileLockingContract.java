@@ -12,7 +12,8 @@ import org.nypl.simplified.test.utilities.TestUtilities;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 
-public final class FileLockingContract implements FileLockingContractType
+@SuppressWarnings("boxing") public final class FileLockingContract implements
+  FileLockingContractType
 {
   public FileLockingContract()
   {

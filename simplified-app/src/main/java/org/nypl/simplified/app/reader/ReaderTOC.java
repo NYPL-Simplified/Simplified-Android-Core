@@ -12,7 +12,8 @@ import org.slf4j.Logger;
 
 import com.io7m.jnull.NullCheck;
 
-public final class ReaderTOC implements Serializable
+@SuppressWarnings("synthetic-access") public final class ReaderTOC implements
+  Serializable
 {
   public static final class TOCElement implements Serializable
   {
@@ -82,7 +83,7 @@ public final class ReaderTOC implements Serializable
     NullCheck.notNull(p);
 
     final List<TOCElement> rs = new ArrayList<TOCElement>();
-    final NavigationTable toc = p.getTableOfContents();
+    final NavigationTable toc = NullCheck.notNull(p.getTableOfContents());
     ReaderTOC.accumulate(rs, -1, toc, toc);
     return new ReaderTOC(rs);
   }
@@ -95,16 +96,20 @@ public final class ReaderTOC implements Serializable
   {
     if (e instanceof NavigationPoint) {
       final NavigationPoint p = (NavigationPoint) e;
-      final String title = p.getTitle();
-      final String content_ref = p.getContent();
-      final String source_href = parent.getSourceHref();
+      final String title = NullCheck.notNull(p.getTitle());
+      final String content_ref = NullCheck.notNull(p.getContent());
+      final String source_href = NullCheck.notNull(parent.getSourceHref());
       ReaderTOC.LOG.debug("nav point: {} → {}", content_ref, title);
       final TOCElement te =
         new TOCElement(indent, title, content_ref, source_href);
       elements.add(te);
 
       for (final NavigationElement ec : p.getChildren()) {
-        ReaderTOC.accumulate(elements, indent + 1, parent, ec);
+        ReaderTOC.accumulate(
+          elements,
+          indent + 1,
+          parent,
+          NullCheck.notNull(ec));
       }
 
       return;
@@ -122,7 +127,7 @@ public final class ReaderTOC implements Serializable
       // content ref accessible from here...
 
       for (final NavigationElement ec : e.getChildren()) {
-        ReaderTOC.accumulate(elements, indent + 1, t, ec);
+        ReaderTOC.accumulate(elements, indent + 1, t, NullCheck.notNull(ec));
       }
     }
   }

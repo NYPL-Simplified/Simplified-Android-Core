@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -133,10 +134,12 @@ import com.io7m.jnull.Nullable;
             SettingsActivity.editableDisable(in_pin_edit);
             SettingsActivity.editableDisable(in_barcode_edit);
 
+            final Editable barcode_text = in_barcode_edit.getText();
             final AccountBarcode barcode =
-              new AccountBarcode(in_barcode_edit.getText().toString());
+              new AccountBarcode(NullCheck.notNull(barcode_text.toString()));
+            final Editable pin_text = in_pin_edit.getText();
             final AccountPIN pin =
-              new AccountPIN(in_pin_edit.getText().toString());
+              new AccountPIN(NullCheck.notNull(pin_text.toString()));
             books.accountLogin(barcode, pin, SettingsActivity.this);
           }
         });

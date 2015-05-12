@@ -17,6 +17,7 @@ import org.simpleframework.transport.connect.SocketConnection;
 
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 
 public final class FileServer implements Container, Callable<Unit>
 {
@@ -48,7 +49,7 @@ public final class FileServer implements Container, Callable<Unit>
     this.server.stop();
   }
 
-  private static byte[] fileAsBytes(
+  private static @Nullable byte[] fileAsBytes(
     final String path)
     throws IOException
   {
@@ -74,40 +75,43 @@ public final class FileServer implements Container, Callable<Unit>
   }
 
   @Override public void handle(
-    final Request request,
-    final Response response)
+    final @Nullable Request request,
+    final @Nullable Response response)
   {
+    final Request nn_request = NullCheck.notNull(request);
+    final Response nn_response = NullCheck.notNull(response);
+
     try {
-      final InetSocketAddress addr = request.getClientAddress();
+      final InetSocketAddress addr = nn_request.getClientAddress();
       System.err.printf(
         "request: %s: %s %s\n",
         addr,
-        request.getMethod(),
-        request.getTarget());
+        nn_request.getMethod(),
+        nn_request.getTarget());
 
-      final String path = NullCheck.notNull(request.getTarget());
+      final String path = NullCheck.notNull(nn_request.getTarget());
       final byte[] bytes = FileServer.fileAsBytes(path);
       if (bytes == null) {
-        response.setStatus(Status.NOT_FOUND);
-        response.close();
+        nn_response.setStatus(Status.NOT_FOUND);
+        nn_response.close();
         return;
       }
 
-      response.setContentLength(bytes.length);
-      response.setStatus(Status.OK);
+      nn_response.setContentLength(bytes.length);
+      nn_response.setStatus(Status.OK);
 
-      if ("GET".equals(request.getMethod())) {
-        final OutputStream out = response.getOutputStream();
+      if ("GET".equals(nn_request.getMethod())) {
+        final OutputStream out = nn_response.getOutputStream();
         out.write(bytes);
         out.flush();
         out.close();
       }
 
     } catch (final IOException e) {
-      response.setStatus(Status.INTERNAL_SERVER_ERROR);
+      nn_response.setStatus(Status.INTERNAL_SERVER_ERROR);
     } finally {
       try {
-        response.close();
+        nn_response.close();
       } catch (final IOException e) {
         e.printStackTrace();
       }

@@ -281,7 +281,9 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         e,
         OPDSFeedParser.ATOM_URI,
         "published");
-    return OPDSRFC3339Formatter.parseRFC3339Date(er.getTextContent().trim());
+    final String text = er.getTextContent();
+    final String trimmed = text.trim();
+    return OPDSRFC3339Formatter.parseRFC3339Date(NullCheck.notNull(trimmed));
   }
 
   private static OptionType<String> findPublisher(

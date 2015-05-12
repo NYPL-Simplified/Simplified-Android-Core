@@ -64,7 +64,7 @@ public final class CatalogFeedWithBlocks implements ListAdapter
   @Override public FeedBlock getItem(
     final int position)
   {
-    return this.adapter.getItem(position);
+    return NullCheck.notNull(this.adapter.getItem(position));
   }
 
   @Override public long getItemId(
