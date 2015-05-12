@@ -36,8 +36,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
-import org.nypl.simplified.opds.core.OPDSFeedType;
-import org.nypl.simplified.opds.core.OPDSNavigationFeed;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -733,17 +731,10 @@ import com.io7m.junreachable.UnreachableCodeException;
       final HTTPResultOKType<InputStream> r_feed)
       throws Exception
     {
-      final OPDSFeedType feed =
+      final OPDSAcquisitionFeed feed =
         this.feed_parser.parse(loans_uri, r_feed.getValue());
 
-      if (feed instanceof OPDSNavigationFeed) {
-        throw new IOException(
-          "Expected an acquisition feed, but received a navigation feed");
-      }
-
-      final OPDSAcquisitionFeed acq_feed = (OPDSAcquisitionFeed) feed;
-      final List<OPDSAcquisitionFeedEntry> entries =
-        acq_feed.getFeedEntries();
+      final List<OPDSAcquisitionFeedEntry> entries = feed.getFeedEntries();
 
       for (final OPDSAcquisitionFeedEntry e : entries) {
         this.syncFeedEntry(NullCheck.notNull(e));

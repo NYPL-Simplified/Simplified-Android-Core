@@ -39,36 +39,6 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
     this.contract.testEmpty0();
   }
 
-  @Override public void testNavigationFeed0()
-    throws Exception
-  {
-    this.contract.testNavigationFeed0();
-  }
-
-  @Override public void testNavigationFeedBadEntryFeaturedLinkWithoutHref()
-    throws Exception
-  {
-    this.contract.testNavigationFeedBadEntryFeaturedLinkWithoutHref();
-  }
-
-  @Override public void testNavigationFeedBadEntryLinkWithoutHref()
-    throws Exception
-  {
-    this.contract.testNavigationFeedBadEntryLinkWithoutHref();
-  }
-
-  @Override public void testNavigationFeedBadEntryNoLinks()
-    throws Exception
-  {
-    this.contract.testNavigationFeedBadEntryNoLinks();
-  }
-
-  @Override public void testNavigationFeedBadEntrySubsectionLinkWithoutHref()
-    throws Exception
-  {
-    this.contract.testNavigationFeedBadEntrySubsectionLinkWithoutHref();
-  }
-
   @Override public void testNotXMLException()
     throws Exception
   {
