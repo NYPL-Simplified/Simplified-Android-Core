@@ -11,6 +11,7 @@ import org.nypl.simplified.books.core.BooksType;
 import org.slf4j.Logger;
 
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -63,9 +64,7 @@ import com.io7m.jnull.Nullable;
   }
 
   private @Nullable EditText barcode_edit;
-
   private @Nullable Button   login;
-
   private @Nullable EditText pin_edit;
 
   @Override public void onAccountIsLoggedIn(
@@ -97,10 +96,19 @@ import com.io7m.jnull.Nullable;
           @Override public void onClick(
             final @Nullable View v)
           {
-            in_login.setEnabled(false);
-            SettingsActivity.editableDisable(in_pin_edit);
-            SettingsActivity.editableDisable(in_barcode_edit);
-            books.accountLogout(SettingsActivity.this);
+            final LogoutDialog d = LogoutDialog.newDialog();
+            d.setOnConfirmListener(new Runnable() {
+              @Override public void run()
+              {
+                in_login.setEnabled(false);
+                SettingsActivity.editableDisable(in_pin_edit);
+                SettingsActivity.editableDisable(in_barcode_edit);
+                books.accountLogout(SettingsActivity.this);
+              }
+            });
+            final FragmentManager fm =
+              SettingsActivity.this.getFragmentManager();
+            d.show(fm, "logout-confirm");
           }
         });
       }
