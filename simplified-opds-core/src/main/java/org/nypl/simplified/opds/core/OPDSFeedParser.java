@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -14,6 +15,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,15 +40,17 @@ import com.io7m.jnull.NullCheck;
 
 public final class OPDSFeedParser implements OPDSFeedParserType
 {
-  private static final URI ACQUISITION_URI_PREFIX;
-  private static final URI ATOM_URI;
-  private static final URI BLOCK_URI;
-  private static final URI DUBLIN_CORE_TERMS_URI;
-  private static final URI FEATURED_URI_PREFIX;
-  private static final URI IMAGE_URI;
-  private static final URI THUMBNAIL_URI;
+  private static final URI    ACQUISITION_URI_PREFIX;
+  private static final URI    ATOM_URI;
+  private static final URI    BLOCK_URI;
+  private static final URI    DUBLIN_CORE_TERMS_URI;
+  private static final URI    FEATURED_URI_PREFIX;
+  private static final URI    IMAGE_URI;
+  private static final URI    THUMBNAIL_URI;
+  private static final Logger LOG;
 
   static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(OPDSFeedParser.class));
     ATOM_URI = NullCheck.notNull(URI.create("http://www.w3.org/2005/Atom"));
     DUBLIN_CORE_TERMS_URI =
       NullCheck.notNull(URI.create("http://purl.org/dc/terms/"));
@@ -520,8 +525,15 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   {
     NullCheck.notNull(s);
 
+    final long time_pre_parse = System.nanoTime();
+    long time_post_parse = time_pre_parse;
+
     try {
+      OPDSFeedParser.LOG.debug("parsing: {}", uri);
+
       final Document d = OPDSFeedParser.parseStream(s);
+      time_post_parse = System.nanoTime();
+
       final Node root = NullCheck.notNull(d.getFirstChild());
       final Element e_feed =
         OPDSXML.nodeAsElementWithName(root, OPDSFeedParser.ATOM_URI, "feed");
@@ -595,6 +607,18 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       throw new OPDSFeedParseException(e);
     } catch (final URISyntaxException e) {
       throw new OPDSFeedParseException(e);
+    } finally {
+      final long time_now = System.nanoTime();
+      final long time_parse = time_post_parse - time_pre_parse;
+      final long time_interp = time_now - time_post_parse;
+      OPDSFeedParser.LOG.debug(
+        "parsing completed ({}ms - parse: {}ms, interp: {}ms): {}",
+        TimeUnit.MILLISECONDS.convert(
+          time_parse + time_interp,
+          TimeUnit.NANOSECONDS),
+        TimeUnit.MILLISECONDS.convert(time_parse, TimeUnit.NANOSECONDS),
+        TimeUnit.MILLISECONDS.convert(time_interp, TimeUnit.NANOSECONDS),
+        uri);
     }
   }
 }

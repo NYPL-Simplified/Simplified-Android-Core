@@ -11,7 +11,8 @@
   <string name="catalog_load_error_text">An error occurred whilst loading the catalog. Please try
     again.
   </string>
-  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/blocks/</string>
+  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/blocks/
+  </string>
   <string name="catalog_unknown_feed">Unknown</string>
   <string name="catalog_detail_related">Related books</string>
   <string name="catalog_downloading">Downloading</string>
@@ -22,11 +23,16 @@
   <string name="catalog_categories">Categories</string>
   <string name="catalog_search">Search</string>
   <string name="catalog_empty_feed">No results found.</string>
+  <string name="catalog_meta_corrupt_title">Metadata damaged</string>
+  <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your
+    account to fix it.
+  </string>
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Borrow</string>
   <string name="catalog_book_read">Read</string>
   <string name="catalog_book_error_dismiss">Dismiss</string>
+  <string name="catalog_book_sync">Sync</string>
   <string name="catalog_book_download">Download</string>
   <string name="catalog_book_delete">Delete</string>
 
@@ -43,7 +49,9 @@
   <string name="settings_logout_failed">Failed to log out!</string>
   <string name="settings_feedback">Feedback</string>
   <string name="settings_credits">Credits</string>
-  <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
+  <string name="settings_logout_confirm">If you sign out of your account, all content will be
+    removed from this device.
+  </string>
 
   <!-- Reader strings -->
   <string name="reader_toc">Table Of Contents</string>

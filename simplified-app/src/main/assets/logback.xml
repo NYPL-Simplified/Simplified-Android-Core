@@ -11,6 +11,10 @@
   </appender>
 
   <logger
+    name="org.nypl.simplified.app.catalog.CatalogFeedBookCellView"
+    level="WARN" />
+  
+  <logger
     name="org.nypl.simplified.app.BookCoverProvider"
     level="WARN" />
 
