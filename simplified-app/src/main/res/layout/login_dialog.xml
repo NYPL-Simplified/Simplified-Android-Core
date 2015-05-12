@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/login_dialog"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
@@ -10,7 +11,9 @@
   <TextView
     android:id="@+id/login_dialog_text"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"/>
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:text="@string/settings_login_title" />
 
   <TableLayout
     android:id="@+id/login_dialog_table"
@@ -27,7 +30,7 @@
         android:id="@+id/login_dialog_barcode_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/settings_barcode"/>
+        android:text="@string/settings_barcode" />
 
       <EditText
         android:id="@+id/login_dialog_barcode_text_edit"
@@ -35,6 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
+        android:layout_marginLeft="16dp"
         android:maxLength="14"
         android:maxLines="1">
       </EditText>
@@ -48,12 +52,13 @@
         android:id="@+id/login_dialog_pin_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/settings_pin"/>
+        android:text="@string/settings_pin" />
 
       <EditText
         android:id="@+id/login_dialog_pin_text_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
         android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
         android:maxLength="4"
@@ -69,16 +74,19 @@
 
     <Button
       android:id="@+id/login_dialog_ok"
+      style="?android:attr/buttonStyleSmall"
+      android:layout_marginTop="16dp"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:background="@drawable/simplified_button"
       android:text="@string/settings_log_in"
-      android:textAppearance="?android:attr/textAppearanceSmall"/>
+      android:textColor="@drawable/simplified_button_text" />
 
     <ProgressBar
       android:id="@+id/login_progress"
       style="?android:attr/progressBarStyleSmall"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"/>
+      android:layout_height="wrap_content" />
   </RelativeLayout>
 
 </LinearLayout>
