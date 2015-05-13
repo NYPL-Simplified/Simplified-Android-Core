@@ -11,7 +11,7 @@
   <!-- Set the time to sleep in milliseconds between attempts to read data from the 
     network by the downloader. This is useful for drastically slowing down the process 
     of downloading books in order to see the state of any intermediate views in the app. -->
-  <integer name="debug_downloader_sleep_time_ms">5000</integer>
+  <integer name="debug_downloader_sleep_time_ms">0</integer>
 
   <!-- If testing on a device with a screen that's considered to be "large", setting 
     this variable to true will instead cause the screen to be reported as "not large". -->
