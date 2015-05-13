@@ -16,9 +16,9 @@
 
     <ProgressBar
       android:id="@+id/feed_progress"
-      style="?android:attr/progressBarStyleSmall"
+      style="?android:attr/progressBarStyle"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
+      android:layout_height="25dp"
       android:layout_alignParentRight="true" />
   </RelativeLayout>
 
