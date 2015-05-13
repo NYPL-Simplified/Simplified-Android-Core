@@ -2,7 +2,7 @@
 <resources>
 
   <!-- If true, Picasso will log (excessively) about what it's doing. -->
-  <bool name="debug_picasso">true</bool>
+  <bool name="debug_picasso">false</bool>
   
   <!-- If true, show the status of books in acquisition feed cells, and book detail 
     activities/dialogs. -->
