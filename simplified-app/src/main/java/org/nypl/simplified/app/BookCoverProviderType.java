@@ -115,4 +115,8 @@ public interface BookCoverProviderType
     final int w,
     final int h,
     final Callback c);
+
+  void loadingThumbailsPause();
+
+  void loadingThumbnailsContinue();
 }

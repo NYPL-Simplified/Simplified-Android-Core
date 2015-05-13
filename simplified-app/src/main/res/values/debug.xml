@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <!-- If true, Picasso will log (excessively) about what it's doing. -->
+  <bool name="debug_picasso">true</bool>
+  
   <!-- If true, show the status of books in acquisition feed cells, and book detail 
     activities/dialogs. -->
   <bool name="debug_catalog_cell_view_states">false</bool>
