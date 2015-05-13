@@ -644,8 +644,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     final GridView grid_view =
       NullCheck.notNull((GridView) layout
         .findViewById(R.id.catalog_feed_noblocks_grid));
-
-    grid_view.setSelection(this.saved_scroll_pos);
+    grid_view.post(new Runnable() {
+      @Override public void run()
+      {
+        grid_view.setSelection(CatalogFeedActivity.this.saved_scroll_pos);
+      }
+    });
     this.list_view = grid_view;
 
     final CatalogFeedArgumentsType args = this.getArguments();
