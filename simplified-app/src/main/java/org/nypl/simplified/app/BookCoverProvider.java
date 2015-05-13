@@ -18,36 +18,26 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
-@SuppressWarnings("synthetic-access") public final class BookCoverProvider implements
-  BookCoverProviderType
+public final class BookCoverProvider implements BookCoverProviderType
 {
-  private static final Logger   LOG;
-  private static final Callback EMPTY_CALLBACK;
+  private static final Logger LOG;
+  private static final String THUMBNAIL_TAG;
 
   static {
     LOG = LogUtilities.getLog(BookCoverProvider.class);
-
-    EMPTY_CALLBACK = new Callback() {
-      @Override public void onError()
-      {
-        BookCoverProvider.LOG.error("failed to load image");
-      }
-
-      @Override public void onSuccess()
-      {
-        // Nothing
-      }
-    };
+    THUMBNAIL_TAG = "thumbnail";
   }
 
   private static URI generateCoverURI(
@@ -74,13 +64,15 @@ import com.squareup.picasso.RequestCreator;
     final CatalogBookCoverGenerator cover_gen =
       new CatalogBookCoverGenerator();
 
+    final Resources rr = in_c.getResources();
     final Picasso.Builder pb = new Picasso.Builder(in_c);
     pb.defaultBitmapConfig(Bitmap.Config.RGB_565);
     pb.indicatorsEnabled(true);
-    pb.loggingEnabled(false);
+    pb.loggingEnabled(rr.getBoolean(R.bool.debug_picasso));
     pb.addRequestHandler(new CatalogBookCoverGeneratorRequestHandler(
       cover_gen));
     pb.executor(in_exec);
+
     final Picasso p = NullCheck.notNull(pb.build());
     return new BookCoverProvider(p, in_books, cover_gen);
   }
@@ -105,20 +97,17 @@ import com.squareup.picasso.RequestCreator;
     final int w,
     final int h)
   {
-    this.loadCoverIntoWithCallback(
-      e,
-      i,
-      w,
-      h,
-      BookCoverProvider.EMPTY_CALLBACK);
+    NullCheck.notNull(e);
+    NullCheck.notNull(i);
+    this.loadCoverIntoActual(e, i, w, h, null);
   }
 
-  @Override public void loadCoverIntoWithCallback(
+  private void loadCoverIntoActual(
     final FeedEntryOPDS e,
     final ImageView i,
     final int w,
     final int h,
-    final Callback c)
+    final @Nullable Callback c)
   {
     BookCoverProvider.LOG.debug("{}: loadCoverInto", e.getBookID());
 
@@ -168,26 +157,46 @@ import com.squareup.picasso.RequestCreator;
     r.into(i, c);
   }
 
+  @Override public void loadCoverIntoWithCallback(
+    final FeedEntryOPDS e,
+    final ImageView i,
+    final int w,
+    final int h,
+    final Callback c)
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(i);
+    NullCheck.notNull(c);
+    this.loadCoverIntoActual(e, i, w, h, c);
+  }
+
+  @Override public void loadingThumbailsPause()
+  {
+    this.picasso.pauseTag(BookCoverProvider.THUMBNAIL_TAG);
+  }
+
+  @Override public void loadingThumbnailsContinue()
+  {
+    this.picasso.resumeTag(BookCoverProvider.THUMBNAIL_TAG);
+  }
+
   @Override public void loadThumbnailInto(
     final FeedEntryOPDS e,
     final ImageView i,
     final int w,
     final int h)
   {
-    this.loadThumbnailIntoWithCallback(
-      e,
-      i,
-      w,
-      h,
-      BookCoverProvider.EMPTY_CALLBACK);
+    NullCheck.notNull(e);
+    NullCheck.notNull(i);
+    this.loadThumbnailIntoActual(e, i, w, h, null);
   }
 
-  @Override public void loadThumbnailIntoWithCallback(
+  private void loadThumbnailIntoActual(
     final FeedEntryOPDS e,
     final ImageView i,
     final int w,
     final int h,
-    final Callback c)
+    final @Nullable Callback c)
   {
     BookCoverProvider.LOG.debug("{}: loadThumbnailInto", e.getBookID());
 
@@ -233,7 +242,21 @@ import com.squareup.picasso.RequestCreator;
     BookCoverProvider.LOG.debug("{}: uri {}", e.getBookID(), uri);
 
     final RequestCreator r = this.picasso.load(uri.toString());
+    r.tag(BookCoverProvider.THUMBNAIL_TAG);
     r.resize(w, h);
     r.into(i, c);
+  }
+
+  @Override public void loadThumbnailIntoWithCallback(
+    final FeedEntryOPDS e,
+    final ImageView i,
+    final int w,
+    final int h,
+    final Callback c)
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(i);
+    NullCheck.notNull(c);
+    this.loadThumbnailIntoActual(e, i, w, h, c);
   }
 }

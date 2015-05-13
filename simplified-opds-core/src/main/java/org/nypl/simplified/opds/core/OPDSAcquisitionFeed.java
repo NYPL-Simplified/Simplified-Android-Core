@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,7 +21,7 @@ import com.io7m.jnull.Nullable;
  */
 
 @SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeed implements
-  OPDSFeedType
+  Serializable
 {
   private static final class Builder implements
     OPDSAcquisitionFeedBuilderType
@@ -205,7 +206,7 @@ import com.io7m.jnull.Nullable;
     return this.entries;
   }
 
-  @Override public String getFeedID()
+  public String getFeedID()
   {
     return this.id;
   }
@@ -215,22 +216,22 @@ import com.io7m.jnull.Nullable;
     return this.next;
   }
 
-  @Override public OptionType<OPDSSearchLink> getFeedSearchURI()
+  public OptionType<OPDSSearchLink> getFeedSearchURI()
   {
     return this.search;
   }
 
-  @Override public String getFeedTitle()
+  public String getFeedTitle()
   {
     return this.title;
   }
 
-  @Override public Calendar getFeedUpdated()
+  public Calendar getFeedUpdated()
   {
     return this.updated;
   }
 
-  @Override public URI getFeedURI()
+  public URI getFeedURI()
   {
     return this.uri;
   }
@@ -249,12 +250,5 @@ import com.io7m.jnull.Nullable;
     result = (prime * result) + this.next.hashCode();
     result = (prime * result) + this.search.hashCode();
     return result;
-  }
-
-  @Override public <A, E extends Exception> A matchFeedType(
-    final OPDSFeedMatcherType<A, E> m)
-    throws E
-  {
-    return m.onAcquisitionFeed(this);
   }
 }

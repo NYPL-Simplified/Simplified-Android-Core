@@ -190,7 +190,19 @@ public final class CatalogFeedWithoutBlocks implements
     final @Nullable AbsListView view,
     final int state)
   {
-    // Nothing
+    switch (state) {
+      case OnScrollListener.SCROLL_STATE_FLING:
+      case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+      {
+        this.book_cover_provider.loadingThumbailsPause();
+        break;
+      }
+      case OnScrollListener.SCROLL_STATE_IDLE:
+      {
+        this.book_cover_provider.loadingThumbnailsContinue();
+        break;
+      }
+    }
   }
 
   private static final Logger LOG;

@@ -15,10 +15,8 @@ import net.jodah.expiringmap.ExpiringMap.Builder;
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
 
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
-import org.nypl.simplified.opds.core.OPDSFeedType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,6 +164,7 @@ import com.io7m.jnull.Nullable;
         try {
           final FeedType f = FeedLoader.this.loadFeed(uri);
           FeedLoader.this.cache.put(uri, f);
+          FeedLoader.LOG.debug("added to cache: {}", uri);
           FeedLoader.callListener(uri, listener, f);
         } catch (final Throwable x) {
           FeedLoader.callErrorListener(uri, listener, x);
@@ -210,13 +209,7 @@ import com.io7m.jnull.Nullable;
   {
     final InputStream s = this.transport.getStream(uri);
     try {
-      final OPDSFeedType d = this.parser.parse(uri, s);
-      if (d instanceof OPDSAcquisitionFeed) {
-        return Feeds.fromAcquisitionFeed((OPDSAcquisitionFeed) d);
-      }
-      throw new IOException(String.format(
-        "Feeds of type %s are not supported.",
-        d));
+      return Feeds.fromAcquisitionFeed(this.parser.parse(uri, s));
     } finally {
       s.close();
     }

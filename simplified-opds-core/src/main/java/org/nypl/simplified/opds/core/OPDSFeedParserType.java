@@ -19,7 +19,7 @@ public interface OPDSFeedParserType
   /**
    * Parse the feed associated with the given stream <code>s</code>. The feed
    * is assumed to exist at <code>uri</code>.
-   * 
+   *
    * @param uri
    *          The URI of the feed
    * @param s
@@ -29,7 +29,7 @@ public interface OPDSFeedParserType
    *           On errors
    */
 
-  OPDSFeedType parse(
+  OPDSAcquisitionFeed parse(
     final URI uri,
     final InputStream s)
     throws OPDSFeedParseException;

@@ -14,21 +14,6 @@ public interface OPDSFeedParserContractType
   void testEmpty0()
     throws Exception;
 
-  void testNavigationFeed0()
-    throws Exception;
-
-  void testNavigationFeedBadEntryFeaturedLinkWithoutHref()
-    throws Exception;
-
-  void testNavigationFeedBadEntryLinkWithoutHref()
-    throws Exception;
-
-  void testNavigationFeedBadEntryNoLinks()
-    throws Exception;
-
-  void testNavigationFeedBadEntrySubsectionLinkWithoutHref()
-    throws Exception;
-
   void testNotXMLException()
     throws Exception;
 

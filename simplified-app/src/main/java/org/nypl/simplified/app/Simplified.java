@@ -89,9 +89,10 @@ import com.io7m.jnull.Nullable;
     {
       NullCheck.notNull(rr);
       this.screen = new ScreenSizeController(rr);
-      this.exec_catalog_feeds = Simplified.namedThreadPool(1, "catalog-feed");
-      this.exec_covers = Simplified.namedThreadPool(1, "cover");
-      this.exec_books = Simplified.namedThreadPool(1, "books");
+      this.exec_catalog_feeds =
+        Simplified.namedThreadPool(1, "catalog-feed", 19);
+      this.exec_covers = Simplified.namedThreadPool(2, "cover", 19);
+      this.exec_books = Simplified.namedThreadPool(1, "books", 19);
 
       /**
        * Catalog URIs.
@@ -319,11 +320,11 @@ import com.io7m.jnull.Nullable;
       this.screen = new ScreenSizeController(rr);
 
       this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
-      this.http_executor = Simplified.namedThreadPool(1, "httpd");
+      this.http_executor = Simplified.namedThreadPool(1, "httpd", 19);
       this.httpd =
         ReaderHTTPServer.newServer(this.http_executor, this.mime, 8080);
 
-      this.epub_exec = Simplified.namedThreadPool(1, "epub");
+      this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
 
       this.settings = ReaderSettings.openSettings(context);
@@ -516,7 +517,8 @@ import com.io7m.jnull.Nullable;
 
   private static ExecutorService namedThreadPool(
     final int count,
-    final String base)
+    final String base,
+    final int priority)
   {
     final ThreadFactory tf = Executors.defaultThreadFactory();
     final ThreadFactory named = new ThreadFactory() {
@@ -528,13 +530,13 @@ import com.io7m.jnull.Nullable;
         /**
          * Apparently, it's necessary to use {@link android.os.Process} to set
          * the thread priority, rather than the standard Java thread
-         * functions. All worker threads are set to the lowest priority (19).
+         * functions.
          */
 
         final Thread t = tf.newThread(new Runnable() {
           @Override public void run()
           {
-            android.os.Process.setThreadPriority(19);
+            android.os.Process.setThreadPriority(priority);
             NullCheck.notNull(r).run();
           }
         });

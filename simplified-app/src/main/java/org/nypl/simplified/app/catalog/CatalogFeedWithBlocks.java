@@ -12,13 +12,17 @@ import android.app.Activity;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogFeedWithBlocks implements ListAdapter
+public final class CatalogFeedWithBlocks implements
+  ListAdapter,
+  OnScrollListener
 {
   private static final Logger               LOG;
 
@@ -121,6 +125,34 @@ public final class CatalogFeedWithBlocks implements ListAdapter
     final int position)
   {
     return this.adapter.isEnabled(position);
+  }
+
+  @Override public void onScroll(
+    final @Nullable AbsListView view,
+    final int first_visible_item,
+    final int visible_count,
+    final int total_count)
+  {
+    // Nothing
+  }
+
+  @Override public void onScrollStateChanged(
+    final @Nullable AbsListView view,
+    final int state)
+  {
+    switch (state) {
+      case OnScrollListener.SCROLL_STATE_FLING:
+      case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
+      {
+        this.book_cover_provider.loadingThumbailsPause();
+        break;
+      }
+      case OnScrollListener.SCROLL_STATE_IDLE:
+      {
+        this.book_cover_provider.loadingThumbnailsContinue();
+        break;
+      }
+    }
   }
 
   @Override public void registerDataSetObserver(

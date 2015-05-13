@@ -59,10 +59,6 @@ import com.io7m.jnull.NullCheck;
     TestUtilities.assertEquals(1, p.getLength());
     final Element pub_actual = (Element) p.item(0);
 
-    final Some<String> pub_prefix =
-      (Some<String>) OPDSXML.getElementPrefix(pub_actual);
-    TestUtilities.assertEquals(pub_prefix.get(), "dcterms");
-
     final Some<String> pub_ns =
       (Some<String>) OPDSXML.getNodeNamespace(pub_actual);
     TestUtilities.assertEquals(pub_ns.get(), "http://purl.org/dc/terms/");

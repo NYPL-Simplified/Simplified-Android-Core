@@ -488,6 +488,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         f);
 
     list.setAdapter(cfl);
+    list.setOnScrollListener(cfl);
   }
 
   @Override public Unit onFeedWithoutBlocks(
@@ -628,6 +629,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
 
     layout.setVisibility(View.VISIBLE);
+    content_area.removeAllViews();
     content_area.addView(layout);
     content_area.requestLayout();
     this.progress_layout = layout;
