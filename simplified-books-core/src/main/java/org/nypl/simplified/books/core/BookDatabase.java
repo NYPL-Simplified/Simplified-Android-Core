@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.TreeTraverser;
-import com.google.common.io.Files;
+import org.nypl.simplified.files.DirectoryUtilities;
+import org.nypl.simplified.files.FileUtilities;
+
 import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -49,7 +49,7 @@ public final class BookDatabase implements BookDatabaseType
   @Override public void create()
     throws IOException
   {
-    FileUtilities.createDirectory(this.directory);
+    DirectoryUtilities.directoryCreate(this.directory);
   }
 
   @Override public boolean credentialsExist()
@@ -88,16 +88,9 @@ public final class BookDatabase implements BookDatabaseType
     throws IOException
   {
     if (this.directory.isDirectory()) {
-      final TreeTraverser<File> trav = Files.fileTreeTraverser();
-      final ImmutableList<File> list =
-        trav.postOrderTraversal(this.directory).toList();
-
-      for (int index = 0; index < list.size(); ++index) {
-        final File file = list.get(index);
-        final boolean ok = file.delete();
-        if (ok == false) {
-          throw new IOException("Unable to delete: " + file);
-        }
+      final List<BookDatabaseEntryType> es = this.getBookDatabaseEntries();
+      for (final BookDatabaseEntryType e : es) {
+        e.destroy();
       }
     } else {
       throw new IllegalStateException("Not logged in");

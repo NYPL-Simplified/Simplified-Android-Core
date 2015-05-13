@@ -154,9 +154,9 @@ public final class HTTP implements HTTPType
       if (conn.getResponseCode() >= 400) {
         return new HTTPResultError<InputStream>(
           conn.getResponseCode(),
-          conn.getResponseMessage(),
+          NullCheck.notNull(conn.getResponseMessage()),
           conn.getContentLength(),
-          conn.getHeaderFields());
+          NullCheck.notNull(conn.getHeaderFields()));
       }
 
       return new OK(conn);
@@ -196,17 +196,17 @@ public final class HTTP implements HTTPType
       if (conn.getResponseCode() >= 400) {
         return new HTTPResultError<Unit>(
           conn.getResponseCode(),
-          conn.getResponseMessage(),
+          NullCheck.notNull(conn.getResponseMessage()),
           conn.getContentLength(),
-          conn.getHeaderFields());
+          NullCheck.notNull(conn.getHeaderFields()));
       }
 
       return new HTTPResultOK<Unit>(
-        conn.getResponseMessage(),
+        NullCheck.notNull(conn.getResponseMessage()),
         conn.getResponseCode(),
         Unit.unit(),
         conn.getContentLength(),
-        conn.getHeaderFields());
+        NullCheck.notNull(conn.getHeaderFields()));
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {

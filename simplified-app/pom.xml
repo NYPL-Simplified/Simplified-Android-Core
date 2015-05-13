@@ -38,6 +38,11 @@
       <artifactId>simplified-opds-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-stack</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>android</groupId>
@@ -69,11 +74,6 @@
       <version>0.17.0</version>
     </dependency>
 
-    <dependency>
-      <groupId>net.jodah</groupId>
-      <artifactId>expiringmap</artifactId>
-      <version>0.4.0</version>
-    </dependency>
     <dependency>
       <groupId>com.squareup.picasso</groupId>
       <artifactId>picasso</artifactId>

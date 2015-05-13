@@ -26,3 +26,23 @@ Current build instructions:
 
     $ mvn -C clean package
 
+------------------------------------------------------------------------
+
+Release procedure:
+
+  0. Disable debugging options in simplified-app/src/main/res/values/debug.xml.
+
+  1. Set log level to 'INFO' in simplified-app/src/main/assets/logback.xml.
+
+  2. Update the version strings in all of the Android manifests:
+
+     $ vim `find . -name AndroidManifest.xml -type f | grep src`
+
+  3. Update the version strings in the Maven POMs:
+
+     $ vim pom.xml simplified-*/pom.xml
+
+  4. Run a build, ensure all tests pass.
+
+  5. Tag in git and pushed signed archives and APK files to wherever
+     they need to go.

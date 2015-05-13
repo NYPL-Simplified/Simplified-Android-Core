@@ -1,474 +1,2313 @@
-<feed 
-  xmlns:opds="http://opds-spec.org/2010/catalog"
-  xmlns:schema="http://schema.org/"
+<feed
+  xmlns:simplified="http://librarysimplified.org/terms/"
   xmlns:app="http://www.w3.org/2007/app"
   xmlns:dcterms="http://purl.org/dc/terms/"
-  xmlns:opds41="http://opds-spec.org/2014/catalog"
-  xmlns:simplified="http://library-simplified.com/"
+  xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:schema="http://schema.org/"
   xmlns="http://www.w3.org/2005/Atom">
-
-  <id>http://library-simplified.herokuapp.com/feed/Fiction</id>
-  <title>Fiction: featured</title>
-  <updated>2015-02-03T18:26:29Z</updated>
-  <link href="http://library-simplified.herokuapp.com/feed/Fiction"/>
-  <link rel="self" href="http://library-simplified.herokuapp.com/feed/Fiction"/>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/7153</id>
-    <title>Elder Conklin</title>
+  <id>http://circulation.alpha.librarysimplified.org/feed/Picture%20Books
+  </id>
+  <title>Picture Books: By author</title>
+  <updated>2015-05-12T20:17:38Z</updated>
+  <link
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books"
+    rel="self" />
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F64647fbc-2dd2-45ba-9080-a5820afd0e9a
+    </id>
+    <title>50 Favourite Nursery Rhymes</title>
     <author>
-      <name>Frank Harris</name>
+      <name></name>
     </author>
-    <summary>Elder Conklin.--The sheriff and his partner.--A modern idyll.--Eatin' crow.--The best man in Garotte.--Gulmore, the boss.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/7153/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/7153/checkout"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/1aeea301-0460-46b8-84d1-1279b7a11d82</id>
-    <title>That Part Was True</title>
-    <alternativeHeadline>A Novel</alternativeHeadline>
-    <author>
-      <name>Deborah Mckinlay</name>
-    </author>
-    <summary>&lt;p&gt;The Bridges of Madison County meets Sleepless in Seattle. A lonely British woman's letter to a successful American author sparks a relationship that changes both their lives.&lt;p&gt;When Eve Petworth writes to Jackson Cooper to praise a scene in one of his books, they discover a mutual love of cookery and food. Their friendship blossoms against the backdrop of Jackson's colorful but ultimately unsatisfying love life and Eve's tense relationship with her soon-to-be married daughter. As each of them offers, from behind the veils of semi-anonymity and distance, wise and increasingly affectionate counsel to the other, they both begin to confront their problems and plan a celebratory meeting in Paris&amp;#8212;a meeting that Eve fears can never happen.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 1.0&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/1aeea301-0460-46b8-84d1-1279b7a11d82/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/1aeea301-0460-46b8-84d1-1279b7a11d82/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1ae/1aeea301-0460-46b8-84d1-1279b7a11d82.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1ae/1aeea301-0460-46b8-84d1-1279b7a11d82.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Blackstone Audio, Inc.</dcterms:publisher>
-    <published>2014-11-14T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2014-02-04</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>2</simplified:total_licenses>
-    <simplified:available_licenses>2</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/21597</id>
-    <title>Jersey Street and Jersey Lane: Urban and Suburban Sketches</title>
-    <author>
-      <name>H. C. Bunner</name>
-    </author>
-    <summary>Jersey and Mulberry.--Tiemann's to Tubby Hook.--The Bowery and Bohemia.--The story of a path.--The lost child.--A letter to town.&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 0.6&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/21597/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/21597/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/21597/cover_21597_49.png"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/21597/cover_21597_49.png"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/e40007ce-5d06-4f1a-b6c1-65070e108931</id>
-    <title>This Charming Man</title>
-    <author>
-      <name>Marian Keyes</name>
-    </author>
-    <summary>&lt;p&gt;The lives of four very different women have been shaped&amp;#8212;and battered&amp;#8212;by one charming man. . . .&lt;p&gt;Ireland's debonair politician Paddy de Courcy&amp;#8212;the &amp;#34;John F. Kennedy Jr. of Dublin&amp;#34;&amp;#8212;has captured tabloid headlines and the imagination of his country with his charm and charisma. But the crushed hearts he's left behind him reveal more about his character than his winning, votegetting smile. Lola, Grace, Marnie, and Alicia have all suffered from his selfishness and cruelty. But with Paddy's political star ascending, the time is finally ripe for redemption . . . and perhaps a bit of revenge.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/e40007ce-5d06-4f1a-b6c1-65070e108931/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/e40007ce-5d06-4f1a-b6c1-65070e108931/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e40/e40007ce-5d06-4f1a-b6c1-65070e108931.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e40/e40007ce-5d06-4f1a-b6c1-65070e108931.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-11-16T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2013-12-31</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>2</simplified:total_licenses>
-    <simplified:available_licenses>2</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/54e72c35-098c-4059-986d-4589189f5775</id>
-    <title>Young Turk</title>
-    <alternativeHeadline>A Novel</alternativeHeadline>
-    <author>
-      <name>Moris Farhi</name>
-    </author>
-    <summary>&lt;p&gt;From a writer whose international acclaim can now spread to US shores comes a wise, craftily spun, and spine-tinglingly erotic tale of love, courage, and the forging of conscience-'a novel of startling integrity and beauty' (Independent on Sunday). In the beginning there is death, says one narrator in this enthralling 'treasure of a novel' (Alan Silletoe), but after that there is life: robust, riotous, nave, sensual, tragic, and profound. Through a series of 13 linked stories connected by a circle of young friends, Moris Farhi writes of the trials and joys of children coming of age in an increasingly dangerous and politicized world: Turkey just before, during, and after World War II. The death at the beginning is that of a girl endowed with second sight, who sees the war and the Holocaust coming and can't bear the gift of life. For Musa, a boy allowed into the women's bath like a fly in a bowl of naked fruit, the change comes when one woman notices his manhood. Bilal, a Jew, sets off for occupied Greece to rescue his relatives and never comes back. Davut participates in a plot to save a poet who is a national hero and anathema to the ruling party, and finds his innocence abused by the plotters. Here is a novel that captures the richness of a moment in history and the timeless aspirations of youth.&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/54e72c35-098c-4059-986d-4589189f5775/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/54e72c35-098c-4059-986d-4589189f5775/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/54e/54e72c35-098c-4059-986d-4589189f5775.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/54e/54e72c35-098c-4059-986d-4589189f5775.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Skyhorse Publishing, Inc.</dcterms:publisher>
-    <published>2014-08-10T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2012-03-15</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>1</simplified:total_licenses>
-    <simplified:available_licenses>1</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/43216</id>
-    <title>Zut and Other Parisians</title>
-    <author>
-      <name>Guy Wetmore Carryl</name>
-    </author>
-    <summary>Zut.--Caffiard, deus ex machina.--The next corner.--The only son of his mother.--The tuition of Dodo Chapuis.--Le pochard.--A Latter-day Lucifer.--Poire!--Papa Labesse.--In the absence of Monsieur.--Little Tapin.&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/43216/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/43216/checkout"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/411cd6c6-d545-46d7-b63c-05c32d548bbd</id>
-    <title>Westward the Tide</title>
-    <author>
-      <name>Louis L'Amour</name>
-    </author>
-    <summary>&lt;p&gt;Matt Bardoul was a good man to have as a friend and a bad one to make trouble with. He was also a single-minded drifter--until he met his match in an outspoken beauty named Jacquine Coyle. She was headed into the Bighorn Mountains with her father and an expedition in search of gold. After Matt signs on to join them, he discovers that there is a group of outlaws in the party--gunfighters and thieves that Matt wouldn't trust for a minute. At first it's unclear what they are planning, but before long Matt realizes that he's the only man standing between innocent people and a brutal conspiracy of greed, lust, and cold-blooded murder.&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;i&gt;From the Paperback edition.&lt;/i&gt;&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.3&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/411cd6c6-d545-46d7-b63c-05c32d548bbd/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/411cd6c6-d545-46d7-b63c-05c32d548bbd/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/411/411cd6c6-d545-46d7-b63c-05c32d548bbd.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/411/411cd6c6-d545-46d7-b63c-05c32d548bbd.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Books on Tape</dcterms:publisher>
-    <published>2014-11-14T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2010-05-04</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>1</simplified:total_licenses>
-    <simplified:available_licenses>1</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/62b6d439-54da-4c9f-90fa-74bb9012374d</id>
-    <title>Fly Away</title>
-    <author>
-      <name>Kristin Hannah</name>
-    </author>
-    <summary>&lt;p&gt;Kristin Hannah's FIREFLY LANE became a touchstone novel in women's lives. Across the world, women embraced the story of Tully and Kate's enduring friendship. They laughed with Tully and cried with Kate and anguished over Tully's fractured relationship with her mother. Now, five years later, in FLY AWAY, Kristin Hannah returns to the world of these unforgettable characters and asks the question...How do you hold yourself together when your world has fallen apart...FLY AWAY is the story of three women who have lost their way and need each other&amp;#8212;plus a miracle&amp;#8212;to transform their lives. An emotionally-complex, heartwrenching novel about love, family, motherhood, loss, and redemption, FLY AWAY reminds us that where there is life, there is hope and where there is love, there is forgiveness. Told with her trademark visceral storytelling and illuminating prose, Kristin Hannah reveals why she is one of the most beloved writers of our day. Includes a Reading Group Guide Read by Kristin Hannah&lt;ul&gt;&lt;li&gt;Work quality: 1.0&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/62b6d439-54da-4c9f-90fa-74bb9012374d/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/62b6d439-54da-4c9f-90fa-74bb9012374d/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/62b/62b6d439-54da-4c9f-90fa-74bb9012374d.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/62b/62b6d439-54da-4c9f-90fa-74bb9012374d.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Macmillan Audio</dcterms:publisher>
-    <published>2014-11-14T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2013-04-23</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>3</simplified:total_licenses>
-    <simplified:available_licenses>2</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/e11bae84-bfd5-4390-a471-77e2a8d84194</id>
-    <title>Big Girls Don't Cry</title>
-    <alternativeHeadline>A Novel</alternativeHeadline>
-    <author>
-      <name>Fay Weldon</name>
-    </author>
-    <summary>&lt;p&gt;First-wave feminism takes front and center in this fearless novel, a New York Times Notable Book of the Year, about women determined to succeed in a man's world&amp;#8212;only to be foiled by their own ambitionA Woman Needs a Man Like a Fish Needs a Bicycle.&#160;It's the 1970s, and the sexual revolution is just beginning. Four women have decided to open a feminist publishing house. Named in honor of the gorgon who turned men's hearts to stone, MedusaPublishing gives the so-called Four Furies a platform for speaking out against female oppression. &#160;&#160; &#160;&#160;Layla is a wealthy, fundamental radical, intolerant of anyone whose ideals deviate, even slightly, from her own&amp;#8212;that is, until she finds herself seduced by a married man; tiny Alice is all mind and very little matter, until she discovers the dangerous New Age practice of goddess worship; Stephanie leaves her unfaithful husband in pursuit of sexual fulfillment with other men&amp;#8212;and women; and Nancy, tired of washing her fianc's socks, discovers she has a remarkable mind for business.&#160;Big Girls Don't Cry is the story of four women who are determined to change the world, and who, over the course of two-and-a-half decades, ultimately transform themselves.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.4&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/e11bae84-bfd5-4390-a471-77e2a8d84194/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/e11bae84-bfd5-4390-a471-77e2a8d84194/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e11/e11bae84-bfd5-4390-a471-77e2a8d84194.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/e11/e11bae84-bfd5-4390-a471-77e2a8d84194.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Open Road Media</dcterms:publisher>
-    <published>2014-08-10T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2013-05-14</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>2</simplified:total_licenses>
-    <simplified:available_licenses>2</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/7d97477b-fce3-4c89-afe2-f819d85be528</id>
-    <title>Random Acts of Kindness</title>
-    <author>
-      <name>Lisa Verge Higgins</name>
-    </author>
-    <summary>&lt;p&gt;A new novel of women's friendship from the author of The Proper Care and Maintenance of Friendship and Friendship Makes the Heart Grow Fonder.&lt;p&gt;With the remnants of her past rattling in the trunk of her Chevy, Jenna Elliott abandons her Seattle home, determined to start life fresh. Her journey compels her to the door of two friends: Claire, an ex&amp;#8211;Buddhist nun and cancer survivor, eager to escape her overbearing family for what may be her last chance to fulfill a dusty dream; and Nicole, a professional life coach who can't even control her own teenage son. But what starts out as an impulsive road trip soon becomes an inexorable journey to their past as the women grapple with who they were, who they are, and the strange twists that have now set them on the road to their hometown of Pine Lake.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/7d97477b-fce3-4c89-afe2-f819d85be528/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/7d97477b-fce3-4c89-afe2-f819d85be528/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/7d9/7d97477b-fce3-4c89-afe2-f819d85be528.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/7d9/7d97477b-fce3-4c89-afe2-f819d85be528.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Blackstone Audio, Inc.</dcterms:publisher>
-    <published>2014-11-16T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2014-03-25</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>1</simplified:total_licenses>
-    <simplified:available_licenses>1</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/24876</id>
-    <title>Lucy Maud Montgomery Short Stories, 1905 to 1906</title>
-    <author>
-      <name>L. M. Montgomery</name>
-    </author>
-    <summary>A correspondence and a climax -- An adventure on Island Rock -- At five o'clock in the morning -- Aunt Susanna's birthday celebration -- Bertie's New Year -- Between the hill and the valley -- Clorinda's gifts -- Cyrilla's inspiration -- Dorinda's desperate deed -- Her own people -- Ida's New Year cake -- In the old valley -- Jane Lavinia -- Mackereling out in the gulf -- Millicent's double -- The blue north room -- The Christmas surprise at Enderly Road -- The dissipation of Miss Ponsonby -- The Falsoms' Christmas dinner -- The Fraser Scholarship -- The girl at the gate -- The light on the Big Dipper -- The prodigal brother -- The redemption of John Churchill -- The schoolmaster's letter -- The story of Uncle Dick -- The understanding of Sister Sara -- The unforgotten one -- The wooing of Bessy -- Their girl Josie -- When Jack and Jill took a hand.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 0.6&lt;/li&gt;&lt;li&gt;Summary quality: 0.0&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/24876/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/24876/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/24876/cover_24876_0.png"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/24876/cover_24876_0.png"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/2f642608-60e0-4ba4-8a08-3c53e01824d1</id>
-    <title>Whippoorwill</title>
-    <alternativeHeadline>Letty and Eulis Series, Book 1</alternativeHeadline>
-    <author>
-      <name>Sharon Sala</name>
-    </author>
-    <summary>&lt;p&gt;Leticia Murphy never planned on becoming a saloon girl. But the Kansas Territories are a difficult place, and Lettie, orphaned at the age of twelve, had to do whatever it took to survive. When she comes to the rough-and-tumble town of Lizard Flats, she wants nothing more than a second chance&amp;#8212;although she knows the likelihood of getting one is slim.&lt;p&gt;Until, that is, a stranger comes to Lizard Flats, a preacher from the East, arriving to perform a wedding. But the man of God isn't quite as holy as he seems. And when he turns up dead in Lettie's bed, it sets off a chain of events nobody could have predicted that will ultimately lead to change not just for Lizard Flats, but for Lettie herself.&lt;p&gt;The first in the best-selling Whippoorwill&lt;i&gt;&lt;/i&gt; trilogy by renowned romance novelist Sharon Sala, Whippoorwill&lt;i&gt;&lt;/i&gt; is sure to leave you spellbound and wanting more.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/2f642608-60e0-4ba4-8a08-3c53e01824d1/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/2f642608-60e0-4ba4-8a08-3c53e01824d1/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/2f6/2f642608-60e0-4ba4-8a08-3c53e01824d1.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/2f6/2f642608-60e0-4ba4-8a08-3c53e01824d1.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>RosettaBooks</dcterms:publisher>
-    <published>2014-08-31T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2014-01-21</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>1</simplified:total_licenses>
-    <simplified:available_licenses>1</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/ceea0f9f-4201-4858-8208-e36c868b2c48</id>
-    <title>The Death of Lucy Kyte</title>
-    <alternativeHeadline>A New Mystery Featuring Josephine Tey</alternativeHeadline>
-    <author>
-      <name>Nicola Upson</name>
-    </author>
-    <summary>&lt;p&gt;An unexpected inheritance plunges beloved British mystery author Josephine Tey into a disturbing puzzle of dark secrets connecting the present and the past in this intriguing historical mystery brimming with psychological tension.&lt;/p&gt;&lt;p&gt;When Josephine Tey unexpectedly inherits Red Barn Cottage from a godmother she barely knows, the will stipulates that she must personally claim the house in the Suffolk countryside. But Josephine is not the only benefactor&amp;#8212;a woman named Lucy Kyte is also in Hester's will. Sorting through the artifacts of her godmother's life, Josephine is intrigued by an infamous murder committed on the cottage's grounds a century before. This old crime&amp;#8212;dubbed the Red Barn murder&amp;#8212;still haunts the tight-knit village and its remote inhabitants. Is it superstition, or is there a very real threat that is frightening the locals? And is the truth related to the mysterious Lucy Kyte, whom no one in the village admits to knowing? Surrounded by the shadows of obsession, abuse, and deceit, with a palpable sense of evil thickening around her, Josephine must untangle historic tragedy from present danger to prevent a deadly cycle from beginning once again. &lt;/p&gt;&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/ceea0f9f-4201-4858-8208-e36c868b2c48/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/ceea0f9f-4201-4858-8208-e36c868b2c48/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/cee/ceea0f9f-4201-4858-8208-e36c868b2c48.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/cee/ceea0f9f-4201-4858-8208-e36c868b2c48.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-06-13T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2014-06-10</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>2</simplified:total_licenses>
-    <simplified:available_licenses>1</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/11354afd-8b04-4a76-b6f0-67458330380b</id>
-    <title>The Tin Horse</title>
-    <alternativeHeadline>A Novel</alternativeHeadline>
-    <author>
-      <name>Janice Steinberg</name>
-    </author>
-    <summary>&lt;p&gt;&lt;b&gt;In the stunning tradition of Lisa See, Maeve Binchy, and Alice Hoffman, &lt;i&gt;The Tin Horse &lt;/i&gt;is  a rich multigenerational story about the intense, often fraught bond sisters share and the dreams and sorrows that lay at the heart of the immigrant experience. &lt;/b&gt;&lt;br&gt;&lt;br&gt;It has been more than sixty years since Elaine Greenstein's twin sister, Barbara, ran away, cutting off contact with her family forever. Elaine has made peace with that loss. But while sifting through old papers as she prepares to move to Rancho Ma&amp;ntilde;ana--or the "Ranch of No Tomorrow" as she refers to the retirement community--she  is stunned to find a possible hint to Barbara's whereabouts all these years later. And it pushes her to confront the fierce love and bitter rivalry of their youth during the 1920s and '30s, in the Jewish neighborhood of Boyle Heights, Los Angeles.&lt;br&gt;&lt;br&gt;Though raised together in Boyle Heights, where kosher delis and storefront signs in Yiddish lined the streets, Elaine and Barbara staked out very different personal territories. Elaine was thoughtful and studious, encouraged to dream of going to college, while Barbara was a bold rule-breaker whose hopes fastened on nearby Hollywood. In the fall of 1939, when the girls were eighteen, Barbara's recklessness took an alarming turn. Leaving only a cryptic note, she left. &lt;br&gt;&lt;br&gt;In an unforgettable voice layered with humor and insight, Elaine delves into the past. She recalls growing up with her spirited family: her &lt;i&gt;luftmensch&lt;/i&gt; of a grandfather, a former tinsmith with tales from the Old Country; her papa, who preaches the American Dream even as it eludes him; her mercurial mother whose own secret grief colors her moods--and of course audacious Barbara and their younger sisters, Audrey and Harriet. As Elaine looks back on the momentous events of history and on the personal dramas of the Greenstein clan, she must finally face the truth of her own childhood, and that of the twin sister she once knew. &lt;br&gt;&lt;br&gt;In &lt;i&gt;The Tin Horse,&lt;/i&gt; Janice Steinberg exquisitely unfolds a rich multigenerational story about the intense, often fraught bonds between sisters, mothers, and daughters and the profound and surprising ways we are shaped by those we love. At its core, it is a book not only about the stories we tell but, more important, those we believe, especially the ones about ourselves.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.0&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/11354afd-8b04-4a76-b6f0-67458330380b/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/11354afd-8b04-4a76-b6f0-67458330380b/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/113/11354afd-8b04-4a76-b6f0-67458330380b.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/113/11354afd-8b04-4a76-b6f0-67458330380b.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Books on Tape</dcterms:publisher>
-    <published>2014-11-14T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2013-01-29</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>5</simplified:total_licenses>
-    <simplified:available_licenses>4</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/29932</id>
-    <title>The Harbor</title>
-    <author>
-      <name>Ernest Poole</name>
-    </author>
-    <summary>"For Billy, an aspiring writer struggling to reconcile his sympathy for the workingman with his middle-class allegiance to capitalist progress, the New York waterfront becomes a window on the world. There he bears witness to the explosive tensions between labor and capital, falling under the influence of two divergent mentors: Dillon, an accomplished engineer and friend of the establishment; and Kramer, who has forsaken every comfort to live in the slums and preach the gospel of unionism. When the Harbor erupts in violence, Billy must choose for himself which path to follow."--Page 4 of cover.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 0.6&lt;/li&gt;&lt;li&gt;Summary quality: 0.8&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/29932/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/29932/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/29932/cover_29932_3.png"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Gutenberg-Illustrated/29932/cover_29932_3.png"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8</id>
-    <title>The Color Master</title>
-    <alternativeHeadline>Stories</alternativeHeadline>
-    <author>
-      <name>Aimee Bender</name>
-    </author>
-    <summary>&lt;p&gt;&lt;b&gt;The bestselling author of &lt;i&gt;The Particular Sadness of Lemon Cake&lt;/i&gt; returns with a wondrous collection of dreamy, strange, and magical stories.&lt;/b&gt;&lt;br&gt;&lt;br&gt;Truly beloved by readers and critics alike, Aimee Bender has become known as something of an enchantress whose lush prose is "moving, fanciful, and gorgeously strange" (&lt;i&gt;People&lt;/i&gt;), "richly imagined and bittersweet" (&lt;i&gt;Vanity Fair&lt;/i&gt;), and "full of provocative ideas" (&lt;i&gt;The Boston Globe&lt;/i&gt;). In her deft hands, "relationships and mundane activities take on mythic qualities" (&lt;i&gt;The Wall Street Journal&lt;/i&gt;).&lt;br&gt;&lt;br&gt;In this collection, Bender's unique talents sparkle brilliantly in stories about people searching for connection through love, sex, and family--while navigating the often painful realities of their lives. A traumatic event unfolds when a girl with flowing hair of golden wheat appears in an apple orchard, where a group of people await her. A woman plays out a prostitution fantasy with her husband and finds she cannot go back to her old sex life. An ugly woman marries an ogre and struggles to decide if she should stay with him after he mistakenly eats their children. Two sisters travel deep into Malaysia, where one learns the art of mending tigers who have been ripped to shreds.&lt;br&gt;&lt;br&gt;In these deeply resonant stories--evocative, funny, beautiful, and sad--we see ourselves reflected as if in a funhouse mirror. Aimee Bender has once again proven herself to be among the most imaginative, exciting, and intelligent writers of our time.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.2&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/b78/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/b78/b78f3d5d-e113-4dc5-ac4d-22414a20b2d8.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Books on Tape</dcterms:publisher>
-    <published>2014-11-17T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2013-08-13</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>2</simplified:total_licenses>
-    <simplified:available_licenses>2</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/1f83e9c4-9a53-4a9c-95c2-3280a576892f</id>
-    <title>John Irving Reads The Pension Grillparzer</title>
-    <alternativeHeadline>A Complete Story from The World According to Garp</alternativeHeadline>
-    <author>
-      <name>John Irving</name>
-    </author>
-    <summary>&lt;p&gt;&lt;I&gt;The World According to Garp&lt;/I&gt; established John Irving's reputation as one of the greatest writers of our time, a master of narrative and characterization that is both comic and profound. "The Pension Grillparzer" is quintessentially Irving - the self-contained story-within-a-story that becomes the hero's masterpiece in &lt;I&gt;The World According to Garp&lt;/I&gt;. Like the novel as a whole, it tells a vivid and engaging tale. The Grillparzer Hotel, inhabited by odd circus performers including a bear and a frighteningly accurate teller of dreams, wants a better rating to attract more tourists - and thus must undergo the scrutiny of an idiosyncratic family of inspectors for the Austrian Tourist Bureau. This valuable recording lends both immediacy and perspective to an understanding of the richly textured story as well as the novel as a whole.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/1f83e9c4-9a53-4a9c-95c2-3280a576892f/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/1f83e9c4-9a53-4a9c-95c2-3280a576892f/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1f8/1f83e9c4-9a53-4a9c-95c2-3280a576892f.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1f8/1f83e9c4-9a53-4a9c-95c2-3280a576892f.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>The Audio Partners Publishing Corporation</dcterms:publisher>
-    <published>2014-11-14T00:00:00Z</published>
-    <dcterms:dateCopyrighted>1988-01-01</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>1</simplified:total_licenses>
-    <simplified:available_licenses>1</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Gutenberg%20ID/40569</id>
-    <title>Tales of Mean Streets</title>
-    <author>
-      <name>Arthur Morrison</name>
-    </author>
-    <summary>Lizerunt.--Without visible means.--To Bow bridge.--That brute Simmons.--Behind the shade.--Three rounds.--In business.--The red cow group.--On the stairs.--Squire Napper.--"A poor stick."--A conversion.--"All that messuage."&lt;ul&gt;&lt;li&gt;Work quality: 0.8&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Gutenberg&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Gutenberg/40569/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/open-access" href="http://library-simplified.herokuapp.com/works/Gutenberg/40569/checkout"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/ca6e0a53-f5bc-4a56-b382-724533c52894</id>
-    <title>The Music Teacher</title>
-    <author>
-      <name>Barbara Hall</name>
-    </author>
-    <summary>&lt;p&gt;In &lt;i&gt;The Music Teacher&lt;/i&gt;, a penetrating and richly entertaining look into the heart and mind of a woman who has failed both as an artist and as a wife, Barbara Hall, award-winning creator and writer of such hit television series as &lt;i&gt;Judging Amy&lt;/i&gt; and &lt;i&gt;Joan of Arcadia&lt;/i&gt;, tells the story of a violinist who has accepted the limitations of her talent and looks for the casual satisfaction of trying to instill her passion for music in others. She gets more than she bargains for, however, when a young girl named Hallie enters her life. For here at last is the real thing: someone with the talent and potential to be truly great. In her drive to shape this young girl into the artist the teacher could never be, she makes one terrible mistake. As a result she is forced to reevaluate her whole life and come to terms with her future.&lt;p&gt;Hall has crafted a thoroughly engrossing novel that examines the pitfalls of failure and holds up a mirror to the face of a culture that places success and achievement above all else&lt;ul&gt;&lt;li&gt;Work quality: 0.9&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.5&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/ca6e0a53-f5bc-4a56-b382-724533c52894/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/ca6e0a53-f5bc-4a56-b382-724533c52894/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/ca6/ca6e0a53-f5bc-4a56-b382-724533c52894.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/ca6/ca6e0a53-f5bc-4a56-b382-724533c52894.jpg"/>
-    <category term="Fiction"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Algonquin Books</dcterms:publisher>
-    <published>2014-08-10T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2009-02-10</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
-    <simplified:total_licenses>3</simplified:total_licenses>
-    <simplified:available_licenses>3</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-  </entry>
-  <entry>
-    <id>http://library-simplified.herokuapp.com/work/Overdrive%20ID/d7131544-a4f3-4041-8936-892e782c3908</id>
-    <title>The Shell Seekers</title>
-    <author>
-      <name>Rosamunde Pilcher</name>
-    </author>
-    <summary>&lt;p&gt;Artist's daughter Penelope Keeling can look back on a full and varied life, yet she is far too energetic and independent to settle sweetly into pensioned-off old age. Now she is faced with a decision which could tear her family apart.&lt;ul&gt;&lt;li&gt;Work quality: 0.7&lt;/li&gt;&lt;li&gt;Cover quality: 1.0&lt;/li&gt;&lt;li&gt;Summary quality: 0.1&lt;/li&gt;&lt;li&gt;License Source: Overdrive&lt;/li&gt;&lt;/ul&gt;</summary>
-    <link href="http://library-simplified.herokuapp.com/works/Overdrive/d7131544-a4f3-4041-8936-892e782c3908/checkout"/>
-    <updated>2015-02-03T18:26:29Z</updated>
-    <link rel="http://opds-spec.org/acquisition/borrow" href="http://library-simplified.herokuapp.com/works/Overdrive/d7131544-a4f3-4041-8936-892e782c3908/checkout"/>
-    <link rel="http://opds-spec.org/image" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/d71/d7131544-a4f3-4041-8936-892e782c3908.jpg"/>
-    <link rel="http://opds-spec.org/image/thumbnail" href="https://s3.amazonaws.com/book-covers.nypl.org/Overdrive/d71/d7131544-a4f3-4041-8936-892e782c3908.jpg"/>
-    <category term="Fiction"/>
+    <summary type="html">50 favourite nursery rhymes, contains lots of the most
+      common nursery rhymes and all those you may have forgotten!
+    </summary>
+    <updated>2015-05-12T20:17:38Z</updated>
+    <simplified:pwid>842012bb-8a58-8ea9-7c31-0dae8f75563b</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Nonfiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>AudioGO Ltd</dcterms:publisher>
-    <published>2014-11-14T00:00:00Z</published>
-    <dcterms:dateCopyrighted>2005-06-06</dcterms:dateCopyrighted>
-    <schema:audience>
-      <schema:name>Adult</schema:name>
-    </schema:audience>
+    <published>2014-11-14T20:14:29Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/64647fbc-2dd2-45ba-9080-a5820afd0e9a/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fa82a1d79-0a29-497e-9862-7f10eb994650
+    </id>
+    <title>ABC USA</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;An American classic is born! Breathtaking
+      folk art-style illustrations that are ageless as well as timeless capture
+      the culture, history, and heritage of the United States&amp;#8212;from A
+      to Z. It's a high-quality, exquisite tribute to America.
+    </summary>
+    <updated>2015-05-12T20:17:38Z</updated>
+    <simplified:pwid>88fe5170-8a14-6cad-3970-684b49c39eba</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/a82a1d79-0a29-497e-9862-7f10eb994650/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/a82a1d79-0a29-497e-9862-7f10eb994650/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="United States History"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Sterling Publishing Co., Inc.</dcterms:publisher>
+    <published>2014-09-28T09:18:32Z</published>
     <simplified:total_licenses>1</simplified:total_licenses>
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/a82a1d79-0a29-497e-9862-7f10eb994650/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
   </entry>
-  <link rel="search" type="application/opensearchdescription+xml" href="http://library-simplified.herokuapp.com/search/Fiction"/>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F72e357b5-a13b-458e-8c49-c53651d5bd79
+    </id>
+    <title>Bob &amp; Rob &amp; Corn on the Cob</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;Bob and Rob are two squirrels who just love
+      eating corn on the cob. Their friends&amp;#8212;a duck, a dog, a chicken,
+      and a piglet&amp;#8212;also love corn on the cob, but not Ella Mae Dobbs,
+      a rabbit with a more refined palate. She's a little bit of a snob when it
+      comes to trying foods she doesn't like. She prefers curly-cut carrots, hot
+      cheese fondue, and especially tofu! Bob and Rob devise a plan to get Ella
+      Mae to try corn on the cob&amp;#8212;and in return they will try some of
+      her favorite foods too. And while they may not find their next favorite
+      food, Bob, Rob, and even Ella Mae Dobbs find that it's important to try
+      new foods. You may be pleasantly surprised at what you find.&lt;br
+      /&gt;From debut author and illustrator Todd McQueen, &lt;i&gt;Bob &amp;
+      Rob &amp; Corn on the Cob&lt;/i&gt; is a whimsical, educational, and
+      hilarious romp into the world of two corn on the cob&amp;#8211;loving
+      squirrels. Perfect for the picky eater in your life who isn't getting the
+      message through &lt;i&gt;Green Eggs and Ham&lt;/i&gt;, this is...
+    </summary>
+    <updated>2015-05-12T20:17:38Z</updated>
+    <simplified:pwid>877fa34b-26b0-3b58-11cc-0d21713b7fde</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/72e357b5-a13b-458e-8c49-c53651d5bd79/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/72e357b5-a13b-458e-8c49-c53651d5bd79/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Humorous Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Sky Pony Press</dcterms:publisher>
+    <published>2014-08-10T13:39:37Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/72e357b5-a13b-458e-8c49-c53651d5bd79/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F221e2010-7c7e-45c7-a241-c848c994e195
+    </id>
+    <title>Chloe, Instead</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;Molly always dreamed of having a sister who
+      is just like her. But she got Chloe, instead. These two sisters are
+      nothing alike: Molly loves to color with crayons. Chloe prefers the taste
+      of wax. Molly loves to read. Chloe prefers to nibble a book's spine. Molly
+      is frustrated! But then she realizes that maybe sisters aren't the ones
+      next to you on the piano bench, they're the ones dancing to the music you
+      play! This humorous, perceptive snapshot of sibling love is perfect for
+      those who may need a bit of convincing what fun little siblings can be!
+    </summary>
+    <updated>2015-05-12T20:17:38Z</updated>
+    <simplified:pwid>05c1933f-c961-1d03-e674-dcf2a1e893d7</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/221e2010-7c7e-45c7-a241-c848c994e195/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/221e2010-7c7e-45c7-a241-c848c994e195/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-06-04T01:11:26Z</published>
+    <simplified:total_licenses>4</simplified:total_licenses>
+    <simplified:available_licenses>0</simplified:available_licenses>
+    <simplified:active_holds>6</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/221e2010-7c7e-45c7-a241-c848c994e195/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F3bc868de-6225-4758-aca0-8a2788017ce4
+    </id>
+    <title>Creature Colors</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;Learn the rainbow with red snakes, orange
+      fish, and yellow birds. Learn to count as two scorpions fight, four
+      penguins waddle, and nine ants work. Andrew Zuckerman's vivid pictures of
+      fascinating animals from around the world will enthrall young readers and
+      teach basic colors and numbers in a celebration of nature in two books
+      that bring the wildly successful photographer's work to a whole new
+      audience. The up-close and personal photos of everyone's favorite animals
+      make these board books perfect educational tools for any child, and
+      stunning works of art for animal lovers of all ages.
+    </summary>
+    <updated>2015-05-12T20:17:38Z</updated>
+    <simplified:pwid>4b47b43e-7a96-af69-b355-44589a64251a</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/3bc868de-6225-4758-aca0-8a2788017ce4/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/3bc868de-6225-4758-aca0-8a2788017ce4/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="2"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Science"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <category
+      term="Education"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-08-10T11:51:14Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/3bc868de-6225-4758-aca0-8a2788017ce4/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F0615700b-761e-4100-aa33-b0aa4b5426db
+    </id>
+    <title>A Good Home for Max</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">In a little shop in a little town, lives a little
+      mouse named Tabi. Each night Tabi tidies the shop, puts out new
+      merchandise, and plays with his animal friends. But when, day after day,
+      Tabi's best friend Max the Dog doesn't find a good home, Tabi realizes he
+      has a bigger job to do. In this sweet, heartwarming picture book,
+      celebrated artist Junzo Terada reminds us all that there's no place like
+      home.
+    </summary>
+    <updated>2015-05-12T20:17:38Z</updated>
+    <simplified:pwid>7586295f-a4a3-3d14-6a73-df1978087530</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/0615700b-761e-4100-aa33-b0aa4b5426db/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/0615700b-761e-4100-aa33-b0aa4b5426db/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-09-30T02:22:57Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0615700b-761e-4100-aa33-b0aa4b5426db/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F959a616f-60da-4249-927f-ceab446d6b17
+    </id>
+    <title>Hide and Seek First Words</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;This stunning new picture-and-word book
+      features dozens of beautiful full-page photographs, each showing a
+      collection of objects in a single category, such as sports, animals,
+      clothing, and music. On every spread, children can play hide-and-seek,
+      searching the main picture for specific objects that are named and
+      pictured at the side. Along the way, they'll learn lots of new words and
+      have fun discovering the surprises hidden in the pictures.
+    </summary>
+    <updated>2015-05-12T20:17:39Z</updated>
+    <simplified:pwid>e8076c29-b831-6d7b-020e-267c95b8777f</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/959a616f-60da-4249-927f-ceab446d6b17/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/959a616f-60da-4249-927f-ceab446d6b17/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="2"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Reference &amp; Study Aids"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <category
+      term="Education"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>DK Publishing</dcterms:publisher>
+    <published>2014-08-24T06:08:28Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/959a616f-60da-4249-927f-ceab446d6b17/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F8bff290f-9a9c-4656-bd3c-193697a34fb0
+    </id>
+    <title>Lately Lily</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;Where has Lily been lately? Everywhere! In
+      this heartfelt picture book from illustrator Micah Player,
+      Lily&amp;#8212;a worldtravelling girl with boundless
+      curiosity&amp;#8212;goes on enviable adventures with her best friend
+      Zeborah, travelling by plane, train, boat, and even by camel. Whether
+      venturing far away or staying close to home, Lily knows that the joy of
+      discovery is the best way to travel each and every day. Readers and fans
+      of the apparel line Lately Lily will appreciate this chance to join Lily
+      on a world tour and experience the many delights of travel through her
+      eyes.
+    </summary>
+    <updated>2015-05-12T20:17:39Z</updated>
+    <simplified:pwid>b3c9d0ae-be14-d6fe-e315-e815a4472e4c</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/8bff290f-9a9c-4656-bd3c-193697a34fb0/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/8bff290f-9a9c-4656-bd3c-193697a34fb0/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-07-04T02:23:20Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/8bff290f-9a9c-4656-bd3c-193697a34fb0/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fce13ae43-bfb9-48e6-af01-dd57526bdf01
+    </id>
+    <title>Lately Lily</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;Where has Lily been lately? Everywhere! In
+      this heartfelt picture book from illustrator Micah Player,
+      Lily&amp;#8212;a worldtravelling girl with boundless
+      curiosity&amp;#8212;goes on enviable adventures with her best friend
+      Zeborah, travelling by plane, train, boat, and even by camel. Whether
+      venturing far away or staying close to home, Lily knows that the joy of
+      discovery is the best way to travel each and every day. Readers and fans
+      of the apparel line Lately Lily will appreciate this chance to join Lily
+      on a world tour and experience the many delights of travel through her
+      eyes.
+    </summary>
+    <updated>2015-05-12T20:17:39Z</updated>
+    <simplified:pwid>b3c9d0ae-be14-d6fe-e315-e815a4472e4c</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/ce13ae43-bfb9-48e6-af01-dd57526bdf01/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/ce13ae43-bfb9-48e6-af01-dd57526bdf01/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-11-14T21:06:01Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/ce13ae43-bfb9-48e6-af01-dd57526bdf01/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fc2ff24b9-4b56-4fc1-a461-a0f5035f94af
+    </id>
+    <title>My Body Belongs to Me from My Head to My Toes</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;As a child, there are constantly people
+      trying to pick you up, hug you, or tickle you. Sometimes, though, children
+      fall victims to people who try to touch them inappropriately. But how do
+      you tell someone, most likely an adult, that you don't want to be touched?
+      Or, if it has already happened, how do you tell an adult you trust about
+      what happened? You're only a child, and they're the adults. Why would they
+      believe you?&lt;br /&gt;&lt;i&gt;My Body Belongs to Me!&lt;/i&gt; is an
+      educational tool to help instill confidence in children when it comes to
+      their bodies. The narrative of the story is led by a girl named Clara, who
+      encourages kids to say &amp;#x201c;no" if they are uncomfortable with
+      physical contact. The narrator gives readers tips about what they can say
+      or do to avoid unwanted physical contact, or how to tell the right people
+      in the event it has already occurred. &lt;i&gt;My Body Belongs to
+      Me!&lt;/i&gt; is an invaluable resource that gives children a voice in
+      uncomfortable situations. Suited for...
+    </summary>
+    <updated>2015-05-12T20:17:39Z</updated>
+    <simplified:pwid>ee38ea4c-9976-c678-3bea-7e0fb7e17c68</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/c2ff24b9-4b56-4fc1-a461-a0f5035f94af/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/c2ff24b9-4b56-4fc1-a461-a0f5035f94af/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Nonfiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Sky Pony Press</dcterms:publisher>
+    <published>2014-08-10T09:46:57Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/c2ff24b9-4b56-4fc1-a461-a0f5035f94af/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fe5edfb13-5584-47f1-96fa-1f2f731a79ea
+    </id>
+    <title>Old MacDonald Had a Farm</title>
+    <author>
+      <name></name>
+    </author>
+    <summary type="html">&lt;p&gt;How many farmyard noises can you think of?
+      Read and sing along as Old MacDonald visits all the animals on his farm.
+    </summary>
+    <updated>2015-05-12T20:17:39Z</updated>
+    <simplified:pwid>4b75b94a-25db-19b9-2b5b-c2605dc81d55</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e5edfb13-5584-47f1-96fa-1f2f731a79ea/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/e5edfb13-5584-47f1-96fa-1f2f731a79ea/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Music"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+    <published>2014-08-05T22:30:12Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e5edfb13-5584-47f1-96fa-1f2f731a79ea/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fc6f152d2-97c9-4aba-9e71-ad36adc01ac8
+    </id>
+    <title>Carnivores</title>
+    <author>
+      <name>Aaron Reynolds</name>
+    </author>
+    <summary type="html">&lt;p&gt;&lt;i&gt;The lion is king of the
+      jungle!&lt;p&gt;The great white shark is sovereign of the
+      seas!&lt;p&gt;The timber wolf is emperor of the
+      forests!&lt;/i&gt;&lt;p&gt;But . . . it's lonely at the top of the food
+      chain. It's difficult to fit in when plant eaters can be so
+      cruel&amp;#8212;just because you ate a relative of theirs that one time!
+      What's a carnivore to do? Aaron Reynolds's roaringly funny text is
+      perfectly paired with Dan Santat's mouthwatering illustrations, creating a
+      toothsome book that's sure to stand out from the herd.
+    </summary>
+    <updated>2015-05-12T20:17:39Z</updated>
+    <simplified:pwid>ef16df2f-9cca-88bb-00d1-0a0e2f56f768</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/c6f152d2-97c9-4aba-9e71-ad36adc01ac8/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/c6f152d2-97c9-4aba-9e71-ad36adc01ac8/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-07-03T03:05:05Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/c6f152d2-97c9-4aba-9e71-ad36adc01ac8/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F71c32f3e-0ec9-4ef2-917b-e4a017bb1b68
+    </id>
+    <title>Apple Orchard Race</title>
+    <author>
+      <name>Abby Klein</name>
+    </author>
+    <summary type="html">&lt;p&gt;With more than 3.2 million copies sold across
+      all channels, READY, FREDDY! is a huge success with first-grade
+      readers!&lt;p&gt;Freddy Thresher's first-grade class is taking a field
+      trip to the local apple orchard. Best of all, whoever finds the hidden
+      wooden apples among the real fruit will win $5! But can Freddy get to the
+      prize before Max cheats his way to winning?
+    </summary>
+    <updated>2015-05-12T20:17:39Z</updated>
+    <simplified:pwid>d0aa5e1f-6331-ce8b-4332-83a68cbbc103</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/71c32f3e-0ec9-4ef2-917b-e4a017bb1b68/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/71c32f3e-0ec9-4ef2-917b-e4a017bb1b68/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc.</dcterms:publisher>
+    <published>2014-08-06T01:28:12Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/71c32f3e-0ec9-4ef2-917b-e4a017bb1b68/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F40f8b92a-1e1b-4758-b0f1-52e3a6e2c291
+    </id>
+    <title>Don't Sit On My Lunch</title>
+    <author>
+      <name>Abby Klein</name>
+    </author>
+    <summary type="html">&lt;p&gt;Watch out, Junie B., there's a new kid on the
+      block! It's Freddy Thresher, a 1st grader who knows it's a jungle out
+      there. Here's the fourth in a new series by an elementary teacher who's
+      seen it all.&lt;p&gt;"I have a problem. A really, really, big problem. I
+      want to try out for the peewee hockey team, but so does Max . .
+      ."&lt;p&gt;Bullies are a problem in school, and Max Sellars is the worst
+      one yet. In addition to hassling Freddy, Max also challenges him for the
+      open spot on the peewee hockey team. Freddy's close friend Jessie is a
+      star hockey player, and she secretly teaches him some rules and tricks. In
+      a warm and funny ending, Max and Freddy make peace with one another,
+      and&amp;#8212;in a surprising twist&amp;#8212;end up becoming teammates.
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>c951bebd-6f9d-ffc8-1235-7d6e05abed24</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/40f8b92a-1e1b-4758-b0f1-52e3a6e2c291/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/40f8b92a-1e1b-4758-b0f1-52e3a6e2c291/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc.</dcterms:publisher>
+    <published>2014-08-10T15:21:03Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>0</simplified:available_licenses>
+    <simplified:active_holds>1</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/40f8b92a-1e1b-4758-b0f1-52e3a6e2c291/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F89485f6a-08fe-4f5d-a9d7-62cc581870d8
+    </id>
+    <title>Help! a Vampire's Coming!</title>
+    <author>
+      <name>Abby Klein</name>
+    </author>
+    <summary type="html">&lt;p&gt;Watch out, Junie B., there's a new kid on the
+      block! It's Freddy Thresher, a 1st grader who knows it's a jungle out
+      there. The sixth in a new series by an elementary school teacher who's
+      seen it all.&lt;p&gt;"I have a problem. A really, really, big problem. I
+      keep having these nightmares about a vampire."&lt;p&gt;Freddy's horrible
+      nightmares are keeping him awake all night. Now he's so tired that he
+      falls asleep during breakfast and drools on himself while napping on the
+      bus. He needs to get some rest&amp;#8212;quick! But every time Freddy
+      closes his eyes, the scary dream comes back. Will Freddy be able to outwit
+      the vampire with the help of his best friend, his big sister, and his
+      parents?
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>9dbace7d-33a5-2c7d-176d-9a80d95a8129</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/89485f6a-08fe-4f5d-a9d7-62cc581870d8/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/89485f6a-08fe-4f5d-a9d7-62cc581870d8/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc.</dcterms:publisher>
+    <published>2014-08-09T20:29:08Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/89485f6a-08fe-4f5d-a9d7-62cc581870d8/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F46f04b95-68a0-4749-82ba-adc4cc822b81
+    </id>
+    <title>The One Hundredth Day of School!</title>
+    <author>
+      <name>Abby Klein</name>
+    </author>
+    <summary type="html">&lt;p&gt;With more than one million copies sold, this
+      series is a huge Scholastic Book Clubs success. Klein presents a diverse
+      community of 1st graders facing real issues that matter to this age
+      group.&lt;p&gt;The 100th day of school is approaching, and to mark the
+      occasion, Freddy and his classmates must each collect and bring to school
+      100 of something. Freddy is overwhelmed by the thought, then he has a
+      great idea to collect 100 shark trading cards. But he only has 21 cards!
+      How will be get another 79 before the 100th day of school? Even if he had
+      the money, his mom would NEVER let him buy that much bubble gum. Join
+      Freddy as he plots the perfcet plan to reach his goal.&lt;p&gt;The Ready,
+      Freddy! series has content, humor, characters and vocabulary perfect for
+      the early chapter-book reader.
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>4eb9c664-b741-188c-bf86-6a69da7e6683</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/46f04b95-68a0-4749-82ba-adc4cc822b81/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/46f04b95-68a0-4749-82ba-adc4cc822b81/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc.</dcterms:publisher>
+    <published>2014-09-30T02:22:57Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>0</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/46f04b95-68a0-4749-82ba-adc4cc822b81/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F3b8c7fc0-d39f-4a64-ab04-a430ae96f807
+    </id>
+    <title>Ready, Set, Snow!</title>
+    <author>
+      <name>Abby Klein</name>
+    </author>
+    <summary type="html">&lt;p&gt;Freddy Thresher's at it again! And this time,
+      there's a snowball fight....&lt;p&gt;Everybody knows shark expert Freddy
+      Thresher is also a snowshoe whiz&amp;#8212;or is he? When Mrs. Wushy
+      announces that the class will be competing in the mini-Winter Olympics,
+      everyone is excited for the competition. But, after betting Max the bully
+      that he will win the Snowshoe Race, Freddy heads straight for snowshoe
+      boot camp, and fast! Will Freddy be able to win gold amid sled pulls and
+      the infamous Snowball Toss?
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>17a6e86a-f370-baa6-c74d-d842416da2f5</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/3b8c7fc0-d39f-4a64-ab04-a430ae96f807/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/3b8c7fc0-d39f-4a64-ab04-a430ae96f807/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc.</dcterms:publisher>
+    <published>2014-08-10T15:28:03Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/3b8c7fc0-d39f-4a64-ab04-a430ae96f807/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fb1d20b7b-a8ca-4ac8-8fc1-8e0e88684f52
+    </id>
+    <title>Yikes Bikes!</title>
+    <author>
+      <name>Abby Klein</name>
+    </author>
+    <summary type="html">&lt;p&gt;First grader Freddy Thresher wants to beat
+      the local bully in raising money for the animal shelter, but first he
+      needs to learn to ride a two-wheeler.&lt;p&gt;Join Freddy and his friends
+      for another 1st grade adventure! Content, humor, characters, and
+      vocabulary are perfect for the chapter-book reader. In this book, Freddy
+      and his classmates participate in a Bike-A-Thon to help raise money for a
+      local animal shelter. After Freddy and Max make a bet to see who can do
+      the most laps, Freddy needs to learn how to ride a two-wheeler fast!
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>9a952ed8-4a65-d79c-2932-1af369a0ec00</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/b1d20b7b-a8ca-4ac8-8fc1-8e0e88684f52/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/b1d20b7b-a8ca-4ac8-8fc1-8e0e88684f52/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Scholastic Inc.</dcterms:publisher>
+    <published>2014-10-01T00:08:14Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/b1d20b7b-a8ca-4ac8-8fc1-8e0e88684f52/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F2f61c602-4eb8-49d8-abe8-5a0696d6c10a
+    </id>
+    <title>The Mystery of the Blue Train</title>
+    <author>
+      <name>Agatha Christie</name>
+    </author>
+    <summary type="html">&lt;p&gt;When the luxurious Blue Train arrives at
+      Nice, a guard attempts to wake serene Ruth Kettering from her slumbers.
+      But she will never wake again &#8211; for a heavy blow has killed her,
+      disfiguring her features almost recognition. What is more, her precious
+      rubies are missing. &lt;p&gt;The prime suspect is Ruth's estranged
+      husband, Derek. Yet Poirot is not convinced, so he stages and eerie
+      re-enactment of the journey, complete with the murderer on board&#8230; </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>dfde822b-10c1-fd00-9464-26ea22ab2f0d</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/2f61c602-4eb8-49d8-abe8-5a0696d6c10a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/2f61c602-4eb8-49d8-abe8-5a0696d6c10a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Suspense/Thriller"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <category
+      term="Historical Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <category
+      term="Mystery"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>HarperCollins</dcterms:publisher>
+    <published>2014-06-03T22:20:32Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>0</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/2f61c602-4eb8-49d8-abe8-5a0696d6c10a/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F0db33110-2d23-44ad-8200-3d1ff860c02e
+    </id>
+    <title>Mama's Day with Little Gray</title>
+    <author>
+      <name>Aimee Reid</name>
+    </author>
+    <summary type="html">&lt;p&gt;From talented illustrator Laura Bryant and
+      gifted newcomer Aimee Reid comes a charming, heartwarming story about a
+      little elephant's love for his mama.&lt;br /&gt;&lt;br
+      /&gt;&lt;i&gt;"Mama, when I grow up, will you grow down?" &lt;/i&gt;&lt;br
+      /&gt;&lt;br /&gt;What would it be like if, one day, Little Gray were the
+      &lt;i&gt;big&lt;/i&gt; elephant and Mama the &lt;i&gt;small&lt;/i&gt; one?
+      Little Gray can picture it perfectly. He'd shade her from the sun, teach
+      her to make mud, and find pictures in the clouds with her. In fact, he
+      would do for her exactly what she does for him.
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>5f019f7c-91fb-79c3-2b92-c0dd8b69cb4f</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/0db33110-2d23-44ad-8200-3d1ff860c02e/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/0db33110-2d23-44ad-8200-3d1ff860c02e/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="2"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+    <published>2014-08-10T04:25:23Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0db33110-2d23-44ad-8200-3d1ff860c02e/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F48a5ff6f-00a8-41e3-81dc-3031fce1db5e
+    </id>
+    <title>Even Monsters...</title>
+    <author>
+      <name>A. J. Smith</name>
+    </author>
+    <summary type="html">&lt;p&gt;&lt;b&gt;An exciting new picture
+      book&amp;#8212;perfect for the little monster in your
+      life!&lt;/b&gt;&lt;p&gt;Everybody knows monsters can be...well, MONSTERS.
+      But did you know sometimes even monsters get scared? They can be sad, they
+      can be kind, they can miss their mommies. Sometimes, they're just plain
+      silly. And even monsters need to brush their teeth!&lt;p&gt;A funny and
+      family-friendly picture book by innovative author/illustrator A. J. Smith,
+      who combines traditional storytelling with exciting interactive digital
+      components.
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>caf3f899-5cc5-97f9-06c8-e597ea4280b4</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/48a5ff6f-00a8-41e3-81dc-3031fce1db5e/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/48a5ff6f-00a8-41e3-81dc-3031fce1db5e/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Sourcebooks, Inc.</dcterms:publisher>
+    <published>2014-08-08T14:51:01Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/48a5ff6f-00a8-41e3-81dc-3031fce1db5e/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F0ce9edee-09fa-44be-92b4-19631d8e7a9d
+    </id>
+    <title>These Rocks Count!</title>
+    <author>
+      <name>Alison Formento</name>
+    </author>
+    <summary type="html">&lt;p&gt;Mr. Tate's class is about to learn that
+      there's more to rocks than being dirty lumps on the ground. On this field
+      trip they're visiting the rocky ridge mountains to learn about rocks. At
+      first the children think rocks will be boring, but they soon learn that
+      rocks are all around us in ways we might not expect&amp;#8212;such as
+      glass and toothpaste!
+    </summary>
+    <updated>2015-05-12T20:17:40Z</updated>
+    <simplified:pwid>22c25c28-d0a4-8aea-9249-96f75e60cac1</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/0ce9edee-09fa-44be-92b4-19631d8e7a9d/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/0ce9edee-09fa-44be-92b4-19631d8e7a9d/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Albert Whitman &amp; Company</dcterms:publisher>
+    <published>2014-08-06T17:11:17Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0ce9edee-09fa-44be-92b4-19631d8e7a9d/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Ffad86458-b139-4ec4-be3d-42b350f1a17a
+    </id>
+    <title>Wait, Hoho, Wait!</title>
+    <author>
+      <name>Alison Inches</name>
+    </author>
+    <summary type="html">&lt;p&gt;Pintoo has a new car and Hoho wants a ride
+      right away! Kai-lan realizes her friend needs a lesson in patience. Based
+      on Nickelodeon's hit series, Ni Hao, Kai-lan.
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>465f8f4e-31e7-7b6f-b7d0-bccc941ac6a4</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/fad86458-b139-4ec4-be3d-42b350f1a17a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/fad86458-b139-4ec4-be3d-42b350f1a17a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Nickelodeon Publishing</dcterms:publisher>
+    <published>2014-08-10T06:06:30Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/fad86458-b139-4ec4-be3d-42b350f1a17a/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fe2db47d4-6498-49de-8bd9-645900961194
+    </id>
+    <title>Duck! Rabbit!</title>
+    <author>
+      <name>Amy Krouse Rosenthal</name>
+    </author>
+    <summary type="html">&lt;p&gt;From the award-winning author of
+      &lt;i&gt;Little Pea&lt;/i&gt;, &lt;i&gt;Little Hoot&lt;/i&gt;, and
+      &lt;i&gt;Little Oink&lt;/i&gt; comes a clever take on the age-old optical
+      illusion: is it a duck or a rabbit? Depends on how you look at it! Readers
+      will find more than just Amy Krouse Rosenthal's signature humor here -
+      there's also a subtle lesson for kids who don't know when to let go of an
+      argument. A smart, simple story that will make readers of all ages eager
+      to take a side, &lt;i&gt;Duck! Rabbit!&lt;/i&gt; makes it easy to agree on
+      one thing - reading it again!
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>dab7afab-0331-a20b-845c-d9b0e5648d03</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/e2db47d4-6498-49de-8bd9-645900961194/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/e2db47d4-6498-49de-8bd9-645900961194/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-10-26T01:11:26Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e2db47d4-6498-49de-8bd9-645900961194/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F91268f94-6382-4e3c-88fd-526dcf807ae5
+    </id>
+    <title>Little Pea</title>
+    <author>
+      <name>Amy Krouse Rosenthal</name>
+    </author>
+    <summary type="html">&lt;p&gt;If Little Pea doesn't eat all of his sweets,
+      there will be no vegetables for dessert! What's a young pea to do?
+      Children who have trouble swallowing their veggies will love the way this
+      pea-size picture book serves up a playful story they can relate to.
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>8f494e79-1266-326d-62ca-2f67f3f3d9fc</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/91268f94-6382-4e3c-88fd-526dcf807ae5/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/91268f94-6382-4e3c-88fd-526dcf807ae5/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-10-26T05:08:30Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>0</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/91268f94-6382-4e3c-88fd-526dcf807ae5/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F57bdbb92-433d-4df7-857b-b90f8443cff7
+    </id>
+    <title>Uni the Unicorn</title>
+    <author>
+      <name>Amy Krouse Rosenthal</name>
+    </author>
+    <summary type="html">&lt;p&gt;&lt;b&gt;An original picture book about a
+      unicorn from bestselling author Amy Krouse Rosenthal&lt;/b&gt; (Plant a
+      Kiss).&lt;br /&gt; &lt;br /&gt; In this clever twist on the age-old belief
+      that there's no such thing as unicorns, Uni the unicorn is told there's no
+      such thing as little girls! No matter what the grown-up unicorns say, Uni
+      believes that little girls are real. Somewhere there must be a smart,
+      strong, wonderful, magical little girl waiting to be best friends. In
+      fact, far away (but not too far), a real little girl believes there is a
+      unicorn waiting for her. This refreshing and sweet story of friendship
+      reminds believers and nonbelievers alike that sometimes wishes really can
+      come true.
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>f6253418-0358-089b-c65c-4fa4448adc76</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/57bdbb92-433d-4df7-857b-b90f8443cff7/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/57bdbb92-433d-4df7-857b-b90f8443cff7/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+    <published>2014-09-30T02:22:57Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/57bdbb92-433d-4df7-857b-b90f8443cff7/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F843e5cd4-d31a-4ba8-8896-db8d2a88ebfe
+    </id>
+    <title>Wumbers</title>
+    <author>
+      <name>Amy Krouse Rosenthal</name>
+    </author>
+    <summary type="html">&lt;p&gt;What do you get when you combine a word and a
+      number? A wumber! Paying tribute to William Steig's CDB!, best-selling
+      book, cre8ors Amy Krouse Rosenthal and Tom Lichtenheld have wri10 and
+      illustr8ed this s2pendous book that is 1derful 4 readers in kindergar10
+      and up. If we've confused you, just take a look at the book 4tun8ly it has
+      helpful pictures. We are sure you will get it ins10tly!
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>966beec9-7ba0-eb71-4cbf-4790e6d250d0</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/843e5cd4-d31a-4ba8-8896-db8d2a88ebfe/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/843e5cd4-d31a-4ba8-8896-db8d2a88ebfe/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Games"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-12-05T07:51:55Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>0</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/843e5cd4-d31a-4ba8-8896-db8d2a88ebfe/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F5553c1d3-f269-4c7c-8ebb-79e25ac1eb02
+    </id>
+    <title>Hooting, Tooting Dinosaurs</title>
+    <author>
+      <name>Andrea Posner-Sanchez</name>
+    </author>
+    <summary type="html">&lt;p&gt;Kids ages 3-6 love watching Jim Henson's
+      &lt;i&gt;Dinosaur Train&lt;/i&gt; on PBS KIDS--and they love reading about
+      their favorite dinosaurs Buddy, Shiny, Tiny, and Don. This Little Golden
+      Book retells the episode in which the Pteranodon family goes to a concert
+      performed by Corythosaurus. These cool dinosaurs have a crest on their
+      head that helps them communicate--and make music!
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>0b446793-0c31-57f6-cdf0-7bded003beca</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/5553c1d3-f269-4c7c-8ebb-79e25ac1eb02/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/5553c1d3-f269-4c7c-8ebb-79e25ac1eb02/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="2"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+    <published>2014-06-05T00:12:20Z</published>
+    <simplified:total_licenses>4</simplified:total_licenses>
+    <simplified:available_licenses>4</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/5553c1d3-f269-4c7c-8ebb-79e25ac1eb02/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F8e93a900-59ec-4c12-bc58-14891564e1d8
+    </id>
+    <title>I Wonder</title>
+    <author>
+      <name>Annaka Harris</name>
+    </author>
+    <summary type="html">&lt;p&gt;&lt;b&gt;&amp;#x201c;&lt;i&gt;I
+      Wonder&lt;/i&gt; offers crucial lessons in emotional intelligence,
+      starting with being secure in the face of uncertainty. Annaka Harris has
+      woven a beautiful tapestry of art, storytelling, and profound wisdom. Any
+      young child &amp;#8211; and parent &amp;#8211; will benefit from sharing
+      this wondrous book together."&amp;#8212;Daniel Goleman, author of
+      &lt;i&gt;Emotional Intelligence&lt;/i&gt;&lt;/b&gt;&lt;br
+      /&gt;&lt;b&gt;&amp;#x201c;&lt;i&gt;I Wonder&lt;/i&gt; captures the beauty
+      of life and the mystery of our world, sweeping child and adult into a
+      powerful journey of discovery. Magnificent!"&amp;#8212;Dr. Daniel Siegel,
+      author of &lt;i&gt;Mindsight&lt;/i&gt; and &lt;i&gt;The Whole-Brain
+      Child&lt;/i&gt;&lt;/b&gt;&lt;br /&gt;Eva takes a walk with her mother and
+      encounters a range of mysteries: from gravity, to life cycles, to the
+      vastness of the universe. She learns that it's okay to say &amp;#x201c;I
+      don't know," and she discovers that there are some things even adults
+      don't know&amp;#8212;mysteries for everyone to wonder about together!
+      &lt;i&gt;I Wonder&lt;/i&gt; is a book that celebrates...</summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>ac1582d3-21b1-5351-6178-809ee8e4f942</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/8e93a900-59ec-4c12-bc58-14891564e1d8/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/8e93a900-59ec-4c12-bc58-14891564e1d8/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Four Elephants Press</dcterms:publisher>
+    <published>2014-08-10T05:32:29Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/8e93a900-59ec-4c12-bc58-14891564e1d8/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F2919f09d-1f0b-4e43-8f89-1696f28f5daf
+    </id>
+    <title>Lola at the Library</title>
+    <author>
+      <name>Anna McQuinn</name>
+    </author>
+    <summary type="html">&lt;p&gt;Lola has a big smile on her face. Why?
+      Because it's Tuesday &amp;#8212; and on Tuesdays, Lola and her mommy go to
+      the library. Join Lola in this cozy celebration of books and the people
+      who love them.&lt;p&gt;Lola at the Library was originally published in
+      Great Britain and there it is called Lulu at the Library. Author Anna
+      McQuinn is a librarian in England.
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>f7086c22-5a94-943d-dee8-787f18a8a4f6</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/2919f09d-1f0b-4e43-8f89-1696f28f5daf/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/2919f09d-1f0b-4e43-8f89-1696f28f5daf/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="2"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Charlesbridge Publishing</dcterms:publisher>
+    <published>2014-08-04T23:27:43Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/2919f09d-1f0b-4e43-8f89-1696f28f5daf/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F9b644daf-e591-4f1f-bf10-90f6f72f04fe
+    </id>
+    <title>Lola Plants a Garden</title>
+    <author>
+      <name>Anna McQuinn</name>
+    </author>
+    <summary type="html">&lt;p&gt;Readers who loved Lola at the Library, Lola
+      Loves Stories, and Lola Reads to Leo are in for a backyard treat. After
+      Lola reads a book of garden poems, she wants to plant some flowers. She
+      gets books from the library and chooses her plants. Then Lola and her
+      mommy buy the seeds, make the garden, and mark the rows. Now it's time to
+      wait. . . .
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>039bd00d-5869-a43d-7fec-165734a53629</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/9b644daf-e591-4f1f-bf10-90f6f72f04fe/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/9b644daf-e591-4f1f-bf10-90f6f72f04fe/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="2"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Charlesbridge</dcterms:publisher>
+    <published>2014-09-30T02:21:56Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>0</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/9b644daf-e591-4f1f-bf10-90f6f72f04fe/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Ff1ec6331-18f2-42bc-8203-d4c734b11ccc
+    </id>
+    <title>Scooter in the Outside</title>
+    <author>
+      <name>Anne Bowen</name>
+    </author>
+    <summary type="html">&lt;p&gt;Arf-arf-arf-a-ROOOOO! That's Scooter saying
+      that this book has it all: humor, adventure, unconditional love, and a
+      memorable dog named Scooter. Scooter LOVES the outside. He loves it so
+      much that one day when Lucy accidentally leaves the door ajar, Scooter
+      goes out all by himself. But without Lucy, the outside is a scary place,
+      with trucks that go WEEEEE-OOOOO-WEEEEE-OOOOO and BEEP-BEEP-BEEP! Luckily,
+      Lucy finds Scooter. Children will relate to Scooter's curiousity as well
+      as his fears, and will enjoy the endearing pictures and the fun read
+      -aloud sounds.
+    </summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>e3155152-d6c5-024c-cf3a-c5881373f270</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/f1ec6331-18f2-42bc-8203-d4c734b11ccc/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/f1ec6331-18f2-42bc-8203-d4c734b11ccc/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Holiday House</dcterms:publisher>
+    <published>2014-08-07T22:55:29Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/f1ec6331-18f2-42bc-8203-d4c734b11ccc/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F4591de87-6c91-4a70-bb09-44127e3d2ae3
+    </id>
+    <title>Edwin Speaks Up</title>
+    <author>
+      <name>April Stevens</name>
+    </author>
+    <summary type="html">&lt;p&gt;Here's a book that will get the whole family
+      laughing. When a large family of ferrets and their precocious baby take a
+      chaotic trip to the supermarket, mom can't keep track of the groceries,
+      the shopping cart . . . or even the kids! Baby Edwin tries to help, but
+      everyone thinks he's just babbling. Little do they know that he really has
+      all the answers.&lt;br /&gt;&lt;br /&gt;Full of fun-to-say nonsense words
+      this is a perfect storytime book and a great read-aloud. April Stevens,
+      author of &lt;i&gt;Waking Up Wendell,&lt;/i&gt; is accompanied by Ezra
+      Jack Keats Award winner Sophie Blackall for a match-up that is sure to
+      delight.&lt;br /&gt;&lt;br /&gt;&lt;i&gt;From the Hardcover
+      edition.&lt;/i&gt;</summary>
+    <updated>2015-05-12T20:17:41Z</updated>
+    <simplified:pwid>cb93ed56-7527-58d6-526c-0f679b84c42b</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/4591de87-6c91-4a70-bb09-44127e3d2ae3/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/4591de87-6c91-4a70-bb09-44127e3d2ae3/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Humorous Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+    <published>2014-08-09T00:54:44Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4591de87-6c91-4a70-bb09-44127e3d2ae3/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F0b873bad-b412-4818-90b7-3d5110cf77f1
+    </id>
+    <title>The Miracle Jar</title>
+    <author>
+      <name>Audrey Penn</name>
+    </author>
+    <summary type="html">Sophie and her brother are excited by the arrival of
+      Hanukkah, and they happily clean the cottage and shine the Menorah as
+      their gift to the family. But when their mother shares her worry that they
+      do not have enough cooking oil to last the eight days of Hanukkah, Father
+      tells them the story behind the holiday celebration and the miracle of the
+      oil. Inspired by the story, the family creates their own Miracle Jar and
+      watches the oil disappear as they enjoy the special food that each day
+      brings. The family's hope and faith is confirmed when a last wipe with a
+      cloth produces just enough oil to enjoy the eighth day's treat.&lt;br
+      /&gt;&lt;br /&gt;In this heartwarming story told by bestselling author
+      Audrey Penn, the flicker of the Menorah candles links past to present, and
+      the miracle of the oil transcends the ages and reminds readers of the
+      spirit of Hanukkah and the continuing possibility of miracles.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>e3b995f7-f890-3b0d-9200-5312567d6972</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/0b873bad-b412-4818-90b7-3d5110cf77f1/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/0b873bad-b412-4818-90b7-3d5110cf77f1/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Tanglewood Press</dcterms:publisher>
+    <published>2014-08-10T00:08:20Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0b873bad-b412-4818-90b7-3d5110cf77f1/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fdfc4a6bb-2cc4-4c99-8a7d-4b13bcfbb59a
+    </id>
+    <title>The Baseball Counting Book</title>
+    <author>
+      <name>Barbara Barbieri McGrath, Brian Shaw</name>
+    </author>
+    <summary type="html">&lt;p&gt;Step up to the plate with this counting book
+      about America's favorite pastime. THE BASEBALL COUNTING BOOK is spring
+      training for little sluggers. The count is zero to zero when the ump
+      calls, "Play ball!" Nine innings later we've counted balls, strikes,
+      players, fans, and more, all the way to twenty. No one strikes out with
+      these fun rhymes. Little leaguers will find themselves counting their way
+      through practice and pointing out all the new things they've learned about
+      this great game when they watch the pro's on TV or at the parks. Early
+      readers will hit a home run with this charming counting book.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>927bbade-907b-e7e0-f1bf-09b2d0cdf562</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/dfc4a6bb-2cc4-4c99-8a7d-4b13bcfbb59a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/dfc4a6bb-2cc4-4c99-8a7d-4b13bcfbb59a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Mathematics"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Charlesbridge</dcterms:publisher>
+    <published>2014-10-01T12:57:44Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/dfc4a6bb-2cc4-4c99-8a7d-4b13bcfbb59a/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fc75d93ef-06bc-4c56-9674-01478ccfc664
+    </id>
+    <title>Teddy Bear Math</title>
+    <author>
+      <name>Barbara Barbieri McGrath, Tim Nihoff</name>
+    </author>
+    <summary type="html">&lt;p&gt;The teddy bears are back&amp;#8212;this time
+      to teach readers all about patterns. Similar to the first three books in
+      the McGrath Math series of concept books, TEDDY BEAR PATTERNS uses rhyming
+      verse to explain the concepts illustrated by the colorful teddies. This
+      simple text helps children to follow along as the teddy bears sort by
+      color, and arrange into patterns of two colors, three colors, and so on.
+      Readers will also discover how they can use patterns to skip count, add,
+      and even multiply, before trying their hand at creating a pattern of their
+      own. TEDDY BEAR PATTERNS is a worthwhile addition to the classroom,
+      especially those that already use bear counters or other manipulatives as
+      learning tools. Back matter provides a summary of the concepts introduced
+      in the book.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>b35a83c8-2599-0a3c-3683-e888ec77df6c</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/c75d93ef-06bc-4c56-9674-01478ccfc664/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/c75d93ef-06bc-4c56-9674-01478ccfc664/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Mathematics"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Charlesbridge</dcterms:publisher>
+    <published>2014-09-30T02:21:56Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/c75d93ef-06bc-4c56-9674-01478ccfc664/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F98074b67-f8fd-4271-899a-ee956278e414
+    </id>
+    <title>Whale Brother</title>
+    <author>
+      <name>Barbara Steiner</name>
+    </author>
+    <summary type="html">Omu wants to become a great carver of ivory like
+      Padloq. But Padloq tells him that he must first find the qarrtsiluni, the
+      stillness. What is the stillness? Where can he find it? An adventure with
+      his whale brothers shows Omu what he needs to know.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>b087ea96-2280-725d-5f3d-3d97e5a46d6b</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/98074b67-f8fd-4271-899a-ee956278e414/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/98074b67-f8fd-4271-899a-ee956278e414/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>childrensElibrary</dcterms:publisher>
+    <published>2014-05-02T23:22:50Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/98074b67-f8fd-4271-899a-ee956278e414/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fcff23d35-2cd2-49d6-996a-0415c4f84236
+    </id>
+    <title>Redbird</title>
+    <author>
+      <name>Barney Saltzberg</name>
+    </author>
+    <summary type="html">&lt;p&gt;Barney Saltzberg's irrepressible and
+      imaginative books&amp;#8212;&lt;i&gt;Good Egg&lt;/i&gt;,
+      &lt;i&gt;Beautiful Oops!&lt;/i&gt;, &lt;i&gt;Arlo Needs Glasses&lt;/i&gt;,
+      and &lt;i&gt;A Little Bit of Oomph!&lt;/i&gt;, combine distinctive art, a
+      lively spirit, and paper engineering to bring great joy to kids (and
+      grown-ups, too). Now Barney is launching a new series of board books about
+      a character named Redbird. With his long orange beak, red body, and
+      friendly expression, Redbird calls to mind Dr. Seuss's offbeat heroes and
+      Boynton's zany barnyard creatures, while embodying the author's signature
+      playful style.&lt;br /&gt; In &lt;i&gt;Friends Come in Different
+      Sizes&lt;/i&gt;, he introduces readers to all his delightful
+      friends&amp;#8212;some who are tall and some who are taller, and some who
+      are small and some who are smaller. &lt;i&gt;Friends can be SHORT. Friends
+      can be LONG. Doesn't matter what they look like . . . Friends all get
+      along!&lt;/i&gt;</summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>29f62b5b-1ef6-1d17-9c93-88ce03efad3c</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/cff23d35-2cd2-49d6-996a-0415c4f84236/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/cff23d35-2cd2-49d6-996a-0415c4f84236/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="1"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Workman Publishing Company</dcterms:publisher>
+    <published>2015-04-09T23:27:39Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/cff23d35-2cd2-49d6-996a-0415c4f84236/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F25fd2e60-daf2-4514-b0a9-eb18a6d2ab29
+    </id>
+    <title>The Bear's Sea Escape</title>
+    <author>
+      <name>Benjamin Chaud</name>
+    </author>
+    <summary type="html">More adventures await The Bear's Song's Little Bear
+      and Papa Bear. When the bears seek warmth from their chilly perch atop the
+      Paris Opera House, Little Bear is mistaken for a toy bear and whisked away
+      . . . to a tropical island! Papa Bear sets out on a frenzied journey to
+      find Little Bear, traveling to a bustling wharf, beneath a sea brimming
+      with coral and mermaids, onto a busy beach, and all the way to a
+      sun-drenched island. As in The Bear's Song, Little Bear is featured in
+      every spread. Will Papa Bear&amp;#8212;and the reader&amp;#8212; find him?
+      Children and parents alike will savor Chaud's lush, detail-rich
+      illustrations and the sweet story as well as the book's bonus
+      seek-and-find elements.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>c2f2bffc-384f-fd12-94d1-c1d1e3bb77a5</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/25fd2e60-daf2-4514-b0a9-eb18a6d2ab29/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/25fd2e60-daf2-4514-b0a9-eb18a6d2ab29/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-10-01T12:57:44Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/25fd2e60-daf2-4514-b0a9-eb18a6d2ab29/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2Fbb1067ed-30ad-4435-90ce-755163fa0a09
+    </id>
+    <title>The Bear's Song</title>
+    <author>
+      <name>Benjamin Chaud</name>
+    </author>
+    <summary type="html">&lt;b&gt;New York Times Notable Children's
+      Book&lt;/b&gt;&lt;br /&gt;"Sweet" has new meaning in this richly
+      illustrated, immersive picture book about two bears on a big-city
+      adventure. Papa Bear is searching for Little Bear, who has escaped the
+      den. Little Bear is following a bee, because where there are bees, there
+      is honey! When the quest leads both bears into the bustling city and a
+      humming opera house, theatrical hijinks ensue, culminating in a
+      deliciously harmonious reunion. Children and parents alike will savor
+      Benjamin Chaud's lush illustrations, and relish in the book's bonus
+      seek-and-find elements.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>ff6631ab-43ee-48fd-801f-95fd0b2e150b</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/bb1067ed-30ad-4435-90ce-755163fa0a09/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/bb1067ed-30ad-4435-90ce-755163fa0a09/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-06-04T00:59:31Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/bb1067ed-30ad-4435-90ce-755163fa0a09/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F61c832bd-04a0-4230-8bfd-e0f2747d921a
+    </id>
+    <title>Thumpy Feet</title>
+    <author>
+      <name>Betsy Lewin</name>
+    </author>
+    <summary type="html">&lt;p&gt;Thumpy, thumpy, thumpy, thump! Here comes
+      Thumpy Feet! He eats, cleans, plays, hunts, and naps. And he'll win his
+      way into your heart! The onomatopoeic text follows a fun-loving,
+      food-loving, self-satisfied cat as he enjoys the simple pleasures of his
+      daily routine. Reminiscent of East Asian ink wash paintings, the
+      illustrations not only reproduce Thumpy Feet's exquisite movement but also
+      his very essence. Masterful compositions &amp;#8212; balanced, varied, and
+      often surprising &amp;#8212; capture the reader's attention and arouse his
+      or her emotions: joy, anticipation, and love at first sight!
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>53507103-b466-c30a-4b32-97fe546ffd05</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/61c832bd-04a0-4230-8bfd-e0f2747d921a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/61c832bd-04a0-4230-8bfd-e0f2747d921a/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Holiday House</dcterms:publisher>
+    <published>2014-08-06T16:48:17Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/61c832bd-04a0-4230-8bfd-e0f2747d921a/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F363ea61f-ceb6-461d-bbe1-6074501441cc
+    </id>
+    <title>Panda Bear, Panda Bear, What Do You See?</title>
+    <author>
+      <name>Bill Martin Jr., Bill Martin, Jr.</name>
+    </author>
+    <summary type="html">&lt;p&gt;Bill Martin Jr and Eric Carle's classic Bear
+      books have been a hit with children for many generations, and have sold
+      more than eleven million copies. This wonderful compilation CD brings
+      together the beloved first three Bear books-Brown Bear, Brown Bear, What
+      Do You See?; Polar Bear, Polar Bear, What Do You Hear?; and Panda Bear,
+      Panda Bear, What Do You See?-and includes the newest addition, Baby Bear,
+      Baby Bear, What Do You See? The stories are read with warmth and humor by
+      Academy Award-winning actress and mother Gwyneth Paltrow.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>44309fc3-0671-287e-8ca2-7edb4d74bd3e</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/363ea61f-ceb6-461d-bbe1-6074501441cc/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/363ea61f-ceb6-461d-bbe1-6074501441cc/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="2"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Macmillan Audio</dcterms:publisher>
+    <published>2014-11-14T19:06:29Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/363ea61f-ceb6-461d-bbe1-6074501441cc/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F9c26e688-4fd3-49a7-8028-f894559f7371
+    </id>
+    <title>Save the Egg!</title>
+    <author>
+      <name>Billy Lopez</name>
+    </author>
+    <summary type="html">&lt;p&gt;When an egg teeters on the edge of a cliff,
+      only the Wonder Pets can save the day!
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>2076f2d3-0f2a-50c2-f7c5-15b918d4ab3d</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/9c26e688-4fd3-49a7-8028-f894559f7371/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/9c26e688-4fd3-49a7-8028-f894559f7371/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Nickelodeon Publishing</dcterms:publisher>
+    <published>2014-08-10T06:05:30Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/9c26e688-4fd3-49a7-8028-f894559f7371/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F77d0fabf-de3c-4523-9098-6e8cf47f6cf0
+    </id>
+    <title>Batman! (DC Super Friends)</title>
+    <author>
+      <name>Billy Wrecks</name>
+    </author>
+    <summary type="html">Boys 2-5 will feel like they are part of the action as
+      Batman, Superman and the other Super Friends save the day! This Little
+      Golden Book is the perfect way to introduce young readers to Batman and
+      the world's greatest super heroes.
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>a37db8cd-31fd-f244-9b74-e3486bc98267</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/77d0fabf-de3c-4523-9098-6e8cf47f6cf0/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/77d0fabf-de3c-4523-9098-6e8cf47f6cf0/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+    <published>2014-07-15T03:19:13Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/77d0fabf-de3c-4523-9098-6e8cf47f6cf0/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F2c5b173f-5343-4814-9579-edc867f76153
+    </id>
+    <title>Animal Baths</title>
+    <author>
+      <name>Bob Barner</name>
+    </author>
+    <summary type="html">Discover how all kinds of animals bathe in this
+      playful exploration of bath time in the animal kingdom! Learn how tiny
+      shrimp aid eels in keeping their teeth squeaky clean, and how schools of
+      fish help sharks stay spic and span. Young readers will recognize their
+      own bath time habits, and will love splashing and playing along in their
+      own imaginative way. Simple rhyming text and vibrant, colorful collages by
+      award-winning author and artist Bob Barner make this book ideal for the
+      youngest readers and bathers!
+    </summary>
+    <updated>2015-05-12T20:17:42Z</updated>
+    <simplified:pwid>f5e641b9-f340-4d2d-9cfb-7d55508579e5</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/2c5b173f-5343-4814-9579-edc867f76153/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/2c5b173f-5343-4814-9579-edc867f76153/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Science"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-08-10T04:19:23Z</published>
+    <simplified:total_licenses>2</simplified:total_licenses>
+    <simplified:available_licenses>2</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/2c5b173f-5343-4814-9579-edc867f76153/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F1a08375c-2d6a-4771-8d8b-a78625d0b92c
+    </id>
+    <title>Bears! Bears! Bears!</title>
+    <author>
+      <name>Bob Barner</name>
+    </author>
+    <summary type="html">Everyone's favorite bears (and some you may have never
+      met before) fish, munch, dive, cuddle, and climb their way through this
+      playful romp. The simple rhyming text is enhanced with fun facts about new
+      cubs (pandas are born no bigger than a stick of butter!) and bears around
+      the world (the spectacled bear is the only species native to South
+      America), while Bob Barner's richly textured paper collage illustrations
+      bring the bears of the world to life. Budding ursinologists will bearly be
+      able to contain themselves&amp;#8212;this book is sure to leave them
+      roaring for more!
+    </summary>
+    <updated>2015-05-12T20:17:43Z</updated>
+    <simplified:pwid>e3ba95c9-dfa7-9f13-e2b5-857aafc030c3</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/1a08375c-2d6a-4771-8d8b-a78625d0b92c/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/1a08375c-2d6a-4771-8d8b-a78625d0b92c/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Science"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-08-04T08:36:46Z</published>
+    <simplified:total_licenses>4</simplified:total_licenses>
+    <simplified:available_licenses>4</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/1a08375c-2d6a-4771-8d8b-a78625d0b92c/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F0ebf26fe-b719-4b18-b77f-71fdda354687
+    </id>
+    <title>Bugs! Bugs! Bugs!</title>
+    <author>
+      <name>Bob Barner</name>
+    </author>
+    <summary type="html">&lt;p&gt;Pretty ladybugs, fluttering butterflies,
+      creepy daddy longlegs, and roly-poly bugs are some of the familiar
+      creatures featured in this whimsically illustrated insect album. Complete
+      with an actual size chart and bug-o-meter listing fun facts about each
+      bug,&lt;i&gt;Bugs! Bugs! Bugs!&lt;/i&gt; will inform and entertain curious
+      little bug lovers everywhere.
+    </summary>
+    <updated>2015-05-12T20:17:43Z</updated>
+    <simplified:pwid>7970a91f-308c-baa8-38d5-119290a8f6c2</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/0ebf26fe-b719-4b18-b77f-71fdda354687/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/0ebf26fe-b719-4b18-b77f-71fdda354687/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Science"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-07-07T05:04:22Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0ebf26fe-b719-4b18-b77f-71fdda354687/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F4d7ab8bf-8d0b-4022-887c-92c414ac8018
+    </id>
+    <title>Stars! Stars! Stars!</title>
+    <author>
+      <name>Bob Barner</name>
+    </author>
+    <summary type="html">&lt;p&gt;In this lively book, award-winning
+      author-artist Bob Barner takes readers on a ride through outer space to
+      visit distant planets and dazzling stars. The simple rhyming text and
+      colorful torn-paper collage illustrations make this book perfect for the
+      very youngest readers, and the Meet the Planets and Meet the Galaxy
+      sections, both bursting with facts, will engage older readers as well.
+      Stars! Stars! Stars! will rocket aspiring stargazers right out of this
+      world!
+    </summary>
+    <updated>2015-05-12T20:17:43Z</updated>
+    <simplified:pwid>4dad56c1-5503-598e-6617-f2ecc6f423b9</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/4d7ab8bf-8d0b-4022-887c-92c414ac8018/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/4d7ab8bf-8d0b-4022-887c-92c414ac8018/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Science"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Chronicle Books LLC</dcterms:publisher>
+    <published>2014-06-07T15:40:04Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4d7ab8bf-8d0b-4022-887c-92c414ac8018/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F8dc49f8f-d588-4dda-ba1a-d437b453779f
+    </id>
+    <title>Jonah and the Whale</title>
+    <author>
+      <name>Brendan Powell Smith</name>
+    </author>
+    <summary type="html">&lt;p&gt;Jonah was a stubborn man. When God came to
+      Jonah to preach repentance to the Ninevites, Jonah wasn't interested.
+      After all, besides being known far and wide for their wickedness, Nineveh
+      was also one of Israel's greatest enemies. So why should Jonah help them?
+      Instead, Jonah decided to ignore God and run&amp;#8212;but he didn't make
+      it very far. &lt;br /&gt;While aboard a ship sailing away from Nineveh,
+      God sent a terrible storm that threatened to sink the ship. The crew,
+      knowing God was angry with Jonah for disobeying him, threw Jonah
+      overboard. But instead of drowning, Jonah was swallowed by a great whale.
+      Would Jonah repent and be saved, or face a perilous demise? Meticulously
+      constructed LEGO dioramas bring to life the incredible story of faith and
+      being swallowed alive. Enjoy reading one of the Bible's oddest stories
+      illustrated with LEGO bricks as a family. This book is aimed at children
+      ages 3 to 6 and could be read by first and second graders. The book will
+      appeal to Christian and...
+    </summary>
+    <updated>2015-05-12T20:17:43Z</updated>
+    <simplified:pwid>36f6c10d-489f-1b76-b0d2-927c42f4750f</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/8dc49f8f-d588-4dda-ba1a-d437b453779f/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/8dc49f8f-d588-4dda-ba1a-d437b453779f/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="4"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Religion &amp; Spirituality"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Sky Pony Press</dcterms:publisher>
+    <published>2014-08-10T12:37:31Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/8dc49f8f-d588-4dda-ba1a-d437b453779f/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FOverdrive%2520ID%2F4cc461f4-4ea2-4076-859e-d70fa37038b1
+    </id>
+    <title>Just a Duck?</title>
+    <author>
+      <name>Carin Bramsen</name>
+    </author>
+    <summary type="html">Carin Bramsen's beloved &lt;i&gt;Hey, Duck!&lt;/i&gt;
+      characters return in this humorous and heartwarming picture book about
+      friendship. Now that Cat has learned to play games that Duck enjoys, it's
+      Duck's turn to try things that Cat likes. However, climbing trees and
+      swatting at leaves prove to be a bit tricky for flat-footed Duck. What's
+      an unlikely pair of friends to do?
+    </summary>
+    <updated>2015-05-12T20:17:43Z</updated>
+    <simplified:pwid>2593dd6c-f333-0090-832b-8d7dee973eb1</simplified:pwid>
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/Overdrive/4cc461f4-4ea2-4076-859e-d70fa37038b1/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image" />
+    <link
+      href="http://s3.amazonaws.com/book-covers.nypl.org/scaled/300/Overdrive/4cc461f4-4ea2-4076-859e-d70fa37038b1/cover.jpg"
+      type="image/jpeg"
+      rel="http://opds-spec.org/image/thumbnail" />
+    <category
+      term="Children"
+      scheme="http://schema.org/audience" />
+    <category
+      term="3"
+      scheme="http://schema.org/typicalAgeRange" />
+    <category
+      term="Fiction"
+      scheme="http://librarysimplified.org/terms/genres/Simplified/" />
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+    <published>2015-03-27T23:10:27Z</published>
+    <simplified:total_licenses>1</simplified:total_licenses>
+    <simplified:available_licenses>1</simplified:available_licenses>
+    <simplified:active_holds>0</simplified:active_holds>
+    <link
+      href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4cc461f4-4ea2-4076-859e-d70fa37038b1/borrow"
+      rel="http://opds-spec.org/acquisition/borrow" />
+  </entry>
+  <link
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=title"
+    opds:facetGroup="Sort by"
+    rel="http://opds-spec.org/facet"
+    title="Title" />
+  <link
+    opds:activeFacet="true"
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=author"
+    opds:facetGroup="Sort by"
+    rel="http://opds-spec.org/facet"
+    title="Author" />
+  <link
+    href="http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?after=70276&amp;order=author&amp;size=50"
+    rel="next" />
+  <link
+    href="http://circulation.alpha.librarysimplified.org/search/Picture%20Books"
+    type="application/opensearchdescription+xml"
+    rel="search" />
 </feed>

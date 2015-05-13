@@ -6,5 +6,5 @@ public interface ReaderOpenPageRequestType extends
   ReaderJSONSerializableType,
   Serializable
 {
-
+  // No extra functions
 }

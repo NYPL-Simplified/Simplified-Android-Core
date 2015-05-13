@@ -116,11 +116,11 @@ public final class ReaderSettings implements ReaderSettingsType
   @Override public void setFontScale(
     final float s)
   {
-    final double x = Math.max(50.0, Math.min(s, 200.0));
+    final Double x = Double.valueOf(Math.max(50.0, Math.min(s, 200.0)));
     ReaderSettings.LOG.debug("font size: {}%", x);
 
     final Editor e = this.settings.edit();
-    e.putFloat("font_scale", (float) x);
+    e.putFloat("font_scale", x.floatValue());
     e.apply();
     this.broadcastChanges();
   }

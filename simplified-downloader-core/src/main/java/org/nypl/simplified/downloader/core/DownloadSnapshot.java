@@ -112,7 +112,7 @@ public final class DownloadSnapshot implements Serializable
     return this.uri;
   }
 
-  @Override public String toString()
+  @SuppressWarnings("boxing") @Override public String toString()
   {
     switch (this.status) {
       case STATUS_CANCELLED:

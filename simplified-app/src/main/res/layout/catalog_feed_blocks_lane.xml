@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <RelativeLayout
+    android:id="@+id/feed_header"
+    android:gravity="center_vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="50dp">
+
+    <TextView
+      android:id="@+id/feed_title"
+      android:textAppearance="@style/SimplifiedTheme.LaneTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/catalog_unknown_feed" />
+
+    <ProgressBar
+      android:id="@+id/feed_progress"
+      style="?android:attr/progressBarStyle"
+      android:layout_width="wrap_content"
+      android:layout_height="25dp"
+      android:layout_alignParentRight="true" />
+  </RelativeLayout>
+
+  <HorizontalScrollView
+    android:id="@+id/feed_scroller"
+    android:layout_width="match_parent"
+    android:layout_height="110dp"
+    android:fillViewport="true">
+    <LinearLayout
+      android:id="@+id/feed_scroller_contents"
+      android:orientation="horizontal"
+      android:layout_height="match_parent"
+      android:layout_width="wrap_content"/>
+  </HorizontalScrollView>
+
+  <!-- Invisible padding element -->
+
+  <View
+    android:layout_width="match_parent"
+    android:layout_height="8dp" />
+
+</merge>

@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.nypl.simplified.files.DirectoryUtilities;
+import org.nypl.simplified.files.FileLocking;
+import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.TreeTraverser;
-import com.google.common.io.Files;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
@@ -104,7 +104,7 @@ import com.io7m.jnull.NullCheck;
   @Override public void create()
     throws IOException
   {
-    FileUtilities.createDirectory(this.directory);
+    DirectoryUtilities.directoryCreate(this.directory);
   }
 
   @Override public void destroy()
@@ -144,28 +144,27 @@ import com.io7m.jnull.NullCheck;
   }
 
   private void destroyBookDataLocked()
+    throws IOException
   {
-    this.file_book.delete();
-    this.file_download_id.delete();
-    this.file_download_id_tmp.delete();
+    FileUtilities.fileDelete(this.file_book);
+    FileUtilities.fileDelete(this.file_download_id);
+    FileUtilities.fileDelete(this.file_download_id_tmp);
   }
 
   private void destroyLocked()
     throws IOException
   {
     if (this.directory.isDirectory()) {
-      final TreeTraverser<File> trav = Files.fileTreeTraverser();
-      final ImmutableList<File> list =
-        trav.postOrderTraversal(this.directory).toList();
-
-      for (int index = 0; index < list.size(); ++index) {
-        final File file = list.get(index);
-        final boolean ok = file.delete();
-        if (ok == false) {
-          throw new IOException("Unable to delete: " + file);
-        }
-      }
+      FileUtilities.fileDelete(this.file_lock);
+      FileUtilities.fileDelete(this.file_cover);
+      FileUtilities.fileDelete(this.file_meta);
+      FileUtilities.fileDelete(this.file_meta_tmp);
+      FileUtilities.fileDelete(this.file_book);
+      FileUtilities.fileDelete(this.file_download_id);
+      FileUtilities.fileDelete(this.file_download_id_tmp);
     }
+
+    FileUtilities.fileDelete(this.directory);
   }
 
   @Override public boolean exists()

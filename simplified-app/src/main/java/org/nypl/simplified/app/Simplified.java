@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.nypl.simplified.app.catalog.CachingFeedLoader;
 import org.nypl.simplified.app.reader.ReaderBookmarks;
 import org.nypl.simplified.app.reader.ReaderBookmarksType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
@@ -28,15 +27,15 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.books.core.FileUtilities;
+import org.nypl.simplified.books.core.FeedLoader;
+import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPType;
-import org.nypl.simplified.opds.core.OPDSFeedLoader;
-import org.nypl.simplified.opds.core.OPDSFeedLoaderType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
@@ -73,14 +72,14 @@ import com.io7m.jnull.Nullable;
     }
 
     private final BooksType                books;
-    private final ExecutorService          books_executor;
-    private final ExecutorService          catalog_executor;
-    private final CoverProviderType        cover_provider;
+    private final ExecutorService          exec_books;
+    private final ExecutorService          exec_catalog_feeds;
+    private final ExecutorService          exec_covers;
+    private final BookCoverProviderType    cover_provider;
     private final DownloaderType           downloader;
     private final URI                      feed_initial_uri;
-    private final OPDSFeedLoaderType       feed_loader;
+    private final FeedLoaderType           feed_loader;
     private final HTTPType                 http;
-    private final Resources                resources;
     private final ScreenSizeControllerType screen;
     private final AtomicBoolean            synced;
 
@@ -88,10 +87,12 @@ import com.io7m.jnull.Nullable;
       final Context context,
       final Resources rr)
     {
-      this.resources = NullCheck.notNull(rr);
+      NullCheck.notNull(rr);
       this.screen = new ScreenSizeController(rr);
-      this.catalog_executor = Simplified.namedThreadPool(3, "catalog");
-      this.books_executor = Simplified.namedThreadPool(1, "books");
+      this.exec_catalog_feeds =
+        Simplified.namedThreadPool(1, "catalog-feed", 19);
+      this.exec_covers = Simplified.namedThreadPool(2, "cover", 19);
+      this.exec_books = Simplified.namedThreadPool(1, "books", 19);
 
       /**
        * Catalog URIs.
@@ -102,7 +103,8 @@ import com.io7m.jnull.Nullable;
           .notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
 
       final OPDSFeedParserType p = OPDSFeedParser.newParser();
-      this.feed_loader = Simplified.makeFeedLoader(this.catalog_executor, p);
+      this.feed_loader =
+        Simplified.makeFeedLoader(this.exec_catalog_feeds, p);
 
       /**
        * Book management.
@@ -118,8 +120,8 @@ import com.io7m.jnull.Nullable;
        */
 
       try {
-        FileUtilities.createDirectory(downloads_dir);
-        FileUtilities.createDirectory(books_dir);
+        DirectoryUtilities.directoryCreate(downloads_dir);
+        DirectoryUtilities.directoryCreate(books_dir);
       } catch (final IOException e) {
         Simplified.LOG.error(
           "could not create directories: {}",
@@ -141,7 +143,7 @@ import com.io7m.jnull.Nullable;
       this.http = HTTP.newHTTP();
       this.downloader =
         Downloader.newDownloader(
-          this.books_executor,
+          this.exec_books,
           this.http,
           downloader_config);
 
@@ -151,7 +153,7 @@ import com.io7m.jnull.Nullable;
 
       this.books =
         BooksController.newBooks(
-          this.books_executor,
+          this.exec_books,
           p,
           this.http,
           this.downloader,
@@ -162,10 +164,10 @@ import com.io7m.jnull.Nullable;
        */
 
       this.cover_provider =
-        CoverProvider.newCoverProvider(
+        BookCoverProvider.newCoverProvider(
           context,
           this.books,
-          this.catalog_executor);
+          this.exec_covers);
 
       this.synced = new AtomicBoolean(false);
     }
@@ -175,7 +177,7 @@ import com.io7m.jnull.Nullable;
       return this.books;
     }
 
-    @Override public CoverProviderType getCoverProvider()
+    @Override public BookCoverProviderType getCoverProvider()
     {
       return this.cover_provider;
     }
@@ -185,7 +187,7 @@ import com.io7m.jnull.Nullable;
       return this.feed_initial_uri;
     }
 
-    @Override public OPDSFeedLoaderType getFeedLoader()
+    @Override public FeedLoaderType getFeedLoader()
     {
       return this.feed_loader;
     }
@@ -216,6 +218,12 @@ import com.io7m.jnull.Nullable;
       final BookSnapshot snap)
     {
       CatalogAppServices.LOG_CA.debug("loaded book: {}", book);
+    }
+
+    @Override public void onAccountDataLoadFailedImmediately(
+      final Throwable error)
+    {
+      CatalogAppServices.LOG_CA.error("failed to load books: ", error);
     }
 
     @Override public void onAccountSyncAuthenticationFailure(
@@ -312,11 +320,11 @@ import com.io7m.jnull.Nullable;
       this.screen = new ScreenSizeController(rr);
 
       this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
-      this.http_executor = Simplified.namedThreadPool(1, "httpd");
+      this.http_executor = Simplified.namedThreadPool(1, "httpd", 19);
       this.httpd =
         ReaderHTTPServer.newServer(this.http_executor, this.mime, 8080);
 
-      this.epub_exec = Simplified.namedThreadPool(1, "epub");
+      this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
 
       this.settings = ReaderSettings.openSettings(context);
@@ -499,18 +507,18 @@ import com.io7m.jnull.Nullable;
     return i.getActualReaderAppServices();
   }
 
-  private static OPDSFeedLoaderType makeFeedLoader(
+  private static FeedLoaderType makeFeedLoader(
     final ExecutorService exec,
     final OPDSFeedParserType p)
   {
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
-    final OPDSFeedLoaderType flx = OPDSFeedLoader.newLoader(exec, p, t);
-    return CachingFeedLoader.newLoader(flx);
+    return FeedLoader.newFeedLoader(exec, p, t);
   }
 
   private static ExecutorService namedThreadPool(
     final int count,
-    final String base)
+    final String base,
+    final int priority)
   {
     final ThreadFactory tf = Executors.defaultThreadFactory();
     final ThreadFactory named = new ThreadFactory() {
@@ -522,13 +530,13 @@ import com.io7m.jnull.Nullable;
         /**
          * Apparently, it's necessary to use {@link android.os.Process} to set
          * the thread priority, rather than the standard Java thread
-         * functions. All worker threads are set to the lowest priority (19).
+         * functions.
          */
 
         final Thread t = tf.newThread(new Runnable() {
           @Override public void run()
           {
-            android.os.Process.setThreadPriority(19);
+            android.os.Process.setThreadPriority(priority);
             NullCheck.notNull(r).run();
           }
         });

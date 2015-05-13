@@ -37,40 +37,6 @@ public final class OPDSFeedParserTest implements OPDSFeedParserContractType
     this.contract.testEmpty0();
   }
 
-  @Override @Test public void testNavigationFeed0()
-    throws Exception
-  {
-    this.contract.testNavigationFeed0();
-  }
-
-  @Override @Test public
-    void
-    testNavigationFeedBadEntryFeaturedLinkWithoutHref()
-      throws Exception
-  {
-    this.contract.testNavigationFeedBadEntryFeaturedLinkWithoutHref();
-  }
-
-  @Override @Test public void testNavigationFeedBadEntryLinkWithoutHref()
-    throws Exception
-  {
-    this.contract.testNavigationFeedBadEntryLinkWithoutHref();
-  }
-
-  @Override @Test public void testNavigationFeedBadEntryNoLinks()
-    throws Exception
-  {
-    this.contract.testNavigationFeedBadEntryNoLinks();
-  }
-
-  @Override @Test public
-    void
-    testNavigationFeedBadEntrySubsectionLinkWithoutHref()
-      throws Exception
-  {
-    this.contract.testNavigationFeedBadEntrySubsectionLinkWithoutHref();
-  }
-
   @Override @Test public void testNotXMLException()
     throws Exception
   {
@@ -87,5 +53,11 @@ public final class OPDSFeedParserTest implements OPDSFeedParserContractType
     throws Exception
   {
     this.contract.testStreamIOException();
+  }
+
+  @Override @Test public void testAcquisitionFeedBlocks0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedBlocks0();
   }
 }

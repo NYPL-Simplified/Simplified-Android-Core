@@ -23,8 +23,9 @@ import org.nypl.simplified.http.core.HTTPType;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
 
-public final class DownloadTool
+@SuppressWarnings({ "boxing" }) public final class DownloadTool
 {
   public static void main(
     final String[] args)
@@ -108,7 +109,7 @@ public final class DownloadTool
       @Override public void downloadReceivedData(
         final DownloadSnapshot snap)
       {
-
+        // Nothing
       }
 
       @Override public void downloadResumed(
@@ -126,19 +127,23 @@ public final class DownloadTool
       @Override public void downloadStartedReceivingData(
         final DownloadSnapshot snap)
       {
-
+        // Nothing
       }
 
       @Override public void downloadCompletedTaken(
         final DownloadSnapshot snap)
       {
-
+        // Nothing
       }
     };
 
     final DownloaderConfiguration c = cb.build();
     final DownloaderType d =
-      Downloader.newDownloaderWithListener(exec, h, c, listener);
+      Downloader.newDownloaderWithListener(
+        NullCheck.notNull(exec),
+        h,
+        c,
+        listener);
 
     final BufferedReader reader =
       new BufferedReader(new InputStreamReader(System.in));
@@ -249,8 +254,8 @@ public final class DownloadTool
             System.err.println("error: usage: auth-basic user pass");
             continue;
           }
-          final String name = segments[1];
-          final String pass = segments[2];
+          final String name = NullCheck.notNull(segments[1]);
+          final String pass = NullCheck.notNull(segments[2]);
           auth = Option.some((HTTPAuthType) new HTTPAuthBasic(name, pass));
           continue;
         }

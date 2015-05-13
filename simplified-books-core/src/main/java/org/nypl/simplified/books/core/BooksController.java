@@ -16,12 +16,13 @@ import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -33,18 +34,12 @@ import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedBuilderType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
-import org.nypl.simplified.opds.core.OPDSFeedType;
-import org.nypl.simplified.opds.core.OPDSNavigationFeed;
+import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.TreeTraverser;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
@@ -61,106 +56,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
   Observable implements BooksType
 {
-  private static final class DeleteBookDataTask implements Runnable
-  {
-    private final BookDatabaseType     book_database;
-    private final BookID               book_id;
-    private final BooksStatusCacheType books_status;
-
-    public DeleteBookDataTask(
-      final BooksStatusCacheType in_books_status,
-      final BookDatabaseType in_book_database,
-      final BookID in_book_id)
-    {
-      this.books_status = NullCheck.notNull(in_books_status);
-      this.book_database = NullCheck.notNull(in_book_database);
-      this.book_id = NullCheck.notNull(in_book_id);
-    }
-
-    @Override public void run()
-    {
-      try {
-        final BookDatabaseEntryType e =
-          this.book_database.getBookDatabaseEntry(this.book_id);
-        e.destroyBookData();
-
-        this.books_status
-          .booksStatusUpdate(new BookStatusLoaned(this.book_id));
-      } catch (final Throwable e) {
-        BooksController.LOG.error(
-          "could not destroy book data for {}: ",
-          this.book_id,
-          e);
-      }
-    }
-  }
-
-  private static final class AcquisitionFeedTask implements Runnable
-  {
-    private final BookDatabaseType                books_database;
-    private final String                          id;
-    private final BookAcquisitionFeedListenerType listener;
-    private final String                          title;
-    private final Calendar                        updated;
-    private final URI                             uri;
-
-    public AcquisitionFeedTask(
-      final BookDatabaseType in_books_database,
-      final URI in_uri,
-      final String in_id,
-      final Calendar in_updated,
-      final String in_title,
-      final BookAcquisitionFeedListenerType in_listener)
-    {
-      this.books_database = NullCheck.notNull(in_books_database);
-      this.uri = NullCheck.notNull(in_uri);
-      this.id = NullCheck.notNull(in_id);
-      this.updated = NullCheck.notNull(in_updated);
-      this.title = NullCheck.notNull(in_title);
-      this.listener = NullCheck.notNull(in_listener);
-    }
-
-    private OPDSAcquisitionFeed feed()
-    {
-      final OPDSAcquisitionFeedBuilderType b =
-        OPDSAcquisitionFeed.newBuilder(
-          this.uri,
-          this.id,
-          this.updated,
-          this.title);
-
-      final List<BookDatabaseEntryType> dirs =
-        this.books_database.getBookDatabaseEntries();
-
-      for (int index = 0; index < dirs.size(); ++index) {
-        final BookDatabaseEntryReadableType dir =
-          NullCheck.notNull(dirs.get(index));
-        final BookID book_id = dir.getID();
-
-        try {
-          b.addEntry(dir.getData());
-        } catch (final IOException x) {
-          // XXX: See issue 30.
-          BooksController.LOG.error(
-            "unable to load book {} metadata: ",
-            book_id,
-            x);
-        }
-      }
-
-      return b.build();
-    }
-
-    @Override public void run()
-    {
-      try {
-        this.listener.onBookAcquisitionFeedSuccess(this.feed());
-      } catch (final Throwable x) {
-        this.listener.onBookAcquisitionFeedFailure(x);
-      }
-    }
-  }
-
   private static final class BorrowTask implements
     Runnable,
     DownloadListenerType
@@ -360,38 +255,28 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private static final class DataLoadTask implements Runnable
   {
-    private final BookDatabaseType            books_database;
-    private final BooksStatusCacheType        books_status;
-    private final DownloaderType              downloader;
-    private final AccountDataLoadListenerType listener;
-    private final AtomicBoolean               logged_in;
+    private final BookDatabaseType                                  books_database;
+    private final BooksStatusCacheType                              books_status;
+    private final DownloaderType                                    downloader;
+    private final AccountDataLoadListenerType                       listener;
+    private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
 
     public DataLoadTask(
       final BookDatabaseType in_books_database,
       final BooksStatusCacheType in_books_status,
       final DownloaderType in_downloader,
       final AccountDataLoadListenerType in_listener,
-      final AtomicBoolean in_logged_in)
+      final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login)
     {
       this.books_database = NullCheck.notNull(in_books_database);
       this.books_status = NullCheck.notNull(in_books_status);
       this.downloader = NullCheck.notNull(in_downloader);
       this.listener = NullCheck.notNull(in_listener);
-      this.logged_in = NullCheck.notNull(in_logged_in);
+      this.login = NullCheck.notNull(in_login);
     }
 
-    @Override public void run()
+    private void loadBooks()
     {
-      this.logged_in.set(this.books_database.credentialsExist());
-      if (this.logged_in.get() == false) {
-        try {
-          this.listener.onAccountUnavailable();
-        } catch (final Throwable x) {
-          // Ignore
-        }
-        return;
-      }
-
       final List<BookDatabaseEntryType> book_list =
         this.books_database.getBookDatabaseEntries();
       for (final BookDatabaseEntryReadableType book_dir : book_list) {
@@ -408,7 +293,30 @@ import com.io7m.junreachable.UnreachableCodeException;
           this.listener.onAccountDataBookLoadFailed(
             id,
             Option.some(e),
-            e.getMessage());
+            NullCheck.notNull(e.getMessage()));
+        }
+      }
+    }
+
+    @Override public void run()
+    {
+      if (this.books_database.credentialsExist()) {
+        try {
+          this.login.set(this.books_database.credentialsGet());
+        } catch (final IOException e) {
+          try {
+            this.listener.onAccountDataLoadFailedImmediately(e);
+          } catch (final Throwable x) {
+            BooksController.LOG.error("listener raised exception: ", x);
+          }
+        }
+
+        this.loadBooks();
+      } else {
+        try {
+          this.listener.onAccountUnavailable();
+        } catch (final Throwable x) {
+          BooksController.LOG.error("listener raised exception: ", x);
         }
       }
 
@@ -419,16 +327,13 @@ import com.io7m.junreachable.UnreachableCodeException;
   private static final class DataSetupTask implements Runnable
   {
     private final BookDatabaseType             books_database;
-    private final BooksControllerConfiguration config;
     private final AccountDataSetupListenerType listener;
 
     public DataSetupTask(
-      final BooksControllerConfiguration in_config,
       final BookDatabaseType in_books_database,
       final AccountDataSetupListenerType in_listener)
     {
       this.books_database = NullCheck.notNull(in_books_database);
-      this.config = NullCheck.notNull(in_config);
       this.listener = NullCheck.notNull(in_listener);
     }
 
@@ -440,7 +345,112 @@ import com.io7m.junreachable.UnreachableCodeException;
       } catch (final Throwable x) {
         this.listener.onAccountDataSetupFailure(
           Option.some(x),
-          x.getMessage());
+          NullCheck.notNull(x.getMessage()));
+      }
+    }
+  }
+
+  private static final class DeleteBookDataTask implements Runnable
+  {
+    private final BookDatabaseType     book_database;
+    private final BookID               book_id;
+    private final BooksStatusCacheType books_status;
+
+    public DeleteBookDataTask(
+      final BooksStatusCacheType in_books_status,
+      final BookDatabaseType in_book_database,
+      final BookID in_book_id)
+    {
+      this.books_status = NullCheck.notNull(in_books_status);
+      this.book_database = NullCheck.notNull(in_book_database);
+      this.book_id = NullCheck.notNull(in_book_id);
+    }
+
+    @Override public void run()
+    {
+      try {
+        final BookDatabaseEntryType e =
+          this.book_database.getBookDatabaseEntry(this.book_id);
+        e.destroyBookData();
+
+        this.books_status
+          .booksStatusUpdate(new BookStatusLoaned(this.book_id));
+      } catch (final Throwable e) {
+        BooksController.LOG.error(
+          "could not destroy book data for {}: ",
+          this.book_id,
+          e);
+      }
+    }
+  }
+
+  private static final class FeedTask implements Runnable
+  {
+    private final BookDatabaseType     books_database;
+    private final String               id;
+    private final BookFeedListenerType listener;
+    private final String               title;
+    private final Calendar             updated;
+    private final URI                  uri;
+
+    public FeedTask(
+      final BookDatabaseType in_books_database,
+      final URI in_uri,
+      final String in_id,
+      final Calendar in_updated,
+      final String in_title,
+      final BookFeedListenerType in_listener)
+    {
+      this.books_database = NullCheck.notNull(in_books_database);
+      this.uri = NullCheck.notNull(in_uri);
+      this.id = NullCheck.notNull(in_id);
+      this.updated = NullCheck.notNull(in_updated);
+      this.title = NullCheck.notNull(in_title);
+      this.listener = NullCheck.notNull(in_listener);
+    }
+
+    private FeedWithoutBlocks feed()
+    {
+      final OptionType<URI> no_next = Option.none();
+      final OptionType<OPDSSearchLink> no_search = Option.none();
+      final FeedWithoutBlocks f =
+        FeedWithoutBlocks.newEmptyFeed(
+          this.uri,
+          this.id,
+          this.updated,
+          this.title,
+          no_next,
+          no_search);
+
+      final List<BookDatabaseEntryType> dirs =
+        this.books_database.getBookDatabaseEntries();
+
+      for (int index = 0; index < dirs.size(); ++index) {
+        final BookDatabaseEntryReadableType dir =
+          NullCheck.notNull(dirs.get(index));
+        final BookID book_id = dir.getID();
+
+        try {
+          final OPDSAcquisitionFeedEntry data = dir.getData();
+          f.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
+        } catch (final IOException x) {
+          BooksController.LOG.error(
+            "unable to load book {} metadata: ",
+            book_id,
+            x);
+          f.add(FeedEntryCorrupt.fromIDAndError(book_id, x));
+        }
+      }
+
+      return f;
+    }
+
+    @Override public void run()
+    {
+      try {
+        this.listener.onBookFeedSuccess(this.feed());
+      } catch (final Throwable x) {
+        this.listener.onBookFeedFailure(x);
       }
     }
   }
@@ -449,14 +459,14 @@ import com.io7m.junreachable.UnreachableCodeException;
     Runnable,
     AccountDataSetupListenerType
   {
-    private final AccountBarcode               barcode;
-    private final BooksController              books;
-    private final BookDatabaseType             books_database;
-    private final BooksControllerConfiguration config;
-    private final HTTPType                     http;
-    private final AccountLoginListenerType     listener;
-    private final AtomicBoolean                logged_in;
-    private final AccountPIN                   pin;
+    private final AccountBarcode                                    barcode;
+    private final BooksController                                   books;
+    private final BookDatabaseType                                  books_database;
+    private final BooksControllerConfiguration                      config;
+    private final HTTPType                                          http;
+    private final AccountLoginListenerType                          listener;
+    private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
+    private final AccountPIN                                        pin;
 
     public LoginTask(
       final BooksController in_books,
@@ -466,7 +476,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AccountBarcode in_barcode,
       final AccountPIN in_pin,
       final AccountLoginListenerType in_listener,
-      final AtomicBoolean in_logged_in)
+      final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login)
     {
       this.books = NullCheck.notNull(in_books);
       this.books_database = NullCheck.notNull(in_books_database);
@@ -475,7 +485,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.barcode = NullCheck.notNull(in_barcode);
       this.pin = NullCheck.notNull(in_pin);
       this.listener = NullCheck.notNull(in_listener);
-      this.logged_in = NullCheck.notNull(in_logged_in);
+      this.login = NullCheck.notNull(in_login);
     }
 
     private void loginCheckCredentials()
@@ -496,7 +506,9 @@ import com.io7m.junreachable.UnreachableCodeException;
            */
 
           LoginTask.this.saveCredentials(LoginTask.this.pin);
-          LoginTask.this.logged_in.set(true);
+          LoginTask.this.login.set(Pair.pair(
+            LoginTask.this.barcode,
+            LoginTask.this.pin));
           return e;
         }
       });
@@ -515,16 +527,15 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.loginCheckCredentials();
         this.listener.onAccountLoginSuccess(this.barcode, this.pin);
       } catch (final Throwable e) {
-        this.listener.onAccountLoginFailure(Option.some(e), e.getMessage());
+        this.listener.onAccountLoginFailure(
+          Option.some(e),
+          NullCheck.notNull(e.getMessage()));
       }
     }
 
     @Override public void run()
     {
-      this.books.submitRunnable(new DataSetupTask(
-        this.config,
-        this.books_database,
-        this));
+      this.books.submitRunnable(new DataSetupTask(this.books_database, this));
     }
 
     private void saveCredentials(
@@ -537,46 +548,38 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private static final class LogoutTask implements Runnable
   {
-    private final File                         base;
-    private final BooksControllerConfiguration config;
-    private final AccountLogoutListenerType    listener;
-    private final AtomicBoolean                logged_in;
+    private final File                                              base;
+    private final BooksControllerConfiguration                      config;
+    private final AccountLogoutListenerType                         listener;
+    private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
 
     public LogoutTask(
       final BooksControllerConfiguration in_config,
-      final AtomicBoolean in_logged_in,
+      final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login,
       final AccountLogoutListenerType in_listener)
     {
       this.config = NullCheck.notNull(in_config);
       this.listener = NullCheck.notNull(in_listener);
-      this.logged_in = NullCheck.notNull(in_logged_in);
+      this.login = NullCheck.notNull(in_login);
       this.base = new File(this.config.getDirectory(), "data");
     }
 
     @Override public void run()
     {
       try {
-        this.logged_in.set(false);
+        this.login.set(null);
 
         if (this.base.isDirectory()) {
-          final TreeTraverser<File> trav = Files.fileTreeTraverser();
-          final ImmutableList<File> list =
-            trav.postOrderTraversal(this.base).toList();
-
-          for (int index = 0; index < list.size(); ++index) {
-            final File file = list.get(index);
-            final boolean ok = file.delete();
-            if (ok == false) {
-              throw new IOException("Unable to delete: " + file);
-            }
-          }
+          DirectoryUtilities.directoryDelete(this.base);
         } else {
           throw new IllegalStateException("Not logged in");
         }
 
         this.listener.onAccountLogoutSuccess();
       } catch (final Throwable e) {
-        this.listener.onAccountLogoutFailure(Option.some(e), e.getMessage());
+        this.listener.onAccountLogoutFailure(
+          Option.some(e),
+          NullCheck.notNull(e.getMessage()));
       }
     }
   }
@@ -655,7 +658,9 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.sync();
         this.listener.onAccountSyncSuccess();
       } catch (final Throwable x) {
-        this.listener.onAccountSyncFailure(Option.some(x), x.getMessage());
+        this.listener.onAccountSyncFailure(
+          Option.some(x),
+          NullCheck.notNull(x.getMessage()));
       }
     }
 
@@ -726,17 +731,10 @@ import com.io7m.junreachable.UnreachableCodeException;
       final HTTPResultOKType<InputStream> r_feed)
       throws Exception
     {
-      final OPDSFeedType feed =
+      final OPDSAcquisitionFeed feed =
         this.feed_parser.parse(loans_uri, r_feed.getValue());
 
-      if (feed instanceof OPDSNavigationFeed) {
-        throw new IOException(
-          "Expected an acquisition feed, but received a navigation feed");
-      }
-
-      final OPDSAcquisitionFeed acq_feed = (OPDSAcquisitionFeed) feed;
-      final List<OPDSAcquisitionFeedEntry> entries =
-        acq_feed.getFeedEntries();
+      final List<OPDSAcquisitionFeedEntry> entries = feed.getFeedEntries();
 
       for (final OPDSAcquisitionFeedEntry e : entries) {
         this.syncFeedEntry(NullCheck.notNull(e));
@@ -841,7 +839,20 @@ import com.io7m.junreachable.UnreachableCodeException;
     try {
       final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
       try {
-        ByteStreams.copy(r.getValue(), fs);
+        final InputStream in = NullCheck.notNull(r.getValue());
+        try {
+          final byte[] buffer = new byte[8192];
+          for (;;) {
+            final int rb = in.read(buffer);
+            if (rb == -1) {
+              break;
+            }
+            fs.write(buffer, 0, rb);
+          }
+        } finally {
+          in.close();
+        }
+
         fs.flush();
       } finally {
         fs.close();
@@ -866,17 +877,17 @@ import com.io7m.junreachable.UnreachableCodeException;
       in_config);
   }
 
-  private final BookDatabaseType             book_database;
-  private final BooksStatusCacheType         books_status;
-  private final BooksControllerConfiguration config;
-  private final File                         data_directory;
-  private final DownloaderType               downloader;
-  private final ExecutorService              exec;
-  private final OPDSFeedParserType           feed_parser;
-  private final HTTPType                     http;
-  private final AtomicBoolean                logged_in;
-  private final AtomicInteger                task_id;
-  private Map<Integer, Future<?>>            tasks;
+  private final BookDatabaseType                                  book_database;
+  private final BooksStatusCacheType                              books_status;
+  private final BooksControllerConfiguration                      config;
+  private final File                                              data_directory;
+  private final DownloaderType                                    downloader;
+  private final ExecutorService                                   exec;
+  private final OPDSFeedParserType                                feed_parser;
+  private final HTTPType                                          http;
+  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
+  private final AtomicInteger                                     task_id;
+  private Map<Integer, Future<?>>                                 tasks;
 
   private BooksController(
     final ExecutorService in_exec,
@@ -891,16 +902,35 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.config = NullCheck.notNull(in_config);
     this.downloader = NullCheck.notNull(in_downloader);
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>();
-    this.logged_in = new AtomicBoolean(false);
+    this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
     this.books_status = BooksStatusCache.newStatusCache();
     this.data_directory = new File(this.config.getDirectory(), "data");
     this.book_database = BookDatabase.newDatabase(this.data_directory);
     this.task_id = new AtomicInteger(0);
   }
 
+  @Override public void accountGetCachedLoginDetails(
+    final AccountGetCachedCredentialsListenerType listener)
+  {
+    final Pair<AccountBarcode, AccountPIN> p = this.login.get();
+    if (p != null) {
+      try {
+        listener.onAccountIsLoggedIn(p.getLeft(), p.getRight());
+      } catch (final Throwable x) {
+        BooksController.LOG.error("listener raised exception: ", x);
+      }
+    } else {
+      try {
+        listener.onAccountIsNotLoggedIn();
+      } catch (final Throwable x) {
+        BooksController.LOG.error("listener raised exception: ", x);
+      }
+    }
+  }
+
   @Override public boolean accountIsLoggedIn()
   {
-    return this.logged_in.get();
+    return this.login.get() != null;
   }
 
   @Override public void accountLoadBooks(
@@ -912,7 +942,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.books_status,
       this.downloader,
       listener,
-      this.logged_in));
+      this.login));
   }
 
   @Override public void accountLogin(
@@ -932,7 +962,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       barcode,
       pin,
       listener,
-      this.logged_in));
+      this.login));
   }
 
   @Override public void accountLogout(
@@ -944,10 +974,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.stopAllTasks();
       this.books_status.booksStatusClearAll();
       this.downloader.downloadDestroyAll();
-      this.submitRunnable(new LogoutTask(
-        this.config,
-        this.logged_in,
-        listener));
+      this.submitRunnable(new LogoutTask(this.config, this.login, listener));
     }
   }
 
@@ -986,6 +1013,18 @@ import com.io7m.junreachable.UnreachableCodeException;
       acq,
       title,
       listener));
+  }
+
+  @Override public void bookDeleteData(
+    final BookID id)
+  {
+    NullCheck.notNull(id);
+
+    BooksController.LOG.debug("delete: {}", id);
+    this.submitRunnable(new DeleteBookDataTask(
+      this.books_status,
+      this.book_database,
+      id));
   }
 
   @Override public void bookDownloadAcknowledge(
@@ -1068,12 +1107,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  @Override public void booksGetAcquisitionFeed(
+  @Override public void booksGetFeed(
     final URI in_uri,
     final String in_id,
     final Calendar in_updated,
     final String in_title,
-    final BookAcquisitionFeedListenerType in_listener)
+    final BookFeedListenerType in_listener)
   {
     NullCheck.notNull(in_uri);
     NullCheck.notNull(in_id);
@@ -1081,7 +1120,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(in_title);
     NullCheck.notNull(in_listener);
 
-    this.submitRunnable(new AcquisitionFeedTask(
+    this.submitRunnable(new FeedTask(
       this.book_database,
       in_uri,
       in_id,
@@ -1200,18 +1239,6 @@ import com.io7m.junreachable.UnreachableCodeException;
       };
       this.tasks.put(id, this.exec.submit(rb));
     }
-  }
-
-  @Override public void bookDeleteData(
-    final BookID id)
-  {
-    NullCheck.notNull(id);
-
-    BooksController.LOG.debug("delete: {}", id);
-    this.submitRunnable(new DeleteBookDataTask(
-      this.books_status,
-      this.book_database,
-      id));
   }
 
 }

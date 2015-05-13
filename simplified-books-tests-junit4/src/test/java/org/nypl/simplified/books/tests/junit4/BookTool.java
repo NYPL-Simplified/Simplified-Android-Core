@@ -29,7 +29,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
-public final class BookTool
+@SuppressWarnings("null") public final class BookTool
 {
   public static void main(
     final String args[])
@@ -43,16 +43,16 @@ public final class BookTool
     final BooksControllerConfigurationBuilderType books_config_builder =
       BooksControllerConfiguration.newBuilder(new File("/tmp/books"));
 
-    books_config_builder
-      .setLoansURI(URI
-        .create("http://10.1.3.1:9999/org/nypl/simplified/downloader/tests/loans.xml"));
+    books_config_builder.setLoansURI(URI
+      .create("http://circulation.alpha.librarysimplified.org/loans/"));
 
     final DownloaderType d =
       Downloader.newDownloader(exec, http, DownloaderConfiguration
         .newBuilder(new File("/tmp/downloads"))
         .build());
 
-    final BooksControllerConfiguration books_config = books_config_builder.build();
+    final BooksControllerConfiguration books_config =
+      books_config_builder.build();
     final AccountsType books =
       BooksController.newBooks(exec, parser, http, d, books_config);
 
@@ -85,7 +85,7 @@ public final class BookTool
 
       @Override public void onAccountDataBookLoadFinished()
       {
-
+        // Nothing
       }
 
       @Override public void onAccountDataBookLoadSucceeded(
@@ -93,6 +93,13 @@ public final class BookTool
         final BookSnapshot snap)
       {
         System.err.println("info: account-load: loaded book: " + book);
+      }
+
+      @Override public void onAccountDataLoadFailedImmediately(
+        final Throwable error)
+      {
+        System.err.println("error: account-load: failed to data: " + error);
+        error.printStackTrace(System.err);
       }
     });
 

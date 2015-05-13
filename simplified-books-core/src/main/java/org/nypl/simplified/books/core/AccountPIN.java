@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.nypl.simplified.files.FileUtilities;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 

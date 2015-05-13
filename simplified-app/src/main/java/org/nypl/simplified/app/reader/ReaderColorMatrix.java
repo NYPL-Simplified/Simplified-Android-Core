@@ -45,8 +45,8 @@ public final class ReaderColorMatrix extends ColorMatrix
     Assertions.checkInvariant(
       actual_index == (4 * 5),
       "%d == %d",
-      actual_index,
-      4 * 5);
+      Integer.valueOf(actual_index),
+      Integer.valueOf(4 * 5));
     return new ReaderColorMatrix(actual);
   }
 

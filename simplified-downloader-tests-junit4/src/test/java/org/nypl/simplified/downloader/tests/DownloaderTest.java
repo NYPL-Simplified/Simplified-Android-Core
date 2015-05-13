@@ -1,8 +1,8 @@
 package org.nypl.simplified.downloader.tests;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -22,18 +22,18 @@ import org.nypl.simplified.downloader.core.Downloader;
 import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
 import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.files.DirectoryUtilities;
+import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
 
-import com.google.common.io.Files;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 
-@SuppressWarnings("static-method") public final class DownloaderTest
+@SuppressWarnings({ "static-method", "synthetic-access" }) public final class DownloaderTest
 {
   private static abstract class LoggingListener implements
     DownloadListenerType
@@ -118,14 +118,15 @@ import com.io7m.jnull.NullCheck;
 
   @Rule public Timeout globalTimeout = new Timeout(10000);
 
-  private @NonNull File makeTempDir()
+  private File makeTempDir()
+    throws IOException
   {
-    final File dir = Files.createTempDir();
+    final File dir = DirectoryUtilities.directoryCreateTemporary();
     System.out.printf("temporary directory: %s\n", dir);
     return NullCheck.notNull(dir);
   }
 
-  private @NonNull URI serverAddress(
+  private URI serverAddress(
     final String path)
   {
     final StringBuilder b = new StringBuilder();
@@ -455,7 +456,7 @@ import com.io7m.jnull.NullCheck;
       final OptionType<HTTPAuthType> none = Option.none();
       d.downloadEnqueue(
         none,
-        URI.create("nothttp://example.com/nonexistent"),
+        NullCheck.notNull(URI.create("nothttp://example.com/nonexistent")),
         "Something",
         listener);
 
@@ -522,7 +523,8 @@ import com.io7m.jnull.NullCheck;
       .statusGet());
 
     final File file = new File(tmp, "1.data");
-    final String text = Files.toString(file, Charset.forName("UTF-8"));
+
+    final String text = FileUtilities.fileReadUTF8(file);
     Assert.assertEquals("Hello.", text);
 
     e.shutdown();
@@ -658,7 +660,7 @@ import com.io7m.jnull.NullCheck;
     }
 
     final File file = new File(tmp, "1.data");
-    final String text = Files.toString(file, Charset.forName("UTF-8"));
+    final String text = FileUtilities.fileReadUTF8(file);
     Assert.assertEquals("Hello.", text);
 
     {
@@ -693,7 +695,6 @@ import com.io7m.jnull.NullCheck;
 
     long id;
 
-    final CountDownLatch start_latch = new CountDownLatch(1);
     final CountDownLatch pause_latch = new CountDownLatch(1);
     final CountDownLatch resume_latch = new CountDownLatch(1);
     final DownloadListenerType listener = new LoggingListener() {

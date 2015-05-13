@@ -35,7 +35,7 @@ public final class BookID implements Serializable
 
       final StringBuilder b = new StringBuilder();
       for (int index = 0; index < dg.length; ++index) {
-        final byte bb = dg[index];
+        final Byte bb = Byte.valueOf(dg[index]);
         b.append(String.format("%02x", bb));
       }
 

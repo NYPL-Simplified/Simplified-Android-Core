@@ -2,22 +2,23 @@ package org.nypl.simplified.app.catalog;
 
 import java.net.URI;
 
-import com.google.common.collect.ImmutableList;
+import org.nypl.simplified.stack.ImmutableStack;
+
 import com.io7m.jnull.NullCheck;
 
 public final class CatalogFeedArgumentsRemote implements
   CatalogFeedArgumentsType
 {
-  private static final long                        serialVersionUID = 1L;
+  private static final long                         serialVersionUID = 1L;
 
-  private final boolean                            drawer_open;
-  private final String                             title;
-  private final ImmutableList<CatalogUpStackEntry> up_stack;
-  private final URI                                uri;
+  private final boolean                             drawer_open;
+  private final String                              title;
+  private final ImmutableStack<CatalogUpStackEntry> up_stack;
+  private final URI                                 uri;
 
   public CatalogFeedArgumentsRemote(
     final boolean in_drawer_open,
-    final ImmutableList<CatalogUpStackEntry> in_up_stack,
+    final ImmutableStack<CatalogUpStackEntry> in_up_stack,
     final String in_title,
     final URI in_uri)
   {
@@ -32,7 +33,7 @@ public final class CatalogFeedArgumentsRemote implements
     return this.title;
   }
 
-  public ImmutableList<CatalogUpStackEntry> getUpStack()
+  public ImmutableStack<CatalogUpStackEntry> getUpStack()
   {
     return this.up_stack;
   }

@@ -37,7 +37,7 @@ public final class OPDSRFC3339Formatter
         df1.setLenient(true);
         d = df1.parse(text);
       }
-      return OPDSRFC3339Formatter.toCal(d);
+      return OPDSRFC3339Formatter.toCal(NullCheck.notNull(d));
     }
 
     /**
@@ -69,7 +69,7 @@ public final class OPDSRFC3339Formatter
       d = df1.parse(new_date);
     }
 
-    return OPDSRFC3339Formatter.toCal(d);
+    return OPDSRFC3339Formatter.toCal(NullCheck.notNull(d));
   }
 
   private static Calendar toCal(

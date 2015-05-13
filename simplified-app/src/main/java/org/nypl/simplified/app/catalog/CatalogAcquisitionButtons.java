@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
@@ -21,30 +22,25 @@ public final class CatalogAcquisitionButtons
     final Activity in_act,
     final ViewGroup in_vg,
     final BooksType in_books,
-    final BookID in_book_id,
-    final OPDSAcquisitionFeedEntry in_e)
+    final FeedEntryOPDS in_e)
   {
     NullCheck.notNull(in_act);
     NullCheck.notNull(in_vg);
     NullCheck.notNull(in_books);
-    NullCheck.notNull(in_book_id);
     NullCheck.notNull(in_e);
 
     in_vg.setVisibility(View.VISIBLE);
     in_vg.removeAllViews();
 
-    for (final OPDSAcquisition a : in_e.getAcquisitions()) {
+    final BookID book_id = in_e.getBookID();
+    final OPDSAcquisitionFeedEntry eo = in_e.getFeedEntry();
+    for (final OPDSAcquisition a : eo.getAcquisitions()) {
       switch (a.getType()) {
         case ACQUISITION_BORROW:
         case ACQUISITION_GENERIC:
         {
           final CatalogAcquisitionButton b =
-            new CatalogAcquisitionButton(
-              in_act,
-              in_books,
-              in_book_id,
-              a,
-              in_e);
+            new CatalogAcquisitionButton(in_act, in_books, book_id, a, in_e);
           in_vg.addView(b);
           break;
         }

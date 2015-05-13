@@ -7,7 +7,7 @@ import java.util.TreeMap;
 import org.nypl.simplified.http.core.URIQueryBuilder;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
-public final class URIQueryBuilderContract implements
+@SuppressWarnings("null") public final class URIQueryBuilderContract implements
   URIQueryBuilderContractType
 {
   @Override public void testQueryEncode_0()

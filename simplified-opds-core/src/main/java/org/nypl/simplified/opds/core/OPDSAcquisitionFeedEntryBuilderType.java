@@ -16,6 +16,10 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void addAuthor(
     final String name);
 
+  void addBlock(
+    final URI uri,
+    final String b);
+
   void addCategory(
     final String c);
 

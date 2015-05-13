@@ -18,7 +18,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class LoginController implements
+@SuppressWarnings("synthetic-access") public final class LoginController implements
   OnClickListener,
   LoginControllerListenerType
 {

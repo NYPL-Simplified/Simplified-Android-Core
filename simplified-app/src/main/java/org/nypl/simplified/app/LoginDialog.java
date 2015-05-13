@@ -14,6 +14,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -219,10 +220,13 @@ public final class LoginDialog extends DialogFragment implements
         in_login_button.setVisibility(View.GONE);
         in_login_progress.setVisibility(View.VISIBLE);
 
+        final Editable barcode_edit_text = in_barcode_edit.getText();
+        final Editable pin_edit_text = in_pin_edit.getText();
+
         final AccountBarcode barcode =
-          new AccountBarcode(in_barcode_edit.getText().toString());
+          new AccountBarcode(NullCheck.notNull(barcode_edit_text.toString()));
         final AccountPIN pin =
-          new AccountPIN(in_pin_edit.getText().toString());
+          new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
         books.accountLogin(barcode, pin, LoginDialog.this);
       }
     });

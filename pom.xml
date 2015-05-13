@@ -25,6 +25,9 @@
     <module>simplified-documentation</module>
     <module>simplified-downloader-core</module>
     <module>simplified-downloader-tests-junit4</module>
+    <module>simplified-files-tests-android</module>
+    <module>simplified-files-tests-junit4</module>
+    <module>simplified-files</module>
     <module>simplified-http-core</module>
     <module>simplified-http-tests-android</module>
     <module>simplified-http-tests-junit4</module>
@@ -33,6 +36,7 @@
     <module>simplified-opds-tests-android</module>
     <module>simplified-opds-tests-junit4</module>
     <module>simplified-opds-tests</module>
+    <module>simplified-stack</module>
     <module>simplified-test-utilities</module>
   </modules>
 
