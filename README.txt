@@ -26,3 +26,19 @@ Current build instructions:
 
     $ mvn -C clean package
 
+------------------------------------------------------------------------
+
+Release procedure:
+
+  1. Update the version strings in all of the Android manifests:
+
+     $ vim `find . -name AndroidManifest.xml -type f | grep src`
+
+  2. Update the version strings in the Maven POMs:
+
+     $ vim pom.xml simplified-*/pom.xml
+
+  3. Run a build, ensure all tests pass.
+
+  4. Tag in git and pushed signed archives and APK files to wherever
+     they need to go.
