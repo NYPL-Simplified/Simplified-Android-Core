@@ -527,6 +527,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         list.setSelection(CatalogFeedActivity.this.saved_scroll_pos);
       }
     });
+    list.setDividerHeight(0);
     this.list_view = list;
 
     final SimplifiedCatalogAppServicesType app =
