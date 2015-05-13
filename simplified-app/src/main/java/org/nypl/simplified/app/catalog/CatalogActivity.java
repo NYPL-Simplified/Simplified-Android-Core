@@ -23,7 +23,6 @@ import com.io7m.jnull.Nullable;
   SimplifiedActivity
 {
   private static final String CATALOG_UP_STACK_ID;
-
   private static final Logger LOG;
 
   static {

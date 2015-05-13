@@ -23,6 +23,7 @@
     <!-- Catalog -->
     <activity
       android:name="org.nypl.simplified.app.catalog.CatalogFeedActivity"
+      android:configChanges="orientation|screenSize"
       android:label="@string/app_name">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

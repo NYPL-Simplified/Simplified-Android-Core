@@ -41,6 +41,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
@@ -108,6 +109,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private static final String CATALOG_ARGS;
+  private static final String LIST_STATE_ID;
   private static final Logger LOG;
 
   static {
@@ -116,6 +118,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   static {
     CATALOG_ARGS = "org.nypl.simplified.app.CatalogFeedActivity.arguments";
+    LIST_STATE_ID =
+      "org.nypl.simplified.app.CatalogFeedActivity.list_view_state";
   }
 
   public static void setActivityArguments(
@@ -177,8 +181,10 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private @Nullable FeedType     feed;
+  private @Nullable AbsListView  list_view;
   private @Nullable Future<Unit> loading;
   private @Nullable ViewGroup    progress_layout;
+  private int                    saved_scroll_pos;
 
   private void configureUpButton(
     final ImmutableStack<CatalogUpStackEntry> up_stack,
@@ -270,6 +276,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     final ImmutableStack<CatalogUpStackEntry> stack = this.getUpStack();
     this.configureUpButton(stack, args.getTitle());
 
+    if (state != null) {
+      CatalogFeedActivity.LOG.debug("received state");
+      this.saved_scroll_pos = state.getInt(CatalogFeedActivity.LIST_STATE_ID);
+    } else {
+      this.saved_scroll_pos = 0;
+    }
+
     /**
      * If this is the root of the catalog, attempt the initial load/login/sync
      * of books.
@@ -280,6 +293,53 @@ import com.io7m.junreachable.UnreachableCodeException;
         Simplified.getCatalogAppServices();
       app.syncInitial();
     }
+
+    final LayoutInflater inflater = this.getLayoutInflater();
+    final FrameLayout content_area = this.getContentFrame();
+    final ViewGroup in_progress_layout =
+      NullCheck.notNull((ViewGroup) inflater.inflate(
+        R.layout.catalog_loading,
+        content_area,
+        false));
+
+    content_area.addView(in_progress_layout);
+    content_area.requestLayout();
+    this.progress_layout = in_progress_layout;
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final FeedLoaderType feed_loader = app.getFeedLoader();
+
+    args
+      .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
+        @Override public Unit onFeedArgumentsLocalBooks(
+          final CatalogFeedArgumentsLocalBooks c)
+        {
+          final BooksType books = app.getBooks();
+          final URI dummy_uri = NullCheck.notNull(URI.create("Books"));
+          final String dummy_id =
+            NullCheck.notNull(rr.getString(R.string.books));
+          final Calendar now = NullCheck.notNull(Calendar.getInstance());
+          final String title =
+            NullCheck.notNull(rr.getString(R.string.books));
+          books.booksGetFeed(
+            dummy_uri,
+            dummy_id,
+            now,
+            title,
+            CatalogFeedActivity.this);
+          return Unit.unit();
+        }
+
+        @Override public Unit onFeedArgumentsRemote(
+          final CatalogFeedArgumentsRemote c)
+        {
+          CatalogFeedActivity.this.loading =
+            feed_loader.fromURI(c.getURI(), CatalogFeedActivity.this);
+          return Unit.unit();
+        }
+      });
   }
 
   @Override public boolean onCreateOptionsMenu(
@@ -431,6 +491,10 @@ import com.io7m.junreachable.UnreachableCodeException;
   private void onFeedWithBlocksUI(
     final FeedWithBlocks f)
   {
+    CatalogFeedActivity.LOG.debug(
+      "received feed with blocks: {}",
+      f.getFeedURI());
+
     UIThread.checkIsUIThread();
 
     this.invalidateOptionsMenu();
@@ -450,9 +514,20 @@ import com.io7m.junreachable.UnreachableCodeException;
     content_area.addView(layout);
     content_area.requestLayout();
 
+    CatalogFeedActivity.LOG.debug(
+      "restoring scroll position: {}",
+      this.saved_scroll_pos);
+
     final ListView list =
       NullCheck.notNull((ListView) layout
         .findViewById(R.id.catalog_feed_blocks_list));
+    list.post(new Runnable() {
+      @Override public void run()
+      {
+        list.setSelection(CatalogFeedActivity.this.saved_scroll_pos);
+      }
+    });
+    this.list_view = list;
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -562,9 +637,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     content_area.addView(layout);
     content_area.requestLayout();
 
+    CatalogFeedActivity.LOG.debug(
+      "restoring scroll position: {}",
+      this.saved_scroll_pos);
+
     final GridView grid_view =
       NullCheck.notNull((GridView) layout
         .findViewById(R.id.catalog_feed_noblocks_grid));
+
+    grid_view.setSelection(this.saved_scroll_pos);
+    this.list_view = grid_view;
 
     final CatalogFeedArgumentsType args = this.getArguments();
     final URI feed_uri = f.getFeedURI();
@@ -609,66 +691,21 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.onFeedWithoutBlocksNonEmptyUI(f);
   }
 
-  @Override protected void onResume()
+  @Override protected void onSaveInstanceState(
+    final @Nullable Bundle state)
   {
-    super.onResume();
+    super.onSaveInstanceState(state);
 
-    CatalogFeedActivity.LOG.debug("onResume");
+    CatalogFeedActivity.LOG.debug("saving state");
 
-    final FrameLayout content_area = this.getContentFrame();
-    final ViewGroup layout;
-    if (this.progress_layout == null) {
-      final LayoutInflater inflater = this.getLayoutInflater();
-      layout =
-        NullCheck.notNull((ViewGroup) inflater.inflate(
-          R.layout.catalog_loading,
-          content_area,
-          false));
-    } else {
-      layout = NullCheck.notNull(this.progress_layout);
+    final Bundle nn_state = NullCheck.notNull(state);
+    final AbsListView lv = this.list_view;
+    if (lv != null) {
+      final int position = lv.getFirstVisiblePosition();
+      CatalogFeedActivity.LOG
+        .debug("saving list view position: {}", position);
+      nn_state.putInt(CatalogFeedActivity.LIST_STATE_ID, position);
     }
-
-    layout.setVisibility(View.VISIBLE);
-    content_area.removeAllViews();
-    content_area.addView(layout);
-    content_area.requestLayout();
-    this.progress_layout = layout;
-
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final FeedLoaderType feed_loader = app.getFeedLoader();
-
-    final CatalogFeedArgumentsType args = this.getArguments();
-    args
-      .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
-        @Override public Unit onFeedArgumentsLocalBooks(
-          final CatalogFeedArgumentsLocalBooks c)
-        {
-          final BooksType books = app.getBooks();
-          final URI dummy_uri = NullCheck.notNull(URI.create("Books"));
-          final String dummy_id =
-            NullCheck.notNull(rr.getString(R.string.books));
-          final Calendar now = NullCheck.notNull(Calendar.getInstance());
-          final String title =
-            NullCheck.notNull(rr.getString(R.string.books));
-          books.booksGetFeed(
-            dummy_uri,
-            dummy_id,
-            now,
-            title,
-            CatalogFeedActivity.this);
-          return Unit.unit();
-        }
-
-        @Override public Unit onFeedArgumentsRemote(
-          final CatalogFeedArgumentsRemote c)
-        {
-          CatalogFeedActivity.this.loading =
-            feed_loader.fromURI(c.getURI(), CatalogFeedActivity.this);
-          return Unit.unit();
-        }
-      });
   }
 
   private void onSelectedBook(
