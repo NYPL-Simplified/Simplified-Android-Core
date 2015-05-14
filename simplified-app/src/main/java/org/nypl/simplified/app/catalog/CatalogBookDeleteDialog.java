@@ -85,6 +85,7 @@ import com.io7m.jnull.Nullable;
     if (d != null) {
       d.setCanceledOnTouchOutside(true);
     }
+
     return layout;
   }
 

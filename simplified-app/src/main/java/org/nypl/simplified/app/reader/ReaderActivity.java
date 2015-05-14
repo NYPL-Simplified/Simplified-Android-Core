@@ -260,7 +260,6 @@ import com.io7m.jnull.Nullable;
     in_hud.setVisibility(View.INVISIBLE);
 
     in_settings.setOnClickListener(new OnClickListener() {
-
       @Override public void onClick(
         final @Nullable View v)
       {
@@ -414,6 +413,13 @@ import com.io7m.jnull.Nullable;
           final @Nullable View v)
         {
           ReaderActivity.LOG.debug("large screen TOC");
+
+          final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
+          final ReaderTOCDialog d =
+            ReaderTOCDialog.newDialog(sent_toc, ReaderActivity.this);
+
+          final FragmentManager fm = ReaderActivity.this.getFragmentManager();
+          d.show(fm, "toc-dialog");
         }
       });
     } else {
