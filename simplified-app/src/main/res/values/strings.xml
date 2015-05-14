@@ -27,6 +27,7 @@
   <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your
     account to fix it.
   </string>
+  <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Borrow</string>

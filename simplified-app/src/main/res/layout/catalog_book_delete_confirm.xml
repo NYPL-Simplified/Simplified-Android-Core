@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/book_delete_dialog"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:gravity="center"
+  android:orientation="vertical"
+  android:background="@color/normal_background"
+  android:padding="16dp">
+
+  <TextView
+    android:id="@+id/book_delete_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/catalog_book_delete_confirm" />
+
+  <Button
+    android:id="@+id/book_delete_confirm"
+    style="?android:attr/buttonStyleSmall"
+    android:layout_marginTop="16dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/simplified_button"
+    android:text="@string/catalog_book_delete"
+    android:textColor="@drawable/simplified_button_text" />
+
+</LinearLayout>
