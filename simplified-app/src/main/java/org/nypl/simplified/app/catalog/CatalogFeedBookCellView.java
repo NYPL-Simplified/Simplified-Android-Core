@@ -238,7 +238,11 @@ import com.squareup.picasso.Callback;
     this.cell_cover_layout.setLayoutParams(ccl_p);
 
     this.entry = new AtomicReference<FeedEntryOPDS>();
-    this.resetVisibility();
+
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
   }
 
   private void loadImageAndSetVisibility(
@@ -290,7 +294,11 @@ import com.squareup.picasso.Callback;
   {
     final BookID book_id = d.getID();
     CatalogFeedBookCellView.LOG.debug("{}: downloaded", book_id);
+
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("downloaded");
 
     final FeedEntryOPDS e = NullCheck.notNull(this.entry.get());
@@ -312,6 +320,10 @@ import com.squareup.picasso.Callback;
     final BookStatusDownloadFailed f)
   {
     CatalogFeedBookCellView.LOG.debug("{}: download failed", f.getID());
+
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.VISIBLE);
     this.setDebugCellText("download-failed");
 
@@ -355,7 +367,11 @@ import com.squareup.picasso.Callback;
     final BookStatusDownloadInProgress d)
   {
     CatalogFeedBookCellView.LOG.debug("{}: downloading", d.getID());
+
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
     this.cell_downloading.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("download-in-progress");
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
@@ -387,7 +403,11 @@ import com.squareup.picasso.Callback;
     final BookStatusLoaned o)
   {
     CatalogFeedBookCellView.LOG.debug("{}: loaned", o.getID());
+
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("loaned");
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
@@ -407,20 +427,16 @@ import com.squareup.picasso.Callback;
     return o.matchBookLoanedStatus(this);
   }
 
-  private void resetVisibility()
-  {
-    this.cell_downloading.setVisibility(View.INVISIBLE);
-    this.cell_book.setVisibility(View.INVISIBLE);
-    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
-    this.cell_corrupt.setVisibility(View.INVISIBLE);
-  }
-
   private void onBookStatusNone(
     final FeedEntryOPDS in_entry,
     final BookID id)
   {
     CatalogFeedBookCellView.LOG.debug("{}: none", id);
+
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("none");
 
     this.loadImageAndSetVisibility(in_entry);
@@ -436,7 +452,11 @@ import com.squareup.picasso.Callback;
     final BookStatusRequestingDownload d)
   {
     CatalogFeedBookCellView.LOG.debug("{}: requesting download", d.getID());
+
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("requesting-download");
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
@@ -451,7 +471,11 @@ import com.squareup.picasso.Callback;
     final BookStatusRequestingLoan s)
   {
     CatalogFeedBookCellView.LOG.debug("{}: requesting loan", s.getID());
+
     this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("requesting-loan");
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
@@ -469,7 +493,10 @@ import com.squareup.picasso.Callback;
       "{}: feed entry corrupt: ",
       e.getBookID(),
       e.getError());
-    this.resetVisibility();
+
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.cell_corrupt.setVisibility(View.VISIBLE);
     this.setDebugCellText("entry-corrupt");
 
@@ -500,10 +527,7 @@ import com.squareup.picasso.Callback;
       }
     });
 
-    this.resetVisibility();
     this.entry.set(feed_e);
-    this.cell_cover_image.setVisibility(View.INVISIBLE);
-    this.cell_cover_progress.setVisibility(View.VISIBLE);
 
     final BookID book_id = feed_e.getBookID();
     final OptionType<BookStatusType> stat =
@@ -518,8 +542,6 @@ import com.squareup.picasso.Callback;
     final BookID id,
     final OptionType<BookStatusType> status_opt)
   {
-    this.resetVisibility();
-
     if (status_opt.isSome()) {
       final Some<BookStatusType> some = (Some<BookStatusType>) status_opt;
       UIThread.runOnUIThread(new Runnable() {
@@ -564,7 +586,14 @@ import com.squareup.picasso.Callback;
     if (in_entry != null) {
       final BookID current_id = in_entry.getBookID();
       if (current_id.equals(update_id)) {
-        this.viewConfigure(in_entry, this.book_selection_listener);
+        UIThread.runOnUIThread(new Runnable() {
+          @Override public void run()
+          {
+            CatalogFeedBookCellView.this.viewConfigure(
+              in_entry,
+              CatalogFeedBookCellView.this.book_selection_listener);
+          }
+        });
       }
     }
   }
