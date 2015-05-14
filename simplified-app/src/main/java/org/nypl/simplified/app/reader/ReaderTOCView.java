@@ -218,6 +218,12 @@ import com.io7m.jnull.Nullable;
     return NullCheck.notNull(this.adapter).hasStableIds();
   }
 
+  public void hideTOCBackButton()
+  {
+    this.view_back.setEnabled(false);
+    this.view_back.setVisibility(View.GONE);
+  }
+
   @Override public boolean isEmpty()
   {
     return NullCheck.notNull(this.adapter).isEmpty();
@@ -240,12 +246,6 @@ import com.io7m.jnull.Nullable;
           s.getColorScheme());
       }
     });
-  }
-
-  public void hideTOCBackButton()
-  {
-    this.view_back.setEnabled(false);
-    this.view_back.setVisibility(View.GONE);
   }
 
   public void onTOCViewDestroy()

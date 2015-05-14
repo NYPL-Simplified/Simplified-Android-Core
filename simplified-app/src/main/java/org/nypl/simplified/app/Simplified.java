@@ -72,11 +72,11 @@ import com.io7m.jnull.Nullable;
     }
 
     private final BooksType                books;
+    private final BookCoverProviderType    cover_provider;
+    private final DownloaderType           downloader;
     private final ExecutorService          exec_books;
     private final ExecutorService          exec_catalog_feeds;
     private final ExecutorService          exec_covers;
-    private final BookCoverProviderType    cover_provider;
-    private final DownloaderType           downloader;
     private final URI                      feed_initial_uri;
     private final FeedLoaderType           feed_loader;
     private final HTTPType                 http;

@@ -46,6 +46,20 @@ import com.io7m.jnull.Nullable;
     // Fragments must have no-arg constructors.
   }
 
+  @Override public void onAccountLogoutFailure(
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    final String s =
+      NullCheck.notNull(String.format("logout failed: %s", message));
+    LogUtilities.errorWithOptionalException(LogoutDialog.LOG, s, error);
+  }
+
+  @Override public void onAccountLogoutSuccess()
+  {
+    // Nothing
+  }
+
   @Override public void onCreate(
     final @Nullable Bundle state)
   {
@@ -111,20 +125,6 @@ import com.io7m.jnull.Nullable;
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);
-  }
-
-  @Override public void onAccountLogoutFailure(
-    final OptionType<Throwable> error,
-    final String message)
-  {
-    final String s =
-      NullCheck.notNull(String.format("logout failed: %s", message));
-    LogUtilities.errorWithOptionalException(LogoutDialog.LOG, s, error);
-  }
-
-  @Override public void onAccountLogoutSuccess()
-  {
-    // Nothing
   }
 
   public void setOnConfirmListener(

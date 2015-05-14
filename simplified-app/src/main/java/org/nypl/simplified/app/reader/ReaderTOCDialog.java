@@ -32,14 +32,6 @@ import com.io7m.jnull.Nullable;
     TOC_ID = "org.nypl.simplified.app.reader.ReaderTOCDialog.toc";
   }
 
-  private @Nullable ReaderTOCSelectionListenerType receiver;
-  private @Nullable ReaderTOCView                  view;
-
-  public ReaderTOCDialog()
-  {
-    // Fragments must have no-arg constructors.
-  }
-
   public static ReaderTOCDialog newDialog(
     final ReaderTOC in_toc,
     final ReaderTOCSelectionListenerType in_receiver)
@@ -51,11 +43,13 @@ import com.io7m.jnull.Nullable;
     d.setTOCReceiver(in_receiver);
     return d;
   }
+  private @Nullable ReaderTOCSelectionListenerType receiver;
 
-  private void setTOCReceiver(
-    final ReaderTOCSelectionListenerType in_receiver)
+  private @Nullable ReaderTOCView                  view;
+
+  public ReaderTOCDialog()
   {
-    this.receiver = NullCheck.notNull(in_receiver);
+    // Fragments must have no-arg constructors.
   }
 
   @Override public void onCreate(
@@ -82,6 +76,11 @@ import com.io7m.jnull.Nullable;
         act,
         in_toc,
         new ReaderTOCViewSelectionListenerType() {
+          @Override public void onTOCBackSelected()
+          {
+            ReaderTOCDialog.this.dismiss();
+          }
+
           @Override public void onTOCItemSelected(
             final TOCElement e)
           {
@@ -90,12 +89,30 @@ import com.io7m.jnull.Nullable;
               .onTOCSelectionReceived(e);
             ReaderTOCDialog.this.dismiss();
           }
-
-          @Override public void onTOCBackSelected()
-          {
-            ReaderTOCDialog.this.dismiss();
-          }
         });
+  }
+
+  @Override public View onCreateView(
+    final @Nullable LayoutInflater inflater,
+    final @Nullable ViewGroup container,
+    final @Nullable Bundle state)
+  {
+    final ReaderTOCView t_view = NullCheck.notNull(this.view);
+    final ViewGroup layout_view = t_view.getLayoutView();
+
+    final Dialog d = this.getDialog();
+    if (d != null) {
+      d.setCanceledOnTouchOutside(true);
+    }
+
+    t_view.hideTOCBackButton();
+    return layout_view;
+  }
+
+  @Override public void onDestroy()
+  {
+    super.onDestroy();
+    NullCheck.notNull(this.view).onTOCViewDestroy();
   }
 
   @Override public void onResume()
@@ -123,26 +140,9 @@ import com.io7m.jnull.Nullable;
     window.setLayout(width, window.getAttributes().height);
   }
 
-  @Override public void onDestroy()
+  private void setTOCReceiver(
+    final ReaderTOCSelectionListenerType in_receiver)
   {
-    super.onDestroy();
-    NullCheck.notNull(this.view).onTOCViewDestroy();
-  }
-
-  @Override public View onCreateView(
-    final @Nullable LayoutInflater inflater,
-    final @Nullable ViewGroup container,
-    final @Nullable Bundle state)
-  {
-    final ReaderTOCView t_view = NullCheck.notNull(this.view);
-    final ViewGroup layout_view = t_view.getLayoutView();
-
-    final Dialog d = this.getDialog();
-    if (d != null) {
-      d.setCanceledOnTouchOutside(true);
-    }
-
-    t_view.hideTOCBackButton();
-    return layout_view;
+    this.receiver = NullCheck.notNull(in_receiver);
   }
 }

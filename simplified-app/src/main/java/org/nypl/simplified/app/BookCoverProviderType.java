@@ -64,6 +64,10 @@ public interface BookCoverProviderType
     final int h,
     final Callback c);
 
+  void loadingThumbailsPause();
+
+  void loadingThumbnailsContinue();
+
   /**
    * <p>
    * Load or generate a thumbnail based on <tt>e</tt> into the image view
@@ -115,8 +119,4 @@ public interface BookCoverProviderType
     final int w,
     final int h,
     final Callback c);
-
-  void loadingThumbailsPause();
-
-  void loadingThumbnailsContinue();
 }

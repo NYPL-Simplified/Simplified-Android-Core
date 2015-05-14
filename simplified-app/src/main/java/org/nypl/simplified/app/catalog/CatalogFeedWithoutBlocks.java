@@ -40,75 +40,27 @@ public final class CatalogFeedWithoutBlocks implements
   FeedLoaderListenerType,
   FeedMatcherType<Unit, UnreachableCodeException>
 {
-  private final ArrayAdapter<FeedEntryType>      adapter;
+  private static final Logger LOG;
+  static {
+    LOG = LogUtilities.getLog(CatalogFeedWithoutBlocks.class);
+  }
+  private static boolean shouldLoadNext(
+    final int first_visible_item,
+    final int total_count)
+  {
+    return (total_count - first_visible_item) <= 50;
+  }
   private final Activity                         activity;
-  private final CatalogBookSelectionListenerType book_select_listener;
+  private final ArrayAdapter<FeedEntryType>      adapter;
   private final BookCoverProviderType            book_cover_provider;
+  private final CatalogBookSelectionListenerType book_select_listener;
   private final BooksType                        books;
+
   private final FeedWithoutBlocks                feed;
-  private final AtomicReference<OptionType<URI>> uri_next;
+
   private final FeedLoaderType                   feed_loader;
 
-  @Override public boolean hasStableIds()
-  {
-    return this.adapter.hasStableIds();
-  }
-
-  @Override public void registerDataSetObserver(
-    final @Nullable DataSetObserver observer)
-  {
-    this.adapter.registerDataSetObserver(observer);
-  }
-
-  @Override public void unregisterDataSetObserver(
-    final @Nullable DataSetObserver observer)
-  {
-    this.adapter.unregisterDataSetObserver(observer);
-  }
-
-  @Override public boolean areAllItemsEnabled()
-  {
-    return this.adapter.areAllItemsEnabled();
-  }
-
-  @Override public boolean isEnabled(
-    final int position)
-  {
-    return this.adapter.isEnabled(position);
-  }
-
-  @Override public int getItemViewType(
-    final int position)
-  {
-    return this.adapter.getItemViewType(position);
-  }
-
-  @Override public int getViewTypeCount()
-  {
-    return this.adapter.getViewTypeCount();
-  }
-
-  @Override public boolean isEmpty()
-  {
-    return this.adapter.isEmpty();
-  }
-
-  @Override public int getCount()
-  {
-    return this.adapter.getCount();
-  }
-
-  @Override public FeedEntryType getItem(
-    final int position)
-  {
-    return NullCheck.notNull(this.adapter.getItem(position));
-  }
-
-  @Override public long getItemId(
-    final int position)
-  {
-    return this.adapter.getItemId(position);
-  }
+  private final AtomicReference<OptionType<URI>> uri_next;
 
   public CatalogFeedWithoutBlocks(
     final Activity in_activity,
@@ -128,6 +80,34 @@ public final class CatalogFeedWithoutBlocks implements
       new AtomicReference<OptionType<URI>>(in_feed.getFeedNext());
     this.adapter =
       new ArrayAdapter<FeedEntryType>(this.activity, 0, this.feed);
+  }
+
+  @Override public boolean areAllItemsEnabled()
+  {
+    return this.adapter.areAllItemsEnabled();
+  }
+
+  @Override public int getCount()
+  {
+    return this.adapter.getCount();
+  }
+
+  @Override public FeedEntryType getItem(
+    final int position)
+  {
+    return NullCheck.notNull(this.adapter.getItem(position));
+  }
+
+  @Override public long getItemId(
+    final int position)
+  {
+    return this.adapter.getItemId(position);
+  }
+
+  @Override public int getItemViewType(
+    final int position)
+  {
+    return this.adapter.getItemViewType(position);
   }
 
   @Override public View getView(
@@ -153,6 +133,74 @@ public final class CatalogFeedWithoutBlocks implements
 
   }
 
+  @Override public int getViewTypeCount()
+  {
+    return this.adapter.getViewTypeCount();
+  }
+
+  @Override public boolean hasStableIds()
+  {
+    return this.adapter.hasStableIds();
+  }
+
+  @Override public boolean isEmpty()
+  {
+    return this.adapter.isEmpty();
+  }
+
+  @Override public boolean isEnabled(
+    final int position)
+  {
+    return this.adapter.isEnabled(position);
+  }
+
+  private @Nullable Future<Unit> loadNext(
+    final AtomicReference<OptionType<URI>> next_ref)
+  {
+    final OptionType<URI> next_opt = next_ref.get();
+    if (next_opt.isSome()) {
+      final Some<URI> next_some = (Some<URI>) next_opt;
+      final URI next = next_some.get();
+
+      CatalogFeedWithoutBlocks.LOG.debug("loading next feed: %s", next);
+      return this.feed_loader.fromURI(next, this);
+    }
+
+    return null;
+  }
+
+  @Override public void onFeedLoadFailure(
+    final URI u,
+    final Throwable e)
+  {
+    if (e instanceof CancellationException) {
+      return;
+    }
+
+    CatalogFeedWithoutBlocks.LOG.error("failed to load feed: ", e);
+  }
+
+  @Override public void onFeedLoadSuccess(
+    final URI u,
+    final FeedType f)
+  {
+    f.matchFeed(this);
+  }
+
+  @Override public Unit onFeedWithBlocks(
+    final FeedWithBlocks f)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onFeedWithoutBlocks(
+    final FeedWithoutBlocks f)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
   @Override public void onScroll(
     final @Nullable AbsListView view,
     final int first_visible_item,
@@ -169,21 +217,6 @@ public final class CatalogFeedWithoutBlocks implements
       total_count)) {
       this.loadNext(this.uri_next);
     }
-  }
-
-  private @Nullable Future<Unit> loadNext(
-    final AtomicReference<OptionType<URI>> next_ref)
-  {
-    final OptionType<URI> next_opt = next_ref.get();
-    if (next_opt.isSome()) {
-      final Some<URI> next_some = (Some<URI>) next_opt;
-      final URI next = next_some.get();
-
-      CatalogFeedWithoutBlocks.LOG.debug("loading next feed: %s", next);
-      return this.feed_loader.fromURI(next, this);
-    }
-
-    return null;
   }
 
   @Override public void onScrollStateChanged(
@@ -205,48 +238,15 @@ public final class CatalogFeedWithoutBlocks implements
     }
   }
 
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(CatalogFeedWithoutBlocks.class);
+  @Override public void registerDataSetObserver(
+    final @Nullable DataSetObserver observer)
+  {
+    this.adapter.registerDataSetObserver(observer);
   }
 
-  private static boolean shouldLoadNext(
-    final int first_visible_item,
-    final int total_count)
+  @Override public void unregisterDataSetObserver(
+    final @Nullable DataSetObserver observer)
   {
-    return (total_count - first_visible_item) <= 50;
-  }
-
-  @Override public void onFeedLoadSuccess(
-    final URI u,
-    final FeedType f)
-  {
-    f.matchFeed(this);
-  }
-
-  @Override public void onFeedLoadFailure(
-    final URI u,
-    final Throwable e)
-  {
-    if (e instanceof CancellationException) {
-      return;
-    }
-
-    CatalogFeedWithoutBlocks.LOG.error("failed to load feed: ", e);
-  }
-
-  @Override public Unit onFeedWithBlocks(
-    final FeedWithBlocks f)
-  {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
-  }
-
-  @Override public Unit onFeedWithoutBlocks(
-    final FeedWithoutBlocks f)
-  {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    this.adapter.unregisterDataSetObserver(observer);
   }
 }

@@ -58,9 +58,9 @@ import com.io7m.jnull.Nullable;
   ReaderTOCSelectionListenerType,
   ReaderSettingsListenerType
 {
-  private static final Logger LOG;
-  private static final String FILE_ID;
   private static final String BOOK_ID;
+  private static final String FILE_ID;
+  private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderActivity.class);
@@ -85,6 +85,7 @@ import com.io7m.jnull.Nullable;
     from.startActivity(i);
   }
 
+  private @Nullable BookID                            book_id;
   private @Nullable Container                         epub_container;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
@@ -99,7 +100,6 @@ import com.io7m.jnull.Nullable;
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private boolean                                     web_view_resized;
-  private @Nullable BookID                            book_id;
 
   /**
    * Apply the given color scheme to all views. Unfortunately, there does not

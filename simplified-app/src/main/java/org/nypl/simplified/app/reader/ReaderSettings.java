@@ -83,6 +83,19 @@ public final class ReaderSettings implements ReaderSettingsType
     }
   }
 
+  @Override public float getFontScale()
+  {
+    try {
+      return this.settings.getFloat("font_scale", 100.0f);
+    } catch (final Throwable x) {
+      ReaderSettings.LOG.error(
+        "failed to parse font scale: {}",
+        x.getMessage(),
+        x);
+      return 100.0f;
+    }
+  }
+
   @Override public void removeListener(
     final ReaderSettingsListenerType l)
   {
@@ -98,19 +111,6 @@ public final class ReaderSettings implements ReaderSettingsType
     e.putString("color_scheme", NullCheck.notNull(c).toString());
     e.apply();
     this.broadcastChanges();
-  }
-
-  @Override public float getFontScale()
-  {
-    try {
-      return this.settings.getFloat("font_scale", 100.0f);
-    } catch (final Throwable x) {
-      ReaderSettings.LOG.error(
-        "failed to parse font scale: {}",
-        x.getMessage(),
-        x);
-      return 100.0f;
-    }
   }
 
   @Override public void setFontScale(

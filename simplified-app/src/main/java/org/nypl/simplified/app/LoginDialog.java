@@ -36,15 +36,15 @@ import com.io7m.jnull.Nullable;
 public final class LoginDialog extends DialogFragment implements
   AccountLoginListenerType
 {
+  private static final String BARCODE_ID;
+
   private static final Logger LOG;
 
+  private static final String PIN_ID;
+  private static final String TEXT_ID;
   static {
     LOG = LogUtilities.getLog(DialogFragment.class);
   }
-
-  private static final String BARCODE_ID;
-  private static final String PIN_ID;
-  private static final String TEXT_ID;
 
   static {
     BARCODE_ID = "org.nypl.simplified.app.LoginDialog.barcode";

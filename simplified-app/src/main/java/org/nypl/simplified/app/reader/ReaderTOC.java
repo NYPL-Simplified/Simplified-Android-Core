@@ -19,10 +19,10 @@ import com.io7m.jnull.NullCheck;
   {
     private static final long serialVersionUID = 1L;
 
-    private final String      title;
     private final String      content_ref;
-    private final String      source_href;
     private final int         indent;
+    private final String      source_href;
+    private final String      title;
 
     private TOCElement(
       final int in_indent,
@@ -36,14 +36,14 @@ import com.io7m.jnull.NullCheck;
       this.source_href = NullCheck.notNull(in_source_href);
     }
 
-    public int getIndent()
-    {
-      return this.indent;
-    }
-
     public String getContentRef()
     {
       return this.content_ref;
+    }
+
+    public int getIndent()
+    {
+      return this.indent;
     }
 
     public String getSourceHref()
@@ -75,17 +75,6 @@ import com.io7m.jnull.NullCheck;
 
   static {
     LOG = LogUtilities.getLog(ReaderTOC.class);
-  }
-
-  public static ReaderTOC fromPackage(
-    final org.readium.sdk.android.Package p)
-  {
-    NullCheck.notNull(p);
-
-    final List<TOCElement> rs = new ArrayList<TOCElement>();
-    final NavigationTable toc = NullCheck.notNull(p.getTableOfContents());
-    ReaderTOC.accumulate(rs, -1, toc, toc);
-    return new ReaderTOC(rs);
   }
 
   private static void accumulate(
@@ -130,6 +119,17 @@ import com.io7m.jnull.NullCheck;
         ReaderTOC.accumulate(elements, indent + 1, t, NullCheck.notNull(ec));
       }
     }
+  }
+
+  public static ReaderTOC fromPackage(
+    final org.readium.sdk.android.Package p)
+  {
+    NullCheck.notNull(p);
+
+    final List<TOCElement> rs = new ArrayList<TOCElement>();
+    final NavigationTable toc = NullCheck.notNull(p.getTableOfContents());
+    ReaderTOC.accumulate(rs, -1, toc, toc);
+    return new ReaderTOC(rs);
   }
 
   private final List<TOCElement> elements;

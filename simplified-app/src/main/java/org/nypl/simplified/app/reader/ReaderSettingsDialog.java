@@ -139,18 +139,6 @@ public final class ReaderSettingsDialog extends DialogFragment
       .setProgress((int) (window.getAttributes().screenBrightness * 100));
     in_view_brightness
       .setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-        @Override public void onStopTrackingTouch(
-          final @Nullable SeekBar bar)
-        {
-          // Nothing
-        }
-
-        @Override public void onStartTrackingTouch(
-          final @Nullable SeekBar bar)
-        {
-          // Nothing
-        }
-
         @Override public void onProgressChanged(
           final @Nullable SeekBar bar,
           final int progress,
@@ -159,6 +147,18 @@ public final class ReaderSettingsDialog extends DialogFragment
           final WindowManager.LayoutParams params = window.getAttributes();
           params.screenBrightness = progress / 100.0f;
           window.setAttributes(params);
+        }
+
+        @Override public void onStartTrackingTouch(
+          final @Nullable SeekBar bar)
+        {
+          // Nothing
+        }
+
+        @Override public void onStopTrackingTouch(
+          final @Nullable SeekBar bar)
+        {
+          // Nothing
         }
       });
 

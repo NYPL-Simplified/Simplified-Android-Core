@@ -9,12 +9,6 @@ import com.io7m.jnull.NullCheck;
 
 public final class LogUtilities
 {
-  public static Logger getLog(
-    final Class<?> c)
-  {
-    return NullCheck.notNull(LoggerFactory.getLogger(c));
-  }
-
   public static void errorWithOptionalException(
     final Logger log,
     final String message,
@@ -26,5 +20,11 @@ public final class LogUtilities
     } else {
       log.error("{}", message);
     }
+  }
+
+  public static Logger getLog(
+    final Class<?> c)
+  {
+    return NullCheck.notNull(LoggerFactory.getLogger(c));
   }
 }

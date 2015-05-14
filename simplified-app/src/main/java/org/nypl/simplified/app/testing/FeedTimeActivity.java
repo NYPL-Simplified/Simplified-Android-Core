@@ -29,16 +29,16 @@ public final class FeedTimeActivity extends Activity implements
       this);
   }
 
-  @Override public void onFeedLoadSuccess(
+  @Override public void onFeedLoadFailure(
     final URI u,
-    final FeedType f)
+    final Throwable x)
   {
 
   }
 
-  @Override public void onFeedLoadFailure(
+  @Override public void onFeedLoadSuccess(
     final URI u,
-    final Throwable x)
+    final FeedType f)
   {
 
   }
