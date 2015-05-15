@@ -149,7 +149,13 @@
       subtle memory-corruption bug causing the application to crash long after the
       user has already moved back to the
       <s:link s:target="org.nypl.simplified.documentation.implementation.app.catalog">catalog</s:link>
-      or into a different book.
+      or into a different book. The design of the <s:term s:type="package">simplified</s:term>
+      package is such that only a single book can be open at a time, the current
+      <s:term s:type="package">reader</s:term> process is closed when the user closes
+      the book, and therefore the cause of any crashes in the <s:term s:type="package">reader</s:term>
+      can be tracked back to individual books if necessary.
+    </s:paragraph>
+    <s:paragraph>
       This is the same approach as taken by the
       <s:link-external s:target="http://chromium.org">Chromium</s:link-external> browser,
       where each tab is executed in a separate process and if that process crashes, it
