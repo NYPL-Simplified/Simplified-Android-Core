@@ -28,6 +28,7 @@ public final class ReaderHTTPMimeMap implements ReaderHTTPMimeMapType
     this.types.put("html", "text/html");
     this.types.put("js", "application/javascript");
     this.types.put("png", "image/png");
+    this.types.put("xhtml", "application/xhtml+xml");
   }
 
   @Override public String getDefaultMimeType()
