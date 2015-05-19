@@ -25,7 +25,10 @@
       android:name="org.nypl.simplified.app.catalog.CatalogFeedActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/app_name">
-
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
     </activity>
     <activity
       android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
@@ -75,10 +78,6 @@
       android:exported="true"
       android:configChanges="orientation|screenSize"
       android:process=".ReaderActivityProcess">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
     </activity>
   </application>
 
