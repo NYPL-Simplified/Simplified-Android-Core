@@ -261,6 +261,8 @@ import com.squareup.picasso.Callback;
       @Override public void onError()
       {
         CatalogFeedBookCellView.LOG.error("unable to load image");
+        ci.setVisibility(View.INVISIBLE);
+        cp.setVisibility(View.INVISIBLE);
       }
 
       @Override public void onSuccess()
