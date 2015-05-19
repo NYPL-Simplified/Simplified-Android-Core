@@ -71,13 +71,6 @@ public interface ReaderReadiumFeedbackListenerType
     boolean playing);
 
   /**
-   * The status of the media overlay has changed; the overlay is available.
-   */
-
-  void onReadiumMediaOverlayStatusChangedIsAvailable(
-    boolean available);
-
-  /**
    * Called when {@link #onReadiumMediaOverlayStatusError()} raises an
    * exception.
    */

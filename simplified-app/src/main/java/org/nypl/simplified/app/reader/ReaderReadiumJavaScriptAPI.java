@@ -216,4 +216,29 @@ import com.io7m.jnull.Nullable;
         e);
     }
   }
+
+  @Override public void mediaOverlayIsAvailable(
+    final ReaderMediaOverlayAvailabilityListenerType l)
+  {
+    NullCheck.notNull(l);
+
+    this.evaluateWithResult(
+      "ReadiumSDK.reader.isMediaOverlayAvailable()",
+      new ValueCallback<String>() {
+        @Override public void onReceiveValue(
+          final @Nullable String value)
+        {
+          try {
+            final boolean available = Boolean.valueOf(value).booleanValue();
+            l.onMediaOverlayIsAvailable(available);
+          } catch (final Throwable x) {
+            try {
+              l.onMediaOverlayIsAvailableError(x);
+            } catch (final Throwable x1) {
+              ReaderReadiumJavaScriptAPI.LOG.error("{}", x1.getMessage(), x1);
+            }
+          }
+        }
+      });
+  }
 }

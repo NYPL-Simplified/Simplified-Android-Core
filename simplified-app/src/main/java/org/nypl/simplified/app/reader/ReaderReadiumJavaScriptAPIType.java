@@ -16,6 +16,13 @@ public interface ReaderReadiumJavaScriptAPIType
     ReaderCurrentPageListenerType l);
 
   /**
+   * Determine whether or not a media overlay is available.
+   */
+
+  void mediaOverlayIsAvailable(
+    ReaderMediaOverlayAvailabilityListenerType l);
+
+  /**
    * Move to the next media overlay.
    */
 

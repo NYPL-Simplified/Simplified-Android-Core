@@ -57,7 +57,8 @@ import com.io7m.jnull.Nullable;
   ReaderReadiumEPUBLoadListenerType,
   ReaderCurrentPageListenerType,
   ReaderTOCSelectionListenerType,
-  ReaderSettingsListenerType
+  ReaderSettingsListenerType,
+  ReaderMediaOverlayAvailabilityListenerType
 {
   private static final String BOOK_ID;
   private static final String FILE_ID;
@@ -106,27 +107,6 @@ import com.io7m.jnull.Nullable;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private boolean                                     web_view_resized;
 
-  /**
-   * Apply the given color scheme to all views. Unfortunately, there does not
-   * seem to be a more pleasant way, in the Android API, than manually
-   * applying values to all of the views in the hierarchy.
-   */
-
-  private void applyViewerColorScheme(
-    final ReaderColorScheme cs)
-  {
-    ReaderActivity.LOG.debug("applying color scheme");
-
-    final View in_root = NullCheck.notNull(this.view_root);
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        in_root.setBackgroundColor(cs.getBackgroundColor());
-        ReaderActivity.this.applyViewerColorFilters();
-      }
-    });
-  }
-
   private void applyViewerColorFilters()
   {
     ReaderActivity.LOG.debug("applying color filters");
@@ -155,6 +135,27 @@ import com.io7m.jnull.Nullable;
         in_media_play.setColorFilter(filter);
         in_media_next.setColorFilter(filter);
         in_media_prev.setColorFilter(filter);
+      }
+    });
+  }
+
+  /**
+   * Apply the given color scheme to all views. Unfortunately, there does not
+   * seem to be a more pleasant way, in the Android API, than manually
+   * applying values to all of the views in the hierarchy.
+   */
+
+  private void applyViewerColorScheme(
+    final ReaderColorScheme cs)
+  {
+    ReaderActivity.LOG.debug("applying color scheme");
+
+    final View in_root = NullCheck.notNull(this.view_root);
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_root.setBackgroundColor(cs.getBackgroundColor());
+        ReaderActivity.this.applyViewerColorFilters();
       }
     });
   }
@@ -503,6 +504,30 @@ import com.io7m.jnull.Nullable;
     hs.startIfNecessaryForPackage(p, this);
   }
 
+  @Override public void onMediaOverlayIsAvailable(
+    final boolean available)
+  {
+    ReaderActivity.LOG.debug(
+      "media overlay status changed: available: {}",
+      available);
+
+    final ViewGroup in_media_hud = NullCheck.notNull(this.view_media);
+    final TextView in_title = NullCheck.notNull(this.view_title_text);
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_media_hud.setVisibility(available ? View.VISIBLE : View.GONE);
+        in_title.setVisibility(available ? View.GONE : View.VISIBLE);
+      }
+    });
+  }
+
+  @Override public void onMediaOverlayIsAvailableError(
+    final Throwable x)
+  {
+    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  }
+
   @Override public void onReaderSettingsChanged(
     final ReaderSettingsType s)
   {
@@ -657,6 +682,7 @@ import com.io7m.jnull.Nullable;
     final ReaderReadiumJavaScriptAPIType readium_js =
       NullCheck.notNull(this.readium_js_api);
     readium_js.getCurrentPage(this);
+    readium_js.mediaOverlayIsAvailable(this);
 
     /**
      * Configure the progress bar and text.
@@ -738,24 +764,6 @@ import com.io7m.jnull.Nullable;
     final String text)
   {
     ReaderActivity.LOG.error("unknown readium function: {}", text);
-  }
-
-  @Override public void onReadiumMediaOverlayStatusChangedIsAvailable(
-    final boolean available)
-  {
-    ReaderActivity.LOG.debug(
-      "media overlay status changed: available: {}",
-      available);
-
-    final ViewGroup in_media_hud = NullCheck.notNull(this.view_media);
-    final TextView in_title = NullCheck.notNull(this.view_title_text);
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        in_media_hud.setVisibility(available ? View.VISIBLE : View.GONE);
-        in_title.setVisibility(available ? View.GONE : View.VISIBLE);
-      }
-    });
   }
 
   @Override public void onReadiumMediaOverlayStatusChangedIsPlaying(
