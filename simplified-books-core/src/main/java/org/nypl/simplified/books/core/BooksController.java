@@ -409,12 +409,12 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.listener = NullCheck.notNull(in_listener);
     }
 
-    private FeedWithoutBlocks feed()
+    private FeedWithoutGroups feed()
     {
       final OptionType<URI> no_next = Option.none();
       final OptionType<OPDSSearchLink> no_search = Option.none();
-      final FeedWithoutBlocks f =
-        FeedWithoutBlocks.newEmptyFeed(
+      final FeedWithoutGroups f =
+        FeedWithoutGroups.newEmptyFeed(
           this.uri,
           this.id,
           this.updated,

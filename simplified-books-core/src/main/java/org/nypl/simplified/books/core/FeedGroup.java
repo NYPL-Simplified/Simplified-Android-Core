@@ -7,19 +7,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSBlock;
+import org.nypl.simplified.opds.core.OPDSGroup;
 
 import com.io7m.jnull.NullCheck;
 
-public final class FeedBlock
+public final class FeedGroup
 {
-  public static FeedBlock fromOPDSBlock(
-    final OPDSBlock b)
+  public static FeedGroup fromOPDSGroup(
+    final OPDSGroup b)
   {
     NullCheck.notNull(b);
 
     final List<FeedEntryType> es = new ArrayList<FeedEntryType>();
-    final List<OPDSAcquisitionFeedEntry> be_list = b.getBlockEntries();
+    final List<OPDSAcquisitionFeedEntry> be_list = b.getGroupEntries();
     final int max = be_list.size();
     for (int index = 0; index < max; ++index) {
       final OPDSAcquisitionFeedEntry be =
@@ -27,18 +27,18 @@ public final class FeedBlock
       es.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(be));
     }
 
-    return new FeedBlock(b.getBlockTitle(), b.getBlockURI(), es);
+    return new FeedGroup(b.getGroupTitle(), b.getGroupURI(), es);
   }
 
-  public static Map<String, FeedBlock> fromOPDSBlocks(
-    final Map<String, OPDSBlock> bs)
+  public static Map<String, FeedGroup> fromOPDSGroups(
+    final Map<String, OPDSGroup> bs)
   {
     NullCheck.notNull(bs);
 
-    final Map<String, FeedBlock> rm = new HashMap<String, FeedBlock>();
+    final Map<String, FeedGroup> rm = new HashMap<String, FeedGroup>();
     for (final String name : bs.keySet()) {
-      final OPDSBlock block = NullCheck.notNull(bs.get(name));
-      rm.put(name, FeedBlock.fromOPDSBlock(block));
+      final OPDSGroup block = NullCheck.notNull(bs.get(name));
+      rm.put(name, FeedGroup.fromOPDSGroup(block));
     }
 
     return rm;
@@ -48,7 +48,7 @@ public final class FeedBlock
   private final String              title;
   private final URI                 uri;
 
-  public FeedBlock(
+  public FeedGroup(
     final String in_title,
     final URI in_uri,
     final List<FeedEntryType> in_entries)
@@ -58,17 +58,17 @@ public final class FeedBlock
     this.entries = NullCheck.notNull(in_entries);
   }
 
-  public List<FeedEntryType> getBlockEntries()
+  public List<FeedEntryType> getGroupEntries()
   {
     return this.entries;
   }
 
-  public String getBlockTitle()
+  public String getGroupTitle()
   {
     return this.title;
   }
 
-  public URI getBlockURI()
+  public URI getGroupURI()
   {
     return this.uri;
   }

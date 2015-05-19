@@ -12,10 +12,10 @@ import java.util.Set;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSBlock;
 import org.nypl.simplified.opds.core.OPDSFeedParseException;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
+import org.nypl.simplified.opds.core.OPDSGroup;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.test.utilities.TestUtilities;
 import org.w3c.dom.DOMException;
@@ -118,27 +118,27 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  @Override public void testAcquisitionFeedBlocks0()
+  @Override public void testAcquisitionFeedGroups0()
     throws Exception
   {
     final URI uri =
-      URI.create("http://circulation.alpha.librarysimplified.org/blocks/");
+      URI.create("http://circulation.alpha.librarysimplified.org/groups/");
     final OPDSFeedParserType p = OPDSFeedParser.newParser();
     final InputStream d =
-      OPDSFeedParserContract.getResource("acquisition-blocks-0.xml");
+      OPDSFeedParserContract.getResource("acquisition-groups-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
     TestUtilities.assertTrue(f.getFeedEntries().isEmpty());
 
-    final Map<String, OPDSBlock> blocks = f.getFeedBlocks();
-    TestUtilities.assertEquals(8, blocks.keySet().size());
+    final Map<String, OPDSGroup> groups = f.getFeedGroups();
+    TestUtilities.assertEquals(7, groups.keySet().size());
 
-    for (final String name : blocks.keySet()) {
+    for (final String name : groups.keySet()) {
       System.out.println(name);
-      final OPDSBlock block = blocks.get(name);
-      TestUtilities.assertEquals(block.getBlockTitle(), name);
-      TestUtilities.assertTrue(block.getBlockEntries().isEmpty() == false);
+      final OPDSGroup group = groups.get(name);
+      TestUtilities.assertEquals(group.getGroupTitle(), name);
+      TestUtilities.assertTrue(group.getGroupEntries().isEmpty() == false);
     }
   }
 

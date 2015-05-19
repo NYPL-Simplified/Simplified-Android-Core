@@ -13,8 +13,8 @@ import org.nypl.simplified.books.core.FeedLoaderListenerType;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.FeedMatcherType;
 import org.nypl.simplified.books.core.FeedType;
-import org.nypl.simplified.books.core.FeedWithBlocks;
-import org.nypl.simplified.books.core.FeedWithoutBlocks;
+import org.nypl.simplified.books.core.FeedWithGroups;
+import org.nypl.simplified.books.core.FeedWithoutGroups;
 import org.slf4j.Logger;
 
 import android.app.Activity;
@@ -34,7 +34,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class CatalogFeedWithoutBlocks implements
+public final class CatalogFeedWithoutGroups implements
   ListAdapter,
   OnScrollListener,
   FeedLoaderListenerType,
@@ -42,7 +42,7 @@ public final class CatalogFeedWithoutBlocks implements
 {
   private static final Logger LOG;
   static {
-    LOG = LogUtilities.getLog(CatalogFeedWithoutBlocks.class);
+    LOG = LogUtilities.getLog(CatalogFeedWithoutGroups.class);
   }
   private static boolean shouldLoadNext(
     final int first_visible_item,
@@ -56,19 +56,19 @@ public final class CatalogFeedWithoutBlocks implements
   private final CatalogBookSelectionListenerType book_select_listener;
   private final BooksType                        books;
 
-  private final FeedWithoutBlocks                feed;
+  private final FeedWithoutGroups                feed;
 
   private final FeedLoaderType                   feed_loader;
 
   private final AtomicReference<OptionType<URI>> uri_next;
 
-  public CatalogFeedWithoutBlocks(
+  public CatalogFeedWithoutGroups(
     final Activity in_activity,
     final BookCoverProviderType in_book_cover_provider,
     final CatalogBookSelectionListenerType in_book_selection_listener,
     final BooksType in_books,
     final FeedLoaderType in_feed_loader,
-    final FeedWithoutBlocks in_feed)
+    final FeedWithoutGroups in_feed)
   {
     this.activity = NullCheck.notNull(in_activity);
     this.book_cover_provider = NullCheck.notNull(in_book_cover_provider);
@@ -162,7 +162,7 @@ public final class CatalogFeedWithoutBlocks implements
       final Some<URI> next_some = (Some<URI>) next_opt;
       final URI next = next_some.get();
 
-      CatalogFeedWithoutBlocks.LOG.debug("loading next feed: %s", next);
+      CatalogFeedWithoutGroups.LOG.debug("loading next feed: %s", next);
       return this.feed_loader.fromURI(next, this);
     }
 
@@ -177,7 +177,7 @@ public final class CatalogFeedWithoutBlocks implements
       return;
     }
 
-    CatalogFeedWithoutBlocks.LOG.error("failed to load feed: ", e);
+    CatalogFeedWithoutGroups.LOG.error("failed to load feed: ", e);
   }
 
   @Override public void onFeedLoadSuccess(
@@ -187,15 +187,15 @@ public final class CatalogFeedWithoutBlocks implements
     f.matchFeed(this);
   }
 
-  @Override public Unit onFeedWithBlocks(
-    final FeedWithBlocks f)
+  @Override public Unit onFeedWithGroups(
+    final FeedWithGroups f)
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
   }
 
-  @Override public Unit onFeedWithoutBlocks(
-    final FeedWithoutBlocks f)
+  @Override public Unit onFeedWithoutGroups(
+    final FeedWithoutGroups f)
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
@@ -212,7 +212,7 @@ public final class CatalogFeedWithoutBlocks implements
      * If a feed is already loading, do not try to load it again.
      */
 
-    if (CatalogFeedWithoutBlocks.shouldLoadNext(
+    if (CatalogFeedWithoutGroups.shouldLoadNext(
       first_visible_item,
       total_count)) {
       this.loadNext(this.uri_next);

@@ -55,9 +55,9 @@ public final class OPDSFeedParserTest implements OPDSFeedParserContractType
     this.contract.testStreamIOException();
   }
 
-  @Override @Test public void testAcquisitionFeedBlocks0()
+  @Override @Test public void testAcquisitionFeedGroups0()
     throws Exception
   {
-    this.contract.testAcquisitionFeedBlocks0();
+    this.contract.testAcquisitionFeedGroups0();
   }
 }

@@ -17,7 +17,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void addAuthor(
     final String name);
 
-  void addBlock(
+  void addGroup(
     final URI uri,
     final String b);
 

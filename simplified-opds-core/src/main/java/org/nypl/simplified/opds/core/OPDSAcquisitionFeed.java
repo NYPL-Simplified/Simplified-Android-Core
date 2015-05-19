@@ -26,9 +26,9 @@ import com.io7m.jnull.Nullable;
   private static final class Builder implements
     OPDSAcquisitionFeedBuilderType
   {
-    private final Map<String, URI>                            block_uris;
-    private final Map<String, List<OPDSAcquisitionFeedEntry>> blocks;
-    private final List<String>                                blocks_order;
+    private final Map<String, URI>                            group_uris;
+    private final Map<String, List<OPDSAcquisitionFeedEntry>> groups;
+    private final List<String>                                groups_order;
     private final List<OPDSAcquisitionFeedEntry>              entries;
     private final String                                      id;
     private OptionType<URI>                                   next;
@@ -48,9 +48,9 @@ import com.io7m.jnull.Nullable;
       this.id = NullCheck.notNull(in_id);
       this.updated = NullCheck.notNull(in_updated);
       this.entries = new ArrayList<OPDSAcquisitionFeedEntry>();
-      this.blocks_order = new ArrayList<String>();
-      this.blocks = new HashMap<String, List<OPDSAcquisitionFeedEntry>>();
-      this.block_uris = new HashMap<String, URI>();
+      this.groups_order = new ArrayList<String>();
+      this.groups = new HashMap<String, List<OPDSAcquisitionFeedEntry>>();
+      this.group_uris = new HashMap<String, URI>();
       this.next = Option.none();
       this.search = Option.none();
     }
@@ -60,48 +60,48 @@ import com.io7m.jnull.Nullable;
     {
       NullCheck.notNull(e);
 
-      final Set<Pair<String, URI>> in_blocks = e.getBlocks();
-      if (in_blocks.isEmpty()) {
+      final Set<Pair<String, URI>> in_groups = e.getGroups();
+      if (in_groups.isEmpty()) {
         this.entries.add(e);
       } else {
-        for (final Pair<String, URI> b : in_blocks) {
+        for (final Pair<String, URI> b : in_groups) {
           NullCheck.notNull(b);
           final String b_name = b.getLeft();
           final URI b_uri = b.getRight();
 
           List<OPDSAcquisitionFeedEntry> es;
-          if (this.blocks.containsKey(b_name)) {
-            es = NullCheck.notNull(this.blocks.get(b_name));
+          if (this.groups.containsKey(b_name)) {
+            es = NullCheck.notNull(this.groups.get(b_name));
           } else {
             es = new ArrayList<OPDSAcquisitionFeedEntry>();
-            this.blocks_order.add(b_name);
+            this.groups_order.add(b_name);
           }
 
           es.add(e);
-          this.blocks.put(b_name, es);
-          this.block_uris.put(b_name, b_uri);
+          this.groups.put(b_name, es);
+          this.group_uris.put(b_name, b_uri);
         }
       }
     }
 
     @Override public OPDSAcquisitionFeed build()
     {
-      final Map<String, OPDSBlock> r_blocks =
-        new HashMap<String, OPDSBlock>();
+      final Map<String, OPDSGroup> r_groups =
+        new HashMap<String, OPDSGroup>();
 
-      for (final String name : this.blocks.keySet()) {
+      for (final String name : this.groups.keySet()) {
         final String nn_name = NullCheck.notNull(name);
         final List<OPDSAcquisitionFeedEntry> in_entries =
-          NullCheck.notNull(this.blocks.get(nn_name));
-        final URI in_uri = NullCheck.notNull(this.block_uris.get(nn_name));
-        r_blocks.put(nn_name, new OPDSBlock(nn_name, in_uri, in_entries));
+          NullCheck.notNull(this.groups.get(nn_name));
+        final URI in_uri = NullCheck.notNull(this.group_uris.get(nn_name));
+        r_groups.put(nn_name, new OPDSGroup(nn_name, in_uri, in_entries));
       }
 
       return new OPDSAcquisitionFeed(
         this.uri,
         this.entries,
-        r_blocks,
-        this.blocks_order,
+        r_groups,
+        this.groups_order,
         this.id,
         this.updated,
         this.title,
@@ -133,8 +133,8 @@ import com.io7m.jnull.Nullable;
     return new Builder(in_uri, in_title, in_id, in_updated);
   }
 
-  private final Map<String, OPDSBlock>         blocks;
-  private final List<String>                   blocks_order;
+  private final Map<String, OPDSGroup>         groups;
+  private final List<String>                   groups_order;
   private final List<OPDSAcquisitionFeedEntry> entries;
   private final String                         id;
   private final OptionType<URI>                next;
@@ -146,8 +146,8 @@ import com.io7m.jnull.Nullable;
   private OPDSAcquisitionFeed(
     final URI in_uri,
     final List<OPDSAcquisitionFeedEntry> in_entries,
-    final Map<String, OPDSBlock> in_blocks,
-    final List<String> in_blocks_order,
+    final Map<String, OPDSGroup> in_groups,
+    final List<String> in_groups_order,
     final String in_id,
     final Calendar in_updated,
     final String in_title,
@@ -157,9 +157,9 @@ import com.io7m.jnull.Nullable;
     this.uri = NullCheck.notNull(in_uri);
     this.entries =
       NullCheck.notNull(Collections.unmodifiableList(in_entries));
-    this.blocks = NullCheck.notNull(Collections.unmodifiableMap(in_blocks));
-    this.blocks_order =
-      NullCheck.notNull(Collections.unmodifiableList(in_blocks_order));
+    this.groups = NullCheck.notNull(Collections.unmodifiableMap(in_groups));
+    this.groups_order =
+      NullCheck.notNull(Collections.unmodifiableList(in_groups_order));
     this.id = NullCheck.notNull(in_id);
     this.updated = NullCheck.notNull(in_updated);
     this.title = NullCheck.notNull(in_title);
@@ -182,8 +182,8 @@ import com.io7m.jnull.Nullable;
     final OPDSAcquisitionFeed other = (OPDSAcquisitionFeed) obj;
     return this.uri.equals(other.uri)
       && this.entries.equals(other.entries)
-      && this.blocks.equals(other.blocks)
-      && this.blocks_order.equals(other.blocks_order)
+      && this.groups.equals(other.groups)
+      && this.groups_order.equals(other.groups_order)
       && this.id.equals(other.id)
       && this.title.equals(other.title)
       && this.updated.equals(other.updated)
@@ -191,14 +191,14 @@ import com.io7m.jnull.Nullable;
       && this.search.equals(other.search);
   }
 
-  public Map<String, OPDSBlock> getFeedBlocks()
+  public Map<String, OPDSGroup> getFeedGroups()
   {
-    return this.blocks;
+    return this.groups;
   }
 
-  public List<String> getFeedBlocksOrder()
+  public List<String> getFeedGroupsOrder()
   {
-    return this.blocks_order;
+    return this.groups_order;
   }
 
   public List<OPDSAcquisitionFeedEntry> getFeedEntries()
@@ -242,8 +242,8 @@ import com.io7m.jnull.Nullable;
     int result = 1;
     result = (prime * result) + this.uri.hashCode();
     result = (prime * result) + this.entries.hashCode();
-    result = (prime * result) + this.blocks.hashCode();
-    result = (prime * result) + this.blocks_order.hashCode();
+    result = (prime * result) + this.groups.hashCode();
+    result = (prime * result) + this.groups_order.hashCode();
     result = (prime * result) + this.id.hashCode();
     result = (prime * result) + this.title.hashCode();
     result = (prime * result) + this.updated.hashCode();

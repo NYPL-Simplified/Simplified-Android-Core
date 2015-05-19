@@ -10,11 +10,11 @@ import org.nypl.simplified.app.ScreenSizeControllerType;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.core.FeedBlock;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
+import org.nypl.simplified.books.core.FeedGroup;
 import org.slf4j.Logger;
 
 import android.content.Context;
@@ -67,7 +67,7 @@ import com.squareup.picasso.Callback;
     final LayoutInflater inflater =
       (LayoutInflater) in_context
         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    inflater.inflate(R.layout.catalog_feed_blocks_lane, this, true);
+    inflater.inflate(R.layout.catalog_feed_groups_lane, this, true);
 
     this.title =
       NullCheck.notNull((TextView) this.findViewById(R.id.feed_title));
@@ -87,31 +87,31 @@ import com.squareup.picasso.Callback;
     this.image_height = sp.height;
   }
 
-  public void configureForBlock(
-    final FeedBlock in_block)
+  public void configureForGroup(
+    final FeedGroup in_group)
   {
-    NullCheck.notNull(in_block);
-    this.configureView(in_block);
+    NullCheck.notNull(in_group);
+    this.configureView(in_group);
   }
 
   private void configureView(
-    final FeedBlock in_block)
+    final FeedGroup in_group)
   {
     this.scroller.setVisibility(View.INVISIBLE);
     this.scroller_contents.removeAllViews();
     this.progress.setVisibility(View.VISIBLE);
 
-    this.title.setText(in_block.getBlockTitle());
+    this.title.setText(in_group.getGroupTitle());
     this.title.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View view_title)
       {
-        CatalogFeedLane.this.listener.onSelectFeed(in_block);
+        CatalogFeedLane.this.listener.onSelectFeed(in_group);
       }
     });
 
     final List<FeedEntryType> es =
-      NullCheck.notNull(in_block.getBlockEntries());
+      NullCheck.notNull(in_group.getGroupEntries());
     final ArrayList<ImageView> image_views =
       new ArrayList<ImageView>(es.size());
 

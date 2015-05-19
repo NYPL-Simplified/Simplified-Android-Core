@@ -14,10 +14,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class FeedWithoutBlocks extends AbstractList<FeedEntryType> implements
+public final class FeedWithoutGroups extends AbstractList<FeedEntryType> implements
   FeedType
 {
-  public static FeedWithoutBlocks newEmptyFeed(
+  public static FeedWithoutGroups newEmptyFeed(
     final URI in_uri,
     final String in_id,
     final Calendar in_updated,
@@ -28,7 +28,7 @@ public final class FeedWithoutBlocks extends AbstractList<FeedEntryType> impleme
     final List<BookID> in_entries_order = new ArrayList<BookID>();
     final Map<BookID, FeedEntryType> in_entries =
       new HashMap<BookID, FeedEntryType>();
-    return new FeedWithoutBlocks(
+    return new FeedWithoutGroups(
       in_uri,
       in_id,
       in_updated,
@@ -48,7 +48,7 @@ public final class FeedWithoutBlocks extends AbstractList<FeedEntryType> impleme
   private final Calendar                   updated;
   private final URI                        uri;
 
-  private FeedWithoutBlocks(
+  private FeedWithoutGroups(
     final URI in_uri,
     final String in_id,
     final Calendar in_updated,
@@ -119,7 +119,7 @@ public final class FeedWithoutBlocks extends AbstractList<FeedEntryType> impleme
     final FeedMatcherType<A, E> m)
     throws E
   {
-    return m.onFeedWithoutBlocks(this);
+    return m.onFeedWithoutGroups(this);
   }
 
   @Override public FeedEntryType remove(

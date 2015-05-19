@@ -57,10 +57,10 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
     this.contract.testStreamIOException();
   }
 
-  @Override public void testAcquisitionFeedBlocks0()
+  @Override public void testAcquisitionFeedGroups0()
     throws Exception
   {
-    this.contract.testAcquisitionFeedBlocks0();
+    this.contract.testAcquisitionFeedGroups0();
   }
 
 }

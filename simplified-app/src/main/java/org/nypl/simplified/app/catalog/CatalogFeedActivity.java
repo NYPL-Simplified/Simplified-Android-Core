@@ -16,14 +16,14 @@ import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookFeedListenerType;
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.books.core.FeedBlock;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
+import org.nypl.simplified.books.core.FeedGroup;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.FeedMatcherType;
 import org.nypl.simplified.books.core.FeedType;
-import org.nypl.simplified.books.core.FeedWithBlocks;
-import org.nypl.simplified.books.core.FeedWithoutBlocks;
+import org.nypl.simplified.books.core.FeedWithGroups;
+import org.nypl.simplified.books.core.FeedWithoutGroups;
 import org.nypl.simplified.http.core.URIQueryBuilder;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.stack.ImmutableStack;
@@ -263,9 +263,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   @Override public void onBookFeedSuccess(
-    final FeedWithoutBlocks f)
+    final FeedWithoutGroups f)
   {
-    this.onFeedWithoutBlocks(f);
+    this.onFeedWithoutGroups(f);
   }
 
   @Override protected void onCreate(
@@ -471,8 +471,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     f.matchFeed(this);
   }
 
-  @Override public Unit onFeedWithBlocks(
-    final FeedWithBlocks f)
+  @Override public Unit onFeedWithGroups(
+    final FeedWithGroups f)
   {
     CatalogFeedActivity.LOG.debug(
       "received feed with blocks: {}",
@@ -481,15 +481,15 @@ import com.io7m.junreachable.UnreachableCodeException;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        CatalogFeedActivity.this.onFeedWithBlocksUI(f);
+        CatalogFeedActivity.this.onFeedWithGroupsUI(f);
       }
     });
 
     return Unit.unit();
   }
 
-  private void onFeedWithBlocksUI(
-    final FeedWithBlocks f)
+  private void onFeedWithGroupsUI(
+    final FeedWithGroups f)
   {
     CatalogFeedActivity.LOG.debug(
       "received feed with blocks: {}",
@@ -507,7 +507,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final LayoutInflater inflater = this.getLayoutInflater();
     final ViewGroup layout =
       NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.catalog_feed_blocks_list,
+        R.layout.catalog_feed_groups_list,
         content_area,
         false));
 
@@ -547,15 +547,15 @@ import com.io7m.junreachable.UnreachableCodeException;
         }
 
         @Override public void onSelectFeed(
-          final FeedBlock in_block)
+          final FeedGroup in_block)
         {
           CatalogFeedActivity.this
-            .onSelectedFeedBlock(new_up_stack, in_block);
+            .onSelectedFeedGroup(new_up_stack, in_block);
         }
       };
 
-    final CatalogFeedWithBlocks cfl =
-      new CatalogFeedWithBlocks(
+    final CatalogFeedWithGroups cfl =
+      new CatalogFeedWithGroups(
         this,
         app,
         app.getCoverProvider(),
@@ -567,8 +567,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     list.setOnScrollListener(cfl);
   }
 
-  @Override public Unit onFeedWithoutBlocks(
-    final FeedWithoutBlocks f)
+  @Override public Unit onFeedWithoutGroups(
+    final FeedWithoutGroups f)
   {
     CatalogFeedActivity.LOG.debug(
       "received feed without blocks: {}",
@@ -577,14 +577,14 @@ import com.io7m.junreachable.UnreachableCodeException;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        CatalogFeedActivity.this.onFeedWithoutBlocksUI(f);
+        CatalogFeedActivity.this.onFeedWithoutGroupsUI(f);
       }
     });
     return Unit.unit();
   }
 
-  private void onFeedWithoutBlocksEmptyUI(
-    final FeedWithoutBlocks f)
+  private void onFeedWithoutGroupsEmptyUI(
+    final FeedWithoutGroups f)
   {
     CatalogFeedActivity.LOG.debug(
       "received feed without blocks (empty): {}",
@@ -603,7 +603,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final LayoutInflater inflater = this.getLayoutInflater();
     final ViewGroup layout =
       NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.catalog_feed_noblocks_empty,
+        R.layout.catalog_feed_nogroups_empty,
         content_area,
         false));
 
@@ -611,8 +611,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     content_area.requestLayout();
   }
 
-  private void onFeedWithoutBlocksNonEmptyUI(
-    final FeedWithoutBlocks f)
+  private void onFeedWithoutGroupsNonEmptyUI(
+    final FeedWithoutGroups f)
   {
     CatalogFeedActivity.LOG.debug(
       "received feed without blocks (non-empty): {}",
@@ -631,7 +631,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final LayoutInflater inflater = this.getLayoutInflater();
     final ViewGroup layout =
       NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.catalog_feed_noblocks,
+        R.layout.catalog_feed_nogroups,
         content_area,
         false));
 
@@ -671,8 +671,8 @@ import com.io7m.junreachable.UnreachableCodeException;
         }
       };
 
-    final CatalogFeedWithoutBlocks without =
-      new CatalogFeedWithoutBlocks(
+    final CatalogFeedWithoutGroups without =
+      new CatalogFeedWithoutGroups(
         this,
         app.getCoverProvider(),
         book_select_listener,
@@ -683,17 +683,17 @@ import com.io7m.junreachable.UnreachableCodeException;
     grid_view.setOnScrollListener(without);
   }
 
-  private void onFeedWithoutBlocksUI(
-    final FeedWithoutBlocks f)
+  private void onFeedWithoutGroupsUI(
+    final FeedWithoutGroups f)
   {
     UIThread.checkIsUIThread();
 
     if (f.isEmpty()) {
-      this.onFeedWithoutBlocksEmptyUI(f);
+      this.onFeedWithoutGroupsEmptyUI(f);
       return;
     }
 
-    this.onFeedWithoutBlocksNonEmptyUI(f);
+    this.onFeedWithoutGroupsNonEmptyUI(f);
   }
 
   @Override protected void onSaveInstanceState(
@@ -733,9 +733,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  private void onSelectedFeedBlock(
+  private void onSelectedFeedGroup(
     final ImmutableStack<CatalogUpStackEntry> new_up_stack,
-    final FeedBlock f)
+    final FeedGroup f)
   {
     CatalogFeedActivity.LOG.debug("onSelectFeed: {}", this);
 
@@ -743,8 +743,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       new CatalogFeedArgumentsRemote(
         false,
         new_up_stack,
-        f.getBlockTitle(),
-        f.getBlockURI());
+        f.getGroupTitle(),
+        f.getGroupURI());
     CatalogFeedActivity.startNewActivity(this, remote);
   }
 }

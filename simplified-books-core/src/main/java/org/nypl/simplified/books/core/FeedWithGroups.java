@@ -13,19 +13,19 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class FeedWithBlocks extends AbstractList<FeedBlock> implements
+public final class FeedWithGroups extends AbstractList<FeedGroup> implements
   FeedType
 {
-  public static FeedWithBlocks fromAcquisitionFeed(
+  public static FeedWithGroups fromAcquisitionFeed(
     final OPDSAcquisitionFeed f)
   {
     NullCheck.notNull(f);
 
-    final Map<String, FeedBlock> blocks =
-      FeedBlock.fromOPDSBlocks(f.getFeedBlocks());
-    final List<String> order = f.getFeedBlocksOrder();
+    final Map<String, FeedGroup> blocks =
+      FeedGroup.fromOPDSGroups(f.getFeedGroups());
+    final List<String> order = f.getFeedGroupsOrder();
 
-    return new FeedWithBlocks(
+    return new FeedWithGroups(
       f.getFeedURI(),
       f.getFeedID(),
       f.getFeedUpdated(),
@@ -35,7 +35,7 @@ public final class FeedWithBlocks extends AbstractList<FeedBlock> implements
       blocks);
   }
 
-  private final Map<String, FeedBlock>     blocks;
+  private final Map<String, FeedGroup>     blocks;
   private final List<String>               blocks_order;
   private final String                     id;
   private final OptionType<OPDSSearchLink> search;
@@ -43,14 +43,14 @@ public final class FeedWithBlocks extends AbstractList<FeedBlock> implements
   private final Calendar                   updated;
   private final URI                        uri;
 
-  private FeedWithBlocks(
+  private FeedWithGroups(
     final URI in_uri,
     final String in_id,
     final Calendar in_updated,
     final String in_title,
     final OptionType<OPDSSearchLink> in_search,
     final List<String> in_blocks_order,
-    final Map<String, FeedBlock> in_blocks)
+    final Map<String, FeedGroup> in_blocks)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -63,22 +63,22 @@ public final class FeedWithBlocks extends AbstractList<FeedBlock> implements
 
   @Override public void add(
     final int index,
-    final @Nullable FeedBlock element)
+    final @Nullable FeedGroup element)
   {
-    final FeedBlock nn_element = NullCheck.notNull(element);
-    final String name = nn_element.getBlockTitle();
+    final FeedGroup nn_element = NullCheck.notNull(element);
+    final String name = nn_element.getGroupTitle();
     this.blocks_order.add(index, name);
     this.blocks.put(name, nn_element);
   }
 
-  @Override public FeedBlock get(
+  @Override public FeedGroup get(
     final int index)
   {
     final String name = NullCheck.notNull(this.blocks_order.get(index));
     return NullCheck.notNull(this.blocks.get(name));
   }
 
-  public Map<String, FeedBlock> getFeedBlocks()
+  public Map<String, FeedGroup> getFeedGroups()
   {
     return this.blocks;
   }
@@ -112,25 +112,25 @@ public final class FeedWithBlocks extends AbstractList<FeedBlock> implements
     final FeedMatcherType<A, E> m)
     throws E
   {
-    return m.onFeedWithBlocks(this);
+    return m.onFeedWithGroups(this);
   }
 
-  @Override public FeedBlock remove(
+  @Override public FeedGroup remove(
     final int index)
   {
     final String name = NullCheck.notNull(this.blocks_order.get(index));
-    final FeedBlock r = NullCheck.notNull(this.blocks.remove(name));
+    final FeedGroup r = NullCheck.notNull(this.blocks.remove(name));
     this.blocks_order.remove(index);
     return r;
   }
 
-  @Override public FeedBlock set(
+  @Override public FeedGroup set(
     final int index,
-    final @Nullable FeedBlock element)
+    final @Nullable FeedGroup element)
   {
-    final FeedBlock nn_element = NullCheck.notNull(element);
+    final FeedGroup nn_element = NullCheck.notNull(element);
     final String name = NullCheck.notNull(this.blocks_order.get(index));
-    final FeedBlock old = NullCheck.notNull(this.blocks.get(name));
+    final FeedGroup old = NullCheck.notNull(this.blocks.get(name));
     this.blocks.put(name, nn_element);
     return old;
   }

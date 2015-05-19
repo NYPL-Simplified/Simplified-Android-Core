@@ -18,5 +18,5 @@ public interface BookFeedListenerType
    */
 
   void onBookFeedSuccess(
-    FeedWithoutBlocks f);
+    FeedWithoutGroups f);
 }

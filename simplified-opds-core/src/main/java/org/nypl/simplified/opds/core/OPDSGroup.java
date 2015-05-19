@@ -7,7 +7,7 @@ import java.util.List;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class OPDSBlock implements Serializable
+public final class OPDSGroup implements Serializable
 {
   private static final long                    serialVersionUID = 1L;
   private final String                         title;
@@ -36,13 +36,13 @@ public final class OPDSBlock implements Serializable
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final OPDSBlock other = (OPDSBlock) obj;
+    final OPDSGroup other = (OPDSGroup) obj;
     return this.entries.equals(other.entries)
       && this.title.equals(other.title)
       && this.uri.equals(other.uri);
   }
 
-  public OPDSBlock(
+  public OPDSGroup(
     final String in_title,
     final URI in_uri,
     final List<OPDSAcquisitionFeedEntry> in_entries)
@@ -52,17 +52,17 @@ public final class OPDSBlock implements Serializable
     this.entries = NullCheck.notNull(in_entries);
   }
 
-  public String getBlockTitle()
+  public String getGroupTitle()
   {
     return this.title;
   }
 
-  public URI getBlockURI()
+  public URI getGroupURI()
   {
     return this.uri;
   }
 
-  public List<OPDSAcquisitionFeedEntry> getBlockEntries()
+  public List<OPDSAcquisitionFeedEntry> getGroupEntries()
   {
     return this.entries;
   }

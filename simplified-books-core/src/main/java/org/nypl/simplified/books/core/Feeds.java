@@ -14,23 +14,23 @@ public final class Feeds
   {
     NullCheck.notNull(f);
 
-    if (f.getFeedBlocks().isEmpty()) {
-      return Feeds.withoutBlocks(f);
+    if (f.getFeedGroups().isEmpty()) {
+      return Feeds.withoutGroups(f);
     }
-    return Feeds.withBlocks(f);
+    return Feeds.withGroups(f);
   }
 
-  private static FeedWithBlocks withBlocks(
+  private static FeedWithGroups withGroups(
     final OPDSAcquisitionFeed f)
   {
-    return FeedWithBlocks.fromAcquisitionFeed(f);
+    return FeedWithGroups.fromAcquisitionFeed(f);
   }
 
-  private static FeedWithoutBlocks withoutBlocks(
+  private static FeedWithoutGroups withoutGroups(
     final OPDSAcquisitionFeed f)
   {
-    final FeedWithoutBlocks rf =
-      FeedWithoutBlocks.newEmptyFeed(
+    final FeedWithoutGroups rf =
+      FeedWithoutGroups.newEmptyFeed(
         f.getFeedURI(),
         f.getFeedID(),
         f.getFeedUpdated(),

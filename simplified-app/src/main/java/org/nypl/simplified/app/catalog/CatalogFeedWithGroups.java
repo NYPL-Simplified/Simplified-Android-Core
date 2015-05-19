@@ -4,8 +4,8 @@ import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.ScreenSizeControllerType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.books.core.FeedBlock;
-import org.nypl.simplified.books.core.FeedWithBlocks;
+import org.nypl.simplified.books.core.FeedGroup;
+import org.nypl.simplified.books.core.FeedWithGroups;
 import org.slf4j.Logger;
 
 import android.app.Activity;
@@ -20,31 +20,31 @@ import android.widget.ListAdapter;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogFeedWithBlocks implements
+public final class CatalogFeedWithGroups implements
   ListAdapter,
   OnScrollListener
 {
   private static final Logger               LOG;
 
   static {
-    LOG = LogUtilities.getLog(CatalogFeedWithBlocks.class);
+    LOG = LogUtilities.getLog(CatalogFeedWithGroups.class);
   }
 
   private final Activity                    activity;
-  private final ArrayAdapter<FeedBlock>     adapter;
+  private final ArrayAdapter<FeedGroup>     adapter;
   private final BookCoverProviderType       book_cover_provider;
   private final BooksType                   books;
-  private final FeedWithBlocks              feed;
+  private final FeedWithGroups              feed;
   private final CatalogFeedLaneListenerType lane_listener;
   private final ScreenSizeControllerType    screen;
 
-  public CatalogFeedWithBlocks(
+  public CatalogFeedWithGroups(
     final Activity in_activity,
     final ScreenSizeControllerType in_screen,
     final BookCoverProviderType in_book_cover_provider,
     final CatalogFeedLaneListenerType in_lane_listener,
     final BooksType in_books,
-    final FeedWithBlocks in_feed)
+    final FeedWithGroups in_feed)
   {
     this.activity = NullCheck.notNull(in_activity);
     this.book_cover_provider = NullCheck.notNull(in_book_cover_provider);
@@ -52,7 +52,7 @@ public final class CatalogFeedWithBlocks implements
     this.books = NullCheck.notNull(in_books);
     this.feed = NullCheck.notNull(in_feed);
     this.screen = NullCheck.notNull(in_screen);
-    this.adapter = new ArrayAdapter<FeedBlock>(this.activity, 0, this.feed);
+    this.adapter = new ArrayAdapter<FeedGroup>(this.activity, 0, this.feed);
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -65,7 +65,7 @@ public final class CatalogFeedWithBlocks implements
     return this.adapter.getCount();
   }
 
-  @Override public FeedBlock getItem(
+  @Override public FeedGroup getItem(
     final int position)
   {
     return NullCheck.notNull(this.adapter.getItem(position));
@@ -88,7 +88,7 @@ public final class CatalogFeedWithBlocks implements
     final @Nullable View reused,
     final @Nullable ViewGroup parent)
   {
-    final FeedBlock block = this.feed.get(position);
+    final FeedGroup group = this.feed.get(position);
 
     CatalogFeedLane view;
     if (reused != null) {
@@ -102,7 +102,7 @@ public final class CatalogFeedWithBlocks implements
           this.lane_listener);
     }
 
-    view.configureForBlock(block);
+    view.configureForGroup(group);
     return view;
   }
 

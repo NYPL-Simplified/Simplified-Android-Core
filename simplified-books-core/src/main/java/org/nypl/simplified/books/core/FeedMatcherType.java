@@ -2,11 +2,11 @@ package org.nypl.simplified.books.core;
 
 public interface FeedMatcherType<A, E extends Exception>
 {
-  A onFeedWithBlocks(
-    FeedWithBlocks f)
+  A onFeedWithGroups(
+    FeedWithGroups f)
     throws E;
 
-  A onFeedWithoutBlocks(
-    FeedWithoutBlocks f)
+  A onFeedWithoutGroups(
+    FeedWithoutGroups f)
     throws E;
 }

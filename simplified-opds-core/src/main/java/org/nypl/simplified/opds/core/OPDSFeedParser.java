@@ -46,8 +46,8 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   private static final URI    ACQUISITION_URI_PREFIX;
   private static final String ACQUISITION_URI_PREFIX_TEXT;
   private static final URI    ATOM_URI;
-  private static final URI    BLOCK_URI;
-  private static final String BLOCK_URI_TEXT;
+  private static final URI    GROUP_URI;
+  private static final String GROUP_URI_TEXT;
   private static final URI    DUBLIN_CORE_TERMS_URI;
   private static final URI    IMAGE_URI;
   private static final String IMAGE_URI_TEXT;
@@ -67,8 +67,8 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     ACQUISITION_URI_PREFIX_TEXT =
       NullCheck.notNull(OPDSFeedParser.ACQUISITION_URI_PREFIX.toString());
 
-    BLOCK_URI = NullCheck.notNull(URI.create("http://opds-spec.org/block"));
-    BLOCK_URI_TEXT = NullCheck.notNull(OPDSFeedParser.BLOCK_URI.toString());
+    GROUP_URI = NullCheck.notNull(URI.create("http://opds-spec.org/group"));
+    GROUP_URI_TEXT = NullCheck.notNull(OPDSFeedParser.GROUP_URI.toString());
 
     THUMBNAIL_URI =
       NullCheck.notNull(URI.create("http://opds-spec.org/image/thumbnail"));
@@ -228,13 +228,13 @@ public final class OPDSFeedParser implements OPDSFeedParserType
          * Block definition.
          */
 
-        if (rel_text.equals(OPDSFeedParser.BLOCK_URI_TEXT)) {
+        if (rel_text.equals(OPDSFeedParser.GROUP_URI_TEXT)) {
           final String uri_text =
             NullCheck.notNull(e_link.getAttribute("href"));
           final String link_title =
             NullCheck.notNull(e_link.getAttribute("title"));
           final URI uri = new URI(uri_text);
-          eb.addBlock(uri, link_title);
+          eb.addGroup(uri, link_title);
           continue;
         }
 

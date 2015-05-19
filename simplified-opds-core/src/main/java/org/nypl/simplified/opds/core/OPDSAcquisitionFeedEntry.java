@@ -28,7 +28,7 @@ import com.io7m.jnull.Nullable;
   {
     private final List<OPDSAcquisition>  acquisitions;
     private final List<String>           authors;
-    private final Set<Pair<String, URI>> blocks;
+    private final Set<Pair<String, URI>> groups;
     private final List<String>           categories;
     private OptionType<URI>              cover;
     private final String                 id;
@@ -57,7 +57,7 @@ import com.io7m.jnull.Nullable;
       this.published = Option.none();
       this.publisher = Option.none();
       this.categories = new ArrayList<String>();
-      this.blocks = new HashSet<Pair<String, URI>>();
+      this.groups = new HashSet<Pair<String, URI>>();
     }
 
     @Override public void addAcquisition(
@@ -72,13 +72,13 @@ import com.io7m.jnull.Nullable;
       this.authors.add(NullCheck.notNull(name));
     }
 
-    @Override public void addBlock(
+    @Override public void addGroup(
       final URI uri,
       final String b)
     {
       NullCheck.notNull(uri);
       NullCheck.notNull(b);
-      this.blocks.add(Pair.pair(b, uri));
+      this.groups.add(Pair.pair(b, uri));
     }
 
     @Override public void addCategory(
@@ -92,7 +92,7 @@ import com.io7m.jnull.Nullable;
       return new OPDSAcquisitionFeedEntry(
         this.authors,
         this.acquisitions,
-        this.blocks,
+        this.groups,
         this.cover,
         this.id,
         this.title,
@@ -162,7 +162,7 @@ import com.io7m.jnull.Nullable;
 
   private final List<OPDSAcquisition>  acquisitions;
   private final List<String>           authors;
-  private final Set<Pair<String, URI>> blocks;
+  private final Set<Pair<String, URI>> groups;
   private final List<String>           categories;
   private final OptionType<URI>        cover;
   private final String                 id;
@@ -177,7 +177,7 @@ import com.io7m.jnull.Nullable;
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
     final List<OPDSAcquisition> in_acquisitions,
-    final Set<Pair<String, URI>> in_blocks,
+    final Set<Pair<String, URI>> in_groups,
     final OptionType<URI> in_cover,
     final String in_id,
     final String in_title,
@@ -193,7 +193,7 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull(Collections.unmodifiableList(in_authors));
     this.acquisitions =
       NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
-    this.blocks = NullCheck.notNull(in_blocks);
+    this.groups = NullCheck.notNull(in_groups);
     this.cover = NullCheck.notNull(in_cover);
     this.id = NullCheck.notNull(in_id);
     this.title = NullCheck.notNull(in_title);
@@ -221,7 +221,7 @@ import com.io7m.jnull.Nullable;
     final OPDSAcquisitionFeedEntry other = (OPDSAcquisitionFeedEntry) obj;
     return this.acquisitions.equals(other.acquisitions)
       && this.authors.equals(other.authors)
-      && this.blocks.equals(other.blocks)
+      && this.groups.equals(other.groups)
       && this.categories.equals(other.categories)
       && this.cover.equals(other.cover)
       && this.id.equals(other.id)
@@ -244,9 +244,9 @@ import com.io7m.jnull.Nullable;
     return this.authors;
   }
 
-  public Set<Pair<String, URI>> getBlocks()
+  public Set<Pair<String, URI>> getGroups()
   {
-    return this.blocks;
+    return this.groups;
   }
 
   public List<String> getCategories()
@@ -305,7 +305,7 @@ import com.io7m.jnull.Nullable;
     int result = 1;
     result = (prime * result) + this.acquisitions.hashCode();
     result = (prime * result) + this.authors.hashCode();
-    result = (prime * result) + this.blocks.hashCode();
+    result = (prime * result) + this.groups.hashCode();
     result = (prime * result) + this.cover.hashCode();
     result = (prime * result) + this.categories.hashCode();
     result = (prime * result) + this.id.hashCode();
