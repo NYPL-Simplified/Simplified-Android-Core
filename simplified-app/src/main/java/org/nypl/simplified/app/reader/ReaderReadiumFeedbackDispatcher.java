@@ -42,6 +42,37 @@ public final class ReaderReadiumFeedbackDispatcher implements
     }
   }
 
+  private static void onMediaOverlayStatusChanged(
+    final ReaderReadiumFeedbackListenerType l,
+    final String[] parts)
+  {
+    try {
+      if (parts.length < 2) {
+        throw new IllegalArgumentException(
+          "Expected media overlay data, but got nothing");
+      }
+
+      final String encoded = NullCheck.notNull(parts[1]);
+      final String decoded =
+        NullCheck.notNull(URLDecoder.decode(encoded, "UTF-8"));
+      final JSONObject json = new JSONObject(decoded);
+
+      ReaderReadiumFeedbackDispatcher.LOG.debug("media-overlay: {}", json);
+
+      if (json.has("isPlaying")) {
+        l.onReadiumMediaOverlayStatusChangedIsPlaying(json
+          .getBoolean("isPlaying"));
+      }
+
+    } catch (final Throwable e) {
+      try {
+        l.onReadiumMediaOverlayStatusError(e);
+      } catch (final Throwable x1) {
+        ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
+      }
+    }
+  }
+
   private static void onPaginationChanged(
     final ReaderReadiumFeedbackListenerType l,
     final String[] parts)
@@ -113,6 +144,18 @@ public final class ReaderReadiumFeedbackDispatcher implements
           return;
         }
 
+        if ("media-overlay-status-changed".equals(function)) {
+          ReaderReadiumFeedbackDispatcher.onMediaOverlayStatusChanged(
+            l,
+            parts);
+          return;
+        }
+
+        if ("media-overlay-is-available".equals(function)) {
+          ReaderReadiumFeedbackDispatcher.onMediaOverlayIsAvailable(l, parts);
+          return;
+        }
+
         if ("pagination-changed".equals(function)) {
           ReaderReadiumFeedbackDispatcher.onPaginationChanged(l, parts);
           return;
@@ -128,6 +171,28 @@ public final class ReaderReadiumFeedbackDispatcher implements
     } catch (final Throwable x) {
       try {
         l.onReadiumFunctionDispatchError(x);
+      } catch (final Throwable x1) {
+        ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
+      }
+    }
+  }
+
+  private static void onMediaOverlayIsAvailable(
+    final ReaderReadiumFeedbackListenerType l,
+    final String[] parts)
+  {
+    try {
+      if (parts.length < 2) {
+        throw new IllegalArgumentException(
+          "Expected media overlay data, but got nothing");
+      }
+
+      final String encoded = NullCheck.notNull(parts[1]);
+      final Boolean decoded = NullCheck.notNull(Boolean.valueOf(encoded));
+      l.onReadiumMediaOverlayStatusChangedIsAvailable(decoded.booleanValue());
+    } catch (final Throwable e) {
+      try {
+        l.onReadiumMediaOverlayStatusError(e);
       } catch (final Throwable x1) {
         ReaderReadiumFeedbackDispatcher.LOG.error("{}", x1.getMessage(), x1);
       }

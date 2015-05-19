@@ -102,6 +102,21 @@ import com.io7m.jnull.Nullable;
       });
   }
 
+  @Override public void mediaOverlayNext()
+  {
+    this.evaluate("ReadiumSDK.reader.nextMediaOverlay();");
+  }
+
+  @Override public void mediaOverlayPrevious()
+  {
+    this.evaluate("ReadiumSDK.reader.previousMediaOverlay();");
+  }
+
+  @Override public void mediaOverlayToggle()
+  {
+    this.evaluate("ReadiumSDK.reader.toggleMediaOverlay();");
+  }
+
   @Override public void openBook(
     final org.readium.sdk.android.Package p,
     final ReaderReadiumViewerSettings vs,

@@ -12,7 +12,7 @@
 
   <logger
     name="org.nypl.simplified.app.catalog.CatalogFeedBookCellView"
-    level="INFO" />
+    level="DEBUG" />
 
   <logger
     name="org.nypl.simplified.app.catalog.CatalogFeedLane"

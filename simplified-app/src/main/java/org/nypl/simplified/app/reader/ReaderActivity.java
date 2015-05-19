@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -91,6 +92,10 @@ import com.io7m.jnull.Nullable;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
   private @Nullable ViewGroup                         view_hud;
   private @Nullable ProgressBar                       view_loading;
+  private @Nullable ViewGroup                         view_media;
+  private @Nullable ImageView                         view_media_next;
+  private @Nullable ImageView                         view_media_play;
+  private @Nullable ImageView                         view_media_prev;
   private @Nullable ProgressBar                       view_progress_bar;
   private @Nullable TextView                          view_progress_text;
   private @Nullable View                              view_root;
@@ -113,11 +118,27 @@ import com.io7m.jnull.Nullable;
     ReaderActivity.LOG.debug("applying color scheme");
 
     final View in_root = NullCheck.notNull(this.view_root);
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_root.setBackgroundColor(cs.getBackgroundColor());
+        ReaderActivity.this.applyViewerColorFilters();
+      }
+    });
+  }
+
+  private void applyViewerColorFilters()
+  {
+    ReaderActivity.LOG.debug("applying color filters");
+
     final TextView in_progress_text =
       NullCheck.notNull(this.view_progress_text);
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
     final ImageView in_toc = NullCheck.notNull(this.view_toc);
     final ImageView in_settings = NullCheck.notNull(this.view_settings);
+    final ImageView in_media_play = NullCheck.notNull(this.view_media_play);
+    final ImageView in_media_next = NullCheck.notNull(this.view_media_next);
+    final ImageView in_media_prev = NullCheck.notNull(this.view_media_prev);
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final int main_color = rr.getColor(R.color.main_color);
@@ -127,11 +148,13 @@ import com.io7m.jnull.Nullable;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        in_root.setBackgroundColor(cs.getBackgroundColor());
         in_progress_text.setTextColor(main_color);
         in_title_text.setTextColor(main_color);
         in_toc.setColorFilter(filter);
         in_settings.setColorFilter(filter);
+        in_media_play.setColorFilter(filter);
+        in_media_next.setColorFilter(filter);
+        in_media_prev.setColorFilter(filter);
       }
     });
   }
@@ -230,25 +253,40 @@ import com.io7m.jnull.Nullable;
     final ReaderSimplifiedFeedbackDispatcherType sd =
       ReaderSimplifiedFeedbackDispatcher.newDispatcher();
 
-    final TextView in_title_text =
-      NullCheck.notNull((TextView) this.findViewById(R.id.reader_title_text));
-    final TextView in_progress_text =
-      NullCheck.notNull((TextView) this
-        .findViewById(R.id.reader_position_text));
-    final ProgressBar in_progress_bar =
-      NullCheck.notNull((ProgressBar) this
-        .findViewById(R.id.reader_position_progress));
-    final ProgressBar in_loading =
-      NullCheck.notNull((ProgressBar) this.findViewById(R.id.reader_loading));
-    final WebView in_webview =
-      NullCheck.notNull((WebView) this.findViewById(R.id.reader_webview));
     final ViewGroup in_hud =
       NullCheck.notNull((ViewGroup) this
         .findViewById(R.id.reader_hud_container));
     final ImageView in_toc =
-      NullCheck.notNull((ImageView) this.findViewById(R.id.reader_toc));
+      NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_toc));
     final ImageView in_settings =
-      NullCheck.notNull((ImageView) this.findViewById(R.id.reader_settings));
+      NullCheck
+        .notNull((ImageView) in_hud.findViewById(R.id.reader_settings));
+    final TextView in_title_text =
+      NullCheck.notNull((TextView) in_hud
+        .findViewById(R.id.reader_title_text));
+    final TextView in_progress_text =
+      NullCheck.notNull((TextView) in_hud
+        .findViewById(R.id.reader_position_text));
+    final ProgressBar in_progress_bar =
+      NullCheck.notNull((ProgressBar) in_hud
+        .findViewById(R.id.reader_position_progress));
+
+    final ViewGroup in_media_overlay =
+      NullCheck.notNull((ViewGroup) this.findViewById(R.id.reader_hud_media));
+    final ImageView in_media_previous =
+      NullCheck.notNull((ImageView) this
+        .findViewById(R.id.reader_hud_media_previous));
+    final ImageView in_media_next =
+      NullCheck.notNull((ImageView) this
+        .findViewById(R.id.reader_hud_media_next));
+    final ImageView in_media_play =
+      NullCheck.notNull((ImageView) this
+        .findViewById(R.id.reader_hud_media_play));
+
+    final ProgressBar in_loading =
+      NullCheck.notNull((ProgressBar) this.findViewById(R.id.reader_loading));
+    final WebView in_webview =
+      NullCheck.notNull((WebView) this.findViewById(R.id.reader_webview));
 
     final View in_root = NullCheck.notNull(in_hud.getRootView());
     this.view_root = in_root;
@@ -257,7 +295,8 @@ import com.io7m.jnull.Nullable;
     in_progress_bar.setVisibility(View.INVISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
     in_webview.setVisibility(View.INVISIBLE);
-    in_hud.setVisibility(View.INVISIBLE);
+    in_hud.setVisibility(View.VISIBLE);
+    in_media_overlay.setVisibility(View.INVISIBLE);
 
     in_settings.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
@@ -278,6 +317,20 @@ import com.io7m.jnull.Nullable;
     this.view_toc = in_toc;
     this.view_settings = in_settings;
     this.web_view_resized = true;
+    this.view_media = in_media_overlay;
+    this.view_media_next = in_media_next;
+    this.view_media_prev = in_media_previous;
+    this.view_media_play = in_media_play;
+
+    final WebChromeClient wc_client = new WebChromeClient() {
+      @Override public void onShowCustomView(
+        final @Nullable View view,
+        final @Nullable CustomViewCallback callback)
+      {
+        super.onShowCustomView(view, callback);
+        ReaderActivity.LOG.debug("web-chrome: {}", view);
+      }
+    };
 
     final WebViewClient wv_client = new WebViewClient() {
       @Override public void onLoadResource(
@@ -310,6 +363,7 @@ import com.io7m.jnull.Nullable;
       }
     };
     in_webview.setBackgroundColor(0x00000000);
+    in_webview.setWebChromeClient(wc_client);
     in_webview.setWebViewClient(wv_client);
     in_webview.setOnLongClickListener(new OnLongClickListener() {
       @Override public boolean onLongClick(
@@ -336,6 +390,8 @@ import com.io7m.jnull.Nullable;
 
     final ReaderReadiumEPUBLoaderType pl = rs.getEPUBLoader();
     pl.loadEPUB(in_epub_file, this);
+
+    this.applyViewerColorFilters();
   }
 
   @Override public void onCurrentPageError(
@@ -483,6 +539,11 @@ import com.io7m.jnull.Nullable;
     final ReaderReadiumJavaScriptAPIType js =
       NullCheck.notNull(this.readium_js_api);
 
+    /**
+     * If there's a bookmark for the current book, send a request to open the
+     * book to that specific page. Otherwise, start at the beginning.
+     */
+
     final BookID in_book_id = NullCheck.notNull(this.book_id);
     final ReaderBookmarksType bookmarks = rs.getBookmarks();
     final OptionType<ReaderBookLocation> mark =
@@ -500,12 +561,19 @@ import com.io7m.jnull.Nullable;
 
     js.openBook(p, vs, page_request);
 
+    /**
+     * Configure the visibility of UI elements.
+     */
+
     final WebView in_web_view = NullCheck.notNull(this.view_web_view);
     final ProgressBar in_loading = NullCheck.notNull(this.view_loading);
     final ProgressBar in_progress_bar =
       NullCheck.notNull(this.view_progress_bar);
     final TextView in_progress_text =
       NullCheck.notNull(this.view_progress_text);
+    final ImageView in_media_play = NullCheck.notNull(this.view_media_play);
+    final ImageView in_media_next = NullCheck.notNull(this.view_media_next);
+    final ImageView in_media_prev = NullCheck.notNull(this.view_media_prev);
 
     in_loading.setVisibility(View.GONE);
     in_web_view.setVisibility(View.VISIBLE);
@@ -514,6 +582,38 @@ import com.io7m.jnull.Nullable;
 
     final ReaderSettingsType settings = rs.getSettings();
     this.onReaderSettingsChanged(settings);
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_media_play.setOnClickListener(new OnClickListener() {
+          @Override public void onClick(
+            final @Nullable View v)
+          {
+            ReaderActivity.LOG.debug("toggling media overlay");
+            js.mediaOverlayToggle();
+          }
+        });
+
+        in_media_next.setOnClickListener(new OnClickListener() {
+          @Override public void onClick(
+            final @Nullable View v)
+          {
+            ReaderActivity.LOG.debug("next media overlay");
+            js.mediaOverlayNext();
+          }
+        });
+
+        in_media_prev.setOnClickListener(new OnClickListener() {
+          @Override public void onClick(
+            final @Nullable View v)
+          {
+            ReaderActivity.LOG.debug("previous media overlay");
+            js.mediaOverlayPrevious();
+          }
+        });
+      }
+    });
   }
 
   @Override public void onReadiumFunctionInitializeError(
@@ -638,6 +738,52 @@ import com.io7m.jnull.Nullable;
     final String text)
   {
     ReaderActivity.LOG.error("unknown readium function: {}", text);
+  }
+
+  @Override public void onReadiumMediaOverlayStatusChangedIsAvailable(
+    final boolean available)
+  {
+    ReaderActivity.LOG.debug(
+      "media overlay status changed: available: {}",
+      available);
+
+    final ViewGroup in_media_hud = NullCheck.notNull(this.view_media);
+    final TextView in_title = NullCheck.notNull(this.view_title_text);
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        in_media_hud.setVisibility(available ? View.VISIBLE : View.GONE);
+        in_title.setVisibility(available ? View.GONE : View.VISIBLE);
+      }
+    });
+  }
+
+  @Override public void onReadiumMediaOverlayStatusChangedIsPlaying(
+    final boolean playing)
+  {
+    ReaderActivity.LOG.debug(
+      "media overlay status changed: playing: {}",
+      playing);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final ImageView play = NullCheck.notNull(this.view_media_play);
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        if (playing) {
+          play.setImageDrawable(rr.getDrawable(R.drawable.circle_pause_8x));
+        } else {
+          play.setImageDrawable(rr.getDrawable(R.drawable.circle_play_8x));
+        }
+      }
+    });
+  }
+
+  @Override public void onReadiumMediaOverlayStatusError(
+    final Throwable e)
+  {
+    ReaderActivity.LOG.error("{}", e.getMessage(), e);
   }
 
   @Override public void onServerStartFailed(

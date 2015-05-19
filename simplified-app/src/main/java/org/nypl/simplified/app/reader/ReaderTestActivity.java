@@ -24,7 +24,8 @@ public final class ReaderTestActivity extends Activity
   {
     super.onCreate(state);
 
-    final File epub_file = new File("/storage/sdcard0/book.epub");
+    final File epub_file =
+      new File("/storage/sdcard0/epub30-test-0120-20140612.epub");
     final BookID id = BookID.exactString("0");
 
     ReaderTestActivity.LOG.debug(

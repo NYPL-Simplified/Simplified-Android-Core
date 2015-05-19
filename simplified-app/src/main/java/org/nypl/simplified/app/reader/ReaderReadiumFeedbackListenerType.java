@@ -62,4 +62,26 @@ public interface ReaderReadiumFeedbackListenerType
 
   void onReadiumFunctionUnknown(
     String text);
+
+  /**
+   * The status of the media overlay has changed; media is/is not playing.
+   */
+
+  void onReadiumMediaOverlayStatusChangedIsPlaying(
+    boolean playing);
+
+  /**
+   * The status of the media overlay has changed; the overlay is available.
+   */
+
+  void onReadiumMediaOverlayStatusChangedIsAvailable(
+    boolean available);
+
+  /**
+   * Called when {@link #onReadiumMediaOverlayStatusError()} raises an
+   * exception.
+   */
+
+  void onReadiumMediaOverlayStatusError(
+    Throwable e);
 }

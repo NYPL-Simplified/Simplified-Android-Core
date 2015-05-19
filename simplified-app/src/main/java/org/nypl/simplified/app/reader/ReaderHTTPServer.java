@@ -2,10 +2,14 @@ package org.nypl.simplified.app.reader;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.http.core.HTTPRangeType;
+import org.nypl.simplified.http.core.HTTPRanges;
 import org.readium.sdk.android.Package;
+import org.readium.sdk.android.util.ResourceInputStream;
 import org.slf4j.Logger;
 
 import com.io7m.jfunctional.Option;
@@ -15,6 +19,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoHTTPD.Response.Status;
 
 /**
  * The default implementation of the {@link ReaderHTTPServerType} interface.
@@ -120,13 +125,36 @@ import fi.iki.elonen.NanoHTTPD;
     final Method method = NullCheck.notNull(nns.getMethod());
     final String path = NullCheck.notNull(nns.getUri());
 
-    ReaderHTTPServer.LOG.debug("request: {} {}", method, path);
+    OptionType<HTTPRangeType> range_opt;
+    final Map<String, String> headers = nns.getHeaders();
+    if (headers.containsKey("range")) {
+      final String range_text = NullCheck.notNull(headers.get("range"));
+      range_opt = HTTPRanges.fromRangeString(range_text);
+      if (range_opt.isSome()) {
+        final Some<HTTPRangeType> some = (Some<HTTPRangeType>) range_opt;
+        ReaderHTTPServer.LOG.debug(
+          "request (ranged {}): {} {}",
+          some.get(),
+          method,
+          path);
+      } else {
+        ReaderHTTPServer.LOG.debug(
+          "request (full - ranged unparseable): {} {}",
+          method,
+          path);
+      }
+    } else {
+      range_opt = Option.none();
+      ReaderHTTPServer.LOG.debug("request (full): {} {}", method, path);
+    }
 
     final String type = this.guessMimeTime(path);
 
     /**
      * Try looking at the included Java resources first. This includes all of
-     * the readium shared javascript content.
+     * the readium shared javascript content. For resources served in this
+     * manner, range requests are ignored and the full entity is always
+     * served.
      */
 
     {
@@ -142,7 +170,8 @@ import fi.iki.elonen.NanoHTTPD;
     }
 
     /**
-     * Otherwise, try serving it from the package.
+     * Otherwise, try serving it from the package. Range requests are
+     * respected iff they are satisfiable.
      */
 
     {
@@ -152,10 +181,30 @@ import fi.iki.elonen.NanoHTTPD;
       ReaderHTTPServer.LOG
         .debug("request: trying package path: {}", relative);
 
-      final InputStream stream = pack.getInputStream(relative, false);
-      if (stream != null) {
+      final int size = pack.getArchiveInfoSize(relative);
+      if (size >= 0) {
+
+        final ResourceInputStream stream;
+        final Status status;
+        if (range_opt.isSome()) {
+          final Some<HTTPRangeType> some_range =
+            (Some<HTTPRangeType>) range_opt;
+
+          status = Response.Status.PARTIAL_CONTENT;
+          stream =
+            NullCheck.notNull((ResourceInputStream) pack.getInputStream(
+              relative,
+              true));
+        } else {
+          status = Response.Status.OK;
+          stream =
+            NullCheck.notNull((ResourceInputStream) pack.getInputStream(
+              relative,
+              false));
+        }
+
         return ReaderHTTPServer.loggedResponse(path, new Response(
-          Response.Status.OK,
+          status,
           type,
           stream));
       }

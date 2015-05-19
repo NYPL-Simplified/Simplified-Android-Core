@@ -35,6 +35,7 @@
       android:id="@+id/reader_hud_top_left"
       android:layout_marginLeft="8dp"
       android:layout_marginTop="8dp"
+      android:orientation="horizontal"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content">
 
@@ -50,6 +51,7 @@
       android:layout_alignParentRight="true"
       android:layout_marginRight="8dp"
       android:layout_marginTop="8dp"
+      android:orientation="horizontal"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content">
 
@@ -58,6 +60,35 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/text_8x" />
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/reader_hud_media"
+      android:orientation="horizontal"
+      android:layout_alignParentTop="true"
+      android:layout_centerHorizontal="true"
+      android:layout_marginRight="8dp"
+      android:layout_marginTop="8dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content">
+
+      <ImageView
+        android:id="@+id/reader_hud_media_previous"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginRight="16dp"
+        android:src="@drawable/circle_left_8x" />
+      <ImageView
+        android:id="@+id/reader_hud_media_play"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/circle_play_8x" />
+      <ImageView
+        android:id="@+id/reader_hud_media_next"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="16dp"
+        android:src="@drawable/circle_next_8x" />
     </LinearLayout>
 
     <TextView

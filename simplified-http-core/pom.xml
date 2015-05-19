@@ -19,6 +19,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-assert</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  
+    <dependency>
       <groupId>com.io7m.jnull</groupId>
       <artifactId>io7m-jnull-core</artifactId>
       <version>[1.0.0, 2.0.0)</version>

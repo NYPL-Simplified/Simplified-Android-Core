@@ -6,12 +6,12 @@
   
   <!-- If true, show the status of books in acquisition feed cells, and book detail 
     activities/dialogs. -->
-  <bool name="debug_catalog_cell_view_states">false</bool>
+  <bool name="debug_catalog_cell_view_states">true</bool>
 
   <!-- Set the time to sleep in milliseconds between attempts to read data from the 
     network by the downloader. This is useful for drastically slowing down the process 
     of downloading books in order to see the state of any intermediate views in the app. -->
-  <integer name="debug_downloader_sleep_time_ms">0</integer>
+  <integer name="debug_downloader_sleep_time_ms">5000</integer>
 
   <!-- If testing on a device with a screen that's considered to be "large", setting 
     this variable to true will instead cause the screen to be reported as "not large". -->

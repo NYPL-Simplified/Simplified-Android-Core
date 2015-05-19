@@ -16,6 +16,24 @@ public interface ReaderReadiumJavaScriptAPIType
     ReaderCurrentPageListenerType l);
 
   /**
+   * Move to the next media overlay.
+   */
+
+  void mediaOverlayNext();
+
+  /**
+   * Move to the previous media overlay.
+   */
+
+  void mediaOverlayPrevious();
+
+  /**
+   * Toggle the media overlay.
+   */
+
+  void mediaOverlayToggle();
+
+  /**
    * Open a book.
    *
    * @param p

@@ -44,6 +44,8 @@ ReadiumSDK.HostAppFeedback = function() {
   this.onPaginationChanged = function(pageChangeData) {
     window.location.href = "readium:pagination-changed/" +
       encodeURIComponent(JSON.stringify(pageChangeData.paginationInfo));
+    window.location.href = "readium:media-overlay-is-available/" +
+      ReadiumSDK.reader.isMediaOverlayAvailable();
   };
   
   this.onSettingsApplied = function() {
