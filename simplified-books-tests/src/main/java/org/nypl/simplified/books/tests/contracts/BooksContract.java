@@ -203,14 +203,14 @@ import com.io7m.junreachable.UnreachableCodeException;
         final URI uri,
         final long offset)
       {
-        return new HTTPResultException<InputStream>(new IOException());
+        return new HTTPResultException<InputStream>(uri, new IOException());
       }
 
       @Override public HTTPResultType<Unit> head(
         final OptionType<HTTPAuthType> auth,
         final URI uri)
       {
-        return new HTTPResultException<Unit>(new IOException());
+        return new HTTPResultException<Unit>(uri, new IOException());
       }
     };
   }

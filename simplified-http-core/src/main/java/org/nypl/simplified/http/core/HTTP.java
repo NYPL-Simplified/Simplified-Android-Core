@@ -163,7 +163,7 @@ public final class HTTP implements HTTPType
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {
-      return new HTTPResultException<InputStream>(e);
+      return new HTTPResultException<InputStream>(uri, e);
     }
   }
 
@@ -210,7 +210,7 @@ public final class HTTP implements HTTPType
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {
-      return new HTTPResultException<Unit>(e);
+      return new HTTPResultException<Unit>(uri, e);
     }
   }
 }

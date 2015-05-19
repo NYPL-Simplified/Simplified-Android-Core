@@ -65,15 +65,25 @@ public interface BookDatabaseEntryWritableType extends Serializable
     throws IOException;
 
   /**
-   * Set the cover and acquisition feed entry of the book
+   * Set the acquisition feed entry of the book
    *
    * @throws IOException
    *           On I/O errors or lock acquisition failures
    */
 
   void setData(
-    OptionType<File> in_cover,
     OPDSAcquisitionFeedEntry in_entry)
+    throws IOException;
+
+  /**
+   * Set the cover of the book
+   *
+   * @throws IOException
+   *           On I/O errors or lock acquisition failures
+   */
+
+  void setCover(
+    OptionType<File> in_cover)
     throws IOException;
 
   /**

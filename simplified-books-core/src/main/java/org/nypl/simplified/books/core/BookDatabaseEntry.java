@@ -317,29 +317,24 @@ import com.io7m.jnull.NullCheck;
     return new BookSnapshot(in_cover, in_book, in_download_id, in_entry);
   }
 
-  @Override public void setData(
-    final OptionType<File> in_cover,
+  private void setDataLocked(
     final OPDSAcquisitionFeedEntry in_entry)
     throws IOException
   {
-    FileLocking.withFileLocked(
-      this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, Unit, IOException>() {
-        @Override public Unit call(
-          final Unit x)
-          throws IOException
-        {
-          BookDatabaseEntry.this.setDataLocked(in_cover, in_entry);
-          return Unit.unit();
-        }
-      });
+    final ObjectOutputStream os =
+      new ObjectOutputStream(new FileOutputStream(this.file_meta_tmp));
+    try {
+      os.writeObject(in_entry);
+      os.flush();
+    } finally {
+      os.close();
+    }
+
+    FileUtilities.fileRename(this.file_meta_tmp, this.file_meta);
   }
 
-  private void setDataLocked(
-    final OptionType<File> in_cover,
-    final OPDSAcquisitionFeedEntry in_entry)
+  private void setCoverLocked(
+    final OptionType<File> in_cover)
     throws IOException
   {
     if (in_cover.isSome()) {
@@ -348,19 +343,6 @@ import com.io7m.jnull.NullCheck;
       some.get().delete();
     } else {
       this.file_cover.delete();
-    }
-
-    {
-      final ObjectOutputStream os =
-        new ObjectOutputStream(new FileOutputStream(this.file_meta_tmp));
-      try {
-        os.writeObject(in_entry);
-        os.flush();
-      } finally {
-        os.close();
-      }
-
-      FileUtilities.fileRename(this.file_meta_tmp, this.file_meta);
     }
   }
 
@@ -391,5 +373,43 @@ import com.io7m.jnull.NullCheck;
       this.file_download_id,
       this.file_download_id_tmp,
       NullCheck.notNull(Long.toString(did)));
+  }
+
+  @Override public void setData(
+    final OPDSAcquisitionFeedEntry in_entry)
+    throws IOException
+  {
+    FileLocking.withFileLocked(
+      this.file_lock,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>() {
+        @Override public Unit call(
+          final Unit x)
+          throws IOException
+        {
+          BookDatabaseEntry.this.setDataLocked(in_entry);
+          return Unit.unit();
+        }
+      });
+  }
+
+  @Override public void setCover(
+    final OptionType<File> in_cover)
+    throws IOException
+  {
+    FileLocking.withFileLocked(
+      this.file_lock,
+      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
+      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>() {
+        @Override public Unit call(
+          final Unit x)
+          throws IOException
+        {
+          BookDatabaseEntry.this.setCoverLocked(in_cover);
+          return Unit.unit();
+        }
+      });
   }
 }

@@ -1,15 +1,20 @@
 package org.nypl.simplified.http.core;
 
+import java.net.URI;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 public final class HTTPResultException<A> implements HTTPResultType<A>
 {
   private final Exception error;
+  private final URI       uri;
 
   public HTTPResultException(
+    final URI in_uri,
     final Exception in_error)
   {
+    this.uri = NullCheck.notNull(in_uri);
     this.error = NullCheck.notNull(in_error);
   }
 
@@ -26,12 +31,17 @@ public final class HTTPResultException<A> implements HTTPResultType<A>
       return false;
     }
     final HTTPResultException<?> other = (HTTPResultException<?>) obj;
-    return this.error.equals(other.error);
+    return this.error.equals(other.error) && this.uri.equals(other.uri);
   }
 
   public Exception getError()
   {
     return this.error;
+  }
+
+  public URI getURI()
+  {
+    return this.uri;
   }
 
   @Override public int hashCode()

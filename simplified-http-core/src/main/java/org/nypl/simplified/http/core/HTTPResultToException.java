@@ -1,6 +1,7 @@
 package org.nypl.simplified.http.core;
 
 import java.io.IOException;
+import java.net.URI;
 
 import com.io7m.jnull.NullCheck;
 
@@ -17,9 +18,12 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("boxing") public final class HTTPResultToException<A> implements
   HTTPResultMatcherType<A, HTTPResultOKType<A>, Exception>
 {
-  public HTTPResultToException()
-  {
+  private final URI uri;
 
+  public HTTPResultToException(
+    final URI in_uri)
+  {
+    this.uri = NullCheck.notNull(in_uri);
   }
 
   @Override public HTTPResultOKType<A> onHTTPError(
@@ -27,8 +31,11 @@ import com.io7m.jnull.NullCheck;
     throws Exception
   {
     final String s =
-      NullCheck
-        .notNull(String.format("%d: %s", e.getStatus(), e.getMessage()));
+      NullCheck.notNull(String.format(
+        "%s: %d: %s",
+        this.uri,
+        e.getStatus(),
+        e.getMessage()));
     throw new IOException(s);
   }
 

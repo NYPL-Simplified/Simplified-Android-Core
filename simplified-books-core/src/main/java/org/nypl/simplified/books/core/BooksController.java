@@ -433,7 +433,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         try {
           final OPDSAcquisitionFeedEntry data = dir.getData();
           f.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
-        } catch (final IOException x) {
+        } catch (final Throwable x) {
           BooksController.LOG.error(
             "unable to load book {} metadata: ",
             book_id,
@@ -625,7 +625,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private static final class SyncTask implements Runnable
   {
-
     private final BookDatabaseType             books_database;
     private final BooksControllerConfiguration config;
     private final DownloaderType               downloader;
@@ -678,7 +677,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final HTTPAuthType auth =
         new HTTPAuthBasic(barcode.toString(), pin.toString());
       final HTTPResultType<InputStream> r =
-        this.http.get(Option.some(auth), this.config.getLoansURI(), 0);
+        this.http.get(Option.some(auth), loans_uri, 0);
 
       r
         .matchResult(new HTTPResultMatcherType<InputStream, Unit, Exception>() {
@@ -688,7 +687,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           {
             final String m =
               NullCheck.notNull(String.format(
-                "%d: %s",
+                "%s: %d: %s",
+                loans_uri,
                 e.getStatus(),
                 e.getMessage()));
 
@@ -735,9 +735,15 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.feed_parser.parse(loans_uri, r_feed.getValue());
 
       final List<OPDSAcquisitionFeedEntry> entries = feed.getFeedEntries();
-
       for (final OPDSAcquisitionFeedEntry e : entries) {
-        this.syncFeedEntry(NullCheck.notNull(e));
+        try {
+          this.syncFeedEntry(NullCheck.notNull(e));
+        } catch (final Throwable x) {
+          BooksController.LOG.error(
+            "unable to save entry: {}: ",
+            e.getID(),
+            x);
+        }
       }
     }
 
@@ -749,11 +755,12 @@ import com.io7m.junreachable.UnreachableCodeException;
       final BookDatabaseEntryType book_dir =
         new BookDatabaseEntry(this.books_database.getLocation(), book_id);
 
+      book_dir.create();
+      book_dir.setData(e);
+
       final OptionType<File> cover =
         BooksController.makeCover(this.http, e.getCover());
-
-      book_dir.create();
-      book_dir.setData(cover, e);
+      book_dir.setCover(cover);
 
       final BookSnapshot snap = book_dir.getSnapshot();
       final BookStatusLoanedType status =
@@ -790,12 +797,14 @@ import com.io7m.junreachable.UnreachableCodeException;
         final BookDatabaseEntryType e =
           this.books_database.getBookDatabaseEntry(this.book_id);
 
+        e.create();
+        e.setData(this.entry);
+
         final OptionType<File> cover =
           BooksController.makeCover(this.http, this.entry.getCover());
 
-        e.create();
-        e.setData(cover, this.entry);
-      } catch (final Exception e) {
+        e.setCover(cover);
+      } catch (final Throwable e) {
         BooksController.LOG.error("unable to update metadata: ", e);
       }
     }
@@ -834,7 +843,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OptionType<HTTPAuthType> no_auth = Option.none();
     final HTTPResultOKType<InputStream> r =
       http.get(no_auth, cover_uri, 0).matchResult(
-        new HTTPResultToException<InputStream>());
+        new HTTPResultToException<InputStream>(cover_uri));
 
     try {
       final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
