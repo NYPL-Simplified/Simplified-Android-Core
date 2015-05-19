@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 
 import android.app.ActionBar;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
@@ -19,8 +17,7 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-@SuppressWarnings("boxing") public abstract class CatalogActivity extends
-  SimplifiedActivity
+public abstract class CatalogActivity extends SimplifiedActivity
 {
   private static final String CATALOG_UP_STACK_ID;
   private static final Logger LOG;
@@ -112,26 +109,6 @@ import com.io7m.jnull.Nullable;
             top.getTitle(),
             top.getURI());
         CatalogFeedActivity.startNewActivity(this, remote);
-        return true;
-      }
-
-      /**
-       * Rotate the screen, for debugging purposes.
-       */
-
-      case R.id.tilt:
-      {
-        CatalogActivity.LOG.debug("flipping orientation");
-        final int o = this.getRequestedOrientation();
-        CatalogActivity.LOG.debug("current orientation: {}", o);
-        if ((o == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-          || (o == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)) {
-          this
-            .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-          this
-            .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
         return true;
       }
 
