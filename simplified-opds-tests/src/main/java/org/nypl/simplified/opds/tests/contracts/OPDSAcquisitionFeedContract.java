@@ -33,7 +33,7 @@ import org.nypl.simplified.test.utilities.TestUtilities;
       OPDSAcquisitionFeed.newBuilder(uri, "id", cal, "Title");
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
-      OPDSAcquisitionFeedEntry.newBuilder("id", "title", cal, cal);
+      OPDSAcquisitionFeedEntry.newBuilder("id", "title", cal);
     eb.addAuthor("Author");
     eb.addAcquisition(new OPDSAcquisition(Type.ACQUISITION_BUY, URI
       .create("http://example.com")));

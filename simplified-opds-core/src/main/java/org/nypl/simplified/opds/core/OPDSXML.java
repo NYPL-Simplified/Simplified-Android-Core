@@ -131,6 +131,28 @@ public final class OPDSXML
     throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
   }
 
+  public static OptionType<Element> getFirstChildElementWithNameOptional(
+    final Element node,
+    final URI namespace,
+    final String name)
+  {
+    NullCheck.notNull(node);
+    NullCheck.notNull(namespace);
+    NullCheck.notNull(name);
+
+    final NodeList children = node.getChildNodes();
+    for (int index = 0; index < children.getLength(); ++index) {
+      final Node child = NullCheck.notNull(children.item(index));
+      if (child instanceof Element) {
+        if (OPDSXML.nodeHasName((Element) child, namespace, name)) {
+          return Option.some((Element) child);
+        }
+      }
+    }
+
+    return Option.none();
+  }
+
   public static OptionType<String> getNodeNamespace(
     final Element e)
   {

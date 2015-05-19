@@ -132,13 +132,19 @@ final class CatalogBookDetail
       buffer.append("\n");
     }
 
-    final Calendar p = e.getPublished();
-    final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-    buffer.append(NullCheck.notNull(rr
-      .getString(R.string.catalog_publication_date)));
-    buffer.append(": ");
-    buffer.append(fmt.format(p.getTime()));
-    return NullCheck.notNull(buffer.toString());
+    final OptionType<Calendar> p_opt = e.getPublished();
+    if (p_opt.isSome()) {
+      final Some<Calendar> some = (Some<Calendar>) p_opt;
+      final Calendar p = some.get();
+      final SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+      buffer.append(NullCheck.notNull(rr
+        .getString(R.string.catalog_publication_date)));
+      buffer.append(": ");
+      buffer.append(fmt.format(p.getTime()));
+      return NullCheck.notNull(buffer.toString());
+    }
+
+    return "";
   }
 
   static void createViewTextPublisher(

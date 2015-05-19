@@ -32,7 +32,7 @@ import com.io7m.jnull.Nullable;
     private final List<String>           categories;
     private OptionType<URI>              cover;
     private final String                 id;
-    private final Calendar               published;
+    private OptionType<Calendar>         published;
     private OptionType<String>           publisher;
     private String                       subtitle;
     private String                       summary;
@@ -43,8 +43,7 @@ import com.io7m.jnull.Nullable;
     private Builder(
       final String in_id,
       final String in_title,
-      final Calendar in_updated,
-      final Calendar in_published)
+      final Calendar in_updated)
     {
       this.id = NullCheck.notNull(in_id);
       this.title = NullCheck.notNull(in_title);
@@ -55,7 +54,7 @@ import com.io7m.jnull.Nullable;
       this.acquisitions = new ArrayList<OPDSAcquisition>();
       this.subtitle = "";
       this.authors = new ArrayList<String>();
-      this.published = NullCheck.notNull(in_published);
+      this.published = Option.none();
       this.publisher = Option.none();
       this.categories = new ArrayList<String>();
       this.blocks = new HashSet<Pair<String, URI>>();
@@ -112,6 +111,12 @@ import com.io7m.jnull.Nullable;
       this.cover = NullCheck.notNull(uri);
     }
 
+    @Override public void setPublishedOption(
+      final OptionType<Calendar> pub)
+    {
+      this.published = NullCheck.notNull(pub);
+    }
+
     @Override public void setPublisherOption(
       final OptionType<String> pub)
     {
@@ -150,10 +155,9 @@ import com.io7m.jnull.Nullable;
   public static OPDSAcquisitionFeedEntryBuilderType newBuilder(
     final String in_id,
     final String in_title,
-    final Calendar in_updated,
-    final Calendar in_published)
+    final Calendar in_updated)
   {
-    return new Builder(in_id, in_title, in_updated, in_published);
+    return new Builder(in_id, in_title, in_updated);
   }
 
   private final List<OPDSAcquisition>  acquisitions;
@@ -162,7 +166,7 @@ import com.io7m.jnull.Nullable;
   private final List<String>           categories;
   private final OptionType<URI>        cover;
   private final String                 id;
-  private final Calendar               published;
+  private final OptionType<Calendar>   published;
   private final OptionType<String>     publisher;
   private final String                 subtitle;
   private final String                 summary;
@@ -181,7 +185,7 @@ import com.io7m.jnull.Nullable;
     final Calendar in_updated,
     final String in_subtitle,
     final String in_summary,
-    final Calendar in_published,
+    final OptionType<Calendar> in_published,
     final OptionType<String> in_publisher,
     final List<String> in_categories)
   {
@@ -260,7 +264,7 @@ import com.io7m.jnull.Nullable;
     return this.id;
   }
 
-  public Calendar getPublished()
+  public OptionType<Calendar> getPublished()
   {
     return this.published;
   }

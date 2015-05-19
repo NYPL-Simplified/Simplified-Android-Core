@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -129,20 +130,29 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     return Option.none();
   }
 
-  private static Calendar findPublished(
+  private static OptionType<Calendar> findPublished(
     final Element e)
-    throws OPDSFeedParseException,
-      DOMException,
+    throws DOMException,
       ParseException
   {
-    final Element er =
-      OPDSXML.getFirstChildElementWithName(
+    final OptionType<Element> e_opt =
+      OPDSXML.getFirstChildElementWithNameOptional(
         e,
         OPDSFeedParser.ATOM_URI,
         "published");
-    final String text = er.getTextContent();
-    final String trimmed = text.trim();
-    return OPDSRFC3339Formatter.parseRFC3339Date(NullCheck.notNull(trimmed));
+
+    return e_opt
+      .mapPartial(new PartialFunctionType<Element, Calendar, ParseException>() {
+        @Override public Calendar call(
+          final Element er)
+          throws ParseException
+        {
+          final String text = er.getTextContent();
+          final String trimmed = text.trim();
+          return OPDSRFC3339Formatter.parseRFC3339Date(NullCheck
+            .notNull(trimmed));
+        }
+      });
   }
 
   private static OptionType<String> findPublisher(
@@ -200,10 +210,9 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     final String id = OPDSFeedParser.findID(e);
     final String title = OPDSFeedParser.findTitle(e);
     final Calendar updated = OPDSFeedParser.findUpdated(e);
-    final Calendar published = OPDSFeedParser.findPublished(e);
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
-      OPDSAcquisitionFeedEntry.newBuilder(id, title, updated, published);
+      OPDSAcquisitionFeedEntry.newBuilder(id, title, updated);
 
     final List<Element> e_links =
       OPDSXML.getChildElementsWithNameNonEmpty(
@@ -224,7 +233,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
             NullCheck.notNull(e_link.getAttribute("href"));
           final String link_title =
             NullCheck.notNull(e_link.getAttribute("title"));
-          final URI uri = NullCheck.notNull(URI.create(uri_text));
+          final URI uri = new URI(uri_text);
           eb.addBlock(uri, link_title);
           continue;
         }
@@ -235,8 +244,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
         if (rel_text.equals(OPDSFeedParser.THUMBNAIL_URI_TEXT)) {
           if (e_link.hasAttribute("href")) {
-            final URI u =
-              NullCheck.notNull(URI.create(e_link.getAttribute("href")));
+            final URI u = new URI(e_link.getAttribute("href"));
             eb.setThumbnailOption(Option.some(u));
             continue;
           }
@@ -248,8 +256,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
         if (rel_text.equals(OPDSFeedParser.IMAGE_URI_TEXT)) {
           if (e_link.hasAttribute("href")) {
-            final URI u =
-              NullCheck.notNull(URI.create(e_link.getAttribute("href")));
+            final URI u = new URI(e_link.getAttribute("href"));
             eb.setCoverOption(Option.some(u));
             continue;
           }
@@ -274,6 +281,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
     OPDSFeedParser.findAcquisitionAuthors(e, eb);
     eb.setPublisherOption(OPDSFeedParser.findPublisher(e));
+    eb.setPublishedOption(OPDSFeedParser.findPublished(e));
     eb.setSubtitleOption(OPDSFeedParser.findSubtitle(e));
     eb.setSummaryOption(OPDSXML.getFirstChildElementTextWithNameOptional(
       e,
