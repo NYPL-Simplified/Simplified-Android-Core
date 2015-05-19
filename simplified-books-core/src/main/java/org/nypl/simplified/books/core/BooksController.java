@@ -206,12 +206,11 @@ import com.io7m.junreachable.UnreachableCodeException;
       switch (this.acq.getType()) {
         case ACQUISITION_GENERIC:
         case ACQUISITION_BORROW:
+        case ACQUISITION_OPEN_ACCESS:
         {
           this.runAcquisitionBorrow();
           break;
         }
-
-        case ACQUISITION_OPEN_ACCESS:
         case ACQUISITION_BUY:
         case ACQUISITION_SAMPLE:
         case ACQUISITION_SUBSCRIBE:

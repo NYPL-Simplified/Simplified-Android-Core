@@ -95,6 +95,7 @@ public final class CatalogAcquisitionButtonController implements
     switch (this.acq.getType()) {
       case ACQUISITION_BORROW:
       case ACQUISITION_GENERIC:
+      case ACQUISITION_OPEN_ACCESS:
       {
         final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
         this.books.bookBorrow(this.id, this.acq, eo.getTitle(), this);
@@ -102,7 +103,6 @@ public final class CatalogAcquisitionButtonController implements
         break;
       }
       case ACQUISITION_BUY:
-      case ACQUISITION_OPEN_ACCESS:
       case ACQUISITION_SAMPLE:
       case ACQUISITION_SUBSCRIBE:
       {
