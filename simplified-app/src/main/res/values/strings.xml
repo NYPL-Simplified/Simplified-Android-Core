@@ -11,8 +11,7 @@
   <string name="catalog_load_error_text">An error occurred whilst loading the catalog. Please try
     again.
   </string>
-  <string name="catalog_start_uri">http://simplified-demo.nypl-labs.biz/rtc.opds
-  </string>
+  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/groups/</string>
   <string name="catalog_unknown_feed">Unknown</string>
   <string name="catalog_detail_related">Related books</string>
   <string name="catalog_downloading">Downloading</string>
