@@ -39,7 +39,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 /**
- * The type of all activities in the app.
+ * The type of non-reader activities in the app.
  */
 
 @SuppressWarnings("boxing") public abstract class SimplifiedActivity extends
@@ -172,8 +172,8 @@ import com.io7m.jnull.Nullable;
 
     final ArrayList<String> di = new ArrayList<String>();
     di.add(catalog_name);
-    di.add(holds_name);
     di.add(books_name);
+    di.add(holds_name);
     di.add(settings_name);
     dl.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_item, di));
 

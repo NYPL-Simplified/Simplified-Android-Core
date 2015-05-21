@@ -3,7 +3,7 @@
 
   <string name="app_name">Simplified</string>
   <string name="holds">Holds</string>
-  <string name="books">Books</string>
+  <string name="books">My Books</string>
 
   <!-- Catalog strings -->
   <string name="catalog">Catalog</string>
