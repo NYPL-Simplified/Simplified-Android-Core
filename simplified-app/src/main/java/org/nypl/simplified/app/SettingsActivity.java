@@ -316,4 +316,9 @@ import com.io7m.jnull.Nullable;
     final BooksType books = app.getBooks();
     books.accountGetCachedLoginDetails(this);
   }
+
+  @Override protected boolean shouldShowNavigationDrawerIndicator()
+  {
+    return true;
+  }
 }

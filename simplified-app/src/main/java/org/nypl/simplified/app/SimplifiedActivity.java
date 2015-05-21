@@ -17,6 +17,7 @@ import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -24,6 +25,7 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -156,6 +158,7 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull((FrameLayout) this.findViewById(R.id.content_frame));
 
     d.setDrawerListener(this);
+    d.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
     dl.setOnItemClickListener(this);
 
     final String app_name =
@@ -254,6 +257,14 @@ import com.io7m.jnull.Nullable;
         return Unit.unit();
       }
     });
+
+    if (this.shouldShowNavigationDrawerIndicator()) {
+      SimplifiedActivity.LOG.debug("setting navigation drawer indicator");
+      final ActionBar bar = this.getActionBar();
+      bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(true);
+    }
 
     /**
      * If the drawer should be open, open it.
@@ -398,5 +409,32 @@ import com.io7m.jnull.Nullable;
     state_nn.putBoolean(
       SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID,
       d.isDrawerOpen(GravityCompat.START));
+  }
+
+  protected abstract boolean shouldShowNavigationDrawerIndicator();
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item_mn)
+  {
+    final MenuItem item = NullCheck.notNull(item_mn);
+    switch (item.getItemId()) {
+
+      case android.R.id.home:
+      {
+        final DrawerLayout d = NullCheck.notNull(this.drawer);
+        if (d.isDrawerOpen(GravityCompat.START)) {
+          d.closeDrawer(GravityCompat.START);
+        } else {
+          d.openDrawer(GravityCompat.START);
+        }
+
+        return super.onOptionsItemSelected(item);
+      }
+
+      default:
+      {
+        return super.onOptionsItemSelected(item);
+      }
+    }
   }
 }

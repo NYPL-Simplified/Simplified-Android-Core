@@ -40,4 +40,9 @@ public final class HoldsActivity extends SimplifiedActivity
   {
     super.onResume();
   }
+
+  @Override protected boolean shouldShowNavigationDrawerIndicator()
+  {
+    return true;
+  }
 }

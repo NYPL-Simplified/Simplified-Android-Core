@@ -527,6 +527,11 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     }
   }
 
+  @Override protected boolean shouldShowNavigationDrawerIndicator()
+  {
+    return false;
+  }
+
   @Override public void update(
     final @Nullable Observable observable,
     final @Nullable Object data)
