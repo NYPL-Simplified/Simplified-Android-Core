@@ -1,11 +1,13 @@
 package org.nypl.simplified.app.catalog;
 
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSCategory;
 
 import android.content.res.Resources;
 import android.webkit.WebSettings;
@@ -23,6 +25,17 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 final class CatalogBookDetail
 {
+  private static final URI    GENRES_URI;
+  private static final String GENRES_URI_TEXT;
+
+  static {
+    GENRES_URI =
+      NullCheck.notNull(URI
+        .create("http://librarysimplified.org/terms/genres/Simplified/"));
+    GENRES_URI_TEXT =
+      NullCheck.notNull(CatalogBookDetail.GENRES_URI.toString());
+  }
+
   static void configureSummaryPublisher(
     final OPDSAcquisitionFeedEntry e,
     final TextView summary_publisher)
@@ -103,8 +116,17 @@ final class CatalogBookDetail
     final OPDSAcquisitionFeedEntry e,
     final StringBuilder buffer)
   {
-    final List<String> cats = e.getCategories();
-    if (cats.isEmpty() == false) {
+    final List<OPDSCategory> cats = e.getCategories();
+
+    boolean has_genres = false;
+    for (int index = 0; index < cats.size(); ++index) {
+      final OPDSCategory c = NullCheck.notNull(cats.get(index));
+      if (CatalogBookDetail.GENRES_URI_TEXT.equals(c.getScheme())) {
+        has_genres = true;
+      }
+    }
+
+    if (has_genres) {
       if (buffer.length() > 0) {
         buffer.append("\n");
       }
@@ -114,10 +136,12 @@ final class CatalogBookDetail
       buffer.append(": ");
 
       for (int index = 0; index < cats.size(); ++index) {
-        final String c = NullCheck.notNull(cats.get(index));
-        buffer.append(c);
-        if ((index + 1) <= cats.size()) {
-          buffer.append(", ");
+        final OPDSCategory c = NullCheck.notNull(cats.get(index));
+        if (CatalogBookDetail.GENRES_URI_TEXT.equals(c.getScheme())) {
+          buffer.append(c.getTerm());
+          if ((index + 1) <= cats.size()) {
+            buffer.append(", ");
+          }
         }
       }
     }

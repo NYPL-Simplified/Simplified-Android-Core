@@ -212,8 +212,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = i.getExtras();
     if (a != null) {
-      return NullCheck.notNull((CatalogFeedArgumentsType) a
-        .getSerializable(CatalogFeedActivity.CATALOG_ARGS));
+      final CatalogFeedArgumentsType args =
+        (CatalogFeedArgumentsType) a
+          .getSerializable(CatalogFeedActivity.CATALOG_ARGS);
+      if (args != null) {
+        return args;
+      }
     }
 
     /**

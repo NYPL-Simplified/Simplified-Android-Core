@@ -12,6 +12,7 @@ import java.util.Set;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSCategory;
 import org.nypl.simplified.opds.core.OPDSFeedParseException;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -275,5 +276,39 @@ import com.io7m.jnull.NullCheck;
           p.parse(uri, d);
         }
       });
+  }
+
+  @Override public void testAcquisitionFeedCategories0()
+    throws Exception
+  {
+    final URI uri =
+      URI
+        .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final InputStream d =
+      OPDSFeedParserContract.getResource("acquisition-categories-0.xml");
+    final OPDSAcquisitionFeed f = p.parse(uri, d);
+    d.close();
+
+    final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(0);
+    final List<OPDSCategory> ec = e.getCategories();
+
+    TestUtilities.assertEquals(3, ec.size());
+
+    final OPDSCategory ec0 = ec.get(0);
+    TestUtilities.assertEquals(ec0.getTerm(), "Children");
+    TestUtilities.assertEquals(ec0.getScheme(), "http://schema.org/audience");
+
+    final OPDSCategory ec1 = ec.get(1);
+    TestUtilities.assertEquals(ec1.getTerm(), "3");
+    TestUtilities.assertEquals(
+      ec1.getScheme(),
+      "http://schema.org/typicalAgeRange");
+
+    final OPDSCategory ec2 = ec.get(2);
+    TestUtilities.assertEquals(ec2.getTerm(), "Nonfiction");
+    TestUtilities.assertEquals(
+      ec2.getScheme(),
+      "http://librarysimplified.org/terms/genres/Simplified/");
   }
 }

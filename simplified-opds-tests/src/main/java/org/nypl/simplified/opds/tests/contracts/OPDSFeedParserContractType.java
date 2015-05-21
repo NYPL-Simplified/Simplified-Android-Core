@@ -25,4 +25,7 @@ public interface OPDSFeedParserContractType
 
   void testAcquisitionFeedGroups0()
     throws Exception;
+
+  void testAcquisitionFeedCategories0()
+    throws Exception;
 }

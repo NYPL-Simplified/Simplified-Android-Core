@@ -279,6 +279,16 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       }
     }
 
+    final List<Element> e_categories =
+      OPDSXML
+        .getChildElementsWithName(e, OPDSFeedParser.ATOM_URI, "category");
+
+    for (final Element ce : e_categories) {
+      final String term = NullCheck.notNull(ce.getAttribute("term"));
+      final String scheme = NullCheck.notNull(ce.getAttribute("scheme"));
+      eb.addCategory(new OPDSCategory(term, scheme));
+    }
+
     OPDSFeedParser.findAcquisitionAuthors(e, eb);
     eb.setPublisherOption(OPDSFeedParser.findPublisher(e));
     eb.setPublishedOption(OPDSFeedParser.findPublished(e));

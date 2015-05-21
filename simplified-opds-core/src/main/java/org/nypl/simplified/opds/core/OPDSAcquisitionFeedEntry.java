@@ -29,7 +29,7 @@ import com.io7m.jnull.Nullable;
     private final List<OPDSAcquisition>  acquisitions;
     private final List<String>           authors;
     private final Set<Pair<String, URI>> groups;
-    private final List<String>           categories;
+    private final List<OPDSCategory>     categories;
     private OptionType<URI>              cover;
     private final String                 id;
     private OptionType<Calendar>         published;
@@ -56,7 +56,7 @@ import com.io7m.jnull.Nullable;
       this.authors = new ArrayList<String>();
       this.published = Option.none();
       this.publisher = Option.none();
-      this.categories = new ArrayList<String>();
+      this.categories = new ArrayList<OPDSCategory>();
       this.groups = new HashSet<Pair<String, URI>>();
     }
 
@@ -82,7 +82,7 @@ import com.io7m.jnull.Nullable;
     }
 
     @Override public void addCategory(
-      final String c)
+      final OPDSCategory c)
     {
       this.categories.add(NullCheck.notNull(c));
     }
@@ -150,7 +150,7 @@ import com.io7m.jnull.Nullable;
     }
   }
 
-  private static final long serialVersionUID = -8647949453454680335L;
+  private static final long serialVersionUID = 2L;
 
   public static OPDSAcquisitionFeedEntryBuilderType newBuilder(
     final String in_id,
@@ -163,7 +163,7 @@ import com.io7m.jnull.Nullable;
   private final List<OPDSAcquisition>  acquisitions;
   private final List<String>           authors;
   private final Set<Pair<String, URI>> groups;
-  private final List<String>           categories;
+  private final List<OPDSCategory>     categories;
   private final OptionType<URI>        cover;
   private final String                 id;
   private final OptionType<Calendar>   published;
@@ -187,7 +187,7 @@ import com.io7m.jnull.Nullable;
     final String in_summary,
     final OptionType<Calendar> in_published,
     final OptionType<String> in_publisher,
-    final List<String> in_categories)
+    final List<OPDSCategory> in_categories)
   {
     this.authors =
       NullCheck.notNull(Collections.unmodifiableList(in_authors));
@@ -249,7 +249,7 @@ import com.io7m.jnull.Nullable;
     return this.groups;
   }
 
-  public List<String> getCategories()
+  public List<OPDSCategory> getCategories()
   {
     return this.categories;
   }
