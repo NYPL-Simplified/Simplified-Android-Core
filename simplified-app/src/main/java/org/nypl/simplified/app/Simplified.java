@@ -77,6 +77,7 @@ import com.io7m.jnull.Nullable;
     private final ExecutorService          exec_books;
     private final ExecutorService          exec_catalog_feeds;
     private final ExecutorService          exec_covers;
+    private final ExecutorService          exec_downloader;
     private final URI                      feed_initial_uri;
     private final FeedLoaderType           feed_loader;
     private final HTTPType                 http;
@@ -92,6 +93,7 @@ import com.io7m.jnull.Nullable;
       this.exec_catalog_feeds =
         Simplified.namedThreadPool(1, "catalog-feed", 19);
       this.exec_covers = Simplified.namedThreadPool(2, "cover", 19);
+      this.exec_downloader = Simplified.namedThreadPool(4, "downloader", 19);
       this.exec_books = Simplified.namedThreadPool(1, "books", 19);
 
       /**
@@ -143,7 +145,7 @@ import com.io7m.jnull.Nullable;
       this.http = HTTP.newHTTP();
       this.downloader =
         Downloader.newDownloader(
-          this.exec_books,
+          this.exec_downloader,
           this.http,
           downloader_config);
 
