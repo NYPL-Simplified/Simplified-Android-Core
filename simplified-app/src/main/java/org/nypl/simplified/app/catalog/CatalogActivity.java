@@ -62,8 +62,12 @@ public abstract class CatalogActivity extends SimplifiedActivity
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = i.getExtras();
     if (a != null) {
-      return (ImmutableStack<CatalogUpStackEntry>) NullCheck.notNull(a
-        .getSerializable(CatalogActivity.CATALOG_UP_STACK_ID));
+      final ImmutableStack<CatalogUpStackEntry> stack =
+        (ImmutableStack<CatalogUpStackEntry>) a
+          .getSerializable(CatalogActivity.CATALOG_UP_STACK_ID);
+      if (stack != null) {
+        return stack;
+      }
     }
 
     final ImmutableStack<CatalogUpStackEntry> empty = ImmutableStack.empty();
