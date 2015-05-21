@@ -67,8 +67,9 @@ public final class BookCoverProvider implements BookCoverProviderType
     final Resources rr = in_c.getResources();
     final Picasso.Builder pb = new Picasso.Builder(in_c);
     pb.defaultBitmapConfig(Bitmap.Config.RGB_565);
-    pb.indicatorsEnabled(true);
-    pb.loggingEnabled(rr.getBoolean(R.bool.debug_picasso));
+    pb
+      .indicatorsEnabled(rr.getBoolean(R.bool.debug_picasso_cache_indicators));
+    pb.loggingEnabled(rr.getBoolean(R.bool.debug_picasso_logging));
     pb.addRequestHandler(new CatalogBookCoverGeneratorRequestHandler(
       cover_gen));
     pb.executor(in_exec);
