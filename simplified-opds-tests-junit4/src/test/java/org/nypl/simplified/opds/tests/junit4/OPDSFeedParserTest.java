@@ -60,4 +60,10 @@ public final class OPDSFeedParserTest implements OPDSFeedParserContractType
   {
     this.contract.testAcquisitionFeedGroups0();
   }
+
+  @Override @Test public void testAcquisitionFeedCategories0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedCategories0();
+  }
 }

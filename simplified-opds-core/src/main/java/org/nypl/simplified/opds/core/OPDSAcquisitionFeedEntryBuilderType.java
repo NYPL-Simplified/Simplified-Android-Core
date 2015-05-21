@@ -22,7 +22,7 @@ public interface OPDSAcquisitionFeedEntryBuilderType
     final String b);
 
   void addCategory(
-    final String c);
+    final OPDSCategory c);
 
   OPDSAcquisitionFeedEntry build();
 

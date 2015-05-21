@@ -15,10 +15,22 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
     this.contract = new OPDSFeedParserContract();
   }
 
+  @Override public void testAcquisitionFeedCategories0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedCategories0();
+  }
+
   @Override public void testAcquisitionFeedFiction0()
     throws Exception
   {
     this.contract.testAcquisitionFeedFiction0();
+  }
+
+  @Override public void testAcquisitionFeedGroups0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedGroups0();
   }
 
   @Override public void testAcquisitionFeedPaginated0()
@@ -55,12 +67,6 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
     throws Exception
   {
     this.contract.testStreamIOException();
-  }
-
-  @Override public void testAcquisitionFeedGroups0()
-    throws Exception
-  {
-    this.contract.testAcquisitionFeedGroups0();
   }
 
 }
