@@ -9,7 +9,6 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ScreenSizeControllerType;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
@@ -98,8 +97,10 @@ import com.squareup.picasso.Callback;
     final FeedGroup in_group)
   {
     this.scroller.setVisibility(View.INVISIBLE);
-    this.scroller_contents.removeAllViews();
+    this.scroller_contents.setVisibility(View.INVISIBLE);
     this.progress.setVisibility(View.VISIBLE);
+
+    this.scroller_contents.removeAllViews();
 
     this.title.setText(in_group.getGroupTitle());
     this.title.setOnClickListener(new OnClickListener() {
@@ -169,6 +170,11 @@ import com.squareup.picasso.Callback;
       final Callback cover_callback = new Callback() {
         @Override public void onError()
         {
+          CatalogFeedLane.LOG.debug(
+            "could not load image for {}",
+            e.getBookID());
+
+          image_view.setVisibility(View.GONE);
           if (images_left.decrementAndGet() <= 0) {
             CatalogFeedLane.this.done();
           }
@@ -195,14 +201,8 @@ import com.squareup.picasso.Callback;
   {
     CatalogFeedLane.LOG.debug("images done");
 
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
-      {
-        CatalogFeedLane.this.progress.setVisibility(View.INVISIBLE);
-        FadeUtilities.fadeIn(
-          CatalogFeedLane.this.scroller,
-          FadeUtilities.DEFAULT_FADE_DURATION);
-      }
-    });
+    this.progress.setVisibility(View.INVISIBLE);
+    this.scroller_contents.setVisibility(View.VISIBLE);
+    FadeUtilities.fadeIn(this.scroller, FadeUtilities.DEFAULT_FADE_DURATION);
   }
 }

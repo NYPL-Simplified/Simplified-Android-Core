@@ -198,12 +198,16 @@ public final class BookCoverProvider implements BookCoverProviderType
     final int h,
     final @Nullable Callback c)
   {
-    BookCoverProvider.LOG.debug("{}: loadThumbnailInto", e.getBookID());
+    final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
+
+    BookCoverProvider.LOG.debug(
+      "{}: loadThumbnailInto {}",
+      e.getBookID(),
+      eo.getID());
 
     UIThread.checkIsUIThread();
 
     final URI uri;
-    final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
     final BookID id = e.getBookID();
     final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
     if (snap_opt.isSome()) {
