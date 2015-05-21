@@ -3,7 +3,6 @@ package org.nypl.simplified.app.catalog;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
@@ -49,9 +48,6 @@ public abstract class CatalogActivity extends SimplifiedActivity
     if (up_stack.isEmpty() == false) {
       bar.setDisplayHomeAsUpEnabled(true);
       bar.setHomeButtonEnabled(true);
-    } else {
-      bar.setDisplayHomeAsUpEnabled(false);
-      bar.setHomeButtonEnabled(false);
     }
   }
 
@@ -94,26 +90,33 @@ public abstract class CatalogActivity extends SimplifiedActivity
       case android.R.id.home:
       {
         final ImmutableStack<CatalogUpStackEntry> us = this.getUpStack();
-        Assertions.checkPrecondition(
-          us.isEmpty() == false,
-          "up stack is not empty");
 
-        CatalogActivity.LOG.debug("up stack before pop: {}", us);
+        /**
+         * If the stack is non-empty, then the user is not at the root of the
+         * catalog. If it is empty, then the button is only enabled to control
+         * the navigation drawer and therefore the event should be propagated.
+         */
 
-        final Pair<CatalogUpStackEntry, ImmutableStack<CatalogUpStackEntry>> p =
-          us.pop();
+        if (us.isEmpty() == false) {
+          CatalogActivity.LOG.debug("up stack before pop: {}", us);
 
-        final ImmutableStack<CatalogUpStackEntry> stack = p.getRight();
-        final CatalogUpStackEntry top = p.getLeft();
+          final Pair<CatalogUpStackEntry, ImmutableStack<CatalogUpStackEntry>> p =
+            us.pop();
 
-        final CatalogFeedArgumentsRemote remote =
-          new CatalogFeedArgumentsRemote(
-            false,
-            stack,
-            top.getTitle(),
-            top.getURI());
-        CatalogFeedActivity.startNewActivity(this, remote);
-        return true;
+          final ImmutableStack<CatalogUpStackEntry> stack = p.getRight();
+          final CatalogUpStackEntry top = p.getLeft();
+
+          final CatalogFeedArgumentsRemote remote =
+            new CatalogFeedArgumentsRemote(
+              false,
+              stack,
+              top.getTitle(),
+              top.getURI());
+          CatalogFeedActivity.startNewActivity(this, remote);
+          return true;
+        }
+
+        return super.onOptionsItemSelected(item);
       }
 
       default:

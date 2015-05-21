@@ -194,9 +194,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (up_stack.isEmpty() == false) {
       bar.setDisplayHomeAsUpEnabled(true);
       bar.setHomeButtonEnabled(true);
-    } else {
-      bar.setDisplayHomeAsUpEnabled(false);
-      bar.setHomeButtonEnabled(false);
     }
 
     bar.setTitle(title);
@@ -750,5 +747,10 @@ import com.io7m.junreachable.UnreachableCodeException;
         f.getGroupTitle(),
         f.getGroupURI());
     CatalogFeedActivity.startNewActivity(this, remote);
+  }
+
+  @Override protected boolean shouldShowNavigationDrawerIndicator()
+  {
+    return this.getUpStack().isEmpty();
   }
 }
