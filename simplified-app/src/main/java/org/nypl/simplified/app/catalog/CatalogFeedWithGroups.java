@@ -2,11 +2,8 @@ package org.nypl.simplified.app.catalog;
 
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.ScreenSizeControllerType;
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedGroup;
 import org.nypl.simplified.books.core.FeedWithGroups;
-import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.database.DataSetObserver;
@@ -24,16 +21,9 @@ public final class CatalogFeedWithGroups implements
   ListAdapter,
   OnScrollListener
 {
-  private static final Logger               LOG;
-
-  static {
-    LOG = LogUtilities.getLog(CatalogFeedWithGroups.class);
-  }
-
   private final Activity                    activity;
   private final ArrayAdapter<FeedGroup>     adapter;
   private final BookCoverProviderType       book_cover_provider;
-  private final BooksType                   books;
   private final FeedWithGroups              feed;
   private final CatalogFeedLaneListenerType lane_listener;
   private final ScreenSizeControllerType    screen;
@@ -43,13 +33,11 @@ public final class CatalogFeedWithGroups implements
     final ScreenSizeControllerType in_screen,
     final BookCoverProviderType in_book_cover_provider,
     final CatalogFeedLaneListenerType in_lane_listener,
-    final BooksType in_books,
     final FeedWithGroups in_feed)
   {
     this.activity = NullCheck.notNull(in_activity);
     this.book_cover_provider = NullCheck.notNull(in_book_cover_provider);
     this.lane_listener = NullCheck.notNull(in_lane_listener);
-    this.books = NullCheck.notNull(in_books);
     this.feed = NullCheck.notNull(in_feed);
     this.screen = NullCheck.notNull(in_screen);
     this.adapter = new ArrayAdapter<FeedGroup>(this.activity, 0, this.feed);

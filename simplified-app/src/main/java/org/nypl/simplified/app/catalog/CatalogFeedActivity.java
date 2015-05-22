@@ -56,7 +56,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-@SuppressWarnings("synthetic-access") public class CatalogFeedActivity extends
+@SuppressWarnings({ "boxing", "synthetic-access" }) public class CatalogFeedActivity extends
   CatalogActivity implements
   BookFeedListenerType,
   FeedMatcherType<Unit, UnreachableCodeException>,
@@ -561,7 +561,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         app,
         app.getCoverProvider(),
         in_lane_listener,
-        app.getBooks(),
         f);
 
     list.setAdapter(cfl);

@@ -450,7 +450,8 @@ import com.io7m.jnull.Nullable;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        final String shortened = TextUtilities.ellipsize(p.getTitle(), 24);
+        final String title = NullCheck.notNull(p.getTitle());
+        final String shortened = TextUtilities.ellipsize(title, 24);
         in_title_text.setText(shortened);
       }
     });

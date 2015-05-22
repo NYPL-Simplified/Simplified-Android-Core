@@ -51,11 +51,7 @@
     <!-- Testing -->
     <activity
       android:name="org.nypl.simplified.app.testing.ThemeZooActivity"
-      android:exported="true">
-    </activity>
-    <activity
-      android:name="org.nypl.simplified.app.testing.FeedTimeActivity"
-      android:exported="true">
+      android:exported="false">
     </activity>
 
     <!-- Reader -->
