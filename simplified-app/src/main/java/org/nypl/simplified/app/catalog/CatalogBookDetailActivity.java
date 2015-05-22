@@ -62,7 +62,8 @@ import com.io7m.junreachable.UnreachableCodeException;
  * An activity showing a full-screen book detail page.
  */
 
-public final class CatalogBookDetailActivity extends CatalogActivity implements
+@SuppressWarnings("synthetic-access") public final class CatalogBookDetailActivity extends
+  CatalogActivity implements
   Observer,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -131,7 +132,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
   private @Nullable TextView      book_downloading_percent_text;
   private @Nullable ProgressBar   book_downloading_progress;
   private @Nullable BooksType     books;
-  private @Nullable TextView      debug_status;
   private @Nullable FeedEntryOPDS entry;
 
   private FeedEntryOPDS getFeedEntry()
@@ -384,7 +384,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity implements
     } else {
       in_debug_status.setVisibility(View.GONE);
     }
-    this.debug_status = in_debug_status;
 
     final ViewGroup header =
       NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_header));

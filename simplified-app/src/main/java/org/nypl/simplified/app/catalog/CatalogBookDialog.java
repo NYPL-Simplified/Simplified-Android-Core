@@ -64,7 +64,8 @@ import com.io7m.junreachable.UnreachableCodeException;
  * screens.
  */
 
-public final class CatalogBookDialog extends DialogFragment implements
+@SuppressWarnings("synthetic-access") public final class CatalogBookDialog extends
+  DialogFragment implements
   Observer,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
