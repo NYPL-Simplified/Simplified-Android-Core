@@ -19,7 +19,7 @@
       style="?android:attr/progressBarStyle"
       android:layout_width="wrap_content"
       android:layout_height="25dp"
-      android:layout_alignParentRight="true" />
+      android:layout_alignParentEnd="true" />
   </RelativeLayout>
 
   <HorizontalScrollView
