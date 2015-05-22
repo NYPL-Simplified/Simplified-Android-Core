@@ -11,7 +11,8 @@
   <string name="catalog_load_error_text">An error occurred whilst loading the catalog. Please try
     again.
   </string>
-  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/groups/</string>
+  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/groups/
+  </string>
   <string name="catalog_unknown_feed">Unknown</string>
   <string name="catalog_detail_related">Related books</string>
   <string name="catalog_downloading">Downloading</string>
@@ -41,8 +42,10 @@
   <string name="settings_login_title">Library Card</string>
   <string name="settings_barcode">Barcode</string>
   <string name="settings_pin">PIN</string>
+  <string name="settings_log_in_cancel">Cancel</string>
   <string name="settings_log_in">Log in</string>
   <string name="settings_log_out">Log out</string>
+  <string name="settings_log_out_cancel">Cancel</string>
   <string name="settings_login_succeeded">Logged in successfully</string>
   <string name="settings_logout_succeeded">Logged out successfully</string>
   <string name="settings_login_failed">Failed to log in!</string>
@@ -52,6 +55,12 @@
   <string name="settings_logout_confirm">If you sign out of your account, all content will be
     removed from this device.
   </string>
+
+  <!-- Accessibility strings used for content descriptions -->
+  <string name="settings_accessibility_log_in_cancel">Cancel login</string>
+  <string name="settings_accessibility_log_in">Log in</string>
+  <string name="settings_accessibility_log_out_cancel">Cancel logout</string>
+  <string name="settings_accessibility_log_out">Log out</string>
 
   <!-- Reader strings -->
   <string name="reader_toc">Table Of Contents</string>

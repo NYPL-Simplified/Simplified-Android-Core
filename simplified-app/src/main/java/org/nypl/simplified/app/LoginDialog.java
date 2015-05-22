@@ -37,11 +37,10 @@ public final class LoginDialog extends DialogFragment implements
   AccountLoginListenerType
 {
   private static final String BARCODE_ID;
-
   private static final Logger LOG;
-
   private static final String PIN_ID;
   private static final String TEXT_ID;
+
   static {
     LOG = LogUtilities.getLog(DialogFragment.class);
   }
@@ -197,6 +196,9 @@ public final class LoginDialog extends DialogFragment implements
         .findViewById(R.id.login_dialog_pin_text_edit));
     final Button in_login_button =
       NullCheck.notNull((Button) layout.findViewById(R.id.login_dialog_ok));
+    final Button in_login_cancel_button =
+      NullCheck.notNull((Button) layout
+        .findViewById(R.id.login_dialog_cancel));
     final ProgressBar in_login_progress =
       NullCheck.notNull((ProgressBar) layout
         .findViewById(R.id.login_progress));
@@ -231,6 +233,14 @@ public final class LoginDialog extends DialogFragment implements
       }
     });
 
+    in_login_cancel_button.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        LoginDialog.this.dismiss();
+      }
+    });
+
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
     this.login = in_login_button;
@@ -241,6 +251,7 @@ public final class LoginDialog extends DialogFragment implements
     if (d != null) {
       d.setCanceledOnTouchOutside(true);
     }
+
     return layout;
   }
 

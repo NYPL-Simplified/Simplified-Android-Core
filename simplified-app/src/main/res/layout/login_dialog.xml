@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:maxLength="14"
         android:maxLines="1">
       </EditText>
@@ -59,7 +59,7 @@
         android:id="@+id/login_dialog_pin_text_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
         android:maxLength="4"
@@ -74,12 +74,26 @@
     android:layout_gravity="center_horizontal">
 
     <Button
-      android:id="@+id/login_dialog_ok"
+      android:id="@+id/login_dialog_cancel"
       style="?android:attr/buttonStyleSmall"
       android:layout_marginTop="16dp"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:background="@drawable/simplified_button"
+      android:contentDescription="@string/settings_accessibility_log_in_cancel"
+      android:text="@string/settings_log_in_cancel"
+      android:textColor="@drawable/simplified_button_text" />
+
+    <Button
+      android:id="@+id/login_dialog_ok"
+      android:layout_toEndOf="@id/login_dialog_cancel"
+      android:layout_marginStart="16dp"
+      style="?android:attr/buttonStyleSmall"
+      android:layout_marginTop="16dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="@drawable/simplified_button"
+      android:contentDescription="@string/settings_accessibility_log_in"
       android:text="@string/settings_log_in"
       android:textColor="@drawable/simplified_button_text" />
 

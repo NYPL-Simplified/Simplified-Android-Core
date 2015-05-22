@@ -82,6 +82,7 @@ import com.io7m.jnull.Nullable;
 
     final Button in_logout_button =
       NullCheck.notNull((Button) layout.findViewById(R.id.logout_confirm));
+
     in_logout_button.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)
@@ -91,6 +92,17 @@ import com.io7m.jnull.Nullable;
         if (r != null) {
           r.run();
         }
+        LogoutDialog.this.dismiss();
+      }
+    });
+
+    final Button in_logout_cancel_button =
+      NullCheck.notNull((Button) layout.findViewById(R.id.logout_cancel));
+
+    in_logout_cancel_button.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
         LogoutDialog.this.dismiss();
       }
     });

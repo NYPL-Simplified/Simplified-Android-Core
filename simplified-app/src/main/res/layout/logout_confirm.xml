@@ -15,14 +15,34 @@
     android:layout_height="wrap_content"
     android:text="@string/settings_logout_confirm" />
 
-  <Button
-    android:id="@+id/logout_confirm"
-    style="?android:attr/buttonStyleSmall"
+  <LinearLayout
     android:layout_marginTop="16dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/simplified_button"
-    android:text="@string/settings_log_out"
-    android:textColor="@drawable/simplified_button_text" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <Button
+      android:id="@+id/logout_cancel"
+      style="?android:attr/buttonStyleSmall"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="@drawable/simplified_button"
+      android:contentDescription="@string/settings_accessibility_log_out_cancel"
+      android:text="@string/settings_log_out_cancel"
+      android:textColor="@drawable/simplified_button_text" />
+
+    <Button
+      android:id="@+id/logout_confirm"
+      style="?android:attr/buttonStyleSmall"
+      android:layout_marginStart="16dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="@drawable/simplified_button"
+      android:contentDescription="@string/settings_accessibility_log_out"
+      android:text="@string/settings_log_out"
+      android:textColor="@drawable/simplified_button_text" />
+
+  </LinearLayout>
 
 </LinearLayout>
