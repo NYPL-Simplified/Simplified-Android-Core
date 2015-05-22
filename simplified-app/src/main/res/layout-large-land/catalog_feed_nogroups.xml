@@ -8,7 +8,7 @@
   android:orientation="vertical">
 
   <GridView
-    android:id="@+id/catalog_acq_feed_grid"
+    android:id="@+id/catalog_feed_noblocks_grid"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:scrollbars="none"
