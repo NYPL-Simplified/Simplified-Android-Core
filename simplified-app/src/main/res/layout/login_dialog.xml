@@ -51,6 +51,7 @@
       android:layout_height="wrap_content">
 
       <TextView
+        android:labelFor="@+id/login_dialog_pin_text_edit"
         android:id="@+id/login_dialog_pin_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
