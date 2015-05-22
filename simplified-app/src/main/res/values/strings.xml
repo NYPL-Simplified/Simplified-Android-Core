@@ -56,7 +56,7 @@
     removed from this device.
   </string>
 
-  <!-- Accessibility strings used for content descriptions -->
+  <!-- Accessibility strings used for content descriptions (Settings) -->
   <string name="settings_accessibility_log_in_cancel">Cancel login</string>
   <string name="settings_accessibility_log_in">Log in</string>
   <string name="settings_accessibility_log_out_cancel">Cancel logout</string>
@@ -64,5 +64,12 @@
 
   <!-- Reader strings -->
   <string name="reader_toc">Table Of Contents</string>
+
+  <!-- Accessibility strings used for content descriptions (Reader) -->
+  <string name="reader_accessibility_toc">Show table of contents</string>
+  <string name="reader_accessibility_settings">Show reader settings</string>
+  <string name="reader_accessibility_media_previous">Go to previous media item</string>
+  <string name="reader_accessibility_media_next">Go to next media item</string>
+  <string name="reader_accessibility_media_play">Play or pause current media item</string>
 
 </resources>

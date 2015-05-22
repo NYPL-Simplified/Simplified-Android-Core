@@ -43,6 +43,7 @@
         android:id="@+id/reader_toc"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:contentDescription="@string/reader_accessibility_toc"
         android:src="@drawable/list_8x" />
     </LinearLayout>
 
@@ -59,6 +60,7 @@
         android:id="@+id/reader_settings"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:contentDescription="@string/reader_accessibility_settings"
         android:src="@drawable/text_8x" />
     </LinearLayout>
 
@@ -77,17 +79,20 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="16dp"
+        android:contentDescription="@string/reader_accessibility_media_previous"
         android:src="@drawable/circle_left_8x" />
       <ImageView
         android:id="@+id/reader_hud_media_play"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:contentDescription="@string/reader_accessibility_media_play"
         android:src="@drawable/circle_play_8x" />
       <ImageView
         android:id="@+id/reader_hud_media_next"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginStart="16dp"
+        android:contentDescription="@string/reader_accessibility_media_next"
         android:src="@drawable/circle_next_8x" />
     </LinearLayout>
 
@@ -115,7 +120,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
-        android:text="Text" />
+        android:text="" />
 
       <ProgressBar
         android:progressDrawable="@drawable/simplified_progress"
