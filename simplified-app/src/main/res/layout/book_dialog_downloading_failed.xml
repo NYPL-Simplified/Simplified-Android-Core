@@ -12,7 +12,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
-    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
     android:text="@string/catalog_download_failed"
     android:textColor="@color/normal_text_major"
     android:textStyle="bold" />
@@ -28,7 +28,7 @@
 
   <Button
     android:id="@+id/book_downloading_failed_dismiss"
-    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true"
     android:layout_alignParentBottom="true"
     android:background="@drawable/simplified_button"
     android:textColor="@drawable/simplified_button_text"
