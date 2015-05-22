@@ -2,6 +2,8 @@ package org.nypl.simplified.app.catalog;
 
 import java.net.URI;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
@@ -25,6 +27,7 @@ import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
 import org.nypl.simplified.http.core.URIQueryBuilder;
+import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
@@ -237,6 +240,14 @@ import com.io7m.junreachable.UnreachableCodeException;
       in_uri);
   }
 
+  private void loadFeed(
+    final FeedLoaderType feed_loader,
+    final URI u)
+  {
+    CatalogFeedActivity.LOG.debug("loading feed: {}", u);
+    this.loading = feed_loader.fromURI(u, this);
+  }
+
   private ImmutableStack<CatalogUpStackEntry> newUpStack(
     final URI feed_uri,
     final String feed_title)
@@ -336,8 +347,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         @Override public Unit onFeedArgumentsRemote(
           final CatalogFeedArgumentsRemote c)
         {
-          CatalogFeedActivity.this.loading =
-            feed_loader.fromURI(c.getURI(), CatalogFeedActivity.this);
+          CatalogFeedActivity.this.loadFeed(feed_loader, c.getURI());
           return Unit.unit();
         }
       });
@@ -642,9 +652,47 @@ import com.io7m.junreachable.UnreachableCodeException;
       "restoring scroll position: {}",
       this.saved_scroll_pos);
 
+    final ViewGroup facets_view =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.catalog_feed_nogroups_facets));
     final GridView grid_view =
       NullCheck.notNull((GridView) layout
-        .findViewById(R.id.catalog_feed_noblocks_grid));
+        .findViewById(R.id.catalog_feed_nogroups_grid));
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final FeedLoaderType feed_loader = app.getFeedLoader();
+
+    final Map<String, List<OPDSFacet>> facet_groups =
+      f.getFeedFacetsByGroup();
+    if (facet_groups.isEmpty()) {
+      facets_view.setVisibility(View.GONE);
+    } else {
+      for (final String g : facet_groups.keySet()) {
+        final List<OPDSFacet> fs = NullCheck.notNull(facet_groups.get(g));
+        final CatalogFacetMenu fm =
+          new CatalogFacetMenu(this, fs, new CatalogFacetMenuListenerType() {
+            @Override public void onFacetSelected(
+              final OPDSFacet facet)
+            {
+              CatalogFeedActivity.LOG.debug(
+                "selected facet {}:{}",
+                facet.getGroup(),
+                facet.getTitle());
+
+              CatalogFeedActivity.this.loadFeed(feed_loader, facet.getURI());
+            }
+
+            @Override public void onFacetSelectedNone()
+            {
+              CatalogFeedActivity.LOG.debug("selected nothing");
+            }
+          });
+
+        facets_view.addView(fm);
+      }
+    }
+
     grid_view.post(new Runnable() {
       @Override public void run()
       {
@@ -657,9 +705,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     final URI feed_uri = f.getFeedURI();
     final ImmutableStack<CatalogUpStackEntry> new_up_stack =
       this.newUpStack(feed_uri, args.getTitle());
-
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
 
     final CatalogBookSelectionListenerType book_select_listener =
       new CatalogBookSelectionListenerType() {

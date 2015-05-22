@@ -27,11 +27,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogFeedWithoutGroups implements
@@ -44,23 +44,28 @@ public final class CatalogFeedWithoutGroups implements
   static {
     LOG = LogUtilities.getLog(CatalogFeedWithoutGroups.class);
   }
+
   private static boolean shouldLoadNext(
     final int first_visible_item,
     final int total_count)
   {
+    CatalogFeedWithoutGroups.LOG.debug(
+      "shouldLoadNext: {} - {} = {}",
+      total_count,
+      first_visible_item,
+      total_count - first_visible_item);
     return (total_count - first_visible_item) <= 50;
   }
-  private final Activity                         activity;
-  private final ArrayAdapter<FeedEntryType>      adapter;
-  private final BookCoverProviderType            book_cover_provider;
-  private final CatalogBookSelectionListenerType book_select_listener;
-  private final BooksType                        books;
 
-  private final FeedWithoutGroups                feed;
-
-  private final FeedLoaderType                   feed_loader;
-
-  private final AtomicReference<OptionType<URI>> uri_next;
+  private final Activity                                 activity;
+  private final ArrayAdapter<FeedEntryType>              adapter;
+  private final BookCoverProviderType                    book_cover_provider;
+  private final CatalogBookSelectionListenerType         book_select_listener;
+  private final BooksType                                books;
+  private final FeedWithoutGroups                        feed;
+  private final FeedLoaderType                           feed_loader;
+  private final AtomicReference<Pair<Future<Unit>, URI>> loading;
+  private final AtomicReference<OptionType<URI>>         uri_next;
 
   public CatalogFeedWithoutGroups(
     final Activity in_activity,
@@ -80,6 +85,7 @@ public final class CatalogFeedWithoutGroups implements
       new AtomicReference<OptionType<URI>>(in_feed.getFeedNext());
     this.adapter =
       new ArrayAdapter<FeedEntryType>(this.activity, 0, this.feed);
+    this.loading = new AtomicReference<Pair<Future<Unit>, URI>>();
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -154,6 +160,15 @@ public final class CatalogFeedWithoutGroups implements
     return this.adapter.isEnabled(position);
   }
 
+  /**
+   * Attempt to load the next feed, if necessary. If the feed is already
+   * loading, the feed will not be requested again.
+   * 
+   * @param next_ref
+   *          The next URI, if any
+   * @return A future representing the loading feed
+   */
+
   private @Nullable Future<Unit> loadNext(
     final AtomicReference<OptionType<URI>> next_ref)
   {
@@ -162,11 +177,37 @@ public final class CatalogFeedWithoutGroups implements
       final Some<URI> next_some = (Some<URI>) next_opt;
       final URI next = next_some.get();
 
-      CatalogFeedWithoutGroups.LOG.debug("loading next feed: %s", next);
-      return this.feed_loader.fromURI(next, this);
+      final Pair<Future<Unit>, URI> in_loading = this.loading.get();
+      if (in_loading == null) {
+        CatalogFeedWithoutGroups.LOG.debug(
+          "no feed currently loading; loading next feed: {}",
+          next);
+        return this.loadNextActual(next);
+      }
+
+      final URI loading_uri = in_loading.getRight();
+      if (loading_uri.equals(next) == false) {
+        CatalogFeedWithoutGroups.LOG.debug(
+          "different feed currently loading; loading next feed: {}",
+          next);
+        return this.loadNextActual(next);
+      }
+
+      CatalogFeedWithoutGroups.LOG.debug(
+        "already loading next feed, not loading again: {}",
+        next);
     }
 
     return null;
+  }
+
+  private Future<Unit> loadNextActual(
+    final URI next)
+  {
+    CatalogFeedWithoutGroups.LOG.debug("loading: {}", next);
+    final Future<Unit> r = this.feed_loader.fromURI(next, this);
+    this.loading.set(Pair.pair(r, next));
+    return r;
   }
 
   @Override public void onFeedLoadFailure(
@@ -190,15 +231,27 @@ public final class CatalogFeedWithoutGroups implements
   @Override public Unit onFeedWithGroups(
     final FeedWithGroups f)
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    CatalogFeedWithoutGroups.LOG.error(
+      "received feed with groups: {}",
+      f.getFeedID());
+
+    return Unit.unit();
   }
 
   @Override public Unit onFeedWithoutGroups(
     final FeedWithoutGroups f)
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    CatalogFeedWithoutGroups.LOG.debug(
+      "received feed without groups: {}",
+      f.getFeedID());
+
+    this.feed.addAll(f);
+    this.uri_next.set(f.getFeedNext());
+
+    CatalogFeedWithoutGroups.LOG.debug(
+      "current feed size: {}",
+      this.feed.size());
+    return Unit.unit();
   }
 
   @Override public void onScroll(
@@ -209,7 +262,6 @@ public final class CatalogFeedWithoutGroups implements
   {
     /**
      * If the user is close enough to the end of the list, load the next feed.
-     * If a feed is already loading, do not try to load it again.
      */
 
     if (CatalogFeedWithoutGroups.shouldLoadNext(
