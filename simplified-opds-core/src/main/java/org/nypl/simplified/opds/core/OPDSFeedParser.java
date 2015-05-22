@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -46,12 +47,16 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   private static final URI    ACQUISITION_URI_PREFIX;
   private static final String ACQUISITION_URI_PREFIX_TEXT;
   private static final URI    ATOM_URI;
+  private static final URI    DUBLIN_CORE_TERMS_URI;
+  private static final URI    FACET_URI;
+  private static final String FACET_URI_TEXT;
   private static final URI    GROUP_URI;
   private static final String GROUP_URI_TEXT;
-  private static final URI    DUBLIN_CORE_TERMS_URI;
   private static final URI    IMAGE_URI;
   private static final String IMAGE_URI_TEXT;
   private static final Logger LOG;
+  private static final URI    OPDS_URI;
+  private static final String OPDS_URI_TEXT;
   private static final URI    THUMBNAIL_URI;
   private static final String THUMBNAIL_URI_TEXT;
 
@@ -67,8 +72,15 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     ACQUISITION_URI_PREFIX_TEXT =
       NullCheck.notNull(OPDSFeedParser.ACQUISITION_URI_PREFIX.toString());
 
+    FACET_URI = NullCheck.notNull(URI.create("http://opds-spec.org/facet"));
+    FACET_URI_TEXT = NullCheck.notNull(OPDSFeedParser.FACET_URI.toString());
+
     GROUP_URI = NullCheck.notNull(URI.create("http://opds-spec.org/group"));
     GROUP_URI_TEXT = NullCheck.notNull(OPDSFeedParser.GROUP_URI.toString());
+
+    OPDS_URI =
+      NullCheck.notNull(URI.create("http://opds-spec.org/2010/catalog"));
+    OPDS_URI_TEXT = NullCheck.notNull(OPDSFeedParser.OPDS_URI.toString());
 
     THUMBNAIL_URI =
       NullCheck.notNull(URI.create("http://opds-spec.org/image/thumbnail"));
@@ -96,13 +108,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     }
   }
 
-  private static OptionType<URI> findAcquisitionNext(
-    final List<Element> e_links)
-    throws URISyntaxException
-  {
-    return OPDSFeedParser.findLinkWithURIRelText(e_links, "next");
-  }
-
   private static String findID(
     final Element ee)
     throws OPDSFeedParseException
@@ -111,23 +116,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       ee,
       OPDSFeedParser.ATOM_URI,
       "id");
-  }
-
-  private static OptionType<URI> findLinkWithURIRelText(
-    final List<Element> e_links,
-    final String text)
-    throws URISyntaxException
-  {
-    for (final Element e : e_links) {
-      if (e.hasAttribute("rel")) {
-        final String rel = e.getAttribute("rel");
-        if (rel.equals(text)) {
-          return Option.some(new URI(e.getAttribute("href")));
-        }
-      }
-    }
-
-    return Option.none();
   }
 
   private static OptionType<Calendar> findPublished(
@@ -301,6 +289,76 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     return eb.build();
   }
 
+  private static OptionType<OPDSFacet> parseFacet(
+    final Element e)
+    throws URISyntaxException
+  {
+    final boolean has_name =
+      OPDSXML.nodeHasName(
+        NullCheck.notNull(e),
+        OPDSFeedParser.ATOM_URI,
+        "link");
+
+    Assertions.checkPrecondition(has_name, "Node has name 'link'");
+
+    boolean has_everything = true;
+    has_everything = has_everything && e.hasAttribute("title");
+    has_everything = has_everything && e.hasAttribute("href");
+    has_everything = has_everything && e.hasAttribute("rel");
+    has_everything =
+      has_everything
+        && e.hasAttributeNS(OPDSFeedParser.OPDS_URI_TEXT, "facetGroup");
+
+    if (has_everything) {
+      final String title = NullCheck.notNull(e.getAttribute("title"));
+      final String rel = NullCheck.notNull(e.getAttribute("rel"));
+      final String href = NullCheck.notNull(e.getAttribute("href"));
+      final String group =
+        NullCheck.notNull(e.getAttributeNS(
+          OPDSFeedParser.OPDS_URI_TEXT,
+          "facetGroup"));
+
+      if (OPDSFeedParser.FACET_URI_TEXT.equals(rel)) {
+        final boolean in_active;
+        if (e.hasAttributeNS(OPDSFeedParser.OPDS_URI_TEXT, "activeFacet")) {
+          final String text =
+            e.getAttributeNS(OPDSFeedParser.OPDS_URI_TEXT, "activeFacet");
+          final Boolean b = Boolean.valueOf(text);
+          in_active = b.booleanValue();
+        } else {
+          in_active = false;
+        }
+
+        final OPDSFacet f =
+          new OPDSFacet(in_active, new URI(href), group, title);
+        return Option.some(f);
+      }
+    }
+
+    return Option.none();
+  }
+
+  private static OptionType<URI> parseNextLink(
+    final Element e)
+    throws URISyntaxException
+  {
+    Assertions.checkPrecondition(
+      e.getLocalName().equals("link"),
+      "localname %s == %s",
+      e.getLocalName(),
+      "link");
+
+    final String rel = e.getAttribute("rel");
+    if ("next".equals(rel)) {
+      if (e.hasAttribute("href")) {
+        final URI uri = new URI(e.getAttribute("href"));
+        return Option.some(uri);
+      }
+    }
+
+    return Option.none();
+  }
+
   private static OptionType<OPDSSearchLink> parseSearchLink(
     final Element e)
     throws URISyntaxException
@@ -398,11 +456,45 @@ public final class OPDSFeedParser implements OPDSFeedParserType
             final Element e = OPDSXML.nodeAsElement(child);
             links.add(e);
 
-            final OptionType<OPDSSearchLink> search_opt =
-              OPDSFeedParser.parseSearchLink(e);
-            if (search_opt.isSome()) {
-              b.setSearchOption(search_opt);
+            /**
+             * Search links.
+             */
+
+            {
+              final OptionType<OPDSSearchLink> search_opt =
+                OPDSFeedParser.parseSearchLink(e);
+              if (search_opt.isSome()) {
+                b.setSearchOption(search_opt);
+                continue;
+              }
             }
+
+            /**
+             * Next links.
+             */
+
+            {
+              final OptionType<URI> next_opt =
+                OPDSFeedParser.parseNextLink(e);
+              if (next_opt.isSome()) {
+                b.setNextOption(next_opt);
+                continue;
+              }
+            }
+
+            /**
+             * Facet links.
+             */
+
+            {
+              final OptionType<OPDSFacet> facet_opt =
+                OPDSFeedParser.parseFacet(e);
+              if (facet_opt.isSome()) {
+                b.addFacet(((Some<OPDSFacet>) facet_opt).get());
+                continue;
+              }
+            }
+
             continue;
           }
 
@@ -421,7 +513,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         }
       }
 
-      b.setNextOption(OPDSFeedParser.findAcquisitionNext(links));
       return b.build();
 
     } catch (final ParserConfigurationException e) {

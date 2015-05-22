@@ -21,6 +21,12 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
     this.contract.testAcquisitionFeedCategories0();
   }
 
+  @Override public void testAcquisitionFeedFacets0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedFacets0();
+  }
+
   @Override public void testAcquisitionFeedFiction0()
     throws Exception
   {
@@ -68,5 +74,4 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase implements
   {
     this.contract.testStreamIOException();
   }
-
 }
