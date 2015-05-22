@@ -29,6 +29,7 @@
 
       <TextView
         android:id="@+id/login_dialog_barcode_text_view"
+        android:labelFor="@+id/login_dialog_barcode_text_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/settings_barcode" />
