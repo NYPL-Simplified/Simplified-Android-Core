@@ -51,7 +51,7 @@
     <!-- Testing -->
     <activity
       android:name="org.nypl.simplified.app.testing.ThemeZooActivity"
-      android:exported="false">
+      android:exported="true">
     </activity>
 
     <!-- Reader -->

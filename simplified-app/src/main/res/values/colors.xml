@@ -12,6 +12,10 @@
   <color name="button_foreground">@color/main_color</color>
   <color name="button_disabled">#dddddd</color>
 
+  <color name="spinner_background">#ffffff</color>
+  <color name="spinner_foreground">@color/main_color</color>
+  <color name="spinner_disabled">#dddddd</color>
+
   <color name="downloading_background">@color/main_color</color>
   <color name="downloading_foreground">#ffffff</color>
 

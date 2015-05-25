@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="spinner_stroke">1dp</dimen>
+  <dimen name="spinner_corner_radius">3dp</dimen>
+
+  <dimen name="spinner_padding_left">3dp</dimen>
+  <dimen name="spinner_padding_right">3dp</dimen>
+  <dimen name="spinner_padding_top">3dp</dimen>
+  <dimen name="spinner_padding_bottom">3dp</dimen>
+
+  <dimen name="spinner_item_padding_left">8dp</dimen>
+  <dimen name="spinner_item_padding_right">8dp</dimen>
+  <dimen name="spinner_item_padding_top">4dp</dimen>
+  <dimen name="spinner_item_padding_bottom">4dp</dimen>
+</resources>

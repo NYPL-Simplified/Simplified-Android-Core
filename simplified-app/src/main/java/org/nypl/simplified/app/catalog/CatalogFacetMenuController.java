@@ -3,9 +3,9 @@ package org.nypl.simplified.app.catalog;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.nypl.simplified.app.R;
 import org.nypl.simplified.opds.core.OPDSFacet;
 
-import android.R;
 import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,7 +15,7 @@ import android.widget.Spinner;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogFacetMenu extends Spinner implements
+public final class CatalogFacetMenuController implements
   android.widget.AdapterView.OnItemSelectedListener
 {
   private final List<OPDSFacet>              facets;
@@ -24,12 +24,14 @@ public final class CatalogFacetMenu extends Spinner implements
   private final CatalogFacetMenuListenerType listener;
   private boolean                            first;
 
-  public CatalogFacetMenu(
+  public CatalogFacetMenuController(
     final Context context,
+    final Spinner in_spinner,
     final List<OPDSFacet> in_facets,
     final CatalogFacetMenuListenerType in_listener)
   {
-    super(context);
+    NullCheck.notNull(context);
+    NullCheck.notNull(in_spinner);
     this.facets = NullCheck.notNull(in_facets);
     this.listener = NullCheck.notNull(in_listener);
     this.texts = new ArrayList<String>(this.facets.size());
@@ -41,20 +43,20 @@ public final class CatalogFacetMenu extends Spinner implements
     this.adapter =
       new ArrayAdapter<String>(
         context,
-        R.layout.simple_list_item_1,
+        R.layout.facet_dropdown_item,
         this.texts);
 
-    this.setAdapter(this.adapter);
+    in_spinner.setAdapter(this.adapter);
 
     for (int index = 0; index < this.facets.size(); ++index) {
       final OPDSFacet f = NullCheck.notNull(this.facets.get(index));
       if (f.isActive()) {
-        this.setSelection(index);
+        in_spinner.setSelection(index);
       }
     }
 
     this.first = true;
-    this.setOnItemSelectedListener(this);
+    in_spinner.setOnItemSelectedListener(this);
   }
 
   @Override public void onItemSelected(

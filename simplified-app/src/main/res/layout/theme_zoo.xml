@@ -50,6 +50,7 @@
   </RelativeLayout>
 
   <RelativeLayout
+    android:id="@+id/theme_zoo_plain"
     android:layout_below="@id/theme_zoo_downloading"
     android:background="@color/normal_background"
     android:layout_width="match_parent"
@@ -90,6 +91,26 @@
       android:enabled="false"
       android:text="Button 1"
       android:textColor="@drawable/simplified_button_text" />
+
+  </RelativeLayout>
+
+  <RelativeLayout
+    android:id="@+id/theme_zoo_facets"
+    android:layout_below="@id/theme_zoo_plain"
+    android:background="#fff"
+    android:layout_width="match_parent"
+    android:layout_height="100dp">
+
+    <Spinner
+      android:id="@+id/theme_zoo_spinner"
+      android:entries="@array/theme_zoo_spinner"
+      android:spinnerMode="dropdown"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentTop="true"
+      android:layout_marginLeft="16dp"
+      android:layout_marginTop="16dp" />
 
   </RelativeLayout>
 

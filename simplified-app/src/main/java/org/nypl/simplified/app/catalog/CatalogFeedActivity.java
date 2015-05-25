@@ -51,6 +51,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
+import android.widget.Spinner;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -245,6 +246,11 @@ import com.io7m.junreachable.UnreachableCodeException;
     final URI u)
   {
     CatalogFeedActivity.LOG.debug("loading feed: {}", u);
+
+    final Future<Unit> previous = this.loading;
+    if (previous != null) {
+      previous.cancel(true);
+    }
     this.loading = feed_loader.fromURI(u, this);
   }
 
@@ -670,26 +676,34 @@ import com.io7m.junreachable.UnreachableCodeException;
     } else {
       for (final String g : facet_groups.keySet()) {
         final List<OPDSFacet> fs = NullCheck.notNull(facet_groups.get(g));
-        final CatalogFacetMenu fm =
-          new CatalogFacetMenu(this, fs, new CatalogFacetMenuListenerType() {
-            @Override public void onFacetSelected(
-              final OPDSFacet facet)
-            {
-              CatalogFeedActivity.LOG.debug(
-                "selected facet {}:{}",
-                facet.getGroup(),
-                facet.getTitle());
 
-              CatalogFeedActivity.this.loadFeed(feed_loader, facet.getURI());
-            }
+        final Spinner spinner =
+          (Spinner) inflater.inflate(R.layout.facet, facets_view, false);
 
-            @Override public void onFacetSelectedNone()
-            {
-              CatalogFeedActivity.LOG.debug("selected nothing");
-            }
-          });
+        final CatalogFacetMenuController fm =
+          new CatalogFacetMenuController(
+            this,
+            spinner,
+            fs,
+            new CatalogFacetMenuListenerType() {
+              @Override public void onFacetSelectedNone()
+              {
+                CatalogFeedActivity.LOG.debug("selected nothing");
+              }
 
-        facets_view.addView(fm);
+              @Override public void onFacetSelected(
+                final OPDSFacet facet)
+              {
+                CatalogFeedActivity.LOG.debug(
+                  "selected facet {}:{}",
+                  facet.getGroup(),
+                  facet.getTitle());
+
+                CatalogFeedActivity.this.loadFeed(feed_loader, facet.getURI());
+              }
+            });
+
+        facets_view.addView(spinner);
       }
     }
 
