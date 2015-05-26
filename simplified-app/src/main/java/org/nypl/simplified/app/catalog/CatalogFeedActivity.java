@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
-import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -184,6 +185,36 @@ import com.io7m.junreachable.UnreachableCodeException;
     from.startActivity(i);
   }
 
+  /**
+   * Start a new catalog feed activity, assuming that the user came from
+   * <tt>from</tt>, with up stack <tt>up_stack</tt>, attempting to load the
+   * feed at <tt>target</tt>. The new activity "replaces" the current activity
+   * by calling <tt>finish()</tt> on the existing activity.
+   *
+   * @param from
+   *          The previous activity
+   * @param up_stack
+   *          The up stack for the new activity
+   * @param title
+   *          The title of the feed
+   * @param target
+   *          The URI of the feed
+   */
+
+  public static void startNewActivityReplacing(
+    final Activity from,
+    final CatalogFeedArgumentsType in_args)
+  {
+    final Bundle b = new Bundle();
+    CatalogFeedActivity.setActivityArguments(b, in_args);
+    final Intent i = new Intent(from, CatalogFeedActivity.class);
+    i.putExtras(b);
+    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    from.startActivity(i);
+    from.finish();
+    from.overridePendingTransition(0, 0);
+  }
+
   private @Nullable FeedType     feed;
   private @Nullable AbsListView  list_view;
   private @Nullable Future<Unit> loading;
@@ -198,9 +229,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (up_stack.isEmpty() == false) {
       bar.setDisplayHomeAsUpEnabled(true);
       bar.setHomeButtonEnabled(true);
+    } else {
+      bar.setTitle(title);
     }
-
-    bar.setTitle(title);
   }
 
   private CatalogFeedArgumentsType getArguments()
@@ -485,6 +516,16 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     CatalogFeedActivity.LOG.debug("received feed for {}", u);
     this.feed = f;
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogFeedActivity.this.configureUpButton(
+          CatalogFeedActivity.this.getUpStack(),
+          f.getFeedTitle());
+      }
+    });
+
     f.matchFeed(this);
   }
 
@@ -667,43 +708,57 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final FeedLoaderType feed_loader = app.getFeedLoader();
+    final Resources rr = NullCheck.notNull(this.getResources());
 
     final Map<String, List<OPDSFacet>> facet_groups =
       f.getFeedFacetsByGroup();
     if (facet_groups.isEmpty()) {
       facets_view.setVisibility(View.GONE);
     } else {
-      for (final String g : facet_groups.keySet()) {
-        final List<OPDSFacet> fs = NullCheck.notNull(facet_groups.get(g));
+      for (final String group_name : facet_groups.keySet()) {
+        final ArrayList<OPDSFacet> group =
+          new ArrayList<OPDSFacet>(NullCheck.notNull(facet_groups
+            .get(group_name)));
 
-        final Spinner spinner =
-          (Spinner) inflater.inflate(R.layout.facet, facets_view, false);
+        final LinearLayout.LayoutParams tvp =
+          new LinearLayout.LayoutParams(
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        tvp.rightMargin = (int) app.screenDPToPixels(8);
 
-        final CatalogFacetMenuController fm =
-          new CatalogFacetMenuController(
+        final TextView tv = new TextView(this);
+        tv.setTextColor(rr.getColor(R.color.normal_text_major));
+        tv.setTextSize(12.0f);
+        tv.setText(group_name + ":");
+        tv.setLayoutParams(tvp);
+
+        facets_view.addView(tv);
+
+        final CatalogFacetButton fb =
+          new CatalogFacetButton(
             this,
-            spinner,
-            fs,
-            new CatalogFacetMenuListenerType() {
-              @Override public void onFacetSelectedNone()
-              {
-                CatalogFeedActivity.LOG.debug("selected nothing");
-              }
-
+            group_name,
+            group,
+            new CatalogFacetSelectionListenerType() {
               @Override public void onFacetSelected(
-                final OPDSFacet facet)
+                final OPDSFacet in_selected)
               {
                 CatalogFeedActivity.LOG.debug(
-                  "selected facet {}:{}",
-                  facet.getGroup(),
-                  facet.getTitle());
+                  "selected: {}",
+                  in_selected.getURI());
 
-                CatalogFeedActivity.this.loadFeed(feed_loader, facet.getURI());
+                CatalogFeedActivity.startNewActivityReplacing(
+                  CatalogFeedActivity.this,
+                  new CatalogFeedArgumentsRemote(
+                    false,
+                    CatalogFeedActivity.this.getUpStack(),
+                    f.getFeedTitle(),
+                    in_selected.getURI()));
               }
             });
 
-        facets_view.addView(spinner);
+        fb.setLayoutParams(tvp);
+        facets_view.addView(fb);
       }
     }
 

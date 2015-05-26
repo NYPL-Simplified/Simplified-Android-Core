@@ -3,6 +3,8 @@
 
   <color name="main_color">#f0731f</color>
 
+  <color name="divider_color">#eeeeee</color>
+  
   <color name="list_item_background">#ffffff</color>
   <color name="list_item_foreground">@color/main_color</color>
   <color name="list_item_text_normal">#000000</color>
@@ -11,10 +13,6 @@
   <color name="button_background">#ffffff</color>
   <color name="button_foreground">@color/main_color</color>
   <color name="button_disabled">#dddddd</color>
-
-  <color name="spinner_background">#ffffff</color>
-  <color name="spinner_foreground">@color/main_color</color>
-  <color name="spinner_disabled">#dddddd</color>
 
   <color name="downloading_background">@color/main_color</color>
   <color name="downloading_foreground">#ffffff</color>

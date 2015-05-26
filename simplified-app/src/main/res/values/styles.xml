@@ -5,9 +5,6 @@
     name="SimplifiedTheme"
     parent="android:Theme.Holo.Light">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
-    <item name="android:spinnerStyle">@style/SimplifiedSpinner</item>
-    <item name="android:spinnerItemStyle">@style/SimplifiedSpinnerItem</item>
-    <item name="android:spinnerDropDownItemStyle">@style/SimplifiedSpinnerDropDownItem</item>
   </style>
 
   <style
@@ -22,26 +19,6 @@
     <item name="android:textColor">@color/main_color</item>
     <item name="android:textStyle">normal</item>
     <item name="android:typeface">sans</item>
-  </style>
-
-  <style
-    name="SimplifiedSpinner"
-    parent="@android:style/Widget.Spinner">
-    <item name="android:popupBackground">@drawable/simplified_popup</item>
-    <item name="android:background">@drawable/simplified_spinner</item>
-  </style>
-
-  <style
-    name="SimplifiedSpinnerItem"
-    parent="@android:style/Widget.TextView.SpinnerItem">
-    <item name="android:textColor">@drawable/simplified_spinner_text</item>
-    <item name="android:background">@drawable/simplified_spinner_item</item>
-  </style>
-
-  <style name="SimplifiedSpinnerDropDownItem">
-    <item name="android:textColor">@drawable/simplified_spinner_drop_item_text</item>
-    <item name="android:textSize">12sp</item>
-    <item name="android:background">@drawable/simplified_spinner_drop_item</item>
   </style>
 
   <style

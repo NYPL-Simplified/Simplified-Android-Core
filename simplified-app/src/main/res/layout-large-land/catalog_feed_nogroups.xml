@@ -9,6 +9,12 @@
 
   <include layout="@layout/catalog_feed_nogroups_facets" />
 
+  <View
+    android:background="@color/divider_color"
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:layout_marginBottom="8dp" />
+
   <GridView
     android:id="@+id/catalog_feed_nogroups_grid"
     android:layout_width="match_parent"
