@@ -229,7 +229,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (up_stack.isEmpty() == false) {
       bar.setDisplayHomeAsUpEnabled(true);
       bar.setHomeButtonEnabled(true);
-    } else {
       bar.setTitle(title);
     }
   }
