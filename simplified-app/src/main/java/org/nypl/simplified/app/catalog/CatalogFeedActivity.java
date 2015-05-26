@@ -277,11 +277,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     final URI u)
   {
     CatalogFeedActivity.LOG.debug("loading feed: {}", u);
-
-    final Future<Unit> previous = this.loading;
-    if (previous != null) {
-      previous.cancel(true);
-    }
     this.loading = feed_loader.fromURI(u, this);
   }
 
