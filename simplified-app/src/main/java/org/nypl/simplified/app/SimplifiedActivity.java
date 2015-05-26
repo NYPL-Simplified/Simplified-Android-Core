@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
@@ -73,6 +74,7 @@ import com.io7m.jnull.Nullable;
   private @Nullable ArrayList<String>                       drawer_items;
   private @Nullable ListView                                drawer_list;
   private @Nullable Map<Class<? extends Activity>, String>  drawer_names_by_class;
+  private @Nullable SharedPreferences                       drawer_settings;
   private boolean                                           finishing;
   private int                                               selected;
 
@@ -141,6 +143,22 @@ import com.io7m.jnull.Nullable;
           SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID,
           open_drawer);
     }
+
+    /**
+     * As per the Android design documents: If the user has manually opened
+     * the navigation drawer, then the user is assumed to understand how the
+     * drawer works. Therefore, if it appears that the drawer should be
+     * opened, check to see if it should actually be closed.
+     */
+
+    final SharedPreferences in_drawer_settings =
+      NullCheck.notNull(this.getSharedPreferences("drawer-settings", 0));
+    if (in_drawer_settings.getBoolean("has-opened-manually", false)) {
+      SimplifiedActivity.LOG
+        .debug("user has manually opened drawer in the past, not opening it now!");
+      open_drawer = false;
+    }
+    this.drawer_settings = in_drawer_settings;
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -345,6 +363,11 @@ import com.io7m.jnull.Nullable;
     final @Nullable View drawerView)
   {
     this.selected = -1;
+    SimplifiedActivity.LOG.debug("drawer opened");
+
+    final SharedPreferences in_drawer_settings =
+      NullCheck.notNull(this.drawer_settings);
+    in_drawer_settings.edit().putBoolean("has-opened-manually", true).apply();
   }
 
   @Override public final void onDrawerSlide(
@@ -371,6 +394,31 @@ import com.io7m.jnull.Nullable;
     final DrawerLayout d = NullCheck.notNull(this.drawer);
     d.closeDrawer(GravityCompat.START);
     this.selected = position;
+  }
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item_mn)
+  {
+    final MenuItem item = NullCheck.notNull(item_mn);
+    switch (item.getItemId()) {
+
+      case android.R.id.home:
+      {
+        final DrawerLayout d = NullCheck.notNull(this.drawer);
+        if (d.isDrawerOpen(GravityCompat.START)) {
+          d.closeDrawer(GravityCompat.START);
+        } else {
+          d.openDrawer(GravityCompat.START);
+        }
+
+        return super.onOptionsItemSelected(item);
+      }
+
+      default:
+      {
+        return super.onOptionsItemSelected(item);
+      }
+    }
   }
 
   @Override protected void onResume()
@@ -412,29 +460,4 @@ import com.io7m.jnull.Nullable;
   }
 
   protected abstract boolean shouldShowNavigationDrawerIndicator();
-
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item_mn)
-  {
-    final MenuItem item = NullCheck.notNull(item_mn);
-    switch (item.getItemId()) {
-
-      case android.R.id.home:
-      {
-        final DrawerLayout d = NullCheck.notNull(this.drawer);
-        if (d.isDrawerOpen(GravityCompat.START)) {
-          d.closeDrawer(GravityCompat.START);
-        } else {
-          d.openDrawer(GravityCompat.START);
-        }
-
-        return super.onOptionsItemSelected(item);
-      }
-
-      default:
-      {
-        return super.onOptionsItemSelected(item);
-      }
-    }
-  }
 }
