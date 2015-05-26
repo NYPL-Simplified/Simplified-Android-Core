@@ -36,7 +36,9 @@ public final class Feeds
         f.getFeedUpdated(),
         f.getFeedTitle(),
         f.getFeedNext(),
-        f.getFeedSearchURI());
+        f.getFeedSearchURI(),
+        f.getFeedFacetsByGroup(),
+        f.getFeedFacetsOrder());
 
     final List<OPDSAcquisitionFeedEntry> in_entries = f.getFeedEntries();
     for (int index = 0; index < in_entries.size(); ++index) {

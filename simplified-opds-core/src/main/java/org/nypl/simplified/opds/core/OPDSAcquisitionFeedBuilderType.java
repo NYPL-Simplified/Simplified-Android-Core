@@ -45,4 +45,14 @@ public interface OPDSAcquisitionFeedBuilderType
 
   void setSearchOption(
     OptionType<OPDSSearchLink> s);
+
+  /**
+   * Add the given facet.
+   * 
+   * @param f
+   *          The facet
+   */
+
+  void addFacet(
+    OPDSFacet f);
 }

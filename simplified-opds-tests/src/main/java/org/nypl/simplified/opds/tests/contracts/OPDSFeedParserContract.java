@@ -13,6 +13,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSCategory;
+import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSFeedParseException;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -310,5 +311,52 @@ import com.io7m.jnull.NullCheck;
     TestUtilities.assertEquals(
       ec2.getScheme(),
       "http://librarysimplified.org/terms/genres/Simplified/");
+  }
+
+  @Override public void testAcquisitionFeedFacets0()
+    throws Exception
+  {
+    final URI uri =
+      URI
+        .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final InputStream d =
+      OPDSFeedParserContract.getResource("acquisition-categories-0.xml");
+    final OPDSAcquisitionFeed f = p.parse(uri, d);
+    d.close();
+
+    final Map<String, List<OPDSFacet>> fbg = f.getFeedFacetsByGroup();
+    final List<OPDSFacet> fo = f.getFeedFacetsOrder();
+
+    TestUtilities.assertEquals(2, fo.size());
+    TestUtilities.assertEquals(1, fbg.size());
+    TestUtilities.assertTrue(fbg.containsKey("Sort by"));
+
+    final List<OPDSFacet> sorted = fbg.get("Sort by");
+    TestUtilities.assertEquals(2, sorted.size());
+
+    {
+      final OPDSFacet fi = sorted.get(0);
+      TestUtilities.assertEquals("Sort by", fi.getGroup());
+      TestUtilities.assertEquals("Title", fi.getTitle());
+      TestUtilities.assertTrue(!fi.isActive());
+      TestUtilities
+        .assertEquals(
+          URI
+            .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=title"),
+          fi.getURI());
+    }
+
+    {
+      final OPDSFacet fi = sorted.get(1);
+      TestUtilities.assertEquals("Sort by", fi.getGroup());
+      TestUtilities.assertEquals("Author", fi.getTitle());
+      TestUtilities.assertTrue(fi.isActive());
+      TestUtilities
+        .assertEquals(
+          URI
+            .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=author"),
+          fi.getURI());
+    }
   }
 }

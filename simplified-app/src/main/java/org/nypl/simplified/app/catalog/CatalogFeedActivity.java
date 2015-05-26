@@ -1,7 +1,10 @@
 package org.nypl.simplified.app.catalog;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
@@ -25,6 +28,7 @@ import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
 import org.nypl.simplified.http.core.URIQueryBuilder;
+import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
@@ -48,6 +52,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
+import android.widget.TextView;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -180,6 +185,36 @@ import com.io7m.junreachable.UnreachableCodeException;
     from.startActivity(i);
   }
 
+  /**
+   * Start a new catalog feed activity, assuming that the user came from
+   * <tt>from</tt>, with up stack <tt>up_stack</tt>, attempting to load the
+   * feed at <tt>target</tt>. The new activity "replaces" the current activity
+   * by calling <tt>finish()</tt> on the existing activity.
+   *
+   * @param from
+   *          The previous activity
+   * @param up_stack
+   *          The up stack for the new activity
+   * @param title
+   *          The title of the feed
+   * @param target
+   *          The URI of the feed
+   */
+
+  public static void startNewActivityReplacing(
+    final Activity from,
+    final CatalogFeedArgumentsType in_args)
+  {
+    final Bundle b = new Bundle();
+    CatalogFeedActivity.setActivityArguments(b, in_args);
+    final Intent i = new Intent(from, CatalogFeedActivity.class);
+    i.putExtras(b);
+    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    from.startActivity(i);
+    from.finish();
+    from.overridePendingTransition(0, 0);
+  }
+
   private @Nullable FeedType     feed;
   private @Nullable AbsListView  list_view;
   private @Nullable Future<Unit> loading;
@@ -194,9 +229,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (up_stack.isEmpty() == false) {
       bar.setDisplayHomeAsUpEnabled(true);
       bar.setHomeButtonEnabled(true);
+      bar.setTitle(title);
     }
-
-    bar.setTitle(title);
   }
 
   private CatalogFeedArgumentsType getArguments()
@@ -235,6 +269,14 @@ import com.io7m.junreachable.UnreachableCodeException;
       NullCheck.notNull(empty),
       in_title,
       in_uri);
+  }
+
+  private void loadFeed(
+    final FeedLoaderType feed_loader,
+    final URI u)
+  {
+    CatalogFeedActivity.LOG.debug("loading feed: {}", u);
+    this.loading = feed_loader.fromURI(u, this);
   }
 
   private ImmutableStack<CatalogUpStackEntry> newUpStack(
@@ -336,8 +378,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         @Override public Unit onFeedArgumentsRemote(
           final CatalogFeedArgumentsRemote c)
         {
-          CatalogFeedActivity.this.loading =
-            feed_loader.fromURI(c.getURI(), CatalogFeedActivity.this);
+          CatalogFeedActivity.this.loadFeed(feed_loader, c.getURI());
           return Unit.unit();
         }
       });
@@ -469,6 +510,16 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     CatalogFeedActivity.LOG.debug("received feed for {}", u);
     this.feed = f;
+
+    UIThread.runOnUIThread(new Runnable() {
+      @Override public void run()
+      {
+        CatalogFeedActivity.this.configureUpButton(
+          CatalogFeedActivity.this.getUpStack(),
+          f.getFeedTitle());
+      }
+    });
+
     f.matchFeed(this);
   }
 
@@ -642,9 +693,69 @@ import com.io7m.junreachable.UnreachableCodeException;
       "restoring scroll position: {}",
       this.saved_scroll_pos);
 
+    final ViewGroup facets_view =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.catalog_feed_nogroups_facets));
     final GridView grid_view =
       NullCheck.notNull((GridView) layout
-        .findViewById(R.id.catalog_feed_noblocks_grid));
+        .findViewById(R.id.catalog_feed_nogroups_grid));
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final Resources rr = NullCheck.notNull(this.getResources());
+
+    final Map<String, List<OPDSFacet>> facet_groups =
+      f.getFeedFacetsByGroup();
+    if (facet_groups.isEmpty()) {
+      facets_view.setVisibility(View.GONE);
+    } else {
+      for (final String group_name : facet_groups.keySet()) {
+        final ArrayList<OPDSFacet> group =
+          new ArrayList<OPDSFacet>(NullCheck.notNull(facet_groups
+            .get(group_name)));
+
+        final LinearLayout.LayoutParams tvp =
+          new LinearLayout.LayoutParams(
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        tvp.rightMargin = (int) app.screenDPToPixels(8);
+
+        final TextView tv = new TextView(this);
+        tv.setTextColor(rr.getColor(R.color.normal_text_major));
+        tv.setTextSize(12.0f);
+        tv.setText(group_name + ":");
+        tv.setLayoutParams(tvp);
+
+        facets_view.addView(tv);
+
+        final CatalogFacetButton fb =
+          new CatalogFacetButton(
+            this,
+            group_name,
+            group,
+            new CatalogFacetSelectionListenerType() {
+              @Override public void onFacetSelected(
+                final OPDSFacet in_selected)
+              {
+                CatalogFeedActivity.LOG.debug(
+                  "selected: {}",
+                  in_selected.getURI());
+
+                CatalogFeedActivity.startNewActivityReplacing(
+                  CatalogFeedActivity.this,
+                  new CatalogFeedArgumentsRemote(
+                    false,
+                    CatalogFeedActivity.this.getUpStack(),
+                    f.getFeedTitle(),
+                    in_selected.getURI()));
+              }
+            });
+
+        fb.setLayoutParams(tvp);
+        facets_view.addView(fb);
+      }
+    }
+
     grid_view.post(new Runnable() {
       @Override public void run()
       {
@@ -657,9 +768,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     final URI feed_uri = f.getFeedURI();
     final ImmutableStack<CatalogUpStackEntry> new_up_stack =
       this.newUpStack(feed_uri, args.getTitle());
-
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
 
     final CatalogBookSelectionListenerType book_select_listener =
       new CatalogBookSelectionListenerType() {

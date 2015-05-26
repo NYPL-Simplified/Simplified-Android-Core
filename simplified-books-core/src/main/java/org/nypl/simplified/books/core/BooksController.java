@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.slf4j.Logger;
@@ -412,6 +415,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     {
       final OptionType<URI> no_next = Option.none();
       final OptionType<OPDSSearchLink> no_search = Option.none();
+      final Map<String, List<OPDSFacet>> no_facet_groups =
+        new HashMap<String, List<OPDSFacet>>();
+      final List<OPDSFacet> no_facets = new ArrayList<OPDSFacet>();
       final FeedWithoutGroups f =
         FeedWithoutGroups.newEmptyFeed(
           this.uri,
@@ -419,7 +425,9 @@ import com.io7m.junreachable.UnreachableCodeException;
           this.updated,
           this.title,
           no_next,
-          no_search);
+          no_search,
+          no_facet_groups,
+          no_facets);
 
       final List<BookDatabaseEntryType> dirs =
         this.books_database.getBookDatabaseEntries();

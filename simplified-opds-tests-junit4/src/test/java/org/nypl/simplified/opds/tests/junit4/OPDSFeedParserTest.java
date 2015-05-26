@@ -13,10 +13,28 @@ public final class OPDSFeedParserTest implements OPDSFeedParserContractType
     this.contract = new OPDSFeedParserContract();
   }
 
+  @Override @Test public void testAcquisitionFeedCategories0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedCategories0();
+  }
+
+  @Override @Test public void testAcquisitionFeedFacets0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedFacets0();
+  }
+
   @Override @Test public void testAcquisitionFeedFiction0()
     throws Exception
   {
     this.contract.testAcquisitionFeedFiction0();
+  }
+
+  @Override @Test public void testAcquisitionFeedGroups0()
+    throws Exception
+  {
+    this.contract.testAcquisitionFeedGroups0();
   }
 
   @Override @Test public void testAcquisitionFeedPaginated0()
@@ -55,15 +73,4 @@ public final class OPDSFeedParserTest implements OPDSFeedParserContractType
     this.contract.testStreamIOException();
   }
 
-  @Override @Test public void testAcquisitionFeedGroups0()
-    throws Exception
-  {
-    this.contract.testAcquisitionFeedGroups0();
-  }
-
-  @Override @Test public void testAcquisitionFeedCategories0()
-    throws Exception
-  {
-    this.contract.testAcquisitionFeedCategories0();
-  }
 }
