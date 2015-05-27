@@ -16,7 +16,7 @@
   <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.implementation">
     <s:subsection-title>Implementation</s:subsection-title>
     <s:paragraph>
-      The <s:term s:type="package">reader</s:term> package uses the 
+      The <s:term s:type="package">reader</s:term> package uses the
       <s:link-external s:target="http://readium.org">Readium SDK</s:link-external>
       to render EPUB documents. The
       <s:term s:type="package">Readium</s:term> SDK consists of a native
@@ -35,7 +35,7 @@
       ID of the book. All operations performed
       by the activity are performed asynchronously, with the activity
       listening for results by implementing various
-      <s:term s:type="term">listener</s:term> interfaces. 
+      <s:term s:type="term">listener</s:term> interfaces.
     </s:paragraph>
     <s:paragraph>
       The <s:term s:type="type">ReaderActivity</s:term> performs the
@@ -45,8 +45,8 @@
       <s:formal-item-title>Loading process</s:formal-item-title>
       <s:list-ordered>
         <s:list-item>
-          A web view <s:term s:type="variable">w</s:term> is created. 
-          Execution of javascript is allowed, but all caching and network 
+          A web view <s:term s:type="variable">w</s:term> is created.
+          Execution of javascript is allowed, but all caching and network
           access is disabled. The web view is configured such that any
           URI that has a scheme equal to <s:term s:type="constant">readium</s:term>
           or <s:term s:type="constant">simplified</s:term> is handled by the
@@ -56,7 +56,7 @@
           events to the application that the application can then handle
           manually. The mapping from Javascript functions to these URIs is
           given by the Javascript code in the included
-          <s:term s:type="file">host_app_feedback.js</s:term> file 
+          <s:term s:type="file">host_app_feedback.js</s:term> file
           <s:footnote>
             This file is not part of the <s:term s:type="package">Readium</s:term>
             SDK but is expected to be implemented by any project using it.
@@ -73,7 +73,7 @@
           The server is passed the loaded EPUB so that it can serve files
           from the EPUB when asked. If the server fails to start, the
           activity terminates with an error message. The server is also
-          responsible for serving other files required by the 
+          responsible for serving other files required by the
           <s:term s:type="package">Readium</s:term> SDK that are not part
           of the loaded EPUB. These files are included as standard Java
           resources.
@@ -85,7 +85,7 @@
           file is responsible for loading the Javascript code used by
           <s:term s:type="package">Readium</s:term>
           <s:footnote>
-            As with <s:term s:type="file">host_app_feedback.js</s:term>, 
+            As with <s:term s:type="file">host_app_feedback.js</s:term>,
             this file is not part of the <s:term s:type="package">Readium</s:term>
             SDK but is expected to be written by any project using it.
           </s:footnote>.
@@ -103,6 +103,33 @@
         </s:list-item>
       </s:list-ordered>
     </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.media_overlay">
+    <s:subsection-title>Media Overlay</s:subsection-title>
+    <s:paragraph>
+      For <s:term s:type="term">media</s:term> elements such as audio and video,
+      <s:term s:type="package">Readium</s:term> allows some degree of control via
+      a <s:term s:type="term">media overlay</s:term>. In practical terms, this is
+      a small piece of user interface that is shown iff the current book page contains
+      a media element, and evaluates Javascript functions to start/stop playback and
+      switch between elements.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Media Overlay</s:formal-item-title>
+      <s:image s:source="media_overlay.png">Media Overlay</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      When a page contains a media element, the <s:term s:type="package">Readium</s:term>
+      package Javascript function
+      <s:term s:type="function">ReadiumSDK.reader.isMediaOverlayAvailable()</s:term>
+      returns <s:term s:type="constant">true</s:term>. This function is evaluated
+      every time a new page is opened in order to decide whether or not to show the
+      media overlay interface. The various interface buttons evaluate functions
+      exposed by the
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderReadiumJavaScriptAPIType.html">ReaderReadiumJavaScriptAPIType</s:link-external>
+      type in order to control the media elements.
+    </s:paragraph>
   </s:subsection>
 
   <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.classes">
