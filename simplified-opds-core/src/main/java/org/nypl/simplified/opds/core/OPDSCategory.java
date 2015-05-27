@@ -5,6 +5,13 @@ import java.io.Serializable;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * An OPDS/Atom <i>category</i>.
+ *
+ * @see <a href="http://tools.ietf.org/html/rfc4287#section-4.2.2">RFC4287
+ *      categories</a>
+ */
+
 public final class OPDSCategory implements Serializable
 {
   private static final long serialVersionUID = 2L;

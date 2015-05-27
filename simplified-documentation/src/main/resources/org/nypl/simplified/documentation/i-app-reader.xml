@@ -4,6 +4,7 @@
   xmlns:xi="http://www.w3.org/2001/XInclude"
   xml:id="org.nypl.simplified.documentation.implementation.app.reader">
   <s:section-title>App (Reader)</s:section-title>
+
   <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
@@ -103,6 +104,7 @@
       </s:list-ordered>
     </s:formal-item>
   </s:subsection>
+
   <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.classes">
     <s:subsection-title>Classes</s:subsection-title>
     <s:paragraph>
@@ -137,6 +139,7 @@
       <s:link-external s:target="apidocs/org/nypl/simplified/app/reader/ReaderReadiumJavaScriptAPI.html">ReaderReadiumJavaScriptAPI</s:link-external>.
     </s:paragraph>
   </s:subsection>
+
   <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.reader.processes">
     <s:subsection-title>Processes</s:subsection-title>
     <s:paragraph>
@@ -162,4 +165,5 @@
       is immediately obvious who/what is to blame for the crash.
     </s:paragraph>
   </s:subsection>
+
 </s:section>

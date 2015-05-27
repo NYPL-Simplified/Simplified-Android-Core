@@ -7,6 +7,10 @@ import java.util.List;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * An OPDS <i>group</i>.
+ */
+
 public final class OPDSGroup implements Serializable
 {
   private static final long                    serialVersionUID = 1L;

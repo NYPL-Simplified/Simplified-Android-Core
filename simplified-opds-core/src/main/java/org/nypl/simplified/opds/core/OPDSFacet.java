@@ -5,6 +5,13 @@ import java.net.URI;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * An OPDS <i>facet</i>.
+ *
+ * @see <a
+ *      href="http://opds-spec.org/specs/opds-catalog-1-1-20110627/#Facets">Facets</a>
+ */
+
 public final class OPDSFacet
 {
   private final boolean active;

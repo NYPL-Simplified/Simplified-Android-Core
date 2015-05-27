@@ -6,6 +6,14 @@ import java.net.URI;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * A specific OPDS acquisition.
+ * 
+ * @see <a
+ *      href="http://opds-spec.org/specs/opds-catalog-1-1-20110627/#Acquisition_Feeds">Acquisiton
+ *      feeds</a>
+ */
+
 public final class OPDSAcquisition implements Serializable
 {
   /**

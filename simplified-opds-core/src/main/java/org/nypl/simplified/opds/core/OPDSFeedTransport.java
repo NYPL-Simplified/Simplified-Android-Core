@@ -6,6 +6,10 @@ import java.net.URI;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * The default implementation of the {@link OPDSFeedTransportType} interface.
+ */
+
 public final class OPDSFeedTransport
 {
   /**

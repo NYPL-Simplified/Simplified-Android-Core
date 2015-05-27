@@ -13,6 +13,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
+/**
+ * Convenient XML handling functions.
+ */
+
 public final class OPDSXML
 {
   public static List<Element> getChildElementsWithName(

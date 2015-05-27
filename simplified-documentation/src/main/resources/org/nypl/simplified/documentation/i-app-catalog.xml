@@ -4,11 +4,168 @@
   xmlns:xi="http://www.w3.org/2001/XInclude"
   xml:id="org.nypl.simplified.documentation.implementation.app.catalog">
   <s:section-title>App (Catalog)</s:section-title>
+
   <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.overview">
     <s:subsection-title>Overview</s:subsection-title>
     <s:paragraph>
       The <s:term s:type="package">catalog</s:term> package implements the book
-      management interface.
+      management and browsing interface.
     </s:paragraph>
   </s:subsection>
+
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.implementation">
+    <s:subsection-title>Implementation</s:subsection-title>
+    <s:paragraph>
+      The application primarily consumes and displays
+      <s:link-external s:target="http://opds-spec.org/specs/">OPDS Catalog feeds</s:link-external>
+      (via the <s:link s:target="org.nypl.simplified.documentation.implementation.opds">OPDS</s:link> package).
+      If the feed contains any <s:term s:type="term">groups</s:term>, the feed is rendered as a
+      series of horizontally scrolling <s:term s:type="term">lanes</s:term>. Otherwise, the feed
+      is rendered as an indefinitely scrolling list of individual <s:term s:type="term">books</s:term>.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Lanes (Feed with groups)</s:formal-item-title>
+      <s:image s:source="lanes.png">Lanes (Feed with groups)</s:image>
+    </s:formal-item>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Books (Feed without groups)</s:formal-item-title>
+      <s:image s:source="nolanes.png">Books (Feed without groups)</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      On startup, the application fetches and displays an initial feed from a configurable URI.
+      For feeds that contain <s:term s:type="term">groups</s:term>, the title of the resulting
+      <s:term s:type="term">lanes</s:term> are clickable and lead to further feeds. Currently,
+      the implementation creates one Android <s:term s:type="type">Activity</s:term> per feed,
+      with each <s:term s:type="type">Activity</s:term> storing an immutable stack of the 
+      feed URIs that led to the currently displayed feed. This allows the user to navigate back
+      to the parent feed using the Android <s:term s:type="term">up</s:term> button: A new 
+      <s:term s:type="type">Activity</s:term> is created that points to the feed URI at the
+      top of the current stack. The creation of new <s:term s:type="type">Activity</s:term>
+      instances for all navigation is necessary for Android to correctly populate the
+      <s:term s:type="term">back stack</s:term> so that use of the Android 
+      <s:term s:type="term">back</s:term> button results in the user stepping backwards
+      through the <s:term s:type="term">history</s:term> of feeds that they have viewed,
+      as opposed to simply travelling back up through the catalog's hierarchy of feeds
+      <s:footnote>
+        Initially, a version of the catalog user interface was produced using Android
+        <s:link-external s:target="https://developer.android.com/guide/components/fragments.html">Fragments</s:link-external>.
+        However, it soon became clear that <s:term s:type="type">Fragments</s:term> were
+        unusable. The extreme complexities of the <s:term s:type="type">Fragment</s:term>
+        lifecycle have been documented by Square in an article titled
+        <s:link-external s:target="https://corner.squareup.com/2014/10/advocating-against-android-fragments.html">Advocating Against Android Fragments</s:link-external>,
+        and after a month of endless infuriating bugs involving 
+        <s:term s:type="type">FragmentTransactions</s:term>, complicated state management,
+        onscreen views randomly appearing and disappearing, and outright incorrect back-stack
+        management on the part of the Android API, it became clear that
+        <s:term s:type="type">Fragments</s:term> were not suitable if developer sanity was
+        in any way important. Instead, the one-<s:term s:type="type">Activity</s:term>-per-feed
+        model was tried and the implementation of feed navigation was completed in a couple of
+        weeks with no issues.
+      </s:footnote>.
+    </s:paragraph>
+    <s:paragraph xml:id="org.nypl.simplified.documentation.implementation.app.catalog.implementation.up_button">
+      When the current stack of feeds is empty, the <s:term s:type="term">action bar</s:term>
+      displays a button that shows and hides the 
+      <s:link s:target="org.nypl.simplified.documentation.implementation.app.catalog.navigation_drawer">navigation drawer</s:link>.
+      When the current stack of feeds is non-empty, the button instead acts as if the user
+      had pressed the Android <s:term s:type="term">up</s:term> button. The button displays
+      a <s:term s:type="term">caret</s:term> if up navigation is possible, and three
+      horizontal lines otherwise (as per the Android design guidelines).
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Up button</s:formal-item-title>
+      <s:image s:source="up_button.png">Up button</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      In order to avoid the user having to constantly reload feeds from the network when
+      travelling back through the catalog, feeds are cached in a simple in-memory LRU
+      cache. Finally, to give the illusion that the catalog is a single 
+      <s:term s:type="type">Activity</s:term>, the default animation used when Android 
+      <s:term s:type="type">Activities</s:term> are created and destroyed are supressed.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.searching">
+    <s:subsection-title>Searching</s:subsection-title>
+    <s:paragraph>
+      Searching of feeds is provided by a server-side mechanism. A feed may contain
+      zero or more links that can respond to 
+      <s:link-external s:target="http://www.opensearch.org/Specifications/OpenSearch/1.1">OpenSearch</s:link-external>
+      queries. Responses are received in the form of standard feeds and therefore no extra
+      logic is required on the part of the application to display search results.
+    </s:paragraph>
+    <s:paragraph>
+      If the current displayed feed contains any usable search links, an entry is
+      added to the Android <s:term s:type="term">action bar</s:term> that allows
+      the user to enter search queries.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Searching</s:formal-item-title>
+      <s:image s:source="search.png">Searching</s:image>
+    </s:formal-item>
+  </s:subsection>
+
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.covers">
+    <s:subsection-title>Covers</s:subsection-title>
+    <s:paragraph>
+      Book covers are loaded and cached from URIs contained within the consumed feeds.
+      The application uses the excellent
+      <s:link-external s:target="https://square.github.io/picasso/">Picasso</s:link-external>
+      image library from Square for asynchronous image loading and both in-memory and on-disk
+      image caching. For some books, covers are not actually provided and instead these are
+      generated algorithmically.
+    </s:paragraph>
+  </s:subsection>
+  
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.my_books">
+    <s:subsection-title>My Books</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">My Books</s:term> section of the application shows the
+      books that users have borrowed and/or downloaded. The list of books is displayed
+      in exactly the same manner as an ordinary feed that does not contain any
+      <s:term s:type="term">groups</s:term>. In practical terms, the list of books
+      is displayed using an ordinary catalog feed activity but with an OPDS feed
+      produced at run-time from the on-disk database of books.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.navigation_drawer">
+    <s:subsection-title>Navigation Drawer</s:subsection-title>
+    <s:paragraph>
+      The <s:term s:type="term">navigation drawer</s:term> provides navigation between
+      the main parts of the application. The drawer can be opened by swiping rightwards
+      on the left edge of the screen, or by pressing the 
+      <s:link s:target="org.nypl.simplified.documentation.implementation.app.catalog.implementation.up_button">action bar up button</s:link>
+      when at the root of the catalog.
+    </s:paragraph>
+    <s:formal-item s:kind="diagram">
+      <s:formal-item-title>Navigation Drawer</s:formal-item-title>
+      <s:image s:source="drawer.png">Navigation Drawer</s:image>
+    </s:formal-item>
+    <s:paragraph>
+      The navigation drawer is conditionally opened on application startup.
+      As per the Android design guidelines, the application stores a boolean flag
+      indicating whether or not the user has ever opened the navigation drawer manually.
+      If the user has ever done this, it is assumed that the user understands how
+      the navigation drawer works and the drawer is therefore not opened automatically
+      on application startup.
+    </s:paragraph>
+  </s:subsection>
+
+  <s:subsection xml:id="org.nypl.simplified.documentation.implementation.app.catalog.classes">
+    <s:subsection-title>Classes</s:subsection-title>
+    <s:paragraph>
+      The main entry point of the catalog is
+      the <s:link-external s:target="apidocs/org/nypl/simplified/app/catalog/CatalogFeedActivity.html">CatalogFeedActivity</s:link-external>
+      class, which is reponsible for fetching and displaying a single feed URI.
+    </s:paragraph>
+    <s:paragraph>
+      Cover images are loaded and/or generated by the 
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/BookCoverProvider.html">BookCoverProvider</s:link-external>
+      and
+      <s:link-external s:target="apidocs/org/nypl/simplified/app/catalog/CatalogBookCoverGenerator.html">CatalogBookCoverGenerator</s:link-external>
+      classes (with the former delegating to the latter as needed).
+    </s:paragraph>
+  </s:subsection>
+
 </s:section>
