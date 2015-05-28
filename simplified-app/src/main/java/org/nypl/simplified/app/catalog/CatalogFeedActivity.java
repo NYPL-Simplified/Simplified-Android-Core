@@ -221,6 +221,73 @@ import com.io7m.junreachable.UnreachableCodeException;
   private @Nullable ViewGroup    progress_layout;
   private int                    saved_scroll_pos;
 
+  private void configureFacets(
+    final FeedWithoutGroups f,
+    final ViewGroup layout,
+    final SimplifiedCatalogAppServicesType app,
+    final Resources rr)
+  {
+    final ViewGroup facets_view =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.catalog_feed_nogroups_facets));
+    final View facet_divider =
+      NullCheck.notNull(layout
+        .findViewById(R.id.catalog_feed_nogroups_facet_divider));
+
+    final Map<String, List<OPDSFacet>> facet_groups =
+      f.getFeedFacetsByGroup();
+    if (facet_groups.isEmpty()) {
+      facets_view.setVisibility(View.GONE);
+      facet_divider.setVisibility(View.GONE);
+    } else {
+      for (final String group_name : facet_groups.keySet()) {
+        final ArrayList<OPDSFacet> group =
+          new ArrayList<OPDSFacet>(NullCheck.notNull(facet_groups
+            .get(group_name)));
+
+        final LinearLayout.LayoutParams tvp =
+          new LinearLayout.LayoutParams(
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        tvp.rightMargin = (int) app.screenDPToPixels(8);
+
+        final TextView tv = new TextView(this);
+        tv.setTextColor(rr.getColor(R.color.normal_text_major));
+        tv.setTextSize(12.0f);
+        tv.setText(group_name + ":");
+        tv.setLayoutParams(tvp);
+
+        facets_view.addView(tv);
+
+        final CatalogFacetButton fb =
+          new CatalogFacetButton(
+            this,
+            group_name,
+            group,
+            new CatalogFacetSelectionListenerType() {
+              @Override public void onFacetSelected(
+                final OPDSFacet in_selected)
+              {
+                CatalogFeedActivity.LOG.debug(
+                  "selected: {}",
+                  in_selected.getURI());
+
+                CatalogFeedActivity.startNewActivityReplacing(
+                  CatalogFeedActivity.this,
+                  new CatalogFeedArgumentsRemote(
+                    false,
+                    CatalogFeedActivity.this.getUpStack(),
+                    f.getFeedTitle(),
+                    in_selected.getURI()));
+              }
+            });
+
+        fb.setLayoutParams(tvp);
+        facets_view.addView(fb);
+      }
+    }
+  }
+
   private void configureUpButton(
     final ImmutableStack<CatalogUpStackEntry> up_stack,
     final String title)
@@ -693,72 +760,15 @@ import com.io7m.junreachable.UnreachableCodeException;
       "restoring scroll position: {}",
       this.saved_scroll_pos);
 
-    final ViewGroup facets_view =
-      NullCheck.notNull((ViewGroup) layout
-        .findViewById(R.id.catalog_feed_nogroups_facets));
-    final GridView grid_view =
-      NullCheck.notNull((GridView) layout
-        .findViewById(R.id.catalog_feed_nogroups_grid));
-    final View facet_divider =
-      NullCheck.notNull(layout
-        .findViewById(R.id.catalog_feed_nogroups_facet_divider));
-
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
 
-    final Map<String, List<OPDSFacet>> facet_groups =
-      f.getFeedFacetsByGroup();
-    if (facet_groups.isEmpty()) {
-      facets_view.setVisibility(View.GONE);
-      facet_divider.setVisibility(View.GONE);
-    } else {
-      for (final String group_name : facet_groups.keySet()) {
-        final ArrayList<OPDSFacet> group =
-          new ArrayList<OPDSFacet>(NullCheck.notNull(facet_groups
-            .get(group_name)));
+    final GridView grid_view =
+      NullCheck.notNull((GridView) layout
+        .findViewById(R.id.catalog_feed_nogroups_grid));
 
-        final LinearLayout.LayoutParams tvp =
-          new LinearLayout.LayoutParams(
-            android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-            android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-        tvp.rightMargin = (int) app.screenDPToPixels(8);
-
-        final TextView tv = new TextView(this);
-        tv.setTextColor(rr.getColor(R.color.normal_text_major));
-        tv.setTextSize(12.0f);
-        tv.setText(group_name + ":");
-        tv.setLayoutParams(tvp);
-
-        facets_view.addView(tv);
-
-        final CatalogFacetButton fb =
-          new CatalogFacetButton(
-            this,
-            group_name,
-            group,
-            new CatalogFacetSelectionListenerType() {
-              @Override public void onFacetSelected(
-                final OPDSFacet in_selected)
-              {
-                CatalogFeedActivity.LOG.debug(
-                  "selected: {}",
-                  in_selected.getURI());
-
-                CatalogFeedActivity.startNewActivityReplacing(
-                  CatalogFeedActivity.this,
-                  new CatalogFeedArgumentsRemote(
-                    false,
-                    CatalogFeedActivity.this.getUpStack(),
-                    f.getFeedTitle(),
-                    in_selected.getURI()));
-              }
-            });
-
-        fb.setLayoutParams(tvp);
-        facets_view.addView(fb);
-      }
-    }
+    this.configureFacets(f, layout, app, rr);
 
     grid_view.post(new Runnable() {
       @Override public void run()
