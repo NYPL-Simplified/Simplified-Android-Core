@@ -37,6 +37,8 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
@@ -759,8 +761,9 @@ import com.io7m.junreachable.UnreachableCodeException;
       throws Exception
     {
       final BookID book_id = BookID.newIDFromEntry(e);
+
       final BookDatabaseEntryType book_dir =
-        new BookDatabaseEntry(this.books_database.getLocation(), book_id);
+        this.books_database.getBookDatabaseEntry(book_id);
 
       book_dir.create();
       book_dir.setData(e);
@@ -883,6 +886,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSFeedParserType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
+    final OPDSAcquisitionFeedEntryParserType in_parser,
+    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
     final BooksControllerConfiguration in_config)
   {
     return new BooksController(
@@ -890,6 +895,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       in_feeds,
       in_http,
       in_downloader,
+      in_parser,
+      in_serializer,
       in_config);
   }
 
@@ -910,6 +917,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSFeedParserType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
+    final OPDSAcquisitionFeedEntryParserType in_parser,
+    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
     final BooksControllerConfiguration in_config)
   {
     this.exec = NullCheck.notNull(in_exec);
@@ -921,7 +930,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
     this.books_status = BooksStatusCache.newStatusCache();
     this.data_directory = new File(this.config.getDirectory(), "data");
-    this.book_database = BookDatabase.newDatabase(this.data_directory);
+    this.book_database =
+      BookDatabase.newDatabase(in_parser, in_serializer, this.data_directory);
     this.task_id = new AtomicInteger(0);
   }
 

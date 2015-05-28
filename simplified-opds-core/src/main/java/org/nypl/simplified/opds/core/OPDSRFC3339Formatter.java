@@ -15,6 +15,11 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class OPDSRFC3339Formatter
 {
+  public static SimpleDateFormat newDateFormatter()
+  {
+    return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+  }
+
   public static Calendar parseRFC3339Date(
     final String text)
     throws ParseException

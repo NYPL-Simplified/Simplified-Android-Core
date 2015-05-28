@@ -351,9 +351,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     final TextView header_title =
       NullCheck.notNull((TextView) header
         .findViewById(R.id.book_header_title));
-    final TextView header_subtitle =
-      NullCheck.notNull((TextView) header
-        .findViewById(R.id.book_header_subtitle));
     final ImageView header_cover =
       NullCheck.notNull((ImageView) header
         .findViewById(R.id.book_header_cover));
@@ -444,12 +441,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     hold_notification.setVisibility(View.GONE);
     header_title.setText(eo.getTitle());
-
-    if (eo.getSubtitle().isEmpty() == false) {
-      header_subtitle.setText(eo.getSubtitle());
-    } else {
-      header_subtitle.setVisibility(View.GONE);
-    }
 
     CatalogBookDetail.configureViewTextAuthor(eo, header_authors);
     CatalogBookDetail.configureViewTextMeta(rr, eo, header_meta);

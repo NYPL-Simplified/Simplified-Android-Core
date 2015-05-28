@@ -35,9 +35,6 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void setPublisherOption(
     OptionType<String> pub);
 
-  void setSubtitleOption(
-    OptionType<String> text);
-
   void setSummaryOption(
     OptionType<String> text);
 

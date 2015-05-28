@@ -28,13 +28,12 @@ import com.io7m.jnull.Nullable;
   {
     private final List<OPDSAcquisition>  acquisitions;
     private final List<String>           authors;
-    private final Set<Pair<String, URI>> groups;
     private final List<OPDSCategory>     categories;
     private OptionType<URI>              cover;
+    private final Set<Pair<String, URI>> groups;
     private final String                 id;
     private OptionType<Calendar>         published;
     private OptionType<String>           publisher;
-    private String                       subtitle;
     private String                       summary;
     private OptionType<URI>              thumbnail;
     private final String                 title;
@@ -52,7 +51,6 @@ import com.io7m.jnull.Nullable;
       this.thumbnail = Option.none();
       this.cover = Option.none();
       this.acquisitions = new ArrayList<OPDSAcquisition>();
-      this.subtitle = "";
       this.authors = new ArrayList<String>();
       this.published = Option.none();
       this.publisher = Option.none();
@@ -72,6 +70,12 @@ import com.io7m.jnull.Nullable;
       this.authors.add(NullCheck.notNull(name));
     }
 
+    @Override public void addCategory(
+      final OPDSCategory c)
+    {
+      this.categories.add(NullCheck.notNull(c));
+    }
+
     @Override public void addGroup(
       final URI uri,
       final String b)
@@ -79,12 +83,6 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull(uri);
       NullCheck.notNull(b);
       this.groups.add(Pair.pair(b, uri));
-    }
-
-    @Override public void addCategory(
-      final OPDSCategory c)
-    {
-      this.categories.add(NullCheck.notNull(c));
     }
 
     @Override public OPDSAcquisitionFeedEntry build()
@@ -98,7 +96,6 @@ import com.io7m.jnull.Nullable;
         this.title,
         this.thumbnail,
         this.updated,
-        this.subtitle,
         this.summary,
         this.published,
         this.publisher,
@@ -123,16 +120,6 @@ import com.io7m.jnull.Nullable;
       this.publisher = NullCheck.notNull(pub);
     }
 
-    @Override public void setSubtitleOption(
-      final OptionType<String> text)
-    {
-      if (text.isNone()) {
-        this.subtitle = "";
-      } else {
-        this.subtitle = ((Some<String>) text).get();
-      }
-    }
-
     @Override public void setSummaryOption(
       final OptionType<String> text)
     {
@@ -152,6 +139,18 @@ import com.io7m.jnull.Nullable;
 
   private static final long serialVersionUID = 2L;
 
+  /**
+   * Construct a new mutable builder for feed entries.
+   *
+   * @param in_id
+   *          The feed ID
+   * @param in_title
+   *          The feed title
+   * @param in_updated
+   *          The feed updated time
+   * @return A new builder
+   */
+
   public static OPDSAcquisitionFeedEntryBuilderType newBuilder(
     final String in_id,
     final String in_title,
@@ -162,13 +161,12 @@ import com.io7m.jnull.Nullable;
 
   private final List<OPDSAcquisition>  acquisitions;
   private final List<String>           authors;
-  private final Set<Pair<String, URI>> groups;
   private final List<OPDSCategory>     categories;
   private final OptionType<URI>        cover;
+  private final Set<Pair<String, URI>> groups;
   private final String                 id;
   private final OptionType<Calendar>   published;
   private final OptionType<String>     publisher;
-  private final String                 subtitle;
   private final String                 summary;
   private final OptionType<URI>        thumbnail;
   private final String                 title;
@@ -183,7 +181,6 @@ import com.io7m.jnull.Nullable;
     final String in_title,
     final OptionType<URI> in_thumbnail,
     final Calendar in_updated,
-    final String in_subtitle,
     final String in_summary,
     final OptionType<Calendar> in_published,
     final OptionType<String> in_publisher,
@@ -199,7 +196,6 @@ import com.io7m.jnull.Nullable;
     this.title = NullCheck.notNull(in_title);
     this.thumbnail = NullCheck.notNull(in_thumbnail);
     this.updated = NullCheck.notNull(in_updated);
-    this.subtitle = NullCheck.notNull(in_subtitle);
     this.summary = NullCheck.notNull(in_summary);
     this.published = NullCheck.notNull(in_published);
     this.publisher = NullCheck.notNull(in_publisher);
@@ -225,7 +221,6 @@ import com.io7m.jnull.Nullable;
       && this.categories.equals(other.categories)
       && this.cover.equals(other.cover)
       && this.id.equals(other.id)
-      && this.subtitle.equals(other.subtitle)
       && this.summary.equals(other.summary)
       && this.thumbnail.equals(other.thumbnail)
       && this.title.equals(other.title)
@@ -244,11 +239,6 @@ import com.io7m.jnull.Nullable;
     return this.authors;
   }
 
-  public Set<Pair<String, URI>> getGroups()
-  {
-    return this.groups;
-  }
-
   public List<OPDSCategory> getCategories()
   {
     return this.categories;
@@ -257,6 +247,11 @@ import com.io7m.jnull.Nullable;
   public OptionType<URI> getCover()
   {
     return this.cover;
+  }
+
+  public Set<Pair<String, URI>> getGroups()
+  {
+    return this.groups;
   }
 
   public String getID()
@@ -272,11 +267,6 @@ import com.io7m.jnull.Nullable;
   public OptionType<String> getPublisher()
   {
     return this.publisher;
-  }
-
-  public String getSubtitle()
-  {
-    return this.subtitle;
   }
 
   public String getSummary()
@@ -309,7 +299,6 @@ import com.io7m.jnull.Nullable;
     result = (prime * result) + this.cover.hashCode();
     result = (prime * result) + this.categories.hashCode();
     result = (prime * result) + this.id.hashCode();
-    result = (prime * result) + this.subtitle.hashCode();
     result = (prime * result) + this.summary.hashCode();
     result = (prime * result) + this.thumbnail.hashCode();
     result = (prime * result) + this.title.hashCode();
@@ -317,5 +306,36 @@ import com.io7m.jnull.Nullable;
     result = (prime * result) + this.published.hashCode();
     result = (prime * result) + this.publisher.hashCode();
     return result;
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("OPDSAcquisitionFeedEntry [acquisitions=");
+    b.append(this.acquisitions);
+    b.append(", authors=");
+    b.append(this.authors);
+    b.append(", groups=");
+    b.append(this.groups);
+    b.append(", categories=");
+    b.append(this.categories);
+    b.append(", cover=");
+    b.append(this.cover);
+    b.append(", id=");
+    b.append(this.id);
+    b.append(", published=");
+    b.append(this.published);
+    b.append(", publisher=");
+    b.append(this.publisher);
+    b.append(", summary=");
+    b.append(this.summary);
+    b.append(", thumbnail=");
+    b.append(this.thumbnail);
+    b.append(", title=");
+    b.append(this.title);
+    b.append(", updated=");
+    b.append(this.updated);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }

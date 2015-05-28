@@ -36,6 +36,10 @@ import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializer;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
@@ -104,7 +108,11 @@ import com.io7m.jnull.Nullable;
         NullCheck
           .notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
 
-      final OPDSFeedParserType p = OPDSFeedParser.newParser();
+      final OPDSAcquisitionFeedEntryParserType in_entry_parser =
+        OPDSAcquisitionFeedEntryParser.newParser();
+      final OPDSAcquisitionFeedEntrySerializerType in_entry_serializer =
+        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
       this.feed_loader =
         Simplified.makeFeedLoader(this.exec_catalog_feeds, p);
 
@@ -159,6 +167,8 @@ import com.io7m.jnull.Nullable;
           p,
           this.http,
           this.downloader,
+          in_entry_parser,
+          in_entry_serializer,
           books_config);
 
       /**

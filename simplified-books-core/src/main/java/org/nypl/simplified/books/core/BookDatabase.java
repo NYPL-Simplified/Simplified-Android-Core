@@ -8,6 +8,10 @@ import java.util.List;
 
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileUtilities;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
@@ -19,6 +23,12 @@ import com.io7m.jnull.Nullable;
 
 public final class BookDatabase implements BookDatabaseType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(BookDatabase.class));
+  }
+
   /**
    * Open a database at the given directory.
    *
@@ -28,22 +38,33 @@ public final class BookDatabase implements BookDatabaseType
    */
 
   public static BookDatabaseType newDatabase(
+    final OPDSAcquisitionFeedEntryParserType in_parser,
+    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
     final File in_directory)
   {
-    return new BookDatabase(in_directory);
+    return new BookDatabase(in_parser, in_serializer, in_directory);
   }
 
-  private final File directory;
-  private final File file_credentials;
-  private final File file_credentials_tmp;
+  private final File                                   directory;
+  private final File                                   file_credentials;
+  private final File                                   file_credentials_tmp;
+  private final OPDSAcquisitionFeedEntryParserType     parser;
+  private final OPDSAcquisitionFeedEntrySerializerType serializer;
 
   private BookDatabase(
+    final OPDSAcquisitionFeedEntryParserType in_parser,
+    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
     final File in_directory)
   {
     this.directory = NullCheck.notNull(in_directory);
+    this.parser = NullCheck.notNull(in_parser);
+    this.serializer = NullCheck.notNull(in_serializer);
+
     this.file_credentials = new File(this.directory, "credentials.txt");
     this.file_credentials_tmp =
       new File(this.directory, "credentials.txt.tmp");
+
+    BookDatabase.LOG.debug("opened database {}", this.directory);
   }
 
   @Override public void create()
@@ -113,7 +134,11 @@ public final class BookDatabase implements BookDatabaseType
 
       for (final File f : book_list) {
         final BookID id = BookID.exactString(NullCheck.notNull(f.getName()));
-        xs.add(new BookDatabaseEntry(this.directory, id));
+        xs.add(new BookDatabaseEntry(
+          this.parser,
+          this.serializer,
+          this.directory,
+          id));
       }
     }
 
@@ -123,7 +148,11 @@ public final class BookDatabase implements BookDatabaseType
   @Override public BookDatabaseEntryType getBookDatabaseEntry(
     final BookID book_id)
   {
-    return new BookDatabaseEntry(this.directory, NullCheck.notNull(book_id));
+    return new BookDatabaseEntry(
+      this.parser,
+      this.serializer,
+      this.directory,
+      NullCheck.notNull(book_id));
   }
 
   @Override public File getLocation()

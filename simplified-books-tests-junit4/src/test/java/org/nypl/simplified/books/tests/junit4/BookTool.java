@@ -22,6 +22,10 @@ import org.nypl.simplified.downloader.core.DownloaderConfiguration;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializer;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 
@@ -38,7 +42,8 @@ import com.io7m.jnull.NullCheck;
       NullCheck.notNull(Executors.newFixedThreadPool(4));
     final HTTPType http = HTTP.newHTTP();
 
-    final OPDSFeedParserType parser = OPDSFeedParser.newParser();
+    final OPDSFeedParserType parser =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
 
     final BooksControllerConfigurationBuilderType books_config_builder =
       BooksControllerConfiguration.newBuilder(new File("/tmp/books"));
@@ -51,10 +56,21 @@ import com.io7m.jnull.NullCheck;
         .newBuilder(new File("/tmp/downloads"))
         .build());
 
+    final OPDSAcquisitionFeedEntryParserType in_parser =
+      OPDSAcquisitionFeedEntryParser.newParser();
+    final OPDSAcquisitionFeedEntrySerializerType in_serializer =
+      OPDSAcquisitionFeedEntrySerializer.newSerializer();
     final BooksControllerConfiguration books_config =
       books_config_builder.build();
     final AccountsType books =
-      BooksController.newBooks(exec, parser, http, d, books_config);
+      BooksController.newBooks(
+        exec,
+        parser,
+        http,
+        d,
+        in_parser,
+        in_serializer,
+        books_config);
 
     final AccountBarcode barcode = new AccountBarcode("4545499");
     final AccountPIN pin = new AccountPIN("4444");
