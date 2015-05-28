@@ -456,6 +456,10 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final Menu menu_nn = NullCheck.notNull(in_menu);
 
+    CatalogFeedActivity.LOG.debug("inflating menu");
+    final MenuInflater inflater = this.getMenuInflater();
+    inflater.inflate(R.menu.catalog, menu_nn);
+
     if (this.feed == null) {
       CatalogFeedActivity.LOG
         .debug("menu creation requested but feed is not yet present");
@@ -464,9 +468,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     CatalogFeedActivity.LOG
       .debug("menu creation requested and feed is present");
-
-    final MenuInflater inflater = this.getMenuInflater();
-    inflater.inflate(R.menu.catalog, menu_nn);
 
     final MenuItem search_item = menu_nn.findItem(R.id.catalog_action_search);
 
@@ -518,9 +519,9 @@ import com.io7m.junreachable.UnreachableCodeException;
       }
     }
 
-    if (search_ok == false) {
-      search_item.setEnabled(false);
-      search_item.setVisible(false);
+    if (search_ok) {
+      search_item.setEnabled(true);
+      search_item.setVisible(true);
     }
 
     return true;
