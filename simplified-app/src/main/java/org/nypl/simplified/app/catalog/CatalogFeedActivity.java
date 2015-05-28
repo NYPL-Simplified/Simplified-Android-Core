@@ -699,6 +699,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final GridView grid_view =
       NullCheck.notNull((GridView) layout
         .findViewById(R.id.catalog_feed_nogroups_grid));
+    final View facet_divider =
+      NullCheck.notNull(layout
+        .findViewById(R.id.catalog_feed_nogroups_facet_divider));
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -708,6 +711,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       f.getFeedFacetsByGroup();
     if (facet_groups.isEmpty()) {
       facets_view.setVisibility(View.GONE);
+      facet_divider.setVisibility(View.GONE);
     } else {
       for (final String group_name : facet_groups.keySet()) {
         final ArrayList<OPDSFacet> group =

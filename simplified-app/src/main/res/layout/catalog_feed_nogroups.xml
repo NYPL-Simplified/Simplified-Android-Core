@@ -10,6 +10,7 @@
   <include layout="@layout/catalog_feed_nogroups_facets" />
 
   <View
+    android:id="@+id/catalog_feed_nogroups_facet_divider"
     android:background="@color/divider_color"
     android:layout_width="match_parent"
     android:layout_height="1dp"
