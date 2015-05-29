@@ -20,6 +20,11 @@ import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookFeedListenerType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
+import org.nypl.simplified.books.core.FeedFacetMatcherType;
+import org.nypl.simplified.books.core.FeedFacetOPDS;
+import org.nypl.simplified.books.core.FeedFacetPseudo;
+import org.nypl.simplified.books.core.FeedFacetPseudoTitleProviderType;
+import org.nypl.simplified.books.core.FeedFacetType;
 import org.nypl.simplified.books.core.FeedGroup;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
 import org.nypl.simplified.books.core.FeedLoaderType;
@@ -234,16 +239,18 @@ import com.io7m.junreachable.UnreachableCodeException;
       NullCheck.notNull(layout
         .findViewById(R.id.catalog_feed_nogroups_facet_divider));
 
-    final Map<String, List<OPDSFacet>> facet_groups =
+    final Map<String, List<FeedFacetType>> facet_groups =
       f.getFeedFacetsByGroup();
+
     if (facet_groups.isEmpty()) {
       facets_view.setVisibility(View.GONE);
       facet_divider.setVisibility(View.GONE);
     } else {
       for (final String group_name : facet_groups.keySet()) {
-        final ArrayList<OPDSFacet> group =
-          new ArrayList<OPDSFacet>(NullCheck.notNull(facet_groups
-            .get(group_name)));
+        final List<FeedFacetType> group =
+          NullCheck.notNull(facet_groups.get(group_name));
+        final ArrayList<FeedFacetType> group_copy =
+          new ArrayList<FeedFacetType>(group);
 
         final LinearLayout.LayoutParams tvp =
           new LinearLayout.LayoutParams(
@@ -256,31 +263,55 @@ import com.io7m.junreachable.UnreachableCodeException;
         tv.setTextSize(12.0f);
         tv.setText(group_name + ":");
         tv.setLayoutParams(tvp);
-
         facets_view.addView(tv);
+
+        final FeedFacetMatcherType<Unit, UnreachableCodeException> facet_feed_listener =
+          new FeedFacetMatcherType<Unit, UnreachableCodeException>() {
+            @Override public Unit onFeedFacetOPDS(
+              final FeedFacetOPDS feed_opds)
+            {
+              final OPDSFacet o = feed_opds.getOPDSFacet();
+              final CatalogFeedArgumentsRemote args =
+                new CatalogFeedArgumentsRemote(
+                  false,
+                  CatalogFeedActivity.this.getUpStack(),
+                  f.getFeedTitle(),
+                  o.getURI());
+              CatalogFeedActivity.startNewActivityReplacing(
+                CatalogFeedActivity.this,
+                args);
+              return Unit.unit();
+            }
+
+            @Override public Unit onFeedFacetPseudo(
+              final FeedFacetPseudo fp)
+            {
+              final String facet_title =
+                NullCheck.notNull(rr.getString(R.string.books_sort_by));
+              final CatalogFeedArgumentsLocalBooks args =
+                new CatalogFeedArgumentsLocalBooks(facet_title, fp.getType());
+              CatalogFeedActivity.startNewActivityReplacing(
+                CatalogFeedActivity.this,
+                args);
+              return Unit.unit();
+            }
+          };
+
+        final CatalogFacetSelectionListenerType facet_listener =
+          new CatalogFacetSelectionListenerType() {
+            @Override public void onFacetSelected(
+              final FeedFacetType in_selected)
+            {
+              in_selected.matchFeedFacet(facet_feed_listener);
+            }
+          };
 
         final CatalogFacetButton fb =
           new CatalogFacetButton(
             this,
-            group_name,
-            group,
-            new CatalogFacetSelectionListenerType() {
-              @Override public void onFacetSelected(
-                final OPDSFacet in_selected)
-              {
-                CatalogFeedActivity.LOG.debug(
-                  "selected: {}",
-                  in_selected.getURI());
-
-                CatalogFeedActivity.startNewActivityReplacing(
-                  CatalogFeedActivity.this,
-                  new CatalogFeedArgumentsRemote(
-                    false,
-                    CatalogFeedActivity.this.getUpStack(),
-                    f.getFeedTitle(),
-                    in_selected.getURI()));
-              }
-            });
+            NullCheck.notNull(group_name),
+            group_copy,
+            facet_listener);
 
         fb.setLayoutParams(tvp);
         facets_view.addView(fb);
@@ -421,23 +452,32 @@ import com.io7m.junreachable.UnreachableCodeException;
       Simplified.getCatalogAppServices();
     final FeedLoaderType feed_loader = app.getFeedLoader();
 
-    args
-      .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
+    final FeedFacetPseudoTitleProviderType facet_title_provider =
+      new CatalogFacetPseudoTitleProvider(rr);
+
+    final CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException> matcher =
+      new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
         @Override public Unit onFeedArgumentsLocalBooks(
           final CatalogFeedArgumentsLocalBooks c)
         {
           final BooksType books = app.getBooks();
+          final Calendar now = NullCheck.notNull(Calendar.getInstance());
           final URI dummy_uri = NullCheck.notNull(URI.create("Books"));
           final String dummy_id =
             NullCheck.notNull(rr.getString(R.string.books));
-          final Calendar now = NullCheck.notNull(Calendar.getInstance());
           final String title =
             NullCheck.notNull(rr.getString(R.string.books));
+          final String facet_group =
+            NullCheck.notNull(rr.getString(R.string.books_sort_by));
+
           books.booksGetFeed(
             dummy_uri,
             dummy_id,
             now,
             title,
+            c.getFacetType(),
+            facet_group,
+            facet_title_provider,
             CatalogFeedActivity.this);
           return Unit.unit();
         }
@@ -448,7 +488,9 @@ import com.io7m.junreachable.UnreachableCodeException;
           CatalogFeedActivity.this.loadFeed(feed_loader, c.getURI());
           return Unit.unit();
         }
-      });
+      };
+
+    args.matchArguments(matcher);
   }
 
   @Override public boolean onCreateOptionsMenu(

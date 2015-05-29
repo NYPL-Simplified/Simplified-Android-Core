@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.assertions.Assertions;
-import org.nypl.simplified.opds.core.OPDSFacet;
+import org.nypl.simplified.books.core.FeedFacetType;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -20,7 +20,7 @@ public final class CatalogFacetButton extends Button
   public CatalogFacetButton(
     final Activity in_activity,
     final String in_group_name,
-    final ArrayList<OPDSFacet> in_group,
+    final ArrayList<FeedFacetType> in_group,
     final CatalogFacetSelectionListenerType in_listener)
   {
     super(in_activity);
@@ -29,9 +29,9 @@ public final class CatalogFacetButton extends Button
     NullCheck.notNull(in_group_name);
     NullCheck.notNull(in_listener);
 
-    OPDSFacet active_maybe = null;
-    for (final OPDSFacet f : in_group) {
-      if (f.isActive()) {
+    FeedFacetType active_maybe = null;
+    for (final FeedFacetType f : in_group) {
+      if (f.facetIsActive()) {
         active_maybe = f;
         break;
       }
@@ -40,14 +40,14 @@ public final class CatalogFacetButton extends Button
     Assertions.checkPrecondition(
       active_maybe != null,
       "At least one facet is active");
-    final OPDSFacet active = NullCheck.notNull(active_maybe);
+    final FeedFacetType active = NullCheck.notNull(active_maybe);
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     this.setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
     this
       .setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
-    this.setText(active.getTitle());
+    this.setText(active.facetGetTitle());
     this.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)
@@ -57,7 +57,7 @@ public final class CatalogFacetButton extends Button
           CatalogFacetDialog.newDialog(in_group_name, in_group);
         d.setFacetSelectionListener(new CatalogFacetSelectionListenerType() {
           @Override public void onFacetSelected(
-            final OPDSFacet f)
+            final FeedFacetType f)
           {
             d.dismiss();
             in_listener.onFacetSelected(f);

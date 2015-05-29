@@ -55,6 +55,9 @@ public interface BooksControllerType extends BooksStatusCacheType
     String in_id,
     Calendar in_updated,
     String in_title,
+    FeedFacetPseudo.Type in_facet_active,
+    String in_facet_group,
+    FeedFacetPseudoTitleProviderType in_facet_titles,
     BookFeedListenerType in_listener);
 
   /**

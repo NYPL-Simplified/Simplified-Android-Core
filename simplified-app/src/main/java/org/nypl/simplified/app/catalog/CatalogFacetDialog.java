@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.opds.core.OPDSFacet;
+import org.nypl.simplified.books.core.FeedFacetType;
 import org.slf4j.Logger;
 
 import android.app.Activity;
@@ -49,7 +49,7 @@ public final class CatalogFacetDialog extends DialogFragment implements
 
   public static CatalogFacetDialog newDialog(
     final String in_facet_group_name,
-    final ArrayList<OPDSFacet> in_facet_group)
+    final ArrayList<FeedFacetType> in_facet_group)
   {
     NullCheck.notNull(in_facet_group);
     final CatalogFacetDialog c = new CatalogFacetDialog();
@@ -60,7 +60,7 @@ public final class CatalogFacetDialog extends DialogFragment implements
     return c;
   }
 
-  private @Nullable ArrayList<OPDSFacet>              group;
+  private @Nullable ArrayList<FeedFacetType>          group;
   private @Nullable ArrayAdapter<String>              group_adapter;
   private @Nullable String                            group_name;
   private @Nullable CatalogFacetSelectionListenerType listener;
@@ -78,8 +78,8 @@ public final class CatalogFacetDialog extends DialogFragment implements
 
     final Bundle b = NullCheck.notNull(this.getArguments());
 
-    final ArrayList<OPDSFacet> in_group =
-      NullCheck.notNull((ArrayList<OPDSFacet>) b
+    final ArrayList<FeedFacetType> in_group =
+      NullCheck.notNull((ArrayList<FeedFacetType>) b
         .getSerializable(CatalogFacetDialog.GROUP_ID));
 
     this.group = in_group;
@@ -88,8 +88,8 @@ public final class CatalogFacetDialog extends DialogFragment implements
 
     final ArrayList<String> in_strings =
       new ArrayList<String>(in_group.size());
-    for (final OPDSFacet f : in_group) {
-      in_strings.add(f.getTitle());
+    for (final FeedFacetType f : in_group) {
+      in_strings.add(f.facetGetTitle());
     }
 
     this.group_adapter =
@@ -136,7 +136,7 @@ public final class CatalogFacetDialog extends DialogFragment implements
     final int position,
     final long id)
   {
-    final OPDSFacet f =
+    final FeedFacetType f =
       NullCheck.notNull(NullCheck.notNull(this.group).get(position));
     NullCheck.notNull(this.listener).onFacetSelected(f);
   }
