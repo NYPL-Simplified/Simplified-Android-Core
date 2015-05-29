@@ -34,6 +34,13 @@ Release procedure:
 
   1. Set log level to 'INFO' in simplified-app/src/main/assets/logback.xml.
 
+     Note that the application logs *a lot*, and therefore debug
+     logging has a noticeable effect on UI performance. With the log
+     level set to 'INFO' or above, logging is completely disabled
+     and does not incur a measurable cost at run-time (log statements
+     are reduced to the equivalent of a single conditional branch and
+     empty method call; no I/O or log message formatting occurs).
+
   2. Update the version strings in all of the Android manifests:
 
      $ vim `find . -name AndroidManifest.xml -type f | grep src`

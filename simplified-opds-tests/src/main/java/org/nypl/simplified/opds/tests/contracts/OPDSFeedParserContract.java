@@ -12,6 +12,7 @@ import java.util.Set;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSFeedParseException;
@@ -50,7 +51,8 @@ import com.io7m.jnull.NullCheck;
     final URI uri =
       URI
         .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
       OPDSFeedParserContract.getResource("acquisition-fiction-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -82,7 +84,6 @@ import com.io7m.jnull.NullCheck;
       final String e_id = e.getID();
       final String e_title = e.getTitle();
       final Calendar e_u = e.getUpdated();
-      final String e_subtitle = e.getSubtitle();
       final List<OPDSAcquisition> e_acq = e.getAcquisitions();
       final List<String> e_authors = e.getAuthors();
       final OptionType<URI> e_thumb = e.getThumbnail();
@@ -102,7 +103,6 @@ import com.io7m.jnull.NullCheck;
       System.out.println();
       System.out.println("id: " + e_id);
       System.out.println("title: " + e_title);
-      System.out.println("subtitle: " + e_subtitle);
       System.out.println("update: " + e_u);
       System.out.println("thumbnail: " + e_thumb);
       System.out.println("cover: " + e_cover);
@@ -125,7 +125,8 @@ import com.io7m.jnull.NullCheck;
   {
     final URI uri =
       URI.create("http://circulation.alpha.librarysimplified.org/groups/");
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
       OPDSFeedParserContract.getResource("acquisition-groups-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -150,7 +151,8 @@ import com.io7m.jnull.NullCheck;
     final URI uri =
       URI
         .create("http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author");
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
       OPDSFeedParserContract.getResource("acquisition-paginated-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -186,7 +188,9 @@ import com.io7m.jnull.NullCheck;
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p = OPDSFeedParser.newParser();
+          final OPDSFeedParserType p =
+            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
+              .newParser());
           final InputStream d = new InputStream() {
             @Override public int read()
               throws IOException
@@ -204,7 +208,8 @@ import com.io7m.jnull.NullCheck;
   {
     final URI uri =
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d = OPDSFeedParserContract.getResource("empty-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     NullCheck.notNull(f);
@@ -224,7 +229,9 @@ import com.io7m.jnull.NullCheck;
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p = OPDSFeedParser.newParser();
+          final OPDSFeedParserType p =
+            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
+              .newParser());
           final InputStream d =
             OPDSFeedParserContract.getResource("bad-not-xml.xml");
           p.parse(uri, d);
@@ -245,7 +252,9 @@ import com.io7m.jnull.NullCheck;
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p = OPDSFeedParser.newParser();
+          final OPDSFeedParserType p =
+            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
+              .newParser());
           final InputStream d =
             OPDSFeedParserContract.getResource("bad-uri-syntax.xml");
           p.parse(uri, d);
@@ -266,7 +275,9 @@ import com.io7m.jnull.NullCheck;
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p = OPDSFeedParser.newParser();
+          final OPDSFeedParserType p =
+            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
+              .newParser());
           final InputStream d = new InputStream() {
             @Override public int read()
               throws IOException
@@ -285,7 +296,8 @@ import com.io7m.jnull.NullCheck;
     final URI uri =
       URI
         .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
       OPDSFeedParserContract.getResource("acquisition-categories-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
@@ -319,7 +331,8 @@ import com.io7m.jnull.NullCheck;
     final URI uri =
       URI
         .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
-    final OPDSFeedParserType p = OPDSFeedParser.newParser();
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
       OPDSFeedParserContract.getResource("acquisition-categories-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);

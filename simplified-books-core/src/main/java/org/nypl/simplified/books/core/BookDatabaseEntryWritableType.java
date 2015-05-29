@@ -2,7 +2,6 @@ package org.nypl.simplified.books.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
@@ -12,14 +11,9 @@ import com.io7m.jfunctional.OptionType;
  * <p>
  * The writable interface supported by book database entries.
  * </p>
- * <p>
- * References are {@link Serializable} and therefore can be passed between
- * processes. However, processes running under different user IDs are not
- * guaranteed to be able to perform any of the operations.
- * </p>
  */
 
-public interface BookDatabaseEntryWritableType extends Serializable
+public interface BookDatabaseEntryWritableType
 {
   /**
    * Copy the given file into the directory as the book data. Typically, this

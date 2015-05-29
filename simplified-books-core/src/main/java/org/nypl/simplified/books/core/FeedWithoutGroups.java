@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 
 import com.io7m.jfunctional.OptionType;
@@ -25,8 +24,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     final String in_title,
     final OptionType<URI> in_next,
     final OptionType<OPDSSearchLink> in_search,
-    final Map<String, List<OPDSFacet>> in_facets_by_group,
-    final List<OPDSFacet> in_facets_order)
+    final Map<String, List<FeedFacetType>> in_facets_by_group,
+    final List<FeedFacetType> in_facets_order)
   {
     final List<BookID> in_entries_order = new ArrayList<BookID>();
     final Map<BookID, FeedEntryType> in_entries =
@@ -44,16 +43,16 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
       in_facets_order);
   }
 
-  private final Map<BookID, FeedEntryType>   entries;
-  private final List<BookID>                 entries_order;
-  private final Map<String, List<OPDSFacet>> facets_by_group;
-  private final List<OPDSFacet>              facets_order;
-  private final String                       id;
-  private final OptionType<URI>              next;
-  private final OptionType<OPDSSearchLink>   search;
-  private final String                       title;
-  private final Calendar                     updated;
-  private final URI                          uri;
+  private final Map<BookID, FeedEntryType>       entries;
+  private final List<BookID>                     entries_order;
+  private final Map<String, List<FeedFacetType>> facets_by_group;
+  private final List<FeedFacetType>              facets_order;
+  private final String                           id;
+  private final OptionType<URI>                  next;
+  private final OptionType<OPDSSearchLink>       search;
+  private final String                           title;
+  private final Calendar                         updated;
+  private final URI                              uri;
 
   private FeedWithoutGroups(
     final URI in_uri,
@@ -64,8 +63,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     final OptionType<OPDSSearchLink> in_search,
     final List<BookID> in_entries_order,
     final Map<BookID, FeedEntryType> in_entries,
-    final Map<String, List<OPDSFacet>> in_facets_by_group,
-    final List<OPDSFacet> in_facets_order)
+    final Map<String, List<FeedFacetType>> in_facets_by_group,
+    final List<FeedFacetType> in_facets_order)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -98,12 +97,12 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     return NullCheck.notNull(this.entries.get(book_id));
   }
 
-  public Map<String, List<OPDSFacet>> getFeedFacetsByGroup()
+  public Map<String, List<FeedFacetType>> getFeedFacetsByGroup()
   {
     return this.facets_by_group;
   }
 
-  public List<OPDSFacet> getFeedFacetsOrder()
+  public List<FeedFacetType> getFeedFacetsOrder()
   {
     return this.facets_order;
   }

@@ -1,9 +1,20 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -226,6 +237,34 @@ public final class OPDSXML
       return namespace.toString().equals(node.getNamespaceURI());
     }
     return false;
+  }
+
+  public static void serializeDocumentToStream(
+    final Document d,
+    final OutputStream o)
+    throws OPDSFeedSerializationException
+  {
+    NullCheck.notNull(d);
+    NullCheck.notNull(o);
+
+    try {
+      final TransformerFactory tf =
+        NullCheck.notNull(TransformerFactory.newInstance());
+
+      final Transformer t = NullCheck.notNull(tf.newTransformer());
+      t.setOutputProperty(OutputKeys.INDENT, "yes");
+      t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+      final DOMSource source = new DOMSource(d);
+      final StreamResult target = new StreamResult(o);
+      t.transform(source, target);
+    } catch (final TransformerConfigurationException ex) {
+      throw new OPDSFeedSerializationException(ex);
+    } catch (final TransformerFactoryConfigurationError ex) {
+      throw new OPDSFeedSerializationException(ex);
+    } catch (final TransformerException ex) {
+      throw new OPDSFeedSerializationException(ex);
+    }
   }
 
   private OPDSXML()

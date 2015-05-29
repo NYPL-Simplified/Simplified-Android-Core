@@ -4,13 +4,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
+import org.nypl.simplified.opds.core.OPDSXML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -33,24 +38,36 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") public final class BookDatabaseEntry implements
   BookDatabaseEntryType
 {
-  private static final long serialVersionUID          = 1L;
-  public static final int   WAIT_MAXIMUM_MILLISECONDS = 1000;
-  public static final int   WAIT_PAUSE_MILLISECONDS   = 10;
+  public static final int                              WAIT_MAXIMUM_MILLISECONDS;
+  public static final int                              WAIT_PAUSE_MILLISECONDS;
+  private static final Logger                          LOG;
 
-  private final File        directory;
-  private final File        file_book;
-  private final File        file_cover;
-  private final File        file_download_id;
-  private final File        file_download_id_tmp;
-  private final File        file_lock;
-  private final File        file_meta;
-  private final File        file_meta_tmp;
-  private final BookID      id;
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(BookDatabaseEntry.class));
+    WAIT_MAXIMUM_MILLISECONDS = 1000;
+    WAIT_PAUSE_MILLISECONDS = 10;
+  }
+
+  private final File                                   directory;
+  private final File                                   file_book;
+  private final File                                   file_cover;
+  private final File                                   file_download_id;
+  private final File                                   file_download_id_tmp;
+  private final File                                   file_lock;
+  private final File                                   file_meta;
+  private final File                                   file_meta_tmp;
+  private final BookID                                 id;
+  private final OPDSAcquisitionFeedEntryParserType     parser;
+  private final OPDSAcquisitionFeedEntrySerializerType serializer;
 
   public BookDatabaseEntry(
+    final OPDSAcquisitionFeedEntryParserType in_parser,
+    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
     final File parent,
     final BookID book_id)
   {
+    this.parser = NullCheck.notNull(in_parser);
+    this.serializer = NullCheck.notNull(in_serializer);
     this.directory =
       new File(NullCheck.notNull(parent), NullCheck
         .notNull(book_id)
@@ -59,8 +76,8 @@ import com.io7m.jnull.NullCheck;
     this.id = NullCheck.notNull(book_id);
     this.file_lock = new File(this.directory, "lock");
     this.file_cover = new File(this.directory, "cover.jpg");
-    this.file_meta = new File(this.directory, "meta.dat");
-    this.file_meta_tmp = new File(this.directory, "meta.dat.tmp");
+    this.file_meta = new File(this.directory, "meta.xml");
+    this.file_meta_tmp = new File(this.directory, "meta.xml.tmp");
     this.file_book = new File(this.directory, "book.epub");
 
     this.file_download_id = new File(this.directory, "download_id.txt");
@@ -225,12 +242,9 @@ import com.io7m.jnull.NullCheck;
   private OPDSAcquisitionFeedEntry getDataLocked()
     throws IOException
   {
-    final ObjectInputStream is =
-      new ObjectInputStream(new FileInputStream(this.file_meta));
+    final FileInputStream is = new FileInputStream(this.file_meta);
     try {
-      return NullCheck.notNull((OPDSAcquisitionFeedEntry) is.readObject());
-    } catch (final ClassNotFoundException e) {
-      throw new IOException(e);
+      return this.parser.parseEntryStream(is);
     } finally {
       is.close();
     }
@@ -269,22 +283,6 @@ import com.io7m.jnull.NullCheck;
     return Option.none();
   }
 
-  private OPDSAcquisitionFeedEntry getEntryLocked()
-    throws IOException
-  {
-    final ObjectInputStream is =
-      new ObjectInputStream(new FileInputStream(this.file_meta));
-    try {
-      final OPDSAcquisitionFeedEntry e =
-        (OPDSAcquisitionFeedEntry) is.readObject();
-      return NullCheck.notNull(e);
-    } catch (final ClassNotFoundException x) {
-      throw new IOException(x);
-    } finally {
-      is.close();
-    }
-  }
-
   @Override public BookID getID()
   {
     return this.id;
@@ -310,7 +308,7 @@ import com.io7m.jnull.NullCheck;
   private BookSnapshot getSnapshotLocked()
     throws IOException
   {
-    final OPDSAcquisitionFeedEntry in_entry = this.getEntryLocked();
+    final OPDSAcquisitionFeedEntry in_entry = this.getDataLocked();
     final OptionType<Long> in_download_id = this.getDownloadIDLocked();
     final OptionType<File> in_cover = this.getCoverLocked();
     final OptionType<File> in_book = this.getBookLocked();
@@ -318,15 +316,17 @@ import com.io7m.jnull.NullCheck;
   }
 
   private void setDataLocked(
-    final OPDSAcquisitionFeedEntry in_entry)
+    final Document d)
     throws IOException
   {
-    final ObjectOutputStream os =
-      new ObjectOutputStream(new FileOutputStream(this.file_meta_tmp));
+    BookDatabaseEntry.LOG.debug("updating data {}", this.file_meta);
+
+    final OutputStream os = new FileOutputStream(this.file_meta_tmp);
+
     try {
-      os.writeObject(in_entry);
-      os.flush();
+      OPDSXML.serializeDocumentToStream(d, os);
     } finally {
+      os.flush();
       os.close();
     }
 
@@ -379,6 +379,8 @@ import com.io7m.jnull.NullCheck;
     final OPDSAcquisitionFeedEntry in_entry)
     throws IOException
   {
+    final Document d = this.serializer.serializeFeedEntry(in_entry);
+
     FileLocking.withFileLocked(
       this.file_lock,
       BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
@@ -388,7 +390,7 @@ import com.io7m.jnull.NullCheck;
           final Unit x)
           throws IOException
         {
-          BookDatabaseEntry.this.setDataLocked(in_entry);
+          BookDatabaseEntry.this.setDataLocked(d);
           return Unit.unit();
         }
       });

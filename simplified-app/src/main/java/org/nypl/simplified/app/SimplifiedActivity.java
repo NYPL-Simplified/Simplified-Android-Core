@@ -14,6 +14,7 @@ import org.nypl.simplified.app.catalog.CatalogUpStackEntry;
 import org.nypl.simplified.app.catalog.HoldsActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
@@ -235,7 +236,9 @@ import com.io7m.jnull.Nullable;
         final Bundle b)
       {
         final CatalogFeedArgumentsLocalBooks local =
-          new CatalogFeedArgumentsLocalBooks(books_name);
+          new CatalogFeedArgumentsLocalBooks(
+            books_name,
+            FeedFacetPseudo.Type.SORT_BY_TITLE);
         CatalogFeedActivity.setActivityArguments(b, local);
         return Unit.unit();
       }

@@ -3,7 +3,13 @@
 
   <string name="app_name">Simplified</string>
   <string name="holds">Holds</string>
+
+  <!-- Books strings -->
   <string name="books">My Books</string>
+  <string name="books_sync">Sync</string>
+  <string name="books_sort_by">Sort by</string>
+  <string name="books_sort_by_author">Author</string>
+  <string name="books_sort_by_title">Title</string>
 
   <!-- Catalog strings -->
   <string name="catalog">Catalog</string>
@@ -11,7 +17,8 @@
   <string name="catalog_load_error_text">An error occurred whilst loading the catalog. Please try
     again.
   </string>
-  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/groups/</string>
+  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/groups/
+  </string>
   <!-- <string name="catalog_start_uri">https://d3frcbs0h4wafj.cloudfront.net/feed/Science%20Fiction?order=author</string> -->
   <string name="catalog_unknown_feed">Unknown</string>
   <string name="catalog_detail_related">Related books</string>
@@ -67,7 +74,8 @@
 
   <!-- Accessibility strings used for content descriptions (Reader) -->
   <string name="reader_accessibility_toc">Show table of contents</string>
-  <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item</string>
+  <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item
+  </string>
   <string name="reader_accessibility_settings">Show reader settings</string>
   <string name="reader_accessibility_media_previous">Go to previous media item</string>
   <string name="reader_accessibility_media_next">Go to next media item</string>

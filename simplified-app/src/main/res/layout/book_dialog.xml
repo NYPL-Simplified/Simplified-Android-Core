@@ -58,19 +58,10 @@
         android:textStyle="bold" />
 
       <TextView
-        android:id="@+id/book_header_subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/book_header_title"
-        android:layout_marginStart="8dp"
-        android:text="Book subtitle"
-        android:textColor="@color/normal_text_major" />
-
-      <TextView
         android:id="@+id/book_header_authors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/book_header_subtitle"
+        android:layout_below="@id/book_header_title"
         android:layout_marginStart="8dp"
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="8"
