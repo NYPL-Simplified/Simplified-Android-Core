@@ -5,6 +5,9 @@
   <string name="holds">Holds</string>
   <string name="books">My Books</string>
 
+  <!-- Books strings -->
+  <string name="books_sync">Sync</string>
+
   <!-- Catalog strings -->
   <string name="catalog">Catalog</string>
   <string name="catalog_load_error_title">Error</string>
