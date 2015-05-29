@@ -36,6 +36,8 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -235,10 +237,12 @@ import com.io7m.jnull.Nullable;
       @Override public Unit call(
         final Bundle b)
       {
+        final OptionType<String> no_search = Option.none();
         final CatalogFeedArgumentsLocalBooks local =
           new CatalogFeedArgumentsLocalBooks(
             books_name,
-            FeedFacetPseudo.Type.SORT_BY_TITLE);
+            FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+            no_search);
         CatalogFeedActivity.setActivityArguments(b, local);
         return Unit.unit();
       }

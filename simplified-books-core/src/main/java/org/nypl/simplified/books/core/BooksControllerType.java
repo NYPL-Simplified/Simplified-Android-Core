@@ -6,6 +6,8 @@ import java.util.Calendar;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
+import com.io7m.jfunctional.OptionType;
+
 /**
  * Interface to the book management functions.
  */
@@ -55,9 +57,10 @@ public interface BooksControllerType extends BooksStatusCacheType
     String in_id,
     Calendar in_updated,
     String in_title,
-    FeedFacetPseudo.Type in_facet_active,
+    FeedFacetPseudo.FacetType in_facet_active,
     String in_facet_group,
     FeedFacetPseudoTitleProviderType in_facet_titles,
+    OptionType<String> in_search,
     BookFeedListenerType in_listener);
 
   /**

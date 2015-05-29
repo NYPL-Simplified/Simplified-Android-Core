@@ -1,7 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.core.FeedFacetPseudo.Type;
+import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.books.core.FeedFacetPseudoTitleProviderType;
 
 import android.content.res.Resources;
@@ -25,7 +25,7 @@ public final class CatalogFacetPseudoTitleProvider implements
   }
 
   @Override public String getTitle(
-    final Type t)
+    final FacetType t)
   {
     switch (t) {
       case SORT_BY_AUTHOR:

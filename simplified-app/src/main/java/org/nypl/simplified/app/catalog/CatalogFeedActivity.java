@@ -18,11 +18,13 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookFeedListenerType;
+import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedFacetMatcherType;
 import org.nypl.simplified.books.core.FeedFacetOPDS;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
+import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.books.core.FeedFacetPseudoTitleProviderType;
 import org.nypl.simplified.books.core.FeedFacetType;
 import org.nypl.simplified.books.core.FeedGroup;
@@ -59,6 +61,7 @@ import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -114,6 +117,44 @@ import com.io7m.junreachable.UnreachableCodeException;
       final CatalogFeedArgumentsRemote new_args =
         new CatalogFeedArgumentsRemote(false, us, "Search", target);
       CatalogFeedActivity.startNewActivity(cfa, new_args);
+      return true;
+    }
+  }
+
+  /**
+   * A handler for local book searches.
+   */
+
+  private final class BooksLocalSearchQueryHandler implements
+    OnQueryTextListener
+  {
+    private final FeedFacetPseudo.FacetType facet_active;
+
+    BooksLocalSearchQueryHandler(
+      final FeedFacetPseudo.FacetType in_facet_active)
+    {
+      this.facet_active = NullCheck.notNull(in_facet_active);
+    }
+
+    @Override public boolean onQueryTextChange(
+      final @Nullable String s)
+    {
+      return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(
+      final @Nullable String query)
+    {
+      final String qnn = NullCheck.notNull(query);
+
+      final CatalogFeedArgumentsLocalBooks new_args =
+        new CatalogFeedArgumentsLocalBooks(
+          "Search",
+          this.facet_active,
+          Option.some(qnn));
+
+      final CatalogFeedActivity cfa = CatalogFeedActivity.this;
+      CatalogFeedActivity.startNewActivityReplacing(cfa, new_args);
       return true;
     }
   }
@@ -265,6 +306,16 @@ import com.io7m.junreachable.UnreachableCodeException;
         tv.setLayoutParams(tvp);
         facets_view.addView(tv);
 
+        final OptionType<String> search_terms;
+        final CatalogFeedArgumentsType current_args = this.getArguments();
+        if (current_args instanceof CatalogFeedArgumentsLocalBooks) {
+          final CatalogFeedArgumentsLocalBooks locals =
+            (CatalogFeedArgumentsLocalBooks) current_args;
+          search_terms = locals.getSearchTerms();
+        } else {
+          search_terms = Option.none();
+        }
+
         final FeedFacetMatcherType<Unit, UnreachableCodeException> facet_feed_listener =
           new FeedFacetMatcherType<Unit, UnreachableCodeException>() {
             @Override public Unit onFeedFacetOPDS(
@@ -289,7 +340,10 @@ import com.io7m.junreachable.UnreachableCodeException;
               final String facet_title =
                 NullCheck.notNull(rr.getString(R.string.books_sort_by));
               final CatalogFeedArgumentsLocalBooks args =
-                new CatalogFeedArgumentsLocalBooks(facet_title, fp.getType());
+                new CatalogFeedArgumentsLocalBooks(
+                  facet_title,
+                  fp.getType(),
+                  search_terms);
               CatalogFeedActivity.startNewActivityReplacing(
                 CatalogFeedActivity.this,
                 args);
@@ -406,6 +460,11 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public void onBookFeedSuccess(
     final FeedWithoutGroups f)
   {
+    CatalogFeedActivity.LOG.debug(
+      "received locally generated feed: {}",
+      f.getFeedID());
+
+    this.feed = f;
     this.onFeedWithoutGroups(f);
   }
 
@@ -478,6 +537,7 @@ import com.io7m.junreachable.UnreachableCodeException;
             c.getFacetType(),
             facet_group,
             facet_title_provider,
+            c.getSearchTerms(),
             CatalogFeedActivity.this);
           return Unit.unit();
         }
@@ -511,6 +571,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     CatalogFeedActivity.LOG
       .debug("menu creation requested and feed is present");
 
+    this.onCreateOptionsMenuSearchItem(menu_nn);
+    return true;
+  }
+
+  private void onCreateOptionsMenuSearchItem(
+    final Menu menu_nn)
+  {
     final MenuItem search_item = menu_nn.findItem(R.id.catalog_action_search);
 
     /**
@@ -549,6 +616,11 @@ import com.io7m.junreachable.UnreachableCodeException;
         sv.setOnQueryTextListener(new OpenSearchQueryHandler(args, search
           .getURI()));
         search_ok = true;
+      } else if (BooksController.LOCAL_SEARCH_TYPE.equals(search.getType())) {
+        final FacetType active_facet = FacetType.SORT_BY_TITLE;
+        sv.setOnQueryTextListener(new BooksLocalSearchQueryHandler(
+          active_facet));
+        search_ok = true;
       } else {
 
         /**
@@ -565,8 +637,6 @@ import com.io7m.junreachable.UnreachableCodeException;
       search_item.setEnabled(true);
       search_item.setVisible(true);
     }
-
-    return true;
   }
 
   @Override protected void onDestroy()

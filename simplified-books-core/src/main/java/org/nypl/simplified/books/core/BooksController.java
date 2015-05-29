@@ -44,9 +44,12 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
   Observable implements BooksType
 {
+  public static final String  LOCAL_SEARCH_TYPE;
+
   private static final Logger LOG;
 
   static {
+    LOCAL_SEARCH_TYPE = "application/simplified-local-search+xml";
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
   }
 
@@ -365,9 +368,10 @@ import com.io7m.junreachable.UnreachableCodeException;
     final String in_id,
     final Calendar in_updated,
     final String in_title,
-    final FeedFacetPseudo.Type in_facet_active,
+    final FeedFacetPseudo.FacetType in_facet_active,
     final String in_facet_group,
     final FeedFacetPseudoTitleProviderType in_facet_titles,
+    final OptionType<String> in_search,
     final BookFeedListenerType in_listener)
   {
     NullCheck.notNull(in_uri);
@@ -377,6 +381,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(in_facet_active);
     NullCheck.notNull(in_facet_group);
     NullCheck.notNull(in_facet_titles);
+    NullCheck.notNull(in_search);
     NullCheck.notNull(in_listener);
 
     this.submitRunnable(new BooksControllerFeedTask(
@@ -388,6 +393,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       in_facet_active,
       in_facet_group,
       in_facet_titles,
+      in_search,
       in_listener));
   }
 
