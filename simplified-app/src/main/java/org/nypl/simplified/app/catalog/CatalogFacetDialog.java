@@ -3,15 +3,12 @@ package org.nypl.simplified.app.catalog;
 import java.util.ArrayList;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.FeedFacetType;
-import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -38,10 +35,8 @@ public final class CatalogFacetDialog extends DialogFragment implements
 {
   private static final String GROUP_ID;
   private static final String GROUP_NAME_ID;
-  private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(CatalogFacetDialog.class);
     GROUP_ID = "org.nypl.simplified.app.catalog.CatalogFacetDialog.facets";
     GROUP_NAME_ID =
       "org.nypl.simplified.app.catalog.CatalogFacetDialog.facets_name";
@@ -78,7 +73,7 @@ public final class CatalogFacetDialog extends DialogFragment implements
 
     final Bundle b = NullCheck.notNull(this.getArguments());
 
-    final ArrayList<FeedFacetType> in_group =
+    @SuppressWarnings("unchecked") final ArrayList<FeedFacetType> in_group =
       NullCheck.notNull((ArrayList<FeedFacetType>) b
         .getSerializable(CatalogFacetDialog.GROUP_ID));
 
@@ -106,7 +101,6 @@ public final class CatalogFacetDialog extends DialogFragment implements
     final @Nullable Bundle state)
   {
     final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
-    final Resources rr = NullCheck.notNull(this.getResources());
 
     final ViewGroup layout =
       NullCheck.notNull((ViewGroup) inflater.inflate(
