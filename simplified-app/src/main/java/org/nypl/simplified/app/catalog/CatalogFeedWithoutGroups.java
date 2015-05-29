@@ -34,7 +34,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-public final class CatalogFeedWithoutGroups implements
+@SuppressWarnings("boxing") public final class CatalogFeedWithoutGroups implements
   ListAdapter,
   OnScrollListener,
   FeedLoaderListenerType,
@@ -163,7 +163,7 @@ public final class CatalogFeedWithoutGroups implements
   /**
    * Attempt to load the next feed, if necessary. If the feed is already
    * loading, the feed will not be requested again.
-   * 
+   *
    * @param next_ref
    *          The next URI, if any
    * @return A future representing the loading feed
