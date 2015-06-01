@@ -83,11 +83,14 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     private final CatalogFeedArgumentsType args;
     private final URI                      base;
+    private final Resources                resources;
 
     OpenSearchQueryHandler(
+      final Resources in_resources,
       final CatalogFeedArgumentsType in_args,
       final URI in_base)
     {
+      this.resources = NullCheck.notNull(in_resources);
       this.args = NullCheck.notNull(in_args);
       this.base = NullCheck.notNull(in_base);
     }
@@ -112,8 +115,11 @@ import com.io7m.junreachable.UnreachableCodeException;
       final ImmutableStack<CatalogFeedArgumentsType> us =
         cfa.newUpStack(this.args);
 
+      final String title =
+        this.resources.getString(R.string.catalog_search) + ": " + qnn;
+
       final CatalogFeedArgumentsRemote new_args =
-        new CatalogFeedArgumentsRemote(false, us, "Search: " + qnn, target);
+        new CatalogFeedArgumentsRemote(false, us, title, target);
       CatalogFeedActivity.startNewActivity(cfa, new_args);
       return true;
     }
@@ -128,11 +134,14 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     private final FeedFacetPseudo.FacetType facet_active;
     private final CatalogFeedArgumentsType  args;
+    private final Resources                 resources;
 
     BooksLocalSearchQueryHandler(
+      final Resources in_resources,
       final CatalogFeedArgumentsType in_args,
       final FeedFacetPseudo.FacetType in_facet_active)
     {
+      this.resources = NullCheck.notNull(in_resources);
       this.args = NullCheck.notNull(in_args);
       this.facet_active = NullCheck.notNull(in_facet_active);
     }
@@ -152,10 +161,13 @@ import com.io7m.junreachable.UnreachableCodeException;
       final ImmutableStack<CatalogFeedArgumentsType> us =
         cfa.newUpStack(this.args);
 
+      final String title =
+        this.resources.getString(R.string.catalog_search) + ": " + qnn;
+
       final CatalogFeedArgumentsLocalBooks new_args =
         new CatalogFeedArgumentsLocalBooks(
           us,
-          "Search: " + qnn,
+          title,
           this.facet_active,
           Option.some(qnn));
 
@@ -608,14 +620,16 @@ import com.io7m.junreachable.UnreachableCodeException;
        * Check that the search URI is of an understood type.
        */
 
+      final Resources rr = NullCheck.notNull(this.getResources());
       final OPDSSearchLink search = search_some.get();
       if ("application/opensearchdescription+xml".equals(search.getType())) {
-        sv.setOnQueryTextListener(new OpenSearchQueryHandler(args, search
+        sv.setOnQueryTextListener(new OpenSearchQueryHandler(rr, args, search
           .getURI()));
         search_ok = true;
       } else if (BooksController.LOCAL_SEARCH_TYPE.equals(search.getType())) {
         final FacetType active_facet = FacetType.SORT_BY_TITLE;
         sv.setOnQueryTextListener(new BooksLocalSearchQueryHandler(
+          rr,
           args,
           active_facet));
         search_ok = true;
