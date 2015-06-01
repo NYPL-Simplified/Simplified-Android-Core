@@ -4,7 +4,7 @@ import com.io7m.jnull.NullCheck;
 
 public final class FeedFacetPseudo implements FeedFacetType
 {
-  public static enum Type
+  public static enum FacetType
   {
     SORT_BY_AUTHOR,
     SORT_BY_TITLE
@@ -13,12 +13,12 @@ public final class FeedFacetPseudo implements FeedFacetType
   private static final long serialVersionUID = 1L;
   private final boolean     active;
   private final String      title;
-  private final Type        type;
+  private final FacetType        type;
 
   public FeedFacetPseudo(
     final String in_title,
     final boolean in_active,
-    final Type in_type)
+    final FacetType in_type)
   {
     this.title = NullCheck.notNull(in_title);
     this.active = in_active;
@@ -35,7 +35,7 @@ public final class FeedFacetPseudo implements FeedFacetType
     return this.active;
   }
 
-  public Type getType()
+  public FacetType getType()
   {
     return this.type;
   }

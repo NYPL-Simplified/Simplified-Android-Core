@@ -32,7 +32,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
   public static void setActivityArguments(
     final Bundle b,
     final boolean drawer_open,
-    final ImmutableStack<CatalogUpStackEntry> up_stack,
+    final ImmutableStack<CatalogFeedArgumentsType> up_stack,
     final FeedEntryOPDS e)
   {
     NullCheck.notNull(b);
@@ -45,7 +45,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
 
   public static void startNewActivity(
     final Activity from,
-    final ImmutableStack<CatalogUpStackEntry> up_stack,
+    final ImmutableStack<CatalogFeedArgumentsType> up_stack,
     final FeedEntryOPDS e)
   {
     final Bundle b = new Bundle();

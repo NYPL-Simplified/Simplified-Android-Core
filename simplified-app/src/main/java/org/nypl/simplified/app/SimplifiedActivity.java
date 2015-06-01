@@ -10,7 +10,7 @@ import org.nypl.simplified.app.catalog.BooksActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
-import org.nypl.simplified.app.catalog.CatalogUpStackEntry;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.HoldsActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.assertions.Assertions;
@@ -36,6 +36,8 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -235,10 +237,15 @@ import com.io7m.jnull.Nullable;
       @Override public Unit call(
         final Bundle b)
       {
+        final OptionType<String> no_search = Option.none();
+        final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
+          ImmutableStack.empty();
         final CatalogFeedArgumentsLocalBooks local =
           new CatalogFeedArgumentsLocalBooks(
+            empty_stack,
             books_name,
-            FeedFacetPseudo.Type.SORT_BY_TITLE);
+            FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+            no_search);
         CatalogFeedActivity.setActivityArguments(b, local);
         return Unit.unit();
       }
@@ -248,7 +255,7 @@ import com.io7m.jnull.Nullable;
       @Override public Unit call(
         final Bundle b)
       {
-        final ImmutableStack<CatalogUpStackEntry> empty =
+        final ImmutableStack<CatalogFeedArgumentsType> empty =
           ImmutableStack.empty();
         final CatalogFeedArgumentsRemote remote =
           new CatalogFeedArgumentsRemote(

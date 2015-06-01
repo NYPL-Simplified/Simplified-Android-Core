@@ -9,16 +9,20 @@ import com.io7m.jnull.NullCheck;
 public final class CatalogFeedArgumentsRemote implements
   CatalogFeedArgumentsType
 {
-  private static final long                         serialVersionUID = 1L;
+  private static final long                              serialVersionUID;
 
-  private final boolean                             drawer_open;
-  private final String                              title;
-  private final ImmutableStack<CatalogUpStackEntry> up_stack;
-  private final URI                                 uri;
+  static {
+    serialVersionUID = 1L;
+  }
+
+  private final boolean                                  drawer_open;
+  private final String                                   title;
+  private final ImmutableStack<CatalogFeedArgumentsType> up_stack;
+  private final URI                                      uri;
 
   public CatalogFeedArgumentsRemote(
     final boolean in_drawer_open,
-    final ImmutableStack<CatalogUpStackEntry> in_up_stack,
+    final ImmutableStack<CatalogFeedArgumentsType> in_up_stack,
     final String in_title,
     final URI in_uri)
   {
@@ -33,7 +37,7 @@ public final class CatalogFeedArgumentsRemote implements
     return this.title;
   }
 
-  public ImmutableStack<CatalogUpStackEntry> getUpStack()
+  @Override public ImmutableStack<CatalogFeedArgumentsType> getUpStack()
   {
     return this.up_stack;
   }
@@ -53,5 +57,20 @@ public final class CatalogFeedArgumentsRemote implements
     throws E
   {
     return m.onFeedArgumentsRemote(this);
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[CatalogFeedArgumentsRemote drawer_open=");
+    b.append(this.drawer_open);
+    b.append(" title=");
+    b.append(this.title);
+    b.append(" up_stack=");
+    b.append(this.up_stack);
+    b.append(" uri=");
+    b.append(this.uri);
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }
