@@ -154,7 +154,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           Option.some(qnn));
 
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
-      CatalogFeedActivity.startNewActivityReplacing(cfa, new_args);
+      CatalogFeedActivity.startNewActivity(cfa, new_args);
       return true;
     }
   }
