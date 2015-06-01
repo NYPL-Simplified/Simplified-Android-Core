@@ -29,19 +29,19 @@ public final class CatalogFacetButton extends Button
     NullCheck.notNull(in_group_name);
     NullCheck.notNull(in_listener);
 
-    FeedFacetType active_maybe = null;
+    Assertions.checkPrecondition(
+      in_group.isEmpty() == false,
+      "Facet group is not empty");
+
+    FeedFacetType active_maybe = NullCheck.notNull(in_group.get(0));
     for (final FeedFacetType f : in_group) {
       if (f.facetIsActive()) {
-        active_maybe = f;
+        active_maybe = NullCheck.notNull(f);
         break;
       }
     }
 
-    Assertions.checkPrecondition(
-      active_maybe != null,
-      "At least one facet is active");
     final FeedFacetType active = NullCheck.notNull(active_maybe);
-
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     this.setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
