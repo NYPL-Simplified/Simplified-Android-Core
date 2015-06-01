@@ -56,18 +56,23 @@ public final class BooksActivity extends CatalogFeedActivity implements
     super.onCreateOptionsMenu(in_menu);
 
     final Menu menu_nn = NullCheck.notNull(in_menu);
-    final MenuItem sync_item =
-      NullCheck.notNull(menu_nn.findItem(R.id.catalog_action_sync_books));
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
+
+    final MenuItem sync_item =
+      NullCheck.notNull(menu_nn.findItem(R.id.catalog_action_sync_books));
+    final MenuItem refresh_item =
+      NullCheck.notNull(menu_nn.findItem(R.id.catalog_action_refresh));
 
     if (books.accountIsLoggedIn()) {
       sync_item.setEnabled(true);
       sync_item.setVisible(true);
     }
 
+    refresh_item.setEnabled(false);
+    refresh_item.setVisible(false);
     return true;
   }
 

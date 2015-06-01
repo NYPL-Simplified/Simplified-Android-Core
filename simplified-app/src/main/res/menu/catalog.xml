@@ -17,4 +17,11 @@
     android:visible="false"
     android:showAsAction="never|withText|collapseActionView" />
 
+  <item
+    android:id="@+id/catalog_action_refresh"
+    android:title="@string/catalog_refresh"
+    android:enabled="false"
+    android:visible="false"
+    android:showAsAction="never|withText|collapseActionView" />
+
 </menu>

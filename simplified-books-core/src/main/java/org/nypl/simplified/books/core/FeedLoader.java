@@ -203,6 +203,13 @@ import com.io7m.jnull.Nullable;
     return this.fetch(uri, listener);
   }
 
+  @Override public void invalidate(
+    final URI uri)
+  {
+    NullCheck.notNull(uri);
+    this.cache.remove(uri);
+  }
+
   private FeedType loadFeed(
     final URI uri)
     throws IOException

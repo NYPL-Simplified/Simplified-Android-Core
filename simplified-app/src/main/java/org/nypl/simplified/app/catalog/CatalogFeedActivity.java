@@ -76,6 +76,57 @@ import com.io7m.junreachable.UnreachableCodeException;
   FeedLoaderListenerType
 {
   /**
+   * A handler for local book searches.
+   */
+
+  private final class BooksLocalSearchQueryHandler implements
+    OnQueryTextListener
+  {
+    private final CatalogFeedArgumentsType  args;
+    private final FeedFacetPseudo.FacetType facet_active;
+    private final Resources                 resources;
+
+    BooksLocalSearchQueryHandler(
+      final Resources in_resources,
+      final CatalogFeedArgumentsType in_args,
+      final FeedFacetPseudo.FacetType in_facet_active)
+    {
+      this.resources = NullCheck.notNull(in_resources);
+      this.args = NullCheck.notNull(in_args);
+      this.facet_active = NullCheck.notNull(in_facet_active);
+    }
+
+    @Override public boolean onQueryTextChange(
+      final @Nullable String s)
+    {
+      return true;
+    }
+
+    @Override public boolean onQueryTextSubmit(
+      final @Nullable String query)
+    {
+      final String qnn = NullCheck.notNull(query);
+
+      final CatalogFeedActivity cfa = CatalogFeedActivity.this;
+      final ImmutableStack<CatalogFeedArgumentsType> us =
+        cfa.newUpStack(this.args);
+
+      final String title =
+        this.resources.getString(R.string.catalog_search) + ": " + qnn;
+
+      final CatalogFeedArgumentsLocalBooks new_args =
+        new CatalogFeedArgumentsLocalBooks(
+          us,
+          title,
+          this.facet_active,
+          Option.some(qnn));
+
+      CatalogFeedActivity.startNewActivity(cfa, new_args);
+      return true;
+    }
+  }
+
+  /**
    * A handler for OpenSearch 1.1 searches.
    */
 
@@ -120,57 +171,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       final CatalogFeedArgumentsRemote new_args =
         new CatalogFeedArgumentsRemote(false, us, title, target);
-      CatalogFeedActivity.startNewActivity(cfa, new_args);
-      return true;
-    }
-  }
-
-  /**
-   * A handler for local book searches.
-   */
-
-  private final class BooksLocalSearchQueryHandler implements
-    OnQueryTextListener
-  {
-    private final FeedFacetPseudo.FacetType facet_active;
-    private final CatalogFeedArgumentsType  args;
-    private final Resources                 resources;
-
-    BooksLocalSearchQueryHandler(
-      final Resources in_resources,
-      final CatalogFeedArgumentsType in_args,
-      final FeedFacetPseudo.FacetType in_facet_active)
-    {
-      this.resources = NullCheck.notNull(in_resources);
-      this.args = NullCheck.notNull(in_args);
-      this.facet_active = NullCheck.notNull(in_facet_active);
-    }
-
-    @Override public boolean onQueryTextChange(
-      final @Nullable String s)
-    {
-      return true;
-    }
-
-    @Override public boolean onQueryTextSubmit(
-      final @Nullable String query)
-    {
-      final String qnn = NullCheck.notNull(query);
-
-      final CatalogFeedActivity cfa = CatalogFeedActivity.this;
-      final ImmutableStack<CatalogFeedArgumentsType> us =
-        cfa.newUpStack(this.args);
-
-      final String title =
-        this.resources.getString(R.string.catalog_search) + ": " + qnn;
-
-      final CatalogFeedArgumentsLocalBooks new_args =
-        new CatalogFeedArgumentsLocalBooks(
-          us,
-          title,
-          this.facet_active,
-          Option.some(qnn));
-
       CatalogFeedActivity.startNewActivity(cfa, new_args);
       return true;
     }
@@ -581,7 +581,20 @@ import com.io7m.junreachable.UnreachableCodeException;
       .debug("menu creation requested and feed is present");
 
     this.onCreateOptionsMenuSearchItem(menu_nn);
+    this.onCreateOptionsMenuRefreshItem(menu_nn);
     return true;
+  }
+
+  @SuppressWarnings("static-method") private
+    void
+    onCreateOptionsMenuRefreshItem(
+      final Menu menu_nn)
+  {
+    final MenuItem refresh_item =
+      menu_nn.findItem(R.id.catalog_action_refresh);
+
+    refresh_item.setEnabled(true);
+    refresh_item.setVisible(true);
   }
 
   private void onCreateOptionsMenuSearchItem(
@@ -649,6 +662,54 @@ import com.io7m.junreachable.UnreachableCodeException;
       search_item.setEnabled(true);
       search_item.setVisible(true);
     }
+  }
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item)
+  {
+    final MenuItem item_nn = NullCheck.notNull(item);
+    switch (item_nn.getItemId()) {
+
+    /**
+     * The menu option to refresh feeds. Essentially, the feed is invalidated
+     * in the cache and a new activity is started that loads the same feed
+     * again (replacing the current activity).
+     */
+
+      case R.id.catalog_action_refresh:
+      {
+        CatalogFeedActivity.LOG.debug("refreshing feed");
+
+        final SimplifiedCatalogAppServicesType app =
+          Simplified.getCatalogAppServices();
+        final FeedLoaderType loader = app.getFeedLoader();
+        final CatalogFeedArgumentsType args = this.getArguments();
+        args
+          .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
+            @Override public Unit onFeedArgumentsLocalBooks(
+              final CatalogFeedArgumentsLocalBooks c)
+            {
+              // Nothing to refresh for local books. This shouldn't even be
+              // reachable.
+              throw new UnreachableCodeException();
+            }
+
+            @Override public Unit onFeedArgumentsRemote(
+              final CatalogFeedArgumentsRemote c)
+            {
+              loader.invalidate(c.getURI());
+              CatalogFeedActivity.startNewActivityReplacing(
+                CatalogFeedActivity.this,
+                args);
+              return Unit.unit();
+            }
+          });
+
+        return true;
+      }
+    }
+
+    return super.onOptionsItemSelected(item_nn);
   }
 
   @Override protected void onDestroy()

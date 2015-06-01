@@ -6,7 +6,7 @@
 
   <!-- Books strings -->
   <string name="books">My Books</string>
-  <string name="books_sync">Sync</string>
+  <string name="books_sync">Sync Account</string>
   <string name="books_sort_by">Sort by</string>
   <string name="books_sort_by_author">Author</string>
   <string name="books_sort_by_title">Title</string>
@@ -35,6 +35,7 @@
     account to fix it.
   </string>
   <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
+  <string name="catalog_refresh">Refresh Feed</string>
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Borrow</string>
