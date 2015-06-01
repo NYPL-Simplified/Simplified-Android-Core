@@ -109,13 +109,11 @@ import com.io7m.junreachable.UnreachableCodeException;
       final URI target = URIQueryBuilder.encodeQuery(this.base, parameters);
 
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
-      final FeedType f = NullCheck.notNull(cfa.feed);
-
-      final ImmutableStack<CatalogUpStackEntry> us =
-        cfa.newUpStack(f.getFeedURI(), this.args.getTitle());
+      final ImmutableStack<CatalogFeedArgumentsType> us =
+        cfa.newUpStack(this.args);
 
       final CatalogFeedArgumentsRemote new_args =
-        new CatalogFeedArgumentsRemote(false, us, "Search", target);
+        new CatalogFeedArgumentsRemote(false, us, "Search: " + qnn, target);
       CatalogFeedActivity.startNewActivity(cfa, new_args);
       return true;
     }
@@ -129,10 +127,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     OnQueryTextListener
   {
     private final FeedFacetPseudo.FacetType facet_active;
+    private final CatalogFeedArgumentsType  args;
 
     BooksLocalSearchQueryHandler(
+      final CatalogFeedArgumentsType in_args,
       final FeedFacetPseudo.FacetType in_facet_active)
     {
+      this.args = NullCheck.notNull(in_args);
       this.facet_active = NullCheck.notNull(in_facet_active);
     }
 
@@ -147,13 +148,17 @@ import com.io7m.junreachable.UnreachableCodeException;
     {
       final String qnn = NullCheck.notNull(query);
 
+      final CatalogFeedActivity cfa = CatalogFeedActivity.this;
+      final ImmutableStack<CatalogFeedArgumentsType> us =
+        cfa.newUpStack(this.args);
+
       final CatalogFeedArgumentsLocalBooks new_args =
         new CatalogFeedArgumentsLocalBooks(
-          "Search",
+          us,
+          "Search: " + qnn,
           this.facet_active,
           Option.some(qnn));
 
-      final CatalogFeedActivity cfa = CatalogFeedActivity.this;
       CatalogFeedActivity.startNewActivity(cfa, new_args);
       return true;
     }
@@ -188,9 +193,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           final CatalogFeedArgumentsLocalBooks c)
         {
           SimplifiedActivity.setActivityArguments(b, false);
-          final ImmutableStack<CatalogUpStackEntry> empty =
-            ImmutableStack.empty();
-          CatalogActivity.setActivityArguments(b, NullCheck.notNull(empty));
+          CatalogActivity.setActivityArguments(b, c.getUpStack());
           return Unit.unit();
         }
 
@@ -211,12 +214,8 @@ import com.io7m.junreachable.UnreachableCodeException;
    *
    * @param from
    *          The previous activity
-   * @param up_stack
-   *          The up stack for the new activity
-   * @param title
-   *          The title of the feed
-   * @param target
-   *          The URI of the feed
+   * @param in_args
+   *          The feed arguments
    */
 
   public static void startNewActivity(
@@ -239,12 +238,8 @@ import com.io7m.junreachable.UnreachableCodeException;
    *
    * @param from
    *          The previous activity
-   * @param up_stack
-   *          The up stack for the new activity
-   * @param title
-   *          The title of the feed
-   * @param target
-   *          The URI of the feed
+   * @param in_args
+   *          The feed arguments
    */
 
   public static void startNewActivityReplacing(
@@ -341,6 +336,7 @@ import com.io7m.junreachable.UnreachableCodeException;
                 NullCheck.notNull(rr.getString(R.string.books_sort_by));
               final CatalogFeedArgumentsLocalBooks args =
                 new CatalogFeedArgumentsLocalBooks(
+                  CatalogFeedActivity.this.getUpStack(),
                   facet_title,
                   fp.getType(),
                   search_terms);
@@ -374,7 +370,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private void configureUpButton(
-    final ImmutableStack<CatalogUpStackEntry> up_stack,
+    final ImmutableStack<CatalogFeedArgumentsType> up_stack,
     final String title)
   {
     final ActionBar bar = this.getActionBar();
@@ -411,7 +407,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final boolean in_drawer_open = true;
-    final ImmutableStack<CatalogUpStackEntry> empty = ImmutableStack.empty();
+    final ImmutableStack<CatalogFeedArgumentsType> empty =
+      ImmutableStack.empty();
     final String in_title =
       NullCheck.notNull(rr.getString(R.string.app_name));
     final URI in_uri = app.getFeedInitialURI();
@@ -431,13 +428,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.loading = feed_loader.fromURI(u, this);
   }
 
-  private ImmutableStack<CatalogUpStackEntry> newUpStack(
-    final URI feed_uri,
-    final String feed_title)
+  private ImmutableStack<CatalogFeedArgumentsType> newUpStack(
+    final CatalogFeedArgumentsType args)
   {
-    final ImmutableStack<CatalogUpStackEntry> up_stack = this.getUpStack();
-    final ImmutableStack<CatalogUpStackEntry> new_up_stack =
-      up_stack.push(new CatalogUpStackEntry(feed_uri, feed_title));
+    final ImmutableStack<CatalogFeedArgumentsType> up_stack =
+      this.getUpStack();
+    final ImmutableStack<CatalogFeedArgumentsType> new_up_stack =
+      up_stack.push(args);
     return new_up_stack;
   }
 
@@ -473,7 +470,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     super.onCreate(state);
     final CatalogFeedArgumentsType args = this.getArguments();
-    final ImmutableStack<CatalogUpStackEntry> stack = this.getUpStack();
+    final ImmutableStack<CatalogFeedArgumentsType> stack = this.getUpStack();
     this.configureUpButton(stack, args.getTitle());
 
     if (state != null) {
@@ -619,6 +616,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       } else if (BooksController.LOCAL_SEARCH_TYPE.equals(search.getType())) {
         final FacetType active_facet = FacetType.SORT_BY_TITLE;
         sv.setOnQueryTextListener(new BooksLocalSearchQueryHandler(
+          args,
           active_facet));
         search_ok = true;
       } else {
@@ -766,9 +764,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       Simplified.getCatalogAppServices();
 
     final CatalogFeedArgumentsType args = this.getArguments();
-    final URI feed_uri = f.getFeedURI();
-    final ImmutableStack<CatalogUpStackEntry> new_up_stack =
-      this.newUpStack(feed_uri, args.getTitle());
+    final ImmutableStack<CatalogFeedArgumentsType> new_up_stack =
+      this.newUpStack(args);
 
     final CatalogFeedLaneListenerType in_lane_listener =
       new CatalogFeedLaneListenerType() {
@@ -892,9 +889,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.list_view = grid_view;
 
     final CatalogFeedArgumentsType args = this.getArguments();
-    final URI feed_uri = f.getFeedURI();
-    final ImmutableStack<CatalogUpStackEntry> new_up_stack =
-      this.newUpStack(feed_uri, args.getTitle());
+    final ImmutableStack<CatalogFeedArgumentsType> new_up_stack =
+      this.newUpStack(args);
 
     final CatalogBookSelectionListenerType book_select_listener =
       new CatalogBookSelectionListenerType() {
@@ -950,7 +946,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private void onSelectedBook(
     final SimplifiedCatalogAppServicesType app,
-    final ImmutableStack<CatalogUpStackEntry> new_up_stack,
+    final ImmutableStack<CatalogFeedArgumentsType> new_up_stack,
     final FeedEntryOPDS e)
   {
     CatalogFeedActivity.LOG.debug("onSelectedBook: {}", this);
@@ -969,7 +965,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private void onSelectedFeedGroup(
-    final ImmutableStack<CatalogUpStackEntry> new_up_stack,
+    final ImmutableStack<CatalogFeedArgumentsType> new_up_stack,
     final FeedGroup f)
   {
     CatalogFeedActivity.LOG.debug("onSelectFeed: {}", this);

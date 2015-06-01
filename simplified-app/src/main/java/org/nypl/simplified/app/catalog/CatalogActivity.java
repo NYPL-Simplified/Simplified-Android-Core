@@ -31,7 +31,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
   public static void setActivityArguments(
     final Bundle b,
-    final ImmutableStack<CatalogUpStackEntry> up_stack)
+    final ImmutableStack<CatalogFeedArgumentsType> up_stack)
   {
     NullCheck.notNull(b);
     b.putSerializable(
@@ -40,7 +40,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
   }
 
   private void configureUpButton(
-    final ImmutableStack<CatalogUpStackEntry> up_stack)
+    final ImmutableStack<CatalogFeedArgumentsType> up_stack)
   {
     CatalogActivity.LOG.debug("up stack: {}", up_stack);
 
@@ -52,21 +52,22 @@ public abstract class CatalogActivity extends SimplifiedActivity
   }
 
   @SuppressWarnings("unchecked") protected final
-    ImmutableStack<CatalogUpStackEntry>
+    ImmutableStack<CatalogFeedArgumentsType>
     getUpStack()
   {
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = i.getExtras();
     if (a != null) {
-      final ImmutableStack<CatalogUpStackEntry> stack =
-        (ImmutableStack<CatalogUpStackEntry>) a
+      final ImmutableStack<CatalogFeedArgumentsType> stack =
+        (ImmutableStack<CatalogFeedArgumentsType>) a
           .getSerializable(CatalogActivity.CATALOG_UP_STACK_ID);
       if (stack != null) {
         return stack;
       }
     }
 
-    final ImmutableStack<CatalogUpStackEntry> empty = ImmutableStack.empty();
+    final ImmutableStack<CatalogFeedArgumentsType> empty =
+      ImmutableStack.empty();
     return NullCheck.notNull(empty);
   }
 
@@ -89,7 +90,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
       case android.R.id.home:
       {
-        final ImmutableStack<CatalogUpStackEntry> us = this.getUpStack();
+        final ImmutableStack<CatalogFeedArgumentsType> us = this.getUpStack();
 
         /**
          * If the stack is non-empty, then the user is not at the root of the
@@ -100,19 +101,11 @@ public abstract class CatalogActivity extends SimplifiedActivity
         if (us.isEmpty() == false) {
           CatalogActivity.LOG.debug("up stack before pop: {}", us);
 
-          final Pair<CatalogUpStackEntry, ImmutableStack<CatalogUpStackEntry>> p =
+          final Pair<CatalogFeedArgumentsType, ImmutableStack<CatalogFeedArgumentsType>> p =
             us.pop();
 
-          final ImmutableStack<CatalogUpStackEntry> stack = p.getRight();
-          final CatalogUpStackEntry top = p.getLeft();
-
-          final CatalogFeedArgumentsRemote remote =
-            new CatalogFeedArgumentsRemote(
-              false,
-              stack,
-              top.getTitle(),
-              top.getURI());
-          CatalogFeedActivity.startNewActivity(this, remote);
+          final CatalogFeedArgumentsType top = p.getLeft();
+          CatalogFeedActivity.startNewActivity(this, top);
           return true;
         }
 
