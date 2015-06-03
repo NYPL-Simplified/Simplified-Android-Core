@@ -893,6 +893,16 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     }
   }
 
+  private static String ellipsize(
+    final String t,
+    final int at)
+  {
+    if (t.length() > at) {
+      return NullCheck.notNull(t.substring(0, at - 1) + "…");
+    }
+    return t;
+  }
+
   private static void renderLabel(
     final Canvas canvas,
     final TenPrintInput i,
@@ -900,26 +910,46 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int ch,
     final int start_y)
   {
+    final int margin = (i.getCoverHeight() * i.getMargin()) / 100;
+
+    /**
+     * Render the white book label.
+     */
+
+    {
+      final Paint paint_label = new Paint();
+      paint_label.setColor(Color.WHITE);
+      paint_label.setAntiAlias(true);
+      paint_label.setFilterBitmap(true);
+      canvas.clipRect(0, margin, cw, start_y, Op.REPLACE);
+      canvas.drawRect(0, 0, cw, ch, paint_label);
+    }
+
+    /**
+     * Render the title and author strings.
+     */
+
+    final float title_size = i.getCoverWidth() * 0.08f;
     final TextPaint title_paint = new TextPaint();
     title_paint.setColor(Color.BLACK);
-    title_paint.setTextSize(28);
+    title_paint.setTextSize(title_size);
     title_paint.setTextAlign(Align.LEFT);
     title_paint.setTypeface(Typeface.create(Typeface.SERIF, Typeface.BOLD));
     title_paint.setAntiAlias(true);
 
+    final float author_size = i.getCoverWidth() * 0.07f;
     final TextPaint author_paint = new TextPaint();
     author_paint.setColor(Color.BLACK);
-    author_paint.setTextSize(28);
+    author_paint.setTextSize(author_size);
     author_paint.setTextAlign(Align.LEFT);
     author_paint
       .setTypeface(Typeface.create(Typeface.SERIF, Typeface.NORMAL));
     author_paint.setAntiAlias(true);
 
-    final int x_margin = (i.getCoverHeight() * i.getMargin()) / 100;
-    final int text_width = canvas.getWidth() - (x_margin * 2);
+    final int text_width = canvas.getWidth() - (margin * 2);
     final StaticLayout title_layout =
       new StaticLayout(
-        i.getTitle(),
+        TenPrintGenerator.ellipsize(i.getTitle(), 30),
         title_paint,
         text_width,
         Layout.Alignment.ALIGN_NORMAL,
@@ -929,7 +959,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
 
     final StaticLayout author_layout =
       new StaticLayout(
-        i.getAuthor(),
+        TenPrintGenerator.ellipsize(i.getAuthor(), 30),
         author_paint,
         text_width,
         Layout.Alignment.ALIGN_NORMAL,
@@ -937,18 +967,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         0,
         false);
 
-    final Paint paint_label = new Paint();
-    paint_label.setColor(Color.WHITE);
-    paint_label.setAntiAlias(true);
-    paint_label.setFilterBitmap(true);
-
-    canvas.clipRect(0, 20, cw, start_y, Op.REPLACE);
-    canvas.drawRect(0, 0, cw, ch, paint_label);
-
     try {
       canvas.save();
-      final int ty = x_margin * 2;
-      canvas.translate(x_margin, ty);
+      canvas.translate(margin, margin);
       title_layout.draw(canvas);
     } finally {
       canvas.restore();
@@ -956,8 +977,8 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
 
     try {
       canvas.save();
-      final int ty = start_y - (author_layout.getHeight() + x_margin);
-      canvas.translate(x_margin, ty);
+      final int ty = start_y - (author_layout.getHeight() + margin);
+      canvas.translate(margin, ty);
       author_layout.draw(canvas);
     } finally {
       canvas.restore();
