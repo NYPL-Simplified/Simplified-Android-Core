@@ -59,8 +59,19 @@ public interface TenPrintInputBuilderType
     int in_cover_height);
 
   /**
-   * Set the grid scale.
+   * Enable or disable the display of debugging symbols and frames in the
+   * generated artwork
    * 
+   * @param b
+   *          <tt>true</tt> iff debugging views should be enabled
+   */
+
+  void setDebuggingArtwork(
+    boolean b);
+
+  /**
+   * Set the grid scale.
+   *
    * @param in_grid_scale
    *          The grid scale
    */

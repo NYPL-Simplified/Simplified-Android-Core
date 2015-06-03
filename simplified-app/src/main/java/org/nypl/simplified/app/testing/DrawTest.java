@@ -19,6 +19,51 @@ import com.io7m.jnull.Nullable;
 
 public final class DrawTest extends Activity
 {
+  private static void drawEllipse(
+    final Canvas c,
+    final int x,
+    final int y,
+    final int w,
+    final int h,
+    final Paint p)
+  {
+    final float left = x;
+    final float top = y;
+    final float right = x + w;
+    final float bottom = y + h;
+    final RectF oval = new RectF(left, top, right, bottom);
+    c.drawOval(oval, p);
+  }
+
+  private static void drawRing(
+    final Canvas c,
+    final int x,
+    final int y,
+    final int w,
+    final int h,
+    final int thick,
+    final Paint p,
+    final Paint q)
+  {
+    {
+      final float left = x;
+      final float top = y;
+      final float right = x + w;
+      final float bottom = y + h;
+      final RectF oval = new RectF(left, top, right, bottom);
+      c.drawOval(oval, p);
+    }
+
+    {
+      final float left = x + thick;
+      final float top = y + thick;
+      final float right = x + (w - thick);
+      final float bottom = y + (h - thick);
+      final RectF oval = new RectF(left, top, right, bottom);
+      c.drawOval(oval, q);
+    }
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -33,27 +78,11 @@ public final class DrawTest extends Activity
     final Bitmap image = Bitmap.createBitmap(300, 450, Config.RGB_565);
     final Canvas canvas = new Canvas(image);
 
-    {
-      final Paint p = new Paint();
-      p.setColor(Color.RED);
-      final float left = 0;
-      final float top = 0;
-      final float right = 300;
-      final float bottom = 451;
-      final RectF oval = new RectF(left, top, right, bottom);
-      canvas.drawOval(oval, p);
-    }
-
-    {
-      final Paint p = new Paint();
-      p.setColor(Color.RED);
-      final float left = 0;
-      final float top = 0;
-      final float right = 10;
-      final float bottom = 10;
-      final RectF oval = new RectF(left, top, right, bottom);
-      canvas.drawOval(oval, p);
-    }
+    final Paint p = new Paint();
+    p.setColor(Color.RED);
+    final Paint q = new Paint();
+    p.setColor(Color.BLUE);
+    DrawTest.drawRing(canvas, 10, 10, 200, 200, 20, p, q);
 
     final ImageView v = new ImageView(this);
     v.setLayoutParams(new FrameLayout.LayoutParams(image.getWidth(), image

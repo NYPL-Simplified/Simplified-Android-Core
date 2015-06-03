@@ -17,6 +17,7 @@ import com.io7m.jnull.NullCheck;
     private float   base_saturation;
     private float   color_distance;
     private int     cover_height;
+    private boolean debug_art;
     private float   grid_scale;
     private boolean invert;
     private int     margin;
@@ -35,6 +36,7 @@ import com.io7m.jnull.NullCheck;
       this.title = "";
       this.author = "";
       this.grid_scale = 1.0f;
+      this.debug_art = false;
     }
 
     @Override public TenPrintInput build()
@@ -49,7 +51,8 @@ import com.io7m.jnull.NullCheck;
         this.invert,
         this.title,
         this.author,
-        this.grid_scale);
+        this.grid_scale,
+        this.debug_art);
     }
 
     @Override public void setAuthor(
@@ -109,6 +112,12 @@ import com.io7m.jnull.NullCheck;
         "Cover height %d must be >= 10",
         in_cover_height);
       this.cover_height = in_cover_height;
+    }
+
+    @Override public void setDebuggingArtwork(
+      final boolean b)
+    {
+      this.debug_art = b;
     }
 
     @Override public void setGridScale(
@@ -174,6 +183,7 @@ import com.io7m.jnull.NullCheck;
   private final float   color_distance;
   private final int     cover_height;
   private final int     cover_width;
+  private final boolean debug_art;
   private final float   grid_scale;
   private final boolean invert;
   private final int     margin;
@@ -190,7 +200,8 @@ import com.io7m.jnull.NullCheck;
     final boolean in_invert,
     final String in_title,
     final String in_author,
-    final float in_grid_scale)
+    final float in_grid_scale,
+    final boolean in_debug_art)
   {
     Assertions.checkPrecondition(
       in_shape_thickness >= 1,
@@ -260,6 +271,12 @@ import com.io7m.jnull.NullCheck;
       in_grid_scale,
       0.1);
     this.grid_scale = in_grid_scale;
+    this.debug_art = in_debug_art;
+  }
+
+  public boolean debugArtworkEnabled()
+  {
+    return this.debug_art;
   }
 
   public String getAuthor()

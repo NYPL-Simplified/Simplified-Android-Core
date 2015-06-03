@@ -27,16 +27,16 @@ public final class CoverGeneration extends Activity
 
     final TenPrintInputBuilderType b = TenPrintInput.newBuilder();
     b.setAuthor("An author");
-    b.setTitle(" qwertyuiopasdfghjkl:zxcvbnm1234567890.");
+    b.setTitle("qwertyuiopasdfghjklzxcvbnm");
     b.setBaseBrightness(0.9f);
     b.setBaseSaturation(0.9f);
     b.setCoverHeight(600);
     b.setGridScale(1.0f);
+    b.setShapeThickness(20);
+    b.setDebuggingArtwork(false);
 
     final TenPrintInput i = b.build();
-
     final Bitmap image = g.generate(i);
-
     this.setContentView(R.layout.test_cover_gen);
 
     final ViewGroup container =
@@ -47,7 +47,6 @@ public final class CoverGeneration extends Activity
     v.setLayoutParams(new FrameLayout.LayoutParams(image.getWidth(), image
       .getHeight()));
     v.setImageBitmap(image);
-
     container.addView(v);
   }
 }

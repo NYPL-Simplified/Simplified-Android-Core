@@ -10,10 +10,15 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
+import android.graphics.Typeface;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 
 import com.io7m.jnull.NullCheck;
 
@@ -31,9 +36,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
   static {
     TITLE_LENGTH_MIN = 2;
     TITLE_LENGTH_MAX = 60;
-    C64_CHARACTER_SET = TenPrintGenerator.getC64Characters();
-    C64_CHARACTER_LIST =
-      new ArrayList<Character>(TenPrintGenerator.C64_CHARACTER_SET);
+    C64_CHARACTER_LIST = TenPrintGenerator.getC64Characters();
+    C64_CHARACTER_SET =
+      new HashSet<Character>(TenPrintGenerator.C64_CHARACTER_LIST);
   }
 
   private static int clampRangeI(
@@ -44,11 +49,11 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     return Math.min(Math.max(v, x0), x1);
   }
 
-  private static Set<Character> getC64Characters()
+  private static List<Character> getC64Characters()
   {
     final String base =
       " qQwWeErRtTyYuUiIoOpPaAsSdDfFgGhHjJkKlL:zZxXcCvVbBnNmM1234567890.";
-    final Set<Character> chars = new HashSet<Character>();
+    final List<Character> chars = new ArrayList<Character>();
     for (int index = 0; index < base.length(); ++index) {
       final Character c = Character.valueOf(base.charAt(index));
       chars.add(c);
@@ -166,6 +171,35 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     canvas.drawOval(oval, p);
   }
 
+  private static void renderRing(
+    final Canvas c,
+    final int x,
+    final int y,
+    final int w,
+    final int h,
+    final int thick,
+    final Paint p,
+    final Paint q)
+  {
+    {
+      final float left = x;
+      final float top = y;
+      final float right = x + w;
+      final float bottom = y + h;
+      final RectF oval = new RectF(left, top, right, bottom);
+      c.drawOval(oval, p);
+    }
+
+    {
+      final float left = x + thick;
+      final float top = y + thick;
+      final float right = x + (w - thick);
+      final float bottom = y + (h - thick);
+      final RectF oval = new RectF(left, top, right, bottom);
+      c.drawOval(oval, q);
+    }
+  }
+
   private static void renderEllipseCenter(
     final Canvas canvas,
     final int x,
@@ -183,8 +217,8 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
   }
 
   private static void renderGridCharacter(
-    final TenPrintInput i,
     final Canvas canvas,
+    final TenPrintInput i,
     final Paint paint_base,
     final Paint paint_shape,
     final char c,
@@ -195,7 +229,6 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int thick = (grid_size * i.getShapeThickness()) / 100;
     final int thick2 = thick * 2;
     final int thick3 = thick * 3;
-
     final int x_max = x + grid_size;
     final int y_max = y + grid_size;
     final int x_center = x + (grid_size / 2);
@@ -203,6 +236,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
 
     canvas.clipRect(x, y_max, x_max, y, Op.REPLACE);
 
+    final int grid_size_double = grid_size * 2;
     switch (c) {
       case 'q':
       case 'Q':
@@ -288,35 +322,29 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       case 'U':
       case 'u':
       {
-        TenPrintGenerator.renderEllipse(
+        TenPrintGenerator.renderRing(
           canvas,
           x,
           y,
-          grid_size * 2,
-          grid_size * 2,
-          paint_shape);
-
-        TenPrintGenerator.renderEllipse(
-          canvas,
-          x + thick,
-          y + thick,
-          grid_size * 2,
-          grid_size * 2,
+          grid_size_double,
+          grid_size_double,
+          thick,
+          paint_shape,
           paint_base);
         break;
       }
       case 'I':
       case 'i':
       {
-        TenPrintGenerator.renderEllipse(
+        TenPrintGenerator.renderRing(
           canvas,
           x - grid_size,
           y,
-          grid_size * 2,
-          grid_size * 2,
-          paint_shape);
-        TenPrintGenerator.renderEllipse(canvas, (x - grid_size) - thick, y
-          + thick, grid_size * 2, grid_size * 2, paint_base);
+          grid_size_double,
+          grid_size_double,
+          thick,
+          paint_shape,
+          paint_base);
         break;
       }
       case 'O':
@@ -432,29 +460,29 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       case 'J':
       case 'j':
       {
-        TenPrintGenerator.renderEllipse(
+        TenPrintGenerator.renderRing(
           canvas,
           x,
           y - grid_size,
-          grid_size * 2,
-          grid_size * 2,
-          paint_shape);
-        TenPrintGenerator.renderEllipse(canvas, x + thick, y
-          - (grid_size + thick), grid_size * 2, grid_size * 2, paint_base);
+          grid_size_double,
+          grid_size_double,
+          thick,
+          paint_shape,
+          paint_base);
         break;
       }
       case 'K':
       case 'k':
       {
-        TenPrintGenerator.renderEllipse(
+        TenPrintGenerator.renderRing(
           canvas,
           x - grid_size,
           y - grid_size,
-          grid_size * 2,
-          grid_size * 2,
-          paint_shape);
-        TenPrintGenerator.renderEllipse(canvas, x - (grid_size + thick), y
-          - (grid_size + thick), grid_size * 2, grid_size * 2, paint_base);
+          grid_size_double,
+          grid_size_double,
+          thick,
+          paint_shape,
+          paint_base);
         break;
       }
       case 'L':
@@ -883,7 +911,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       }
     }
 
-    {
+    if (i.debugArtworkEnabled()) {
       final Paint pt = new Paint();
       pt.setColor(Color.BLACK);
       pt.setTextSize(16.0f);
@@ -891,6 +919,77 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
 
       pt.setStyle(Style.STROKE);
       canvas.drawRect(x, y_max, x_max, y, pt);
+    }
+  }
+
+  private static void renderLabel(
+    final Canvas canvas,
+    final TenPrintInput i,
+    final int cw,
+    final int ch,
+    final int start_y)
+  {
+    final TextPaint title_paint = new TextPaint();
+    title_paint.setColor(Color.BLACK);
+    title_paint.setTextSize(28);
+    title_paint.setTextAlign(Align.LEFT);
+    title_paint.setTypeface(Typeface.create(Typeface.SERIF, Typeface.BOLD));
+    title_paint.setAntiAlias(true);
+
+    final TextPaint author_paint = new TextPaint();
+    author_paint.setColor(Color.BLACK);
+    author_paint.setTextSize(28);
+    author_paint.setTextAlign(Align.LEFT);
+    author_paint
+      .setTypeface(Typeface.create(Typeface.SERIF, Typeface.NORMAL));
+    author_paint.setAntiAlias(true);
+
+    final int x_margin = (i.getCoverHeight() * i.getMargin()) / 100;
+    final int text_width = canvas.getWidth() - (x_margin * 2);
+    final StaticLayout title_layout =
+      new StaticLayout(
+        i.getTitle(),
+        title_paint,
+        text_width,
+        Layout.Alignment.ALIGN_NORMAL,
+        1,
+        0,
+        false);
+
+    final StaticLayout author_layout =
+      new StaticLayout(
+        i.getAuthor(),
+        author_paint,
+        text_width,
+        Layout.Alignment.ALIGN_NORMAL,
+        1,
+        0,
+        false);
+
+    final Paint paint_label = new Paint();
+    paint_label.setColor(Color.WHITE);
+    paint_label.setAntiAlias(true);
+    paint_label.setFilterBitmap(true);
+
+    canvas.clipRect(0, 20, cw, start_y, Op.REPLACE);
+    canvas.drawRect(0, 0, cw, ch, paint_label);
+
+    try {
+      canvas.save();
+      final int ty = x_margin * 2;
+      canvas.translate(x_margin, ty);
+      title_layout.draw(canvas);
+    } finally {
+      canvas.restore();
+    }
+
+    try {
+      canvas.save();
+      final int ty = start_y - (author_layout.getHeight() + x_margin);
+      canvas.translate(x_margin, ty);
+      author_layout.draw(canvas);
+    } finally {
+      canvas.restore();
     }
   }
 
@@ -925,14 +1024,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final Bitmap b =
       NullCheck.notNull(Bitmap.createBitmap(cw, ch, Config.RGB_565));
 
-    final int margin = i.getMargin();
     final int start_y = ch - cw;
-    final int title_font_size = (int) (cw * 0.08);
-    final int author_font_size = (int) (ch * 0.07);
-    final int offset = (ch * margin) / 100;
-    final int title_height = (int) ((start_y - offset) * 0.75);
-    final int author_height = (int) ((start_y - offset) * 0.25);
-
     final int text_length = TenPrintGenerator.getTextLength(i);
     final int color_base = TenPrintGenerator.getColorBase(i, text_length);
     final int color_shape = TenPrintGenerator.getColorShape(i, text_length);
@@ -960,8 +1052,8 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         final int x_offset = x * grid_size;
         final int y_offset = start_y + (y * grid_size);
         TenPrintGenerator.renderGridCharacter(
-          i,
           canvas,
+          i,
           paint_base,
           paint_shape,
           c,
@@ -972,6 +1064,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       }
     }
 
+    TenPrintGenerator.renderLabel(canvas, i, cw, ch, start_y);
     return b;
   }
 }
