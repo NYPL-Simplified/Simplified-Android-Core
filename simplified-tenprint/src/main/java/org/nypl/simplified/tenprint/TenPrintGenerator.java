@@ -171,35 +171,6 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     canvas.drawOval(oval, p);
   }
 
-  private static void renderRing(
-    final Canvas c,
-    final int x,
-    final int y,
-    final int w,
-    final int h,
-    final int thick,
-    final Paint p,
-    final Paint q)
-  {
-    {
-      final float left = x;
-      final float top = y;
-      final float right = x + w;
-      final float bottom = y + h;
-      final RectF oval = new RectF(left, top, right, bottom);
-      c.drawOval(oval, p);
-    }
-
-    {
-      final float left = x + thick;
-      final float top = y + thick;
-      final float right = x + (w - thick);
-      final float bottom = y + (h - thick);
-      final RectF oval = new RectF(left, top, right, bottom);
-      c.drawOval(oval, q);
-    }
-  }
-
   private static void renderEllipseCenter(
     final Canvas canvas,
     final int x,
@@ -1007,6 +978,35 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final float bottom = y + h;
     final RectF r = new RectF(left, top, right, bottom);
     canvas.drawRect(r, p);
+  }
+
+  private static void renderRing(
+    final Canvas c,
+    final int x,
+    final int y,
+    final int w,
+    final int h,
+    final int thick,
+    final Paint p,
+    final Paint q)
+  {
+    {
+      final float left = x;
+      final float top = y;
+      final float right = x + w;
+      final float bottom = y + h;
+      final RectF oval = new RectF(left, top, right, bottom);
+      c.drawOval(oval, p);
+    }
+
+    {
+      final float left = x + thick;
+      final float top = y + thick;
+      final float right = x + (w - thick);
+      final float bottom = y + (h - thick);
+      final RectF oval = new RectF(left, top, right, bottom);
+      c.drawOval(oval, q);
+    }
   }
 
   private TenPrintGenerator()
