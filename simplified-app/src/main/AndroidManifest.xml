@@ -53,6 +53,15 @@
       android:name="org.nypl.simplified.app.testing.ThemeZooActivity"
       android:exported="true">
     </activity>
+    <activity
+      android:name="org.nypl.simplified.app.testing.CoverGeneration"
+      android:exported="true">
+
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.testing.DrawTest"
+      android:exported="true">
+    </activity>
 
     <!-- Reader -->
     <activity

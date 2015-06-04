@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
 import org.nypl.simplified.app.reader.ReaderBookmarks;
 import org.nypl.simplified.app.reader.ReaderBookmarksType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
@@ -44,6 +45,8 @@ import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
+import org.nypl.simplified.tenprint.TenPrintGenerator;
+import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.slf4j.Logger;
 
 import android.app.Application;
@@ -69,24 +72,25 @@ import com.io7m.jnull.Nullable;
     AccountDataLoadListenerType,
     AccountSyncListenerType
   {
-    private static final Logger            LOG_CA;
+    private static final Logger             LOG_CA;
 
     static {
       LOG_CA = LogUtilities.getLog(CatalogAppServices.class);
     }
 
-    private final BooksType                books;
-    private final BookCoverProviderType    cover_provider;
-    private final DownloaderType           downloader;
-    private final ExecutorService          exec_books;
-    private final ExecutorService          exec_catalog_feeds;
-    private final ExecutorService          exec_covers;
-    private final ExecutorService          exec_downloader;
-    private final URI                      feed_initial_uri;
-    private final FeedLoaderType           feed_loader;
-    private final HTTPType                 http;
-    private final ScreenSizeControllerType screen;
-    private final AtomicBoolean            synced;
+    private final BooksType                 books;
+    private final BookCoverProviderType     cover_provider;
+    private final DownloaderType            downloader;
+    private final ExecutorService           exec_books;
+    private final ExecutorService           exec_catalog_feeds;
+    private final ExecutorService           exec_covers;
+    private final ExecutorService           exec_downloader;
+    private final URI                       feed_initial_uri;
+    private final FeedLoaderType            feed_loader;
+    private final HTTPType                  http;
+    private final ScreenSizeControllerType  screen;
+    private final AtomicBoolean             synced;
+    private final CatalogBookCoverGenerator cover_generator;
 
     public CatalogAppServices(
       final Context context,
@@ -175,10 +179,14 @@ import com.io7m.jnull.Nullable;
        * Configure cover provider.
        */
 
+      final TenPrintGeneratorType ten_print =
+        TenPrintGenerator.newGenerator();
+      this.cover_generator = new CatalogBookCoverGenerator(ten_print);
       this.cover_provider =
         BookCoverProvider.newCoverProvider(
           context,
           this.books,
+          this.cover_generator,
           this.exec_covers);
 
       this.synced = new AtomicBoolean(false);
