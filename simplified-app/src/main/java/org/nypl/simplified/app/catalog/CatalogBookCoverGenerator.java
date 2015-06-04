@@ -11,22 +11,25 @@ import java.util.TreeMap;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.http.core.URIQueryBuilder;
+import org.nypl.simplified.tenprint.TenPrintGeneratorType;
+import org.nypl.simplified.tenprint.TenPrintInput;
+import org.nypl.simplified.tenprint.TenPrintInputBuilderType;
 import org.slf4j.Logger;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 
 import com.io7m.jnull.NullCheck;
 
 public final class CatalogBookCoverGenerator implements
   CatalogBookCoverGeneratorType
 {
-  private static final Logger LOG;
+  private static final Logger         LOG;
+  private final TenPrintGeneratorType generator;
 
   static {
     LOG = LogUtilities.getLog(CatalogBookCoverGenerator.class);
@@ -45,9 +48,10 @@ public final class CatalogBookCoverGenerator implements
     return m;
   }
 
-  public CatalogBookCoverGenerator()
+  public CatalogBookCoverGenerator(
+    final TenPrintGeneratorType in_generator)
   {
-    // Nothing
+    this.generator = NullCheck.notNull(in_generator);
   }
 
   @Override public Bitmap generateImage(
@@ -59,31 +63,29 @@ public final class CatalogBookCoverGenerator implements
 
     final Map<String, String> params =
       CatalogBookCoverGenerator.getParameters(u);
-    final String title = NullCheck.notNull(params.get("title"));
 
-    final Bitmap b =
-      Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+    final String title_maybe = params.get("title");
+    final String title =
+      title_maybe == null ? "" : NullCheck.notNull(title_maybe);
+    final String author_maybe = params.get("author");
+    final String author =
+      author_maybe == null ? "" : NullCheck.notNull(author_maybe);
 
-    final Canvas c = new Canvas(b);
-    final Paint p = new Paint();
+    final TenPrintInputBuilderType ib = TenPrintInput.newBuilder();
+    ib.setAuthor(author);
+    ib.setTitle(title);
+    ib.setCoverHeight(height);
+    final TenPrintInput i = ib.build();
+    final Bitmap cover = this.generator.generate(i);
 
-    final int hash = title.hashCode();
-
-    p.setStyle(Style.FILL);
-    p.setColor(hash);
-    p.setAlpha(0xff);
-    c.drawRect(0, 0, width, height, p);
-
-    p.setColor(Color.WHITE);
-    p.setAlpha(0xff);
-    c.drawRect(4, 4, width - 4, height / 4, p);
-
-    p.setColor(Color.BLACK);
-    p.setAlpha(0xff);
-    p.setAntiAlias(true);
-    c.drawText(TextUtilities.ellipsize(title, 16), 8, 16, p);
-
-    return NullCheck.notNull(b);
+    final Bitmap container =
+      Bitmap.createBitmap(width, height, Config.RGB_565);
+    final Canvas c = new Canvas(container);
+    final Paint white = new Paint();
+    white.setColor(Color.WHITE);
+    c.drawRect(0, 0, width, height, white);
+    c.drawBitmap(cover, (width - cover.getWidth()) / 2, 0, null);
+    return NullCheck.notNull(container);
   }
 
   @Override public URI generateURIForTitleAuthor(

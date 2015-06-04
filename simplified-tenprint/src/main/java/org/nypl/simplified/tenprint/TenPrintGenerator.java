@@ -911,6 +911,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int start_y)
   {
     final int margin = (i.getCoverHeight() * i.getMargin()) / 100;
+    final int margin_half = margin / 2;
 
     /**
      * Render the white book label.
@@ -921,7 +922,12 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       paint_label.setColor(Color.WHITE);
       paint_label.setAntiAlias(true);
       paint_label.setFilterBitmap(true);
-      canvas.clipRect(0, margin, cw, start_y, Op.REPLACE);
+      canvas.clipRect(
+        margin_half,
+        margin_half,
+        cw - margin_half,
+        start_y,
+        Op.REPLACE);
       canvas.drawRect(0, 0, cw, ch, paint_label);
     }
 
@@ -934,7 +940,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     title_paint.setColor(Color.BLACK);
     title_paint.setTextSize(title_size);
     title_paint.setTextAlign(Align.LEFT);
-    title_paint.setTypeface(Typeface.create(Typeface.SERIF, Typeface.BOLD));
+    title_paint.setTypeface(Typeface.create(
+      Typeface.SANS_SERIF,
+      Typeface.BOLD));
     title_paint.setAntiAlias(true);
 
     final float author_size = i.getCoverWidth() * 0.07f;
@@ -942,8 +950,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     author_paint.setColor(Color.BLACK);
     author_paint.setTextSize(author_size);
     author_paint.setTextAlign(Align.LEFT);
-    author_paint
-      .setTypeface(Typeface.create(Typeface.SERIF, Typeface.NORMAL));
+    author_paint.setTypeface(Typeface.create(
+      Typeface.SANS_SERIF,
+      Typeface.NORMAL));
     author_paint.setAntiAlias(true);
 
     final int text_width = canvas.getWidth() - (margin * 2);
@@ -969,7 +978,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
 
     try {
       canvas.save();
-      canvas.translate(margin, margin);
+      canvas.translate(margin * 1.25f, margin);
       title_layout.draw(canvas);
     } finally {
       canvas.restore();
@@ -977,8 +986,8 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
 
     try {
       canvas.save();
-      final int ty = start_y - (author_layout.getHeight() + margin);
-      canvas.translate(margin, ty);
+      final int ty = start_y - (author_layout.getHeight() + margin_half);
+      canvas.translate(margin * 1.25f, ty);
       author_layout.draw(canvas);
     } finally {
       canvas.restore();

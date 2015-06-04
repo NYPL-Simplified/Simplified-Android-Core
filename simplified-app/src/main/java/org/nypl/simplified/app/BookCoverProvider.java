@@ -5,7 +5,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGeneratorRequestHandler;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGeneratorType;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -59,11 +58,9 @@ public final class BookCoverProvider implements BookCoverProviderType
   public static BookCoverProviderType newCoverProvider(
     final Context in_c,
     final BooksType in_books,
+    final CatalogBookCoverGeneratorType in_generator,
     final ExecutorService in_exec)
   {
-    final CatalogBookCoverGenerator cover_gen =
-      new CatalogBookCoverGenerator();
-
     final Resources rr = in_c.getResources();
     final Picasso.Builder pb = new Picasso.Builder(in_c);
     pb.defaultBitmapConfig(Bitmap.Config.RGB_565);
@@ -71,11 +68,11 @@ public final class BookCoverProvider implements BookCoverProviderType
       .indicatorsEnabled(rr.getBoolean(R.bool.debug_picasso_cache_indicators));
     pb.loggingEnabled(rr.getBoolean(R.bool.debug_picasso_logging));
     pb.addRequestHandler(new CatalogBookCoverGeneratorRequestHandler(
-      cover_gen));
+      in_generator));
     pb.executor(in_exec);
 
     final Picasso p = NullCheck.notNull(pb.build());
-    return new BookCoverProvider(p, in_books, cover_gen);
+    return new BookCoverProvider(p, in_books, in_generator);
   }
 
   private final BooksType                     books;

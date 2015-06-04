@@ -26,13 +26,13 @@ public final class CoverGeneration extends Activity
     final TenPrintGeneratorType g = TenPrintGenerator.newGenerator();
 
     final TenPrintInputBuilderType b = TenPrintInput.newBuilder();
-    b.setAuthor("An author");
-    b.setTitle("qwertyuiopasdfghjklzxcvbnm");
+    b.setAuthor("G. Mercer Adam, A Ethelwyn Wetherby");
+    b.setTitle("An Algonquin Maiden: A Romance ...");
     b.setBaseBrightness(0.9f);
     b.setBaseSaturation(0.9f);
-    b.setCoverHeight(600);
+    b.setCoverHeight(120);
     b.setGridScale(1.0f);
-    b.setShapeThickness(20);
+    b.setShapeThickness(15);
     b.setDebuggingArtwork(false);
 
     final TenPrintInput i = b.build();
