@@ -70,6 +70,16 @@ import com.io7m.jnull.Nullable;
   private @Nullable Button   login;
   private @Nullable EditText pin_edit;
 
+  @Override protected SimplifiedPart navigationDrawerGetPart()
+  {
+    return SimplifiedPart.PART_SETTINGS;
+  }
+
+  @Override protected boolean navigationDrawerShouldShowIndicator()
+  {
+    return true;
+  }
+
   @Override public void onAccountIsLoggedIn(
     final AccountBarcode barcode,
     final AccountPIN pin)
@@ -315,10 +325,5 @@ import com.io7m.jnull.Nullable;
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     books.accountGetCachedLoginDetails(this);
-  }
-
-  @Override protected boolean shouldShowNavigationDrawerIndicator()
-  {
-    return true;
   }
 }

@@ -14,6 +14,7 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.SimplifiedPart;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
@@ -440,6 +441,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.loading = feed_loader.fromURI(u, this);
   }
 
+  @Override protected SimplifiedPart navigationDrawerGetPart()
+  {
+    return SimplifiedPart.PART_CATALOG;
+  }
+
+  @Override protected boolean navigationDrawerShouldShowIndicator()
+  {
+    return this.getUpStack().isEmpty();
+  }
+
   private ImmutableStack<CatalogFeedArgumentsType> newUpStack(
     final CatalogFeedArgumentsType args)
   {
@@ -662,54 +673,6 @@ import com.io7m.junreachable.UnreachableCodeException;
       search_item.setEnabled(true);
       search_item.setVisible(true);
     }
-  }
-
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item)
-  {
-    final MenuItem item_nn = NullCheck.notNull(item);
-    switch (item_nn.getItemId()) {
-
-    /**
-     * The menu option to refresh feeds. Essentially, the feed is invalidated
-     * in the cache and a new activity is started that loads the same feed
-     * again (replacing the current activity).
-     */
-
-      case R.id.catalog_action_refresh:
-      {
-        CatalogFeedActivity.LOG.debug("refreshing feed");
-
-        final SimplifiedCatalogAppServicesType app =
-          Simplified.getCatalogAppServices();
-        final FeedLoaderType loader = app.getFeedLoader();
-        final CatalogFeedArgumentsType args = this.getArguments();
-        args
-          .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
-            @Override public Unit onFeedArgumentsLocalBooks(
-              final CatalogFeedArgumentsLocalBooks c)
-            {
-              // Nothing to refresh for local books. This shouldn't even be
-              // reachable.
-              throw new UnreachableCodeException();
-            }
-
-            @Override public Unit onFeedArgumentsRemote(
-              final CatalogFeedArgumentsRemote c)
-            {
-              loader.invalidate(c.getURI());
-              CatalogFeedActivity.startNewActivityReplacing(
-                CatalogFeedActivity.this,
-                args);
-              return Unit.unit();
-            }
-          });
-
-        return true;
-      }
-    }
-
-    return super.onOptionsItemSelected(item_nn);
   }
 
   @Override protected void onDestroy()
@@ -1002,6 +965,54 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.onFeedWithoutGroupsNonEmptyUI(f);
   }
 
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item)
+  {
+    final MenuItem item_nn = NullCheck.notNull(item);
+    switch (item_nn.getItemId()) {
+
+    /**
+     * The menu option to refresh feeds. Essentially, the feed is invalidated
+     * in the cache and a new activity is started that loads the same feed
+     * again (replacing the current activity).
+     */
+
+      case R.id.catalog_action_refresh:
+      {
+        CatalogFeedActivity.LOG.debug("refreshing feed");
+
+        final SimplifiedCatalogAppServicesType app =
+          Simplified.getCatalogAppServices();
+        final FeedLoaderType loader = app.getFeedLoader();
+        final CatalogFeedArgumentsType args = this.getArguments();
+        args
+          .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
+            @Override public Unit onFeedArgumentsLocalBooks(
+              final CatalogFeedArgumentsLocalBooks c)
+            {
+              // Nothing to refresh for local books. This shouldn't even be
+              // reachable.
+              throw new UnreachableCodeException();
+            }
+
+            @Override public Unit onFeedArgumentsRemote(
+              final CatalogFeedArgumentsRemote c)
+            {
+              loader.invalidate(c.getURI());
+              CatalogFeedActivity.startNewActivityReplacing(
+                CatalogFeedActivity.this,
+                args);
+              return Unit.unit();
+            }
+          });
+
+        return true;
+      }
+    }
+
+    return super.onOptionsItemSelected(item_nn);
+  }
+
   @Override protected void onSaveInstanceState(
     final @Nullable Bundle state)
   {
@@ -1035,6 +1046,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       CatalogBookDetailActivity.startNewActivity(
         CatalogFeedActivity.this,
         new_up_stack,
+        this.navigationDrawerGetPart(),
         e);
     }
   }
@@ -1052,10 +1064,5 @@ import com.io7m.junreachable.UnreachableCodeException;
         f.getGroupTitle(),
         f.getGroupURI());
     CatalogFeedActivity.startNewActivity(this, remote);
-  }
-
-  @Override protected boolean shouldShowNavigationDrawerIndicator()
-  {
-    return this.getUpStack().isEmpty();
   }
 }
