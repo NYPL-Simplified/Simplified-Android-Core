@@ -270,6 +270,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private @Nullable FeedType     feed;
+  private boolean                feed_error;
   private @Nullable AbsListView  list_view;
   private @Nullable Future<Unit> loading;
   private @Nullable ViewGroup    progress_layout;
@@ -585,6 +586,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (this.feed == null) {
       CatalogFeedActivity.LOG
         .debug("menu creation requested but feed is not yet present");
+
+      if (this.feed_error) {
+        CatalogFeedActivity.LOG
+          .debug("feed has failed, enabling refresh menu item");
+        this.onCreateOptionsMenuRefreshItem(menu_nn);
+      }
       return true;
     }
 
@@ -704,6 +711,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     UIThread.checkIsUIThread();
 
     CatalogFeedActivity.LOG.error("Failed to get feed: ", e);
+    this.feed_error = true;
+    this.invalidateOptionsMenu();
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup progress = NullCheck.notNull(this.progress_layout);
