@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,34 +59,43 @@ public final class CatalogBookCoverGenerator implements
     final URI u,
     final int width,
     final int height)
+    throws IOException
   {
-    CatalogBookCoverGenerator.LOG.debug("generating: {}", u);
+    try {
+      CatalogBookCoverGenerator.LOG.debug("generating: {}", u);
 
-    final Map<String, String> params =
-      CatalogBookCoverGenerator.getParameters(u);
+      final Map<String, String> params =
+        CatalogBookCoverGenerator.getParameters(u);
 
-    final String title_maybe = params.get("title");
-    final String title =
-      title_maybe == null ? "" : NullCheck.notNull(title_maybe);
-    final String author_maybe = params.get("author");
-    final String author =
-      author_maybe == null ? "" : NullCheck.notNull(author_maybe);
+      final String title_maybe = params.get("title");
+      final String title =
+        title_maybe == null ? "" : NullCheck.notNull(title_maybe);
+      final String author_maybe = params.get("author");
+      final String author =
+        author_maybe == null ? "" : NullCheck.notNull(author_maybe);
 
-    final TenPrintInputBuilderType ib = TenPrintInput.newBuilder();
-    ib.setAuthor(author);
-    ib.setTitle(title);
-    ib.setCoverHeight(height);
-    final TenPrintInput i = ib.build();
-    final Bitmap cover = this.generator.generate(i);
+      final TenPrintInputBuilderType ib = TenPrintInput.newBuilder();
+      ib.setAuthor(author);
+      ib.setTitle(title);
+      ib.setCoverHeight(height);
+      final TenPrintInput i = ib.build();
+      final Bitmap cover = this.generator.generate(i);
 
-    final Bitmap container =
-      Bitmap.createBitmap(width, height, Config.RGB_565);
-    final Canvas c = new Canvas(container);
-    final Paint white = new Paint();
-    white.setColor(Color.WHITE);
-    c.drawRect(0, 0, width, height, white);
-    c.drawBitmap(cover, (width - cover.getWidth()) / 2, 0, null);
-    return NullCheck.notNull(container);
+      final Bitmap container =
+        Bitmap.createBitmap(width, height, Config.RGB_565);
+      final Canvas c = new Canvas(container);
+      final Paint white = new Paint();
+      white.setColor(Color.WHITE);
+      c.drawRect(0, 0, width, height, white);
+      c.drawBitmap(cover, (width - cover.getWidth()) / 2, 0, null);
+      return NullCheck.notNull(container);
+    } catch (final Throwable e) {
+      CatalogBookCoverGenerator.LOG.error(
+        "error generating image for {}: ",
+        u,
+        e);
+      throw new IOException(e);
+    }
   }
 
   @Override public URI generateURIForTitleAuthor(

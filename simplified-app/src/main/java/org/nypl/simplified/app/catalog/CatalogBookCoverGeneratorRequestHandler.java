@@ -44,12 +44,16 @@ public final class CatalogBookCoverGeneratorRequestHandler extends
     final int networkPolicy)
     throws IOException
   {
-    final Request request = NullCheck.notNull(request_mn);
-    final Bitmap b =
-      this.generator.generateImage(
-        NullCheck.notNull(URI.create(request.uri.toString())),
-        request.targetWidth,
-        request.targetHeight);
-    return new Result(b, LoadedFrom.MEMORY);
+    try {
+      final Request request = NullCheck.notNull(request_mn);
+      final Bitmap b =
+        this.generator.generateImage(
+          NullCheck.notNull(URI.create(request.uri.toString())),
+          request.targetWidth,
+          request.targetHeight);
+      return new Result(b, LoadedFrom.MEMORY);
+    } catch (final Throwable e) {
+      throw new IOException(e);
+    }
   }
 }

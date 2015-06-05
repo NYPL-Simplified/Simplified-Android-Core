@@ -14,18 +14,19 @@ public interface CatalogBookCoverGeneratorType
    *          The image URI
    * @return A loaded bitmap
    * @throws IOException
-   *           On I/O errors
+   *           On errors
    */
 
   Bitmap generateImage(
     URI u,
     int width,
-    int height);
+    int height)
+    throws IOException;
 
   /**
    * Generate a URI from the given title and author, suitable for use in cover
    * generation.
-   * 
+   *
    * @param title
    *          The title
    * @param author
