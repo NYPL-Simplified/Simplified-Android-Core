@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.nypl.simplified.app.catalog.BooksActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
@@ -13,7 +12,6 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.HoldsActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
@@ -27,13 +25,16 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
@@ -70,16 +71,16 @@ import com.io7m.jnull.Nullable;
     b.putBoolean(SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID, open_drawer);
   }
 
-  private @Nullable FrameLayout                             content_frame;
-  private @Nullable DrawerLayout                            drawer;
-  private @Nullable Map<String, FunctionType<Bundle, Unit>> drawer_arg_funcs;
-  private @Nullable Map<String, Class<? extends Activity>>  drawer_classes_by_name;
-  private @Nullable ArrayList<String>                       drawer_items;
-  private @Nullable ListView                                drawer_list;
-  private @Nullable Map<Class<? extends Activity>, String>  drawer_names_by_class;
-  private @Nullable SharedPreferences                       drawer_settings;
-  private boolean                                           finishing;
-  private int                                               selected;
+  private @Nullable FrameLayout                                     content_frame;
+  private @Nullable DrawerLayout                                    drawer;
+  private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>> drawer_arg_funcs;
+  private @Nullable Map<SimplifiedPart, Class<? extends Activity>>  drawer_classes_by_name;
+  private @Nullable ArrayList<SimplifiedPart>                       drawer_items;
+  private @Nullable ListView                                        drawer_list;
+  private @Nullable SharedPreferences                               drawer_settings;
+  private boolean                                                   finishing;
+  private int                                                       selected;
+  private @Nullable ArrayAdapter<SimplifiedPart>                    adapter;
 
   private void finishWithConditionalAnimationOverride()
   {
@@ -99,6 +100,10 @@ import com.io7m.jnull.Nullable;
   {
     return NullCheck.notNull(this.content_frame);
   }
+
+  protected abstract SimplifiedPart navigationDrawerGetPart();
+
+  protected abstract boolean navigationDrawerShouldShowIndicator();
 
   @Override public void onBackPressed()
   {
@@ -184,56 +189,61 @@ import com.io7m.jnull.Nullable;
 
     final String app_name =
       NullCheck.notNull(rr.getString(R.string.app_name));
-    final String catalog_name =
-      NullCheck.notNull(rr.getString(R.string.catalog));
-    final String holds_name = NullCheck.notNull(rr.getString(R.string.holds));
-    final String books_name = NullCheck.notNull(rr.getString(R.string.books));
-    final String settings_name =
-      NullCheck.notNull(rr.getString(R.string.settings));
 
-    final ArrayList<String> di = new ArrayList<String>();
-    di.add(catalog_name);
-    di.add(books_name);
-    di.add(holds_name);
-    di.add(settings_name);
-    dl.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_item, di));
+    final ArrayList<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
+    di.add(SimplifiedPart.PART_CATALOG);
+    di.add(SimplifiedPart.PART_BOOKS);
+    di.add(SimplifiedPart.PART_HOLDS);
+    di.add(SimplifiedPart.PART_SETTINGS);
+
+    final LayoutInflater inflater =
+      NullCheck.notNull(this.getLayoutInflater());
+    this.adapter =
+      new ArrayAdapter<SimplifiedPart>(this, R.layout.drawer_item, di) {
+        @Override public View getView(
+          final int position,
+          final @Nullable View reuse,
+          final @Nullable ViewGroup parent)
+        {
+          View v;
+          if (reuse != null) {
+            v = reuse;
+          } else {
+            v = inflater.inflate(R.layout.drawer_item, parent, false);
+          }
+
+          final SimplifiedPart part = NullCheck.notNull(di.get(position));
+          final TextView tv =
+            NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+          tv.setText(part.getPartName(rr));
+          return v;
+        }
+      };
+
+    dl.setAdapter(this.adapter);
 
     /**
      * Set up a map of names ↔ classes.
      */
 
-    final Map<String, Class<? extends Activity>> classes_by_name =
-      new HashMap<String, Class<? extends Activity>>();
-    classes_by_name.put(books_name, BooksActivity.class);
-    classes_by_name.put(catalog_name, CatalogFeedActivity.class);
-    classes_by_name.put(holds_name, HoldsActivity.class);
-    classes_by_name.put(settings_name, SettingsActivity.class);
-
-    final Map<Class<? extends Activity>, String> names_by_class =
-      new HashMap<Class<? extends Activity>, String>();
-    for (final Entry<String, Class<? extends Activity>> e : classes_by_name
-      .entrySet()) {
-      final Class<? extends Activity> c = NullCheck.notNull(e.getValue());
-      final String n = NullCheck.notNull(e.getKey());
-
-      Assertions.checkPrecondition(
-        names_by_class.containsKey(c) == false,
-        "%s contains key %s",
-        names_by_class,
-        c);
-
-      names_by_class.put(c, n);
-    }
+    final Map<SimplifiedPart, Class<? extends Activity>> classes_by_name =
+      new HashMap<SimplifiedPart, Class<? extends Activity>>();
+    classes_by_name.put(SimplifiedPart.PART_BOOKS, BooksActivity.class);
+    classes_by_name.put(
+      SimplifiedPart.PART_CATALOG,
+      CatalogFeedActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_HOLDS, HoldsActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_SETTINGS, SettingsActivity.class);
 
     /**
      * Set up a map of part names to functions that configure argument
      * bundles.
      */
 
-    final Map<String, FunctionType<Bundle, Unit>> da =
-      new HashMap<String, FunctionType<Bundle, Unit>>();
+    final Map<SimplifiedPart, FunctionType<Bundle, Unit>> da =
+      new HashMap<SimplifiedPart, FunctionType<Bundle, Unit>>();
 
-    da.put(books_name, new FunctionType<Bundle, Unit>() {
+    da.put(SimplifiedPart.PART_BOOKS, new FunctionType<Bundle, Unit>() {
       @Override public Unit call(
         final Bundle b)
       {
@@ -243,7 +253,7 @@ import com.io7m.jnull.Nullable;
         final CatalogFeedArgumentsLocalBooks local =
           new CatalogFeedArgumentsLocalBooks(
             empty_stack,
-            books_name,
+            SimplifiedPart.PART_BOOKS.getPartName(rr),
             FeedFacetPseudo.FacetType.SORT_BY_TITLE,
             no_search);
         CatalogFeedActivity.setActivityArguments(b, local);
@@ -251,7 +261,7 @@ import com.io7m.jnull.Nullable;
       }
     });
 
-    da.put(catalog_name, new FunctionType<Bundle, Unit>() {
+    da.put(SimplifiedPart.PART_CATALOG, new FunctionType<Bundle, Unit>() {
       @Override public Unit call(
         final Bundle b)
       {
@@ -268,7 +278,7 @@ import com.io7m.jnull.Nullable;
       }
     });
 
-    da.put(holds_name, new FunctionType<Bundle, Unit>() {
+    da.put(SimplifiedPart.PART_HOLDS, new FunctionType<Bundle, Unit>() {
       @Override public Unit call(
         final Bundle b)
       {
@@ -277,7 +287,7 @@ import com.io7m.jnull.Nullable;
       }
     });
 
-    da.put(settings_name, new FunctionType<Bundle, Unit>() {
+    da.put(SimplifiedPart.PART_SETTINGS, new FunctionType<Bundle, Unit>() {
       @Override public Unit call(
         final Bundle b)
       {
@@ -286,7 +296,7 @@ import com.io7m.jnull.Nullable;
       }
     });
 
-    if (this.shouldShowNavigationDrawerIndicator()) {
+    if (this.navigationDrawerShouldShowIndicator()) {
       SimplifiedActivity.LOG.debug("setting navigation drawer indicator");
       final ActionBar bar = this.getActionBar();
       bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
@@ -304,7 +314,6 @@ import com.io7m.jnull.Nullable;
 
     this.drawer_items = di;
     this.drawer_classes_by_name = classes_by_name;
-    this.drawer_names_by_class = names_by_class;
     this.drawer_arg_funcs = da;
     this.drawer = d;
     this.drawer_list = dl;
@@ -345,13 +354,14 @@ import com.io7m.jnull.Nullable;
      */
 
     if (this.selected != -1) {
-      final ArrayList<String> di = NullCheck.notNull(this.drawer_items);
-      final Map<String, Class<? extends Activity>> dc =
+      final ArrayList<SimplifiedPart> di =
+        NullCheck.notNull(this.drawer_items);
+      final Map<SimplifiedPart, Class<? extends Activity>> dc =
         NullCheck.notNull(this.drawer_classes_by_name);
-      final Map<String, FunctionType<Bundle, Unit>> fas =
+      final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
         NullCheck.notNull(this.drawer_arg_funcs);
 
-      final String name = NullCheck.notNull(di.get(this.selected));
+      final SimplifiedPart name = NullCheck.notNull(di.get(this.selected));
       final Class<? extends Activity> c = NullCheck.notNull(dc.get(name));
       final FunctionType<Bundle, Unit> fa = NullCheck.notNull(fas.get(name));
 
@@ -436,26 +446,15 @@ import com.io7m.jnull.Nullable;
     super.onResume();
     SimplifiedActivity.LOG.debug("onResume: {}", this);
 
-    final Map<Class<? extends Activity>, String> dnbc =
-      NullCheck.notNull(this.drawer_names_by_class);
-    final List<String> di = NullCheck.notNull(this.drawer_items);
-
+    final List<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
     final ListView dl = NullCheck.notNull(this.drawer_list);
-    final Class<? extends SimplifiedActivity> c = this.getClass();
-    if (dnbc.containsKey(c)) {
-      final String name = NullCheck.notNull(dnbc.get(c));
-      SimplifiedActivity.LOG.debug("restored drawer name: {}", name);
-      final int pos = di.indexOf(name);
-      SimplifiedActivity.LOG.debug("restored selected item: {}", pos);
+    final SimplifiedPart p = this.navigationDrawerGetPart();
 
-      dl.setSelection(pos);
-      dl.setItemChecked(pos, true);
-    } else {
-      for (int index = 0; index < dnbc.size(); ++index) {
-        dl.setSelection(0);
-        dl.setItemChecked(index, false);
-      }
-    }
+    final int pos = di.indexOf(p);
+    SimplifiedActivity.LOG.debug("restored selected item: {}", pos);
+
+    dl.setSelection(pos);
+    dl.setItemChecked(pos, true);
   }
 
   @Override protected void onSaveInstanceState(
@@ -468,6 +467,4 @@ import com.io7m.jnull.Nullable;
       SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID,
       d.isDrawerOpen(GravityCompat.START));
   }
-
-  protected abstract boolean shouldShowNavigationDrawerIndicator();
 }

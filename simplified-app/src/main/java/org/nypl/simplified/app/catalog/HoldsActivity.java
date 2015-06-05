@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.SimplifiedActivity;
+import org.nypl.simplified.app.SimplifiedPart;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,6 +14,16 @@ import com.io7m.jnull.Nullable;
 
 public final class HoldsActivity extends SimplifiedActivity
 {
+  @Override protected SimplifiedPart navigationDrawerGetPart()
+  {
+    return SimplifiedPart.PART_HOLDS;
+  }
+
+  @Override protected boolean navigationDrawerShouldShowIndicator()
+  {
+    return true;
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -39,10 +50,5 @@ public final class HoldsActivity extends SimplifiedActivity
   @Override protected void onResume()
   {
     super.onResume();
-  }
-
-  @Override protected boolean shouldShowNavigationDrawerIndicator()
-  {
-    return true;
   }
 }

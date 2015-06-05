@@ -3,6 +3,7 @@ package org.nypl.simplified.app.catalog;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.SimplifiedPart;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -30,60 +31,14 @@ public final class BooksActivity extends CatalogFeedActivity implements
     LOG = LogUtilities.getLog(BooksActivity.class);
   }
 
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item)
+  @Override protected SimplifiedPart navigationDrawerGetPart()
   {
-    final MenuItem item_nn = NullCheck.notNull(item);
-    switch (item_nn.getItemId()) {
-      case R.id.catalog_action_sync_books:
-      {
-        final SimplifiedCatalogAppServicesType app =
-          Simplified.getCatalogAppServices();
-        final BooksType books = app.getBooks();
-
-        item_nn.setEnabled(false);
-        books.accountGetCachedLoginDetails(this);
-        return true;
-      }
-    }
-
-    return super.onOptionsItemSelected(item_nn);
+    return SimplifiedPart.PART_BOOKS;
   }
 
-  @Override public boolean onCreateOptionsMenu(
-    final @Nullable Menu in_menu)
-  {
-    super.onCreateOptionsMenu(in_menu);
-
-    final Menu menu_nn = NullCheck.notNull(in_menu);
-
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
-
-    final MenuItem sync_item =
-      NullCheck.notNull(menu_nn.findItem(R.id.catalog_action_sync_books));
-    final MenuItem refresh_item =
-      NullCheck.notNull(menu_nn.findItem(R.id.catalog_action_refresh));
-
-    if (books.accountIsLoggedIn()) {
-      sync_item.setEnabled(true);
-      sync_item.setVisible(true);
-    }
-
-    refresh_item.setEnabled(false);
-    refresh_item.setVisible(false);
-    return true;
-  }
-
-  @Override protected boolean shouldShowNavigationDrawerIndicator()
+  @Override protected boolean navigationDrawerShouldShowIndicator()
   {
     return true;
-  }
-
-  @Override public void onAccountIsNotLoggedIn()
-  {
-    BooksActivity.LOG.debug("account is not logged in");
   }
 
   @Override public void onAccountIsLoggedIn(
@@ -94,6 +49,11 @@ public final class BooksActivity extends CatalogFeedActivity implements
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
     books.accountSync(this);
+  }
+
+  @Override public void onAccountIsNotLoggedIn()
+  {
+    BooksActivity.LOG.debug("account is not logged in");
   }
 
   @Override public void onAccountSyncAuthenticationFailure(
@@ -128,5 +88,51 @@ public final class BooksActivity extends CatalogFeedActivity implements
         BooksActivity.this.invalidateOptionsMenu();
       }
     });
+  }
+
+  @Override public boolean onCreateOptionsMenu(
+    final @Nullable Menu in_menu)
+  {
+    super.onCreateOptionsMenu(in_menu);
+
+    final Menu menu_nn = NullCheck.notNull(in_menu);
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final BooksType books = app.getBooks();
+
+    final MenuItem sync_item =
+      NullCheck.notNull(menu_nn.findItem(R.id.catalog_action_sync_books));
+    final MenuItem refresh_item =
+      NullCheck.notNull(menu_nn.findItem(R.id.catalog_action_refresh));
+
+    if (books.accountIsLoggedIn()) {
+      sync_item.setEnabled(true);
+      sync_item.setVisible(true);
+    }
+
+    refresh_item.setEnabled(false);
+    refresh_item.setVisible(false);
+    return true;
+  }
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item)
+  {
+    final MenuItem item_nn = NullCheck.notNull(item);
+    switch (item_nn.getItemId()) {
+      case R.id.catalog_action_sync_books:
+      {
+        final SimplifiedCatalogAppServicesType app =
+          Simplified.getCatalogAppServices();
+        final BooksType books = app.getBooks();
+
+        item_nn.setEnabled(false);
+        books.accountGetCachedLoginDetails(this);
+        return true;
+      }
+    }
+
+    return super.onOptionsItemSelected(item_nn);
   }
 }
