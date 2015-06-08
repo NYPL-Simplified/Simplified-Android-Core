@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -29,6 +30,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -71,6 +73,7 @@ import com.io7m.jnull.Nullable;
     b.putBoolean(SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID, open_drawer);
   }
 
+  private @Nullable ArrayAdapter<SimplifiedPart>                    adapter;
   private @Nullable FrameLayout                                     content_frame;
   private @Nullable DrawerLayout                                    drawer;
   private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>> drawer_arg_funcs;
@@ -80,7 +83,6 @@ import com.io7m.jnull.Nullable;
   private @Nullable SharedPreferences                               drawer_settings;
   private boolean                                                   finishing;
   private int                                                       selected;
-  private @Nullable ArrayAdapter<SimplifiedPart>                    adapter;
 
   private void finishWithConditionalAnimationOverride()
   {
@@ -99,6 +101,20 @@ import com.io7m.jnull.Nullable;
   protected final FrameLayout getContentFrame()
   {
     return NullCheck.notNull(this.content_frame);
+  }
+
+  private void hideKeyboard()
+  {
+    // Check if no view has focus:
+    final View view = this.getCurrentFocus();
+    if (view != null) {
+      final InputMethodManager im =
+        (InputMethodManager) this
+          .getSystemService(Context.INPUT_METHOD_SERVICE);
+      im.hideSoftInputFromWindow(
+        view.getWindowToken(),
+        InputMethodManager.HIDE_NOT_ALWAYS);
+    }
   }
 
   protected abstract SimplifiedPart navigationDrawerGetPart();
@@ -335,8 +351,9 @@ import com.io7m.jnull.Nullable;
   @Override public final void onDrawerClosed(
     final @Nullable View drawerView)
   {
-    SimplifiedActivity.LOG
-      .debug("drawer closed, selected: {}", this.selected);
+    SimplifiedActivity.LOG.debug(
+      "onDrawerClosed: selected: {}",
+      this.selected);
 
     /**
      * If the drawer is closing because the user pressed the back button, then
@@ -383,11 +400,13 @@ import com.io7m.jnull.Nullable;
     final @Nullable View drawerView)
   {
     this.selected = -1;
-    SimplifiedActivity.LOG.debug("drawer opened");
+    SimplifiedActivity.LOG.debug("onDrawerOpened: {}", drawerView);
 
     final SharedPreferences in_drawer_settings =
       NullCheck.notNull(this.drawer_settings);
     in_drawer_settings.edit().putBoolean("has-opened-manually", true).apply();
+
+    this.hideKeyboard();
   }
 
   @Override public final void onDrawerSlide(
@@ -400,7 +419,7 @@ import com.io7m.jnull.Nullable;
   @Override public final void onDrawerStateChanged(
     final int newState)
   {
-    // Nothing
+    SimplifiedActivity.LOG.debug("onDrawerStateChanged: {}", newState);
   }
 
   @Override public void onItemClick(
@@ -409,7 +428,7 @@ import com.io7m.jnull.Nullable;
     final int position,
     final long id)
   {
-    SimplifiedActivity.LOG.debug("selected navigation item: {}", position);
+    SimplifiedActivity.LOG.debug("onItemClick: {}", position);
 
     final DrawerLayout d = NullCheck.notNull(this.drawer);
     d.closeDrawer(GravityCompat.START);
