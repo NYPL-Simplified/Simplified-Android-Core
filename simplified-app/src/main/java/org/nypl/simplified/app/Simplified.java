@@ -20,6 +20,7 @@ import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
 import org.nypl.simplified.app.reader.ReaderSettings;
 import org.nypl.simplified.app.reader.ReaderSettingsType;
 import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
@@ -509,8 +510,18 @@ import com.io7m.jnull.Nullable;
 
     if (Environment.MEDIA_MOUNTED.equals(Environment
       .getExternalStorageState())) {
+
+      Simplified.LOG.debug("trying external storage");
       if (Environment.isExternalStorageRemovable() == false) {
-        return NullCheck.notNull(context.getExternalFilesDir(null));
+        final File r = context.getExternalFilesDir(null);
+        Simplified.LOG.debug(
+          "external storage is not removable, using it ({})",
+          r);
+        Assertions.checkPrecondition(
+          r.isDirectory(),
+          "Data directory {} is a directory",
+          r);
+        return NullCheck.notNull(r);
       }
     }
 
@@ -518,7 +529,14 @@ import com.io7m.jnull.Nullable;
      * Otherwise, use internal storage.
      */
 
-    return NullCheck.notNull(context.getFilesDir());
+    final File r = context.getFilesDir();
+    Simplified.LOG
+      .debug("no non-removable external storage, using internal storage ({})");
+    Assertions.checkPrecondition(
+      r.isDirectory(),
+      "Data directory {} is a directory",
+      r);
+    return NullCheck.notNull(r);
   }
 
   public static SimplifiedReaderAppServicesType getReaderAppServices()

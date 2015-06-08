@@ -23,7 +23,7 @@
     level="INFO" />
 
   <!-- Log level - change this to ERROR on release -->
-  <root level="INFO">
+  <root level="DEBUG">
     <appender-ref ref="LOG_CAT" />
   </root>
 
