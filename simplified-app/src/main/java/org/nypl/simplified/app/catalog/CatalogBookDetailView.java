@@ -198,7 +198,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         final OPDSCategory c = NullCheck.notNull(cats.get(index));
         if (CatalogBookDetailView.GENRES_URI_TEXT.equals(c.getScheme())) {
           buffer.append(c.getTerm());
-          if ((index + 1) <= cats.size()) {
+          if ((index + 1) < cats.size()) {
             buffer.append(", ");
           }
         }
