@@ -9,30 +9,9 @@ import com.io7m.jnull.NullCheck;
 public final class TextUtilities
 {
   /**
-   * If <tt>t</tt> is longer than <tt>at</tt> characters, truncate the string
-   * to <tt>at - 1</tt> characters and end with "…".
-   *
-   * @param t
-   *          The string
-   * @param at
-   *          The maximum length
-   * @return An ellipsized string
-   */
-
-  public static String ellipsize(
-    final String t,
-    final int at)
-  {
-    if (t.length() > at) {
-      return NullCheck.notNull(t.substring(0, at - 1) + "…");
-    }
-    return t;
-  }
-
-  /**
    * Brutally and overzealously attempt to remove one layer of quoting from a
    * given string. In other words "\"x\"" becomes "x".
-   * 
+   *
    * @param t
    *          The string
    * @return The unquoted string

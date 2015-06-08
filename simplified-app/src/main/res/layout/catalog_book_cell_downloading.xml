@@ -14,8 +14,10 @@
     android:id="@+id/cell_downloading_title"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:maxLines="1"
+    android:ellipsize="end"
     android:textColor="@color/downloading_foreground"
-    android:text="Title"
+    android:text="@string/placeholder_long_title"
     android:textStyle="bold" />
 
   <TextView
@@ -23,8 +25,10 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:paddingBottom="16dp"
+    android:maxLines="1"
+    android:ellipsize="end"
     android:textColor="@color/downloading_foreground"
-    android:text="Authors"
+    android:text="@string/placeholder_long_author"
     android:textSize="10sp" />
 
   <LinearLayout

@@ -14,7 +14,6 @@ import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
 import org.readium.sdk.android.Container;
@@ -450,9 +449,7 @@ import com.io7m.jnull.Nullable;
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
-        final String title = NullCheck.notNull(p.getTitle());
-        final String shortened = TextUtilities.ellipsize(title, 24);
-        in_title_text.setText(shortened);
+        in_title_text.setText(NullCheck.notNull(p.getTitle()));
       }
     });
 

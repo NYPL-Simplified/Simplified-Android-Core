@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
@@ -87,13 +86,7 @@ import com.squareup.picasso.Callback;
         sb.append(", ");
       }
     }
-    return TextUtilities.ellipsize(NullCheck.notNull(sb.toString()), 32);
-  }
-
-  private static String makeTitleText(
-    final OPDSAcquisitionFeedEntry in_e)
-  {
-    return TextUtilities.ellipsize(in_e.getTitle(), 32);
+    return NullCheck.notNull(sb.toString());
   }
 
   private final Activity                       activity;
@@ -379,8 +372,7 @@ import com.squareup.picasso.Callback;
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     final BookID book_id = d.getID();
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
-    this.cell_downloading_title.setText(CatalogFeedBookCellView
-      .makeTitleText(oe));
+    this.cell_downloading_title.setText(oe.getTitle());
     this.cell_downloading_authors.setText(CatalogFeedBookCellView
       .makeAuthorText(oe));
 
@@ -516,7 +508,7 @@ import com.squareup.picasso.Callback;
     final FeedEntryOPDS feed_e)
   {
     final OPDSAcquisitionFeedEntry oe = feed_e.getFeedEntry();
-    this.cell_title.setText(CatalogFeedBookCellView.makeTitleText(oe));
+    this.cell_title.setText(oe.getTitle());
     this.cell_authors.setText(CatalogFeedBookCellView.makeAuthorText(oe));
 
     final CatalogBookSelectionListenerType book_listener =

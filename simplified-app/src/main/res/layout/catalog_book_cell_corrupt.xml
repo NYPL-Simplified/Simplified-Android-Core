@@ -28,8 +28,10 @@
     android:layout_below="@id/cell_corrupt_title"
     android:layout_marginStart="8dp"
     android:layout_marginTop="8dp"
+    android:ellipsize="end"
+    android:maxLines="3"
     android:textColor="@color/normal_text_major"
-    android:text="Text"
+    android:text="@string/placeholder_lorem"
     android:textSize="10sp" />
 
 </RelativeLayout>
