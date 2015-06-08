@@ -25,7 +25,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -76,6 +75,7 @@ public final class LoginDialog extends DialogFragment implements
   private @Nullable ProgressBar                 login_progress;
   private @Nullable EditText                    pin_edit;
   private @Nullable TextView                    text;
+  private @Nullable ViewGroup                   layout;
 
   public LoginDialog()
   {
@@ -179,28 +179,30 @@ public final class LoginDialog extends DialogFragment implements
     final String initial_txt =
       NullCheck.notNull(b.getString(LoginDialog.TEXT_ID));
 
-    final LinearLayout layout =
-      NullCheck.notNull((LinearLayout) inflater.inflate(
+    final ViewGroup in_layout =
+      NullCheck.notNull((ViewGroup) inflater.inflate(
         R.layout.login_dialog,
         container,
         false));
+    this.layout = in_layout;
 
     final TextView in_text =
-      NullCheck.notNull((TextView) layout
+      NullCheck.notNull((TextView) in_layout
         .findViewById(R.id.login_dialog_text));
     final EditText in_barcode_edit =
-      NullCheck.notNull((EditText) layout
+      NullCheck.notNull((EditText) in_layout
         .findViewById(R.id.login_dialog_barcode_text_edit));
     final EditText in_pin_edit =
-      NullCheck.notNull((EditText) layout
+      NullCheck.notNull((EditText) in_layout
         .findViewById(R.id.login_dialog_pin_text_edit));
     final Button in_login_button =
-      NullCheck.notNull((Button) layout.findViewById(R.id.login_dialog_ok));
+      NullCheck
+        .notNull((Button) in_layout.findViewById(R.id.login_dialog_ok));
     final Button in_login_cancel_button =
-      NullCheck.notNull((Button) layout
+      NullCheck.notNull((Button) in_layout
         .findViewById(R.id.login_dialog_cancel));
     final ProgressBar in_login_progress =
-      NullCheck.notNull((ProgressBar) layout
+      NullCheck.notNull((ProgressBar) in_layout
         .findViewById(R.id.login_progress));
 
     final SimplifiedCatalogAppServicesType app =
@@ -252,7 +254,7 @@ public final class LoginDialog extends DialogFragment implements
       d.setCanceledOnTouchOutside(true);
     }
 
-    return layout;
+    return in_layout;
   }
 
   @Override public void onResume()
@@ -278,6 +280,8 @@ public final class LoginDialog extends DialogFragment implements
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);
+
+    NullCheck.notNull(this.layout).requestLayout();
   }
 
   public void setLoginListener(
