@@ -15,7 +15,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:gravity="center"
-      android:text="@string/catalog_load_error_text"
+      android:text="@string/catalog_load_not_connected"
       android:textColor="@color/normal_text_major"
       android:textAppearance="?android:attr/textAppearanceMedium" />
 

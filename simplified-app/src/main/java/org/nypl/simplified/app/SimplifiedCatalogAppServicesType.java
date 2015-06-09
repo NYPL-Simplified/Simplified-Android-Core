@@ -11,6 +11,7 @@ import org.nypl.simplified.books.core.FeedLoaderType;
 
 public interface SimplifiedCatalogAppServicesType extends
   ScreenSizeControllerType,
+  NetworkConnectivityType,
   SimplifiedAppInitialSyncType
 {
   /**
