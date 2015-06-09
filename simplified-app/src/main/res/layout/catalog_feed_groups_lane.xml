@@ -12,6 +12,9 @@
       android:textAppearance="@style/SimplifiedTheme.LaneTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:maxLines="1"
+      android:ellipsize="end"
       android:text="@string/catalog_unknown_feed" />
 
     <ProgressBar
@@ -31,7 +34,9 @@
       android:id="@+id/feed_scroller_contents"
       android:orientation="horizontal"
       android:layout_height="match_parent"
-      android:layout_width="wrap_content"/>
+      android:layout_width="wrap_content"
+      android:paddingStart="8dp"
+      android:paddingEnd="8dp" />
   </HorizontalScrollView>
 
   <!-- Invisible padding element -->
