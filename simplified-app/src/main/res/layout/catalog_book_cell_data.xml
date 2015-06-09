@@ -32,9 +32,9 @@
     android:id="@+id/cell_text_layout"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:layout_weight="1"
     android:paddingStart="8dp"
-    android:paddingTop="8dp">
+    android:layout_marginBottom="8dp"
+    android:layout_weight="1">
 
     <TextView
       android:id="@+id/cell_title"
@@ -54,7 +54,7 @@
       android:textColor="@color/normal_text_major"
       android:text="@string/placeholder_long_author"
       android:ellipsize="end"
-      android:maxLines="2" />
+      android:maxLines="1" />
 
     <LinearLayout
       android:id="@+id/cell_buttons"

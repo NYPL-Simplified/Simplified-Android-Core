@@ -12,7 +12,8 @@ import android.widget.Button;
 
 import com.io7m.jnull.NullCheck;
 
-public final class CatalogAcquisitionButton extends Button
+public final class CatalogAcquisitionButton extends Button implements
+  CatalogBookButtonType
 {
   public CatalogAcquisitionButton(
     final Activity in_activity,

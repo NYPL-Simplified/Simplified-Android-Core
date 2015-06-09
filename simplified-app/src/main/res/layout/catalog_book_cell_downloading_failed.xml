@@ -7,7 +7,7 @@
   android:id="@+id/cell_downloading_failed"
   android:layout_width="match_parent"
   android:layout_height="110dp"
-  android:orientation="vertical">
+  android:padding="8dp">
 
   <TextView
     android:id="@+id/cell_downloading_failed_title"
@@ -15,34 +15,45 @@
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
     android:layout_alignParentStart="true"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
-    android:text="@string/catalog_download_failed"
+    android:maxLines="1"
+    android:ellipsize="end"
+    android:text="@string/placeholder_long_title"
     android:textColor="@color/normal_text_major"
     android:textStyle="bold" />
 
   <TextView
-    android:id="@+id/cell_downloading_failed_text"
+    android:id="@+id/cell_downloading_failed_static_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_below="@id/cell_downloading_failed_title"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="8dp"
-    android:ellipsize="end"
-    android:maxLines="2"
-    android:textColor="@color/normal_text_major"
-    android:text="@string/placeholder_lorem"
-    android:textSize="10sp" />
+    android:text="@string/catalog_download_failed"
+    android:textColor="@color/normal_text_major" />
 
-  <Button
-    android:id="@+id/cell_downloading_failed_dismiss"
-    android:layout_alignParentEnd="true"
-    android:layout_alignParentBottom="true"
-    android:background="@drawable/simplified_button"
-    android:textColor="@drawable/simplified_button_text"
+  <LinearLayout
     android:layout_width="wrap_content"
-    android:layout_height="35dp"
-    android:textSize="12sp"
-    android:text="@string/catalog_book_error_dismiss"/>
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"
+    android:layout_alignParentBottom="true"
+    android:orientation="horizontal">
+
+    <Button
+      android:id="@+id/cell_downloading_failed_retry"
+      android:background="@drawable/simplified_button"
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="wrap_content"
+      android:layout_height="35dp"
+      android:textSize="12sp"
+      android:text="@string/catalog_book_error_retry" />
+
+    <Button
+      android:id="@+id/cell_downloading_failed_dismiss"
+      android:background="@drawable/simplified_button"
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="wrap_content"
+      android:layout_height="35dp"
+      android:layout_marginLeft="8dp"
+      android:textSize="12sp"
+      android:text="@string/catalog_book_error_dismiss" />
+  </LinearLayout>
 
 </RelativeLayout>

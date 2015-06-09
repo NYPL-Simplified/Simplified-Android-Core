@@ -13,6 +13,7 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
@@ -579,14 +580,21 @@ import com.io7m.junreachable.UnreachableCodeException;
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final int dp35 = (int) app.screenDPToPixels(35);
+    final int dp8 = (int) app.screenDPToPixels(8);
     final int button_count = layout.getChildCount();
     for (int index = 0; index < button_count; ++index) {
       final View v = layout.getChildAt(index);
-      if (v instanceof CatalogAcquisitionButton) {
-        final android.widget.LinearLayout.LayoutParams lp =
-          new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, dp35);
-        v.setLayoutParams(lp);
-      }
+
+      Assertions.checkPrecondition(
+        v instanceof CatalogBookButtonType,
+        "view %s is an instance of CatalogBookButtonType",
+        v);
+
+      final android.widget.LinearLayout.LayoutParams lp =
+        new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, dp35);
+      lp.leftMargin = dp8;
+
+      v.setLayoutParams(lp);
     }
   }
 

@@ -16,7 +16,8 @@ import android.widget.LinearLayout;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-public final class CatalogBookDeleteButton extends Button
+public final class CatalogBookDeleteButton extends Button implements
+  CatalogBookButtonType
 {
   public CatalogBookDeleteButton(
     final Activity in_activity,

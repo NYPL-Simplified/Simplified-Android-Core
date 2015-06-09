@@ -106,7 +106,8 @@ import com.squareup.picasso.Callback;
   private final Button                         cell_downloading_cancel;
   private final ViewGroup                      cell_downloading_failed;
   private final Button                         cell_downloading_failed_dismiss;
-  private final TextView                       cell_downloading_failed_text;
+  private final Button                         cell_downloading_failed_retry;
+  private final TextView                       cell_downloading_failed_title;
   private final TextView                       cell_downloading_percent_text;
   private final ProgressBar                    cell_downloading_progress;
   private final TextView                       cell_downloading_title;
@@ -172,12 +173,15 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_failed =
       NullCheck.notNull((ViewGroup) this
         .findViewById(R.id.cell_downloading_failed));
-    this.cell_downloading_failed_text =
+    this.cell_downloading_failed_title =
       NullCheck.notNull((TextView) this.cell_downloading_failed
-        .findViewById(R.id.cell_downloading_failed_text));
+        .findViewById(R.id.cell_downloading_failed_title));
     this.cell_downloading_failed_dismiss =
       NullCheck.notNull((Button) this.cell_downloading_failed
         .findViewById(R.id.cell_downloading_failed_dismiss));
+    this.cell_downloading_failed_retry =
+      NullCheck.notNull((Button) this.cell_downloading_failed
+        .findViewById(R.id.cell_downloading_failed_retry));
 
     this.cell_corrupt =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_corrupt));
@@ -322,15 +326,10 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_failed.setVisibility(View.VISIBLE);
     this.setDebugCellText("download-failed");
 
-    final DownloadSnapshot snap = f.getDownloadSnapshot();
-    final OptionType<Throwable> e_opt = snap.getError();
-    if (e_opt.isSome()) {
-      final Throwable e = ((Some<Throwable>) e_opt).get();
-      this.cell_downloading_failed_text.setText(e.getMessage());
-    } else {
-      this.cell_downloading_failed_text.setText("");
-    }
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
+    this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss
       .setOnClickListener(new OnClickListener() {
         @Override public void onClick(
