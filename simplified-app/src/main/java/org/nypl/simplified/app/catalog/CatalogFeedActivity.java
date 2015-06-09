@@ -52,8 +52,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
@@ -270,7 +272,6 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private @Nullable FeedType     feed;
-  private boolean                feed_error;
   private @Nullable AbsListView  list_view;
   private @Nullable Future<Unit> loading;
   private @Nullable ViewGroup    progress_layout;
@@ -586,12 +587,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (this.feed == null) {
       CatalogFeedActivity.LOG
         .debug("menu creation requested but feed is not yet present");
-
-      if (this.feed_error) {
-        CatalogFeedActivity.LOG
-          .debug("feed has failed, enabling refresh menu item");
-        this.onCreateOptionsMenuRefreshItem(menu_nn);
-      }
       return true;
     }
 
@@ -711,7 +706,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     UIThread.checkIsUIThread();
 
     CatalogFeedActivity.LOG.error("Failed to get feed: ", e);
-    this.feed_error = true;
     this.invalidateOptionsMenu();
 
     final FrameLayout content_area = this.getContentFrame();
@@ -720,13 +714,24 @@ import com.io7m.junreachable.UnreachableCodeException;
     content_area.removeAllViews();
 
     final LayoutInflater inflater = this.getLayoutInflater();
-    final LinearLayout error =
-      NullCheck.notNull((LinearLayout) inflater.inflate(
+    final ViewGroup error =
+      NullCheck.notNull((ViewGroup) inflater.inflate(
         R.layout.catalog_loading_error,
         content_area,
         false));
     content_area.addView(error);
     content_area.requestLayout();
+
+    final Button retry =
+      NullCheck
+        .notNull((Button) error.findViewById(R.id.catalog_error_retry));
+    retry.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        CatalogFeedActivity.this.retryFeed();
+      }
+    });
   }
 
   @Override public void onFeedLoadSuccess(
@@ -989,32 +994,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       case R.id.catalog_action_refresh:
       {
         CatalogFeedActivity.LOG.debug("refreshing feed");
-
-        final SimplifiedCatalogAppServicesType app =
-          Simplified.getCatalogAppServices();
-        final FeedLoaderType loader = app.getFeedLoader();
-        final CatalogFeedArgumentsType args = this.getArguments();
-        args
-          .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
-            @Override public Unit onFeedArgumentsLocalBooks(
-              final CatalogFeedArgumentsLocalBooks c)
-            {
-              // Nothing to refresh for local books. This shouldn't even be
-              // reachable.
-              throw new UnreachableCodeException();
-            }
-
-            @Override public Unit onFeedArgumentsRemote(
-              final CatalogFeedArgumentsRemote c)
-            {
-              loader.invalidate(c.getURI());
-              CatalogFeedActivity.startNewActivityReplacing(
-                CatalogFeedActivity.this,
-                args);
-              return Unit.unit();
-            }
-          });
-
+        this.retryFeed();
         return true;
       }
     }
@@ -1073,5 +1053,33 @@ import com.io7m.junreachable.UnreachableCodeException;
         f.getGroupTitle(),
         f.getGroupURI());
     CatalogFeedActivity.startNewActivity(this, remote);
+  }
+
+  private void retryFeed()
+  {
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final FeedLoaderType loader = app.getFeedLoader();
+    final CatalogFeedArgumentsType args = this.getArguments();
+    args
+      .matchArguments(new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>() {
+        @Override public Unit onFeedArgumentsLocalBooks(
+          final CatalogFeedArgumentsLocalBooks c)
+        {
+          // Nothing to refresh for local books. This shouldn't even be
+          // reachable.
+          throw new UnreachableCodeException();
+        }
+
+        @Override public Unit onFeedArgumentsRemote(
+          final CatalogFeedArgumentsRemote c)
+        {
+          loader.invalidate(c.getURI());
+          CatalogFeedActivity.startNewActivityReplacing(
+            CatalogFeedActivity.this,
+            args);
+          return Unit.unit();
+        }
+      });
   }
 }
