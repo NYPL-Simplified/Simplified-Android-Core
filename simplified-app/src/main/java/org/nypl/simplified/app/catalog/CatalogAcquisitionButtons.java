@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Utility functions for configuring a set of acquisition buttons.
@@ -21,6 +22,11 @@ import com.io7m.jnull.NullCheck;
 
 public final class CatalogAcquisitionButtons
 {
+  private CatalogAcquisitionButtons()
+  {
+    throw new UnreachableCodeException();
+  }
+
   public static void addButtons(
     final Activity in_act,
     final ViewGroup in_vg,
@@ -39,15 +45,17 @@ public final class CatalogAcquisitionButtons
     final OPDSAcquisitionFeedEntry eo = in_e.getFeedEntry();
 
     final OPDSAcquisition a =
-      CatalogAcquisitionButtons.preferredAcquisition(eo.getAcquisitions());
+      CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
     final CatalogAcquisitionButton b =
       new CatalogAcquisitionButton(in_act, in_books, book_id, a, in_e);
     in_vg.addView(b);
   }
 
-  private static OPDSAcquisition preferredAcquisition(
+  public static OPDSAcquisition getPreferredAcquisition(
     final List<OPDSAcquisition> acquisitions)
   {
+    NullCheck.notNull(acquisitions);
+
     Assertions.checkPrecondition(
       acquisitions.isEmpty() == false,
       "Acquisitions list is non-empty");

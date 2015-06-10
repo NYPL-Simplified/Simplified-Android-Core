@@ -31,6 +31,7 @@ import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
@@ -340,6 +341,21 @@ import com.squareup.picasso.Callback;
         }
       });
 
+    /**
+     * Manually construct an acquisition controller for the retry button.
+     */
+
+    final OPDSAcquisition a =
+      CatalogAcquisitionButtons.getPreferredAcquisition(oe.getAcquisitions());
+    final CatalogAcquisitionButtonController retry_ctl =
+      new CatalogAcquisitionButtonController(
+        this.activity,
+        this.books,
+        fe.getBookID(),
+        a,
+        fe);
+
+    this.cell_downloading_failed_retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
 

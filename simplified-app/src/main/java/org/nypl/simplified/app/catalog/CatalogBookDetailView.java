@@ -32,6 +32,7 @@ import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.slf4j.Logger;
@@ -483,6 +484,24 @@ import com.io7m.junreachable.UnreachableCodeException;
       }
     });
 
+    /**
+     * Manually construct an acquisition controller for the retry button.
+     */
+
+    final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
+    final OPDSAcquisition a =
+      CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
+    final CatalogAcquisitionButtonController retry_ctl =
+      new CatalogAcquisitionButtonController(
+        this.activity,
+        this.books,
+        this.entry.getBookID(),
+        a,
+        this.entry);
+
+    final Button retry =
+      NullCheck.notNull(this.book_downloading_failed_retry);
+    retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
 
