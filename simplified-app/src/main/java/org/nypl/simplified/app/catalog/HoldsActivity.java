@@ -40,6 +40,8 @@ public final class HoldsActivity extends SimplifiedActivity
         false));
     content_area.addView(layout);
     content_area.requestLayout();
+
+    this.navigationDrawerSetActionBarTitle();
   }
 
   @Override protected void onDestroy()

@@ -176,8 +176,6 @@ import com.io7m.jnull.Nullable;
           open_drawer);
     }
 
-    this.navigationDrawerSetActionBarTitle();
-
     /**
      * As per the Android design documents: If the user has manually opened
      * the navigation drawer, then the user is assumed to understand how the

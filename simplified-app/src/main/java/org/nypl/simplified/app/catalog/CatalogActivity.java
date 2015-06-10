@@ -71,12 +71,6 @@ public abstract class CatalogActivity extends SimplifiedActivity
     return NullCheck.notNull(empty);
   }
 
-  @Override protected void onCreate(
-    final @Nullable Bundle state)
-  {
-    super.onCreate(state);
-  }
-
   @Override public boolean onOptionsItemSelected(
     final @Nullable MenuItem item_mn)
   {

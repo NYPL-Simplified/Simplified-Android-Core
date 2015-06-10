@@ -494,6 +494,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final @Nullable Bundle state)
   {
     super.onCreate(state);
+
+    this.navigationDrawerSetActionBarTitle();
+
     final CatalogFeedArgumentsType args = this.getArguments();
     final ImmutableStack<CatalogFeedArgumentsType> stack = this.getUpStack();
     this.configureUpButton(stack, args.getTitle());

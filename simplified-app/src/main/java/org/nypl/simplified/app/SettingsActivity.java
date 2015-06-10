@@ -382,6 +382,8 @@ import com.io7m.jnull.Nullable;
       }
     });
 
+    this.navigationDrawerSetActionBarTitle();
+
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
     this.login = in_login;

@@ -116,6 +116,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
       new CatalogBookDetailView(this, inflater, this.getFeedEntry());
     this.view = detail_view;
     this.part = this.getPart();
+    this.navigationDrawerSetActionBarTitle();
 
     final FrameLayout content_area = this.getContentFrame();
     content_area.removeAllViews();
