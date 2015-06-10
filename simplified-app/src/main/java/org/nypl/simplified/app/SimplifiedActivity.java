@@ -119,6 +119,14 @@ import com.io7m.jnull.Nullable;
 
   protected abstract SimplifiedPart navigationDrawerGetPart();
 
+  protected final void navigationDrawerSetActionBarTitle()
+  {
+    final ActionBar bar = NullCheck.notNull(this.getActionBar());
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final SimplifiedPart part = this.navigationDrawerGetPart();
+    bar.setTitle(part.getPartName(rr));
+  }
+
   protected abstract boolean navigationDrawerShouldShowIndicator();
 
   @Override public void onBackPressed()
@@ -167,6 +175,8 @@ import com.io7m.jnull.Nullable;
           SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID,
           open_drawer);
     }
+
+    this.navigationDrawerSetActionBarTitle();
 
     /**
      * As per the Android design documents: If the user has manually opened
