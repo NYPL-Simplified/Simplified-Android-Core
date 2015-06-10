@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/book_downloading"
+  android:id="@+id/book_dialog_downloading"
   android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:layout_marginBottom="16dp"
-  android:padding="16dp"
+  android:layout_height="match_parent"
   android:background="@color/downloading_background"
   android:orientation="vertical">
 
   <LinearLayout
-    android:id="@+id/book_downloading_inner"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    android:layout_margin="16dp"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
@@ -26,7 +23,7 @@
       android:textSize="10sp" />
 
     <ProgressBar
-      android:id="@+id/book_downloading_progress"
+      android:id="@+id/book_dialog_downloading_progress"
       style="?android:attr/progressBarStyleHorizontal"
       android:layout_width="wrap_content"
       android:layout_height="3dp"
@@ -35,7 +32,7 @@
       android:progressDrawable="@drawable/simplified_progress_inverse" />
 
     <TextView
-      android:id="@+id/book_downloading_percent_text"
+      android:id="@+id/book_dialog_downloading_percent_text"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_weight="1"
@@ -48,14 +45,15 @@
   </LinearLayout>
 
   <Button
-    android:id="@+id/book_downloading_cancel"
+    android:id="@+id/book_dialog_downloading_cancel"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/book_downloading_inner"
+    android:layout_height="35dp"
     android:background="@drawable/simplified_button"
-    android:textColor="@drawable/simplified_button_text"
     android:layout_centerHorizontal="true"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="16dp"
     android:text="@string/catalog_cancel_downloading"
-    android:textSize="10sp" />
+    android:textColor="@drawable/simplified_button_text"
+    android:textSize="12sp" />
 
 </RelativeLayout>

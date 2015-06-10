@@ -1,5 +1,7 @@
 package org.nypl.simplified.app;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -20,6 +22,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -251,9 +254,17 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull(rr.getString(R.string.settings_logout_succeeded));
     final int duration = Toast.LENGTH_SHORT;
 
+    final EditText be = NullCheck.notNull(this.barcode_edit);
+    final EditText pe = NullCheck.notNull(this.pin_edit);
+
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
       {
+        SettingsActivity.editableEnable(be);
+        SettingsActivity.editableEnable(pe);
+        be.setText("");
+        pe.setText("");
+
         final Toast toast = Toast.makeText(context, text, duration);
         toast.show();
       }
@@ -311,6 +322,65 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull((EditText) this.findViewById(R.id.settings_pin_edit));
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
+
+    final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
+    final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
+
+    in_barcode_edit.addTextChangedListener(new TextWatcher() {
+      @Override public void onTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int before,
+        final int count)
+      {
+        in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
+        in_login.setEnabled((in_barcode_empty.get() == false)
+          && (in_pin_empty.get() == false));
+      }
+
+      @Override public void beforeTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int count,
+        final int after)
+      {
+        // Nothing
+      }
+
+      @Override public void afterTextChanged(
+        final @Nullable Editable s)
+      {
+        // Nothing
+      }
+    });
+
+    in_pin_edit.addTextChangedListener(new TextWatcher() {
+      @Override public void onTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int before,
+        final int count)
+      {
+        in_pin_empty.set(NullCheck.notNull(s).length() == 0);
+        in_login.setEnabled((in_barcode_empty.get() == false)
+          && (in_pin_empty.get() == false));
+      }
+
+      @Override public void beforeTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int count,
+        final int after)
+      {
+        // Nothing
+      }
+
+      @Override public void afterTextChanged(
+        final @Nullable Editable s)
+      {
+        // Nothing
+      }
+    });
 
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;

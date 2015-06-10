@@ -54,6 +54,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.DisplayMetrics;
 
@@ -80,6 +82,8 @@ import com.io7m.jnull.Nullable;
     }
 
     private final BooksType                 books;
+    private final Context                   context;
+    private final CatalogBookCoverGenerator cover_generator;
     private final BookCoverProviderType     cover_provider;
     private final DownloaderType            downloader;
     private final ExecutorService           exec_books;
@@ -91,13 +95,14 @@ import com.io7m.jnull.Nullable;
     private final HTTPType                  http;
     private final ScreenSizeControllerType  screen;
     private final AtomicBoolean             synced;
-    private final CatalogBookCoverGenerator cover_generator;
 
     public CatalogAppServices(
-      final Context context,
+      final Context in_context,
       final Resources rr)
     {
       NullCheck.notNull(rr);
+
+      this.context = NullCheck.notNull(in_context);
       this.screen = new ScreenSizeController(rr);
       this.exec_catalog_feeds =
         Simplified.namedThreadPool(1, "catalog-feed", 19);
@@ -125,7 +130,7 @@ import com.io7m.jnull.Nullable;
        * Book management.
        */
 
-      final File base_dir = Simplified.getDiskDataDir(context);
+      final File base_dir = Simplified.getDiskDataDir(in_context);
       final File downloads_dir = new File(base_dir, "downloads");
       final File books_dir = new File(base_dir, "books");
 
@@ -185,7 +190,7 @@ import com.io7m.jnull.Nullable;
       this.cover_generator = new CatalogBookCoverGenerator(ten_print);
       this.cover_provider =
         BookCoverProvider.newCoverProvider(
-          context,
+          in_context,
           this.books,
           this.cover_generator,
           this.exec_covers);
@@ -211,6 +216,20 @@ import com.io7m.jnull.Nullable;
     @Override public FeedLoaderType getFeedLoader()
     {
       return this.feed_loader;
+    }
+
+    @Override public boolean isNetworkAvailable()
+    {
+      final NetworkInfo info =
+        ((ConnectivityManager) this.context
+          .getSystemService(Context.CONNECTIVITY_SERVICE))
+          .getActiveNetworkInfo();
+
+      if (info == null) {
+        return false;
+      }
+
+      return info.isConnected();
     }
 
     @Override public void onAccountDataBookLoadFailed(

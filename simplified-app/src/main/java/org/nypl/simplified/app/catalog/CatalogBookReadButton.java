@@ -12,7 +12,8 @@ import android.widget.LinearLayout;
 
 import com.io7m.jnull.NullCheck;
 
-public final class CatalogBookReadButton extends Button
+public final class CatalogBookReadButton extends Button implements
+  CatalogBookButtonType
 {
   public CatalogBookReadButton(
     final Activity in_activity,

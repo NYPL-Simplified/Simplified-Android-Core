@@ -53,7 +53,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Book"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:text="@string/placeholder_long_title"
         android:textColor="@color/normal_text_major"
         android:textStyle="bold" />
 
@@ -64,9 +66,10 @@
         android:layout_below="@id/book_header_title"
         android:layout_marginStart="8dp"
         android:inputType="textMultiLine|textNoSuggestions"
-        android:maxLines="8"
+        android:maxLines="2"
         android:minLines="1"
-        android:text="Authors"
+        android:ellipsize="end"
+        android:text="@string/placeholder_long_author"
         android:textColor="@color/normal_text_major" />
 
       <TextView
@@ -79,50 +82,40 @@
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="8"
         android:minLines="1"
-        android:text="Meta"
+        android:ellipsize="end"
+        android:text="@string/placeholder_lorem"
         android:textColor="@color/normal_text_minor" />
     </RelativeLayout>
   </LinearLayout>
 
-  <LinearLayout
-    android:id="@+id/book_hold_notification"
+  <FrameLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
-    android:padding="16dp"
-    android:background="@color/notification_background"
-    android:orientation="vertical">
+    android:layout_height="96dp">
 
-    <TextView
-      android:id="@+id/book_hold_notification_text"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="center"
-      android:text="This hold will be automatically cancelled in 1 hour"
-      android:textColor="@color/notification_foreground" />
-  </LinearLayout>
+    <include
+      layout="@layout/book_dialog_downloading"
+      android:layout_height="match_parent"
+      android:layout_width="match_parent"
+      android:visibility="visible" />
 
-  <include layout="@layout/book_dialog_downloading" android:visibility="gone" />
-  <include layout="@layout/book_dialog_downloading_failed"/>
+    <include
+      layout="@layout/book_dialog_downloading_failed"
+      android:layout_height="match_parent"
+      android:layout_width="match_parent"
+      android:visibility="visible" />
 
-  <LinearLayout
-    android:id="@+id/book_buttons"
-    android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:layout_marginBottom="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginStart="16dp"
-    android:gravity="center"
-    android:orientation="horizontal">
-  </LinearLayout>
+    <include
+      layout="@layout/book_dialog_download"
+      android:layout_height="match_parent"
+      android:layout_width="match_parent"
+      android:visibility="visible" />
+  </FrameLayout>
 
   <LinearLayout
     android:id="@+id/book_summary_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginStart="16dp"
+    android:layout_margin="16dp"
     android:orientation="vertical">
 
     <View

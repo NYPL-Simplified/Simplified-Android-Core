@@ -13,6 +13,7 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
@@ -31,6 +32,7 @@ import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.slf4j.Logger;
@@ -251,12 +253,14 @@ import com.io7m.junreachable.UnreachableCodeException;
   }
 
   private final Activity      activity;
-  private final ViewGroup     book_buttons;
+  private final ViewGroup     book_download;
+  private final LinearLayout  book_download_buttons;
+  private final TextView      book_download_text;
   private final ViewGroup     book_downloading;
   private final Button        book_downloading_cancel;
   private final ViewGroup     book_downloading_failed;
   private final Button        book_downloading_failed_dismiss;
-  private final TextView      book_downloading_failed_text;
+  private final Button        book_downloading_failed_retry;
   private final TextView      book_downloading_percent_text;
   private final ProgressBar   book_downloading_progress;
   private final BooksType     books;
@@ -337,37 +341,41 @@ import com.io7m.junreachable.UnreachableCodeException;
       NullCheck
         .notNull((TextView) header.findViewById(R.id.book_header_meta));
 
-    final ViewGroup hold_notification =
+    final ViewGroup bdd =
       NullCheck.notNull((ViewGroup) layout
-        .findViewById(R.id.book_hold_notification));
-
-    final ViewGroup bd =
-      NullCheck.notNull((ViewGroup) layout
-        .findViewById(R.id.book_downloading));
-    this.book_downloading = bd;
+        .findViewById(R.id.book_dialog_downloading));
+    this.book_downloading = bdd;
     this.book_downloading_percent_text =
-      NullCheck.notNull((TextView) bd
-        .findViewById(R.id.book_downloading_percent_text));
+      NullCheck.notNull((TextView) bdd
+        .findViewById(R.id.book_dialog_downloading_percent_text));
     this.book_downloading_progress =
-      NullCheck.notNull((ProgressBar) bd
-        .findViewById(R.id.book_downloading_progress));
+      NullCheck.notNull((ProgressBar) bdd
+        .findViewById(R.id.book_dialog_downloading_progress));
     this.book_downloading_cancel =
-      NullCheck.notNull((Button) bd
-        .findViewById(R.id.book_downloading_cancel));
+      NullCheck.notNull((Button) bdd
+        .findViewById(R.id.book_dialog_downloading_cancel));
 
     final ViewGroup bdf =
       NullCheck.notNull((ViewGroup) layout
-        .findViewById(R.id.book_downloading_failed));
-    this.book_downloading_failed_text =
-      NullCheck.notNull((TextView) bdf
-        .findViewById(R.id.book_downloading_failed_text));
+        .findViewById(R.id.book_dialog_downloading_failed));
     this.book_downloading_failed_dismiss =
       NullCheck.notNull((Button) bdf
-        .findViewById(R.id.book_downloading_failed_dismiss));
+        .findViewById(R.id.book_dialog_downloading_failed_dismiss));
+    this.book_downloading_failed_retry =
+      NullCheck.notNull((Button) bdf
+        .findViewById(R.id.book_dialog_downloading_failed_retry));
     this.book_downloading_failed = bdf;
 
-    this.book_buttons =
-      NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_buttons));
+    final ViewGroup bd =
+      NullCheck.notNull((ViewGroup) layout
+        .findViewById(R.id.book_dialog_download));
+    this.book_download = bd;
+    this.book_download_buttons =
+      NullCheck.notNull((LinearLayout) bd
+        .findViewById(R.id.book_dialog_download_buttons));
+    this.book_download_text =
+      NullCheck.notNull((TextView) bd
+        .findViewById(R.id.book_dialog_download_text));
 
     final ViewGroup summary =
       NullCheck.notNull((ViewGroup) layout
@@ -409,7 +417,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     CatalogBookDetailView.configureSummaryWebView(eo, summary_text);
     CatalogBookDetailView.configureSummaryWebViewHeight(summary_text);
 
-    hold_notification.setVisibility(View.GONE);
     header_title.setText(eo.getTitle());
 
     CatalogBookDetailView.configureViewTextAuthor(eo, header_authors);
@@ -444,36 +451,32 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public Unit onBookStatusDownloaded(
     final BookStatusDownloaded d)
   {
-    this.book_buttons.removeAllViews();
-    this.book_buttons.addView(new CatalogBookDeleteButton(this.activity, d
-      .getID()));
-    this.book_buttons.addView(new CatalogBookReadButton(this.activity, d
-      .getID()));
-    this.book_buttons.setVisibility(View.VISIBLE);
-    this.book_downloading.setVisibility(View.GONE);
-    this.book_downloading_failed.setVisibility(View.GONE);
+    this.book_download_buttons.removeAllViews();
+    this.book_download_buttons.addView(new CatalogBookDeleteButton(
+      this.activity,
+      d.getID()));
+    this.book_download_buttons.addView(new CatalogBookReadButton(
+      this.activity,
+      d.getID()));
+    this.book_download_buttons.setVisibility(View.VISIBLE);
+    CatalogBookDetailView.configureButtonsHeight(this.book_download_buttons);
+
+    this.book_download.setVisibility(View.VISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
     return Unit.unit();
   }
 
   @Override public Unit onBookStatusDownloadFailed(
     final BookStatusDownloadFailed f)
   {
-    this.book_buttons.setVisibility(View.GONE);
-    this.book_downloading.setVisibility(View.GONE);
+    this.book_download.setVisibility(View.INVISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
 
-    final DownloadSnapshot snap = f.getDownloadSnapshot();
-    final OptionType<Throwable> e_opt = snap.getError();
-    if (e_opt.isSome()) {
-      final Throwable e = ((Some<Throwable>) e_opt).get();
-      this.book_downloading_failed_text.setText(e.getMessage());
-    } else {
-      this.book_downloading_failed_text.setText("");
-    }
-
-    final Button button =
+    final Button dismiss =
       NullCheck.notNull(this.book_downloading_failed_dismiss);
-    button.setOnClickListener(new OnClickListener() {
+    dismiss.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)
       {
@@ -481,6 +484,24 @@ import com.io7m.junreachable.UnreachableCodeException;
       }
     });
 
+    /**
+     * Manually construct an acquisition controller for the retry button.
+     */
+
+    final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
+    final OPDSAcquisition a =
+      CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
+    final CatalogAcquisitionButtonController retry_ctl =
+      new CatalogAcquisitionButtonController(
+        this.activity,
+        this.books,
+        this.entry.getBookID(),
+        a,
+        this.entry);
+
+    final Button retry =
+      NullCheck.notNull(this.book_downloading_failed_retry);
+    retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
 
@@ -499,9 +520,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public Unit onBookStatusDownloadInProgress(
     final BookStatusDownloadInProgress d)
   {
-    this.book_buttons.setVisibility(View.GONE);
+    this.book_download.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
-    this.book_downloading_failed.setVisibility(View.GONE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
     final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogDownloadProgressBar.setProgressBar(
@@ -524,16 +545,23 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
-    this.book_buttons.removeAllViews();
-    this.book_buttons.setVisibility(View.VISIBLE);
-    this.book_downloading.setVisibility(View.GONE);
-    this.book_downloading_failed.setVisibility(View.GONE);
+    this.book_download_buttons.removeAllViews();
+    this.book_download_buttons.setVisibility(View.VISIBLE);
+    this.book_download.setVisibility(View.VISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    this.book_download_text.setText(rr
+      .getString(R.string.catalog_book_public_domain));
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
-      this.book_buttons,
+      this.book_download_buttons,
       NullCheck.notNull(this.books),
       NullCheck.notNull(this.entry));
+
+    CatalogBookDetailView.configureButtonsHeight(this.book_download_buttons);
     return Unit.unit();
   }
 
@@ -546,35 +574,66 @@ import com.io7m.junreachable.UnreachableCodeException;
   private void onBookStatusNone(
     final FeedEntryOPDS e)
   {
-    this.book_buttons.removeAllViews();
-    this.book_buttons.setVisibility(View.VISIBLE);
-    this.book_downloading.setVisibility(View.GONE);
-    this.book_downloading_failed.setVisibility(View.GONE);
+    this.book_download_buttons.removeAllViews();
+    this.book_download_buttons.setVisibility(View.VISIBLE);
+    this.book_download.setVisibility(View.VISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    this.book_download_text.setText(rr
+      .getString(R.string.catalog_book_public_domain));
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
-      this.book_buttons,
+      this.book_download_buttons,
       this.books,
       e);
+
+    CatalogBookDetailView.configureButtonsHeight(this.book_download_buttons);
+  }
+
+  private static void configureButtonsHeight(
+    final LinearLayout layout)
+  {
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final int dp35 = (int) app.screenDPToPixels(35);
+    final int dp8 = (int) app.screenDPToPixels(8);
+    final int button_count = layout.getChildCount();
+    for (int index = 0; index < button_count; ++index) {
+      final View v = layout.getChildAt(index);
+
+      Assertions.checkPrecondition(
+        v instanceof CatalogBookButtonType,
+        "view %s is an instance of CatalogBookButtonType",
+        v);
+
+      final android.widget.LinearLayout.LayoutParams lp =
+        new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, dp35);
+      lp.leftMargin = dp8;
+
+      v.setLayoutParams(lp);
+    }
   }
 
   @Override public Unit onBookStatusRequestingDownload(
     final BookStatusRequestingDownload d)
   {
-    this.book_buttons.setVisibility(View.GONE);
-    this.book_buttons.removeAllViews();
-    this.book_downloading.setVisibility(View.GONE);
-    this.book_downloading_failed.setVisibility(View.GONE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.removeAllViews();
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
     return Unit.unit();
   }
 
   @Override public Unit onBookStatusRequestingLoan(
     final BookStatusRequestingLoan s)
   {
-    this.book_buttons.setVisibility(View.GONE);
-    this.book_buttons.removeAllViews();
-    this.book_downloading.setVisibility(View.GONE);
-    this.book_downloading_failed.setVisibility(View.GONE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.removeAllViews();
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
     return Unit.unit();
   }
 

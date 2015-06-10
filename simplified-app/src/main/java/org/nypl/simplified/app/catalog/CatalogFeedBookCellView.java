@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
@@ -32,6 +31,7 @@ import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.downloader.core.DownloadSnapshot;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
@@ -87,13 +87,7 @@ import com.squareup.picasso.Callback;
         sb.append(", ");
       }
     }
-    return TextUtilities.ellipsize(NullCheck.notNull(sb.toString()), 32);
-  }
-
-  private static String makeTitleText(
-    final OPDSAcquisitionFeedEntry in_e)
-  {
-    return TextUtilities.ellipsize(in_e.getTitle(), 32);
+    return NullCheck.notNull(sb.toString());
   }
 
   private final Activity                       activity;
@@ -113,7 +107,8 @@ import com.squareup.picasso.Callback;
   private final Button                         cell_downloading_cancel;
   private final ViewGroup                      cell_downloading_failed;
   private final Button                         cell_downloading_failed_dismiss;
-  private final TextView                       cell_downloading_failed_text;
+  private final Button                         cell_downloading_failed_retry;
+  private final TextView                       cell_downloading_failed_title;
   private final TextView                       cell_downloading_percent_text;
   private final ProgressBar                    cell_downloading_progress;
   private final TextView                       cell_downloading_title;
@@ -179,12 +174,15 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_failed =
       NullCheck.notNull((ViewGroup) this
         .findViewById(R.id.cell_downloading_failed));
-    this.cell_downloading_failed_text =
+    this.cell_downloading_failed_title =
       NullCheck.notNull((TextView) this.cell_downloading_failed
-        .findViewById(R.id.cell_downloading_failed_text));
+        .findViewById(R.id.cell_downloading_failed_title));
     this.cell_downloading_failed_dismiss =
       NullCheck.notNull((Button) this.cell_downloading_failed
         .findViewById(R.id.cell_downloading_failed_dismiss));
+    this.cell_downloading_failed_retry =
+      NullCheck.notNull((Button) this.cell_downloading_failed
+        .findViewById(R.id.cell_downloading_failed_retry));
 
     this.cell_corrupt =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_corrupt));
@@ -329,15 +327,10 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_failed.setVisibility(View.VISIBLE);
     this.setDebugCellText("download-failed");
 
-    final DownloadSnapshot snap = f.getDownloadSnapshot();
-    final OptionType<Throwable> e_opt = snap.getError();
-    if (e_opt.isSome()) {
-      final Throwable e = ((Some<Throwable>) e_opt).get();
-      this.cell_downloading_failed_text.setText(e.getMessage());
-    } else {
-      this.cell_downloading_failed_text.setText("");
-    }
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
+    this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss
       .setOnClickListener(new OnClickListener() {
         @Override public void onClick(
@@ -348,6 +341,21 @@ import com.squareup.picasso.Callback;
         }
       });
 
+    /**
+     * Manually construct an acquisition controller for the retry button.
+     */
+
+    final OPDSAcquisition a =
+      CatalogAcquisitionButtons.getPreferredAcquisition(oe.getAcquisitions());
+    final CatalogAcquisitionButtonController retry_ctl =
+      new CatalogAcquisitionButtonController(
+        this.activity,
+        this.books,
+        fe.getBookID(),
+        a,
+        fe);
+
+    this.cell_downloading_failed_retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
 
@@ -379,8 +387,7 @@ import com.squareup.picasso.Callback;
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     final BookID book_id = d.getID();
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
-    this.cell_downloading_title.setText(CatalogFeedBookCellView
-      .makeTitleText(oe));
+    this.cell_downloading_title.setText(oe.getTitle());
     this.cell_downloading_authors.setText(CatalogFeedBookCellView
       .makeAuthorText(oe));
 
@@ -516,7 +523,7 @@ import com.squareup.picasso.Callback;
     final FeedEntryOPDS feed_e)
   {
     final OPDSAcquisitionFeedEntry oe = feed_e.getFeedEntry();
-    this.cell_title.setText(CatalogFeedBookCellView.makeTitleText(oe));
+    this.cell_title.setText(oe.getTitle());
     this.cell_authors.setText(CatalogFeedBookCellView.makeAuthorText(oe));
 
     final CatalogBookSelectionListenerType book_listener =

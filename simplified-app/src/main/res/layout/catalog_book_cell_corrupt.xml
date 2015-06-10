@@ -7,6 +7,7 @@
   android:id="@+id/cell_corrupt"
   android:layout_width="match_parent"
   android:layout_height="110dp"
+  android:layout_marginEnd="8dp"
   android:orientation="vertical">
 
   <TextView
@@ -28,8 +29,10 @@
     android:layout_below="@id/cell_corrupt_title"
     android:layout_marginStart="8dp"
     android:layout_marginTop="8dp"
+    android:ellipsize="end"
+    android:maxLines="3"
     android:textColor="@color/normal_text_major"
-    android:text="Text"
+    android:text="@string/placeholder_lorem"
     android:textSize="10sp" />
 
 </RelativeLayout>

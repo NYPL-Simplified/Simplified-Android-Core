@@ -1,35 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- The cell contents shown when a book is downloading -->
 
-<LinearLayout
+<RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/cell_downloading"
   android:layout_width="match_parent"
   android:layout_height="110dp"
-  android:orientation="vertical"
-  android:background="@color/downloading_background"
-  android:padding="8dp">
+  android:padding="8dp"
+  android:background="@color/downloading_background">
 
   <TextView
     android:id="@+id/cell_downloading_title"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:maxLines="1"
+    android:ellipsize="end"
     android:textColor="@color/downloading_foreground"
-    android:text="Title"
+    android:text="@string/placeholder_long_title"
     android:textStyle="bold" />
 
   <TextView
     android:id="@+id/cell_downloading_authors"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingBottom="16dp"
+    android:layout_below="@id/cell_downloading_title"
+    android:maxLines="1"
+    android:ellipsize="end"
     android:textColor="@color/downloading_foreground"
-    android:text="Authors"
-    android:textSize="10sp" />
+    android:text="@string/placeholder_long_author"
+    android:textSize="12sp" />
 
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_below="@id/cell_downloading_authors"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
@@ -39,7 +43,7 @@
       android:layout_weight="1"
       android:textColor="@color/downloading_foreground"
       android:text="@string/catalog_downloading"
-      android:textSize="10sp" />
+      android:textSize="12sp" />
 
     <ProgressBar
       android:id="@+id/cell_downloading_progress"
@@ -59,18 +63,19 @@
       android:text="0%"
       android:textColor="@color/downloading_foreground"
       android:textAlignment="gravity"
-      android:textSize="10sp" />
+      android:textSize="12sp" />
   </LinearLayout>
 
   <Button
     android:id="@+id/cell_downloading_cancel"
     style="?android:attr/buttonStyleSmall"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
+    android:layout_height="35dp"
+    android:layout_centerHorizontal="true"
+    android:layout_alignParentBottom="true"
     android:background="@drawable/simplified_button"
     android:text="@string/catalog_cancel_downloading"
     android:textColor="@drawable/simplified_button_text"
-    android:textSize="10sp" />
+    android:textSize="12sp" />
 
-</LinearLayout>
+</RelativeLayout>

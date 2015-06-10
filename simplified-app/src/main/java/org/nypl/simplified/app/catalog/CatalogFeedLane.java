@@ -97,6 +97,13 @@ import com.squareup.picasso.Callback;
     final FeedGroup in_group)
   {
     this.scroller.setVisibility(View.INVISIBLE);
+    this.scroller.post(new Runnable() {
+      @Override public void run()
+      {
+        CatalogFeedLane.this.scroller.scrollTo(0, 0);
+      }
+    });
+
     this.scroller_contents.setVisibility(View.INVISIBLE);
     this.progress.setVisibility(View.VISIBLE);
 

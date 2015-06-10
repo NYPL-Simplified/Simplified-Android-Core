@@ -1,5 +1,7 @@
 package org.nypl.simplified.app;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -15,6 +17,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -74,8 +77,8 @@ public final class LoginDialog extends DialogFragment implements
   private @Nullable Button                      login;
   private @Nullable ProgressBar                 login_progress;
   private @Nullable EditText                    pin_edit;
+  private @Nullable ViewGroup                   root_layout;
   private @Nullable TextView                    text;
-  private @Nullable ViewGroup                   layout;
 
   public LoginDialog()
   {
@@ -184,7 +187,7 @@ public final class LoginDialog extends DialogFragment implements
         R.layout.login_dialog,
         container,
         false));
-    this.layout = in_layout;
+    this.root_layout = in_layout;
 
     final TextView in_text =
       NullCheck.notNull((TextView) in_layout
@@ -243,6 +246,65 @@ public final class LoginDialog extends DialogFragment implements
       }
     });
 
+    final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
+    final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
+
+    in_barcode_edit.addTextChangedListener(new TextWatcher() {
+      @Override public void afterTextChanged(
+        final @Nullable Editable s)
+      {
+        // Nothing
+      }
+
+      @Override public void beforeTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int count,
+        final int after)
+      {
+        // Nothing
+      }
+
+      @Override public void onTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int before,
+        final int count)
+      {
+        in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
+        in_login_button.setEnabled((in_barcode_empty.get() == false)
+          && (in_pin_empty.get() == false));
+      }
+    });
+
+    in_pin_edit.addTextChangedListener(new TextWatcher() {
+      @Override public void afterTextChanged(
+        final @Nullable Editable s)
+      {
+        // Nothing
+      }
+
+      @Override public void beforeTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int count,
+        final int after)
+      {
+        // Nothing
+      }
+
+      @Override public void onTextChanged(
+        final @Nullable CharSequence s,
+        final int start,
+        final int before,
+        final int count)
+      {
+        in_pin_empty.set(NullCheck.notNull(s).length() == 0);
+        in_login_button.setEnabled((in_barcode_empty.get() == false)
+          && (in_pin_empty.get() == false));
+      }
+    });
+
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
     this.login = in_login_button;
@@ -281,7 +343,8 @@ public final class LoginDialog extends DialogFragment implements
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);
 
-    NullCheck.notNull(this.layout).requestLayout();
+    final ViewGroup layout = NullCheck.notNull(this.root_layout);
+    layout.requestLayout();
   }
 
   public void setLoginListener(
