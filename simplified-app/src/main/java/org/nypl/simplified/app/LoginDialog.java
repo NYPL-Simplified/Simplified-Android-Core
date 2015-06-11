@@ -10,25 +10,20 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BooksType;
 import org.slf4j.Logger;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
-import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.io7m.jfunctional.OptionType;
@@ -75,10 +70,10 @@ public final class LoginDialog extends DialogFragment implements
   private @Nullable EditText                    barcode_edit;
   private @Nullable LoginControllerListenerType listener;
   private @Nullable Button                      login;
-  private @Nullable ProgressBar                 login_progress;
   private @Nullable EditText                    pin_edit;
   private @Nullable ViewGroup                   root_layout;
   private @Nullable TextView                    text;
+  private @Nullable Button                      cancel;
 
   public LoginDialog()
   {
@@ -98,7 +93,7 @@ public final class LoginDialog extends DialogFragment implements
     final EditText in_barcode_edit = NullCheck.notNull(this.barcode_edit);
     final EditText in_pin_edit = NullCheck.notNull(this.pin_edit);
     final Button in_login = NullCheck.notNull(this.login);
-    final ProgressBar in_progress = NullCheck.notNull(this.login_progress);
+    final Button in_cancel = NullCheck.notNull(this.cancel);
 
     UIThread.runOnUIThread(new Runnable() {
       @Override public void run()
@@ -107,8 +102,7 @@ public final class LoginDialog extends DialogFragment implements
         in_barcode_edit.setEnabled(true);
         in_pin_edit.setEnabled(true);
         in_login.setEnabled(true);
-        in_login.setVisibility(View.VISIBLE);
-        in_progress.setVisibility(View.GONE);
+        in_cancel.setEnabled(true);
       }
     });
 
@@ -143,6 +137,20 @@ public final class LoginDialog extends DialogFragment implements
         LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
     }
+  }
+
+  @Override public void onResume()
+  {
+    super.onResume();
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final int dp200 = (int) app.screenDPToPixels(200);
+
+    final Dialog dialog = NullCheck.notNull(this.getDialog());
+    final Window window = NullCheck.notNull(dialog.getWindow());
+    window.setLayout(dp200, dp200);
+    window.setGravity(Gravity.CENTER);
   }
 
   @Override public void onCancel(
@@ -204,9 +212,6 @@ public final class LoginDialog extends DialogFragment implements
     final Button in_login_cancel_button =
       NullCheck.notNull((Button) in_layout
         .findViewById(R.id.login_dialog_cancel));
-    final ProgressBar in_login_progress =
-      NullCheck.notNull((ProgressBar) in_layout
-        .findViewById(R.id.login_progress));
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -216,7 +221,7 @@ public final class LoginDialog extends DialogFragment implements
     in_barcode_edit.setText(initial_bar.toString());
     in_pin_edit.setText(initial_pin.toString());
 
-    in_login_progress.setVisibility(View.GONE);
+    in_login_button.setEnabled(false);
     in_login_button.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View button)
@@ -224,8 +229,7 @@ public final class LoginDialog extends DialogFragment implements
         in_barcode_edit.setEnabled(false);
         in_pin_edit.setEnabled(false);
         in_login_button.setEnabled(false);
-        in_login_button.setVisibility(View.GONE);
-        in_login_progress.setVisibility(View.VISIBLE);
+        in_login_cancel_button.setEnabled(false);
 
         final Editable barcode_edit_text = in_barcode_edit.getText();
         final Editable pin_edit_text = in_pin_edit.getText();
@@ -308,7 +312,7 @@ public final class LoginDialog extends DialogFragment implements
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
     this.login = in_login_button;
-    this.login_progress = in_login_progress;
+    this.cancel = in_login_cancel_button;
     this.text = in_text;
 
     final Dialog d = this.getDialog();
@@ -317,34 +321,6 @@ public final class LoginDialog extends DialogFragment implements
     }
 
     return in_layout;
-  }
-
-  @Override public void onResume()
-  {
-    super.onResume();
-
-    /**
-     * Force the dialog to always appear at the same size, with a decent
-     * amount of empty space around it.
-     */
-
-    final Activity act = NullCheck.notNull(this.getActivity());
-    final WindowManager window_manager =
-      NullCheck.notNull((WindowManager) act
-        .getSystemService(Context.WINDOW_SERVICE));
-    final Display display =
-      NullCheck.notNull(window_manager.getDefaultDisplay());
-
-    final DisplayMetrics m = new DisplayMetrics();
-    display.getMetrics(m);
-
-    final int width = (int) (m.widthPixels * 0.80);
-    final Dialog dialog = NullCheck.notNull(this.getDialog());
-    final Window window = NullCheck.notNull(dialog.getWindow());
-    window.setLayout(width, window.getAttributes().height);
-
-    final ViewGroup layout = NullCheck.notNull(this.root_layout);
-    layout.requestLayout();
   }
 
   public void setLoginListener(

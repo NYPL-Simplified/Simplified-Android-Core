@@ -4,19 +4,13 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.slf4j.Logger;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
@@ -112,31 +106,6 @@ import com.io7m.jnull.Nullable;
       d.setCanceledOnTouchOutside(true);
     }
     return layout;
-  }
-
-  @Override public void onResume()
-  {
-    super.onResume();
-
-    /**
-     * Force the dialog to always appear at the same size, with a decent
-     * amount of empty space around it.
-     */
-
-    final Activity act = NullCheck.notNull(this.getActivity());
-    final WindowManager window_manager =
-      NullCheck.notNull((WindowManager) act
-        .getSystemService(Context.WINDOW_SERVICE));
-    final Display display =
-      NullCheck.notNull(window_manager.getDefaultDisplay());
-
-    final DisplayMetrics m = new DisplayMetrics();
-    display.getMetrics(m);
-
-    final int width = (int) (m.widthPixels * 0.80);
-    final Dialog dialog = NullCheck.notNull(this.getDialog());
-    final Window window = NullCheck.notNull(dialog.getWindow());
-    window.setLayout(width, window.getAttributes().height);
   }
 
   public void setOnConfirmListener(

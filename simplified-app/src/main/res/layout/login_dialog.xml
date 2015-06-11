@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+
+<!-- Note that due to the utter brokenness of the Android API, the width and height 
+  of the layout specified here is ignored when the layout is inflated as part of a 
+  dialog. The width and height specified here are used for the purposes of designing 
+  the layout in the GUI editor, but the actual width and height of the dialog must 
+  be set at run-time. See org.nypl.simplified.app.LoginDialog. -->
+
+<RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/login_dialog"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
+  android:layout_width="200dp"
+  android:layout_height="200dp"
   android:gravity="center"
-  android:orientation="vertical"
   android:background="@color/normal_background"
   android:padding="16dp">
 
@@ -13,17 +19,19 @@
     android:id="@+id/login_dialog_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    android:layout_alignParentTop="true"
+    android:layout_centerHorizontal="true"
     android:maxLines="1"
     android:ellipsize="end"
     android:text="@string/settings_login_title" />
 
   <TableLayout
     android:id="@+id/login_dialog_table"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:layout_marginBottom="16dp">
+    android:layout_centerHorizontal="true"
+    android:layout_below="@id/login_dialog_text"
+    android:layout_gravity="center">
 
     <TableRow
       android:layout_width="wrap_content"
@@ -66,6 +74,7 @@
         android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
+        android:minWidth="100dp"
         android:maxLength="4"
         android:maxLines="1">
       </EditText>
@@ -75,7 +84,9 @@
   <RelativeLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal">
+    android:layout_gravity="center_horizontal"
+    android:layout_centerHorizontal="true"
+    android:layout_below="@id/login_dialog_table">
 
     <Button
       android:id="@+id/login_dialog_cancel"
@@ -101,11 +112,6 @@
       android:text="@string/settings_log_in"
       android:textColor="@drawable/simplified_button_text" />
 
-    <ProgressBar
-      android:id="@+id/login_progress"
-      style="?android:attr/progressBarStyleSmall"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content" />
   </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>
