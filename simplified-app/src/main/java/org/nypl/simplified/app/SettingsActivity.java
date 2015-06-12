@@ -148,7 +148,6 @@ import com.io7m.jnull.Nullable;
         SettingsActivity.editableEnable(in_barcode_edit);
         SettingsActivity.editableEnable(in_pin_edit);
 
-        in_login.setEnabled(true);
         in_login.setText(rr.getString(R.string.settings_log_in));
         in_login.setOnClickListener(new OnClickListener() {
           @Override public void onClick(
@@ -381,6 +380,8 @@ import com.io7m.jnull.Nullable;
         // Nothing
       }
     });
+
+    in_login.setEnabled(false);
 
     this.navigationDrawerSetActionBarTitle();
 
