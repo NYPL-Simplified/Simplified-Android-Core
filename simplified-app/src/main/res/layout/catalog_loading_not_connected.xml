@@ -22,7 +22,7 @@
     <Button
       android:id="@+id/catalog_error_retry"
       android:layout_width="wrap_content"
-      android:layout_height="35dp"
+      android:layout_height="@dimen/button_standard_height"
       android:layout_gravity="center_horizontal"
       android:layout_marginTop="16dp"
       android:background="@drawable/simplified_button"

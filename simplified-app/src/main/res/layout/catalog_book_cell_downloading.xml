@@ -70,7 +70,7 @@
     android:id="@+id/cell_downloading_cancel"
     style="?android:attr/buttonStyleSmall"
     android:layout_width="wrap_content"
-    android:layout_height="35dp"
+    android:layout_height="@dimen/button_standard_height"
     android:layout_centerHorizontal="true"
     android:layout_alignParentBottom="true"
     android:background="@drawable/simplified_button"

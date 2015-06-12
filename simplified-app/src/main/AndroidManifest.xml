@@ -64,6 +64,7 @@
     </activity>
     <activity
       android:name="org.nypl.simplified.app.testing.LoginTest"
+      android:configChanges="orientation|screenSize"
       android:exported="true">
     </activity>
 

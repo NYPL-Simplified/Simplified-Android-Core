@@ -9,8 +9,8 @@
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/login_dialog"
-  android:layout_width="200dp"
-  android:layout_height="200dp"
+  android:layout_width="280dp"
+  android:layout_height="280dp"
   android:gravity="center"
   android:background="@color/normal_background"
   android:padding="16dp">
@@ -74,7 +74,7 @@
         android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:inputType="textNoSuggestions|number"
-        android:minWidth="100dp"
+        android:minWidth="160dp"
         android:maxLength="4"
         android:maxLines="1">
       </EditText>
@@ -93,7 +93,7 @@
       style="?android:attr/buttonStyleSmall"
       android:layout_marginTop="16dp"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
+      android:layout_height="@dimen/button_standard_height"
       android:background="@drawable/simplified_button"
       android:contentDescription="@string/settings_accessibility_log_in_cancel"
       android:text="@string/settings_log_in_cancel"
@@ -106,7 +106,7 @@
       style="?android:attr/buttonStyleSmall"
       android:layout_marginTop="16dp"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
+      android:layout_height="@dimen/button_standard_height"
       android:background="@drawable/simplified_button"
       android:contentDescription="@string/settings_accessibility_log_in"
       android:text="@string/settings_log_in"

@@ -71,7 +71,7 @@
       android:background="@drawable/simplified_button"
       android:layout_gravity="end"
       android:layout_width="wrap_content"
-      android:layout_height="35dp"
+      android:layout_height="@dimen/button_standard_height"
       android:textColor="@drawable/simplified_button_text"
       android:textSize="12sp"
       android:text="@string/settings_log_in" />
