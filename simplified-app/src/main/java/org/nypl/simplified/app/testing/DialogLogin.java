@@ -10,7 +10,7 @@ import android.os.Bundle;
 
 import com.io7m.jnull.Nullable;
 
-public final class LoginTest extends Activity
+public final class DialogLogin extends Activity
 {
   @Override protected void onCreate(
     final @Nullable Bundle state)
@@ -19,9 +19,9 @@ public final class LoginTest extends Activity
 
     final LoginDialog d =
       LoginDialog.newDialog(
-        "Login Required",
-        new AccountBarcode("77777"),
-        new AccountPIN("4444"));
+        "Something here",
+        new AccountBarcode(""),
+        new AccountPIN(""));
     final FragmentManager fm = this.getFragmentManager();
     d.show(fm, "dialog");
   }

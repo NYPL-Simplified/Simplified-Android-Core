@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -143,13 +144,13 @@ public final class LoginDialog extends DialogFragment implements
   {
     super.onResume();
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final int dp200 = (int) app.screenDPToPixels(200);
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final int h = (int) rr.getDimension(R.dimen.login_dialog_height);
+    final int w = (int) rr.getDimension(R.dimen.login_dialog_width);
 
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
-    window.setLayout(dp200, dp200);
+    window.setLayout(w, h);
     window.setGravity(Gravity.CENTER);
   }
 

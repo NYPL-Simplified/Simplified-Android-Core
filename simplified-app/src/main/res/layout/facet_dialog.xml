@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Note that due to the utter brokenness of the Android API, the width and height 
+  of the layout specified here is ignored when the layout is inflated as part of a 
+  dialog. The width and height specified here are used for the purposes of designing 
+  the layout in the GUI editor, but the actual width and height of the dialog must 
+  be set at run-time. See org.nypl.simplified.app.catalog.CatalogFacetDialog. -->
+
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/facet_dialog"
   android:background="@color/normal_background"
-  android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
+  android:layout_width="@dimen/facet_dialog_width"
+  android:layout_height="@dimen/facet_dialog_height">
 
   <TextView
     android:id="@+id/facet_title"

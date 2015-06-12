@@ -6,13 +6,15 @@ import org.slf4j.Logger;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
-import android.widget.LinearLayout;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -53,8 +55,8 @@ import com.io7m.jnull.Nullable;
   {
     final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
 
-    final LinearLayout layout =
-      NullCheck.notNull((LinearLayout) inflater.inflate(
+    final ViewGroup layout =
+      NullCheck.notNull((ViewGroup) inflater.inflate(
         R.layout.catalog_book_delete_confirm,
         container,
         false));
@@ -81,6 +83,20 @@ import com.io7m.jnull.Nullable;
     }
 
     return layout;
+  }
+
+  @Override public void onResume()
+  {
+    super.onResume();
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final int h = (int) rr.getDimension(R.dimen.book_delete_dialog_height);
+    final int w = (int) rr.getDimension(R.dimen.book_delete_dialog_width);
+
+    final Dialog dialog = NullCheck.notNull(this.getDialog());
+    final Window window = NullCheck.notNull(dialog.getWindow());
+    window.setLayout(w, h);
+    window.setGravity(Gravity.CENTER);
   }
 
   public void setOnConfirmListener(

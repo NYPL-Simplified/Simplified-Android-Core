@@ -54,8 +54,8 @@
   <string name="settings_log_out_cancel">Cancel</string>
   <string name="settings_login_succeeded">Logged in successfully</string>
   <string name="settings_logout_succeeded">Logged out successfully</string>
-  <string name="settings_login_failed">Failed to log in!</string>
-  <string name="settings_logout_failed">Failed to log out!</string>
+  <string name="settings_login_failed">Login Failed</string>
+  <string name="settings_logout_failed">Logout Failed</string>
   <string name="settings_feedback">Feedback</string>
   <string name="settings_credits">Credits</string>
   <string name="settings_logout_confirm">If you sign out of your account, all content will be

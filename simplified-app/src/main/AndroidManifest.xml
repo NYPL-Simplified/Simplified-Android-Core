@@ -63,7 +63,22 @@
       android:exported="true">
     </activity>
     <activity
-      android:name="org.nypl.simplified.app.testing.LoginTest"
+      android:name="org.nypl.simplified.app.testing.DialogLogin"
+      android:configChanges="orientation|screenSize"
+      android:exported="true">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.testing.DialogLogout"
+      android:configChanges="orientation|screenSize"
+      android:exported="true">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.testing.DialogBookDelete"
+      android:configChanges="orientation|screenSize"
+      android:exported="true">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.testing.DialogFacet"
       android:configChanges="orientation|screenSize"
       android:exported="true">
     </activity>

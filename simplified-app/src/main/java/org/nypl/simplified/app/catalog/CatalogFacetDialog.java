@@ -7,10 +7,13 @@ import org.nypl.simplified.books.core.FeedFacetType;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -87,6 +90,20 @@ public final class CatalogFacetDialog extends DialogFragment implements
         android.R.layout.simple_list_item_1,
         android.R.id.text1,
         in_strings);
+  }
+
+  @Override public void onResume()
+  {
+    super.onResume();
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final int h = (int) rr.getDimension(R.dimen.facet_dialog_height);
+    final int w = (int) rr.getDimension(R.dimen.facet_dialog_width);
+
+    final Dialog dialog = NullCheck.notNull(this.getDialog());
+    final Window window = NullCheck.notNull(dialog.getWindow());
+    window.setLayout(w, h);
+    window.setGravity(Gravity.CENTER);
   }
 
   @Override public View onCreateView(
