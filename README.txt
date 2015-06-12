@@ -28,6 +28,42 @@ Current build instructions:
 
 ------------------------------------------------------------------------
 
+To produce NYPL-branded packages:
+
+  1. Edit simplified-app/src/main/AndroidManifest.xml.
+
+     Change:
+
+      <application
+        android:name="org.nypl.simplified.app.Simplified"
+        android:allowBackup="true"
+        android:icon="@drawable/simplified"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/SimplifiedTheme">
+
+     To:
+
+      <application
+        android:name="org.nypl.simplified.app.Simplified"
+        android:allowBackup="true"
+        android:icon="@drawable/nypl"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/SimplifiedTheme">
+
+  2. Edit simplified-app/src/main/res/values/colors.xml.
+
+     Change:
+
+       <color name="main_color">#f0731f</color>
+
+     To:
+
+       <color name="main_color">@color/nypl_brand_color</color>
+
+------------------------------------------------------------------------
+
 Release procedure:
 
   0. Disable debugging options in simplified-app/src/main/res/values/debug.xml.

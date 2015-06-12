@@ -2,6 +2,8 @@
 <resources>
 
   <color name="main_color">#f0731f</color>
+  
+  <color name="nypl_brand_color">#dc221d</color>
 
   <color name="divider_color">#eeeeee</color>
   
