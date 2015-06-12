@@ -459,7 +459,9 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.activity,
       d.getID()));
     this.book_download_buttons.setVisibility(View.VISIBLE);
-    CatalogBookDetailView.configureButtonsHeight(this.book_download_buttons);
+    CatalogBookDetailView.configureButtonsHeight(
+      this.activity.getResources(),
+      this.book_download_buttons);
 
     this.book_download.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
@@ -561,7 +563,9 @@ import com.io7m.junreachable.UnreachableCodeException;
       NullCheck.notNull(this.books),
       NullCheck.notNull(this.entry));
 
-    CatalogBookDetailView.configureButtonsHeight(this.book_download_buttons);
+    CatalogBookDetailView.configureButtonsHeight(
+      rr,
+      this.book_download_buttons);
     return Unit.unit();
   }
 
@@ -590,15 +594,18 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.books,
       e);
 
-    CatalogBookDetailView.configureButtonsHeight(this.book_download_buttons);
+    CatalogBookDetailView.configureButtonsHeight(
+      rr,
+      this.book_download_buttons);
   }
 
   private static void configureButtonsHeight(
+    final Resources rr,
     final LinearLayout layout)
   {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final int dp35 = (int) app.screenDPToPixels(35);
+    final int dp35 = (int) rr.getDimension(R.dimen.button_standard_height);
     final int dp8 = (int) app.screenDPToPixels(8);
     final int button_count = layout.getChildCount();
     for (int index = 0; index < button_count; ++index) {

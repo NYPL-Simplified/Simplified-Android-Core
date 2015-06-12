@@ -50,6 +50,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.io7m.jnull</groupId>
+      <artifactId>io7m-jnull-core</artifactId>
+      <version>[1.0.0, 2.0.0)</version>
+    </dependency>
+
+    <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
       <version>${org.nypl.android.packageVersion}</version>

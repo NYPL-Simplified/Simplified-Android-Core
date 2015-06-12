@@ -59,7 +59,7 @@
     <LinearLayout
       android:id="@+id/cell_buttons"
       android:layout_width="wrap_content"
-      android:layout_height="35dp"
+      android:layout_height="@dimen/button_standard_height"
       android:layout_alignParentBottom="true"
       android:layout_alignParentEnd="true"
       android:orientation="horizontal" />
