@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <color name="main_color">#f0731f</color>
-  
+  <color name="main_color">@color/nypl_brand_color</color>
+ 
+  <color name="simplified_color">#f0731f</color>
   <color name="nypl_brand_color">#dc221d</color>
 
   <color name="divider_color">#eeeeee</color>
