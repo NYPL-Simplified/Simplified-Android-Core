@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nypl.simplified</groupId>
   <artifactId>simplified</artifactId>
-  <version>0.3.9</version>
+  <version>0.3.10</version>
 
   <packaging>pom</packaging>
   <name>simplified</name>

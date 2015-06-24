@@ -16,8 +16,11 @@
   <string name="catalog_load_error_title">Error</string>
   <string name="catalog_load_error_text">An error occurred while loading the catalog. Please try again.</string>
   <string name="catalog_load_not_connected">You are not connected to the internet. Please connect and try again.</string>
-  <string name="catalog_start_uri">http://circulation.alpha.librarysimplified.org/groups/</string>
-  <!-- <string name="catalog_start_uri">https://d3frcbs0h4wafj.cloudfront.net/feed/Science%20Fiction?order=author</string> -->
+
+  <string name="catalog_uri_development">http://circulation.alpha.librarysimplified.org/groups/</string>
+  <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
+  <string name="catalog_start_uri">@string/catalog_uri_qa</string>
+
   <string name="catalog_unknown_feed">Unknown</string>
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_downloading">Downloading</string>
