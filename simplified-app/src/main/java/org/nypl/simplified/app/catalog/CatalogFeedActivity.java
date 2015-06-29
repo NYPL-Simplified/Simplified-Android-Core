@@ -396,6 +396,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
+  /**
+   * @return <tt>true</tt> if the feed is local and should therefore not show
+   *         "network is unavailable" messages when the network is unavailable
+   */
+
+  @SuppressWarnings("static-method") protected boolean feedIsLocal()
+  {
+    return false;
+  }
+
   private CatalogFeedArgumentsType getArguments()
   {
     /**
@@ -575,44 +585,14 @@ import com.io7m.junreachable.UnreachableCodeException;
         }
       };
 
-    if (app.isNetworkAvailable() == false) {
-      this.onNetworkUnavailable();
-      return;
+    if (this.feedIsLocal() == false) {
+      if (app.isNetworkAvailable() == false) {
+        this.onNetworkUnavailable();
+        return;
+      }
     }
 
     args.matchArguments(matcher);
-  }
-
-  private void onNetworkUnavailable()
-  {
-    UIThread.checkIsUIThread();
-
-    CatalogFeedActivity.LOG.debug("network is unavailable");
-
-    final FrameLayout content_area = this.getContentFrame();
-    final ViewGroup progress = NullCheck.notNull(this.progress_layout);
-    progress.setVisibility(View.GONE);
-    content_area.removeAllViews();
-
-    final LayoutInflater inflater = this.getLayoutInflater();
-    final ViewGroup error =
-      NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.catalog_loading_not_connected,
-        content_area,
-        false));
-    content_area.addView(error);
-    content_area.requestLayout();
-
-    final Button retry =
-      NullCheck
-        .notNull((Button) error.findViewById(R.id.catalog_error_retry));
-    retry.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
-      {
-        CatalogFeedActivity.this.retryFeed();
-      }
-    });
   }
 
   @Override public boolean onCreateOptionsMenu(
@@ -1017,6 +997,38 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
 
     this.onFeedWithoutGroupsNonEmptyUI(f);
+  }
+
+  private void onNetworkUnavailable()
+  {
+    UIThread.checkIsUIThread();
+
+    CatalogFeedActivity.LOG.debug("network is unavailable");
+
+    final FrameLayout content_area = this.getContentFrame();
+    final ViewGroup progress = NullCheck.notNull(this.progress_layout);
+    progress.setVisibility(View.GONE);
+    content_area.removeAllViews();
+
+    final LayoutInflater inflater = this.getLayoutInflater();
+    final ViewGroup error =
+      NullCheck.notNull((ViewGroup) inflater.inflate(
+        R.layout.catalog_loading_not_connected,
+        content_area,
+        false));
+    content_area.addView(error);
+    content_area.requestLayout();
+
+    final Button retry =
+      NullCheck
+        .notNull((Button) error.findViewById(R.id.catalog_error_retry));
+    retry.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(
+        final @Nullable View v)
+      {
+        CatalogFeedActivity.this.retryFeed();
+      }
+    });
   }
 
   @Override public boolean onOptionsItemSelected(
