@@ -1,6 +1,9 @@
 package org.nypl.simplified.app.drm;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
@@ -9,6 +12,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 
 public final class DRMTestActivity extends Activity implements
   RMSDKResourceProviderType
@@ -42,6 +46,22 @@ public final class DRMTestActivity extends Activity implements
     final String name)
   {
     DRMTestActivity.LOG.debug("getResource: {}", name);
+
+    if ("res:///ReaderClientCert.sig".equals(name)) {
+      try {
+        final InputStream is = this.getAssets().open("ReaderClientCert.sig");
+        final byte[] data = new byte[is.available()];
+        is.read(data);
+        is.close();
+
+        DRMTestActivity.LOG.debug("returning {} bytes", data.length);
+        return data;
+      } catch (final MalformedURLException e) {
+        throw new UnreachableCodeException(e);
+      } catch (final IOException e) {
+        throw new UnreachableCodeException(e);
+      }
+    }
     return null;
   }
 }
