@@ -24,6 +24,7 @@ final class RMSDKProvider
   }
 
   private static native void nyadInitialize(
+    final RMSDKResourceProviderType res,
     final byte[] device_serial,
     final byte[] device_name,
     final byte[] app_storage,
@@ -31,6 +32,7 @@ final class RMSDKProvider
     final byte[] book_path);
 
   public static RMSDKProvider openProvider(
+    final RMSDKResourceProviderType res,
     final String device_serial,
     final String device_name,
     final File app_storage,
@@ -38,6 +40,7 @@ final class RMSDKProvider
     final File book_path)
     throws DRMUnsupportedException
   {
+    NullCheck.notNull(res);
     NullCheck.notNull(device_serial);
     NullCheck.notNull(device_name);
     NullCheck.notNull(app_storage);
@@ -55,6 +58,7 @@ final class RMSDKProvider
       final RMSDKProvider p = new RMSDKProvider();
       RMSDKProvider.LOG.debug("calling nyadInitialize");
       RMSDKProvider.nyadInitialize(
+        res,
         RMSDKProvider.getUTF8Bytes(device_serial),
         RMSDKProvider.getUTF8Bytes(device_name),
         RMSDKProvider.getUTF8Bytes(app_storage.getAbsolutePath()),

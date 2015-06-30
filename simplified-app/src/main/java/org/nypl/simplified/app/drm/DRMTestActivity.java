@@ -10,7 +10,8 @@ import android.os.Bundle;
 
 import com.io7m.jnull.Nullable;
 
-public final class DRMTestActivity extends Activity
+public final class DRMTestActivity extends Activity implements
+  RMSDKResourceProviderType
 {
   private static final Logger LOG;
 
@@ -26,6 +27,7 @@ public final class DRMTestActivity extends Activity
     try {
       final RMSDKProvider p =
         RMSDKProvider.openProvider(
+          this,
           "42f40c40374851a5b4a3d8375cb98924",
           "NYPL Reader",
           new File("/data/local/tmp/simplified"),
@@ -34,5 +36,12 @@ public final class DRMTestActivity extends Activity
     } catch (final DRMUnsupportedException e) {
       DRMTestActivity.LOG.error("unsupported drm: ", e);
     }
+  }
+
+  @Override public @Nullable byte[] getResourceAsBytes(
+    final String name)
+  {
+    DRMTestActivity.LOG.debug("getResource: {}", name);
+    return null;
   }
 }
