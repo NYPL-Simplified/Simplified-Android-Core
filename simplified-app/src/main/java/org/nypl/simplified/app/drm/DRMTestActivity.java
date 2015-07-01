@@ -5,6 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 
+import org.nypl.drm.core.AdobeAdeptConnectorFactory;
+import org.nypl.drm.core.AdobeAdeptConnectorFactoryType;
+import org.nypl.drm.core.AdobeAdeptConnectorType;
+import org.nypl.drm.core.AdobeAdeptDRMClientType;
+import org.nypl.drm.core.AdobeAdeptNetProviderType;
+import org.nypl.drm.core.AdobeAdeptResourceProviderType;
+import org.nypl.drm.core.DRMException;
+import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
 
@@ -17,7 +25,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class DRMTestActivity extends Activity implements
   AdobeAdeptResourceProviderType,
-  AdobeAdeptDRMClientType
+  AdobeAdeptDRMClientType,
+  AdobeAdeptNetProviderType
 {
   private static final Logger LOG;
 
@@ -31,8 +40,13 @@ public final class DRMTestActivity extends Activity implements
     super.onCreate(state);
 
     try {
+      final AdobeAdeptConnectorFactoryType f =
+        AdobeAdeptConnectorFactory.get();
+
       final AdobeAdeptConnectorType p =
-        AdobeAdeptConnector.openConnector(
+        f.get(
+          "org.nypl.simplified.app",
+          this,
           this,
           this,
           "42f40c40374851a5b4a3d8375cb98924",
@@ -40,8 +54,11 @@ public final class DRMTestActivity extends Activity implements
           new File("/data/local/tmp/simplified"),
           new File("/data/local/tmp/simplified"),
           new File("/data/local/tmp/simplified"));
+
     } catch (final DRMUnsupportedException e) {
       DRMTestActivity.LOG.error("unsupported drm: ", e);
+    } catch (final DRMException e) {
+      DRMTestActivity.LOG.error("error starting drm: ", e);
     }
   }
 

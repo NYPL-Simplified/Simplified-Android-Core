@@ -50,6 +50,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.nypl.drm</groupId>
+      <artifactId>nypl-drm-core</artifactId>
+      <version>0.1.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.io7m.jnull</groupId>
       <artifactId>io7m-jnull-core</artifactId>
       <version>[1.0.0, 2.0.0)</version>
@@ -127,14 +133,7 @@
       <dependencies>
         <dependency>
           <groupId>org.nypl.drm</groupId>
-          <artifactId>libnypl_adobe</artifactId>
-          <version>0.1.0</version>
-        </dependency>
-        <dependency>
-          <groupId>org.nypl.drm</groupId>
-          <artifactId>libnypl_adobe</artifactId>
-          <classifier>armeabi-v7a</classifier>
-          <type>so</type>
+          <artifactId>nypl-drm-adobe</artifactId>
           <version>0.1.0</version>
         </dependency>
       </dependencies>
