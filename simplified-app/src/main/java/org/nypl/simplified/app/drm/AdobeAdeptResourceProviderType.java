@@ -6,7 +6,7 @@ import com.io7m.jnull.Nullable;
  * The type of functions that map resources to byte arrays.
  */
 
-public interface RMSDKResourceProviderType
+public interface AdobeAdeptResourceProviderType
 {
   /**
    * @param name

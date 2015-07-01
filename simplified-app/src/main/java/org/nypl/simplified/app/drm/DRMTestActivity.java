@@ -12,10 +12,12 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
 public final class DRMTestActivity extends Activity implements
-  RMSDKResourceProviderType
+  AdobeAdeptResourceProviderType,
+  AdobeAdeptDRMClientType
 {
   private static final Logger LOG;
 
@@ -29,8 +31,9 @@ public final class DRMTestActivity extends Activity implements
     super.onCreate(state);
 
     try {
-      final RMSDKProvider p =
-        RMSDKProvider.openProvider(
+      final AdobeAdeptConnectorType p =
+        AdobeAdeptConnector.openConnector(
+          this,
           this,
           "42f40c40374851a5b4a3d8375cb98924",
           "NYPL Reader",
@@ -63,5 +66,45 @@ public final class DRMTestActivity extends Activity implements
       }
     }
     return null;
+  }
+
+  @Override public void onWorkflowsDone(
+    final int w,
+    final String remaining)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public void onWorkflowProgress(
+    final int w,
+    final String title,
+    final double progress)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public void onWorkflowError(
+    final int w,
+    final String code)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public void onFollowupURL(
+    final int w,
+    final String url)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public void onDownloadCompleted(
+    final String url)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
   }
 }
