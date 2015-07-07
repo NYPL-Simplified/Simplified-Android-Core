@@ -15,7 +15,7 @@ final class OPDSAtom
 {
   static String findID(
     final Element ee)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     return OPDSXML.getFirstChildElementTextWithName(
       ee,
@@ -50,7 +50,7 @@ final class OPDSAtom
 
   static String findTitle(
     final Element e)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     return OPDSXML.getFirstChildElementTextWithName(
       e,
@@ -60,7 +60,7 @@ final class OPDSAtom
 
   static Calendar findUpdated(
     final Element e)
-    throws OPDSFeedParseException,
+    throws OPDSParseException,
       ParseException
   {
     final String e_updated_raw =

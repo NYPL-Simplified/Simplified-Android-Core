@@ -15,7 +15,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.nypl.simplified.opds.core.OPDSFacet;
-import org.nypl.simplified.opds.core.OPDSFeedParseException;
+import org.nypl.simplified.opds.core.OPDSParseException;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSGroup;
@@ -182,7 +182,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)
@@ -223,7 +223,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)
@@ -246,7 +246,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)
@@ -269,7 +269,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)

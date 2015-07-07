@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.nypl.simplified.opds.core.OPDSSearchLink;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -23,13 +21,14 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     final Calendar in_updated,
     final String in_title,
     final OptionType<URI> in_next,
-    final OptionType<OPDSSearchLink> in_search,
+    final OptionType<FeedSearchType> in_search,
     final Map<String, List<FeedFacetType>> in_facets_by_group,
     final List<FeedFacetType> in_facets_order)
   {
     final List<BookID> in_entries_order = new ArrayList<BookID>();
     final Map<BookID, FeedEntryType> in_entries =
       new HashMap<BookID, FeedEntryType>();
+
     return new FeedWithoutGroups(
       in_uri,
       in_id,
@@ -49,7 +48,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
   private final List<FeedFacetType>              facets_order;
   private final String                           id;
   private final OptionType<URI>                  next;
-  private final OptionType<OPDSSearchLink>       search;
+  private final OptionType<FeedSearchType>       search;
   private final String                           title;
   private final Calendar                         updated;
   private final URI                              uri;
@@ -60,7 +59,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     final Calendar in_updated,
     final String in_title,
     final OptionType<URI> in_next,
-    final OptionType<OPDSSearchLink> in_search,
+    final OptionType<FeedSearchType> in_search,
     final List<BookID> in_entries_order,
     final Map<BookID, FeedEntryType> in_entries,
     final Map<String, List<FeedFacetType>> in_facets_by_group,
@@ -117,7 +116,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     return this.next;
   }
 
-  @Override public OptionType<OPDSSearchLink> getFeedSearchURI()
+  @Override public OptionType<FeedSearchType> getFeedSearch()
   {
     return this.search;
   }

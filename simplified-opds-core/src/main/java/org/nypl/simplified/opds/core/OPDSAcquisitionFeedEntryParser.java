@@ -27,7 +27,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
   private static void findAcquisitionAuthors(
     final Element e,
     final OPDSAcquisitionFeedEntryBuilderType eb)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     final List<Element> e_authors =
       OPDSXML.getChildElementsWithName(
@@ -60,7 +60,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
 
   private static OPDSAcquisitionFeedEntry parseAcquisitionEntry(
     final Element e)
-    throws OPDSFeedParseException,
+    throws OPDSParseException,
       ParseException,
       URISyntaxException
   {
@@ -167,22 +167,22 @@ public final class OPDSAcquisitionFeedEntryParser implements
 
   @Override public OPDSAcquisitionFeedEntry parseEntry(
     final Element e)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(e);
 
     try {
       return OPDSAcquisitionFeedEntryParser.parseAcquisitionEntry(e);
     } catch (final ParseException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     } catch (final URISyntaxException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     }
   }
 
   @Override public OPDSAcquisitionFeedEntry parseEntryStream(
     final InputStream s)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(s);
 
@@ -194,11 +194,11 @@ public final class OPDSAcquisitionFeedEntryParser implements
       final Element e = NullCheck.notNull(d.getDocumentElement());
       return this.parseEntry(e);
     } catch (final ParserConfigurationException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     } catch (final SAXException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     } catch (final IOException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     }
   }
 }

@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,11 +165,8 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final OptionType<URI> no_next = Option.none();
 
-    final OPDSSearchLink search_link =
-      new OPDSSearchLink(
-        BooksController.LOCAL_SEARCH_TYPE,
-        NullCheck.notNull(URI.create("generated-feed-search:unused")));
-    final OptionType<OPDSSearchLink> some_search = Option.some(search_link);
+    final OptionType<FeedSearchType> some_search =
+      Option.some((FeedSearchType) new FeedSearchLocal());
 
     final Map<String, List<FeedFacetType>> facet_groups =
       new HashMap<String, List<FeedFacetType>>();

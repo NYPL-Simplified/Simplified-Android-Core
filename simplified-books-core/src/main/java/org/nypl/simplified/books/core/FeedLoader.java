@@ -15,11 +15,19 @@ import net.jodah.expiringmap.ExpiringMap.Builder;
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
 
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
+import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
+import org.nypl.simplified.opds.core.OPDSParseException;
+import org.nypl.simplified.opds.core.OPDSSearchLink;
+import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -105,7 +113,8 @@ import com.io7m.jnull.Nullable;
   public static FeedLoaderType newFeedLoader(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
-    final OPDSFeedTransportType in_transport)
+    final OPDSFeedTransportType in_transport,
+    final OPDSSearchParserType in_search_parser)
   {
     final Builder<Object, Object> b = ExpiringMap.builder();
     b.expirationPolicy(ExpirationPolicy.ACCESSED);
@@ -115,6 +124,7 @@ import com.io7m.jnull.Nullable;
       in_exec,
       in_parser,
       in_transport,
+      in_search_parser,
       NullCheck.notNull(m));
   }
 
@@ -122,24 +132,33 @@ import com.io7m.jnull.Nullable;
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
     final OPDSFeedTransportType in_transport,
+    final OPDSSearchParserType in_search_parser,
     final ExpiringMap<URI, FeedType> m)
   {
-    return new FeedLoader(in_exec, in_parser, in_transport, m);
+    return new FeedLoader(
+      in_exec,
+      in_parser,
+      in_transport,
+      in_search_parser,
+      m);
   }
 
   private final ExpiringMap<URI, FeedType> cache;
   private final ExecutorService            exec;
   private final OPDSFeedParserType         parser;
   private final OPDSFeedTransportType      transport;
+  private final OPDSSearchParserType       search_parser;
 
   private FeedLoader(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
     final OPDSFeedTransportType in_transport,
+    final OPDSSearchParserType in_search_parser,
     final ExpiringMap<URI, FeedType> in_m)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.parser = NullCheck.notNull(in_parser);
+    this.search_parser = NullCheck.notNull(in_search_parser);
     this.transport = NullCheck.notNull(in_transport);
     this.cache = NullCheck.notNull(in_m);
     this.cache.addExpirationListener(this);
@@ -216,7 +235,26 @@ import com.io7m.jnull.Nullable;
   {
     final InputStream s = this.transport.getStream(uri);
     try {
-      return Feeds.fromAcquisitionFeed(this.parser.parse(uri, s));
+      final OPDSAcquisitionFeed parsed = this.parser.parse(uri, s);
+      final OptionType<OPDSSearchLink> search_opt = parsed.getFeedSearchURI();
+      if (search_opt.isSome()) {
+        final Some<OPDSSearchLink> some = (Some<OPDSSearchLink>) search_opt;
+        final URI search_uri = some.get().getURI();
+
+        final InputStream ss = this.transport.getStream(search_uri);
+        try {
+          final OptionType<OPDSOpenSearch1_1> search =
+            Option.some(this.search_parser.parse(search_uri, ss));
+          return Feeds.fromAcquisitionFeed(parsed, search);
+        } catch (final OPDSParseException e) {
+          FeedLoader.LOG.error("could not parse search: ", e);
+        } finally {
+          ss.close();
+        }
+      }
+
+      final OptionType<OPDSOpenSearch1_1> none = Option.none();
+      return Feeds.fromAcquisitionFeed(parsed, none);
     } finally {
       s.close();
     }

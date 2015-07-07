@@ -44,12 +44,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
   Observable implements BooksType
 {
-  public static final String  LOCAL_SEARCH_TYPE;
-
   private static final Logger LOG;
 
   static {
-    LOCAL_SEARCH_TYPE = "application/simplified-local-search+xml";
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
   }
 

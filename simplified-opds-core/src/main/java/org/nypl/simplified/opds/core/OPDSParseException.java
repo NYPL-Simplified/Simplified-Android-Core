@@ -6,7 +6,7 @@ import java.io.IOException;
  * The type of errors raised during attempts to parse OPDS feeds.
  */
 
-public final class OPDSFeedParseException extends IOException
+public final class OPDSParseException extends IOException
 {
   private static final long serialVersionUID = 5463756509505950662L;
 
@@ -14,7 +14,7 @@ public final class OPDSFeedParseException extends IOException
    * Construct an exception with no message or cause.
    */
 
-  public OPDSFeedParseException()
+  public OPDSParseException()
   {
     super();
   }
@@ -26,7 +26,7 @@ public final class OPDSFeedParseException extends IOException
    *          The message
    */
 
-  public OPDSFeedParseException(
+  public OPDSParseException(
     final String message)
   {
     super(message);
@@ -41,7 +41,7 @@ public final class OPDSFeedParseException extends IOException
    *          The cause
    */
 
-  public OPDSFeedParseException(
+  public OPDSParseException(
     final String message,
     final Throwable cause)
   {
@@ -55,7 +55,7 @@ public final class OPDSFeedParseException extends IOException
    *          The case
    */
 
-  public OPDSFeedParseException(
+  public OPDSParseException(
     final Throwable cause)
   {
     super(cause);

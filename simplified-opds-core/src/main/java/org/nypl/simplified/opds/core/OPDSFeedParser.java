@@ -180,7 +180,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   @Override public OPDSAcquisitionFeed parse(
     final URI uri,
     final InputStream s)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(s);
 
@@ -287,19 +287,19 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       return b.build();
 
     } catch (final ParserConfigurationException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final SAXException e) {
-      throw new OPDSFeedParseException(e);
-    } catch (final OPDSFeedParseException e) {
+      throw new OPDSParseException(e);
+    } catch (final OPDSParseException e) {
       throw e;
     } catch (final IOException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final DOMException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final ParseException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final URISyntaxException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } finally {
       final long time_now = System.nanoTime();
       final long time_parse = time_post_parse - time_pre_parse;
