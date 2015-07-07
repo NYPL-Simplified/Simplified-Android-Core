@@ -6,7 +6,7 @@ import java.net.URI;
 /**
  * <p>
  * The type of parsers that consume {@link InputStream} values and produce
- * feeds.
+ * search descriptions.
  * </p>
  * <p>
  * Implementations are required to be able to accept requests from any number
@@ -14,22 +14,22 @@ import java.net.URI;
  * </p>
  */
 
-public interface OPDSFeedParserType
+public interface OPDSSearchParserType
 {
   /**
-   * Parse the feed associated with the given stream <code>s</code>. The feed
-   * is assumed to exist at <code>uri</code>.
+   * Parse the search description associated with the given stream
+   * <code>s</code>. The description is assumed to exist at <code>uri</code>.
    *
    * @param uri
-   *          The URI of the feed
+   *          The URI of the description
    * @param s
    *          The input stream
-   * @return A parsed feed
+   * @return A parsed description
    * @throws OPDSParseException
    *           On errors
    */
 
-  OPDSAcquisitionFeed parse(
+  OPDSOpenSearch1_1 parse(
     final URI uri,
     final InputStream s)
     throws OPDSParseException;

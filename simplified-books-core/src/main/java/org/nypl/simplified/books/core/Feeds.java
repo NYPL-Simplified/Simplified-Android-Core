@@ -8,30 +8,36 @@ import java.util.Map;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFacet;
+import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 
+import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 public final class Feeds
 {
   public static FeedType fromAcquisitionFeed(
-    final OPDSAcquisitionFeed f)
+    final OPDSAcquisitionFeed f,
+    final OptionType<OPDSOpenSearch1_1> search)
   {
     NullCheck.notNull(f);
 
     if (f.getFeedGroups().isEmpty()) {
-      return Feeds.withoutGroups(f);
+      return Feeds.withoutGroups(f, search);
     }
-    return Feeds.withGroups(f);
+    return Feeds.withGroups(f, search);
   }
 
   private static FeedWithGroups withGroups(
-    final OPDSAcquisitionFeed f)
+    final OPDSAcquisitionFeed f,
+    final OptionType<OPDSOpenSearch1_1> search)
   {
-    return FeedWithGroups.fromAcquisitionFeed(f);
+    return FeedWithGroups.fromAcquisitionFeed(f, search);
   }
 
   private static FeedWithoutGroups withoutGroups(
-    final OPDSAcquisitionFeed f)
+    final OPDSAcquisitionFeed f,
+    final OptionType<OPDSOpenSearch1_1> search)
   {
     final Map<String, List<FeedFacetType>> facets_by_group =
       new HashMap<String, List<FeedFacetType>>();
@@ -50,6 +56,15 @@ public final class Feeds
       facets_order.add(new FeedFacetOPDS(NullCheck.notNull(ff)));
     }
 
+    final OptionType<FeedSearchType> actual_search =
+      search.map(new FunctionType<OPDSOpenSearch1_1, FeedSearchType>() {
+        @Override public FeedSearchType call(
+          final OPDSOpenSearch1_1 s)
+        {
+          return new FeedSearchOpen1_1(s);
+        }
+      });
+
     final FeedWithoutGroups rf =
       FeedWithoutGroups.newEmptyFeed(
         f.getFeedURI(),
@@ -57,7 +72,7 @@ public final class Feeds
         f.getFeedUpdated(),
         f.getFeedTitle(),
         f.getFeedNext(),
-        f.getFeedSearchURI(),
+        actual_search,
         facets_by_group,
         facets_order);
 

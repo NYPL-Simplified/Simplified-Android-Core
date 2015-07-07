@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 
@@ -19,7 +17,6 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookFeedListenerType;
-import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedFacetMatcherType;
@@ -32,12 +29,15 @@ import org.nypl.simplified.books.core.FeedGroup;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.FeedMatcherType;
+import org.nypl.simplified.books.core.FeedSearchLocal;
+import org.nypl.simplified.books.core.FeedSearchMatcherType;
+import org.nypl.simplified.books.core.FeedSearchOpen1_1;
+import org.nypl.simplified.books.core.FeedSearchType;
 import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
-import org.nypl.simplified.http.core.URIQueryBuilder;
 import org.nypl.simplified.opds.core.OPDSFacet;
-import org.nypl.simplified.opds.core.OPDSSearchLink;
+import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
@@ -136,17 +136,17 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final class OpenSearchQueryHandler implements OnQueryTextListener
   {
     private final CatalogFeedArgumentsType args;
-    private final URI                      base;
+    private final OPDSOpenSearch1_1        search;
     private final Resources                resources;
 
     OpenSearchQueryHandler(
       final Resources in_resources,
       final CatalogFeedArgumentsType in_args,
-      final URI in_base)
+      final OPDSOpenSearch1_1 in_search)
     {
       this.resources = NullCheck.notNull(in_resources);
       this.args = NullCheck.notNull(in_args);
-      this.base = NullCheck.notNull(in_base);
+      this.search = NullCheck.notNull(in_search);
     }
 
     @Override public boolean onQueryTextChange(
@@ -159,11 +159,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final @Nullable String query)
     {
       final String qnn = NullCheck.notNull(query);
-
-      final SortedMap<String, String> parameters =
-        new TreeMap<String, String>();
-      parameters.put("q", qnn);
-      final URI target = URIQueryBuilder.encodeQuery(this.base, parameters);
+      final URI target = this.search.getQueryURIForTerms(qnn);
 
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
       final ImmutableStack<CatalogFeedArgumentsType> us =
@@ -641,12 +637,11 @@ import com.io7m.junreachable.UnreachableCodeException;
      */
 
     final FeedType feed_actual = NullCheck.notNull(this.feed);
-    final OptionType<OPDSSearchLink> search_opt =
-      feed_actual.getFeedSearchURI();
+    final OptionType<FeedSearchType> search_opt = feed_actual.getFeedSearch();
     boolean search_ok = false;
     if (search_opt.isSome()) {
-      final Some<OPDSSearchLink> search_some =
-        (Some<OPDSSearchLink>) search_opt;
+      final Some<FeedSearchType> search_some =
+        (Some<FeedSearchType>) search_opt;
 
       final SearchView sv = (SearchView) search_item.getActionView();
       sv.setSubmitButtonEnabled(true);
@@ -667,28 +662,30 @@ import com.io7m.junreachable.UnreachableCodeException;
        */
 
       final Resources rr = NullCheck.notNull(this.getResources());
-      final OPDSSearchLink search = search_some.get();
-      if ("application/opensearchdescription+xml".equals(search.getType())) {
-        sv.setOnQueryTextListener(new OpenSearchQueryHandler(rr, args, search
-          .getURI()));
-        search_ok = true;
-      } else if (BooksController.LOCAL_SEARCH_TYPE.equals(search.getType())) {
-        final FacetType active_facet = FacetType.SORT_BY_TITLE;
-        sv.setOnQueryTextListener(new BooksLocalSearchQueryHandler(
-          rr,
-          args,
-          active_facet));
-        search_ok = true;
-      } else {
+      final FeedSearchType search = search_some.get();
+      search_ok =
+        search
+          .matchSearch(new FeedSearchMatcherType<Boolean, UnreachableCodeException>() {
+            @Override public Boolean onFeedSearchOpen1_1(
+              final FeedSearchOpen1_1 fs)
+            {
+              sv.setOnQueryTextListener(new OpenSearchQueryHandler(
+                rr,
+                args,
+                fs.getSearch()));
+              return NullCheck.notNull(Boolean.TRUE);
+            }
 
-        /**
-         * The application doesn't understand the search type.
-         */
-
-        CatalogFeedActivity.LOG.error(
-          "unknown search type: {}",
-          search.getType());
-      }
+            @Override public Boolean onFeedSearchLocal(
+              final FeedSearchLocal f)
+            {
+              sv.setOnQueryTextListener(new BooksLocalSearchQueryHandler(
+                rr,
+                args,
+                FacetType.SORT_BY_TITLE));
+              return NullCheck.notNull(Boolean.TRUE);
+            }
+          });
     }
 
     if (search_ok) {

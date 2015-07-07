@@ -46,6 +46,8 @@ import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
+import org.nypl.simplified.opds.core.OPDSSearchParser;
+import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.tenprint.TenPrintGenerator;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.slf4j.Logger;
@@ -123,8 +125,9 @@ import com.io7m.jnull.Nullable;
       final OPDSAcquisitionFeedEntrySerializerType in_entry_serializer =
         OPDSAcquisitionFeedEntrySerializer.newSerializer();
       final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
+      final OPDSSearchParserType s = OPDSSearchParser.newParser();
       this.feed_loader =
-        Simplified.makeFeedLoader(this.exec_catalog_feeds, p);
+        Simplified.makeFeedLoader(this.exec_catalog_feeds, s, p);
 
       /**
        * Book management.
@@ -566,10 +569,11 @@ import com.io7m.jnull.Nullable;
 
   private static FeedLoaderType makeFeedLoader(
     final ExecutorService exec,
+    final OPDSSearchParserType s,
     final OPDSFeedParserType p)
   {
     final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
-    return FeedLoader.newFeedLoader(exec, p, t);
+    return FeedLoader.newFeedLoader(exec, p, t, s);
   }
 
   private static ExecutorService namedThreadPool(

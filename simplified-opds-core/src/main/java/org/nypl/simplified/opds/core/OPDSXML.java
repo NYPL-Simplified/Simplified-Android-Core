@@ -54,7 +54,7 @@ public final class OPDSXML
     final Element node,
     final URI namespace,
     final String name)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
@@ -78,14 +78,14 @@ public final class OPDSXML
     m.append("Expected name:      ");
     m.append(name);
     m.append("\n");
-    throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
+    throw new OPDSParseException(NullCheck.notNull(m.toString()));
   }
 
   public static String getFirstChildElementTextWithName(
     final Element node,
     final URI namespace,
     final String name)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     final Element e =
       OPDSXML.getFirstChildElementWithName(node, namespace, name);
@@ -119,7 +119,7 @@ public final class OPDSXML
     final Element node,
     final URI namespace,
     final String name)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
@@ -143,7 +143,7 @@ public final class OPDSXML
     m.append("Expected name:      ");
     m.append(name);
     m.append("\n");
-    throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
+    throw new OPDSParseException(NullCheck.notNull(m.toString()));
   }
 
   public static OptionType<Element> getFirstChildElementWithNameOptional(
@@ -182,7 +182,7 @@ public final class OPDSXML
 
   public static Element nodeAsElement(
     final Node node)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(node);
 
@@ -190,7 +190,7 @@ public final class OPDSXML
       final StringBuilder m = new StringBuilder();
       m.append("Expected element but got node of type ");
       m.append(node.getNodeName());
-      throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
+      throw new OPDSParseException(NullCheck.notNull(m.toString()));
     }
     return (Element) node;
   }
@@ -199,7 +199,7 @@ public final class OPDSXML
     final Node node,
     final URI namespace,
     final String name)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
@@ -224,7 +224,7 @@ public final class OPDSXML
     m.append("Got name:           ");
     m.append(e.getNodeName());
     m.append("\n");
-    throw new OPDSFeedParseException(NullCheck.notNull(m.toString()));
+    throw new OPDSParseException(NullCheck.notNull(m.toString()));
   }
 
   public static boolean nodeHasName(
