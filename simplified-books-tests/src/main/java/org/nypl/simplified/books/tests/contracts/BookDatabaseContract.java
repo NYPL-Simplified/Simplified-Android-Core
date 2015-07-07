@@ -17,6 +17,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializer;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.io7m.jfunctional.PartialProcedureType;
@@ -69,7 +70,8 @@ import com.io7m.jfunctional.Unit;
         OPDSAcquisitionFeedEntry.newBuilder(
           "abcd",
           "Title",
-          Calendar.getInstance());
+          Calendar.getInstance(),
+          OPDSAvailabilityOpenAccess.get());
       eb.addAcquisition(new OPDSAcquisition(Type.ACQUISITION_BORROW, URI
         .create("http://example.com")));
       ee = eb.build();

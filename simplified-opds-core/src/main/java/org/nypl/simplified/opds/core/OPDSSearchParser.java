@@ -51,7 +51,7 @@ public final class OPDSSearchParser implements OPDSSearchParserType
 
   private static Document parseStream(
     final InputStream s)
-    throws ParserConfigurationException,
+      throws ParserConfigurationException,
       SAXException,
       IOException
   {
@@ -65,7 +65,7 @@ public final class OPDSSearchParser implements OPDSSearchParserType
   @Override public OPDSOpenSearch1_1 parse(
     final URI uri,
     final InputStream s)
-    throws OPDSParseException
+      throws OPDSParseException
   {
     NullCheck.notNull(s);
 
@@ -113,9 +113,9 @@ public final class OPDSSearchParser implements OPDSSearchParserType
         TimeUnit.MILLISECONDS.convert(
           time_parse + time_interp,
           TimeUnit.NANOSECONDS),
-        TimeUnit.MILLISECONDS.convert(time_parse, TimeUnit.NANOSECONDS),
-        TimeUnit.MILLISECONDS.convert(time_interp, TimeUnit.NANOSECONDS),
-        uri);
+          TimeUnit.MILLISECONDS.convert(time_parse, TimeUnit.NANOSECONDS),
+          TimeUnit.MILLISECONDS.convert(time_interp, TimeUnit.NANOSECONDS),
+          uri);
     }
   }
 }

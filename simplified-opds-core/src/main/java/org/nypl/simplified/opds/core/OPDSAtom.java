@@ -15,7 +15,7 @@ final class OPDSAtom
 {
   static String findID(
     final Element ee)
-    throws OPDSParseException
+      throws OPDSParseException
   {
     return OPDSXML.getFirstChildElementTextWithName(
       ee,
@@ -25,9 +25,9 @@ final class OPDSAtom
 
   static OptionType<Calendar> findPublished(
     final Element e)
-    throws DOMException,
+      throws DOMException,
       ParseException
-  {
+      {
     final OptionType<Element> e_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
         e,
@@ -38,7 +38,7 @@ final class OPDSAtom
       .mapPartial(new PartialFunctionType<Element, Calendar, ParseException>() {
         @Override public Calendar call(
           final Element er)
-          throws ParseException
+            throws ParseException
         {
           final String text = er.getTextContent();
           final String trimmed = text.trim();
@@ -46,11 +46,11 @@ final class OPDSAtom
             .notNull(trimmed));
         }
       });
-  }
+      }
 
   static String findTitle(
     final Element e)
-    throws OPDSParseException
+      throws OPDSParseException
   {
     return OPDSXML.getFirstChildElementTextWithName(
       e,
@@ -60,7 +60,7 @@ final class OPDSAtom
 
   static Calendar findUpdated(
     final Element e)
-    throws OPDSParseException,
+      throws OPDSParseException,
       ParseException
   {
     final String e_updated_raw =

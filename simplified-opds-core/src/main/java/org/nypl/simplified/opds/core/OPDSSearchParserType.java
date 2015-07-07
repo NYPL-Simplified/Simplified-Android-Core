@@ -32,5 +32,5 @@ public interface OPDSSearchParserType
   OPDSOpenSearch1_1 parse(
     final URI uri,
     final InputStream s)
-    throws OPDSParseException;
+      throws OPDSParseException;
 }

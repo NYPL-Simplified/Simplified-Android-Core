@@ -48,7 +48,7 @@ public interface OPDSAcquisitionFeedBuilderType
 
   /**
    * Add the given facet.
-   * 
+   *
    * @param f
    *          The facet
    */

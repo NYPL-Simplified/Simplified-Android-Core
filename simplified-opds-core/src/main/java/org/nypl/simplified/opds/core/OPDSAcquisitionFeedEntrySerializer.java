@@ -25,7 +25,7 @@ import com.io7m.jnull.Nullable;
  */
 
 @SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeedEntrySerializer implements
-  OPDSAcquisitionFeedEntrySerializerType
+OPDSAcquisitionFeedEntrySerializerType
 {
   public static OPDSAcquisitionFeedEntrySerializerType newSerializer()
   {
@@ -39,7 +39,7 @@ import com.io7m.jnull.Nullable;
 
   @Override public Document serializeFeedEntry(
     final OPDSAcquisitionFeedEntry e)
-    throws OPDSFeedSerializationException
+      throws OPDSFeedSerializationException
   {
     NullCheck.notNull(e);
 
@@ -76,7 +76,7 @@ import com.io7m.jnull.Nullable;
   @Override public Element serializeFeedEntryForDocument(
     final Document d,
     final OPDSAcquisitionFeedEntry e)
-    throws OPDSFeedSerializationException
+      throws OPDSFeedSerializationException
   {
     NullCheck.notNull(d);
     NullCheck.notNull(e);
@@ -148,78 +148,78 @@ import com.io7m.jnull.Nullable;
     {
       final OptionType<URI> cover_opt = e.getCover();
       cover_opt
-        .mapPartial(new PartialFunctionType<URI, Unit, OPDSFeedSerializationException>() {
-          @Override public Unit call(
-            final URI u)
+      .mapPartial(new PartialFunctionType<URI, Unit, OPDSFeedSerializationException>() {
+        @Override public Unit call(
+          final URI u)
             throws OPDSFeedSerializationException
-          {
-            ee.appendChild(OPDSAcquisitionFeedEntrySerializer.createLink(
-              d,
-              NullCheck.notNull(u.toString()),
-              null,
-              OPDSFeedConstants.IMAGE_URI_TEXT));
-            return Unit.unit();
-          }
-        });
+        {
+          ee.appendChild(OPDSAcquisitionFeedEntrySerializer.createLink(
+            d,
+            NullCheck.notNull(u.toString()),
+            null,
+            OPDSFeedConstants.IMAGE_URI_TEXT));
+          return Unit.unit();
+        }
+      });
     }
 
     {
       final OptionType<URI> thumb_opt = e.getThumbnail();
       thumb_opt
-        .mapPartial(new PartialFunctionType<URI, Unit, OPDSFeedSerializationException>() {
-          @Override public Unit call(
-            final URI u)
+      .mapPartial(new PartialFunctionType<URI, Unit, OPDSFeedSerializationException>() {
+        @Override public Unit call(
+          final URI u)
             throws OPDSFeedSerializationException
-          {
-            ee.appendChild(OPDSAcquisitionFeedEntrySerializer.createLink(
-              d,
-              NullCheck.notNull(u.toString()),
-              null,
-              OPDSFeedConstants.THUMBNAIL_URI_TEXT));
-            return Unit.unit();
-          }
-        });
+        {
+          ee.appendChild(OPDSAcquisitionFeedEntrySerializer.createLink(
+            d,
+            NullCheck.notNull(u.toString()),
+            null,
+            OPDSFeedConstants.THUMBNAIL_URI_TEXT));
+          return Unit.unit();
+        }
+      });
     }
 
     {
       final OptionType<String> pub_opt = e.getPublisher();
       pub_opt
-        .mapPartial(new PartialFunctionType<String, Unit, OPDSFeedSerializationException>() {
-          @Override public Unit call(
-            final String publisher)
+      .mapPartial(new PartialFunctionType<String, Unit, OPDSFeedSerializationException>() {
+        @Override public Unit call(
+          final String publisher)
             throws OPDSFeedSerializationException
-          {
-            final Element ee_publisher =
-              NullCheck.notNull(d.createElementNS(
-                OPDSFeedConstants.DUBLIN_CORE_TERMS_URI_TEXT,
-                "dcterms:publisher"));
+        {
+          final Element ee_publisher =
+            NullCheck.notNull(d.createElementNS(
+              OPDSFeedConstants.DUBLIN_CORE_TERMS_URI_TEXT,
+              "dcterms:publisher"));
 
-            ee_publisher.appendChild(d.createTextNode(publisher));
-            ee.appendChild(ee_publisher);
-            return Unit.unit();
-          }
-        });
+          ee_publisher.appendChild(d.createTextNode(publisher));
+          ee.appendChild(ee_publisher);
+          return Unit.unit();
+        }
+      });
     }
 
     {
       final OptionType<Calendar> pub_opt = e.getPublished();
       pub_opt
-        .mapPartial(new PartialFunctionType<Calendar, Unit, OPDSFeedSerializationException>() {
-          @Override public Unit call(
-            final Calendar published)
+      .mapPartial(new PartialFunctionType<Calendar, Unit, OPDSFeedSerializationException>() {
+        @Override public Unit call(
+          final Calendar published)
             throws OPDSFeedSerializationException
-          {
-            final Element ee_published =
-              NullCheck.notNull(d.createElementNS(
-                OPDSFeedConstants.ATOM_URI_TEXT,
-                "published"));
+        {
+          final Element ee_published =
+            NullCheck.notNull(d.createElementNS(
+              OPDSFeedConstants.ATOM_URI_TEXT,
+              "published"));
 
-            final String text = fmt.format(published.getTime());
-            ee_published.appendChild(d.createTextNode(text));
-            ee.appendChild(ee_published);
-            return Unit.unit();
-          }
-        });
+          final String text = fmt.format(published.getTime());
+          ee_published.appendChild(d.createTextNode(text));
+          ee.appendChild(ee_published);
+          return Unit.unit();
+        }
+      });
     }
 
     {

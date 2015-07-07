@@ -1,6 +1,5 @@
 package org.nypl.simplified.opds.core;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,11 +19,10 @@ import com.io7m.jnull.Nullable;
  * The type of OPDS acquisition feeds.
  */
 
-@SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeed implements
-  Serializable
+@SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeed
 {
   private static final class Builder implements
-    OPDSAcquisitionFeedBuilderType
+  OPDSAcquisitionFeedBuilderType
   {
     private final List<OPDSAcquisitionFeedEntry>              entries;
     private final Map<String, List<OPDSFacet>>                facets_by_group;
@@ -144,8 +142,6 @@ import com.io7m.jnull.Nullable;
       this.search = NullCheck.notNull(in_search);
     }
   }
-
-  private static final long serialVersionUID = -7962463871020194252L;
 
   public static OPDSAcquisitionFeedBuilderType newBuilder(
     final URI in_uri,

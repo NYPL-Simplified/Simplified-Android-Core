@@ -18,9 +18,9 @@ public interface OPDSAcquisitionFeedEntrySerializerType
   Element serializeFeedEntryForDocument(
     Document d,
     OPDSAcquisitionFeedEntry e)
-    throws OPDSFeedSerializationException;
+      throws OPDSFeedSerializationException;
 
   Document serializeFeedEntry(
     OPDSAcquisitionFeedEntry e)
-    throws OPDSFeedSerializationException;
+      throws OPDSFeedSerializationException;
 }

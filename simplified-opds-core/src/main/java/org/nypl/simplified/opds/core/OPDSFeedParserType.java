@@ -32,5 +32,5 @@ public interface OPDSFeedParserType
   OPDSAcquisitionFeed parse(
     final URI uri,
     final InputStream s)
-    throws OPDSParseException;
+      throws OPDSParseException;
 }

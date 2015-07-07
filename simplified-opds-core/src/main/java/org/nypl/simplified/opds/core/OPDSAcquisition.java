@@ -1,6 +1,5 @@
 package org.nypl.simplified.opds.core;
 
-import java.io.Serializable;
 import java.net.URI;
 
 import com.io7m.jnull.NullCheck;
@@ -8,13 +7,13 @@ import com.io7m.jnull.Nullable;
 
 /**
  * A specific OPDS acquisition.
- * 
+ *
  * @see <a
  *      href="http://opds-spec.org/specs/opds-catalog-1-1-20110627/#Acquisition_Feeds">Acquisiton
  *      feeds</a>
  */
 
-public final class OPDSAcquisition implements Serializable
+public final class OPDSAcquisition
 {
   /**
    * The specific type of acquisition.
@@ -24,16 +23,16 @@ public final class OPDSAcquisition implements Serializable
   {
     ACQUISITION_BORROW(NullCheck.notNull(URI
       .create("http://opds-spec.org/acquisition/borrow"))),
-    ACQUISITION_BUY(NullCheck.notNull(URI
-      .create("http://opds-spec.org/acquisition/buy"))),
-    ACQUISITION_GENERIC(NullCheck.notNull(URI
-      .create("http://opds-spec.org/acquisition"))),
-    ACQUISITION_OPEN_ACCESS(NullCheck.notNull(URI
-      .create("http://opds-spec.org/acquisition/open-access"))),
-    ACQUISITION_SAMPLE(NullCheck.notNull(URI
-      .create("http://opds-spec.org/acquisition/sample"))),
-    ACQUISITION_SUBSCRIBE(NullCheck.notNull(URI
-      .create("http://opds-spec.org/acquisition/subscribe")));
+      ACQUISITION_BUY(NullCheck.notNull(URI
+        .create("http://opds-spec.org/acquisition/buy"))),
+        ACQUISITION_GENERIC(NullCheck.notNull(URI
+          .create("http://opds-spec.org/acquisition"))),
+          ACQUISITION_OPEN_ACCESS(NullCheck.notNull(URI
+            .create("http://opds-spec.org/acquisition/open-access"))),
+            ACQUISITION_SAMPLE(NullCheck.notNull(URI
+              .create("http://opds-spec.org/acquisition/sample"))),
+              ACQUISITION_SUBSCRIBE(NullCheck.notNull(URI
+                .create("http://opds-spec.org/acquisition/subscribe")));
 
     private final URI uri;
 
@@ -49,10 +48,8 @@ public final class OPDSAcquisition implements Serializable
     }
   }
 
-  private static final long serialVersionUID = 8499594912565063700L;
-
-  private final Type        type;
-  private final URI         uri;
+  private final Type type;
+  private final URI  uri;
 
   public OPDSAcquisition(
     final Type in_type,
