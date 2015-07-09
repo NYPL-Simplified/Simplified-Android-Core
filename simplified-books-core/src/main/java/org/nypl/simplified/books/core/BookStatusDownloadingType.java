@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.core;
 
-import org.nypl.simplified.downloader.core.DownloadSnapshot;
 
 /**
  * The given book is owned/loaned.
@@ -8,12 +7,6 @@ import org.nypl.simplified.downloader.core.DownloadSnapshot;
 
 public interface BookStatusDownloadingType extends BookStatusLoanedType
 {
-  /**
-   * @return The most recently recorded download snapshot.
-   */
-
-  DownloadSnapshot getDownloadSnapshot();
-
   /**
    * Match on the type of status.
    *

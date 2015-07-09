@@ -1,5 +1,7 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -10,10 +12,11 @@ import com.io7m.jnull.Nullable;
  *      categories</a>
  */
 
-public final class OPDSCategory
+public final class OPDSCategory implements Serializable
 {
-  private final String scheme;
-  private final String term;
+  private static final long serialVersionUID = 1L;
+  private final String      scheme;
+  private final String      term;
 
   public OPDSCategory(
     final String in_term,

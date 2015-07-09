@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.net.URI;
 
 import com.io7m.jnull.NullCheck;
@@ -13,8 +14,10 @@ import com.io7m.jnull.Nullable;
  *      feeds</a>
  */
 
-public final class OPDSAcquisition
+public final class OPDSAcquisition implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   /**
    * The specific type of acquisition.
    */
@@ -23,16 +26,16 @@ public final class OPDSAcquisition
   {
     ACQUISITION_BORROW(NullCheck.notNull(URI
       .create("http://opds-spec.org/acquisition/borrow"))),
-      ACQUISITION_BUY(NullCheck.notNull(URI
-        .create("http://opds-spec.org/acquisition/buy"))),
-        ACQUISITION_GENERIC(NullCheck.notNull(URI
-          .create("http://opds-spec.org/acquisition"))),
-          ACQUISITION_OPEN_ACCESS(NullCheck.notNull(URI
-            .create("http://opds-spec.org/acquisition/open-access"))),
-            ACQUISITION_SAMPLE(NullCheck.notNull(URI
-              .create("http://opds-spec.org/acquisition/sample"))),
-              ACQUISITION_SUBSCRIBE(NullCheck.notNull(URI
-                .create("http://opds-spec.org/acquisition/subscribe")));
+    ACQUISITION_BUY(NullCheck.notNull(URI
+      .create("http://opds-spec.org/acquisition/buy"))),
+    ACQUISITION_GENERIC(NullCheck.notNull(URI
+      .create("http://opds-spec.org/acquisition"))),
+    ACQUISITION_OPEN_ACCESS(NullCheck.notNull(URI
+      .create("http://opds-spec.org/acquisition/open-access"))),
+    ACQUISITION_SAMPLE(NullCheck.notNull(URI
+      .create("http://opds-spec.org/acquisition/sample"))),
+    ACQUISITION_SUBSCRIBE(NullCheck.notNull(URI
+      .create("http://opds-spec.org/acquisition/subscribe")));
 
     private final URI uri;
 

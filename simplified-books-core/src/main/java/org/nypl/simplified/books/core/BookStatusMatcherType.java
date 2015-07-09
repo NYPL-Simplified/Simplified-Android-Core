@@ -11,6 +11,14 @@ package org.nypl.simplified.books.core;
 
 public interface BookStatusMatcherType<A, E extends Exception>
 {
+  A onBookStatusHoldable(
+    BookStatusHoldable s)
+    throws E;
+
+  A onBookStatusHeld(
+    BookStatusHeld s)
+    throws E;
+
   A onBookStatusLoanedType(
     BookStatusLoanedType o)
     throws E;

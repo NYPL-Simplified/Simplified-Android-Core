@@ -14,8 +14,8 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
-import org.nypl.simplified.opds.core.OPDSAvailabilityOnHold;
-import org.nypl.simplified.opds.core.OPDSAvailabilityOnLoan;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.nypl.simplified.opds.core.OPDSFacet;
@@ -401,7 +401,7 @@ import com.io7m.jnull.NullCheck;
         .assertEquals(
           e.getID(),
           "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fbev589");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityOnLoan
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
         .get(
           OPDSRFC3339Formatter.parseRFC3339Date("2015-03-30T14:52:06Z"),
           Option.some(OPDSRFC3339Formatter
@@ -418,7 +418,7 @@ import com.io7m.jnull.NullCheck;
         .assertEquals(
           e.getID(),
           "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Faght6r9");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityOnLoan
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
         .get(
           OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:56:23Z"),
           Option.some(OPDSRFC3339Formatter
@@ -435,7 +435,7 @@ import com.io7m.jnull.NullCheck;
         .assertEquals(
           e.getID(),
           "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fetk2889");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityOnLoan
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
         .get(
           OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:32:36Z"),
           Option.some(OPDSRFC3339Formatter
@@ -454,7 +454,7 @@ import com.io7m.jnull.NullCheck;
           "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Feqkyrr9");
       TestUtilities.assertEquals(
         e.getAvailability(),
-        OPDSAvailabilityOnHold.get(
+        OPDSAvailabilityHeld.get(
           OPDSRFC3339Formatter.parseRFC3339Date("2015-05-22T14:17:56Z"),
           1));
     }
@@ -470,7 +470,7 @@ import com.io7m.jnull.NullCheck;
           e.getID(),
           "http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F37284");
       final OptionType<Calendar> none = Option.none();
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityOnLoan
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
         .get(OPDSRFC3339Formatter
           .parseRFC3339Date("2015-04-16T18:51:36.392154Z"), none));
     }
@@ -486,7 +486,7 @@ import com.io7m.jnull.NullCheck;
           e.getID(),
           "http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F26787");
       final OptionType<Calendar> none = Option.none();
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityOnLoan
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
         .get(OPDSRFC3339Formatter
           .parseRFC3339Date("2015-04-03T18:03:03.275883Z"), none));
     }
@@ -501,7 +501,7 @@ import com.io7m.jnull.NullCheck;
         .assertEquals(
           e.getID(),
           "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fcgaxr9");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityOnLoan
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
         .get(
           OPDSRFC3339Formatter.parseRFC3339Date("2015-03-13T13:38:19Z"),
           Option.some(OPDSRFC3339Formatter

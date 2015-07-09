@@ -25,8 +25,26 @@ public final class CatalogAcquisitionButton extends Button implements
     super(in_activity);
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
-    this.setText(NullCheck.notNull(rr
-      .getString(R.string.catalog_book_download)));
+
+    switch (in_acq.getType()) {
+      case ACQUISITION_BORROW:
+      {
+        this.setText(NullCheck.notNull(rr
+          .getString(R.string.catalog_book_borrow)));
+        break;
+      }
+      case ACQUISITION_BUY:
+      case ACQUISITION_GENERIC:
+      case ACQUISITION_OPEN_ACCESS:
+      case ACQUISITION_SAMPLE:
+      case ACQUISITION_SUBSCRIBE:
+      {
+        this.setText(NullCheck.notNull(rr
+          .getString(R.string.catalog_book_download)));
+        break;
+      }
+    }
+
     this.setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
     this

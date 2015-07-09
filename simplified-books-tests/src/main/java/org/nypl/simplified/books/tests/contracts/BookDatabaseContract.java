@@ -13,36 +13,33 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializer;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSJSONParser;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializer;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 
-@SuppressWarnings({
-  "boxing",
-  "synthetic-access",
-  "null",
-  "resource",
-  "static-method" }) public final class BookDatabaseContract implements
+@SuppressWarnings({ "null" }) public final class BookDatabaseContract implements
   BookDatabaseContractType
 {
   @Override public void testBooksDatabaseInit()
     throws Exception
   {
-    final OPDSAcquisitionFeedEntryParserType in_parser =
-      OPDSAcquisitionFeedEntryParser.newParser();
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-      OPDSAcquisitionFeedEntrySerializer.newSerializer();
+    final OPDSJSONSerializerType in_json_serializer =
+      OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
     final File in_directory = File.createTempFile("pre", "");
     in_directory.delete();
 
     final BookDatabaseType bd =
-      BookDatabase.newDatabase(in_parser, in_serializer, in_directory);
+      BookDatabase.newDatabase(
+        in_json_serializer,
+        in_json_parser,
+        in_directory);
 
     bd.create();
     TestUtilities.assertTrue(in_directory.isDirectory());
@@ -53,15 +50,17 @@ import com.io7m.jfunctional.Unit;
   @Override public void testBooksDatabaseEntry()
     throws Exception
   {
-    final OPDSAcquisitionFeedEntryParserType in_parser =
-      OPDSAcquisitionFeedEntryParser.newParser();
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-      OPDSAcquisitionFeedEntrySerializer.newSerializer();
+    final OPDSJSONSerializerType in_json_serializer =
+      OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
     final File in_directory = File.createTempFile("pre", "");
     in_directory.delete();
 
     final BookDatabaseType bd =
-      BookDatabase.newDatabase(in_parser, in_serializer, in_directory);
+      BookDatabase.newDatabase(
+        in_json_serializer,
+        in_json_parser,
+        in_directory);
     bd.create();
 
     final OPDSAcquisitionFeedEntry ee;
@@ -89,14 +88,16 @@ import com.io7m.jfunctional.Unit;
   @Override public void testBooksDatabaseInitFailed()
     throws Exception
   {
-    final OPDSAcquisitionFeedEntryParserType in_parser =
-      OPDSAcquisitionFeedEntryParser.newParser();
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-      OPDSAcquisitionFeedEntrySerializer.newSerializer();
+    final OPDSJSONSerializerType in_json_serializer =
+      OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
     final File in_directory = File.createTempFile("pre", "");
 
     final BookDatabaseType bd =
-      BookDatabase.newDatabase(in_parser, in_serializer, in_directory);
+      BookDatabase.newDatabase(
+        in_json_serializer,
+        in_json_parser,
+        in_directory);
 
     TestUtilities.expectException(
       IOException.class,

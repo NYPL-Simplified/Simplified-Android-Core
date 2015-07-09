@@ -17,17 +17,17 @@ import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
-import org.nypl.simplified.downloader.core.Downloader;
-import org.nypl.simplified.downloader.core.DownloaderConfiguration;
+import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializer;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
+import org.nypl.simplified.opds.core.OPDSJSONParser;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializer;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -52,24 +52,21 @@ import com.io7m.jnull.NullCheck;
       .create("http://circulation.alpha.librarysimplified.org/loans/"));
 
     final DownloaderType d =
-      Downloader.newDownloader(exec, http, DownloaderConfiguration
-        .newBuilder(new File("/tmp/downloads"))
-        .build());
+      DownloaderHTTP.newDownloader(exec, new File("/tmp/downloader"), http);
 
-    final OPDSAcquisitionFeedEntryParserType in_parser =
-      OPDSAcquisitionFeedEntryParser.newParser();
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-      OPDSAcquisitionFeedEntrySerializer.newSerializer();
+    final OPDSJSONSerializerType in_json_serializer =
+      OPDSJSONSerializer.newSerializer();
     final BooksControllerConfiguration books_config =
       books_config_builder.build();
+    final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
     final AccountsType books =
       BooksController.newBooks(
         exec,
         parser,
         http,
         d,
-        in_parser,
-        in_serializer,
+        in_json_serializer,
+        in_json_parser,
         books_config);
 
     final AccountBarcode barcode = new AccountBarcode("4545499");

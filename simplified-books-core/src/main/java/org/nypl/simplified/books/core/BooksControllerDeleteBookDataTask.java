@@ -1,8 +1,12 @@
 package org.nypl.simplified.books.core;
 
+import java.util.Calendar;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 final class BooksControllerDeleteBookDataTask implements Runnable
@@ -36,7 +40,10 @@ final class BooksControllerDeleteBookDataTask implements Runnable
         this.book_database.getBookDatabaseEntry(this.book_id);
       e.destroyBookData();
 
-      this.books_status.booksStatusUpdate(new BookStatusLoaned(this.book_id));
+      final OptionType<Calendar> none = Option.none();
+      this.books_status.booksStatusUpdate(new BookStatusLoaned(
+        this.book_id,
+        none));
     } catch (final Throwable e) {
       BooksControllerDeleteBookDataTask.LOG.error(
         "could not destroy book data for {}: ",

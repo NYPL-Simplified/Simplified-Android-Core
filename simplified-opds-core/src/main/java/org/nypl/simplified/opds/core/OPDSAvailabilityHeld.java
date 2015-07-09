@@ -9,19 +9,21 @@ import com.io7m.jnull.Nullable;
  * The book is on hold.
  */
 
-public final class OPDSAvailabilityOnHold implements OPDSAvailabilityType
+public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
 {
-  public static OPDSAvailabilityOnHold get(
+  private static final long serialVersionUID = 1L;
+
+  public static OPDSAvailabilityHeld get(
     final Calendar in_start_date,
     final int in_position)
   {
-    return new OPDSAvailabilityOnHold(in_start_date, in_position);
+    return new OPDSAvailabilityHeld(in_start_date, in_position);
   }
 
   private final int      position;
   private final Calendar start_date;
 
-  private OPDSAvailabilityOnHold(
+  private OPDSAvailabilityHeld(
     final Calendar in_start_date,
     final int in_position)
   {
@@ -41,7 +43,7 @@ public final class OPDSAvailabilityOnHold implements OPDSAvailabilityType
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final OPDSAvailabilityOnHold other = (OPDSAvailabilityOnHold) obj;
+    final OPDSAvailabilityHeld other = (OPDSAvailabilityHeld) obj;
     return (this.position == other.position)
       && this.start_date.equals(other.start_date);
   }
@@ -69,6 +71,6 @@ public final class OPDSAvailabilityOnHold implements OPDSAvailabilityType
     final OPDSAvailabilityMatcherType<A, E> m)
     throws E
   {
-    return m.onHold(this);
+    return m.onHeld(this);
   }
 }

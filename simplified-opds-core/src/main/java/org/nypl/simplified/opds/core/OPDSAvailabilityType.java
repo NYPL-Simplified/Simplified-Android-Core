@@ -1,5 +1,7 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * The type of book availability.
@@ -11,7 +13,7 @@ package org.nypl.simplified.opds.core;
  * </p>
  */
 
-public interface OPDSAvailabilityType
+public interface OPDSAvailabilityType extends Serializable
 {
   /**
    * Match the type of availability.
@@ -25,5 +27,5 @@ public interface OPDSAvailabilityType
 
   <A, E extends Exception> A matchAvailability(
     OPDSAvailabilityMatcherType<A, E> m)
-      throws E;
+    throws E;
 }

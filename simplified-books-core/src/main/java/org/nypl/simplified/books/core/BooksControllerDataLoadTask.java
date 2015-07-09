@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.nypl.simplified.downloader.core.DownloaderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,20 +23,17 @@ final class BooksControllerDataLoadTask implements Runnable
 
   private final BookDatabaseType                                  books_database;
   private final BooksStatusCacheType                              books_status;
-  private final DownloaderType                                    downloader;
   private final AccountDataLoadListenerType                       listener;
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
 
   BooksControllerDataLoadTask(
     final BookDatabaseType in_books_database,
     final BooksStatusCacheType in_books_status,
-    final DownloaderType in_downloader,
     final AccountDataLoadListenerType in_listener,
     final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login)
   {
     this.books_database = NullCheck.notNull(in_books_database);
     this.books_status = NullCheck.notNull(in_books_status);
-    this.downloader = NullCheck.notNull(in_downloader);
     this.listener = NullCheck.notNull(in_listener);
     this.login = NullCheck.notNull(in_login);
   }
@@ -50,9 +46,7 @@ final class BooksControllerDataLoadTask implements Runnable
       final BookID id = book_dir.getID();
       try {
         final BookSnapshot snap = book_dir.getSnapshot();
-        final BookStatusLoanedType status =
-          BookStatus.fromBookSnapshot(this.downloader, id, snap);
-
+        final BookStatusType status = BookStatus.fromSnapshot(id, snap);
         this.books_status.booksStatusUpdate(status);
         this.books_status.booksSnapshotUpdate(id, snap);
         this.listener.onAccountDataBookLoadSucceeded(id, snap);

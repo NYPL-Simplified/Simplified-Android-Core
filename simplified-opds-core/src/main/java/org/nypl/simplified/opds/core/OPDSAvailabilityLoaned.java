@@ -10,19 +10,21 @@ import com.io7m.jnull.Nullable;
  * The book is loaned out to the user.
  */
 
-public final class OPDSAvailabilityOnLoan implements OPDSAvailabilityType
+public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
 {
-  public static OPDSAvailabilityOnLoan get(
+  private static final long serialVersionUID = 1L;
+
+  public static OPDSAvailabilityLoaned get(
     final Calendar in_start_date,
     final OptionType<Calendar> in_end_date)
   {
-    return new OPDSAvailabilityOnLoan(in_start_date, in_end_date);
+    return new OPDSAvailabilityLoaned(in_start_date, in_end_date);
   }
 
   private final OptionType<Calendar> end_date;
   private final Calendar             start_date;
 
-  private OPDSAvailabilityOnLoan(
+  private OPDSAvailabilityLoaned(
     final Calendar in_start_date,
     final OptionType<Calendar> in_end_date)
   {
@@ -42,7 +44,7 @@ public final class OPDSAvailabilityOnLoan implements OPDSAvailabilityType
     if (this.getClass() != obj.getClass()) {
       return false;
     }
-    final OPDSAvailabilityOnLoan other = (OPDSAvailabilityOnLoan) obj;
+    final OPDSAvailabilityLoaned other = (OPDSAvailabilityLoaned) obj;
     return this.end_date.equals(other.end_date)
       && this.start_date.equals(other.start_date);
   }
@@ -70,6 +72,6 @@ public final class OPDSAvailabilityOnLoan implements OPDSAvailabilityType
     final OPDSAvailabilityMatcherType<A, E> m)
     throws E
   {
-    return m.onLoan(this);
+    return m.onLoaned(this);
   }
 }

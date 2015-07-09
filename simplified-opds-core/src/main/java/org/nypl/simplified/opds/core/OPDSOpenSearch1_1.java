@@ -11,7 +11,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 /**
  * The type of Open Search 1.1 descriptions.
  *
- * @see http://www.opensearch.org/Specifications/OpenSearch/1.1
+ * @see <a href="http://www.opensearch.org/Specifications/OpenSearch/1.1">OpenSearch 1.1</a>
  */
 
 public final class OPDSOpenSearch1_1

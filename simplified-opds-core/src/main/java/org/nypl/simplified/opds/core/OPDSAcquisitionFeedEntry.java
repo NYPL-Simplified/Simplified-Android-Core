@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -19,10 +20,13 @@ import com.io7m.jnull.Nullable;
  * The type of entries in acquisition feeds.
  */
 
-@SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeedEntry
+@SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeedEntry implements
+  Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   private static final class Builder implements
-  OPDSAcquisitionFeedEntryBuilderType
+    OPDSAcquisitionFeedEntryBuilderType
   {
     private final List<OPDSAcquisition>  acquisitions;
     private final List<String>           authors;

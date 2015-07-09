@@ -6,6 +6,7 @@ package org.nypl.simplified.opds.core;
 
 public final class OPDSAvailabilityHoldable implements OPDSAvailabilityType
 {
+  private static final long                     serialVersionUID = 1L;
   private static final OPDSAvailabilityHoldable INSTANCE;
 
   static {
@@ -19,7 +20,7 @@ public final class OPDSAvailabilityHoldable implements OPDSAvailabilityType
 
   @Override public <A, E extends Exception> A matchAvailability(
     final OPDSAvailabilityMatcherType<A, E> m)
-      throws E
+    throws E
   {
     return m.onHoldable(this);
   }

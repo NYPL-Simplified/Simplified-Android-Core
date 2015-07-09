@@ -8,16 +8,16 @@ package org.nypl.simplified.opds.core;
 
 public interface OPDSAvailabilityMatcherType<A, E extends Exception>
 {
-  A onHold(
-    OPDSAvailabilityOnHold a)
+  A onHeld(
+    OPDSAvailabilityHeld a)
       throws E;
 
   A onHoldable(
     OPDSAvailabilityHoldable a)
       throws E;
 
-  A onLoan(
-    OPDSAvailabilityOnLoan a)
+  A onLoaned(
+    OPDSAvailabilityLoaned a)
       throws E;
 
   A onLoanable(

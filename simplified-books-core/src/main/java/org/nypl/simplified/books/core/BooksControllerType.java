@@ -33,18 +33,17 @@ public interface BooksControllerType extends BooksStatusCacheType
     BookID id);
 
   /**
-   * Acknowledge the cancelled or completed download of the book with the
-   * given <tt>id</tt> .
-   */
-
-  void bookDownloadAcknowledge(
-    BookID id);
-
-  /**
    * Cancel the download of the book with the given <tt>id</tt>.
    */
 
   void bookDownloadCancel(
+    BookID id);
+
+  /**
+   * Acknowledge the failed download of book <tt>id</tt>, if any.
+   */
+
+  void bookDownloadAcknowledge(
     BookID id);
 
   /**

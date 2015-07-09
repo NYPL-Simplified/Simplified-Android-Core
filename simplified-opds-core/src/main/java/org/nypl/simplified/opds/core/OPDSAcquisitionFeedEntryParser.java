@@ -226,7 +226,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
               }
             });
 
-        return OPDSAvailabilityOnLoan.get(start, end);
+        return OPDSAvailabilityLoaned.get(start, end);
       }
 
       if ("hold".equals(ee_name)) {
@@ -245,7 +245,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
                 OPDSFeedConstants.SCHEMA_URI,
                 "position")).intValue();
 
-          return OPDSAvailabilityOnHold.get(start, pos);
+          return OPDSAvailabilityHeld.get(start, pos);
         } catch (final NumberFormatException x) {
           throw new OPDSParseException("Error parsing hold position", x);
         }

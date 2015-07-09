@@ -1,5 +1,8 @@
 package org.nypl.simplified.books.core;
 
+import java.util.Calendar;
+
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -10,12 +13,15 @@ import com.io7m.jnull.NullCheck;
 public final class BookStatusRequestingDownload implements
   BookStatusLoanedType
 {
-  private final BookID id;
+  private final BookID               id;
+  private final OptionType<Calendar> loan_end_date;
 
   public BookStatusRequestingDownload(
-    final BookID in_id)
+    final BookID in_id,
+    final OptionType<Calendar> in_loan_end_date)
   {
     this.id = NullCheck.notNull(in_id);
+    this.loan_end_date = NullCheck.notNull(in_loan_end_date);
   }
 
   @Override public BookID getID()
@@ -44,5 +50,15 @@ public final class BookStatusRequestingDownload implements
     b.append(this.id);
     b.append("]");
     return NullCheck.notNull(b.toString());
+  }
+
+  @Override public OptionType<Calendar> getLoanExpiryDate()
+  {
+    return this.loan_end_date;
+  }
+
+  @Override public BookStatusPriorityOrdering getPriority()
+  {
+    return BookStatusPriorityOrdering.BOOK_STATUS_DOWNLOAD_REQUESTING;
   }
 }

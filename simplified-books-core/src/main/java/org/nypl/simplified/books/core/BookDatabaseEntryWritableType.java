@@ -79,16 +79,4 @@ public interface BookDatabaseEntryWritableType
   void setCover(
     OptionType<File> in_cover)
     throws IOException;
-
-  /**
-   * Set the download ID of the book.
-   *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  void setDownloadID(
-    long did)
-    throws IOException;
-
 }

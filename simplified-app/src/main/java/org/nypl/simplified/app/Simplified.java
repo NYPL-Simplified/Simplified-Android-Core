@@ -31,21 +31,21 @@ import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
-import org.nypl.simplified.downloader.core.Downloader;
-import org.nypl.simplified.downloader.core.DownloaderConfiguration;
-import org.nypl.simplified.downloader.core.DownloaderConfigurationBuilderType;
+import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializer;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
+import org.nypl.simplified.opds.core.OPDSJSONParser;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializer;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.tenprint.TenPrintGenerator;
@@ -87,7 +87,6 @@ import com.io7m.jnull.Nullable;
     private final Context                   context;
     private final CatalogBookCoverGenerator cover_generator;
     private final BookCoverProviderType     cover_provider;
-    private final DownloaderType            downloader;
     private final ExecutorService           exec_books;
     private final ExecutorService           exec_catalog_feeds;
     private final ExecutorService           exec_covers;
@@ -97,6 +96,7 @@ import com.io7m.jnull.Nullable;
     private final HTTPType                  http;
     private final ScreenSizeControllerType  screen;
     private final AtomicBoolean             synced;
+    private final DownloaderType            downloader;
 
     public CatalogAppServices(
       final Context in_context,
@@ -122,8 +122,11 @@ import com.io7m.jnull.Nullable;
 
       final OPDSAcquisitionFeedEntryParserType in_entry_parser =
         OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_entry_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
+
       final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
       final OPDSSearchParserType s = OPDSSearchParser.newParser();
       this.feed_loader =
@@ -157,18 +160,12 @@ import com.io7m.jnull.Nullable;
       CatalogAppServices.LOG_CA.debug("downloads: {}", downloads_dir);
       CatalogAppServices.LOG_CA.debug("books:     {}", books_dir);
 
-      final DownloaderConfigurationBuilderType dcb =
-        DownloaderConfiguration.newBuilder(downloads_dir);
-      dcb.setReadSleepTime(rr
-        .getInteger(R.integer.debug_downloader_sleep_time_ms));
-      final DownloaderConfiguration downloader_config = dcb.build();
-
       this.http = HTTP.newHTTP();
       this.downloader =
-        Downloader.newDownloader(
-          this.exec_downloader,
-          this.http,
-          downloader_config);
+        DownloaderHTTP.newDownloader(
+          this.exec_books,
+          downloads_dir,
+          this.http);
 
       final BooksControllerConfigurationBuilderType bcb =
         BooksControllerConfiguration.newBuilder(books_dir);
@@ -180,8 +177,8 @@ import com.io7m.jnull.Nullable;
           p,
           this.http,
           this.downloader,
-          in_entry_parser,
-          in_entry_serializer,
+          in_json_serializer,
+          in_json_parser,
           books_config);
 
       /**
