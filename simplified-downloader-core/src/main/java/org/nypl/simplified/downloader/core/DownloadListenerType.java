@@ -1,45 +1,36 @@
 package org.nypl.simplified.downloader.core;
 
 import java.io.File;
+import java.io.IOException;
+
+import com.io7m.jfunctional.OptionType;
+
+/**
+ * The type of download status listeners.
+ */
 
 public interface DownloadListenerType
 {
-  void downloadCancelled(
-    DownloadSnapshot snap);
+  void onDownloadStarted(
+    DownloadType d,
+    long expected_total);
 
-  void downloadCleanedUp(
-    DownloadSnapshot snap);
+  void onDownloadDataReceived(
+    DownloadType d,
+    long running_total,
+    long expected_total);
 
-  void downloadCompleted(
-    DownloadSnapshot snap);
+  void onDownloadCancelled(
+    DownloadType d);
 
-  void downloadCompletedTake(
-    DownloadSnapshot snap,
-    File file_data);
+  void onDownloadFailed(
+    DownloadType d,
+    int status,
+    long running_total,
+    OptionType<Exception> exception);
 
-  void downloadCompletedTakeFailed(
-    DownloadSnapshot snap,
-    Throwable x);
-
-  void downloadCompletedTaken(
-    DownloadSnapshot snap);
-
-  void downloadFailed(
-    DownloadSnapshot snap,
-    Throwable e);
-
-  void downloadPaused(
-    DownloadSnapshot snap);
-
-  void downloadReceivedData(
-    DownloadSnapshot snap);
-
-  void downloadResumed(
-    DownloadSnapshot snap);
-
-  void downloadStarted(
-    DownloadSnapshot snap);
-
-  void downloadStartedReceivingData(
-    DownloadSnapshot snap);
+  void onDownloadCompleted(
+    DownloadType d,
+    File file)
+    throws IOException;
 }

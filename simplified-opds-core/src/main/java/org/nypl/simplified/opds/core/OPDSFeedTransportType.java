@@ -15,5 +15,5 @@ public interface OPDSFeedTransportType
 {
   InputStream getStream(
     final URI uri)
-    throws IOException;
+      throws IOException;
 }

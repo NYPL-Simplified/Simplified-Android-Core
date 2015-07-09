@@ -23,6 +23,10 @@ public final class OPDSFeedConstants
   public static final URI    THUMBNAIL_URI;
   public static final String THUMBNAIL_URI_TEXT;
   public static final String DUBLIN_CORE_TERMS_URI_TEXT;
+  public static final String SCHEMA_URI_TEXT;
+  public static final URI    SCHEMA_URI;
+  public static final URI    SIMPLIFIED_URI;
+  public static final String SIMPLIFIED_URI_TEXT;
 
   static {
     ATOM_URI = NullCheck.notNull(URI.create("http://www.w3.org/2005/Atom"));
@@ -58,6 +62,15 @@ public final class OPDSFeedConstants
     IMAGE_URI = NullCheck.notNull(URI.create("http://opds-spec.org/image"));
     IMAGE_URI_TEXT =
       NullCheck.notNull(OPDSFeedConstants.IMAGE_URI.toString());
+
+    SCHEMA_URI = NullCheck.notNull(URI.create("http://schema.org/"));
+    SCHEMA_URI_TEXT =
+      NullCheck.notNull(OPDSFeedConstants.SCHEMA_URI.toString());
+
+    SIMPLIFIED_URI =
+      NullCheck.notNull(URI.create("http://librarysimplified.org/terms/"));
+    SIMPLIFIED_URI_TEXT =
+      NullCheck.notNull(OPDSFeedConstants.SIMPLIFIED_URI.toString());
   }
 
   private OPDSFeedConstants()

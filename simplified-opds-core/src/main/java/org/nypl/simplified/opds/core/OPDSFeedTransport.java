@@ -26,7 +26,7 @@ public final class OPDSFeedTransport
     return new OPDSFeedTransportType() {
       @Override public InputStream getStream(
         final URI uri)
-        throws IOException
+          throws IOException
       {
         return NullCheck.notNull(NullCheck.notNull(uri.toURL()).openStream());
       }

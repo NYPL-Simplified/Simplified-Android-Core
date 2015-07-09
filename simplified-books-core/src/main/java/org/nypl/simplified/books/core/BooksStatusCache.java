@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.nypl.simplified.books.core.BookStatus.RelativeImportance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,36 +107,26 @@ public final class BooksStatusCache extends Observable implements
     final BookID id = NullCheck.notNull(update).getID();
     if (this.status.containsKey(id)) {
       final BookStatusType current = NullCheck.notNull(this.status.get(id));
-      final RelativeImportance compared =
-        BookStatus.compareImportance(current, update);
-      switch (compared) {
-        case IMPORTANCE_LESS_THAN:
-        {
-          BooksStatusCache.LOG.debug(
-            "current {} < {}, updating",
-            current,
-            update);
-          this.put(update);
-          break;
-        }
-        case IMPORTANCE_SAME:
-        {
-          BooksStatusCache.LOG.debug(
-            "current {} == {}, updating",
-            current,
-            update);
-          this.put(update);
-          break;
-        }
-        case IMPORTANCE_MORE_THAN:
-        {
-          BooksStatusCache.LOG.debug(
-            "current {} > {}, not updating",
-            current,
-            update);
-          break;
-        }
+      final BookStatusPriorityOrdering current_p = current.getPriority();
+      final BookStatusPriorityOrdering update_p = update.getPriority();
+
+      if (current_p.getPriority() <= update_p.getPriority()) {
+        BooksStatusCache.LOG.debug(
+          "current {} <= {}, updating",
+          current,
+          update);
+        this.put(update);
+        return;
       }
+
+      if (current_p.getPriority() > update_p.getPriority()) {
+        BooksStatusCache.LOG.debug(
+          "current {} > {}, not updating",
+          current,
+          update);
+        return;
+      }
+
     } else {
       this.booksStatusUpdate(update);
     }

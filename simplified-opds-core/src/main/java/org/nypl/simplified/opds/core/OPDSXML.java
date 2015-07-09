@@ -34,7 +34,7 @@ public final class OPDSXML
     final Element node,
     final URI namespace,
     final String name)
-  {
+    {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -48,14 +48,14 @@ public final class OPDSXML
     }
 
     return xs;
-  }
+    }
 
   public static List<Element> getChildElementsWithNameNonEmpty(
     final Element node,
     final URI namespace,
     final String name)
-    throws OPDSParseException
-  {
+      throws OPDSParseException
+      {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -79,13 +79,13 @@ public final class OPDSXML
     m.append(name);
     m.append("\n");
     throw new OPDSParseException(NullCheck.notNull(m.toString()));
-  }
+      }
 
   public static String getFirstChildElementTextWithName(
     final Element node,
     final URI namespace,
     final String name)
-    throws OPDSParseException
+      throws OPDSParseException
   {
     final Element e =
       OPDSXML.getFirstChildElementWithName(node, namespace, name);
@@ -96,7 +96,7 @@ public final class OPDSXML
     final Element node,
     final URI namespace,
     final String name)
-  {
+    {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -113,13 +113,13 @@ public final class OPDSXML
     }
 
     return Option.none();
-  }
+    }
 
   public static Element getFirstChildElementWithName(
     final Element node,
     final URI namespace,
     final String name)
-    throws OPDSParseException
+      throws OPDSParseException
   {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
@@ -150,7 +150,7 @@ public final class OPDSXML
     final Element node,
     final URI namespace,
     final String name)
-  {
+    {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -166,11 +166,11 @@ public final class OPDSXML
     }
 
     return Option.none();
-  }
+    }
 
   public static OptionType<String> getNodeNamespace(
     final Element e)
-  {
+    {
     NullCheck.notNull(e);
 
     final String ns = e.getNamespaceURI();
@@ -178,11 +178,11 @@ public final class OPDSXML
       return Option.some(ns);
     }
     return Option.none();
-  }
+    }
 
   public static Element nodeAsElement(
     final Node node)
-    throws OPDSParseException
+      throws OPDSParseException
   {
     NullCheck.notNull(node);
 
@@ -199,7 +199,7 @@ public final class OPDSXML
     final Node node,
     final URI namespace,
     final String name)
-    throws OPDSParseException
+      throws OPDSParseException
   {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
@@ -242,7 +242,7 @@ public final class OPDSXML
   public static void serializeDocumentToStream(
     final Document d,
     final OutputStream o)
-    throws OPDSFeedSerializationException
+      throws OPDSFeedSerializationException
   {
     NullCheck.notNull(d);
     NullCheck.notNull(o);

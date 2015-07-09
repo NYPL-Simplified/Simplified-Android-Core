@@ -41,7 +41,6 @@ import com.io7m.jnull.NullCheck;
 
   private final BookDatabaseType             books_database;
   private final BooksControllerConfiguration config;
-  private final DownloaderType               downloader;
   private final OPDSFeedParserType           feed_parser;
   private final HTTPType                     http;
   private final AccountSyncListenerType      listener;
@@ -62,7 +61,7 @@ import com.io7m.jnull.NullCheck;
     this.http = NullCheck.notNull(in_http);
     this.feed_parser = NullCheck.notNull(in_feed_parser);
     this.listener = NullCheck.notNull(in_listener);
-    this.downloader = NullCheck.notNull(in_downloader);
+    NullCheck.notNull(in_downloader);
   }
 
   @Override public void run()
@@ -177,8 +176,7 @@ import com.io7m.jnull.NullCheck;
     book_dir.setCover(cover);
 
     final BookSnapshot snap = book_dir.getSnapshot();
-    final BookStatusLoanedType status =
-      BookStatus.fromBookSnapshot(this.downloader, book_id, snap);
+    final BookStatusType status = BookStatus.fromSnapshot(book_id, snap);
 
     this.status_cache.booksStatusUpdateIfMoreImportant(status);
     this.status_cache.booksSnapshotUpdate(book_id, snap);

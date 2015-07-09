@@ -22,7 +22,7 @@ public final class OPDSRFC3339Formatter
 
   public static Calendar parseRFC3339Date(
     final String text)
-    throws ParseException
+      throws ParseException
   {
     NullCheck.notNull(text);
 
@@ -58,7 +58,7 @@ public final class OPDSRFC3339Formatter
     String post = text.substring(text.lastIndexOf('-'));
     post =
       post.substring(0, post.indexOf(':'))
-        + post.substring(post.indexOf(':') + 1);
+      + post.substring(post.indexOf(':') + 1);
 
     final String new_date = pre + post;
     final SimpleDateFormat df0 =

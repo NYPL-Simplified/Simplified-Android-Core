@@ -19,7 +19,7 @@ public interface OPDSAcquisitionFeedEntryParserType
 
   OPDSAcquisitionFeedEntry parseEntry(
     final Element e)
-    throws OPDSParseException;
+      throws OPDSParseException;
 
   /**
    * Parse the feed entry represented by the given stream <tt>s</tt>.
@@ -34,5 +34,5 @@ public interface OPDSAcquisitionFeedEntryParserType
 
   OPDSAcquisitionFeedEntry parseEntryStream(
     final InputStream s)
-    throws OPDSParseException;
+      throws OPDSParseException;
 }

@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Calendar;
 
@@ -11,8 +12,10 @@ import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-final class OPDSAtom
+final class OPDSAtom implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   static String findID(
     final Element ee)
     throws OPDSParseException

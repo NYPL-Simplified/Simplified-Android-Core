@@ -1,101 +1,31 @@
 package org.nypl.simplified.downloader.core;
 
 import java.net.URI;
-import java.util.Map;
 
 import org.nypl.simplified.http.core.HTTPAuthType;
 
 import com.io7m.jfunctional.OptionType;
 
 /**
- * The type of download managers.
+ * The type of downloaders.
  */
 
 public interface DownloaderType
 {
   /**
-   * Acknowledge a completed download, removing it from the downloader. Has no
-   * effect if the download is still in progress, or if the download does not
-   * exist.
+   * Download the file at the given URI.
    *
-   * @param id
-   *          The id of the download
-   */
-
-  void downloadAcknowledge(
-    final long id);
-
-  /**
-   * Cancel the given download. Has no effect if the download is already
-   * completed, or does not exist.
-   *
-   * @param id
-   *          The unique identifier of the download in progress
-   */
-
-  void downloadCancel(
-    long id);
-
-  /**
-   * Halt all downloads and delete any data.
-   */
-
-  void downloadDestroyAll();
-
-  /**
-   * Queue a URI for downloading. If the URI is already in progress, return
-   * the identifier of the download.
-   *
-   * @param auth
-   *          Authentication details
    * @param uri
    *          The URI
-   * @param title
-   *          A human-readable name for the download
+   * @param auth
+   *          The authentication data, if any
    * @param listener
-   *          A listener that will be notified of download state changes
-   *
-   * @return The unique identifier of the download in progress
+   *          The listener
+   * @return A download
    */
 
-  long downloadEnqueue(
-    final OptionType<HTTPAuthType> auth,
-    final URI uri,
-    final String title,
-    final DownloadListenerType listener);
-
-  /**
-   * Pause the given download. Has no effect if the download is already
-   * completed, or does not exist.
-   *
-   * @param id
-   *          The unique identifier of the download in progress
-   */
-
-  void downloadPause(
-    long id);
-
-  /**
-   * Resume the given download. Has no effect if the download is not paused,
-   * or does not exist.
-   *
-   * @param id
-   *          The unique identifier of the download in progress
-   */
-
-  void downloadResume(
-    long id);
-
-  /**
-   * @return A snapshot of the given download
-   */
-
-  OptionType<DownloadSnapshot> downloadStatusSnapshot(
-    long id);
-
-  /**
-   * @return A snapshot of all the current downloads
-   */
-
-  Map<Long, DownloadSnapshot> downloadStatusSnapshotAll();
+  DownloadType download(
+    URI uri,
+    OptionType<HTTPAuthType> auth,
+    DownloadListenerType listener);
 }

@@ -14,8 +14,7 @@ import com.io7m.jnull.Nullable;
 
 public final class OPDSCategory implements Serializable
 {
-  private static final long serialVersionUID = 2L;
-
+  private static final long serialVersionUID = 1L;
   private final String      scheme;
   private final String      term;
 

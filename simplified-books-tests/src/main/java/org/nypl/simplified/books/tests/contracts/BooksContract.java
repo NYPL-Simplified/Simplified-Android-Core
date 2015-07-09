@@ -28,8 +28,7 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.downloader.core.Downloader;
-import org.nypl.simplified.downloader.core.DownloaderConfiguration;
+import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
@@ -41,10 +40,11 @@ import org.nypl.simplified.http.core.HTTPResultOK;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializer;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
+import org.nypl.simplified.opds.core.OPDSJSONParser;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializer;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.io7m.jfunctional.OptionType;
@@ -231,15 +231,15 @@ import com.io7m.junreachable.UnreachableCodeException;
       final BooksControllerConfiguration in_config = bcb.build();
       final HTTPType in_http = BooksContract.makeExceptionHTTP();
 
-      final OPDSAcquisitionFeedEntryParserType in_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
       final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
-          .build());
+        DownloaderHTTP.newDownloader(
+          exec,
+          DirectoryUtilities.directoryCreateTemporary(),
+          in_http);
 
       final BooksType b =
         BooksController
@@ -249,8 +249,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               .newParser()),
             in_http,
             d,
-            in_parser,
-            in_serializer,
+            in_json_serializer,
+            in_json_parser,
             in_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
@@ -312,15 +312,15 @@ import com.io7m.junreachable.UnreachableCodeException;
         BooksControllerConfiguration.newBuilder(tmp);
       final BooksControllerConfiguration in_config = bcb.build();
       final HTTPType in_http = BooksContract.makeExceptionHTTP();
-      final OPDSAcquisitionFeedEntryParserType in_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
       final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
-          .build());
+        DownloaderHTTP.newDownloader(
+          exec,
+          DirectoryUtilities.directoryCreateTemporary(),
+          in_http);
 
       final BooksType b =
         BooksController
@@ -330,8 +330,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               .newParser()),
             in_http,
             d,
-            in_parser,
-            in_serializer,
+            in_json_serializer,
+            in_json_parser,
             in_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
@@ -398,14 +398,16 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AccountPIN pin = new AccountPIN("pin");
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
-      final OPDSAcquisitionFeedEntryParserType in_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
+
       final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
-          .build());
+        DownloaderHTTP.newDownloader(
+          exec,
+          DirectoryUtilities.directoryCreateTemporary(),
+          in_http);
+
       final BooksType b =
         BooksController
           .newBooks(
@@ -414,8 +416,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               .newParser()),
             in_http,
             d,
-            in_parser,
-            in_serializer,
+            in_json_serializer,
+            in_json_parser,
             in_config);
 
       final AtomicBoolean rejected = new AtomicBoolean(false);
@@ -471,14 +473,15 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
-      final OPDSAcquisitionFeedEntryParserType in_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
+
       final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
-          .build());
+        DownloaderHTTP.newDownloader(
+          exec,
+          DirectoryUtilities.directoryCreateTemporary(),
+          in_http);
 
       final BooksType b =
         BooksController
@@ -488,8 +491,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               .newParser()),
             in_http,
             d,
-            in_parser,
-            in_serializer,
+            in_json_serializer,
+            in_json_parser,
             in_config);
 
       final AtomicBoolean failed = new AtomicBoolean(false);
@@ -545,15 +548,15 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
-      final OPDSAcquisitionFeedEntryParserType in_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
       final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
-          .build());
+        DownloaderHTTP.newDownloader(
+          exec,
+          DirectoryUtilities.directoryCreateTemporary(),
+          in_http);
 
       final BooksType b =
         BooksController
@@ -563,8 +566,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               .newParser()),
             in_http,
             d,
-            in_parser,
-            in_serializer,
+            in_json_serializer,
+            in_json_parser,
             in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
@@ -681,14 +684,15 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
-      final OPDSAcquisitionFeedEntryParserType in_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
+
       final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
-          .build());
+        DownloaderHTTP.newDownloader(
+          exec,
+          DirectoryUtilities.directoryCreateTemporary(),
+          in_http);
 
       final BooksType b =
         BooksController
@@ -698,8 +702,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               .newParser()),
             in_http,
             d,
-            in_parser,
-            in_serializer,
+            in_json_serializer,
+            in_json_parser,
             in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
@@ -882,14 +886,15 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
-      final OPDSAcquisitionFeedEntryParserType in_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
-      final OPDSAcquisitionFeedEntrySerializerType in_serializer =
-        OPDSAcquisitionFeedEntrySerializer.newSerializer();
+      final OPDSJSONSerializerType in_json_serializer =
+        OPDSJSONSerializer.newSerializer();
+      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
+
       final DownloaderType d =
-        Downloader.newDownloader(exec, in_http, DownloaderConfiguration
-          .newBuilder(DirectoryUtilities.directoryCreateTemporary())
-          .build());
+        DownloaderHTTP.newDownloader(
+          exec,
+          DirectoryUtilities.directoryCreateTemporary(),
+          in_http);
 
       final BooksType b =
         BooksController
@@ -899,8 +904,8 @@ import com.io7m.junreachable.UnreachableCodeException;
               .newParser()),
             in_http,
             d,
-            in_parser,
-            in_serializer,
+            in_json_serializer,
+            in_json_parser,
             in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
