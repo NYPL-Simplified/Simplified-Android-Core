@@ -335,8 +335,19 @@ import com.squareup.picasso.Callback;
      * Manually construct an acquisition controller for the retry button.
      */
 
-    final OPDSAcquisition a =
+    final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(oe.getAcquisitions());
+
+    /**
+     * Theoretically, if the book has ever been downloaded, then the
+     * acquisition list must have contained one usable acquisition relation...
+     */
+
+    if (a_opt.isNone()) {
+      throw new UnreachableCodeException();
+    }
+
+    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
         this.activity,

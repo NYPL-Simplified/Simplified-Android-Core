@@ -3,7 +3,6 @@ package org.nypl.simplified.app.catalog;
 import java.util.List;
 
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
@@ -15,6 +14,9 @@ import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
@@ -47,21 +49,24 @@ public final class CatalogAcquisitionButtons
     final BookID book_id = in_e.getBookID();
     final OPDSAcquisitionFeedEntry eo = in_e.getFeedEntry();
 
-    final OPDSAcquisition a =
+    final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
-    final CatalogAcquisitionButton b =
-      new CatalogAcquisitionButton(in_act, in_books, book_id, a, in_e);
-    in_vg.addView(b);
+    if (a_opt.isSome()) {
+      final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
+      final CatalogAcquisitionButton b =
+        new CatalogAcquisitionButton(in_act, in_books, book_id, a, in_e);
+      in_vg.addView(b);
+    }
   }
 
-  public static OPDSAcquisition getPreferredAcquisition(
+  public static OptionType<OPDSAcquisition> getPreferredAcquisition(
     final List<OPDSAcquisition> acquisitions)
   {
     NullCheck.notNull(acquisitions);
 
-    Assertions.checkPrecondition(
-      acquisitions.isEmpty() == false,
-      "Acquisitions list is non-empty");
+    if (acquisitions.isEmpty()) {
+      return Option.none();
+    }
 
     OPDSAcquisition best = NullCheck.notNull(acquisitions.get(0));
     for (final OPDSAcquisition current : acquisitions) {
@@ -76,7 +81,8 @@ public final class CatalogAcquisitionButtons
       "best acquisition of {} was {}",
       acquisitions,
       best);
-    return best;
+
+    return Option.some(best);
   }
 
   private static int priority(

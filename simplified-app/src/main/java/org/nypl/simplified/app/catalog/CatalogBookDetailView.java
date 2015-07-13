@@ -286,12 +286,11 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  private static String onBookStatusLoanedText(
-    final BookStatusLoaned o,
+  private static String onLoanText(
+    final OptionType<Calendar> loan_end_opt,
     final Resources rr)
   {
     final String text;
-    final OptionType<Calendar> loan_end_opt = o.getLoanExpiryDate();
     if (loan_end_opt.isSome()) {
       final Some<Calendar> loan_end_some = (Some<Calendar>) loan_end_opt;
       final Calendar loan_end = loan_end_some.get();
@@ -523,6 +522,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final Button dismiss =
       NullCheck.notNull(this.book_downloading_failed_dismiss);
+    final Button retry =
+      NullCheck.notNull(this.book_downloading_failed_retry);
+
     dismiss.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)
@@ -536,8 +538,19 @@ import com.io7m.junreachable.UnreachableCodeException;
      */
 
     final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
-    final OPDSAcquisition a =
+    final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
+
+    /**
+     * Theoretically, if the book has ever been downloaded, then the
+     * acquisition list must have contained one usable acquisition relation...
+     */
+
+    if (a_opt.isNone()) {
+      throw new UnreachableCodeException();
+    }
+
+    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
         this.activity,
@@ -545,9 +558,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.entry.getBookID(),
         a,
         this.entry);
-
-    final Button retry =
-      NullCheck.notNull(this.book_downloading_failed_retry);
     retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
@@ -614,7 +624,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
-    final String text = CatalogBookDetailView.onBookStatusLoanedText(o, rr);
+    final String text =
+      CatalogBookDetailView.onLoanText(o.getLoanExpiryDate(), rr);
     this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
@@ -665,11 +676,6 @@ import com.io7m.junreachable.UnreachableCodeException;
               .getString(R.string.catalog_book_availability_holdable));
           }
 
-          /*
-           * Contradictory; The book status should not be "None" if the book
-           * availability is "on loan".
-           */
-
           @Override public String onLoanable(
             final OPDSAvailabilityLoanable a)
           {
@@ -680,7 +686,7 @@ import com.io7m.junreachable.UnreachableCodeException;
           @Override public String onLoaned(
             final OPDSAvailabilityLoaned a)
           {
-            throw new UnreachableCodeException();
+            return CatalogBookDetailView.onLoanText(a.getEndDate(), rr);
           }
 
           @Override public String onOpenAccess(
