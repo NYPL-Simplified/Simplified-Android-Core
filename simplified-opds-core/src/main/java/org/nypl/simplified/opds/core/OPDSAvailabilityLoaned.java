@@ -1,7 +1,9 @@
 package org.nypl.simplified.opds.core;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -73,5 +75,23 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
     throws E
   {
     return m.onLoaned(this);
+  }
+
+  @Override public String toString()
+  {
+    final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
+    final StringBuilder b = new StringBuilder();
+    b.append("[OPDSAvailabilityLoaned end_date=");
+    b.append(this.end_date.map(new FunctionType<Calendar, String>() {
+      @Override public String call(
+        final Calendar c)
+      {
+        return NullCheck.notNull(fmt.format(c));
+      }
+    }));
+    b.append(" start_date=");
+    b.append(fmt.format(this.start_date.getTime()));
+    b.append("]");
+    return NullCheck.notNull(b.toString());
   }
 }

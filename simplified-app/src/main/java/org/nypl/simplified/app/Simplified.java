@@ -174,7 +174,7 @@ import com.io7m.jnull.Nullable;
       this.books =
         BooksController.newBooks(
           this.exec_books,
-          p,
+          this.feed_loader,
           this.http,
           this.downloader,
           in_json_serializer,

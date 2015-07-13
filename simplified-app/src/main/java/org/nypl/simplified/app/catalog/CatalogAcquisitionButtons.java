@@ -2,12 +2,14 @@ package org.nypl.simplified.app.catalog;
 
 import java.util.List;
 
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.view.View;
@@ -22,9 +24,10 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogAcquisitionButtons
 {
-  private CatalogAcquisitionButtons()
-  {
-    throw new UnreachableCodeException();
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(CatalogAcquisitionButtons.class);
   }
 
   public static void addButtons(
@@ -68,6 +71,11 @@ public final class CatalogAcquisitionButtons
         best = nn_current;
       }
     }
+
+    CatalogAcquisitionButtons.LOG.debug(
+      "best acquisition of {} was {}",
+      acquisitions,
+      best);
     return best;
   }
 
@@ -78,9 +86,9 @@ public final class CatalogAcquisitionButtons
       case ACQUISITION_BORROW:
         return 6;
       case ACQUISITION_OPEN_ACCESS:
-        return 5;
-      case ACQUISITION_GENERIC:
         return 4;
+      case ACQUISITION_GENERIC:
+        return 5;
       case ACQUISITION_SAMPLE:
         return 3;
       case ACQUISITION_BUY:
@@ -90,5 +98,10 @@ public final class CatalogAcquisitionButtons
     }
 
     return 0;
+  }
+
+  private CatalogAcquisitionButtons()
+  {
+    throw new UnreachableCodeException();
   }
 }

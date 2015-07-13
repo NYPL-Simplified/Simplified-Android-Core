@@ -22,6 +22,7 @@ import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
 import org.nypl.simplified.books.core.BookStatusDownloadingType;
 import org.nypl.simplified.books.core.BookStatusHeld;
 import org.nypl.simplified.books.core.BookStatusHoldable;
+import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
@@ -284,6 +285,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       buffer.append(some.get());
     }
   }
+
   private static String onBookStatusLoanedText(
     final BookStatusLoaned o,
     final Resources rr)
@@ -303,6 +305,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
     return NullCheck.notNull(text);
   }
+
   private final Activity      activity;
   private final ViewGroup     book_download;
   private final LinearLayout  book_download_buttons;
@@ -592,6 +595,13 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onBookStatusLoanable(
+    final BookStatusLoanable s)
+  {
+    this.onBookStatusNone(this.entry);
+    return Unit.unit();
   }
 
   @Override public Unit onBookStatusLoaned(

@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -23,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -149,7 +147,14 @@ import com.io7m.jnull.NullCheck;
     final List<OPDSAcquisitionFeedEntry> entries = feed.getFeedEntries();
     for (final OPDSAcquisitionFeedEntry e : entries) {
       try {
-        this.syncFeedEntry(NullCheck.notNull(e));
+        final OPDSAcquisitionFeedEntry e_nn = NullCheck.notNull(e);
+        final BookID book_id = BookID.newIDFromEntry(e_nn);
+        BooksController.syncFeedEntry(
+          e_nn,
+          this.books_database,
+          this.status_cache,
+          this.http);
+        this.listener.onAccountSyncBook(book_id);
       } catch (final Throwable x) {
         BooksControllerSyncTask.LOG.error(
           "unable to save entry: {}: ",
@@ -157,29 +162,5 @@ import com.io7m.jnull.NullCheck;
           x);
       }
     }
-  }
-
-  private void syncFeedEntry(
-    final OPDSAcquisitionFeedEntry e)
-    throws Exception
-  {
-    final BookID book_id = BookID.newIDFromEntry(e);
-
-    final BookDatabaseEntryType book_dir =
-      this.books_database.getBookDatabaseEntry(book_id);
-
-    book_dir.create();
-    book_dir.setData(e);
-
-    final OptionType<File> cover =
-      BooksController.makeCover(this.http, e.getCover());
-    book_dir.setCover(cover);
-
-    final BookSnapshot snap = book_dir.getSnapshot();
-    final BookStatusType status = BookStatus.fromSnapshot(book_id, snap);
-
-    this.status_cache.booksStatusUpdateIfMoreImportant(status);
-    this.status_cache.booksSnapshotUpdate(book_id, snap);
-    this.listener.onAccountSyncBook(book_id);
   }
 }

@@ -2,6 +2,7 @@ package org.nypl.simplified.books.core;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
@@ -34,6 +35,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * The default implementation of the {@link BooksType} interface.
@@ -51,7 +53,7 @@ import com.io7m.jnull.NullCheck;
   static OptionType<File> makeCover(
     final HTTPType http,
     final OptionType<URI> cover_opt)
-    throws Exception
+    throws IOException
   {
     if (cover_opt.isSome()) {
       final Some<URI> some = (Some<URI>) cover_opt;
@@ -70,8 +72,10 @@ import com.io7m.jnull.NullCheck;
     final HTTPType http,
     final File cover_file_tmp,
     final URI cover_uri)
-    throws Exception
+    throws IOException
   {
+    BooksController.LOG.debug("fetching cover {}", cover_uri);
+
     final OptionType<HTTPAuthType> no_auth = Option.none();
     final HTTPResultOKType<InputStream> r =
       http.get(no_auth, cover_uri, 0).matchResult(
@@ -101,11 +105,13 @@ import com.io7m.jnull.NullCheck;
     } finally {
       r.close();
     }
+
+    BooksController.LOG.debug("fetched cover {}", cover_uri);
   }
 
   public static BooksType newBooks(
     final ExecutorService in_exec,
-    final OPDSFeedParserType in_feeds,
+    final FeedLoaderType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
@@ -122,22 +128,74 @@ import com.io7m.jnull.NullCheck;
       in_config);
   }
 
+  /**
+   * Convenience function to update a given book database entry and download a
+   * cover.
+   *
+   * @param e
+   *          The acquisition feed entry
+   * @param book_database
+   *          The book database
+   * @param books_status
+   *          The book status cache
+   * @param http
+   *          An HTTP implementation
+   * @throws IOException
+   *           On I/O errors
+   */
+
+  static void syncFeedEntry(
+    final OPDSAcquisitionFeedEntry e,
+    final BookDatabaseType book_database,
+    final BooksStatusCacheType books_status,
+    final HTTPType http)
+    throws IOException
+  {
+    final BookID book_id = BookID.newIDFromEntry(e);
+
+    BooksController.LOG.debug("book {}: synchronizing book entry", book_id);
+    final BookDatabaseEntryType book_dir =
+      book_database.getBookDatabaseEntry(book_id);
+    book_dir.create();
+    book_dir.setData(e);
+
+    BooksController.LOG.debug("book {}: fetching cover", book_id);
+    final OptionType<File> cover =
+      BooksController.makeCover(http, e.getCover());
+    book_dir.setCover(cover);
+
+    BooksController.LOG.debug("book {}: getting snapshot", book_id);
+    final BookSnapshot snap = book_dir.getSnapshot();
+    BooksController.LOG.debug("book {}: determining status", book_id);
+    final BookStatusType status = BookStatus.fromSnapshot(book_id, snap);
+
+    BooksController.LOG.debug("book {}: updating status", book_id);
+    books_status.booksStatusUpdateIfMoreImportant(status);
+    BooksController.LOG.debug("book {}: updating snapshot", book_id);
+    books_status.booksSnapshotUpdate(book_id, snap);
+
+    BooksController.LOG.debug(
+      "book {}: finished synchronizing book entry",
+      book_id);
+  }
+
   private final BookDatabaseType                                  book_database;
   private final BooksStatusCacheType                              books_status;
   private final BooksControllerConfiguration                      config;
   private final File                                              data_directory;
+  private final DownloaderType                                    downloader;
+  private final ConcurrentHashMap<BookID, DownloadType>           downloads;
   private final ExecutorService                                   exec;
+  private final FeedLoaderType                                    feed_loader;
   private final OPDSFeedParserType                                feed_parser;
   private final HTTPType                                          http;
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
   private final AtomicInteger                                     task_id;
   private Map<Integer, Future<?>>                                 tasks;
-  private final DownloaderType                                    downloader;
-  private final ConcurrentHashMap<BookID, DownloadType>           downloads;
 
   private BooksController(
     final ExecutorService in_exec,
-    final OPDSFeedParserType in_feeds,
+    final FeedLoaderType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
@@ -145,7 +203,7 @@ import com.io7m.jnull.NullCheck;
     final BooksControllerConfiguration in_config)
   {
     this.exec = NullCheck.notNull(in_exec);
-    this.feed_parser = NullCheck.notNull(in_feeds);
+    this.feed_loader = NullCheck.notNull(in_feeds);
     this.http = NullCheck.notNull(in_http);
     this.downloader = NullCheck.notNull(in_downloader);
     this.config = NullCheck.notNull(in_config);
@@ -160,6 +218,7 @@ import com.io7m.jnull.NullCheck;
         in_json_parser,
         this.data_directory);
     this.task_id = new AtomicInteger(0);
+    this.feed_parser = this.feed_loader.getOPDSFeedParser();
   }
 
   @Override public void accountGetCachedLoginDetails(
@@ -249,11 +308,12 @@ import com.io7m.jnull.NullCheck;
   @Override public void bookBorrow(
     final BookID id,
     final OPDSAcquisition acq,
-    final String title,
+    final OPDSAcquisitionFeedEntry eo,
     final BookBorrowListenerType listener)
   {
     NullCheck.notNull(id);
     NullCheck.notNull(acq);
+    NullCheck.notNull(eo);
     NullCheck.notNull(listener);
 
     BooksController.LOG.debug("borrow {}", id);
@@ -263,10 +323,13 @@ import com.io7m.jnull.NullCheck;
       this.book_database,
       this.books_status,
       this.downloader,
+      this.http,
       this.downloads,
       id,
       acq,
-      listener));
+      eo,
+      listener,
+      this.feed_loader));
   }
 
   @Override public void bookDeleteData(
@@ -279,6 +342,46 @@ import com.io7m.jnull.NullCheck;
       this.books_status,
       this.book_database,
       id));
+  }
+
+  @Override public void bookDownloadAcknowledge(
+    final BookID id)
+  {
+    BooksController.LOG.debug("acknowledging download of book {}", id);
+
+    final OptionType<BookStatusType> status_opt =
+      this.books_status.booksStatusGet(id);
+    if (status_opt.isSome()) {
+      final Some<BookStatusType> status_some =
+        (Some<BookStatusType>) status_opt;
+      final BookStatusType status = status_some.get();
+      BooksController.LOG.debug(
+        "status of book {} is currently {}",
+        id,
+        status);
+
+      if (status instanceof BookStatusDownloadFailed) {
+        final OptionType<BookSnapshot> snap_opt =
+          this.books_status.booksSnapshotGet(id);
+        if (snap_opt.isSome()) {
+          final Some<BookSnapshot> snap_some = (Some<BookSnapshot>) snap_opt;
+          final BookSnapshot snap = snap_some.get();
+          this.books_status.booksStatusUpdate(BookStatus.fromSnapshot(
+            id,
+            snap));
+        } else {
+
+          /**
+           * A snapshot *must* exist for a book that has had a download
+           * attempt.
+           */
+
+          throw new UnreachableCodeException();
+        }
+      }
+    } else {
+      BooksController.LOG.debug("status of book {} unavailable", id);
+    }
   }
 
   @Override public void bookDownloadCancel(
@@ -437,20 +540,6 @@ import com.io7m.jnull.NullCheck;
         }
       };
       this.tasks.put(id, this.exec.submit(rb));
-    }
-  }
-
-  @Override public void bookDownloadAcknowledge(
-    final BookID id)
-  {
-    BooksController.LOG.debug("acknowledging download of book {}", id);
-
-    final OptionType<BookSnapshot> snap_opt =
-      this.books_status.booksSnapshotGet(id);
-    if (snap_opt.isSome()) {
-      final Some<BookSnapshot> some_snap = (Some<BookSnapshot>) snap_opt;
-      final BookSnapshot snap = some_snap.get();
-      this.books_status.booksStatusUpdate(BookStatus.fromSnapshot(id, snap));
     }
   }
 }

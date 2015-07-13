@@ -76,6 +76,7 @@ public final class BooksStatusCache extends Observable implements
     final BookID id,
     final BookSnapshot snap)
   {
+    BooksStatusCache.LOG.debug("update snapshot: {} {}", id, snap);
     this.snapshots.put(id, snap);
   }
 

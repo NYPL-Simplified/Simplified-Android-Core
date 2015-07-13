@@ -18,6 +18,7 @@ import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
 import org.nypl.simplified.books.core.BookStatusDownloadingType;
 import org.nypl.simplified.books.core.BookStatusHeld;
 import org.nypl.simplified.books.core.BookStatusHoldable;
+import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
@@ -401,6 +402,14 @@ import com.squareup.picasso.Callback;
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onBookStatusLoanable(
+    final BookStatusLoanable s)
+  {
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.onBookStatusNone(fe, s.getID());
+    return Unit.unit();
   }
 
   @Override public Unit onBookStatusLoaned(

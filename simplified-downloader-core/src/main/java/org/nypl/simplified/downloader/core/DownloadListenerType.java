@@ -27,7 +27,7 @@ public interface DownloadListenerType
     DownloadType d,
     int status,
     long running_total,
-    OptionType<Exception> exception);
+    OptionType<Throwable> exception);
 
   void onDownloadCompleted(
     DownloadType d,

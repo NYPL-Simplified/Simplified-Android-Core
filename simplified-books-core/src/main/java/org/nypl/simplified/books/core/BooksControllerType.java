@@ -22,7 +22,7 @@ public interface BooksControllerType extends BooksStatusCacheType
   void bookBorrow(
     BookID id,
     OPDSAcquisition acq,
-    String title,
+    OPDSAcquisitionFeedEntry eo,
     BookBorrowListenerType listener);
 
   /**

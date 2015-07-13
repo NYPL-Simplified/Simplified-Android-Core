@@ -26,4 +26,8 @@ public interface BookStatusMatcherType<A, E extends Exception>
   A onBookStatusRequestingLoan(
     BookStatusRequestingLoan s)
     throws E;
+
+  A onBookStatusLoanable(
+    BookStatusLoanable s)
+    throws E;
 }
