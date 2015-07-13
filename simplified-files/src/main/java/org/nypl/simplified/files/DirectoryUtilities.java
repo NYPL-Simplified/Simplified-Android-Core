@@ -38,11 +38,12 @@ public final class DirectoryUtilities
     final File directory)
     throws IOException
   {
-    directory.mkdirs();
-    if (directory.isDirectory() == false) {
-      throw new IOException(String.format(
-        "Could not create directory '%s': Not a directory",
-        directory));
+    if (directory.mkdirs() == false) {
+      if (directory.isDirectory() == false) {
+        throw new IOException(String.format(
+          "Could not create directory '%s': Not a directory",
+          directory));
+      }
     }
   }
 
