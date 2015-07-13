@@ -14,7 +14,6 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
 final class BookStatus
@@ -41,15 +40,13 @@ final class BookStatus
         @Override public BookStatusType onHeld(
           final OPDSAvailabilityHeld a)
         {
-          // TODO Auto-generated method stub
-          throw new UnimplementedCodeException();
+          return new BookStatusHeld(in_id, a.getPosition());
         }
 
         @Override public BookStatusType onHoldable(
           final OPDSAvailabilityHoldable a)
         {
-          // TODO Auto-generated method stub
-          throw new UnimplementedCodeException();
+          return new BookStatusHoldable(in_id);
         }
 
         @Override public BookStatusType onLoaned(
