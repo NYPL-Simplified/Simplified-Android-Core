@@ -43,7 +43,7 @@ import com.io7m.jnull.NullCheck;
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BookDatabaseEntry.class));
-    WAIT_MAXIMUM_MILLISECONDS = 1000;
+    WAIT_MAXIMUM_MILLISECONDS = 100;
     WAIT_PAUSE_MILLISECONDS = 10;
   }
 

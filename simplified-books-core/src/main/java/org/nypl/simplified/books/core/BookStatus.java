@@ -9,11 +9,11 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
 final class BookStatus
@@ -33,47 +33,45 @@ final class BookStatus
     final OptionType<Calendar> no_expiry = Option.none();
     final OPDSAcquisitionFeedEntry e = in_snap.getEntry();
     final boolean downloaded = in_snap.getBook().isSome();
-    return e
-      .getAvailability()
-      .matchAvailability(
-        new OPDSAvailabilityMatcherType<BookStatusLoanedType, UnreachableCodeException>() {
-          @Override public BookStatusLoanedType onHeld(
-            final OPDSAvailabilityHeld a)
-          {
-            // TODO Auto-generated method stub
-            throw new UnimplementedCodeException();
-          }
 
-          @Override public BookStatusLoanedType onHoldable(
-            final OPDSAvailabilityHoldable a)
-          {
-            // TODO Auto-generated method stub
-            throw new UnimplementedCodeException();
-          }
+    final OPDSAvailabilityType availability = e.getAvailability();
+    return availability
+      .matchAvailability(new OPDSAvailabilityMatcherType<BookStatusType, UnreachableCodeException>() {
+        @Override public BookStatusType onHeld(
+          final OPDSAvailabilityHeld a)
+        {
+          return new BookStatusHeld(in_id, a.getPosition());
+        }
 
-          @Override public BookStatusLoanedType onLoaned(
-            final OPDSAvailabilityLoaned a)
-          {
-            if (downloaded) {
-              return new BookStatusDownloaded(in_id, a.getEndDate());
-            }
-            return new BookStatusLoaned(in_id, a.getEndDate());
-          }
+        @Override public BookStatusType onHoldable(
+          final OPDSAvailabilityHoldable a)
+        {
+          return new BookStatusHoldable(in_id);
+        }
 
-          @Override public BookStatusLoanedType onLoanable(
-            final OPDSAvailabilityLoanable a)
-          {
+        @Override public BookStatusType onLoaned(
+          final OPDSAvailabilityLoaned a)
+        {
+          if (downloaded) {
+            return new BookStatusDownloaded(in_id, a.getEndDate());
+          }
+          return new BookStatusLoaned(in_id, a.getEndDate());
+        }
+
+        @Override public BookStatusType onLoanable(
+          final OPDSAvailabilityLoanable a)
+        {
+          return new BookStatusLoanable(in_id);
+        }
+
+        @Override public BookStatusType onOpenAccess(
+          final OPDSAvailabilityOpenAccess a)
+        {
+          if (downloaded) {
             return new BookStatusDownloaded(in_id, no_expiry);
           }
-
-          @Override public BookStatusLoanedType onOpenAccess(
-            final OPDSAvailabilityOpenAccess a)
-          {
-            if (downloaded) {
-              return new BookStatusDownloaded(in_id, no_expiry);
-            }
-            return new BookStatusLoaned(in_id, no_expiry);
-          }
-        });
+          return new BookStatusLoaned(in_id, no_expiry);
+        }
+      });
   }
 }

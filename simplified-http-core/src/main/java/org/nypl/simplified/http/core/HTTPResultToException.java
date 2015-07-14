@@ -16,7 +16,7 @@ import com.io7m.jnull.NullCheck;
  */
 
 @SuppressWarnings("boxing") public final class HTTPResultToException<A> implements
-  HTTPResultMatcherType<A, HTTPResultOKType<A>, Exception>
+  HTTPResultMatcherType<A, HTTPResultOKType<A>, IOException>
 {
   private final URI uri;
 
@@ -28,7 +28,7 @@ import com.io7m.jnull.NullCheck;
 
   @Override public HTTPResultOKType<A> onHTTPError(
     final HTTPResultError<A> e)
-    throws Exception
+    throws IOException
   {
     final String s =
       NullCheck.notNull(String.format(
@@ -41,14 +41,14 @@ import com.io7m.jnull.NullCheck;
 
   @Override public HTTPResultOKType<A> onHTTPException(
     final HTTPResultException<A> e)
-    throws Exception
+    throws IOException
   {
-    throw e.getError();
+    throw new IOException(e.getError());
   }
 
   @Override public HTTPResultOKType<A> onHTTPOK(
     final HTTPResultOKType<A> e)
-    throws Exception
+    throws IOException
   {
     return e;
   }

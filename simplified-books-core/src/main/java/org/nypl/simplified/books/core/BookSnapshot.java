@@ -41,4 +41,17 @@ public final class BookSnapshot
   {
     return this.entry;
   }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[BookSnapshot book=");
+    b.append(this.book);
+    b.append(" cover=");
+    b.append(this.cover);
+    b.append(" entry=");
+    b.append(this.entry.getClass().getCanonicalName());
+    b.append("]");
+    return NullCheck.notNull(b.toString());
+  }
 }

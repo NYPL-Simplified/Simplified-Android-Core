@@ -2,21 +2,14 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jnull.NullCheck;
 
-/**
- * The given book is currently placed on hold.
- */
-
-public final class BookStatusHeld implements BookStatusType
+public final class BookStatusLoanable implements BookStatusType
 {
   private final BookID id;
-  private final int    queue_position;
 
-  public BookStatusHeld(
-    final BookID in_id,
-    final int in_queue_position)
+  public BookStatusLoanable(
+    final BookID in_id)
   {
     this.id = NullCheck.notNull(in_id);
-    this.queue_position = in_queue_position;
   }
 
   @Override public BookID getID()
@@ -26,28 +19,21 @@ public final class BookStatusHeld implements BookStatusType
 
   @Override public BookStatusPriorityOrdering getPriority()
   {
-    return BookStatusPriorityOrdering.BOOK_STATUS_HELD;
-  }
-
-  public int getQueuePosition()
-  {
-    return this.queue_position;
+    return BookStatusPriorityOrdering.BOOK_STATUS_LOANABLE;
   }
 
   @Override public <A, E extends Exception> A matchBookStatus(
     final BookStatusMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusHeld(this);
+    return m.onBookStatusLoanable(this);
   }
 
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("[BookStatusHeld ");
+    b.append("BookStatusLoanable ");
     b.append(this.id);
-    b.append(" ");
-    b.append(this.queue_position);
     b.append("]");
     return NullCheck.notNull(b.toString());
   }

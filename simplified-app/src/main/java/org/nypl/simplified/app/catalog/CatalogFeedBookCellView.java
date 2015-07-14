@@ -18,6 +18,7 @@ import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
 import org.nypl.simplified.books.core.BookStatusDownloadingType;
 import org.nypl.simplified.books.core.BookStatusHeld;
 import org.nypl.simplified.books.core.BookStatusHoldable;
+import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
@@ -334,8 +335,19 @@ import com.squareup.picasso.Callback;
      * Manually construct an acquisition controller for the retry button.
      */
 
-    final OPDSAcquisition a =
+    final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(oe.getAcquisitions());
+
+    /**
+     * Theoretically, if the book has ever been downloaded, then the
+     * acquisition list must have contained one usable acquisition relation...
+     */
+
+    if (a_opt.isNone()) {
+      throw new UnreachableCodeException();
+    }
+
+    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
         this.activity,
@@ -401,6 +413,14 @@ import com.squareup.picasso.Callback;
   {
     // TODO Auto-generated method stub
     throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onBookStatusLoanable(
+    final BookStatusLoanable s)
+  {
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.onBookStatusNone(fe, s.getID());
+    return Unit.unit();
   }
 
   @Override public Unit onBookStatusLoaned(

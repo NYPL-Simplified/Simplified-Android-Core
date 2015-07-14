@@ -6,8 +6,8 @@ package org.nypl.simplified.opds.core;
 
 public final class OPDSAvailabilityLoanable implements OPDSAvailabilityType
 {
-  private static final long                     serialVersionUID = 1L;
   private static final OPDSAvailabilityLoanable INSTANCE;
+  private static final long                     serialVersionUID = 1L;
 
   static {
     INSTANCE = new OPDSAvailabilityLoanable();
@@ -23,5 +23,10 @@ public final class OPDSAvailabilityLoanable implements OPDSAvailabilityType
     throws E
   {
     return m.onLoanable(this);
+  }
+
+  @Override public String toString()
+  {
+    return "[OPDSAvailabilityLoanable]";
   }
 }

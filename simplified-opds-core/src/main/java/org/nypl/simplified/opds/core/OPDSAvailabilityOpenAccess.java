@@ -24,4 +24,9 @@ public final class OPDSAvailabilityOpenAccess implements OPDSAvailabilityType
   {
     return m.onOpenAccess(this);
   }
+
+  @Override public String toString()
+  {
+    return "[OPDSAvailabilityOpenAccess]";
+  }
 }

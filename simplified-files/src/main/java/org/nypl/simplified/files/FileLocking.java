@@ -9,6 +9,9 @@ import java.nio.channels.OverlappingFileLockException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -20,6 +23,12 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class FileLocking
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(FileLocking.class));
+  }
+
   /**
    * Attempt to acquire a lock on <tt>file</tt>, waiting for a maximum of
    * <tt>milliseconds</tt> ms, in <tt>wait</tt> millisecond increments. If a
@@ -60,8 +69,12 @@ public final class FileLocking
         TimeUnit.MILLISECONDS
           .convert(System.nanoTime(), TimeUnit.NANOSECONDS);
 
-      if ((time_now - time_start) > milliseconds) {
+      final long diff = time_now - time_start;
+      FileLocking.LOG.trace("lock try {} (diff {})", file, diff);
+
+      if (diff > milliseconds) {
         abort.set(true);
+        FileLocking.LOG.trace("lock timeout {} ", file);
         break;
       }
 
@@ -72,9 +85,11 @@ public final class FileLocking
           try {
             final FileLock lock = fc.lock();
             try {
+              FileLocking.LOG.trace("lock obtain {}", file);
               return p.call(Unit.unit());
             } finally {
               lock.release();
+              FileLocking.LOG.trace("lock release {}", file);
             }
           } finally {
             fc.close();

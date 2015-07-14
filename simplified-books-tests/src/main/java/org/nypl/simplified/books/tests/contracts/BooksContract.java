@@ -28,6 +28,8 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedLoader;
+import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
@@ -41,10 +43,15 @@ import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
+import org.nypl.simplified.opds.core.OPDSFeedParserType;
+import org.nypl.simplified.opds.core.OPDSFeedTransport;
+import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSJSONParser;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
 import org.nypl.simplified.opds.core.OPDSJSONSerializer;
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
+import org.nypl.simplified.opds.core.OPDSSearchParser;
+import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
 import com.io7m.jfunctional.OptionType;
@@ -194,11 +201,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     };
   }
 
-  public BooksContract()
-  {
-
-  }
-
   private static HTTPType makeExceptionHTTP()
   {
     return new HTTPType() {
@@ -217,6 +219,27 @@ import com.io7m.junreachable.UnreachableCodeException;
         return new HTTPResultException<Unit>(uri, new IOException());
       }
     };
+  }
+
+  private static FeedLoaderType newParser()
+  {
+    final OPDSFeedParserType in_parser =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+    final ExecutorService in_exec = Executors.newSingleThreadExecutor();
+    final OPDSFeedTransportType in_transport =
+      OPDSFeedTransport.newTransport();
+    final OPDSSearchParserType in_search_parser =
+      OPDSSearchParser.newParser();
+    return FeedLoader.newFeedLoader(
+      in_exec,
+      in_parser,
+      in_transport,
+      in_search_parser);
+  }
+
+  public BooksContract()
+  {
+
   }
 
   @Override public void testBooksLoadFileNotDirectory()
@@ -242,16 +265,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_http);
 
       final BooksType b =
-        BooksController
-          .newBooks(
-            exec,
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser()),
-            in_http,
-            d,
-            in_json_serializer,
-            in_json_parser,
-            in_config);
+        BooksController.newBooks(
+          exec,
+          BooksContract.newParser(),
+          in_http,
+          d,
+          in_json_serializer,
+          in_json_parser,
+          in_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -278,19 +299,19 @@ import com.io7m.junreachable.UnreachableCodeException;
           ok.set(false);
         }
 
+        @Override public void onAccountDataLoadFailedImmediately(
+          final Throwable error)
+        {
+          System.out.println("testBooksLoadFileNotDirectory: load failed");
+          ok.set(false);
+        }
+
         @Override public void onAccountUnavailable()
         {
           System.out
             .println("testBooksLoadFileNotDirectory: account unavailable");
           ok.set(true);
           latch.countDown();
-        }
-
-        @Override public void onAccountDataLoadFailedImmediately(
-          final Throwable error)
-        {
-          System.out.println("testBooksLoadFileNotDirectory: load failed");
-          ok.set(false);
         }
       });
 
@@ -323,16 +344,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_http);
 
       final BooksType b =
-        BooksController
-          .newBooks(
-            exec,
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser()),
-            in_http,
-            d,
-            in_json_serializer,
-            in_json_parser,
-            in_config);
+        BooksController.newBooks(
+          exec,
+          BooksContract.newParser(),
+          in_http,
+          d,
+          in_json_serializer,
+          in_json_parser,
+          in_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -359,18 +378,18 @@ import com.io7m.junreachable.UnreachableCodeException;
           ok.set(false);
         }
 
-        @Override public void onAccountUnavailable()
-        {
-          System.out.println("testBooksLoadNotLoggedIn: account unavailable");
-          ok.set(true);
-          latch.countDown();
-        }
-
         @Override public void onAccountDataLoadFailedImmediately(
           final Throwable error)
         {
           System.out.println("testBooksLoadNotLoggedIn: load failed");
           ok.set(false);
+        }
+
+        @Override public void onAccountUnavailable()
+        {
+          System.out.println("testBooksLoadNotLoggedIn: account unavailable");
+          ok.set(true);
+          latch.countDown();
         }
       });
 
@@ -409,16 +428,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_http);
 
       final BooksType b =
-        BooksController
-          .newBooks(
-            exec,
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser()),
-            in_http,
-            d,
-            in_json_serializer,
-            in_json_parser,
-            in_config);
+        BooksController.newBooks(
+          exec,
+          BooksContract.newParser(),
+          in_http,
+          d,
+          in_json_serializer,
+          in_json_parser,
+          in_config);
 
       final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
@@ -484,16 +501,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_http);
 
       final BooksType b =
-        BooksController
-          .newBooks(
-            exec,
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser()),
-            in_http,
-            d,
-            in_json_serializer,
-            in_json_parser,
-            in_config);
+        BooksController.newBooks(
+          exec,
+          BooksContract.newParser(),
+          in_http,
+          d,
+          in_json_serializer,
+          in_json_parser,
+          in_config);
 
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -559,16 +574,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_http);
 
       final BooksType b =
-        BooksController
-          .newBooks(
-            exec,
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser()),
-            in_http,
-            d,
-            in_json_serializer,
-            in_json_parser,
-            in_config);
+        BooksController.newBooks(
+          exec,
+          BooksContract.newParser(),
+          in_http,
+          d,
+          in_json_serializer,
+          in_json_parser,
+          in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -695,16 +708,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_http);
 
       final BooksType b =
-        BooksController
-          .newBooks(
-            exec,
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser()),
-            in_http,
-            d,
-            in_json_serializer,
-            in_json_parser,
-            in_config);
+        BooksController.newBooks(
+          exec,
+          BooksContract.newParser(),
+          in_http,
+          d,
+          in_json_serializer,
+          in_json_parser,
+          in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -823,13 +834,13 @@ import com.io7m.junreachable.UnreachableCodeException;
             }
           }
 
-          @Override public void onAccountUnavailable()
+          @Override public void onAccountDataLoadFailedImmediately(
+            final Throwable error)
           {
             ok.set(false);
           }
 
-          @Override public void onAccountDataLoadFailedImmediately(
-            final Throwable error)
+          @Override public void onAccountUnavailable()
           {
             ok.set(false);
           }
@@ -897,16 +908,14 @@ import com.io7m.junreachable.UnreachableCodeException;
           in_http);
 
       final BooksType b =
-        BooksController
-          .newBooks(
-            exec,
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser()),
-            in_http,
-            d,
-            in_json_serializer,
-            in_json_parser,
-            in_config);
+        BooksController.newBooks(
+          exec,
+          BooksContract.newParser(),
+          in_http,
+          d,
+          in_json_serializer,
+          in_json_parser,
+          in_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 

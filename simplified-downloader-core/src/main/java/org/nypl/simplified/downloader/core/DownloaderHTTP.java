@@ -71,7 +71,7 @@ import com.io7m.jnull.NullCheck;
         {
           try {
             in_listener.onDownloadStarted(d, in_expected);
-          } catch (final Exception x) {
+          } catch (final Throwable x) {
             Download.this.log.error(
               "Ignoring exception: onDownloadStarted raised: ",
               x);
@@ -82,7 +82,7 @@ import com.io7m.jnull.NullCheck;
           final DownloadType d,
           final int in_status,
           final long in_running_total,
-          final OptionType<Exception> in_exception)
+          final OptionType<Throwable> in_exception)
         {
           try {
             in_listener.onDownloadFailed(
@@ -90,7 +90,7 @@ import com.io7m.jnull.NullCheck;
               in_status,
               in_running_total,
               in_exception);
-          } catch (final Exception x) {
+          } catch (final Throwable x) {
             Download.this.log.error(
               "Ignoring exception: onDownloadFailed raised: ",
               x);
@@ -107,7 +107,7 @@ import com.io7m.jnull.NullCheck;
               d,
               in_running_total,
               in_expected_total);
-          } catch (final Exception x) {
+          } catch (final Throwable x) {
             Download.this.log.error(
               "Ignoring exception: onDownloadDataReceived raised: ",
               x);
@@ -120,7 +120,7 @@ import com.io7m.jnull.NullCheck;
         {
           try {
             in_listener.onDownloadCompleted(d, in_file);
-          } catch (final Exception x) {
+          } catch (final Throwable x) {
             Download.this.log.error(
               "Ignoring exception: onDownloadCompleted raised: ",
               x);
@@ -132,7 +132,7 @@ import com.io7m.jnull.NullCheck;
         {
           try {
             in_listener.onDownloadCancelled(d);
-          } catch (final Exception x) {
+          } catch (final Throwable x) {
             Download.this.log.error(
               "Ignoring exception: onDownloadCancelled raised: ",
               x);
@@ -156,7 +156,7 @@ import com.io7m.jnull.NullCheck;
 
         final HTTPResultType<InputStream> r = rf.call();
         r.matchResult(this);
-      } catch (final Exception e) {
+      } catch (final Throwable e) {
         this.listener.onDownloadFailed(this, -1, this.total, Option.some(e));
         this.failed();
       }
@@ -168,7 +168,7 @@ import com.io7m.jnull.NullCheck;
     {
       this.log.error("http error: status {}", e.getStatus());
 
-      final OptionType<Exception> none = Option.none();
+      final OptionType<Throwable> none = Option.none();
       this.listener.onDownloadFailed(this, e.getStatus(), this.total, none);
       this.failed();
       return Unit.unit();
@@ -184,7 +184,7 @@ import com.io7m.jnull.NullCheck;
         this,
         -1,
         this.total,
-        Option.some(e.getError()));
+        Option.some((Throwable) e.getError()));
       this.failed();
       return Unit.unit();
     }
@@ -224,7 +224,7 @@ import com.io7m.jnull.NullCheck;
                 "received {} bytes but expected {}",
                 this.total,
                 expected);
-              final OptionType<Exception> none = Option.none();
+              final OptionType<Throwable> none = Option.none();
               this.listener.onDownloadFailed(
                 this,
                 e.getStatus(),

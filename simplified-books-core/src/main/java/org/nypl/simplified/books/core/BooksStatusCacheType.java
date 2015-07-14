@@ -54,10 +54,7 @@ public interface BooksStatusCacheType extends BooksObservableType
    * Update the status of the book referred to by <tt>s</tt> if the given
    * status is <i>more important</i> than the current status.
    * <i>Importance</i> is essentially defined by a somewhat arbitrary partial
-   * order on the subtypes of {@link BookStatusType}: Values of
-   * {@link BookStatusLoanedType} are less important than values of
-   * {@link BookStatusDownloadingType}, other values of {@link BookStatusType}
-   * are less important than values of {@link BookStatusLoanedType}.
+   * order: {@link BookStatusPriorityOrdering}.
    *
    * @param s
    *          The book status

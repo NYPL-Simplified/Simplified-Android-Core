@@ -144,11 +144,13 @@ import com.io7m.jnull.Nullable;
   }
 
   private final ExpiringMap<URI, FeedType> cache;
-  private final ExecutorService            exec;
-  private final OPDSFeedParserType         parser;
-  private final OPDSFeedTransportType      transport;
-  private final OPDSSearchParserType       search_parser;
 
+  private final ExecutorService            exec;
+
+  private final OPDSFeedParserType         parser;
+
+  private final OPDSSearchParserType       search_parser;
+  private final OPDSFeedTransportType      transport;
   private FeedLoader(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
@@ -163,14 +165,12 @@ import com.io7m.jnull.Nullable;
     this.cache = NullCheck.notNull(in_m);
     this.cache.addExpirationListener(this);
   }
-
   @Override public void expired(
     final @Nullable URI key,
     final @Nullable FeedType value)
   {
     FeedLoader.LOG.debug("expired: {}", key);
   }
-
   private Future<Unit> fetch(
     final URI uri,
     final FeedLoaderListenerType listener)
@@ -220,6 +220,21 @@ import com.io7m.jnull.Nullable;
     NullCheck.notNull(uri);
     NullCheck.notNull(listener);
     return this.fetch(uri, listener);
+  }
+
+  @Override public OPDSFeedParserType getOPDSFeedParser()
+  {
+    return this.parser;
+  }
+
+  @Override public OPDSFeedTransportType getOPDSFeedTransport()
+  {
+    return this.transport;
+  }
+
+  @Override public OPDSSearchParserType getOPDSSearchParser()
+  {
+    return this.search_parser;
   }
 
   @Override public void invalidate(

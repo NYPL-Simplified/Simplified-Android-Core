@@ -12,13 +12,13 @@ import com.io7m.jnull.NullCheck;
 public final class BookStatusDownloadFailed implements
   BookStatusDownloadingType
 {
-  private final OptionType<Exception> error;
+  private final OptionType<Throwable> error;
   private final BookID                id;
   private final OptionType<Calendar>  loan_end_date;
 
   public BookStatusDownloadFailed(
     final BookID in_id,
-    final OptionType<Exception> x,
+    final OptionType<Throwable> x,
     final OptionType<Calendar> in_loan_end_date)
   {
     this.id = NullCheck.notNull(in_id);

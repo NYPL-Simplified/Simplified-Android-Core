@@ -73,4 +73,16 @@ public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
   {
     return m.onHeld(this);
   }
+
+  @Override public String toString()
+  {
+    final StringBuilder b = new StringBuilder();
+    b.append("[OPDSAvailabilityHeld position=");
+    b.append(this.position);
+    b.append(" start_date=");
+    b.append(OPDSRFC3339Formatter.newDateFormatter().format(
+      this.start_date.getTime()));
+    b.append("]");
+    return NullCheck.notNull(b.toString());
+  }
 }
