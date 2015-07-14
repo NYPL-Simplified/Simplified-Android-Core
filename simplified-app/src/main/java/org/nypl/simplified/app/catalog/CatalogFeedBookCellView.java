@@ -11,13 +11,14 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
 import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
 import org.nypl.simplified.books.core.BookStatusDownloaded;
 import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
-import org.nypl.simplified.books.core.BookStatusDownloadingPaused;
 import org.nypl.simplified.books.core.BookStatusDownloadingType;
+import org.nypl.simplified.books.core.BookStatusHeld;
+import org.nypl.simplified.books.core.BookStatusHoldable;
+import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
@@ -30,7 +31,6 @@ import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
-import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -53,6 +53,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 
@@ -278,17 +279,6 @@ import com.squareup.picasso.Callback;
       callback);
   }
 
-  @Override public Unit onBookStatusDownloadCancelled(
-    final BookStatusDownloadCancelled c)
-  {
-    CatalogFeedBookCellView.LOG.debug("{}: cancelled", c.getID());
-    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
-    final BookID id = c.getID();
-    this.books.bookDownloadAcknowledge(id);
-    this.onStatus(fe, id, this.books.booksStatusGet(id));
-    return Unit.unit();
-  }
-
   @Override public Unit onBookStatusDownloaded(
     final BookStatusDownloaded d)
   {
@@ -345,8 +335,19 @@ import com.squareup.picasso.Callback;
      * Manually construct an acquisition controller for the retry button.
      */
 
-    final OPDSAcquisition a =
+    final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(oe.getAcquisitions());
+
+    /**
+     * Theoretically, if the book has ever been downloaded, then the
+     * acquisition list must have contained one usable acquisition relation...
+     */
+
+    if (a_opt.isNone()) {
+      throw new UnreachableCodeException();
+    }
+
+    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
         this.activity,
@@ -363,14 +364,6 @@ import com.squareup.picasso.Callback;
     final BookStatusDownloadingType o)
   {
     return o.matchBookDownloadingStatus(this);
-  }
-
-  @Override public Unit onBookStatusDownloadingPaused(
-    final BookStatusDownloadingPaused p)
-  {
-    CatalogFeedBookCellView.LOG.debug("{}: paused", p.getID());
-    this.setDebugCellText("download-paused");
-    return Unit.unit();
   }
 
   @Override public Unit onBookStatusDownloadInProgress(
@@ -391,9 +384,9 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_authors.setText(CatalogFeedBookCellView
       .makeAuthorText(oe));
 
-    final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogDownloadProgressBar.setProgressBar(
-      snap,
+      d.getCurrentTotalBytes(),
+      d.getExpectedTotalBytes(),
       this.cell_downloading_percent_text,
       this.cell_downloading_progress);
 
@@ -405,6 +398,28 @@ import com.squareup.picasso.Callback;
       }
     });
 
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusHeld(
+    final BookStatusHeld s)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onBookStatusHoldable(
+    final BookStatusHoldable s)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onBookStatusLoanable(
+    final BookStatusLoanable s)
+  {
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.onBookStatusNone(fe, s.getID());
     return Unit.unit();
   }
 

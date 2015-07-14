@@ -3,6 +3,10 @@ package org.nypl.simplified.books.core;
 import java.net.URI;
 import java.util.concurrent.Future;
 
+import org.nypl.simplified.opds.core.OPDSFeedParserType;
+import org.nypl.simplified.opds.core.OPDSFeedTransportType;
+import org.nypl.simplified.opds.core.OPDSSearchParserType;
+
 import com.io7m.jfunctional.Unit;
 
 /**
@@ -41,6 +45,24 @@ public interface FeedLoaderType
   Future<Unit> fromURIRefreshing(
     URI uri,
     FeedLoaderListenerType listener);
+
+  /**
+   * @return The feed parser that backs this loader.
+   */
+
+  OPDSFeedParserType getOPDSFeedParser();
+
+  /**
+   * @return The feed transport that backs this loader.
+   */
+
+  OPDSFeedTransportType getOPDSFeedTransport();
+
+  /**
+   * @return The search parser that backs this loader.
+   */
+
+  OPDSSearchParserType getOPDSSearchParser();
 
   /**
    * Invalidate the cached feed for URI <tt>uri</tt>, if any.

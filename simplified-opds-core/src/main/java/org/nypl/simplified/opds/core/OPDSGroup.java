@@ -1,6 +1,5 @@
 package org.nypl.simplified.opds.core;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 
@@ -11,9 +10,8 @@ import com.io7m.jnull.Nullable;
  * An OPDS <i>group</i>.
  */
 
-public final class OPDSGroup implements Serializable
+public final class OPDSGroup
 {
-  private static final long                    serialVersionUID = 1L;
   private final String                         title;
   private final URI                            uri;
   private final List<OPDSAcquisitionFeedEntry> entries;

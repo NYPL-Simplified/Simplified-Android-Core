@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
-import org.nypl.simplified.opds.core.OPDSSearchLink;
+import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -17,7 +18,8 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
   FeedType
 {
   public static FeedWithGroups fromAcquisitionFeed(
-    final OPDSAcquisitionFeed f)
+    final OPDSAcquisitionFeed f,
+    final OptionType<OPDSOpenSearch1_1> search)
   {
     NullCheck.notNull(f);
 
@@ -25,12 +27,21 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
       FeedGroup.fromOPDSGroups(f.getFeedGroups());
     final List<String> order = f.getFeedGroupsOrder();
 
+    final OptionType<FeedSearchType> actual_search =
+      search.map(new FunctionType<OPDSOpenSearch1_1, FeedSearchType>() {
+        @Override public FeedSearchType call(
+          final OPDSOpenSearch1_1 s)
+        {
+          return new FeedSearchOpen1_1(s);
+        }
+      });
+
     return new FeedWithGroups(
       f.getFeedURI(),
       f.getFeedID(),
       f.getFeedUpdated(),
       f.getFeedTitle(),
-      f.getFeedSearchURI(),
+      actual_search,
       order,
       blocks);
   }
@@ -38,7 +49,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
   private final Map<String, FeedGroup>     blocks;
   private final List<String>               blocks_order;
   private final String                     id;
-  private final OptionType<OPDSSearchLink> search;
+  private final OptionType<FeedSearchType> search;
   private final String                     title;
   private final Calendar                   updated;
   private final URI                        uri;
@@ -48,7 +59,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
     final String in_id,
     final Calendar in_updated,
     final String in_title,
-    final OptionType<OPDSSearchLink> in_search,
+    final OptionType<FeedSearchType> in_search,
     final List<String> in_blocks_order,
     final Map<String, FeedGroup> in_blocks)
   {
@@ -88,7 +99,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
     return this.id;
   }
 
-  @Override public OptionType<OPDSSearchLink> getFeedSearchURI()
+  @Override public OptionType<FeedSearchType> getFeedSearch()
   {
     return this.search;
   }

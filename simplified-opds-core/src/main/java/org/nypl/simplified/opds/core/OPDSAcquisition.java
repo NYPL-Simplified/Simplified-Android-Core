@@ -8,7 +8,7 @@ import com.io7m.jnull.Nullable;
 
 /**
  * A specific OPDS acquisition.
- * 
+ *
  * @see <a
  *      href="http://opds-spec.org/specs/opds-catalog-1-1-20110627/#Acquisition_Feeds">Acquisiton
  *      feeds</a>
@@ -16,6 +16,8 @@ import com.io7m.jnull.Nullable;
 
 public final class OPDSAcquisition implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   /**
    * The specific type of acquisition.
    */
@@ -49,10 +51,8 @@ public final class OPDSAcquisition implements Serializable
     }
   }
 
-  private static final long serialVersionUID = 8499594912565063700L;
-
-  private final Type        type;
-  private final URI         uri;
+  private final Type type;
+  private final URI  uri;
 
   public OPDSAcquisition(
     final Type in_type,

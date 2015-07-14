@@ -56,8 +56,8 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
   private static OptionType<OPDSFacet> parseFacet(
     final Element e)
-    throws URISyntaxException
-  {
+      throws URISyntaxException
+      {
     final boolean has_name =
       OPDSXML.nodeHasName(
         NullCheck.notNull(e),
@@ -72,7 +72,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     has_everything = has_everything && e.hasAttribute("rel");
     has_everything =
       has_everything
-        && e.hasAttributeNS(OPDSFeedConstants.OPDS_URI_TEXT, "facetGroup");
+      && e.hasAttributeNS(OPDSFeedConstants.OPDS_URI_TEXT, "facetGroup");
 
     if (has_everything) {
       final String title = NullCheck.notNull(e.getAttribute("title"));
@@ -101,12 +101,12 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     }
 
     return Option.none();
-  }
+      }
 
   private static OptionType<URI> parseNextLink(
     final Element e)
-    throws URISyntaxException
-  {
+      throws URISyntaxException
+      {
     Assertions.checkPrecondition(
       e.getLocalName().equals("link"),
       "localname %s == %s",
@@ -122,12 +122,12 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     }
 
     return Option.none();
-  }
+      }
 
   private static OptionType<OPDSSearchLink> parseSearchLink(
     final Element e)
-    throws URISyntaxException
-  {
+      throws URISyntaxException
+      {
     final boolean has_name =
       OPDSXML.nodeHasName(
         NullCheck.notNull(e),
@@ -138,8 +138,8 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
     final boolean has_everything =
       e.hasAttribute("type")
-        && e.hasAttribute("rel")
-        && e.hasAttribute("href");
+      && e.hasAttribute("rel")
+      && e.hasAttribute("href");
 
     if (has_everything) {
       final String t = NullCheck.notNull(e.getAttribute("type"));
@@ -154,11 +154,11 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     }
 
     return Option.none();
-  }
+      }
 
   private static Document parseStream(
     final InputStream s)
-    throws ParserConfigurationException,
+      throws ParserConfigurationException,
       SAXException,
       IOException
   {
@@ -180,7 +180,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
   @Override public OPDSAcquisitionFeed parse(
     final URI uri,
     final InputStream s)
-    throws OPDSFeedParseException
+      throws OPDSParseException
   {
     NullCheck.notNull(s);
 
@@ -287,19 +287,19 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       return b.build();
 
     } catch (final ParserConfigurationException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final SAXException e) {
-      throw new OPDSFeedParseException(e);
-    } catch (final OPDSFeedParseException e) {
+      throw new OPDSParseException(e);
+    } catch (final OPDSParseException e) {
       throw e;
     } catch (final IOException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final DOMException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final ParseException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } catch (final URISyntaxException e) {
-      throw new OPDSFeedParseException(e);
+      throw new OPDSParseException(e);
     } finally {
       final long time_now = System.nanoTime();
       final long time_parse = time_post_parse - time_pre_parse;
@@ -309,9 +309,9 @@ public final class OPDSFeedParser implements OPDSFeedParserType
         TimeUnit.MILLISECONDS.convert(
           time_parse + time_interp,
           TimeUnit.NANOSECONDS),
-        TimeUnit.MILLISECONDS.convert(time_parse, TimeUnit.NANOSECONDS),
-        TimeUnit.MILLISECONDS.convert(time_interp, TimeUnit.NANOSECONDS),
-        uri);
+          TimeUnit.MILLISECONDS.convert(time_parse, TimeUnit.NANOSECONDS),
+          TimeUnit.MILLISECONDS.convert(time_interp, TimeUnit.NANOSECONDS),
+          uri);
     }
   }
 }

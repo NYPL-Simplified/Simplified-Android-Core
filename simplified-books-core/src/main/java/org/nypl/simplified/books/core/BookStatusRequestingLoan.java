@@ -37,4 +37,9 @@ public final class BookStatusRequestingLoan implements BookStatusType
     b.append("]");
     return NullCheck.notNull(b.toString());
   }
+
+  @Override public BookStatusPriorityOrdering getPriority()
+  {
+    return BookStatusPriorityOrdering.BOOK_STATUS_LOAN_IN_PROGRESS;
+  }
 }

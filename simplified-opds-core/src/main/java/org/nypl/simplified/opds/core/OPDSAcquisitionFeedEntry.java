@@ -23,11 +23,14 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeedEntry implements
   Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   private static final class Builder implements
     OPDSAcquisitionFeedEntryBuilderType
   {
     private final List<OPDSAcquisition>  acquisitions;
     private final List<String>           authors;
+    private OPDSAvailabilityType         availability;
     private final List<OPDSCategory>     categories;
     private OptionType<URI>              cover;
     private final Set<Pair<String, URI>> groups;
@@ -42,11 +45,14 @@ import com.io7m.jnull.Nullable;
     private Builder(
       final String in_id,
       final String in_title,
-      final Calendar in_updated)
+      final Calendar in_updated,
+      final OPDSAvailabilityType in_availability)
     {
       this.id = NullCheck.notNull(in_id);
       this.title = NullCheck.notNull(in_title);
       this.updated = NullCheck.notNull(in_updated);
+      this.availability = NullCheck.notNull(in_availability);
+
       this.summary = "";
       this.thumbnail = Option.none();
       this.cover = Option.none();
@@ -90,6 +96,7 @@ import com.io7m.jnull.Nullable;
       return new OPDSAcquisitionFeedEntry(
         this.authors,
         this.acquisitions,
+        this.availability,
         this.groups,
         this.cover,
         this.id,
@@ -100,6 +107,17 @@ import com.io7m.jnull.Nullable;
         this.published,
         this.publisher,
         this.categories);
+    }
+
+    @Override public List<OPDSAcquisition> getAcquisitions()
+    {
+      return this.acquisitions;
+    }
+
+    @Override public void setAvailability(
+      final OPDSAvailabilityType a)
+    {
+      this.availability = NullCheck.notNull(a);
     }
 
     @Override public void setCoverOption(
@@ -137,8 +155,6 @@ import com.io7m.jnull.Nullable;
     }
   }
 
-  private static final long serialVersionUID = 2L;
-
   /**
    * Construct a new mutable builder for feed entries.
    *
@@ -148,19 +164,23 @@ import com.io7m.jnull.Nullable;
    *          The feed title
    * @param in_updated
    *          The feed updated time
+   * @param in_availability
+   *          The availability
    * @return A new builder
    */
 
   public static OPDSAcquisitionFeedEntryBuilderType newBuilder(
     final String in_id,
     final String in_title,
-    final Calendar in_updated)
+    final Calendar in_updated,
+    final OPDSAvailabilityType in_availability)
   {
-    return new Builder(in_id, in_title, in_updated);
+    return new Builder(in_id, in_title, in_updated, in_availability);
   }
 
   private final List<OPDSAcquisition>  acquisitions;
   private final List<String>           authors;
+  private final OPDSAvailabilityType   availability;
   private final List<OPDSCategory>     categories;
   private final OptionType<URI>        cover;
   private final Set<Pair<String, URI>> groups;
@@ -175,6 +195,7 @@ import com.io7m.jnull.Nullable;
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
     final List<OPDSAcquisition> in_acquisitions,
+    final OPDSAvailabilityType in_availability,
     final Set<Pair<String, URI>> in_groups,
     final OptionType<URI> in_cover,
     final String in_id,
@@ -190,6 +211,7 @@ import com.io7m.jnull.Nullable;
       NullCheck.notNull(Collections.unmodifiableList(in_authors));
     this.acquisitions =
       NullCheck.notNull(Collections.unmodifiableList(in_acquisitions));
+    this.availability = NullCheck.notNull(in_availability);
     this.groups = NullCheck.notNull(in_groups);
     this.cover = NullCheck.notNull(in_cover);
     this.id = NullCheck.notNull(in_id);
@@ -216,6 +238,7 @@ import com.io7m.jnull.Nullable;
     }
     final OPDSAcquisitionFeedEntry other = (OPDSAcquisitionFeedEntry) obj;
     return this.acquisitions.equals(other.acquisitions)
+      && this.availability.equals(other.availability)
       && this.authors.equals(other.authors)
       && this.groups.equals(other.groups)
       && this.categories.equals(other.categories)
@@ -237,6 +260,11 @@ import com.io7m.jnull.Nullable;
   public List<String> getAuthors()
   {
     return this.authors;
+  }
+
+  public OPDSAvailabilityType getAvailability()
+  {
+    return this.availability;
   }
 
   public List<OPDSCategory> getCategories()
@@ -294,6 +322,7 @@ import com.io7m.jnull.Nullable;
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.acquisitions.hashCode();
+    result = (prime * result) + this.availability.hashCode();
     result = (prime * result) + this.authors.hashCode();
     result = (prime * result) + this.groups.hashCode();
     result = (prime * result) + this.cover.hashCode();
@@ -311,16 +340,18 @@ import com.io7m.jnull.Nullable;
   @Override public String toString()
   {
     final StringBuilder b = new StringBuilder();
-    b.append("OPDSAcquisitionFeedEntry [acquisitions=");
+    b.append("[OPDSAcquisitionFeedEntry acquisitions=");
     b.append(this.acquisitions);
     b.append(", authors=");
     b.append(this.authors);
-    b.append(", groups=");
-    b.append(this.groups);
+    b.append(", availability=");
+    b.append(this.availability);
     b.append(", categories=");
     b.append(this.categories);
     b.append(", cover=");
     b.append(this.cover);
+    b.append(", groups=");
+    b.append(this.groups);
     b.append(", id=");
     b.append(this.id);
     b.append(", published=");

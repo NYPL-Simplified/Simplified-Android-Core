@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.3.10</version>
+    <version>0.3.11</version>
   </parent>
   <artifactId>simplified-books-core</artifactId>
 
@@ -25,17 +25,17 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>simplified-downloader-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>simplified-files</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-http-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-downloader-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

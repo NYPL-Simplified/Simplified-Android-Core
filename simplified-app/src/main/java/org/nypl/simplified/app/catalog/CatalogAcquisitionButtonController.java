@@ -91,6 +91,9 @@ public final class CatalogAcquisitionButtonController implements
   @Override public void onLoginSuccess()
   {
     CatalogAcquisitionButtonController.LOG.debug("login succeeded");
+    CatalogAcquisitionButtonController.LOG.debug(
+      "attempting borrow of {} acquisition",
+      this.acq.getType());
 
     switch (this.acq.getType()) {
       case ACQUISITION_BORROW:
@@ -98,8 +101,7 @@ public final class CatalogAcquisitionButtonController implements
       case ACQUISITION_OPEN_ACCESS:
       {
         final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
-        this.books.bookBorrow(this.id, this.acq, eo.getTitle(), this);
-        this.books.bookUpdateMetadata(this.id, eo);
+        this.books.bookBorrow(this.id, this.acq, eo, this);
         break;
       }
       case ACQUISITION_BUY:

@@ -13,16 +13,22 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.nypl.simplified.opds.core.OPDSFacet;
-import org.nypl.simplified.opds.core.OPDSFeedParseException;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSGroup;
+import org.nypl.simplified.opds.core.OPDSParseException;
+import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.test.utilities.TestUtilities;
 import org.w3c.dom.DOMException;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Some;
@@ -182,7 +188,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)
@@ -223,7 +229,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)
@@ -246,7 +252,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)
@@ -269,7 +275,7 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSFeedParseException.class,
+      OPDSParseException.class,
       new PartialProcedureType<Unit, Exception>() {
         @Override public void call(
           final Unit x)
@@ -370,6 +376,160 @@ import com.io7m.jnull.NullCheck;
           URI
             .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=author"),
           fi.getURI());
+    }
+  }
+
+  @Override public void testAcquisitionFeedAvailability()
+    throws Exception
+  {
+    final URI uri =
+      URI
+        .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+    final InputStream d = OPDSFeedParserContract.getResource("loans.xml");
+    final OPDSAcquisitionFeed f = p.parse(uri, d);
+    d.close();
+
+    /**
+     * A simple time-limited loan.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(0);
+      TestUtilities
+        .assertEquals(
+          e.getID(),
+          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fbev589");
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
+        .get(
+          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-30T14:52:06Z"),
+          Option.some(OPDSRFC3339Formatter
+            .parseRFC3339Date("2015-04-20T14:52:06Z"))));
+    }
+
+    /**
+     * A simple time-limited loan.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(1);
+      TestUtilities
+        .assertEquals(
+          e.getID(),
+          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Faght6r9");
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
+        .get(
+          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:56:23Z"),
+          Option.some(OPDSRFC3339Formatter
+            .parseRFC3339Date("2015-04-15T19:56:23Z"))));
+    }
+
+    /**
+     * A simple time-limited loan.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(2);
+      TestUtilities
+        .assertEquals(
+          e.getID(),
+          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fetk2889");
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
+        .get(
+          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:32:36Z"),
+          Option.some(OPDSRFC3339Formatter
+            .parseRFC3339Date("2015-04-15T19:32:36Z"))));
+    }
+
+    /**
+     * A simple hold.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(3);
+      TestUtilities
+        .assertEquals(
+          e.getID(),
+          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Feqkyrr9");
+      TestUtilities.assertEquals(
+        e.getAvailability(),
+        OPDSAvailabilityHeld.get(
+          OPDSRFC3339Formatter.parseRFC3339Date("2015-05-22T14:17:56Z"),
+          1));
+    }
+
+    /**
+     * A loan with no end date.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(4);
+      TestUtilities
+        .assertEquals(
+          e.getID(),
+          "http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F37284");
+      final OptionType<Calendar> none = Option.none();
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
+        .get(OPDSRFC3339Formatter
+          .parseRFC3339Date("2015-04-16T18:51:36.392154Z"), none));
+    }
+
+    /**
+     * A loan with no end date.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(5);
+      TestUtilities
+        .assertEquals(
+          e.getID(),
+          "http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F26787");
+      final OptionType<Calendar> none = Option.none();
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
+        .get(OPDSRFC3339Formatter
+          .parseRFC3339Date("2015-04-03T18:03:03.275883Z"), none));
+    }
+
+    /**
+     * A loan with no end date.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(6);
+      TestUtilities
+        .assertEquals(
+          e.getID(),
+          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fcgaxr9");
+      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
+        .get(
+          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-13T13:38:19Z"),
+          Option.some(OPDSRFC3339Formatter
+            .parseRFC3339Date("2015-04-03T13:38:19Z"))));
+    }
+
+    /**
+     * Falling back to "loanable" due to a lack of information.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(7);
+      TestUtilities.assertEquals(e.getID(), "simplified:extra-0");
+      TestUtilities.assertEquals(
+        e.getAvailability(),
+        OPDSAvailabilityLoanable.get());
+    }
+
+    /**
+     * Open access.
+     */
+
+    {
+      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(8);
+      TestUtilities.assertEquals(e.getID(), "simplified:extra-1");
+      TestUtilities.assertEquals(
+        e.getAvailability(),
+        OPDSAvailabilityOpenAccess.get());
     }
   }
 }

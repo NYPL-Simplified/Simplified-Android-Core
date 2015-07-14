@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileUtilities;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,27 +38,27 @@ public final class BookDatabase implements BookDatabaseType
    */
 
   public static BookDatabaseType newDatabase(
-    final OPDSAcquisitionFeedEntryParserType in_parser,
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
+    final OPDSJSONSerializerType in_json_serializer,
+    final OPDSJSONParserType in_json_parser,
     final File in_directory)
   {
-    return new BookDatabase(in_parser, in_serializer, in_directory);
+    return new BookDatabase(in_json_serializer, in_json_parser, in_directory);
   }
 
-  private final File                                   directory;
-  private final File                                   file_credentials;
-  private final File                                   file_credentials_tmp;
-  private final OPDSAcquisitionFeedEntryParserType     parser;
-  private final OPDSAcquisitionFeedEntrySerializerType serializer;
+  private final File                   directory;
+  private final File                   file_credentials;
+  private final File                   file_credentials_tmp;
+  private final OPDSJSONParserType     parser;
+  private final OPDSJSONSerializerType serializer;
 
   private BookDatabase(
-    final OPDSAcquisitionFeedEntryParserType in_parser,
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
+    final OPDSJSONSerializerType in_json_serializer,
+    final OPDSJSONParserType in_json_parser,
     final File in_directory)
   {
     this.directory = NullCheck.notNull(in_directory);
-    this.parser = NullCheck.notNull(in_parser);
-    this.serializer = NullCheck.notNull(in_serializer);
+    this.parser = NullCheck.notNull(in_json_parser);
+    this.serializer = NullCheck.notNull(in_json_serializer);
 
     this.file_credentials = new File(this.directory, "credentials.txt");
     this.file_credentials_tmp =
@@ -135,8 +135,8 @@ public final class BookDatabase implements BookDatabaseType
       for (final File f : book_list) {
         final BookID id = BookID.exactString(NullCheck.notNull(f.getName()));
         xs.add(new BookDatabaseEntry(
-          this.parser,
           this.serializer,
+          this.parser,
           this.directory,
           id));
       }
@@ -149,8 +149,8 @@ public final class BookDatabase implements BookDatabaseType
     final BookID book_id)
   {
     return new BookDatabaseEntry(
-      this.parser,
       this.serializer,
+      this.parser,
       this.directory,
       NullCheck.notNull(book_id));
   }

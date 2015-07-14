@@ -13,13 +13,13 @@ public interface OPDSAcquisitionFeedEntryParserType
    *          The XML element
    *
    * @return A parsed feed entry
-   * @throws OPDSFeedParseException
+   * @throws OPDSParseException
    *           On errors
    */
 
   OPDSAcquisitionFeedEntry parseEntry(
     final Element e)
-    throws OPDSFeedParseException;
+      throws OPDSParseException;
 
   /**
    * Parse the feed entry represented by the given stream <tt>s</tt>.
@@ -28,11 +28,11 @@ public interface OPDSAcquisitionFeedEntryParserType
    *          The entry stream
    *
    * @return A parsed feed entry
-   * @throws OPDSFeedParseException
+   * @throws OPDSParseException
    *           On errors
    */
 
   OPDSAcquisitionFeedEntry parseEntryStream(
     final InputStream s)
-    throws OPDSFeedParseException;
+      throws OPDSParseException;
 }

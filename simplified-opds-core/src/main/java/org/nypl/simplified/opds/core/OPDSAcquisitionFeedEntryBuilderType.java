@@ -2,6 +2,7 @@ package org.nypl.simplified.opds.core;
 
 import java.net.URI;
 import java.util.Calendar;
+import java.util.List;
 
 import com.io7m.jfunctional.OptionType;
 
@@ -17,14 +18,19 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void addAuthor(
     final String name);
 
+  void addCategory(
+    final OPDSCategory c);
+
   void addGroup(
     final URI uri,
     final String b);
 
-  void addCategory(
-    final OPDSCategory c);
-
   OPDSAcquisitionFeedEntry build();
+
+  List<OPDSAcquisition> getAcquisitions();
+
+  void setAvailability(
+    OPDSAvailabilityType a);
 
   void setCoverOption(
     OptionType<URI> uri);

@@ -2,6 +2,7 @@ package org.nypl.simplified.books.core;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
@@ -15,7 +16,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.nypl.simplified.downloader.core.DownloadSnapshot;
+import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultOKType;
@@ -23,9 +24,9 @@ import org.nypl.simplified.http.core.HTTPResultToException;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,6 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
@@ -44,19 +44,16 @@ import com.io7m.junreachable.UnreachableCodeException;
 @SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
   Observable implements BooksType
 {
-  public static final String  LOCAL_SEARCH_TYPE;
-
   private static final Logger LOG;
 
   static {
-    LOCAL_SEARCH_TYPE = "application/simplified-local-search+xml";
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
   }
 
   static OptionType<File> makeCover(
     final HTTPType http,
     final OptionType<URI> cover_opt)
-    throws Exception
+    throws IOException
   {
     if (cover_opt.isSome()) {
       final Some<URI> some = (Some<URI>) cover_opt;
@@ -75,8 +72,10 @@ import com.io7m.junreachable.UnreachableCodeException;
     final HTTPType http,
     final File cover_file_tmp,
     final URI cover_uri)
-    throws Exception
+    throws IOException
   {
+    BooksController.LOG.debug("fetching cover {}", cover_uri);
+
     final OptionType<HTTPAuthType> no_auth = Option.none();
     final HTTPResultOKType<InputStream> r =
       http.get(no_auth, cover_uri, 0).matchResult(
@@ -106,15 +105,17 @@ import com.io7m.junreachable.UnreachableCodeException;
     } finally {
       r.close();
     }
+
+    BooksController.LOG.debug("fetched cover {}", cover_uri);
   }
 
   public static BooksType newBooks(
     final ExecutorService in_exec,
-    final OPDSFeedParserType in_feeds,
+    final FeedLoaderType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
-    final OPDSAcquisitionFeedEntryParserType in_parser,
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
+    final OPDSJSONSerializerType in_json_serializer,
+    final OPDSJSONParserType in_json_parser,
     final BooksControllerConfiguration in_config)
   {
     return new BooksController(
@@ -122,9 +123,60 @@ import com.io7m.junreachable.UnreachableCodeException;
       in_feeds,
       in_http,
       in_downloader,
-      in_parser,
-      in_serializer,
+      in_json_serializer,
+      in_json_parser,
       in_config);
+  }
+
+  /**
+   * Convenience function to update a given book database entry and download a
+   * cover.
+   *
+   * @param e
+   *          The acquisition feed entry
+   * @param book_database
+   *          The book database
+   * @param books_status
+   *          The book status cache
+   * @param http
+   *          An HTTP implementation
+   * @throws IOException
+   *           On I/O errors
+   */
+
+  static void syncFeedEntry(
+    final OPDSAcquisitionFeedEntry e,
+    final BookDatabaseType book_database,
+    final BooksStatusCacheType books_status,
+    final HTTPType http)
+    throws IOException
+  {
+    final BookID book_id = BookID.newIDFromEntry(e);
+
+    BooksController.LOG.debug("book {}: synchronizing book entry", book_id);
+    final BookDatabaseEntryType book_dir =
+      book_database.getBookDatabaseEntry(book_id);
+    book_dir.create();
+    book_dir.setData(e);
+
+    BooksController.LOG.debug("book {}: fetching cover", book_id);
+    final OptionType<File> cover =
+      BooksController.makeCover(http, e.getCover());
+    book_dir.setCover(cover);
+
+    BooksController.LOG.debug("book {}: getting snapshot", book_id);
+    final BookSnapshot snap = book_dir.getSnapshot();
+    BooksController.LOG.debug("book {}: determining status", book_id);
+    final BookStatusType status = BookStatus.fromSnapshot(book_id, snap);
+
+    BooksController.LOG.debug("book {}: updating status", book_id);
+    books_status.booksStatusUpdateIfMoreImportant(status);
+    BooksController.LOG.debug("book {}: updating snapshot", book_id);
+    books_status.booksSnapshotUpdate(book_id, snap);
+
+    BooksController.LOG.debug(
+      "book {}: finished synchronizing book entry",
+      book_id);
   }
 
   private final BookDatabaseType                                  book_database;
@@ -132,7 +184,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final BooksControllerConfiguration                      config;
   private final File                                              data_directory;
   private final DownloaderType                                    downloader;
+  private final ConcurrentHashMap<BookID, DownloadType>           downloads;
   private final ExecutorService                                   exec;
+  private final FeedLoaderType                                    feed_loader;
   private final OPDSFeedParserType                                feed_parser;
   private final HTTPType                                          http;
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
@@ -141,25 +195,30 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private BooksController(
     final ExecutorService in_exec,
-    final OPDSFeedParserType in_feeds,
+    final FeedLoaderType in_feeds,
     final HTTPType in_http,
     final DownloaderType in_downloader,
-    final OPDSAcquisitionFeedEntryParserType in_parser,
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
+    final OPDSJSONSerializerType in_json_serializer,
+    final OPDSJSONParserType in_json_parser,
     final BooksControllerConfiguration in_config)
   {
     this.exec = NullCheck.notNull(in_exec);
-    this.feed_parser = NullCheck.notNull(in_feeds);
+    this.feed_loader = NullCheck.notNull(in_feeds);
     this.http = NullCheck.notNull(in_http);
-    this.config = NullCheck.notNull(in_config);
     this.downloader = NullCheck.notNull(in_downloader);
+    this.config = NullCheck.notNull(in_config);
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>();
     this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
+    this.downloads = new ConcurrentHashMap<BookID, DownloadType>();
     this.books_status = BooksStatusCache.newStatusCache();
     this.data_directory = new File(this.config.getDirectory(), "data");
     this.book_database =
-      BookDatabase.newDatabase(in_parser, in_serializer, this.data_directory);
+      BookDatabase.newDatabase(
+        in_json_serializer,
+        in_json_parser,
+        this.data_directory);
     this.task_id = new AtomicInteger(0);
+    this.feed_parser = this.feed_loader.getOPDSFeedParser();
   }
 
   @Override public void accountGetCachedLoginDetails(
@@ -193,7 +252,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.submitRunnable(new BooksControllerDataLoadTask(
       this.book_database,
       this.books_status,
-      this.downloader,
       listener,
       this.login));
   }
@@ -226,7 +284,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     synchronized (this) {
       this.stopAllTasks();
       this.books_status.booksStatusClearAll();
-      this.downloader.downloadDestroyAll();
       this.submitRunnable(new BooksControllerLogoutTask(
         this.config,
         this.login,
@@ -251,11 +308,12 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public void bookBorrow(
     final BookID id,
     final OPDSAcquisition acq,
-    final String title,
+    final OPDSAcquisitionFeedEntry eo,
     final BookBorrowListenerType listener)
   {
     NullCheck.notNull(id);
     NullCheck.notNull(acq);
+    NullCheck.notNull(eo);
     NullCheck.notNull(listener);
 
     BooksController.LOG.debug("borrow {}", id);
@@ -265,10 +323,13 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.book_database,
       this.books_status,
       this.downloader,
+      this.http,
+      this.downloads,
       id,
       acq,
-      title,
-      listener));
+      eo,
+      listener,
+      this.feed_loader));
   }
 
   @Override public void bookDeleteData(
@@ -286,19 +347,40 @@ import com.io7m.junreachable.UnreachableCodeException;
   @Override public void bookDownloadAcknowledge(
     final BookID id)
   {
-    final OptionType<BookStatusType> s_opt =
-      this.books_status.booksStatusGet(id);
-    if (s_opt.isSome()) {
-      final Some<BookStatusType> some = (Some<BookStatusType>) s_opt;
-      final BookStatusType status = some.get();
+    BooksController.LOG.debug("acknowledging download of book {}", id);
 
-      if (status instanceof BookStatusDownloadingType) {
-        final BookStatusDownloadingType downloading =
-          (BookStatusDownloadingType) status;
-        final DownloadSnapshot dsnap = downloading.getDownloadSnapshot();
-        this.downloader.downloadAcknowledge(dsnap.statusGetID());
-        this.books_status.booksStatusUpdate(new BookStatusLoaned(id));
+    final OptionType<BookStatusType> status_opt =
+      this.books_status.booksStatusGet(id);
+    if (status_opt.isSome()) {
+      final Some<BookStatusType> status_some =
+        (Some<BookStatusType>) status_opt;
+      final BookStatusType status = status_some.get();
+      BooksController.LOG.debug(
+        "status of book {} is currently {}",
+        id,
+        status);
+
+      if (status instanceof BookStatusDownloadFailed) {
+        final OptionType<BookSnapshot> snap_opt =
+          this.books_status.booksSnapshotGet(id);
+        if (snap_opt.isSome()) {
+          final Some<BookSnapshot> snap_some = (Some<BookSnapshot>) snap_opt;
+          final BookSnapshot snap = snap_some.get();
+          this.books_status.booksStatusUpdate(BookStatus.fromSnapshot(
+            id,
+            snap));
+        } else {
+
+          /**
+           * A snapshot *must* exist for a book that has had a download
+           * attempt.
+           */
+
+          throw new UnreachableCodeException();
+        }
       }
+    } else {
+      BooksController.LOG.debug("status of book {} unavailable", id);
     }
   }
 
@@ -307,59 +389,11 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     BooksController.LOG.debug("download cancel {}", id);
 
-    final OptionType<BookStatusType> s_opt =
-      this.books_status.booksStatusGet(id);
-
-    if (s_opt.isSome()) {
-      final Some<BookStatusType> some = (Some<BookStatusType>) s_opt;
-      final BookStatusType status = some.get();
-
-      BooksController.LOG.debug("download cancel {}: status: {}", id, status);
-      status
-        .matchBookStatus(new BookStatusMatcherType<Unit, UnreachableCodeException>() {
-          @Override public Unit onBookStatusLoanedType(
-            final BookStatusLoanedType loaned)
-          {
-            return loaned
-              .matchBookLoanedStatus(new BookStatusLoanedMatcherType<Unit, UnreachableCodeException>() {
-                @Override public Unit onBookStatusDownloaded(
-                  final BookStatusDownloaded d)
-                {
-                  return Unit.unit();
-                }
-
-                @Override public Unit onBookStatusDownloading(
-                  final BookStatusDownloadingType o)
-                {
-                  final DownloadSnapshot snap = o.getDownloadSnapshot();
-                  final long did = snap.statusGetID();
-                  BooksController.this.downloader.downloadCancel(did);
-                  BooksController.this.downloader.downloadAcknowledge(did);
-                  return Unit.unit();
-                }
-
-                @Override public Unit onBookStatusLoaned(
-                  final BookStatusLoaned o)
-                {
-                  return Unit.unit();
-                }
-
-                @Override public Unit onBookStatusRequestingDownload(
-                  final BookStatusRequestingDownload d)
-                {
-                  return Unit.unit();
-                }
-              });
-          }
-
-          @Override public Unit onBookStatusRequestingLoan(
-            final BookStatusRequestingLoan s)
-          {
-            return Unit.unit();
-          }
-        });
-    } else {
-      BooksController.LOG.debug("download cancel {}: no known download", id);
+    final DownloadType d = this.downloads.get(id);
+    if (d != null) {
+      BooksController.LOG.debug("cancelling download {}", d);
+      d.cancel();
+      this.downloads.remove(id);
     }
   }
 
@@ -508,5 +542,4 @@ import com.io7m.junreachable.UnreachableCodeException;
       this.tasks.put(id, this.exec.submit(rb));
     }
   }
-
 }

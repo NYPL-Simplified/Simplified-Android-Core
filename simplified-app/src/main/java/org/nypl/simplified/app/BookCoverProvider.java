@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -29,14 +30,17 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
-public final class BookCoverProvider implements BookCoverProviderType
+@SuppressWarnings("synthetic-access") public final class BookCoverProvider implements
+  BookCoverProviderType
 {
+  private static final String COVER_TAG;
   private static final Logger LOG;
   private static final String THUMBNAIL_TAG;
 
   static {
     LOG = LogUtilities.getLog(BookCoverProvider.class);
     THUMBNAIL_TAG = "thumbnail";
+    COVER_TAG = "cover";
   }
 
   private static URI generateCoverURI(
@@ -53,6 +57,66 @@ public final class BookCoverProvider implements BookCoverProviderType
       author = NullCheck.notNull(authors.get(0));
     }
     return cg.generateURIForTitleAuthor(title, author);
+  }
+
+  private static void load(
+    final FeedEntryOPDS e,
+    final ImageView i,
+    final int w,
+    final int h,
+    final @Nullable Callback c,
+    final Picasso p,
+    final CatalogBookCoverGeneratorType cg,
+    final String tag,
+    final OptionType<URI> uri_opt)
+  {
+    final URI uri_generated = BookCoverProvider.generateCoverURI(e, cg);
+    if (uri_opt.isSome()) {
+      final URI uri_specified = ((Some<URI>) uri_opt).get();
+
+      BookCoverProvider.LOG.debug(
+        "{}: {}: loading specified uri {}",
+        tag,
+        e.getBookID(),
+        uri_specified);
+
+      final RequestCreator r = p.load(uri_specified.toString());
+      r.tag(tag);
+      r.resize(w, h);
+      r.into(i, new Callback() {
+        @Override public void onError()
+        {
+          BookCoverProvider.LOG.debug(
+            "{}: {}: failed to load uri {}, falling back to generation",
+            tag,
+            e.getBookID(),
+            uri_specified);
+
+          final RequestCreator fallback_r = p.load(uri_generated.toString());
+          fallback_r.tag(tag);
+          fallback_r.resize(w, h);
+          fallback_r.into(i, c);
+        }
+
+        @Override public void onSuccess()
+        {
+          if (c != null) {
+            c.onSuccess();
+          }
+        }
+      });
+    } else {
+      BookCoverProvider.LOG.debug(
+        "{}: {}: loading generated uri {}",
+        tag,
+        e.getBookID(),
+        uri_generated);
+
+      final RequestCreator r = p.load(uri_generated.toString());
+      r.tag(tag);
+      r.resize(w, h);
+      r.into(i, c);
+    }
   }
 
   public static BookCoverProviderType newCoverProvider(
@@ -89,6 +153,42 @@ public final class BookCoverProvider implements BookCoverProviderType
     this.cover_gen = NullCheck.notNull(in_cover_gen);
   }
 
+  private OptionType<URI> getCoverURI(
+    final FeedEntryOPDS e)
+  {
+    final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
+    final BookID id = e.getBookID();
+    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
+    if (snap_opt.isSome()) {
+      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
+      final OptionType<File> cover_opt = snap.getCover();
+      if (cover_opt.isSome()) {
+        final Some<File> some = (Some<File>) cover_opt;
+        return Option.some(NullCheck.notNull(some.get().toURI()));
+      }
+    }
+
+    return eo.getCover();
+  }
+
+  private OptionType<URI> getThumbnailURI(
+    final FeedEntryOPDS e)
+  {
+    final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
+    final BookID id = e.getBookID();
+    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
+    if (snap_opt.isSome()) {
+      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
+      final OptionType<File> cover_opt = snap.getCover();
+      if (cover_opt.isSome()) {
+        final Some<File> some = (Some<File>) cover_opt;
+        return Option.some(NullCheck.notNull(some.get().toURI()));
+      }
+    }
+
+    return eo.getThumbnail();
+  }
+
   @Override public void loadCoverInto(
     final FeedEntryOPDS e,
     final ImageView i,
@@ -107,52 +207,26 @@ public final class BookCoverProvider implements BookCoverProviderType
     final int h,
     final @Nullable Callback c)
   {
-    BookCoverProvider.LOG.debug("{}: loadCoverInto", e.getBookID());
+    final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
+
+    BookCoverProvider.LOG.debug(
+      "{}: loadCoverInto {}",
+      e.getBookID(),
+      eo.getID());
 
     UIThread.checkIsUIThread();
 
-    final URI uri;
-    final BookID id = e.getBookID();
-    final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
-    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
-    if (snap_opt.isSome()) {
-      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
-
-      /**
-       * On receipt of a book snapshot, construct a URI from the location of
-       * the cover image, if any. If there is no cover, generate one as
-       * normal.
-       */
-
-      final OptionType<File> cover_opt = snap.getCover();
-      if (cover_opt.isSome()) {
-        final Some<File> some = (Some<File>) cover_opt;
-        uri = some.get().toURI();
-      } else {
-        uri = BookCoverProvider.generateCoverURI(e, this.cover_gen);
-      }
-
-    } else {
-
-      /**
-       * If no snapshot is received, either fetch or generate a cover as with
-       * ordinary books.
-       */
-
-      final OptionType<URI> cover_opt = eo.getCover();
-      if (cover_opt.isSome()) {
-        final Some<URI> some = (Some<URI>) cover_opt;
-        uri = some.get();
-      } else {
-        uri = BookCoverProvider.generateCoverURI(e, this.cover_gen);
-      }
-    }
-
-    BookCoverProvider.LOG.debug("{}: uri {}", e.getBookID(), uri);
-
-    final RequestCreator r = this.picasso.load(uri.toString());
-    r.resize(w, h);
-    r.into(i, c);
+    final OptionType<URI> uri_opt = this.getCoverURI(e);
+    BookCoverProvider.load(
+      e,
+      i,
+      w,
+      h,
+      c,
+      this.picasso,
+      this.cover_gen,
+      BookCoverProvider.COVER_TAG,
+      uri_opt);
   }
 
   @Override public void loadCoverIntoWithCallback(
@@ -205,48 +279,17 @@ public final class BookCoverProvider implements BookCoverProviderType
 
     UIThread.checkIsUIThread();
 
-    final URI uri;
-    final BookID id = e.getBookID();
-    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
-    if (snap_opt.isSome()) {
-      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
-
-      /**
-       * On receipt of a book snapshot, construct a URI from the location of
-       * the cover image, if any. If there is no cover, generate one as
-       * normal.
-       */
-
-      final OptionType<File> cover_opt = snap.getCover();
-      if (cover_opt.isSome()) {
-        final Some<File> some = (Some<File>) cover_opt;
-        uri = some.get().toURI();
-      } else {
-        uri = BookCoverProvider.generateCoverURI(e, this.cover_gen);
-      }
-
-    } else {
-
-      /**
-       * If no snapshot is received, either fetch or generate a cover as with
-       * ordinary books.
-       */
-
-      final OptionType<URI> thumb_opt = eo.getThumbnail();
-      if (thumb_opt.isSome()) {
-        final Some<URI> some = (Some<URI>) thumb_opt;
-        uri = some.get();
-      } else {
-        uri = BookCoverProvider.generateCoverURI(e, this.cover_gen);
-      }
-    }
-
-    BookCoverProvider.LOG.debug("{}: uri {}", e.getBookID(), uri);
-
-    final RequestCreator r = this.picasso.load(uri.toString());
-    r.tag(BookCoverProvider.THUMBNAIL_TAG);
-    r.resize(w, h);
-    r.into(i, c);
+    final OptionType<URI> uri_opt = this.getThumbnailURI(e);
+    BookCoverProvider.load(
+      e,
+      i,
+      w,
+      h,
+      c,
+      this.picasso,
+      this.cover_gen,
+      BookCoverProvider.THUMBNAIL_TAG,
+      uri_opt);
   }
 
   @Override public void loadThumbnailIntoWithCallback(

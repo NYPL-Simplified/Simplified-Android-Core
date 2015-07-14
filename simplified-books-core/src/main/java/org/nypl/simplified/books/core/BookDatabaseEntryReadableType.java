@@ -46,15 +46,6 @@ public interface BookDatabaseEntryReadableType
   File getDirectory();
 
   /**
-   * @return The download ID associated with the book, if any
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
-   */
-
-  OptionType<Long> getDownloadID()
-    throws IOException;
-
-  /**
    * @return The ID of the book
    */
 

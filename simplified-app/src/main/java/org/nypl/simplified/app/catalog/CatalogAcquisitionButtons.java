@@ -2,17 +2,21 @@ package org.nypl.simplified.app.catalog;
 
 import java.util.List;
 
-import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.slf4j.Logger;
 
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
@@ -22,9 +26,10 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class CatalogAcquisitionButtons
 {
-  private CatalogAcquisitionButtons()
-  {
-    throw new UnreachableCodeException();
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(CatalogAcquisitionButtons.class);
   }
 
   public static void addButtons(
@@ -44,21 +49,24 @@ public final class CatalogAcquisitionButtons
     final BookID book_id = in_e.getBookID();
     final OPDSAcquisitionFeedEntry eo = in_e.getFeedEntry();
 
-    final OPDSAcquisition a =
+    final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
-    final CatalogAcquisitionButton b =
-      new CatalogAcquisitionButton(in_act, in_books, book_id, a, in_e);
-    in_vg.addView(b);
+    if (a_opt.isSome()) {
+      final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
+      final CatalogAcquisitionButton b =
+        new CatalogAcquisitionButton(in_act, in_books, book_id, a, in_e);
+      in_vg.addView(b);
+    }
   }
 
-  public static OPDSAcquisition getPreferredAcquisition(
+  public static OptionType<OPDSAcquisition> getPreferredAcquisition(
     final List<OPDSAcquisition> acquisitions)
   {
     NullCheck.notNull(acquisitions);
 
-    Assertions.checkPrecondition(
-      acquisitions.isEmpty() == false,
-      "Acquisitions list is non-empty");
+    if (acquisitions.isEmpty()) {
+      return Option.none();
+    }
 
     OPDSAcquisition best = NullCheck.notNull(acquisitions.get(0));
     for (final OPDSAcquisition current : acquisitions) {
@@ -68,7 +76,13 @@ public final class CatalogAcquisitionButtons
         best = nn_current;
       }
     }
-    return best;
+
+    CatalogAcquisitionButtons.LOG.debug(
+      "best acquisition of {} was {}",
+      acquisitions,
+      best);
+
+    return Option.some(best);
   }
 
   private static int priority(
@@ -78,9 +92,9 @@ public final class CatalogAcquisitionButtons
       case ACQUISITION_BORROW:
         return 6;
       case ACQUISITION_OPEN_ACCESS:
-        return 5;
-      case ACQUISITION_GENERIC:
         return 4;
+      case ACQUISITION_GENERIC:
+        return 5;
       case ACQUISITION_SAMPLE:
         return 3;
       case ACQUISITION_BUY:
@@ -90,5 +104,10 @@ public final class CatalogAcquisitionButtons
     }
 
     return 0;
+  }
+
+  private CatalogAcquisitionButtons()
+  {
+    throw new UnreachableCodeException();
   }
 }

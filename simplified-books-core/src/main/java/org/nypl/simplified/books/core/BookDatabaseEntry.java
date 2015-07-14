@@ -10,13 +10,12 @@ import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntrySerializerType;
-import org.nypl.simplified.opds.core.OPDSXML;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
@@ -38,36 +37,34 @@ import com.io7m.jnull.NullCheck;
 @SuppressWarnings("synthetic-access") public final class BookDatabaseEntry implements
   BookDatabaseEntryType
 {
-  public static final int                              WAIT_MAXIMUM_MILLISECONDS;
-  public static final int                              WAIT_PAUSE_MILLISECONDS;
-  private static final Logger                          LOG;
+  public static final int              WAIT_MAXIMUM_MILLISECONDS;
+  public static final int              WAIT_PAUSE_MILLISECONDS;
+  private static final Logger          LOG;
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BookDatabaseEntry.class));
-    WAIT_MAXIMUM_MILLISECONDS = 1000;
+    WAIT_MAXIMUM_MILLISECONDS = 100;
     WAIT_PAUSE_MILLISECONDS = 10;
   }
 
-  private final File                                   directory;
-  private final File                                   file_book;
-  private final File                                   file_cover;
-  private final File                                   file_download_id;
-  private final File                                   file_download_id_tmp;
-  private final File                                   file_lock;
-  private final File                                   file_meta;
-  private final File                                   file_meta_tmp;
-  private final BookID                                 id;
-  private final OPDSAcquisitionFeedEntryParserType     parser;
-  private final OPDSAcquisitionFeedEntrySerializerType serializer;
+  private final File                   directory;
+  private final File                   file_book;
+  private final File                   file_cover;
+  private final File                   file_lock;
+  private final File                   file_meta;
+  private final File                   file_meta_tmp;
+  private final BookID                 id;
+  private final OPDSJSONParserType     parser;
+  private final OPDSJSONSerializerType serializer;
 
   public BookDatabaseEntry(
-    final OPDSAcquisitionFeedEntryParserType in_parser,
-    final OPDSAcquisitionFeedEntrySerializerType in_serializer,
+    final OPDSJSONSerializerType in_json_serializer,
+    final OPDSJSONParserType in_json_parser,
     final File parent,
     final BookID book_id)
   {
-    this.parser = NullCheck.notNull(in_parser);
-    this.serializer = NullCheck.notNull(in_serializer);
+    this.parser = NullCheck.notNull(in_json_parser);
+    this.serializer = NullCheck.notNull(in_json_serializer);
     this.directory =
       new File(NullCheck.notNull(parent), NullCheck
         .notNull(book_id)
@@ -76,13 +73,9 @@ import com.io7m.jnull.NullCheck;
     this.id = NullCheck.notNull(book_id);
     this.file_lock = new File(this.directory, "lock");
     this.file_cover = new File(this.directory, "cover.jpg");
-    this.file_meta = new File(this.directory, "meta.xml");
-    this.file_meta_tmp = new File(this.directory, "meta.xml.tmp");
+    this.file_meta = new File(this.directory, "meta.json");
+    this.file_meta_tmp = new File(this.directory, "meta.json.tmp");
     this.file_book = new File(this.directory, "book.epub");
-
-    this.file_download_id = new File(this.directory, "download_id.txt");
-    this.file_download_id_tmp =
-      new File(this.directory, "download_id.txt.tmp");
   }
 
   @Override public void copyInBookFromSameFilesystem(
@@ -109,13 +102,6 @@ import com.io7m.jnull.NullCheck;
     throws IOException
   {
     FileUtilities.fileRename(file, this.file_book);
-
-    this.file_download_id.delete();
-    if (this.file_download_id.exists()) {
-      throw new IOException(String.format(
-        "Could not delete '%s'",
-        this.file_download_id));
-    }
   }
 
   @Override public void create()
@@ -164,8 +150,6 @@ import com.io7m.jnull.NullCheck;
     throws IOException
   {
     FileUtilities.fileDelete(this.file_book);
-    FileUtilities.fileDelete(this.file_download_id);
-    FileUtilities.fileDelete(this.file_download_id_tmp);
   }
 
   private void destroyLocked()
@@ -177,8 +161,6 @@ import com.io7m.jnull.NullCheck;
       FileUtilities.fileDelete(this.file_meta);
       FileUtilities.fileDelete(this.file_meta_tmp);
       FileUtilities.fileDelete(this.file_book);
-      FileUtilities.fileDelete(this.file_download_id);
-      FileUtilities.fileDelete(this.file_download_id_tmp);
     }
 
     FileUtilities.fileDelete(this.directory);
@@ -244,7 +226,7 @@ import com.io7m.jnull.NullCheck;
   {
     final FileInputStream is = new FileInputStream(this.file_meta);
     try {
-      return this.parser.parseEntryStream(is);
+      return this.parser.parseAcquisitionFeedEntryFromStream(is);
     } finally {
       is.close();
     }
@@ -253,34 +235,6 @@ import com.io7m.jnull.NullCheck;
   @Override public File getDirectory()
   {
     return this.directory;
-  }
-
-  @Override public OptionType<Long> getDownloadID()
-    throws IOException
-  {
-    return FileLocking.withFileLocked(
-      this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, OptionType<Long>, IOException>() {
-        @Override public OptionType<Long> call(
-          final Unit x)
-          throws IOException
-        {
-          return BookDatabaseEntry.this.getDownloadIDLocked();
-        }
-      });
-  }
-
-  private OptionType<Long> getDownloadIDLocked()
-    throws IOException
-  {
-    if (this.file_download_id.isFile()) {
-      final Long i =
-        Long.valueOf(FileUtilities.fileReadUTF8(this.file_download_id));
-      return Option.some(NullCheck.notNull(i));
-    }
-    return Option.none();
   }
 
   @Override public BookID getID()
@@ -309,14 +263,13 @@ import com.io7m.jnull.NullCheck;
     throws IOException
   {
     final OPDSAcquisitionFeedEntry in_entry = this.getDataLocked();
-    final OptionType<Long> in_download_id = this.getDownloadIDLocked();
     final OptionType<File> in_cover = this.getCoverLocked();
     final OptionType<File> in_book = this.getBookLocked();
-    return new BookSnapshot(in_cover, in_book, in_download_id, in_entry);
+    return new BookSnapshot(in_cover, in_book, in_entry);
   }
 
   private void setDataLocked(
-    final Document d)
+    final ObjectNode d)
     throws IOException
   {
     BookDatabaseEntry.LOG.debug("updating data {}", this.file_meta);
@@ -324,7 +277,7 @@ import com.io7m.jnull.NullCheck;
     final OutputStream os = new FileOutputStream(this.file_meta_tmp);
 
     try {
-      OPDSXML.serializeDocumentToStream(d, os);
+      this.serializer.serializeToStream(d, os);
     } finally {
       os.flush();
       os.close();
@@ -346,40 +299,11 @@ import com.io7m.jnull.NullCheck;
     }
   }
 
-  @Override public void setDownloadID(
-    final long did)
-    throws IOException
-  {
-    FileLocking.withFileLocked(
-      this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, Unit, IOException>() {
-        @Override public Unit call(
-          final Unit x)
-          throws IOException
-        {
-          BookDatabaseEntry.this.setDownloadIDLocked(did);
-          return Unit.unit();
-        }
-      });
-  }
-
-  private void setDownloadIDLocked(
-    final long did)
-    throws IOException
-  {
-    FileUtilities.fileWriteUTF8Atomically(
-      this.file_download_id,
-      this.file_download_id_tmp,
-      NullCheck.notNull(Long.toString(did)));
-  }
-
   @Override public void setData(
     final OPDSAcquisitionFeedEntry in_entry)
     throws IOException
   {
-    final Document d = this.serializer.serializeFeedEntry(in_entry);
+    final ObjectNode d = this.serializer.serializeFeedEntry(in_entry);
 
     FileLocking.withFileLocked(
       this.file_lock,

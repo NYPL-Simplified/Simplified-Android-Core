@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.Calendar;
 
@@ -11,11 +12,13 @@ import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-final class OPDSAtom
+final class OPDSAtom implements Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   static String findID(
     final Element ee)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     return OPDSXML.getFirstChildElementTextWithName(
       ee,
@@ -50,7 +53,7 @@ final class OPDSAtom
 
   static String findTitle(
     final Element e)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     return OPDSXML.getFirstChildElementTextWithName(
       e,
@@ -60,7 +63,7 @@ final class OPDSAtom
 
   static Calendar findUpdated(
     final Element e)
-    throws OPDSFeedParseException,
+    throws OPDSParseException,
       ParseException
   {
     final String e_updated_raw =

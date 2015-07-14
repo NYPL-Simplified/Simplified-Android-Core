@@ -23,6 +23,8 @@ import com.io7m.jnull.Nullable;
 @SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeed implements
   Serializable
 {
+  private static final long serialVersionUID = 1L;
+
   private static final class Builder implements
     OPDSAcquisitionFeedBuilderType
   {
@@ -144,8 +146,6 @@ import com.io7m.jnull.Nullable;
       this.search = NullCheck.notNull(in_search);
     }
   }
-
-  private static final long serialVersionUID = -7962463871020194252L;
 
   public static OPDSAcquisitionFeedBuilderType newBuilder(
     final URI in_uri,

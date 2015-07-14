@@ -25,12 +25,12 @@ public interface OPDSFeedParserType
    * @param s
    *          The input stream
    * @return A parsed feed
-   * @throws OPDSFeedParseException
+   * @throws OPDSParseException
    *           On errors
    */
 
   OPDSAcquisitionFeed parse(
     final URI uri,
     final InputStream s)
-    throws OPDSFeedParseException;
+      throws OPDSParseException;
 }

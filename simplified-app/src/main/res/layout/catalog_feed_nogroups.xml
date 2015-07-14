@@ -26,7 +26,7 @@
     android:scrollbars="none"
     android:verticalSpacing="8dp"
     android:horizontalSpacing="8dp"
-    android:numColumns="1">
+    android:numColumns="@integer/catalog_feed_nogroups_columns">
   </GridView>
 
 </LinearLayout>

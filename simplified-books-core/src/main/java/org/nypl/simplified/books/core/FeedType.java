@@ -3,8 +3,6 @@ package org.nypl.simplified.books.core;
 import java.net.URI;
 import java.util.Calendar;
 
-import org.nypl.simplified.opds.core.OPDSSearchLink;
-
 import com.io7m.jfunctional.OptionType;
 
 public interface FeedType
@@ -19,7 +17,7 @@ public interface FeedType
    * @return The search URI for the feed
    */
 
-  OptionType<OPDSSearchLink> getFeedSearchURI();
+  OptionType<FeedSearchType> getFeedSearch();
 
   /**
    * @return The title of the feed
@@ -41,7 +39,7 @@ public interface FeedType
 
   /**
    * Match the type of feed.
-   * 
+   *
    * @param m
    *          The matcher
    * @return The value returned by the matcher

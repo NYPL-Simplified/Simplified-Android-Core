@@ -13,21 +13,33 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
 public final class OPDSAcquisitionFeedEntryParser implements
   OPDSAcquisitionFeedEntryParserType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG =
+      NullCheck.notNull(LoggerFactory
+        .getLogger(OPDSAcquisitionFeedEntryParser.class));
+  }
+
   private static void findAcquisitionAuthors(
     final Element e,
     final OPDSAcquisitionFeedEntryBuilderType eb)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     final List<Element> e_authors =
       OPDSXML.getChildElementsWithName(
@@ -60,7 +72,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
 
   private static OPDSAcquisitionFeedEntry parseAcquisitionEntry(
     final Element e)
-    throws OPDSFeedParseException,
+    throws OPDSParseException,
       ParseException,
       URISyntaxException
   {
@@ -69,7 +81,11 @@ public final class OPDSAcquisitionFeedEntryParser implements
     final Calendar updated = OPDSAtom.findUpdated(e);
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
-      OPDSAcquisitionFeedEntry.newBuilder(id, title, updated);
+      OPDSAcquisitionFeedEntry.newBuilder(
+        id,
+        title,
+        updated,
+        OPDSAvailabilityLoanable.get());
 
     final List<Element> e_links =
       OPDSXML.getChildElementsWithNameNonEmpty(
@@ -157,7 +173,165 @@ public final class OPDSAcquisitionFeedEntryParser implements
       OPDSFeedConstants.ATOM_URI,
       "summary"));
 
+    eb.setAvailability(OPDSAcquisitionFeedEntryParser.determineAvailability(
+      eb,
+      e));
     return eb.build();
+  }
+
+  private static OPDSAvailabilityType determineAvailability(
+    final OPDSAcquisitionFeedEntryBuilderType eb,
+    final Element e)
+    throws OPDSParseException,
+      ParseException
+  {
+    final OptionType<Element> ee_opt =
+      OPDSXML.getFirstChildElementWithNameOptional(
+        e,
+        OPDSFeedConstants.SCHEMA_URI,
+        "Event");
+
+    /**
+     * If there is a <tt>schema:Event</tt> element, then the book is either
+     * already borrowed, or is on hold.
+     */
+
+    if (ee_opt.isSome()) {
+      final Some<Element> ee_some = (Some<Element>) ee_opt;
+      final Element ee = ee_some.get();
+      final String ee_name =
+        OPDSXML.getFirstChildElementTextWithName(
+          ee,
+          OPDSFeedConstants.SCHEMA_URI,
+          "name");
+
+      if ("loan".equals(ee_name)) {
+        final Calendar start =
+          OPDSRFC3339Formatter.parseRFC3339Date(OPDSXML
+            .getFirstChildElementTextWithName(
+              ee,
+              OPDSFeedConstants.SCHEMA_URI,
+              "startDate"));
+        final OptionType<Calendar> end =
+          OPDSXML.getFirstChildElementTextWithNameOptional(
+            ee,
+            OPDSFeedConstants.SCHEMA_URI,
+            "endDate").mapPartial(
+            new PartialFunctionType<String, Calendar, ParseException>() {
+              @Override public Calendar call(
+                final String s)
+                throws ParseException
+              {
+                return OPDSRFC3339Formatter.parseRFC3339Date(s);
+              }
+            });
+
+        return OPDSAvailabilityLoaned.get(start, end);
+      }
+
+      if ("hold".equals(ee_name)) {
+        final Calendar start =
+          OPDSRFC3339Formatter.parseRFC3339Date(OPDSXML
+            .getFirstChildElementTextWithName(
+              ee,
+              OPDSFeedConstants.SCHEMA_URI,
+              "startDate"));
+
+        try {
+          final int pos =
+            Integer.valueOf(
+              OPDSXML.getFirstChildElementTextWithName(
+                ee,
+                OPDSFeedConstants.SCHEMA_URI,
+                "position")).intValue();
+
+          return OPDSAvailabilityHeld.get(start, pos);
+        } catch (final NumberFormatException x) {
+          throw new OPDSParseException("Error parsing hold position", x);
+        }
+      }
+
+      OPDSAcquisitionFeedEntryParser.LOG.error(
+        "ignoring unrecognized event type: {}",
+        ee_name);
+    }
+
+    /**
+     * Otherwise, the availability must be inferred from the number of
+     * licenses and the type of available acquisition links.
+     */
+
+    boolean borrow = false;
+    final List<OPDSAcquisition> acqs = eb.getAcquisitions();
+    for (int index = 0; index < acqs.size(); ++index) {
+      final OPDSAcquisition acq = acqs.get(index);
+      switch (acq.getType()) {
+        case ACQUISITION_BORROW:
+        case ACQUISITION_GENERIC:
+        {
+          borrow = true;
+          break;
+        }
+
+        /**
+         * If there was an acquisition link that implies open access, then the
+         * book is available and there is nothing more to do.
+         */
+
+        case ACQUISITION_OPEN_ACCESS:
+        {
+          return OPDSAvailabilityOpenAccess.get();
+        }
+        case ACQUISITION_SAMPLE:
+        case ACQUISITION_SUBSCRIBE:
+        case ACQUISITION_BUY:
+        {
+          OPDSAcquisitionFeedEntryParser.LOG.error(
+            "unimplemented acquisition type: {}",
+            acq.getType());
+          break;
+        }
+      }
+    }
+
+    /**
+     * If there was an acquisition link that implies borrowing, then check to
+     * see if there are available licenses. If there are no licenses, the book
+     * is only available to put on hold.
+     */
+
+    if (borrow) {
+      final OptionType<String> license_count_opt =
+        OPDSXML.getFirstChildElementTextWithNameOptional(
+          e,
+          OPDSFeedConstants.SIMPLIFIED_URI,
+          "available_licenses");
+
+      if (license_count_opt.isSome()) {
+        final Some<String> license_count_some =
+          (Some<String>) license_count_opt;
+        final String license_count_text = license_count_some.get();
+        try {
+          final Integer license_count = Integer.valueOf(license_count_text);
+          if (license_count.intValue() == 0) {
+            return OPDSAvailabilityHoldable.get();
+          }
+        } catch (final NumberFormatException x) {
+          throw new OPDSParseException("Error parsing license count", x);
+        }
+      }
+    }
+
+    /**
+     * If the number of licenses is not specified, or is specified and
+     * non-zero, or the required information above is otherwise missing, the
+     * book is assumed to be available for borrowing; there is not enough
+     * information to make a more intelligent guess and no sane way to handle
+     * the fact that there might be no acquisition links and nothing
+     * whatsoever specified.
+     */
+
+    return OPDSAvailabilityLoanable.get();
   }
 
   private OPDSAcquisitionFeedEntryParser()
@@ -167,22 +341,22 @@ public final class OPDSAcquisitionFeedEntryParser implements
 
   @Override public OPDSAcquisitionFeedEntry parseEntry(
     final Element e)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(e);
 
     try {
       return OPDSAcquisitionFeedEntryParser.parseAcquisitionEntry(e);
     } catch (final ParseException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     } catch (final URISyntaxException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     }
   }
 
   @Override public OPDSAcquisitionFeedEntry parseEntryStream(
     final InputStream s)
-    throws OPDSFeedParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(s);
 
@@ -194,11 +368,11 @@ public final class OPDSAcquisitionFeedEntryParser implements
       final Element e = NullCheck.notNull(d.getDocumentElement());
       return this.parseEntry(e);
     } catch (final ParserConfigurationException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     } catch (final SAXException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     } catch (final IOException ex) {
-      throw new OPDSFeedParseException(ex);
+      throw new OPDSParseException(ex);
     }
   }
 }

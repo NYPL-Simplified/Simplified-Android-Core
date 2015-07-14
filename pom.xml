@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nypl.simplified</groupId>
   <artifactId>simplified</artifactId>
-  <version>0.3.10</version>
+  <version>0.3.11</version>
 
   <packaging>pom</packaging>
   <name>simplified</name>
@@ -24,7 +24,6 @@
     <module>simplified-books-tests</module>
     <module>simplified-documentation</module>
     <module>simplified-downloader-core</module>
-    <module>simplified-downloader-tests-junit4</module>
     <module>simplified-files-tests-android</module>
     <module>simplified-files-tests-junit4</module>
     <module>simplified-files</module>

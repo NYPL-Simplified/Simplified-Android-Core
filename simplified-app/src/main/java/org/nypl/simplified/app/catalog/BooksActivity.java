@@ -31,6 +31,11 @@ public final class BooksActivity extends CatalogFeedActivity implements
     LOG = LogUtilities.getLog(BooksActivity.class);
   }
 
+  @Override protected boolean feedIsLocal()
+  {
+    return true;
+  }
+
   @Override protected SimplifiedPart navigationDrawerGetPart()
   {
     return SimplifiedPart.PART_BOOKS;

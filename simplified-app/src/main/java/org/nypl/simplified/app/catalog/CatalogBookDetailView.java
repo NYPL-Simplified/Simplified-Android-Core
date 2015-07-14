@@ -15,13 +15,14 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookStatusDownloadCancelled;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
 import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
 import org.nypl.simplified.books.core.BookStatusDownloaded;
 import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
-import org.nypl.simplified.books.core.BookStatusDownloadingPaused;
 import org.nypl.simplified.books.core.BookStatusDownloadingType;
+import org.nypl.simplified.books.core.BookStatusHeld;
+import org.nypl.simplified.books.core.BookStatusHoldable;
+import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusLoanedMatcherType;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
@@ -31,10 +32,17 @@ import org.nypl.simplified.books.core.BookStatusRequestingLoan;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
-import org.nypl.simplified.downloader.core.DownloadSnapshot;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
+import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSCategory;
+import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
 import org.slf4j.Logger;
 
 import android.app.Activity;
@@ -59,9 +67,10 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
-@SuppressWarnings("synthetic-access") public final class CatalogBookDetailView implements
+@SuppressWarnings({ "boxing", "synthetic-access" }) public final class CatalogBookDetailView implements
   Observer,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -81,6 +90,31 @@ import com.io7m.junreachable.UnreachableCodeException;
         .create("http://librarysimplified.org/terms/genres/Simplified/"));
     GENRES_URI_TEXT =
       NullCheck.notNull(CatalogBookDetailView.GENRES_URI.toString());
+  }
+
+  private static void configureButtonsHeight(
+    final Resources rr,
+    final LinearLayout layout)
+  {
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final int dp35 = (int) rr.getDimension(R.dimen.button_standard_height);
+    final int dp8 = (int) app.screenDPToPixels(8);
+    final int button_count = layout.getChildCount();
+    for (int index = 0; index < button_count; ++index) {
+      final View v = layout.getChildAt(index);
+
+      Assertions.checkPrecondition(
+        v instanceof CatalogBookButtonType,
+        "view %s is an instance of CatalogBookButtonType",
+        v);
+
+      final android.widget.LinearLayout.LayoutParams lp =
+        new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, dp35);
+      lp.leftMargin = dp8;
+
+      v.setLayoutParams(lp);
+    }
   }
 
   private static void configureSummaryPublisher(
@@ -252,6 +286,25 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
+  private static String onLoanText(
+    final OptionType<Calendar> loan_end_opt,
+    final Resources rr)
+  {
+    final String text;
+    if (loan_end_opt.isSome()) {
+      final Some<Calendar> loan_end_some = (Some<Calendar>) loan_end_opt;
+      final Calendar loan_end = loan_end_some.get();
+      final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
+      text =
+        String.format(rr.getString(
+          R.string.catalog_book_availability_on_loan_timed,
+          fmt.format(loan_end.getTime())));
+    } else {
+      text = rr.getString(R.string.catalog_book_availability_on_loan_untimed);
+    }
+    return NullCheck.notNull(text);
+  }
+
   private final Activity      activity;
   private final ViewGroup     book_download;
   private final LinearLayout  book_download_buttons;
@@ -264,7 +317,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final TextView      book_downloading_percent_text;
   private final ProgressBar   book_downloading_progress;
   private final BooksType     books;
+
   private final FeedEntryOPDS entry;
+
   private final ScrollView    scroll_view;
 
   public CatalogBookDetailView(
@@ -437,17 +492,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     return this.scroll_view;
   }
 
-  @Override public Unit onBookStatusDownloadCancelled(
-    final BookStatusDownloadCancelled c)
-  {
-    final BookID id = c.getID();
-    this.books.bookDownloadAcknowledge(id);
-    final OptionType<BookStatusType> status_opt =
-      this.books.booksStatusGet(id);
-    this.onStatus(this.entry, status_opt);
-    return Unit.unit();
-  }
-
   @Override public Unit onBookStatusDownloaded(
     final BookStatusDownloaded d)
   {
@@ -478,6 +522,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final Button dismiss =
       NullCheck.notNull(this.book_downloading_failed_dismiss);
+    final Button retry =
+      NullCheck.notNull(this.book_downloading_failed_retry);
+
     dismiss.setOnClickListener(new OnClickListener() {
       @Override public void onClick(
         final @Nullable View v)
@@ -491,8 +538,19 @@ import com.io7m.junreachable.UnreachableCodeException;
      */
 
     final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
-    final OPDSAcquisition a =
+    final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
+
+    /**
+     * Theoretically, if the book has ever been downloaded, then the
+     * acquisition list must have contained one usable acquisition relation...
+     */
+
+    if (a_opt.isNone()) {
+      throw new UnreachableCodeException();
+    }
+
+    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
         this.activity,
@@ -500,9 +558,6 @@ import com.io7m.junreachable.UnreachableCodeException;
         this.entry.getBookID(),
         a,
         this.entry);
-
-    final Button retry =
-      NullCheck.notNull(this.book_downloading_failed_retry);
     retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
@@ -513,12 +568,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     return o.matchBookDownloadingStatus(this);
   }
 
-  @Override public Unit onBookStatusDownloadingPaused(
-    final BookStatusDownloadingPaused p)
-  {
-    return Unit.unit();
-  }
-
   @Override public Unit onBookStatusDownloadInProgress(
     final BookStatusDownloadInProgress d)
   {
@@ -526,9 +575,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
-    final DownloadSnapshot snap = d.getDownloadSnapshot();
     CatalogDownloadProgressBar.setProgressBar(
-      snap,
+      d.getCurrentTotalBytes(),
+      d.getExpectedTotalBytes(),
       NullCheck.notNull(this.book_downloading_percent_text),
       NullCheck.notNull(this.book_downloading_progress));
 
@@ -544,6 +593,27 @@ import com.io7m.junreachable.UnreachableCodeException;
     return Unit.unit();
   }
 
+  @Override public Unit onBookStatusHeld(
+    final BookStatusHeld s)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onBookStatusHoldable(
+    final BookStatusHoldable s)
+  {
+    // TODO Auto-generated method stub
+    throw new UnimplementedCodeException();
+  }
+
+  @Override public Unit onBookStatusLoanable(
+    final BookStatusLoanable s)
+  {
+    this.onBookStatusNone(this.entry);
+    return Unit.unit();
+  }
+
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
@@ -554,8 +624,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
-    this.book_download_text.setText(rr
-      .getString(R.string.catalog_book_public_domain));
+    final String text =
+      CatalogBookDetailView.onLoanText(o.getLoanExpiryDate(), rr);
+    this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
@@ -585,8 +656,48 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
-    this.book_download_text.setText(rr
-      .getString(R.string.catalog_book_public_domain));
+    final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
+    final OPDSAvailabilityType avail = eo.getAvailability();
+    final String text =
+      avail
+        .matchAvailability(new OPDSAvailabilityMatcherType<String, UnreachableCodeException>() {
+          @Override public String onHeld(
+            final OPDSAvailabilityHeld a)
+          {
+            return NullCheck.notNull(String.format(
+              rr.getString(R.string.catalog_book_availability_on_hold),
+              a.getPosition()));
+          }
+
+          @Override public String onHoldable(
+            final OPDSAvailabilityHoldable a)
+          {
+            return NullCheck.notNull(rr
+              .getString(R.string.catalog_book_availability_holdable));
+          }
+
+          @Override public String onLoanable(
+            final OPDSAvailabilityLoanable a)
+          {
+            return NullCheck.notNull(rr
+              .getString(R.string.catalog_book_availability_loanable));
+          }
+
+          @Override public String onLoaned(
+            final OPDSAvailabilityLoaned a)
+          {
+            return CatalogBookDetailView.onLoanText(a.getEndDate(), rr);
+          }
+
+          @Override public String onOpenAccess(
+            final OPDSAvailabilityOpenAccess a)
+          {
+            return NullCheck.notNull(rr
+              .getString(R.string.catalog_book_availability_open_access));
+          }
+        });
+
+    this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
@@ -597,31 +708,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     CatalogBookDetailView.configureButtonsHeight(
       rr,
       this.book_download_buttons);
-  }
-
-  private static void configureButtonsHeight(
-    final Resources rr,
-    final LinearLayout layout)
-  {
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final int dp35 = (int) rr.getDimension(R.dimen.button_standard_height);
-    final int dp8 = (int) app.screenDPToPixels(8);
-    final int button_count = layout.getChildCount();
-    for (int index = 0; index < button_count; ++index) {
-      final View v = layout.getChildAt(index);
-
-      Assertions.checkPrecondition(
-        v instanceof CatalogBookButtonType,
-        "view %s is an instance of CatalogBookButtonType",
-        v);
-
-      final android.widget.LinearLayout.LayoutParams lp =
-        new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, dp35);
-      lp.leftMargin = dp8;
-
-      v.setLayoutParams(lp);
-    }
   }
 
   @Override public Unit onBookStatusRequestingDownload(
