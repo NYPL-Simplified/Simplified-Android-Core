@@ -8,12 +8,19 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+/**
+ * An immutable stack.
+ *
+ * @param <T> The type of elements.
+ */
+
 public final class ImmutableStack<T> implements Serializable
 {
   private static final long serialVersionUID = 1L;
 
   /**
    * @return A new empty stack
+   * @param <T> The type of stack elements
    */
 
   public static <T> ImmutableStack<T> empty()
@@ -82,7 +89,7 @@ public final class ImmutableStack<T> implements Serializable
   /**
    * Push the given element to the current stack, returning a new stack.
    *
-   * @param e
+   * @param x
    *          The element
    * @return A new stack
    */
