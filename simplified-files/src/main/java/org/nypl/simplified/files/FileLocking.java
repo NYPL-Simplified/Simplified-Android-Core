@@ -1,5 +1,12 @@
 package org.nypl.simplified.files;
 
+import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,14 +15,6 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.io7m.jfunctional.PartialFunctionType;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Trivial file locking utilities.
@@ -29,24 +28,27 @@ public final class FileLocking
     LOG = NullCheck.notNull(LoggerFactory.getLogger(FileLocking.class));
   }
 
+  private FileLocking()
+  {
+    throw new UnreachableCodeException();
+  }
+
   /**
    * Attempt to acquire a lock on <tt>file</tt>, waiting for a maximum of
    * <tt>milliseconds</tt> ms, in <tt>wait</tt> millisecond increments. If a
    * lock is acquired, evaluate and return the result of <tt>p</tt>.
    *
-   * @param file
-   *          The lock file
-   * @param wait
-   *          The wait increment
-   * @param milliseconds
-   *          The maximum wait time
-   * @param p
-   *          The function to evaluate
+   * @param file         The lock file
+   * @param wait         The wait increment
+   * @param milliseconds The maximum wait time
+   * @param p            The function to evaluate
+   * @param <T>          The type of returned values
+   * @param <E>          The type of thrown exceptions
+   *
    * @return The value returned by <tt>p</tt>
-   * @throws E
-   *           If <tt>p</tt> raises <tt>E</tt>
-   * @throws IOException
-   *           If the lock cannot be acquired in the given time limit
+   *
+   * @throws E           If <tt>p</tt> raises <tt>E</tt>
+   * @throws IOException If the lock cannot be acquired in the given time limit
    */
 
   public static <T, E extends Exception> T withFileLocked(
@@ -54,8 +56,7 @@ public final class FileLocking
     final long wait,
     final long milliseconds,
     final PartialFunctionType<Unit, T, E> p)
-    throws E,
-      IOException
+    throws E, IOException
   {
     NullCheck.notNull(file);
     NullCheck.notNull(p);
@@ -66,11 +67,10 @@ public final class FileLocking
 
     while (abort.get() == false) {
       final long time_now =
-        TimeUnit.MILLISECONDS
-          .convert(System.nanoTime(), TimeUnit.NANOSECONDS);
+        TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
 
       final long diff = time_now - time_start;
-      FileLocking.LOG.trace("lock try {} (diff {})", file, diff);
+      FileLocking.LOG.trace("lock try {} (diff {})", file, Long.valueOf(diff));
 
       if (diff > milliseconds) {
         abort.set(true);
@@ -106,16 +106,10 @@ public final class FileLocking
       }
     }
 
-    final String m =
-      String.format(
-        "Timed out attempting to lock '%s' after %d milliseconds",
-        file,
-        Long.valueOf(milliseconds));
+    final String m = String.format(
+      "Timed out attempting to lock '%s' after %d milliseconds",
+      file,
+      Long.valueOf(milliseconds));
     throw new IOException(m);
-  }
-
-  private FileLocking()
-  {
-    throw new UnreachableCodeException();
   }
 }

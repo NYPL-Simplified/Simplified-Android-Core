@@ -136,28 +136,7 @@
     <favorites_list name="simplified" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="TenPrintInput.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/TenPrintInput.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.33238637">
-              <caret line="212" column="17" selection-start-line="212" selection-start-column="17" selection-end-line="212" selection-end-column="17" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TenPrintGenerator.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/TenPrintGenerator.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="80" column="30" selection-start-line="80" selection-start-column="30" selection-end-line="80" selection-end-column="30" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -176,10 +155,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookCoverGeneratorRequestHandler.java" />
-        <option value="$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookCoverGeneratorType.java" />
-        <option value="$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookDeleteButton.java" />
-        <option value="$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/Simplified.java" />
         <option value="$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/reader/ReaderReadiumJavaScriptAPIType.java" />
         <option value="$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookDeleteDialog.java" />
         <option value="$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookDetailActivity.java" />
@@ -225,8 +200,12 @@
         <option value="$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/package-info.java" />
         <option value="$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/TenPrintInputBuilderType.java" />
         <option value="$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/TenPrintGenerator.java" />
-        <option value="$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/TenPrintInput.java" />
         <option value="$PROJECT_DIR$/simplified-checkstyle/src/main/resources/org/nypl/simplified/checkstyle/checkstyle.xml" />
+        <option value="$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/TenPrintInput.java" />
+        <option value="$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/DirectoryUtilities.java" />
+        <option value="$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/FileLocking.java" />
+        <option value="$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/FileUtilities.java" />
+        <option value="$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/package-info.java" />
       </list>
     </option>
   </component>
@@ -398,50 +377,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="Simplified-Android" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="simplified" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Simplified-Android" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="simplified-checkstyle" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="simplified" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Simplified-Android" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="simplified-checkstyle" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="resources" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="checkstyle" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -872,38 +807,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookDeleteButton.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="27" column="35" selection-start-line="27" selection-start-column="35" selection-end-line="27" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/Simplified.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.21306819">
-          <caret line="204" column="21" selection-start-line="204" selection-start-column="21" selection-end-line="204" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/reader/ReaderReadiumJavaScriptAPIType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.59659094">
-          <caret line="63" column="39" selection-start-line="63" selection-start-column="39" selection-end-line="63" selection-end-column="39" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookDetailActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33238637">
-          <caret line="81" column="2" selection-start-line="81" selection-start-column="2" selection-end-line="81" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/simplified-app/src/main/java/org/nypl/simplified/app/catalog/CatalogBookDeleteDialog.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1258,7 +1161,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/simplified-tenprint/src/main/java/org/nypl/simplified/tenprint/TenPrintGenerator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
+        <state vertical-scroll-proportion="0.33238637">
           <caret line="80" column="30" selection-start-line="80" selection-start-column="30" selection-end-line="80" selection-end-column="30" />
           <folding />
         </state>
@@ -1276,6 +1179,38 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33238637">
           <caret line="212" column="17" selection-start-line="212" selection-start-column="17" selection-end-line="212" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/DirectoryUtilities.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="62" column="38" selection-start-line="62" selection-start-column="38" selection-end-line="62" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/FileLocking.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="86" column="12" selection-start-line="86" selection-start-column="12" selection-end-line="86" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/package-info.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.19886364">
+          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simplified-files/src/main/java/org/nypl/simplified/files/FileUtilities.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.025568182">
+          <caret line="47" column="15" selection-start-line="47" selection-start-column="15" selection-end-line="47" selection-end-column="15" />
           <folding />
         </state>
       </provider>
