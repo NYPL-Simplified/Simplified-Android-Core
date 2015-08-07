@@ -1,5 +1,9 @@
 package org.nypl.simplified.tenprint;
 
+/**
+ * The type of mutable builders for input parameters.
+ */
+
 public interface TenPrintInputBuilderType
 {
   /**
@@ -11,8 +15,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the book author.
    *
-   * @param in_author
-   *          The author
+   * @param in_author The author
    */
 
   void setAuthor(
@@ -21,8 +24,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the base brightness for colors.
    *
-   * @param in_base_brightness
-   *          The brightness level
+   * @param in_base_brightness The brightness level
    */
 
   void setBaseBrightness(
@@ -31,8 +33,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the base saturation level for colors.
    *
-   * @param in_base_saturation
-   *          The saturation level
+   * @param in_base_saturation The saturation level
    */
 
   void setBaseSaturation(
@@ -41,8 +42,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the color distance.
    *
-   * @param in_color_distance
-   *          The distance
+   * @param in_color_distance The distance
    */
 
   void setColorDistance(
@@ -51,8 +51,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the cover height.
    *
-   * @param in_cover_height
-   *          The cover height
+   * @param in_cover_height The cover height
    */
 
   void setCoverHeight(
@@ -61,9 +60,8 @@ public interface TenPrintInputBuilderType
   /**
    * Enable or disable the display of debugging symbols and frames in the
    * generated artwork
-   * 
-   * @param b
-   *          <tt>true</tt> iff debugging views should be enabled
+   *
+   * @param b <tt>true</tt> iff debugging views should be enabled
    */
 
   void setDebuggingArtwork(
@@ -72,8 +70,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the grid scale.
    *
-   * @param in_grid_scale
-   *          The grid scale
+   * @param in_grid_scale The grid scale
    */
 
   void setGridScale(
@@ -82,8 +79,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set whether or not colors should be inverted.
    *
-   * @param in_invert
-   *          <tt>true</tt> iff colors should be inverted
+   * @param in_invert <tt>true</tt> iff colors should be inverted
    */
 
   void setInvert(
@@ -92,8 +88,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the margin.
    *
-   * @param in_margin
-   *          The margin
+   * @param in_margin The margin
    */
 
   void setMargin(
@@ -102,8 +97,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the thickness of the shapes rendered inside each grid square.
    *
-   * @param in_shape_thickness
-   *          The thickness
+   * @param in_shape_thickness The thickness
    */
 
   void setShapeThickness(
@@ -112,8 +106,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set the book title.
    *
-   * @param in_title
-   *          The title
+   * @param in_title The title
    */
 
   void setTitle(

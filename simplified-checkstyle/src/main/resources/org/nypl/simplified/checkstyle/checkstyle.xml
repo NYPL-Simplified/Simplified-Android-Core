@@ -60,7 +60,7 @@
     <module name="ConstantName"/>
     <module name="CovariantEquals"/>
     <module name="CyclomaticComplexity">
-      <property name="max" value="65"/>
+      <property name="max" value="70"/>
     </module>
     <!--
     <module name="DeclarationOrder"/>
@@ -81,7 +81,7 @@
     <module name="EqualsAvoidNull"/>
     <module name="EqualsHashCode"/>
     <module name="ExecutableStatementCount">
-      <property name="max" value="150"/>
+      <property name="max" value="200"/>
     </module>
     <module name="ExplicitInitialization"/>
     <module name="FallThrough"/>
@@ -107,7 +107,7 @@
     <!-- <module name="InnerTypeLast"/> -->
     <module name="InterfaceIsType"/>
     <module name="JavaNCSS">
-      <property name="methodMaximum" value="210"/>
+      <property name="methodMaximum" value="270"/>
     </module>
     <module name="JavadocMethod">
       <property name="scope" value="public"/>
