@@ -1,8 +1,13 @@
 .classpath
+.idea/libraries
+.idea/workspace.xml
 .project
 .settings
+gen
 simplified-*/.classpath
 simplified-*/.project
 simplified-*/.settings
 simplified-*/bin
 simplified-*/target
+simplified-app/src/main/assets/ReaderClientCert.sig
+target
