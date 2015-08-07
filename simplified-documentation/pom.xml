@@ -39,24 +39,28 @@
       <artifactId>simplified-books-core</artifactId>
       <version>${project.version}</version>
       <classifier>javadoc</classifier>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-http-core</artifactId>
       <version>${project.version}</version>
       <classifier>javadoc</classifier>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-opds-core</artifactId>
       <version>${project.version}</version>
       <classifier>javadoc</classifier>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-app</artifactId>
       <version>${project.version}</version>
       <classifier>javadoc</classifier>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 
