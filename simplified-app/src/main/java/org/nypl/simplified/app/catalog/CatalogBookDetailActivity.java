@@ -1,5 +1,12 @@
 package org.nypl.simplified.app.catalog;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.widget.FrameLayout;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
@@ -7,15 +14,6 @@ import org.nypl.simplified.app.SimplifiedPart;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.stack.ImmutableStack;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.widget.FrameLayout;
-
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 
 /**
  * An activity showing a full-screen book detail page.
@@ -33,6 +31,28 @@ public final class CatalogBookDetailActivity extends CatalogActivity
       "org.nypl.simplified.app.CatalogBookDetailActivity.part";
   }
 
+  private @Nullable SimplifiedPart        part;
+  private @Nullable CatalogBookDetailView view;
+
+  /**
+   * Construct an activity.
+   */
+
+  public CatalogBookDetailActivity()
+  {
+
+  }
+
+  /**
+   * Set the arguments of the activity to be created.
+   *
+   * @param b           The argument bundle
+   * @param drawer_open {@code true} if the navigation drawer should be opened.
+   * @param in_part     The application part
+   * @param up_stack    The up-stack
+   * @param e           The feed entry
+   */
+
   public static void setActivityArguments(
     final Bundle b,
     final boolean drawer_open,
@@ -44,12 +64,20 @@ public final class CatalogBookDetailActivity extends CatalogActivity
     SimplifiedActivity.setActivityArguments(b, drawer_open);
     CatalogActivity.setActivityArguments(b, up_stack);
     b.putSerializable(
-      CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_PART,
-      in_part);
+      CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_PART, in_part);
     b.putSerializable(
       CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_FEED_ENTRY_ID,
       NullCheck.notNull(e));
   }
+
+  /**
+   * Start a new activity with the given arguments.
+   *
+   * @param from     The parent activity
+   * @param up_stack The up stack
+   * @param in_part  The application part
+   * @param e        The feed entry
+   */
 
   public static void startNewActivity(
     final Activity from,
@@ -59,35 +87,29 @@ public final class CatalogBookDetailActivity extends CatalogActivity
   {
     final Bundle b = new Bundle();
     CatalogBookDetailActivity.setActivityArguments(
-      b,
-      false,
-      in_part,
-      up_stack,
-      e);
+      b, false, in_part, up_stack, e);
     final Intent i = new Intent(from, CatalogBookDetailActivity.class);
     i.putExtras(b);
     i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
     from.startActivity(i);
   }
 
-  private @Nullable SimplifiedPart        part;
-  private @Nullable CatalogBookDetailView view;
-
   private FeedEntryOPDS getFeedEntry()
   {
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = NullCheck.notNull(i.getExtras());
-    return NullCheck
-      .notNull((FeedEntryOPDS) a
-        .getSerializable(CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_FEED_ENTRY_ID));
+    return NullCheck.notNull(
+      (FeedEntryOPDS) a.getSerializable(
+        CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_FEED_ENTRY_ID));
   }
 
   private SimplifiedPart getPart()
   {
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = NullCheck.notNull(i.getExtras());
-    return NullCheck.notNull((SimplifiedPart) a
-      .getSerializable(CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_PART));
+    return NullCheck.notNull(
+      (SimplifiedPart) a.getSerializable(
+        CatalogBookDetailActivity.CATALOG_BOOK_DETAIL_PART));
   }
 
   @Override protected SimplifiedPart navigationDrawerGetPart()
@@ -109,8 +131,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
-    final LayoutInflater inflater =
-      NullCheck.notNull(this.getLayoutInflater());
+    final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
     final CatalogBookDetailView detail_view =
       new CatalogBookDetailView(this, inflater, this.getFeedEntry());

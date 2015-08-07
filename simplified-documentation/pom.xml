@@ -62,6 +62,21 @@
       <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
+
+    <dependency>
+      <groupId>android</groupId>
+      <artifactId>android</artifactId>
+      <version>${org.nypl.android.packageVersion}</version>
+      <optional>true</optional>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>android.support</groupId>
+      <artifactId>compatibility-v13</artifactId>
+      <version>${org.nypl.android.support-v13.packageVersion}</version>
+      <optional>true</optional>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <reporting>

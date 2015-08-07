@@ -1,19 +1,30 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.SimplifiedActivity;
-import org.nypl.simplified.app.SimplifiedPart;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.SimplifiedActivity;
+import org.nypl.simplified.app.SimplifiedPart;
+
+/**
+ * An activity that displays the holds for the current user.
+ */
 
 public final class HoldsActivity extends SimplifiedActivity
 {
+  /**
+   * Construct a new activity.
+   */
+
+  public HoldsActivity()
+  {
+
+  }
+
   @Override protected SimplifiedPart navigationDrawerGetPart()
   {
     return SimplifiedPart.PART_HOLDS;
@@ -29,15 +40,12 @@ public final class HoldsActivity extends SimplifiedActivity
   {
     super.onCreate(state);
 
-    final LayoutInflater inflater =
-      NullCheck.notNull(this.getLayoutInflater());
+    final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
     final FrameLayout content_area = this.getContentFrame();
-    final LinearLayout layout =
-      NullCheck.notNull((LinearLayout) inflater.inflate(
-        R.layout.holds,
-        content_area,
-        false));
+    final LinearLayout layout = NullCheck.notNull(
+      (LinearLayout) inflater.inflate(
+        R.layout.holds, content_area, false));
     content_area.addView(layout);
     content_area.requestLayout();
 

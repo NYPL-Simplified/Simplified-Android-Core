@@ -9,14 +9,30 @@ import org.nypl.simplified.app.reader.ReaderSettingsType;
  * Services provided to the reader.
  */
 
-public interface SimplifiedReaderAppServicesType extends
-  ScreenSizeControllerType
+public interface SimplifiedReaderAppServicesType
+  extends ScreenSizeControllerType
 {
+  /**
+   * @return The bookmarks database
+   */
+
   ReaderBookmarksType getBookmarks();
+
+  /**
+   * @return The EPUB loader
+   */
 
   ReaderReadiumEPUBLoaderType getEPUBLoader();
 
+  /**
+   * @return The HTTP server
+   */
+
   ReaderHTTPServerType getHTTPServer();
+
+  /**
+   * @return The settings database
+   */
 
   ReaderSettingsType getSettings();
 }

@@ -1,8 +1,9 @@
 package org.nypl.simplified.app.reader;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.io7m.jnull.NullCheck;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The default implementation of the {@link ReaderHTTPMimeMapType} type.
@@ -10,14 +11,8 @@ import com.io7m.jnull.NullCheck;
 
 public final class ReaderHTTPMimeMap implements ReaderHTTPMimeMapType
 {
-  public static ReaderHTTPMimeMapType newMap(
-    final String in_default_type)
-  {
-    return new ReaderHTTPMimeMap(in_default_type);
-  }
-
-  private final String                            default_type;
-  private final ConcurrentHashMap<String, String> types;
+  private final String              default_type;
+  private final Map<String, String> types;
 
   private ReaderHTTPMimeMap(
     final String in_default_type)
@@ -51,6 +46,21 @@ public final class ReaderHTTPMimeMap implements ReaderHTTPMimeMapType
     this.types.put("xhtml", "application/xhtml+xml");
     this.types.put("xml", "application/xml");
     this.types.put("zip", "application/octet-stream");
+  }
+
+  /**
+   * Construct a new MIME map
+   *
+   * @param in_default_type The default content type, if there is no known type
+   *                        for the given suffix
+   *
+   * @return A new MIME map
+   */
+
+  public static ReaderHTTPMimeMapType newMap(
+    final String in_default_type)
+  {
+    return new ReaderHTTPMimeMap(in_default_type);
   }
 
   @Override public String getDefaultMimeType()

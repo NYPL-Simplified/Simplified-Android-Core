@@ -190,27 +190,17 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
       </profile>
-      <profile default="false" name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="true" />
-        <module name="libnypl_adobe" />
-        <module name="nypl-drm-checkstyle" />
-      </profile>
       <profile default="false" name="Annotation profile for nypl-drm-adobe-example" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="nypl-drm-adobe-example" />
       </profile>
       <profile default="false" name="Annotation profile for nypl-drm-core-tests" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="nypl-drm-core-tests" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

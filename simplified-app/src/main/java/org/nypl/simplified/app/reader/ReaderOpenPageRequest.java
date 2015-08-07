@@ -1,12 +1,11 @@
 package org.nypl.simplified.app.reader;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A request for a specific page in a book. This request is serialized to JSON
@@ -15,12 +14,65 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 @SuppressWarnings("synthetic-access") public final class ReaderOpenPageRequest
 {
-  private static final class FromContentAndSourceHref implements
-    ReaderOpenPageRequestType
+  private ReaderOpenPageRequest()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Construct a page request for the given location.
+   *
+   * @param location The location
+   *
+   * @return A new page request
+   */
+
+  public static ReaderOpenPageRequestType fromBookLocation(
+    final ReaderBookLocation location)
+  {
+    NullCheck.notNull(location);
+    return new FromElementCFIAndIDRef(
+      location.getIDRef(), location.getContentCFI());
+  }
+
+  /**
+   * Construct a page request for the given location.
+   *
+   * @param in_content     The content CFI
+   * @param in_source_href The source ref
+   *
+   * @return A new page request
+   */
+
+  public static ReaderOpenPageRequestType fromContentAndSourceHref(
+    final String in_content,
+    final String in_source_href)
+  {
+    return new FromContentAndSourceHref(in_content, in_source_href);
+  }
+
+  /**
+   * Construct a page request for the given location.
+   *
+   * @param in_id_ref      The ID ref
+   * @param in_element_cfi The element CFI
+   *
+   * @return A new page request
+   */
+
+  public static ReaderOpenPageRequestType fromElementCFIAndIDRef(
+    final String in_id_ref,
+    final OptionType<String> in_element_cfi)
+  {
+    return new FromElementCFIAndIDRef(in_id_ref, in_element_cfi);
+  }
+
+  private static final class FromContentAndSourceHref
+    implements ReaderOpenPageRequestType
   {
     private static final long serialVersionUID = 1L;
-    private final String      content;
-    private final String      source_href;
+    private final String content;
+    private final String source_href;
 
     private FromContentAndSourceHref(
       final String in_content,
@@ -40,10 +92,10 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
   }
 
-  private static final class FromElementCFIAndIDRef implements
-    ReaderOpenPageRequestType
+  private static final class FromElementCFIAndIDRef
+    implements ReaderOpenPageRequestType
   {
-    private static final long        serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private final OptionType<String> element_cfi;
     private final String             id_ref;
 
@@ -68,33 +120,5 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       return json;
     }
-  }
-
-  public static ReaderOpenPageRequestType fromBookLocation(
-    final ReaderBookLocation location)
-  {
-    NullCheck.notNull(location);
-    return new FromElementCFIAndIDRef(
-      location.getIDRef(),
-      location.getContentCFI());
-  }
-
-  public static ReaderOpenPageRequestType fromContentAndSourceHref(
-    final String in_content,
-    final String in_source_href)
-  {
-    return new FromContentAndSourceHref(in_content, in_source_href);
-  }
-
-  public static ReaderOpenPageRequestType fromElementCFIAndIDRef(
-    final String in_id_ref,
-    final OptionType<String> in_element_cfi)
-  {
-    return new FromElementCFIAndIDRef(in_id_ref, in_element_cfi);
-  }
-
-  private ReaderOpenPageRequest()
-  {
-    throw new UnreachableCodeException();
   }
 }

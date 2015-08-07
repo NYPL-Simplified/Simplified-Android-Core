@@ -1,15 +1,18 @@
 package org.nypl.simplified.app.catalog;
 
-import java.net.URI;
-
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.stack.ImmutableStack;
 
-import com.io7m.jnull.NullCheck;
+import java.net.URI;
 
-public final class CatalogFeedArgumentsRemote implements
-  CatalogFeedArgumentsType
+/**
+ * Feed arguments indicating that the displayed feed is a remote feed.
+ */
+
+public final class CatalogFeedArgumentsRemote
+  implements CatalogFeedArgumentsType
 {
-  private static final long                              serialVersionUID;
+  private static final long serialVersionUID;
 
   static {
     serialVersionUID = 1L;
@@ -19,6 +22,15 @@ public final class CatalogFeedArgumentsRemote implements
   private final String                                   title;
   private final ImmutableStack<CatalogFeedArgumentsType> up_stack;
   private final URI                                      uri;
+
+  /**
+   * Construct feed arguments.
+   *
+   * @param in_drawer_open {@code true} if the navigation drawer should be open
+   * @param in_up_stack    The new up-stack
+   * @param in_title       The title of the feed
+   * @param in_uri         The URI of the feed
+   */
 
   public CatalogFeedArgumentsRemote(
     final boolean in_drawer_open,
@@ -42,10 +54,18 @@ public final class CatalogFeedArgumentsRemote implements
     return this.up_stack;
   }
 
+  /**
+   * @return The feed URI
+   */
+
   public URI getURI()
   {
     return this.uri;
   }
+
+  /**
+   * @return {@code true} if the navigation drawer should be open
+   */
 
   public boolean isDrawerOpen()
   {

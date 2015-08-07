@@ -1,5 +1,14 @@
 package org.nypl.simplified.app;
 
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.content.Context;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Toast;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -7,22 +16,14 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountsType;
 import org.slf4j.Logger;
 
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.content.Context;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Toast;
+/**
+ * The default login controller.
+ */
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-
-@SuppressWarnings("synthetic-access") public final class LoginController implements
-  OnClickListener,
-  LoginControllerListenerType
+@SuppressWarnings("synthetic-access") public final class LoginController
+  implements OnClickListener, LoginControllerListenerType
 {
-  private static final Logger               LOG;
+  private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(LoginController.class);
@@ -31,6 +32,15 @@ import com.io7m.jnull.Nullable;
   private final AccountsType                accounts;
   private final Activity                    activity;
   private final LoginControllerListenerType listener;
+
+  /**
+   * Construct a new login controller.
+   *
+   * @param in_activity The current activity
+   * @param in_accounts The accounts database
+   * @param in_listener A listener that will receive the results of login
+   *                    attempts
+   */
 
   public LoginController(
     final Activity in_activity,
@@ -68,21 +78,21 @@ import com.io7m.jnull.Nullable;
   {
     LoginController.LOG.debug("onLoginFailure");
     LogUtilities.errorWithOptionalException(
-      LoginController.LOG,
-      message,
-      error);
+      LoginController.LOG, message, error);
 
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        final Context context =
-          LoginController.this.activity.getApplicationContext();
-        final CharSequence text = "Failed to log in: " + message;
-        final int duration = Toast.LENGTH_SHORT;
-        final Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-      }
-    });
+        @Override public void run()
+        {
+          final Context context =
+            LoginController.this.activity.getApplicationContext();
+          final CharSequence text = "Failed to log in: " + message;
+          final int duration = Toast.LENGTH_SHORT;
+          final Toast toast = Toast.makeText(context, text, duration);
+          toast.show();
+        }
+      });
 
     this.listener.onLoginFailure(error, message);
   }
@@ -91,17 +101,19 @@ import com.io7m.jnull.Nullable;
   {
     LoginController.LOG.debug("onLoginSuccess");
 
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        final Context context =
-          LoginController.this.activity.getApplicationContext();
-        final CharSequence text = "Logged in";
-        final int duration = Toast.LENGTH_SHORT;
-        final Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-      }
-    });
+        @Override public void run()
+        {
+          final Context context =
+            LoginController.this.activity.getApplicationContext();
+          final CharSequence text = "Logged in";
+          final int duration = Toast.LENGTH_SHORT;
+          final Toast toast = Toast.makeText(context, text, duration);
+          toast.show();
+        }
+      });
 
     this.listener.onLoginSuccess();
   }

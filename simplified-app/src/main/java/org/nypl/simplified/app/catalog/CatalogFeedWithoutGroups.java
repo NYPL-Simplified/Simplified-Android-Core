@@ -1,10 +1,20 @@
 package org.nypl.simplified.app.catalog;
 
-import java.net.URI;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
-
+import android.app.Activity;
+import android.database.DataSetObserver;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BooksType;
@@ -17,44 +27,25 @@ import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
 import org.slf4j.Logger;
 
-import android.app.Activity;
-import android.database.DataSetObserver;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
+import java.net.URI;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnreachableCodeException;
+/**
+ * A view that displays a catalog feed that does not contain any groups.
+ */
 
-@SuppressWarnings("boxing") public final class CatalogFeedWithoutGroups implements
-  ListAdapter,
+@SuppressWarnings("boxing") public final class CatalogFeedWithoutGroups
+  implements ListAdapter,
   OnScrollListener,
   FeedLoaderListenerType,
   FeedMatcherType<Unit, UnreachableCodeException>
 {
   private static final Logger LOG;
+
   static {
     LOG = LogUtilities.getLog(CatalogFeedWithoutGroups.class);
-  }
-
-  private static boolean shouldLoadNext(
-    final int first_visible_item,
-    final int total_count)
-  {
-    CatalogFeedWithoutGroups.LOG.debug(
-      "shouldLoadNext: {} - {} = {}",
-      total_count,
-      first_visible_item,
-      total_count - first_visible_item);
-    return (total_count - first_visible_item) <= 50;
   }
 
   private final Activity                                 activity;
@@ -66,6 +57,17 @@ import com.io7m.junreachable.UnreachableCodeException;
   private final FeedLoaderType                           feed_loader;
   private final AtomicReference<Pair<Future<Unit>, URI>> loading;
   private final AtomicReference<OptionType<URI>>         uri_next;
+
+  /**
+   * Construct a view.
+   *
+   * @param in_activity                The host activity
+   * @param in_book_cover_provider     A cover provider
+   * @param in_book_selection_listener A book selection listener
+   * @param in_books                   The books database
+   * @param in_feed_loader             An asynchronous feed loader
+   * @param in_feed                    The current feed
+   */
 
   public CatalogFeedWithoutGroups(
     final Activity in_activity,
@@ -81,11 +83,21 @@ import com.io7m.junreachable.UnreachableCodeException;
     this.books = NullCheck.notNull(in_books);
     this.feed = NullCheck.notNull(in_feed);
     this.feed_loader = NullCheck.notNull(in_feed_loader);
-    this.uri_next =
-      new AtomicReference<OptionType<URI>>(in_feed.getFeedNext());
-    this.adapter =
-      new ArrayAdapter<FeedEntryType>(this.activity, 0, this.feed);
+    this.uri_next = new AtomicReference<OptionType<URI>>(in_feed.getFeedNext());
+    this.adapter = new ArrayAdapter<FeedEntryType>(this.activity, 0, this.feed);
     this.loading = new AtomicReference<Pair<Future<Unit>, URI>>();
+  }
+
+  private static boolean shouldLoadNext(
+    final int first_visible_item,
+    final int total_count)
+  {
+    CatalogFeedWithoutGroups.LOG.debug(
+      "shouldLoadNext: {} - {} = {}",
+      total_count,
+      first_visible_item,
+      total_count - first_visible_item);
+    return (total_count - first_visible_item) <= 50;
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -127,11 +139,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     if (reused != null) {
       cv = (CatalogFeedBookCellView) reused;
     } else {
-      cv =
-        new CatalogFeedBookCellView(
-          this.activity,
-          this.book_cover_provider,
-          this.books);
+      cv = new CatalogFeedBookCellView(
+        this.activity, this.book_cover_provider, this.books);
     }
 
     cv.viewConfigure(e, this.book_select_listener);
@@ -164,8 +173,8 @@ import com.io7m.junreachable.UnreachableCodeException;
    * Attempt to load the next feed, if necessary. If the feed is already
    * loading, the feed will not be requested again.
    *
-   * @param next_ref
-   *          The next URI, if any
+   * @param next_ref The next URI, if any
+   *
    * @return A future representing the loading feed
    */
 
@@ -180,22 +189,19 @@ import com.io7m.junreachable.UnreachableCodeException;
       final Pair<Future<Unit>, URI> in_loading = this.loading.get();
       if (in_loading == null) {
         CatalogFeedWithoutGroups.LOG.debug(
-          "no feed currently loading; loading next feed: {}",
-          next);
+          "no feed currently loading; loading next feed: {}", next);
         return this.loadNextActual(next);
       }
 
       final URI loading_uri = in_loading.getRight();
       if (loading_uri.equals(next) == false) {
         CatalogFeedWithoutGroups.LOG.debug(
-          "different feed currently loading; loading next feed: {}",
-          next);
+          "different feed currently loading; loading next feed: {}", next);
         return this.loadNextActual(next);
       }
 
       CatalogFeedWithoutGroups.LOG.debug(
-        "already loading next feed, not loading again: {}",
-        next);
+        "already loading next feed, not loading again: {}", next);
     }
 
     return null;
@@ -232,8 +238,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final FeedWithGroups f)
   {
     CatalogFeedWithoutGroups.LOG.error(
-      "received feed with groups: {}",
-      f.getFeedID());
+      "received feed with groups: {}", f.getFeedID());
 
     return Unit.unit();
   }
@@ -242,15 +247,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     final FeedWithoutGroups f)
   {
     CatalogFeedWithoutGroups.LOG.debug(
-      "received feed without groups: {}",
-      f.getFeedID());
+      "received feed without groups: {}", f.getFeedID());
 
     this.feed.addAll(f);
     this.uri_next.set(f.getFeedNext());
 
     CatalogFeedWithoutGroups.LOG.debug(
-      "current feed size: {}",
-      this.feed.size());
+      "current feed size: {}", this.feed.size());
     return Unit.unit();
   }
 
@@ -265,8 +268,7 @@ import com.io7m.junreachable.UnreachableCodeException;
      */
 
     if (CatalogFeedWithoutGroups.shouldLoadNext(
-      first_visible_item,
-      total_count)) {
+      first_visible_item, total_count)) {
       this.loadNext(this.uri_next);
     }
   }
@@ -277,13 +279,11 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     switch (state) {
       case OnScrollListener.SCROLL_STATE_FLING:
-      case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-      {
+      case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL: {
         this.book_cover_provider.loadingThumbailsPause();
         break;
       }
-      case OnScrollListener.SCROLL_STATE_IDLE:
-      {
+      case OnScrollListener.SCROLL_STATE_IDLE: {
         this.book_cover_provider.loadingThumbnailsContinue();
         break;
       }

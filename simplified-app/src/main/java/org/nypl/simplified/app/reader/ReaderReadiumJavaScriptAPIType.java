@@ -10,6 +10,8 @@ public interface ReaderReadiumJavaScriptAPIType
 {
   /**
    * Retrieve the current page.
+   *
+   * @param l The current page listener
    */
 
   void getCurrentPage(
@@ -17,6 +19,8 @@ public interface ReaderReadiumJavaScriptAPIType
 
   /**
    * Determine whether or not a media overlay is available.
+   *
+   * @param l The media overlay listener
    */
 
   void mediaOverlayIsAvailable(
@@ -43,12 +47,9 @@ public interface ReaderReadiumJavaScriptAPIType
   /**
    * Open a book.
    *
-   * @param p
-   *          The package
-   * @param vs
-   *          The current reader viewer settings
-   * @param r
-   *          A request for a specific page, if any
+   * @param p  The package
+   * @param vs The current reader viewer settings
+   * @param r  A request for a specific page, if any
    */
 
   void openBook(
@@ -59,8 +60,8 @@ public interface ReaderReadiumJavaScriptAPIType
   /**
    * Go to the specific location in the book.
    *
-   * @param r
-   *          The page request
+   * @param content_ref The content ref
+   * @param source_href The source href
    */
 
   void openContentURL(
@@ -82,8 +83,7 @@ public interface ReaderReadiumJavaScriptAPIType
   /**
    * Configure the page style based on the given settings.
    *
-   * @param r
-   *          The settings
+   * @param r The settings
    */
 
   void setPageStyleSettings(

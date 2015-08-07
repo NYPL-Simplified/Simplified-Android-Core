@@ -1,10 +1,12 @@
 package org.nypl.simplified.app.reader;
 
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoHTTPD.Response.Status;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.http.core.HTTPRangeType;
 import org.nypl.simplified.http.core.HTTPRanges;
@@ -12,26 +14,39 @@ import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;
 import org.slf4j.Logger;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.Response.Status;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * The default implementation of the {@link ReaderHTTPServerType} interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class ReaderHTTPServer extends
-  NanoHTTPD implements ReaderHTTPServerType
+@SuppressWarnings("synthetic-access") public final class ReaderHTTPServer
+  extends NanoHTTPD implements ReaderHTTPServerType
 {
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderHTTPServer.class);
+  }
+
+  private final     URI                   base;
+  private final     ExecutorService       exec;
+  private final     ReaderHTTPMimeMapType mime;
+  private @Nullable Package               epub_package;
+
+  private ReaderHTTPServer(
+    final ExecutorService in_exec,
+    final ReaderHTTPMimeMapType in_mime,
+    final int in_port)
+  {
+    super("127.0.0.1", in_port);
+    this.exec = NullCheck.notNull(in_exec);
+    this.mime = NullCheck.notNull(in_mime);
+    this.base =
+      NullCheck.notNull(URI.create("http://127.0.0.1:" + in_port + "/"));
   }
 
   private static OptionType<String> getSuffix(
@@ -49,12 +64,19 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
     final Response r)
   {
     ReaderHTTPServer.LOG.debug(
-      "response: {} {} {}",
-      r.getStatus(),
-      path,
-      r.getMimeType());
+      "response: {} {} {}", r.getStatus(), path, r.getMimeType());
     return r;
   }
+
+  /**
+   * Construct a new HTTP server.
+   *
+   * @param in_exec An executor service
+   * @param in_mime The MIME map
+   * @param in_port The TCP port on which to listen
+   *
+   * @return A new server
+   */
 
   public static ReaderHTTPServerType newServer(
     final ExecutorService in_exec,
@@ -69,26 +91,7 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
   {
     ReaderHTTPServer.LOG.error("{}", x.getMessage(), x);
     return new Response(
-      Response.Status.INTERNAL_ERROR,
-      "text/plain",
-      x.getMessage());
-  }
-
-  private final URI                   base;
-  private @Nullable Package           epub_package;
-  private final ExecutorService       exec;
-  private final ReaderHTTPMimeMapType mime;
-
-  private ReaderHTTPServer(
-    final ExecutorService in_exec,
-    final ReaderHTTPMimeMapType in_mime,
-    final int in_port)
-  {
-    super("127.0.0.1", in_port);
-    this.exec = NullCheck.notNull(in_exec);
-    this.mime = NullCheck.notNull(in_mime);
-    this.base =
-      NullCheck.notNull(URI.create("http://127.0.0.1:" + in_port + "/"));
+      Response.Status.INTERNAL_ERROR, "text/plain", x.getMessage());
   }
 
   @Override public URI getURIBase()
@@ -125,7 +128,7 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
     final Method method = NullCheck.notNull(nns.getMethod());
     final String path = NullCheck.notNull(nns.getUri());
 
-    OptionType<HTTPRangeType> range_opt;
+    final OptionType<HTTPRangeType> range_opt;
     final Map<String, String> headers = nns.getHeaders();
     if (headers.containsKey("range")) {
       final String range_text = NullCheck.notNull(headers.get("range"));
@@ -133,15 +136,10 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
       if (range_opt.isSome()) {
         final Some<HTTPRangeType> some = (Some<HTTPRangeType>) range_opt;
         ReaderHTTPServer.LOG.debug(
-          "request (ranged {}): {} {}",
-          some.get(),
-          method,
-          path);
+          "request (ranged {}): {} {}", some.get(), method, path);
       } else {
         ReaderHTTPServer.LOG.debug(
-          "request (full - ranged unparseable): {} {}",
-          method,
-          path);
+          "request (full - ranged unparseable): {} {}", method, path);
       }
     } else {
       range_opt = Option.none();
@@ -162,10 +160,9 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
         ReaderHTTPServer.class.getResourceAsStream(path);
 
       if (stream != null) {
-        return ReaderHTTPServer.loggedResponse(path, new Response(
-          Response.Status.OK,
-          type,
-          stream));
+        return ReaderHTTPServer.loggedResponse(
+          path, new Response(
+            Response.Status.OK, type, stream));
       }
     }
 
@@ -178,8 +175,7 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
       final Package pack = NullCheck.notNull(this.epub_package);
       final String relative = path.replaceFirst("^[/]+", "");
 
-      ReaderHTTPServer.LOG
-        .debug("request: trying package path: {}", relative);
+      ReaderHTTPServer.LOG.debug("request: trying package path: {}", relative);
 
       final int size = pack.getArchiveInfoSize(relative);
       if (size >= 0) {
@@ -191,29 +187,25 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
             (Some<HTTPRangeType>) range_opt;
 
           status = Response.Status.PARTIAL_CONTENT;
-          stream =
-            NullCheck.notNull((ResourceInputStream) pack.getInputStream(
-              relative,
-              true));
+          stream = NullCheck.notNull(
+            (ResourceInputStream) pack.getInputStream(
+              relative, true));
         } else {
           status = Response.Status.OK;
-          stream =
-            NullCheck.notNull((ResourceInputStream) pack.getInputStream(
-              relative,
-              false));
+          stream = NullCheck.notNull(
+            (ResourceInputStream) pack.getInputStream(
+              relative, false));
         }
 
-        return ReaderHTTPServer.loggedResponse(path, new Response(
-          status,
-          type,
-          stream));
+        return ReaderHTTPServer.loggedResponse(
+          path, new Response(
+            status, type, stream));
       }
     }
 
-    return ReaderHTTPServer.loggedResponse(path, new Response(
-      Response.Status.NOT_FOUND,
-      "text/plain",
-      ""));
+    return ReaderHTTPServer.loggedResponse(
+      path, new Response(
+        Response.Status.NOT_FOUND, "text/plain", ""));
   }
 
   private void setPackage(
@@ -229,21 +221,23 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
     NullCheck.notNull(p);
     NullCheck.notNull(s);
     final ReaderHTTPServer hs = this;
-    this.exec.submit(new Runnable() {
-      @Override public void run()
+    this.exec.submit(
+      new Runnable()
       {
-        try {
-          boolean fresh = false;
-          if (hs.isAlive() == false) {
-            hs.start();
-            fresh = true;
+        @Override public void run()
+        {
+          try {
+            boolean fresh = false;
+            if (hs.isAlive() == false) {
+              hs.start();
+              fresh = true;
+            }
+            hs.setPackage(p);
+            s.onServerStartSucceeded(hs, fresh);
+          } catch (final Throwable x) {
+            s.onServerStartFailed(hs, x);
           }
-          hs.setPackage(p);
-          s.onServerStartSucceeded(hs, fresh);
-        } catch (final Throwable x) {
-          s.onServerStartFailed(hs, x);
         }
-      }
-    });
+      });
   }
 }

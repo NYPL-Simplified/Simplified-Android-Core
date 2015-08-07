@@ -1,80 +1,36 @@
 package org.nypl.simplified.app.reader;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.readium.sdk.android.components.navigation.NavigationElement;
 import org.readium.sdk.android.components.navigation.NavigationPoint;
 import org.readium.sdk.android.components.navigation.NavigationTable;
 import org.slf4j.Logger;
 
-import com.io7m.jnull.NullCheck;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-@SuppressWarnings("synthetic-access") public final class ReaderTOC implements
-  Serializable
+/**
+ * The table of contents.
+ */
+
+@SuppressWarnings("synthetic-access") public final class ReaderTOC
+  implements Serializable
 {
-  public static final class TOCElement implements Serializable
-  {
-    private static final long serialVersionUID = 1L;
-
-    private final String      content_ref;
-    private final int         indent;
-    private final String      source_href;
-    private final String      title;
-
-    private TOCElement(
-      final int in_indent,
-      final String in_title,
-      final String in_content_ref,
-      final String in_source_href)
-    {
-      this.indent = in_indent;
-      this.title = NullCheck.notNull(in_title);
-      this.content_ref = NullCheck.notNull(in_content_ref);
-      this.source_href = NullCheck.notNull(in_source_href);
-    }
-
-    public String getContentRef()
-    {
-      return this.content_ref;
-    }
-
-    public int getIndent()
-    {
-      return this.indent;
-    }
-
-    public String getSourceHref()
-    {
-      return this.source_href;
-    }
-
-    public String getTitle()
-    {
-      return this.title;
-    }
-
-    @Override public String toString()
-    {
-      final StringBuilder b = new StringBuilder();
-      b.append("[TOCElement title=");
-      b.append(this.title);
-      b.append(" content_ref=");
-      b.append(this.content_ref);
-      b.append(" source_href=");
-      b.append(this.source_href);
-      b.append("]");
-      return NullCheck.notNull(b.toString());
-    }
-  }
-
   private static final Logger LOG;
-  private static final long   serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
   static {
     LOG = LogUtilities.getLog(ReaderTOC.class);
+  }
+
+  private final List<TOCElement> elements;
+
+  private ReaderTOC(
+    final List<TOCElement> rs)
+  {
+    this.elements = NullCheck.notNull(rs);
   }
 
   private static void accumulate(
@@ -95,10 +51,7 @@ import com.io7m.jnull.NullCheck;
 
       for (final NavigationElement ec : p.getChildren()) {
         ReaderTOC.accumulate(
-          elements,
-          indent + 1,
-          parent,
-          NullCheck.notNull(ec));
+          elements, indent + 1, parent, NullCheck.notNull(ec));
       }
 
       return;
@@ -107,10 +60,7 @@ import com.io7m.jnull.NullCheck;
     if (e instanceof NavigationTable) {
       final NavigationTable t = (NavigationTable) e;
       ReaderTOC.LOG.debug(
-        "nav table: {} {} → {}",
-        t.getSourceHref(),
-        t.getType(),
-        t.getTitle());
+        "nav table: {} {} → {}", t.getSourceHref(), t.getType(), t.getTitle());
 
       // XXX: What's the correct thing to do here? There's no
       // content ref accessible from here...
@@ -120,6 +70,14 @@ import com.io7m.jnull.NullCheck;
       }
     }
   }
+
+  /**
+   * Parse and return a table of contents from the given package.
+   *
+   * @param p The package
+   *
+   * @return A table of contents
+   */
 
   public static ReaderTOC fromPackage(
     final org.readium.sdk.android.Package p)
@@ -132,16 +90,88 @@ import com.io7m.jnull.NullCheck;
     return new ReaderTOC(rs);
   }
 
-  private final List<TOCElement> elements;
-
-  private ReaderTOC(
-    final List<TOCElement> rs)
-  {
-    this.elements = NullCheck.notNull(rs);
-  }
+  /**
+   * @return The list of elements in the table.
+   */
 
   public List<TOCElement> getElements()
   {
     return this.elements;
+  }
+
+  /**
+   * A TOC element.
+   */
+
+  public static final class TOCElement implements Serializable
+  {
+    private static final long serialVersionUID = 1L;
+
+    private final String content_ref;
+    private final int    indent;
+    private final String source_href;
+    private final String title;
+
+    private TOCElement(
+      final int in_indent,
+      final String in_title,
+      final String in_content_ref,
+      final String in_source_href)
+    {
+      this.indent = in_indent;
+      this.title = NullCheck.notNull(in_title);
+      this.content_ref = NullCheck.notNull(in_content_ref);
+      this.source_href = NullCheck.notNull(in_source_href);
+    }
+
+    /**
+     * @return The content ref for the element
+     */
+
+    public String getContentRef()
+    {
+      return this.content_ref;
+    }
+
+    /**
+     * @return The indentation level of the element (used when rendering the
+     * TOC)
+     */
+
+    public int getIndent()
+    {
+      return this.indent;
+    }
+
+    /**
+     * @return The source href of the element
+     */
+
+    public String getSourceHref()
+    {
+      return this.source_href;
+    }
+
+    /**
+     * @return The title of the element
+     */
+
+    public String getTitle()
+    {
+      return this.title;
+    }
+
+    @Override public String toString()
+    {
+      final StringBuilder b = new StringBuilder();
+      b.append("[TOCElement title=");
+      b.append(this.title);
+      b.append(" content_ref=");
+      b.append(this.content_ref);
+      b.append(" source_href=");
+      b.append(this.source_href);
+      b.append("]");
+      return NullCheck.notNull(b.toString());
+    }
   }
 }

@@ -1,20 +1,22 @@
 package org.nypl.simplified.app.catalog;
 
+import android.app.ActionBar;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.widget.FrameLayout;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
-import android.app.ActionBar;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.widget.FrameLayout;
-
-import com.io7m.jfunctional.Pair;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+/**
+ * An abstract activity providing <i>up</i> navigation using the home button.
+ */
 
 public abstract class CatalogActivity extends SimplifiedActivity
 {
@@ -29,14 +31,20 @@ public abstract class CatalogActivity extends SimplifiedActivity
     CATALOG_UP_STACK_ID = "org.nypl.simplified.app.CatalogActivity.up_stack";
   }
 
+  /**
+   * Set the arguments for the activity that will be created.
+   *
+   * @param b        The argument bundle
+   * @param up_stack The up stack for the created activity
+   */
+
   public static void setActivityArguments(
     final Bundle b,
     final ImmutableStack<CatalogFeedArgumentsType> up_stack)
   {
     NullCheck.notNull(b);
     b.putSerializable(
-      CatalogActivity.CATALOG_UP_STACK_ID,
-      NullCheck.notNull(up_stack));
+      CatalogActivity.CATALOG_UP_STACK_ID, NullCheck.notNull(up_stack));
   }
 
   private void configureUpButton(
@@ -51,16 +59,15 @@ public abstract class CatalogActivity extends SimplifiedActivity
     }
   }
 
-  @SuppressWarnings("unchecked") protected final
-    ImmutableStack<CatalogFeedArgumentsType>
-    getUpStack()
+  @SuppressWarnings("unchecked")
+  protected final ImmutableStack<CatalogFeedArgumentsType> getUpStack()
   {
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = i.getExtras();
     if (a != null) {
       final ImmutableStack<CatalogFeedArgumentsType> stack =
-        (ImmutableStack<CatalogFeedArgumentsType>) a
-          .getSerializable(CatalogActivity.CATALOG_UP_STACK_ID);
+        (ImmutableStack<CatalogFeedArgumentsType>) a.getSerializable(
+          CatalogActivity.CATALOG_UP_STACK_ID);
       if (stack != null) {
         return stack;
       }
@@ -77,13 +84,12 @@ public abstract class CatalogActivity extends SimplifiedActivity
     final MenuItem item = NullCheck.notNull(item_mn);
     switch (item.getItemId()) {
 
-    /**
-     * Configure the home button to start a new activity with a popped
-     * up-stack.
-     */
+      /**
+       * Configure the home button to start a new activity with a popped
+       * up-stack.
+       */
 
-      case android.R.id.home:
-      {
+      case android.R.id.home: {
         final ImmutableStack<CatalogFeedArgumentsType> us = this.getUpStack();
 
         /**
@@ -95,8 +101,9 @@ public abstract class CatalogActivity extends SimplifiedActivity
         if (us.isEmpty() == false) {
           CatalogActivity.LOG.debug("up stack before pop: {}", us);
 
-          final Pair<CatalogFeedArgumentsType, ImmutableStack<CatalogFeedArgumentsType>> p =
-            us.pop();
+          final Pair<CatalogFeedArgumentsType,
+            ImmutableStack<CatalogFeedArgumentsType>>
+            p = us.pop();
 
           final CatalogFeedArgumentsType top = p.getLeft();
           CatalogFeedActivity.startNewActivity(this, top);
@@ -106,8 +113,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
         return super.onOptionsItemSelected(item);
       }
 
-      default:
-      {
+      default: {
         return super.onOptionsItemSelected(item);
       }
     }

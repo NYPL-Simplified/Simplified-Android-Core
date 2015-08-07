@@ -10,6 +10,8 @@ public interface ReaderReadiumEPUBLoadListenerType
 {
   /**
    * The EPUB failed to load.
+   *
+   * @param x The raised exception
    */
 
   void onEPUBLoadFailed(
@@ -17,6 +19,8 @@ public interface ReaderReadiumEPUBLoadListenerType
 
   /**
    * The EPUB loaded successfully.
+   *
+   * @param c The EPUB container
    */
 
   void onEPUBLoadSucceeded(

@@ -9,6 +9,8 @@ public interface ReaderReadiumFeedbackListenerType
 {
   /**
    * Called when an exception is raised when trying to dispatch a function.
+   *
+   * @param x The raised exception
    */
 
   void onReadiumFunctionDispatchError(
@@ -22,6 +24,8 @@ public interface ReaderReadiumFeedbackListenerType
 
   /**
    * Called when {@link #onReadiumFunctionInitialize()} raises an exception.
+   *
+   * @param e The raised exception
    */
 
   void onReadiumFunctionInitializeError(
@@ -29,14 +33,18 @@ public interface ReaderReadiumFeedbackListenerType
 
   /**
    * Called on receipt of a <tt>readium:pagination-changed</tt> request.
+   *
+   * @param e The pagination event
    */
 
   void onReadiumFunctionPaginationChanged(
     ReaderPaginationChangedEvent e);
 
   /**
-   * Called when {@link #onReadiumFunctionPaginationChanged()} raises an
-   * exception.
+   * Called when {@link #onReadiumFunctionPaginationChanged
+   * (ReaderPaginationChangedEvent)} raises an exception.
+   *
+   * @param e The raised exception
    */
 
   void onReadiumFunctionPaginationChangedError(
@@ -51,6 +59,8 @@ public interface ReaderReadiumFeedbackListenerType
   /**
    * Called when {@link #onReadiumFunctionSettingsApplied()} raises an
    * exception.
+   *
+   * @param e The raised exception
    */
 
   void onReadiumFunctionSettingsAppliedError(
@@ -58,6 +68,8 @@ public interface ReaderReadiumFeedbackListenerType
 
   /**
    * Called when an unknown request is made.
+   *
+   * @param text The text of the request
    */
 
   void onReadiumFunctionUnknown(
@@ -65,14 +77,18 @@ public interface ReaderReadiumFeedbackListenerType
 
   /**
    * The status of the media overlay has changed; media is/is not playing.
+   *
+   * @param playing {@code true} if the media is playing
    */
 
   void onReadiumMediaOverlayStatusChangedIsPlaying(
     boolean playing);
 
   /**
-   * Called when {@link #onReadiumMediaOverlayStatusError()} raises an
-   * exception.
+   * Called when {@link #onReadiumMediaOverlayStatusChangedIsPlaying(boolean)}
+   * raises an exception.
+   *
+   * @param e The raised exception
    */
 
   void onReadiumMediaOverlayStatusError(

@@ -1,17 +1,15 @@
 package org.nypl.simplified.app.reader;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.slf4j.Logger;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * User-configurable reader settings.
@@ -25,12 +23,6 @@ public final class ReaderSettings implements ReaderSettingsType
     LOG = LogUtilities.getLog(ReaderSettings.class);
   }
 
-  public static ReaderSettingsType openSettings(
-    final Context cc)
-  {
-    return new ReaderSettings(cc);
-  }
-
   private final Map<ReaderSettingsListenerType, Unit> listeners;
   private final SharedPreferences                     settings;
 
@@ -39,8 +31,21 @@ public final class ReaderSettings implements ReaderSettingsType
   {
     NullCheck.notNull(cc);
     this.settings = NullCheck.notNull(cc.getSharedPreferences("reader", 0));
-    this.listeners =
-      new ConcurrentHashMap<ReaderSettingsListenerType, Unit>();
+    this.listeners = new ConcurrentHashMap<ReaderSettingsListenerType, Unit>();
+  }
+
+  /**
+   * Open the reader settings.
+   *
+   * @param cc The application context
+   *
+   * @return The reader settings
+   */
+
+  public static ReaderSettingsType openSettings(
+    final Context cc)
+  {
+    return new ReaderSettings(cc);
   }
 
   @Override public void addListener(
@@ -58,10 +63,7 @@ public final class ReaderSettings implements ReaderSettingsType
         l.onReaderSettingsChanged(this);
       } catch (final Throwable x) {
         ReaderSettings.LOG.error(
-          "listener raised exception: {}",
-          l,
-          x.getMessage(),
-          x);
+          "listener raised exception: {}", l, x.getMessage(), x);
       }
     }
   }
@@ -69,39 +71,15 @@ public final class ReaderSettings implements ReaderSettingsType
   @Override public ReaderColorScheme getColorScheme()
   {
     try {
-      final String raw =
-        NullCheck.notNull(this.settings.getString(
-          "color_scheme",
-          ReaderColorScheme.SCHEME_BLACK_ON_BEIGE.toString()));
+      final String raw = NullCheck.notNull(
+        this.settings.getString(
+          "color_scheme", ReaderColorScheme.SCHEME_BLACK_ON_BEIGE.toString()));
       return NullCheck.notNull(ReaderColorScheme.valueOf(raw));
     } catch (final Throwable x) {
       ReaderSettings.LOG.error(
-        "failed to parse color scheme: {}",
-        x.getMessage(),
-        x);
+        "failed to parse color scheme: {}", x.getMessage(), x);
       return ReaderColorScheme.SCHEME_BLACK_ON_BEIGE;
     }
-  }
-
-  @Override public float getFontScale()
-  {
-    try {
-      return this.settings.getFloat("font_scale", 100.0f);
-    } catch (final Throwable x) {
-      ReaderSettings.LOG.error(
-        "failed to parse font scale: {}",
-        x.getMessage(),
-        x);
-      return 100.0f;
-    }
-  }
-
-  @Override public void removeListener(
-    final ReaderSettingsListenerType l)
-  {
-    NullCheck.notNull(l);
-    ReaderSettings.LOG.debug("removing listener: {}", l);
-    this.listeners.remove(l);
   }
 
   @Override public void setColorScheme(
@@ -111,6 +89,17 @@ public final class ReaderSettings implements ReaderSettingsType
     e.putString("color_scheme", NullCheck.notNull(c).toString());
     e.apply();
     this.broadcastChanges();
+  }
+
+  @Override public float getFontScale()
+  {
+    try {
+      return this.settings.getFloat("font_scale", 100.0f);
+    } catch (final Throwable x) {
+      ReaderSettings.LOG.error(
+        "failed to parse font scale: {}", x.getMessage(), x);
+      return 100.0f;
+    }
   }
 
   @Override public void setFontScale(
@@ -123,5 +112,13 @@ public final class ReaderSettings implements ReaderSettingsType
     e.putFloat("font_scale", x.floatValue());
     e.apply();
     this.broadcastChanges();
+  }
+
+  @Override public void removeListener(
+    final ReaderSettingsListenerType l)
+  {
+    NullCheck.notNull(l);
+    ReaderSettings.LOG.debug("removing listener: {}", l);
+    this.listeners.remove(l);
   }
 }

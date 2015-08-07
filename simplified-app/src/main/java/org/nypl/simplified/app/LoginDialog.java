@@ -1,15 +1,5 @@
 package org.nypl.simplified.app;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.core.AccountBarcode;
-import org.nypl.simplified.books.core.AccountLoginListenerType;
-import org.nypl.simplified.books.core.AccountPIN;
-import org.nypl.simplified.books.core.BooksType;
-import org.slf4j.Logger;
-
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
@@ -26,13 +16,25 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountLoginListenerType;
+import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.BooksType;
+import org.slf4j.Logger;
 
-public final class LoginDialog extends DialogFragment implements
-  AccountLoginListenerType
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * A reusable login dialog.
+ */
+
+public final class LoginDialog extends DialogFragment
+  implements AccountLoginListenerType
 {
   private static final String BARCODE_ID;
   private static final Logger LOG;
@@ -48,6 +50,33 @@ public final class LoginDialog extends DialogFragment implements
     PIN_ID = "org.nypl.simplified.app.LoginDialog.pin";
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
   }
+
+  private @Nullable EditText                    barcode_edit;
+  private @Nullable LoginControllerListenerType listener;
+  private @Nullable Button                      login;
+  private @Nullable EditText                    pin_edit;
+  private @Nullable ViewGroup                   root_layout;
+  private @Nullable TextView                    text;
+  private @Nullable Button                      cancel;
+
+  /**
+   * Construct a new dialog.
+   */
+
+  public LoginDialog()
+  {
+    // Fragments must have no-arg constructors.
+  }
+
+  /**
+   * Create a new login dialog.
+   *
+   * @param text    The initial dialog text.
+   * @param barcode The barcode that will be used to log in
+   * @param pin     The PIN that will be used to log in
+   *
+   * @return A new dialog
+   */
 
   public static LoginDialog newDialog(
     final String text,
@@ -68,19 +97,6 @@ public final class LoginDialog extends DialogFragment implements
     return d;
   }
 
-  private @Nullable EditText                    barcode_edit;
-  private @Nullable LoginControllerListenerType listener;
-  private @Nullable Button                      login;
-  private @Nullable EditText                    pin_edit;
-  private @Nullable ViewGroup                   root_layout;
-  private @Nullable TextView                    text;
-  private @Nullable Button                      cancel;
-
-  public LoginDialog()
-  {
-    // Fragments must have no-arg constructors.
-  }
-
   @Override public void onAccountLoginFailure(
     final OptionType<Throwable> error,
     final String message)
@@ -96,16 +112,18 @@ public final class LoginDialog extends DialogFragment implements
     final Button in_login = NullCheck.notNull(this.login);
     final Button in_cancel = NullCheck.notNull(this.cancel);
 
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        in_text.setText(message);
-        in_barcode_edit.setEnabled(true);
-        in_pin_edit.setEnabled(true);
-        in_login.setEnabled(true);
-        in_cancel.setEnabled(true);
-      }
-    });
+        @Override public void run()
+        {
+          in_text.setText(message);
+          in_barcode_edit.setEnabled(true);
+          in_pin_edit.setEnabled(true);
+          in_login.setEnabled(true);
+          in_cancel.setEnabled(true);
+        }
+      });
 
     final LoginControllerListenerType ls = this.listener;
     if (ls != null) {
@@ -123,12 +141,14 @@ public final class LoginDialog extends DialogFragment implements
   {
     LoginDialog.LOG.debug("login succeeded");
 
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        LoginDialog.this.dismiss();
-      }
-    });
+        @Override public void run()
+        {
+          LoginDialog.this.dismiss();
+        }
+      });
 
     final LoginControllerListenerType ls = this.listener;
     if (ls != null) {
@@ -185,34 +205,26 @@ public final class LoginDialog extends DialogFragment implements
     final Bundle b = this.getArguments();
     final AccountPIN initial_pin =
       NullCheck.notNull((AccountPIN) b.getSerializable(LoginDialog.PIN_ID));
-    final AccountBarcode initial_bar =
-      NullCheck.notNull((AccountBarcode) b
-        .getSerializable(LoginDialog.BARCODE_ID));
+    final AccountBarcode initial_bar = NullCheck.notNull(
+      (AccountBarcode) b.getSerializable(LoginDialog.BARCODE_ID));
     final String initial_txt =
       NullCheck.notNull(b.getString(LoginDialog.TEXT_ID));
 
-    final ViewGroup in_layout =
-      NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.login_dialog,
-        container,
-        false));
+    final ViewGroup in_layout = NullCheck.notNull(
+      (ViewGroup) inflater.inflate(
+        R.layout.login_dialog, container, false));
     this.root_layout = in_layout;
 
-    final TextView in_text =
-      NullCheck.notNull((TextView) in_layout
-        .findViewById(R.id.login_dialog_text));
-    final EditText in_barcode_edit =
-      NullCheck.notNull((EditText) in_layout
-        .findViewById(R.id.login_dialog_barcode_text_edit));
-    final EditText in_pin_edit =
-      NullCheck.notNull((EditText) in_layout
-        .findViewById(R.id.login_dialog_pin_text_edit));
+    final TextView in_text = NullCheck.notNull(
+      (TextView) in_layout.findViewById(R.id.login_dialog_text));
+    final EditText in_barcode_edit = NullCheck.notNull(
+      (EditText) in_layout.findViewById(R.id.login_dialog_barcode_text_edit));
+    final EditText in_pin_edit = NullCheck.notNull(
+      (EditText) in_layout.findViewById(R.id.login_dialog_pin_text_edit));
     final Button in_login_button =
-      NullCheck
-        .notNull((Button) in_layout.findViewById(R.id.login_dialog_ok));
-    final Button in_login_cancel_button =
-      NullCheck.notNull((Button) in_layout
-        .findViewById(R.id.login_dialog_cancel));
+      NullCheck.notNull((Button) in_layout.findViewById(R.id.login_dialog_ok));
+    final Button in_login_cancel_button = NullCheck.notNull(
+      (Button) in_layout.findViewById(R.id.login_dialog_cancel));
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -223,92 +235,100 @@ public final class LoginDialog extends DialogFragment implements
     in_pin_edit.setText(initial_pin.toString());
 
     in_login_button.setEnabled(false);
-    in_login_button.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View button)
+    in_login_button.setOnClickListener(
+      new OnClickListener()
       {
-        in_barcode_edit.setEnabled(false);
-        in_pin_edit.setEnabled(false);
-        in_login_button.setEnabled(false);
-        in_login_cancel_button.setEnabled(false);
+        @Override public void onClick(
+          final @Nullable View button)
+        {
+          in_barcode_edit.setEnabled(false);
+          in_pin_edit.setEnabled(false);
+          in_login_button.setEnabled(false);
+          in_login_cancel_button.setEnabled(false);
 
-        final Editable barcode_edit_text = in_barcode_edit.getText();
-        final Editable pin_edit_text = in_pin_edit.getText();
+          final Editable barcode_edit_text = in_barcode_edit.getText();
+          final Editable pin_edit_text = in_pin_edit.getText();
 
-        final AccountBarcode barcode =
-          new AccountBarcode(NullCheck.notNull(barcode_edit_text.toString()));
-        final AccountPIN pin =
-          new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
-        books.accountLogin(barcode, pin, LoginDialog.this);
-      }
-    });
+          final AccountBarcode barcode =
+            new AccountBarcode(NullCheck.notNull(barcode_edit_text.toString()));
+          final AccountPIN pin =
+            new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
+          books.accountLogin(barcode, pin, LoginDialog.this);
+        }
+      });
 
-    in_login_cancel_button.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    in_login_cancel_button.setOnClickListener(
+      new OnClickListener()
       {
-        LoginDialog.this.dismiss();
-      }
-    });
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          LoginDialog.this.dismiss();
+        }
+      });
 
     final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
     final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
 
-    in_barcode_edit.addTextChangedListener(new TextWatcher() {
-      @Override public void afterTextChanged(
-        final @Nullable Editable s)
+    in_barcode_edit.addTextChangedListener(
+      new TextWatcher()
       {
-        // Nothing
-      }
+        @Override public void afterTextChanged(
+          final @Nullable Editable s)
+        {
+          // Nothing
+        }
 
-      @Override public void beforeTextChanged(
-        final @Nullable CharSequence s,
-        final int start,
-        final int count,
-        final int after)
-      {
-        // Nothing
-      }
+        @Override public void beforeTextChanged(
+          final @Nullable CharSequence s,
+          final int start,
+          final int count,
+          final int after)
+        {
+          // Nothing
+        }
 
-      @Override public void onTextChanged(
-        final @Nullable CharSequence s,
-        final int start,
-        final int before,
-        final int count)
-      {
-        in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
-        in_login_button.setEnabled((in_barcode_empty.get() == false)
-          && (in_pin_empty.get() == false));
-      }
-    });
+        @Override public void onTextChanged(
+          final @Nullable CharSequence s,
+          final int start,
+          final int before,
+          final int count)
+        {
+          in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
+          in_login_button.setEnabled(
+            (in_barcode_empty.get() == false) && (in_pin_empty.get() == false));
+        }
+      });
 
-    in_pin_edit.addTextChangedListener(new TextWatcher() {
-      @Override public void afterTextChanged(
-        final @Nullable Editable s)
+    in_pin_edit.addTextChangedListener(
+      new TextWatcher()
       {
-        // Nothing
-      }
+        @Override public void afterTextChanged(
+          final @Nullable Editable s)
+        {
+          // Nothing
+        }
 
-      @Override public void beforeTextChanged(
-        final @Nullable CharSequence s,
-        final int start,
-        final int count,
-        final int after)
-      {
-        // Nothing
-      }
+        @Override public void beforeTextChanged(
+          final @Nullable CharSequence s,
+          final int start,
+          final int count,
+          final int after)
+        {
+          // Nothing
+        }
 
-      @Override public void onTextChanged(
-        final @Nullable CharSequence s,
-        final int start,
-        final int before,
-        final int count)
-      {
-        in_pin_empty.set(NullCheck.notNull(s).length() == 0);
-        in_login_button.setEnabled((in_barcode_empty.get() == false)
-          && (in_pin_empty.get() == false));
-      }
-    });
+        @Override public void onTextChanged(
+          final @Nullable CharSequence s,
+          final int start,
+          final int before,
+          final int count)
+        {
+          in_pin_empty.set(NullCheck.notNull(s).length() == 0);
+          in_login_button.setEnabled(
+            (in_barcode_empty.get() == false) && (in_pin_empty.get() == false));
+        }
+      });
 
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
@@ -323,6 +343,13 @@ public final class LoginDialog extends DialogFragment implements
 
     return in_layout;
   }
+
+  /**
+   * Set the listener that will be used to receive the results of the login
+   * attempt.
+   *
+   * @param in_listener The listener
+   */
 
   public void setLoginListener(
     final LoginControllerListenerType in_listener)

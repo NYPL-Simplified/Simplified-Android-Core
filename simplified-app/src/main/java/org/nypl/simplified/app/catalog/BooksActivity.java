@@ -1,5 +1,10 @@
 package org.nypl.simplified.app.catalog;
 
+import android.view.Menu;
+import android.view.MenuItem;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
@@ -14,21 +19,26 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.slf4j.Logger;
 
-import android.view.Menu;
-import android.view.MenuItem;
+/**
+ * The activity that displays the currently loaned and/or downloaded books.
+ */
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-
-public final class BooksActivity extends CatalogFeedActivity implements
-  AccountGetCachedCredentialsListenerType,
-  AccountSyncListenerType
+public final class BooksActivity extends CatalogFeedActivity
+  implements AccountGetCachedCredentialsListenerType, AccountSyncListenerType
 {
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(BooksActivity.class);
+  }
+
+  /**
+   * Construct an activity.
+   */
+
+  public BooksActivity()
+  {
+
   }
 
   @Override protected boolean feedIsLocal()
@@ -77,22 +87,26 @@ public final class BooksActivity extends CatalogFeedActivity implements
     final OptionType<Throwable> error,
     final String message)
   {
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        BooksActivity.this.invalidateOptionsMenu();
-      }
-    });
+        @Override public void run()
+        {
+          BooksActivity.this.invalidateOptionsMenu();
+        }
+      });
   }
 
   @Override public void onAccountSyncSuccess()
   {
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        BooksActivity.this.invalidateOptionsMenu();
-      }
-    });
+        @Override public void run()
+        {
+          BooksActivity.this.invalidateOptionsMenu();
+        }
+      });
   }
 
   @Override public boolean onCreateOptionsMenu(
@@ -126,8 +140,7 @@ public final class BooksActivity extends CatalogFeedActivity implements
   {
     final MenuItem item_nn = NullCheck.notNull(item);
     switch (item_nn.getItemId()) {
-      case R.id.catalog_action_sync_books:
-      {
+      case R.id.catalog_action_sync_books: {
         final SimplifiedCatalogAppServicesType app =
           Simplified.getCatalogAppServices();
         final BooksType books = app.getBooks();

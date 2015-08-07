@@ -10,6 +10,8 @@ public interface CatalogFacetSelectionListenerType
 {
   /**
    * The facet <tt>f</tt> was selected.
+   *
+   * @param f The facet
    */
 
   void onFacetSelected(

@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.utilities;
 
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Simple string processing functions.
@@ -8,12 +9,17 @@ import com.io7m.jnull.NullCheck;
 
 public final class TextUtilities
 {
+  private TextUtilities()
+  {
+    throw new UnreachableCodeException();
+  }
+
   /**
    * Brutally and overzealously attempt to remove one layer of quoting from a
    * given string. In other words "\"x\"" becomes "x".
    *
-   * @param t
-   *          The string
+   * @param t The string
+   *
    * @return The unquoted string
    */
 

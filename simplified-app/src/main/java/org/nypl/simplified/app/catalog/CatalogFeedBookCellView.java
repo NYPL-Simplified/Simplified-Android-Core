@@ -1,10 +1,25 @@
 package org.nypl.simplified.app.catalog;
 
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.atomic.AtomicReference;
-
+import android.app.Activity;
+import android.content.Context;
+import android.content.res.Resources;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.squareup.picasso.Callback;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -35,35 +50,17 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.res.Resources;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
-import com.io7m.junreachable.UnreachableCodeException;
-import com.squareup.picasso.Callback;
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A single cell in feed (list or grid).
  */
 
-@SuppressWarnings("synthetic-access") public final class CatalogFeedBookCellView extends
-  FrameLayout implements
-  Observer,
+@SuppressWarnings("synthetic-access") public final class CatalogFeedBookCellView
+  extends FrameLayout implements Observer,
   FeedEntryMatcherType<Unit, UnreachableCodeException>,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -75,49 +72,42 @@ import com.squareup.picasso.Callback;
     LOG = LogUtilities.getLog(CatalogFeedBookCellView.class);
   }
 
-  private static String makeAuthorText(
-    final OPDSAcquisitionFeedEntry in_e)
-  {
-    final StringBuilder sb = new StringBuilder();
-    final List<String> as = in_e.getAuthors();
-    final int max = as.size();
-    for (int index = 0; index < max; ++index) {
-      final String a = NullCheck.notNull(as.get(index));
-      sb.append(a);
-      if ((index + 1) < max) {
-        sb.append(", ");
-      }
-    }
-    return NullCheck.notNull(sb.toString());
-  }
+  private final Activity                         activity;
+  private final BooksType                        books;
+  private final TextView                         cell_authors;
+  private final ViewGroup                        cell_book;
+  private final ViewGroup                        cell_buttons;
+  private final ViewGroup                        cell_corrupt;
+  private final TextView                         cell_corrupt_text;
+  private final ImageView                        cell_cover_image;
+  private final ViewGroup                        cell_cover_layout;
+  private final ProgressBar                      cell_cover_progress;
+  private final TextView                         cell_debug;
+  private final ViewGroup                        cell_downloading;
+  private final TextView                         cell_downloading_authors;
+  private final Button                           cell_downloading_cancel;
+  private final ViewGroup                        cell_downloading_failed;
+  private final Button
+                                                 cell_downloading_failed_dismiss;
+  private final Button                           cell_downloading_failed_retry;
+  private final TextView                         cell_downloading_failed_title;
+  private final TextView                         cell_downloading_percent_text;
+  private final ProgressBar                      cell_downloading_progress;
+  private final TextView                         cell_downloading_title;
+  private final ViewGroup                        cell_text_layout;
+  private final TextView                         cell_title;
+  private final BookCoverProviderType            cover_provider;
+  private final boolean                          debug_cell_state;
+  private final AtomicReference<FeedEntryOPDS>   entry;
+  private       CatalogBookSelectionListenerType book_selection_listener;
 
-  private final Activity                       activity;
-  private CatalogBookSelectionListenerType     book_selection_listener;
-  private final BooksType                      books;
-  private final TextView                       cell_authors;
-  private final ViewGroup                      cell_book;
-  private final ViewGroup                      cell_buttons;
-  private final ViewGroup                      cell_corrupt;
-  private final TextView                       cell_corrupt_text;
-  private final ImageView                      cell_cover_image;
-  private final ViewGroup                      cell_cover_layout;
-  private final ProgressBar                    cell_cover_progress;
-  private final TextView                       cell_debug;
-  private final ViewGroup                      cell_downloading;
-  private final TextView                       cell_downloading_authors;
-  private final Button                         cell_downloading_cancel;
-  private final ViewGroup                      cell_downloading_failed;
-  private final Button                         cell_downloading_failed_dismiss;
-  private final Button                         cell_downloading_failed_retry;
-  private final TextView                       cell_downloading_failed_title;
-  private final TextView                       cell_downloading_percent_text;
-  private final ProgressBar                    cell_downloading_progress;
-  private final TextView                       cell_downloading_title;
-  private final ViewGroup                      cell_text_layout;
-  private final TextView                       cell_title;
-  private final BookCoverProviderType          cover_provider;
-  private final boolean                        debug_cell_state;
-  private final AtomicReference<FeedEntryOPDS> entry;
+  /**
+   * Construct a cell view.
+   *
+   * @param in_activity       The host activity
+   * @param in_cover_provider A cover provider
+   * @param in_books          The books database
+   */
 
   public CatalogFeedBookCellView(
     final Activity in_activity,
@@ -130,7 +120,8 @@ import com.squareup.picasso.Callback;
     this.cover_provider = NullCheck.notNull(in_cover_provider);
     this.books = NullCheck.notNull(in_books);
 
-    this.book_selection_listener = new CatalogBookSelectionListenerType() {
+    this.book_selection_listener = new CatalogBookSelectionListenerType()
+    {
       @Override public void onSelectBook(
         final CatalogFeedBookCellView v,
         final FeedEntryOPDS e)
@@ -143,9 +134,8 @@ import com.squareup.picasso.Callback;
       NullCheck.notNull(in_activity.getApplicationContext());
     final Resources rr = NullCheck.notNull(context.getResources());
 
-    final LayoutInflater inflater =
-      (LayoutInflater) context
-        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
+      Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.catalog_book_cell, this, true);
 
     /**
@@ -156,40 +146,38 @@ import com.squareup.picasso.Callback;
 
     this.cell_downloading =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_downloading));
-    this.cell_downloading_progress =
-      NullCheck.notNull((ProgressBar) this.cell_downloading
-        .findViewById(R.id.cell_downloading_progress));
-    this.cell_downloading_percent_text =
-      NullCheck.notNull((TextView) this.cell_downloading
-        .findViewById(R.id.cell_downloading_percent_text));
-    this.cell_downloading_title =
-      NullCheck.notNull((TextView) this.cell_downloading
-        .findViewById(R.id.cell_downloading_title));
-    this.cell_downloading_authors =
-      NullCheck.notNull((TextView) this.cell_downloading
-        .findViewById(R.id.cell_downloading_authors));
-    this.cell_downloading_cancel =
-      NullCheck.notNull((Button) this.cell_downloading
-        .findViewById(R.id.cell_downloading_cancel));
+    this.cell_downloading_progress = NullCheck.notNull(
+      (ProgressBar) this.cell_downloading.findViewById(
+        R.id.cell_downloading_progress));
+    this.cell_downloading_percent_text = NullCheck.notNull(
+      (TextView) this.cell_downloading.findViewById(
+        R.id.cell_downloading_percent_text));
+    this.cell_downloading_title = NullCheck.notNull(
+      (TextView) this.cell_downloading.findViewById(
+        R.id.cell_downloading_title));
+    this.cell_downloading_authors = NullCheck.notNull(
+      (TextView) this.cell_downloading.findViewById(
+        R.id.cell_downloading_authors));
+    this.cell_downloading_cancel = NullCheck.notNull(
+      (Button) this.cell_downloading.findViewById(
+        R.id.cell_downloading_cancel));
 
-    this.cell_downloading_failed =
-      NullCheck.notNull((ViewGroup) this
-        .findViewById(R.id.cell_downloading_failed));
-    this.cell_downloading_failed_title =
-      NullCheck.notNull((TextView) this.cell_downloading_failed
-        .findViewById(R.id.cell_downloading_failed_title));
-    this.cell_downloading_failed_dismiss =
-      NullCheck.notNull((Button) this.cell_downloading_failed
-        .findViewById(R.id.cell_downloading_failed_dismiss));
-    this.cell_downloading_failed_retry =
-      NullCheck.notNull((Button) this.cell_downloading_failed
-        .findViewById(R.id.cell_downloading_failed_retry));
+    this.cell_downloading_failed = NullCheck.notNull(
+      (ViewGroup) this.findViewById(R.id.cell_downloading_failed));
+    this.cell_downloading_failed_title = NullCheck.notNull(
+      (TextView) this.cell_downloading_failed.findViewById(
+        R.id.cell_downloading_failed_title));
+    this.cell_downloading_failed_dismiss = NullCheck.notNull(
+      (Button) this.cell_downloading_failed.findViewById(
+        R.id.cell_downloading_failed_dismiss));
+    this.cell_downloading_failed_retry = NullCheck.notNull(
+      (Button) this.cell_downloading_failed.findViewById(
+        R.id.cell_downloading_failed_retry));
 
     this.cell_corrupt =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_corrupt));
-    this.cell_corrupt_text =
-      NullCheck.notNull((TextView) this.cell_corrupt
-        .findViewById(R.id.cell_corrupt_text));
+    this.cell_corrupt_text = NullCheck.notNull(
+      (TextView) this.cell_corrupt.findViewById(R.id.cell_corrupt_text));
 
     this.cell_book =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_book));
@@ -202,28 +190,22 @@ import com.squareup.picasso.Callback;
       this.cell_debug.setVisibility(View.GONE);
     }
 
-    this.cell_text_layout =
-      NullCheck.notNull((ViewGroup) this.cell_book
-        .findViewById(R.id.cell_text_layout));
-    this.cell_title =
-      NullCheck.notNull((TextView) this.cell_text_layout
-        .findViewById(R.id.cell_title));
-    this.cell_authors =
-      NullCheck.notNull((TextView) this.cell_text_layout
-        .findViewById(R.id.cell_authors));
-    this.cell_buttons =
-      NullCheck.notNull((ViewGroup) this.cell_text_layout
-        .findViewById(R.id.cell_buttons));
+    this.cell_text_layout = NullCheck.notNull(
+      (ViewGroup) this.cell_book.findViewById(R.id.cell_text_layout));
+    this.cell_title = NullCheck.notNull(
+      (TextView) this.cell_text_layout.findViewById(R.id.cell_title));
+    this.cell_authors = NullCheck.notNull(
+      (TextView) this.cell_text_layout.findViewById(R.id.cell_authors));
+    this.cell_buttons = NullCheck.notNull(
+      (ViewGroup) this.cell_text_layout.findViewById(R.id.cell_buttons));
 
     this.cell_cover_layout =
-      NullCheck
-        .notNull((ViewGroup) this.findViewById(R.id.cell_cover_layout));
-    this.cell_cover_image =
-      NullCheck.notNull((ImageView) this.cell_cover_layout
-        .findViewById(R.id.cell_cover_image));
-    this.cell_cover_progress =
-      NullCheck.notNull((ProgressBar) this.cell_cover_layout
-        .findViewById(R.id.cell_cover_loading));
+      NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_cover_layout));
+    this.cell_cover_image = NullCheck.notNull(
+      (ImageView) this.cell_cover_layout.findViewById(R.id.cell_cover_image));
+    this.cell_cover_progress = NullCheck.notNull(
+      (ProgressBar) this.cell_cover_layout.findViewById(
+        R.id.cell_cover_loading));
 
     /**
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
@@ -244,11 +226,26 @@ import com.squareup.picasso.Callback;
     this.cell_downloading_failed.setVisibility(View.INVISIBLE);
   }
 
+  private static String makeAuthorText(
+    final OPDSAcquisitionFeedEntry in_e)
+  {
+    final StringBuilder sb = new StringBuilder();
+    final List<String> as = in_e.getAuthors();
+    final int max = as.size();
+    for (int index = 0; index < max; ++index) {
+      final String a = NullCheck.notNull(as.get(index));
+      sb.append(a);
+      if ((index + 1) < max) {
+        sb.append(", ");
+      }
+    }
+    return NullCheck.notNull(sb.toString());
+  }
+
   private void loadImageAndSetVisibility(
     final FeedEntryOPDS in_e)
   {
-    final int in_image_height =
-      this.cell_cover_layout.getLayoutParams().height;
+    final int in_image_height = this.cell_cover_layout.getLayoutParams().height;
 
     final ImageView ci = this.cell_cover_image;
     final ProgressBar cp = this.cell_cover_progress;
@@ -256,7 +253,8 @@ import com.squareup.picasso.Callback;
     ci.setVisibility(View.INVISIBLE);
     cp.setVisibility(View.VISIBLE);
 
-    final Callback callback = new Callback() {
+    final Callback callback = new Callback()
+    {
       @Override public void onError()
       {
         CatalogFeedBookCellView.LOG.error("unable to load image");
@@ -297,12 +295,12 @@ import com.squareup.picasso.Callback;
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    this.cell_buttons.addView(new CatalogBookDeleteButton(
-      this.activity,
-      book_id));
-    this.cell_buttons.addView(new CatalogBookReadButton(
-      this.activity,
-      book_id));
+    this.cell_buttons.addView(
+      new CatalogBookDeleteButton(
+        this.activity, book_id));
+    this.cell_buttons.addView(
+      new CatalogBookReadButton(
+        this.activity, book_id));
     return Unit.unit();
   }
 
@@ -321,13 +319,14 @@ import com.squareup.picasso.Callback;
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
     this.cell_downloading_failed_title.setText(oe.getTitle());
-    this.cell_downloading_failed_dismiss
-      .setOnClickListener(new OnClickListener() {
+    this.cell_downloading_failed_dismiss.setOnClickListener(
+      new OnClickListener()
+      {
         @Override public void onClick(
           final @Nullable View v)
         {
-          CatalogFeedBookCellView.this.books.bookDownloadAcknowledge(f
-            .getID());
+          CatalogFeedBookCellView.this.books.bookDownloadAcknowledge(
+            f.getID());
         }
       });
 
@@ -350,11 +349,7 @@ import com.squareup.picasso.Callback;
     final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
-        this.activity,
-        this.books,
-        fe.getBookID(),
-        a,
-        fe);
+        this.activity, this.books, fe.getBookID(), a, fe);
 
     this.cell_downloading_failed_retry.setOnClickListener(retry_ctl);
     return Unit.unit();
@@ -381,8 +376,8 @@ import com.squareup.picasso.Callback;
     final BookID book_id = d.getID();
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
     this.cell_downloading_title.setText(oe.getTitle());
-    this.cell_downloading_authors.setText(CatalogFeedBookCellView
-      .makeAuthorText(oe));
+    this.cell_downloading_authors.setText(
+      CatalogFeedBookCellView.makeAuthorText(oe));
 
     CatalogDownloadProgressBar.setProgressBar(
       d.getCurrentTotalBytes(),
@@ -390,13 +385,15 @@ import com.squareup.picasso.Callback;
       this.cell_downloading_percent_text,
       this.cell_downloading_progress);
 
-    this.cell_downloading_cancel.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    this.cell_downloading_cancel.setOnClickListener(
+      new OnClickListener()
       {
-        CatalogFeedBookCellView.this.books.bookDownloadCancel(book_id);
-      }
-    });
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          CatalogFeedBookCellView.this.books.bookDownloadCancel(book_id);
+        }
+      });
 
     return Unit.unit();
   }
@@ -438,10 +435,7 @@ import com.squareup.picasso.Callback;
     this.loadImageAndSetVisibility(fe);
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity,
-      this.cell_buttons,
-      this.books,
-      fe);
+      this.activity, this.cell_buttons, this.books, fe);
     return Unit.unit();
   }
 
@@ -466,10 +460,7 @@ import com.squareup.picasso.Callback;
     this.loadImageAndSetVisibility(in_entry);
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity,
-      this.cell_buttons,
-      this.books,
-      in_entry);
+      this.activity, this.cell_buttons, this.books, in_entry);
   }
 
   @Override public Unit onBookStatusRequestingDownload(
@@ -514,9 +505,7 @@ import com.squareup.picasso.Callback;
     final FeedEntryCorrupt e)
   {
     CatalogFeedBookCellView.LOG.debug(
-      "{}: feed entry corrupt: ",
-      e.getBookID(),
-      e.getError());
+      "{}: feed entry corrupt: ", e.getBookID(), e.getError());
 
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_book.setVisibility(View.INVISIBLE);
@@ -525,11 +514,8 @@ import com.squareup.picasso.Callback;
     this.setDebugCellText("entry-corrupt");
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final String text =
-      String.format(
-        "%s (%s)",
-        rr.getString(R.string.catalog_meta_corrupt),
-        e.getBookID());
+    final String text = String.format(
+      "%s (%s)", rr.getString(R.string.catalog_meta_corrupt), e.getBookID());
     this.cell_corrupt_text.setText(text);
     return Unit.unit();
   }
@@ -543,19 +529,20 @@ import com.squareup.picasso.Callback;
 
     final CatalogBookSelectionListenerType book_listener =
       this.book_selection_listener;
-    this.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    this.setOnClickListener(
+      new OnClickListener()
       {
-        book_listener.onSelectBook(CatalogFeedBookCellView.this, feed_e);
-      }
-    });
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          book_listener.onSelectBook(CatalogFeedBookCellView.this, feed_e);
+        }
+      });
 
     this.entry.set(feed_e);
 
     final BookID book_id = feed_e.getBookID();
-    final OptionType<BookStatusType> stat =
-      this.books.booksStatusGet(book_id);
+    final OptionType<BookStatusType> stat = this.books.booksStatusGet(book_id);
     this.onStatus(feed_e, book_id, stat);
 
     return Unit.unit();
@@ -568,19 +555,23 @@ import com.squareup.picasso.Callback;
   {
     if (status_opt.isSome()) {
       final Some<BookStatusType> some = (Some<BookStatusType>) status_opt;
-      UIThread.runOnUIThread(new Runnable() {
-        @Override public void run()
+      UIThread.runOnUIThread(
+        new Runnable()
         {
-          some.get().matchBookStatus(CatalogFeedBookCellView.this);
-        }
-      });
+          @Override public void run()
+          {
+            some.get().matchBookStatus(CatalogFeedBookCellView.this);
+          }
+        });
     } else {
-      UIThread.runOnUIThread(new Runnable() {
-        @Override public void run()
+      UIThread.runOnUIThread(
+        new Runnable()
         {
-          CatalogFeedBookCellView.this.onBookStatusNone(in_entry, id);
-        }
-      });
+          @Override public void run()
+          {
+            CatalogFeedBookCellView.this.onBookStatusNone(in_entry, id);
+          }
+        });
     }
   }
 
@@ -597,10 +588,7 @@ import com.squareup.picasso.Callback;
     final @Nullable Object data)
   {
     Assertions.checkPrecondition(
-      data instanceof BookID,
-      "%s instanceof %s",
-      data,
-      BookID.class);
+      data instanceof BookID, "%s instanceof %s", data, BookID.class);
 
     CatalogFeedBookCellView.LOG.debug("update: {}", data);
 
@@ -610,14 +598,15 @@ import com.squareup.picasso.Callback;
     if (in_entry != null) {
       final BookID current_id = in_entry.getBookID();
       if (current_id.equals(update_id)) {
-        UIThread.runOnUIThread(new Runnable() {
-          @Override public void run()
+        UIThread.runOnUIThread(
+          new Runnable()
           {
-            CatalogFeedBookCellView.this.viewConfigure(
-              in_entry,
-              CatalogFeedBookCellView.this.book_selection_listener);
-          }
-        });
+            @Override public void run()
+            {
+              CatalogFeedBookCellView.this.viewConfigure(
+                in_entry, CatalogFeedBookCellView.this.book_selection_listener);
+            }
+          });
       }
     }
   }
@@ -626,6 +615,9 @@ import com.squareup.picasso.Callback;
    * Configure the overall status of the cell. The cell displays a number of
    * different layouts depending on whether the current book is loaned, fully
    * downloaded, currently downloading, not loaned, etc.
+   *
+   * @param in_e        The new feed entry
+   * @param in_listener A selection listener
    */
 
   public void viewConfigure(

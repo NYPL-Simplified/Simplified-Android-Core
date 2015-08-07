@@ -1,13 +1,5 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.books.core.FeedEntryOPDS;
-import org.slf4j.Logger;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -20,13 +12,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryOPDS;
+import org.slf4j.Logger;
 
 /**
- * A book detail dialog fragment used on tablets or devices with large
- * screens.
+ * A book detail dialog fragment used on tablets or devices with large screens.
  */
 
 public final class CatalogBookDialog extends DialogFragment
@@ -42,24 +39,35 @@ public final class CatalogBookDialog extends DialogFragment
     ACQUISITION_ENTRY_ID = "org.nypl.simplified.app.CatalogBookDialog.entry";
   }
 
+  private @Nullable FeedEntryOPDS         entry;
+  private @Nullable CatalogBookDetailView view;
+
+  /**
+   * Construct a book dialog.
+   */
+
+  public CatalogBookDialog()
+  {
+    // Fragments must have no-arg constructors.
+  }
+
+  /**
+   * Construct a new book dialog.
+   *
+   * @param e The feed entry
+   *
+   * @return A new dialog
+   */
+
   public static CatalogBookDialog newDialog(
     final FeedEntryOPDS e)
   {
     final CatalogBookDialog c = new CatalogBookDialog();
     final Bundle b = new Bundle();
     b.putSerializable(
-      CatalogBookDialog.ACQUISITION_ENTRY_ID,
-      NullCheck.notNull(e));
+      CatalogBookDialog.ACQUISITION_ENTRY_ID, NullCheck.notNull(e));
     c.setArguments(b);
     return c;
-  }
-
-  private @Nullable FeedEntryOPDS         entry;
-  private @Nullable CatalogBookDetailView view;
-
-  public CatalogBookDialog()
-  {
-    // Fragments must have no-arg constructors.
   }
 
   @Override public void onCreate(
@@ -69,9 +77,9 @@ public final class CatalogBookDialog extends DialogFragment
     this.setStyle(DialogFragment.STYLE_NORMAL, R.style.SimplifiedBookDialog);
 
     final Bundle b = NullCheck.notNull(this.getArguments());
-    final FeedEntryOPDS e =
-      NullCheck.notNull((FeedEntryOPDS) b
-        .getSerializable(CatalogBookDialog.ACQUISITION_ENTRY_ID));
+    final FeedEntryOPDS e = NullCheck.notNull(
+      (FeedEntryOPDS) b.getSerializable(
+        CatalogBookDialog.ACQUISITION_ENTRY_ID));
 
     CatalogBookDialog.LOG.debug("showing dialog for id: {}", e.getBookID());
     this.entry = e;
@@ -85,11 +93,8 @@ public final class CatalogBookDialog extends DialogFragment
     final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
     final FeedEntryOPDS e = NullCheck.notNull(this.entry);
 
-    final CatalogBookDetailView detail_view =
-      new CatalogBookDetailView(
-        NullCheck.notNull(this.getActivity()),
-        inflater,
-        e);
+    final CatalogBookDetailView detail_view = new CatalogBookDetailView(
+      NullCheck.notNull(this.getActivity()), inflater, e);
     this.view = detail_view;
 
     final SimplifiedCatalogAppServicesType app =
@@ -127,9 +132,8 @@ public final class CatalogBookDialog extends DialogFragment
      */
 
     final Activity act = NullCheck.notNull(this.getActivity());
-    final WindowManager window_manager =
-      NullCheck.notNull((WindowManager) act
-        .getSystemService(Context.WINDOW_SERVICE));
+    final WindowManager window_manager = NullCheck.notNull(
+      (WindowManager) act.getSystemService(Context.WINDOW_SERVICE));
     final Display display =
       NullCheck.notNull(window_manager.getDefaultDisplay());
 

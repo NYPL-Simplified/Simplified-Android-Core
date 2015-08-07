@@ -22,7 +22,7 @@ public final class Assertions
    * Require that the given invariant <tt>c</tt> be <tt>true</tt>, raising
    * {@link AssertionError} if it isn't.
    *
-   * @param c
+   * @param condition
    *          The invariant
    * @param message
    *          The message displayed on failure (a format string)

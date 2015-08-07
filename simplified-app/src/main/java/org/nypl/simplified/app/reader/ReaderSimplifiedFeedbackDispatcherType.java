@@ -13,6 +13,9 @@ public interface ReaderSimplifiedFeedbackDispatcherType
 {
   /**
    * Dispatch the URI to the given listener.
+   *
+   * @param uri The URI
+   * @param l   The receiving listener
    */
 
   void dispatch(

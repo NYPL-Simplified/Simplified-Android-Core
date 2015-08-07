@@ -1,16 +1,20 @@
 package org.nypl.simplified.app.catalog;
 
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.stack.ImmutableStack;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
+/**
+ * Arguments given to a {@link CatalogFeedActivity} that indicate that the feed
+ * to be displayed is the local books feed.
+ */
 
-public final class CatalogFeedArgumentsLocalBooks implements
-  CatalogFeedArgumentsType
+public final class CatalogFeedArgumentsLocalBooks
+  implements CatalogFeedArgumentsType
 {
-  private static final long                              serialVersionUID;
+  private static final long serialVersionUID;
 
   static {
     serialVersionUID = 1L;
@@ -20,6 +24,15 @@ public final class CatalogFeedArgumentsLocalBooks implements
   private final OptionType<String>                       search_terms;
   private final String                                   title;
   private final ImmutableStack<CatalogFeedArgumentsType> up_stack;
+
+  /**
+   * Construct feed arguments.
+   *
+   * @param in_up_stack     The new up-stack
+   * @param in_title        The feed title
+   * @param in_facet_type   The current facet type
+   * @param in_search_terms The search terms, if any
+   */
 
   public CatalogFeedArgumentsLocalBooks(
     final ImmutableStack<CatalogFeedArgumentsType> in_up_stack,
@@ -33,10 +46,18 @@ public final class CatalogFeedArgumentsLocalBooks implements
     this.search_terms = NullCheck.notNull(in_search_terms);
   }
 
+  /**
+   * @return The current facet type
+   */
+
   public FacetType getFacetType()
   {
     return this.facet_type;
   }
+
+  /**
+   * @return The search terms, if any
+   */
 
   public OptionType<String> getSearchTerms()
   {

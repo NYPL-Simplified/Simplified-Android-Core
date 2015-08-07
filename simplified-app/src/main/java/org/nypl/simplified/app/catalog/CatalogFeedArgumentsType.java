@@ -1,8 +1,12 @@
 package org.nypl.simplified.app.catalog;
 
+import org.nypl.simplified.stack.ImmutableStack;
+
 import java.io.Serializable;
 
-import org.nypl.simplified.stack.ImmutableStack;
+/**
+ * The type of catalog feed arguments.
+ */
 
 public interface CatalogFeedArgumentsType extends Serializable
 {
@@ -21,11 +25,13 @@ public interface CatalogFeedArgumentsType extends Serializable
   /**
    * Match on the type of feed.
    *
-   * @param m
-   *          The matcher
+   * @param m   The matcher
+   * @param <A> The type of values returned by the matcher
+   * @param <E> The type of exceptions raised by the matcher
+   *
    * @return The value returned by the matcher
-   * @throws E
-   *           Propagated from the matcher
+   *
+   * @throws E Propagated from the matcher
    */
 
   <A, E extends Exception> A matchArguments(

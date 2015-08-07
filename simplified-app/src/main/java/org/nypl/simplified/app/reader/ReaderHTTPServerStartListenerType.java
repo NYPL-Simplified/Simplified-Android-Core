@@ -8,6 +8,9 @@ public interface ReaderHTTPServerStartListenerType
 {
   /**
    * The server failed to start.
+   *
+   * @param hs The server
+   * @param x  The error raised
    */
 
   void onServerStartFailed(
@@ -18,6 +21,9 @@ public interface ReaderHTTPServerStartListenerType
    * The server started successfully. The value of <tt>first</tt> is
    * <tt>true</tt> if this is the first time the server has been requested to
    * start.
+   *
+   * @param hs    The server
+   * @param first Indicates whether this is the first server startup
    */
 
   void onServerStartSucceeded(

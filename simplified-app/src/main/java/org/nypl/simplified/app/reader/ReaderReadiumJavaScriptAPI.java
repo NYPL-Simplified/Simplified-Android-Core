@@ -1,41 +1,35 @@
 package org.nypl.simplified.app.reader;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
-import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode;
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.TextUtilities;
-import org.nypl.simplified.app.utilities.UIThread;
-import org.slf4j.Logger;
-
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
+import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings
+  .SyntheticSpreadMode;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.app.utilities.TextUtilities;
+import org.nypl.simplified.app.utilities.UIThread;
+import org.slf4j.Logger;
 
 /**
  * The default implementation of the {@link ReaderReadiumJavaScriptAPIType}
  * interface.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) public final class ReaderReadiumJavaScriptAPI implements
-  ReaderReadiumJavaScriptAPIType
+@SuppressWarnings({ "boxing", "synthetic-access" })
+public final class ReaderReadiumJavaScriptAPI
+  implements ReaderReadiumJavaScriptAPIType
 {
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderReadiumJavaScriptAPI.class);
-  }
-
-  public static ReaderReadiumJavaScriptAPIType newAPI(
-    final WebView wv)
-  {
-    return new ReaderReadiumJavaScriptAPI(wv);
   }
 
   private final WebView web_view;
@@ -46,18 +40,34 @@ import com.io7m.jnull.Nullable;
     this.web_view = NullCheck.notNull(wv);
   }
 
+  /**
+   * Construct a new JavaScript API.
+   *
+   * @param wv A web view
+   *
+   * @return A new API
+   */
+
+  public static ReaderReadiumJavaScriptAPIType newAPI(
+    final WebView wv)
+  {
+    return new ReaderReadiumJavaScriptAPI(wv);
+  }
+
   private void evaluate(
     final String script)
   {
     ReaderReadiumJavaScriptAPI.LOG.debug("sending javascript: {}", script);
 
     final WebView wv = this.web_view;
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        wv.evaluateJavascript(script, null);
-      }
-    });
+        @Override public void run()
+        {
+          wv.evaluateJavascript(script, null);
+        }
+      });
   }
 
   private void evaluateWithResult(
@@ -67,12 +77,14 @@ import com.io7m.jnull.Nullable;
     ReaderReadiumJavaScriptAPI.LOG.debug("sending javascript: {}", script);
 
     final WebView wv = this.web_view;
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        wv.evaluateJavascript(script, callback);
-      }
-    });
+        @Override public void run()
+        {
+          wv.evaluateJavascript(script, callback);
+        }
+      });
   }
 
   @Override public void getCurrentPage(
@@ -81,8 +93,8 @@ import com.io7m.jnull.Nullable;
     NullCheck.notNull(l);
 
     this.evaluateWithResult(
-      "ReadiumSDK.reader.bookmarkCurrentPage()",
-      new ValueCallback<String>() {
+      "ReadiumSDK.reader.bookmarkCurrentPage()", new ValueCallback<String>()
+      {
         @Override public void onReceiveValue(
           final @Nullable String value)
         {
@@ -133,9 +145,10 @@ import com.io7m.jnull.Nullable;
         o.put("openPageRequest", some.get().toJSON());
       }
 
-      this.evaluate(NullCheck.notNull(String.format(
-        "ReadiumSDK.reader.openBook(%s)",
-        o)));
+      this.evaluate(
+        NullCheck.notNull(
+          String.format(
+            "ReadiumSDK.reader.openBook(%s)", o)));
     } catch (final JSONException e) {
       throw new IllegalArgumentException(e);
     }
@@ -148,10 +161,12 @@ import com.io7m.jnull.Nullable;
     NullCheck.notNull(content_ref);
     NullCheck.notNull(source_href);
 
-    this.evaluate(NullCheck.notNull(String.format(
-      "ReadiumSDK.reader.openContentUrl('%s','%s',null)",
-      content_ref,
-      source_href)));
+    this.evaluate(
+      NullCheck.notNull(
+        String.format(
+          "ReadiumSDK.reader.openContentUrl('%s','%s',null)",
+          content_ref,
+          source_href)));
   }
 
   @Override public void pageNext()
@@ -172,14 +187,12 @@ import com.io7m.jnull.Nullable;
 
       final ReaderColorScheme cs = r.getColorScheme();
 
-      final String color =
-        NullCheck.notNull(String.format(
-          "#%06x",
-          cs.getForegroundColor() & 0xffffff));
-      final String background =
-        NullCheck.notNull(String.format(
-          "#%06x",
-          cs.getBackgroundColor() & 0xffffff));
+      final String color = NullCheck.notNull(
+        String.format(
+          "#%06x", cs.getForegroundColor() & 0xffffff));
+      final String background = NullCheck.notNull(
+        String.format(
+          "#%06x", cs.getBackgroundColor() & 0xffffff));
 
       decls.put("color", color);
       decls.put("backgroundColor", background);
@@ -191,29 +204,25 @@ import com.io7m.jnull.Nullable;
       final JSONArray a = new JSONArray();
       a.put(o);
 
-      this
-        .evaluate(NullCheck.notNull(String
-          .format(
-            "ReadiumSDK.reader.setBookStyles(%s); document.body.style.backgroundColor = \"%s\";",
+      this.evaluate(
+        NullCheck.notNull(
+          String.format(
+            "ReadiumSDK.reader.setBookStyles(%s); document.body.style"
+            + ".backgroundColor = \"%s\";",
             a,
             background)));
 
-      final ReaderReadiumViewerSettings vs =
-        new ReaderReadiumViewerSettings(
-          SyntheticSpreadMode.AUTO,
-          ScrollMode.AUTO,
-          (int) r.getFontScale(),
-          20);
+      final ReaderReadiumViewerSettings vs = new ReaderReadiumViewerSettings(
+        SyntheticSpreadMode.AUTO, ScrollMode.AUTO, (int) r.getFontScale(), 20);
 
-      this.evaluate(NullCheck.notNull(String.format(
-        "ReadiumSDK.reader.updateSettings(%s);",
-        vs.toJSON())));
+      this.evaluate(
+        NullCheck.notNull(
+          String.format(
+            "ReadiumSDK.reader.updateSettings(%s);", vs.toJSON())));
 
     } catch (final JSONException e) {
       ReaderReadiumJavaScriptAPI.LOG.error(
-        "error constructing json: {}",
-        e.getMessage(),
-        e);
+        "error constructing json: {}", e.getMessage(), e);
     }
   }
 
@@ -223,8 +232,8 @@ import com.io7m.jnull.Nullable;
     NullCheck.notNull(l);
 
     this.evaluateWithResult(
-      "ReadiumSDK.reader.isMediaOverlayAvailable()",
-      new ValueCallback<String>() {
+      "ReadiumSDK.reader.isMediaOverlayAvailable()", new ValueCallback<String>()
+      {
         @Override public void onReceiveValue(
           final @Nullable String value)
         {

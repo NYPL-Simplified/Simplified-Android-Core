@@ -13,6 +13,9 @@ public interface ReaderReadiumFeedbackDispatcherType
 {
   /**
    * Dispatch the URI to the given listener.
+   *
+   * @param uri The URI
+   * @param l   The listener
    */
 
   void dispatch(

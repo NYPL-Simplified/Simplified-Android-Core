@@ -2,13 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../adept-connector/libnypl_adobe/libnypl_adobe.iml" filepath="$PROJECT_DIR$/../adept-connector/libnypl_adobe/libnypl_adobe.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../adept-connector/nypl-drm.iml" filepath="$PROJECT_DIR$/../adept-connector/nypl-drm.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../adept-connector/nypl-drm-adobe/nypl-drm-adobe.iml" filepath="$PROJECT_DIR$/../adept-connector/nypl-drm-adobe/nypl-drm-adobe.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../adept-connector/nypl-drm-adobe-example/nypl-drm-adobe-example.iml" filepath="$PROJECT_DIR$/../adept-connector/nypl-drm-adobe-example/nypl-drm-adobe-example.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../adept-connector/nypl-drm-checkstyle/nypl-drm-checkstyle.iml" filepath="$PROJECT_DIR$/../adept-connector/nypl-drm-checkstyle/nypl-drm-checkstyle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../adept-connector/nypl-drm-core/nypl-drm-core.iml" filepath="$PROJECT_DIR$/../adept-connector/nypl-drm-core/nypl-drm-core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../adept-connector/nypl-drm-core-tests/nypl-drm-core-tests.iml" filepath="$PROJECT_DIR$/../adept-connector/nypl-drm-core-tests/nypl-drm-core-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified.iml" filepath="$PROJECT_DIR$/simplified.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app/simplified-app.iml" filepath="$PROJECT_DIR$/simplified-app/simplified-app.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app-tests/simplified-app-tests.iml" filepath="$PROJECT_DIR$/simplified-app-tests/simplified-app-tests.iml" />

@@ -1,9 +1,5 @@
 package org.nypl.simplified.app;
 
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.books.core.AccountLogoutListenerType;
-import org.slf4j.Logger;
-
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.res.Resources;
@@ -15,13 +11,19 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.AccountLogoutListenerType;
+import org.slf4j.Logger;
 
-@SuppressWarnings("synthetic-access") public final class LogoutDialog extends
-  DialogFragment implements AccountLogoutListenerType
+/**
+ * A reusable logout dialog.
+ */
+
+@SuppressWarnings("synthetic-access") public final class LogoutDialog
+  extends DialogFragment implements AccountLogoutListenerType
 {
   private static final Logger LOG;
 
@@ -29,17 +31,24 @@ import com.io7m.jnull.Nullable;
     LOG = LogUtilities.getLog(DialogFragment.class);
   }
 
-  public static LogoutDialog newDialog()
-  {
-    final LogoutDialog d = new LogoutDialog();
-    return d;
-  }
-
   private @Nullable Runnable on_confirm;
+
+  /**
+   * Construct a new dialog.
+   */
 
   public LogoutDialog()
   {
     // Fragments must have no-arg constructors.
+  }
+
+  /**
+   * @return A new dialog
+   */
+
+  public static LogoutDialog newDialog()
+  {
+    return new LogoutDialog();
   }
 
   @Override public void onAccountLogoutFailure(
@@ -84,38 +93,40 @@ import com.io7m.jnull.Nullable;
   {
     final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
 
-    final ViewGroup layout =
-      NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.logout_confirm,
-        container,
-        false));
+    final ViewGroup layout = NullCheck.notNull(
+      (ViewGroup) inflater.inflate(
+        R.layout.logout_confirm, container, false));
 
     final Button in_logout_button =
       NullCheck.notNull((Button) layout.findViewById(R.id.logout_confirm));
 
-    in_logout_button.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    in_logout_button.setOnClickListener(
+      new OnClickListener()
       {
-        final Runnable r = LogoutDialog.this.on_confirm;
-        LogoutDialog.LOG.debug("runnable: {}", r);
-        if (r != null) {
-          r.run();
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          final Runnable r = LogoutDialog.this.on_confirm;
+          LogoutDialog.LOG.debug("runnable: {}", r);
+          if (r != null) {
+            r.run();
+          }
+          LogoutDialog.this.dismiss();
         }
-        LogoutDialog.this.dismiss();
-      }
-    });
+      });
 
     final Button in_logout_cancel_button =
       NullCheck.notNull((Button) layout.findViewById(R.id.logout_cancel));
 
-    in_logout_cancel_button.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    in_logout_cancel_button.setOnClickListener(
+      new OnClickListener()
       {
-        LogoutDialog.this.dismiss();
-      }
-    });
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          LogoutDialog.this.dismiss();
+        }
+      });
 
     final Dialog d = this.getDialog();
     if (d != null) {
@@ -124,10 +135,15 @@ import com.io7m.jnull.Nullable;
     return layout;
   }
 
+  /**
+   * Set the confirmation listener.
+   *
+   * @param r The listener
+   */
+
   public void setOnConfirmListener(
     final Runnable r)
   {
     this.on_confirm = NullCheck.notNull(r);
-
   }
 }

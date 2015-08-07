@@ -1,18 +1,24 @@
 package org.nypl.simplified.app.reader;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.slf4j.Logger;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
+/**
+ * <p>The default implementation of the {@link ReaderBookmarksType}
+ * interface.</p>
+ *
+ * <p>This implementation uses the Android `SharedPreferences` class to
+ * serialize bookmarks.</p>
+ */
 
 public final class ReaderBookmarks implements ReaderBookmarksType
 {
@@ -20,12 +26,6 @@ public final class ReaderBookmarks implements ReaderBookmarksType
 
   static {
     LOG = LogUtilities.getLog(ReaderBookmarks.class);
-  }
-
-  public static ReaderBookmarksType openBookmarks(
-    final Context cc)
-  {
-    return new ReaderBookmarks(cc);
   }
 
   private final SharedPreferences bookmarks;
@@ -36,6 +36,20 @@ public final class ReaderBookmarks implements ReaderBookmarksType
     NullCheck.notNull(cc);
     this.bookmarks =
       NullCheck.notNull(cc.getSharedPreferences("reader-bookmarks", 0));
+  }
+
+  /**
+   * Open the bookmarks database.
+   *
+   * @param cc The application context
+   *
+   * @return A bookmarks database
+   */
+
+  public static ReaderBookmarksType openBookmarks(
+    final Context cc)
+  {
+    return new ReaderBookmarks(cc);
   }
 
   @Override public OptionType<ReaderBookLocation> getBookmark(
@@ -55,9 +69,7 @@ public final class ReaderBookmarks implements ReaderBookmarksType
       return Option.none();
     } catch (final JSONException e) {
       ReaderBookmarks.LOG.error(
-        "unable to deserialize bookmark: {}",
-        e.getMessage(),
-        e);
+        "unable to deserialize bookmark: {}", e.getMessage(), e);
       return Option.none();
     }
   }
@@ -71,9 +83,7 @@ public final class ReaderBookmarks implements ReaderBookmarksType
 
     try {
       ReaderBookmarks.LOG.debug(
-        "saving bookmark for book {}: {}",
-        id,
-        bookmark);
+        "saving bookmark for book {}: {}", id, bookmark);
 
       final JSONObject o = NullCheck.notNull(bookmark.toJSON());
       final String text = NullCheck.notNull(o.toString());
@@ -83,9 +93,7 @@ public final class ReaderBookmarks implements ReaderBookmarksType
       e.apply();
     } catch (final JSONException e) {
       ReaderBookmarks.LOG.error(
-        "unable to serialize bookmark: {}",
-        e.getMessage(),
-        e);
+        "unable to serialize bookmark: {}", e.getMessage(), e);
     }
   }
 }
