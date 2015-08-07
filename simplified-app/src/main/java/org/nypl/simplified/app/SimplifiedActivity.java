@@ -70,7 +70,7 @@ import java.util.Map;
                                                  drawer_arg_funcs;
   private @Nullable Map<SimplifiedPart, Class<? extends Activity>>
                                                  drawer_classes_by_name;
-  private @Nullable ArrayList<SimplifiedPart>    drawer_items;
+  private @Nullable List<SimplifiedPart>    drawer_items;
   private @Nullable ListView                     drawer_list;
   private @Nullable SharedPreferences            drawer_settings;
   private           boolean                      finishing;
@@ -216,7 +216,7 @@ import java.util.Map;
 
     final String app_name = NullCheck.notNull(rr.getString(R.string.app_name));
 
-    final ArrayList<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
+    final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);
     di.add(SimplifiedPart.PART_HOLDS);
@@ -386,7 +386,7 @@ import java.util.Map;
      */
 
     if (this.selected != -1) {
-      final ArrayList<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
+      final List<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
       final Map<SimplifiedPart, Class<? extends Activity>> dc =
         NullCheck.notNull(this.drawer_classes_by_name);
       final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =

@@ -202,6 +202,13 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
       </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-checkstyle" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="libnypl_adobe" target="1.5" />
@@ -219,6 +226,7 @@
       <module name="simplified-books-tests" target="1.6" />
       <module name="simplified-books-tests-android" target="1.6" />
       <module name="simplified-books-tests-junit4" target="1.6" />
+      <module name="simplified-checkstyle" target="1.5" />
       <module name="simplified-documentation" target="1.6" />
       <module name="simplified-downloader-core" target="1.6" />
       <module name="simplified-files" target="1.6" />
