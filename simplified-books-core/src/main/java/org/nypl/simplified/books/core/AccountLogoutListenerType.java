@@ -10,6 +10,9 @@ public interface AccountLogoutListenerType
 {
   /**
    * Logging out failed.
+   *
+   * @param error   The exception, if any
+   * @param message The error message
    */
 
   void onAccountLogoutFailure(

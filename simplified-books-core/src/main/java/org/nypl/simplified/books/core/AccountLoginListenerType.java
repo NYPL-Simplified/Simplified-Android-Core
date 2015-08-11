@@ -10,6 +10,9 @@ public interface AccountLoginListenerType
 {
   /**
    * Logging in failed.
+   *
+   * @param error   The exception, if any
+   * @param message The error message
    */
 
   void onAccountLoginFailure(
@@ -18,6 +21,9 @@ public interface AccountLoginListenerType
 
   /**
    * Logging in succeeded.
+   *
+   * @param barcode The current barcode
+   * @param pin     The current PIN
    */
 
   void onAccountLoginSuccess(

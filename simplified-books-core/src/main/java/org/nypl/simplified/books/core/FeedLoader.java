@@ -1,20 +1,15 @@
 package org.nypl.simplified.books.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import net.jodah.expiringmap.ExpiringMap;
 import net.jodah.expiringmap.ExpiringMap.Builder;
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
-
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
@@ -25,65 +20,51 @@ import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-@SuppressWarnings("synthetic-access") public final class FeedLoader implements
-  FeedLoaderType,
-  ExpirationListener<URI, FeedType>
+/**
+ * The default implementation of the {@link FeedLoaderType} interface.
+ *
+ * This implementation caches feeds. A feed is ejected from the cache if it has
+ * not been accessed for five minutes.
+ */
+
+@SuppressWarnings("synthetic-access") public final class FeedLoader
+  implements FeedLoaderType, ExpirationListener<URI, FeedType>
 {
-  private static final class ImmediateFuture<T> implements Future<T>
-  {
-    private final T value;
-
-    private ImmediateFuture(
-      final T in_value)
-    {
-      this.value = NullCheck.notNull(in_value);
-    }
-
-    @Override public boolean cancel(
-      final boolean x)
-    {
-      return false;
-    }
-
-    @Override public T get()
-      throws InterruptedException,
-        ExecutionException
-    {
-      return this.value;
-    }
-
-    @Override public T get(
-      final long time,
-      final @Nullable TimeUnit time_unit)
-      throws InterruptedException,
-        ExecutionException,
-        TimeoutException
-    {
-      return this.value;
-    }
-
-    @Override public boolean isCancelled()
-    {
-      return false;
-    }
-
-    @Override public boolean isDone()
-    {
-      return true;
-    }
-  }
-
   private static final Logger LOG;
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(FeedLoader.class));
+  }
+
+  private final ExpiringMap<URI, FeedType> cache;
+  private final ExecutorService            exec;
+  private final OPDSFeedParserType         parser;
+  private final OPDSSearchParserType       search_parser;
+  private final OPDSFeedTransportType      transport;
+
+  private FeedLoader(
+    final ExecutorService in_exec,
+    final OPDSFeedParserType in_parser,
+    final OPDSFeedTransportType in_transport,
+    final OPDSSearchParserType in_search_parser,
+    final ExpiringMap<URI, FeedType> in_m)
+  {
+    this.exec = NullCheck.notNull(in_exec);
+    this.parser = NullCheck.notNull(in_parser);
+    this.search_parser = NullCheck.notNull(in_search_parser);
+    this.transport = NullCheck.notNull(in_transport);
+    this.cache = NullCheck.notNull(in_m);
+    this.cache.addExpirationListener(this);
   }
 
   private static void callErrorListener(
@@ -110,6 +91,17 @@ import com.io7m.jnull.Nullable;
     }
   }
 
+  /**
+   * Construct a new feed loader.
+   *
+   * @param in_exec          An executor
+   * @param in_parser        A feed parser
+   * @param in_transport     A feed transport
+   * @param in_search_parser A search document parser
+   *
+   * @return A new feed loader
+   */
+
   public static FeedLoaderType newFeedLoader(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
@@ -118,15 +110,23 @@ import com.io7m.jnull.Nullable;
   {
     final Builder<Object, Object> b = ExpiringMap.builder();
     b.expirationPolicy(ExpirationPolicy.ACCESSED);
-    b.expiration(5, TimeUnit.MINUTES);
+    b.expiration(5L, TimeUnit.MINUTES);
     final ExpiringMap<URI, FeedType> m = b.build();
     return FeedLoader.newFeedLoaderFromExpiringMap(
-      in_exec,
-      in_parser,
-      in_transport,
-      in_search_parser,
-      NullCheck.notNull(m));
+      in_exec, in_parser, in_transport, in_search_parser, NullCheck.notNull(m));
   }
+
+  /**
+   * Construct a feed loader from an existing map.
+   *
+   * @param in_exec          An executor
+   * @param in_parser        A feed parser
+   * @param in_transport     A feed transport
+   * @param in_search_parser A search document parser
+   * @param m                A map
+   *
+   * @return A new feed loader
+   */
 
   public static FeedLoaderType newFeedLoaderFromExpiringMap(
     final ExecutorService in_exec,
@@ -136,48 +136,24 @@ import com.io7m.jnull.Nullable;
     final ExpiringMap<URI, FeedType> m)
   {
     return new FeedLoader(
-      in_exec,
-      in_parser,
-      in_transport,
-      in_search_parser,
-      m);
+      in_exec, in_parser, in_transport, in_search_parser, m);
   }
 
-  private final ExpiringMap<URI, FeedType> cache;
-
-  private final ExecutorService            exec;
-
-  private final OPDSFeedParserType         parser;
-
-  private final OPDSSearchParserType       search_parser;
-  private final OPDSFeedTransportType      transport;
-  private FeedLoader(
-    final ExecutorService in_exec,
-    final OPDSFeedParserType in_parser,
-    final OPDSFeedTransportType in_transport,
-    final OPDSSearchParserType in_search_parser,
-    final ExpiringMap<URI, FeedType> in_m)
-  {
-    this.exec = NullCheck.notNull(in_exec);
-    this.parser = NullCheck.notNull(in_parser);
-    this.search_parser = NullCheck.notNull(in_search_parser);
-    this.transport = NullCheck.notNull(in_transport);
-    this.cache = NullCheck.notNull(in_m);
-    this.cache.addExpirationListener(this);
-  }
   @Override public void expired(
     final @Nullable URI key,
     final @Nullable FeedType value)
   {
     FeedLoader.LOG.debug("expired: {}", key);
   }
+
   private Future<Unit> fetch(
     final URI uri,
     final FeedLoaderListenerType listener)
   {
     FeedLoader.LOG.debug("not cached, fetching: {}", uri);
 
-    final Callable<Unit> c = new Callable<Unit>() {
+    final Callable<Unit> c = new Callable<Unit>()
+    {
       @Override public Unit call()
       {
         try {
@@ -272,6 +248,47 @@ import com.io7m.jnull.Nullable;
       return Feeds.fromAcquisitionFeed(parsed, none);
     } finally {
       s.close();
+    }
+  }
+
+  private static final class ImmediateFuture<T> implements Future<T>
+  {
+    private final T value;
+
+    private ImmediateFuture(
+      final T in_value)
+    {
+      this.value = NullCheck.notNull(in_value);
+    }
+
+    @Override public boolean cancel(
+      final boolean x)
+    {
+      return false;
+    }
+
+    @Override public T get()
+      throws InterruptedException, ExecutionException
+    {
+      return this.value;
+    }
+
+    @Override public T get(
+      final long time,
+      final @Nullable TimeUnit time_unit)
+      throws InterruptedException, ExecutionException, TimeoutException
+    {
+      return this.value;
+    }
+
+    @Override public boolean isCancelled()
+    {
+      return false;
+    }
+
+    @Override public boolean isDone()
+    {
+      return true;
     }
   }
 }

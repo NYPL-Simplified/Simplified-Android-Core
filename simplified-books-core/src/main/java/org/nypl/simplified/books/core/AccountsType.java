@@ -14,6 +14,8 @@ public interface AccountsType
 
   /**
    * Get login details delivering them to the given listener immediately.
+   *
+   * @param listener The listener
    */
 
   void accountGetCachedLoginDetails(
@@ -21,6 +23,8 @@ public interface AccountsType
 
   /**
    * Start loading books, delivering results to the given <tt>listener</tt>.
+   *
+   * @param listener The listener
    */
 
   void accountLoadBooks(
@@ -28,6 +32,10 @@ public interface AccountsType
 
   /**
    * Log in, delivering results to the given <tt>listener</tt>.
+   *
+   * @param barcode  The barcode
+   * @param pin      The PIN
+   * @param listener The listener
    */
 
   void accountLogin(
@@ -37,6 +45,8 @@ public interface AccountsType
 
   /**
    * Log out, delivering results to the given <tt>listener</tt>.
+   *
+   * @param listener The listener
    */
 
   void accountLogout(
@@ -44,6 +54,8 @@ public interface AccountsType
 
   /**
    * Sync books, delivering results to the given <tt>listener</tt>.
+   *
+   * @param listener The listener
    */
 
   void accountSync(

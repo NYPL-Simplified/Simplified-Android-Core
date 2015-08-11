@@ -1,9 +1,9 @@
 package org.nypl.simplified.books.core;
 
-import java.util.Calendar;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+
+import java.util.Calendar;
 
 /**
  * The given book is downloaded and available for reading.
@@ -13,6 +13,13 @@ public final class BookStatusDownloaded implements BookStatusDownloadedType
 {
   private final BookID               id;
   private final OptionType<Calendar> loan_end_date;
+
+  /**
+   * Construct a status value.
+   *
+   * @param in_id            The book ID
+   * @param in_loan_end_date The expiry date of the loan, if any
+   */
 
   public BookStatusDownloaded(
     final BookID in_id,
@@ -53,7 +60,7 @@ public final class BookStatusDownloaded implements BookStatusDownloadedType
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(64);
     b.append("[BookStatusDownloaded ");
     b.append(this.id);
     b.append("]");

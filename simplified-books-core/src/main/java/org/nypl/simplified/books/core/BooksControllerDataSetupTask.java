@@ -23,8 +23,7 @@ final class BooksControllerDataSetupTask implements Runnable
       this.listener.onAccountDataSetupSuccess();
     } catch (final Throwable x) {
       this.listener.onAccountDataSetupFailure(
-        Option.some(x),
-        NullCheck.notNull(x.getMessage()));
+        Option.some(x), NullCheck.notNull(x.getMessage()));
     }
   }
 }

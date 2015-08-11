@@ -1,15 +1,9 @@
 package org.nypl.simplified.downloader.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
@@ -19,10 +13,15 @@ import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.slf4j.Logger;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * A function to follow redirects and make some attempt to correctly handle
@@ -59,7 +58,7 @@ import com.io7m.jnull.NullCheck;
     this.max_redirects = in_max_redirects;
     this.cur_redirects = 0;
     this.byte_offset = in_byte_offset;
-    this.tried_auth = new HashSet<URI>();
+    this.tried_auth = new HashSet<URI>(32);
   }
 
   private abstract static class DownloadErrorFlattener<A, B> implements

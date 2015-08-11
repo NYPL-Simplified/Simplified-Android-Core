@@ -73,13 +73,6 @@
         <processorPath useClasspath="true" />
         <module name="simplified-http-tests-junit4" />
       </profile>
-      <profile default="false" name="Annotation profile for simplified-tenprint" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="true" />
-        <module name="simplified-tenprint" />
-      </profile>
       <profile default="false" name="Annotation profile for simplified-stack" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
@@ -202,12 +195,26 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
       </profile>
-      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+      <profile default="false" name="Annotation profile for simplified-checkstyle" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="simplified-checkstyle" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-tenprint" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-tenprint" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-files-tests" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-files-tests" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -226,10 +233,11 @@
       <module name="simplified-books-tests" target="1.6" />
       <module name="simplified-books-tests-android" target="1.6" />
       <module name="simplified-books-tests-junit4" target="1.6" />
-      <module name="simplified-checkstyle" target="1.5" />
+      <module name="simplified-checkstyle" target="1.6" />
       <module name="simplified-documentation" target="1.6" />
       <module name="simplified-downloader-core" target="1.6" />
       <module name="simplified-files" target="1.6" />
+      <module name="simplified-files-tests" target="1.6" />
       <module name="simplified-files-tests-android" target="1.6" />
       <module name="simplified-files-tests-junit4" target="1.6" />
       <module name="simplified-http-core" target="1.6" />

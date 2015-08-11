@@ -17,8 +17,8 @@ import java.net.URI;
 public interface OPDSFeedParserType
 {
   /**
-   * Parse the feed associated with the given stream <code>s</code>. The feed
-   * is assumed to exist at <code>uri</code>.
+   * Parse the feed associated with the given stream {@code s}. The feed
+   * is assumed to exist at {@code uri}.
    *
    * @param uri
    *          The URI of the feed

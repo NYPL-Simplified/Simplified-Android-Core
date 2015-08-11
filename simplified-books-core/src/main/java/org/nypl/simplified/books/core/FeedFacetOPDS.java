@@ -1,13 +1,22 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.opds.core.OPDSFacet;
 
-import com.io7m.jnull.NullCheck;
+/**
+ * A facet taken from an OPDS feed.
+ */
 
 public final class FeedFacetOPDS implements FeedFacetType
 {
   private static final long serialVersionUID = 1L;
-  private final OPDSFacet   facet;
+  private final OPDSFacet facet;
+
+  /**
+   * Construct an OPDS facet.
+   *
+   * @param in_facet The actual OPDS facet
+   */
 
   public FeedFacetOPDS(
     final OPDSFacet in_facet)
@@ -24,6 +33,10 @@ public final class FeedFacetOPDS implements FeedFacetType
   {
     return this.facet.isActive();
   }
+
+  /**
+   * @return The actual OPDS facet
+   */
 
   public OPDSFacet getOPDSFacet()
   {

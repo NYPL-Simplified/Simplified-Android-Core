@@ -9,6 +9,12 @@ public abstract class AccountAuthenticationError extends Exception
 {
   private static final long serialVersionUID = 1L;
 
+  /**
+   * Construct an exception.
+   *
+   * @param message The exception message
+   */
+
   public AccountAuthenticationError(
     final String message)
   {

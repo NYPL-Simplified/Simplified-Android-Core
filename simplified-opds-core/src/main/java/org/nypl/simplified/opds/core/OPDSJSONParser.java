@@ -1,14 +1,5 @@
 package org.nypl.simplified.opds.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.text.ParseException;
-import java.util.Calendar;
-
-import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,14 +12,27 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.util.Calendar;
 
 /**
  * The default implementation of the {@link OPDSJSONParserType} interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class OPDSJSONParser implements
-  OPDSJSONParserType
+@SuppressWarnings("synthetic-access") public final class OPDSJSONParser
+  implements OPDSJSONParserType
 {
+  private OPDSJSONParser()
+  {
+    // Nothing
+  }
+
   private static ObjectNode checkObject(
     final @Nullable String key,
     final JsonNode n)
@@ -42,9 +46,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       case NULL:
       case NUMBER:
       case POJO:
-      case STRING:
-      {
-        final StringBuilder sb = new StringBuilder();
+      case STRING: {
+        final StringBuilder sb = new StringBuilder(128);
         if (key != null) {
           sb.append("Expected: A key '");
           sb.append(key);
@@ -62,8 +65,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         final String m = NullCheck.notNull(sb.toString());
         throw new OPDSParseException(m);
       }
-      case OBJECT:
-      {
+      case OBJECT: {
         return (ObjectNode) n;
       }
     }
@@ -78,8 +80,7 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     final JsonNode n = OPDSJSONParser.getNode(s, key);
     switch (n.getNodeType()) {
-      case ARRAY:
-      {
+      case ARRAY: {
         return (ArrayNode) n;
       }
       case BINARY:
@@ -89,9 +90,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       case NUMBER:
       case POJO:
       case STRING:
-      case OBJECT:
-      {
-        final StringBuilder sb = new StringBuilder();
+      case OBJECT: {
+        final StringBuilder sb = new StringBuilder(128);
         sb.append("Expected: A key '");
         sb.append(key);
         sb.append("' with a value of type Array\n");
@@ -120,9 +120,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       case OBJECT:
       case POJO:
       case STRING:
-      case NUMBER:
-      {
-        final StringBuilder sb = new StringBuilder();
+      case NUMBER: {
+        final StringBuilder sb = new StringBuilder(128);
         sb.append("Expected: A key '");
         sb.append(key);
         sb.append("' with a value of type Boolean\n");
@@ -132,8 +131,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         final String m = NullCheck.notNull(sb.toString());
         throw new OPDSParseException(m);
       }
-      case BOOLEAN:
-      {
+      case BOOLEAN: {
         return v.asBoolean();
       }
     }
@@ -155,9 +153,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       case NULL:
       case OBJECT:
       case POJO:
-      case STRING:
-      {
-        final StringBuilder sb = new StringBuilder();
+      case STRING: {
+        final StringBuilder sb = new StringBuilder(128);
         sb.append("Expected: A key '");
         sb.append(key);
         sb.append("' with a value of type Integer\n");
@@ -167,8 +164,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         final String m = NullCheck.notNull(sb.toString());
         throw new OPDSParseException(m);
       }
-      case NUMBER:
-      {
+      case NUMBER: {
         return v.asInt();
       }
     }
@@ -187,7 +183,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       return NullCheck.notNull(s.get(key));
     }
 
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(128);
     sb.append("Expected: A key '");
     sb.append(key);
     sb.append("'\n");
@@ -230,9 +226,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       case NULL:
       case NUMBER:
       case OBJECT:
-      case POJO:
-      {
-        final StringBuilder sb = new StringBuilder();
+      case POJO: {
+        final StringBuilder sb = new StringBuilder(128);
         sb.append("Expected: A key '");
         sb.append(key);
         sb.append("' with a value of type String\n");
@@ -242,8 +237,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         final String m = NullCheck.notNull(sb.toString());
         throw new OPDSParseException(m);
       }
-      case STRING:
-      {
+      case STRING: {
         return NullCheck.notNull(v.asText());
       }
     }
@@ -268,14 +262,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     throws OPDSParseException
   {
     try {
-      return OPDSRFC3339Formatter.parseRFC3339Date(OPDSJSONParser.getString(
-        s,
-        key));
+      return OPDSRFC3339Formatter.parseRFC3339Date(
+        OPDSJSONParser.getString(
+          s, key));
     } catch (final ParseException e) {
-      final String m =
-        NullCheck.notNull(String.format(
-          "Could not parse RFC3999 date for key '%s'",
-          key));
+      final String m = NullCheck.notNull(
+        String.format(
+          "Could not parse RFC3999 date for key '%s'", key));
       throw new OPDSParseException(m, e);
     }
   }
@@ -290,6 +283,10 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
     return Option.none();
   }
+
+  /**
+   * @return A new JSON parser
+   */
 
   public static OPDSJSONParserType newParser()
   {
@@ -353,11 +350,6 @@ import com.io7m.junreachable.UnreachableCodeException;
     return new OPDSCategory(in_term, in_scheme);
   }
 
-  private OPDSJSONParser()
-  {
-    // Nothing
-  }
-
   @Override public OPDSAcquisitionFeed parseAcquisitionFeed(
     final ObjectNode s)
     throws OPDSParseException
@@ -373,10 +365,10 @@ import com.io7m.junreachable.UnreachableCodeException;
       final OPDSAcquisitionFeedBuilderType fb =
         OPDSAcquisitionFeed.newBuilder(in_uri, in_id, in_updated, in_title);
 
-      fb.setNextOption(OPDSJSONParser
-        .getStringOptional(s, "next")
-        .mapPartial(
-          new PartialFunctionType<String, URI, URISyntaxException>() {
+      fb.setNextOption(
+        OPDSJSONParser.getStringOptional(s, "next").mapPartial(
+          new PartialFunctionType<String, URI, URISyntaxException>()
+          {
             @Override public URI call(
               final String u)
               throws URISyntaxException
@@ -385,51 +377,46 @@ import com.io7m.junreachable.UnreachableCodeException;
             }
           }));
 
-      fb
-        .setSearchOption(OPDSJSONParser
-          .getObjectOptional(s, "search")
-          .mapPartial(
-            new PartialFunctionType<ObjectNode, OPDSSearchLink, OPDSParseException>() {
-              @Override public OPDSSearchLink call(
-                final ObjectNode o)
-                throws OPDSParseException
-              {
-                try {
-                  final String in_search_type =
-                    OPDSJSONParser.getString(o, "type");
-                  final URI in_search_uri =
-                    new URI(OPDSJSONParser.getString(o, "uri"));
-                  return new OPDSSearchLink(in_search_type, in_search_uri);
-                } catch (final URISyntaxException e) {
-                  throw new OPDSParseException(e);
-                }
+      fb.setSearchOption(
+        OPDSJSONParser.getObjectOptional(s, "search").mapPartial(
+          new PartialFunctionType<ObjectNode, OPDSSearchLink,
+            OPDSParseException>()
+          {
+            @Override public OPDSSearchLink call(
+              final ObjectNode o)
+              throws OPDSParseException
+            {
+              try {
+                final String in_search_type =
+                  OPDSJSONParser.getString(o, "type");
+                final URI in_search_uri =
+                  new URI(OPDSJSONParser.getString(o, "uri"));
+                return new OPDSSearchLink(in_search_type, in_search_uri);
+              } catch (final URISyntaxException e) {
+                throw new OPDSParseException(e);
               }
-            }));
+            }
+          }));
 
       {
         final ArrayNode fs = OPDSJSONParser.getArray(s, "facets");
         for (int index = 0; index < fs.size(); ++index) {
-          final ObjectNode o =
-            OPDSJSONParser.checkObject(null, fs.get(index));
+          final ObjectNode o = OPDSJSONParser.checkObject(null, fs.get(index));
           final boolean in_facet_active =
             OPDSJSONParser.getBoolean(o, "active");
-          final URI in_facet_uri =
-            new URI(OPDSJSONParser.getString(o, "uri"));
+          final URI in_facet_uri = new URI(OPDSJSONParser.getString(o, "uri"));
           final String in_facet_group = OPDSJSONParser.getString(o, "group");
           final String in_facet_title = OPDSJSONParser.getString(o, "title");
-          fb.addFacet(new OPDSFacet(
-            in_facet_active,
-            in_facet_uri,
-            in_facet_group,
-            in_facet_title));
+          fb.addFacet(
+            new OPDSFacet(
+              in_facet_active, in_facet_uri, in_facet_group, in_facet_title));
         }
       }
 
       {
         final ArrayNode fs = OPDSJSONParser.getArray(s, "entries");
         for (int index = 0; index < fs.size(); ++index) {
-          final ObjectNode o =
-            OPDSJSONParser.checkObject(null, fs.get(index));
+          final ObjectNode o = OPDSJSONParser.checkObject(null, fs.get(index));
           fb.addEntry(this.parseAcquisitionFeedEntry(o));
         }
       }
@@ -451,16 +438,13 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Calendar in_updated = OPDSJSONParser.getTimestamp(s, "updated");
 
     final OPDSAvailabilityType in_availability =
-      OPDSJSONParser.parseAvailability(OPDSJSONParser.getObject(
-        s,
-        "availability"));
+      OPDSJSONParser.parseAvailability(
+        OPDSJSONParser.getObject(
+          s, "availability"));
 
     final OPDSAcquisitionFeedEntryBuilderType fb =
       OPDSAcquisitionFeedEntry.newBuilder(
-        in_id,
-        in_title,
-        in_updated,
-        in_availability);
+        in_id, in_title, in_updated, in_availability);
 
     {
       final ArrayNode a = OPDSJSONParser.getArray(s, "authors");
@@ -472,8 +456,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     {
       final ArrayNode a = OPDSJSONParser.getArray(s, "acquisitions");
       for (int index = 0; index < a.size(); ++index) {
-        fb.addAcquisition(OPDSJSONParser.parseAcquisition(OPDSJSONParser
-          .checkObject(null, a.get(index))));
+        fb.addAcquisition(
+          OPDSJSONParser.parseAcquisition(
+            OPDSJSONParser.checkObject(null, a.get(index))));
       }
     }
 
@@ -488,8 +473,7 @@ import com.io7m.junreachable.UnreachableCodeException;
       final ArrayNode a = OPDSJSONParser.getArray(s, "groups");
       for (int index = 0; index < a.size(); ++index) {
         try {
-          final ObjectNode jo =
-            OPDSJSONParser.checkObject(null, a.get(index));
+          final ObjectNode jo = OPDSJSONParser.checkObject(null, a.get(index));
           final URI in_uri = new URI(OPDSJSONParser.getString(jo, "uri"));
           final String in_name = OPDSJSONParser.getString(jo, "name");
           fb.addGroup(in_uri, in_name);
@@ -500,10 +484,10 @@ import com.io7m.junreachable.UnreachableCodeException;
     }
 
     {
-      final OptionType<String> o =
-        OPDSJSONParser.getStringOptional(s, "cover");
-      o
-        .mapPartial(new PartialFunctionType<String, Unit, OPDSParseException>() {
+      final OptionType<String> o = OPDSJSONParser.getStringOptional(s, "cover");
+      o.mapPartial(
+        new PartialFunctionType<String, Unit, OPDSParseException>()
+        {
           @Override public Unit call(
             final String u)
             throws OPDSParseException
@@ -521,8 +505,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     {
       final OptionType<String> o =
         OPDSJSONParser.getStringOptional(s, "thumbnail");
-      o
-        .mapPartial(new PartialFunctionType<String, Unit, OPDSParseException>() {
+      o.mapPartial(
+        new PartialFunctionType<String, Unit, OPDSParseException>()
+        {
           @Override public Unit call(
             final String u)
             throws OPDSParseException
@@ -537,24 +522,21 @@ import com.io7m.junreachable.UnreachableCodeException;
         });
     }
 
-    fb
-      .setPublishedOption(OPDSJSONParser.getTimestampOptional(s, "published"));
+    fb.setPublishedOption(OPDSJSONParser.getTimestampOptional(s, "published"));
     fb.setPublisherOption(OPDSJSONParser.getStringOptional(s, "publisher"));
     fb.setSummaryOption(OPDSJSONParser.getStringOptional(s, "summary"));
     return fb.build();
   }
 
-  @Override public
-    OPDSAcquisitionFeedEntry
-    parseAcquisitionFeedEntryFromStream(
-      final InputStream s)
-      throws OPDSParseException
+  @Override public OPDSAcquisitionFeedEntry parseAcquisitionFeedEntryFromStream(
+    final InputStream s)
+    throws OPDSParseException
   {
     try {
       final ObjectMapper jom = new ObjectMapper();
-      return this.parseAcquisitionFeedEntry(OPDSJSONParser.checkObject(
-        null,
-        jom.readTree(s)));
+      return this.parseAcquisitionFeedEntry(
+        OPDSJSONParser.checkObject(
+          null, jom.readTree(s)));
     } catch (final JsonProcessingException e) {
       throw new OPDSParseException(e);
     } catch (final IOException e) {
@@ -568,9 +550,9 @@ import com.io7m.junreachable.UnreachableCodeException;
   {
     try {
       final ObjectMapper jom = new ObjectMapper();
-      return this.parseAcquisitionFeed(OPDSJSONParser.checkObject(
-        null,
-        jom.readTree(s)));
+      return this.parseAcquisitionFeed(
+        OPDSJSONParser.checkObject(
+          null, jom.readTree(s)));
     } catch (final JsonProcessingException e) {
       throw new OPDSParseException(e);
     } catch (final IOException e) {

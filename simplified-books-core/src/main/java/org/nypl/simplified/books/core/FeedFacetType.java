@@ -23,11 +23,13 @@ public interface FeedFacetType extends Serializable
   /**
    * Match the type of feed facet.
    *
-   * @param m
-   *          The matcher
+   * @param m   The matcher
+   * @param <A> The type of returned values
+   * @param <E> The type of raised exceptions
+   *
    * @return The value returned by the matcher
-   * @throws E
-   *           If the matcher raises <tt>E</tt>
+   *
+   * @throws E If the matcher raises <tt>E</tt>
    */
 
   <A, E extends Exception> A matchFeedFacet(

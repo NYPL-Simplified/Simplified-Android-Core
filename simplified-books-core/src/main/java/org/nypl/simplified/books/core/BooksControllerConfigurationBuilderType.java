@@ -17,6 +17,8 @@ public interface BooksControllerConfigurationBuilderType
 
   /**
    * Set the book database directory.
+   *
+   * @param directory The directory
    */
 
   void setDirectory(
@@ -24,6 +26,8 @@ public interface BooksControllerConfigurationBuilderType
 
   /**
    * Set the loans URI.
+   *
+   * @param uri The loans URI
    */
 
   void setLoansURI(

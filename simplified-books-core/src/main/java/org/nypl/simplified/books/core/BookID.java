@@ -1,13 +1,12 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 
 /**
  * The unique identifier for a given book on disk. This is typically a SHA256
@@ -18,12 +17,35 @@ import com.io7m.jnull.Nullable;
 public final class BookID implements Serializable
 {
   private static final long serialVersionUID = 1L;
+  private final String id;
+
+  private BookID(
+    final String in_id)
+  {
+    this.id = NullCheck.notNull(in_id);
+  }
+
+  /**
+   * Create a book ID consisting of the given string.
+   *
+   * @param id The string
+   *
+   * @return A new book ID
+   */
 
   public static BookID exactString(
     final String id)
   {
     return new BookID(id);
   }
+
+  /**
+   * Construct a book ID derived from the hash of the given text.
+   *
+   * @param text The text
+   *
+   * @return A new book ID
+   */
 
   public static BookID newFromText(
     final String text)
@@ -33,7 +55,7 @@ public final class BookID implements Serializable
       md.update(text.getBytes());
       final byte[] dg = md.digest();
 
-      final StringBuilder b = new StringBuilder();
+      final StringBuilder b = new StringBuilder(64);
       for (int index = 0; index < dg.length; ++index) {
         final Byte bb = Byte.valueOf(dg[index]);
         b.append(String.format("%02x", bb));
@@ -45,19 +67,19 @@ public final class BookID implements Serializable
     }
   }
 
+  /**
+   * Calculate a book ID from the given acquisition feed entry.
+   *
+   * @param e The entry
+   *
+   * @return A new book ID
+   */
+
   public static BookID newIDFromEntry(
     final OPDSAcquisitionFeedEntry e)
   {
     NullCheck.notNull(e);
     return BookID.newFromText(e.getID());
-  }
-
-  private final String id;
-
-  private BookID(
-    final String in_id)
-  {
-    this.id = NullCheck.notNull(in_id);
   }
 
   @Override public boolean equals(

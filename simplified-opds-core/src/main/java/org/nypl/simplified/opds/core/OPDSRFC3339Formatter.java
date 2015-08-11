@@ -1,13 +1,13 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Parser for RFC3339 dates.
@@ -15,14 +15,33 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class OPDSRFC3339Formatter
 {
+  private OPDSRFC3339Formatter()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * @return A new RFC3339 date formatter
+   */
+
   public static SimpleDateFormat newDateFormatter()
   {
     return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
   }
 
+  /**
+   * Parse the given timestamp to an RFC3339 date in the UTC timezone.
+   *
+   * @param text The timestamp
+   *
+   * @return A parsed date
+   *
+   * @throws ParseException On parse errors
+   */
+
   public static Calendar parseRFC3339Date(
     final String text)
-      throws ParseException
+    throws ParseException
   {
     NullCheck.notNull(text);
 
@@ -56,13 +75,11 @@ public final class OPDSRFC3339Formatter
      */
 
     String post = text.substring(text.lastIndexOf('-'));
-    post =
-      post.substring(0, post.indexOf(':'))
-      + post.substring(post.indexOf(':') + 1);
+    post = post.substring(0, post.indexOf(':')) + post.substring(
+      post.indexOf(':') + 1);
 
     final String new_date = pre + post;
-    final SimpleDateFormat df0 =
-      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    final SimpleDateFormat df0 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     df0.setTimeZone(utc);
     try {
       d = df0.parse(new_date);
@@ -83,10 +100,5 @@ public final class OPDSRFC3339Formatter
     final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
     cal.setTime(d);
     return cal;
-  }
-
-  private OPDSRFC3339Formatter()
-  {
-    throw new UnreachableCodeException();
   }
 }

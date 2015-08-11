@@ -8,6 +8,8 @@ public interface BookFeedListenerType
 {
   /**
    * Generating the feed failed.
+   *
+   * @param x The exception raised
    */
 
   void onBookFeedFailure(
@@ -15,6 +17,8 @@ public interface BookFeedListenerType
 
   /**
    * Generating the feed succeeded.
+   *
+   * @param f The feed
    */
 
   void onBookFeedSuccess(

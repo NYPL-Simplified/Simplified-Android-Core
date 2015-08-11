@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -23,7 +23,7 @@
       <artifactId>simplified-assert</artifactId>
       <version>${project.version}</version>
     </dependency>
-  
+
     <dependency>
       <groupId>com.io7m.jnull</groupId>
       <artifactId>io7m-jnull-core</artifactId>
@@ -48,53 +48,54 @@
 
   <build>
     <plugins>
+      <!-- Check style -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.5</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>2.7</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.4</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
-      </plugin>
-
-      <!-- Require JDK >= 1.6 -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.15</version>
+        <dependencies>
+          <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>simplified-checkstyle</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <configuration>
+              <configLocation>org/nypl/simplified/checkstyle/checkstyle.xml
+              </configLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <!-- Produce custom manifest in jar files -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
+        <version>2.6</version>
         <configuration>
           <archive>
             <manifestEntries>
               <Specification-Title>${project.name}</Specification-Title>
-              <Specification-Version>${project.version}</Specification-Version>
+              <Specification-Version>${project.version}
+              </Specification-Version>
               <Specification-Vendor>NYPL Labs</Specification-Vendor>
               <Implementation-Title>${project.name}</Implementation-Title>
-              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Version>${project.version}
+              </Implementation-Version>
               <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+              <Implementation-Vendor-Id>${project.groupId}
+              </Implementation-Vendor-Id>
               <Built-By>NYPL Labs</Built-By>
               <Sealed>true</Sealed>
             </manifestEntries>
@@ -106,7 +107,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -118,12 +119,15 @@
               <archive>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Version>${project.version}
+                  </Specification-Version>
                   <Specification-Vendor>NYPL Labs</Specification-Vendor>
                   <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Version>${project.version}
+                  </Implementation-Version>
                   <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Implementation-Vendor-Id>${project.groupId}
+                  </Implementation-Vendor-Id>
                   <Built-By>NYPL Labs</Built-By>
                 </manifestEntries>
               </archive>
@@ -136,7 +140,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
+        <version>2.10.3</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -145,16 +149,20 @@
               <goal>jar</goal>
             </goals>
             <configuration>
-              <bottom><![CDATA[Copyright &#169; {currentYear} &lt;NYPL Labs&gt; http://labs.nypl.org]]></bottom>
+              <bottom>
+                <![CDATA[Copyright &#169; {currentYear} &lt;NYPL Labs&gt; http://labs.nypl.org]]></bottom>
               <archive>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Version>${project.version}
+                  </Specification-Version>
                   <Specification-Vendor>NYPL Labs</Specification-Vendor>
                   <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Version>${project.version}
+                  </Implementation-Version>
                   <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Implementation-Vendor-Id>${project.groupId}
+                  </Implementation-Vendor-Id>
                   <Built-By>NYPL Labs</Built-By>
                 </manifestEntries>
               </archive>
@@ -163,15 +171,6 @@
         </executions>
       </plugin>
     </plugins>
-
-    <!-- Allow deployment over ssh -->
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh-external</artifactId>
-        <version>2.2</version>
-      </extension>
-    </extensions>
   </build>
 
 </project>

@@ -1,13 +1,12 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.nypl.simplified.files.DirectoryUtilities;
-
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.files.DirectoryUtilities;
+
+import java.io.File;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class BooksControllerLogoutTask implements Runnable
 {
@@ -41,8 +40,7 @@ final class BooksControllerLogoutTask implements Runnable
       this.listener.onAccountLogoutSuccess();
     } catch (final Throwable e) {
       this.listener.onAccountLogoutFailure(
-        Option.some(e),
-        NullCheck.notNull(e.getMessage()));
+        Option.some(e), NullCheck.notNull(e.getMessage()));
     }
   }
 }

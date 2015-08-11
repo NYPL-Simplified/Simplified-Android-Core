@@ -11,6 +11,13 @@ public final class BookStatusHeld implements BookStatusType
   private final BookID id;
   private final int    queue_position;
 
+  /**
+   * Construct a status value.
+   *
+   * @param in_id             The book ID
+   * @param in_queue_position The current position of the user in the queue
+   */
+
   public BookStatusHeld(
     final BookID in_id,
     final int in_queue_position)
@@ -29,6 +36,10 @@ public final class BookStatusHeld implements BookStatusType
     return BookStatusPriorityOrdering.BOOK_STATUS_HELD;
   }
 
+  /**
+   * @return The current position of the user in the queue
+   */
+
   public int getQueuePosition()
   {
     return this.queue_position;
@@ -43,7 +54,7 @@ public final class BookStatusHeld implements BookStatusType
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusHeld ");
     b.append(this.id);
     b.append(" ");

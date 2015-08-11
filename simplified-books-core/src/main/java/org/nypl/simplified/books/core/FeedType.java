@@ -1,9 +1,17 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.OptionType;
+
 import java.net.URI;
 import java.util.Calendar;
 
-import com.io7m.jfunctional.OptionType;
+/**
+ * The type of mutable feeds.
+ *
+ * This provides an abstraction over parsed OPDS feeds, and locally generated
+ * feeds from book databases. The user can match on the values using {@link
+ * #matchFeed(FeedMatcherType)} to determine the real type of the feed.
+ */
 
 public interface FeedType
 {
@@ -40,11 +48,13 @@ public interface FeedType
   /**
    * Match the type of feed.
    *
-   * @param m
-   *          The matcher
+   * @param m   The matcher
+   * @param <A> The type of returned values
+   * @param <E> The type of raised exceptions
+   *
    * @return The value returned by the matcher
-   * @throws E
-   *           If the matcher raises <tt>E</tt>
+   *
+   * @throws E If the matcher raises {@code E}
    */
 
   <A, E extends Exception> A matchFeed(

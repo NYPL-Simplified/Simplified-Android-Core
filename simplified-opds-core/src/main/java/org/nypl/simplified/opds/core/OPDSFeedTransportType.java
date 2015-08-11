@@ -7,13 +7,21 @@ import java.net.URI;
 /**
  * A mapping from {@link URI} to {@link InputStream}.
  *
- * Mostly included to facilitate unit testing without needing an HTTP server
- * to exist.
+ * Mostly included to facilitate unit testing without needing an HTTP server to
+ * exist.
  */
 
 public interface OPDSFeedTransportType
 {
+  /**
+   * @param uri The URI
+   *
+   * @return An input stream for the given URI.
+   *
+   * @throws IOException On I/O errors
+   */
+
   InputStream getStream(
     final URI uri)
-      throws IOException;
+    throws IOException;
 }

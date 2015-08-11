@@ -14,6 +14,9 @@ public interface AccountGetCachedCredentialsListenerType
 
   /**
    * The account is logged in with the given credentials.
+   *
+   * @param barcode The current barcode
+   * @param pin     The current PIN
    */
 
   void onAccountIsLoggedIn(

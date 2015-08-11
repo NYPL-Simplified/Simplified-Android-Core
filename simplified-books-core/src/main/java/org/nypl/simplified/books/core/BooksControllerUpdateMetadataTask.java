@@ -1,23 +1,21 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
-
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
+import java.io.File;
 
 final class BooksControllerUpdateMetadataTask implements Runnable
 {
-  private static final Logger            LOG;
+  private static final Logger LOG;
 
   static {
-    LOG =
-      NullCheck.notNull(LoggerFactory
-        .getLogger(BooksControllerSyncTask.class));
+    LOG = NullCheck.notNull(
+      LoggerFactory.getLogger(BooksControllerSyncTask.class));
   }
 
   private final BookID                   book_id;
@@ -52,8 +50,7 @@ final class BooksControllerUpdateMetadataTask implements Runnable
       e.setCover(cover);
     } catch (final Throwable e) {
       BooksControllerUpdateMetadataTask.LOG.error(
-        "unable to update metadata: ",
-        e);
+        "unable to update metadata: ", e);
     }
   }
 }

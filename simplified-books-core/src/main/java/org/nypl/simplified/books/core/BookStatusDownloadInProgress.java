@@ -1,21 +1,30 @@
 package org.nypl.simplified.books.core;
 
-import java.util.Calendar;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+
+import java.util.Calendar;
 
 /**
  * The given book is currently downloading.
  */
 
-public final class BookStatusDownloadInProgress implements
-  BookStatusDownloadingType
+public final class BookStatusDownloadInProgress
+  implements BookStatusDownloadingType
 {
   private final long                 current_total;
   private final long                 expected_total;
   private final BookID               id;
   private final OptionType<Calendar> loan_end_date;
+
+  /**
+   * Construct a status value.
+   *
+   * @param in_id             The book ID
+   * @param in_current_total  The current number of bytes downloaded
+   * @param in_expected_total The expected total bytes
+   * @param in_loan_end_date  The end date of the loan, if any
+   */
 
   public BookStatusDownloadInProgress(
     final BookID in_id,
@@ -29,10 +38,18 @@ public final class BookStatusDownloadInProgress implements
     this.loan_end_date = NullCheck.notNull(in_loan_end_date);
   }
 
+  /**
+   * @return The current number of downloaded bytes
+   */
+
   public long getCurrentTotalBytes()
   {
     return this.current_total;
   }
+
+  /**
+   * @return The expected total bytes
+   */
 
   public long getExpectedTotalBytes()
   {
@@ -77,7 +94,7 @@ public final class BookStatusDownloadInProgress implements
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusDownloadInProgress ");
     b.append(this.id);
     b.append(" [");

@@ -33,6 +33,8 @@
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/r" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-archiver" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-status" />
+      <excludeFolder url="file://$MODULE_DIR$/target/screenshots" />
+      <excludeFolder url="file://$MODULE_DIR$/target/surefire-reports" />
     </content>
     <orderEntry type="jdk" jdkName="Maven Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -42,9 +44,9 @@
     <orderEntry type="module" module-name="simplified-assert" scope="PROVIDED" />
     <orderEntry type="module" module-name="simplified-files" scope="PROVIDED" />
     <orderEntry type="module" module-name="simplified-downloader-core" scope="PROVIDED" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jequality:io7m-jequality-core:1.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jequality:io7m-jequality-core:1.0.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.jodah:expiringmap:0.4.0" level="project" />
     <orderEntry type="module" module-name="simplified-http-core" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.iharder:base64:2.3.8" level="project" />
@@ -55,7 +57,7 @@
     <orderEntry type="module" module-name="simplified-stack" scope="PROVIDED" />
     <orderEntry type="module" module-name="simplified-tenprint" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-sdk-android-runtime:0.17.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-shared-js:0.17.0" level="project" />

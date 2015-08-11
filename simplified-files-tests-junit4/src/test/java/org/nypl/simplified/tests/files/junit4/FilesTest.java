@@ -13,15 +13,21 @@ public final class FilesTest implements FileLockingContractType
     this.contract = new FileLockingContract();
   }
 
-  @Override @Test public void testLocking0()
+  @Override @Test public void testLockingSimple()
     throws Exception
   {
-    this.contract.testLocking0();
+    this.contract.testLockingSimple();
   }
 
-  @Override @Test public void testLocking1()
+  @Override @Test public void testLockingSelf()
     throws Exception
   {
-    this.contract.testLocking1();
+    this.contract.testLockingSelf();
+  }
+
+  @Override public void testLockingOtherThread()
+    throws Exception
+  {
+    this.contract.testLockingOtherThread();
   }
 }

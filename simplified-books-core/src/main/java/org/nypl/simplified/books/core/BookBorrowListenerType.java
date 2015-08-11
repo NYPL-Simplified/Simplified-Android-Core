@@ -10,6 +10,9 @@ public interface BookBorrowListenerType
 {
   /**
    * Book borrowing failed.
+   *
+   * @param id The book ID
+   * @param e  The exception, if any
    */
 
   void onBookBorrowFailure(
@@ -18,6 +21,8 @@ public interface BookBorrowListenerType
 
   /**
    * Book borrowing succeeded.
+   *
+   * @param id The book ID
    */
 
   void onBookBorrowSuccess(

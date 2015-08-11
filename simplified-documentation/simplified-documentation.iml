@@ -13,7 +13,7 @@
     <orderEntry type="library" name="Maven: com.io7m.jstructural:io7m-jstructural-tools:4.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jstructural:io7m-jstructural-core:4.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jlog:io7m-jlog-core:3.1.0" level="project" />
-    <orderEntry type="library" name="Maven: com.io7m.jproperties:io7m-jproperties-core:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: com.io7m.jproperties:io7m-jproperties-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jranges:io7m-jranges-core:1.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jstructural:io7m-jstructural-xom:4.0.0" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jstructural:io7m-jstructural-schema:4.0.0" level="project" />
@@ -28,10 +28,10 @@
     <orderEntry type="module" module-name="simplified-http-core" />
     <orderEntry type="module" module-name="simplified-downloader-core" />
     <orderEntry type="module" module-name="simplified-opds-core" />
-    <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.0" level="project" />
-    <orderEntry type="library" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.0" level="project" />
-    <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.0" level="project" />
-    <orderEntry type="library" name="Maven: com.io7m.jequality:io7m-jequality-core:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: com.io7m.jequality:io7m-jequality-core:1.0.2" level="project" />
     <orderEntry type="library" name="Maven: net.jodah:expiringmap:0.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.12" level="project" />
     <orderEntry type="module" module-name="simplified-http-core" />

@@ -1,12 +1,12 @@
 package org.nypl.simplified.opds.core;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * The book is loaned out to the user.
@@ -15,14 +15,6 @@ import com.io7m.jnull.Nullable;
 public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
 {
   private static final long serialVersionUID = 1L;
-
-  public static OPDSAvailabilityLoaned get(
-    final Calendar in_start_date,
-    final OptionType<Calendar> in_end_date)
-  {
-    return new OPDSAvailabilityLoaned(in_start_date, in_end_date);
-  }
-
   private final OptionType<Calendar> end_date;
   private final Calendar             start_date;
 
@@ -32,6 +24,20 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
   {
     this.start_date = NullCheck.notNull(in_start_date);
     this.end_date = NullCheck.notNull(in_end_date);
+  }
+
+  /**
+   * @param in_start_date The start date for the loan
+   * @param in_end_date   The end date for the loan
+   *
+   * @return An availability value that states that the given book is loaned
+   */
+
+  public static OPDSAvailabilityLoaned get(
+    final Calendar in_start_date,
+    final OptionType<Calendar> in_end_date)
+  {
+    return new OPDSAvailabilityLoaned(in_start_date, in_end_date);
   }
 
   @Override public boolean equals(
@@ -48,13 +54,21 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
     }
     final OPDSAvailabilityLoaned other = (OPDSAvailabilityLoaned) obj;
     return this.end_date.equals(other.end_date)
-      && this.start_date.equals(other.start_date);
+           && this.start_date.equals(other.start_date);
   }
+
+  /**
+   * @return The end date for the loan, if any
+   */
 
   public OptionType<Calendar> getEndDate()
   {
     return this.end_date;
   }
+
+  /**
+   * @return The start date for the loan
+   */
 
   public Calendar getStartDate()
   {
@@ -80,15 +94,18 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
   @Override public String toString()
   {
     final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[OPDSAvailabilityLoaned end_date=");
-    b.append(this.end_date.map(new FunctionType<Calendar, String>() {
-      @Override public String call(
-        final Calendar c)
-      {
-        return NullCheck.notNull(fmt.format(c));
-      }
-    }));
+    b.append(
+      this.end_date.map(
+        new FunctionType<Calendar, String>()
+        {
+          @Override public String call(
+            final Calendar c)
+          {
+            return NullCheck.notNull(fmt.format(c));
+          }
+        }));
     b.append(" start_date=");
     b.append(fmt.format(this.start_date.getTime()));
     b.append("]");

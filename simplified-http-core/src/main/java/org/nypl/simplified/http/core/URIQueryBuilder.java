@@ -1,16 +1,34 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.SortedMap;
 
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
+/**
+ * Functions for producing URIs.
+ */
 
 public final class URIQueryBuilder
 {
+  private URIQueryBuilder()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Encode a query using the given base URI and set of parameters.
+   *
+   * @param base       The base URI
+   * @param parameters The parameters
+   *
+   * @return An encoded query
+   */
+
   public static URI encodeQuery(
     final URI base,
     final SortedMap<String, String> parameters)
@@ -21,7 +39,7 @@ public final class URIQueryBuilder
 
       if (parameters.isEmpty() == false) {
         final Iterator<String> iter = parameters.keySet().iterator();
-        final StringBuilder query = new StringBuilder();
+        final StringBuilder query = new StringBuilder(128);
         while (iter.hasNext()) {
           final String name = NullCheck.notNull(iter.next());
           final String value = NullCheck.notNull(parameters.get(name));
@@ -42,10 +60,5 @@ public final class URIQueryBuilder
     } catch (final UnsupportedEncodingException e) {
       throw new UnreachableCodeException(e);
     }
-  }
-
-  private URIQueryBuilder()
-  {
-    throw new UnreachableCodeException();
   }
 }

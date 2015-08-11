@@ -1,9 +1,9 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jnull.NullCheck;
+
 import java.io.IOException;
 import java.net.URI;
-
-import com.io7m.jnull.NullCheck;
 
 /**
  * A result matcher that returns results in the case that the server responds
@@ -11,14 +11,19 @@ import com.io7m.jnull.NullCheck;
  * responding with an error code, or re-raises any exception raised in the
  * process of creating a connection.
  *
- * @param <A>
- *          The type of returned values
+ * @param <A> The type of returned values
  */
 
-@SuppressWarnings("boxing") public final class HTTPResultToException<A> implements
-  HTTPResultMatcherType<A, HTTPResultOKType<A>, IOException>
+@SuppressWarnings("boxing") public final class HTTPResultToException<A>
+  implements HTTPResultMatcherType<A, HTTPResultOKType<A>, IOException>
 {
   private final URI uri;
+
+  /**
+   * Construct a matcher.
+   *
+   * @param in_uri The HTTP URI
+   */
 
   public HTTPResultToException(
     final URI in_uri)
@@ -30,12 +35,9 @@ import com.io7m.jnull.NullCheck;
     final HTTPResultError<A> e)
     throws IOException
   {
-    final String s =
-      NullCheck.notNull(String.format(
-        "%s: %d: %s",
-        this.uri,
-        e.getStatus(),
-        e.getMessage()));
+    final String s = NullCheck.notNull(
+      String.format(
+        "%s: %d: %s", this.uri, e.getStatus(), e.getMessage()));
     throw new IOException(s);
   }
 

@@ -1,10 +1,16 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jnull.NullCheck;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import com.io7m.jnull.NullCheck;
+/**
+ * The type of successful HTTP results.
+ *
+ * @param <A> The type of result values
+ */
 
 public final class HTTPResultOK<A> implements HTTPResultOKType<A>
 {
@@ -13,6 +19,16 @@ public final class HTTPResultOK<A> implements HTTPResultOKType<A>
   private final String                    message;
   private final int                       status;
   private final A                         value;
+
+  /**
+   * Construct a result.
+   *
+   * @param in_message        The server message
+   * @param in_status         The status code
+   * @param in_value          The resulting value
+   * @param in_content_length The content length
+   * @param in_headers        The headers
+   */
 
   public HTTPResultOK(
     final String in_message,

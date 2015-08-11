@@ -1,24 +1,46 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import org.nypl.simplified.files.FileUtilities;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.nypl.simplified.files.FileUtilities;
-
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-
 /**
  * The type of account barcodes.
  *
- * Account barcodes are expected to be 5-14 digit numbers, but the type does
- * not (currently) enforce this fact.
+ * Account barcodes are expected to be 5-14 digit numbers, but the type does not
+ * (currently) enforce this fact.
  */
 
 public final class AccountBarcode implements Serializable
 {
   private static final long serialVersionUID = 1L;
+  private final String value;
+
+  /**
+   * Construct a barcode.
+   *
+   * @param in_value The raw barcode value
+   */
+
+  public AccountBarcode(
+    final String in_value)
+  {
+    this.value = NullCheck.notNull(in_value);
+  }
+
+  /**
+   * Read a barcode from the first line of the given file.
+   *
+   * @param f The file
+   *
+   * @return A barcode
+   *
+   * @throws IOException On I/O errors
+   */
 
   public static AccountBarcode readFromFile(
     final File f)
@@ -26,14 +48,6 @@ public final class AccountBarcode implements Serializable
   {
     final String text = FileUtilities.fileReadUTF8(f);
     return new AccountBarcode(NullCheck.notNull(text));
-  }
-
-  private final String value;
-
-  public AccountBarcode(
-    final String in_value)
-  {
-    this.value = NullCheck.notNull(in_value);
   }
 
   @Override public boolean equals(
@@ -61,6 +75,17 @@ public final class AccountBarcode implements Serializable
   {
     return this.value;
   }
+
+  /**
+   * Write the barcode to the {@code f_tmp}, atomically renaming {@code f_tmp}
+   * to {@code f} on success. For platform independence, {@code f_tmp} and
+   * {@code f} should be in the same directory.
+   *
+   * @param f     The resulting file
+   * @param f_tmp The temporary file
+   *
+   * @throws IOException On I/O errors
+   */
 
   public void writeToFile(
     final File f,

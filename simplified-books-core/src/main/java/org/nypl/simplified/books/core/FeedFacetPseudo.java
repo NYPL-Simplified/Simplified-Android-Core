@@ -2,18 +2,26 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * A pseudo-facet.
+ *
+ * This is used to provide facets for locally generated feeds.
+ */
+
 public final class FeedFacetPseudo implements FeedFacetType
 {
-  public static enum FacetType
-  {
-    SORT_BY_AUTHOR,
-    SORT_BY_TITLE
-  }
-
   private static final long serialVersionUID = 1L;
-  private final boolean     active;
-  private final String      title;
-  private final FacetType        type;
+  private final boolean   active;
+  private final String    title;
+  private final FacetType type;
+
+  /**
+   * Construct a pseudo-facet.
+   *
+   * @param in_title  The facet title
+   * @param in_active {@code true} if the facet is currently active
+   * @param in_type   The type of facet
+   */
 
   public FeedFacetPseudo(
     final String in_title,
@@ -35,6 +43,10 @@ public final class FeedFacetPseudo implements FeedFacetType
     return this.active;
   }
 
+  /**
+   * @return The facet type
+   */
+
   public FacetType getType()
   {
     return this.type;
@@ -45,5 +57,24 @@ public final class FeedFacetPseudo implements FeedFacetType
     throws E
   {
     return m.onFeedFacetPseudo(this);
+  }
+
+  /**
+   * The type of facets.
+   */
+
+  public enum FacetType
+  {
+    /**
+     * Sort the feed in question by author.
+     */
+
+    SORT_BY_AUTHOR,
+
+    /**
+     * Sort the feed in question by book title.
+     */
+
+    SORT_BY_TITLE
   }
 }

@@ -1,11 +1,11 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Calendar;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnimplementedCodeException;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
@@ -24,44 +24,42 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnimplementedCodeException;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Calendar;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * <p>
- * The logic for borrowing and/or fulfilling a book.
- * </p>
+ * <p> The logic for borrowing and/or fulfilling a book. </p>
  */
 
-@SuppressWarnings("synthetic-access") final class BooksControllerBorrowTask implements
-  Runnable,
+@SuppressWarnings("synthetic-access") final class BooksControllerBorrowTask
+  implements Runnable,
   DownloadListenerType,
   FeedLoaderListenerType,
   FeedMatcherType<Unit, Exception>,
   FeedEntryMatcherType<Unit, Exception>
 {
-  private static final Logger                           LOG;
+  private static final Logger LOG;
 
   static {
-    LOG =
-      NullCheck.notNull(LoggerFactory
-        .getLogger(BooksControllerBorrowTask.class));
+    LOG = NullCheck.notNull(
+      LoggerFactory.getLogger(
+        BooksControllerBorrowTask.class));
   }
 
-  private final OPDSAcquisition                         acq;
-  private final BookID                                  book_id;
-  private final BookDatabaseType                        books_database;
-  private final BooksStatusCacheType                    books_status;
-  private final DownloaderType                          downloader;
-  private final ConcurrentHashMap<BookID, DownloadType> downloads;
-  private final FeedLoaderType                          feed_loader;
-  private final HTTPType                                http;
-  private final BookBorrowListenerType                  listener;
-  private final OPDSAcquisitionFeedEntry                feed_entry;
+  private final OPDSAcquisition           acq;
+  private final BookID                    book_id;
+  private final BookDatabaseType          books_database;
+  private final BooksStatusCacheType      books_status;
+  private final DownloaderType            downloader;
+  private final Map<BookID, DownloadType> downloads;
+  private final FeedLoaderType            feed_loader;
+  private final HTTPType                  http;
+  private final BookBorrowListenerType    listener;
+  private final OPDSAcquisitionFeedEntry  feed_entry;
 
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
@@ -110,9 +108,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     throws IOException
   {
     BooksControllerBorrowTask.LOG.debug(
-      "download {} completed for {}",
-      d,
-      file);
+      "download {} completed for {}", d, file);
 
     final BookDatabaseEntryType e =
       this.books_database.getBookDatabaseEntry(this.book_id);
@@ -134,10 +130,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     final OptionType<Calendar> none = Option.none();
     final BookStatusDownloadInProgress status =
       new BookStatusDownloadInProgress(
-        this.book_id,
-        running_total,
-        expected_total,
-        none);
+        this.book_id, running_total, expected_total, none);
     this.books_status.booksStatusUpdate(status);
   }
 
@@ -164,8 +157,8 @@ import com.io7m.junreachable.UnimplementedCodeException;
     final FeedEntryCorrupt e)
     throws IOException
   {
-    BooksControllerBorrowTask.LOG
-      .error("unexpectedly received corrupt feed entry");
+    BooksControllerBorrowTask.LOG.error(
+      "unexpectedly received corrupt feed entry");
     throw new IOException(e.getError());
   }
 
@@ -179,13 +172,13 @@ import com.io7m.junreachable.UnimplementedCodeException;
     final OPDSAvailabilityType availability = ee.getAvailability();
 
     BooksControllerBorrowTask.LOG.debug(
-      "book availability is {}",
-      availability);
+      "book availability is {}", availability);
 
     final BookID b_id = this.book_id;
     final BooksStatusCacheType stat = this.books_status;
-    availability
-      .matchAvailability(new OPDSAvailabilityMatcherType<Unit, Exception>() {
+    availability.matchAvailability(
+      new OPDSAvailabilityMatcherType<Unit, Exception>()
+      {
         @Override public Unit onHeld(
           final OPDSAvailabilityHeld a)
         {
@@ -219,8 +212,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
           stat.booksStatusUpdate(status);
 
           BooksControllerBorrowTask.this.downloads.put(
-            b_id,
-            BooksControllerBorrowTask.this.runAcquisitionFulfill(ee));
+            b_id, BooksControllerBorrowTask.this.runAcquisitionFulfill(ee));
 
           return Unit.unit();
         }
@@ -253,8 +245,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
       f.matchFeed(this);
     } catch (final Exception e) {
       this.listener.onBookBorrowFailure(
-        this.book_id,
-        Option.some((Throwable) e));
+        this.book_id, Option.some((Throwable) e));
     }
   }
 
@@ -281,27 +272,21 @@ import com.io7m.junreachable.UnimplementedCodeException;
       BooksControllerBorrowTask.LOG.debug("creating feed entry");
 
       BooksController.syncFeedEntry(
-        this.feed_entry,
-        this.books_database,
-        this.books_status,
-        this.http);
+        this.feed_entry, this.books_database, this.books_status, this.http);
 
       switch (this.acq.getType()) {
-        case ACQUISITION_BORROW:
-        {
+        case ACQUISITION_BORROW: {
           this.runAcquisitionBorrow();
           break;
         }
         case ACQUISITION_GENERIC:
-        case ACQUISITION_OPEN_ACCESS:
-        {
+        case ACQUISITION_OPEN_ACCESS: {
           this.runAcquisitionFulfill(this.feed_entry);
           break;
         }
         case ACQUISITION_BUY:
         case ACQUISITION_SAMPLE:
-        case ACQUISITION_SUBSCRIBE:
-        {
+        case ACQUISITION_SUBSCRIBE: {
           throw new UnimplementedCodeException();
         }
       }
@@ -320,8 +305,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
   private void runAcquisitionBorrow()
   {
     BooksControllerBorrowTask.LOG.debug(
-      "fetching item feed: {}",
-      this.acq.getURI());
+      "fetching item feed: {}", this.acq.getURI());
     this.feed_loader.fromURIRefreshing(this.acq.getURI(), this);
   }
 
@@ -330,8 +314,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
     throws Exception
   {
     BooksControllerBorrowTask.LOG.debug(
-      "book {}: starting download",
-      this.book_id);
+      "book {}: starting download", this.book_id);
 
     final Pair<AccountBarcode, AccountPIN> p =
       this.books_database.credentialsGet();
@@ -354,15 +337,13 @@ import com.io7m.junreachable.UnimplementedCodeException;
     for (final OPDSAcquisition ea : ee.getAcquisitions()) {
       switch (ea.getType()) {
         case ACQUISITION_GENERIC:
-        case ACQUISITION_OPEN_ACCESS:
-        {
+        case ACQUISITION_OPEN_ACCESS: {
           return this.runDownload(ea);
         }
         case ACQUISITION_BORROW:
         case ACQUISITION_BUY:
         case ACQUISITION_SAMPLE:
-        case ACQUISITION_SUBSCRIBE:
-        {
+        case ACQUISITION_SUBSCRIBE: {
           break;
         }
       }

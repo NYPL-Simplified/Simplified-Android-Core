@@ -7,11 +7,20 @@ package org.nypl.simplified.opds.core;
 public final class OPDSAvailabilityHoldable implements OPDSAvailabilityType
 {
   private static final OPDSAvailabilityHoldable INSTANCE;
-  private static final long                     serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
   static {
     INSTANCE = new OPDSAvailabilityHoldable();
   }
+
+  private OPDSAvailabilityHoldable()
+  {
+
+  }
+
+  /**
+   * @return An availability value stating that a book is available for hold
+   */
 
   public static OPDSAvailabilityHoldable get()
   {

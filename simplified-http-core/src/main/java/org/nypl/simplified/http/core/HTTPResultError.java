@@ -1,10 +1,16 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+
 import java.util.List;
 import java.util.Map;
 
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+/**
+ * A result value representing a server-side error.
+ *
+ * @param <A> The type of value
+ */
 
 public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
 {
@@ -12,6 +18,15 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
   private final Map<String, List<String>> headers;
   private final String                    message;
   private final int                       status;
+
+  /**
+   * Construct an error result.
+   *
+   * @param in_status         The status code
+   * @param in_message        The message
+   * @param in_content_length The content length
+   * @param in_headers        The server headers
+   */
 
   public HTTPResultError(
     final int in_status,
@@ -39,9 +54,9 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
     }
     final HTTPResultError<?> other = (HTTPResultError<?>) obj;
     return this.message.equals(other.message)
-      && (this.status == other.status)
-      && (this.content_length == other.content_length)
-      && (this.headers.equals(other.headers));
+           && (this.status == other.status)
+           && (this.content_length == other.content_length)
+           && (this.headers.equals(other.headers));
   }
 
   @Override public long getContentLength()

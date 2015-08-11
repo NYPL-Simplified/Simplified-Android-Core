@@ -1,20 +1,26 @@
 package org.nypl.simplified.books.core;
 
-import java.util.Calendar;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+
+import java.util.Calendar;
 
 /**
  * The given book is being requested for download, but the download has not
  * actually started yet.
  */
 
-public final class BookStatusRequestingDownload implements
-  BookStatusLoanedType
+public final class BookStatusRequestingDownload implements BookStatusLoanedType
 {
   private final BookID               id;
   private final OptionType<Calendar> loan_end_date;
+
+  /**
+   * Construct the book status.
+   *
+   * @param in_id            The book ID
+   * @param in_loan_end_date The end date of the loan, if any
+   */
 
   public BookStatusRequestingDownload(
     final BookID in_id,
@@ -45,7 +51,7 @@ public final class BookStatusRequestingDownload implements
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusRequestingDownload ");
     b.append(this.id);
     b.append("]");

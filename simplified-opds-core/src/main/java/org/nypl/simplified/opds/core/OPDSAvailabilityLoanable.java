@@ -7,11 +7,20 @@ package org.nypl.simplified.opds.core;
 public final class OPDSAvailabilityLoanable implements OPDSAvailabilityType
 {
   private static final OPDSAvailabilityLoanable INSTANCE;
-  private static final long                     serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
   static {
     INSTANCE = new OPDSAvailabilityLoanable();
   }
+
+  private OPDSAvailabilityLoanable()
+  {
+
+  }
+
+  /**
+   * @return An availability value stating that a book is available for loan
+   */
 
   public static OPDSAvailabilityLoanable get()
   {

@@ -1,14 +1,27 @@
 package org.nypl.simplified.http.core;
 
-import java.net.URI;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import java.net.URI;
+
+/**
+ * An HTTP result representing a typically client-side error.
+ *
+ * @param <A> The type of result value
+ */
 
 public final class HTTPResultException<A> implements HTTPResultType<A>
 {
   private final Exception error;
   private final URI       uri;
+
+  /**
+   * Construct a result value.
+   *
+   * @param in_uri   The URI
+   * @param in_error The exception raised
+   */
 
   public HTTPResultException(
     final URI in_uri,
@@ -34,10 +47,18 @@ public final class HTTPResultException<A> implements HTTPResultType<A>
     return this.error.equals(other.error) && this.uri.equals(other.uri);
   }
 
+  /**
+   * @return The exception raised
+   */
+
   public Exception getError()
   {
     return this.error;
   }
+
+  /**
+   * @return The URI
+   */
 
   public URI getURI()
   {

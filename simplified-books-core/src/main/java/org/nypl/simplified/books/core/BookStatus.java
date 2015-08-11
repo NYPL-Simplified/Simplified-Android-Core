@@ -1,7 +1,9 @@
 package org.nypl.simplified.books.core;
 
-import java.util.Calendar;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
@@ -11,10 +13,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
+import java.util.Calendar;
 
 final class BookStatus
 {
@@ -35,8 +34,10 @@ final class BookStatus
     final boolean downloaded = in_snap.getBook().isSome();
 
     final OPDSAvailabilityType availability = e.getAvailability();
-    return availability
-      .matchAvailability(new OPDSAvailabilityMatcherType<BookStatusType, UnreachableCodeException>() {
+    return availability.matchAvailability(
+      new OPDSAvailabilityMatcherType<BookStatusType,
+        UnreachableCodeException>()
+      {
         @Override public BookStatusType onHeld(
           final OPDSAvailabilityHeld a)
         {

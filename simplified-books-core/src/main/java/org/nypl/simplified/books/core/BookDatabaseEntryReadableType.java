@@ -1,16 +1,13 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.OptionType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+
 import java.io.File;
 import java.io.IOException;
 
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-
-import com.io7m.jfunctional.OptionType;
-
 /**
- * <p>
- * The readable interface supported by book database entries.
- * </p>
+ * <p> The readable interface supported by book database entries. </p>
  */
 
 public interface BookDatabaseEntryReadableType
@@ -23,8 +20,8 @@ public interface BookDatabaseEntryReadableType
 
   /**
    * @return The cover of the book, if any
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   OptionType<File> getCover()
@@ -32,8 +29,8 @@ public interface BookDatabaseEntryReadableType
 
   /**
    * @return The acquisition feed entry associated with the book
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   OPDSAcquisitionFeedEntry getData()
@@ -53,8 +50,8 @@ public interface BookDatabaseEntryReadableType
 
   /**
    * @return A snapshot of the current book state
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   BookSnapshot getSnapshot()

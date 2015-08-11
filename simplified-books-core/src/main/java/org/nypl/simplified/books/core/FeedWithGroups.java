@@ -1,51 +1,25 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
+import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
+
 import java.net.URI;
 import java.util.AbstractList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
-import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
+/**
+ * A (mutable) feed with groups.
+ */
 
-import com.io7m.jfunctional.FunctionType;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-
-public final class FeedWithGroups extends AbstractList<FeedGroup> implements
-  FeedType
+public final class FeedWithGroups extends AbstractList<FeedGroup>
+  implements FeedType
 {
-  public static FeedWithGroups fromAcquisitionFeed(
-    final OPDSAcquisitionFeed f,
-    final OptionType<OPDSOpenSearch1_1> search)
-  {
-    NullCheck.notNull(f);
-
-    final Map<String, FeedGroup> blocks =
-      FeedGroup.fromOPDSGroups(f.getFeedGroups());
-    final List<String> order = f.getFeedGroupsOrder();
-
-    final OptionType<FeedSearchType> actual_search =
-      search.map(new FunctionType<OPDSOpenSearch1_1, FeedSearchType>() {
-        @Override public FeedSearchType call(
-          final OPDSOpenSearch1_1 s)
-        {
-          return new FeedSearchOpen1_1(s);
-        }
-      });
-
-    return new FeedWithGroups(
-      f.getFeedURI(),
-      f.getFeedID(),
-      f.getFeedUpdated(),
-      f.getFeedTitle(),
-      actual_search,
-      order,
-      blocks);
-  }
-
   private final Map<String, FeedGroup>     blocks;
   private final List<String>               blocks_order;
   private final String                     id;
@@ -72,6 +46,45 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
     this.blocks = NullCheck.notNull(in_blocks);
   }
 
+  /**
+   * Construct a feed from the given acquisition feed.
+   *
+   * @param f      The feed
+   * @param search An optional link to a search document
+   *
+   * @return A new feed
+   */
+
+  public static FeedWithGroups fromAcquisitionFeed(
+    final OPDSAcquisitionFeed f,
+    final OptionType<OPDSOpenSearch1_1> search)
+  {
+    NullCheck.notNull(f);
+
+    final Map<String, FeedGroup> blocks =
+      FeedGroup.fromOPDSGroups(f.getFeedGroups());
+    final List<String> order = f.getFeedGroupsOrder();
+
+    final OptionType<FeedSearchType> actual_search = search.map(
+      new FunctionType<OPDSOpenSearch1_1, FeedSearchType>()
+      {
+        @Override public FeedSearchType call(
+          final OPDSOpenSearch1_1 s)
+        {
+          return new FeedSearchOpen1_1(s);
+        }
+      });
+
+    return new FeedWithGroups(
+      f.getFeedURI(),
+      f.getFeedID(),
+      f.getFeedUpdated(),
+      f.getFeedTitle(),
+      actual_search,
+      order,
+      blocks);
+  }
+
   @Override public void add(
     final int index,
     final @Nullable FeedGroup element)
@@ -88,6 +101,10 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
     final String name = NullCheck.notNull(this.blocks_order.get(index));
     return NullCheck.notNull(this.blocks.get(name));
   }
+
+  /**
+   * @return The feed groups
+   */
 
   public Map<String, FeedGroup> getFeedGroups()
   {

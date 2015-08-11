@@ -18,7 +18,7 @@ public interface OPDSSearchParserType
 {
   /**
    * Parse the search description associated with the given stream
-   * <code>s</code>. The description is assumed to exist at <code>uri</code>.
+   * {@code s}. The description is assumed to exist at {@code uri}.
    *
    * @param uri
    *          The URI of the description

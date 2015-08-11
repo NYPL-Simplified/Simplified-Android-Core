@@ -1,12 +1,12 @@
 package org.nypl.simplified.http.core;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Functions to parse Range requests.
@@ -23,9 +23,14 @@ public final class HTTPRanges
     PATTERN_SUFFIX = NullCheck.notNull(Pattern.compile("bytes=-([0-9]+)"));
   }
 
+  private HTTPRanges()
+  {
+    throw new UnreachableCodeException();
+  }
+
   /**
-   * @param text
-   *          A range string of the form <tt>bytes=([0-9]*)-([0-9]*)</tt>)
+   * @param text A range string of the form <tt>bytes=([0-9]*)-([0-9]*)</tt>)
+   *
    * @return The parsed byte range
    */
 
@@ -57,7 +62,7 @@ public final class HTTPRanges
           if (end.isEmpty() == false) {
             end_val = Long.valueOf(end).longValue();
           } else {
-            end_val = -1;
+            end_val = -1L;
           }
 
           final HTTPByteRangeInclusive rbi =
@@ -70,10 +75,5 @@ public final class HTTPRanges
     } catch (final NumberFormatException e) {
       return Option.none();
     }
-  }
-
-  private HTTPRanges()
-  {
-    throw new UnreachableCodeException();
   }
 }

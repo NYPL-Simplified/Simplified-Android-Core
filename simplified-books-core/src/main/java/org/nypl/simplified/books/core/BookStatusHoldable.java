@@ -10,6 +10,12 @@ public final class BookStatusHoldable implements BookStatusType
 {
   private final BookID id;
 
+  /**
+   * Construct a status value.
+   *
+   * @param in_id The book ID
+   */
+
   public BookStatusHoldable(
     final BookID in_id)
   {
@@ -35,7 +41,7 @@ public final class BookStatusHoldable implements BookStatusType
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusHoldable ");
     b.append(this.id);
     b.append("]");

@@ -1,11 +1,12 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
@@ -15,36 +16,33 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.PartialFunctionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * A single book directory.
  *
- * All operations on the directory are serialized by acquiring a mandatory
- * lock on a <tt>lock</tt> file inside the directory for the duration of the
- * changes. Due to limitations in the Android and Java APIs, threads must
- * busy-wait on acquiring file locks. Threads contending for the locks will
- * try for at most {@link #WAIT_MAXIMUM_MILLISECONDS} milliseconds, pausing
- * for {@link #WAIT_PAUSE_MILLISECONDS} between lock attempts before failing.
+ * All operations on the directory are thread-safe but not necessarily
+ * process-safe.
  */
 
-@SuppressWarnings("synthetic-access") public final class BookDatabaseEntry implements
-  BookDatabaseEntryType
+@SuppressWarnings("synthetic-access") public final class BookDatabaseEntry
+  implements BookDatabaseEntryType
 {
-  public static final int              WAIT_MAXIMUM_MILLISECONDS;
-  public static final int              WAIT_PAUSE_MILLISECONDS;
-  private static final Logger          LOG;
+  /**
+   * The number of milliseconds to wait whilst attempting to acquire a lock.
+   */
+
+  public static final int WAIT_MAXIMUM_MILLISECONDS;
+
+  private static final Logger LOG;
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BookDatabaseEntry.class));
     WAIT_MAXIMUM_MILLISECONDS = 100;
-    WAIT_PAUSE_MILLISECONDS = 10;
   }
 
   private final File                   directory;
@@ -57,6 +55,15 @@ import com.io7m.jnull.NullCheck;
   private final OPDSJSONParserType     parser;
   private final OPDSJSONSerializerType serializer;
 
+  /**
+   * Construct a book database entry.
+   *
+   * @param in_json_serializer A JSON serializer
+   * @param in_json_parser     A JSON parser
+   * @param parent             The parent directory
+   * @param book_id            The book ID
+   */
+
   public BookDatabaseEntry(
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
@@ -65,10 +72,8 @@ import com.io7m.jnull.NullCheck;
   {
     this.parser = NullCheck.notNull(in_json_parser);
     this.serializer = NullCheck.notNull(in_json_serializer);
-    this.directory =
-      new File(NullCheck.notNull(parent), NullCheck
-        .notNull(book_id)
-        .toString());
+    this.directory = new File(
+      NullCheck.notNull(parent), NullCheck.notNull(book_id).toString());
 
     this.id = NullCheck.notNull(book_id);
     this.file_lock = new File(this.directory, "lock");
@@ -82,11 +87,11 @@ import com.io7m.jnull.NullCheck;
     final File file)
     throws IOException
   {
-    FileLocking.withFileLocked(
+    FileLocking.withFileThreadLocked(
       this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, Unit, IOException>() {
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>()
+      {
         @Override public Unit call(
           final Unit x)
           throws IOException
@@ -113,11 +118,11 @@ import com.io7m.jnull.NullCheck;
   @Override public void destroy()
     throws IOException
   {
-    FileLocking.withFileLocked(
+    FileLocking.withFileThreadLocked(
       this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, Unit, IOException>() {
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>()
+      {
         @Override public Unit call(
           final Unit x)
           throws IOException
@@ -131,11 +136,11 @@ import com.io7m.jnull.NullCheck;
   @Override public void destroyBookData()
     throws IOException
   {
-    FileLocking.withFileLocked(
+    FileLocking.withFileThreadLocked(
       this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, Unit, IOException>() {
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>()
+      {
         @Override public Unit call(
           final Unit x)
           throws IOException
@@ -182,16 +187,35 @@ import com.io7m.jnull.NullCheck;
   @Override public OptionType<File> getCover()
     throws IOException
   {
-    return FileLocking.withFileLocked(
+    return FileLocking.withFileThreadLocked(
       this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, OptionType<File>, IOException>() {
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, OptionType<File>, IOException>()
+      {
         @Override public OptionType<File> call(
           final Unit x)
           throws IOException
         {
           return BookDatabaseEntry.this.getCoverLocked();
+        }
+      });
+  }
+
+  @Override public void setCover(
+    final OptionType<File> in_cover)
+    throws IOException
+  {
+    FileLocking.withFileThreadLocked(
+      this.file_lock,
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>()
+      {
+        @Override public Unit call(
+          final Unit x)
+          throws IOException
+        {
+          BookDatabaseEntry.this.setCoverLocked(in_cover);
+          return Unit.unit();
         }
       });
   }
@@ -204,19 +228,53 @@ import com.io7m.jnull.NullCheck;
     return Option.none();
   }
 
+  private void setCoverLocked(
+    final OptionType<File> in_cover)
+    throws IOException
+  {
+    if (in_cover.isSome()) {
+      final Some<File> some = (Some<File>) in_cover;
+      FileUtilities.fileCopy(some.get(), this.file_cover);
+      some.get().delete();
+    } else {
+      this.file_cover.delete();
+    }
+  }
+
   @Override public OPDSAcquisitionFeedEntry getData()
     throws IOException
   {
-    return FileLocking.withFileLocked(
+    return FileLocking.withFileThreadLocked(
       this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, OPDSAcquisitionFeedEntry, IOException>() {
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, OPDSAcquisitionFeedEntry, IOException>()
+      {
         @Override public OPDSAcquisitionFeedEntry call(
           final Unit x)
           throws IOException
         {
           return BookDatabaseEntry.this.getDataLocked();
+        }
+      });
+  }
+
+  @Override public void setData(
+    final OPDSAcquisitionFeedEntry in_entry)
+    throws IOException
+  {
+    final ObjectNode d = this.serializer.serializeFeedEntry(in_entry);
+
+    FileLocking.withFileThreadLocked(
+      this.file_lock,
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>()
+      {
+        @Override public Unit call(
+          final Unit x)
+          throws IOException
+        {
+          BookDatabaseEntry.this.setDataLocked(d);
+          return Unit.unit();
         }
       });
   }
@@ -230,42 +288,6 @@ import com.io7m.jnull.NullCheck;
     } finally {
       is.close();
     }
-  }
-
-  @Override public File getDirectory()
-  {
-    return this.directory;
-  }
-
-  @Override public BookID getID()
-  {
-    return this.id;
-  }
-
-  @Override public BookSnapshot getSnapshot()
-    throws IOException
-  {
-    return FileLocking.withFileLocked(
-      this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, BookSnapshot, IOException>() {
-        @Override public BookSnapshot call(
-          final Unit x)
-          throws IOException
-        {
-          return BookDatabaseEntry.this.getSnapshotLocked();
-        }
-      });
-  }
-
-  private BookSnapshot getSnapshotLocked()
-    throws IOException
-  {
-    final OPDSAcquisitionFeedEntry in_entry = this.getDataLocked();
-    final OptionType<File> in_cover = this.getCoverLocked();
-    final OptionType<File> in_book = this.getBookLocked();
-    return new BookSnapshot(in_cover, in_book, in_entry);
   }
 
   private void setDataLocked(
@@ -286,56 +308,39 @@ import com.io7m.jnull.NullCheck;
     FileUtilities.fileRename(this.file_meta_tmp, this.file_meta);
   }
 
-  private void setCoverLocked(
-    final OptionType<File> in_cover)
-    throws IOException
+  @Override public File getDirectory()
   {
-    if (in_cover.isSome()) {
-      final Some<File> some = (Some<File>) in_cover;
-      FileUtilities.fileCopy(some.get(), this.file_cover);
-      some.get().delete();
-    } else {
-      this.file_cover.delete();
-    }
+    return this.directory;
   }
 
-  @Override public void setData(
-    final OPDSAcquisitionFeedEntry in_entry)
+  @Override public BookID getID()
+  {
+    return this.id;
+  }
+
+  @Override public BookSnapshot getSnapshot()
     throws IOException
   {
-    final ObjectNode d = this.serializer.serializeFeedEntry(in_entry);
-
-    FileLocking.withFileLocked(
+    return FileLocking.withFileThreadLocked(
       this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, Unit, IOException>() {
-        @Override public Unit call(
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, BookSnapshot, IOException>()
+      {
+        @Override public BookSnapshot call(
           final Unit x)
           throws IOException
         {
-          BookDatabaseEntry.this.setDataLocked(d);
-          return Unit.unit();
+          return BookDatabaseEntry.this.getSnapshotLocked();
         }
       });
   }
 
-  @Override public void setCover(
-    final OptionType<File> in_cover)
+  private BookSnapshot getSnapshotLocked()
     throws IOException
   {
-    FileLocking.withFileLocked(
-      this.file_lock,
-      BookDatabaseEntry.WAIT_PAUSE_MILLISECONDS,
-      BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
-      new PartialFunctionType<Unit, Unit, IOException>() {
-        @Override public Unit call(
-          final Unit x)
-          throws IOException
-        {
-          BookDatabaseEntry.this.setCoverLocked(in_cover);
-          return Unit.unit();
-        }
-      });
+    final OPDSAcquisitionFeedEntry in_entry = this.getDataLocked();
+    final OptionType<File> in_cover = this.getCoverLocked();
+    final OptionType<File> in_book = this.getBookLocked();
+    return new BookSnapshot(in_cover, in_book, in_entry);
   }
 }

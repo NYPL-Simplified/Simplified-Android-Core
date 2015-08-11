@@ -1,5 +1,20 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -8,32 +23,24 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+/**
+ * The default implementation of the {@link OPDSAcquisitionFeedEntryParserType}
+ * type.
+ */
 
-import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.PartialFunctionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheck;
-
-public final class OPDSAcquisitionFeedEntryParser implements
-  OPDSAcquisitionFeedEntryParserType
+public final class OPDSAcquisitionFeedEntryParser
+  implements OPDSAcquisitionFeedEntryParserType
 {
   private static final Logger LOG;
 
   static {
-    LOG =
-      NullCheck.notNull(LoggerFactory
-        .getLogger(OPDSAcquisitionFeedEntryParser.class));
+    LOG = NullCheck.notNull(
+      LoggerFactory.getLogger(OPDSAcquisitionFeedEntryParser.class));
+  }
+
+  private OPDSAcquisitionFeedEntryParser()
+  {
+
   }
 
   private static void findAcquisitionAuthors(
@@ -41,17 +48,11 @@ public final class OPDSAcquisitionFeedEntryParser implements
     final OPDSAcquisitionFeedEntryBuilderType eb)
     throws OPDSParseException
   {
-    final List<Element> e_authors =
-      OPDSXML.getChildElementsWithName(
-        e,
-        OPDSFeedConstants.ATOM_URI,
-        "author");
+    final List<Element> e_authors = OPDSXML.getChildElementsWithName(
+      e, OPDSFeedConstants.ATOM_URI, "author");
     for (final Element ea : e_authors) {
-      final String name =
-        OPDSXML.getFirstChildElementTextWithName(
-          NullCheck.notNull(ea),
-          OPDSFeedConstants.ATOM_URI,
-          "name");
+      final String name = OPDSXML.getFirstChildElementTextWithName(
+        NullCheck.notNull(ea), OPDSFeedConstants.ATOM_URI, "name");
       eb.addAuthor(name);
     }
   }
@@ -60,10 +61,12 @@ public final class OPDSAcquisitionFeedEntryParser implements
     final Element e)
   {
     return OPDSXML.getFirstChildElementTextWithNameOptional(
-      e,
-      OPDSFeedConstants.DUBLIN_CORE_TERMS_URI,
-      "publisher");
+      e, OPDSFeedConstants.DUBLIN_CORE_TERMS_URI, "publisher");
   }
+
+  /**
+   * @return A new feed entry parser
+   */
 
   public static OPDSAcquisitionFeedEntryParserType newParser()
   {
@@ -72,9 +75,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
 
   private static OPDSAcquisitionFeedEntry parseAcquisitionEntry(
     final Element e)
-    throws OPDSParseException,
-      ParseException,
-      URISyntaxException
+    throws OPDSParseException, ParseException, URISyntaxException
   {
     final String id = OPDSAtom.findID(e);
     final String title = OPDSAtom.findTitle(e);
@@ -82,16 +83,10 @@ public final class OPDSAcquisitionFeedEntryParser implements
 
     final OPDSAcquisitionFeedEntryBuilderType eb =
       OPDSAcquisitionFeedEntry.newBuilder(
-        id,
-        title,
-        updated,
-        OPDSAvailabilityLoanable.get());
+        id, title, updated, OPDSAvailabilityLoanable.get());
 
-    final List<Element> e_links =
-      OPDSXML.getChildElementsWithNameNonEmpty(
-        e,
-        OPDSFeedConstants.ATOM_URI,
-        "link");
+    final List<Element> e_links = OPDSXML.getChildElementsWithNameNonEmpty(
+      e, OPDSFeedConstants.ATOM_URI, "link");
 
     for (final Element e_link : e_links) {
       if (e_link.hasAttribute("rel")) {
@@ -139,8 +134,8 @@ public final class OPDSAcquisitionFeedEntryParser implements
          * Acquisitions.
          */
 
-        if (rel_text
-          .startsWith(OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT)) {
+        if (rel_text.startsWith(
+          OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT)) {
           for (final Type v : OPDSAcquisition.Type.values()) {
             final String uri_text = NullCheck.notNull(v.getURI().toString());
             if (rel_text.equals(uri_text)) {
@@ -153,11 +148,8 @@ public final class OPDSAcquisitionFeedEntryParser implements
       }
     }
 
-    final List<Element> e_categories =
-      OPDSXML.getChildElementsWithName(
-        e,
-        OPDSFeedConstants.ATOM_URI,
-        "category");
+    final List<Element> e_categories = OPDSXML.getChildElementsWithName(
+      e, OPDSFeedConstants.ATOM_URI, "category");
 
     for (final Element ce : e_categories) {
       final String term = NullCheck.notNull(ce.getAttribute("term"));
@@ -168,28 +160,24 @@ public final class OPDSAcquisitionFeedEntryParser implements
     OPDSAcquisitionFeedEntryParser.findAcquisitionAuthors(e, eb);
     eb.setPublisherOption(OPDSAcquisitionFeedEntryParser.findPublisher(e));
     eb.setPublishedOption(OPDSAtom.findPublished(e));
-    eb.setSummaryOption(OPDSXML.getFirstChildElementTextWithNameOptional(
-      e,
-      OPDSFeedConstants.ATOM_URI,
-      "summary"));
+    eb.setSummaryOption(
+      OPDSXML.getFirstChildElementTextWithNameOptional(
+        e, OPDSFeedConstants.ATOM_URI, "summary"));
 
-    eb.setAvailability(OPDSAcquisitionFeedEntryParser.determineAvailability(
-      eb,
-      e));
+    eb.setAvailability(
+      OPDSAcquisitionFeedEntryParser.determineAvailability(
+        eb, e));
     return eb.build();
   }
 
   private static OPDSAvailabilityType determineAvailability(
     final OPDSAcquisitionFeedEntryBuilderType eb,
     final Element e)
-    throws OPDSParseException,
-      ParseException
+    throws OPDSParseException, ParseException
   {
     final OptionType<Element> ee_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
-        e,
-        OPDSFeedConstants.SCHEMA_URI,
-        "Event");
+        e, OPDSFeedConstants.SCHEMA_URI, "Event");
 
     /**
      * If there is a <tt>schema:Event</tt> element, then the book is either
@@ -199,25 +187,18 @@ public final class OPDSAcquisitionFeedEntryParser implements
     if (ee_opt.isSome()) {
       final Some<Element> ee_some = (Some<Element>) ee_opt;
       final Element ee = ee_some.get();
-      final String ee_name =
-        OPDSXML.getFirstChildElementTextWithName(
-          ee,
-          OPDSFeedConstants.SCHEMA_URI,
-          "name");
+      final String ee_name = OPDSXML.getFirstChildElementTextWithName(
+        ee, OPDSFeedConstants.SCHEMA_URI, "name");
 
       if ("loan".equals(ee_name)) {
-        final Calendar start =
-          OPDSRFC3339Formatter.parseRFC3339Date(OPDSXML
-            .getFirstChildElementTextWithName(
-              ee,
-              OPDSFeedConstants.SCHEMA_URI,
-              "startDate"));
+        final Calendar start = OPDSRFC3339Formatter.parseRFC3339Date(
+          OPDSXML.getFirstChildElementTextWithName(
+            ee, OPDSFeedConstants.SCHEMA_URI, "startDate"));
         final OptionType<Calendar> end =
           OPDSXML.getFirstChildElementTextWithNameOptional(
-            ee,
-            OPDSFeedConstants.SCHEMA_URI,
-            "endDate").mapPartial(
-            new PartialFunctionType<String, Calendar, ParseException>() {
+            ee, OPDSFeedConstants.SCHEMA_URI, "endDate").mapPartial(
+            new PartialFunctionType<String, Calendar, ParseException>()
+            {
               @Override public Calendar call(
                 final String s)
                 throws ParseException
@@ -230,20 +211,14 @@ public final class OPDSAcquisitionFeedEntryParser implements
       }
 
       if ("hold".equals(ee_name)) {
-        final Calendar start =
-          OPDSRFC3339Formatter.parseRFC3339Date(OPDSXML
-            .getFirstChildElementTextWithName(
-              ee,
-              OPDSFeedConstants.SCHEMA_URI,
-              "startDate"));
+        final Calendar start = OPDSRFC3339Formatter.parseRFC3339Date(
+          OPDSXML.getFirstChildElementTextWithName(
+            ee, OPDSFeedConstants.SCHEMA_URI, "startDate"));
 
         try {
-          final int pos =
-            Integer.valueOf(
-              OPDSXML.getFirstChildElementTextWithName(
-                ee,
-                OPDSFeedConstants.SCHEMA_URI,
-                "position")).intValue();
+          final int pos = Integer.valueOf(
+            OPDSXML.getFirstChildElementTextWithName(
+              ee, OPDSFeedConstants.SCHEMA_URI, "position")).intValue();
 
           return OPDSAvailabilityHeld.get(start, pos);
         } catch (final NumberFormatException x) {
@@ -252,8 +227,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
       }
 
       OPDSAcquisitionFeedEntryParser.LOG.error(
-        "ignoring unrecognized event type: {}",
-        ee_name);
+        "ignoring unrecognized event type: {}", ee_name);
     }
 
     /**
@@ -267,8 +241,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
       final OPDSAcquisition acq = acqs.get(index);
       switch (acq.getType()) {
         case ACQUISITION_BORROW:
-        case ACQUISITION_GENERIC:
-        {
+        case ACQUISITION_GENERIC: {
           borrow = true;
           break;
         }
@@ -278,17 +251,14 @@ public final class OPDSAcquisitionFeedEntryParser implements
          * book is available and there is nothing more to do.
          */
 
-        case ACQUISITION_OPEN_ACCESS:
-        {
+        case ACQUISITION_OPEN_ACCESS: {
           return OPDSAvailabilityOpenAccess.get();
         }
         case ACQUISITION_SAMPLE:
         case ACQUISITION_SUBSCRIBE:
-        case ACQUISITION_BUY:
-        {
+        case ACQUISITION_BUY: {
           OPDSAcquisitionFeedEntryParser.LOG.error(
-            "unimplemented acquisition type: {}",
-            acq.getType());
+            "unimplemented acquisition type: {}", acq.getType());
           break;
         }
       }
@@ -303,9 +273,7 @@ public final class OPDSAcquisitionFeedEntryParser implements
     if (borrow) {
       final OptionType<String> license_count_opt =
         OPDSXML.getFirstChildElementTextWithNameOptional(
-          e,
-          OPDSFeedConstants.SIMPLIFIED_URI,
-          "available_licenses");
+          e, OPDSFeedConstants.SIMPLIFIED_URI, "available_licenses");
 
       if (license_count_opt.isSome()) {
         final Some<String> license_count_some =
@@ -332,11 +300,6 @@ public final class OPDSAcquisitionFeedEntryParser implements
      */
 
     return OPDSAvailabilityLoanable.get();
-  }
-
-  private OPDSAcquisitionFeedEntryParser()
-  {
-
   }
 
   @Override public OPDSAcquisitionFeedEntry parseEntry(

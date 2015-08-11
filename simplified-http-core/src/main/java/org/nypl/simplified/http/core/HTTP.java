@@ -1,5 +1,10 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -9,17 +14,19 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
-
 /**
  * Default implementation of the {@link HTTPType} type.
  */
 
 public final class HTTP implements HTTPType
 {
+  private final String user_agent;
+
+  private HTTP()
+  {
+    this.user_agent = HTTP.userAgent();
+  }
+
   private static String userAgent()
   {
     final Package p = HTTP.class.getPackage();
@@ -32,67 +39,6 @@ public final class HTTP implements HTTPType
     return "simplified-http";
   }
 
-  private static final class OK implements HTTPResultOKType<InputStream>
-  {
-    private final HttpURLConnection         conn;
-    private final long                      content_length;
-    private final Map<String, List<String>> headers;
-    private final String                    message;
-    private final int                       status;
-    private final InputStream               stream;
-
-    OK(
-      final HttpURLConnection c)
-      throws IOException
-    {
-      this.conn = NullCheck.notNull(c);
-      this.message = NullCheck.notNull(this.conn.getResponseMessage());
-      this.status = this.conn.getResponseCode();
-      this.stream = NullCheck.notNull(this.conn.getInputStream());
-      this.headers = NullCheck.notNull(this.conn.getHeaderFields());
-      this.content_length = c.getContentLength();
-    }
-
-    @Override public void close()
-      throws IOException
-    {
-      this.conn.disconnect();
-      this.stream.close();
-    }
-
-    @Override public long getContentLength()
-    {
-      return this.content_length;
-    }
-
-    @Override public String getMessage()
-    {
-      return this.message;
-    }
-
-    @Override public Map<String, List<String>> getResponseHeaders()
-    {
-      return this.headers;
-    }
-
-    @Override public int getStatus()
-    {
-      return this.status;
-    }
-
-    @Override public InputStream getValue()
-    {
-      return this.stream;
-    }
-
-    @Override public <B, E extends Exception> B matchResult(
-      final HTTPResultMatcherType<InputStream, B, E> m)
-      throws E
-    {
-      return m.onHTTPOK(this);
-    }
-  }
-
   private static void checkURI(
     final URI uri)
   {
@@ -100,7 +46,7 @@ public final class HTTP implements HTTPType
     final String scheme = NullCheck.notNull(uri.getScheme());
     final boolean ok = "http".equals(scheme) || "https".endsWith(scheme);
     if (!ok) {
-      final StringBuilder m = new StringBuilder();
+      final StringBuilder m = new StringBuilder(64);
       m.append("Unsupported URI scheme.\n");
       m.append("  URI scheme: ");
       m.append(scheme);
@@ -110,16 +56,13 @@ public final class HTTP implements HTTPType
     }
   }
 
+  /**
+   * @return A new HTTP interface
+   */
+
   public static HTTPType newHTTP()
   {
     return new HTTP();
-  }
-
-  private final String user_agent;
-
-  private HTTP()
-  {
-    this.user_agent = HTTP.userAgent();
   }
 
   @Override public HTTPResultType<InputStream> get(
@@ -155,7 +98,7 @@ public final class HTTP implements HTTPType
         return new HTTPResultError<InputStream>(
           conn.getResponseCode(),
           NullCheck.notNull(conn.getResponseMessage()),
-          conn.getContentLength(),
+          (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()));
       }
 
@@ -197,7 +140,7 @@ public final class HTTP implements HTTPType
         return new HTTPResultError<Unit>(
           conn.getResponseCode(),
           NullCheck.notNull(conn.getResponseMessage()),
-          conn.getContentLength(),
+          (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()));
       }
 
@@ -205,12 +148,73 @@ public final class HTTP implements HTTPType
         NullCheck.notNull(conn.getResponseMessage()),
         conn.getResponseCode(),
         Unit.unit(),
-        conn.getContentLength(),
+        (long) conn.getContentLength(),
         NullCheck.notNull(conn.getHeaderFields()));
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {
       return new HTTPResultException<Unit>(uri, e);
+    }
+  }
+
+  private static final class OK implements HTTPResultOKType<InputStream>
+  {
+    private final HttpURLConnection         conn;
+    private final long                      content_length;
+    private final Map<String, List<String>> headers;
+    private final String                    message;
+    private final int                       status;
+    private final InputStream               stream;
+
+    OK(
+      final HttpURLConnection c)
+      throws IOException
+    {
+      this.conn = NullCheck.notNull(c);
+      this.message = NullCheck.notNull(this.conn.getResponseMessage());
+      this.status = this.conn.getResponseCode();
+      this.stream = NullCheck.notNull(this.conn.getInputStream());
+      this.headers = NullCheck.notNull(this.conn.getHeaderFields());
+      this.content_length = (long) c.getContentLength();
+    }
+
+    @Override public void close()
+      throws IOException
+    {
+      this.conn.disconnect();
+      this.stream.close();
+    }
+
+    @Override public long getContentLength()
+    {
+      return this.content_length;
+    }
+
+    @Override public String getMessage()
+    {
+      return this.message;
+    }
+
+    @Override public Map<String, List<String>> getResponseHeaders()
+    {
+      return this.headers;
+    }
+
+    @Override public int getStatus()
+    {
+      return this.status;
+    }
+
+    @Override public InputStream getValue()
+    {
+      return this.stream;
+    }
+
+    @Override public <B, E extends Exception> B matchResult(
+      final HTTPResultMatcherType<InputStream, B, E> m)
+      throws E
+    {
+      return m.onHTTPOK(this);
     }
   }
 }

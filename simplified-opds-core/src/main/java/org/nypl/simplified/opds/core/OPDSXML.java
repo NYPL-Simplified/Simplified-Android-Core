@@ -1,9 +1,13 @@
 package org.nypl.simplified.opds.core;
 
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -13,16 +17,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Convenient XML handling functions.
@@ -30,11 +28,28 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public final class OPDSXML
 {
+
+  private OPDSXML()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Return all child elements of {@code node} that have name {@code name} in
+   * namespace {@code namespace}.
+   *
+   * @param node      The parent node
+   * @param namespace The namespace
+   * @param name      The element name
+   *
+   * @return A list of elements
+   */
+
   public static List<Element> getChildElementsWithName(
     final Element node,
     final URI namespace,
     final String name)
-    {
+  {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -42,20 +57,33 @@ public final class OPDSXML
     final NodeList children =
       node.getElementsByTagNameNS(namespace.toString(), name);
 
-    final List<Element> xs = new ArrayList<Element>();
+    final List<Element> xs = new ArrayList<Element>(children.getLength());
     for (int index = 0; index < children.getLength(); ++index) {
       xs.add((Element) children.item(index));
     }
 
     return xs;
-    }
+  }
+
+  /**
+   * Return all child elements of {@code node} that have name {@code name} in
+   * namespace {@code namespace}.
+   *
+   * @param node      The parent node
+   * @param namespace The namespace
+   * @param name      The element name
+   *
+   * @return A list of elements
+   *
+   * @throws OPDSParseException If there are no matching elements
+   */
 
   public static List<Element> getChildElementsWithNameNonEmpty(
     final Element node,
     final URI namespace,
     final String name)
-      throws OPDSParseException
-      {
+    throws OPDSParseException
+  {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -63,14 +91,14 @@ public final class OPDSXML
     final NodeList children =
       node.getElementsByTagNameNS(namespace.toString(), name);
     if (children.getLength() >= 1) {
-      final List<Element> xs = new ArrayList<Element>();
+      final List<Element> xs = new ArrayList<Element>(children.getLength());
       for (int index = 0; index < children.getLength(); ++index) {
         xs.add((Element) children.item(index));
       }
       return xs;
     }
 
-    final StringBuilder m = new StringBuilder();
+    final StringBuilder m = new StringBuilder(128);
     m.append("Missing at least one required element.\n");
     m.append("Expected namespace: ");
     m.append(namespace);
@@ -79,24 +107,48 @@ public final class OPDSXML
     m.append(name);
     m.append("\n");
     throw new OPDSParseException(NullCheck.notNull(m.toString()));
-      }
+  }
+
+  /**
+   * Return the text of the first child element of {@code node} that has name
+   * {@code name} in namespace {@code namespace}.
+   *
+   * @param node      The node
+   * @param namespace The child namespace
+   * @param name      The child name
+   *
+   * @return The text of the child element
+   *
+   * @throws OPDSParseException If there are no matching child elements
+   */
 
   public static String getFirstChildElementTextWithName(
     final Element node,
     final URI namespace,
     final String name)
-      throws OPDSParseException
+    throws OPDSParseException
   {
     final Element e =
       OPDSXML.getFirstChildElementWithName(node, namespace, name);
     return NullCheck.notNull(e.getTextContent().trim());
   }
 
+  /**
+   * Return the (optional) text of the first child element of {@code node} that
+   * has name {@code name} in namespace {@code namespace}.
+   *
+   * @param node      The node
+   * @param namespace The child namespace
+   * @param name      The child name
+   *
+   * @return The text of the child element, if any
+   */
+
   public static OptionType<String> getFirstChildElementTextWithNameOptional(
     final Element node,
     final URI namespace,
     final String name)
-    {
+  {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -113,13 +165,26 @@ public final class OPDSXML
     }
 
     return Option.none();
-    }
+  }
+
+  /**
+   * Return the first child element of {@code node} that has name {@code name}
+   * in namespace {@code namespace}.
+   *
+   * @param node      The node
+   * @param namespace The child namespace
+   * @param name      The child name
+   *
+   * @return The child element
+   *
+   * @throws OPDSParseException If no matching element exists
+   */
 
   public static Element getFirstChildElementWithName(
     final Element node,
     final URI namespace,
     final String name)
-      throws OPDSParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
@@ -135,7 +200,7 @@ public final class OPDSXML
       }
     }
 
-    final StringBuilder m = new StringBuilder();
+    final StringBuilder m = new StringBuilder(128);
     m.append("Expected required element.\n");
     m.append("Expected namespace: ");
     m.append(namespace);
@@ -146,11 +211,22 @@ public final class OPDSXML
     throw new OPDSParseException(NullCheck.notNull(m.toString()));
   }
 
+  /**
+   * Return the first child element of {@code node} that has name {@code name}
+   * in namespace {@code namespace}, if any.
+   *
+   * @param node      The node
+   * @param namespace The child namespace
+   * @param name      The child name
+   *
+   * @return The child element, if any
+   */
+
   public static OptionType<Element> getFirstChildElementWithNameOptional(
     final Element node,
     final URI namespace,
     final String name)
-    {
+  {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
@@ -166,11 +242,17 @@ public final class OPDSXML
     }
 
     return Option.none();
-    }
+  }
+
+  /**
+   * @param e The element
+   *
+   * @return The namespace of the given element, if any
+   */
 
   public static OptionType<String> getNodeNamespace(
     final Element e)
-    {
+  {
     NullCheck.notNull(e);
 
     final String ns = e.getNamespaceURI();
@@ -178,16 +260,27 @@ public final class OPDSXML
       return Option.some(ns);
     }
     return Option.none();
-    }
+  }
+
+  /**
+   * Cast the given node to an {@link Element}, raising an exception if it is
+   * not an element.
+   *
+   * @param node The node
+   *
+   * @return The node as an element
+   *
+   * @throws OPDSParseException If the node is not an {@link Element}
+   */
 
   public static Element nodeAsElement(
     final Node node)
-      throws OPDSParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(node);
 
     if ((node instanceof Element) == false) {
-      final StringBuilder m = new StringBuilder();
+      final StringBuilder m = new StringBuilder(128);
       m.append("Expected element but got node of type ");
       m.append(node.getNodeName());
       throw new OPDSParseException(NullCheck.notNull(m.toString()));
@@ -195,11 +288,26 @@ public final class OPDSXML
     return (Element) node;
   }
 
+  /**
+   * Cast the given node to an {@link Element}, raising an exception if it is
+   * not an element and/or does not have the given {@code name} and {@code
+   * namespace}.
+   *
+   * @param node      The node
+   * @param name      The expected element name
+   * @param namespace The expected element namespace
+   *
+   * @return The node as an element
+   *
+   * @throws OPDSParseException If the node is not an {@link Element} or has the
+   *                            wrong name
+   */
+
   public static Element nodeAsElementWithName(
     final Node node,
     final URI namespace,
     final String name)
-      throws OPDSParseException
+    throws OPDSParseException
   {
     NullCheck.notNull(node);
     NullCheck.notNull(namespace);
@@ -210,7 +318,7 @@ public final class OPDSXML
       return e;
     }
 
-    final StringBuilder m = new StringBuilder();
+    final StringBuilder m = new StringBuilder(128);
     m.append("Missing required element.\n");
     m.append("Expected namespace: ");
     m.append(namespace);
@@ -227,6 +335,14 @@ public final class OPDSXML
     throw new OPDSParseException(NullCheck.notNull(m.toString()));
   }
 
+  /**
+   * @param node      The element
+   * @param namespace The namespace
+   * @param name      The name
+   *
+   * @return {@code true} if the given element has the given name and namespace
+   */
+
   public static boolean nodeHasName(
     final Element node,
     final URI namespace,
@@ -239,10 +355,20 @@ public final class OPDSXML
     return false;
   }
 
+  /**
+   * Convenient function to serialize the given document to the given output
+   * stream.
+   *
+   * @param d The document
+   * @param o The output stream
+   *
+   * @throws OPDSFeedSerializationException If any errors occur on serialization
+   */
+
   public static void serializeDocumentToStream(
     final Document d,
     final OutputStream o)
-      throws OPDSFeedSerializationException
+    throws OPDSFeedSerializationException
   {
     NullCheck.notNull(d);
     NullCheck.notNull(o);
@@ -265,10 +391,5 @@ public final class OPDSXML
     } catch (final TransformerException ex) {
       throw new OPDSFeedSerializationException(ex);
     }
-  }
-
-  private OPDSXML()
-  {
-    throw new UnreachableCodeException();
   }
 }

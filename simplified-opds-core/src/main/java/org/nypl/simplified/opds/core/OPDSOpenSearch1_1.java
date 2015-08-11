@@ -1,28 +1,45 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
+//@formatter:off
 
 /**
  * The type of Open Search 1.1 descriptions.
  *
- * @see <a href="http://www.opensearch.org/Specifications/OpenSearch/1.1">OpenSearch 1.1</a>
+ * @see <a href="http://www.opensearch.org/Specifications/OpenSearch/1.1">
+ *   OpenSearch 1.1</a>
  */
+
+//@formatter:on
 
 public final class OPDSOpenSearch1_1
 {
   private final String template;
+
+  /**
+   * Construct a search template.
+   *
+   * @param in_template The template
+   */
 
   public OPDSOpenSearch1_1(
     final String in_template)
   {
     this.template = NullCheck.notNull(in_template);
   }
+
+  /**
+   * @param terms The search terms
+   *
+   * @return A query URI for searching with the given search terms
+   */
 
   public URI getQueryURIForTerms(
     final String terms)

@@ -8,7 +8,7 @@ public interface BookStatusType
 {
   /**
    * @return The status priority; higher priority status updates will replace
-   *         lower priority values.
+   * lower priority values.
    */
 
   BookStatusPriorityOrdering getPriority();
@@ -22,11 +22,13 @@ public interface BookStatusType
   /**
    * Match on the type of status.
    *
-   * @param m
-   *          The matcher
+   * @param m   The matcher
+   * @param <A> The type of returned values
+   * @param <E> The type of raised exceptions
+   *
    * @return The value returned by the matcher
-   * @throws E
-   *           If the matcher raises <tt>E</tt>
+   *
+   * @throws E If the matcher raises <tt>E</tt>
    */
 
   <A, E extends Exception> A matchBookStatus(

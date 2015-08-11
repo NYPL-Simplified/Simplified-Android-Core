@@ -8,13 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Trivial file locking utilities.
@@ -22,10 +20,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class FileLocking
 {
-  private static final Logger LOG;
+  private static final Logger                   LOG;
+  private static final Map<File, ReentrantLock> PATH_LOCKS;
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(FileLocking.class));
+    PATH_LOCKS = new WeakHashMap<File, ReentrantLock>(16);
   }
 
   private FileLocking()
@@ -35,11 +35,10 @@ public final class FileLocking
 
   /**
    * Attempt to acquire a lock on <tt>file</tt>, waiting for a maximum of
-   * <tt>milliseconds</tt> ms, in <tt>wait</tt> millisecond increments. If a
-   * lock is acquired, evaluate and return the result of <tt>p</tt>.
+   * <tt>milliseconds</tt> ms. If a lock is acquired, evaluate and return the
+   * result of <tt>p</tt>.
    *
    * @param file         The lock file
-   * @param wait         The wait increment
    * @param milliseconds The maximum wait time
    * @param p            The function to evaluate
    * @param <T>          The type of returned values
@@ -51,9 +50,8 @@ public final class FileLocking
    * @throws IOException If the lock cannot be acquired in the given time limit
    */
 
-  public static <T, E extends Exception> T withFileLocked(
+  public static <T, E extends Exception> T withFileThreadLocked(
     final File file,
-    final long wait,
     final long milliseconds,
     final PartialFunctionType<Unit, T, E> p)
     throws E, IOException
@@ -61,55 +59,46 @@ public final class FileLocking
     NullCheck.notNull(file);
     NullCheck.notNull(p);
 
-    final AtomicBoolean abort = new AtomicBoolean(false);
-    final long time_start =
-      TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
-
-    while (abort.get() == false) {
-      final long time_now =
-        TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
-
-      final long diff = time_now - time_start;
-      FileLocking.LOG.trace("lock try {} (diff {})", file, Long.valueOf(diff));
-
-      if (diff > milliseconds) {
-        abort.set(true);
-        FileLocking.LOG.trace("lock timeout {} ", file);
-        break;
+    final File f = file.getCanonicalFile();
+    final ReentrantLock lock = FileLocking.getFileLock(file);
+    try {
+      if (lock.isHeldByCurrentThread()) {
+        throw new IOException(
+          String.format("Lock of file %s already held by this thread", f));
       }
 
-      try {
-        final FileOutputStream fs = new FileOutputStream(file);
+      if (lock.tryLock(milliseconds, TimeUnit.MILLISECONDS)) {
         try {
-          final FileChannel fc = fs.getChannel();
-          try {
-            final FileLock lock = fc.lock();
-            try {
-              FileLocking.LOG.trace("lock obtain {}", file);
-              return p.call(Unit.unit());
-            } finally {
-              lock.release();
-              FileLocking.LOG.trace("lock release {}", file);
-            }
-          } finally {
-            fc.close();
-          }
+          FileLocking.LOG.trace("lock obtain {}", file);
+          return p.call(Unit.unit());
         } finally {
-          fs.close();
+          FileLocking.LOG.trace("lock unlock {}", file);
+          lock.unlock();
         }
-      } catch (final OverlappingFileLockException e) {
-        try {
-          Thread.sleep(wait);
-        } catch (final InterruptedException x) {
-          // Don't care
-        }
+      } else {
+        throw new IOException(
+          String.format(
+            "Timed out waiting for lock of file %s", f));
       }
+    } catch (final InterruptedException e) {
+      throw new IOException(
+        String.format("Interrupted waiting for lock of file %s", f));
+    }
+  }
+
+  private static synchronized ReentrantLock getFileLock(final File file)
+  {
+    FileLocking.LOG.trace("lock request {}", file);
+
+    final ReentrantLock lock = FileLocking.PATH_LOCKS.get(file);
+    if (lock != null) {
+      FileLocking.LOG.trace("lock reuse {}", file);
+      return lock;
     }
 
-    final String m = String.format(
-      "Timed out attempting to lock '%s' after %d milliseconds",
-      file,
-      Long.valueOf(milliseconds));
-    throw new IOException(m);
+    FileLocking.LOG.trace("lock new {}", file);
+    final ReentrantLock new_lock = new ReentrantLock(true);
+    FileLocking.PATH_LOCKS.put(file, new_lock);
+    return new_lock;
   }
 }
