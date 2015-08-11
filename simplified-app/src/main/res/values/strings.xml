@@ -64,6 +64,9 @@
   <string name="settings_login_succeeded">Logged in successfully</string>
   <string name="settings_logout_succeeded">Logged out successfully</string>
   <string name="settings_login_failed">Login Failed</string>
+  <string name="settings_login_failed_credentials">Your barcode and pin combination was not valid. Please try again.</string>
+  <string name="settings_login_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
+  <string name="settings_login_failed_device">An error occurred when activating your device. Please check your connection or try again later.</string>
   <string name="settings_logout_failed">Logout Failed</string>
   <string name="settings_feedback">Feedback</string>
   <string name="settings_credits">Credits</string>

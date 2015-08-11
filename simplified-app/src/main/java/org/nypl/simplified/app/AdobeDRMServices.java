@@ -2,6 +2,7 @@ package org.nypl.simplified.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.os.Build;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -16,10 +17,14 @@ import org.nypl.drm.core.AdobeAdeptNetProviderType;
 import org.nypl.drm.core.AdobeAdeptResourceProvider;
 import org.nypl.drm.core.AdobeAdeptResourceProviderType;
 import org.nypl.drm.core.DRMException;
+import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.SecureRandom;
 
 /**
@@ -55,10 +60,10 @@ public final class AdobeDRMServices
       context.getSharedPreferences("adobe-drm-settings", 0);
 
     String serial = settings.getString("adobe-device-serial", null);
-    if (serial == null) {
-      LOG.debug("generating new device serial");
+    if (serial == null || serial.length() != 64) {
+      AdobeDRMServices.LOG.debug("generating new device serial");
       final SecureRandom rng = new SecureRandom();
-      final byte[] bytes = new byte[16];
+      final byte[] bytes = new byte[32];
       rng.nextBytes(bytes);
       final StringBuilder sb = new StringBuilder();
       for (int index = 0; index < bytes.length; ++index) {
@@ -66,7 +71,7 @@ public final class AdobeDRMServices
       }
       serial = sb.toString();
     } else {
-      LOG.debug("loaded existing device serial");
+      AdobeDRMServices.LOG.debug("loaded existing device serial");
     }
 
     settings.edit().putString("adobe-device-serial", serial).apply();
@@ -115,8 +120,8 @@ public final class AdobeDRMServices
 
     final AdobeAdeptConnectorFactoryType factory =
       AdobeAdeptConnectorFactory.get();
-    final AdobeAdeptResourceProviderType res =
-      AdobeAdeptResourceProvider.get(context.getAssets());
+    final AdobeAdeptResourceProviderType res = AdobeAdeptResourceProvider.get(
+      AdobeDRMServices.getCertificateAsset(context.getAssets()));
     final AdobeAdeptNetProviderType net = AdobeAdeptNetProvider.get(agent);
 
     try {
@@ -154,6 +159,42 @@ public final class AdobeDRMServices
     } catch (final DRMException e) {
       AdobeDRMServices.LOG.error("DRM is not supported: ", e);
       return Option.none();
+    }
+  }
+
+  /**
+   * Read the certificate from the Android assets.
+   *
+   * @param assets The assets
+   *
+   * @return A certificate
+   *
+   * @throws DRMUnsupportedException If the certificate is missing or
+   *                                 inaccessible
+   */
+
+  private static byte[] getCertificateAsset(final AssetManager assets)
+    throws DRMUnsupportedException
+  {
+    try {
+      final InputStream is = assets.open("ReaderClientCert.sig");
+      try {
+        final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[8192];
+        while (true) {
+          final int r = is.read(buffer);
+          if (r == -1) {
+            break;
+          }
+          bao.write(buffer, 0, r);
+        }
+        return bao.toByteArray();
+      } finally {
+        is.close();
+      }
+    } catch (final IOException e) {
+      throw new DRMUnsupportedException(
+        "ReaderClientCert.sig is unavailable", e);
     }
   }
 }

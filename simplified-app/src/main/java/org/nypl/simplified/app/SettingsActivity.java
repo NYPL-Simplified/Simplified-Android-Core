@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -33,14 +34,12 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.slf4j.Logger;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * The activity displaying the settings for the application.
  */
 
-@SuppressWarnings("synthetic-access") public final class SettingsActivity
-  extends SimplifiedActivity implements AccountLogoutListenerType,
+public final class SettingsActivity extends SimplifiedActivity implements
+  AccountLogoutListenerType,
   AccountLoginListenerType,
   AccountGetCachedCredentialsListenerType,
   AccountSyncListenerType
@@ -167,6 +166,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
           SettingsActivity.editableEnable(in_barcode_edit);
           SettingsActivity.editableEnable(in_pin_edit);
 
+          SettingsActivity.this.enableLoginIfFieldsNonEmpty(
+            in_login,
+            in_pin_edit,
+            in_barcode_edit);
+
           in_login.setText(rr.getString(R.string.settings_log_in));
           in_login.setOnClickListener(
             new OnClickListener()
@@ -192,7 +196,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
       });
   }
 
-  @Override public void onAccountLoginFailure(
+  private void onAccountLoginFailure(
     final OptionType<Throwable> error,
     final String message)
   {
@@ -228,6 +232,37 @@ import java.util.concurrent.atomic.AtomicBoolean;
       });
   }
 
+  @Override public void onAccountLoginFailureCredentialsIncorrect()
+  {
+    SettingsActivity.LOG.error("onAccountLoginFailureCredentialsIncorrect");
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final OptionType<Throwable> none = Option.none();
+    this.onAccountLoginFailure(
+      none, rr.getString(R.string.settings_login_failed_credentials));
+  }
+
+  @Override public void onAccountLoginFailureServerError(final int code)
+  {
+    SettingsActivity.LOG.error("onAccountLoginFailureServerError: {}", code);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final OptionType<Throwable> none = Option.none();
+    this.onAccountLoginFailure(
+      none, rr.getString(R.string.settings_login_failed_server));
+  }
+
+  @Override public void onAccountLoginFailureLocalError(
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    SettingsActivity.LOG.error("onAccountLoginFailureLocalError: {}", message);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    this.onAccountLoginFailure(
+      error, rr.getString(R.string.settings_login_failed_server));
+  }
+
   @Override public void onAccountLoginSuccess(
     final AccountBarcode barcode,
     final AccountPIN pin)
@@ -255,6 +290,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
           books.accountSync(SettingsActivity.this);
         }
       });
+  }
+
+  @Override
+  public void onAccountLoginFailureDeviceActivationError(final String message)
+  {
+    SettingsActivity.LOG.error(
+      "onAccountLoginFailureDeviceActivationError: {}", message);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final OptionType<Throwable> none = Option.none();
+    this.onAccountLoginFailure(
+      none, rr.getString(R.string.settings_login_failed_device));
   }
 
   @Override public void onAccountLogoutFailure(
@@ -345,8 +392,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
     final TextView in_adobe =
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_adobe_drm));
 
-    final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
-    final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
+    /**
+     * Set a text change listener on both fields that enables the login
+     * button if both fields are non-empty.
+     */
 
     in_barcode_edit.addTextChangedListener(
       new TextWatcher()
@@ -357,9 +406,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
           final int before,
           final int count)
         {
-          in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
-          in_login.setEnabled(
-            (in_barcode_empty.get() == false) && (in_pin_empty.get() == false));
+          SettingsActivity.this.enableLoginIfFieldsNonEmpty(
+            in_login, in_pin_edit, in_barcode_edit);
         }
 
         @Override public void beforeTextChanged(
@@ -387,9 +435,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
           final int before,
           final int count)
         {
-          in_pin_empty.set(NullCheck.notNull(s).length() == 0);
-          in_login.setEnabled(
-            (in_barcode_empty.get() == false) && (in_pin_empty.get() == false));
+          SettingsActivity.this.enableLoginIfFieldsNonEmpty(
+            in_login, in_pin_edit, in_barcode_edit);
         }
 
         @Override public void beforeTextChanged(
@@ -425,6 +472,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
     this.login = in_login;
+  }
+
+  private void enableLoginIfFieldsNonEmpty(
+    final Button in_login,
+    final EditText in_pin_edit,
+    final EditText in_barcode_edit)
+  {
+    in_login.setEnabled(
+      in_pin_edit.getText().length() != 0 && in_barcode_edit.length() != 0);
   }
 
   @Override protected void onResume()

@@ -6,6 +6,7 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -62,6 +63,7 @@ public final class BooksController extends Observable implements BooksType
   private final HTTPType                                          http;
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
   private final AtomicInteger                                     task_id;
+  private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
   private       Map<Integer, Future<?>>                           tasks;
 
   private BooksController(
@@ -71,7 +73,8 @@ public final class BooksController extends Observable implements BooksType
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config)
+    final BooksControllerConfiguration in_config,
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.feed_loader = NullCheck.notNull(in_feeds);
@@ -87,6 +90,7 @@ public final class BooksController extends Observable implements BooksType
       in_json_serializer, in_json_parser, this.data_directory);
     this.task_id = new AtomicInteger(0);
     this.feed_parser = this.feed_loader.getOPDSFeedParser();
+    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
   }
 
   static OptionType<File> makeCover(
@@ -158,6 +162,7 @@ public final class BooksController extends Observable implements BooksType
    * @param in_json_serializer A JSON serializer
    * @param in_json_parser     A JSON parser
    * @param in_config          The controller configuration
+   * @param in_adobe_drm       An Adobe DRM interface, if supported
    *
    * @return A new books controller
    */
@@ -169,7 +174,8 @@ public final class BooksController extends Observable implements BooksType
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config)
+    final BooksControllerConfiguration in_config,
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
   {
     return new BooksController(
       in_exec,
@@ -178,7 +184,8 @@ public final class BooksController extends Observable implements BooksType
       in_downloader,
       in_json_serializer,
       in_json_parser,
-      in_config);
+      in_config,
+      in_adobe_drm);
   }
 
   /**
@@ -275,6 +282,7 @@ public final class BooksController extends Observable implements BooksType
         this.book_database,
         this.http,
         this.config,
+        this.adobe_drm,
         barcode,
         pin,
         listener,
@@ -291,7 +299,7 @@ public final class BooksController extends Observable implements BooksType
       this.books_status.booksStatusClearAll();
       this.submitRunnable(
         new BooksControllerLogoutTask(
-          this.config, this.login, listener));
+          this.config, this.adobe_drm, this.login, listener));
     }
   }
 

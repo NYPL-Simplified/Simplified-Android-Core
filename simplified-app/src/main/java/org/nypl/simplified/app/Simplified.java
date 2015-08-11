@@ -334,7 +334,8 @@ public final class Simplified extends Application
         this.downloader,
         in_json_serializer,
         in_json_parser,
-        books_config);
+        books_config,
+        this.adobe_drm);
 
       /**
        * Configure cover provider.

@@ -16,6 +16,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -97,7 +98,7 @@ public final class LoginDialog extends DialogFragment
     return d;
   }
 
-  @Override public void onAccountLoginFailure(
+  private void onAccountLoginFailure(
     final OptionType<Throwable> error,
     final String message)
   {
@@ -135,6 +136,37 @@ public final class LoginDialog extends DialogFragment
     }
   }
 
+  @Override public void onAccountLoginFailureCredentialsIncorrect()
+  {
+    LoginDialog.LOG.error("onAccountLoginFailureCredentialsIncorrect");
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final OptionType<Throwable> none = Option.none();
+    this.onAccountLoginFailure(
+      none, rr.getString(R.string.settings_login_failed_credentials));
+  }
+
+  @Override public void onAccountLoginFailureServerError(final int code)
+  {
+    LoginDialog.LOG.error("onAccountLoginFailureServerError: {}", code);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final OptionType<Throwable> none = Option.none();
+    this.onAccountLoginFailure(
+      none, rr.getString(R.string.settings_login_failed_server));
+  }
+
+  @Override public void onAccountLoginFailureLocalError(
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    LoginDialog.LOG.error("onAccountLoginFailureLocalError: {}", message);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    this.onAccountLoginFailure(
+      error, rr.getString(R.string.settings_login_failed_server));
+  }
+
   @Override public void onAccountLoginSuccess(
     final AccountBarcode barcode,
     final AccountPIN pin)
@@ -158,6 +190,18 @@ public final class LoginDialog extends DialogFragment
         LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
     }
+  }
+
+  @Override
+  public void onAccountLoginFailureDeviceActivationError(final String message)
+  {
+    LoginDialog.LOG.error(
+      "onAccountLoginFailureDeviceActivationError: {}", message);
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final OptionType<Throwable> none = Option.none();
+    this.onAccountLoginFailure(
+      none, rr.getString(R.string.settings_login_failed_device));
   }
 
   @Override public void onResume()

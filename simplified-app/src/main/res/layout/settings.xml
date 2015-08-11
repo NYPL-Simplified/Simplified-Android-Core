@@ -41,7 +41,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:layout_marginStart="16dp"
-          android:inputType="textNoSuggestions|number"
+          android:inputType="textNoSuggestions"
           android:maxLength="14"
           android:maxLines="1" />
       </TableRow>
@@ -62,7 +62,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:layout_marginStart="16dp"
-          android:inputType="textNoSuggestions|number"
+          android:inputType="textNoSuggestions"
           android:maxLength="4"
           android:maxLines="1" />
       </TableRow>

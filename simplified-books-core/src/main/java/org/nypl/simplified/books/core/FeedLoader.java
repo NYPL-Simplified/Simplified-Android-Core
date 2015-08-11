@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException;
  * not been accessed for five minutes.
  */
 
-@SuppressWarnings("synthetic-access") public final class FeedLoader
+public final class FeedLoader
   implements FeedLoaderType, ExpirationListener<URI, FeedType>
 {
   private static final Logger LOG;
