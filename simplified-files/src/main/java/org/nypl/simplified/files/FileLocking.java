@@ -34,9 +34,12 @@ public final class FileLocking
   }
 
   /**
-   * Attempt to acquire a lock on <tt>file</tt>, waiting for a maximum of
-   * <tt>milliseconds</tt> ms. If a lock is acquired, evaluate and return the
-   * result of <tt>p</tt>.
+   * Attempt to acquire a lock on {@code file}, waiting for a maximum of {@code
+   * milliseconds} ms. Locks are per-thread. Concurrent access to locks is not
+   * prevented for separate processes. If a lock is acquired, evaluate and
+   * return the result of {@code p}. If the current thread already has a lock
+   * for the given file, an exception will be raised immediately without
+   * waiting.
    *
    * @param file         The lock file
    * @param milliseconds The maximum wait time
@@ -44,9 +47,9 @@ public final class FileLocking
    * @param <T>          The type of returned values
    * @param <E>          The type of thrown exceptions
    *
-   * @return The value returned by <tt>p</tt>
+   * @return The value returned by {@code p}
    *
-   * @throws E           If <tt>p</tt> raises <tt>E</tt>
+   * @throws E           If {@code p} raises {@code E}
    * @throws IOException If the lock cannot be acquired in the given time limit
    */
 
