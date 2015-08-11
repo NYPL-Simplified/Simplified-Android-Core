@@ -1,9 +1,11 @@
 package org.nypl.simplified.app;
 
-import java.net.URI;
-
+import com.io7m.jfunctional.OptionType;
+import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedLoaderType;
+
+import java.net.URI;
 
 /**
  * Services provided to the main Simplified app.
@@ -38,4 +40,9 @@ public interface SimplifiedCatalogAppServicesType extends
 
   FeedLoaderType getFeedLoader();
 
+  /**
+   * @return Adobe DRM services, if any are available
+   */
+
+  OptionType<AdobeAdeptExecutorType> getAdobeDRMExecutor();
 }

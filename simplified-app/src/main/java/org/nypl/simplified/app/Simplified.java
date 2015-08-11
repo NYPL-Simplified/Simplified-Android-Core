@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
 import org.nypl.simplified.app.reader.ReaderBookmarks;
 import org.nypl.simplified.app.reader.ReaderBookmarksType;
@@ -67,7 +68,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Global application state.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 public final class Simplified extends Application
 {
   private static final              Logger     LOG;
@@ -238,20 +238,21 @@ public final class Simplified extends Application
       LOG_CA = LogUtilities.getLog(CatalogAppServices.class);
     }
 
-    private final BooksType                 books;
-    private final Context                   context;
-    private final CatalogBookCoverGenerator cover_generator;
-    private final BookCoverProviderType     cover_provider;
-    private final ExecutorService           exec_books;
-    private final ExecutorService           exec_catalog_feeds;
-    private final ExecutorService           exec_covers;
-    private final ExecutorService           exec_downloader;
-    private final URI                       feed_initial_uri;
-    private final FeedLoaderType            feed_loader;
-    private final HTTPType                  http;
-    private final ScreenSizeControllerType  screen;
-    private final AtomicBoolean             synced;
-    private final DownloaderType            downloader;
+    private final BooksType                          books;
+    private final Context                            context;
+    private final CatalogBookCoverGenerator          cover_generator;
+    private final BookCoverProviderType              cover_provider;
+    private final ExecutorService                    exec_books;
+    private final ExecutorService                    exec_catalog_feeds;
+    private final ExecutorService                    exec_covers;
+    private final ExecutorService                    exec_downloader;
+    private final URI                                feed_initial_uri;
+    private final FeedLoaderType                     feed_loader;
+    private final HTTPType                           http;
+    private final ScreenSizeControllerType           screen;
+    private final AtomicBoolean                      synced;
+    private final DownloaderType                     downloader;
+    private final OptionType<AdobeAdeptExecutorType> adobe_drm;
 
     public CatalogAppServices(
       final Context in_context,
@@ -285,6 +286,12 @@ public final class Simplified extends Application
       final OPDSSearchParserType s = OPDSSearchParser.newParser();
       this.feed_loader =
         Simplified.makeFeedLoader(this.exec_catalog_feeds, s, p);
+
+      /**
+       * DRM.
+       */
+
+      this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(this.context);
 
       /**
        * Book management.
@@ -359,6 +366,11 @@ public final class Simplified extends Application
     @Override public FeedLoaderType getFeedLoader()
     {
       return this.feed_loader;
+    }
+
+    @Override public OptionType<AdobeAdeptExecutorType> getAdobeDRMExecutor()
+    {
+      return this.adobe_drm;
     }
 
     @Override public boolean isNetworkAvailable()

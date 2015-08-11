@@ -1,0 +1,159 @@
+package org.nypl.simplified.app;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Build;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.drm.core.AdobeAdeptConnectorFactory;
+import org.nypl.drm.core.AdobeAdeptConnectorFactoryType;
+import org.nypl.drm.core.AdobeAdeptExecutor;
+import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.drm.core.AdobeAdeptNetProvider;
+import org.nypl.drm.core.AdobeAdeptNetProviderType;
+import org.nypl.drm.core.AdobeAdeptResourceProvider;
+import org.nypl.drm.core.AdobeAdeptResourceProviderType;
+import org.nypl.drm.core.DRMException;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
+
+import java.io.File;
+import java.security.SecureRandom;
+
+/**
+ * Functions to initialize and control Adobe DRM.
+ */
+
+public final class AdobeDRMServices
+{
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(AdobeDRMServices.class);
+  }
+
+  private AdobeDRMServices()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Retrieve or generate a serial number unique to this device.
+   *
+   * @param context The application context
+   *
+   * @return A unique device serial
+   */
+
+  public static String getDeviceSerial(final Context context)
+  {
+    NullCheck.notNull(context);
+
+    final SharedPreferences settings =
+      context.getSharedPreferences("adobe-drm-settings", 0);
+
+    String serial = settings.getString("adobe-device-serial", null);
+    if (serial == null) {
+      LOG.debug("generating new device serial");
+      final SecureRandom rng = new SecureRandom();
+      final byte[] bytes = new byte[16];
+      rng.nextBytes(bytes);
+      final StringBuilder sb = new StringBuilder();
+      for (int index = 0; index < bytes.length; ++index) {
+        sb.append(String.format("%02x", bytes[index]));
+      }
+      serial = sb.toString();
+    } else {
+      LOG.debug("loaded existing device serial");
+    }
+
+    settings.edit().putString("adobe-device-serial", serial).apply();
+    return serial;
+  }
+
+  /**
+   * Attempt to load an Adobe DRM implementation.
+   *
+   * @param context Application context
+   *
+   * @return A DRM implementation
+   *
+   * @throws DRMException If DRM is unavailable or cannot be initialized.
+   */
+
+  public static AdobeAdeptExecutorType newAdobeDRM(
+    final Context context)
+    throws DRMException
+  {
+    NullCheck.notNull(context);
+
+    final Logger log = AdobeDRMServices.LOG;
+
+    final String device_name =
+      String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
+    final String device_serial = AdobeDRMServices.getDeviceSerial(context);
+    log.debug("adobe device name:            {}", device_name);
+    log.debug("adobe device serial:          {}", device_serial);
+
+    final File app_storage = context.getFilesDir();
+    final File xml_storage = context.getFilesDir();
+    final File book_storage = context.getExternalFilesDir("adobe-books-tmp");
+    final File temp_storage =
+      new File(context.getExternalCacheDir(), "adobe-tmp");
+    log.debug("adobe app storage:            {}", app_storage);
+    log.debug("adobe xml storage:            {}", xml_storage);
+    log.debug("adobe temporary book storage: {}", book_storage);
+    log.debug("adobe temporary storage:      {}", temp_storage);
+
+    final Package p = Simplified.class.getPackage();
+    final String package_name = p.getName();
+    final String package_version = p.getImplementationVersion();
+    final String agent = String.format("%s/%s", package_name, package_version);
+    log.debug("adobe user agent:             {}", agent);
+
+    final AdobeAdeptConnectorFactoryType factory =
+      AdobeAdeptConnectorFactory.get();
+    final AdobeAdeptResourceProviderType res =
+      AdobeAdeptResourceProvider.get(context.getAssets());
+    final AdobeAdeptNetProviderType net = AdobeAdeptNetProvider.get(agent);
+
+    try {
+      return AdobeAdeptExecutor.newExecutor(
+        factory,
+        package_name,
+        package_version,
+        res,
+        net,
+        device_serial,
+        device_name,
+        app_storage,
+        xml_storage,
+        book_storage,
+        temp_storage);
+    } catch (final InterruptedException e) {
+      throw new UnreachableCodeException();
+    }
+  }
+
+  /**
+   * Attempt to load an Adobe DRM implementation.
+   *
+   * @param context Application context
+   *
+   * @return A DRM implementation, if any are available
+   */
+
+  public static OptionType<AdobeAdeptExecutorType> newAdobeDRMOptional(
+    final Context context)
+  {
+    try {
+      return Option.some(
+        AdobeDRMServices.newAdobeDRM(context));
+    } catch (final DRMException e) {
+      AdobeDRMServices.LOG.error("DRM is not supported: ", e);
+      return Option.none();
+    }
+  }
+}

@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
@@ -326,6 +327,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
     super.onCreate(state);
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
+    final Resources resources = NullCheck.notNull(this.getResources());
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup layout = NullCheck.notNull(
@@ -340,6 +342,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
       NullCheck.notNull((EditText) this.findViewById(R.id.settings_pin_edit));
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
+    final TextView in_adobe =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_adobe_drm));
 
     final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
     final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
@@ -407,6 +411,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
     in_login.setEnabled(false);
 
     this.navigationDrawerSetActionBarTitle();
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    if (app.getAdobeDRMExecutor().isSome()) {
+      in_adobe.setText(
+        resources.getText(R.string.settings_adobe_drm_supported));
+    } else {
+      in_adobe.setText(
+        resources.getText(R.string.settings_adobe_drm_unsupported));
+    }
 
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
