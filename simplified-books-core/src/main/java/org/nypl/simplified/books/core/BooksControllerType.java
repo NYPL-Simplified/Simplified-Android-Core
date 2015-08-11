@@ -15,7 +15,7 @@ public interface BooksControllerType extends BooksStatusCacheType
 {
   /**
    * Borrow the given book, delivering the results to the given
-   * <tt>listener</tt>.
+   * {@code listener}.
    *
    * @param id       The book ID
    * @param acq      The specific acquisition relation
@@ -39,7 +39,7 @@ public interface BooksControllerType extends BooksStatusCacheType
     BookID id);
 
   /**
-   * Cancel the download of the book with the given <tt>id</tt>.
+   * Cancel the download of the book with the given {@code id}.
    *
    * @param id The book ID
    */
@@ -48,7 +48,7 @@ public interface BooksControllerType extends BooksStatusCacheType
     BookID id);
 
   /**
-   * Acknowledge the failed download of book <tt>id</tt>, if any.
+   * Acknowledge the failed download of book {@code id}, if any.
    *
    * @param id The book ID
    */
@@ -58,7 +58,7 @@ public interface BooksControllerType extends BooksStatusCacheType
 
   /**
    * Retrieve an acquisition feed of all owned/borrowed books on the current
-   * account, delivering the results to the given <tt>listener</tt>.
+   * account, delivering the results to the given {@code listener}.
    *
    * @param in_uri          The URI that will be used for the feed
    * @param in_id           The ID that will be used for the feed

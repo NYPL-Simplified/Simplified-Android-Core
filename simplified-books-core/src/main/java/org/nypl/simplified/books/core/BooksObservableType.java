@@ -33,7 +33,7 @@ public interface BooksObservableType
     Observer o);
 
   /**
-   * Notify all observers that the book with <tt>id</tt> has changed in some
+   * Notify all observers that the book with {@code id} has changed in some
    * manner.
    *
    * @param id The book ID

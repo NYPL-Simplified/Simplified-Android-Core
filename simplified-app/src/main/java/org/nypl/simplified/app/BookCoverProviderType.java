@@ -11,8 +11,8 @@ import org.nypl.simplified.books.core.FeedEntryOPDS;
 public interface BookCoverProviderType
 {
   /**
-   * <p> Load or generate a cover based on <tt>e</tt> into the image view
-   * <tt>i</tt>, at width <tt>w</tt> and height <tt>h</tt>. </p> <p> Must only
+   * <p> Load or generate a cover based on {@code e} into the image view
+   * {@code i}, at width {@code w} and height {@code h}. </p> <p> Must only
    * be called from the UI thread. </p>
    *
    * @param e The feed entry
@@ -28,8 +28,8 @@ public interface BookCoverProviderType
     final int h);
 
   /**
-   * <p> Load or generate a cover based on <tt>e</tt> into the image view
-   * <tt>i</tt>, at width <tt>w</tt> and height <tt>h</tt>, calling <tt>c</tt>
+   * <p> Load or generate a cover based on {@code e} into the image view
+   * {@code i}, at width {@code w} and height {@code h}, calling {@code c}
    * on completion. </p> <p> Must only be called from the UI thread. </p>
    *
    * @param e The feed entry
@@ -61,8 +61,8 @@ public interface BookCoverProviderType
   void loadingThumbnailsContinue();
 
   /**
-   * <p> Load or generate a thumbnail based on <tt>e</tt> into the image view
-   * <tt>i</tt>, at width <tt>w</tt> and height <tt>h</tt>. </p> <p> Must only
+   * <p> Load or generate a thumbnail based on {@code e} into the image view
+   * {@code i}, at width {@code w} and height {@code h}. </p> <p> Must only
    * be called from the UI thread. </p>
    *
    * @param e The feed entry
@@ -78,8 +78,8 @@ public interface BookCoverProviderType
     final int h);
 
   /**
-   * <p> Load or generate a thumbnail based on <tt>e</tt> into the image view
-   * <tt>i</tt>, at width <tt>w</tt> and height <tt>h</tt>, calling <tt>c</tt>
+   * <p> Load or generate a thumbnail based on {@code e} into the image view
+   * {@code i}, at width {@code w} and height {@code h}, calling {@code c}
    * on completion. </p> <p> Must only be called from the UI thread. </p>
    *
    * @param e The feed entry

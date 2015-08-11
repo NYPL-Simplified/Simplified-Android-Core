@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Data parsed from a <tt>readium:pagination-changed</tt> event.
+ * Data parsed from a {@code readium:pagination-changed} event.
  */
 
 @SuppressWarnings("synthetic-access")
@@ -84,7 +84,7 @@ public final class ReaderPaginationChangedEvent
 
   /**
    * @return The fractional progress throughout the entire book, where
-   * <tt>0.0</tt> is the start of the book, and <tt>1.0</tt> is the end.
+   * {@code 0.0} is the start of the book, and {@code 1.0} is the end.
    */
 
   public double getProgressFractional()

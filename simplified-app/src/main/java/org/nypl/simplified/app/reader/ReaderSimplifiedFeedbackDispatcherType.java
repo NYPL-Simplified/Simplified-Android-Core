@@ -5,7 +5,7 @@ import java.net.URI;
 /**
  * The type of Simplified function dispatchers.
  *
- * A dispatcher expects non-hierarchical URIs that use a <tt>simplified</tt>
+ * A dispatcher expects non-hierarchical URIs that use a {@code simplified}
  * scheme.
  */
 

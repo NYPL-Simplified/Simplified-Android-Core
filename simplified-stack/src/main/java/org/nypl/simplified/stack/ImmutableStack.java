@@ -58,7 +58,7 @@ public final class ImmutableStack<T> implements Serializable
   }
 
   /**
-   * @return <tt>true</tt> iff the stack is empty
+   * @return {@code true} iff the stack is empty
    */
 
   public boolean isEmpty()

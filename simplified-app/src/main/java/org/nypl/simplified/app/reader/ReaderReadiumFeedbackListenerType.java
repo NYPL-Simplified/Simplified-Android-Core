@@ -1,8 +1,8 @@
 package org.nypl.simplified.app.reader;
 
 /**
- * Functions called via the <tt>host_app_feedback.js</tt> file using the
- * <tt>readium</tt> URI scheme.
+ * Functions called via the {@code host_app_feedback.js} file using the
+ * {@code readium} URI scheme.
  */
 
 public interface ReaderReadiumFeedbackListenerType
@@ -17,7 +17,7 @@ public interface ReaderReadiumFeedbackListenerType
     Throwable x);
 
   /**
-   * Called on receipt of a <tt>readium:initialize</tt> request.
+   * Called on receipt of a {@code readium:initialize} request.
    */
 
   void onReadiumFunctionInitialize();
@@ -32,7 +32,7 @@ public interface ReaderReadiumFeedbackListenerType
     Throwable e);
 
   /**
-   * Called on receipt of a <tt>readium:pagination-changed</tt> request.
+   * Called on receipt of a {@code readium:pagination-changed} request.
    *
    * @param e The pagination event
    */
@@ -51,7 +51,7 @@ public interface ReaderReadiumFeedbackListenerType
     Throwable e);
 
   /**
-   * Called on receipt of a <tt>readium:settings-applied</tt> request.
+   * Called on receipt of a {@code readium:settings-applied} request.
    */
 
   void onReadiumFunctionSettingsApplied();

@@ -149,8 +149,8 @@ public class CatalogFeedActivity extends CatalogActivity implements
 
   /**
    * Start a new catalog feed activity, assuming that the user came from
-   * <tt>from</tt>, with up stack <tt>up_stack</tt>, attempting to load the feed
-   * at <tt>target</tt>.
+   * {@code from}, with up stack {@code up_stack}, attempting to load the feed
+   * at {@code target}.
    *
    * @param from    The previous activity
    * @param in_args The feed arguments
@@ -170,9 +170,9 @@ public class CatalogFeedActivity extends CatalogActivity implements
 
   /**
    * Start a new catalog feed activity, assuming that the user came from
-   * <tt>from</tt>, with up stack <tt>up_stack</tt>, attempting to load the feed
-   * at <tt>target</tt>. The new activity "replaces" the current activity by
-   * calling <tt>finish()</tt> on the existing activity.
+   * {@code from}, with up stack {@code up_stack}, attempting to load the feed
+   * at {@code target}. The new activity "replaces" the current activity by
+   * calling {@code finish()} on the existing activity.
    *
    * @param from    The previous activity
    * @param in_args The feed arguments
@@ -308,7 +308,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
   }
 
   /**
-   * @return <tt>true</tt> if the feed is local and should therefore not show
+   * @return {@code true} if the feed is local and should therefore not show
    * "network is unavailable" messages when the network is unavailable
    */
 

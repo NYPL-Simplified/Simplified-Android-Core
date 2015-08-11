@@ -7,7 +7,7 @@ package org.nypl.simplified.books.core;
 public interface AccountsType
 {
   /**
-   * @return <tt>true</tt> if the user is currently logged into an account.
+   * @return {@code true} if the user is currently logged into an account.
    */
 
   boolean accountIsLoggedIn();
@@ -22,7 +22,7 @@ public interface AccountsType
     AccountGetCachedCredentialsListenerType listener);
 
   /**
-   * Start loading books, delivering results to the given <tt>listener</tt>.
+   * Start loading books, delivering results to the given {@code listener}.
    *
    * @param listener The listener
    */
@@ -31,7 +31,7 @@ public interface AccountsType
     AccountDataLoadListenerType listener);
 
   /**
-   * Log in, delivering results to the given <tt>listener</tt>.
+   * Log in, delivering results to the given {@code listener}.
    *
    * @param barcode  The barcode
    * @param pin      The PIN
@@ -44,7 +44,7 @@ public interface AccountsType
     AccountLoginListenerType listener);
 
   /**
-   * Log out, delivering results to the given <tt>listener</tt>.
+   * Log out, delivering results to the given {@code listener}.
    *
    * @param listener The listener
    */
@@ -53,7 +53,7 @@ public interface AccountsType
     AccountLogoutListenerType listener);
 
   /**
-   * Sync books, delivering results to the given <tt>listener</tt>.
+   * Sync books, delivering results to the given {@code listener}.
    *
    * @param listener The listener
    */

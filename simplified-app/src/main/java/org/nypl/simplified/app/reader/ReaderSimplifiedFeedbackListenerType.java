@@ -1,8 +1,8 @@
 package org.nypl.simplified.app.reader;
 
 /**
- * Functions called via the <tt>host_app_feedback.js</tt> file using the
- * <tt>simplified</tt> URI scheme.
+ * Functions called via the {@code host_app_feedback.js} file using the
+ * {@code simplified} URI scheme.
  */
 
 public interface ReaderSimplifiedFeedbackListenerType

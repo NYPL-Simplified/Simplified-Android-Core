@@ -23,7 +23,7 @@ public interface BookDatabaseType
     throws IOException;
 
   /**
-   * @return <tt>true</tt> if user credentials exist in the database.
+   * @return {@code true} if user credentials exist in the database.
    */
 
   boolean credentialsExist();
@@ -69,7 +69,7 @@ public interface BookDatabaseType
   /**
    * @param book_id The book ID
    *
-   * @return The database entry for <tt>book_id</tt>
+   * @return The database entry for {@code book_id}
    */
 
   BookDatabaseEntryType getBookDatabaseEntry(

@@ -29,7 +29,7 @@ public final class HTTPRanges
   }
 
   /**
-   * @param text A range string of the form <tt>bytes=([0-9]*)-([0-9]*)</tt>)
+   * @param text A range string of the form {@code bytes=([0-9]*)-([0-9]*)})
    *
    * @return The parsed byte range
    */

@@ -61,7 +61,7 @@ public interface TenPrintInputBuilderType
    * Enable or disable the display of debugging symbols and frames in the
    * generated artwork
    *
-   * @param b <tt>true</tt> iff debugging views should be enabled
+   * @param b {@code true} iff debugging views should be enabled
    */
 
   void setDebuggingArtwork(
@@ -79,7 +79,7 @@ public interface TenPrintInputBuilderType
   /**
    * Set whether or not colors should be inverted.
    *
-   * @param in_invert <tt>true</tt> iff colors should be inverted
+   * @param in_invert {@code true} iff colors should be inverted
    */
 
   void setInvert(

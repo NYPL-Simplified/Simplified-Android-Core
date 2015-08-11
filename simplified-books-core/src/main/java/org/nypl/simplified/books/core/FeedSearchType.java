@@ -18,7 +18,7 @@ public interface FeedSearchType
    *
    * @return The value returned by the matcher
    *
-   * @throws E If the matcher raises <tt>E</tt>
+   * @throws E If the matcher raises {@code E}
    */
 
   <A, E extends Exception> A matchSearch(

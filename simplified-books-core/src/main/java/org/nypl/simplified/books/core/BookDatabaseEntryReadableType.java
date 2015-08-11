@@ -13,7 +13,7 @@ import java.io.IOException;
 public interface BookDatabaseEntryReadableType
 {
   /**
-   * @return <tt>true</tt> if the book directory exists.
+   * @return {@code true} if the book directory exists.
    */
 
   boolean exists();

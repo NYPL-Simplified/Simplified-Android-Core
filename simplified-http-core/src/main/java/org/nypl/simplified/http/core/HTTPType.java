@@ -13,9 +13,9 @@ import java.net.URI;
 public interface HTTPType
 {
   /**
-   * Retrieve the content at <tt>uri</tt>, using authentication details
-   * <tt>auth</tt>. The content returned will have been requested with the
-   * initial byte offset <tt>offset</tt>.
+   * Retrieve the content at {@code uri}, using authentication details
+   * {@code auth}. The content returned will have been requested with the
+   * initial byte offset {@code offset}.
    *
    * @param auth   The authentication details, if any
    * @param uri    The URI
@@ -30,7 +30,7 @@ public interface HTTPType
     final long offset);
 
   /**
-   * Peek at the URI <tt>uri</tt>, using authentication details <tt>auth</tt>.
+   * Peek at the URI {@code uri}, using authentication details {@code auth}.
    *
    * @param auth The authentication details, if any
    * @param uri  The URI

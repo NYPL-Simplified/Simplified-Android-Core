@@ -62,7 +62,7 @@ public interface FeedLoaderType
   OPDSSearchParserType getOPDSSearchParser();
 
   /**
-   * Invalidate the cached feed for URI <tt>uri</tt>, if any.
+   * Invalidate the cached feed for URI {@code uri}, if any.
    *
    * @param uri The URI
    */

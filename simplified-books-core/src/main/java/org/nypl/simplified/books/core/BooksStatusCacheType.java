@@ -47,7 +47,7 @@ public interface BooksStatusCacheType extends BooksObservableType
     BookID id);
 
   /**
-   * Update the status of the book referred to by <tt>s</tt>.
+   * Update the status of the book referred to by {@code s}.
    *
    * @param s The book status
    */
@@ -56,7 +56,7 @@ public interface BooksStatusCacheType extends BooksObservableType
     BookStatusType s);
 
   /**
-   * Update the status of the book referred to by <tt>s</tt> if the given status
+   * Update the status of the book referred to by {@code s} if the given status
    * is <i>more important</i> than the current status. <i>Importance</i> is
    * essentially defined by a somewhat arbitrary partial order: {@link
    * BookStatusPriorityOrdering}.

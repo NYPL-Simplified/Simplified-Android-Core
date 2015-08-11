@@ -180,7 +180,7 @@ public final class OPDSAcquisitionFeedEntryParser
         e, OPDSFeedConstants.SCHEMA_URI, "Event");
 
     /**
-     * If there is a <tt>schema:Event</tt> element, then the book is either
+     * If there is a {@code schema:Event} element, then the book is either
      * already borrowed, or is on hold.
      */
 

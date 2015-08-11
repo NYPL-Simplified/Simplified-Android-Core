@@ -11,7 +11,7 @@ import java.io.InputStream;
 public interface OPDSAcquisitionFeedEntryParserType
 {
   /**
-   * Parse the feed entry represented by the XML element <tt>e</tt>.
+   * Parse the feed entry represented by the XML element {@code e}.
    *
    * @param e The XML element
    *
@@ -25,7 +25,7 @@ public interface OPDSAcquisitionFeedEntryParserType
     throws OPDSParseException;
 
   /**
-   * Parse the feed entry represented by the given stream <tt>s</tt>.
+   * Parse the feed entry represented by the given stream {@code s}.
    *
    * @param s The entry stream
    *
