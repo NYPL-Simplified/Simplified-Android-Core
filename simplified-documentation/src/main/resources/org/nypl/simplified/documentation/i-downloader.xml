@@ -13,8 +13,7 @@
         s:target="apidocs/org/nypl/simplified/downloader/core/package-summary.html">simplified-downloader-core</s:link-external>
       package implements a simple asynchronous API for retrieving files over
       HTTP.
-      The downloader supports pausing and resuming downloads, and can
-      resume downloads after JVM shutdowns/restarts.
+      The downloader supports pausing and resuming downloads.
     </s:paragraph>
   </s:subsection>
 </s:section>
