@@ -228,7 +228,7 @@ public final class CatalogBookDetailView implements Observer,
      */
 
     final int cover_height = header_cover.getLayoutParams().height;
-    final int cover_width = (int) ((cover_height / 4.0) * 3.0);
+    final int cover_width = (int) (((double) cover_height / 4.0) * 3.0);
     final LinearLayout.LayoutParams cp =
       new LinearLayout.LayoutParams(cover_width, LayoutParams.WRAP_CONTENT);
     header_left.setLayoutParams(cp);

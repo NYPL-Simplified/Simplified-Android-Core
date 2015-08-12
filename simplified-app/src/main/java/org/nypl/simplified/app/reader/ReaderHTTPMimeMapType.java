@@ -15,8 +15,8 @@ public interface ReaderHTTPMimeMapType
   /**
    * Retrieve the MIME type for a file with suffix {@code suffix}.
    *
-   * @param suffix
-   *          The file suffix
+   * @param suffix The file suffix
+   *
    * @return A MIME type
    */
 

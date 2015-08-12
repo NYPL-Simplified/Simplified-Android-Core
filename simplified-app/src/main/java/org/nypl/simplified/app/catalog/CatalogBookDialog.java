@@ -140,7 +140,7 @@ public final class CatalogBookDialog extends DialogFragment
     final DisplayMetrics m = new DisplayMetrics();
     display.getMetrics(m);
 
-    final int width = (int) (m.widthPixels * 0.75);
+    final int width = (int) ((double) m.widthPixels * 0.75);
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);

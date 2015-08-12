@@ -1,8 +1,8 @@
 package org.nypl.simplified.app.reader;
 
 /**
- * Functions called via the {@code host_app_feedback.js} file using the
- * {@code readium} URI scheme.
+ * Functions called via the {@code host_app_feedback.js} file using the {@code
+ * readium} URI scheme.
  */
 
 public interface ReaderReadiumFeedbackListenerType

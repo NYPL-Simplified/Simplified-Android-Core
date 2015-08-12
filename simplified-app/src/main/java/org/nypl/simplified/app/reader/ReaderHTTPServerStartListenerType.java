@@ -18,9 +18,8 @@ public interface ReaderHTTPServerStartListenerType
     Throwable x);
 
   /**
-   * The server started successfully. The value of {@code first} is
-   * {@code true} if this is the first time the server has been requested to
-   * start.
+   * The server started successfully. The value of {@code first} is {@code true}
+   * if this is the first time the server has been requested to start.
    *
    * @param hs    The server
    * @param first Indicates whether this is the first server startup

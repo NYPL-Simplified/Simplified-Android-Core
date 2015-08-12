@@ -106,7 +106,7 @@ public final class HTTP implements HTTPType
 
       final int code = conn.getResponseCode();
       HTTP.LOG.trace(
-        "GET {} (auth {}) (result {})", uri, auth_opt, code);
+        "GET {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
 
       if (code >= 400) {
         return new HTTPResultError<InputStream>(
@@ -154,7 +154,7 @@ public final class HTTP implements HTTPType
 
       final int code = conn.getResponseCode();
       HTTP.LOG.trace(
-        "HEAD {} (auth {}) (result {})", uri, auth_opt, code);
+        "HEAD {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
 
       if (code >= 400) {
         return new HTTPResultError<Unit>(

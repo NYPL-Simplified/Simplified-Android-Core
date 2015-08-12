@@ -192,7 +192,9 @@ public final class Simplified extends Application
               NullCheck.notNull(r).run();
             }
           });
-        t.setName(String.format("simplified-%s-tasks-%d", base, this.id));
+        t.setName(
+          String.format(
+            "simplified-%s-tasks-%d", base, Integer.valueOf(this.id)));
         ++this.id;
         return t;
       }
@@ -226,7 +228,8 @@ public final class Simplified extends Application
 
   @Override public void onCreate()
   {
-    Simplified.LOG.debug("starting app: pid {}", android.os.Process.myPid());
+    Simplified.LOG.debug(
+      "starting app: pid {}", Integer.valueOf(android.os.Process.myPid()));
     Simplified.INSTANCE = this;
   }
 
@@ -257,7 +260,7 @@ public final class Simplified extends Application
     private final DownloaderType                     downloader;
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
 
-    public CatalogAppServices(
+    private CatalogAppServices(
       final Context in_context,
       final Resources rr)
     {
@@ -507,7 +510,7 @@ public final class Simplified extends Application
     private final ScreenSizeControllerType    screen;
     private final ReaderSettingsType          settings;
 
-    public ReaderAppServices(
+    private ReaderAppServices(
       final Context context,
       final Resources rr)
     {
@@ -577,30 +580,33 @@ public final class Simplified extends Application
   {
     private final Resources resources;
 
-    public ScreenSizeController(
+    private ScreenSizeController(
       final Resources rr)
     {
       this.resources = NullCheck.notNull(rr);
 
       final DisplayMetrics dm = this.resources.getDisplayMetrics();
-      final float dp_height = dm.heightPixels / dm.density;
-      final float dp_width = dm.widthPixels / dm.density;
-      CatalogAppServices.LOG_CA.debug("screen ({} x {})", dp_width, dp_height);
+      final float dp_height = (float) dm.heightPixels / dm.density;
+      final float dp_width = (float) dm.widthPixels / dm.density;
       CatalogAppServices.LOG_CA.debug(
-        "screen ({} x {})", dm.widthPixels, dm.heightPixels);
+        "screen ({} x {})", Float.valueOf(dp_width), Float.valueOf(dp_height));
+      CatalogAppServices.LOG_CA.debug(
+        "screen ({} x {})",
+        Integer.valueOf(dm.widthPixels),
+        Integer.valueOf(dm.heightPixels));
     }
 
     @Override public double screenDPToPixels(
       final int dp)
     {
       final float scale = this.resources.getDisplayMetrics().density;
-      return ((dp * scale) + 0.5);
+      return ((double) (dp * scale) + 0.5);
     }
 
     @Override public double screenGetDPI()
     {
       final DisplayMetrics metrics = this.resources.getDisplayMetrics();
-      return metrics.densityDpi;
+      return (double) metrics.densityDpi;
     }
 
     @Override public int screenGetHeightPixels()

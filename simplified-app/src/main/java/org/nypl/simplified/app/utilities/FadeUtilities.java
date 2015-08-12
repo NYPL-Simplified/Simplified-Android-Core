@@ -36,7 +36,7 @@ public final class FadeUtilities
     v.setVisibility(View.VISIBLE);
     v.setAlpha(0.0f);
     final ViewPropertyAnimator a = v.animate();
-    a.setDuration(duration);
+    a.setDuration((long) duration);
     a.alpha(1.0f);
   }
 
@@ -54,7 +54,7 @@ public final class FadeUtilities
   {
     v.setAlpha(1.0f);
     final ViewPropertyAnimator a = v.animate();
-    a.setDuration(duration);
+    a.setDuration((long) duration);
     a.alpha(0.0f);
     a.withEndAction(
       new Runnable()

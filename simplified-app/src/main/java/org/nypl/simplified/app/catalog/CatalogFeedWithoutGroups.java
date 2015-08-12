@@ -95,9 +95,9 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
   {
     CatalogFeedWithoutGroups.LOG.debug(
       "shouldLoadNext: {} - {} = {}",
-      total_count,
-      first_visible_item,
-      total_count - first_visible_item);
+      Integer.valueOf(total_count),
+      Integer.valueOf(first_visible_item),
+      Integer.valueOf(total_count - first_visible_item));
     return (total_count - first_visible_item) <= 50;
   }
 
@@ -255,7 +255,7 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     this.uri_next.set(f.getFeedNext());
 
     CatalogFeedWithoutGroups.LOG.debug(
-      "current feed size: {}", this.feed.size());
+      "current feed size: {}", Integer.valueOf(this.feed.size()));
     return Unit.unit();
   }
 

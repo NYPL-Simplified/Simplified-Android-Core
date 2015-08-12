@@ -213,7 +213,7 @@ import java.util.concurrent.atomic.AtomicReference;
      */
 
     final int cover_height = this.cell_cover_layout.getLayoutParams().height;
-    final int cover_width = (int) ((cover_height / 4.0) * 3.0);
+    final int cover_width = (int) (((double) cover_height / 4.0) * 3.0);
     final LinearLayout.LayoutParams ccl_p =
       new LinearLayout.LayoutParams(cover_width, cover_height);
     this.cell_cover_layout.setLayoutParams(ccl_p);
@@ -272,7 +272,7 @@ import java.util.concurrent.atomic.AtomicReference;
     this.cover_provider.loadThumbnailIntoWithCallback(
       in_e,
       this.cell_cover_image,
-      (int) (in_image_height * 0.75),
+      (int) ((double) in_image_height * 0.75),
       in_image_height,
       callback);
   }

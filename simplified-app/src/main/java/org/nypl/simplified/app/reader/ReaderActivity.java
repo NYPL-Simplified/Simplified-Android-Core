@@ -210,9 +210,9 @@ public final class ReaderActivity extends Activity implements
       if (result_code == Activity.RESULT_OK) {
         final Intent nnd = NullCheck.notNull(data);
         final Bundle b = NullCheck.notNull(nnd.getExtras());
-        final TOCElement e =
-          NullCheck.notNull((TOCElement) b.getSerializable(ReaderTOCActivity
-                                                             .TOC_SELECTED_ID));
+        final TOCElement e = NullCheck.notNull(
+          (TOCElement) b.getSerializable(
+            ReaderTOCActivity.TOC_SELECTED_ID));
         this.onTOCSelectionReceived(e);
       }
     }
@@ -266,33 +266,33 @@ public final class ReaderActivity extends Activity implements
     final ReaderSimplifiedFeedbackDispatcherType sd =
       ReaderSimplifiedFeedbackDispatcher.newDispatcher();
 
-    final ViewGroup in_hud =
-      NullCheck.notNull((ViewGroup) this.findViewById(R.id
-                                                        .reader_hud_container));
+    final ViewGroup in_hud = NullCheck.notNull(
+      (ViewGroup) this.findViewById(
+        R.id.reader_hud_container));
     final ImageView in_toc =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_toc));
     final ImageView in_settings =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_settings));
     final TextView in_title_text =
       NullCheck.notNull((TextView) in_hud.findViewById(R.id.reader_title_text));
-    final TextView in_progress_text =
-      NullCheck.notNull((TextView) in_hud.findViewById(R.id
-                                                         .reader_position_text));
-    final ProgressBar in_progress_bar =
-      NullCheck.notNull((ProgressBar) in_hud.findViewById(R.id
-                                                            .reader_position_progress));
+    final TextView in_progress_text = NullCheck.notNull(
+      (TextView) in_hud.findViewById(
+        R.id.reader_position_text));
+    final ProgressBar in_progress_bar = NullCheck.notNull(
+      (ProgressBar) in_hud.findViewById(
+        R.id.reader_position_progress));
 
     final ViewGroup in_media_overlay =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.reader_hud_media));
-    final ImageView in_media_previous =
-      NullCheck.notNull((ImageView) this.findViewById(R.id
-                                                        .reader_hud_media_previous));
-    final ImageView in_media_next =
-      NullCheck.notNull((ImageView) this.findViewById(R.id
-                                                        .reader_hud_media_next));
-    final ImageView in_media_play =
-      NullCheck.notNull((ImageView) this.findViewById(R.id
-                                                        .reader_hud_media_play));
+    final ImageView in_media_previous = NullCheck.notNull(
+      (ImageView) this.findViewById(
+        R.id.reader_hud_media_previous));
+    final ImageView in_media_next = NullCheck.notNull(
+      (ImageView) this.findViewById(
+        R.id.reader_hud_media_next));
+    final ImageView in_media_play = NullCheck.notNull(
+      (ImageView) this.findViewById(
+        R.id.reader_hud_media_play));
 
     final ProgressBar in_loading =
       NullCheck.notNull((ProgressBar) this.findViewById(R.id.reader_loading));
@@ -725,7 +725,7 @@ public final class ReaderActivity extends Activity implements
         {
           final double p = e.getProgressFractional();
           in_progress_bar.setMax(100);
-          in_progress_bar.setProgress((int) (100 * p));
+          in_progress_bar.setProgress((int) (100.0 * p));
 
           final List<OpenPage> pages = e.getOpenPages();
           if (pages.isEmpty()) {
@@ -764,7 +764,7 @@ public final class ReaderActivity extends Activity implements
             in_progress_text.setVisibility(View.VISIBLE);
             simplified_js.pageHasChanged();
           }
-        }, 200);
+        }, 200L);
     } else {
       UIThread.runOnUIThread(
         new Runnable()
@@ -879,8 +879,7 @@ public final class ReaderActivity extends Activity implements
           switch (in_hud.getVisibility()) {
             case View.VISIBLE: {
               FadeUtilities.fadeOut(
-                in_hud,
-                FadeUtilities.DEFAULT_FADE_DURATION);
+                in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
               break;
             }
             case View.INVISIBLE:

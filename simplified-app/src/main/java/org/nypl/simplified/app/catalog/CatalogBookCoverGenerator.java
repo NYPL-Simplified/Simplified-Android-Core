@@ -99,8 +99,8 @@ public final class CatalogBookCoverGenerator
       final Canvas c = new Canvas(container);
       final Paint white = new Paint();
       white.setColor(Color.WHITE);
-      c.drawRect(0, 0, width, height, white);
-      c.drawBitmap(cover, (width - cover.getWidth()) / 2, 0, null);
+      c.drawRect(0.0F, 0.0F, (float) width, (float) height, white);
+      c.drawBitmap(cover, (float) ((width - cover.getWidth()) / 2), 0.0F, null);
       return NullCheck.notNull(container);
     } catch (final Throwable e) {
       CatalogBookCoverGenerator.LOG.error(

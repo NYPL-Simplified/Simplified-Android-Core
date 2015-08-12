@@ -590,7 +590,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
                 rr, args, FacetType.SORT_BY_TITLE));
             return NullCheck.notNull(Boolean.TRUE);
           }
-        });
+        }).booleanValue();
     }
 
     if (search_ok) {
@@ -719,7 +719,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
     content_area.requestLayout();
 
     CatalogFeedActivity.LOG.debug(
-      "restoring scroll position: {}", this.saved_scroll_pos);
+      "restoring scroll position: {}", Integer.valueOf(this.saved_scroll_pos));
 
     final ListView list = NullCheck.notNull(
       (ListView) layout.findViewById(
@@ -832,7 +832,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
     content_area.requestLayout();
 
     CatalogFeedActivity.LOG.debug(
-      "restoring scroll position: {}", this.saved_scroll_pos);
+      "restoring scroll position: {}", Integer.valueOf(this.saved_scroll_pos));
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -957,7 +957,8 @@ public class CatalogFeedActivity extends CatalogActivity implements
     final AbsListView lv = this.list_view;
     if (lv != null) {
       final int position = lv.getFirstVisiblePosition();
-      CatalogFeedActivity.LOG.debug("saving list view position: {}", position);
+      CatalogFeedActivity.LOG.debug(
+        "saving list view position: {}", Integer.valueOf(position));
       nn_state.putInt(CatalogFeedActivity.LIST_STATE_ID, position);
     }
   }

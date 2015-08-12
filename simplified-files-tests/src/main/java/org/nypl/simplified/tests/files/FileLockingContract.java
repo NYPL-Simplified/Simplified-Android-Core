@@ -46,7 +46,7 @@ public final class FileLockingContract implements FileLockingContractType
     final AtomicBoolean locked = new AtomicBoolean(false);
 
     FileLocking.withFileThreadLocked(
-      lock, 1000, new PartialFunctionType<Unit, Unit, IOException>()
+      lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>()
       {
         @Override public Unit call(
           final Unit x)
@@ -71,7 +71,7 @@ public final class FileLockingContract implements FileLockingContractType
 
     FileLockingContract.LOG.debug("attempting outer lock");
     FileLocking.withFileThreadLocked(
-      lock, 1000, new PartialFunctionType<Unit, Unit, IOException>()
+      lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>()
       {
         @Override public Unit call(
           final Unit u0)
@@ -82,7 +82,7 @@ public final class FileLockingContract implements FileLockingContractType
           try {
             FileLockingContract.LOG.debug("attempting inner lock");
             FileLocking.withFileThreadLocked(
-              lock, 1000, new PartialFunctionType<Unit, Unit, IOException>()
+              lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>()
               {
                 @Override public Unit call(
                   final Unit u1)
@@ -105,8 +105,8 @@ public final class FileLockingContract implements FileLockingContractType
       });
     FileLockingContract.LOG.debug("finished outer lock");
 
-    TestUtilities.assertEquals(count.get(), 2);
-    TestUtilities.assertEquals(failed.get(), true);
+    TestUtilities.assertEquals(Integer.valueOf(count.get()), Integer.valueOf(2));
+    TestUtilities.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
   }
 
   @Override public void testLockingOtherThread()
@@ -123,7 +123,7 @@ public final class FileLockingContract implements FileLockingContractType
       {
         try {
           FileLocking.withFileThreadLocked(
-            lock, 1000, new PartialFunctionType<Unit, Unit, IOException>()
+            lock, 1000L, new PartialFunctionType<Unit, Unit, IOException>()
             {
               @Override public Unit call(
                 final Unit x)
@@ -133,7 +133,7 @@ public final class FileLockingContract implements FileLockingContractType
                 latch.countDown();
 
                 try {
-                  Thread.sleep(1000);
+                  Thread.sleep(1000L);
                 } catch (InterruptedException e) {
                   e.printStackTrace();
                 }
@@ -147,7 +147,7 @@ public final class FileLockingContract implements FileLockingContractType
     };
 
     t1.start();
-    latch.await(5, TimeUnit.SECONDS);
+    latch.await(5L, TimeUnit.SECONDS);
 
     final Thread t2 = new Thread()
     {
@@ -155,7 +155,7 @@ public final class FileLockingContract implements FileLockingContractType
       {
         try {
           FileLocking.withFileThreadLocked(
-            lock, 500, new PartialFunctionType<Unit, Unit, IOException>()
+            lock, 500L, new PartialFunctionType<Unit, Unit, IOException>()
             {
               @Override public Unit call(
                 final Unit x)
@@ -171,6 +171,6 @@ public final class FileLockingContract implements FileLockingContractType
       }
     };
 
-    TestUtilities.assertEquals(1, count.get());
+    TestUtilities.assertEquals(Integer.valueOf(1), Integer.valueOf(count.get()));
   }
 }

@@ -38,8 +38,8 @@ public final class DrawTest extends Activity
     final int h,
     final Paint p)
   {
-    final float right = x + w;
-    final float bottom = y + h;
+    final float right = (float) (x + w);
+    final float bottom = (float) (y + h);
     final RectF oval = new RectF((float) x, (float) y, right, bottom);
     c.drawOval(oval, p);
   }
@@ -55,17 +55,17 @@ public final class DrawTest extends Activity
     final Paint q)
   {
     {
-      final float right = x + w;
-      final float bottom = y + h;
+      final float right = (float) (x + w);
+      final float bottom = (float) (y + h);
       final RectF oval = new RectF((float) x, (float) y, right, bottom);
       c.drawOval(oval, p);
     }
 
     {
-      final float left = x + thick;
-      final float top = y + thick;
-      final float right = x + (w - thick);
-      final float bottom = y + (h - thick);
+      final float left = (float) (x + thick);
+      final float top = (float) (y + thick);
+      final float right = (float) (x + (w - thick));
+      final float bottom = (float) (y + (h - thick));
       final RectF oval = new RectF(left, top, right, bottom);
       c.drawOval(oval, q);
     }

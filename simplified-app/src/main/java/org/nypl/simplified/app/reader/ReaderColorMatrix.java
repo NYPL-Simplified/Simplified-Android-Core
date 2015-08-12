@@ -83,23 +83,23 @@ public final class ReaderColorMatrix extends ColorMatrix
 
     {
       // CHECKSTYLE_SPACE:OFF
-      final float[] row_0 = { -1, 0, 0, 0, 255 };
-      final float[] row_1 = { 0, -1, 0, 0, 255 };
-      final float[] row_2 = { 0, 0, -1, 0, 255 };
-      final float[] row_3 = { 0, 0, 0, 1, 0 };
+      final float[] row_0 = { -1.0F, 0.0F, 0.0F, 0.0F, 255.0F };
+      final float[] row_1 = { 0.0F, -1.0F, 0.0F, 0.0F, 255.0F };
+      final float[] row_2 = { 0.0F, 0.0F, -1.0F, 0.0F, 255.0F };
+      final float[] row_3 = { 0.0F, 0.0F, 0.0F, 1.0F, 0.0F };
       // CHECKSTYLE_SPACE:ON
       inversion = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
     }
 
     {
-      final float r = Color.red(c) / 256.0f;
-      final float g = Color.green(c) / 256.0f;
-      final float b = Color.blue(c) / 256.0f;
+      final float r = (float) Color.red(c) / 256.0f;
+      final float g = (float) Color.green(c) / 256.0f;
+      final float b = (float) Color.blue(c) / 256.0f;
       // CHECKSTYLE_SPACE:OFF
-      final float[] row_0 = { r, 0, 0, 0, 0 };
-      final float[] row_1 = { 0, g, 0, 0, 0 };
-      final float[] row_2 = { 0, 0, b, 0, 0 };
-      final float[] row_3 = { 0, 0, 0, 1, 0 };
+      final float[] row_0 = { r, 0.0F, 0.0F, 0.0F, 0.0F };
+      final float[] row_1 = { 0.0F, g, 0.0F, 0.0F, 0.0F };
+      final float[] row_2 = { 0.0F, 0.0F, b, 0.0F, 0.0F };
+      final float[] row_3 = { 0.0F, 0.0F, 0.0F, 1.0F, 0.0F };
       // CHECKSTYLE_SPACE:ON
       tint = ReaderColorMatrix.fromRows(row_0, row_1, row_2, row_3);
     }

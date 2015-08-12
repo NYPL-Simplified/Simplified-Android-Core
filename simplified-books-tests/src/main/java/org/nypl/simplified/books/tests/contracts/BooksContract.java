@@ -100,8 +100,7 @@ public final class BooksContract implements BooksContractType
         return new HTTPResultOK<InputStream>(
           "OK",
           200,
-          new ByteArrayInputStream("DATA".getBytes()),
-          4,
+          new ByteArrayInputStream("DATA".getBytes()), 4L,
           empty_headers);
       }
 
@@ -140,7 +139,7 @@ public final class BooksContract implements BooksContractType
                     "/org/nypl/simplified/books/tests/contracts/loans.xml");
 
                 return new HTTPResultOK<InputStream>(
-                  "OK", 200, stream, 1, empty_headers);
+                  "OK", 200, stream, 1L, empty_headers);
               }
             });
         } catch (final IOException e) {
@@ -157,7 +156,7 @@ public final class BooksContract implements BooksContractType
         }
 
         return new HTTPResultOK<Unit>(
-          "OK", 200, Unit.unit(), 1, empty_headers);
+          "OK", 200, Unit.unit(), 1L, empty_headers);
       }
 
       private HTTPResultType<Unit> headLoans(
@@ -191,7 +190,7 @@ public final class BooksContract implements BooksContractType
                 }
 
                 return new HTTPResultOK<Unit>(
-                  "OK", 200, Unit.unit(), 1, empty_headers);
+                  "OK", 200, Unit.unit(), 1L, empty_headers);
               }
             });
         } catch (final IOException e) {
@@ -201,7 +200,7 @@ public final class BooksContract implements BooksContractType
 
       private <T> HTTPResultType<T> unauthorized()
       {
-        return new HTTPResultError<T>(401, "Unauthorized", 0, empty_headers);
+        return new HTTPResultError<T>(401, "Unauthorized", 0L, empty_headers);
       }
     };
   }

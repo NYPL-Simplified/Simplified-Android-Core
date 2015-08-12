@@ -167,9 +167,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
           SettingsActivity.editableEnable(in_pin_edit);
 
           SettingsActivity.this.enableLoginIfFieldsNonEmpty(
-            in_login,
-            in_pin_edit,
-            in_barcode_edit);
+            in_login, in_pin_edit, in_barcode_edit);
 
           in_login.setText(rr.getString(R.string.settings_log_in));
           in_login.setOnClickListener(
@@ -244,7 +242,8 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
   @Override public void onAccountLoginFailureServerError(final int code)
   {
-    SettingsActivity.LOG.error("onAccountLoginFailureServerError: {}", code);
+    SettingsActivity.LOG.error(
+      "onAccountLoginFailureServerError: {}", Integer.valueOf(code));
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final OptionType<Throwable> none = Option.none();

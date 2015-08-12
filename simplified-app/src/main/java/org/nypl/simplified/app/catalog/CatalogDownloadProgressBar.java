@@ -35,7 +35,7 @@ public final class CatalogDownloadProgressBar
     NullCheck.notNull(text);
     NullCheck.notNull(bar);
 
-    if (expected_total < 0) {
+    if (expected_total < 0L) {
       bar.setIndeterminate(true);
     } else {
       final double perc =

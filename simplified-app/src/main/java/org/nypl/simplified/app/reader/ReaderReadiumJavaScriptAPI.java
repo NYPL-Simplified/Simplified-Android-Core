@@ -208,9 +208,7 @@ public final class ReaderReadiumJavaScriptAPI
         NullCheck.notNull(
           String.format(
             "ReadiumSDK.reader.setBookStyles(%s); document.body.style"
-            + ".backgroundColor = \"%s\";",
-            a,
-            background)));
+            + ".backgroundColor = \"%s\";", a, background)));
 
       final ReaderReadiumViewerSettings vs = new ReaderReadiumViewerSettings(
         SyntheticSpreadMode.AUTO, ScrollMode.AUTO, (int) r.getFontScale(), 20);

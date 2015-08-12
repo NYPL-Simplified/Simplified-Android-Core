@@ -149,7 +149,7 @@ public final class ReaderSettingsDialog extends DialogFragment
     final Activity activity = this.getActivity();
     final Window window = activity.getWindow();
     in_view_brightness.setProgress(
-      (int) (window.getAttributes().screenBrightness * 100));
+      (int) (window.getAttributes().screenBrightness * 100.0F));
     in_view_brightness.setOnSeekBarChangeListener(
       new OnSeekBarChangeListener()
       {
@@ -159,7 +159,7 @@ public final class ReaderSettingsDialog extends DialogFragment
           final boolean from_user)
         {
           final WindowManager.LayoutParams params = window.getAttributes();
-          params.screenBrightness = progress / 100.0f;
+          params.screenBrightness = (float) progress / 100.0f;
           window.setAttributes(params);
         }
 

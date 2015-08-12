@@ -148,7 +148,8 @@ public final class LoginDialog extends DialogFragment
 
   @Override public void onAccountLoginFailureServerError(final int code)
   {
-    LoginDialog.LOG.error("onAccountLoginFailureServerError: {}", code);
+    LoginDialog.LOG.error(
+      "onAccountLoginFailureServerError: {}", Integer.valueOf(code));
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final OptionType<Throwable> none = Option.none();

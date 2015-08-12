@@ -143,7 +143,7 @@ import org.slf4j.Logger;
     final DisplayMetrics m = new DisplayMetrics();
     display.getMetrics(m);
 
-    final int width = (int) (m.widthPixels * 0.80);
+    final int width = (int) ((double) m.widthPixels * 0.80);
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);

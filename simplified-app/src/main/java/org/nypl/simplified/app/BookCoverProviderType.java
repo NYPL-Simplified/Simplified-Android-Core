@@ -11,9 +11,9 @@ import org.nypl.simplified.books.core.FeedEntryOPDS;
 public interface BookCoverProviderType
 {
   /**
-   * <p> Load or generate a cover based on {@code e} into the image view
-   * {@code i}, at width {@code w} and height {@code h}. </p> <p> Must only
-   * be called from the UI thread. </p>
+   * <p> Load or generate a cover based on {@code e} into the image view {@code
+   * i}, at width {@code w} and height {@code h}. </p> <p> Must only be called
+   * from the UI thread. </p>
    *
    * @param e The feed entry
    * @param i The image view
@@ -28,9 +28,9 @@ public interface BookCoverProviderType
     final int h);
 
   /**
-   * <p> Load or generate a cover based on {@code e} into the image view
-   * {@code i}, at width {@code w} and height {@code h}, calling {@code c}
-   * on completion. </p> <p> Must only be called from the UI thread. </p>
+   * <p> Load or generate a cover based on {@code e} into the image view {@code
+   * i}, at width {@code w} and height {@code h}, calling {@code c} on
+   * completion. </p> <p> Must only be called from the UI thread. </p>
    *
    * @param e The feed entry
    * @param i The image view
@@ -62,8 +62,8 @@ public interface BookCoverProviderType
 
   /**
    * <p> Load or generate a thumbnail based on {@code e} into the image view
-   * {@code i}, at width {@code w} and height {@code h}. </p> <p> Must only
-   * be called from the UI thread. </p>
+   * {@code i}, at width {@code w} and height {@code h}. </p> <p> Must only be
+   * called from the UI thread. </p>
    *
    * @param e The feed entry
    * @param i The image view
@@ -79,8 +79,8 @@ public interface BookCoverProviderType
 
   /**
    * <p> Load or generate a thumbnail based on {@code e} into the image view
-   * {@code i}, at width {@code w} and height {@code h}, calling {@code c}
-   * on completion. </p> <p> Must only be called from the UI thread. </p>
+   * {@code i}, at width {@code w} and height {@code h}, calling {@code c} on
+   * completion. </p> <p> Must only be called from the UI thread. </p>
    *
    * @param e The feed entry
    * @param i The image view

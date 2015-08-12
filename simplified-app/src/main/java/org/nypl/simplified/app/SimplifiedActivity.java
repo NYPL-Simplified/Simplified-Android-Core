@@ -70,7 +70,7 @@ import java.util.Map;
                                                  drawer_arg_funcs;
   private @Nullable Map<SimplifiedPart, Class<? extends Activity>>
                                                  drawer_classes_by_name;
-  private @Nullable List<SimplifiedPart>    drawer_items;
+  private @Nullable List<SimplifiedPart>         drawer_items;
   private @Nullable ListView                     drawer_list;
   private @Nullable SharedPreferences            drawer_settings;
   private           boolean                      finishing;
@@ -115,9 +115,8 @@ import java.util.Map;
     // Check if no view has focus:
     final View view = this.getCurrentFocus();
     if (view != null) {
-      final InputMethodManager im =
-        (InputMethodManager) this.getSystemService(Context
-                                                     .INPUT_METHOD_SERVICE);
+      final InputMethodManager im = (InputMethodManager) this.getSystemService(
+        Context.INPUT_METHOD_SERVICE);
       im.hideSoftInputFromWindow(
         view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }

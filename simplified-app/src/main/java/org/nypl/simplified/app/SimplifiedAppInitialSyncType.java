@@ -7,8 +7,8 @@ package org.nypl.simplified.app;
 public interface SimplifiedAppInitialSyncType
 {
   /**
-   * Load and synchronize books once, ignoring errors and ignoring the fact
-   * that the user may not be logged in.
+   * Load and synchronize books once, ignoring errors and ignoring the fact that
+   * the user may not be logged in.
    */
 
   void syncInitial();

@@ -83,8 +83,8 @@ public final class ReaderPaginationChangedEvent
   }
 
   /**
-   * @return The fractional progress throughout the entire book, where
-   * {@code 0.0} is the start of the book, and {@code 1.0} is the end.
+   * @return The fractional progress throughout the entire book, where {@code
+   * 0.0} is the start of the book, and {@code 1.0} is the end.
    */
 
   public double getProgressFractional()
@@ -94,12 +94,12 @@ public final class ReaderPaginationChangedEvent
     }
 
     final OpenPage page = NullCheck.notNull(this.open_pages.get(0));
-    final double major_index = page.spine_item_index;
-    final double major_max = this.spine_item_count;
+    final double major_index = (double) page.spine_item_index;
+    final double major_max = (double) this.spine_item_count;
     final double major = major_index / major_max;
 
-    final double minor_index = page.spine_item_page_index;
-    final double minor_max = page.spine_item_page_count;
+    final double minor_index = (double) page.spine_item_page_index;
+    final double minor_max = (double) page.spine_item_page_count;
     final double minor = minor_index / minor_max;
 
     return major + (minor * 0.1);

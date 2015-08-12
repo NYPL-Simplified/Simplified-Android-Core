@@ -40,10 +40,10 @@ public final class ThemeZooActivity extends Activity
       {
         pro_0.setProgress((pro_0.getProgress() + 10) % 100);
         pro_1.setProgress((pro_1.getProgress() + 10) % 100);
-        UIThread.runOnUIThreadDelayed(this, 1000);
+        UIThread.runOnUIThreadDelayed(this, 1000L);
       }
     };
 
-    UIThread.runOnUIThreadDelayed(r, 1000);
+    UIThread.runOnUIThreadDelayed(r, 1000L);
   }
 }

@@ -183,7 +183,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         });
     }
 
-    final int image_width = (int) (CatalogFeedLane.this.image_height * 0.75);
+    final int image_width =
+      (int) ((double) CatalogFeedLane.this.image_height * 0.75);
     final AtomicInteger images_left = new AtomicInteger(es.size());
     for (int index = 0; index < es.size(); ++index) {
       final ImageView image_view = image_views.get(index);

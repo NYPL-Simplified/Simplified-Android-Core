@@ -67,7 +67,7 @@ public final class AdobeDRMServices
       rng.nextBytes(bytes);
       final StringBuilder sb = new StringBuilder();
       for (int index = 0; index < bytes.length; ++index) {
-        sb.append(String.format("%02x", bytes[index]));
+        sb.append(String.format("%02x", Byte.valueOf(bytes[index])));
       }
       serial = sb.toString();
     } else {
