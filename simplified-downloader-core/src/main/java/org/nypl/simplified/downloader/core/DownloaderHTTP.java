@@ -80,7 +80,9 @@ public final class DownloaderHTTP implements DownloaderType
     NullCheck.notNull(in_listener);
 
     final long id = this.id_pool.incrementAndGet();
-    final File file = new File(this.directory, String.format("%016d.data", id));
+    final File file = new File(
+      this.directory, String.format(
+      "%016d.data", Long.valueOf(id)));
 
     DownloaderHTTP.LOG.debug("queued download {} for {}", file, in_uri);
     final Download d =
@@ -117,7 +119,8 @@ public final class DownloaderHTTP implements DownloaderType
       this.http = NullCheck.notNull(in_http);
       NullCheck.notNull(in_listener);
 
-      final String name = String.format("%s[%d]", DownloaderHTTP.class, in_id);
+      final String name = String.format(
+        "%s[%d]", DownloaderHTTP.class, Long.valueOf(in_id));
       this.log = NullCheck.notNull(LoggerFactory.getLogger(name));
       this.cancel = new AtomicBoolean(false);
       this.listener =
@@ -160,7 +163,7 @@ public final class DownloaderHTTP implements DownloaderType
       final HTTPResultError<InputStream> e)
       throws IOException
     {
-      this.log.error("http error: status {}", e.getStatus());
+      this.log.error("http error: status {}", Integer.valueOf(e.getStatus()));
 
       final OptionType<Throwable> none = Option.none();
       this.listener.onDownloadFailed(this, e.getStatus(), this.total, none);
@@ -184,10 +187,11 @@ public final class DownloaderHTTP implements DownloaderType
       final HTTPResultOKType<InputStream> e)
       throws IOException
     {
-      this.log.debug("http ok: ", e.getStatus());
+      this.log.debug("http ok: ", Integer.valueOf(e.getStatus()));
       final long expected = e.getContentLength();
       this.content_type = Download.getContentType(e.getResponseHeaders());
-      this.log.debug("expecting {} bytes of {}", expected, this.content_type);
+      this.log.debug(
+        "expecting {} bytes of {}", Long.valueOf(expected), this.content_type);
       this.listener.onDownloadStarted(this, expected);
 
       final OutputStream out = new FileOutputStream(this.file);
@@ -213,7 +217,9 @@ public final class DownloaderHTTP implements DownloaderType
           } else {
             if (this.total != expected) {
               this.log.error(
-                "received {} bytes but expected {}", this.total, expected);
+                "received {} bytes but expected {}",
+                Long.valueOf(this.total),
+                Long.valueOf(expected));
               final OptionType<Throwable> none = Option.none();
               this.listener.onDownloadFailed(
                 this, e.getStatus(), this.total, none);

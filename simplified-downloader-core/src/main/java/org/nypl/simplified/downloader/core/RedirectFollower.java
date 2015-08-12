@@ -28,19 +28,19 @@ import java.util.concurrent.Callable;
  * authentication.
  */
 
-@SuppressWarnings("boxing") final class RedirectFollower implements
-  Callable<HTTPResultOKType<InputStream>>,
+@SuppressWarnings("boxing") final class RedirectFollower
+  implements Callable<HTTPResultOKType<InputStream>>,
   HTTPResultMatcherType<Unit, Unit, Exception>
 {
   private final long                     byte_offset;
-  private int                            cur_redirects;
-  private OptionType<HTTPAuthType>       current_auth;
-  private URI                            current_uri;
   private final HTTPType                 http;
   private final int                      max_redirects;
   private final OptionType<HTTPAuthType> target_auth;
   private final Set<URI>                 tried_auth;
   private final Logger                   logger;
+  private       int                      cur_redirects;
+  private       OptionType<HTTPAuthType> current_auth;
+  private       URI                      current_uri;
 
   RedirectFollower(
     final Logger in_logger,
@@ -61,30 +61,6 @@ import java.util.concurrent.Callable;
     this.tried_auth = new HashSet<URI>(32);
   }
 
-  private abstract static class DownloadErrorFlattener<A, B> implements
-    HTTPResultMatcherType<A, B, Exception>
-  {
-    private DownloadErrorFlattener()
-    {
-
-    }
-
-    @Override public final B onHTTPError(
-      final HTTPResultError<A> e)
-      throws Exception
-    {
-      final String m = String.format("%d: %s", e.getStatus(), e.getMessage());
-      throw new IOException(NullCheck.notNull(m));
-    }
-
-    @Override public final B onHTTPException(
-      final HTTPResultException<A> e)
-      throws Exception
-    {
-      throw e.getError();
-    }
-  }
-
   @Override public HTTPResultOKType<InputStream> call()
     throws Exception
   {
@@ -93,8 +69,9 @@ import java.util.concurrent.Callable;
     final HTTPResultType<InputStream> r =
       this.http.get(this.current_auth, this.current_uri, this.byte_offset);
 
-    return r
-      .matchResult(new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>() {
+    return r.matchResult(
+      new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>()
+      {
         @Override public HTTPResultOKType<InputStream> onHTTPOK(
           final HTTPResultOKType<InputStream> e)
           throws Exception
@@ -112,12 +89,10 @@ import java.util.concurrent.Callable;
     this.logger.debug("received {} for {}", code, this.current_uri);
 
     switch (code) {
-      case HttpURLConnection.HTTP_UNAUTHORIZED:
-      {
+      case HttpURLConnection.HTTP_UNAUTHORIZED: {
         if (this.tried_auth.contains(this.current_uri)) {
           this.logger.error(
-            "already tried authenticating for {}",
-            this.current_uri);
+            "already tried authenticating for {}", this.current_uri);
 
           final String m = String.format("%d: %s", code, e.getMessage());
           throw new DownloadAuthenticationError(NullCheck.notNull(m));
@@ -149,16 +124,14 @@ import java.util.concurrent.Callable;
     this.logger.debug("received {} for {}", code, this.current_uri);
 
     switch (code) {
-      case HttpURLConnection.HTTP_OK:
-      {
+      case HttpURLConnection.HTTP_OK: {
         return Unit.unit();
       }
 
       case HttpURLConnection.HTTP_MOVED_PERM:
       case HttpURLConnection.HTTP_MOVED_TEMP:
       case 307:
-      case 308:
-      {
+      case 308: {
         this.current_auth = Option.none();
 
         final Map<String, List<String>> headers =
@@ -176,24 +149,20 @@ import java.util.concurrent.Callable;
         this.current_uri = NullCheck.notNull(URI.create(location));
 
         this.logger.debug(
-          "following redirect {} to {}",
-          this.cur_redirects,
-          this.current_uri);
+          "following redirect {} to {}", this.cur_redirects, this.current_uri);
 
         this.processURI();
         return Unit.unit();
       }
     }
 
-    throw new IOException(String.format(
-      "Unhandled http code (%d: %s)",
-      e.getStatus(),
-      e.getMessage()));
+    throw new IOException(
+      String.format(
+        "Unhandled http code (%d: %s)", e.getStatus(), e.getMessage()));
   }
 
   private void processURI()
-    throws IOException,
-      Exception
+    throws IOException, Exception
   {
     this.logger.debug("processing {}", this.current_uri);
 
@@ -204,5 +173,29 @@ import java.util.concurrent.Callable;
     final HTTPResultType<Unit> r =
       this.http.head(this.current_auth, this.current_uri);
     r.matchResult(this);
+  }
+
+  private abstract static class DownloadErrorFlattener<A, B>
+    implements HTTPResultMatcherType<A, B, Exception>
+  {
+    private DownloadErrorFlattener()
+    {
+
+    }
+
+    @Override public final B onHTTPError(
+      final HTTPResultError<A> e)
+      throws Exception
+    {
+      final String m = String.format("%d: %s", e.getStatus(), e.getMessage());
+      throw new IOException(NullCheck.notNull(m));
+    }
+
+    @Override public final B onHTTPException(
+      final HTTPResultException<A> e)
+      throws Exception
+    {
+      throw e.getError();
+    }
   }
 }
