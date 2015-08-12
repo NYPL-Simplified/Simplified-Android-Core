@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,7 +30,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * The default implementation of the {@link DownloaderType} interface.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 public final class DownloaderHTTP implements DownloaderType
 {
   private static final Logger LOG;
@@ -100,6 +101,7 @@ public final class DownloaderHTTP implements DownloaderType
     private final DownloadListenerType     listener;
     private final Logger                   log;
     private       long                     total;
+    private       String                   content_type;
 
     public Download(
       final long in_id,
@@ -118,74 +120,23 @@ public final class DownloaderHTTP implements DownloaderType
       final String name = String.format("%s[%d]", DownloaderHTTP.class, in_id);
       this.log = NullCheck.notNull(LoggerFactory.getLogger(name));
       this.cancel = new AtomicBoolean(false);
-      this.listener = new DownloadListenerType()
-      {
-        @Override public void onDownloadStarted(
-          final DownloadType d,
-          final long in_expected)
-        {
-          try {
-            in_listener.onDownloadStarted(d, in_expected);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadStarted raised: ", x);
-          }
-        }
-
-        @Override public void onDownloadFailed(
-          final DownloadType d,
-          final int in_status,
-          final long in_running_total,
-          final OptionType<Throwable> in_exception)
-        {
-          try {
-            in_listener.onDownloadFailed(
-              d, in_status, in_running_total, in_exception);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadFailed raised: ", x);
-          }
-        }
-
-        @Override public void onDownloadDataReceived(
-          final DownloadType d,
-          final long in_running_total,
-          final long in_expected_total)
-        {
-          try {
-            in_listener.onDownloadDataReceived(
-              d, in_running_total, in_expected_total);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadDataReceived raised: ", x);
-          }
-        }
-
-        @Override public void onDownloadCompleted(
-          final DownloadType d,
-          final File in_file)
-        {
-          try {
-            in_listener.onDownloadCompleted(d, in_file);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadCompleted raised: ", x);
-          }
-        }
-
-        @Override public void onDownloadCancelled(
-          final DownloadType d)
-        {
-          try {
-            in_listener.onDownloadCancelled(d);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadCancelled raised: ", x);
-          }
-        }
-      };
+      this.listener =
+        new DownloadCatchingListener(DownloaderHTTP.LOG, in_listener);
 
       this.total = 0L;
+    }
+
+    private static String getContentType(
+      final Map<String, List<String>> headers)
+    {
+      if (headers.containsKey("Content-Type")) {
+        final List<String> values = headers.get("Content-Type");
+        if (values.isEmpty() == false) {
+          return NullCheck.notNull(values.get(0));
+        }
+      }
+
+      return "application/octet-stream";
     }
 
     @Override public void run()
@@ -235,8 +186,8 @@ public final class DownloaderHTTP implements DownloaderType
     {
       this.log.debug("http ok: ", e.getStatus());
       final long expected = e.getContentLength();
-      this.log.debug("expecting {} bytes", expected);
-
+      this.content_type = Download.getContentType(e.getResponseHeaders());
+      this.log.debug("expecting {} bytes of {}", expected, this.content_type);
       this.listener.onDownloadStarted(this, expected);
 
       final OutputStream out = new FileOutputStream(this.file);
@@ -252,7 +203,8 @@ public final class DownloaderHTTP implements DownloaderType
             }
             this.total += (long) r;
             out.write(buffer, 0, r);
-            this.listener.onDownloadDataReceived(this, this.total, expected);
+            this.listener.onDownloadDataReceived(
+              this, this.total, expected);
           }
 
           if (this.cancel.get()) {
@@ -290,6 +242,11 @@ public final class DownloaderHTTP implements DownloaderType
     {
       this.log.debug("cancelling download");
       this.cancel.set(true);
+    }
+
+    @Override public String getContentType()
+    {
+      return this.content_type;
     }
   }
 }

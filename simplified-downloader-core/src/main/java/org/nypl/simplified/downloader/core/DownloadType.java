@@ -11,4 +11,10 @@ public interface DownloadType
    */
 
   void cancel();
+
+  /**
+   * @return The content type of the remote data
+   */
+
+  String getContentType();
 }

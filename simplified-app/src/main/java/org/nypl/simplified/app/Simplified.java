@@ -33,18 +33,19 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
+import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
-import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSJSONParser;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
@@ -154,10 +155,12 @@ public final class Simplified extends Application
 
   private static FeedLoaderType makeFeedLoader(
     final ExecutorService exec,
+    final HTTPType http,
     final OPDSSearchParserType s,
     final OPDSFeedParserType p)
   {
-    final OPDSFeedTransportType t = OPDSFeedTransport.newTransport();
+    final OPDSFeedTransportType<OptionType<HTTPAuthType>> t =
+      FeedHTTPTransport.newTransport(http);
     return FeedLoader.newFeedLoader(exec, p, t, s);
   }
 
@@ -275,17 +278,20 @@ public final class Simplified extends Application
       this.feed_initial_uri =
         NullCheck.notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
 
+      /**
+       * Feed loaders and parsers.
+       */
+
+      this.http = HTTP.newHTTP();
       final OPDSAcquisitionFeedEntryParserType in_entry_parser =
         OPDSAcquisitionFeedEntryParser.newParser();
-
       final OPDSJSONSerializerType in_json_serializer =
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
-
       final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
       final OPDSSearchParserType s = OPDSSearchParser.newParser();
       this.feed_loader =
-        Simplified.makeFeedLoader(this.exec_catalog_feeds, s, p);
+        Simplified.makeFeedLoader(this.exec_catalog_feeds, this.http, s, p);
 
       /**
        * DRM.
@@ -319,7 +325,6 @@ public final class Simplified extends Application
       CatalogAppServices.LOG_CA.debug("downloads: {}", downloads_dir);
       CatalogAppServices.LOG_CA.debug("books:     {}", books_dir);
 
-      this.http = HTTP.newHTTP();
       this.downloader = DownloaderHTTP.newDownloader(
         this.exec_books, downloads_dir, this.http);
 

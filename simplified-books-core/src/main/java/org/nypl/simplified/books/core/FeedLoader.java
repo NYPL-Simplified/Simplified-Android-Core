@@ -10,6 +10,7 @@ import net.jodah.expiringmap.ExpiringMap;
 import net.jodah.expiringmap.ExpiringMap.Builder;
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
+import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
@@ -46,16 +47,16 @@ public final class FeedLoader
     LOG = NullCheck.notNull(LoggerFactory.getLogger(FeedLoader.class));
   }
 
-  private final ExpiringMap<URI, FeedType> cache;
-  private final ExecutorService            exec;
-  private final OPDSFeedParserType         parser;
-  private final OPDSSearchParserType       search_parser;
-  private final OPDSFeedTransportType      transport;
+  private final ExpiringMap<URI, FeedType>                      cache;
+  private final ExecutorService                                 exec;
+  private final OPDSFeedParserType                              parser;
+  private final OPDSSearchParserType                            search_parser;
+  private final OPDSFeedTransportType<OptionType<HTTPAuthType>> transport;
 
   private FeedLoader(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
-    final OPDSFeedTransportType in_transport,
+    final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport,
     final OPDSSearchParserType in_search_parser,
     final ExpiringMap<URI, FeedType> in_m)
   {
@@ -105,7 +106,7 @@ public final class FeedLoader
   public static FeedLoaderType newFeedLoader(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
-    final OPDSFeedTransportType in_transport,
+    final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport,
     final OPDSSearchParserType in_search_parser)
   {
     final Builder<Object, Object> b = ExpiringMap.builder();
@@ -131,7 +132,7 @@ public final class FeedLoader
   public static FeedLoaderType newFeedLoaderFromExpiringMap(
     final ExecutorService in_exec,
     final OPDSFeedParserType in_parser,
-    final OPDSFeedTransportType in_transport,
+    final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport,
     final OPDSSearchParserType in_search_parser,
     final ExpiringMap<URI, FeedType> m)
   {
@@ -148,16 +149,17 @@ public final class FeedLoader
 
   private Future<Unit> fetch(
     final URI uri,
+    final OptionType<HTTPAuthType> auth,
     final FeedLoaderListenerType listener)
   {
-    FeedLoader.LOG.debug("not cached, fetching: {}", uri);
+    FeedLoader.LOG.debug("not cached, fetching: {} (auth {})", uri, auth);
 
     final Callable<Unit> c = new Callable<Unit>()
     {
       @Override public Unit call()
       {
         try {
-          final FeedType f = FeedLoader.this.loadFeed(uri);
+          final FeedType f = FeedLoader.this.loadFeed(uri, auth);
           FeedLoader.this.cache.put(uri, f);
           FeedLoader.LOG.debug("added to cache: {}", uri);
           FeedLoader.callListener(uri, listener, f);
@@ -174,9 +176,11 @@ public final class FeedLoader
 
   @Override public Future<Unit> fromURI(
     final URI uri,
+    final OptionType<HTTPAuthType> auth,
     final FeedLoaderListenerType listener)
   {
     NullCheck.notNull(uri);
+    NullCheck.notNull(auth);
     NullCheck.notNull(listener);
 
     if (this.cache.containsKey(uri)) {
@@ -186,16 +190,18 @@ public final class FeedLoader
       return new ImmediateFuture<Unit>(Unit.unit());
     }
 
-    return this.fetch(uri, listener);
+    return this.fetch(uri, auth, listener);
   }
 
   @Override public Future<Unit> fromURIRefreshing(
     final URI uri,
+    final OptionType<HTTPAuthType> auth,
     final FeedLoaderListenerType listener)
   {
     NullCheck.notNull(uri);
+    NullCheck.notNull(auth);
     NullCheck.notNull(listener);
-    return this.fetch(uri, listener);
+    return this.fetch(uri, auth, listener);
   }
 
   @Override public OPDSFeedParserType getOPDSFeedParser()
@@ -221,10 +227,11 @@ public final class FeedLoader
   }
 
   private FeedType loadFeed(
-    final URI uri)
+    final URI uri,
+    final OptionType<HTTPAuthType> auth)
     throws IOException
   {
-    final InputStream s = this.transport.getStream(uri);
+    final InputStream s = this.transport.getStream(auth, uri);
     try {
       final OPDSAcquisitionFeed parsed = this.parser.parse(uri, s);
       final OptionType<OPDSSearchLink> search_opt = parsed.getFeedSearchURI();
@@ -232,7 +239,7 @@ public final class FeedLoader
         final Some<OPDSSearchLink> some = (Some<OPDSSearchLink>) search_opt;
         final URI search_uri = some.get().getURI();
 
-        final InputStream ss = this.transport.getStream(search_uri);
+        final InputStream ss = this.transport.getStream(auth, search_uri);
         try {
           final OptionType<OPDSOpenSearch1_1> search =
             Option.some(this.search_parser.parse(search_uri, ss));

@@ -7,6 +7,7 @@
         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
         <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/src/main/assets" />
         <option name="APK_PATH" value="/target/simplified-opds-tests-android.apk" />
+        <option name="LIBRARY_PROJECT" value="true" />
         <option name="COMPILE_CUSTOM_GENERATED_SOURCES" value="false" />
         <resOverlayFolders>
           <path>/res-overlay</path>

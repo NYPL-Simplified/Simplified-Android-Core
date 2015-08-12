@@ -5,6 +5,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -224,5 +225,68 @@ public final class FileUtilities
     NullCheck.notNull(text);
     FileUtilities.fileWriteUTF8(f_tmp, text);
     FileUtilities.fileRename(f_tmp, f);
+  }
+
+  /**
+   * Read the entire contents of the given file, returning it as a byte array.
+   *
+   * @param file The file
+   *
+   * @return The contents of the file
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static byte[] fileReadBytes(final File file)
+    throws IOException
+  {
+    NullCheck.notNull(file);
+
+    final FileInputStream fs = new FileInputStream(file);
+    try {
+      final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+      try {
+        final byte[] buffer = new byte[8192];
+        while (true) {
+          final int r = fs.read(buffer);
+          if (r == -1) {
+            break;
+          }
+          bao.write(buffer, 0, r);
+        }
+        return bao.toByteArray();
+      } finally {
+        bao.close();
+      }
+    } finally {
+      fs.close();
+    }
+  }
+
+  /**
+   * Write the given bytes to the given file.
+   *
+   * @param data The data
+   * @param file The file
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static void fileWriteBytes(
+    final byte[] data,
+    final File file)
+    throws IOException
+  {
+    NullCheck.notNull(data);
+    NullCheck.notNull(file);
+
+    final FileOutputStream fs = new FileOutputStream(file);
+    try {
+      fs.write(data);
+      fs.flush();
+      fs.close();
+    } finally {
+      fs.close();
+    }
   }
 }

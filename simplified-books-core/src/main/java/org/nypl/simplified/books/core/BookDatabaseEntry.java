@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
  * A single book directory.
@@ -29,8 +30,7 @@ import java.io.OutputStream;
  * process-safe.
  */
 
-@SuppressWarnings("synthetic-access") public final class BookDatabaseEntry
-  implements BookDatabaseEntryType
+public final class BookDatabaseEntry implements BookDatabaseEntryType
 {
   /**
    * The number of milliseconds to wait whilst attempting to acquire a lock.
@@ -46,6 +46,7 @@ import java.io.OutputStream;
   }
 
   private final File                   directory;
+  private final File                   file_adobe_rights;
   private final File                   file_book;
   private final File                   file_cover;
   private final File                   file_lock;
@@ -81,6 +82,7 @@ import java.io.OutputStream;
     this.file_meta = new File(this.directory, "meta.json");
     this.file_meta_tmp = new File(this.directory, "meta.json.tmp");
     this.file_book = new File(this.directory, "book.epub");
+    this.file_adobe_rights = new File(this.directory, "rights_adobe.xml");
   }
 
   @Override public void copyInBookFromSameFilesystem(
@@ -100,6 +102,30 @@ import java.io.OutputStream;
           return Unit.unit();
         }
       });
+  }
+
+  @Override public void copyInBook(final File file)
+    throws IOException
+  {
+    FileLocking.withFileThreadLocked(
+      this.file_lock,
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>()
+      {
+        @Override public Unit call(
+          final Unit x)
+          throws IOException
+        {
+          BookDatabaseEntry.this.copyInBookLocked(file);
+          return Unit.unit();
+        }
+      });
+  }
+
+  private void copyInBookLocked(final File file)
+    throws IOException
+  {
+    FileUtilities.fileCopy(file, this.file_book);
   }
 
   private void copyInBookFromSameFilesystemLocked(
@@ -218,6 +244,36 @@ import java.io.OutputStream;
           return Unit.unit();
         }
       });
+  }
+
+  @Override
+  public void setAdobeRightsInformation(final OptionType<ByteBuffer> rights)
+    throws IOException
+  {
+    FileLocking.withFileThreadLocked(
+      this.file_lock,
+      (long) BookDatabaseEntry.WAIT_MAXIMUM_MILLISECONDS,
+      new PartialFunctionType<Unit, Unit, IOException>()
+      {
+        @Override public Unit call(
+          final Unit x)
+          throws IOException
+        {
+          BookDatabaseEntry.this.setAdobeRightsInformationLocked(rights);
+          return Unit.unit();
+        }
+      });
+  }
+
+  private void setAdobeRightsInformationLocked(
+    final OptionType<ByteBuffer> in_rights)
+    throws IOException
+  {
+    if (in_rights.isSome()) {
+      final ByteBuffer data = ((Some<ByteBuffer>) in_rights).get();
+      FileUtilities.fileWriteBytes(
+        data.array(), this.file_adobe_rights);
+    }
   }
 
   private OptionType<File> getCoverLocked()

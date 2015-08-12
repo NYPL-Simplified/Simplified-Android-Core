@@ -57,6 +57,7 @@ import org.nypl.simplified.books.core.FeedSearchType;
 import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
+import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 import org.nypl.simplified.stack.ImmutableStack;
@@ -75,7 +76,6 @@ import java.util.concurrent.Future;
  * feeds.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 public class CatalogFeedActivity extends CatalogActivity implements
   BookFeedListenerType,
   FeedMatcherType<Unit, UnreachableCodeException>,
@@ -148,9 +148,9 @@ public class CatalogFeedActivity extends CatalogActivity implements
   }
 
   /**
-   * Start a new catalog feed activity, assuming that the user came from
-   * {@code from}, with up stack {@code up_stack}, attempting to load the feed
-   * at {@code target}.
+   * Start a new catalog feed activity, assuming that the user came from {@code
+   * from}, with up stack {@code up_stack}, attempting to load the feed at
+   * {@code target}.
    *
    * @param from    The previous activity
    * @param in_args The feed arguments
@@ -169,10 +169,10 @@ public class CatalogFeedActivity extends CatalogActivity implements
   }
 
   /**
-   * Start a new catalog feed activity, assuming that the user came from
-   * {@code from}, with up stack {@code up_stack}, attempting to load the feed
-   * at {@code target}. The new activity "replaces" the current activity by
-   * calling {@code finish()} on the existing activity.
+   * Start a new catalog feed activity, assuming that the user came from {@code
+   * from}, with up stack {@code up_stack}, attempting to load the feed at
+   * {@code target}. The new activity "replaces" the current activity by calling
+   * {@code finish()} on the existing activity.
    *
    * @param from    The previous activity
    * @param in_args The feed arguments
@@ -357,7 +357,8 @@ public class CatalogFeedActivity extends CatalogActivity implements
     final URI u)
   {
     CatalogFeedActivity.LOG.debug("loading feed: {}", u);
-    this.loading = feed_loader.fromURI(u, this);
+    final OptionType<HTTPAuthType> none = Option.none();
+    this.loading = feed_loader.fromURI(u, none, this);
   }
 
   @Override protected SimplifiedPart navigationDrawerGetPart()

@@ -8,6 +8,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
@@ -25,6 +26,7 @@ import org.nypl.simplified.books.core.FeedMatcherType;
 import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
+import org.nypl.simplified.http.core.HTTPAuthType;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -36,8 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * A view that displays a catalog feed that does not contain any groups.
  */
 
-@SuppressWarnings("boxing") public final class CatalogFeedWithoutGroups
-  implements ListAdapter,
+public final class CatalogFeedWithoutGroups implements ListAdapter,
   OnScrollListener,
   FeedLoaderListenerType,
   FeedMatcherType<Unit, UnreachableCodeException>
@@ -211,7 +212,8 @@ import java.util.concurrent.atomic.AtomicReference;
     final URI next)
   {
     CatalogFeedWithoutGroups.LOG.debug("loading: {}", next);
-    final Future<Unit> r = this.feed_loader.fromURI(next, this);
+    final OptionType<HTTPAuthType> none = Option.none();
+    final Future<Unit> r = this.feed_loader.fromURI(next, none, this);
     this.loading.set(Pair.pair(r, next));
     return r;
   }

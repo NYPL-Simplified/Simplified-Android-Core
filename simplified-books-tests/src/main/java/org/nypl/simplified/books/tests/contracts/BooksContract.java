@@ -1,19 +1,11 @@
 package org.nypl.simplified.books.tests.contracts;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
@@ -28,11 +20,13 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
+import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthMatcherType;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -44,7 +38,6 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
-import org.nypl.simplified.opds.core.OPDSFeedTransport;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSJSONParser;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
@@ -54,15 +47,36 @@ import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.junreachable.UnreachableCodeException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-@SuppressWarnings({ "boxing", "synthetic-access", "null", "resource" }) public final class BooksContract implements
-  BooksContractType
+/**
+ * The default implementation of the {@link BooksContractType}.
+ */
+
+public final class BooksContract implements BooksContractType
 {
   private static final URI LOANS_URI = URI.create("http://example.com/loans");
+
+  /**
+   * Construct a contract.
+   */
+
+  public BooksContract()
+  {
+
+  }
 
   private static HTTPType makeAuthHTTP(
     final AccountBarcode barcode,
@@ -71,7 +85,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Map<String, List<String>> empty_headers =
       new HashMap<String, List<String>>();
 
-    return new HTTPType() {
+    return new HTTPType()
+    {
 
       @Override public HTTPResultType<InputStream> get(
         final OptionType<HTTPAuthType> auth_opt,
@@ -100,8 +115,9 @@ import com.io7m.junreachable.UnreachableCodeException;
         final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
         final HTTPAuthType auth = some.get();
         try {
-          return auth
-            .matchAuthType(new HTTPAuthMatcherType<HTTPResultType<InputStream>, IOException>() {
+          return auth.matchAuthType(
+            new HTTPAuthMatcherType<HTTPResultType<InputStream>, IOException>()
+            {
               private boolean isAuthorized(
                 final HTTPAuthBasic b)
               {
@@ -120,15 +136,11 @@ import com.io7m.junreachable.UnreachableCodeException;
                 }
 
                 final InputStream stream =
-                  BooksContract.class
-                    .getResourceAsStream("/org/nypl/simplified/books/tests/contracts/loans.xml");
+                  BooksContract.class.getResourceAsStream(
+                    "/org/nypl/simplified/books/tests/contracts/loans.xml");
 
                 return new HTTPResultOK<InputStream>(
-                  "OK",
-                  200,
-                  stream,
-                  1,
-                  empty_headers);
+                  "OK", 200, stream, 1, empty_headers);
               }
             });
         } catch (final IOException e) {
@@ -145,11 +157,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         }
 
         return new HTTPResultOK<Unit>(
-          "OK",
-          200,
-          Unit.unit(),
-          1,
-          empty_headers);
+          "OK", 200, Unit.unit(), 1, empty_headers);
       }
 
       private HTTPResultType<Unit> headLoans(
@@ -162,8 +170,9 @@ import com.io7m.junreachable.UnreachableCodeException;
         final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
         final HTTPAuthType auth = some.get();
         try {
-          return auth
-            .matchAuthType(new HTTPAuthMatcherType<HTTPResultType<Unit>, IOException>() {
+          return auth.matchAuthType(
+            new HTTPAuthMatcherType<HTTPResultType<Unit>, IOException>()
+            {
               private boolean isAuthorized(
                 final HTTPAuthBasic b)
               {
@@ -182,11 +191,7 @@ import com.io7m.junreachable.UnreachableCodeException;
                 }
 
                 return new HTTPResultOK<Unit>(
-                  "OK",
-                  200,
-                  Unit.unit(),
-                  1,
-                  empty_headers);
+                  "OK", 200, Unit.unit(), 1, empty_headers);
               }
             });
         } catch (final IOException e) {
@@ -203,7 +208,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
   private static HTTPType makeExceptionHTTP()
   {
-    return new HTTPType() {
+    return new HTTPType()
+    {
       @Override public HTTPResultType<InputStream> get(
         final OptionType<HTTPAuthType> auth,
         final URI uri,
@@ -226,20 +232,12 @@ import com.io7m.junreachable.UnreachableCodeException;
     final OPDSFeedParserType in_parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final ExecutorService in_exec = Executors.newSingleThreadExecutor();
+    final HTTPType http = HTTP.newHTTP();
     final OPDSFeedTransportType in_transport =
-      OPDSFeedTransport.newTransport();
-    final OPDSSearchParserType in_search_parser =
-      OPDSSearchParser.newParser();
+      FeedHTTPTransport.newTransport(http);
+    final OPDSSearchParserType in_search_parser = OPDSSearchParser.newParser();
     return FeedLoader.newFeedLoader(
-      in_exec,
-      in_parser,
-      in_transport,
-      in_search_parser);
-  }
-
-  public BooksContract()
-  {
-
+      in_exec, in_parser, in_transport, in_search_parser);
   }
 
   @Override public void testBooksLoadFileNotDirectory()
@@ -258,65 +256,65 @@ import com.io7m.junreachable.UnreachableCodeException;
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-      final DownloaderType d =
-        DownloaderHTTP.newDownloader(
-          exec,
-          DirectoryUtilities.directoryCreateTemporary(),
-          in_http);
+      final DownloaderType d = DownloaderHTTP.newDownloader(
+        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
-      final BooksType b =
-        BooksController.newBooks(
-          exec,
-          BooksContract.newParser(),
-          in_http,
-          d,
-          in_json_serializer,
-          in_json_parser,
-          in_config);
+      final OptionType<AdobeAdeptExecutorType> none = Option.none();
+      final BooksType b = BooksController.newBooks(
+        exec,
+        BooksContract.newParser(),
+        in_http,
+        d,
+        in_json_serializer,
+        in_json_parser,
+        in_config,
+        none);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
-      b.accountLoadBooks(new AccountDataLoadListenerType() {
-        @Override public void onAccountDataBookLoadFailed(
-          final BookID id,
-          final OptionType<Throwable> error,
-          final String message)
+      b.accountLoadBooks(
+        new AccountDataLoadListenerType()
         {
-          System.out.println("testBooksLoadFileNotDirectory: load failed");
-          ok.set(false);
-        }
+          @Override public void onAccountDataBookLoadFailed(
+            final BookID id,
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            System.out.println("testBooksLoadFileNotDirectory: load failed");
+            ok.set(false);
+          }
 
-        @Override public void onAccountDataBookLoadFinished()
-        {
-          System.out.println("testBooksLoadFileNotDirectory: load finished");
-        }
+          @Override public void onAccountDataBookLoadFinished()
+          {
+            System.out.println("testBooksLoadFileNotDirectory: load finished");
+          }
 
-        @Override public void onAccountDataBookLoadSucceeded(
-          final BookID book,
-          final BookSnapshot snap)
-        {
-          System.out.println("testBooksLoadFileNotDirectory: load succeeded");
-          ok.set(false);
-        }
+          @Override public void onAccountDataBookLoadSucceeded(
+            final BookID book,
+            final BookSnapshot snap)
+          {
+            System.out.println("testBooksLoadFileNotDirectory: load succeeded");
+            ok.set(false);
+          }
 
-        @Override public void onAccountDataLoadFailedImmediately(
-          final Throwable error)
-        {
-          System.out.println("testBooksLoadFileNotDirectory: load failed");
-          ok.set(false);
-        }
+          @Override public void onAccountDataLoadFailedImmediately(
+            final Throwable error)
+          {
+            System.out.println("testBooksLoadFileNotDirectory: load failed");
+            ok.set(false);
+          }
 
-        @Override public void onAccountUnavailable()
-        {
-          System.out
-            .println("testBooksLoadFileNotDirectory: account unavailable");
-          ok.set(true);
-          latch.countDown();
-        }
-      });
+          @Override public void onAccountUnavailable()
+          {
+            System.out.println(
+              "testBooksLoadFileNotDirectory: account unavailable");
+            ok.set(true);
+            latch.countDown();
+          }
+        });
 
       latch.await();
-      TestUtilities.assertEquals(ok.get(), true);
+      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
@@ -337,64 +335,64 @@ import com.io7m.junreachable.UnreachableCodeException;
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-      final DownloaderType d =
-        DownloaderHTTP.newDownloader(
-          exec,
-          DirectoryUtilities.directoryCreateTemporary(),
-          in_http);
+      final DownloaderType d = DownloaderHTTP.newDownloader(
+        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
-      final BooksType b =
-        BooksController.newBooks(
-          exec,
-          BooksContract.newParser(),
-          in_http,
-          d,
-          in_json_serializer,
-          in_json_parser,
-          in_config);
+      final OptionType<AdobeAdeptExecutorType> none = Option.none();
+      final BooksType b = BooksController.newBooks(
+        exec,
+        BooksContract.newParser(),
+        in_http,
+        d,
+        in_json_serializer,
+        in_json_parser,
+        in_config,
+        none);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
-      b.accountLoadBooks(new AccountDataLoadListenerType() {
-        @Override public void onAccountDataBookLoadFailed(
-          final BookID id,
-          final OptionType<Throwable> error,
-          final String message)
+      b.accountLoadBooks(
+        new AccountDataLoadListenerType()
         {
-          System.out.println("testBooksLoadNotLoggedIn: load failed");
-          ok.set(false);
-        }
+          @Override public void onAccountDataBookLoadFailed(
+            final BookID id,
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            System.out.println("testBooksLoadNotLoggedIn: load failed");
+            ok.set(false);
+          }
 
-        @Override public void onAccountDataBookLoadFinished()
-        {
-          System.out.println("testBooksLoadNotLoggedIn: load finished");
-        }
+          @Override public void onAccountDataBookLoadFinished()
+          {
+            System.out.println("testBooksLoadNotLoggedIn: load finished");
+          }
 
-        @Override public void onAccountDataBookLoadSucceeded(
-          final BookID book,
-          final BookSnapshot snap)
-        {
-          System.out.println("testBooksLoadNotLoggedIn: load succeeded");
-          ok.set(false);
-        }
+          @Override public void onAccountDataBookLoadSucceeded(
+            final BookID book,
+            final BookSnapshot snap)
+          {
+            System.out.println("testBooksLoadNotLoggedIn: load succeeded");
+            ok.set(false);
+          }
 
-        @Override public void onAccountDataLoadFailedImmediately(
-          final Throwable error)
-        {
-          System.out.println("testBooksLoadNotLoggedIn: load failed");
-          ok.set(false);
-        }
+          @Override public void onAccountDataLoadFailedImmediately(
+            final Throwable error)
+          {
+            System.out.println("testBooksLoadNotLoggedIn: load failed");
+            ok.set(false);
+          }
 
-        @Override public void onAccountUnavailable()
-        {
-          System.out.println("testBooksLoadNotLoggedIn: account unavailable");
-          ok.set(true);
-          latch.countDown();
-        }
-      });
+          @Override public void onAccountUnavailable()
+          {
+            System.out.println("testBooksLoadNotLoggedIn: account unavailable");
+            ok.set(true);
+            latch.countDown();
+          }
+        });
 
       latch.await();
-      TestUtilities.assertEquals(ok.get(), true);
+      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
@@ -421,53 +419,69 @@ import com.io7m.junreachable.UnreachableCodeException;
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-      final DownloaderType d =
-        DownloaderHTTP.newDownloader(
-          exec,
-          DirectoryUtilities.directoryCreateTemporary(),
-          in_http);
+      final DownloaderType d = DownloaderHTTP.newDownloader(
+        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
-      final BooksType b =
-        BooksController.newBooks(
-          exec,
-          BooksContract.newParser(),
-          in_http,
-          d,
-          in_json_serializer,
-          in_json_parser,
-          in_config);
+      final OptionType<AdobeAdeptExecutorType> none = Option.none();
+      final BooksType b = BooksController.newBooks(
+        exec,
+        BooksContract.newParser(),
+        in_http,
+        d,
+        in_json_serializer,
+        in_json_parser,
+        in_config,
+        none);
 
       final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
 
-      final AccountLoginListenerType listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-            // Nothing
-          }
+      final AccountLoginListenerType listener = new AccountLoginListenerType()
+      {
+        @Override public void onAccountLoginFailureCredentialsIncorrect()
+        {
+          // Nothing
+        }
 
-          @Override public void onAccountLoginSuccess(
-            final AccountBarcode used_barcode,
-            final AccountPIN used_pin)
-          {
-            try {
-              System.out.println("testBooksLoginAcceptedFirst: logged in");
-              succeeded.set(true);
-            } finally {
-              latch.countDown();
-            }
+        @Override public void onAccountLoginFailureServerError(final int code)
+        {
+          // Nothing
+        }
+
+        @Override public void onAccountLoginFailureLocalError(
+          final OptionType<Throwable> error,
+          final String message)
+        {
+          // Nothing
+        }
+
+        @Override public void onAccountLoginSuccess(
+          final AccountBarcode used_barcode,
+          final AccountPIN used_pin)
+        {
+          try {
+            System.out.println("testBooksLoginAcceptedFirst: logged in");
+            succeeded.set(true);
+          } finally {
+            latch.countDown();
           }
-        };
+        }
+
+        @Override public void onAccountLoginFailureDeviceActivationError(
+          final String message)
+        {
+          // Nothing
+        }
+      };
 
       b.accountLogin(barcode, pin, listener);
 
       latch.await();
-      TestUtilities.assertEquals(rejected.get(), false);
-      TestUtilities.assertEquals(succeeded.get(), true);
+      TestUtilities.assertEquals(
+        Boolean.valueOf(rejected.get()), Boolean.FALSE);
+      TestUtilities.assertEquals(
+        Boolean.valueOf(succeeded.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
@@ -494,35 +508,43 @@ import com.io7m.junreachable.UnreachableCodeException;
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-      final DownloaderType d =
-        DownloaderHTTP.newDownloader(
-          exec,
-          DirectoryUtilities.directoryCreateTemporary(),
-          in_http);
+      final DownloaderType d = DownloaderHTTP.newDownloader(
+        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
-      final BooksType b =
-        BooksController.newBooks(
-          exec,
-          BooksContract.newParser(),
-          in_http,
-          d,
-          in_json_serializer,
-          in_json_parser,
-          in_config);
+      final OptionType<AdobeAdeptExecutorType> none = Option.none();
+      final BooksType b = BooksController.newBooks(
+        exec,
+        BooksContract.newParser(),
+        in_http,
+        d,
+        in_json_serializer,
+        in_json_parser,
+        in_config,
+        none);
 
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
 
       final AccountLoginListenerType login_listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
+        new AccountLoginListenerType()
+        {
+          @Override public void onAccountLoginFailureCredentialsIncorrect()
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountLoginFailureServerError(final int code)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountLoginFailureLocalError(
             final OptionType<Throwable> error,
             final String message)
           {
             try {
-              System.err
-                .println("testBooksLoginFileNotDirectory: login failed: "
-                  + message);
+              System.err.println(
+                "testBooksLoginFileNotDirectory: login failed: " + message);
               ((Some<Throwable>) error).get().printStackTrace();
               failed.set(true);
             } finally {
@@ -536,12 +558,18 @@ import com.io7m.junreachable.UnreachableCodeException;
           {
             throw new UnreachableCodeException();
           }
+
+          @Override public void onAccountLoginFailureDeviceActivationError(
+            final String message)
+          {
+            // Nothing
+          }
         };
 
       b.accountLogin(barcode, pin, login_listener);
 
       latch.await();
-      TestUtilities.assertEquals(failed.get(), true);
+      TestUtilities.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
@@ -567,34 +595,42 @@ import com.io7m.junreachable.UnreachableCodeException;
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-      final DownloaderType d =
-        DownloaderHTTP.newDownloader(
-          exec,
-          DirectoryUtilities.directoryCreateTemporary(),
-          in_http);
+      final DownloaderType d = DownloaderHTTP.newDownloader(
+        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
-      final BooksType b =
-        BooksController.newBooks(
-          exec,
-          BooksContract.newParser(),
-          in_http,
-          d,
-          in_json_serializer,
-          in_json_parser,
-          in_config);
+      final OptionType<AdobeAdeptExecutorType> none = Option.none();
+      final BooksType b = BooksController.newBooks(
+        exec,
+        BooksContract.newParser(),
+        in_http,
+        d,
+        in_json_serializer,
+        in_json_parser,
+        in_config,
+        none);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
       final AccountLoginListenerType login_listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
+        new AccountLoginListenerType()
+        {
+          @Override public void onAccountLoginFailureCredentialsIncorrect()
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountLoginFailureServerError(final int code)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountLoginFailureLocalError(
             final OptionType<Throwable> error,
             final String message)
           {
             try {
-              System.err
-                .println("testBooksSyncFileNotDirectory: login failed: "
-                  + message);
+              System.err.println(
+                "testBooksSyncFileNotDirectory: login failed: " + message);
               ((Some<Throwable>) error).get().printStackTrace();
             } finally {
               latch0.countDown();
@@ -606,11 +642,17 @@ import com.io7m.junreachable.UnreachableCodeException;
             final AccountPIN used_pin)
           {
             try {
-              System.err
-                .println("testBooksSyncFileNotDirectory: login succeeded");
+              System.err.println(
+                "testBooksSyncFileNotDirectory: login succeeded");
             } finally {
               latch0.countDown();
             }
+          }
+
+          @Override public void onAccountLoginFailureDeviceActivationError(
+            final String message)
+          {
+            // Nothing
           }
         };
 
@@ -630,15 +672,15 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AtomicBoolean failed = new AtomicBoolean(false);
 
       final AccountSyncListenerType sync_listener =
-        new AccountSyncListenerType() {
+        new AccountSyncListenerType()
+        {
           @Override public void onAccountSyncAuthenticationFailure(
             final String message)
           {
             try {
               failed.set(true);
-              System.err
-                .println("testBooksSyncFileNotDirectory: login failed: "
-                  + message);
+              System.err.println(
+                "testBooksSyncFileNotDirectory: login failed: " + message);
             } finally {
               latch1.countDown();
             }
@@ -647,8 +689,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           @Override public void onAccountSyncBook(
             final BookID book)
           {
-            System.err.println("testBooksSyncFileNotDirectory: synced book: "
-              + book);
+            System.err.println(
+              "testBooksSyncFileNotDirectory: synced book: " + book);
           }
 
           @Override public void onAccountSyncFailure(
@@ -657,9 +699,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           {
             try {
               failed.set(true);
-              System.err
-                .println("testBooksSyncFileNotDirectory: login failed: "
-                  + message);
+              System.err.println(
+                "testBooksSyncFileNotDirectory: login failed: " + message);
               ((Some<Throwable>) error).get().printStackTrace();
             } finally {
               latch1.countDown();
@@ -674,7 +715,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       b.accountSync(sync_listener);
       latch1.await();
-      TestUtilities.assertEquals(failed.get(), true);
+      TestUtilities.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
@@ -701,37 +742,46 @@ import com.io7m.junreachable.UnreachableCodeException;
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-      final DownloaderType d =
-        DownloaderHTTP.newDownloader(
-          exec,
-          DirectoryUtilities.directoryCreateTemporary(),
-          in_http);
+      final DownloaderType d = DownloaderHTTP.newDownloader(
+        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
-      final BooksType b =
-        BooksController.newBooks(
-          exec,
-          BooksContract.newParser(),
-          in_http,
-          d,
-          in_json_serializer,
-          in_json_parser,
-          in_config);
+      final OptionType<AdobeAdeptExecutorType> none = Option.none();
+      final BooksType b = BooksController.newBooks(
+        exec,
+        BooksContract.newParser(),
+        in_http,
+        d,
+        in_json_serializer,
+        in_json_parser,
+        in_config,
+        none);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
       final AccountLoginListenerType login_listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
-            final OptionType<Throwable> error,
-            final String message)
+        new AccountLoginListenerType()
+        {
+
+          @Override public void onAccountLoginFailureCredentialsIncorrect()
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountLoginFailureServerError(final int code)
           {
             try {
-              System.err.println("testBooksSyncLoadOK: login failed: "
-                + message);
-              ((Some<Throwable>) error).get().printStackTrace();
+              System.err.println(
+                "testBooksSyncLoadOK: login failed: " + code);
             } finally {
               latch0.countDown();
             }
+          }
+
+          @Override public void onAccountLoginFailureLocalError(
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            // Nothing
           }
 
           @Override public void onAccountLoginSuccess(
@@ -744,6 +794,12 @@ import com.io7m.junreachable.UnreachableCodeException;
               latch0.countDown();
             }
           }
+
+          @Override public void onAccountLoginFailureDeviceActivationError(
+            final String message)
+          {
+            // Nothing
+          }
         };
 
       b.accountLogin(barcode, pin, login_listener);
@@ -755,15 +811,16 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AtomicInteger count = new AtomicInteger(0);
 
       final AccountSyncListenerType sync_listener =
-        new AccountSyncListenerType() {
+        new AccountSyncListenerType()
+        {
 
           @Override public void onAccountSyncAuthenticationFailure(
             final String message)
           {
             try {
               ok.set(false);
-              System.err.println("testBooksSyncLoadOK: login failed: "
-                + message);
+              System.err.println(
+                "testBooksSyncLoadOK: login failed: " + message);
             } finally {
               latch1.countDown();
             }
@@ -781,8 +838,8 @@ import com.io7m.junreachable.UnreachableCodeException;
           {
             try {
               ok.set(false);
-              System.err.println("testBooksSyncLoadOK: login failed: "
-                + message);
+              System.err.println(
+                "testBooksSyncLoadOK: login failed: " + message);
               ((Some<Throwable>) error).get().printStackTrace();
             } finally {
               latch1.countDown();
@@ -799,15 +856,17 @@ import com.io7m.junreachable.UnreachableCodeException;
       b.accountSync(sync_listener);
       latch1.await();
 
-      TestUtilities.assertEquals(ok.get(), true);
-      TestUtilities.assertEquals(count.get(), 4);
+      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      TestUtilities.assertEquals(
+        Integer.valueOf(count.get()), Integer.valueOf(4));
 
       ok.set(false);
       count.set(0);
       final CountDownLatch latch2 = new CountDownLatch(4);
 
       final AccountDataLoadListenerType load_listener =
-        new AccountDataLoadListenerType() {
+        new AccountDataLoadListenerType()
+        {
 
           @Override public void onAccountDataBookLoadFailed(
             final BookID id,
@@ -850,12 +909,14 @@ import com.io7m.junreachable.UnreachableCodeException;
 
       latch2.await();
 
-      TestUtilities.assertEquals(ok.get(), true);
-      TestUtilities.assertEquals(count.get(), 4);
+      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      TestUtilities.assertEquals(
+        Integer.valueOf(count.get()), Integer.valueOf(4));
 
       final CountDownLatch latch3 = new CountDownLatch(1);
       final AccountLogoutListenerType logout_listener =
-        new AccountLogoutListenerType() {
+        new AccountLogoutListenerType()
+        {
           @Override public void onAccountLogoutFailure(
             final OptionType<Throwable> error,
             final String message)
@@ -901,36 +962,46 @@ import com.io7m.junreachable.UnreachableCodeException;
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-      final DownloaderType d =
-        DownloaderHTTP.newDownloader(
-          exec,
-          DirectoryUtilities.directoryCreateTemporary(),
-          in_http);
+      final DownloaderType d = DownloaderHTTP.newDownloader(
+        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
-      final BooksType b =
-        BooksController.newBooks(
-          exec,
-          BooksContract.newParser(),
-          in_http,
-          d,
-          in_json_serializer,
-          in_json_parser,
-          in_config);
+      final OptionType<AdobeAdeptExecutorType> none = Option.none();
+      final BooksType b = BooksController.newBooks(
+        exec,
+        BooksContract.newParser(),
+        in_http,
+        d,
+        in_json_serializer,
+        in_json_parser,
+        in_config,
+        none);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
       final AccountLoginListenerType login_listener =
-        new AccountLoginListenerType() {
-          @Override public void onAccountLoginFailure(
-            final OptionType<Throwable> error,
-            final String message)
+        new AccountLoginListenerType()
+        {
+
+          @Override public void onAccountLoginFailureCredentialsIncorrect()
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountLoginFailureServerError(final int code)
           {
             try {
-              System.err.println("testBooksSyncOK: login failed: " + message);
-              ((Some<Throwable>) error).get().printStackTrace();
+              System.err.println("testBooksSyncOK: login failed: " + code);
             } finally {
               latch0.countDown();
             }
+          }
+
+          @Override public void onAccountLoginFailureLocalError(
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            // Nothing
+
           }
 
           @Override public void onAccountLoginSuccess(
@@ -943,6 +1014,12 @@ import com.io7m.junreachable.UnreachableCodeException;
               latch0.countDown();
             }
           }
+
+          @Override public void onAccountLoginFailureDeviceActivationError(
+            final String message)
+          {
+            // Nothing
+          }
         };
 
       b.accountLogin(barcode, pin, login_listener);
@@ -954,7 +1031,8 @@ import com.io7m.junreachable.UnreachableCodeException;
       final AtomicInteger count = new AtomicInteger(0);
 
       final AccountSyncListenerType sync_listener =
-        new AccountSyncListenerType() {
+        new AccountSyncListenerType()
+        {
 
           @Override public void onAccountSyncAuthenticationFailure(
             final String message)
@@ -997,48 +1075,49 @@ import com.io7m.junreachable.UnreachableCodeException;
       b.accountSync(sync_listener);
       latch1.await();
 
-      TestUtilities.assertEquals(ok.get(), true);
-      TestUtilities.assertEquals(count.get(), 4);
+      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      TestUtilities.assertEquals(
+        Integer.valueOf(count.get()), Integer.valueOf(4));
 
       /**
        * Assert status of each book.
        */
 
       {
-        final OptionType<BookStatusType> opt =
-          b
-            .booksStatusGet(BookID
-              .exactString("561c5ecf0d3020e18ff66e17db27ca232898d409e1d7b0a0432dbea848a1abfe"));
+        final OptionType<BookStatusType> opt = b.booksStatusGet(
+          BookID.exactString(
+            "561c5ecf0d3020e18ff66e17db27ca232898d409e1d7b0a0432dbea848a1abfe"
+            + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
         TestUtilities.assertEquals(o, o);
       }
 
       {
-        final OptionType<BookStatusType> opt =
-          b
-            .booksStatusGet(BookID
-              .exactString("28a0d7122f93e0e052e9e50b35531d01d55056d8fbd3c853e307a0455888150e"));
+        final OptionType<BookStatusType> opt = b.booksStatusGet(
+          BookID.exactString(
+            "28a0d7122f93e0e052e9e50b35531d01d55056d8fbd3c853e307a0455888150e"
+            + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
         TestUtilities.assertEquals(o, o);
       }
 
       {
-        final OptionType<BookStatusType> opt =
-          b
-            .booksStatusGet(BookID
-              .exactString("8e697815fb146a0ffd0bb3776b8197cea1bd6cb75a95a34053bf2b65e0b7e7e7"));
+        final OptionType<BookStatusType> opt = b.booksStatusGet(
+          BookID.exactString(
+            "8e697815fb146a0ffd0bb3776b8197cea1bd6cb75a95a34053bf2b65e0b7e7e7"
+            + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
         TestUtilities.assertEquals(o, o);
       }
 
       {
-        final OptionType<BookStatusType> opt =
-          b
-            .booksStatusGet(BookID
-              .exactString("284a2dc4e2852f1a69665aa28949e8659cf9d7d53ca11c7bf096403261368ade"));
+        final OptionType<BookStatusType> opt = b.booksStatusGet(
+          BookID.exactString(
+            "284a2dc4e2852f1a69665aa28949e8659cf9d7d53ca11c7bf096403261368ade"
+            + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
         TestUtilities.assertEquals(o, o);

@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
+import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
@@ -19,6 +21,7 @@ public interface FeedLoaderType
    * fetched. The feed (or errors) are delivered to the given listener.
    *
    * @param uri      The URI
+   * @param auth     HTTP authentication details, if any
    * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
@@ -26,6 +29,7 @@ public interface FeedLoaderType
 
   Future<Unit> fromURI(
     URI uri,
+    OptionType<HTTPAuthType> auth,
     FeedLoaderListenerType listener);
 
   /**
@@ -34,6 +38,7 @@ public interface FeedLoaderType
    * listener.
    *
    * @param uri      The URI
+   * @param auth     HTTP authentication details, if any
    * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
@@ -41,6 +46,7 @@ public interface FeedLoaderType
 
   Future<Unit> fromURIRefreshing(
     URI uri,
+    OptionType<HTTPAuthType> auth,
     FeedLoaderListenerType listener);
 
   /**

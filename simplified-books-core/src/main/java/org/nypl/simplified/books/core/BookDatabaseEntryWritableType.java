@@ -5,6 +5,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * <p>The writable interface supported by book database entries.</p>
@@ -25,6 +26,19 @@ public interface BookDatabaseEntryWritableType
    */
 
   void copyInBookFromSameFilesystem(
+    File file)
+    throws IOException;
+
+  /**
+   * Copy the given file into the directory as the book data. Typically, this
+   * will be an EPUB file.
+   *
+   * @param file The file to be copied
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  void copyInBook(
     File file)
     throws IOException;
 
@@ -77,5 +91,16 @@ public interface BookDatabaseEntryWritableType
 
   void setCover(
     OptionType<File> in_cover)
+    throws IOException;
+
+  /**
+   * Set the Adobe rights information for the book.
+   *
+   * @param rights The rights information
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  void setAdobeRightsInformation(OptionType<ByteBuffer> rights)
     throws IOException;
 }

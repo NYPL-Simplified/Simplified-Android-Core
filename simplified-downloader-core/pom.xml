@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-  xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
@@ -93,12 +93,15 @@
           <archive>
             <manifestEntries>
               <Specification-Title>${project.name}</Specification-Title>
-              <Specification-Version>${project.version}</Specification-Version>
+              <Specification-Version>${project.version}
+              </Specification-Version>
               <Specification-Vendor>NYPL Labs</Specification-Vendor>
               <Implementation-Title>${project.name}</Implementation-Title>
-              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Version>${project.version}
+              </Implementation-Version>
               <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+              <Implementation-Vendor-Id>${project.groupId}
+              </Implementation-Vendor-Id>
               <Built-By>NYPL Labs</Built-By>
               <Sealed>true</Sealed>
             </manifestEntries>
@@ -122,12 +125,15 @@
               <archive>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Version>${project.version}
+                  </Specification-Version>
                   <Specification-Vendor>NYPL Labs</Specification-Vendor>
                   <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Version>${project.version}
+                  </Implementation-Version>
                   <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Implementation-Vendor-Id>${project.groupId}
+                  </Implementation-Vendor-Id>
                   <Built-By>NYPL Labs</Built-By>
                 </manifestEntries>
               </archive>
@@ -149,16 +155,20 @@
               <goal>jar</goal>
             </goals>
             <configuration>
-              <bottom><![CDATA[Copyright &#169; {currentYear} &lt;NYPL Labs&gt; http://labs.nypl.org]]></bottom>
+              <bottom>
+                <![CDATA[Copyright &#169; {currentYear} &lt;NYPL Labs&gt; http://labs.nypl.org]]></bottom>
               <archive>
                 <manifestEntries>
                   <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
+                  <Specification-Version>${project.version}
+                  </Specification-Version>
                   <Specification-Vendor>NYPL Labs</Specification-Vendor>
                   <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
+                  <Implementation-Version>${project.version}
+                  </Implementation-Version>
                   <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                  <Implementation-Vendor-Id>${project.groupId}
+                  </Implementation-Vendor-Id>
                   <Built-By>NYPL Labs</Built-By>
                 </manifestEntries>
               </archive>

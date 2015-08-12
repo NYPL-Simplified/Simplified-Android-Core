@@ -4,6 +4,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,12 @@ import java.util.Map;
 
 public final class HTTP implements HTTPType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(HTTP.class));
+  }
+
   private final String user_agent;
 
   private HTTP()
@@ -74,6 +82,8 @@ public final class HTTP implements HTTPType
     HTTP.checkURI(uri);
 
     try {
+      HTTP.LOG.trace("GET {} (auth {})", uri, auth_opt);
+
       final URL url = NullCheck.notNull(uri.toURL());
       final HttpURLConnection conn =
         NullCheck.notNull((HttpURLConnection) url.openConnection());
@@ -94,9 +104,13 @@ public final class HTTP implements HTTPType
 
       conn.connect();
 
-      if (conn.getResponseCode() >= 400) {
+      final int code = conn.getResponseCode();
+      HTTP.LOG.trace(
+        "GET {} (auth {}) (result {})", uri, auth_opt, code);
+
+      if (code >= 400) {
         return new HTTPResultError<InputStream>(
-          conn.getResponseCode(),
+          code,
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()));
@@ -118,6 +132,8 @@ public final class HTTP implements HTTPType
     HTTP.checkURI(uri);
 
     try {
+      HTTP.LOG.trace("HEAD {} (auth {})", uri, auth_opt);
+
       final URL url = NullCheck.notNull(uri.toURL());
       final HttpURLConnection conn =
         NullCheck.notNull((HttpURLConnection) url.openConnection());
@@ -136,9 +152,13 @@ public final class HTTP implements HTTPType
 
       conn.connect();
 
-      if (conn.getResponseCode() >= 400) {
+      final int code = conn.getResponseCode();
+      HTTP.LOG.trace(
+        "HEAD {} (auth {}) (result {})", uri, auth_opt, code);
+
+      if (code >= 400) {
         return new HTTPResultError<Unit>(
-          conn.getResponseCode(),
+          code,
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()));
@@ -146,7 +166,7 @@ public final class HTTP implements HTTPType
 
       return new HTTPResultOK<Unit>(
         NullCheck.notNull(conn.getResponseMessage()),
-        conn.getResponseCode(),
+        code,
         Unit.unit(),
         (long) conn.getContentLength(),
         NullCheck.notNull(conn.getHeaderFields()));

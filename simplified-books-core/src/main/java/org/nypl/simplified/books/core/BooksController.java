@@ -343,7 +343,8 @@ public final class BooksController extends Observable implements BooksType
         acq,
         eo,
         listener,
-        this.feed_loader));
+        this.feed_loader,
+        this.adobe_drm));
   }
 
   @Override public void bookDeleteData(
