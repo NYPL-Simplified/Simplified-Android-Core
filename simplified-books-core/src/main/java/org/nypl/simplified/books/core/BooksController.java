@@ -539,7 +539,7 @@ public final class BooksController extends Observable implements BooksType
     final Runnable r)
   {
     synchronized (this) {
-      final int id = Integer.valueOf(this.task_id.incrementAndGet());
+      final int id = this.task_id.incrementAndGet();
       final Runnable rb = new Runnable()
       {
         @Override public void run()

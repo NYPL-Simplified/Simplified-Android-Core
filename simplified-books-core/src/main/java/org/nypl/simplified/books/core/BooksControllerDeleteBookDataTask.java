@@ -21,7 +21,7 @@ final class BooksControllerDeleteBookDataTask implements Runnable
   private final BookID               book_id;
   private final BooksStatusCacheType books_status;
 
-  public BooksControllerDeleteBookDataTask(
+  BooksControllerDeleteBookDataTask(
     final BooksStatusCacheType in_books_status,
     final BookDatabaseType in_book_database,
     final BookID in_book_id)

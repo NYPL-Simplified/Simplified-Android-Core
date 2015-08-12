@@ -59,8 +59,7 @@ public final class FeedHTTPTransport
           throw new IOException(
             String.format(
               "Server error for URI %s: %d (%s)",
-              uri,
-              e.getStatus(),
+              uri, Integer.valueOf(e.getStatus()),
               e.getMessage()));
         }
 

@@ -178,7 +178,7 @@ final class BooksControllerLoginTask implements Runnable,
     try {
       this.books_database.credentialsSet(this.barcode, this.pin);
       this.login.set(Pair.pair(this.barcode, this.pin));
-    } catch (IOException e) {
+    } catch (final IOException e) {
       this.listener.onAccountLoginFailureLocalError(
         Option.some((Throwable) e), e.getMessage());
       return;

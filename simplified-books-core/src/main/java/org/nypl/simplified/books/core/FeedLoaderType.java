@@ -59,7 +59,7 @@ public interface FeedLoaderType
    * @return The feed transport that backs this loader.
    */
 
-  OPDSFeedTransportType getOPDSFeedTransport();
+  OPDSFeedTransportType<OptionType<HTTPAuthType>> getOPDSFeedTransport();
 
   /**
    * @return The search parser that backs this loader.

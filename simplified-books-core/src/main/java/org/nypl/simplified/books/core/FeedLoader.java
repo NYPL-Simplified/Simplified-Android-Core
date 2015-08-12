@@ -209,7 +209,7 @@ public final class FeedLoader
     return this.parser;
   }
 
-  @Override public OPDSFeedTransportType getOPDSFeedTransport()
+  @Override public OPDSFeedTransportType<OptionType<HTTPAuthType>> getOPDSFeedTransport()
   {
     return this.transport;
   }

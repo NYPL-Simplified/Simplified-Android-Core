@@ -8,7 +8,7 @@ final class BooksControllerDataSetupTask implements Runnable
   private final BookDatabaseType             books_database;
   private final AccountDataSetupListenerType listener;
 
-  public BooksControllerDataSetupTask(
+  BooksControllerDataSetupTask(
     final BookDatabaseType in_books_database,
     final AccountDataSetupListenerType in_listener)
   {

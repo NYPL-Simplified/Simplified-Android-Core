@@ -14,7 +14,7 @@ final class AccountLoginListenerCatcher implements AccountLoginListenerType
   private final Logger                   log;
   private final AccountLoginListenerType delegate;
 
-  public AccountLoginListenerCatcher(
+  AccountLoginListenerCatcher(
     final Logger in_log,
     final AccountLoginListenerType in_delegate)
   {

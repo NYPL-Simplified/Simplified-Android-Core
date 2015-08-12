@@ -514,7 +514,7 @@ final class BooksControllerBorrowTask implements Runnable,
        */
 
       BooksControllerBorrowTask.this.downloadDataReceived(
-        (long) (10000L * progress), 10000L);
+        (long) (10000.0 * progress), 10000L);
     }
 
     @Override public void onFulfillmentCancelled()

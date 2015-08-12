@@ -15,7 +15,7 @@ final class AccountLogoutListenerCatcher implements AccountLogoutListenerType
   private final Logger                    log;
   private final AccountLogoutListenerType delegate;
 
-  public AccountLogoutListenerCatcher(
+  AccountLogoutListenerCatcher(
     final Logger in_log,
     final AccountLogoutListenerType in_delegate)
   {
@@ -29,7 +29,7 @@ final class AccountLogoutListenerCatcher implements AccountLogoutListenerType
   {
     try {
       this.delegate.onAccountLogoutFailure(error, message);
-    } catch (Throwable e) {
+    } catch (final Throwable e) {
       this.log.error("onAccountLogoutFailure raised: ", e);
     }
   }
@@ -38,7 +38,7 @@ final class AccountLogoutListenerCatcher implements AccountLogoutListenerType
   {
     try {
       this.delegate.onAccountLogoutSuccess();
-    } catch (Throwable e) {
+    } catch (final Throwable e) {
       this.log.error("onAccountLogoutSuccess raised: ", e);
     }
   }

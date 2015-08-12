@@ -30,7 +30,7 @@ final class BooksControllerLogoutTask implements Runnable
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
   private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
 
-  public BooksControllerLogoutTask(
+  BooksControllerLogoutTask(
     final BooksControllerConfiguration in_config,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login,
