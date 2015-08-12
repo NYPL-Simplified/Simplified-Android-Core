@@ -103,7 +103,7 @@ public final class DownloaderHTTP implements DownloaderType
     private       long                     total;
     private       String                   content_type;
 
-    public Download(
+    private Download(
       final long in_id,
       final File in_file,
       final OptionType<HTTPAuthType> in_auth,

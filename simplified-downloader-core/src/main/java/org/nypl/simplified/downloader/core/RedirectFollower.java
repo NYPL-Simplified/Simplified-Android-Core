@@ -42,7 +42,7 @@ import java.util.concurrent.Callable;
   private final Set<URI>                 tried_auth;
   private final Logger                   logger;
 
-  public RedirectFollower(
+  RedirectFollower(
     final Logger in_logger,
     final HTTPType in_http,
     final OptionType<HTTPAuthType> in_auth,
@@ -64,7 +64,7 @@ import java.util.concurrent.Callable;
   private abstract static class DownloadErrorFlattener<A, B> implements
     HTTPResultMatcherType<A, B, Exception>
   {
-    public DownloadErrorFlattener()
+    private DownloadErrorFlattener()
     {
 
     }
