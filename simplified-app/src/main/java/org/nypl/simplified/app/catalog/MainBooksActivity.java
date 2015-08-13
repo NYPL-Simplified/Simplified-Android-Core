@@ -16,6 +16,7 @@ import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
 import org.slf4j.Logger;
 
@@ -23,27 +24,27 @@ import org.slf4j.Logger;
  * The activity that displays the currently loaned and/or downloaded books.
  */
 
-public final class BooksActivity extends CatalogFeedActivity
+public final class MainBooksActivity extends CatalogFeedActivity
   implements AccountGetCachedCredentialsListenerType, AccountSyncListenerType
 {
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(BooksActivity.class);
+    LOG = LogUtilities.getLog(MainBooksActivity.class);
   }
 
   /**
    * Construct an activity.
    */
 
-  public BooksActivity()
+  public MainBooksActivity()
   {
 
   }
 
-  @Override protected boolean feedIsLocal()
+  @Override protected BooksFeedSelection getLocalFeedTypeSelection()
   {
-    return true;
+    return BooksFeedSelection.BOOKS_FEED_LOANED;
   }
 
   @Override protected SimplifiedPart navigationDrawerGetPart()
@@ -54,6 +55,11 @@ public final class BooksActivity extends CatalogFeedActivity
   @Override protected boolean navigationDrawerShouldShowIndicator()
   {
     return true;
+  }
+
+  @Override protected String catalogFeedGetEmptyText()
+  {
+    return this.getResources().getString(R.string.catalog_empty_feed);
   }
 
   @Override public void onAccountIsLoggedIn(
@@ -68,7 +74,7 @@ public final class BooksActivity extends CatalogFeedActivity
 
   @Override public void onAccountIsNotLoggedIn()
   {
-    BooksActivity.LOG.debug("account is not logged in");
+    MainBooksActivity.LOG.debug("account is not logged in");
   }
 
   @Override public void onAccountSyncAuthenticationFailure(
@@ -92,7 +98,7 @@ public final class BooksActivity extends CatalogFeedActivity
       {
         @Override public void run()
         {
-          BooksActivity.this.invalidateOptionsMenu();
+          MainBooksActivity.this.invalidateOptionsMenu();
         }
       });
   }
@@ -104,7 +110,7 @@ public final class BooksActivity extends CatalogFeedActivity
       {
         @Override public void run()
         {
-          BooksActivity.this.invalidateOptionsMenu();
+          MainBooksActivity.this.invalidateOptionsMenu();
         }
       });
   }

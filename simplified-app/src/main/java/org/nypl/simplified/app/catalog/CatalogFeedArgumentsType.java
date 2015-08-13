@@ -37,4 +37,17 @@ public interface CatalogFeedArgumentsType extends Serializable
   <A, E extends Exception> A matchArguments(
     CatalogFeedArgumentsMatcherType<A, E> m)
     throws E;
+
+  /**
+   * @return {@code true} If the feed is locally generated as opposed to being
+   * fetched from a remote server
+   */
+
+  boolean isLocallyGenerated();
+
+  /**
+   * @return {@code true} If the feed is the result of a search query.
+   */
+
+  boolean isSearching();
 }

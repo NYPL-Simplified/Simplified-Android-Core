@@ -33,11 +33,11 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.SimplifiedPart;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookFeedListenerType;
+import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedFacetMatcherType;
@@ -76,7 +76,7 @@ import java.util.concurrent.Future;
  * feeds.
  */
 
-public class CatalogFeedActivity extends CatalogActivity implements
+public abstract class CatalogFeedActivity extends CatalogActivity implements
   BookFeedListenerType,
   FeedMatcherType<Unit, UnreachableCodeException>,
   FeedLoaderListenerType
@@ -145,27 +145,6 @@ public class CatalogFeedActivity extends CatalogActivity implements
           return Unit.unit();
         }
       });
-  }
-
-  /**
-   * Start a new catalog feed activity, assuming that the user came from {@code
-   * from}, with up stack {@code up_stack}, attempting to load the feed at
-   * {@code target}.
-   *
-   * @param from    The previous activity
-   * @param in_args The feed arguments
-   */
-
-  public static void startNewActivity(
-    final Activity from,
-    final CatalogFeedArgumentsType in_args)
-  {
-    final Bundle b = new Bundle();
-    CatalogFeedActivity.setActivityArguments(b, in_args);
-    final Intent i = new Intent(from, CatalogFeedActivity.class);
-    i.putExtras(b);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-    from.startActivity(i);
   }
 
   /**
@@ -253,7 +232,8 @@ public class CatalogFeedActivity extends CatalogActivity implements
                   false,
                   CatalogFeedActivity.this.getUpStack(),
                   f.getFeedTitle(),
-                  o.getURI());
+                  o.getURI(),
+                  false);
               CatalogFeedActivity.startNewActivityReplacing(
                 CatalogFeedActivity.this, args);
               return Unit.unit();
@@ -264,12 +244,14 @@ public class CatalogFeedActivity extends CatalogActivity implements
             {
               final String facet_title =
                 NullCheck.notNull(rr.getString(R.string.books_sort_by));
+
               final CatalogFeedArgumentsLocalBooks args =
                 new CatalogFeedArgumentsLocalBooks(
                   CatalogFeedActivity.this.getUpStack(),
                   facet_title,
                   fp.getType(),
-                  search_terms);
+                  search_terms,
+                  CatalogFeedActivity.this.getLocalFeedTypeSelection());
               CatalogFeedActivity.startNewActivityReplacing(
                 CatalogFeedActivity.this, args);
               return Unit.unit();
@@ -295,6 +277,13 @@ public class CatalogFeedActivity extends CatalogActivity implements
     }
   }
 
+  /**
+   * If this activity is being used in a part of the application that generates
+   * local feeds, then return the type of feed that should be generated.
+   */
+
+  protected abstract BooksFeedSelection getLocalFeedTypeSelection();
+
   private void configureUpButton(
     final ImmutableStack<CatalogFeedArgumentsType> up_stack,
     final String title)
@@ -305,16 +294,6 @@ public class CatalogFeedActivity extends CatalogActivity implements
       bar.setHomeButtonEnabled(true);
       bar.setTitle(title);
     }
-  }
-
-  /**
-   * @return {@code true} if the feed is local and should therefore not show
-   * "network is unavailable" messages when the network is unavailable
-   */
-
-  @SuppressWarnings("static-method") protected boolean feedIsLocal()
-  {
-    return false;
   }
 
   private CatalogFeedArgumentsType getArguments()
@@ -349,7 +328,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
     final URI in_uri = app.getFeedInitialURI();
 
     return new CatalogFeedArgumentsRemote(
-      in_drawer_open, NullCheck.notNull(empty), in_title, in_uri);
+      in_drawer_open, NullCheck.notNull(empty), in_title, in_uri, false);
   }
 
   private void loadFeed(
@@ -359,11 +338,6 @@ public class CatalogFeedActivity extends CatalogActivity implements
     CatalogFeedActivity.LOG.debug("loading feed: {}", u);
     final OptionType<HTTPAuthType> none = Option.none();
     this.loading = feed_loader.fromURI(u, none, this);
-  }
-
-  @Override protected SimplifiedPart navigationDrawerGetPart()
-  {
-    return SimplifiedPart.PART_CATALOG;
   }
 
   @Override protected boolean navigationDrawerShouldShowIndicator()
@@ -468,6 +442,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
           final String title = NullCheck.notNull(rr.getString(R.string.books));
           final String facet_group =
             NullCheck.notNull(rr.getString(R.string.books_sort_by));
+          final BooksFeedSelection selection = c.getSelection();
 
           books.booksGetFeed(
             dummy_uri,
@@ -478,6 +453,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
             facet_group,
             facet_title_provider,
             c.getSearchTerms(),
+            selection,
             CatalogFeedActivity.this);
           return Unit.unit();
         }
@@ -490,7 +466,7 @@ public class CatalogFeedActivity extends CatalogActivity implements
         }
       };
 
-    if (this.feedIsLocal() == false) {
+    if (args.isLocallyGenerated() == false) {
       if (app.isNetworkAvailable() == false) {
         this.onNetworkUnavailable();
         return;
@@ -523,12 +499,10 @@ public class CatalogFeedActivity extends CatalogActivity implements
     return true;
   }
 
-  @SuppressWarnings("static-method")
   private void onCreateOptionsMenuRefreshItem(
     final Menu menu_nn)
   {
     final MenuItem refresh_item = menu_nn.findItem(R.id.catalog_action_refresh);
-
     refresh_item.setEnabled(true);
     refresh_item.setVisible(true);
   }
@@ -803,6 +777,17 @@ public class CatalogFeedActivity extends CatalogActivity implements
       (ViewGroup) inflater.inflate(
         R.layout.catalog_feed_nogroups_empty, content_area, false));
 
+    final TextView empty_text = NullCheck.notNull(
+      (TextView) layout.findViewById(
+        R.id.catalog_feed_nogroups_empty_text));
+
+    if (this.getArguments().isSearching()) {
+      final Resources resources = this.getResources();
+      empty_text.setText(resources.getText(R.string.catalog_empty_feed));
+    } else {
+      empty_text.setText(this.catalogFeedGetEmptyText());
+    }
+
     content_area.addView(layout);
     content_area.requestLayout();
   }
@@ -892,6 +877,11 @@ public class CatalogFeedActivity extends CatalogActivity implements
 
     this.onFeedWithoutGroupsNonEmptyUI(f);
   }
+
+  /**
+   * The network is unavailable. Simply display a message and a button to allow
+   * the user to retry loading when they have fixed their connection.
+   */
 
   private void onNetworkUnavailable()
   {
@@ -990,8 +980,8 @@ public class CatalogFeedActivity extends CatalogActivity implements
     CatalogFeedActivity.LOG.debug("onSelectFeed: {}", this);
 
     final CatalogFeedArgumentsRemote remote = new CatalogFeedArgumentsRemote(
-      false, new_up_stack, f.getGroupTitle(), f.getGroupURI());
-    CatalogFeedActivity.startNewActivity(this, remote);
+      false, new_up_stack, f.getGroupTitle(), f.getGroupURI(), false);
+    this.catalogActivityForkNew(remote);
   }
 
   private void retryFeed()
@@ -1021,6 +1011,12 @@ public class CatalogFeedActivity extends CatalogActivity implements
         }
       });
   }
+
+  /**
+   * @return The text to display when a feed is empty.
+   */
+
+  protected abstract String catalogFeedGetEmptyText();
 
   /**
    * A handler for local book searches.
@@ -1063,9 +1059,13 @@ public class CatalogFeedActivity extends CatalogActivity implements
 
       final CatalogFeedArgumentsLocalBooks new_args =
         new CatalogFeedArgumentsLocalBooks(
-          us, title, this.facet_active, Option.some(qnn));
+          us,
+          title,
+          this.facet_active,
+          Option.some(qnn),
+          CatalogFeedActivity.this.getLocalFeedTypeSelection());
 
-      CatalogFeedActivity.startNewActivity(cfa, new_args);
+      CatalogFeedActivity.this.catalogActivityForkNew(new_args);
       return true;
     }
   }
@@ -1110,8 +1110,9 @@ public class CatalogFeedActivity extends CatalogActivity implements
         this.resources.getString(R.string.catalog_search) + ": " + qnn;
 
       final CatalogFeedArgumentsRemote new_args =
-        new CatalogFeedArgumentsRemote(false, us, title, target);
-      CatalogFeedActivity.startNewActivity(cfa, new_args);
+        new CatalogFeedArgumentsRemote(false, us, title, target, true);
+
+      CatalogFeedActivity.this.catalogActivityForkNew(new_args);
       return true;
     }
   }

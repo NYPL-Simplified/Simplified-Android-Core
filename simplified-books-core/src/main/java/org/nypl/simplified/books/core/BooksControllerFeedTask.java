@@ -1,8 +1,9 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -49,6 +50,7 @@ import java.util.Map;
   private final Calendar                         updated;
   private final URI                              uri;
   private final OptionType<String>               search;
+  private final BooksFeedSelection               selection;
 
   BooksControllerFeedTask(
     final BookDatabaseType in_books_database,
@@ -60,6 +62,7 @@ import java.util.Map;
     final String in_facet_group,
     final FeedFacetPseudoTitleProviderType in_facet_titles,
     final OptionType<String> in_search,
+    final BooksFeedSelection in_selection,
     final BookFeedListenerType in_listener)
   {
     this.books_database = NullCheck.notNull(in_books_database);
@@ -71,12 +74,23 @@ import java.util.Map;
     this.facet_group = NullCheck.notNull(in_facet_group);
     this.facet_titles = NullCheck.notNull(in_facet_titles);
     this.search = NullCheck.notNull(in_search);
+    this.selection = NullCheck.notNull(in_selection);
     this.listener = NullCheck.notNull(in_listener);
   }
+
+  /**
+   * Load all the entries that are applicable for the selected type of feed.
+   *
+   * @param f         The feed being built
+   * @param dirs      The list of database entries
+   * @param selection The type of feed
+   * @param entries   The resulting entries
+   */
 
   private static void entriesLoad(
     final FeedWithoutGroups f,
     final List<BookDatabaseEntryType> dirs,
+    final BooksFeedSelection selection,
     final AbstractList<FeedEntryType> entries)
   {
     for (int index = 0; index < dirs.size(); ++index) {
@@ -87,8 +101,10 @@ import java.util.Map;
       try {
         final OPDSAcquisitionFeedEntry data = dir.getData();
         final OPDSAvailabilityType availability = data.getAvailability();
-        final Boolean use =
-          availability.matchAvailability(new UsableForBooksFeed());
+
+        final Boolean use = availability.matchAvailability(
+          BooksControllerFeedTask.matcherForSelection(selection));
+
         if (use.booleanValue()) {
           entries.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
         }
@@ -99,6 +115,31 @@ import java.util.Map;
       }
     }
   }
+
+  /**
+   * Select an entry matcher based on the type of feed.
+   */
+
+  private static OPDSAvailabilityMatcherType<Boolean,
+    UnreachableCodeException> matcherForSelection(
+    final BooksFeedSelection selection)
+  {
+    switch (selection) {
+      case BOOKS_FEED_LOANED:
+        return new UsableForBooksFeed();
+      case BOOKS_FEED_HOLDS:
+        return new UsableForHoldsFeed();
+    }
+
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Sort the feed entries according to the given facet type.
+   *
+   * @param entries    The entries to be sorted
+   * @param facet_type The facet type
+   */
 
   private static void entriesSortForFacet(
     final List<FeedEntryType> entries,
@@ -172,6 +213,15 @@ import java.util.Map;
     }
   }
 
+  /**
+   * Search the given feed entry for any of the given terms.
+   *
+   * @param terms_upper The terms
+   * @param e           The feed entry
+   *
+   * @return {@code true} if the feed entry matches
+   */
+
   private static boolean entriesSearchFeedEntryOPDSMatches(
     final List<String> terms_upper,
     final FeedEntryOPDS e)
@@ -195,44 +245,54 @@ import java.util.Map;
     return false;
   }
 
+  /**
+   * Search all entries for the given search terms. The search is case
+   * insensitive.
+   *
+   * @param entries The entries
+   * @param terms   The search terms, separated by spaces
+   */
+
   private static void entriesSearch(
     final List<FeedEntryType> entries,
-    final OptionType<String> in_search)
+    final String terms)
   {
-    if (in_search.isSome()) {
-      final Some<String> some_search = (Some<String>) in_search;
-      final String term = some_search.get();
-      final List<String> terms_upper =
-        BooksControllerFeedTask.entriesSearchTermsSplitUpper(term);
+    final List<String> terms_upper =
+      BooksControllerFeedTask.entriesSearchTermsSplitUpper(terms);
 
-      final FeedEntryMatcherType<Boolean, UnreachableCodeException> matcher =
-        new FeedEntryMatcherType<Boolean, UnreachableCodeException>()
+    final FeedEntryMatcherType<Boolean, UnreachableCodeException> matcher =
+      new FeedEntryMatcherType<Boolean, UnreachableCodeException>()
+      {
+        @Override public Boolean onFeedEntryOPDS(
+          final FeedEntryOPDS e)
         {
-          @Override public Boolean onFeedEntryOPDS(
-            final FeedEntryOPDS e)
-          {
-            return Boolean.valueOf(
-              BooksControllerFeedTask.entriesSearchFeedEntryOPDSMatches(
-                terms_upper, e));
-          }
-
-          @Override public Boolean onFeedEntryCorrupt(
-            final FeedEntryCorrupt e)
-          {
-            return Boolean.FALSE;
-          }
-        };
-
-      final Iterator<FeedEntryType> iter = entries.iterator();
-      while (iter.hasNext()) {
-        final FeedEntryType e = iter.next();
-        final Boolean ok = e.matchFeedEntry(matcher);
-        if (ok.booleanValue() == false) {
-          iter.remove();
+          return Boolean.valueOf(
+            BooksControllerFeedTask.entriesSearchFeedEntryOPDSMatches(
+              terms_upper, e));
         }
+
+        @Override public Boolean onFeedEntryCorrupt(
+          final FeedEntryCorrupt e)
+        {
+          return Boolean.FALSE;
+        }
+      };
+
+    final Iterator<FeedEntryType> iter = entries.iterator();
+    while (iter.hasNext()) {
+      final FeedEntryType e = iter.next();
+      final Boolean ok = e.matchFeedEntry(matcher);
+      if (ok.booleanValue() == false) {
+        iter.remove();
       }
     }
   }
+
+  /**
+   * Split a string into a set of uppercase search terms.
+   *
+   * @param term The terms
+   */
 
   private static List<String> entriesSearchTermsSplitUpper(
     final String term)
@@ -278,10 +338,19 @@ import java.util.Map;
     final List<BookDatabaseEntryType> dirs =
       this.books_database.getBookDatabaseEntries();
 
-    final ArrayList<FeedEntryType> entries = new ArrayList<FeedEntryType>(32);
+    final AbstractList<FeedEntryType> entries =
+      new ArrayList<FeedEntryType>(dirs.size());
 
-    BooksControllerFeedTask.entriesLoad(f, dirs, entries);
-    BooksControllerFeedTask.entriesSearch(entries, this.search);
+    BooksControllerFeedTask.entriesLoad(f, dirs, this.selection, entries);
+    this.search.map(
+      new FunctionType<String, Unit>()
+      {
+        @Override public Unit call(final String terms)
+        {
+          BooksControllerFeedTask.entriesSearch(entries, terms);
+          return Unit.unit();
+        }
+      });
     BooksControllerFeedTask.entriesSortForFacet(entries, this.facet_active);
 
     for (int index = 0; index < entries.size(); ++index) {
@@ -336,6 +405,45 @@ import java.util.Map;
     @Override public Boolean onOpenAccess(final OPDSAvailabilityOpenAccess a)
     {
       return Boolean.TRUE;
+    }
+  }
+
+  /**
+   * An availability matcher that indicates if a book should be shown for
+   * "Holds" feeds.
+   */
+
+  private static final class UsableForHoldsFeed
+    implements OPDSAvailabilityMatcherType<Boolean, UnreachableCodeException>
+  {
+    UsableForHoldsFeed()
+    {
+
+    }
+
+    @Override public Boolean onHeld(final OPDSAvailabilityHeld a)
+    {
+      return Boolean.TRUE;
+    }
+
+    @Override public Boolean onHoldable(final OPDSAvailabilityHoldable a)
+    {
+      return Boolean.FALSE;
+    }
+
+    @Override public Boolean onLoaned(final OPDSAvailabilityLoaned a)
+    {
+      return Boolean.FALSE;
+    }
+
+    @Override public Boolean onLoanable(final OPDSAvailabilityLoanable a)
+    {
+      return Boolean.FALSE;
+    }
+
+    @Override public Boolean onOpenAccess(final OPDSAvailabilityOpenAccess a)
+    {
+      return Boolean.FALSE;
     }
   }
 }

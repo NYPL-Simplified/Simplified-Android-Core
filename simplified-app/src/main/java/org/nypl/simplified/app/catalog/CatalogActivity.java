@@ -106,7 +106,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
             p = us.pop();
 
           final CatalogFeedArgumentsType top = p.getLeft();
-          CatalogFeedActivity.startNewActivity(this, top);
+          this.catalogActivityForkNew(top);
           return true;
         }
 
@@ -126,5 +126,16 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
     final FrameLayout content_area = this.getContentFrame();
     FadeUtilities.fadeIn(content_area, FadeUtilities.DEFAULT_FADE_DURATION);
+  }
+
+  protected final void catalogActivityForkNew(
+    final CatalogFeedArgumentsType args)
+  {
+    final Bundle b = new Bundle();
+    CatalogFeedActivity.setActivityArguments(b, args);
+    final Intent i = new Intent(this, this.getClass());
+    i.putExtras(b);
+    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    this.startActivity(i);
   }
 }

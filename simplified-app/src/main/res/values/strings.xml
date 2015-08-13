@@ -11,6 +11,9 @@
   <string name="books_sort_by_author">Author</string>
   <string name="books_sort_by_title">Title</string>
 
+  <!-- Holds strings -->
+  <string name="holds_empty">When you reserve a book from the catalog it will show up here. Look here from time to time to see if your book is available to download.</string>
+
   <!-- Catalog strings -->
   <string name="catalog">Catalog</string>
   <string name="catalog_load_error_title">Error</string>
@@ -46,7 +49,7 @@
   <string name="catalog_book_delete">Delete</string>
 
   <string name="catalog_book_availability_on_loan_untimed">You have this book on loan.</string>
-  <string name="catalog_book_availability_on_loan_timed">You have this book on loan until %s.</string>
+  <string name="catalog_book_availability_on_loan_timed">You have this book until %s.</string>
   <string name="catalog_book_availability_open_access">This public domain book is yours to keep.</string>
   <string name="catalog_book_availability_on_hold">This book is on hold.</string>
   <string name="catalog_book_availability_loanable">This book is available for loan.</string>

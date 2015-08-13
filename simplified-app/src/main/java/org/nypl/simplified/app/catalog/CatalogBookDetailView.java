@@ -21,7 +21,6 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
@@ -581,15 +580,49 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusHeld(
     final BookStatusHeld s)
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    this.book_download_buttons.removeAllViews();
+    this.book_download_buttons.setVisibility(View.VISIBLE);
+    this.book_download.setVisibility(View.VISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    this.book_download_text.setText(
+      rr.getText(R.string.catalog_book_availability_on_hold));
+
+    CatalogAcquisitionButtons.addButtons(
+      this.activity,
+      this.book_download_buttons,
+      NullCheck.notNull(this.books),
+      NullCheck.notNull(this.entry));
+
+    CatalogBookDetailView.configureButtonsHeight(
+      rr, this.book_download_buttons);
+    return Unit.unit();
   }
 
   @Override public Unit onBookStatusHoldable(
     final BookStatusHoldable s)
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    this.book_download_buttons.removeAllViews();
+    this.book_download_buttons.setVisibility(View.VISIBLE);
+    this.book_download.setVisibility(View.VISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    this.book_download_text.setText(
+      rr.getText(R.string.catalog_book_availability_holdable));
+
+    CatalogAcquisitionButtons.addButtons(
+      this.activity,
+      this.book_download_buttons,
+      NullCheck.notNull(this.books),
+      NullCheck.notNull(this.entry));
+
+    CatalogBookDetailView.configureButtonsHeight(
+      rr, this.book_download_buttons);
+    return Unit.unit();
   }
 
   @Override public Unit onBookStatusLoanable(

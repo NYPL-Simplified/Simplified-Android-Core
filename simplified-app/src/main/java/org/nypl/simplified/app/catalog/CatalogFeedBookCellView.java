@@ -17,7 +17,6 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 import org.nypl.simplified.app.BookCoverProviderType;
@@ -401,15 +400,39 @@ import java.util.concurrent.atomic.AtomicReference;
   @Override public Unit onBookStatusHeld(
     final BookStatusHeld s)
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    CatalogFeedBookCellView.LOG.debug("{}: held", s.getID());
+
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
+    this.setDebugCellText("held");
+
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(fe);
+
+    CatalogAcquisitionButtons.addButtons(
+      this.activity, this.cell_buttons, this.books, fe);
+    return Unit.unit();
   }
 
   @Override public Unit onBookStatusHoldable(
     final BookStatusHoldable s)
   {
-    // TODO Auto-generated method stub
-    throw new UnimplementedCodeException();
+    CatalogFeedBookCellView.LOG.debug("{}: holdable", s.getID());
+
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
+    this.setDebugCellText("holdable");
+
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(fe);
+
+    CatalogAcquisitionButtons.addButtons(
+      this.activity, this.cell_buttons, this.books, fe);
+    return Unit.unit();
   }
 
   @Override public Unit onBookStatusLoanable(

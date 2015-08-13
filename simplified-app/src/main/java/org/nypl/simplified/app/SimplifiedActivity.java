@@ -27,13 +27,15 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.app.catalog.BooksActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
-import org.nypl.simplified.app.catalog.HoldsActivity;
+import org.nypl.simplified.app.catalog.MainBooksActivity;
+import org.nypl.simplified.app.catalog.MainCatalogActivity;
+import org.nypl.simplified.app.catalog.MainHoldsActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
@@ -47,8 +49,8 @@ import java.util.Map;
  * The type of non-reader activities in the app.
  */
 
-@SuppressWarnings("boxing") public abstract class SimplifiedActivity
-  extends Activity implements DrawerListener, OnItemClickListener
+public abstract class SimplifiedActivity extends Activity
+  implements DrawerListener, OnItemClickListener
 {
   private static final Logger LOG;
   private static final String NAVIGATION_DRAWER_OPEN_ID;
@@ -172,6 +174,11 @@ import java.util.Map;
       SimplifiedActivity.LOG.debug("drawer requested: {}", open_drawer);
     }
 
+    /**
+     * The activity is being re-initialized. Set the drawer to whatever
+     * state it was in when the activity was destroyed.
+     */
+
     if (state != null) {
       SimplifiedActivity.LOG.debug("reinitializing");
       open_drawer = state.getBoolean(
@@ -253,10 +260,10 @@ import java.util.Map;
 
     final Map<SimplifiedPart, Class<? extends Activity>> classes_by_name =
       new HashMap<SimplifiedPart, Class<? extends Activity>>();
-    classes_by_name.put(SimplifiedPart.PART_BOOKS, BooksActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_BOOKS, MainBooksActivity.class);
     classes_by_name.put(
-      SimplifiedPart.PART_CATALOG, CatalogFeedActivity.class);
-    classes_by_name.put(SimplifiedPart.PART_HOLDS, HoldsActivity.class);
+      SimplifiedPart.PART_CATALOG, MainCatalogActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_HOLDS, MainHoldsActivity.class);
     classes_by_name.put(SimplifiedPart.PART_SETTINGS, SettingsActivity.class);
 
     /**
@@ -281,7 +288,8 @@ import java.util.Map;
               empty_stack,
               SimplifiedPart.PART_BOOKS.getPartName(rr),
               FeedFacetPseudo.FacetType.SORT_BY_TITLE,
-              no_search);
+              no_search,
+              BooksFeedSelection.BOOKS_FEED_LOANED);
           CatalogFeedActivity.setActivityArguments(b, local);
           return Unit.unit();
         }
@@ -300,7 +308,8 @@ import java.util.Map;
               false,
               NullCheck.notNull(empty),
               app_name,
-              app.getFeedInitialURI());
+              app.getFeedInitialURI(),
+              false);
           CatalogFeedActivity.setActivityArguments(b, remote);
           return Unit.unit();
         }
@@ -312,7 +321,17 @@ import java.util.Map;
         @Override public Unit call(
           final Bundle b)
         {
-          SimplifiedActivity.setActivityArguments(b, false);
+          final OptionType<String> no_search = Option.none();
+          final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
+            ImmutableStack.empty();
+          final CatalogFeedArgumentsLocalBooks local =
+            new CatalogFeedArgumentsLocalBooks(
+              empty_stack,
+              SimplifiedPart.PART_HOLDS.getPartName(rr),
+              FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+              no_search,
+              BooksFeedSelection.BOOKS_FEED_HOLDS);
+          CatalogFeedActivity.setActivityArguments(b, local);
           return Unit.unit();
         }
       });

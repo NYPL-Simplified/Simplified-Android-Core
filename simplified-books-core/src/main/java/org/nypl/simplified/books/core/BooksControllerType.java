@@ -14,8 +14,8 @@ import java.util.Calendar;
 public interface BooksControllerType extends BooksStatusCacheType
 {
   /**
-   * Borrow the given book, delivering the results to the given
-   * {@code listener}.
+   * Borrow the given book, delivering the results to the given {@code
+   * listener}.
    *
    * @param id       The book ID
    * @param acq      The specific acquisition relation
@@ -57,8 +57,8 @@ public interface BooksControllerType extends BooksStatusCacheType
     BookID id);
 
   /**
-   * Retrieve an acquisition feed of all owned/borrowed books on the current
-   * account, delivering the results to the given {@code listener}.
+   * Retrieve an acquisition feed of  books on the current account, delivering
+   * the results to the given {@code listener}.
    *
    * @param in_uri          The URI that will be used for the feed
    * @param in_id           The ID that will be used for the feed
@@ -69,6 +69,7 @@ public interface BooksControllerType extends BooksStatusCacheType
    * @param in_facet_group  The facet group
    * @param in_facet_titles A facet title provider
    * @param in_search       The search that will be performed on the feed
+   * @param in_selection    The type of feed that will be generated
    * @param in_listener     The listener that will receive the feed
    */
 
@@ -81,6 +82,7 @@ public interface BooksControllerType extends BooksStatusCacheType
     String in_facet_group,
     FeedFacetPseudoTitleProviderType in_facet_titles,
     OptionType<String> in_search,
+    BooksFeedSelection in_selection,
     BookFeedListenerType in_listener);
 
   /**

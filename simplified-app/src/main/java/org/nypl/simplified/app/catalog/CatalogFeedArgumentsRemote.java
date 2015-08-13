@@ -22,6 +22,7 @@ public final class CatalogFeedArgumentsRemote
   private final String                                   title;
   private final ImmutableStack<CatalogFeedArgumentsType> up_stack;
   private final URI                                      uri;
+  private final boolean                                  searching;
 
   /**
    * Construct feed arguments.
@@ -30,18 +31,21 @@ public final class CatalogFeedArgumentsRemote
    * @param in_up_stack    The new up-stack
    * @param in_title       The title of the feed
    * @param in_uri         The URI of the feed
+   * @param in_searching   The feed represents a search query
    */
 
   public CatalogFeedArgumentsRemote(
     final boolean in_drawer_open,
     final ImmutableStack<CatalogFeedArgumentsType> in_up_stack,
     final String in_title,
-    final URI in_uri)
+    final URI in_uri,
+    final boolean in_searching)
   {
     this.drawer_open = in_drawer_open;
     this.up_stack = NullCheck.notNull(in_up_stack);
     this.title = NullCheck.notNull(in_title);
     this.uri = NullCheck.notNull(in_uri);
+    this.searching = in_searching;
   }
 
   @Override public String getTitle()
@@ -77,6 +81,16 @@ public final class CatalogFeedArgumentsRemote
     throws E
   {
     return m.onFeedArgumentsRemote(this);
+  }
+
+  @Override public boolean isLocallyGenerated()
+  {
+    return false;
+  }
+
+  @Override public boolean isSearching()
+  {
+    return this.searching;
   }
 
   @Override public String toString()

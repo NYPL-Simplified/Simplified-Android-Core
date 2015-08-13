@@ -103,7 +103,7 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
           @Override public String call(
             final Calendar c)
           {
-            return NullCheck.notNull(fmt.format(c));
+            return NullCheck.notNull(fmt.format(c.getTime()));
           }
         }));
     b.append(" start_date=");

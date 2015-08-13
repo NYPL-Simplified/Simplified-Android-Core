@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * The default implementation of the {@link BooksType} interface.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 public final class BooksController extends Observable implements BooksType
 {
   private static final Logger LOG;
@@ -418,6 +417,7 @@ public final class BooksController extends Observable implements BooksType
     final String in_facet_group,
     final FeedFacetPseudoTitleProviderType in_facet_titles,
     final OptionType<String> in_search,
+    final BooksFeedSelection in_selection,
     final BookFeedListenerType in_listener)
   {
     NullCheck.notNull(in_uri);
@@ -428,6 +428,7 @@ public final class BooksController extends Observable implements BooksType
     NullCheck.notNull(in_facet_group);
     NullCheck.notNull(in_facet_titles);
     NullCheck.notNull(in_search);
+    NullCheck.notNull(in_selection);
     NullCheck.notNull(in_listener);
 
     this.submitRunnable(
@@ -441,6 +442,7 @@ public final class BooksController extends Observable implements BooksType
         in_facet_group,
         in_facet_titles,
         in_search,
+        in_selection,
         in_listener));
   }
 
