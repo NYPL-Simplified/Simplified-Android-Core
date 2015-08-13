@@ -25,8 +25,7 @@ import java.util.Calendar;
  * The default implementation of the {@link OPDSJSONParserType} interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class OPDSJSONParser
-  implements OPDSJSONParserType
+public final class OPDSJSONParser implements OPDSJSONParserType
 {
   private OPDSJSONParser()
   {
@@ -245,6 +244,17 @@ import java.util.Calendar;
     throw new UnreachableCodeException();
   }
 
+  private static OptionType<Integer> getIntegerOptional(
+    final ObjectNode n,
+    final String key)
+    throws OPDSParseException
+  {
+    if (n.has(key)) {
+      return Option.some(OPDSJSONParser.getInteger(n, key));
+    }
+    return Option.none();
+  }
+
   private static OptionType<String> getStringOptional(
     final ObjectNode n,
     final String key)
@@ -329,7 +339,8 @@ import java.util.Calendar;
       final ObjectNode n = OPDSJSONParser.getObject(node, "held");
       final Calendar in_start_date =
         OPDSJSONParser.getTimestamp(n, "start_date");
-      final int in_position = OPDSJSONParser.getInteger(n, "position");
+      final OptionType<Integer> in_position =
+        OPDSJSONParser.getIntegerOptional(n, "position");
       return OPDSAvailabilityHeld.get(in_start_date, in_position);
     }
     if (node.has("open_access")) {

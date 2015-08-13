@@ -65,7 +65,17 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
           oh.put("start_date", fmt.format(a.getStartDate().getTime()));
-          oh.put("position", a.getPosition());
+
+          a.getPosition().map(
+            new FunctionType<Integer, Unit>()
+            {
+              @Override public Unit call(final Integer x)
+              {
+                oh.put("position", x);
+                return Unit.unit();
+              }
+            });
+
           o.set("held", oh);
           return o;
         }

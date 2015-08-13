@@ -8,6 +8,13 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
+import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +86,12 @@ import java.util.Map;
 
       try {
         final OPDSAcquisitionFeedEntry data = dir.getData();
-        entries.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
+        final OPDSAvailabilityType availability = data.getAvailability();
+        final Boolean use =
+          availability.matchAvailability(new UsableForBooksFeed());
+        if (use.booleanValue()) {
+          entries.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
+        }
       } catch (final Throwable x) {
         BooksControllerFeedTask.LOG.error(
           "unable to load book {} metadata: ", book_id, x);
@@ -285,6 +297,45 @@ import java.util.Map;
       this.listener.onBookFeedSuccess(this.feed());
     } catch (final Throwable x) {
       this.listener.onBookFeedFailure(x);
+    }
+  }
+
+  /**
+   * An availability matcher that indicates if a book should be shown for "My
+   * Books" feeds.
+   */
+
+  private static final class UsableForBooksFeed
+    implements OPDSAvailabilityMatcherType<Boolean, UnreachableCodeException>
+  {
+    UsableForBooksFeed()
+    {
+
+    }
+
+    @Override public Boolean onHeld(final OPDSAvailabilityHeld a)
+    {
+      return Boolean.FALSE;
+    }
+
+    @Override public Boolean onHoldable(final OPDSAvailabilityHoldable a)
+    {
+      return Boolean.FALSE;
+    }
+
+    @Override public Boolean onLoaned(final OPDSAvailabilityLoaned a)
+    {
+      return Boolean.TRUE;
+    }
+
+    @Override public Boolean onLoanable(final OPDSAvailabilityLoanable a)
+    {
+      return Boolean.FALSE;
+    }
+
+    @Override public Boolean onOpenAccess(final OPDSAvailabilityOpenAccess a)
+    {
+      return Boolean.TRUE;
     }
   }
 }

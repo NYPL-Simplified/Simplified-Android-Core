@@ -216,11 +216,17 @@ public final class OPDSAcquisitionFeedEntryParser
             ee, OPDSFeedConstants.SCHEMA_URI, "startDate"));
 
         try {
-          final int pos = Integer.valueOf(
-            OPDSXML.getFirstChildElementTextWithName(
-              ee, OPDSFeedConstants.SCHEMA_URI, "position")).intValue();
-
-          return OPDSAvailabilityHeld.get(start, pos);
+          return OPDSAvailabilityHeld.get(
+            start, OPDSXML.getFirstChildElementTextWithNameOptional(
+              ee, OPDSFeedConstants.SCHEMA_URI, "position").mapPartial(
+              new PartialFunctionType<String, Integer, NumberFormatException>()
+              {
+                @Override public Integer call(final String x)
+                  throws NumberFormatException
+                {
+                  return Integer.valueOf(x);
+                }
+              }));
         } catch (final NumberFormatException x) {
           throw new OPDSParseException("Error parsing hold position", x);
         }

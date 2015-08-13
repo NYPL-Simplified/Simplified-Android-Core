@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 /**
@@ -8,8 +9,8 @@ import com.io7m.jnull.NullCheck;
 
 public final class BookStatusHeld implements BookStatusType
 {
-  private final BookID id;
-  private final int    queue_position;
+  private final BookID              id;
+  private final OptionType<Integer> queue_position;
 
   /**
    * Construct a status value.
@@ -20,7 +21,7 @@ public final class BookStatusHeld implements BookStatusType
 
   public BookStatusHeld(
     final BookID in_id,
-    final int in_queue_position)
+    final OptionType<Integer> in_queue_position)
   {
     this.id = NullCheck.notNull(in_id);
     this.queue_position = in_queue_position;
@@ -40,7 +41,7 @@ public final class BookStatusHeld implements BookStatusType
    * @return The current position of the user in the queue
    */
 
-  public int getQueuePosition()
+  public OptionType<Integer> getQueuePosition()
   {
     return this.queue_position;
   }

@@ -48,7 +48,7 @@
   <string name="catalog_book_availability_on_loan_untimed">You have this book on loan.</string>
   <string name="catalog_book_availability_on_loan_timed">You have this book on loan until %s.</string>
   <string name="catalog_book_availability_open_access">This public domain book is yours to keep.</string>
-  <string name="catalog_book_availability_on_hold">This book is on hold. You are number %d in the queue.</string>
+  <string name="catalog_book_availability_on_hold">This book is on hold.</string>
   <string name="catalog_book_availability_loanable">This book is available for loan.</string>
   <string name="catalog_book_availability_holdable">This book may be placed on hold.</string>
 

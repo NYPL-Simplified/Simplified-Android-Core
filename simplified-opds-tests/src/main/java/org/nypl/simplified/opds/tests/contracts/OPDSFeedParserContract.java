@@ -1,20 +1,18 @@
 package org.nypl.simplified.opds.tests.contracts;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialProcedureType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSCategory;
@@ -28,35 +26,36 @@ import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.test.utilities.TestUtilities;
 import org.w3c.dom.DOMException;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.PartialProcedureType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@SuppressWarnings({ "boxing", "null", "resource" }) public final class OPDSFeedParserContract implements
-  OPDSFeedParserContractType
+public final class OPDSFeedParserContract implements OPDSFeedParserContractType
 {
-  public static InputStream getResource(
-    final String name)
-    throws Exception
-  {
-    return NullCheck.notNull(OPDSFeedParserContract.class
-      .getResourceAsStream(name));
-  }
-
   public OPDSFeedParserContract()
   {
     // Nothing
   }
 
+  public static InputStream getResource(
+    final String name)
+    throws Exception
+  {
+    return NullCheck.notNull(
+      OPDSFeedParserContract.class.getResourceAsStream(
+        name));
+  }
+
   @Override public void testAcquisitionFeedFiction0()
     throws Exception
   {
-    final URI uri =
-      URI
-        .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final URI uri = URI.create(
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
@@ -73,14 +72,12 @@ import com.io7m.jnull.NullCheck;
     final Some<OPDSSearchLink> search_opt =
       (Some<OPDSSearchLink>) f.getFeedSearchURI();
     final OPDSSearchLink search = search_opt.get();
-    TestUtilities
-      .assertEquals(
-        URI
-          .create("http://circulation.alpha.librarysimplified.org/search/Picture%20Books"),
-        search.getURI());
     TestUtilities.assertEquals(
-      "application/opensearchdescription+xml",
-      search.getType());
+      URI.create(
+        "http://circulation.alpha.librarysimplified"
+        + ".org/search/Picture%20Books"), search.getURI());
+    TestUtilities.assertEquals(
+      "application/opensearchdescription+xml", search.getType());
 
     final Calendar u = f.getFeedUpdated();
     final Set<String> ids = new HashSet<String>();
@@ -154,9 +151,9 @@ import com.io7m.jnull.NullCheck;
   @Override public void testAcquisitionFeedPaginated0()
     throws Exception
   {
-    final URI uri =
-      URI
-        .create("http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author");
+    final URI uri = URI.create(
+      "http://library-simplified.herokuapp"
+      + ".com/feed/Biography%20%26%20Memoir?order=author");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
@@ -164,21 +161,19 @@ import com.io7m.jnull.NullCheck;
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
-    TestUtilities
-      .assertEquals(
-        "http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?order=author",
-        f.getFeedID());
     TestUtilities.assertEquals(
-      "Biography & Memoir: By author",
-      f.getFeedTitle());
+      "http://library-simplified.herokuapp"
+      + ".com/feed/Biography%20%26%20Memoir?order=author", f.getFeedID());
+    TestUtilities.assertEquals(
+      "Biography & Memoir: By author", f.getFeedTitle());
     TestUtilities.assertEquals(50, f.getFeedEntries().size());
 
     final Some<URI> next_opt = (Some<URI>) f.getFeedNext();
 
-    TestUtilities
-      .assertEquals(
-        "http://library-simplified.herokuapp.com/feed/Biography%20%26%20Memoir?after=155057&order=author",
-        next_opt.get().toString());
+    TestUtilities.assertEquals(
+      "http://library-simplified.herokuapp"
+      + ".com/feed/Biography%20%26%20Memoir?after=155057&order=author",
+      next_opt.get().toString());
   }
 
   @Override public void testDOMException()
@@ -188,16 +183,17 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSParseException.class,
-      new PartialProcedureType<Unit, Exception>() {
+      OPDSParseException.class, new PartialProcedureType<Unit, Exception>()
+      {
         @Override public void call(
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p =
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser());
-          final InputStream d = new InputStream() {
+          final OPDSAcquisitionFeedEntryParserType ep =
+            OPDSAcquisitionFeedEntryParser.newParser();
+          final OPDSFeedParserType p = OPDSFeedParser.newParser(ep);
+          final InputStream d = new InputStream()
+          {
             @Override public int read()
               throws IOException
             {
@@ -229,15 +225,14 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSParseException.class,
-      new PartialProcedureType<Unit, Exception>() {
+      OPDSParseException.class, new PartialProcedureType<Unit, Exception>()
+      {
         @Override public void call(
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p =
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser());
+          final OPDSFeedParserType p = OPDSFeedParser.newParser(
+            OPDSAcquisitionFeedEntryParser.newParser());
           final InputStream d =
             OPDSFeedParserContract.getResource("bad-not-xml.xml");
           p.parse(uri, d);
@@ -252,15 +247,14 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSParseException.class,
-      new PartialProcedureType<Unit, Exception>() {
+      OPDSParseException.class, new PartialProcedureType<Unit, Exception>()
+      {
         @Override public void call(
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p =
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser());
+          final OPDSFeedParserType p = OPDSFeedParser.newParser(
+            OPDSAcquisitionFeedEntryParser.newParser());
           final InputStream d =
             OPDSFeedParserContract.getResource("bad-uri-syntax.xml");
           p.parse(uri, d);
@@ -275,16 +269,16 @@ import com.io7m.jnull.NullCheck;
       URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     TestUtilities.expectException(
-      OPDSParseException.class,
-      new PartialProcedureType<Unit, Exception>() {
+      OPDSParseException.class, new PartialProcedureType<Unit, Exception>()
+      {
         @Override public void call(
           final Unit x)
           throws Exception
         {
-          final OPDSFeedParserType p =
-            OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser
-              .newParser());
-          final InputStream d = new InputStream() {
+          final OPDSFeedParserType p = OPDSFeedParser.newParser(
+            OPDSAcquisitionFeedEntryParser.newParser());
+          final InputStream d = new InputStream()
+          {
             @Override public int read()
               throws IOException
             {
@@ -299,9 +293,8 @@ import com.io7m.jnull.NullCheck;
   @Override public void testAcquisitionFeedCategories0()
     throws Exception
   {
-    final URI uri =
-      URI
-        .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final URI uri = URI.create(
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
@@ -321,22 +314,19 @@ import com.io7m.jnull.NullCheck;
     final OPDSCategory ec1 = ec.get(1);
     TestUtilities.assertEquals(ec1.getTerm(), "3");
     TestUtilities.assertEquals(
-      ec1.getScheme(),
-      "http://schema.org/typicalAgeRange");
+      ec1.getScheme(), "http://schema.org/typicalAgeRange");
 
     final OPDSCategory ec2 = ec.get(2);
     TestUtilities.assertEquals(ec2.getTerm(), "Nonfiction");
     TestUtilities.assertEquals(
-      ec2.getScheme(),
-      "http://librarysimplified.org/terms/genres/Simplified/");
+      ec2.getScheme(), "http://librarysimplified.org/terms/genres/Simplified/");
   }
 
   @Override public void testAcquisitionFeedFacets0()
     throws Exception
   {
-    final URI uri =
-      URI
-        .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final URI uri = URI.create(
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
@@ -359,11 +349,10 @@ import com.io7m.jnull.NullCheck;
       TestUtilities.assertEquals("Sort by", fi.getGroup());
       TestUtilities.assertEquals("Title", fi.getTitle());
       TestUtilities.assertTrue(!fi.isActive());
-      TestUtilities
-        .assertEquals(
-          URI
-            .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=title"),
-          fi.getURI());
+      TestUtilities.assertEquals(
+        URI.create(
+          "http://circulation.alpha.librarysimplified"
+          + ".org/feed/Picture%20Books?order=title"), fi.getURI());
     }
 
     {
@@ -371,20 +360,18 @@ import com.io7m.jnull.NullCheck;
       TestUtilities.assertEquals("Sort by", fi.getGroup());
       TestUtilities.assertEquals("Author", fi.getTitle());
       TestUtilities.assertTrue(fi.isActive());
-      TestUtilities
-        .assertEquals(
-          URI
-            .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books?order=author"),
-          fi.getURI());
+      TestUtilities.assertEquals(
+        URI.create(
+          "http://circulation.alpha.librarysimplified"
+          + ".org/feed/Picture%20Books?order=author"), fi.getURI());
     }
   }
 
   @Override public void testAcquisitionFeedAvailability()
     throws Exception
   {
-    final URI uri =
-      URI
-        .create("http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final URI uri = URI.create(
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d = OPDSFeedParserContract.getResource("loans.xml");
@@ -397,15 +384,22 @@ import com.io7m.jnull.NullCheck;
 
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(0);
-      TestUtilities
-        .assertEquals(
-          e.getID(),
-          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fbev589");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
-        .get(
-          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-30T14:52:06Z"),
-          Option.some(OPDSRFC3339Formatter
-            .parseRFC3339Date("2015-04-20T14:52:06Z"))));
+      TestUtilities.assertEquals(
+        e.getID(),
+        "http://circulation.alpha.librarysimplified"
+        + ".org/works/?urn=urn%3Alibrarysimplified"
+        + ".org%2Fterms%2Fid%2F3M%2520ID%2Fbev589");
+
+      final Calendar expected_start_date =
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-30T14:52:06Z");
+      final OptionType<Calendar> expected_end_date = Option.some(
+        OPDSRFC3339Formatter.parseRFC3339Date(
+          "2015-04-20T14:52:06Z"));
+      final OPDSAvailabilityLoaned expected_availability =
+        OPDSAvailabilityLoaned.get(
+          expected_start_date, expected_end_date);
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -414,15 +408,20 @@ import com.io7m.jnull.NullCheck;
 
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(1);
-      TestUtilities
-        .assertEquals(
-          e.getID(),
-          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Faght6r9");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
-        .get(
-          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:56:23Z"),
-          Option.some(OPDSRFC3339Formatter
-            .parseRFC3339Date("2015-04-15T19:56:23Z"))));
+      TestUtilities.assertEquals(
+        e.getID(),
+        "http://circulation.alpha.librarysimplified"
+        + ".org/works/?urn=urn%3Alibrarysimplified"
+        + ".org%2Fterms%2Fid%2F3M%2520ID%2Faght6r9");
+
+      final Calendar expected_start_date =
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:56:23Z");
+      final OptionType<Calendar> expected_end_date = Option.some(
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-15T19:56:23Z"));
+      final OPDSAvailabilityLoaned expected_availability =
+        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -431,15 +430,20 @@ import com.io7m.jnull.NullCheck;
 
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(2);
-      TestUtilities
-        .assertEquals(
-          e.getID(),
-          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fetk2889");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
-        .get(
-          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:32:36Z"),
-          Option.some(OPDSRFC3339Formatter
-            .parseRFC3339Date("2015-04-15T19:32:36Z"))));
+      TestUtilities.assertEquals(
+        e.getID(),
+        "http://circulation.alpha.librarysimplified"
+        + ".org/works/?urn=urn%3Alibrarysimplified"
+        + ".org%2Fterms%2Fid%2F3M%2520ID%2Fetk2889");
+
+      final Calendar expected_start_date =
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:32:36Z");
+      final OptionType<Calendar> expected_end_date = Option.some(
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-15T19:32:36Z"));
+      final OPDSAvailabilityLoaned expected_availability =
+        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -448,15 +452,20 @@ import com.io7m.jnull.NullCheck;
 
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(3);
-      TestUtilities
-        .assertEquals(
-          e.getID(),
-          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Feqkyrr9");
       TestUtilities.assertEquals(
-        e.getAvailability(),
-        OPDSAvailabilityHeld.get(
-          OPDSRFC3339Formatter.parseRFC3339Date("2015-05-22T14:17:56Z"),
-          1));
+        e.getID(),
+        "http://circulation.alpha.librarysimplified"
+        + ".org/works/?urn=urn%3Alibrarysimplified"
+        + ".org%2Fterms%2Fid%2F3M%2520ID%2Feqkyrr9");
+
+      final Calendar expected_start_date =
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-05-22T14:17:56Z");
+      final OptionType<Integer> expected_position =
+        Option.some(Integer.valueOf(1));
+      final OPDSAvailabilityHeld expected_availability =
+        OPDSAvailabilityHeld.get(expected_start_date, expected_position);
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -465,14 +474,18 @@ import com.io7m.jnull.NullCheck;
 
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(4);
-      TestUtilities
-        .assertEquals(
-          e.getID(),
-          "http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F37284");
+      TestUtilities.assertEquals(
+        e.getID(),
+        "http://circulation.alpha.librarysimplified"
+        + ".org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F37284");
+
       final OptionType<Calendar> none = Option.none();
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
-        .get(OPDSRFC3339Formatter
-          .parseRFC3339Date("2015-04-16T18:51:36.392154Z"), none));
+      final Calendar expected_start_date =
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-16T18:51:36.392154Z");
+      final OPDSAvailabilityLoaned expected_availability =
+        OPDSAvailabilityLoaned.get(expected_start_date, none);
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -481,14 +494,18 @@ import com.io7m.jnull.NullCheck;
 
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(5);
-      TestUtilities
-        .assertEquals(
-          e.getID(),
-          "http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F26787");
-      final OptionType<Calendar> none = Option.none();
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
-        .get(OPDSRFC3339Formatter
-          .parseRFC3339Date("2015-04-03T18:03:03.275883Z"), none));
+      TestUtilities.assertEquals(
+        e.getID(),
+        "http://circulation.alpha.librarysimplified"
+        + ".org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F26787");
+
+      final OptionType<Calendar> expected_end_date = Option.none();
+      final Calendar expected_start_date =
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-03T18:03:03.275883Z");
+      final OPDSAvailabilityLoaned expected_availability =
+        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -497,15 +514,20 @@ import com.io7m.jnull.NullCheck;
 
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(6);
-      TestUtilities
-        .assertEquals(
-          e.getID(),
-          "http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fcgaxr9");
-      TestUtilities.assertEquals(e.getAvailability(), OPDSAvailabilityLoaned
-        .get(
-          OPDSRFC3339Formatter.parseRFC3339Date("2015-03-13T13:38:19Z"),
-          Option.some(OPDSRFC3339Formatter
-            .parseRFC3339Date("2015-04-03T13:38:19Z"))));
+      TestUtilities.assertEquals(
+        e.getID(),
+        "http://circulation.alpha.librarysimplified"
+        + ".org/works/?urn=urn%3Alibrarysimplified"
+        + ".org%2Fterms%2Fid%2F3M%2520ID%2Fcgaxr9");
+
+      final Calendar expected_start_date =
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-13T13:38:19Z");
+      final OptionType<Calendar> expected_end_date = Option.some(
+        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-03T13:38:19Z"));
+      final OPDSAvailabilityLoaned expected_availability =
+        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -515,9 +537,11 @@ import com.io7m.jnull.NullCheck;
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(7);
       TestUtilities.assertEquals(e.getID(), "simplified:extra-0");
-      TestUtilities.assertEquals(
-        e.getAvailability(),
-        OPDSAvailabilityLoanable.get());
+
+      final OPDSAvailabilityLoanable expected_availability =
+        OPDSAvailabilityLoanable.get();
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
 
     /**
@@ -527,9 +551,11 @@ import com.io7m.jnull.NullCheck;
     {
       final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(8);
       TestUtilities.assertEquals(e.getID(), "simplified:extra-1");
-      TestUtilities.assertEquals(
-        e.getAvailability(),
-        OPDSAvailabilityOpenAccess.get());
+
+      final OPDSAvailabilityOpenAccess expected_availability =
+        OPDSAvailabilityOpenAccess.get();
+
+      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
     }
   }
 }

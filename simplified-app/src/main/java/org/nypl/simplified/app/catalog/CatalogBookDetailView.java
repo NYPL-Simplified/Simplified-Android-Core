@@ -460,10 +460,10 @@ public final class CatalogBookDetailView implements Observer,
       final Some<Calendar> loan_end_some = (Some<Calendar>) loan_end_opt;
       final Calendar loan_end = loan_end_some.get();
       final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
-      text = String.format(
-        rr.getString(
-          R.string.catalog_book_availability_on_loan_timed,
-          fmt.format(loan_end.getTime())));
+      final String base_format =
+        rr.getString(R.string.catalog_book_availability_on_loan_timed);
+      final String formatted_date = fmt.format(loan_end.getTime());
+      text = String.format(base_format, formatted_date);
     } else {
       text = rr.getString(R.string.catalog_book_availability_on_loan_untimed);
     }
@@ -649,9 +649,7 @@ public final class CatalogBookDetailView implements Observer,
           final OPDSAvailabilityHeld a)
         {
           return NullCheck.notNull(
-            String.format(
-              rr.getString(R.string.catalog_book_availability_on_hold),
-              a.getPosition()));
+            rr.getString(R.string.catalog_book_availability_on_hold));
         }
 
         @Override public String onHoldable(
