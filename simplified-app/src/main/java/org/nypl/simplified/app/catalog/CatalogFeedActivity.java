@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -147,30 +146,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       });
   }
 
-  /**
-   * Start a new catalog feed activity, assuming that the user came from {@code
-   * from}, with up stack {@code up_stack}, attempting to load the feed at
-   * {@code target}. The new activity "replaces" the current activity by calling
-   * {@code finish()} on the existing activity.
-   *
-   * @param from    The previous activity
-   * @param in_args The feed arguments
-   */
-
-  public static void startNewActivityReplacing(
-    final Activity from,
-    final CatalogFeedArgumentsType in_args)
-  {
-    final Bundle b = new Bundle();
-    CatalogFeedActivity.setActivityArguments(b, in_args);
-    final Intent i = new Intent(from, CatalogFeedActivity.class);
-    i.putExtras(b);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-    from.startActivity(i);
-    from.finish();
-    from.overridePendingTransition(0, 0);
-  }
-
   private void configureFacets(
     final FeedWithoutGroups f,
     final ViewGroup layout,
@@ -234,8 +209,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
                   f.getFeedTitle(),
                   o.getURI(),
                   false);
-              CatalogFeedActivity.startNewActivityReplacing(
-                CatalogFeedActivity.this, args);
+
+              CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
               return Unit.unit();
             }
 
@@ -252,8 +227,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
                   fp.getType(),
                   search_terms,
                   CatalogFeedActivity.this.getLocalFeedTypeSelection());
-              CatalogFeedActivity.startNewActivityReplacing(
-                CatalogFeedActivity.this, args);
+
+              CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
               return Unit.unit();
             }
           };
@@ -1005,8 +980,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           final CatalogFeedArgumentsRemote c)
         {
           loader.invalidate(c.getURI());
-          CatalogFeedActivity.startNewActivityReplacing(
-            CatalogFeedActivity.this, args);
+
+          CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
           return Unit.unit();
         }
       });

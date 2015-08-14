@@ -131,11 +131,23 @@ public abstract class CatalogActivity extends SimplifiedActivity
   protected final void catalogActivityForkNew(
     final CatalogFeedArgumentsType args)
   {
+    NullCheck.notNull(args);
+
     final Bundle b = new Bundle();
     CatalogFeedActivity.setActivityArguments(b, args);
     final Intent i = new Intent(this, this.getClass());
     i.putExtras(b);
     i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
     this.startActivity(i);
+  }
+
+  protected final void catalogActivityForkNewReplacing(
+    final CatalogFeedArgumentsType args)
+  {
+    NullCheck.notNull(args);
+
+    this.catalogActivityForkNew(args);
+    this.finish();
+    this.overridePendingTransition(0, 0);
   }
 }
