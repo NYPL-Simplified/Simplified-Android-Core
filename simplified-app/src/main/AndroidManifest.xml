@@ -21,9 +21,9 @@
     android:largeHeap="true"
     android:theme="@style/SimplifiedTheme">
 
-    <!-- Catalog -->
+    <!-- Main entry point for the application. -->
     <activity
-      android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
+      android:name="org.nypl.simplified.app.MainSplashActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/app_name">
       <intent-filter>
@@ -31,21 +31,40 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+
+    <!-- Main application parts -->
     <activity
-      android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
+      android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
+      android:configChanges="orientation|screenSize"
+      android:label="@string/app_name">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
+      android:configChanges="orientation|screenSize"
       android:exported="false">
     </activity>
     <activity
-      android:name=".catalog.MainBooksActivity"
-      android:exported="false">
-    </activity>
-    <activity
-      android:name=".catalog.MainHoldsActivity"
+      android:name="org.nypl.simplified.app.catalog.MainHoldsActivity"
+      android:configChanges="orientation|screenSize"
       android:exported="false">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.SettingsActivity"
       android:configChanges="orientation|screenSize"
+      android:exported="false">
+    </activity>
+
+    <!-- EULA -->
+    <activity
+      android:name="org.nypl.simplified.app.MainEULAActivity"
+      android:configChanges="orientation|screenSize"
+      android:label="@string/app_name"
+      android:exported="true">
+    </activity>
+
+    <!-- Catalog -->
+    <activity
+      android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
       android:exported="false">
     </activity>
 

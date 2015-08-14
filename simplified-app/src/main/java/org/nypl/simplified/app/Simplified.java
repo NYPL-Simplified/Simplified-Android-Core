@@ -259,6 +259,7 @@ public final class Simplified extends Application
     private final AtomicBoolean                      synced;
     private final DownloaderType                     downloader;
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
+    private final OptionType<EULAType>               eula;
 
     private CatalogAppServices(
       final Context in_context,
@@ -354,7 +355,20 @@ public final class Simplified extends Application
       this.cover_provider = BookCoverProvider.newCoverProvider(
         in_context, this.books, this.cover_generator, this.exec_covers);
 
+      /**
+       * Configure EULA.
+       */
+
+      this.eula = EULA.getEULA(
+        this.context.getAssets(),
+        this.context.getSharedPreferences("simplified", 0));
+
       this.synced = new AtomicBoolean(false);
+    }
+
+    @Override public OptionType<EULAType> getEULA()
+    {
+      return this.eula;
     }
 
     @Override public BooksType getBooks()

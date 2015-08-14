@@ -4,6 +4,10 @@
   <string name="app_name">Simplified</string>
   <string name="holds">Holds</string>
 
+  <!-- EULA strings -->
+  <string name="eula_disagree">Disagree</string>
+  <string name="eula_agree">Agree</string>
+
   <!-- Books strings -->
   <string name="books">My Books</string>
   <string name="books_sync">Sync Account</string>

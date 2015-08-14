@@ -17,6 +17,12 @@ public interface SimplifiedCatalogAppServicesType extends
   SimplifiedAppInitialSyncType
 {
   /**
+   * @return The EULA, if any
+   */
+
+  OptionType<EULAType> getEULA();
+
+  /**
    * @return A book management interface
    */
 
