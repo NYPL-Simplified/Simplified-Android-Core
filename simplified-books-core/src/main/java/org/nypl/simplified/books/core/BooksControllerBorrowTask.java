@@ -161,6 +161,9 @@ final class BooksControllerBorrowTask implements Runnable,
     e.copyInBook(file);
     e.setAdobeRightsInformation(rights);
 
+    final BookSnapshot snap = e.getSnapshot();
+    this.books_status.booksSnapshotUpdate(this.book_id, snap);
+
     final OptionType<Calendar> none = Option.none();
     final BookStatusDownloaded status =
       new BookStatusDownloaded(this.book_id, none);
