@@ -15,8 +15,6 @@ import com.io7m.jnull.NullCheck;
 import org.nypl.drm.core.Assertions;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 
-import java.net.URI;
-
 /**
  * An activity that shows a license agreement, and aborts if the user does not
  * agree to it.
