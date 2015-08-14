@@ -360,8 +360,7 @@ public final class Simplified extends Application
        */
 
       this.eula = EULA.getEULA(
-        this.context.getAssets(),
-        this.context.getSharedPreferences("simplified", 0));
+        this.http, this.exec_downloader, this.context);
 
       this.synced = new AtomicBoolean(false);
     }

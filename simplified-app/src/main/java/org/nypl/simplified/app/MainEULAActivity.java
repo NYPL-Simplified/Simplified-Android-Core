@@ -15,6 +15,8 @@ import com.io7m.jnull.NullCheck;
 import org.nypl.drm.core.Assertions;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 
+import java.net.URI;
+
 /**
  * An activity that shows a license agreement, and aborts if the user does not
  * agree to it.
@@ -61,10 +63,12 @@ public final class MainEULAActivity extends Activity
           if (url.startsWith("mailto:")) {
             final MailTo mt = MailTo.parse(url);
             final Intent i = new Intent(Intent.ACTION_SEND);
+
+            final String[] addresses = new String[1];
+            addresses[0] = mt.getTo();
+
             i.setType("text/plain");
-            i.putExtra(
-              Intent.EXTRA_EMAIL, new String[] {
-                mt.getTo() });
+            i.putExtra(Intent.EXTRA_EMAIL, addresses);
             i.putExtra(Intent.EXTRA_SUBJECT, mt.getSubject());
             i.putExtra(Intent.EXTRA_CC, mt.getCc());
             i.putExtra(Intent.EXTRA_TEXT, mt.getBody());

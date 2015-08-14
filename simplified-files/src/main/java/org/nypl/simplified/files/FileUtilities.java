@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -285,6 +286,46 @@ public final class FileUtilities
       fs.write(data);
       fs.flush();
       fs.close();
+    } finally {
+      fs.close();
+    }
+  }
+
+  /**
+   * Write {@code stream} to {@code file_tmp}, atomically renaming {@code
+   * file_tmp} to {@code file} on success. For portability, {@code file_tmp} and
+   * {@code file} should be in the same directory.
+   *
+   * @param file     The file
+   * @param file_tmp The temporary file
+   * @param stream   The input stream
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static void fileWriteStream(
+    final File file,
+    final File file_tmp,
+    final InputStream stream)
+    throws IOException
+  {
+    NullCheck.notNull(file);
+    NullCheck.notNull(file_tmp);
+    NullCheck.notNull(stream);
+
+    final FileOutputStream fs = new FileOutputStream(file_tmp);
+    try {
+      final byte[] buffer = new byte[8192];
+      while (true) {
+        final int r = stream.read(buffer);
+        if (r == -1) {
+          break;
+        }
+        fs.write(buffer, 0, r);
+      }
+      fs.flush();
+      fs.close();
+      file_tmp.renameTo(file);
     } finally {
       fs.close();
     }
