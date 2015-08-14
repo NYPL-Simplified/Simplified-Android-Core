@@ -181,6 +181,16 @@ final class BooksControllerBorrowTask implements Runnable,
   private void runFulfillACSM(final File file)
     throws IOException
   {
+    /**
+     * The ACSM file will typically have downloaded almost instantly, leaving
+     * the download progress bar at 100%. The Adobe library will then take up
+     * to roughly ten seconds to start fulfilling the ACSM. This call
+     * effectively sets the download progress bar to 0% so that it doesn't look
+     * as if the user is waiting for no good reason.
+     */
+
+    this.downloadDataReceived(0L, 100L);
+
     if (this.adobe_drm.isSome()) {
       final AdobeAdeptExecutorType adobe =
         ((Some<AdobeAdeptExecutorType>) this.adobe_drm).get();
