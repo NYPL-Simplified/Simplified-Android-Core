@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -28,6 +29,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.app.EULAType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
@@ -145,6 +147,49 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         }
       });
   }
+
+  /**
+   * On the (possible) receipt of a link to the feed's EULA, update the URI for
+   * the document if one has actually been defined for the application.
+   *
+   * @param latest The (possible) link
+   *
+   * @see {@link EULAType}
+   */
+
+  private static void onPossiblyReceivedEULALink(final OptionType<URI> latest)
+  {
+    latest.map(
+      new FunctionType<URI, Unit>()
+      {
+        @Override public Unit call(final URI latest_actual)
+        {
+          final SimplifiedCatalogAppServicesType app =
+            Simplified.getCatalogAppServices();
+
+          app.getEULA().map(
+            new FunctionType<EULAType, Unit>()
+            {
+              @Override public Unit call(final EULAType eula)
+              {
+                eula.documentSetLatestURI(latest_actual);
+                return Unit.unit();
+              }
+            });
+          return Unit.unit();
+        }
+      });
+  }
+
+  /**
+   * Configure the facets layout. This is what causes facets to be shown or not
+   * shown at the top of the screen when rendering a feed.
+   *
+   * @param f      The feed
+   * @param layout The view group that will contain facet elements
+   * @param app    The app services
+   * @param rr     The app resources
+   */
 
   private void configureFacets(
     final FeedWithoutGroups f,
@@ -613,13 +658,13 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     CatalogFeedActivity.LOG.debug("received feed for {}", u);
     this.feed = f;
 
+    final CatalogFeedActivity cfa = this;
     UIThread.runOnUIThread(
       new Runnable()
       {
         @Override public void run()
         {
-          CatalogFeedActivity.this.configureUpButton(
-            CatalogFeedActivity.this.getUpStack(), f.getFeedTitle());
+          cfa.configureUpButton(cfa.getUpStack(), f.getFeedTitle());
         }
       });
 
@@ -641,6 +686,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         }
       });
 
+    onPossiblyReceivedEULALink(f.getFeedTermsOfService());
     return Unit.unit();
   }
 
@@ -728,6 +774,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           CatalogFeedActivity.this.onFeedWithoutGroupsUI(f);
         }
       });
+
+    onPossiblyReceivedEULALink(f.getFeedTermsOfService());
     return Unit.unit();
   }
 
@@ -1038,9 +1086,9 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           title,
           this.facet_active,
           Option.some(qnn),
-          CatalogFeedActivity.this.getLocalFeedTypeSelection());
+          cfa.getLocalFeedTypeSelection());
 
-      CatalogFeedActivity.this.catalogActivityForkNew(new_args);
+      cfa.catalogActivityForkNew(new_args);
       return true;
     }
   }
@@ -1087,7 +1135,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       final CatalogFeedArgumentsRemote new_args =
         new CatalogFeedArgumentsRemote(false, us, title, target, true);
 
-      CatalogFeedActivity.this.catalogActivityForkNew(new_args);
+      cfa.catalogActivityForkNew(new_args);
       return true;
     }
   }

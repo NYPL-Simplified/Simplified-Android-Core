@@ -27,6 +27,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
   private final String                     title;
   private final Calendar                   updated;
   private final URI                        uri;
+  private final OptionType<URI>            terms_of_service;
 
   private FeedWithGroups(
     final URI in_uri,
@@ -35,7 +36,8 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     final String in_title,
     final OptionType<FeedSearchType> in_search,
     final List<String> in_blocks_order,
-    final Map<String, FeedGroup> in_blocks)
+    final Map<String, FeedGroup> in_blocks,
+    final OptionType<URI> in_terms_of_service)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -44,6 +46,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     this.search = NullCheck.notNull(in_search);
     this.blocks_order = NullCheck.notNull(in_blocks_order);
     this.blocks = NullCheck.notNull(in_blocks);
+    this.terms_of_service = NullCheck.notNull(in_terms_of_service);
   }
 
   /**
@@ -82,7 +85,17 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
       f.getFeedTitle(),
       actual_search,
       order,
-      blocks);
+      blocks,
+      f.getFeedTermsOfService());
+  }
+
+  /**
+   * @return A link to the terms of service, if any
+   */
+
+  public OptionType<URI> getFeedTermsOfService()
+  {
+    return this.terms_of_service;
   }
 
   @Override public void add(

@@ -20,10 +20,10 @@ import java.util.Set;
  * The type of OPDS acquisition feeds.
  */
 
-@SuppressWarnings("synthetic-access") public final class OPDSAcquisitionFeed
-  implements Serializable
+public final class OPDSAcquisitionFeed implements Serializable
 {
   private static final long serialVersionUID = 1L;
+
   private final List<OPDSAcquisitionFeedEntry> entries;
   private final Map<String, List<OPDSFacet>>   facets_by_group;
   private final List<OPDSFacet>                facets_order;
@@ -35,6 +35,7 @@ import java.util.Set;
   private final String                         title;
   private final Calendar                       updated;
   private final URI                            uri;
+  private final OptionType<URI>                terms_of_service;
 
   private OPDSAcquisitionFeed(
     final URI in_uri,
@@ -47,7 +48,8 @@ import java.util.Set;
     final OptionType<URI> in_next,
     final OptionType<OPDSSearchLink> in_search,
     final List<OPDSFacet> in_facets_order,
-    final Map<String, List<OPDSFacet>> in_facets)
+    final Map<String, List<OPDSFacet>> in_facets,
+    final OptionType<URI> in_terms_of_service)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.entries = NullCheck.notNull(Collections.unmodifiableList(in_entries));
@@ -63,6 +65,7 @@ import java.util.Set;
     this.title = NullCheck.notNull(in_title);
     this.next = NullCheck.notNull(in_next);
     this.search = NullCheck.notNull(in_search);
+    this.terms_of_service = NullCheck.notNull(in_terms_of_service);
   }
 
   /**
@@ -108,7 +111,8 @@ import java.util.Set;
            && this.title.equals(other.title)
            && this.updated.equals(other.updated)
            && this.next.equals(other.next)
-           && this.search.equals(other.search);
+           && this.search.equals(other.search)
+           && this.terms_of_service.equals(other.terms_of_service);
   }
 
   /**
@@ -202,6 +206,15 @@ import java.util.Set;
   }
 
   /**
+   * @return The link to the terms of service, if any
+   */
+
+  public OptionType<URI> getFeedTermsOfService()
+  {
+    return this.terms_of_service;
+  }
+
+  /**
    * @return The feed URI
    */
 
@@ -225,6 +238,7 @@ import java.util.Set;
     result = (prime * result) + this.updated.hashCode();
     result = (prime * result) + this.next.hashCode();
     result = (prime * result) + this.search.hashCode();
+    result = (prime * result) + this.terms_of_service.hashCode();
     return result;
   }
 
@@ -242,6 +256,7 @@ import java.util.Set;
     private final URI                                         uri;
     private       OptionType<URI>                             next;
     private       OptionType<OPDSSearchLink>                  search;
+    private       OptionType<URI>                             terms_of_service;
 
     private Builder(
       final URI in_uri,
@@ -261,6 +276,7 @@ import java.util.Set;
       this.group_uris = new HashMap<String, URI>(32);
       this.next = Option.none();
       this.search = Option.none();
+      this.terms_of_service = Option.none();
     }
 
     @Override public void addEntry(
@@ -309,6 +325,11 @@ import java.util.Set;
       this.facets_order.add(f);
     }
 
+    @Override public void setTermsOfServiceOption(final OptionType<URI> u)
+    {
+      this.terms_of_service = NullCheck.notNull(u);
+    }
+
     @Override public OPDSAcquisitionFeed build()
     {
       final Map<String, OPDSGroup> r_groups =
@@ -333,7 +354,8 @@ import java.util.Set;
         this.next,
         this.search,
         this.facets_order,
-        this.facets_by_group);
+        this.facets_by_group,
+        this.terms_of_service);
     }
 
     @Override public void setNextOption(

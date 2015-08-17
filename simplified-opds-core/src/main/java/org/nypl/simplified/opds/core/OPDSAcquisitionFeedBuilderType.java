@@ -1,8 +1,8 @@
 package org.nypl.simplified.opds.core;
 
-import java.net.URI;
-
 import com.io7m.jfunctional.OptionType;
+
+import java.net.URI;
 
 /**
  * The type of mutable builders for {@link OPDSAcquisitionFeed} values.
@@ -13,8 +13,7 @@ public interface OPDSAcquisitionFeedBuilderType
   /**
    * Add an entry to the feed being constructed.
    *
-   * @param e
-   *          The entry
+   * @param e The entry
    */
 
   void addEntry(
@@ -29,8 +28,7 @@ public interface OPDSAcquisitionFeedBuilderType
   /**
    * Set the URI of the next feed in a paginated feed
    *
-   * @param next
-   *          The next URI, if any
+   * @param next The next URI, if any
    */
 
   void setNextOption(
@@ -39,8 +37,7 @@ public interface OPDSAcquisitionFeedBuilderType
   /**
    * Set the URI of the search facilities for the given feed
    *
-   * @param s
-   *          The search URI, if any
+   * @param s The search URI, if any
    */
 
   void setSearchOption(
@@ -49,10 +46,17 @@ public interface OPDSAcquisitionFeedBuilderType
   /**
    * Add the given facet.
    *
-   * @param f
-   *          The facet
+   * @param f The facet
    */
 
   void addFacet(
     OPDSFacet f);
+
+  /**
+   * Set the URI of the terms of service document for the feed, if any
+   *
+   * @param u The terms of service URI, if any
+   */
+
+  void setTermsOfServiceOption(OptionType<URI> u);
 }

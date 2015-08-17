@@ -30,8 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("synthetic-access") final class BooksControllerFeedTask
-  implements Runnable
+final class BooksControllerFeedTask implements Runnable
 {
   private static final Logger LOG;
 
@@ -325,6 +324,7 @@ import java.util.Map;
     }
     facet_groups.put(this.facet_group, facets);
 
+    final OptionType<URI> no_terms = Option.none();
     final FeedWithoutGroups f = FeedWithoutGroups.newEmptyFeed(
       this.uri,
       this.id,
@@ -333,7 +333,8 @@ import java.util.Map;
       no_next,
       some_search,
       facet_groups,
-      facets);
+      facets,
+      no_terms);
 
     final List<BookDatabaseEntryType> dirs =
       this.books_database.getBookDatabaseEntries();

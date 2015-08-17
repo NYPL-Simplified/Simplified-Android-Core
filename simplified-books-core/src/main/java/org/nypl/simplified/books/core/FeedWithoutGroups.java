@@ -29,6 +29,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   private final String                           title;
   private final Calendar                         updated;
   private final URI                              uri;
+  private final OptionType<URI>                  terms_of_service;
 
   private FeedWithoutGroups(
     final URI in_uri,
@@ -40,7 +41,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     final List<BookID> in_entries_order,
     final Map<BookID, FeedEntryType> in_entries,
     final Map<String, List<FeedFacetType>> in_facets_by_group,
-    final List<FeedFacetType> in_facets_order)
+    final List<FeedFacetType> in_facets_order,
+    final OptionType<URI> in_terms_of_service)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -52,19 +54,22 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     this.entries = NullCheck.notNull(in_entries);
     this.facets_by_group = NullCheck.notNull(in_facets_by_group);
     this.facets_order = NullCheck.notNull(in_facets_order);
+    this.terms_of_service = NullCheck.notNull(in_terms_of_service);
   }
 
   /**
    * Construct an empty feed.
    *
-   * @param in_uri             The feed URI
-   * @param in_id              The feed ID
-   * @param in_updated         The last updated time
-   * @param in_title           The title
-   * @param in_next            A link to the next part of the feed, if any
-   * @param in_search          A link to the feed searcher, if any
-   * @param in_facets_by_group The facets arranged by group
-   * @param in_facets_order    The facets arranged in order
+   * @param in_uri              The feed URI
+   * @param in_id               The feed ID
+   * @param in_updated          The last updated time
+   * @param in_title            The title
+   * @param in_next             A link to the next part of the feed, if any
+   * @param in_search           A link to the feed searcher, if any
+   * @param in_facets_by_group  The facets arranged by group
+   * @param in_facets_order     The facets arranged in order
+   * @param in_terms_of_service An optional link to the terms of service for the
+   *                            feed
    *
    * @return An empty feed
    */
@@ -77,7 +82,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     final OptionType<URI> in_next,
     final OptionType<FeedSearchType> in_search,
     final Map<String, List<FeedFacetType>> in_facets_by_group,
-    final List<FeedFacetType> in_facets_order)
+    final List<FeedFacetType> in_facets_order,
+    final OptionType<URI> in_terms_of_service)
   {
     final List<BookID> in_entries_order = new ArrayList<BookID>(32);
     final Map<BookID, FeedEntryType> in_entries =
@@ -93,7 +99,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
       in_entries_order,
       in_entries,
       in_facets_by_group,
-      in_facets_order);
+      in_facets_order,
+      in_terms_of_service);
   }
 
   @Override public void add(
@@ -106,6 +113,15 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
       this.entries_order.add(index, book_id);
       this.entries.put(book_id, nn_element);
     }
+  }
+
+  /**
+   * @return A link to the terms of service, if any
+   */
+
+  public OptionType<URI> getFeedTermsOfService()
+  {
+    return this.terms_of_service;
   }
 
   @Override public FeedEntryType get(
