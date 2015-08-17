@@ -85,7 +85,7 @@ public final class MainEULAActivity extends Activity
     Assertions.checkPrecondition(eula_opt.isSome(), "EULA must be provided");
     final Some<EULAType> some_eula = (Some<EULAType>) eula_opt;
     final EULAType eula = some_eula.get();
-    this.web_view.loadUrl(eula.eulaGetReadableURL().toString());
+    this.web_view.loadUrl(eula.documentGetReadableURL().toString());
 
     /**
      * Agreeing with the EULA opens the catalog.

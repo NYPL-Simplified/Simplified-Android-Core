@@ -100,8 +100,10 @@ public final class BooksContract implements BooksContractType
         return new HTTPResultOK<InputStream>(
           "OK",
           200,
-          new ByteArrayInputStream("DATA".getBytes()), 4L,
-          empty_headers);
+          new ByteArrayInputStream("DATA".getBytes()),
+          4L,
+          empty_headers,
+          0L);
       }
 
       private HTTPResultType<InputStream> getLoans(
@@ -139,7 +141,7 @@ public final class BooksContract implements BooksContractType
                     "/org/nypl/simplified/books/tests/contracts/loans.xml");
 
                 return new HTTPResultOK<InputStream>(
-                  "OK", 200, stream, 1L, empty_headers);
+                  "OK", 200, stream, 1L, empty_headers, 0L);
               }
             });
         } catch (final IOException e) {
@@ -156,7 +158,7 @@ public final class BooksContract implements BooksContractType
         }
 
         return new HTTPResultOK<Unit>(
-          "OK", 200, Unit.unit(), 1L, empty_headers);
+          "OK", 200, Unit.unit(), 1L, empty_headers, 0L);
       }
 
       private HTTPResultType<Unit> headLoans(
@@ -190,7 +192,7 @@ public final class BooksContract implements BooksContractType
                 }
 
                 return new HTTPResultOK<Unit>(
-                  "OK", 200, Unit.unit(), 1L, empty_headers);
+                  "OK", 200, Unit.unit(), 1L, empty_headers, 0L);
               }
             });
         } catch (final IOException e) {
@@ -200,7 +202,8 @@ public final class BooksContract implements BooksContractType
 
       private <T> HTTPResultType<T> unauthorized()
       {
-        return new HTTPResultError<T>(401, "Unauthorized", 0L, empty_headers);
+        return new HTTPResultError<T>(
+          401, "Unauthorized", 0L, empty_headers, 0L);
       }
     };
   }
@@ -232,7 +235,7 @@ public final class BooksContract implements BooksContractType
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final ExecutorService in_exec = Executors.newSingleThreadExecutor();
     final HTTPType http = HTTP.newHTTP();
-    final OPDSFeedTransportType in_transport =
+    final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport =
       FeedHTTPTransport.newTransport(http);
     final OPDSSearchParserType in_search_parser = OPDSSearchParser.newParser();
     return FeedLoader.newFeedLoader(

@@ -13,6 +13,12 @@ import java.util.Map;
 public interface HTTPResultConnectedType<A> extends HTTPResultType<A>
 {
   /**
+   * @return The last modified time, in seconds since the epoch
+   */
+
+  long getLastModifiedTime();
+
+  /**
    * @return The size in bytes of the remote file
    */
 

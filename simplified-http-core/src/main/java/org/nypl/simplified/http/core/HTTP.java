@@ -13,8 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Default implementation of the {@link HTTPType} type.
@@ -108,15 +106,23 @@ public final class HTTP implements HTTPType
       HTTP.LOG.trace(
         "GET {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
 
+      conn.getLastModified();
       if (code >= 400) {
         return new HTTPResultError<InputStream>(
           code,
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
-          NullCheck.notNull(conn.getHeaderFields()));
+          NullCheck.notNull(conn.getHeaderFields()),
+          conn.getLastModified());
       }
 
-      return new OK(conn);
+      return new HTTPResultOK<InputStream>(
+        NullCheck.notNull(conn.getResponseMessage()),
+        code,
+        conn.getInputStream(),
+        (long) conn.getContentLength(),
+        NullCheck.notNull(conn.getHeaderFields()),
+        conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {
@@ -161,7 +167,8 @@ public final class HTTP implements HTTPType
           code,
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
-          NullCheck.notNull(conn.getHeaderFields()));
+          NullCheck.notNull(conn.getHeaderFields()),
+          conn.getLastModified());
       }
 
       return new HTTPResultOK<Unit>(
@@ -169,72 +176,12 @@ public final class HTTP implements HTTPType
         code,
         Unit.unit(),
         (long) conn.getContentLength(),
-        NullCheck.notNull(conn.getHeaderFields()));
+        NullCheck.notNull(conn.getHeaderFields()),
+        conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {
       return new HTTPResultException<Unit>(uri, e);
-    }
-  }
-
-  private static final class OK implements HTTPResultOKType<InputStream>
-  {
-    private final HttpURLConnection         conn;
-    private final long                      content_length;
-    private final Map<String, List<String>> headers;
-    private final String                    message;
-    private final int                       status;
-    private final InputStream               stream;
-
-    OK(
-      final HttpURLConnection c)
-      throws IOException
-    {
-      this.conn = NullCheck.notNull(c);
-      this.message = NullCheck.notNull(this.conn.getResponseMessage());
-      this.status = this.conn.getResponseCode();
-      this.stream = NullCheck.notNull(this.conn.getInputStream());
-      this.headers = NullCheck.notNull(this.conn.getHeaderFields());
-      this.content_length = (long) c.getContentLength();
-    }
-
-    @Override public void close()
-      throws IOException
-    {
-      this.conn.disconnect();
-      this.stream.close();
-    }
-
-    @Override public long getContentLength()
-    {
-      return this.content_length;
-    }
-
-    @Override public String getMessage()
-    {
-      return this.message;
-    }
-
-    @Override public Map<String, List<String>> getResponseHeaders()
-    {
-      return this.headers;
-    }
-
-    @Override public int getStatus()
-    {
-      return this.status;
-    }
-
-    @Override public InputStream getValue()
-    {
-      return this.stream;
-    }
-
-    @Override public <B, E extends Exception> B matchResult(
-      final HTTPResultMatcherType<InputStream, B, E> m)
-      throws E
-    {
-      return m.onHTTPOK(this);
     }
   }
 }
