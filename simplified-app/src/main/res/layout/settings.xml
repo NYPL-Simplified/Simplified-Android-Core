@@ -123,14 +123,47 @@
       android:layout_marginTop="16dp" />
 
     <TextView
+      android:id="@+id/settings_eula"
+      android:text="@string/settings_eula"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_below="@id/settings_credits_divider"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_eula_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_below="@id/settings_eula"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
+    <TextView
+      android:id="@+id/settings_privacy"
+      android:text="@string/settings_privacy"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_below="@id/settings_eula_divider"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_privacy_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_below="@id/settings_privacy"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
+    <TextView
       android:id="@+id/settings_adobe_drm"
       android:textAppearance="?android:attr/textAppearanceMedium"
       android:text=""
       android:textColor="#eee"
-      android:layout_below="@id/settings_credits_divider"
+      android:layout_below="@id/settings_privacy_divider"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"/>
-
   </RelativeLayout>
 
 </ScrollView>

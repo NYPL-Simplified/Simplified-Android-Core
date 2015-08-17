@@ -76,10 +76,10 @@
   <string name="settings_login_failed_device">An error occurred when activating your device. Please check your connection or try again later.</string>
   <string name="settings_logout_failed">Logout Failed</string>
   <string name="settings_feedback">Feedback</string>
-  <string name="settings_credits">Credits</string>
-  <string name="settings_logout_confirm">If you sign out of your account, all content will be
-    removed from this device.
-  </string>
+  <string name="settings_credits">Acknowledgements</string>
+  <string name="settings_eula">User Agreement</string>
+  <string name="settings_privacy">Privacy Policy</string>
+  <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
   <string name="settings_adobe_drm_supported">Adobe DRM: Supported</string>
   <string name="settings_adobe_drm_unsupported">Adobe DRM: Unsupported</string>
 

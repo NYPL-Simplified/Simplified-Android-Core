@@ -49,7 +49,14 @@
       android:exported="false">
     </activity>
     <activity
-      android:name="org.nypl.simplified.app.SettingsActivity"
+      android:name="org.nypl.simplified.app.MainSettingsActivity"
+      android:configChanges="orientation|screenSize"
+      android:exported="false">
+    </activity>
+
+    <!-- General components -->
+    <activity
+      android:name="org.nypl.simplified.app.WebViewActivity"
       android:configChanges="orientation|screenSize"
       android:exported="false">
     </activity>

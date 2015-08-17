@@ -47,6 +47,14 @@ public final class MainEULAActivity extends Activity
       NullCheck.notNull((Button) this.findViewById(R.id.eula_disagree));
 
     final WebSettings settings = this.web_view.getSettings();
+    settings.setAllowFileAccess(true);
+    settings.setAllowContentAccess(true);
+    settings.setSupportMultipleWindows(false);
+    settings.setAllowUniversalAccessFromFileURLs(false);
+    settings.setJavaScriptEnabled(false);
+    settings.setBlockNetworkImage(true);
+    settings.setBlockNetworkLoads(true);
+
     this.web_view.setWebViewClient(
       new WebViewClient()
       {

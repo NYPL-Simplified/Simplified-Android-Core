@@ -264,7 +264,7 @@ public abstract class SimplifiedActivity extends Activity
     classes_by_name.put(
       SimplifiedPart.PART_CATALOG, MainCatalogActivity.class);
     classes_by_name.put(SimplifiedPart.PART_HOLDS, MainHoldsActivity.class);
-    classes_by_name.put(SimplifiedPart.PART_SETTINGS, SettingsActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_SETTINGS, MainSettingsActivity.class);
 
     /**
      * Set up a map of part names to functions that configure argument

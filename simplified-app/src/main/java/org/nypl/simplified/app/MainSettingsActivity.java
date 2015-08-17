@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,8 +19,12 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -38,7 +43,7 @@ import org.slf4j.Logger;
  * The activity displaying the settings for the application.
  */
 
-public final class SettingsActivity extends SimplifiedActivity implements
+public final class MainSettingsActivity extends SimplifiedActivity implements
   AccountLogoutListenerType,
   AccountLoginListenerType,
   AccountGetCachedCredentialsListenerType,
@@ -47,7 +52,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(SettingsActivity.class);
+    LOG = LogUtilities.getLog(MainSettingsActivity.class);
   }
 
   private @Nullable EditText barcode_edit;
@@ -58,7 +63,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
    * Construct an activity.
    */
 
-  public SettingsActivity()
+  public MainSettingsActivity()
   {
 
   }
@@ -97,7 +102,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final AccountBarcode barcode,
     final AccountPIN pin)
   {
-    SettingsActivity.LOG.debug("account is logged in: {}", barcode);
+    MainSettingsActivity.LOG.debug("account is logged in: {}", barcode);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -115,8 +120,8 @@ public final class SettingsActivity extends SimplifiedActivity implements
         {
           in_pin_edit.setText(pin.toString());
           in_barcode_edit.setText(barcode.toString());
-          SettingsActivity.editableDisable(in_barcode_edit);
-          SettingsActivity.editableDisable(in_pin_edit);
+          MainSettingsActivity.editableDisable(in_barcode_edit);
+          MainSettingsActivity.editableDisable(in_pin_edit);
 
           in_login.setEnabled(true);
           in_login.setText(rr.getString(R.string.settings_log_out));
@@ -133,13 +138,13 @@ public final class SettingsActivity extends SimplifiedActivity implements
                     @Override public void run()
                     {
                       in_login.setEnabled(false);
-                      SettingsActivity.editableDisable(in_pin_edit);
-                      SettingsActivity.editableDisable(in_barcode_edit);
-                      books.accountLogout(SettingsActivity.this);
+                      MainSettingsActivity.editableDisable(in_pin_edit);
+                      MainSettingsActivity.editableDisable(in_barcode_edit);
+                      books.accountLogout(MainSettingsActivity.this);
                     }
                   });
                 final FragmentManager fm =
-                  SettingsActivity.this.getFragmentManager();
+                  MainSettingsActivity.this.getFragmentManager();
                 d.show(fm, "logout-confirm");
               }
             });
@@ -163,10 +168,10 @@ public final class SettingsActivity extends SimplifiedActivity implements
       {
         @Override public void run()
         {
-          SettingsActivity.editableEnable(in_barcode_edit);
-          SettingsActivity.editableEnable(in_pin_edit);
+          MainSettingsActivity.editableEnable(in_barcode_edit);
+          MainSettingsActivity.editableEnable(in_pin_edit);
 
-          SettingsActivity.this.enableLoginIfFieldsNonEmpty(
+          MainSettingsActivity.this.enableLoginIfFieldsNonEmpty(
             in_login, in_pin_edit, in_barcode_edit);
 
           in_login.setText(rr.getString(R.string.settings_log_in));
@@ -177,8 +182,8 @@ public final class SettingsActivity extends SimplifiedActivity implements
                 final @Nullable View v)
               {
                 in_login.setEnabled(false);
-                SettingsActivity.editableDisable(in_pin_edit);
-                SettingsActivity.editableDisable(in_barcode_edit);
+                MainSettingsActivity.editableDisable(in_pin_edit);
+                MainSettingsActivity.editableDisable(in_barcode_edit);
 
                 final Editable barcode_text = in_barcode_edit.getText();
                 final AccountBarcode barcode = new AccountBarcode(
@@ -187,7 +192,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
                 final Editable pin_text = in_pin_edit.getText();
                 final AccountPIN pin =
                   new AccountPIN(NullCheck.notNull(pin_text.toString()));
-                books.accountLogin(barcode, pin, SettingsActivity.this);
+                books.accountLogin(barcode, pin, MainSettingsActivity.this);
               }
             });
         }
@@ -198,12 +203,12 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final OptionType<Throwable> error,
     final String message)
   {
-    SettingsActivity.LOG.debug("onAccountLoginFailure");
+    MainSettingsActivity.LOG.debug("onAccountLoginFailure");
     LogUtilities.errorWithOptionalException(
-      SettingsActivity.LOG, message, error);
+      MainSettingsActivity.LOG, message, error);
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final SettingsActivity ctx = this;
+    final MainSettingsActivity ctx = this;
     UIThread.runOnUIThread(
       new Runnable()
       {
@@ -222,7 +227,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
               @Override public void onDismiss(
                 final @Nullable DialogInterface d)
               {
-                SettingsActivity.this.onAccountIsNotLoggedIn();
+                MainSettingsActivity.this.onAccountIsNotLoggedIn();
               }
             });
           a.show();
@@ -232,7 +237,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
   @Override public void onAccountLoginFailureCredentialsIncorrect()
   {
-    SettingsActivity.LOG.error("onAccountLoginFailureCredentialsIncorrect");
+    MainSettingsActivity.LOG.error("onAccountLoginFailureCredentialsIncorrect");
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final OptionType<Throwable> none = Option.none();
@@ -242,7 +247,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
   @Override public void onAccountLoginFailureServerError(final int code)
   {
-    SettingsActivity.LOG.error(
+    MainSettingsActivity.LOG.error(
       "onAccountLoginFailureServerError: {}", Integer.valueOf(code));
 
     final Resources rr = NullCheck.notNull(this.getResources());
@@ -255,7 +260,8 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final OptionType<Throwable> error,
     final String message)
   {
-    SettingsActivity.LOG.error("onAccountLoginFailureLocalError: {}", message);
+    MainSettingsActivity.LOG.error(
+      "onAccountLoginFailureLocalError: {}", message);
 
     final Resources rr = NullCheck.notNull(this.getResources());
     this.onAccountLoginFailure(
@@ -266,7 +272,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final AccountBarcode barcode,
     final AccountPIN pin)
   {
-    SettingsActivity.LOG.debug("account login succeeded: {}", barcode);
+    MainSettingsActivity.LOG.debug("account login succeeded: {}", barcode);
     this.onAccountIsLoggedIn(barcode, pin);
 
     final SimplifiedCatalogAppServicesType app =
@@ -274,7 +280,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final BooksType books = app.getBooks();
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final Context context = SettingsActivity.this.getApplicationContext();
+    final Context context = MainSettingsActivity.this.getApplicationContext();
     final CharSequence text =
       NullCheck.notNull(rr.getString(R.string.settings_login_succeeded));
     final int duration = Toast.LENGTH_SHORT;
@@ -286,7 +292,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
         {
           final Toast toast = Toast.makeText(context, text, duration);
           toast.show();
-          books.accountSync(SettingsActivity.this);
+          books.accountSync(MainSettingsActivity.this);
         }
       });
   }
@@ -294,7 +300,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
   @Override
   public void onAccountLoginFailureDeviceActivationError(final String message)
   {
-    SettingsActivity.LOG.error(
+    MainSettingsActivity.LOG.error(
       "onAccountLoginFailureDeviceActivationError: {}", message);
 
     final Resources rr = NullCheck.notNull(this.getResources());
@@ -307,18 +313,18 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final OptionType<Throwable> error,
     final String message)
   {
-    SettingsActivity.LOG.debug("onAccountLogoutFailure");
+    MainSettingsActivity.LOG.debug("onAccountLogoutFailure");
     LogUtilities.errorWithOptionalException(
-      SettingsActivity.LOG, message, error);
+      MainSettingsActivity.LOG, message, error);
   }
 
   @Override public void onAccountLogoutSuccess()
   {
-    SettingsActivity.LOG.debug("onAccountLogoutSuccess");
+    MainSettingsActivity.LOG.debug("onAccountLogoutSuccess");
     this.onAccountIsNotLoggedIn();
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final Context context = SettingsActivity.this.getApplicationContext();
+    final Context context = MainSettingsActivity.this.getApplicationContext();
     final CharSequence text =
       NullCheck.notNull(rr.getString(R.string.settings_logout_succeeded));
     final int duration = Toast.LENGTH_SHORT;
@@ -331,8 +337,8 @@ public final class SettingsActivity extends SimplifiedActivity implements
       {
         @Override public void run()
         {
-          SettingsActivity.editableEnable(be);
-          SettingsActivity.editableEnable(pe);
+          MainSettingsActivity.editableEnable(be);
+          MainSettingsActivity.editableEnable(pe);
           be.setText("");
           pe.setText("");
 
@@ -345,13 +351,13 @@ public final class SettingsActivity extends SimplifiedActivity implements
   @Override public void onAccountSyncAuthenticationFailure(
     final String message)
   {
-    SettingsActivity.LOG.error("failed to sync account: {}", message);
+    MainSettingsActivity.LOG.error("failed to sync account: {}", message);
   }
 
   @Override public void onAccountSyncBook(
     final BookID book)
   {
-    SettingsActivity.LOG.error("synced book: {}", book);
+    MainSettingsActivity.LOG.error("synced book: {}", book);
   }
 
   @Override public void onAccountSyncFailure(
@@ -359,18 +365,21 @@ public final class SettingsActivity extends SimplifiedActivity implements
     final String message)
   {
     LogUtilities.errorWithOptionalException(
-      SettingsActivity.LOG, message, error);
+      MainSettingsActivity.LOG, message, error);
   }
 
   @Override public void onAccountSyncSuccess()
   {
-    SettingsActivity.LOG.debug("completed sync");
+    MainSettingsActivity.LOG.debug("completed sync");
   }
 
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
     super.onCreate(state);
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
     final Resources resources = NullCheck.notNull(this.getResources());
@@ -392,6 +401,46 @@ public final class SettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_adobe_drm));
 
     /**
+     * If an EULA is defined, configure the EULA to open a web view displaying
+     * the policy on click. Otherwise, disable the text.
+     */
+
+    final TextView in_eula =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_eula));
+    app.getEULA().accept(
+      new OptionVisitorType<EULAType, Unit>()
+      {
+        @Override public Unit none(final None<EULAType> n)
+        {
+          in_eula.setEnabled(false);
+          return Unit.unit();
+        }
+
+        @Override public Unit some(final Some<EULAType> s)
+        {
+          final EULAType eula = s.get();
+          in_eula.setOnClickListener(
+            new OnClickListener()
+            {
+              @Override public void onClick(final View v)
+              {
+                final Intent i =
+                  new Intent(MainSettingsActivity.this, WebViewActivity.class);
+                final Bundle b = new Bundle();
+                WebViewActivity.setActivityArguments(
+                  b,
+                  eula.documentGetReadableURL().toString(),
+                  resources.getString(R.string.settings_eula),
+                  SimplifiedPart.PART_SETTINGS);
+                i.putExtras(b);
+                MainSettingsActivity.this.startActivity(i);
+              }
+            });
+          return Unit.unit();
+        }
+      });
+
+    /**
      * Set a text change listener on both fields that enables the login
      * button if both fields are non-empty.
      */
@@ -405,7 +454,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
           final int before,
           final int count)
         {
-          SettingsActivity.this.enableLoginIfFieldsNonEmpty(
+          MainSettingsActivity.this.enableLoginIfFieldsNonEmpty(
             in_login, in_pin_edit, in_barcode_edit);
         }
 
@@ -434,7 +483,7 @@ public final class SettingsActivity extends SimplifiedActivity implements
           final int before,
           final int count)
         {
-          SettingsActivity.this.enableLoginIfFieldsNonEmpty(
+          MainSettingsActivity.this.enableLoginIfFieldsNonEmpty(
             in_login, in_pin_edit, in_barcode_edit);
         }
 
@@ -458,8 +507,6 @@ public final class SettingsActivity extends SimplifiedActivity implements
 
     this.navigationDrawerSetActionBarTitle();
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
     if (app.getAdobeDRMExecutor().isSome()) {
       in_adobe.setText(
         resources.getText(R.string.settings_adobe_drm_supported));

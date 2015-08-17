@@ -6,6 +6,10 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * The separate parts of the application, excluding the reader.
+ *
+ * When an activity is asked, it returns a {@code SimplifiedPart} value, and
+ * this value is used to determine which item in the application's navigation
+ * drawer will be highlighted when that activity is in the foreground.
  */
 
 public enum SimplifiedPart
