@@ -358,7 +358,9 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     final ObjectNode o = OPDSJSONParser.checkObject(null, jn);
     final String in_term = OPDSJSONParser.getString(o, "term");
     final String in_scheme = OPDSJSONParser.getString(o, "scheme");
-    return new OPDSCategory(in_term, in_scheme);
+    final OptionType<String> in_label =
+      OPDSJSONParser.getStringOptional(o, "label");
+    return new OPDSCategory(in_term, in_scheme, in_label);
   }
 
   @Override public OPDSAcquisitionFeed parseAcquisitionFeed(

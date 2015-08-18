@@ -395,7 +395,7 @@ public final class CatalogBookDetailView implements Observer,
       for (int index = 0; index < cats.size(); ++index) {
         final OPDSCategory c = NullCheck.notNull(cats.get(index));
         if (CatalogBookDetailView.GENRES_URI_TEXT.equals(c.getScheme())) {
-          buffer.append(c.getTerm());
+          buffer.append(c.getEffectiveLabel());
           if ((index + 1) < cats.size()) {
             buffer.append(", ");
           }

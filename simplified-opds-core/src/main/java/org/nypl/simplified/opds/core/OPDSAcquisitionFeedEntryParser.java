@@ -154,7 +154,15 @@ public final class OPDSAcquisitionFeedEntryParser
     for (final Element ce : e_categories) {
       final String term = NullCheck.notNull(ce.getAttribute("term"));
       final String scheme = NullCheck.notNull(ce.getAttribute("scheme"));
-      eb.addCategory(new OPDSCategory(term, scheme));
+
+      final OptionType<String> label;
+      if (ce.hasAttribute("label")) {
+        label = Option.some(ce.getAttribute("label"));
+      } else {
+        label = Option.none();
+      }
+
+      eb.addCategory(new OPDSCategory(term, scheme, label));
     }
 
     OPDSAcquisitionFeedEntryParser.findAcquisitionAuthors(e, eb);
