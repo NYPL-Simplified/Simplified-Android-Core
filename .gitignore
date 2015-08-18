@@ -11,3 +11,4 @@ simplified-*/bin
 simplified-*/target
 simplified-app/src/main/assets/ReaderClientCert.sig
 target
+pom.xml.versionsBackup
