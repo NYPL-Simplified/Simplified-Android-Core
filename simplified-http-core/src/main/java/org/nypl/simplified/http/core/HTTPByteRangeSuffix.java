@@ -1,26 +1,30 @@
 package org.nypl.simplified.http.core;
 
-import org.nypl.simplified.assertions.Assertions;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.assertions.Assertions;
 
 /**
  * The byte range of an HTTP Range request.
  */
 
-@SuppressWarnings("boxing") public final class HTTPByteRangeSuffix implements
-  HTTPRangeType
+public final class HTTPByteRangeSuffix implements HTTPRangeType
 {
   private final long byte_from_end;
+
+  /**
+   * Construct a suffix byte range.
+   *
+   * @param in_byte_from_end The number of bytes from the end
+   */
 
   public HTTPByteRangeSuffix(
     final long in_byte_from_end)
   {
     Assertions.checkPrecondition(
-      in_byte_from_end >= 0,
+      in_byte_from_end >= 0L,
       "byte_from_end %d >= 0",
-      in_byte_from_end);
+      Long.valueOf(in_byte_from_end));
     this.byte_from_end = in_byte_from_end;
   }
 
@@ -40,6 +44,10 @@ import com.io7m.jnull.Nullable;
     return this.byte_from_end == other.byte_from_end;
   }
 
+  /**
+   * @return The number of bytes from the end
+   */
+
   public long getByteFromEnd()
   {
     return this.byte_from_end;
@@ -49,15 +57,14 @@ import com.io7m.jnull.Nullable;
   {
     final int prime = 31;
     int result = 1;
-    result =
-      (prime * result)
-        + (int) (this.byte_from_end ^ (this.byte_from_end >>> 32));
+    result = (prime * result) + (int) (this.byte_from_end ^ (this.byte_from_end
+                                                             >>> 32));
     return result;
   }
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(32);
     b.append("-");
     b.append(this.byte_from_end);
     return NullCheck.notNull(b.toString());

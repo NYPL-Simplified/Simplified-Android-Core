@@ -22,9 +22,21 @@ Current build instructions:
 
     $ export ANDROID_HOME=${HOME}/local/android-sdk-linux
 
-  Then, simply:
+  If the package should be built without support for Adobe DRM,
+  simply run:
 
-    $ mvn -C clean package
+    $ mvn clean package
+
+  If the application is to be built with support for Adobe DRM, the
+  the Adobe-provided ReaderClientCert.sig file must be placed in
+  simplified-app/src/main/assets. The build will check for the
+  existence of this file and fail if it does not exist. Additionally,
+  the NYPL Adobe DRM package(s) must be deployed to a local repository.
+
+  Once this is done, building the package with Adobe DRM support
+  enabled is achieved by:
+
+    $ mvn -P nypl-adobe-drm clean package
 
 ------------------------------------------------------------------------
 

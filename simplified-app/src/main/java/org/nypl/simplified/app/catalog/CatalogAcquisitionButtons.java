@@ -1,7 +1,13 @@
 package org.nypl.simplified.app.catalog;
 
-import java.util.List;
-
+import android.app.Activity;
+import android.view.View;
+import android.view.ViewGroup;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
@@ -10,15 +16,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
-import android.app.Activity;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
+import java.util.List;
 
 /**
  * Utility functions for configuring a set of acquisition buttons.
@@ -31,6 +29,21 @@ public final class CatalogAcquisitionButtons
   static {
     LOG = LogUtilities.getLog(CatalogAcquisitionButtons.class);
   }
+
+  private CatalogAcquisitionButtons()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Given a feed entry, add all the required acquisition buttons to the given
+   * view group.
+   *
+   * @param in_act   The activity hosting the view
+   * @param in_vg    The view group
+   * @param in_books The books database
+   * @param in_e     The feed entry
+   */
 
   public static void addButtons(
     final Activity in_act,
@@ -59,6 +72,14 @@ public final class CatalogAcquisitionButtons
     }
   }
 
+  /**
+   * Return the preferred acquisition type, from the list of types.
+   *
+   * @param acquisitions The list of acquisition types
+   *
+   * @return The preferred acquisition, if any
+   */
+
   public static OptionType<OPDSAcquisition> getPreferredAcquisition(
     final List<OPDSAcquisition> acquisitions)
   {
@@ -71,16 +92,14 @@ public final class CatalogAcquisitionButtons
     OPDSAcquisition best = NullCheck.notNull(acquisitions.get(0));
     for (final OPDSAcquisition current : acquisitions) {
       final OPDSAcquisition nn_current = NullCheck.notNull(current);
-      if (CatalogAcquisitionButtons.priority(nn_current) > CatalogAcquisitionButtons
-        .priority(best)) {
+      if (CatalogAcquisitionButtons.priority(nn_current)
+          > CatalogAcquisitionButtons.priority(best)) {
         best = nn_current;
       }
     }
 
     CatalogAcquisitionButtons.LOG.debug(
-      "best acquisition of {} was {}",
-      acquisitions,
-      best);
+      "best acquisition of {} was {}", acquisitions, best);
 
     return Option.some(best);
   }
@@ -104,10 +123,5 @@ public final class CatalogAcquisitionButtons
     }
 
     return 0;
-  }
-
-  private CatalogAcquisitionButtons()
-  {
-    throw new UnreachableCodeException();
   }
 }

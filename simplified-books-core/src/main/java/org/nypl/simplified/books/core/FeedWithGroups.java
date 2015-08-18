@@ -1,22 +1,66 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
+import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
+
 import java.net.URI;
 import java.util.AbstractList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
-import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
+/**
+ * A (mutable) feed with groups.
+ */
 
-import com.io7m.jfunctional.FunctionType;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-
-public final class FeedWithGroups extends AbstractList<FeedGroup> implements
-  FeedType
+public final class FeedWithGroups extends AbstractList<FeedGroup>
+  implements FeedType
 {
+  private final Map<String, FeedGroup>     blocks;
+  private final List<String>               blocks_order;
+  private final String                     id;
+  private final OptionType<FeedSearchType> search;
+  private final String                     title;
+  private final Calendar                   updated;
+  private final URI                        uri;
+  private final OptionType<URI>            terms_of_service;
+  private final OptionType<URI>            privacy_policy;
+
+  private FeedWithGroups(
+    final URI in_uri,
+    final String in_id,
+    final Calendar in_updated,
+    final String in_title,
+    final OptionType<FeedSearchType> in_search,
+    final List<String> in_blocks_order,
+    final Map<String, FeedGroup> in_blocks,
+    final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_privacy_policy)
+  {
+    this.uri = NullCheck.notNull(in_uri);
+    this.id = NullCheck.notNull(in_id);
+    this.updated = NullCheck.notNull(in_updated);
+    this.title = NullCheck.notNull(in_title);
+    this.search = NullCheck.notNull(in_search);
+    this.blocks_order = NullCheck.notNull(in_blocks_order);
+    this.blocks = NullCheck.notNull(in_blocks);
+    this.terms_of_service = NullCheck.notNull(in_terms_of_service);
+    this.privacy_policy = NullCheck.notNull(in_privacy_policy);
+  }
+
+  /**
+   * Construct a feed from the given acquisition feed.
+   *
+   * @param f      The feed
+   * @param search An optional link to a search document
+   *
+   * @return A new feed
+   */
+
   public static FeedWithGroups fromAcquisitionFeed(
     final OPDSAcquisitionFeed f,
     final OptionType<OPDSOpenSearch1_1> search)
@@ -27,8 +71,9 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
       FeedGroup.fromOPDSGroups(f.getFeedGroups());
     final List<String> order = f.getFeedGroupsOrder();
 
-    final OptionType<FeedSearchType> actual_search =
-      search.map(new FunctionType<OPDSOpenSearch1_1, FeedSearchType>() {
+    final OptionType<FeedSearchType> actual_search = search.map(
+      new FunctionType<OPDSOpenSearch1_1, FeedSearchType>()
+      {
         @Override public FeedSearchType call(
           final OPDSOpenSearch1_1 s)
         {
@@ -43,33 +88,27 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
       f.getFeedTitle(),
       actual_search,
       order,
-      blocks);
+      blocks,
+      f.getFeedTermsOfService(),
+      f.getFeedPrivacyPolicy());
   }
 
-  private final Map<String, FeedGroup>     blocks;
-  private final List<String>               blocks_order;
-  private final String                     id;
-  private final OptionType<FeedSearchType> search;
-  private final String                     title;
-  private final Calendar                   updated;
-  private final URI                        uri;
+  /**
+   * @return A link to the terms of service, if any
+   */
 
-  private FeedWithGroups(
-    final URI in_uri,
-    final String in_id,
-    final Calendar in_updated,
-    final String in_title,
-    final OptionType<FeedSearchType> in_search,
-    final List<String> in_blocks_order,
-    final Map<String, FeedGroup> in_blocks)
+  public OptionType<URI> getFeedTermsOfService()
   {
-    this.uri = NullCheck.notNull(in_uri);
-    this.id = NullCheck.notNull(in_id);
-    this.updated = NullCheck.notNull(in_updated);
-    this.title = NullCheck.notNull(in_title);
-    this.search = NullCheck.notNull(in_search);
-    this.blocks_order = NullCheck.notNull(in_blocks_order);
-    this.blocks = NullCheck.notNull(in_blocks);
+    return this.terms_of_service;
+  }
+
+  /**
+   * @return A link to the privacy policy, if any
+   */
+
+  public OptionType<URI> getFeedPrivacyPolicy()
+  {
+    return this.privacy_policy;
   }
 
   @Override public void add(
@@ -88,6 +127,10 @@ public final class FeedWithGroups extends AbstractList<FeedGroup> implements
     final String name = NullCheck.notNull(this.blocks_order.get(index));
     return NullCheck.notNull(this.blocks.get(name));
   }
+
+  /**
+   * @return The feed groups
+   */
 
   public Map<String, FeedGroup> getFeedGroups()
   {

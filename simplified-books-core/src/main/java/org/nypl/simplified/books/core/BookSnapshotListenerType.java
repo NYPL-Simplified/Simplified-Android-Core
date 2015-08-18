@@ -8,6 +8,8 @@ public interface BookSnapshotListenerType
 {
   /**
    * Producing a snapshot failed.
+   *
+   * @param x The exception raised
    */
 
   void onBookSnapshotFailure(
@@ -15,6 +17,9 @@ public interface BookSnapshotListenerType
 
   /**
    * Producing a snapshot succeeded.
+   *
+   * @param id   The book ID
+   * @param snap The book snapshot
    */
 
   void onBookSnapshotSuccess(

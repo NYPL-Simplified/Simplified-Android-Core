@@ -1,27 +1,35 @@
 package org.nypl.simplified.app.reader;
 
-import java.net.URI;
-import java.net.URLDecoder;
-
+import com.io7m.jnull.NullCheck;
 import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
 
-import com.io7m.jnull.NullCheck;
+import java.net.URI;
+import java.net.URLDecoder;
 
 /**
- * The default implementation of the
- * {@link ReaderReadiumFeedbackDispatcherType} interface.
+ * The default implementation of the {@link ReaderReadiumFeedbackDispatcherType}
+ * interface.
  */
 
-public final class ReaderReadiumFeedbackDispatcher implements
-  ReaderReadiumFeedbackDispatcherType
+public final class ReaderReadiumFeedbackDispatcher
+  implements ReaderReadiumFeedbackDispatcherType
 {
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderReadiumFeedbackDispatcher.class);
   }
+
+  private ReaderReadiumFeedbackDispatcher()
+  {
+
+  }
+
+  /**
+   * @return A new dispatcher
+   */
 
   public static ReaderReadiumFeedbackDispatcherType newDispatcher()
   {
@@ -60,8 +68,8 @@ public final class ReaderReadiumFeedbackDispatcher implements
       ReaderReadiumFeedbackDispatcher.LOG.debug("media-overlay: {}", json);
 
       if (json.has("isPlaying")) {
-        l.onReadiumMediaOverlayStatusChangedIsPlaying(json
-          .getBoolean("isPlaying"));
+        l.onReadiumMediaOverlayStatusChangedIsPlaying(
+          json.getBoolean("isPlaying"));
       }
 
     } catch (final Throwable e) {
@@ -114,11 +122,6 @@ public final class ReaderReadiumFeedbackDispatcher implements
     }
   }
 
-  private ReaderReadiumFeedbackDispatcher()
-  {
-
-  }
-
   @Override public void dispatch(
     final URI uri,
     final ReaderReadiumFeedbackListenerType l)
@@ -146,8 +149,7 @@ public final class ReaderReadiumFeedbackDispatcher implements
 
         if ("media-overlay-status-changed".equals(function)) {
           ReaderReadiumFeedbackDispatcher.onMediaOverlayStatusChanged(
-            l,
-            parts);
+            l, parts);
           return;
         }
 

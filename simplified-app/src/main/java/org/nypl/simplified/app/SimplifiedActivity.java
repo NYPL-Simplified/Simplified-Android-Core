@@ -1,21 +1,5 @@
 package org.nypl.simplified.app;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.nypl.simplified.app.catalog.BooksActivity;
-import org.nypl.simplified.app.catalog.CatalogFeedActivity;
-import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
-import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
-import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
-import org.nypl.simplified.app.catalog.HoldsActivity;
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.books.core.FeedFacetPseudo;
-import org.nypl.simplified.stack.ImmutableStack;
-import org.slf4j.Logger;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -37,24 +21,40 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.catalog.CatalogFeedActivity;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
+import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
+import org.nypl.simplified.app.catalog.MainBooksActivity;
+import org.nypl.simplified.app.catalog.MainCatalogActivity;
+import org.nypl.simplified.app.catalog.MainHoldsActivity;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.BooksFeedSelection;
+import org.nypl.simplified.books.core.FeedFacetPseudo;
+import org.nypl.simplified.stack.ImmutableStack;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type of non-reader activities in the app.
  */
 
-@SuppressWarnings("boxing") public abstract class SimplifiedActivity extends
-  Activity implements DrawerListener, OnItemClickListener
+public abstract class SimplifiedActivity extends Activity
+  implements DrawerListener, OnItemClickListener
 {
-  private static int          ACTIVITY_COUNT;
   private static final Logger LOG;
   private static final String NAVIGATION_DRAWER_OPEN_ID;
+  private static       int    ACTIVITY_COUNT;
 
   static {
     LOG = LogUtilities.getLog(SimplifiedActivity.class);
@@ -65,6 +65,26 @@ import com.io7m.jnull.Nullable;
       "org.nypl.simplified.app.SimplifiedActivity.drawer_open";
   }
 
+  private @Nullable ArrayAdapter<SimplifiedPart> adapter;
+  private @Nullable FrameLayout                  content_frame;
+  private @Nullable DrawerLayout                 drawer;
+  private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>>
+                                                 drawer_arg_funcs;
+  private @Nullable Map<SimplifiedPart, Class<? extends Activity>>
+                                                 drawer_classes_by_name;
+  private @Nullable List<SimplifiedPart>         drawer_items;
+  private @Nullable ListView                     drawer_list;
+  private @Nullable SharedPreferences            drawer_settings;
+  private           boolean                      finishing;
+  private           int                          selected;
+
+  /**
+   * Set the arguments for the activity that will be created.
+   *
+   * @param b           The argument bundle
+   * @param open_drawer {@code true} iff the navigation drawer should be opened
+   */
+
   public static void setActivityArguments(
     final Bundle b,
     final boolean open_drawer)
@@ -72,17 +92,6 @@ import com.io7m.jnull.Nullable;
     NullCheck.notNull(b);
     b.putBoolean(SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID, open_drawer);
   }
-
-  private @Nullable ArrayAdapter<SimplifiedPart>                    adapter;
-  private @Nullable FrameLayout                                     content_frame;
-  private @Nullable DrawerLayout                                    drawer;
-  private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>> drawer_arg_funcs;
-  private @Nullable Map<SimplifiedPart, Class<? extends Activity>>  drawer_classes_by_name;
-  private @Nullable ArrayList<SimplifiedPart>                       drawer_items;
-  private @Nullable ListView                                        drawer_list;
-  private @Nullable SharedPreferences                               drawer_settings;
-  private boolean                                                   finishing;
-  private int                                                       selected;
 
   private void finishWithConditionalAnimationOverride()
   {
@@ -108,12 +117,10 @@ import com.io7m.jnull.Nullable;
     // Check if no view has focus:
     final View view = this.getCurrentFocus();
     if (view != null) {
-      final InputMethodManager im =
-        (InputMethodManager) this
-          .getSystemService(Context.INPUT_METHOD_SERVICE);
+      final InputMethodManager im = (InputMethodManager) this.getSystemService(
+        Context.INPUT_METHOD_SERVICE);
       im.hideSoftInputFromWindow(
-        view.getWindowToken(),
-        InputMethodManager.HIDE_NOT_ALWAYS);
+        view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
   }
 
@@ -163,17 +170,19 @@ import com.io7m.jnull.Nullable;
     final Bundle a = i.getExtras();
     if (a != null) {
       SimplifiedActivity.LOG.debug("non-null intent extras");
-      open_drawer =
-        a.getBoolean(SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID);
+      open_drawer = a.getBoolean(SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID);
       SimplifiedActivity.LOG.debug("drawer requested: {}", open_drawer);
     }
 
+    /**
+     * The activity is being re-initialized. Set the drawer to whatever
+     * state it was in when the activity was destroyed.
+     */
+
     if (state != null) {
       SimplifiedActivity.LOG.debug("reinitializing");
-      open_drawer =
-        state.getBoolean(
-          SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID,
-          open_drawer);
+      open_drawer = state.getBoolean(
+        SimplifiedActivity.NAVIGATION_DRAWER_OPEN_ID, open_drawer);
     }
 
     /**
@@ -186,8 +195,8 @@ import com.io7m.jnull.Nullable;
     final SharedPreferences in_drawer_settings =
       NullCheck.notNull(this.getSharedPreferences("drawer-settings", 0));
     if (in_drawer_settings.getBoolean("has-opened-manually", false)) {
-      SimplifiedActivity.LOG
-        .debug("user has manually opened drawer in the past, not opening it now!");
+      SimplifiedActivity.LOG.debug(
+        "user has manually opened drawer in the past, not opening it now!");
       open_drawer = false;
     }
     this.drawer_settings = in_drawer_settings;
@@ -211,25 +220,24 @@ import com.io7m.jnull.Nullable;
     d.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
     dl.setOnItemClickListener(this);
 
-    final String app_name =
-      NullCheck.notNull(rr.getString(R.string.app_name));
+    final String app_name = NullCheck.notNull(rr.getString(R.string.app_name));
 
-    final ArrayList<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
+    final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);
     di.add(SimplifiedPart.PART_HOLDS);
     di.add(SimplifiedPart.PART_SETTINGS);
 
-    final LayoutInflater inflater =
-      NullCheck.notNull(this.getLayoutInflater());
+    final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
     this.adapter =
-      new ArrayAdapter<SimplifiedPart>(this, R.layout.drawer_item, di) {
+      new ArrayAdapter<SimplifiedPart>(this, R.layout.drawer_item, di)
+      {
         @Override public View getView(
           final int position,
           final @Nullable View reuse,
           final @Nullable ViewGroup parent)
         {
-          View v;
+          final View v;
           if (reuse != null) {
             v = reuse;
           } else {
@@ -252,12 +260,11 @@ import com.io7m.jnull.Nullable;
 
     final Map<SimplifiedPart, Class<? extends Activity>> classes_by_name =
       new HashMap<SimplifiedPart, Class<? extends Activity>>();
-    classes_by_name.put(SimplifiedPart.PART_BOOKS, BooksActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_BOOKS, MainBooksActivity.class);
     classes_by_name.put(
-      SimplifiedPart.PART_CATALOG,
-      CatalogFeedActivity.class);
-    classes_by_name.put(SimplifiedPart.PART_HOLDS, HoldsActivity.class);
-    classes_by_name.put(SimplifiedPart.PART_SETTINGS, SettingsActivity.class);
+      SimplifiedPart.PART_CATALOG, MainCatalogActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_HOLDS, MainHoldsActivity.class);
+    classes_by_name.put(SimplifiedPart.PART_SETTINGS, MainSettingsActivity.class);
 
     /**
      * Set up a map of part names to functions that configure argument
@@ -267,58 +274,78 @@ import com.io7m.jnull.Nullable;
     final Map<SimplifiedPart, FunctionType<Bundle, Unit>> da =
       new HashMap<SimplifiedPart, FunctionType<Bundle, Unit>>();
 
-    da.put(SimplifiedPart.PART_BOOKS, new FunctionType<Bundle, Unit>() {
-      @Override public Unit call(
-        final Bundle b)
+    da.put(
+      SimplifiedPart.PART_BOOKS, new FunctionType<Bundle, Unit>()
       {
-        final OptionType<String> no_search = Option.none();
-        final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
-          ImmutableStack.empty();
-        final CatalogFeedArgumentsLocalBooks local =
-          new CatalogFeedArgumentsLocalBooks(
-            empty_stack,
-            SimplifiedPart.PART_BOOKS.getPartName(rr),
-            FeedFacetPseudo.FacetType.SORT_BY_TITLE,
-            no_search);
-        CatalogFeedActivity.setActivityArguments(b, local);
-        return Unit.unit();
-      }
-    });
+        @Override public Unit call(
+          final Bundle b)
+        {
+          final OptionType<String> no_search = Option.none();
+          final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
+            ImmutableStack.empty();
+          final CatalogFeedArgumentsLocalBooks local =
+            new CatalogFeedArgumentsLocalBooks(
+              empty_stack,
+              SimplifiedPart.PART_BOOKS.getPartName(rr),
+              FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+              no_search,
+              BooksFeedSelection.BOOKS_FEED_LOANED);
+          CatalogFeedActivity.setActivityArguments(b, local);
+          return Unit.unit();
+        }
+      });
 
-    da.put(SimplifiedPart.PART_CATALOG, new FunctionType<Bundle, Unit>() {
-      @Override public Unit call(
-        final Bundle b)
+    da.put(
+      SimplifiedPart.PART_CATALOG, new FunctionType<Bundle, Unit>()
       {
-        final ImmutableStack<CatalogFeedArgumentsType> empty =
-          ImmutableStack.empty();
-        final CatalogFeedArgumentsRemote remote =
-          new CatalogFeedArgumentsRemote(
-            false,
-            NullCheck.notNull(empty),
-            app_name,
-            app.getFeedInitialURI());
-        CatalogFeedActivity.setActivityArguments(b, remote);
-        return Unit.unit();
-      }
-    });
+        @Override public Unit call(
+          final Bundle b)
+        {
+          final ImmutableStack<CatalogFeedArgumentsType> empty =
+            ImmutableStack.empty();
+          final CatalogFeedArgumentsRemote remote =
+            new CatalogFeedArgumentsRemote(
+              false,
+              NullCheck.notNull(empty),
+              app_name,
+              app.getFeedInitialURI(),
+              false);
+          CatalogFeedActivity.setActivityArguments(b, remote);
+          return Unit.unit();
+        }
+      });
 
-    da.put(SimplifiedPart.PART_HOLDS, new FunctionType<Bundle, Unit>() {
-      @Override public Unit call(
-        final Bundle b)
+    da.put(
+      SimplifiedPart.PART_HOLDS, new FunctionType<Bundle, Unit>()
       {
-        SimplifiedActivity.setActivityArguments(b, false);
-        return Unit.unit();
-      }
-    });
+        @Override public Unit call(
+          final Bundle b)
+        {
+          final OptionType<String> no_search = Option.none();
+          final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
+            ImmutableStack.empty();
+          final CatalogFeedArgumentsLocalBooks local =
+            new CatalogFeedArgumentsLocalBooks(
+              empty_stack,
+              SimplifiedPart.PART_HOLDS.getPartName(rr),
+              FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+              no_search,
+              BooksFeedSelection.BOOKS_FEED_HOLDS);
+          CatalogFeedActivity.setActivityArguments(b, local);
+          return Unit.unit();
+        }
+      });
 
-    da.put(SimplifiedPart.PART_SETTINGS, new FunctionType<Bundle, Unit>() {
-      @Override public Unit call(
-        final Bundle b)
+    da.put(
+      SimplifiedPart.PART_SETTINGS, new FunctionType<Bundle, Unit>()
       {
-        SimplifiedActivity.setActivityArguments(b, false);
-        return Unit.unit();
-      }
-    });
+        @Override public Unit call(
+          final Bundle b)
+        {
+          SimplifiedActivity.setActivityArguments(b, false);
+          return Unit.unit();
+        }
+      });
 
     if (this.navigationDrawerShouldShowIndicator()) {
       SimplifiedActivity.LOG.debug("setting navigation drawer indicator");
@@ -345,8 +372,7 @@ import com.io7m.jnull.Nullable;
     this.selected = -1;
     SimplifiedActivity.ACTIVITY_COUNT = SimplifiedActivity.ACTIVITY_COUNT + 1;
     SimplifiedActivity.LOG.debug(
-      "activity count: {}",
-      SimplifiedActivity.ACTIVITY_COUNT);
+      "activity count: {}", SimplifiedActivity.ACTIVITY_COUNT);
   }
 
   @Override protected void onDestroy()
@@ -357,11 +383,10 @@ import com.io7m.jnull.Nullable;
   }
 
   @Override public final void onDrawerClosed(
-    final @Nullable View drawerView)
+    final @Nullable View drawer_view)
   {
     SimplifiedActivity.LOG.debug(
-      "onDrawerClosed: selected: {}",
-      this.selected);
+      "onDrawerClosed: selected: {}", this.selected);
 
     /**
      * If the drawer is closing because the user pressed the back button, then
@@ -379,8 +404,7 @@ import com.io7m.jnull.Nullable;
      */
 
     if (this.selected != -1) {
-      final ArrayList<SimplifiedPart> di =
-        NullCheck.notNull(this.drawer_items);
+      final List<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
       final Map<SimplifiedPart, Class<? extends Activity>> dc =
         NullCheck.notNull(this.drawer_classes_by_name);
       final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
@@ -405,10 +429,10 @@ import com.io7m.jnull.Nullable;
   }
 
   @Override public final void onDrawerOpened(
-    final @Nullable View drawerView)
+    final @Nullable View drawer_view)
   {
     this.selected = -1;
-    SimplifiedActivity.LOG.debug("onDrawerOpened: {}", drawerView);
+    SimplifiedActivity.LOG.debug("onDrawerOpened: {}", drawer_view);
 
     final SharedPreferences in_drawer_settings =
       NullCheck.notNull(this.drawer_settings);
@@ -418,16 +442,16 @@ import com.io7m.jnull.Nullable;
   }
 
   @Override public final void onDrawerSlide(
-    final @Nullable View drawerView,
-    final float slideOffset)
+    final @Nullable View drawer_view,
+    final float slide_offset)
   {
     // Nothing
   }
 
   @Override public final void onDrawerStateChanged(
-    final int newState)
+    final int new_state)
   {
-    SimplifiedActivity.LOG.debug("onDrawerStateChanged: {}", newState);
+    SimplifiedActivity.LOG.debug("onDrawerStateChanged: {}", new_state);
   }
 
   @Override public void onItemClick(
@@ -449,8 +473,7 @@ import com.io7m.jnull.Nullable;
     final MenuItem item = NullCheck.notNull(item_mn);
     switch (item.getItemId()) {
 
-      case android.R.id.home:
-      {
+      case android.R.id.home: {
         final DrawerLayout d = NullCheck.notNull(this.drawer);
         if (d.isDrawerOpen(GravityCompat.START)) {
           d.closeDrawer(GravityCompat.START);
@@ -461,8 +484,7 @@ import com.io7m.jnull.Nullable;
         return super.onOptionsItemSelected(item);
       }
 
-      default:
-      {
+      default: {
         return super.onOptionsItemSelected(item);
       }
     }

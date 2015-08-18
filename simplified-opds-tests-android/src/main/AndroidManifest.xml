@@ -2,8 +2,8 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.opds.tests.android"
-  android:versionCode="41"
-  android:versionName="0.3.11">
+  android:versionCode="43"
+  android:versionName="0.3.13">
   <application>
     <uses-library android:name="android.test.runner"/>
   </application>

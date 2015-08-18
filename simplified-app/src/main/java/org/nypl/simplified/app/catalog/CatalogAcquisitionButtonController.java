@@ -1,5 +1,12 @@
 package org.nypl.simplified.app.catalog;
 
+import android.app.Activity;
+import android.view.View;
+import android.view.View.OnClickListener;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 import org.nypl.simplified.app.LoginController;
 import org.nypl.simplified.app.LoginControllerListenerType;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -11,21 +18,19 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
-import android.app.Activity;
-import android.view.View;
-import android.view.View.OnClickListener;
+/**
+ * A controller for an acquisition button.
+ *
+ * This is responsible for logging in, if necessary, and then starting the
+ * borrow of a given book.
+ */
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
-
-public final class CatalogAcquisitionButtonController implements
-  OnClickListener,
+public final class CatalogAcquisitionButtonController
+  implements OnClickListener,
   LoginControllerListenerType,
   BookBorrowListenerType
 {
-  private static final Logger   LOG;
+  private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(CatalogAcquisitionButtonController.class);
@@ -37,6 +42,16 @@ public final class CatalogAcquisitionButtonController implements
   private final FeedEntryOPDS   entry;
   private final BookID          id;
   private final LoginController login_controller;
+
+  /**
+   * Construct a button controller.
+   *
+   * @param in_activity The host activity
+   * @param in_books    The books database
+   * @param in_id       The book ID
+   * @param in_acq      The acquisition
+   * @param in_entry    The associated feed entry
+   */
 
   public CatalogAcquisitionButtonController(
     final Activity in_activity,
@@ -59,9 +74,7 @@ public final class CatalogAcquisitionButtonController implements
     final OptionType<Throwable> in_e)
   {
     LogUtilities.errorWithOptionalException(
-      CatalogAcquisitionButtonController.LOG,
-      "borrow failed",
-      in_e);
+      CatalogAcquisitionButtonController.LOG, "borrow failed", in_e);
   }
 
   @Override public void onBookBorrowSuccess(
@@ -92,22 +105,19 @@ public final class CatalogAcquisitionButtonController implements
   {
     CatalogAcquisitionButtonController.LOG.debug("login succeeded");
     CatalogAcquisitionButtonController.LOG.debug(
-      "attempting borrow of {} acquisition",
-      this.acq.getType());
+      "attempting borrow of {} acquisition", this.acq.getType());
 
     switch (this.acq.getType()) {
       case ACQUISITION_BORROW:
       case ACQUISITION_GENERIC:
-      case ACQUISITION_OPEN_ACCESS:
-      {
+      case ACQUISITION_OPEN_ACCESS: {
         final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
         this.books.bookBorrow(this.id, this.acq, eo, this);
         break;
       }
       case ACQUISITION_BUY:
       case ACQUISITION_SAMPLE:
-      case ACQUISITION_SUBSCRIBE:
-      {
+      case ACQUISITION_SUBSCRIBE: {
         throw new UnimplementedCodeException();
       }
     }

@@ -2,9 +2,19 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jnull.NullCheck;
 
+/**
+ * A status value indicating that a book can be loaned.
+ */
+
 public final class BookStatusLoanable implements BookStatusType
 {
   private final BookID id;
+
+  /**
+   * Construct a status value.
+   *
+   * @param in_id The book ID
+   */
 
   public BookStatusLoanable(
     final BookID in_id)
@@ -31,7 +41,7 @@ public final class BookStatusLoanable implements BookStatusType
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("BookStatusLoanable ");
     b.append(this.id);
     b.append("]");

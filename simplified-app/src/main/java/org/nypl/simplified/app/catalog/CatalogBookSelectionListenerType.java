@@ -11,10 +11,8 @@ public interface CatalogBookSelectionListenerType
   /**
    * The user selected a book.
    *
-   * @param v
-   *          The cell
-   * @param e
-   *          The selected book
+   * @param v The cell
+   * @param e The selected book
    */
 
   void onSelectBook(

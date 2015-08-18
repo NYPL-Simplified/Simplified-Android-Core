@@ -19,10 +19,10 @@ public final class Assertions
   }
 
   /**
-   * Require that the given invariant <tt>c</tt> be <tt>true</tt>, raising
+   * Require that the given invariant {@code c} be {@code true}, raising
    * {@link AssertionError} if it isn't.
    *
-   * @param c
+   * @param condition
    *          The invariant
    * @param message
    *          The message displayed on failure (a format string)
@@ -43,7 +43,7 @@ public final class Assertions
   }
 
   /**
-   * Require that the given precondition <tt>c</tt> be <tt>true</tt>, raising
+   * Require that the given precondition {@code c} be {@code true}, raising
    * {@link AssertionError} if it isn't.
    *
    * @param c

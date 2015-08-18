@@ -1,10 +1,5 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.app.BookCoverProviderType;
-import org.nypl.simplified.app.ScreenSizeControllerType;
-import org.nypl.simplified.books.core.FeedGroup;
-import org.nypl.simplified.books.core.FeedWithGroups;
-
 import android.app.Activity;
 import android.database.DataSetObserver;
 import android.view.View;
@@ -13,13 +8,19 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.BookCoverProviderType;
+import org.nypl.simplified.app.ScreenSizeControllerType;
+import org.nypl.simplified.books.core.FeedGroup;
+import org.nypl.simplified.books.core.FeedWithGroups;
 
-public final class CatalogFeedWithGroups implements
-  ListAdapter,
-  OnScrollListener
+/**
+ * A view that displays a catalog feed that contains groups.
+ */
+
+public final class CatalogFeedWithGroups
+  implements ListAdapter, OnScrollListener
 {
   private final Activity                    activity;
   private final ArrayAdapter<FeedGroup>     adapter;
@@ -27,6 +28,16 @@ public final class CatalogFeedWithGroups implements
   private final FeedWithGroups              feed;
   private final CatalogFeedLaneListenerType lane_listener;
   private final ScreenSizeControllerType    screen;
+
+  /**
+   * Construct a view.
+   *
+   * @param in_activity            The host activity
+   * @param in_screen              The screen
+   * @param in_book_cover_provider A cover provider
+   * @param in_lane_listener       A lane listener
+   * @param in_feed                A feed
+   */
 
   public CatalogFeedWithGroups(
     final Activity in_activity,
@@ -78,16 +89,15 @@ public final class CatalogFeedWithGroups implements
   {
     final FeedGroup group = this.feed.get(position);
 
-    CatalogFeedLane view;
+    final CatalogFeedLane view;
     if (reused != null) {
       view = (CatalogFeedLane) reused;
     } else {
-      view =
-        new CatalogFeedLane(
-          this.activity,
-          this.book_cover_provider,
-          this.screen,
-          this.lane_listener);
+      view = new CatalogFeedLane(
+        this.activity,
+        this.book_cover_provider,
+        this.screen,
+        this.lane_listener);
     }
 
     view.configureForGroup(group);
@@ -130,13 +140,11 @@ public final class CatalogFeedWithGroups implements
   {
     switch (state) {
       case OnScrollListener.SCROLL_STATE_FLING:
-      case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL:
-      {
+      case OnScrollListener.SCROLL_STATE_TOUCH_SCROLL: {
         this.book_cover_provider.loadingThumbailsPause();
         break;
       }
-      case OnScrollListener.SCROLL_STATE_IDLE:
-      {
+      case OnScrollListener.SCROLL_STATE_IDLE: {
         this.book_cover_provider.loadingThumbnailsContinue();
         break;
       }

@@ -1,26 +1,42 @@
 package org.nypl.simplified.app.reader;
 
-import java.io.Serializable;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Serializable;
 
 /**
  * The current page. A specific location in an EPUB is identified by an
- * <i>idref</i> and a <i>content CFI</i>. In some cases, the <i>content
- * CFI</i> may not be present.
+ * <i>idref</i> and a <i>content CFI</i>. In some cases, the <i>content CFI</i>
+ * may not be present.
  */
 
-public final class ReaderBookLocation implements
-  ReaderJSONSerializableType,
-  Serializable
+public final class ReaderBookLocation
+  implements ReaderJSONSerializableType, Serializable
 {
   private static final long serialVersionUID = 1L;
+  private final OptionType<String> content_cfi;
+  private final String             id_ref;
+
+  private ReaderBookLocation(
+    final String in_id_ref,
+    final OptionType<String> in_content_cfi)
+  {
+    this.id_ref = NullCheck.notNull(in_id_ref);
+    this.content_cfi = NullCheck.notNull(in_content_cfi);
+  }
+
+  /**
+   * Construct a location from the given IDRef.
+   *
+   * @param i The IDRef
+   *
+   * @return A new location
+   */
 
   public static ReaderBookLocation fromIDRef(
     final String i)
@@ -28,6 +44,16 @@ public final class ReaderBookLocation implements
     final OptionType<String> none = Option.none();
     return new ReaderBookLocation(NullCheck.notNull(i), none);
   }
+
+  /**
+   * Construct a location from the given JSON.
+   *
+   * @param o The JSON
+   *
+   * @return A new location
+   *
+   * @throws JSONException On JSON errors
+   */
 
   public static ReaderBookLocation fromJSON(
     final JSONObject o)
@@ -47,21 +73,18 @@ public final class ReaderBookLocation implements
     return new ReaderBookLocation(in_id_ref, in_content_cfi);
   }
 
-  private final OptionType<String> content_cfi;
-  private final String             id_ref;
-
-  private ReaderBookLocation(
-    final String in_id_ref,
-    final OptionType<String> in_content_cfi)
-  {
-    this.id_ref = NullCheck.notNull(in_id_ref);
-    this.content_cfi = NullCheck.notNull(in_content_cfi);
-  }
+  /**
+   * @return The content CFI, if any
+   */
 
   public OptionType<String> getContentCFI()
   {
     return this.content_cfi;
   }
+
+  /**
+   * @return The IDRef
+   */
 
   public String getIDRef()
   {

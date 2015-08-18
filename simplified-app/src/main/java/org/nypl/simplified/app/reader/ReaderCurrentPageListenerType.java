@@ -8,6 +8,8 @@ public interface ReaderCurrentPageListenerType
 {
   /**
    * The current book location could not be received.
+   *
+   * @param x The exception raised
    */
 
   void onCurrentPageError(
@@ -15,6 +17,8 @@ public interface ReaderCurrentPageListenerType
 
   /**
    * The current book location was received successfully.
+   *
+   * @param l The location
    */
 
   void onCurrentPageReceived(

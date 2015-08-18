@@ -7,7 +7,7 @@ package org.nypl.simplified.app;
 public interface NetworkConnectivityType
 {
   /**
-   * @return <tt>true</tt> iff network connectivity is available.
+   * @return {@code true} iff network connectivity is available.
    */
 
   boolean isNetworkAvailable();

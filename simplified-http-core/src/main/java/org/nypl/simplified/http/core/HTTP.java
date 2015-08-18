@@ -1,18 +1,18 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
 
 /**
  * Default implementation of the {@link HTTPType} type.
@@ -20,6 +20,19 @@ import com.io7m.jnull.NullCheck;
 
 public final class HTTP implements HTTPType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(HTTP.class));
+  }
+
+  private final String user_agent;
+
+  private HTTP()
+  {
+    this.user_agent = HTTP.userAgent();
+  }
+
   private static String userAgent()
   {
     final Package p = HTTP.class.getPackage();
@@ -32,67 +45,6 @@ public final class HTTP implements HTTPType
     return "simplified-http";
   }
 
-  private static final class OK implements HTTPResultOKType<InputStream>
-  {
-    private final HttpURLConnection         conn;
-    private final long                      content_length;
-    private final Map<String, List<String>> headers;
-    private final String                    message;
-    private final int                       status;
-    private final InputStream               stream;
-
-    OK(
-      final HttpURLConnection c)
-      throws IOException
-    {
-      this.conn = NullCheck.notNull(c);
-      this.message = NullCheck.notNull(this.conn.getResponseMessage());
-      this.status = this.conn.getResponseCode();
-      this.stream = NullCheck.notNull(this.conn.getInputStream());
-      this.headers = NullCheck.notNull(this.conn.getHeaderFields());
-      this.content_length = c.getContentLength();
-    }
-
-    @Override public void close()
-      throws IOException
-    {
-      this.conn.disconnect();
-      this.stream.close();
-    }
-
-    @Override public long getContentLength()
-    {
-      return this.content_length;
-    }
-
-    @Override public String getMessage()
-    {
-      return this.message;
-    }
-
-    @Override public Map<String, List<String>> getResponseHeaders()
-    {
-      return this.headers;
-    }
-
-    @Override public int getStatus()
-    {
-      return this.status;
-    }
-
-    @Override public InputStream getValue()
-    {
-      return this.stream;
-    }
-
-    @Override public <B, E extends Exception> B matchResult(
-      final HTTPResultMatcherType<InputStream, B, E> m)
-      throws E
-    {
-      return m.onHTTPOK(this);
-    }
-  }
-
   private static void checkURI(
     final URI uri)
   {
@@ -100,7 +52,7 @@ public final class HTTP implements HTTPType
     final String scheme = NullCheck.notNull(uri.getScheme());
     final boolean ok = "http".equals(scheme) || "https".endsWith(scheme);
     if (!ok) {
-      final StringBuilder m = new StringBuilder();
+      final StringBuilder m = new StringBuilder(64);
       m.append("Unsupported URI scheme.\n");
       m.append("  URI scheme: ");
       m.append(scheme);
@@ -110,16 +62,13 @@ public final class HTTP implements HTTPType
     }
   }
 
+  /**
+   * @return A new HTTP interface
+   */
+
   public static HTTPType newHTTP()
   {
     return new HTTP();
-  }
-
-  private final String user_agent;
-
-  private HTTP()
-  {
-    this.user_agent = HTTP.userAgent();
   }
 
   @Override public HTTPResultType<InputStream> get(
@@ -131,6 +80,8 @@ public final class HTTP implements HTTPType
     HTTP.checkURI(uri);
 
     try {
+      HTTP.LOG.trace("GET {} (auth {})", uri, auth_opt);
+
       final URL url = NullCheck.notNull(uri.toURL());
       final HttpURLConnection conn =
         NullCheck.notNull((HttpURLConnection) url.openConnection());
@@ -151,15 +102,27 @@ public final class HTTP implements HTTPType
 
       conn.connect();
 
-      if (conn.getResponseCode() >= 400) {
+      final int code = conn.getResponseCode();
+      HTTP.LOG.trace(
+        "GET {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
+
+      conn.getLastModified();
+      if (code >= 400) {
         return new HTTPResultError<InputStream>(
-          conn.getResponseCode(),
+          code,
           NullCheck.notNull(conn.getResponseMessage()),
-          conn.getContentLength(),
-          NullCheck.notNull(conn.getHeaderFields()));
+          (long) conn.getContentLength(),
+          NullCheck.notNull(conn.getHeaderFields()),
+          conn.getLastModified());
       }
 
-      return new OK(conn);
+      return new HTTPResultOK<InputStream>(
+        NullCheck.notNull(conn.getResponseMessage()),
+        code,
+        conn.getInputStream(),
+        (long) conn.getContentLength(),
+        NullCheck.notNull(conn.getHeaderFields()),
+        conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {
@@ -175,6 +138,8 @@ public final class HTTP implements HTTPType
     HTTP.checkURI(uri);
 
     try {
+      HTTP.LOG.trace("HEAD {} (auth {})", uri, auth_opt);
+
       final URL url = NullCheck.notNull(uri.toURL());
       final HttpURLConnection conn =
         NullCheck.notNull((HttpURLConnection) url.openConnection());
@@ -193,20 +158,26 @@ public final class HTTP implements HTTPType
 
       conn.connect();
 
-      if (conn.getResponseCode() >= 400) {
+      final int code = conn.getResponseCode();
+      HTTP.LOG.trace(
+        "HEAD {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
+
+      if (code >= 400) {
         return new HTTPResultError<Unit>(
-          conn.getResponseCode(),
+          code,
           NullCheck.notNull(conn.getResponseMessage()),
-          conn.getContentLength(),
-          NullCheck.notNull(conn.getHeaderFields()));
+          (long) conn.getContentLength(),
+          NullCheck.notNull(conn.getHeaderFields()),
+          conn.getLastModified());
       }
 
       return new HTTPResultOK<Unit>(
         NullCheck.notNull(conn.getResponseMessage()),
-        conn.getResponseCode(),
+        code,
         Unit.unit(),
-        conn.getContentLength(),
-        NullCheck.notNull(conn.getHeaderFields()));
+        (long) conn.getContentLength(),
+        NullCheck.notNull(conn.getHeaderFields()),
+        conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {

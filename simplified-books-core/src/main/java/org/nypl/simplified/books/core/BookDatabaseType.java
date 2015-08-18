@@ -1,10 +1,10 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.Pair;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import com.io7m.jfunctional.Pair;
 
 /**
  * The type of book databases.
@@ -16,23 +16,22 @@ public interface BookDatabaseType
    * Create the initial empty database. Has no effect if the database already
    * exists.
    *
-   * @throws IOException
-   *           On I/O errors
+   * @throws IOException On I/O errors
    */
 
   void create()
     throws IOException;
 
   /**
-   * @return <tt>true</tt> if user credentials exist in the database.
+   * @return {@code true} if user credentials exist in the database.
    */
 
   boolean credentialsExist();
 
   /**
    * @return The user credentials
-   * @throws IOException
-   *           On I/O errors
+   *
+   * @throws IOException On I/O errors
    */
 
   Pair<AccountBarcode, AccountPIN> credentialsGet()
@@ -41,12 +40,10 @@ public interface BookDatabaseType
   /**
    * Set the user credentials.
    *
-   * @param barcode
-   *          The barcode
-   * @param pin
-   *          The PIN
-   * @throws IOException
-   *           On I/O errors
+   * @param barcode The barcode
+   * @param pin     The PIN
+   *
+   * @throws IOException On I/O errors
    */
 
   void credentialsSet(
@@ -57,8 +54,7 @@ public interface BookDatabaseType
   /**
    * Destroy the database.
    *
-   * @throws IOException
-   *           On I/O errors
+   * @throws IOException On I/O errors
    */
 
   void destroy()
@@ -71,9 +67,9 @@ public interface BookDatabaseType
   List<BookDatabaseEntryType> getBookDatabaseEntries();
 
   /**
-   * @param book_id
-   *          The book ID
-   * @return The database entry for <tt>book_id</tt>
+   * @param book_id The book ID
+   *
+   * @return The database entry for {@code book_id}
    */
 
   BookDatabaseEntryType getBookDatabaseEntry(

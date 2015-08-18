@@ -9,7 +9,9 @@ import org.nypl.simplified.books.core.FeedFacetType;
 public interface CatalogFacetSelectionListenerType
 {
   /**
-   * The facet <tt>f</tt> was selected.
+   * The facet {@code f} was selected.
+   *
+   * @param f The facet
    */
 
   void onFacetSelected(

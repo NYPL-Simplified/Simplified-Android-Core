@@ -1,19 +1,29 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import net.iharder.Base64;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 
-import net.iharder.Base64;
-
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+/**
+ * HTTP Basic Auth functions.
+ */
 
 public final class HTTPAuthBasic implements HTTPAuthType
 {
   private static final long serialVersionUID = 1L;
-  private final String      password;
-  private final String      user;
+  private final String password;
+  private final String user;
+
+  /**
+   * Construct a basic auth value.
+   *
+   * @param in_user     The username
+   * @param in_password The password
+   */
 
   public HTTPAuthBasic(
     final String in_user,
@@ -36,14 +46,21 @@ public final class HTTPAuthBasic implements HTTPAuthType
       return false;
     }
     final HTTPAuthBasic other = (HTTPAuthBasic) obj;
-    return this.password.equals(other.password)
-      && this.user.equals(other.user);
+    return this.password.equals(other.password) && this.user.equals(other.user);
   }
+
+  /**
+   * @return The password
+   */
 
   public String getPassword()
   {
     return this.password;
   }
+
+  /**
+   * @return The user
+   */
 
   public String getUser()
   {

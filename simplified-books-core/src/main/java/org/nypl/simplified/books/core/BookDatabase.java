@@ -1,11 +1,8 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.io7m.jfunctional.Pair;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
@@ -13,9 +10,11 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.io7m.jfunctional.Pair;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A file-based book database.
@@ -27,22 +26,6 @@ public final class BookDatabase implements BookDatabaseType
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BookDatabase.class));
-  }
-
-  /**
-   * Open a database at the given directory.
-   *
-   * @param in_directory
-   *          The directory
-   * @return A reference to the database
-   */
-
-  public static BookDatabaseType newDatabase(
-    final OPDSJSONSerializerType in_json_serializer,
-    final OPDSJSONParserType in_json_parser,
-    final File in_directory)
-  {
-    return new BookDatabase(in_json_serializer, in_json_parser, in_directory);
   }
 
   private final File                   directory;
@@ -61,10 +44,27 @@ public final class BookDatabase implements BookDatabaseType
     this.serializer = NullCheck.notNull(in_json_serializer);
 
     this.file_credentials = new File(this.directory, "credentials.txt");
-    this.file_credentials_tmp =
-      new File(this.directory, "credentials.txt.tmp");
+    this.file_credentials_tmp = new File(this.directory, "credentials.txt.tmp");
 
     BookDatabase.LOG.debug("opened database {}", this.directory);
+  }
+
+  /**
+   * Open a database at the given directory.
+   *
+   * @param in_json_serializer A JSON serializer
+   * @param in_json_parser     A JSON parser
+   * @param in_directory       The directory
+   *
+   * @return A reference to the database
+   */
+
+  public static BookDatabaseType newDatabase(
+    final OPDSJSONSerializerType in_json_serializer,
+    final OPDSJSONParserType in_json_parser,
+    final File in_directory)
+  {
+    return new BookDatabase(in_json_serializer, in_json_parser, in_directory);
   }
 
   @Override public void create()
@@ -83,8 +83,7 @@ public final class BookDatabase implements BookDatabaseType
   {
     final String text = FileUtilities.fileReadUTF8(this.file_credentials);
     final String[] segments = text.split(":");
-    final AccountBarcode b =
-      new AccountBarcode(NullCheck.notNull(segments[0]));
+    final AccountBarcode b = new AccountBarcode(NullCheck.notNull(segments[0]));
     final AccountPIN p = new AccountPIN(NullCheck.notNull(segments[1]));
     return Pair.pair(b, p);
   }
@@ -97,12 +96,9 @@ public final class BookDatabase implements BookDatabaseType
     NullCheck.notNull(barcode);
     NullCheck.notNull(pin);
 
-    final String text =
-      NullCheck.notNull(String.format("%s:%s", barcode, pin));
+    final String text = NullCheck.notNull(String.format("%s:%s", barcode, pin));
     FileUtilities.fileWriteUTF8Atomically(
-      this.file_credentials,
-      this.file_credentials_tmp,
-      text);
+      this.file_credentials, this.file_credentials_tmp, text);
   }
 
   @Override public void destroy()
@@ -121,24 +117,24 @@ public final class BookDatabase implements BookDatabaseType
   @Override public List<BookDatabaseEntryType> getBookDatabaseEntries()
   {
     final List<BookDatabaseEntryType> xs =
-      new ArrayList<BookDatabaseEntryType>();
+      new ArrayList<BookDatabaseEntryType>(32);
 
     if (this.directory.isDirectory()) {
-      final File[] book_list = this.directory.listFiles(new FileFilter() {
-        @Override public boolean accept(
-          final @Nullable File path)
+      final File[] book_list = this.directory.listFiles(
+        new FileFilter()
         {
-          return NullCheck.notNull(path).isDirectory();
-        }
-      });
+          @Override public boolean accept(
+            final @Nullable File path)
+          {
+            return NullCheck.notNull(path).isDirectory();
+          }
+        });
 
       for (final File f : book_list) {
         final BookID id = BookID.exactString(NullCheck.notNull(f.getName()));
-        xs.add(new BookDatabaseEntry(
-          this.serializer,
-          this.parser,
-          this.directory,
-          id));
+        xs.add(
+          new BookDatabaseEntry(
+            this.serializer, this.parser, this.directory, id));
       }
     }
 
@@ -149,10 +145,7 @@ public final class BookDatabase implements BookDatabaseType
     final BookID book_id)
   {
     return new BookDatabaseEntry(
-      this.serializer,
-      this.parser,
-      this.directory,
-      NullCheck.notNull(book_id));
+      this.serializer, this.parser, this.directory, NullCheck.notNull(book_id));
   }
 
   @Override public File getLocation()

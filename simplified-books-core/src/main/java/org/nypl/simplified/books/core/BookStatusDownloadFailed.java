@@ -1,20 +1,27 @@
 package org.nypl.simplified.books.core;
 
-import java.util.Calendar;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+
+import java.util.Calendar;
 
 /**
  * The given book failed to download properly.
  */
 
-public final class BookStatusDownloadFailed implements
-  BookStatusDownloadingType
+public final class BookStatusDownloadFailed implements BookStatusDownloadingType
 {
   private final OptionType<Throwable> error;
   private final BookID                id;
   private final OptionType<Calendar>  loan_end_date;
+
+  /**
+   * Construct a status value.
+   *
+   * @param in_id            The book ID
+   * @param x                The exception raised, if any
+   * @param in_loan_end_date The expiry date of the loan, if any
+   */
 
   public BookStatusDownloadFailed(
     final BookID in_id,
@@ -59,7 +66,7 @@ public final class BookStatusDownloadFailed implements
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusDownloadFailed ");
     b.append(this.id);
     b.append(" ");

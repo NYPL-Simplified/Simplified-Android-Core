@@ -1,9 +1,9 @@
 package org.nypl.simplified.opds.core;
 
-import java.util.Calendar;
-
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+
+import java.util.Calendar;
 
 /**
  * The book is on hold.
@@ -12,59 +12,70 @@ import com.io7m.jnull.Nullable;
 public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
 {
   private static final long serialVersionUID = 1L;
+  private final OptionType<Integer> position;
+  private final Calendar            start_date;
+
+  private OPDSAvailabilityHeld(
+    final Calendar in_start_date,
+    final OptionType<Integer> in_position)
+  {
+    this.start_date = NullCheck.notNull(in_start_date);
+    this.position = NullCheck.notNull(in_position);
+  }
+
+  /**
+   * @param in_start_date The start date
+   * @param in_position   The queue position
+   *
+   * @return A value that states that a book is on hold
+   */
 
   public static OPDSAvailabilityHeld get(
     final Calendar in_start_date,
-    final int in_position)
+    final OptionType<Integer> in_position)
   {
     return new OPDSAvailabilityHeld(in_start_date, in_position);
   }
 
-  private final int      position;
-  private final Calendar start_date;
-
-  private OPDSAvailabilityHeld(
-    final Calendar in_start_date,
-    final int in_position)
+  @Override public boolean equals(final Object o)
   {
-    this.start_date = NullCheck.notNull(in_start_date);
-    this.position = in_position;
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
+    if (this == o) {
       return true;
     }
-    if (obj == null) {
+    if (o == null || this.getClass() != o.getClass()) {
       return false;
     }
-    if (this.getClass() != obj.getClass()) {
+
+    final OPDSAvailabilityHeld that = (OPDSAvailabilityHeld) o;
+    if (!this.position.equals(that.position)) {
       return false;
     }
-    final OPDSAvailabilityHeld other = (OPDSAvailabilityHeld) obj;
-    return (this.position == other.position)
-      && this.start_date.equals(other.start_date);
-  }
-
-  public int getPosition()
-  {
-    return this.position;
-  }
-
-  public Calendar getStartDate()
-  {
-    return this.start_date;
+    return this.start_date.equals(that.start_date);
   }
 
   @Override public int hashCode()
   {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.position;
-    result = (prime * result) + this.start_date.hashCode();
+    int result = this.position.hashCode();
+    result = 31 * result + this.start_date.hashCode();
     return result;
+  }
+
+  /**
+   * @return The queue position
+   */
+
+  public OptionType<Integer> getPosition()
+  {
+    return this.position;
+  }
+
+  /**
+   * @return The start date
+   */
+
+  public Calendar getStartDate()
+  {
+    return this.start_date;
   }
 
   @Override public <A, E extends Exception> A matchAvailability(
@@ -76,12 +87,13 @@ public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[OPDSAvailabilityHeld position=");
     b.append(this.position);
     b.append(" start_date=");
-    b.append(OPDSRFC3339Formatter.newDateFormatter().format(
-      this.start_date.getTime()));
+    b.append(
+      OPDSRFC3339Formatter.newDateFormatter().format(
+        this.start_date.getTime()));
     b.append("]");
     return NullCheck.notNull(b.toString());
   }

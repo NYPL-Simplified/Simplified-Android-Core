@@ -15,7 +15,7 @@ public interface FeedFacetType extends Serializable
   String facetGetTitle();
 
   /**
-   * @return <tt>true</tt> iff the facet is active
+   * @return {@code true} iff the facet is active
    */
 
   boolean facetIsActive();
@@ -23,11 +23,13 @@ public interface FeedFacetType extends Serializable
   /**
    * Match the type of feed facet.
    *
-   * @param m
-   *          The matcher
+   * @param m   The matcher
+   * @param <A> The type of returned values
+   * @param <E> The type of raised exceptions
+   *
    * @return The value returned by the matcher
-   * @throws E
-   *           If the matcher raises <tt>E</tt>
+   *
+   * @throws E If the matcher raises {@code E}
    */
 
   <A, E extends Exception> A matchFeedFacet(

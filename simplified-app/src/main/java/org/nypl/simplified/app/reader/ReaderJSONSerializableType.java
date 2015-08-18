@@ -9,6 +9,12 @@ import org.json.JSONObject;
 
 public interface ReaderJSONSerializableType
 {
+  /**
+   * @return A JSON representation of the object
+   *
+   * @throws JSONException On serialization errors
+   */
+
   JSONObject toJSON()
     throws JSONException;
 }

@@ -1,10 +1,5 @@
 package org.nypl.simplified.tenprint;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -19,8 +14,12 @@ import android.graphics.Typeface;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-
 import com.io7m.jnull.NullCheck;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The default implementation of the {@link TenPrintGeneratorType} interface.
@@ -41,6 +40,11 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       new HashSet<Character>(TenPrintGenerator.C64_CHARACTER_LIST);
   }
 
+  private TenPrintGenerator()
+  {
+    // Nothing
+  }
+
   private static int clampRangeI(
     final int v,
     final int x0,
@@ -53,7 +57,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
   {
     final String base =
       " qQwWeErRtTyYuUiIoOpPaAsSdDfFgGhHjJkKlL:zZxXcCvVbBnNmM1234567890.";
-    final List<Character> chars = new ArrayList<Character>();
+    final List<Character> chars = new ArrayList<Character>(base.length());
     for (int index = 0; index < base.length(); ++index) {
       final Character c = Character.valueOf(base.charAt(index));
       chars.add(c);
@@ -67,14 +71,14 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final Set<Character> c64_set = TenPrintGenerator.C64_CHARACTER_SET;
     final List<Character> c64_seq = TenPrintGenerator.C64_CHARACTER_LIST;
 
-    final StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder(s.length());
     for (int index = 0; index < s.length(); ++index) {
       final char c = s.charAt(index);
       final Character cc = Character.valueOf(c);
       if (c64_set.contains(cc)) {
         sb.append(c);
       } else {
-        sb.append(c64_seq.get(c % c64_seq.size()));
+        sb.append(c64_seq.get((int) c % c64_seq.size()));
       }
     }
     return NullCheck.notNull(sb.toString());
@@ -85,11 +89,14 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int text_length)
   {
     final float base_hue =
-      (float) TenPrintGenerator.mapRangeD(text_length, 2, 80, 0.0, 360.0);
+      (float) TenPrintGenerator.mapRangeD(
+        (double) text_length,
+        2.0,
+        80.0, 0.0, 360.0);
     final float base_saturation = i.getBaseSaturation();
     final float base_brightness = i.getBaseBrightness();
-    final float[] base_hsv =
-      new float[] { base_hue, base_saturation, base_brightness };
+    final float[] base_hsv = {
+      base_hue, base_saturation, base_brightness, };
     return Color.HSVToColor(base_hsv);
   }
 
@@ -98,13 +105,13 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int text_length)
   {
     final double base =
-      TenPrintGenerator.mapRangeD(text_length, 2, 80, 0.0, 360.0);
-    final float shape_hue = (float) ((base + i.getColorDistance()) % 360.0f);
+      TenPrintGenerator.mapRangeD((double) text_length, 2.0, 80.0, 0.0, 360.0);
+    final float shape_hue = (float) ((base + (double) i.getColorDistance()) % 360.0);
 
     final float shape_saturation = i.getBaseSaturation();
     final float shape_brightness = i.getBaseBrightness();
-    final float[] shape_hsv =
-      new float[] { shape_hue, shape_saturation, shape_brightness };
+    final float[] shape_hsv = {
+      shape_hue, shape_saturation, shape_brightness, };
     return Color.HSVToColor(shape_hsv);
   }
 
@@ -112,21 +119,19 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final TenPrintInput i)
   {
     final String title = i.getTitle();
-    final int scaled = (int) (title.length() * i.getGridScale());
+    final int scaled = (int) ((float) title.length() * i.getGridScale());
 
-    final int length =
-      TenPrintGenerator.clampRangeI(
-        scaled,
-        TenPrintGenerator.TITLE_LENGTH_MIN,
-        TenPrintGenerator.TITLE_LENGTH_MAX);
+    final int length = TenPrintGenerator.clampRangeI(
+      scaled,
+      TenPrintGenerator.TITLE_LENGTH_MIN,
+      TenPrintGenerator.TITLE_LENGTH_MAX);
 
-    final double r =
-      TenPrintGenerator.mapRangeD(
-        length,
-        TenPrintGenerator.TITLE_LENGTH_MIN,
-        TenPrintGenerator.TITLE_LENGTH_MAX,
-        2,
-        11);
+    final double r = TenPrintGenerator.mapRangeD(
+      (double) length,
+      (double) TenPrintGenerator.TITLE_LENGTH_MIN,
+      (double) TenPrintGenerator.TITLE_LENGTH_MAX,
+      2.0,
+      11.0);
 
     return (int) r;
   }
@@ -136,8 +141,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
   {
     final String title = i.getTitle();
     final String author = i.getAuthor();
-    final int text_length = title.length() + author.length();
-    return text_length;
+    return title.length() + author.length();
   }
 
   private static double mapRangeD(
@@ -149,6 +153,10 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
   {
     return y0 + ((y1 - y0) * ((v - x0) / (x1 - x0)));
   }
+
+  /**
+   * @return A new cover generator
+   */
 
   public static TenPrintGeneratorType newGenerator()
   {
@@ -163,11 +171,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int h,
     final Paint p)
   {
-    final float left = x;
-    final float top = y;
-    final float right = x + w;
-    final float bottom = y + h;
-    final RectF oval = new RectF(left, top, right, bottom);
+    final float right = (float) (x + w);
+    final float bottom = (float) (y + h);
+    final RectF oval = new RectF((float) x, (float) y, right, bottom);
     canvas.drawOval(oval, p);
   }
 
@@ -179,10 +185,10 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int h,
     final Paint p)
   {
-    final float left = x - (w / 2);
-    final float top = y - (h / 2);
-    final float right = x + (w / 2);
-    final float bottom = y + (h / 2);
+    final float left = (float) (x - (w / 2));
+    final float top = (float) (y - (h / 2));
+    final float right = (float) (x + (w / 2));
+    final float bottom = (float) (y + (h / 2));
     final RectF oval = new RectF(left, top, right, bottom);
     canvas.drawOval(oval, p);
   }
@@ -205,94 +211,56 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int x_center = x + (grid_size / 2);
     final int y_center = y + (grid_size / 2);
 
-    canvas.clipRect(x, y_max, x_max, y, Op.REPLACE);
+    canvas.clipRect(
+      (float) x,
+      (float) y_max,
+      (float) x_max,
+      (float) y, Op.REPLACE);
 
     final int grid_size_double = grid_size * 2;
     switch (c) {
       case 'q':
-      case 'Q':
-      {
+      case 'Q': {
         TenPrintGenerator.renderEllipse(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
         break;
       }
       case 'W':
-      case 'w':
-      {
+      case 'w': {
         TenPrintGenerator.renderEllipse(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
 
         final int size_smaller = grid_size - thick2;
         TenPrintGenerator.renderEllipse(
-          canvas,
-          x + thick,
-          y + thick,
-          size_smaller,
-          size_smaller,
-          paint_base);
+          canvas, x + thick, y + thick, size_smaller, size_smaller, paint_base);
         break;
       }
       case 'E':
-      case 'e':
-      {
+      case 'e': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y + thick,
-          grid_size,
-          thick,
-          paint_shape);
+          canvas, x, y + thick, grid_size, thick, paint_shape);
         break;
       }
       case 'R':
-      case 'r':
-      {
+      case 'r': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y + (grid_size - thick2),
-          grid_size,
-          thick,
-          paint_shape);
+          canvas, x, y + (grid_size - thick2), grid_size, thick, paint_shape);
         break;
       }
       case 'T':
-      case 't':
-      {
+      case 't': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x + thick,
-          y,
-          thick,
-          grid_size,
-          paint_shape);
+          canvas, x + thick, y, thick, grid_size, paint_shape);
         break;
       }
       case 'Y':
-      case 'y':
-      {
+      case 'y': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x + (grid_size - thick2),
-          y,
-          thick,
-          grid_size,
-          paint_shape);
+          canvas, x + (grid_size - thick2), y, thick, grid_size, paint_shape);
         break;
       }
       case 'U':
-      case 'u':
-      {
+      case 'u': {
         TenPrintGenerator.renderRing(
           canvas,
           x,
@@ -305,8 +273,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
       case 'I':
-      case 'i':
-      {
+      case 'i': {
         TenPrintGenerator.renderRing(
           canvas,
           x - grid_size,
@@ -319,118 +286,69 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
       case 'O':
-      case 'o':
-      {
+      case 'o': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x + thick,
-          y + thick,
-          grid_size,
-          grid_size,
-          paint_base);
+          canvas, x + thick, y + thick, grid_size, grid_size, paint_base);
         break;
       }
       case 'P':
-      case 'p':
-      {
+      case 'p': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x - thick,
-          y + thick,
-          grid_size,
-          grid_size,
-          paint_base);
+          canvas, x - thick, y + thick, grid_size, grid_size, paint_base);
         break;
       }
       case 'A':
-      case 'a':
-      {
+      case 'a': {
         final Path p = new Path();
-        p.moveTo(x, y_max);
-        p.lineTo(x_center, y);
-        p.lineTo(x_max, y_max);
-        p.lineTo(x, y_max);
+        p.moveTo((float) x, (float) y_max);
+        p.lineTo((float) x_center, (float) y);
+        p.lineTo((float) x_max, (float) y_max);
+        p.lineTo((float) x, (float) y_max);
         p.close();
         canvas.drawPath(p, paint_shape);
         break;
       }
       case 'S':
-      case 's':
-      {
+      case 's': {
         final Path p = new Path();
-        p.moveTo(x, y);
-        p.lineTo(x_center, y_max);
-        p.lineTo(x_max, y);
-        p.lineTo(x, y);
+        p.moveTo((float) x, (float) y);
+        p.lineTo((float) x_center, (float) y_max);
+        p.lineTo((float) x_max, (float) y);
+        p.lineTo((float) x, (float) y);
         p.close();
         canvas.drawPath(p, paint_shape);
         break;
       }
       case 'D':
-      case 'd':
-      {
+      case 'd': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y + thick2,
-          grid_size,
-          thick,
-          paint_shape);
+          canvas, x, y + thick2, grid_size, thick, paint_shape);
         break;
       }
       case 'F':
-      case 'f':
-      {
+      case 'f': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y + thick3,
-          grid_size,
-          thick,
-          paint_shape);
+          canvas, x, y + thick3, grid_size, thick, paint_shape);
         break;
       }
       case 'G':
-      case 'g':
-      {
+      case 'g': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x + thick2,
-          y,
-          thick,
-          grid_size,
-          paint_shape);
+          canvas, x + thick2, y, thick, grid_size, paint_shape);
         break;
       }
       case 'H':
-      case 'h':
-      {
+      case 'h': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x + (grid_size - thick3),
-          y,
-          thick,
-          grid_size,
-          paint_shape);
+          canvas, x + (grid_size - thick3), y, thick, grid_size, paint_shape);
         break;
       }
       case 'J':
-      case 'j':
-      {
+      case 'j': {
         TenPrintGenerator.renderRing(
           canvas,
           x,
@@ -443,8 +361,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
       case 'K':
-      case 'k':
-      {
+      case 'k': {
         TenPrintGenerator.renderRing(
           canvas,
           x - grid_size,
@@ -457,62 +374,39 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
       case 'L':
-      case 'l':
-      {
+      case 'l': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x + thick,
-          y - thick,
-          grid_size,
-          grid_size,
-          paint_base);
+          canvas, x + thick, y - thick, grid_size, grid_size, paint_base);
         break;
       }
-      case ':':
-      {
+      case ':': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x - thick,
-          y - thick,
-          grid_size,
-          grid_size,
-          paint_base);
+          canvas, x - thick, y - thick, grid_size, grid_size, paint_base);
         break;
       }
 
       case 'Z':
-      case 'z':
-      {
+      case 'z': {
         {
           final Path p = new Path();
-          p.moveTo(x, y_center);
-          p.lineTo(x_center, y);
-          p.lineTo(x_max, y_center);
-          p.lineTo(x, y_center);
+          p.moveTo((float) x, (float) y_center);
+          p.lineTo((float) x_center, (float) y);
+          p.lineTo((float) x_max, (float) y_center);
+          p.lineTo((float) x, (float) y_center);
           p.close();
           canvas.drawPath(p, paint_shape);
         }
 
         {
           final Path p = new Path();
-          p.moveTo(x, y_center);
-          p.lineTo(x_center, y_max);
-          p.lineTo(x_max, y_center);
-          p.lineTo(x, y_center);
+          p.moveTo((float) x, (float) y_center);
+          p.lineTo((float) x_center, (float) y_max);
+          p.lineTo((float) x_max, (float) y_center);
+          p.lineTo((float) x, (float) y_center);
           p.close();
           canvas.drawPath(p, paint_shape);
         }
@@ -520,98 +414,75 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       }
 
       case 'X':
-      case 'x':
-      {
+      case 'x': {
         final int gs_3 = grid_size / 3;
         TenPrintGenerator.renderEllipseCenter(
-          canvas,
-          x_center,
-          y + gs_3,
-          thick2,
-          thick2,
-          paint_shape);
+          canvas, x_center, y + gs_3, thick2, thick2, paint_shape);
         TenPrintGenerator.renderEllipseCenter(
-          canvas,
-          x + gs_3,
-          y_max - gs_3,
-          thick2,
-          thick2,
-          paint_shape);
-        TenPrintGenerator.renderEllipseCenter(canvas, x_max - gs_3, y_max
-          - gs_3, thick2, thick2, paint_shape);
+          canvas, x + gs_3, y_max - gs_3, thick2, thick2, paint_shape);
+        TenPrintGenerator.renderEllipseCenter(
+          canvas, x_max - gs_3, y_max - gs_3, thick2, thick2, paint_shape);
         break;
       }
 
       case 'C':
-      case 'c':
-      {
+      case 'c': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y + thick3,
-          grid_size,
-          thick,
-          paint_shape);
+          canvas, x, y + thick3, grid_size, thick, paint_shape);
         break;
       }
 
       case 'V':
-      case 'v':
-      {
+      case 'v': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
 
         {
           final Path p = new Path();
-          p.moveTo(x, y + thick);
-          p.lineTo(x_center - thick, y_center);
-          p.lineTo(x, y_max - thick);
-          p.lineTo(x, y + thick);
+          p.moveTo((float) x, (float) (y + thick));
+          p.lineTo((float) (x_center - thick), (float) y_center);
+          p.lineTo((float) x, (float) (y_max - thick));
+          p.lineTo((float) x, (float) (y + thick));
           p.close();
           canvas.drawPath(p, paint_base);
         }
 
         {
           final Path p = new Path();
-          p.moveTo(x_max, y + thick);
-          p.lineTo(x_center + thick, y_center);
-          p.lineTo(x_max, y_max - thick);
-          p.lineTo(x_max, y + thick);
+          p.moveTo((float) x_max, (float) (y + thick));
+          p.lineTo((float) (x_center + thick), (float) y_center);
+          p.lineTo((float) x_max, (float) (y_max - thick));
+          p.lineTo((float) x_max, (float) (y + thick));
           p.close();
           canvas.drawPath(p, paint_base);
         }
 
         {
           final Path p = new Path();
-          p.moveTo(x_max, y + thick);
-          p.lineTo(x_center + thick, y_center);
-          p.lineTo(x_max, y_max - thick);
-          p.lineTo(x_max, y + thick);
+          p.moveTo((float) x_max, (float) (y + thick));
+          p.lineTo((float) (x_center + thick), (float) y_center);
+          p.lineTo((float) x_max, (float) (y_max - thick));
+          p.lineTo((float) x_max, (float) (y + thick));
           p.close();
           canvas.drawPath(p, paint_base);
         }
 
         {
           final Path p = new Path();
-          p.moveTo(x + thick, y_max);
-          p.lineTo(x_center, y_center + thick);
-          p.lineTo(x_max - thick, y_max);
-          p.lineTo(x + +thick, y_max);
+          p.moveTo((float) (x + thick), (float) y_max);
+          p.lineTo((float) x_center, (float) (y_center + thick));
+          p.lineTo((float) (x_max - thick), (float) y_max);
+          p.lineTo((float) (x + thick), (float) y_max);
           p.close();
           canvas.drawPath(p, paint_base);
         }
 
         {
           final Path p = new Path();
-          p.moveTo(x + thick, y);
-          p.lineTo(x_center, y_center - thick);
-          p.lineTo(x_max - thick, y);
-          p.lineTo(x + thick, y);
+          p.moveTo((float) (x + thick), (float) y);
+          p.lineTo((float) x_center, (float) (y_center - thick));
+          p.lineTo((float) (x_max - thick), (float) y);
+          p.lineTo((float) (x + thick), (float) y);
           p.close();
           canvas.drawPath(p, paint_base);
         }
@@ -620,45 +491,33 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       }
 
       case 'B':
-      case 'b':
-      {
+      case 'b': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x + thick3,
-          y,
-          thick,
-          grid_size,
-          paint_shape);
+          canvas, x + thick3, y, thick, grid_size, paint_shape);
         break;
       }
 
       case 'N':
-      case 'n':
-      {
+      case 'n': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
 
         {
           final Path p = new Path();
-          p.moveTo(x, y);
-          p.lineTo(x_max - thick, y);
-          p.lineTo(x, y_max - thick);
-          p.lineTo(x, y);
+          p.moveTo((float) x, (float) y);
+          p.lineTo((float) (x_max - thick), (float) y);
+          p.lineTo((float) x, (float) (y_max - thick));
+          p.lineTo((float) x, (float) y);
           p.close();
           canvas.drawPath(p, paint_base);
         }
 
         {
           final Path p = new Path();
-          p.moveTo(x + thick, y_max);
-          p.lineTo(x_max + thick, y_max);
-          p.lineTo(x_max + thick, y);
-          p.lineTo(x + thick, y_max);
+          p.moveTo((float) (x + thick), (float) y_max);
+          p.lineTo((float) (x_max + thick), (float) y_max);
+          p.lineTo((float) (x_max + thick), (float) y);
+          p.lineTo((float) (x + thick), (float) y_max);
           p.close();
           canvas.drawPath(p, paint_base);
         }
@@ -667,32 +526,26 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       }
 
       case 'M':
-      case 'm':
-      {
+      case 'm': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          grid_size,
-          paint_shape);
+          canvas, x, y, grid_size, grid_size, paint_shape);
 
         {
           final Path p = new Path();
-          p.moveTo(x, y + thick);
-          p.lineTo(x, y_max + thick);
-          p.lineTo(x_max, y_max + thick);
-          p.lineTo(x, y + thick);
+          p.moveTo((float) x, (float) (y + thick));
+          p.lineTo((float) x, (float) (y_max + thick));
+          p.lineTo((float) x_max, (float) (y_max + thick));
+          p.lineTo((float) x, (float) (y + thick));
           p.close();
           canvas.drawPath(p, paint_base);
         }
 
         {
           final Path p = new Path();
-          p.moveTo(x, y - thick);
-          p.lineTo(x_max, y_max - thick);
-          p.lineTo(x_max, y - thick);
-          p.lineTo(x, y - thick);
+          p.moveTo((float) x, (float) (y - thick));
+          p.lineTo((float) x_max, (float) (y_max - thick));
+          p.lineTo((float) x_max, (float) (y - thick));
+          p.lineTo((float) x, (float) (y - thick));
           p.close();
           canvas.drawPath(p, paint_base);
         }
@@ -700,8 +553,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
 
-      case '0':
-      {
+      case '0': {
         TenPrintGenerator.renderRectangle(
           canvas,
           x_center - (thick / 2),
@@ -720,15 +572,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
 
-      case '1':
-      {
+      case '1': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y_center - (thick / 2),
-          grid_size,
-          thick,
-          paint_shape);
+          canvas, x, y_center - (thick / 2), grid_size, thick, paint_shape);
         TenPrintGenerator.renderRectangle(
           canvas,
           x_center - (thick / 2),
@@ -740,15 +586,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
 
-      case '2':
-      {
+      case '2': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y_center - (thick / 2),
-          grid_size,
-          thick,
-          paint_shape);
+          canvas, x, y_center - (thick / 2), grid_size, thick, paint_shape);
 
         TenPrintGenerator.renderRectangle(
           canvas,
@@ -761,108 +601,55 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         break;
       }
 
-      case '3':
-      {
+      case '3': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y_center - (thick / 2),
-          grid_size / 2,
-          thick,
-          paint_shape);
+          canvas, x, y_center - (thick / 2), grid_size / 2, thick, paint_shape);
 
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x_center - (thick / 2),
-          y,
-          thick,
-          grid_size,
-          paint_shape);
+          canvas, x_center - (thick / 2), y, thick, grid_size, paint_shape);
 
         break;
       }
 
-      case '4':
-      {
+      case '4': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          thick2,
-          grid_size,
-          paint_shape);
+          canvas, x, y, thick2, grid_size, paint_shape);
         break;
       }
 
-      case '5':
-      {
+      case '5': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          thick3,
-          grid_size,
-          paint_shape);
+          canvas, x, y, thick3, grid_size, paint_shape);
         break;
       }
 
-      case '6':
-      {
+      case '6': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x_max - thick3,
-          y,
-          thick3,
-          grid_size,
-          paint_shape);
+          canvas, x_max - thick3, y, thick3, grid_size, paint_shape);
         break;
       }
 
-      case '7':
-      {
+      case '7': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          thick2,
-          paint_shape);
+          canvas, x, y, grid_size, thick2, paint_shape);
         break;
       }
 
-      case '8':
-      {
+      case '8': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          grid_size,
-          thick3,
-          paint_shape);
+          canvas, x, y, grid_size, thick3, paint_shape);
         break;
       }
 
-      case '9':
-      {
+      case '9': {
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y,
-          thick,
-          grid_size,
-          paint_shape);
+          canvas, x, y, thick, grid_size, paint_shape);
         TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y_max - thick3,
-          grid_size,
-          thick3,
-          paint_shape);
+          canvas, x, y_max - thick3, grid_size, thick3, paint_shape);
         break;
       }
 
-      case '.':
-      {
+      case '.': {
         TenPrintGenerator.renderRectangle(
           canvas,
           x_center - (thick / 2),
@@ -886,10 +673,12 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       final Paint pt = new Paint();
       pt.setColor(Color.BLACK);
       pt.setTextSize(16.0f);
-      canvas.drawText("" + c, x + 10, y_max - 16, pt);
+      canvas.drawText(Character.toString(c),
+                      (float) (x + 10),
+                      (float) (y_max - 16), pt);
 
       pt.setStyle(Style.STROKE);
-      canvas.drawRect(x, y_max, x_max, y, pt);
+      canvas.drawRect((float) x, (float) y_max, (float) x_max, (float) y, pt);
     }
   }
 
@@ -923,62 +712,55 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
       paint_label.setAntiAlias(true);
       paint_label.setFilterBitmap(true);
       canvas.clipRect(
-        margin_half,
-        margin_half,
-        cw - margin_half,
-        start_y,
-        Op.REPLACE);
-      canvas.drawRect(0, 0, cw, ch, paint_label);
+        (float) margin_half,
+        (float) margin_half,
+        (float) (cw - margin_half),
+        (float) start_y, Op.REPLACE);
+      canvas.drawRect(0.0F, 0.0F, (float) cw, (float) ch, paint_label);
     }
 
     /**
      * Render the title and author strings.
      */
 
-    final float title_size = i.getCoverWidth() * 0.08f;
+    final float title_size = (float) i.getCoverWidth() * 0.08f;
     final TextPaint title_paint = new TextPaint();
     title_paint.setColor(Color.BLACK);
     title_paint.setTextSize(title_size);
     title_paint.setTextAlign(Align.LEFT);
-    title_paint.setTypeface(Typeface.create(
-      Typeface.SANS_SERIF,
-      Typeface.BOLD));
+    title_paint.setTypeface(
+      Typeface.create(
+        Typeface.SANS_SERIF, Typeface.BOLD));
     title_paint.setAntiAlias(true);
 
-    final float author_size = i.getCoverWidth() * 0.07f;
+    final float author_size = (float) i.getCoverWidth() * 0.07f;
     final TextPaint author_paint = new TextPaint();
     author_paint.setColor(Color.BLACK);
     author_paint.setTextSize(author_size);
     author_paint.setTextAlign(Align.LEFT);
-    author_paint.setTypeface(Typeface.create(
-      Typeface.SANS_SERIF,
-      Typeface.NORMAL));
+    author_paint.setTypeface(
+      Typeface.create(
+        Typeface.SANS_SERIF, Typeface.NORMAL));
     author_paint.setAntiAlias(true);
 
     final int text_width = canvas.getWidth() - (margin * 2);
-    final StaticLayout title_layout =
-      new StaticLayout(
-        TenPrintGenerator.ellipsize(i.getTitle(), 30),
-        title_paint,
-        text_width,
-        Layout.Alignment.ALIGN_NORMAL,
-        1,
-        0,
-        false);
+    final StaticLayout title_layout = new StaticLayout(
+      TenPrintGenerator.ellipsize(i.getTitle(), 30),
+      title_paint,
+      text_width,
+      Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F,
+      false);
 
-    final StaticLayout author_layout =
-      new StaticLayout(
-        TenPrintGenerator.ellipsize(i.getAuthor(), 30),
-        author_paint,
-        text_width,
-        Layout.Alignment.ALIGN_NORMAL,
-        1,
-        0,
-        false);
+    final StaticLayout author_layout = new StaticLayout(
+      TenPrintGenerator.ellipsize(i.getAuthor(), 30),
+      author_paint,
+      text_width,
+      Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F,
+      false);
 
     try {
       canvas.save();
-      canvas.translate(margin * 1.25f, margin);
+      canvas.translate((float) margin * 1.25f, (float) margin);
       title_layout.draw(canvas);
     } finally {
       canvas.restore();
@@ -987,7 +769,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     try {
       canvas.save();
       final int ty = start_y - (author_layout.getHeight() + margin_half);
-      canvas.translate(margin * 1.25f, ty);
+      canvas.translate((float) margin * 1.25f, (float) ty);
       author_layout.draw(canvas);
     } finally {
       canvas.restore();
@@ -1002,11 +784,9 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int h,
     final Paint p)
   {
-    final float left = x;
-    final float top = y;
-    final float right = x + w;
-    final float bottom = y + h;
-    final RectF r = new RectF(left, top, right, bottom);
+    final float right = (float) (x + w);
+    final float bottom = (float) (y + h);
+    final RectF r = new RectF((float) x, (float) y, right, bottom);
     canvas.drawRect(r, p);
   }
 
@@ -1021,27 +801,20 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final Paint q)
   {
     {
-      final float left = x;
-      final float top = y;
-      final float right = x + w;
-      final float bottom = y + h;
-      final RectF oval = new RectF(left, top, right, bottom);
+      final float right = (float) (x + w);
+      final float bottom = (float) (y + h);
+      final RectF oval = new RectF((float) x, (float) y, right, bottom);
       c.drawOval(oval, p);
     }
 
     {
-      final float left = x + thick;
-      final float top = y + thick;
-      final float right = x + (w - thick);
-      final float bottom = y + (h - thick);
+      final float left = (float) (x + thick);
+      final float top = (float) (y + thick);
+      final float right = (float) (x + (w - thick));
+      final float bottom = (float) (y + (h - thick));
       final RectF oval = new RectF(left, top, right, bottom);
       c.drawOval(oval, q);
     }
-  }
-
-  private TenPrintGenerator()
-  {
-    // Nothing
   }
 
   @Override public Bitmap generate(
@@ -1070,7 +843,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     paint_shape.setFilterBitmap(true);
 
     final Canvas canvas = new Canvas(b);
-    canvas.drawRect(0, 0, cw, ch, paint_base);
+    canvas.drawRect(0.0F, 0.0F, (float) cw, (float) ch, paint_base);
 
     final String c64_text = TenPrintGenerator.getC64String(i.getTitle());
     final int grid_count = TenPrintGenerator.getGridCount(i);
@@ -1082,14 +855,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         final int x_offset = x * grid_size;
         final int y_offset = start_y + (y * grid_size);
         TenPrintGenerator.renderGridCharacter(
-          canvas,
-          i,
-          paint_base,
-          paint_shape,
-          c,
-          x_offset,
-          y_offset,
-          grid_size);
+          canvas, i, paint_base, paint_shape, c, x_offset, y_offset, grid_size);
         grid_cell = grid_cell + 1;
       }
     }

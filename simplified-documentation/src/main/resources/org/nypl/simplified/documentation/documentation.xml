@@ -7,4 +7,5 @@
   <s:document-style>documentation.css</s:document-style>
   <s:document-contents />
   <xi:include href="implementation.xml" />
+  <xi:include href="api.xml" />
 </s:document>

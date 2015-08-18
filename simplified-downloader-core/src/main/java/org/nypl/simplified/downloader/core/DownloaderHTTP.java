@@ -1,15 +1,9 @@
 package org.nypl.simplified.downloader.core;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
@@ -20,20 +14,84 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * The default implementation of the {@link DownloaderType} interface.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) public final class DownloaderHTTP implements
-  DownloaderType
+public final class DownloaderHTTP implements DownloaderType
 {
-  private static final class Download implements
-    Runnable,
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(DownloaderHTTP.class));
+  }
+
+  private final HTTPType        http;
+  private final ExecutorService exec;
+  private final File            directory;
+  private final AtomicLong      id_pool;
+
+  private DownloaderHTTP(
+    final ExecutorService in_exec,
+    final File in_directory,
+    final HTTPType in_http)
+  {
+    this.exec = NullCheck.notNull(in_exec);
+    this.directory = NullCheck.notNull(in_directory);
+    this.http = NullCheck.notNull(in_http);
+    this.id_pool = new AtomicLong(0L);
+  }
+
+  /**
+   * @param in_exec      An executor service
+   * @param in_directory A storage directory
+   * @param in_http      An HTTP interface
+   *
+   * @return A new downloader
+   */
+
+  public static DownloaderType newDownloader(
+    final ExecutorService in_exec,
+    final File in_directory,
+    final HTTPType in_http)
+  {
+    return new DownloaderHTTP(in_exec, in_directory, in_http);
+  }
+
+  @Override public DownloadType download(
+    final URI in_uri,
+    final OptionType<HTTPAuthType> in_auth,
+    final DownloadListenerType in_listener)
+  {
+    NullCheck.notNull(in_uri);
+    NullCheck.notNull(in_auth);
+    NullCheck.notNull(in_listener);
+
+    final long id = this.id_pool.incrementAndGet();
+    final File file = new File(
+      this.directory, String.format(
+      "%016d.data", Long.valueOf(id)));
+
+    DownloaderHTTP.LOG.debug("queued download {} for {}", file, in_uri);
+    final Download d =
+      new Download(id, file, in_auth, in_uri, this.http, in_listener);
+    this.exec.execute(d);
+    return d;
+  }
+
+  private static final class Download implements Runnable,
     DownloadType,
     HTTPResultMatcherType<InputStream, Unit, IOException>
   {
@@ -43,10 +101,11 @@ import com.io7m.jnull.NullCheck;
     private final OptionType<HTTPAuthType> auth;
     private final File                     file;
     private final DownloadListenerType     listener;
-    private long                           total;
     private final Logger                   log;
+    private       long                     total;
+    private       String                   content_type;
 
-    public Download(
+    private Download(
       final long in_id,
       final File in_file,
       final OptionType<HTTPAuthType> in_auth,
@@ -60,99 +119,37 @@ import com.io7m.jnull.NullCheck;
       this.http = NullCheck.notNull(in_http);
       NullCheck.notNull(in_listener);
 
-      final String name =
-        String.format("%s[%d]", DownloaderHTTP.class, in_id);
+      final String name = String.format(
+        "%s[%d]", DownloaderHTTP.class, Long.valueOf(in_id));
       this.log = NullCheck.notNull(LoggerFactory.getLogger(name));
       this.cancel = new AtomicBoolean(false);
-      this.listener = new DownloadListenerType() {
-        @Override public void onDownloadStarted(
-          final DownloadType d,
-          final long in_expected)
-        {
-          try {
-            in_listener.onDownloadStarted(d, in_expected);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadStarted raised: ",
-              x);
-          }
-        }
-
-        @Override public void onDownloadFailed(
-          final DownloadType d,
-          final int in_status,
-          final long in_running_total,
-          final OptionType<Throwable> in_exception)
-        {
-          try {
-            in_listener.onDownloadFailed(
-              d,
-              in_status,
-              in_running_total,
-              in_exception);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadFailed raised: ",
-              x);
-          }
-        }
-
-        @Override public void onDownloadDataReceived(
-          final DownloadType d,
-          final long in_running_total,
-          final long in_expected_total)
-        {
-          try {
-            in_listener.onDownloadDataReceived(
-              d,
-              in_running_total,
-              in_expected_total);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadDataReceived raised: ",
-              x);
-          }
-        }
-
-        @Override public void onDownloadCompleted(
-          final DownloadType d,
-          final File in_file)
-        {
-          try {
-            in_listener.onDownloadCompleted(d, in_file);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadCompleted raised: ",
-              x);
-          }
-        }
-
-        @Override public void onDownloadCancelled(
-          final DownloadType d)
-        {
-          try {
-            in_listener.onDownloadCancelled(d);
-          } catch (final Throwable x) {
-            Download.this.log.error(
-              "Ignoring exception: onDownloadCancelled raised: ",
-              x);
-          }
-        }
-      };
+      this.listener =
+        new DownloadCatchingListener(DownloaderHTTP.LOG, in_listener);
 
       this.total = 0L;
+    }
+
+    private static String getContentType(
+      final Map<String, List<String>> headers)
+    {
+      if (headers.containsKey("Content-Type")) {
+        final List<String> values = headers.get("Content-Type");
+        if (values.isEmpty() == false) {
+          return NullCheck.notNull(values.get(0));
+        }
+      }
+
+      return "application/octet-stream";
     }
 
     @Override public void run()
     {
       try {
         final RedirectFollower rf =
-          new RedirectFollower(this.log, this.http, this.auth, 5, this.uri, 0);
+          new RedirectFollower(this.log, this.http, this.auth, 5, this.uri, 0L);
 
         this.log.debug(
-          "starting download, uri {} to file {}",
-          this.uri,
-          this.file);
+          "starting download, uri {} to file {}", this.uri, this.file);
 
         final HTTPResultType<InputStream> r = rf.call();
         r.matchResult(this);
@@ -166,7 +163,7 @@ import com.io7m.jnull.NullCheck;
       final HTTPResultError<InputStream> e)
       throws IOException
     {
-      this.log.error("http error: status {}", e.getStatus());
+      this.log.error("http error: status {}", Integer.valueOf(e.getStatus()));
 
       final OptionType<Throwable> none = Option.none();
       this.listener.onDownloadFailed(this, e.getStatus(), this.total, none);
@@ -181,10 +178,7 @@ import com.io7m.jnull.NullCheck;
       this.log.error("http error: ", e.getError());
 
       this.listener.onDownloadFailed(
-        this,
-        -1,
-        this.total,
-        Option.some((Throwable) e.getError()));
+        this, -1, this.total, Option.some((Throwable) e.getError()));
       this.failed();
       return Unit.unit();
     }
@@ -193,10 +187,11 @@ import com.io7m.jnull.NullCheck;
       final HTTPResultOKType<InputStream> e)
       throws IOException
     {
-      this.log.debug("http ok: ", e.getStatus());
+      this.log.debug("http ok: ", Integer.valueOf(e.getStatus()));
       final long expected = e.getContentLength();
-      this.log.debug("expecting {} bytes", expected);
-
+      this.content_type = Download.getContentType(e.getResponseHeaders());
+      this.log.debug(
+        "expecting {} bytes of {}", Long.valueOf(expected), this.content_type);
       this.listener.onDownloadStarted(this, expected);
 
       final OutputStream out = new FileOutputStream(this.file);
@@ -210,9 +205,10 @@ import com.io7m.jnull.NullCheck;
             if (r == -1) {
               break;
             }
-            this.total += r;
+            this.total += (long) r;
             out.write(buffer, 0, r);
-            this.listener.onDownloadDataReceived(this, this.total, expected);
+            this.listener.onDownloadDataReceived(
+              this, this.total, expected);
           }
 
           if (this.cancel.get()) {
@@ -222,14 +218,11 @@ import com.io7m.jnull.NullCheck;
             if (this.total != expected) {
               this.log.error(
                 "received {} bytes but expected {}",
-                this.total,
-                expected);
+                Long.valueOf(this.total),
+                Long.valueOf(expected));
               final OptionType<Throwable> none = Option.none();
               this.listener.onDownloadFailed(
-                this,
-                e.getStatus(),
-                this.total,
-                none);
+                this, e.getStatus(), this.total, none);
               this.failed();
             } else {
               this.log.debug("download completed");
@@ -256,55 +249,10 @@ import com.io7m.jnull.NullCheck;
       this.log.debug("cancelling download");
       this.cancel.set(true);
     }
-  }
 
-  private static final Logger   LOG;
-
-  static {
-    LOG = NullCheck.notNull(LoggerFactory.getLogger(DownloaderHTTP.class));
-  }
-
-  private final HTTPType        http;
-  private final ExecutorService exec;
-  private final File            directory;
-  private final AtomicLong      id_pool;
-
-  public static DownloaderType newDownloader(
-    final ExecutorService in_exec,
-    final File in_directory,
-    final HTTPType in_http)
-  {
-    return new DownloaderHTTP(in_exec, in_directory, in_http);
-  }
-
-  private DownloaderHTTP(
-    final ExecutorService in_exec,
-    final File in_directory,
-    final HTTPType in_http)
-  {
-    this.exec = NullCheck.notNull(in_exec);
-    this.directory = NullCheck.notNull(in_directory);
-    this.http = NullCheck.notNull(in_http);
-    this.id_pool = new AtomicLong(0);
-  }
-
-  @Override public DownloadType download(
-    final URI in_uri,
-    final OptionType<HTTPAuthType> in_auth,
-    final DownloadListenerType in_listener)
-  {
-    NullCheck.notNull(in_uri);
-    NullCheck.notNull(in_auth);
-    NullCheck.notNull(in_listener);
-
-    final long id = this.id_pool.incrementAndGet();
-    final File file =
-      new File(this.directory, String.format("%016d.data", id));
-
-    DownloaderHTTP.LOG.debug("queued download {} for {}", file, in_uri);
-    final Download d =
-      new Download(id, file, in_auth, in_uri, this.http, in_listener);
-    this.exec.execute(d);
-    return d;
+    @Override public String getContentType()
+    {
+      return this.content_type;
+    }
   }
 }

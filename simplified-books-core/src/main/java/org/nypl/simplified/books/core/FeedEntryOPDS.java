@@ -1,12 +1,15 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
-import com.io7m.jnull.NullCheck;
+/**
+ * An entry from an OPDS feed.
+ */
 
 public final class FeedEntryOPDS implements FeedEntryType
 {
-  private static final long              serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
   private final BookID                   book_id;
   private final OPDSAcquisitionFeedEntry entry;
 
@@ -18,15 +21,27 @@ public final class FeedEntryOPDS implements FeedEntryType
     this.entry = NullCheck.notNull(in_e);
   }
 
-  public OPDSAcquisitionFeedEntry getFeedEntry()
-  {
-    return this.entry;
-  }
+  /**
+   * Construct a feed entry from the given OPDS feed entry.
+   *
+   * @param e The entry
+   *
+   * @return A feed entry
+   */
 
   public static FeedEntryType fromOPDSAcquisitionFeedEntry(
     final OPDSAcquisitionFeedEntry e)
   {
     return new FeedEntryOPDS(BookID.newIDFromEntry(e), e);
+  }
+
+  /**
+   * @return The actual feed entry
+   */
+
+  public OPDSAcquisitionFeedEntry getFeedEntry()
+  {
+    return this.entry;
   }
 
   @Override public BookID getBookID()

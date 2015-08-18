@@ -2,8 +2,8 @@ package org.nypl.simplified.app.utilities;
 
 import android.os.Handler;
 import android.os.Looper;
-
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
 
 /**
  * Some trivial functions for asserting that code is running on the expected
@@ -12,22 +12,28 @@ import com.io7m.jnull.NullCheck;
 
 public final class UIThread
 {
+  private UIThread()
+  {
+    throw new UnreachableCodeException();
+  }
+
   /**
-   * Check that the current thread is the UI thread and raise
-   * {@link IllegalStateException} if it isn't.
+   * Check that the current thread is the UI thread and raise {@link
+   * IllegalStateException} if it isn't.
    */
 
   public static void checkIsUIThread()
   {
     if (UIThread.isUIThread() == false) {
-      throw new IllegalStateException(String.format(
-        "Current thread '%s' is not the Android UI thread",
-        Thread.currentThread()));
+      throw new IllegalStateException(
+        String.format(
+          "Current thread '%s' is not the Android UI thread",
+          Thread.currentThread()));
     }
   }
 
   /**
-   * @return <code>true</code> iff the current thread is the UI thread.
+   * @return {@code true} iff the current thread is the UI thread.
    */
 
   public static boolean isUIThread()
@@ -38,8 +44,7 @@ public final class UIThread
   /**
    * Run the given Runnable on the UI thread.
    *
-   * @param r
-   *          The runnable
+   * @param r The runnable
    */
 
   public static void runOnUIThread(
@@ -54,10 +59,8 @@ public final class UIThread
   /**
    * Run the given Runnable on the UI thread after the specified delay.
    *
-   * @param r
-   *          The runnable
-   * @param ms
-   *          The delay in milliseconds
+   * @param r  The runnable
+   * @param ms The delay in milliseconds
    */
 
   public static void runOnUIThreadDelayed(

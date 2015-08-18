@@ -1,9 +1,5 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.slf4j.Logger;
-
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.res.Resources;
@@ -15,12 +11,18 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
 
-@SuppressWarnings("synthetic-access") public final class CatalogBookDeleteDialog extends
-  DialogFragment
+/**
+ * A book dialog requesting confirmation of the deletion of a given book.
+ */
+
+@SuppressWarnings("synthetic-access") public final class CatalogBookDeleteDialog
+  extends DialogFragment
 {
   private static final Logger LOG;
 
@@ -28,17 +30,24 @@ import com.io7m.jnull.Nullable;
     LOG = LogUtilities.getLog(DialogFragment.class);
   }
 
-  public static CatalogBookDeleteDialog newDialog()
-  {
-    final CatalogBookDeleteDialog d = new CatalogBookDeleteDialog();
-    return d;
-  }
-
   private @Nullable Runnable on_confirm;
+
+  /**
+   * Construct a dialog.
+   */
 
   public CatalogBookDeleteDialog()
   {
     // Fragments must have no-arg constructors.
+  }
+
+  /**
+   * @return A new dialog
+   */
+
+  public static CatalogBookDeleteDialog newDialog()
+  {
+    return new CatalogBookDeleteDialog();
   }
 
   @Override public void onCreate(
@@ -55,27 +64,26 @@ import com.io7m.jnull.Nullable;
   {
     final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
 
-    final ViewGroup layout =
-      NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.catalog_book_delete_confirm,
-        container,
-        false));
+    final ViewGroup layout = NullCheck.notNull(
+      (ViewGroup) inflater.inflate(
+        R.layout.catalog_book_delete_confirm, container, false));
 
-    final Button in_delete_button =
-      NullCheck.notNull((Button) layout
-        .findViewById(R.id.book_delete_confirm));
-    in_delete_button.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    final Button in_delete_button = NullCheck.notNull(
+      (Button) layout.findViewById(R.id.book_delete_confirm));
+    in_delete_button.setOnClickListener(
+      new OnClickListener()
       {
-        final Runnable r = CatalogBookDeleteDialog.this.on_confirm;
-        CatalogBookDeleteDialog.LOG.debug("runnable: {}", r);
-        if (r != null) {
-          r.run();
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          final Runnable r = CatalogBookDeleteDialog.this.on_confirm;
+          CatalogBookDeleteDialog.LOG.debug("runnable: {}", r);
+          if (r != null) {
+            r.run();
+          }
+          CatalogBookDeleteDialog.this.dismiss();
         }
-        CatalogBookDeleteDialog.this.dismiss();
-      }
-    });
+      });
 
     final Dialog d = this.getDialog();
     if (d != null) {
@@ -98,6 +106,12 @@ import com.io7m.jnull.Nullable;
     window.setLayout(w, h);
     window.setGravity(Gravity.CENTER);
   }
+
+  /**
+   * Set the runnable that will be executed on confirmation.
+   *
+   * @param r The runnable
+   */
 
   public void setOnConfirmListener(
     final Runnable r)

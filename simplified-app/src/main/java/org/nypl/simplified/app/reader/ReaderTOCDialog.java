@@ -1,10 +1,5 @@
 package org.nypl.simplified.app.reader;
 
-import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.slf4j.Logger;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -17,20 +12,48 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
 
-@SuppressWarnings("synthetic-access") public final class ReaderTOCDialog extends
-  DialogFragment
+/**
+ * The table-of-contents dialog.
+ */
+
+@SuppressWarnings("synthetic-access") public final class ReaderTOCDialog
+  extends DialogFragment
 {
-  private static final Logger                      LOG;
-  private static final String                      TOC_ID;
+  private static final Logger LOG;
+  private static final String TOC_ID;
 
   static {
     LOG = LogUtilities.getLog(ReaderTOCDialog.class);
     TOC_ID = "org.nypl.simplified.app.reader.ReaderTOCDialog.toc";
   }
+
+  private @Nullable ReaderTOCSelectionListenerType receiver;
+  private @Nullable ReaderTOCView                  view;
+
+  /**
+   * Construct a dialog.
+   */
+
+  public ReaderTOCDialog()
+  {
+    // Fragments must have no-arg constructors.
+  }
+
+  /**
+   * Construct a new dialog.
+   *
+   * @param in_toc      The table of contents
+   * @param in_receiver The listener that will item selections
+   *
+   * @return A new dialog
+   */
 
   public static ReaderTOCDialog newDialog(
     final ReaderTOC in_toc,
@@ -42,14 +65,6 @@ import com.io7m.jnull.Nullable;
     d.setArguments(b);
     d.setTOCReceiver(in_receiver);
     return d;
-  }
-  private @Nullable ReaderTOCSelectionListenerType receiver;
-
-  private @Nullable ReaderTOCView                  view;
-
-  public ReaderTOCDialog()
-  {
-    // Fragments must have no-arg constructors.
   }
 
   @Override public void onCreate(
@@ -63,33 +78,28 @@ import com.io7m.jnull.Nullable;
 
     final Bundle b = NullCheck.notNull(this.getArguments());
     final ReaderTOC in_toc =
-      NullCheck
-        .notNull((ReaderTOC) b.getSerializable(ReaderTOCDialog.TOC_ID));
+      NullCheck.notNull((ReaderTOC) b.getSerializable(ReaderTOCDialog.TOC_ID));
 
     final Activity act = NullCheck.notNull(this.getActivity());
     final LayoutInflater in_inflater =
       NullCheck.notNull(act.getLayoutInflater());
 
-    this.view =
-      new ReaderTOCView(
-        in_inflater,
-        act,
-        in_toc,
-        new ReaderTOCViewSelectionListenerType() {
-          @Override public void onTOCBackSelected()
-          {
-            ReaderTOCDialog.this.dismiss();
-          }
+    this.view = new ReaderTOCView(
+      in_inflater, act, in_toc, new ReaderTOCViewSelectionListenerType()
+    {
+      @Override public void onTOCBackSelected()
+      {
+        ReaderTOCDialog.this.dismiss();
+      }
 
-          @Override public void onTOCItemSelected(
-            final TOCElement e)
-          {
-            NullCheck
-              .notNull(ReaderTOCDialog.this.receiver)
-              .onTOCSelectionReceived(e);
-            ReaderTOCDialog.this.dismiss();
-          }
-        });
+      @Override public void onTOCItemSelected(
+        final TOCElement e)
+      {
+        NullCheck.notNull(ReaderTOCDialog.this.receiver)
+          .onTOCSelectionReceived(e);
+        ReaderTOCDialog.this.dismiss();
+      }
+    });
   }
 
   @Override public View onCreateView(
@@ -125,16 +135,15 @@ import com.io7m.jnull.Nullable;
      */
 
     final Activity act = NullCheck.notNull(this.getActivity());
-    final WindowManager window_manager =
-      NullCheck.notNull((WindowManager) act
-        .getSystemService(Context.WINDOW_SERVICE));
+    final WindowManager window_manager = NullCheck.notNull(
+      (WindowManager) act.getSystemService(Context.WINDOW_SERVICE));
     final Display display =
       NullCheck.notNull(window_manager.getDefaultDisplay());
 
     final DisplayMetrics m = new DisplayMetrics();
     display.getMetrics(m);
 
-    final int width = (int) (m.widthPixels * 0.80);
+    final int width = (int) ((double) m.widthPixels * 0.80);
     final Dialog dialog = NullCheck.notNull(this.getDialog());
     final Window window = NullCheck.notNull(dialog.getWindow());
     window.setLayout(width, window.getAttributes().height);

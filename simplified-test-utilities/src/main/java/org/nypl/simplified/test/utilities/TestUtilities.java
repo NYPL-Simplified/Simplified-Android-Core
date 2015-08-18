@@ -63,7 +63,7 @@ public final class TestUtilities
    *
    * @param <A>
    *          The type of returned value
-   * @return <code>null</code>
+   * @return {@code null}
    */
 
   @SuppressWarnings({ "null", "unchecked" }) public static @NonNull

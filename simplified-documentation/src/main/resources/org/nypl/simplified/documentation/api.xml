@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:part
+  xmlns:s="http://schemas.io7m.com/structural/2.1.0"
+  xmlns:xi="http://www.w3.org/2001/XInclude">
+  <s:part-title>JavaDoc</s:part-title>
+  <s:part-contents />
+
+  <s:section>
+    <s:section-title>JavaDoc</s:section-title>
+    <s:paragraph>
+      Internal API documentation for the package is provided via the
+      included <s:link-external s:target="apidocs">JavaDocs</s:link-external>.
+    </s:paragraph>
+  </s:section>
+</s:part>

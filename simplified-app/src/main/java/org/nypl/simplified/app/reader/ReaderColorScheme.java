@@ -24,14 +24,12 @@ public enum ReaderColorScheme
    * White text on a black backdrop.
    */
 
-  SCHEME_WHITE_ON_BLACK(Color.BLACK, Color.WHITE)
+  SCHEME_WHITE_ON_BLACK(Color.BLACK, Color.WHITE);
 
-  ;
+  private final int back;
+  private final int fore;
 
-  private int back;
-  private int fore;
-
-  private ReaderColorScheme(
+  ReaderColorScheme(
     final int bg,
     final int fg)
   {
@@ -39,10 +37,18 @@ public enum ReaderColorScheme
     this.fore = fg;
   }
 
+  /**
+   * @return The background color as an ARGB value
+   */
+
   public int getBackgroundColor()
   {
     return this.back;
   }
+
+  /**
+   * @return The foreground color as an ARGB value
+   */
 
   public int getForegroundColor()
   {

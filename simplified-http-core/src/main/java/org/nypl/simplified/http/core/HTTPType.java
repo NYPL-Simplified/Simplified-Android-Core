@@ -1,10 +1,10 @@
 package org.nypl.simplified.http.core;
 
-import java.io.InputStream;
-import java.net.URI;
-
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
+
+import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Mindlessly simple synchronous HTTP requests.
@@ -13,16 +13,14 @@ import com.io7m.jfunctional.Unit;
 public interface HTTPType
 {
   /**
-   * Retrieve the content at <tt>uri</tt>, using authentication details
-   * <tt>auth</tt>. The content returned will have been requested with the
-   * initial byte offset <tt>offset</tt>.
+   * Retrieve the content at {@code uri}, using authentication details
+   * {@code auth}. The content returned will have been requested with the
+   * initial byte offset {@code offset}.
    *
-   * @param auth
-   *          The authentication details, if any
-   * @param uri
-   *          The URI
-   * @param offset
-   *          The byte offset
+   * @param auth   The authentication details, if any
+   * @param uri    The URI
+   * @param offset The byte offset
+   *
    * @return A result
    */
 
@@ -32,13 +30,11 @@ public interface HTTPType
     final long offset);
 
   /**
-   * Peek at the URI <tt>uri</tt>, using authentication details <tt>auth</tt>.
+   * Peek at the URI {@code uri}, using authentication details {@code auth}.
    *
-   * @param auth
-   *          The authentication details, if any
-   * @param uri
-   *          The URI
-   * 
+   * @param auth The authentication details, if any
+   * @param uri  The URI
+   *
    * @return A result
    */
 

@@ -8,6 +8,13 @@ import java.io.File;
 
 public interface ReaderReadiumEPUBLoaderType
 {
+  /**
+   * Attempt to load an EPUB.
+   *
+   * @param f The EPUB file
+   * @param l The EPUB result listener
+   */
+
   void loadEPUB(
     File f,
     ReaderReadiumEPUBLoadListenerType l);

@@ -4,11 +4,10 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <LinearLayout
+  <RelativeLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="16dp"
-    android:orientation="vertical">
+    android:layout_height="match_parent"
+    android:layout_margin="16dp">
 
     <TextView
       android:id="@+id/settings_login_title"
@@ -18,10 +17,13 @@
       android:layout_height="wrap_content" />
 
     <TableLayout
+      android:id="@+id/settings_login_table"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_below="@id/settings_login_title"
       android:layout_marginTop="8dp"
       android:layout_marginBottom="16dp">
+
       <TableRow
         android:id="@+id/tableRow1"
         android:layout_width="wrap_content"
@@ -39,7 +41,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:layout_marginStart="16dp"
-          android:inputType="textNoSuggestions|number"
+          android:inputType="textNoSuggestions"
           android:maxLength="14"
           android:maxLines="1" />
       </TableRow>
@@ -60,7 +62,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:layout_marginStart="16dp"
-          android:inputType="textNoSuggestions|number"
+          android:inputType="textNoSuggestions"
           android:maxLength="4"
           android:maxLines="1" />
       </TableRow>
@@ -72,27 +74,32 @@
       android:layout_gravity="end"
       android:layout_width="wrap_content"
       android:layout_height="@dimen/button_standard_height"
+      android:layout_below="@id/settings_login_table"
       android:textColor="@drawable/simplified_button_text"
       android:textSize="12sp"
       android:text="@string/settings_log_in" />
 
     <View
       android:background="#eee"
+      android:id="@+id/settings_login_divider"
       android:layout_width="match_parent"
       android:layout_height="1dp"
+      android:layout_below="@+id/settings_login"
       android:layout_marginBottom="16dp"
       android:layout_marginTop="16dp" />
-
 
     <TextView
       android:id="@+id/settings_feedback"
       android:text="@string/settings_feedback"
       android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_below="@+id/settings_login_divider"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" />
 
     <View
       android:background="#eee"
+      android:id="@+id/settings_feedback_divider"
+      android:layout_below="@+id/settings_feedback"
       android:layout_width="match_parent"
       android:layout_height="1dp"
       android:layout_marginBottom="16dp"
@@ -102,15 +109,71 @@
       android:id="@+id/settings_credits"
       android:text="@string/settings_credits"
       android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_below="@id/settings_feedback_divider"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" />
 
     <View
       android:background="#eee"
+      android:id="@+id/settings_credits_divider"
       android:layout_width="match_parent"
       android:layout_height="1dp"
+      android:layout_below="@id/settings_credits"
       android:layout_marginBottom="16dp"
       android:layout_marginTop="16dp" />
-  </LinearLayout>
+
+    <TextView
+      android:id="@+id/settings_eula"
+      android:text="@string/settings_eula"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_below="@id/settings_credits_divider"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_eula_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_below="@id/settings_eula"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
+    <TextView
+      android:id="@+id/settings_privacy"
+      android:text="@string/settings_privacy"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_below="@id/settings_eula_divider"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_privacy_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_below="@id/settings_privacy"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
+
+    <TextView
+      android:id="@+id/settings_adobe_accounts"
+      android:text="@string/settings_adobe_accounts"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_below="@id/settings_privacy_divider"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_adobe_accounts_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_below="@id/settings_adobe_accounts"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
+  </RelativeLayout>
 
 </ScrollView>

@@ -1,20 +1,31 @@
 package org.nypl.simplified.app.testing;
 
-import java.util.ArrayList;
-
+import android.app.Activity;
+import android.app.FragmentManager;
+import android.os.Bundle;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.catalog.CatalogFacetDialog;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.books.core.FeedFacetType;
 
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.os.Bundle;
+import java.util.ArrayList;
 
-import com.io7m.jnull.Nullable;
+/**
+ * A facet selection activity.
+ */
 
 public final class DialogFacet extends Activity
 {
+  /**
+   * Construct an activity.
+   */
+
+  public DialogFacet()
+  {
+
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -30,8 +41,7 @@ public final class DialogFacet extends Activity
       items.add(ft);
     }
 
-    final CatalogFacetDialog d =
-      CatalogFacetDialog.newDialog("Sort by", items);
+    final CatalogFacetDialog d = CatalogFacetDialog.newDialog("Sort by", items);
     final FragmentManager fm = this.getFragmentManager();
     d.show(fm, "dialog");
   }

@@ -1,8 +1,8 @@
 package org.nypl.simplified.app.reader;
 
-import java.net.URI;
-
 import org.readium.sdk.android.Package;
+
+import java.net.URI;
 
 /**
  * The interface exposed by the reader HTTP server.
@@ -17,9 +17,12 @@ public interface ReaderHTTPServerType
   URI getURIBase();
 
   /**
-   * Start the server if it is not already running, and instruct it to serve
-   * the given package. If the server is already running, it will serve the
-   * given package for all subsequent requests.
+   * Start the server if it is not already running, and instruct it to serve the
+   * given package. If the server is already running, it will serve the given
+   * package for all subsequent requests.
+   *
+   * @param p The EPUB package
+   * @param s The server listener
    */
 
   void startIfNecessaryForPackage(

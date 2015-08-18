@@ -1,23 +1,22 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-
 /**
  * The default implementation of the {@link BooksStatusCacheType} interface.
  */
 
-public final class BooksStatusCache extends Observable implements
-  BooksStatusCacheType
+public final class BooksStatusCache extends Observable
+  implements BooksStatusCacheType
 {
   private static final Logger LOG;
 
@@ -25,18 +24,22 @@ public final class BooksStatusCache extends Observable implements
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksStatusCache.class));
   }
 
-  public static BooksStatusCacheType newStatusCache()
-  {
-    return new BooksStatusCache();
-  }
-
   private final Map<BookID, BookSnapshot>   snapshots;
   private final Map<BookID, BookStatusType> status;
 
-  public BooksStatusCache()
+  private BooksStatusCache()
   {
-    this.status = new HashMap<BookID, BookStatusType>();
-    this.snapshots = new HashMap<BookID, BookSnapshot>();
+    this.status = new HashMap<BookID, BookStatusType>(32);
+    this.snapshots = new HashMap<BookID, BookSnapshot>(32);
+  }
+
+  /**
+   * @return A new status cache
+   */
+
+  public static BooksStatusCacheType newStatusCache()
+  {
+    return new BooksStatusCache();
   }
 
   @Override public void booksObservableAddObserver(
@@ -113,18 +116,14 @@ public final class BooksStatusCache extends Observable implements
 
       if (current_p.getPriority() <= update_p.getPriority()) {
         BooksStatusCache.LOG.debug(
-          "current {} <= {}, updating",
-          current,
-          update);
+          "current {} <= {}, updating", current, update);
         this.put(update);
         return;
       }
 
       if (current_p.getPriority() > update_p.getPriority()) {
         BooksStatusCache.LOG.debug(
-          "current {} > {}, not updating",
-          current,
-          update);
+          "current {} > {}, not updating", current, update);
         return;
       }
 

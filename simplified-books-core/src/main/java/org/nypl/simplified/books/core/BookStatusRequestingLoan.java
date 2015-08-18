@@ -11,6 +11,12 @@ public final class BookStatusRequestingLoan implements BookStatusType
 {
   private final BookID id;
 
+  /**
+   * Construct the book status.
+   *
+   * @param in_id The book ID
+   */
+
   public BookStatusRequestingLoan(
     final BookID in_id)
   {
@@ -31,7 +37,7 @@ public final class BookStatusRequestingLoan implements BookStatusType
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder();
+    final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusRequestingLoan ");
     b.append(this.id);
     b.append("]");

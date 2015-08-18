@@ -3,23 +3,51 @@ package org.nypl.simplified.books.core;
 /**
  * Status matcher.
  *
- * @param <A>
- *          The type of returned values
- * @param <E>
- *          The type of raised exceptions
+ * @param <A> The type of returned values
+ * @param <E> The type of raised exceptions
  */
 
 public interface BookStatusDownloadingMatcherType<A, E extends Exception>
 {
+  /**
+   * Match a status value.
+   *
+   * @param s The status value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
   A onBookStatusDownloaded(
-    BookStatusDownloaded d)
+    BookStatusDownloaded s)
     throws E;
+
+  /**
+   * Match a status value.
+   *
+   * @param s The status value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
 
   A onBookStatusDownloadFailed(
-    BookStatusDownloadFailed f)
+    BookStatusDownloadFailed s)
     throws E;
 
+  /**
+   * Match a status value.
+   *
+   * @param s The status value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
   A onBookStatusDownloadInProgress(
-    BookStatusDownloadInProgress d)
+    BookStatusDownloadInProgress s)
     throws E;
 }

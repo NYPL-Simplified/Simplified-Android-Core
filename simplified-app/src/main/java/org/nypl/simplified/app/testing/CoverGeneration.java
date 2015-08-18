@@ -1,23 +1,34 @@
 package org.nypl.simplified.app.testing;
 
-import org.nypl.simplified.app.R;
-import org.nypl.simplified.tenprint.TenPrintGenerator;
-import org.nypl.simplified.tenprint.TenPrintGeneratorType;
-import org.nypl.simplified.tenprint.TenPrintInput;
-import org.nypl.simplified.tenprint.TenPrintInputBuilderType;
-
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.tenprint.TenPrintGenerator;
+import org.nypl.simplified.tenprint.TenPrintGeneratorType;
+import org.nypl.simplified.tenprint.TenPrintInput;
+import org.nypl.simplified.tenprint.TenPrintInputBuilderType;
+
+/**
+ * A cover generation activity.
+ */
 
 public final class CoverGeneration extends Activity
 {
+  /**
+   * Construct an activity.
+   */
+
+  public CoverGeneration()
+  {
+
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -39,13 +50,13 @@ public final class CoverGeneration extends Activity
     final Bitmap image = g.generate(i);
     this.setContentView(R.layout.test_cover_gen);
 
-    final ViewGroup container =
-      NullCheck.notNull((ViewGroup) this
-        .findViewById(R.id.test_cover_container));
+    final ViewGroup container = NullCheck.notNull(
+      (ViewGroup) this.findViewById(R.id.test_cover_container));
 
     final ImageView v = new ImageView(this);
-    v.setLayoutParams(new FrameLayout.LayoutParams(image.getWidth(), image
-      .getHeight()));
+    v.setLayoutParams(
+      new FrameLayout.LayoutParams(
+        image.getWidth(), image.getHeight()));
     v.setImageBitmap(image);
     container.addView(v);
   }

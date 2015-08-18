@@ -1,27 +1,28 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
-import java.io.IOException;
-
+import com.io7m.jfunctional.OptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
-import com.io7m.jfunctional.OptionType;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
- * <p>
- * The writable interface supported by book database entries.
- * </p>
+ * <p>The writable interface supported by book database entries.</p>
+ *
+ * <p>These are blocking operations that imply disk I/O.</p>
  */
 
 public interface BookDatabaseEntryWritableType
 {
   /**
    * Copy the given file into the directory as the book data. Typically, this
-   * will be an EPUB file. This function will instantly fail if `file` is not
-   * on the same filesystem as the book database.
+   * will be an EPUB file. This function will instantly fail if `file` is not on
+   * the same filesystem as the book database.
    *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   * @param file The file to be copied
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   void copyInBookFromSameFilesystem(
@@ -29,10 +30,22 @@ public interface BookDatabaseEntryWritableType
     throws IOException;
 
   /**
+   * Copy the given file into the directory as the book data. Typically, this
+   * will be an EPUB file.
+   *
+   * @param file The file to be copied
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  void copyInBook(
+    File file)
+    throws IOException;
+
+  /**
    * Create the book directory if it does not exist.
    *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   void create()
@@ -41,8 +54,7 @@ public interface BookDatabaseEntryWritableType
   /**
    * Destroy the book directory and all of its contents.
    *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   void destroy()
@@ -51,8 +63,7 @@ public interface BookDatabaseEntryWritableType
   /**
    * Destroy the book data, if it exists.
    *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   void destroyBookData()
@@ -61,8 +72,9 @@ public interface BookDatabaseEntryWritableType
   /**
    * Set the acquisition feed entry of the book
    *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   * @param in_entry The feed entry
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   void setData(
@@ -72,11 +84,23 @@ public interface BookDatabaseEntryWritableType
   /**
    * Set the cover of the book
    *
-   * @throws IOException
-   *           On I/O errors or lock acquisition failures
+   * @param in_cover The cover
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
    */
 
   void setCover(
     OptionType<File> in_cover)
+    throws IOException;
+
+  /**
+   * Set the Adobe rights information for the book.
+   *
+   * @param rights The rights information
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  void setAdobeRightsInformation(OptionType<ByteBuffer> rights)
     throws IOException;
 }

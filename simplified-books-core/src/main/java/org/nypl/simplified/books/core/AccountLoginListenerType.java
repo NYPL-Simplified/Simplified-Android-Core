@@ -9,18 +9,47 @@ import com.io7m.jfunctional.OptionType;
 public interface AccountLoginListenerType
 {
   /**
-   * Logging in failed.
+   * Logging in failed due to rejected credentials.
    */
 
-  void onAccountLoginFailure(
-    OptionType<Throwable> error,
-    String message);
+  void onAccountLoginFailureCredentialsIncorrect();
+
+  /**
+   * Logging in failed due to a server error.
+   *
+   * @param code The HTTP status code
+   */
+
+  void onAccountLoginFailureServerError(int code);
+
+  /**
+   * Logging in failed due to a local error.
+   *
+   * @param error   The exception raised, if any
+   * @param message The error message
+   */
+
+  void onAccountLoginFailureLocalError(
+    final OptionType<Throwable> error,
+    final String message);
 
   /**
    * Logging in succeeded.
+   *
+   * @param barcode The current barcode
+   * @param pin     The current PIN
    */
 
   void onAccountLoginSuccess(
     AccountBarcode barcode,
     AccountPIN pin);
+
+  /**
+   * Logging in failed due to a failure with device activation.
+   *
+   * @param message The error message
+   */
+
+  void onAccountLoginFailureDeviceActivationError(String message);
+
 }

@@ -1,13 +1,12 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import org.nypl.simplified.files.FileUtilities;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-
-import org.nypl.simplified.files.FileUtilities;
-
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 
 /**
  * The type of account PINs.
@@ -19,7 +18,13 @@ import com.io7m.jnull.Nullable;
 public final class AccountPIN implements Serializable
 {
   private static final long serialVersionUID = 1L;
-  private final String      value;
+  private final String value;
+
+  /**
+   * Construct a PIN.
+   *
+   * @param in_value The raw PIN value
+   */
 
   public AccountPIN(
     final String in_value)
@@ -52,6 +57,17 @@ public final class AccountPIN implements Serializable
   {
     return this.value;
   }
+
+  /**
+   * Write the pin to the {@code f_tmp}, atomically renaming {@code f_tmp} to
+   * {@code f} on success. For platform independence, {@code f_tmp} and {@code
+   * f} should be in the same directory.
+   *
+   * @param file_pin     The resulting file
+   * @param file_pin_tmp The temporary file
+   *
+   * @throws IOException On I/O errors
+   */
 
   public void writeToFile(
     final File file_pin,

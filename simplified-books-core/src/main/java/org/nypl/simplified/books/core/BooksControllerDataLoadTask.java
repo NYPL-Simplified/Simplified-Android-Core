@@ -1,27 +1,26 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jnull.NullCheck;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.Pair;
-import com.io7m.jnull.NullCheck;
-
 final class BooksControllerDataLoadTask implements Runnable
 {
-  private static final Logger                                     LOG;
+  private static final Logger LOG;
 
   static {
-    LOG =
-      NullCheck.notNull(LoggerFactory
-        .getLogger(BooksControllerDataLoadTask.class));
+    LOG = NullCheck.notNull(
+      LoggerFactory.getLogger(BooksControllerDataLoadTask.class));
   }
 
-  private final BookDatabaseType                                  books_database;
+  private final BookDatabaseType
+    books_database;
   private final BooksStatusCacheType                              books_status;
   private final AccountDataLoadListenerType                       listener;
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
@@ -52,9 +51,7 @@ final class BooksControllerDataLoadTask implements Runnable
         this.listener.onAccountDataBookLoadSucceeded(id, snap);
       } catch (final Throwable e) {
         this.listener.onAccountDataBookLoadFailed(
-          id,
-          Option.some(e),
-          NullCheck.notNull(e.getMessage()));
+          id, Option.some(e), NullCheck.notNull(e.getMessage()));
       }
     }
   }
@@ -69,8 +66,7 @@ final class BooksControllerDataLoadTask implements Runnable
           this.listener.onAccountDataLoadFailedImmediately(e);
         } catch (final Throwable x) {
           BooksControllerDataLoadTask.LOG.error(
-            "listener raised exception: ",
-            x);
+            "listener raised exception: ", x);
         }
       }
 
@@ -80,8 +76,7 @@ final class BooksControllerDataLoadTask implements Runnable
         this.listener.onAccountUnavailable();
       } catch (final Throwable x) {
         BooksControllerDataLoadTask.LOG.error(
-          "listener raised exception: ",
-          x);
+          "listener raised exception: ", x);
       }
     }
 

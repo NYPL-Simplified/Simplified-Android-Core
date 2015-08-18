@@ -1,25 +1,34 @@
 package org.nypl.simplified.app.reader;
 
-import java.net.URI;
-
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
 
-import com.io7m.jnull.NullCheck;
+import java.net.URI;
 
 /**
- * The default implementation of the
- * {@link ReaderSimplifiedFeedbackDispatcherType} interface.
+ * The default implementation of the {@link
+ * ReaderSimplifiedFeedbackDispatcherType}
+ * interface.
  */
 
-public final class ReaderSimplifiedFeedbackDispatcher implements
-  ReaderSimplifiedFeedbackDispatcherType
+public final class ReaderSimplifiedFeedbackDispatcher
+  implements ReaderSimplifiedFeedbackDispatcherType
 {
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderSimplifiedFeedbackDispatcher.class);
   }
+
+  private ReaderSimplifiedFeedbackDispatcher()
+  {
+
+  }
+
+  /**
+   * @return A new dispatcher
+   */
 
   public static ReaderSimplifiedFeedbackDispatcherType newDispatcher()
   {
@@ -36,9 +45,7 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
         l.onSimplifiedGestureCenterError(e);
       } catch (final Throwable x1) {
         ReaderSimplifiedFeedbackDispatcher.LOG.error(
-          "{}",
-          x1.getMessage(),
-          x1);
+          "{}", x1.getMessage(), x1);
       }
     }
   }
@@ -53,9 +60,7 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
         l.onSimplifiedGestureLeftError(e);
       } catch (final Throwable x1) {
         ReaderSimplifiedFeedbackDispatcher.LOG.error(
-          "{}",
-          x1.getMessage(),
-          x1);
+          "{}", x1.getMessage(), x1);
       }
     }
   }
@@ -70,16 +75,9 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
         l.onSimplifiedGestureRightError(e);
       } catch (final Throwable x1) {
         ReaderSimplifiedFeedbackDispatcher.LOG.error(
-          "{}",
-          x1.getMessage(),
-          x1);
+          "{}", x1.getMessage(), x1);
       }
     }
-  }
-
-  private ReaderSimplifiedFeedbackDispatcher()
-  {
-
   }
 
   @Override public void dispatch(
@@ -122,9 +120,7 @@ public final class ReaderSimplifiedFeedbackDispatcher implements
         l.onSimplifiedFunctionDispatchError(x);
       } catch (final Throwable x1) {
         ReaderSimplifiedFeedbackDispatcher.LOG.error(
-          "{}",
-          x1.getMessage(),
-          x1);
+          "{}", x1.getMessage(), x1);
       }
     }
   }

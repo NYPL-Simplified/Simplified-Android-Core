@@ -2,12 +2,30 @@ package org.nypl.simplified.app.catalog;
 
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
+/**
+ * Functions for configuring a progress bar indicating the status of a running
+ * download.
+ */
+
 public final class CatalogDownloadProgressBar
 {
+  private CatalogDownloadProgressBar()
+  {
+    throw new UnreachableCodeException();
+  }
+
+  /**
+   * Set the progress bar.
+   *
+   * @param current_total  The current total bytes
+   * @param expected_total The expected total bytes
+   * @param text           The text
+   * @param bar            The progress bar
+   */
+
   public static void setProgressBar(
     final long current_total,
     final long expected_total,
@@ -17,7 +35,7 @@ public final class CatalogDownloadProgressBar
     NullCheck.notNull(text);
     NullCheck.notNull(bar);
 
-    if (expected_total < 0) {
+    if (expected_total < 0L) {
       bar.setIndeterminate(true);
     } else {
       final double perc =
@@ -28,10 +46,5 @@ public final class CatalogDownloadProgressBar
       bar.setProgress(iperc);
       text.setText(String.format("%d%%", Integer.valueOf(iperc)));
     }
-  }
-
-  private CatalogDownloadProgressBar()
-  {
-    throw new UnreachableCodeException();
   }
 }

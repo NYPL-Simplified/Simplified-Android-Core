@@ -6,12 +6,21 @@ package org.nypl.simplified.opds.core;
 
 public final class OPDSAvailabilityOpenAccess implements OPDSAvailabilityType
 {
-  private static final long                       serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
   private static final OPDSAvailabilityOpenAccess INSTANCE;
 
   static {
     INSTANCE = new OPDSAvailabilityOpenAccess();
   }
+
+  private OPDSAvailabilityOpenAccess()
+  {
+
+  }
+
+  /**
+   * @return An "open access" availability value
+   */
 
   public static OPDSAvailabilityOpenAccess get()
   {

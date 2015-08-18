@@ -1,9 +1,19 @@
 package org.nypl.simplified.app.catalog;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+import com.squareup.picasso.Callback;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ScreenSizeControllerType;
@@ -16,26 +26,18 @@ import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.FeedGroup;
 import org.slf4j.Logger;
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnreachableCodeException;
-import com.squareup.picasso.Callback;
+/**
+ * A feed lane.
+ */
 
-@SuppressWarnings("synthetic-access") public final class CatalogFeedLane extends
-  LinearLayout
+@SuppressWarnings("synthetic-access") public final class CatalogFeedLane
+  extends LinearLayout
 {
-  private static final Logger               LOG;
+  private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(CatalogFeedLane.class);
@@ -49,6 +51,15 @@ import com.squareup.picasso.Callback;
   private final HorizontalScrollView        scroller;
   private final ViewGroup                   scroller_contents;
   private final TextView                    title;
+
+  /**
+   * Construct a feed lane.
+   *
+   * @param in_context  A context
+   * @param in_covers   A cover provider
+   * @param in_screen   The screen
+   * @param in_listener A lane listener
+   */
 
   public CatalogFeedLane(
     final Context in_context,
@@ -64,27 +75,31 @@ import com.squareup.picasso.Callback;
     this.setOrientation(LinearLayout.VERTICAL);
 
     final LayoutInflater inflater =
-      (LayoutInflater) in_context
-        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      (LayoutInflater) in_context.getSystemService(
+        Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.catalog_feed_groups_lane, this, true);
 
     this.title =
       NullCheck.notNull((TextView) this.findViewById(R.id.feed_title));
     this.progress =
       NullCheck.notNull((ProgressBar) this.findViewById(R.id.feed_progress));
-    this.scroller =
-      NullCheck.notNull((HorizontalScrollView) this
-        .findViewById(R.id.feed_scroller));
+    this.scroller = NullCheck.notNull(
+      (HorizontalScrollView) this.findViewById(R.id.feed_scroller));
     this.scroller.setHorizontalScrollBarEnabled(false);
 
-    this.scroller_contents =
-      NullCheck.notNull((ViewGroup) this.scroller
-        .findViewById(R.id.feed_scroller_contents));
+    this.scroller_contents = NullCheck.notNull(
+      (ViewGroup) this.scroller.findViewById(R.id.feed_scroller_contents));
 
     final android.view.ViewGroup.LayoutParams sp =
       this.scroller.getLayoutParams();
     this.image_height = sp.height;
   }
+
+  /**
+   * Configure the lane for the given group.
+   *
+   * @param in_group The group
+   */
 
   public void configureForGroup(
     final FeedGroup in_group)
@@ -97,12 +112,14 @@ import com.squareup.picasso.Callback;
     final FeedGroup in_group)
   {
     this.scroller.setVisibility(View.INVISIBLE);
-    this.scroller.post(new Runnable() {
-      @Override public void run()
+    this.scroller.post(
+      new Runnable()
       {
-        CatalogFeedLane.this.scroller.scrollTo(0, 0);
-      }
-    });
+        @Override public void run()
+        {
+          CatalogFeedLane.this.scroller.scrollTo(0, 0);
+        }
+      });
 
     this.scroller_contents.setVisibility(View.INVISIBLE);
     this.progress.setVisibility(View.VISIBLE);
@@ -110,13 +127,15 @@ import com.squareup.picasso.Callback;
     this.scroller_contents.removeAllViews();
 
     this.title.setText(in_group.getGroupTitle());
-    this.title.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View view_title)
+    this.title.setOnClickListener(
+      new OnClickListener()
       {
-        CatalogFeedLane.this.listener.onSelectFeed(in_group);
-      }
-    });
+        @Override public void onClick(
+          final @Nullable View view_title)
+        {
+          CatalogFeedLane.this.listener.onSelectFeed(in_group);
+        }
+      });
 
     final List<FeedEntryType> es =
       NullCheck.notNull(in_group.getGroupEntries());
@@ -125,8 +144,9 @@ import com.squareup.picasso.Callback;
 
     for (int index = 0; index < es.size(); ++index) {
       final FeedEntryType e = NullCheck.notNull(es.get(index));
-      e
-        .matchFeedEntry(new FeedEntryMatcherType<Unit, UnreachableCodeException>() {
+      e.matchFeedEntry(
+        new FeedEntryMatcherType<Unit, UnreachableCodeException>()
+        {
           @Override public Unit onFeedEntryCorrupt(
             final FeedEntryCorrupt ec)
           {
@@ -140,23 +160,21 @@ import com.squareup.picasso.Callback;
             final ImageView image_view =
               new ImageView(CatalogFeedLane.this.getContext());
 
-            final LinearLayout.LayoutParams p =
-              new LinearLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            final LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+              android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+              android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
             p.setMargins(
-              0,
-              0,
-              (int) CatalogFeedLane.this.screen.screenDPToPixels(8),
-              0);
+              0, 0, (int) CatalogFeedLane.this.screen.screenDPToPixels(8), 0);
             image_view.setLayoutParams(p);
-            image_view.setOnClickListener(new OnClickListener() {
-              @Override public void onClick(
-                final @Nullable View v)
+            image_view.setOnClickListener(
+              new OnClickListener()
               {
-                CatalogFeedLane.this.listener.onSelectBook(eo);
-              }
-            });
+                @Override public void onClick(
+                  final @Nullable View v)
+                {
+                  CatalogFeedLane.this.listener.onSelectBook(eo);
+                }
+              });
 
             image_views.add(image_view);
             CatalogFeedLane.this.scroller_contents.addView(image_view);
@@ -165,7 +183,8 @@ import com.squareup.picasso.Callback;
         });
     }
 
-    final int image_width = (int) (CatalogFeedLane.this.image_height * 0.75);
+    final int image_width =
+      (int) ((double) CatalogFeedLane.this.image_height * 0.75);
     final AtomicInteger images_left = new AtomicInteger(es.size());
     for (int index = 0; index < es.size(); ++index) {
       final ImageView image_view = image_views.get(index);
@@ -174,12 +193,12 @@ import com.squareup.picasso.Callback;
       }
 
       final FeedEntryType e = NullCheck.notNull(es.get(index));
-      final Callback cover_callback = new Callback() {
+      final Callback cover_callback = new Callback()
+      {
         @Override public void onError()
         {
           CatalogFeedLane.LOG.debug(
-            "could not load image for {}",
-            e.getBookID());
+            "could not load image for {}", e.getBookID());
 
           image_view.setVisibility(View.GONE);
           if (images_left.decrementAndGet() <= 0) {

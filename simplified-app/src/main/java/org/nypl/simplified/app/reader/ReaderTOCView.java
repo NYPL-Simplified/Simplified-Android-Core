@@ -1,15 +1,5 @@
 package org.nypl.simplified.app.reader;
 
-import java.util.List;
-
-import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
-import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
-import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.app.utilities.UIThread;
-import org.slf4j.Logger;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
@@ -23,15 +13,26 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
+import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.app.utilities.UIThread;
+import org.slf4j.Logger;
 
-@SuppressWarnings("synthetic-access") public final class ReaderTOCView implements
-  ListAdapter,
-  ReaderSettingsListenerType
+import java.util.List;
+
+/**
+ * A re-usable view of a table of contents.
+ */
+
+@SuppressWarnings("synthetic-access") public final class ReaderTOCView
+  implements ListAdapter, ReaderSettingsListenerType
 {
-  private static final Logger                      LOG;
+  private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderTOCView.class);
@@ -45,6 +46,15 @@ import com.io7m.jnull.Nullable;
   private final ViewGroup                          view_layout;
   private final ViewGroup                          view_root;
   private final TextView                           view_title;
+
+  /**
+   * Construct a TOC view.
+   *
+   * @param in_inflater A layout inflater
+   * @param in_context  A context
+   * @param in_toc      The table of contents
+   * @param in_listener A selection listener
+   */
 
   public ReaderTOCView(
     final LayoutInflater in_inflater,
@@ -63,33 +73,31 @@ import com.io7m.jnull.Nullable;
     final ReaderSettingsType settings = rs.getSettings();
     settings.addListener(this);
 
-    final ViewGroup in_layout =
-      NullCheck.notNull((ViewGroup) in_inflater.inflate(
-        R.layout.reader_toc,
-        null));
+    final ViewGroup in_layout = NullCheck.notNull(
+      (ViewGroup) in_inflater.inflate(
+        R.layout.reader_toc, null));
 
-    final ImageView in_back =
-      NullCheck.notNull((ImageView) in_layout
-        .findViewById(R.id.reader_toc_back));
-    final ListView in_list_view =
-      NullCheck.notNull((ListView) in_layout
-        .findViewById(R.id.reader_toc_list));
-    final TextView in_title =
-      NullCheck.notNull((TextView) in_layout
-        .findViewById(R.id.reader_toc_title));
+    final ImageView in_back = NullCheck.notNull(
+      (ImageView) in_layout.findViewById(R.id.reader_toc_back));
+    final ListView in_list_view = NullCheck.notNull(
+      (ListView) in_layout.findViewById(R.id.reader_toc_list));
+    final TextView in_title = NullCheck.notNull(
+      (TextView) in_layout.findViewById(R.id.reader_toc_title));
     final ViewGroup in_root =
       NullCheck.notNull((ViewGroup) in_list_view.getRootView());
 
     final List<TOCElement> es = in_toc.getElements();
     this.adapter = new ArrayAdapter<TOCElement>(in_context, 0, es);
 
-    in_back.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    in_back.setOnClickListener(
+      new OnClickListener()
       {
-        in_listener.onTOCBackSelected();
-      }
-    });
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          in_listener.onTOCBackSelected();
+        }
+      });
 
     in_list_view.setAdapter(this);
 
@@ -102,8 +110,7 @@ import com.io7m.jnull.Nullable;
     this.listener = in_listener;
 
     this.applyColorScheme(
-      NullCheck.notNull(in_context.getResources()),
-      settings.getColorScheme());
+      NullCheck.notNull(in_context.getResources()), settings.getColorScheme());
   }
 
   private void applyColorScheme(
@@ -119,8 +126,7 @@ import com.io7m.jnull.Nullable;
 
     in_root.setBackgroundColor(cs.getBackgroundColor());
     in_title.setTextColor(main_color);
-    in_back
-      .setColorFilter(ReaderColorMatrix.getImageFilterMatrix(main_color));
+    in_back.setColorFilter(ReaderColorMatrix.getImageFilterMatrix(main_color));
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -136,9 +142,8 @@ import com.io7m.jnull.Nullable;
   @Override public TOCElement getItem(
     final int position)
   {
-    return NullCheck.notNull(NullCheck
-      .notNull(this.adapter)
-      .getItem(position));
+    return NullCheck.notNull(
+      NullCheck.notNull(this.adapter).getItem(position));
   }
 
   @Override public long getItemId(
@@ -152,6 +157,10 @@ import com.io7m.jnull.Nullable;
   {
     return NullCheck.notNull(this.adapter).getItemViewType(position);
   }
+
+  /**
+   * @return The view group containing the main layout
+   */
 
   public ViewGroup getLayoutView()
   {
@@ -167,11 +176,8 @@ import com.io7m.jnull.Nullable;
     if (reuse != null) {
       item_view = (ViewGroup) reuse;
     } else {
-      item_view =
-        (ViewGroup) this.inflater.inflate(
-          R.layout.reader_toc_element,
-          parent,
-          false);
+      item_view = (ViewGroup) this.inflater.inflate(
+        R.layout.reader_toc_element, parent, false);
     }
 
     /**
@@ -179,9 +185,8 @@ import com.io7m.jnull.Nullable;
      * indentation level.
      */
 
-    final TextView text_view =
-      NullCheck.notNull((TextView) item_view
-        .findViewById(R.id.reader_toc_element_text));
+    final TextView text_view = NullCheck.notNull(
+      (TextView) item_view.findViewById(R.id.reader_toc_element_text));
     final TOCElement e = NullCheck.notNull(this.adapter).getItem(position);
     text_view.setText(e.getTitle());
 
@@ -189,21 +194,22 @@ import com.io7m.jnull.Nullable;
       Simplified.getReaderAppServices();
     final ReaderSettingsType settings = rs.getSettings();
 
-    final RelativeLayout.LayoutParams p =
-      new RelativeLayout.LayoutParams(
-        android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-        android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+    final RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(
+      android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+      android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
     p.setMargins((int) rs.screenDPToPixels(e.getIndent() * 16), 0, 0, 0);
     text_view.setLayoutParams(p);
     text_view.setTextColor(settings.getColorScheme().getForegroundColor());
 
-    item_view.setOnClickListener(new OnClickListener() {
-      @Override public void onClick(
-        final @Nullable View v)
+    item_view.setOnClickListener(
+      new OnClickListener()
       {
-        ReaderTOCView.this.listener.onTOCItemSelected(e);
-      }
-    });
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          ReaderTOCView.this.listener.onTOCItemSelected(e);
+        }
+      });
 
     return item_view;
   }
@@ -217,6 +223,10 @@ import com.io7m.jnull.Nullable;
   {
     return NullCheck.notNull(this.adapter).hasStableIds();
   }
+
+  /**
+   * Hide the back button!
+   */
 
   public void hideTOCBackButton()
   {
@@ -238,15 +248,21 @@ import com.io7m.jnull.Nullable;
   @Override public void onReaderSettingsChanged(
     final ReaderSettingsType s)
   {
-    UIThread.runOnUIThread(new Runnable() {
-      @Override public void run()
+    UIThread.runOnUIThread(
+      new Runnable()
       {
-        ReaderTOCView.this.applyColorScheme(
-          NullCheck.notNull(ReaderTOCView.this.context.getResources()),
-          s.getColorScheme());
-      }
-    });
+        @Override public void run()
+        {
+          ReaderTOCView.this.applyColorScheme(
+            NullCheck.notNull(ReaderTOCView.this.context.getResources()),
+            s.getColorScheme());
+        }
+      });
   }
+
+  /**
+   * Called when a table of contents is destroyed.
+   */
 
   public void onTOCViewDestroy()
   {

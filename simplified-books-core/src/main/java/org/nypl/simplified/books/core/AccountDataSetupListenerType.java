@@ -10,6 +10,9 @@ public interface AccountDataSetupListenerType
 {
   /**
    * Setting up the database failed.
+   *
+   * @param error   The error, if any
+   * @param message The error message
    */
 
   void onAccountDataSetupFailure(

@@ -1,5 +1,9 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
+
 import java.net.URI;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -8,40 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+/**
+ * A (mutable) feed without groups.
+ */
 
-public final class FeedWithoutGroups extends AbstractList<FeedEntryType> implements
-  FeedType
+public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
+  implements FeedType
 {
-  public static FeedWithoutGroups newEmptyFeed(
-    final URI in_uri,
-    final String in_id,
-    final Calendar in_updated,
-    final String in_title,
-    final OptionType<URI> in_next,
-    final OptionType<FeedSearchType> in_search,
-    final Map<String, List<FeedFacetType>> in_facets_by_group,
-    final List<FeedFacetType> in_facets_order)
-  {
-    final List<BookID> in_entries_order = new ArrayList<BookID>();
-    final Map<BookID, FeedEntryType> in_entries =
-      new HashMap<BookID, FeedEntryType>();
-
-    return new FeedWithoutGroups(
-      in_uri,
-      in_id,
-      in_updated,
-      in_title,
-      in_next,
-      in_search,
-      in_entries_order,
-      in_entries,
-      in_facets_by_group,
-      in_facets_order);
-  }
-
   private final Map<BookID, FeedEntryType>       entries;
   private final List<BookID>                     entries_order;
   private final Map<String, List<FeedFacetType>> facets_by_group;
@@ -52,6 +29,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
   private final String                           title;
   private final Calendar                         updated;
   private final URI                              uri;
+  private final OptionType<URI>                  terms_of_service;
+  private final OptionType<URI>                  privacy_policy;
 
   private FeedWithoutGroups(
     final URI in_uri,
@@ -63,7 +42,9 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     final List<BookID> in_entries_order,
     final Map<BookID, FeedEntryType> in_entries,
     final Map<String, List<FeedFacetType>> in_facets_by_group,
-    final List<FeedFacetType> in_facets_order)
+    final List<FeedFacetType> in_facets_order,
+    final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_privacy_policy)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -75,6 +56,58 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     this.entries = NullCheck.notNull(in_entries);
     this.facets_by_group = NullCheck.notNull(in_facets_by_group);
     this.facets_order = NullCheck.notNull(in_facets_order);
+    this.terms_of_service = NullCheck.notNull(in_terms_of_service);
+    this.privacy_policy = NullCheck.notNull(in_privacy_policy);
+  }
+
+  /**
+   * Construct an empty feed.
+   *
+   * @param in_uri              The feed URI
+   * @param in_id               The feed ID
+   * @param in_updated          The last updated time
+   * @param in_title            The title
+   * @param in_next             A link to the next part of the feed, if any
+   * @param in_search           A link to the feed searcher, if any
+   * @param in_facets_by_group  The facets arranged by group
+   * @param in_facets_order     The facets arranged in order
+   * @param in_terms_of_service An optional link to the terms of service for the
+   *                            feed
+   * @param in_privacy_policy   An optional link to the privacy policy for the
+   *                            feed
+   *
+   * @return An empty feed
+   */
+
+  public static FeedWithoutGroups newEmptyFeed(
+    final URI in_uri,
+    final String in_id,
+    final Calendar in_updated,
+    final String in_title,
+    final OptionType<URI> in_next,
+    final OptionType<FeedSearchType> in_search,
+    final Map<String, List<FeedFacetType>> in_facets_by_group,
+    final List<FeedFacetType> in_facets_order,
+    final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_privacy_policy)
+  {
+    final List<BookID> in_entries_order = new ArrayList<BookID>(32);
+    final Map<BookID, FeedEntryType> in_entries =
+      new HashMap<BookID, FeedEntryType>(32);
+
+    return new FeedWithoutGroups(
+      in_uri,
+      in_id,
+      in_updated,
+      in_title,
+      in_next,
+      in_search,
+      in_entries_order,
+      in_entries,
+      in_facets_by_group,
+      in_facets_order,
+      in_terms_of_service,
+      in_privacy_policy);
   }
 
   @Override public void add(
@@ -89,6 +122,15 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     }
   }
 
+  /**
+   * @return A link to the terms of service, if any
+   */
+
+  public OptionType<URI> getFeedTermsOfService()
+  {
+    return this.terms_of_service;
+  }
+
   @Override public FeedEntryType get(
     final int index)
   {
@@ -96,10 +138,18 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
     return NullCheck.notNull(this.entries.get(book_id));
   }
 
+  /**
+   * @return The feed facets by group
+   */
+
   public Map<String, List<FeedFacetType>> getFeedFacetsByGroup()
   {
     return this.facets_by_group;
   }
+
+  /**
+   * @return The feed facets in order
+   */
 
   public List<FeedFacetType> getFeedFacetsOrder()
   {
@@ -110,6 +160,19 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType> impleme
   {
     return this.id;
   }
+
+  /**
+   * @return A link to the privacy policy, if any
+   */
+
+  public OptionType<URI> getFeedPrivacyPolicy()
+  {
+    return this.privacy_policy;
+  }
+
+  /**
+   * @return A link to the next part of the feed, if any
+   */
 
   public OptionType<URI> getFeedNext()
   {

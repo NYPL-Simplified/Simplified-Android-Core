@@ -1,11 +1,9 @@
 package org.nypl.simplified.books.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.List;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -21,20 +19,20 @@ import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.Pair;
-import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.util.List;
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) final class BooksControllerSyncTask implements
-  Runnable
+@SuppressWarnings({ "boxing", "synthetic-access" })
+final class BooksControllerSyncTask implements Runnable
 {
-  private static final Logger                LOG;
+  private static final Logger LOG;
 
   static {
-    LOG =
-      NullCheck.notNull(LoggerFactory
-        .getLogger(BooksControllerSyncTask.class));
+    LOG = NullCheck.notNull(
+      LoggerFactory.getLogger(BooksControllerSyncTask.class));
   }
 
   private final BookDatabaseType             books_database;
@@ -69,8 +67,7 @@ import com.io7m.jnull.NullCheck;
       this.listener.onAccountSyncSuccess();
     } catch (final Throwable x) {
       this.listener.onAccountSyncFailure(
-        Option.some(x),
-        NullCheck.notNull(x.getMessage()));
+        Option.some(x), NullCheck.notNull(x.getMessage()));
     }
   }
 
@@ -88,52 +85,49 @@ import com.io7m.jnull.NullCheck;
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
     final HTTPResultType<InputStream> r =
-      this.http.get(Option.some(auth), loans_uri, 0);
+      this.http.get(Option.some(auth), loans_uri, 0L);
 
-    r.matchResult(new HTTPResultMatcherType<InputStream, Unit, Exception>() {
-      @Override public Unit onHTTPError(
-        final HTTPResultError<InputStream> e)
-        throws Exception
+    r.matchResult(
+      new HTTPResultMatcherType<InputStream, Unit, Exception>()
       {
-        final String m =
-          NullCheck.notNull(String.format(
-            "%s: %d: %s",
-            loans_uri,
-            e.getStatus(),
-            e.getMessage()));
+        @Override public Unit onHTTPError(
+          final HTTPResultError<InputStream> e)
+          throws Exception
+        {
+          final String m = NullCheck.notNull(
+            String.format(
+              "%s: %d: %s", loans_uri, e.getStatus(), e.getMessage()));
 
-        switch (e.getStatus()) {
-          case HttpURLConnection.HTTP_UNAUTHORIZED:
-          {
-            in_listener.onAccountSyncAuthenticationFailure("Invalid PIN");
+          switch (e.getStatus()) {
+            case HttpURLConnection.HTTP_UNAUTHORIZED: {
+              in_listener.onAccountSyncAuthenticationFailure("Invalid PIN");
+              return Unit.unit();
+            }
+            default: {
+              throw new IOException(m);
+            }
+          }
+        }
+
+        @Override public Unit onHTTPException(
+          final HTTPResultException<InputStream> e)
+          throws Exception
+        {
+          throw e.getError();
+        }
+
+        @Override public Unit onHTTPOK(
+          final HTTPResultOKType<InputStream> e)
+          throws Exception
+        {
+          try {
+            BooksControllerSyncTask.this.syncFeedEntries(loans_uri, e);
             return Unit.unit();
-          }
-          default:
-          {
-            throw new IOException(m);
+          } finally {
+            e.close();
           }
         }
-      }
-
-      @Override public Unit onHTTPException(
-        final HTTPResultException<InputStream> e)
-        throws Exception
-      {
-        throw e.getError();
-      }
-
-      @Override public Unit onHTTPOK(
-        final HTTPResultOKType<InputStream> e)
-        throws Exception
-      {
-        try {
-          BooksControllerSyncTask.this.syncFeedEntries(loans_uri, e);
-          return Unit.unit();
-        } finally {
-          e.close();
-        }
-      }
-    });
+      });
   }
 
   private void syncFeedEntries(
@@ -150,16 +144,11 @@ import com.io7m.jnull.NullCheck;
         final OPDSAcquisitionFeedEntry e_nn = NullCheck.notNull(e);
         final BookID book_id = BookID.newIDFromEntry(e_nn);
         BooksController.syncFeedEntry(
-          e_nn,
-          this.books_database,
-          this.status_cache,
-          this.http);
+          e_nn, this.books_database, this.status_cache, this.http);
         this.listener.onAccountSyncBook(book_id);
       } catch (final Throwable x) {
         BooksControllerSyncTask.LOG.error(
-          "unable to save entry: {}: ",
-          e.getID(),
-          x);
+          "unable to save entry: {}: ", e.getID(), x);
       }
     }
   }

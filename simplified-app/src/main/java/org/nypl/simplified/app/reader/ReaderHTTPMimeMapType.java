@@ -13,10 +13,10 @@ public interface ReaderHTTPMimeMapType
   String getDefaultMimeType();
 
   /**
-   * Retrieve the MIME type for a file with suffix <tt>suffix</tt>.
+   * Retrieve the MIME type for a file with suffix {@code suffix}.
    *
-   * @param suffix
-   *          The file suffix
+   * @param suffix The file suffix
+   *
    * @return A MIME type
    */
 

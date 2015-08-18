@@ -1,10 +1,5 @@
 package org.nypl.simplified.app.catalog;
 
-import java.util.ArrayList;
-
-import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.core.FeedFacetType;
-
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.res.Resources;
@@ -19,16 +14,19 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.books.core.FeedFacetType;
+
+import java.util.ArrayList;
 
 /**
  * A dialog used to select facets.
  */
 
-public final class CatalogFacetDialog extends DialogFragment implements
-  OnItemClickListener
+public final class CatalogFacetDialog extends DialogFragment
+  implements OnItemClickListener
 {
   private static final String GROUP_ID;
   private static final String GROUP_NAME_ID;
@@ -38,6 +36,29 @@ public final class CatalogFacetDialog extends DialogFragment implements
     GROUP_NAME_ID =
       "org.nypl.simplified.app.catalog.CatalogFacetDialog.facets_name";
   }
+
+  private @Nullable ArrayList<FeedFacetType>          group;
+  private @Nullable ArrayAdapter<String>              group_adapter;
+  private @Nullable String                            group_name;
+  private @Nullable CatalogFacetSelectionListenerType listener;
+
+  /**
+   * Construct a dialog.
+   */
+
+  public CatalogFacetDialog()
+  {
+    // Fragments must have no-arg constructors.
+  }
+
+  /**
+   * Construct a dialog.
+   *
+   * @param in_facet_group_name The facet group name
+   * @param in_facet_group      The facet group
+   *
+   * @return A new dialog
+   */
 
   public static CatalogFacetDialog newDialog(
     final String in_facet_group_name,
@@ -52,16 +73,6 @@ public final class CatalogFacetDialog extends DialogFragment implements
     return c;
   }
 
-  private @Nullable ArrayList<FeedFacetType>          group;
-  private @Nullable ArrayAdapter<String>              group_adapter;
-  private @Nullable String                            group_name;
-  private @Nullable CatalogFacetSelectionListenerType listener;
-
-  public CatalogFacetDialog()
-  {
-    // Fragments must have no-arg constructors.
-  }
-
   @Override public void onCreate(
     final @Nullable Bundle state)
   {
@@ -71,25 +82,24 @@ public final class CatalogFacetDialog extends DialogFragment implements
     final Bundle b = NullCheck.notNull(this.getArguments());
 
     @SuppressWarnings("unchecked") final ArrayList<FeedFacetType> in_group =
-      NullCheck.notNull((ArrayList<FeedFacetType>) b
-        .getSerializable(CatalogFacetDialog.GROUP_ID));
+      NullCheck.notNull(
+        (ArrayList<FeedFacetType>) b.getSerializable(
+          CatalogFacetDialog.GROUP_ID));
 
     this.group = in_group;
     this.group_name =
       NullCheck.notNull(b.getString(CatalogFacetDialog.GROUP_NAME_ID));
 
-    final ArrayList<String> in_strings =
-      new ArrayList<String>(in_group.size());
+    final ArrayList<String> in_strings = new ArrayList<String>(in_group.size());
     for (final FeedFacetType f : in_group) {
       in_strings.add(f.facetGetTitle());
     }
 
-    this.group_adapter =
-      new ArrayAdapter<String>(
-        this.getActivity(),
-        android.R.layout.simple_list_item_1,
-        android.R.id.text1,
-        in_strings);
+    this.group_adapter = new ArrayAdapter<String>(
+      this.getActivity(),
+      android.R.layout.simple_list_item_1,
+      android.R.id.text1,
+      in_strings);
   }
 
   @Override public void onResume()
@@ -113,11 +123,9 @@ public final class CatalogFacetDialog extends DialogFragment implements
   {
     final LayoutInflater inflater = NullCheck.notNull(inflater_mn);
 
-    final ViewGroup layout =
-      NullCheck.notNull((ViewGroup) inflater.inflate(
-        R.layout.facet_dialog,
-        container,
-        false));
+    final ViewGroup layout = NullCheck.notNull(
+      (ViewGroup) inflater.inflate(
+        R.layout.facet_dialog, container, false));
 
     final ListView in_list =
       NullCheck.notNull((ListView) layout.findViewById(R.id.facet_list));
@@ -145,6 +153,12 @@ public final class CatalogFacetDialog extends DialogFragment implements
       NullCheck.notNull(NullCheck.notNull(this.group).get(position));
     NullCheck.notNull(this.listener).onFacetSelected(f);
   }
+
+  /**
+   * Set the selection listener.
+   *
+   * @param in_listener The listener
+   */
 
   public void setFacetSelectionListener(
     final CatalogFacetSelectionListenerType in_listener)

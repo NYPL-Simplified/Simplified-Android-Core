@@ -1,5 +1,26 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.simplified.downloader.core.DownloadType;
+import org.nypl.simplified.downloader.core.DownloaderType;
+import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPResultOKType;
+import org.nypl.simplified.http.core.HTTPResultToException;
+import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSFeedParserType;
+import org.nypl.simplified.opds.core.OPDSJSONParserType;
+import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,38 +37,59 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.nypl.simplified.downloader.core.DownloadType;
-import org.nypl.simplified.downloader.core.DownloaderType;
-import org.nypl.simplified.http.core.HTTPAuthType;
-import org.nypl.simplified.http.core.HTTPResultOKType;
-import org.nypl.simplified.http.core.HTTPResultToException;
-import org.nypl.simplified.http.core.HTTPType;
-import org.nypl.simplified.opds.core.OPDSAcquisition;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSFeedParserType;
-import org.nypl.simplified.opds.core.OPDSJSONParserType;
-import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
-import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheck;
-import com.io7m.junreachable.UnreachableCodeException;
-
 /**
  * The default implementation of the {@link BooksType} interface.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" }) public final class BooksController extends
-  Observable implements BooksType
+public final class BooksController extends Observable implements BooksType
 {
   private static final Logger LOG;
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
+  }
+
+  private final BookDatabaseType                                  book_database;
+  private final BooksStatusCacheType                              books_status;
+  private final BooksControllerConfiguration                      config;
+  private final File
+                                                                  data_directory;
+  private final DownloaderType                                    downloader;
+  private final ConcurrentHashMap<BookID, DownloadType>           downloads;
+  private final ExecutorService                                   exec;
+  private final FeedLoaderType                                    feed_loader;
+  private final OPDSFeedParserType                                feed_parser;
+  private final HTTPType                                          http;
+  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
+  private final AtomicInteger                                     task_id;
+  private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
+  private       Map<Integer, Future<?>>                           tasks;
+
+  private BooksController(
+    final ExecutorService in_exec,
+    final FeedLoaderType in_feeds,
+    final HTTPType in_http,
+    final DownloaderType in_downloader,
+    final OPDSJSONSerializerType in_json_serializer,
+    final OPDSJSONParserType in_json_parser,
+    final BooksControllerConfiguration in_config,
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+  {
+    this.exec = NullCheck.notNull(in_exec);
+    this.feed_loader = NullCheck.notNull(in_feeds);
+    this.http = NullCheck.notNull(in_http);
+    this.downloader = NullCheck.notNull(in_downloader);
+    this.config = NullCheck.notNull(in_config);
+    this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
+    this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
+    this.downloads = new ConcurrentHashMap<BookID, DownloadType>(32);
+    this.books_status = BooksStatusCache.newStatusCache();
+    this.data_directory = new File(this.config.getDirectory(), "data");
+    this.book_database = BookDatabase.newDatabase(
+      in_json_serializer, in_json_parser, this.data_directory);
+    this.task_id = new AtomicInteger(0);
+    this.feed_parser = this.feed_loader.getOPDSFeedParser();
+    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
   }
 
   static OptionType<File> makeCover(
@@ -78,7 +120,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
     final OptionType<HTTPAuthType> no_auth = Option.none();
     final HTTPResultOKType<InputStream> r =
-      http.get(no_auth, cover_uri, 0).matchResult(
+      http.get(no_auth, cover_uri, 0L).matchResult(
         new HTTPResultToException<InputStream>(cover_uri));
 
     try {
@@ -87,7 +129,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         final InputStream in = NullCheck.notNull(r.getValue());
         try {
           final byte[] buffer = new byte[8192];
-          for (;;) {
+          while (true) {
             final int rb = in.read(buffer);
             if (rb == -1) {
               break;
@@ -109,6 +151,21 @@ import com.io7m.junreachable.UnreachableCodeException;
     BooksController.LOG.debug("fetched cover {}", cover_uri);
   }
 
+  /**
+   * Construct a new books controller.
+   *
+   * @param in_exec            An executor
+   * @param in_feeds           An asynchronous feed loader
+   * @param in_http            An HTTP interface
+   * @param in_downloader      A downloader
+   * @param in_json_serializer A JSON serializer
+   * @param in_json_parser     A JSON parser
+   * @param in_config          The controller configuration
+   * @param in_adobe_drm       An Adobe DRM interface, if supported
+   *
+   * @return A new books controller
+   */
+
   public static BooksType newBooks(
     final ExecutorService in_exec,
     final FeedLoaderType in_feeds,
@@ -116,7 +173,8 @@ import com.io7m.junreachable.UnreachableCodeException;
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config)
+    final BooksControllerConfiguration in_config,
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
   {
     return new BooksController(
       in_exec,
@@ -125,23 +183,20 @@ import com.io7m.junreachable.UnreachableCodeException;
       in_downloader,
       in_json_serializer,
       in_json_parser,
-      in_config);
+      in_config,
+      in_adobe_drm);
   }
 
   /**
    * Convenience function to update a given book database entry and download a
    * cover.
    *
-   * @param e
-   *          The acquisition feed entry
-   * @param book_database
-   *          The book database
-   * @param books_status
-   *          The book status cache
-   * @param http
-   *          An HTTP implementation
-   * @throws IOException
-   *           On I/O errors
+   * @param e             The acquisition feed entry
+   * @param book_database The book database
+   * @param books_status  The book status cache
+   * @param http          An HTTP implementation
+   *
+   * @throws IOException On I/O errors
    */
 
   static void syncFeedEntry(
@@ -175,50 +230,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     books_status.booksSnapshotUpdate(book_id, snap);
 
     BooksController.LOG.debug(
-      "book {}: finished synchronizing book entry",
-      book_id);
-  }
-
-  private final BookDatabaseType                                  book_database;
-  private final BooksStatusCacheType                              books_status;
-  private final BooksControllerConfiguration                      config;
-  private final File                                              data_directory;
-  private final DownloaderType                                    downloader;
-  private final ConcurrentHashMap<BookID, DownloadType>           downloads;
-  private final ExecutorService                                   exec;
-  private final FeedLoaderType                                    feed_loader;
-  private final OPDSFeedParserType                                feed_parser;
-  private final HTTPType                                          http;
-  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
-  private final AtomicInteger                                     task_id;
-  private Map<Integer, Future<?>>                                 tasks;
-
-  private BooksController(
-    final ExecutorService in_exec,
-    final FeedLoaderType in_feeds,
-    final HTTPType in_http,
-    final DownloaderType in_downloader,
-    final OPDSJSONSerializerType in_json_serializer,
-    final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config)
-  {
-    this.exec = NullCheck.notNull(in_exec);
-    this.feed_loader = NullCheck.notNull(in_feeds);
-    this.http = NullCheck.notNull(in_http);
-    this.downloader = NullCheck.notNull(in_downloader);
-    this.config = NullCheck.notNull(in_config);
-    this.tasks = new ConcurrentHashMap<Integer, Future<?>>();
-    this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
-    this.downloads = new ConcurrentHashMap<BookID, DownloadType>();
-    this.books_status = BooksStatusCache.newStatusCache();
-    this.data_directory = new File(this.config.getDirectory(), "data");
-    this.book_database =
-      BookDatabase.newDatabase(
-        in_json_serializer,
-        in_json_parser,
-        this.data_directory);
-    this.task_id = new AtomicInteger(0);
-    this.feed_parser = this.feed_loader.getOPDSFeedParser();
+      "book {}: finished synchronizing book entry", book_id);
   }
 
   @Override public void accountGetCachedLoginDetails(
@@ -249,11 +261,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final AccountDataLoadListenerType listener)
   {
     NullCheck.notNull(listener);
-    this.submitRunnable(new BooksControllerDataLoadTask(
-      this.book_database,
-      this.books_status,
-      listener,
-      this.login));
+    this.submitRunnable(
+      new BooksControllerDataLoadTask(
+        this.book_database, this.books_status, listener, this.login));
   }
 
   @Override public void accountLogin(
@@ -265,15 +275,17 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(pin);
     NullCheck.notNull(listener);
 
-    this.submitRunnable(new BooksControllerLoginTask(
-      this,
-      this.book_database,
-      this.http,
-      this.config,
-      barcode,
-      pin,
-      listener,
-      this.login));
+    this.submitRunnable(
+      new BooksControllerLoginTask(
+        this,
+        this.book_database,
+        this.http,
+        this.config,
+        this.adobe_drm,
+        barcode,
+        pin,
+        listener,
+        this.login));
   }
 
   @Override public void accountLogout(
@@ -284,10 +296,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     synchronized (this) {
       this.stopAllTasks();
       this.books_status.booksStatusClearAll();
-      this.submitRunnable(new BooksControllerLogoutTask(
-        this.config,
-        this.login,
-        listener));
+      this.submitRunnable(
+        new BooksControllerLogoutTask(
+          this.config, this.adobe_drm, this.login, listener));
     }
   }
 
@@ -295,14 +306,15 @@ import com.io7m.junreachable.UnreachableCodeException;
     final AccountSyncListenerType listener)
   {
     NullCheck.notNull(listener);
-    this.submitRunnable(new BooksControllerSyncTask(
-      this.config,
-      this,
-      this.book_database,
-      this.http,
-      this.feed_parser,
-      this.downloader,
-      listener));
+    this.submitRunnable(
+      new BooksControllerSyncTask(
+        this.config,
+        this,
+        this.book_database,
+        this.http,
+        this.feed_parser,
+        this.downloader,
+        listener));
   }
 
   @Override public void bookBorrow(
@@ -319,17 +331,19 @@ import com.io7m.junreachable.UnreachableCodeException;
     BooksController.LOG.debug("borrow {}", id);
 
     this.books_status.booksStatusUpdate(new BookStatusRequestingLoan(id));
-    this.submitRunnable(new BooksControllerBorrowTask(
-      this.book_database,
-      this.books_status,
-      this.downloader,
-      this.http,
-      this.downloads,
-      id,
-      acq,
-      eo,
-      listener,
-      this.feed_loader));
+    this.submitRunnable(
+      new BooksControllerBorrowTask(
+        this.book_database,
+        this.books_status,
+        this.downloader,
+        this.http,
+        this.downloads,
+        id,
+        acq,
+        eo,
+        listener,
+        this.feed_loader,
+        this.adobe_drm));
   }
 
   @Override public void bookDeleteData(
@@ -338,10 +352,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(id);
 
     BooksController.LOG.debug("delete: {}", id);
-    this.submitRunnable(new BooksControllerDeleteBookDataTask(
-      this.books_status,
-      this.book_database,
-      id));
+    this.submitRunnable(
+      new BooksControllerDeleteBookDataTask(
+        this.books_status, this.book_database, id));
   }
 
   @Override public void bookDownloadAcknowledge(
@@ -356,9 +369,7 @@ import com.io7m.junreachable.UnreachableCodeException;
         (Some<BookStatusType>) status_opt;
       final BookStatusType status = status_some.get();
       BooksController.LOG.debug(
-        "status of book {} is currently {}",
-        id,
-        status);
+        "status of book {} is currently {}", id, status);
 
       if (status instanceof BookStatusDownloadFailed) {
         final OptionType<BookSnapshot> snap_opt =
@@ -366,9 +377,9 @@ import com.io7m.junreachable.UnreachableCodeException;
         if (snap_opt.isSome()) {
           final Some<BookSnapshot> snap_some = (Some<BookSnapshot>) snap_opt;
           final BookSnapshot snap = snap_some.get();
-          this.books_status.booksStatusUpdate(BookStatus.fromSnapshot(
-            id,
-            snap));
+          this.books_status.booksStatusUpdate(
+            BookStatus.fromSnapshot(
+              id, snap));
         } else {
 
           /**
@@ -406,6 +417,7 @@ import com.io7m.junreachable.UnreachableCodeException;
     final String in_facet_group,
     final FeedFacetPseudoTitleProviderType in_facet_titles,
     final OptionType<String> in_search,
+    final BooksFeedSelection in_selection,
     final BookFeedListenerType in_listener)
   {
     NullCheck.notNull(in_uri);
@@ -416,19 +428,22 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(in_facet_group);
     NullCheck.notNull(in_facet_titles);
     NullCheck.notNull(in_search);
+    NullCheck.notNull(in_selection);
     NullCheck.notNull(in_listener);
 
-    this.submitRunnable(new BooksControllerFeedTask(
-      this.book_database,
-      in_uri,
-      in_id,
-      in_updated,
-      in_title,
-      in_facet_active,
-      in_facet_group,
-      in_facet_titles,
-      in_search,
-      in_listener));
+    this.submitRunnable(
+      new BooksControllerFeedTask(
+        this.book_database,
+        in_uri,
+        in_id,
+        in_updated,
+        in_title,
+        in_facet_active,
+        in_facet_group,
+        in_facet_titles,
+        in_search,
+        in_selection,
+        in_listener));
   }
 
   @Override public synchronized void booksObservableAddObserver(
@@ -498,18 +513,16 @@ import com.io7m.junreachable.UnreachableCodeException;
     NullCheck.notNull(e);
 
     BooksController.LOG.debug("update metadata {}: {}", id, e);
-    this.submitRunnable(new BooksControllerUpdateMetadataTask(
-      this.http,
-      this.book_database,
-      id,
-      e));
+    this.submitRunnable(
+      new BooksControllerUpdateMetadataTask(
+        this.http, this.book_database, id, e));
   }
 
   private void stopAllTasks()
   {
     synchronized (this) {
       final Map<Integer, Future<?>> t_old = this.tasks;
-      this.tasks = new ConcurrentHashMap<Integer, Future<?>>();
+      this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
 
       final Iterator<Future<?>> iter = t_old.values().iterator();
       while (iter.hasNext()) {
@@ -528,8 +541,9 @@ import com.io7m.junreachable.UnreachableCodeException;
     final Runnable r)
   {
     synchronized (this) {
-      final int id = Integer.valueOf(this.task_id.incrementAndGet());
-      final Runnable rb = new Runnable() {
+      final int id = this.task_id.incrementAndGet();
+      final Runnable rb = new Runnable()
+      {
         @Override public void run()
         {
           try {
