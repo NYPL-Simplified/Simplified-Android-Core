@@ -104,9 +104,12 @@ public final class AdobeDRMServices
 
     final File app_storage = context.getFilesDir();
     final File xml_storage = context.getFilesDir();
-    final File book_storage = context.getExternalFilesDir("adobe-books-tmp");
+
+    final File book_storage =
+      new File(Simplified.getDiskDataDir(context), "adobe-books-tmp");
     final File temp_storage =
-      new File(context.getExternalCacheDir(), "adobe-tmp");
+      new File(Simplified.getDiskDataDir(context), "adobe-tmp");
+
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);
     log.debug("adobe temporary book storage: {}", book_storage);

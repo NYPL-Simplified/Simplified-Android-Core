@@ -109,7 +109,7 @@ public final class Simplified extends Application
     return i.getActualAppServices();
   }
 
-  private static File getDiskDataDir(
+  static File getDiskDataDir(
     final Context context)
   {
     /**
