@@ -19,11 +19,9 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.io7m.jfunctional.None;
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.OptionVisitorType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -397,8 +395,15 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((EditText) this.findViewById(R.id.settings_pin_edit));
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
-    final TextView in_adobe =
-      NullCheck.notNull((TextView) this.findViewById(R.id.settings_adobe_drm));
+    final TextView in_adobe_accounts = NullCheck.notNull(
+      (TextView) this.findViewById(R.id.settings_adobe_accounts));
+
+    /**
+     * If Adobe DRM support is available, then enable the accounts
+     * management section.
+     */
+
+    in_adobe_accounts.setEnabled(false);
 
     /**
      * If an EULA is defined, configure the EULA to open a web view displaying
@@ -407,18 +412,14 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final TextView in_eula =
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_eula));
-    app.getEULA().accept(
-      new OptionVisitorType<EULAType, Unit>()
-      {
-        @Override public Unit none(final None<EULAType> n)
-        {
-          in_eula.setEnabled(false);
-          return Unit.unit();
-        }
+    in_eula.setEnabled(false);
 
-        @Override public Unit some(final Some<EULAType> s)
+    app.getEULA().map(
+      new FunctionType<EULAType, Unit>()
+      {
+        @Override public Unit call(final EULAType eula)
         {
-          final EULAType eula = s.get();
+          in_eula.setEnabled(true);
           in_eula.setOnClickListener(
             new OnClickListener()
             {
@@ -441,7 +442,15 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       });
 
     /**
-     * Set a text change listener on both fields that enables the login
+     * Enable/disable the privacy policy field.
+     */
+
+    final TextView in_privacy =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_privacy));
+    in_privacy.setEnabled(false);
+
+    /**
+     * Set a text change listener on both login fields that enables the login
      * button if both fields are non-empty.
      */
 
@@ -506,15 +515,6 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     in_login.setEnabled(false);
 
     this.navigationDrawerSetActionBarTitle();
-
-    if (app.getAdobeDRMExecutor().isSome()) {
-      in_adobe.setText(
-        resources.getText(R.string.settings_adobe_drm_supported));
-    } else {
-      in_adobe.setText(
-        resources.getText(R.string.settings_adobe_drm_unsupported));
-    }
-
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
     this.login = in_login;

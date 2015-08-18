@@ -156,14 +156,24 @@
       android:layout_marginBottom="16dp"
       android:layout_marginTop="16dp" />
 
+
     <TextView
-      android:id="@+id/settings_adobe_drm"
+      android:id="@+id/settings_adobe_accounts"
+      android:text="@string/settings_adobe_accounts"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text=""
-      android:textColor="#eee"
       android:layout_below="@id/settings_privacy_divider"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
+      android:layout_height="wrap_content" />
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_adobe_accounts_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_below="@id/settings_adobe_accounts"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp" />
+
   </RelativeLayout>
 
 </ScrollView>
