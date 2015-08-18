@@ -36,6 +36,7 @@ public final class OPDSAcquisitionFeed implements Serializable
   private final Calendar                       updated;
   private final URI                            uri;
   private final OptionType<URI>                terms_of_service;
+  private final OptionType<URI>                privacy_policy;
 
   private OPDSAcquisitionFeed(
     final URI in_uri,
@@ -49,7 +50,8 @@ public final class OPDSAcquisitionFeed implements Serializable
     final OptionType<OPDSSearchLink> in_search,
     final List<OPDSFacet> in_facets_order,
     final Map<String, List<OPDSFacet>> in_facets,
-    final OptionType<URI> in_terms_of_service)
+    final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_privacy_policy)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.entries = NullCheck.notNull(Collections.unmodifiableList(in_entries));
@@ -66,6 +68,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     this.next = NullCheck.notNull(in_next);
     this.search = NullCheck.notNull(in_search);
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
+    this.privacy_policy = NullCheck.notNull(in_privacy_policy);
   }
 
   /**
@@ -112,7 +115,8 @@ public final class OPDSAcquisitionFeed implements Serializable
            && this.updated.equals(other.updated)
            && this.next.equals(other.next)
            && this.search.equals(other.search)
-           && this.terms_of_service.equals(other.terms_of_service);
+           && this.terms_of_service.equals(other.terms_of_service)
+           && this.privacy_policy.equals(other.privacy_policy);
   }
 
   /**
@@ -215,6 +219,15 @@ public final class OPDSAcquisitionFeed implements Serializable
   }
 
   /**
+   * @return The link to the privacy policy, if any
+   */
+
+  public OptionType<URI> getFeedPrivacyPolicy()
+  {
+    return this.privacy_policy;
+  }
+
+  /**
    * @return The feed URI
    */
 
@@ -239,6 +252,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     result = (prime * result) + this.next.hashCode();
     result = (prime * result) + this.search.hashCode();
     result = (prime * result) + this.terms_of_service.hashCode();
+    result = (prime * result) + this.privacy_policy.hashCode();
     return result;
   }
 
@@ -257,6 +271,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     private       OptionType<URI>                             next;
     private       OptionType<OPDSSearchLink>                  search;
     private       OptionType<URI>                             terms_of_service;
+    private       OptionType<URI>                             privacy_policy;
 
     private Builder(
       final URI in_uri,
@@ -277,6 +292,7 @@ public final class OPDSAcquisitionFeed implements Serializable
       this.next = Option.none();
       this.search = Option.none();
       this.terms_of_service = Option.none();
+      this.privacy_policy = Option.none();
     }
 
     @Override public void addEntry(
@@ -330,6 +346,11 @@ public final class OPDSAcquisitionFeed implements Serializable
       this.terms_of_service = NullCheck.notNull(u);
     }
 
+    @Override public void setPrivacyPolicyOption(final OptionType<URI> u)
+    {
+      this.privacy_policy = NullCheck.notNull(u);
+    }
+
     @Override public OPDSAcquisitionFeed build()
     {
       final Map<String, OPDSGroup> r_groups =
@@ -355,7 +376,8 @@ public final class OPDSAcquisitionFeed implements Serializable
         this.search,
         this.facets_order,
         this.facets_by_group,
-        this.terms_of_service);
+        this.terms_of_service,
+        this.privacy_policy);
     }
 
     @Override public void setNextOption(

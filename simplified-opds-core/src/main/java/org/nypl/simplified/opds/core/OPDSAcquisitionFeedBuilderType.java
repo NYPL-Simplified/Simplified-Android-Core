@@ -20,6 +20,14 @@ public interface OPDSAcquisitionFeedBuilderType
     OPDSAcquisitionFeedEntry e);
 
   /**
+   * Set the URI of the privacy policy document for the feed, if any
+   *
+   * @param u The privacy policy URI, if any
+   */
+
+  void setPrivacyPolicyOption(OptionType<URI> u);
+
+  /**
    * @return A feed consisting of all the values given so far
    */
 

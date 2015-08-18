@@ -449,6 +449,33 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_privacy));
     in_privacy.setEnabled(false);
 
+    app.getPrivacyPolicy().map(
+      new FunctionType<PrivacyPolicyType, Unit>()
+      {
+        @Override public Unit call(final PrivacyPolicyType policy)
+        {
+          in_privacy.setEnabled(true);
+          in_privacy.setOnClickListener(
+            new OnClickListener()
+            {
+              @Override public void onClick(final View v)
+              {
+                final Intent i = new Intent(
+                  MainSettingsActivity.this, WebViewActivity.class);
+                final Bundle b = new Bundle();
+                WebViewActivity.setActivityArguments(
+                  b,
+                  policy.documentGetReadableURL().toString(),
+                  resources.getString(R.string.settings_privacy),
+                  SimplifiedPart.PART_SETTINGS);
+                i.putExtras(b);
+                MainSettingsActivity.this.startActivity(i);
+              }
+            });
+          return Unit.unit();
+        }
+      });
+
     /**
      * Set a text change listener on both login fields that enables the login
      * button if both fields are non-empty.

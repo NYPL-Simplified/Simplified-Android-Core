@@ -28,6 +28,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
   private final Calendar                   updated;
   private final URI                        uri;
   private final OptionType<URI>            terms_of_service;
+  private final OptionType<URI>            privacy_policy;
 
   private FeedWithGroups(
     final URI in_uri,
@@ -37,7 +38,8 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     final OptionType<FeedSearchType> in_search,
     final List<String> in_blocks_order,
     final Map<String, FeedGroup> in_blocks,
-    final OptionType<URI> in_terms_of_service)
+    final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_privacy_policy)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -47,6 +49,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     this.blocks_order = NullCheck.notNull(in_blocks_order);
     this.blocks = NullCheck.notNull(in_blocks);
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
+    this.privacy_policy = NullCheck.notNull(in_privacy_policy);
   }
 
   /**
@@ -86,7 +89,8 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
       actual_search,
       order,
       blocks,
-      f.getFeedTermsOfService());
+      f.getFeedTermsOfService(),
+      f.getFeedPrivacyPolicy());
   }
 
   /**
@@ -96,6 +100,15 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
   public OptionType<URI> getFeedTermsOfService()
   {
     return this.terms_of_service;
+  }
+
+  /**
+   * @return A link to the privacy policy, if any
+   */
+
+  public OptionType<URI> getFeedPrivacyPolicy()
+  {
+    return this.privacy_policy;
   }
 
   @Override public void add(

@@ -260,6 +260,7 @@ public final class Simplified extends Application
     private final DownloaderType                     downloader;
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
     private final OptionType<EULAType>               eula;
+    private final OptionType<PrivacyPolicyType>      privacy;
 
     private CatalogAppServices(
       final Context in_context,
@@ -356,10 +357,12 @@ public final class Simplified extends Application
         in_context, this.books, this.cover_generator, this.exec_covers);
 
       /**
-       * Configure EULA.
+       * Configure EULA, privacy policy, etc.
        */
 
       this.eula = EULA.getEULA(
+        this.http, this.exec_downloader, this.context);
+      this.privacy = PrivacyPolicy.getPrivacyPolicy(
         this.http, this.exec_downloader, this.context);
 
       this.synced = new AtomicBoolean(false);
@@ -368,6 +371,11 @@ public final class Simplified extends Application
     @Override public OptionType<EULAType> getEULA()
     {
       return this.eula;
+    }
+
+    @Override public OptionType<PrivacyPolicyType> getPrivacyPolicy()
+    {
+      return this.privacy;
     }
 
     @Override public BooksType getBooks()

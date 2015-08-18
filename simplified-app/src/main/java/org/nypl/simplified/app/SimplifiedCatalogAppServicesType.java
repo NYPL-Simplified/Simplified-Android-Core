@@ -23,6 +23,12 @@ public interface SimplifiedCatalogAppServicesType extends
   OptionType<EULAType> getEULA();
 
   /**
+   * @return The privacy policy, if any
+   */
+
+  OptionType<PrivacyPolicyType> getPrivacyPolicy();
+
+  /**
    * @return A book management interface
    */
 
