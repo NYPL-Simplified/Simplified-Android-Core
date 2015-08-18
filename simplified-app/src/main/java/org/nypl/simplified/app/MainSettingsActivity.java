@@ -435,6 +435,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                   SimplifiedPart.PART_SETTINGS);
                 i.putExtras(b);
                 MainSettingsActivity.this.startActivity(i);
+                MainSettingsActivity.this.overridePendingTransition(0, 0);
               }
             });
           return Unit.unit();
@@ -470,6 +471,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                   SimplifiedPart.PART_SETTINGS);
                 i.putExtras(b);
                 MainSettingsActivity.this.startActivity(i);
+                MainSettingsActivity.this.overridePendingTransition(0, 0);
               }
             });
           return Unit.unit();

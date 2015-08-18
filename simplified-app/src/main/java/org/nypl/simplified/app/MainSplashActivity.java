@@ -9,6 +9,9 @@ import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * A splash screen activity that either shows a license agreement, or simply
  * starts up another activity without displaying anything if the user has
@@ -35,7 +38,21 @@ public final class MainSplashActivity extends Activity
   @Override protected void onCreate(final Bundle state)
   {
     super.onCreate(state);
+    this.setContentView(R.layout.splash);
 
+    final Timer timer = new Timer();
+    timer.schedule(
+      new TimerTask()
+      {
+        @Override public void run()
+        {
+          MainSplashActivity.this.finishSplash();
+        }
+      }, 2000L);
+  }
+
+  private void finishSplash()
+  {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final OptionType<EULAType> eula_opt = app.getEULA();
@@ -44,14 +61,14 @@ public final class MainSplashActivity extends Activity
       final Some<EULAType> some_eula = (Some<EULAType>) eula_opt;
       final EULAType eula = some_eula.get();
       if (eula.eulaHasAgreed()) {
-        LOG.debug("EULA: agreed");
+        MainSplashActivity.LOG.debug("EULA: agreed");
         this.openCatalog();
       } else {
-        LOG.debug("EULA: not agreed");
+        MainSplashActivity.LOG.debug("EULA: not agreed");
         this.openEULA();
       }
     } else {
-      LOG.debug("EULA: unavailable");
+      MainSplashActivity.LOG.debug("EULA: unavailable");
       this.openCatalog();
     }
   }
@@ -59,20 +76,16 @@ public final class MainSplashActivity extends Activity
   private void openEULA()
   {
     final Intent i = new Intent(this, MainEULAActivity.class);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
     this.startActivity(i);
-    this.finish();
     this.overridePendingTransition(0, 0);
+    this.finish();
   }
 
   private void openCatalog()
   {
     final Intent i = new Intent(this, MainCatalogActivity.class);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
     this.startActivity(i);
-    this.finish();
     this.overridePendingTransition(0, 0);
+    this.finish();
   }
 }
