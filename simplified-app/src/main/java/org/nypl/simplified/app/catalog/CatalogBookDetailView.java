@@ -565,14 +565,6 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookAvailabilityStrings.getAvailabilityString(rr, s);
     this.book_download_text.setText(text);
 
-    CatalogAcquisitionButtons.addButtons(
-      this.activity,
-      this.book_download_buttons,
-      NullCheck.notNull(this.books),
-      NullCheck.notNull(this.entry));
-
-    CatalogBookDetailView.configureButtonsHeight(
-      rr, this.book_download_buttons);
     return Unit.unit();
   }
 

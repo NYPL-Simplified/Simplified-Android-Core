@@ -23,6 +23,7 @@
       android:maxLines="1"
       android:ellipsize="end"
       android:text="@string/catalog_book_availability_open_access"
+      android:textSize="12sp"
       android:textColor="@color/notification_foreground" />
   </LinearLayout>
 
