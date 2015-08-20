@@ -1,24 +1,17 @@
 package org.nypl.simplified.opds.tests.android;
 
+import android.test.InstrumentationTestCase;
 import org.nypl.simplified.opds.tests.contracts.OPDSFeedParserContract;
 import org.nypl.simplified.opds.tests.contracts.OPDSFeedParserContractType;
 
-import android.test.InstrumentationTestCase;
-
-public final class OPDSFeedParserTest extends InstrumentationTestCase implements
-  OPDSFeedParserContractType
+public final class OPDSFeedParserTest extends InstrumentationTestCase
+  implements OPDSFeedParserContractType
 {
   private final OPDSFeedParserContractType contract;
 
   public OPDSFeedParserTest()
   {
     this.contract = new OPDSFeedParserContract();
-  }
-
-  @Override public void testAcquisitionFeedAvailability()
-    throws Exception
-  {
-    this.contract.testAcquisitionFeedAvailability();
   }
 
   @Override public void testAcquisitionFeedCategories0()

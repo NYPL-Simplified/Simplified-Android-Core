@@ -1,6 +1,5 @@
 package org.nypl.simplified.opds.tests.contracts;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Some;
@@ -11,17 +10,12 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
-import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSGroup;
 import org.nypl.simplified.opds.core.OPDSParseException;
-import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.test.utilities.TestUtilities;
 import org.w3c.dom.DOMException;
@@ -135,9 +129,13 @@ public final class OPDSFeedParserContract implements OPDSFeedParserContractType
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
-    TestUtilities.assertTrue(f.getFeedEntries().isEmpty());
+    final List<OPDSAcquisitionFeedEntry> entries = f.getFeedEntries();
+    for (int index = 0; index < entries.size(); ++index) {
+      System.out.println(entries.get(index).getTitle());
+    }
 
     final Map<String, OPDSGroup> groups = f.getFeedGroups();
+    TestUtilities.assertTrue(entries.isEmpty());
     TestUtilities.assertEquals(7, groups.keySet().size());
 
     for (final String name : groups.keySet()) {
@@ -367,195 +365,4 @@ public final class OPDSFeedParserContract implements OPDSFeedParserContractType
     }
   }
 
-  @Override public void testAcquisitionFeedAvailability()
-    throws Exception
-  {
-    final URI uri = URI.create(
-      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
-    final OPDSFeedParserType p =
-      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
-    final InputStream d = OPDSFeedParserContract.getResource("loans.xml");
-    final OPDSAcquisitionFeed f = p.parse(uri, d);
-    d.close();
-
-    /**
-     * A simple time-limited loan.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(0);
-      TestUtilities.assertEquals(
-        e.getID(),
-        "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=urn%3Alibrarysimplified"
-        + ".org%2Fterms%2Fid%2F3M%2520ID%2Fbev589");
-
-      final Calendar expected_start_date =
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-30T14:52:06Z");
-      final OptionType<Calendar> expected_end_date = Option.some(
-        OPDSRFC3339Formatter.parseRFC3339Date(
-          "2015-04-20T14:52:06Z"));
-      final OPDSAvailabilityLoaned expected_availability =
-        OPDSAvailabilityLoaned.get(
-          expected_start_date, expected_end_date);
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * A simple time-limited loan.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(1);
-      TestUtilities.assertEquals(
-        e.getID(),
-        "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=urn%3Alibrarysimplified"
-        + ".org%2Fterms%2Fid%2F3M%2520ID%2Faght6r9");
-
-      final Calendar expected_start_date =
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:56:23Z");
-      final OptionType<Calendar> expected_end_date = Option.some(
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-15T19:56:23Z"));
-      final OPDSAvailabilityLoaned expected_availability =
-        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * A simple time-limited loan.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(2);
-      TestUtilities.assertEquals(
-        e.getID(),
-        "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=urn%3Alibrarysimplified"
-        + ".org%2Fterms%2Fid%2F3M%2520ID%2Fetk2889");
-
-      final Calendar expected_start_date =
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-25T19:32:36Z");
-      final OptionType<Calendar> expected_end_date = Option.some(
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-15T19:32:36Z"));
-      final OPDSAvailabilityLoaned expected_availability =
-        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * A simple hold.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(3);
-      TestUtilities.assertEquals(
-        e.getID(),
-        "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=urn%3Alibrarysimplified"
-        + ".org%2Fterms%2Fid%2F3M%2520ID%2Feqkyrr9");
-
-      final Calendar expected_start_date =
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-05-22T14:17:56Z");
-      final OptionType<Integer> expected_position =
-        Option.some(Integer.valueOf(1));
-      final OPDSAvailabilityHeld expected_availability =
-        OPDSAvailabilityHeld.get(expected_start_date, expected_position);
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * A loan with no end date.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(4);
-      TestUtilities.assertEquals(
-        e.getID(),
-        "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F37284");
-
-      final OptionType<Calendar> none = Option.none();
-      final Calendar expected_start_date =
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-16T18:51:36.392154Z");
-      final OPDSAvailabilityLoaned expected_availability =
-        OPDSAvailabilityLoaned.get(expected_start_date, none);
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * A loan with no end date.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(5);
-      TestUtilities.assertEquals(
-        e.getID(),
-        "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F26787");
-
-      final OptionType<Calendar> expected_end_date = Option.none();
-      final Calendar expected_start_date =
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-03T18:03:03.275883Z");
-      final OPDSAvailabilityLoaned expected_availability =
-        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * A loan with no end date.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(6);
-      TestUtilities.assertEquals(
-        e.getID(),
-        "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=urn%3Alibrarysimplified"
-        + ".org%2Fterms%2Fid%2F3M%2520ID%2Fcgaxr9");
-
-      final Calendar expected_start_date =
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-03-13T13:38:19Z");
-      final OptionType<Calendar> expected_end_date = Option.some(
-        OPDSRFC3339Formatter.parseRFC3339Date("2015-04-03T13:38:19Z"));
-      final OPDSAvailabilityLoaned expected_availability =
-        OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * Falling back to "loanable" due to a lack of information.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(7);
-      TestUtilities.assertEquals(e.getID(), "simplified:extra-0");
-
-      final OPDSAvailabilityLoanable expected_availability =
-        OPDSAvailabilityLoanable.get();
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-
-    /**
-     * Open access.
-     */
-
-    {
-      final OPDSAcquisitionFeedEntry e = f.getFeedEntries().get(8);
-      TestUtilities.assertEquals(e.getID(), "simplified:extra-1");
-
-      final OPDSAvailabilityOpenAccess expected_availability =
-        OPDSAvailabilityOpenAccess.get();
-
-      TestUtilities.assertEquals(e.getAvailability(), expected_availability);
-    }
-  }
 }

@@ -52,12 +52,19 @@
   <string name="catalog_book_download">Download</string>
   <string name="catalog_book_delete">Delete</string>
 
-  <string name="catalog_book_availability_on_loan_untimed">You have this book on loan.</string>
-  <string name="catalog_book_availability_on_loan_timed">You have this book until %s.</string>
-  <string name="catalog_book_availability_open_access">This public domain book is yours to keep.</string>
-  <string name="catalog_book_availability_on_hold">This book is on hold.</string>
+  <string name="catalog_book_availability_loaned_indefinite">You have this book on loan.</string>
+  <string name="catalog_book_availability_loaned_timed">You have this book on loan for %s.</string>
+  <string name="catalog_book_availability_open_access">This book is yours to keep.</string>
+  <string name="catalog_book_availability_held_indefinite">You have this book on hold.</string>
+  <string name="catalog_book_availability_held_timed">You will be able to borrow this book in %s.</string>
+  <string name="catalog_book_availability_held_queue">You are at position %d in the queue for this book.</string>
+  <string name="catalog_book_availability_reserved_timed">You have %s to borrow this book before your reservation expires.</string>
+  <string name="catalog_book_availability_reserved_indefinite">You have this book reserved.</string>
   <string name="catalog_book_availability_loanable">This book is available for loan.</string>
   <string name="catalog_book_availability_holdable">This book may be placed on hold.</string>
+  <string name="catalog_book_interval_days">days</string>
+  <string name="catalog_book_interval_hours">hours</string>
+  <string name="catalog_book_interval_sub_hour">less than an hour</string>
 
   <!-- Settings strings -->
   <string name="settings">Settings</string>

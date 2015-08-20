@@ -19,6 +19,20 @@ public interface OPDSAvailabilityMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
+  A onReserved(
+    OPDSAvailabilityReserved a)
+    throws E;
+
+  /**
+   * Match an availability value.
+   *
+   * @param a The value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
   A onHeld(
     OPDSAvailabilityHeld a)
     throws E;

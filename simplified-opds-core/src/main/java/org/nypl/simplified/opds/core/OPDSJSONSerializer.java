@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -59,6 +61,27 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     return av.matchAvailability(
       new OPDSAvailabilityMatcherType<ObjectNode, UnreachableCodeException>()
       {
+        @Override public ObjectNode onReserved(
+          final OPDSAvailabilityReserved a)
+        {
+          final ObjectNode o = jom.createObjectNode();
+          final ObjectNode oh = jom.createObjectNode();
+
+          a.getEndDate().map(
+            new FunctionType<Calendar, Unit>()
+            {
+              @Override public Unit call(
+                final Calendar t)
+              {
+                oh.put("end_date", fmt.format(t.getTime()));
+                return Unit.unit();
+              }
+            });
+
+          o.set("reserved", oh);
+          return o;
+        }
+
         @Override public ObjectNode onHeld(
           final OPDSAvailabilityHeld a)
         {
@@ -140,6 +163,13 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     final ObjectNode je = jom.createObjectNode();
     je.put("scheme", c.getScheme());
     je.put("term", c.getTerm());
+
+    final OptionType<String> label_opt = c.getLabel();
+    if (label_opt.isSome()) {
+      final Some<String> some = (Some<String>) label_opt;
+      je.put("label", some.get());
+    }
+
     return je;
   }
 

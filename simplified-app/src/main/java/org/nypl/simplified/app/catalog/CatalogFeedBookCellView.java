@@ -39,6 +39,7 @@ import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
 import org.nypl.simplified.books.core.BookStatusRequestingDownload;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
+import org.nypl.simplified.books.core.BookStatusReserved;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
@@ -58,8 +59,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * A single cell in feed (list or grid).
  */
 
-@SuppressWarnings("synthetic-access") public final class CatalogFeedBookCellView
-  extends FrameLayout implements Observer,
+public final class CatalogFeedBookCellView extends FrameLayout implements
+  Observer,
   FeedEntryMatcherType<Unit, UnreachableCodeException>,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -407,6 +408,25 @@ import java.util.concurrent.atomic.AtomicReference;
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("held");
+
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(fe);
+
+    CatalogAcquisitionButtons.addButtons(
+      this.activity, this.cell_buttons, this.books, fe);
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusReserved(
+    final BookStatusReserved s)
+  {
+    CatalogFeedBookCellView.LOG.debug("{}: reserved", s.getID());
+
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
+    this.setDebugCellText("reserved");
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);

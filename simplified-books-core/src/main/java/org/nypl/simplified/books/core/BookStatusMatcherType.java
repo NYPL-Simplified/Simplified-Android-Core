@@ -47,6 +47,20 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
+  A onBookStatusReserved(
+    BookStatusReserved s)
+    throws E;
+
+  /**
+   * Match a status value.
+   *
+   * @param s The status value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
   A onBookStatusLoanedType(
     BookStatusLoanedType s)
     throws E;

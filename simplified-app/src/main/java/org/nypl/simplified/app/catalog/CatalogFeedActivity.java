@@ -300,6 +300,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   /**
    * If this activity is being used in a part of the application that generates
    * local feeds, then return the type of feed that should be generated.
+
+   * @return The type of feed that should be generated.
    */
 
   protected abstract BooksFeedSelection getLocalFeedTypeSelection();

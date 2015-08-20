@@ -1,4 +1,11 @@
-<feed xmlns:simplified="http://librarysimplified.org/terms/" xmlns:app="http://www.w3.org/2007/app" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:schema="http://schema.org/" xmlns="http://www.w3.org/2005/Atom">
+<feed
+  xmlns:simplified="http://librarysimplified.org/terms/"
+  xmlns:app="http://www.w3.org/2007/app"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:schema="http://schema.org/"
+  xmlns="http://www.w3.org/2005/Atom">
+
   <id>http://circulation.alpha.librarysimplified.org/loans/</id>
   <title>Active loans</title>
   <updated>2015-03-24T17:23:50Z</updated>
@@ -16,11 +23,14 @@
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
     <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-03-24T16:57:38.057562Z</schema:startDate>
-    </schema:Event>
-    <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/7cbd729a-dc86-41fb-aee0-3999aaa4e1fc/checkout" rel="http://opds-spec.org/acquisition/borrow"/>
+    <link href="http://example.com/Loaned-Indefinite"
+          rel="http://opds-spec.org/acquisition/borrow">
+      <opds:available
+        status="available"
+        since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
   </entry>
   <entry>
     <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FGutenberg%2520ID%2F45493</id>
@@ -35,11 +45,14 @@
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
     <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-03-24T16:57:41.585528Z</schema:startDate>
-    </schema:Event>
-    <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/7cbd729a-dc86-41fb-aee0-3999aaa4e1fc/checkout" rel="http://opds-spec.org/acquisition/borrow"/>
+    <link href="http://example.com/Loaned-Indefinite"
+          rel="http://opds-spec.org/acquisition/borrow">
+      <opds:available
+        status="available"
+        since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
   </entry>
   <entry>
     <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FGutenberg%2520ID%2F35708</id>
@@ -54,11 +67,14 @@
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
     <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-03-24T16:57:44.602146Z</schema:startDate>
-    </schema:Event>
-    <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/7cbd729a-dc86-41fb-aee0-3999aaa4e1fc/checkout" rel="http://opds-spec.org/acquisition/borrow"/>
+    <link href="http://example.com/Loaned-Indefinite"
+          rel="http://opds-spec.org/acquisition/borrow">
+      <opds:available
+        status="available"
+        since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
   </entry>
   <entry>
     <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2FGutenberg%2520ID%2F38084</id>
@@ -75,10 +91,13 @@
     <dcterms:language>en</dcterms:language>
     <dcterms:publisher>Project Gutenberg</dcterms:publisher>
     <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-03-24T16:57:55.413356Z</schema:startDate>
-    </schema:Event>
-    <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/7cbd729a-dc86-41fb-aee0-3999aaa4e1fc/checkout" rel="http://opds-spec.org/acquisition/borrow"/>
+    <link href="http://example.com/Loaned-Indefinite"
+          rel="http://opds-spec.org/acquisition/borrow">
+      <opds:available
+        status="available"
+        since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
   </entry>
 </feed>

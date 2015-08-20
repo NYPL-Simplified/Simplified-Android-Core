@@ -37,6 +37,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   private final OptionType<URI>        thumbnail;
   private final String                 title;
   private final Calendar               updated;
+
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
     final List<OPDSAcquisition> in_acquisitions,

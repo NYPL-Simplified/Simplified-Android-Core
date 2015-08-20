@@ -2,9 +2,9 @@ package org.nypl.simplified.opds.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +96,7 @@ public final class OPDSAcquisitionFeedEntryParser
          * Block definition.
          */
 
-        if (rel_text.equals(OPDSFeedConstants.GROUP_URI_TEXT)) {
+        if (rel_text.equals(OPDSFeedConstants.GROUP_REL_TEXT)) {
           final String uri_text =
             NullCheck.notNull(e_link.getAttribute("href"));
           final String link_title =
@@ -136,13 +136,22 @@ public final class OPDSAcquisitionFeedEntryParser
 
         if (rel_text.startsWith(
           OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT)) {
+
+          boolean open_access = false;
           for (final Type v : OPDSAcquisition.Type.values()) {
             final String uri_text = NullCheck.notNull(v.getURI().toString());
             if (rel_text.equals(uri_text)) {
               final URI href = new URI(e_link.getAttribute("href"));
               eb.addAcquisition(new OPDSAcquisition(v, href));
+              open_access = open_access || v == Type.ACQUISITION_OPEN_ACCESS;
               break;
             }
+          }
+
+          if (open_access) {
+            eb.setAvailability(OPDSAvailabilityOpenAccess.get());
+          } else {
+            OPDSAcquisitionFeedEntryParser.tryAvailability(eb, e_link);
           }
         }
       }
@@ -154,7 +163,15 @@ public final class OPDSAcquisitionFeedEntryParser
     for (final Element ce : e_categories) {
       final String term = NullCheck.notNull(ce.getAttribute("term"));
       final String scheme = NullCheck.notNull(ce.getAttribute("scheme"));
-      eb.addCategory(new OPDSCategory(term, scheme));
+
+      final OptionType<String> label;
+      if (ce.hasAttribute("label")) {
+        label = Option.some(ce.getAttribute("label"));
+      } else {
+        label = Option.none();
+      }
+
+      eb.addCategory(new OPDSCategory(term, scheme, label));
     }
 
     OPDSAcquisitionFeedEntryParser.findAcquisitionAuthors(e, eb);
@@ -164,148 +181,94 @@ public final class OPDSAcquisitionFeedEntryParser
       OPDSXML.getFirstChildElementTextWithNameOptional(
         e, OPDSFeedConstants.ATOM_URI, "summary"));
 
-    eb.setAvailability(
-      OPDSAcquisitionFeedEntryParser.determineAvailability(
-        eb, e));
     return eb.build();
   }
 
-  private static OPDSAvailabilityType determineAvailability(
+  private static void tryAvailability(
     final OPDSAcquisitionFeedEntryBuilderType eb,
     final Element e)
     throws OPDSParseException, ParseException
   {
-    final OptionType<Element> ee_opt =
+    final OptionType<Element> copies_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
-        e, OPDSFeedConstants.SCHEMA_URI, "Event");
+        e, OPDSFeedConstants.OPDS_URI, "copies");
+    final OptionType<Element> holds_opt =
+      OPDSXML.getFirstChildElementWithNameOptional(
+        e, OPDSFeedConstants.OPDS_URI, "holds");
 
-    /**
-     * If there is a {@code schema:Event} element, then the book is either
-     * already borrowed, or is on hold.
-     */
+    if (copies_opt.isSome()) {
+      Assertions.checkPrecondition(
+        holds_opt.isSome(), "If opds:copies exists, opds:holds must exist");
 
-    if (ee_opt.isSome()) {
-      final Some<Element> ee_some = (Some<Element>) ee_opt;
-      final Element ee = ee_some.get();
-      final String ee_name = OPDSXML.getFirstChildElementTextWithName(
-        ee, OPDSFeedConstants.SCHEMA_URI, "name");
-
-      if ("loan".equals(ee_name)) {
-        final Calendar start = OPDSRFC3339Formatter.parseRFC3339Date(
-          OPDSXML.getFirstChildElementTextWithName(
-            ee, OPDSFeedConstants.SCHEMA_URI, "startDate"));
-        final OptionType<Calendar> end =
-          OPDSXML.getFirstChildElementTextWithNameOptional(
-            ee, OPDSFeedConstants.SCHEMA_URI, "endDate").mapPartial(
-            new PartialFunctionType<String, Calendar, ParseException>()
-            {
-              @Override public Calendar call(
-                final String s)
-                throws ParseException
-              {
-                return OPDSRFC3339Formatter.parseRFC3339Date(s);
-              }
-            });
-
-        return OPDSAvailabilityLoaned.get(start, end);
-      }
-
-      if ("hold".equals(ee_name)) {
-        final Calendar start = OPDSRFC3339Formatter.parseRFC3339Date(
-          OPDSXML.getFirstChildElementTextWithName(
-            ee, OPDSFeedConstants.SCHEMA_URI, "startDate"));
-
-        try {
-          return OPDSAvailabilityHeld.get(
-            start, OPDSXML.getFirstChildElementTextWithNameOptional(
-              ee, OPDSFeedConstants.SCHEMA_URI, "position").mapPartial(
-              new PartialFunctionType<String, Integer, NumberFormatException>()
-              {
-                @Override public Integer call(final String x)
-                  throws NumberFormatException
-                {
-                  return Integer.valueOf(x);
-                }
-              }));
-        } catch (final NumberFormatException x) {
-          throw new OPDSParseException("Error parsing hold position", x);
-        }
-      }
-
-      OPDSAcquisitionFeedEntryParser.LOG.error(
-        "ignoring unrecognized event type: {}", ee_name);
+      final Some<Element> copies_some = (Some<Element>) copies_opt;
+      final Some<Element> holds_some = (Some<Element>) holds_opt;
+      final Element copies = copies_some.get();
+      final Element holds = holds_some.get();
+      eb.setAvailability(
+        OPDSAcquisitionFeedEntryParser.inferAvailability(e, copies, holds));
     }
+  }
 
+  private static OPDSAvailabilityType inferAvailability(
+    final Element e,
+    final Element copies,
+    final Element holds)
+    throws OPDSParseException
+  {
     /**
-     * Otherwise, the availability must be inferred from the number of
-     * licenses and the type of available acquisition links.
+     * If there is an "available" element, then the user has interacted
+     * with the book in some manner, such as attempting to borrow it or
+     * place a hold on it.
      */
 
-    boolean borrow = false;
-    final List<OPDSAcquisition> acqs = eb.getAcquisitions();
-    for (int index = 0; index < acqs.size(); ++index) {
-      final OPDSAcquisition acq = acqs.get(index);
-      switch (acq.getType()) {
-        case ACQUISITION_BORROW:
-        case ACQUISITION_GENERIC: {
-          borrow = true;
-          break;
-        }
+    final OptionType<Element> available_opt =
+      OPDSXML.getFirstChildElementWithNameOptional(
+        e, OPDSFeedConstants.OPDS_URI, "available");
 
-        /**
-         * If there was an acquisition link that implies open access, then the
-         * book is available and there is nothing more to do.
-         */
+    if (available_opt.isSome()) {
+      final Some<Element> available_some = (Some<Element>) available_opt;
+      final Element available = available_some.get();
+      final String status = available.getAttribute("status");
 
-        case ACQUISITION_OPEN_ACCESS: {
-          return OPDSAvailabilityOpenAccess.get();
-        }
-        case ACQUISITION_SAMPLE:
-        case ACQUISITION_SUBSCRIBE:
-        case ACQUISITION_BUY: {
-          OPDSAcquisitionFeedEntryParser.LOG.error(
-            "unimplemented acquisition type: {}", acq.getType());
-          break;
-        }
+      if ("reserved".equals(status)) {
+        final OptionType<Calendar> end_date =
+          OPDSXML.getAttributeRFC3339Optional(available, "until");
+        return OPDSAvailabilityReserved.get(end_date);
+      }
+
+      if ("unavailable".equals(status)) {
+        final OptionType<Calendar> end_date =
+          OPDSXML.getAttributeRFC3339Optional(available, "until");
+        final Calendar start_date =
+          OPDSXML.getAttributeRFC3339(available, "since");
+        final OptionType<Integer> queue =
+          OPDSXML.getAttributeIntegerOptional(holds, "position");
+        return OPDSAvailabilityHeld.get(start_date, queue, end_date);
+      }
+
+      if ("available".equals(status)) {
+        final OptionType<Calendar> end_date =
+          OPDSXML.getAttributeRFC3339Optional(available, "until");
+        final Calendar start_date =
+          OPDSXML.getAttributeRFC3339(available, "since");
+        return OPDSAvailabilityLoaned.get(start_date, end_date);
       }
     }
 
     /**
-     * If there was an acquisition link that implies borrowing, then check to
-     * see if there are available licenses. If there are no licenses, the book
-     * is only available to put on hold.
+     * Otherwise, the user has never seen the book before, and the book
+     * is either holdable or loanable. If there are available copies, the
+     * book is loanable. Otherwise, all that can be done is to place a hold.
      */
 
-    if (borrow) {
-      final OptionType<String> license_count_opt =
-        OPDSXML.getFirstChildElementTextWithNameOptional(
-          e, OPDSFeedConstants.SIMPLIFIED_URI, "available_licenses");
+    final int copies_available =
+      OPDSXML.getAttributeInteger(copies, "available");
 
-      if (license_count_opt.isSome()) {
-        final Some<String> license_count_some =
-          (Some<String>) license_count_opt;
-        final String license_count_text = license_count_some.get();
-        try {
-          final Integer license_count = Integer.valueOf(license_count_text);
-          if (license_count.intValue() == 0) {
-            return OPDSAvailabilityHoldable.get();
-          }
-        } catch (final NumberFormatException x) {
-          throw new OPDSParseException("Error parsing license count", x);
-        }
-      }
+    if (copies_available > 0) {
+      return OPDSAvailabilityLoanable.get();
     }
 
-    /**
-     * If the number of licenses is not specified, or is specified and
-     * non-zero, or the required information above is otherwise missing, the
-     * book is assumed to be available for borrowing; there is not enough
-     * information to make a more intelligent guess and no sane way to handle
-     * the fact that there might be no acquisition links and nothing
-     * whatsoever specified.
-     */
-
-    return OPDSAvailabilityLoanable.get();
+    return OPDSAvailabilityHoldable.get();
   }
 
   @Override public OPDSAcquisitionFeedEntry parseEntry(
