@@ -11,6 +11,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityReserved;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
 import org.nypl.simplified.test.utilities.TestUtilities;
@@ -191,6 +192,41 @@ public final class OPDSFeedEntryParserContract
     TestUtilities.assertEquals(availability, expected);
   }
 
+  @Override public void testEntryAvailabilityReserved()
+    throws Exception
+  {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
+      OPDSFeedEntryParserContract.getResource(
+        "entry-availability-reserved.xml"));
+
+    final OPDSAvailabilityType availability = e.getAvailability();
+
+    final OptionType<Calendar> expected_end_date = Option.none();
+    final OPDSAvailabilityReserved expected =
+      OPDSAvailabilityReserved.get(expected_end_date);
+
+    TestUtilities.assertEquals(availability, expected);
+  }
+
+  @Override public void testEntryAvailabilityReservedTimed()
+    throws Exception
+  {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
+      OPDSFeedEntryParserContract.getResource(
+        "entry-availability-reserved-timed.xml"));
+
+    final OPDSAvailabilityType availability = e.getAvailability();
+
+    final OptionType<Calendar> expected_end_date = Option.some(
+      OPDSRFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
+    final OPDSAvailabilityReserved expected =
+      OPDSAvailabilityReserved.get(expected_end_date);
+
+    TestUtilities.assertEquals(availability, expected);
+  }
+
   @Override public void testEntryAvailabilityOpenAccess()
     throws Exception
   {
@@ -203,6 +239,24 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityOpenAccess expected =
       OPDSAvailabilityOpenAccess.get();
+
+    TestUtilities.assertEquals(availability, expected);
+  }
+
+  @Override public void testEntryAvailabilityReservedSpecific0()
+    throws Exception
+  {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
+      OPDSFeedEntryParserContract.getResource(
+        "entry-availability-reserved-specific0.xml"));
+
+    final OPDSAvailabilityType availability = e.getAvailability();
+
+    final OptionType<Calendar> expected_end_date = Option.some(
+      OPDSRFC3339Formatter.parseRFC3339Date("2015-08-24T00:30:24Z"));
+    final OPDSAvailabilityReserved expected =
+      OPDSAvailabilityReserved.get(expected_end_date);
 
     TestUtilities.assertEquals(availability, expected);
   }

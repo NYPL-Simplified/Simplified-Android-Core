@@ -13,7 +13,7 @@
   <published>2014-08-29T10:46:42Z</published>
   <link href="http://example.com/Reserved"
         rel="http://opds-spec.org/acquisition/borrow">
-    <opds:available
+    <opds:availability
       status="reserved"
       since="2000-01-01T00:00:00Z"/>
     <opds:holds total="0"/>

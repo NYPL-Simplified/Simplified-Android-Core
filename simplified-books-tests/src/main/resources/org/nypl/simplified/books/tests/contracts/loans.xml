@@ -25,7 +25,7 @@
     <published>2014-04-01T00:00:00Z</published>
     <link href="http://example.com/Loaned-Indefinite"
           rel="http://opds-spec.org/acquisition/borrow">
-      <opds:available
+      <opds:availability
         status="available"
         since="2000-01-01T00:00:00Z"/>
       <opds:holds total="0"/>
@@ -47,7 +47,7 @@
     <published>2014-04-01T00:00:00Z</published>
     <link href="http://example.com/Loaned-Indefinite"
           rel="http://opds-spec.org/acquisition/borrow">
-      <opds:available
+      <opds:availability
         status="available"
         since="2000-01-01T00:00:00Z"/>
       <opds:holds total="0"/>
@@ -69,7 +69,7 @@
     <published>2014-04-01T00:00:00Z</published>
     <link href="http://example.com/Loaned-Indefinite"
           rel="http://opds-spec.org/acquisition/borrow">
-      <opds:available
+      <opds:availability
         status="available"
         since="2000-01-01T00:00:00Z"/>
       <opds:holds total="0"/>
@@ -93,7 +93,7 @@
     <published>2014-04-01T00:00:00Z</published>
     <link href="http://example.com/Loaned-Indefinite"
           rel="http://opds-spec.org/acquisition/borrow">
-      <opds:available
+      <opds:availability
         status="available"
         since="2000-01-01T00:00:00Z"/>
       <opds:holds total="0"/>

@@ -84,6 +84,33 @@ public interface OPDSFeedEntryParserContractType
    * @throws Exception On errors
    */
 
+  void testEntryAvailabilityReserved()
+    throws Exception;
+
+  /**
+   * Test that a given entry has the expected availability.
+   *
+   * @throws Exception On errors
+   */
+
+  void testEntryAvailabilityReservedTimed()
+    throws Exception;
+
+  /**
+   * Test that a given entry has the expected availability.
+   *
+   * @throws Exception On errors
+   */
+
   void testEntryAvailabilityOpenAccess()
+    throws Exception;
+
+  /**
+   * Test that a given entry has the expected availability.
+   *
+   * @throws Exception On errors
+   */
+
+  void testEntryAvailabilityReservedSpecific0()
     throws Exception;
 }

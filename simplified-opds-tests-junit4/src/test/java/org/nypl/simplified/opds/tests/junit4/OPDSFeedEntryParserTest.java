@@ -32,6 +32,24 @@ public final class OPDSFeedEntryParserTest
     this.contract.testEntryAvailabilityOpenAccess();
   }
 
+  @Override @Test public void testEntryAvailabilityReserved()
+    throws Exception
+  {
+    this.contract.testEntryAvailabilityReserved();
+  }
+
+  @Override @Test public void testEntryAvailabilityReservedSpecific0()
+    throws Exception
+  {
+    this.contract.testEntryAvailabilityReservedSpecific0();
+  }
+
+  @Override @Test public void testEntryAvailabilityReservedTimed()
+    throws Exception
+  {
+    this.contract.testEntryAvailabilityReservedTimed();
+  }
+
   @Override @Test public void testEntryAvailabilityLoanedIndefinite()
     throws Exception
   {

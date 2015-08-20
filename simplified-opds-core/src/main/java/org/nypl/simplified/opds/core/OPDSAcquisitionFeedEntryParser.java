@@ -223,7 +223,7 @@ public final class OPDSAcquisitionFeedEntryParser
 
     final OptionType<Element> available_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
-        e, OPDSFeedConstants.OPDS_URI, "available");
+        e, OPDSFeedConstants.OPDS_URI, "availability");
 
     if (available_opt.isSome()) {
       final Some<Element> available_some = (Some<Element>) available_opt;
