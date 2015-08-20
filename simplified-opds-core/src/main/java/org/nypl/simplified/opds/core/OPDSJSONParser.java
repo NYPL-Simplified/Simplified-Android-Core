@@ -335,14 +335,25 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         OPDSJSONParser.getTimestampOptional(n, "end_date");
       return OPDSAvailabilityLoaned.get(in_start_date, in_end_date);
     }
+
     if (node.has("held")) {
       final ObjectNode n = OPDSJSONParser.getObject(node, "held");
       final Calendar in_start_date =
         OPDSJSONParser.getTimestamp(n, "start_date");
       final OptionType<Integer> in_position =
         OPDSJSONParser.getIntegerOptional(n, "position");
-      return OPDSAvailabilityHeld.get(in_start_date, in_position);
+      final OptionType<Calendar> in_end_date =
+        OPDSJSONParser.getTimestampOptional(n, "end_date");
+      return OPDSAvailabilityHeld.get(in_start_date, in_position, in_end_date);
     }
+
+    if (node.has("reserved")) {
+      final ObjectNode n = OPDSJSONParser.getObject(node, "reserved");
+      final OptionType<Calendar> in_end_date =
+        OPDSJSONParser.getTimestampOptional(n, "end_date");
+      return OPDSAvailabilityReserved.get(in_end_date);
+    }
+
     if (node.has("open_access")) {
       return OPDSAvailabilityOpenAccess.get();
     }

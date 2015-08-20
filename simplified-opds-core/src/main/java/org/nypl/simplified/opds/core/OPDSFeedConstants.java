@@ -11,19 +11,18 @@ final class OPDSFeedConstants
   public static final URI    ATOM_URI;
   public static final URI    DUBLIN_CORE_TERMS_URI;
   public static final String FACET_URI_TEXT;
-  public static final String GROUP_URI_TEXT;
+  public static final String GROUP_REL_TEXT;
   public static final String IMAGE_URI_TEXT;
   public static final String OPDS_URI_TEXT;
   public static final String THUMBNAIL_URI_TEXT;
   public static final URI    SCHEMA_URI;
   public static final URI    SIMPLIFIED_URI;
+  public static final URI    OPDS_URI;
 
   private static final URI    ACQUISITION_URI_PREFIX;
   private static final String ATOM_URI_TEXT;
   private static final URI    FACET_URI;
-  private static final URI    GROUP_URI;
   private static final URI    IMAGE_URI;
-  private static final URI    OPDS_URI;
   private static final URI    THUMBNAIL_URI;
   private static final String DUBLIN_CORE_TERMS_URI_TEXT;
   private static final String SCHEMA_URI_TEXT;
@@ -46,8 +45,7 @@ final class OPDSFeedConstants
     FACET_URI = NullCheck.notNull(URI.create("http://opds-spec.org/facet"));
     FACET_URI_TEXT = NullCheck.notNull(OPDSFeedConstants.FACET_URI.toString());
 
-    GROUP_URI = NullCheck.notNull(URI.create("http://opds-spec.org/group"));
-    GROUP_URI_TEXT = NullCheck.notNull(OPDSFeedConstants.GROUP_URI.toString());
+    GROUP_REL_TEXT = "collection";
 
     OPDS_URI =
       NullCheck.notNull(URI.create("http://opds-spec.org/2010/catalog"));

@@ -5,7 +5,7 @@
     name="STDERR"
     class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>necto: %-5level %logger{8}: %msg%n
+      <pattern>%-5level %logger{128}: %msg%n
       </pattern>
     </encoder>
     <target>System.err</target>

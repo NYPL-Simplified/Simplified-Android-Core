@@ -11,6 +11,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityReserved;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
 import java.util.Calendar;
@@ -38,10 +39,20 @@ final class BookStatus
       new OPDSAvailabilityMatcherType<BookStatusType,
         UnreachableCodeException>()
       {
+        @Override public BookStatusType onReserved(
+          final OPDSAvailabilityReserved a)
+        {
+          return new BookStatusReserved(in_id, a.getEndDate());
+        }
+
         @Override public BookStatusType onHeld(
           final OPDSAvailabilityHeld a)
         {
-          return new BookStatusHeld(in_id, a.getPosition());
+          return new BookStatusHeld(
+            in_id,
+            a.getPosition(),
+            a.getStartDate(),
+            a.getEndDate());
         }
 
         @Override public BookStatusType onHoldable(

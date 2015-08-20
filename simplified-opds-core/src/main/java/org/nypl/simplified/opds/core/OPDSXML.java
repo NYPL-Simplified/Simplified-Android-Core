@@ -19,7 +19,9 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
 import java.net.URI;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -356,6 +358,76 @@ public final class OPDSXML
   }
 
   /**
+   * Parse the contents of attribute {@code name} of element {@code e} as an
+   * RFC3339 date, if the attribute exists.
+   *
+   * @param e    The element
+   * @param name The attribute name
+   *
+   * @return A date, if any
+   *
+   * @throws OPDSParseException On parse errors
+   */
+
+  public static OptionType<Calendar> getAttributeRFC3339Optional(
+    final Element e,
+    final String name)
+    throws OPDSParseException
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(name);
+
+    try {
+      final OptionType<Calendar> end_date;
+      if (e.hasAttribute(name)) {
+        return Option.some(
+          OPDSRFC3339Formatter.parseRFC3339Date(e.getAttribute(name)));
+      }
+
+      return Option.none();
+    } catch (final ParseException x) {
+      throw new OPDSParseException(x);
+    }
+  }
+
+  /**
+   * Parse the contents of attribute {@code name} of element {@code e} as an
+   * RFC3339 date.
+   *
+   * @param e    The element
+   * @param name The attribute name
+   *
+   * @return A date
+   *
+   * @throws OPDSParseException On parse errors
+   */
+
+  public static Calendar getAttributeRFC3339(
+    final Element e,
+    final String name)
+    throws OPDSParseException
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(name);
+
+    final OptionType<Calendar> end_date;
+    if (e.hasAttribute(name)) {
+      try {
+        return OPDSRFC3339Formatter.parseRFC3339Date(e.getAttribute(name));
+      } catch (final ParseException x) {
+        throw new OPDSParseException(x);
+      }
+    }
+
+    final StringBuilder m = new StringBuilder(128);
+    m.append("Expected required attribute.\n");
+    m.append("Expected name:      ");
+    m.append(name);
+    m.append("\n");
+    throw new OPDSParseException(NullCheck.notNull(m.toString()));
+  }
+
+  /**
    * Convenient function to serialize the given document to the given output
    * stream.
    *
@@ -391,5 +463,72 @@ public final class OPDSXML
     } catch (final TransformerException ex) {
       throw new OPDSFeedSerializationException(ex);
     }
+  }
+
+  /**
+   * Parse the contents of attribute {@code name} of element {@code e} as an
+   * integer, if the attribute exists.
+   *
+   * @param e    The element
+   * @param name The attribute name
+   *
+   * @return An integer, if any
+   *
+   * @throws OPDSParseException On parse errors
+   */
+
+  public static OptionType<Integer> getAttributeIntegerOptional(
+    final Element e,
+    final String name)
+    throws OPDSParseException
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(name);
+
+    if (e.hasAttribute(name)) {
+      try {
+        return Option.some(Integer.valueOf(e.getAttribute(name)));
+      } catch (final NumberFormatException x) {
+        throw new OPDSParseException(x);
+      }
+    }
+
+    return Option.none();
+  }
+
+  /**
+   * Parse the contents of attribute {@code name} of element {@code e} as an
+   * integer.
+   *
+   * @param e    The element
+   * @param name The attribute name
+   *
+   * @return An integer
+   *
+   * @throws OPDSParseException On parse errors
+   */
+
+  public static int getAttributeInteger(
+    final Element e,
+    final String name)
+    throws OPDSParseException
+  {
+    NullCheck.notNull(e);
+    NullCheck.notNull(name);
+
+    if (e.hasAttribute(name)) {
+      try {
+        return Integer.valueOf(e.getAttribute(name));
+      } catch (final NumberFormatException x) {
+        throw new OPDSParseException(x);
+      }
+    }
+
+    final StringBuilder m = new StringBuilder(128);
+    m.append("Expected required attribute.\n");
+    m.append("Expected name:      ");
+    m.append(name);
+    m.append("\n");
+    throw new OPDSParseException(NullCheck.notNull(m.toString()));
   }
 }

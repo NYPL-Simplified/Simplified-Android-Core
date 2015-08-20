@@ -1,0 +1,19 @@
+<entry
+  xmlns:schema="http://schema.org/"
+  xmlns="http://www.w3.org/2005/Atom"
+  schema:additionalType="http://schema.org/Book">
+  <id>Open-Access</id>
+  <title>Open-Access</title>
+  <author>
+    <name>Author</name>
+  </author>
+  <summary type="html"></summary>
+  <updated>2015-08-17T20:37:53Z</updated>
+  <published>2014-08-29T10:46:42Z</published>
+  <link href="http://example.com/Open-Access"
+        type="application/epub+zip"
+        rel="http://opds-spec.org/acquisition/open-access"/>
+  <link href="http://example.com/Open-Access"
+        rel="http://opds-spec.org/acquisition/borrow">
+  </link>
+</entry>

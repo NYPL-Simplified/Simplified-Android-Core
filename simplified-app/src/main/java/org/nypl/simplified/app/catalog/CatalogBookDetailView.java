@@ -44,20 +44,14 @@ import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
 import org.nypl.simplified.books.core.BookStatusRequestingDownload;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
+import org.nypl.simplified.books.core.BookStatusReserved;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
-import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
-import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
-import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSCategory;
-import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -71,7 +65,6 @@ import java.util.Observer;
  * A book detail view.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 public final class CatalogBookDetailView implements Observer,
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -450,25 +443,6 @@ public final class CatalogBookDetailView implements Observer,
     }
   }
 
-  private static String onLoanText(
-    final OptionType<Calendar> loan_end_opt,
-    final Resources rr)
-  {
-    final String text;
-    if (loan_end_opt.isSome()) {
-      final Some<Calendar> loan_end_some = (Some<Calendar>) loan_end_opt;
-      final Calendar loan_end = loan_end_some.get();
-      final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
-      final String base_format =
-        rr.getString(R.string.catalog_book_availability_on_loan_timed);
-      final String formatted_date = fmt.format(loan_end.getTime());
-      text = String.format(base_format, formatted_date);
-    } else {
-      text = rr.getString(R.string.catalog_book_availability_on_loan_untimed);
-    }
-    return NullCheck.notNull(text);
-  }
-
   /**
    * @return The scrolling view containing the book details
    */
@@ -587,8 +561,34 @@ public final class CatalogBookDetailView implements Observer,
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
-    this.book_download_text.setText(
-      rr.getText(R.string.catalog_book_availability_on_hold));
+    final String text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(rr, s);
+    this.book_download_text.setText(text);
+
+    CatalogAcquisitionButtons.addButtons(
+      this.activity,
+      this.book_download_buttons,
+      NullCheck.notNull(this.books),
+      NullCheck.notNull(this.entry));
+
+    CatalogBookDetailView.configureButtonsHeight(
+      rr, this.book_download_buttons);
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusReserved(
+    final BookStatusReserved s)
+  {
+    this.book_download_buttons.removeAllViews();
+    this.book_download_buttons.setVisibility(View.VISIBLE);
+    this.book_download.setVisibility(View.VISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    final String text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(rr, s);
+    this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
@@ -611,8 +611,9 @@ public final class CatalogBookDetailView implements Observer,
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
-    this.book_download_text.setText(
-      rr.getText(R.string.catalog_book_availability_holdable));
+    final String text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(rr, s);
+    this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
@@ -643,7 +644,7 @@ public final class CatalogBookDetailView implements Observer,
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     final String text =
-      CatalogBookDetailView.onLoanText(o.getLoanExpiryDate(), rr);
+      CatalogBookAvailabilityStrings.getAvailabilityString(rr, o);
     this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
@@ -675,44 +676,8 @@ public final class CatalogBookDetailView implements Observer,
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
     final OPDSAvailabilityType avail = eo.getAvailability();
-    final String text = avail.matchAvailability(
-      new OPDSAvailabilityMatcherType<String, UnreachableCodeException>()
-      {
-        @Override public String onHeld(
-          final OPDSAvailabilityHeld a)
-        {
-          return NullCheck.notNull(
-            rr.getString(R.string.catalog_book_availability_on_hold));
-        }
-
-        @Override public String onHoldable(
-          final OPDSAvailabilityHoldable a)
-        {
-          return NullCheck.notNull(
-            rr.getString(R.string.catalog_book_availability_holdable));
-        }
-
-        @Override public String onLoanable(
-          final OPDSAvailabilityLoanable a)
-        {
-          return NullCheck.notNull(
-            rr.getString(R.string.catalog_book_availability_loanable));
-        }
-
-        @Override public String onLoaned(
-          final OPDSAvailabilityLoaned a)
-        {
-          return CatalogBookDetailView.onLoanText(a.getEndDate(), rr);
-        }
-
-        @Override public String onOpenAccess(
-          final OPDSAvailabilityOpenAccess a)
-        {
-          return NullCheck.notNull(
-            rr.getString(R.string.catalog_book_availability_open_access));
-        }
-      });
-
+    final String text =
+      CatalogBookAvailabilityStrings.getOPDSAvailabilityString(rr, avail);
     this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(

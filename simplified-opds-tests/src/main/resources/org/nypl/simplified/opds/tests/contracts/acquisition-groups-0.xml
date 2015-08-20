@@ -24,7 +24,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/b58171d3-434b-4667-8b50-cd5305b460df/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/39f46038-5eee-4c31-bf01-e2088cb33204</id>
@@ -46,7 +46,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>1</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/39f46038-5eee-4c31-bf01-e2088cb33204/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/1bfa3ca5-8983-4cd9-bfc1-a506c1337a41</id>
@@ -68,7 +68,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/1bfa3ca5-8983-4cd9-bfc1-a506c1337a41/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/befedea6-446a-4e11-8d29-c73d38345c03</id>
@@ -90,7 +90,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/befedea6-446a-4e11-8d29-c73d38345c03/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/5dfbab03-c017-41fd-a513-b12044a5b34a</id>
@@ -112,7 +112,7 @@
     <simplified:available_licenses>12</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/5dfbab03-c017-41fd-a513-b12044a5b34a/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/511be1bc-03f2-4e04-9035-e3861d58a8e0</id>
@@ -136,7 +136,7 @@
     <simplified:available_licenses>9</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/511be1bc-03f2-4e04-9035-e3861d58a8e0/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/16bcfd58-0df7-4973-842e-99f440e82446</id>
@@ -158,7 +158,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/16bcfd58-0df7-4973-842e-99f440e82446/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/ca199ca7-c1fb-4d34-ae17-4f2d673083e2</id>
@@ -180,7 +180,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/ca199ca7-c1fb-4d34-ae17-4f2d673083e2/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/bygy7r9</id>
@@ -202,7 +202,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/bygy7r9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/3fc36521-1dec-4652-8118-752ce5807f69</id>
@@ -224,7 +224,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/3fc36521-1dec-4652-8118-752ce5807f69/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/esv8az9</id>
@@ -248,7 +248,7 @@
     <simplified:available_licenses>6</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/esv8az9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/00139f8a-d5d1-4c1e-b945-27a113549464</id>
@@ -270,7 +270,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/00139f8a-d5d1-4c1e-b945-27a113549464/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/6c5b34ca-475d-44fc-b87f-f9d14a615092</id>
@@ -293,7 +293,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/6c5b34ca-475d-44fc-b87f-f9d14a615092/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/0631e00c-3ec5-47f5-b46a-41345a7a9a1f</id>
@@ -316,7 +316,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0631e00c-3ec5-47f5-b46a-41345a7a9a1f/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/3649115a-515c-4ee1-93e6-0a1dfc44cdf1</id>
@@ -338,7 +338,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/3649115a-515c-4ee1-93e6-0a1dfc44cdf1/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/bygzsz9</id>
@@ -360,7 +360,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/bygzsz9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/9897cff9-d990-45d4-85ab-fa11834e8298</id>
@@ -382,7 +382,7 @@
     <simplified:available_licenses>7</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/9897cff9-d990-45d4-85ab-fa11834e8298/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/7db72212-4b05-4b90-8eb4-d76be4a8ca84</id>
@@ -404,7 +404,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/7db72212-4b05-4b90-8eb4-d76be4a8ca84/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/2393de13-3ea0-4bf1-98aa-4c0204303999</id>
@@ -428,7 +428,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/2393de13-3ea0-4bf1-98aa-4c0204303999/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/2ef437e8-b724-4c02-a089-2873fdc4212c</id>
@@ -451,7 +451,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/2ef437e8-b724-4c02-a089-2873fdc4212c/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="http://opds-spec.org/group" title="Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Fiction" rel="collection" title="Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/dpr26z9</id>
@@ -475,7 +475,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/dpr26z9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/367a215d-531e-4d71-b8a4-bd7509ade81a</id>
@@ -498,7 +498,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/367a215d-531e-4d71-b8a4-bd7509ade81a/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/21a7e2f4-3769-4176-be98-1e6ae16c77b1</id>
@@ -522,7 +522,7 @@
     <simplified:available_licenses>4</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/21a7e2f4-3769-4176-be98-1e6ae16c77b1/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/9543cf8a-b0c9-423d-a066-c22444f036b2</id>
@@ -546,7 +546,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/9543cf8a-b0c9-423d-a066-c22444f036b2/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/0d9d3115-8357-4f06-ada8-acb52acb786a</id>
@@ -568,7 +568,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0d9d3115-8357-4f06-ada8-acb52acb786a/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/a04fbda9-4cbf-4780-aea7-8fe0a1d11fff</id>
@@ -591,7 +591,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/a04fbda9-4cbf-4780-aea7-8fe0a1d11fff/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/a640122e-7490-4614-a4f1-726687662eb0</id>
@@ -615,7 +615,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/a640122e-7490-4614-a4f1-726687662eb0/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/ac89cf36-4e26-4b04-928f-8179f8f317c9</id>
@@ -637,7 +637,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/ac89cf36-4e26-4b04-928f-8179f8f317c9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/070684c0-7100-4dee-a9f9-c78a9c02f38c</id>
@@ -660,7 +660,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/070684c0-7100-4dee-a9f9-c78a9c02f38c/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/f3ccbde6-3af0-4f98-b33b-a13b1eff16f0</id>
@@ -683,7 +683,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/f3ccbde6-3af0-4f98-b33b-a13b1eff16f0/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/amms2r9</id>
@@ -706,7 +706,7 @@
     <simplified:available_licenses>4</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/amms2r9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/ect4qr9</id>
@@ -730,7 +730,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/ect4qr9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/8e5f1fc0-4b08-443a-806d-0b916ef25399</id>
@@ -752,7 +752,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/8e5f1fc0-4b08-443a-806d-0b916ef25399/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/2e978bb5-19f4-4654-9957-a2ca3822fffa</id>
@@ -775,7 +775,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/2e978bb5-19f4-4654-9957-a2ca3822fffa/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/e8421af6-8d29-4448-b6ed-cd1be51d675d</id>
@@ -797,7 +797,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e8421af6-8d29-4448-b6ed-cd1be51d675d/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/df6c778b-6d63-4b20-9aad-b50859daa850</id>
@@ -819,7 +819,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/df6c778b-6d63-4b20-9aad-b50859daa850/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/e24af54e-462e-42df-93b1-3b974f0223bf</id>
@@ -847,7 +847,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e24af54e-462e-42df-93b1-3b974f0223bf/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/5547cc08-0406-4d37-96fa-ec4ee95c1474</id>
@@ -869,7 +869,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/5547cc08-0406-4d37-96fa-ec4ee95c1474/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/a8bc44e5-b79b-43b9-8fa5-f2db6764bc05</id>
@@ -891,7 +891,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/a8bc44e5-b79b-43b9-8fa5-f2db6764bc05/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/6805ddb2-af8b-4c77-b5f5-a9e8307a897f</id>
@@ -913,7 +913,7 @@
     <simplified:available_licenses>9</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/6805ddb2-af8b-4c77-b5f5-a9e8307a897f/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="http://opds-spec.org/group" title="Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Nonfiction" rel="collection" title="Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/aa0b46db-ac85-4a6d-ba53-702244a4ab70</id>
@@ -936,7 +936,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/aa0b46db-ac85-4a6d-ba53-702244a4ab70/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/do1oor9</id>
@@ -959,7 +959,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/do1oor9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/427885e8-d6eb-485f-8530-7488c6ced535</id>
@@ -981,7 +981,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/427885e8-d6eb-485f-8530-7488c6ced535/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/42d5ca80-05e4-43e8-9707-961e62ef9d6e</id>
@@ -1004,7 +1004,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/42d5ca80-05e4-43e8-9707-961e62ef9d6e/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/4e8b6b59-e9d9-48e1-91ee-592568a696d7</id>
@@ -1026,7 +1026,7 @@
     <simplified:available_licenses>4</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4e8b6b59-e9d9-48e1-91ee-592568a696d7/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/f15ecbc5-88a6-4ff1-8963-0756a2b609c4</id>
@@ -1049,7 +1049,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/f15ecbc5-88a6-4ff1-8963-0756a2b609c4/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/0d16c55d-aca8-4f6f-a854-160e38f35b21</id>
@@ -1072,7 +1072,7 @@
     <simplified:available_licenses>7</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0d16c55d-aca8-4f6f-a854-160e38f35b21/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/3d5b73e1-77e8-4b51-9e22-1a25222a47bb</id>
@@ -1094,7 +1094,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/3d5b73e1-77e8-4b51-9e22-1a25222a47bb/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/ammkmg9</id>
@@ -1119,7 +1119,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/ammkmg9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/080bce35-d86b-4a39-bdd7-f7899bfc698e</id>
@@ -1141,7 +1141,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/080bce35-d86b-4a39-bdd7-f7899bfc698e/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/a94ef90f-c54e-4371-9e50-00a4f26874f8</id>
@@ -1164,7 +1164,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/a94ef90f-c54e-4371-9e50-00a4f26874f8/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/707ef181-2fb9-475b-8c2c-b71560cd09c5</id>
@@ -1187,7 +1187,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/707ef181-2fb9-475b-8c2c-b71560cd09c5/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/3b0b4be0-aad2-489d-9f26-50b0b0331a62</id>
@@ -1209,7 +1209,7 @@
     <simplified:available_licenses>5</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/3b0b4be0-aad2-489d-9f26-50b0b0331a62/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/0a31944f-1510-4248-a11d-8b236ded11c6</id>
@@ -1232,7 +1232,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0a31944f-1510-4248-a11d-8b236ded11c6/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/aneczg9</id>
@@ -1255,7 +1255,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/aneczg9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/af316d46-ebe6-4ec2-95ca-e732d96ae6fb</id>
@@ -1277,7 +1277,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/af316d46-ebe6-4ec2-95ca-e732d96ae6fb/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/c84a7f2c-65ff-4be9-ab20-2449c17aeab1</id>
@@ -1300,7 +1300,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/c84a7f2c-65ff-4be9-ab20-2449c17aeab1/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/da0469e2-45ca-42b8-b59b-b4d21a6662e7</id>
@@ -1324,7 +1324,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/da0469e2-45ca-42b8-b59b-b4d21a6662e7/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/5e56915b-a9bf-4368-9412-679a9485c594</id>
@@ -1346,7 +1346,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/5e56915b-a9bf-4368-9412-679a9485c594/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/412b592f-fe13-4547-b007-3f6eea037645</id>
@@ -1369,7 +1369,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/412b592f-fe13-4547-b007-3f6eea037645/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="http://opds-spec.org/group" title="Young Adult Fiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Fiction" rel="collection" title="Young Adult Fiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/apfs389</id>
@@ -1391,7 +1391,7 @@
     <simplified:available_licenses>4</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/apfs389/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/dpr3eg9</id>
@@ -1414,7 +1414,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/dpr3eg9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/e43f83ad-f1a5-4c64-875b-f4a2a3716b7a</id>
@@ -1437,7 +1437,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e43f83ad-f1a5-4c64-875b-f4a2a3716b7a/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/d65xpr9</id>
@@ -1459,7 +1459,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/d65xpr9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/d677339b-4260-4f1d-b898-ac86d0b3b687</id>
@@ -1483,7 +1483,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/d677339b-4260-4f1d-b898-ac86d0b3b687/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/1f39f928-1bd0-4e45-8939-7a2a35836d16</id>
@@ -1507,7 +1507,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/1f39f928-1bd0-4e45-8939-7a2a35836d16/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/4b8593f5-8ca8-4551-8fe6-74c8c4f7bfbe</id>
@@ -1530,7 +1530,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4b8593f5-8ca8-4551-8fe6-74c8c4f7bfbe/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/15ddaf43-d9ea-438b-91bc-0fe4e72ec844</id>
@@ -1553,7 +1553,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/15ddaf43-d9ea-438b-91bc-0fe4e72ec844/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/apfuar9</id>
@@ -1575,7 +1575,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/apfuar9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/405c1e11-eb86-4362-bfe4-b0f1d35f7456</id>
@@ -1599,7 +1599,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/405c1e11-eb86-4362-bfe4-b0f1d35f7456/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/d7e2z9</id>
@@ -1621,7 +1621,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/d7e2z9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/e954ea52-e8a1-492c-bc4b-e0acd9abbf45</id>
@@ -1644,7 +1644,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e954ea52-e8a1-492c-bc4b-e0acd9abbf45/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/e9acacf5-8649-4f46-aa0a-e830cd7db1e3</id>
@@ -1667,7 +1667,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e9acacf5-8649-4f46-aa0a-e830cd7db1e3/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/cf363b57-4e1d-4b32-b1b5-ac19972f9487</id>
@@ -1690,7 +1690,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/cf363b57-4e1d-4b32-b1b5-ac19972f9487/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/ee0e732f-592d-49e9-b809-89bb6de8e7fb</id>
@@ -1712,7 +1712,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/ee0e732f-592d-49e9-b809-89bb6de8e7fb/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/e01d1fbc-3dfa-4954-acb1-43be764b8e34</id>
@@ -1734,7 +1734,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e01d1fbc-3dfa-4954-acb1-43be764b8e34/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/4d5fd2ae-4c12-406f-b2a6-72aac7922492</id>
@@ -1758,7 +1758,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4d5fd2ae-4c12-406f-b2a6-72aac7922492/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/d898e84a-6de1-4c0e-b369-ef0a4716958d</id>
@@ -1781,7 +1781,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/d898e84a-6de1-4c0e-b369-ef0a4716958d/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/915fe12e-bf53-4eb7-bfaa-fca50327c068</id>
@@ -1804,7 +1804,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/915fe12e-bf53-4eb7-bfaa-fca50327c068/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/4fc4b13f-3d6c-42f0-80f3-62983f68828d</id>
@@ -1827,7 +1827,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4fc4b13f-3d6c-42f0-80f3-62983f68828d/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="http://opds-spec.org/group" title="Young Adult Nonfiction"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Young%20Adult%20Nonfiction" rel="collection" title="Young Adult Nonfiction"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/69ef6748-7b6b-4f44-a50e-2d63e54e1848</id>
@@ -1850,7 +1850,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/69ef6748-7b6b-4f44-a50e-2d63e54e1848/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/6fe157bf-22c5-434e-b50d-28db18324f21</id>
@@ -1873,7 +1873,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/6fe157bf-22c5-434e-b50d-28db18324f21/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/etk6pg9</id>
@@ -1897,7 +1897,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/etk6pg9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/c524ce0e-fcba-4e6e-b953-26223e0b2bb0</id>
@@ -1920,7 +1920,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/c524ce0e-fcba-4e6e-b953-26223e0b2bb0/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/b856215b-757a-49ce-86c2-feaa8b1fa192</id>
@@ -1943,7 +1943,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/b856215b-757a-49ce-86c2-feaa8b1fa192/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/889cb901-ce7b-4478-bed5-6e122bcc38cd</id>
@@ -1966,7 +1966,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/889cb901-ce7b-4478-bed5-6e122bcc38cd/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/348b4f81-405d-4b9c-93dc-fd17562ec38d</id>
@@ -1989,7 +1989,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/348b4f81-405d-4b9c-93dc-fd17562ec38d/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/884d26d3-3071-4689-b0e7-115a965fd568</id>
@@ -2013,7 +2013,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/884d26d3-3071-4689-b0e7-115a965fd568/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/377e2ed2-c833-4019-9bf5-ef8dffe41ec7</id>
@@ -2037,7 +2037,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/377e2ed2-c833-4019-9bf5-ef8dffe41ec7/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/5939b648-f16a-4f17-b8e2-251fb6a08722</id>
@@ -2062,7 +2062,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/5939b648-f16a-4f17-b8e2-251fb6a08722/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/e0708134-0505-494a-b781-0d91599b900d</id>
@@ -2086,7 +2086,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/e0708134-0505-494a-b781-0d91599b900d/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/a3dd0bfa-54b5-49ea-adfa-be7f879487ee</id>
@@ -2109,7 +2109,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/a3dd0bfa-54b5-49ea-adfa-be7f879487ee/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/esepsr9</id>
@@ -2132,7 +2132,7 @@
     <simplified:available_licenses>8</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/esepsr9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/03f04076-0820-4b0d-80dd-75aae4ee1b84</id>
@@ -2155,7 +2155,7 @@
     <simplified:available_licenses>3</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/03f04076-0820-4b0d-80dd-75aae4ee1b84/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/dea5256e-f829-4aff-aec4-865cac1401e9</id>
@@ -2178,7 +2178,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/dea5256e-f829-4aff-aec4-865cac1401e9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/4b6b3191-ac8a-413c-bee0-95daa01ec9d5</id>
@@ -2201,7 +2201,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/4b6b3191-ac8a-413c-bee0-95daa01ec9d5/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/2c4d067c-334d-4ac0-9b24-cab0e529b8c6</id>
@@ -2225,7 +2225,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/2c4d067c-334d-4ac0-9b24-cab0e529b8c6/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/5b54ea64-4c28-46ae-a57b-5b5f21861a91</id>
@@ -2249,7 +2249,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/5b54ea64-4c28-46ae-a57b-5b5f21861a91/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/711f1352-f183-42d8-b907-e93e635ddcdb</id>
@@ -2273,7 +2273,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/711f1352-f183-42d8-b907-e93e635ddcdb/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/c7675720-c10b-454e-8d11-87615c0dba5a</id>
@@ -2297,7 +2297,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/c7675720-c10b-454e-8d11-87615c0dba5a/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="http://opds-spec.org/group" title="Children's Books"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/groups/Children%27s%20Books" rel="collection" title="Children's Books"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/crrmmg9</id>
@@ -2321,7 +2321,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/crrmmg9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/9e49f979-51a4-4ba9-b730-bc64eee0eb48</id>
@@ -2343,7 +2343,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/9e49f979-51a4-4ba9-b730-bc64eee0eb48/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/apftx89</id>
@@ -2367,7 +2367,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/apftx89/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/a8cvz89</id>
@@ -2390,7 +2390,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/a8cvz89/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/15d01e26-724b-481a-9721-97cce8f7d05d</id>
@@ -2413,7 +2413,7 @@
     <simplified:available_licenses>6</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/15d01e26-724b-481a-9721-97cce8f7d05d/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/fm9z9</id>
@@ -2436,7 +2436,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/fm9z9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/ee9b3664-ce2d-4356-a856-31e374e63b65</id>
@@ -2458,7 +2458,7 @@
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>4</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/ee9b3664-ce2d-4356-a856-31e374e63b65/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/b9a5b9ef-dc59-4a03-9af4-f88385d3e3af</id>
@@ -2481,7 +2481,7 @@
     <simplified:available_licenses>7</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/b9a5b9ef-dc59-4a03-9af4-f88385d3e3af/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/etktbr9</id>
@@ -2506,7 +2506,7 @@
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>3</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/etktbr9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/a74d6aab-1c07-4511-8834-899ef0949536</id>
@@ -2531,7 +2531,7 @@
     <simplified:available_licenses>4</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/a74d6aab-1c07-4511-8834-899ef0949536/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/b5235c44-57dd-4eea-a0a1-af59006f563f</id>
@@ -2554,7 +2554,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/b5235c44-57dd-4eea-a0a1-af59006f563f/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/7e8ec548-086a-4fe0-8edd-dd516896486c</id>
@@ -2577,7 +2577,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/7e8ec548-086a-4fe0-8edd-dd516896486c/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/7abce3ae-ec1f-45bb-b772-0b8643f089a0</id>
@@ -2603,7 +2603,7 @@
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>2</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/7abce3ae-ec1f-45bb-b772-0b8643f089a0/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/3cda9e59-f52e-4b49-8c44-c10e0cca0ef7</id>
@@ -2625,7 +2625,7 @@
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>1</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/3cda9e59-f52e-4b49-8c44-c10e0cca0ef7/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/dptsvr9</id>
@@ -2648,7 +2648,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/dptsvr9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/8870fcea-578b-4887-804e-c25659acf734</id>
@@ -2672,7 +2672,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/8870fcea-578b-4887-804e-c25659acf734/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/576380e8-5e6c-449b-89ee-59bdfeb865b6</id>
@@ -2695,7 +2695,7 @@
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>2</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/576380e8-5e6c-449b-89ee-59bdfeb865b6/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/8cd10e58-60dd-4f13-9752-81e7b9293643</id>
@@ -2719,7 +2719,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/8cd10e58-60dd-4f13-9752-81e7b9293643/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/3M%20ID/asdyz9</id>
@@ -2742,7 +2742,7 @@
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>9</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/3M/asdyz9/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/d86e5da1-b3f1-4e97-81d5-882ceda88dad</id>
@@ -2765,7 +2765,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/d86e5da1-b3f1-4e97-81d5-882ceda88dad/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="http://opds-spec.org/group" title="Best Sellers"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/popular/" rel="collection" title="Best Sellers"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/0532c46f-0470-4461-bbe2-1083e2a523eb</id>
@@ -2788,7 +2788,7 @@
     <simplified:available_licenses>1</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/0532c46f-0470-4461-bbe2-1083e2a523eb/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/staff_picks/" rel="http://opds-spec.org/group" title="Staff Picks"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/staff_picks/" rel="collection" title="Staff Picks"/>
   </entry>
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/58f5294b-551b-4926-ad2c-14c9fbdb41ec</id>
@@ -2811,7 +2811,7 @@
     <simplified:available_licenses>2</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
     <link href="http://circulation.alpha.librarysimplified.org/works/Overdrive/58f5294b-551b-4926-ad2c-14c9fbdb41ec/borrow" rel="http://opds-spec.org/acquisition/borrow"/>
-    <link href="https://d3frcbs0h4wafj.cloudfront.net/staff_picks/" rel="http://opds-spec.org/group" title="Staff Picks"/>
+    <link href="https://d3frcbs0h4wafj.cloudfront.net/staff_picks/" rel="collection" title="Staff Picks"/>
   </entry>
   <link href="http://circulation.alpha.librarysimplified.org/search/" type="application/opensearchdescription+xml" rel="search"/>
   <link href="http://circulation.alpha.librarysimplified.org/loans/" rel="http://opds-spec.org/shelf"/>

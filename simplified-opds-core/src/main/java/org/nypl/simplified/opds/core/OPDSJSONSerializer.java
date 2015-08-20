@@ -61,6 +61,27 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     return av.matchAvailability(
       new OPDSAvailabilityMatcherType<ObjectNode, UnreachableCodeException>()
       {
+        @Override public ObjectNode onReserved(
+          final OPDSAvailabilityReserved a)
+        {
+          final ObjectNode o = jom.createObjectNode();
+          final ObjectNode oh = jom.createObjectNode();
+
+          a.getEndDate().map(
+            new FunctionType<Calendar, Unit>()
+            {
+              @Override public Unit call(
+                final Calendar t)
+              {
+                oh.put("end_date", fmt.format(t.getTime()));
+                return Unit.unit();
+              }
+            });
+
+          o.set("reserved", oh);
+          return o;
+        }
+
         @Override public ObjectNode onHeld(
           final OPDSAvailabilityHeld a)
         {
