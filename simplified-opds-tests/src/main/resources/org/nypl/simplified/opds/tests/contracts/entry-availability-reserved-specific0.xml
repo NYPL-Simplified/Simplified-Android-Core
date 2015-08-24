@@ -38,7 +38,6 @@
     <opds:holds total="0"/>
     <opds:copies available="0" total="2"/>
   </link>
-  <link
-    href="http://circulation.alpha.librarysimplified.org/loans/3M/arzopz9/revoke"
-    rel="http://librarysimplified.org/terms/rel/revoke"/>
+  <link rel="http://librarysimplified.org/terms/rel/revoke"
+        href="http://example.com/revoke"/>
 </entry>

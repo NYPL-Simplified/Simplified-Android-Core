@@ -1,11 +1,6 @@
 package org.nypl.simplified.opds.tests.contracts;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.List;
-
+import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
@@ -18,17 +13,35 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializer;
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
-import com.io7m.jnull.NullCheck;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.List;
 
-@SuppressWarnings("resource") public final class OPDSJSONSerializerContract implements
-  OPDSJSONSerializerContractType
+/**
+ * Default implementation of the {@link OPDSJSONSerializerContractType}.
+ */
+
+public final class OPDSJSONSerializerContract
+  implements OPDSJSONSerializerContractType
 {
+  /**
+   * Obtain a reference to the given feed.
+   *
+   * @param name The feed name
+   *
+   * @return A feed stream
+   *
+   * @throws Exception On errors
+   */
+
   public static InputStream getResource(
     final String name)
     throws Exception
   {
-    return NullCheck.notNull(OPDSJSONSerializerContract.class
-      .getResourceAsStream(name));
+    return NullCheck.notNull(
+      OPDSJSONSerializerContract.class.getResourceAsStream(name));
   }
 
   @Override public void testRoundTrip0()
@@ -54,6 +67,7 @@ import com.io7m.jnull.NullCheck;
 
     {
       TestUtilities.assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
+      TestUtilities.assertEquals(e0.getAvailability(), e1.getAvailability());
       TestUtilities.assertEquals(e0.getAuthors(), e1.getAuthors());
       TestUtilities.assertEquals(e0.getCategories(), e1.getCategories());
       TestUtilities.assertEquals(e0.getCover(), e1.getCover());
@@ -80,10 +94,8 @@ import com.io7m.jnull.NullCheck;
 
     final OPDSJSONSerializerType s = OPDSJSONSerializer.newSerializer();
 
-    final InputStream rs0 =
-      OPDSJSONSerializerContract.getResource("loans.xml");
-    final OPDSAcquisitionFeed fe0 =
-      p.parse(new URI("http://example.com"), rs0);
+    final InputStream rs0 = OPDSJSONSerializerContract.getResource("loans.xml");
+    final OPDSAcquisitionFeed fe0 = p.parse(new URI("http://example.com"), rs0);
 
     final ByteArrayOutputStream bao0 = new ByteArrayOutputStream();
     s.serializeToStream(s.serializeFeed(fe0), bao0);
@@ -98,8 +110,7 @@ import com.io7m.jnull.NullCheck;
       for (int index = 0; index < fe0e.size(); ++index) {
         final OPDSAcquisitionFeedEntry e0 = fe0e.get(index);
         final OPDSAcquisitionFeedEntry e1 = fe1e.get(index);
-        TestUtilities
-          .assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
+        TestUtilities.assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
         TestUtilities.assertEquals(e0.getAuthors(), e1.getAuthors());
         TestUtilities.assertEquals(e0.getCategories(), e1.getCategories());
         TestUtilities.assertEquals(e0.getCover(), e1.getCover());

@@ -17,6 +17,7 @@ import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Calendar;
 
 /**
@@ -70,8 +71,10 @@ public final class OPDSFeedEntryParserContract
     final Calendar expected_start_date =
       OPDSRFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
     final OptionType<Calendar> expected_end_date = Option.none();
-    final OPDSAvailabilityLoaned expected =
-      OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
+    final OPDSAvailabilityLoaned expected = OPDSAvailabilityLoaned.get(
+      expected_start_date, expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -90,8 +93,10 @@ public final class OPDSFeedEntryParserContract
       OPDSRFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
     final OptionType<Calendar> expected_end_date = Option.some(
       OPDSRFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
-    final OPDSAvailabilityLoaned expected =
-      OPDSAvailabilityLoaned.get(expected_start_date, expected_end_date);
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
+    final OPDSAvailabilityLoaned expected = OPDSAvailabilityLoaned.get(
+      expected_start_date, expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -124,8 +129,10 @@ public final class OPDSFeedEntryParserContract
       OPDSRFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
     final OptionType<Integer> queue_position = Option.none();
     final OptionType<Calendar> expected_end_date = Option.none();
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-      expected_start_date, queue_position, expected_end_date);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -145,8 +152,10 @@ public final class OPDSFeedEntryParserContract
     final OptionType<Calendar> expected_end_date = Option.some(
       OPDSRFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.none();
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-      expected_start_date, queue_position, expected_end_date);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -165,8 +174,10 @@ public final class OPDSFeedEntryParserContract
       OPDSRFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
     final OptionType<Integer> queue_position = Option.some(3);
     final OptionType<Calendar> expected_end_date = Option.none();
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-      expected_start_date, queue_position, expected_end_date);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -186,8 +197,10 @@ public final class OPDSFeedEntryParserContract
     final OptionType<Calendar> expected_end_date = Option.some(
       OPDSRFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.some(3);
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-      expected_start_date, queue_position, expected_end_date);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -203,8 +216,10 @@ public final class OPDSFeedEntryParserContract
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<Calendar> expected_end_date = Option.none();
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityReserved expected =
-      OPDSAvailabilityReserved.get(expected_end_date);
+      OPDSAvailabilityReserved.get(expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -221,8 +236,10 @@ public final class OPDSFeedEntryParserContract
 
     final OptionType<Calendar> expected_end_date = Option.some(
       OPDSRFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityReserved expected =
-      OPDSAvailabilityReserved.get(expected_end_date);
+      OPDSAvailabilityReserved.get(expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -237,8 +254,10 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityOpenAccess expected =
-      OPDSAvailabilityOpenAccess.get();
+      OPDSAvailabilityOpenAccess.get(expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -255,8 +274,10 @@ public final class OPDSFeedEntryParserContract
 
     final OptionType<Calendar> expected_end_date = Option.some(
       OPDSRFC3339Formatter.parseRFC3339Date("2015-08-24T00:30:24Z"));
+    final OptionType<URI> expected_revoke =
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityReserved expected =
-      OPDSAvailabilityReserved.get(expected_end_date);
+      OPDSAvailabilityReserved.get(expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }

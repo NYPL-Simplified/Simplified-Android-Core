@@ -19,4 +19,6 @@
     <opds:holds total="0"/>
     <opds:copies available="1" total="1"/>
   </link>
+  <link rel="http://librarysimplified.org/terms/rel/revoke"
+        href="http://example.com/revoke"/>
 </entry>

@@ -16,4 +16,6 @@
   <link href="http://example.com/Open-Access"
         rel="http://opds-spec.org/acquisition/borrow">
   </link>
+  <link rel="http://librarysimplified.org/terms/rel/revoke"
+        href="http://example.com/revoke"/>
 </entry>

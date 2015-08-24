@@ -18,7 +18,8 @@ final class OPDSFeedConstants
   public static final URI    SCHEMA_URI;
   public static final URI    SIMPLIFIED_URI;
   public static final URI    OPDS_URI;
-
+  public static final URI    REVOKE_URI;
+  public static final  String REVOKE_URI_TEXT;
   private static final URI    ACQUISITION_URI_PREFIX;
   private static final String ATOM_URI_TEXT;
   private static final URI    FACET_URI;
@@ -67,6 +68,11 @@ final class OPDSFeedConstants
       NullCheck.notNull(URI.create("http://librarysimplified.org/terms/"));
     SIMPLIFIED_URI_TEXT =
       NullCheck.notNull(OPDSFeedConstants.SIMPLIFIED_URI.toString());
+
+    REVOKE_URI = NullCheck.notNull(
+      URI.create("http://librarysimplified.org/terms/rel/revoke"));
+    REVOKE_URI_TEXT =
+      NullCheck.notNull(OPDSFeedConstants.REVOKE_URI.toString());
   }
 
   private OPDSFeedConstants()

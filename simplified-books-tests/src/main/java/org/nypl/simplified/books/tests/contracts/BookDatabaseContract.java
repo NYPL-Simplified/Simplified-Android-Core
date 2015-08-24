@@ -1,10 +1,9 @@
 package org.nypl.simplified.books.tests.contracts;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Calendar;
-
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialProcedureType;
+import com.io7m.jfunctional.Unit;
 import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
@@ -20,12 +19,26 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializer;
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.nypl.simplified.test.utilities.TestUtilities;
 
-import com.io7m.jfunctional.PartialProcedureType;
-import com.io7m.jfunctional.Unit;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Calendar;
 
-@SuppressWarnings({ "null" }) public final class BookDatabaseContract implements
-  BookDatabaseContractType
+/**
+ * Default implementation of {@link BookDatabaseContractType}.
+ */
+
+public final class BookDatabaseContract implements BookDatabaseContractType
 {
+  /**
+   * Construct a contract.
+   */
+
+  public BookDatabaseContract()
+  {
+
+  }
+
   @Override public void testBooksDatabaseInit()
     throws Exception
   {
@@ -35,11 +48,8 @@ import com.io7m.jfunctional.Unit;
     final File in_directory = File.createTempFile("pre", "");
     in_directory.delete();
 
-    final BookDatabaseType bd =
-      BookDatabase.newDatabase(
-        in_json_serializer,
-        in_json_parser,
-        in_directory);
+    final BookDatabaseType bd = BookDatabase.newDatabase(
+      in_json_serializer, in_json_parser, in_directory);
 
     bd.create();
     TestUtilities.assertTrue(in_directory.isDirectory());
@@ -56,23 +66,22 @@ import com.io7m.jfunctional.Unit;
     final File in_directory = File.createTempFile("pre", "");
     in_directory.delete();
 
-    final BookDatabaseType bd =
-      BookDatabase.newDatabase(
-        in_json_serializer,
-        in_json_parser,
-        in_directory);
+    final BookDatabaseType bd = BookDatabase.newDatabase(
+      in_json_serializer, in_json_parser, in_directory);
     bd.create();
 
     final OPDSAcquisitionFeedEntry ee;
     {
+      final OptionType<URI> revoke = Option.none();
       final OPDSAcquisitionFeedEntryBuilderType eb =
         OPDSAcquisitionFeedEntry.newBuilder(
           "abcd",
           "Title",
           Calendar.getInstance(),
-          OPDSAvailabilityOpenAccess.get());
-      eb.addAcquisition(new OPDSAcquisition(Type.ACQUISITION_BORROW, URI
-        .create("http://example.com")));
+          OPDSAvailabilityOpenAccess.get(revoke));
+      eb.addAcquisition(
+        new OPDSAcquisition(
+          Type.ACQUISITION_BORROW, URI.create("http://example.com")));
       ee = eb.build();
     }
 
@@ -93,15 +102,12 @@ import com.io7m.jfunctional.Unit;
     final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
     final File in_directory = File.createTempFile("pre", "");
 
-    final BookDatabaseType bd =
-      BookDatabase.newDatabase(
-        in_json_serializer,
-        in_json_parser,
-        in_directory);
+    final BookDatabaseType bd = BookDatabase.newDatabase(
+      in_json_serializer, in_json_parser, in_directory);
 
     TestUtilities.expectException(
-      IOException.class,
-      new PartialProcedureType<Unit, Exception>() {
+      IOException.class, new PartialProcedureType<Unit, Exception>()
+      {
         @Override public void call(
           final Unit x)
           throws Exception

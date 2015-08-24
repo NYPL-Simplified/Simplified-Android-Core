@@ -88,6 +88,29 @@ public final class OPDSAcquisitionFeedEntryParser
     final List<Element> e_links = OPDSXML.getChildElementsWithNameNonEmpty(
       e, OPDSFeedConstants.ATOM_URI, "link");
 
+    /**
+     * First, locate a revocation link, if any. This is required to be found
+     * first as it needs to be used later in availability information.
+     */
+
+    OptionType<URI> revoke = Option.none();
+    for (final Element e_link : e_links) {
+      if (e_link.hasAttribute("rel")) {
+        final String rel_text = NullCheck.notNull(e_link.getAttribute("rel"));
+        if (rel_text.equals(OPDSFeedConstants.REVOKE_URI_TEXT)) {
+          if (e_link.hasAttribute("href")) {
+            final URI u = new URI(e_link.getAttribute("href"));
+            revoke = Option.some(u);
+            break;
+          }
+        }
+      }
+    }
+
+    /**
+     * Now, handle any other types of links.
+     */
+
     for (final Element e_link : e_links) {
       if (e_link.hasAttribute("rel")) {
         final String rel_text = NullCheck.notNull(e_link.getAttribute("rel"));
@@ -149,9 +172,9 @@ public final class OPDSAcquisitionFeedEntryParser
           }
 
           if (open_access) {
-            eb.setAvailability(OPDSAvailabilityOpenAccess.get());
+            eb.setAvailability(OPDSAvailabilityOpenAccess.get(revoke));
           } else {
-            OPDSAcquisitionFeedEntryParser.tryAvailability(eb, e_link);
+            OPDSAcquisitionFeedEntryParser.tryAvailability(eb, e_link, revoke);
           }
         }
       }
@@ -186,7 +209,8 @@ public final class OPDSAcquisitionFeedEntryParser
 
   private static void tryAvailability(
     final OPDSAcquisitionFeedEntryBuilderType eb,
-    final Element e)
+    final Element e,
+    final OptionType<URI> revoke)
     throws OPDSParseException, ParseException
   {
     final OptionType<Element> copies_opt =
@@ -205,14 +229,16 @@ public final class OPDSAcquisitionFeedEntryParser
       final Element copies = copies_some.get();
       final Element holds = holds_some.get();
       eb.setAvailability(
-        OPDSAcquisitionFeedEntryParser.inferAvailability(e, copies, holds));
+        OPDSAcquisitionFeedEntryParser.inferAvailability(
+          e, copies, holds, revoke));
     }
   }
 
   private static OPDSAvailabilityType inferAvailability(
     final Element e,
     final Element copies,
-    final Element holds)
+    final Element holds,
+    final OptionType<URI> revoke)
     throws OPDSParseException
   {
     /**
@@ -233,7 +259,7 @@ public final class OPDSAcquisitionFeedEntryParser
       if ("reserved".equals(status)) {
         final OptionType<Calendar> end_date =
           OPDSXML.getAttributeRFC3339Optional(available, "until");
-        return OPDSAvailabilityReserved.get(end_date);
+        return OPDSAvailabilityReserved.get(end_date, revoke);
       }
 
       if ("unavailable".equals(status)) {
@@ -243,7 +269,7 @@ public final class OPDSAcquisitionFeedEntryParser
           OPDSXML.getAttributeRFC3339(available, "since");
         final OptionType<Integer> queue =
           OPDSXML.getAttributeIntegerOptional(holds, "position");
-        return OPDSAvailabilityHeld.get(start_date, queue, end_date);
+        return OPDSAvailabilityHeld.get(start_date, queue, end_date, revoke);
       }
 
       if ("available".equals(status)) {
@@ -251,7 +277,7 @@ public final class OPDSAcquisitionFeedEntryParser
           OPDSXML.getAttributeRFC3339Optional(available, "until");
         final Calendar start_date =
           OPDSXML.getAttributeRFC3339(available, "since");
-        return OPDSAvailabilityLoaned.get(start_date, end_date);
+        return OPDSAvailabilityLoaned.get(start_date, end_date, revoke);
       }
     }
 

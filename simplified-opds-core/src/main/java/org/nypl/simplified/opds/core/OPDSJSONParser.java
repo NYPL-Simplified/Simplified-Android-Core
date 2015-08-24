@@ -333,7 +333,9 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         OPDSJSONParser.getTimestamp(n, "start_date");
       final OptionType<Calendar> in_end_date =
         OPDSJSONParser.getTimestampOptional(n, "end_date");
-      return OPDSAvailabilityLoaned.get(in_start_date, in_end_date);
+      final OptionType<URI> in_revoke =
+        OPDSJSONParser.getURIOptional(n, "revoke");
+      return OPDSAvailabilityLoaned.get(in_start_date, in_end_date, in_revoke);
     }
 
     if (node.has("held")) {
@@ -344,21 +346,49 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         OPDSJSONParser.getIntegerOptional(n, "position");
       final OptionType<Calendar> in_end_date =
         OPDSJSONParser.getTimestampOptional(n, "end_date");
-      return OPDSAvailabilityHeld.get(in_start_date, in_position, in_end_date);
+      final OptionType<URI> in_revoke =
+        OPDSJSONParser.getURIOptional(n, "revoke");
+      return OPDSAvailabilityHeld.get(
+        in_start_date, in_position, in_end_date, in_revoke);
     }
 
     if (node.has("reserved")) {
       final ObjectNode n = OPDSJSONParser.getObject(node, "reserved");
       final OptionType<Calendar> in_end_date =
         OPDSJSONParser.getTimestampOptional(n, "end_date");
-      return OPDSAvailabilityReserved.get(in_end_date);
+      final OptionType<URI> in_revoke =
+        OPDSJSONParser.getURIOptional(n, "revoke");
+      return OPDSAvailabilityReserved.get(in_end_date, in_revoke);
     }
 
     if (node.has("open_access")) {
-      return OPDSAvailabilityOpenAccess.get();
+      final ObjectNode n = OPDSJSONParser.getObject(node, "open_access");
+      final OptionType<URI> in_revoke =
+        OPDSJSONParser.getURIOptional(n, "revoke");
+      return OPDSAvailabilityOpenAccess.get(in_revoke);
     }
 
     throw new OPDSParseException("Expected availability information");
+  }
+
+  private static OptionType<URI> getURIOptional(
+    final ObjectNode n,
+    final String key)
+    throws OPDSParseException
+  {
+    return OPDSJSONParser.getStringOptional(n, key).mapPartial(
+      new PartialFunctionType<String, URI, OPDSParseException>()
+      {
+        @Override public URI call(final String x)
+          throws OPDSParseException
+        {
+          try {
+            return new URI(x);
+          } catch (final URISyntaxException e) {
+            throw new OPDSParseException(e);
+          }
+        }
+      });
   }
 
   private static OPDSCategory parseCategory(

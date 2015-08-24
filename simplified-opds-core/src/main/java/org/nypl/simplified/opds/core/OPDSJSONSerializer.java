@@ -78,6 +78,16 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
               }
             });
 
+          a.getRevoke().map(
+            new FunctionType<URI, Unit>()
+            {
+              @Override public Unit call(final URI uri)
+              {
+                oh.put("revoke", uri.toString());
+                return Unit.unit();
+              }
+            });
+
           o.set("reserved", oh);
           return o;
         }
@@ -95,6 +105,16 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
               @Override public Unit call(final Integer x)
               {
                 oh.put("position", x);
+                return Unit.unit();
+              }
+            });
+
+          a.getRevoke().map(
+            new FunctionType<URI, Unit>()
+            {
+              @Override public Unit call(final URI uri)
+              {
+                oh.put("revoke", uri.toString());
                 return Unit.unit();
               }
             });
@@ -139,6 +159,16 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
               }
             });
 
+          a.getRevoke().map(
+            new FunctionType<URI, Unit>()
+            {
+              @Override public Unit call(final URI uri)
+              {
+                oh.put("revoke", uri.toString());
+                return Unit.unit();
+              }
+            });
+
           o.set("loaned", oh);
           return o;
         }
@@ -148,6 +178,17 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
+
+          a.getRevoke().map(
+            new FunctionType<URI, Unit>()
+            {
+              @Override public Unit call(final URI uri)
+              {
+                oh.put("revoke", uri.toString());
+                return Unit.unit();
+              }
+            });
+
           o.set("open_access", oh);
           return o;
         }

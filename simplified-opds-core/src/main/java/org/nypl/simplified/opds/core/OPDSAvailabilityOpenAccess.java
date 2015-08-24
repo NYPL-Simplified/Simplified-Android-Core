@@ -1,5 +1,10 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NullCheck;
+
+import java.net.URI;
+
 /**
  * The book is public domain.
  */
@@ -7,24 +12,49 @@ package org.nypl.simplified.opds.core;
 public final class OPDSAvailabilityOpenAccess implements OPDSAvailabilityType
 {
   private static final long serialVersionUID = 1L;
-  private static final OPDSAvailabilityOpenAccess INSTANCE;
+  private final OptionType<URI> revoke;
 
-  static {
-    INSTANCE = new OPDSAvailabilityOpenAccess();
-  }
-
-  private OPDSAvailabilityOpenAccess()
+  private OPDSAvailabilityOpenAccess(final OptionType<URI> in_revoke)
   {
-
+    this.revoke = NullCheck.notNull(in_revoke);
   }
 
   /**
+   * @param revoke The revocation link, if any
+   *
    * @return An "open access" availability value
    */
 
-  public static OPDSAvailabilityOpenAccess get()
+  public static OPDSAvailabilityOpenAccess get(
+    final OptionType<URI> revoke)
   {
-    return OPDSAvailabilityOpenAccess.INSTANCE;
+    return new OPDSAvailabilityOpenAccess(revoke);
+  }
+
+  @Override public String toString()
+  {
+    final StringBuilder sb = new StringBuilder("OPDSAvailabilityOpenAccess{");
+    sb.append("revoke=").append(this.revoke);
+    sb.append('}');
+    return sb.toString();
+  }
+
+  @Override public boolean equals(final Object o)
+  {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || this.getClass() != o.getClass()) {
+      return false;
+    }
+
+    final OPDSAvailabilityOpenAccess that = (OPDSAvailabilityOpenAccess) o;
+    return this.revoke.equals(that.revoke);
+  }
+
+  @Override public int hashCode()
+  {
+    return this.revoke.hashCode();
   }
 
   @Override public <A, E extends Exception> A matchAvailability(
@@ -34,8 +64,12 @@ public final class OPDSAvailabilityOpenAccess implements OPDSAvailabilityType
     return m.onOpenAccess(this);
   }
 
-  @Override public String toString()
+  /**
+   * @return The revocation link, if any
+   */
+
+  public OptionType<URI> getRevoke()
   {
-    return "[OPDSAvailabilityOpenAccess]";
+    return this.revoke;
   }
 }
