@@ -10,16 +10,16 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
- * The book is reserved.
+ * The book is held and is ready to be checked out now.
  */
 
-public final class OPDSAvailabilityReserved implements OPDSAvailabilityType
+public final class OPDSAvailabilityHeldReady implements OPDSAvailabilityType
 {
   private static final long serialVersionUID = 1L;
   private final OptionType<Calendar> end_date;
   private final OptionType<URI>      revoke;
 
-  private OPDSAvailabilityReserved(
+  private OPDSAvailabilityHeldReady(
     final OptionType<Calendar> in_end_date,
     final OptionType<URI> in_revoke)
   {
@@ -34,11 +34,11 @@ public final class OPDSAvailabilityReserved implements OPDSAvailabilityType
    * @return A value that states that a book is on hold
    */
 
-  public static OPDSAvailabilityReserved get(
+  public static OPDSAvailabilityHeldReady get(
     final OptionType<Calendar> in_end_date,
     final OptionType<URI> in_revoke)
   {
-    return new OPDSAvailabilityReserved(in_end_date, in_revoke);
+    return new OPDSAvailabilityHeldReady(in_end_date, in_revoke);
   }
 
   /**
@@ -68,7 +68,7 @@ public final class OPDSAvailabilityReserved implements OPDSAvailabilityType
       return false;
     }
 
-    final OPDSAvailabilityReserved that = (OPDSAvailabilityReserved) o;
+    final OPDSAvailabilityHeldReady that = (OPDSAvailabilityHeldReady) o;
     return this.end_date.equals(that.end_date)
            && this.revoke.equals(that.revoke);
   }
@@ -82,14 +82,14 @@ public final class OPDSAvailabilityReserved implements OPDSAvailabilityType
     final OPDSAvailabilityMatcherType<A, E> m)
     throws E
   {
-    return m.onReserved(this);
+    return m.onHeldReady(this);
   }
 
   @Override public String toString()
   {
     final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
     final StringBuilder b = new StringBuilder(128);
-    b.append("[OPDSAvailabilityReserved end_date=");
+    b.append("[OPDSAvailabilityHeldReady end_date=");
     this.end_date.map(
       new FunctionType<Calendar, Unit>()
       {

@@ -76,10 +76,10 @@ public final class OPDSFeedEntryParserTest extends InstrumentationTestCase
     this.contract.testEntryAvailabilityOpenAccess();
   }
 
-  @Override public void testEntryAvailabilityReserved()
+  @Override public void testEntryAvailabilityHeldReady()
     throws Exception
   {
-    this.contract.testEntryAvailabilityReserved();
+    this.contract.testEntryAvailabilityHeldReady();
   }
 
   @Override public void testEntryAvailabilityReservedSpecific0()

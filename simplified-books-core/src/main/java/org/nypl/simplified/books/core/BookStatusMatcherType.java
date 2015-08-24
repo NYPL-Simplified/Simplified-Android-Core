@@ -47,8 +47,8 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onBookStatusReserved(
-    BookStatusReserved s)
+  A onBookStatusHeldReady(
+    BookStatusHeldReady s)
     throws E;
 
   /**

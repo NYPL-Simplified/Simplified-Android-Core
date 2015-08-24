@@ -7,11 +7,11 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.opds.core.OPDSAvailabilityReserved;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
 import org.nypl.simplified.test.utilities.TestUtilities;
@@ -205,21 +205,21 @@ public final class OPDSFeedEntryParserContract
     TestUtilities.assertEquals(availability, expected);
   }
 
-  @Override public void testEntryAvailabilityReserved()
+  @Override public void testEntryAvailabilityHeldReady()
     throws Exception
   {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
       OPDSFeedEntryParserContract.getResource(
-        "entry-availability-reserved.xml"));
+        "entry-availability-heldready.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<Calendar> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
       Option.some(new URI("http://example.com/revoke"));
-    final OPDSAvailabilityReserved expected =
-      OPDSAvailabilityReserved.get(expected_end_date, expected_revoke);
+    final OPDSAvailabilityHeldReady expected =
+      OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -230,7 +230,7 @@ public final class OPDSFeedEntryParserContract
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
       OPDSFeedEntryParserContract.getResource(
-        "entry-availability-reserved-timed.xml"));
+        "entry-availability-heldready-timed.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
@@ -238,8 +238,8 @@ public final class OPDSFeedEntryParserContract
       OPDSRFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
     final OptionType<URI> expected_revoke =
       Option.some(new URI("http://example.com/revoke"));
-    final OPDSAvailabilityReserved expected =
-      OPDSAvailabilityReserved.get(expected_end_date, expected_revoke);
+    final OPDSAvailabilityHeldReady expected =
+      OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }
@@ -268,7 +268,7 @@ public final class OPDSFeedEntryParserContract
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
       OPDSFeedEntryParserContract.getResource(
-        "entry-availability-reserved-specific0.xml"));
+        "entry-availability-heldready-specific0.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
@@ -276,8 +276,8 @@ public final class OPDSFeedEntryParserContract
       OPDSRFC3339Formatter.parseRFC3339Date("2015-08-24T00:30:24Z"));
     final OptionType<URI> expected_revoke =
       Option.some(new URI("http://example.com/revoke"));
-    final OPDSAvailabilityReserved expected =
-      OPDSAvailabilityReserved.get(expected_end_date, expected_revoke);
+    final OPDSAvailabilityHeldReady expected =
+      OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
     TestUtilities.assertEquals(availability, expected);
   }

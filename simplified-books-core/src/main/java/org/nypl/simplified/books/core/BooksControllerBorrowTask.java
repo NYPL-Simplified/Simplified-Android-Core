@@ -28,7 +28,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.opds.core.OPDSAvailabilityReserved;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -281,11 +281,11 @@ final class BooksControllerBorrowTask implements Runnable,
     availability.matchAvailability(
       new OPDSAvailabilityMatcherType<Unit, Exception>()
       {
-        @Override public Unit onReserved(
-          final OPDSAvailabilityReserved a)
+        @Override public Unit onHeldReady(
+          final OPDSAvailabilityHeldReady a)
         {
-          final BookStatusReserved status =
-            new BookStatusReserved(b_id, a.getEndDate());
+          final BookStatusHeldReady status =
+            new BookStatusHeldReady(b_id, a.getEndDate());
           stat.booksStatusUpdate(status);
           return Unit.unit();
         }

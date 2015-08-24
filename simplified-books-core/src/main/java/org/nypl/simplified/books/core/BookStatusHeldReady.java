@@ -13,7 +13,7 @@ import java.util.Calendar;
  * hold where the current user is at position 0 in the queue.
  */
 
-public final class BookStatusReserved implements BookStatusType
+public final class BookStatusHeldReady implements BookStatusType
 {
   private final BookID               id;
   private final OptionType<Calendar> end_date;
@@ -25,7 +25,7 @@ public final class BookStatusReserved implements BookStatusType
    * @param in_end_date The expiry date
    */
 
-  public BookStatusReserved(
+  public BookStatusHeldReady(
     final BookID in_id,
     final OptionType<Calendar> in_end_date)
   {
@@ -49,21 +49,21 @@ public final class BookStatusReserved implements BookStatusType
 
   @Override public BookStatusPriorityOrdering getPriority()
   {
-    return BookStatusPriorityOrdering.BOOK_STATUS_RESERVED;
+    return BookStatusPriorityOrdering.BOOK_STATUS_HELD_READY;
   }
 
   @Override public <A, E extends Exception> A matchBookStatus(
     final BookStatusMatcherType<A, E> m)
     throws E
   {
-    return m.onBookStatusReserved(this);
+    return m.onBookStatusHeldReady(this);
   }
 
   @Override public String toString()
   {
     final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
     final StringBuilder b = new StringBuilder(128);
-    b.append("[BookStatusReserved ");
+    b.append("[BookStatusHeldReady ");
     b.append(this.id);
     b.append(" ");
     b.append(

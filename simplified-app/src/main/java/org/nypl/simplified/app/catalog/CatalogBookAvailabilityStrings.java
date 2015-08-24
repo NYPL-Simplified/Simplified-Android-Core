@@ -7,12 +7,12 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.BookStatusHeld;
+import org.nypl.simplified.books.core.BookStatusHeldReady;
 import org.nypl.simplified.books.core.BookStatusHoldable;
 import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
-import org.nypl.simplified.books.core.BookStatusReserved;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
@@ -20,7 +20,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.opds.core.OPDSAvailabilityReserved;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
 import java.util.Calendar;
@@ -56,7 +56,7 @@ public final class CatalogBookAvailabilityStrings
     return s.matchAvailability(
       new OPDSAvailabilityMatcherType<String, UnreachableCodeException>()
       {
-        @Override public String onReserved(final OPDSAvailabilityReserved a)
+        @Override public String onHeldReady(final OPDSAvailabilityHeldReady a)
         {
           return CatalogBookAvailabilityStrings.onReserved(a.getEndDate(), r);
         }
@@ -128,8 +128,8 @@ public final class CatalogBookAvailabilityStrings
             end_date_opt, queue_opt, r);
         }
 
-        @Override public String onBookStatusReserved(
-          final BookStatusReserved s)
+        @Override public String onBookStatusHeldReady(
+          final BookStatusHeldReady s)
         {
           return CatalogBookAvailabilityStrings.onReserved(
             s.getExpiryDate(), r);

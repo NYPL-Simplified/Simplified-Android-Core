@@ -256,13 +256,13 @@ public final class OPDSAcquisitionFeedEntryParser
       final Element available = available_some.get();
       final String status = available.getAttribute("status");
 
-      if ("reserved".equals(status)) {
+      if ("ready".equals(status)) {
         final OptionType<Calendar> end_date =
           OPDSXML.getAttributeRFC3339Optional(available, "until");
-        return OPDSAvailabilityReserved.get(end_date, revoke);
+        return OPDSAvailabilityHeldReady.get(end_date, revoke);
       }
 
-      if ("unavailable".equals(status)) {
+      if ("reserved".equals(status)) {
         final OptionType<Calendar> end_date =
           OPDSXML.getAttributeRFC3339Optional(available, "until");
         final Calendar start_date =

@@ -19,8 +19,8 @@ public interface OPDSAvailabilityMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onReserved(
-    OPDSAvailabilityReserved a)
+  A onHeldReady(
+    OPDSAvailabilityHeldReady a)
     throws E;
 
   /**

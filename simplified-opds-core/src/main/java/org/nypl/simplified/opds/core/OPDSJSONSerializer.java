@@ -61,8 +61,8 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     return av.matchAvailability(
       new OPDSAvailabilityMatcherType<ObjectNode, UnreachableCodeException>()
       {
-        @Override public ObjectNode onReserved(
-          final OPDSAvailabilityReserved a)
+        @Override public ObjectNode onHeldReady(
+          final OPDSAvailabilityHeldReady a)
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
@@ -88,7 +88,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
               }
             });
 
-          o.set("reserved", oh);
+          o.set("held_ready", oh);
           return o;
         }
 

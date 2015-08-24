@@ -46,10 +46,10 @@ public enum BookStatusPriorityOrdering
   BOOK_STATUS_LOANABLE(15),
 
   /**
-   * {@link BookStatusReserved}
+   * {@link BookStatusHeldReady}
    */
 
-  BOOK_STATUS_RESERVED(12),
+  BOOK_STATUS_HELD_READY(12),
 
   /**
    * {@link BookStatusHeld}

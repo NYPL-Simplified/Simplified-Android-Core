@@ -14,7 +14,7 @@
   <link href="http://example.com/Held-Timed-Queued"
         rel="http://opds-spec.org/acquisition/borrow">
     <opds:availability
-      status="unavailable"
+      status="reserved"
       since="2000-01-01T00:00:00Z"
       until="2010-01-01T00:00:00Z"/>
     <opds:holds total="0" position="3"/>

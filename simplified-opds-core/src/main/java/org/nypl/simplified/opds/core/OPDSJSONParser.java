@@ -352,13 +352,13 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         in_start_date, in_position, in_end_date, in_revoke);
     }
 
-    if (node.has("reserved")) {
-      final ObjectNode n = OPDSJSONParser.getObject(node, "reserved");
+    if (node.has("held_ready")) {
+      final ObjectNode n = OPDSJSONParser.getObject(node, "held_ready");
       final OptionType<Calendar> in_end_date =
         OPDSJSONParser.getTimestampOptional(n, "end_date");
       final OptionType<URI> in_revoke =
         OPDSJSONParser.getURIOptional(n, "revoke");
-      return OPDSAvailabilityReserved.get(in_end_date, in_revoke);
+      return OPDSAvailabilityHeldReady.get(in_end_date, in_revoke);
     }
 
     if (node.has("open_access")) {

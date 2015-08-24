@@ -31,6 +31,7 @@ import org.nypl.simplified.books.core.BookStatusDownloaded;
 import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType;
 import org.nypl.simplified.books.core.BookStatusDownloadingType;
 import org.nypl.simplified.books.core.BookStatusHeld;
+import org.nypl.simplified.books.core.BookStatusHeldReady;
 import org.nypl.simplified.books.core.BookStatusHoldable;
 import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoaned;
@@ -39,7 +40,6 @@ import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
 import org.nypl.simplified.books.core.BookStatusRequestingDownload;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
-import org.nypl.simplified.books.core.BookStatusReserved;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
@@ -417,8 +417,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusReserved(
-    final BookStatusReserved s)
+  @Override public Unit onBookStatusHeldReady(
+    final BookStatusHeldReady s)
   {
     CatalogFeedBookCellView.LOG.debug("{}: reserved", s.getID());
 

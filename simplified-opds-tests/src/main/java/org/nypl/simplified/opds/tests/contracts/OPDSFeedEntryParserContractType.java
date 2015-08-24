@@ -84,7 +84,7 @@ public interface OPDSFeedEntryParserContractType
    * @throws Exception On errors
    */
 
-  void testEntryAvailabilityReserved()
+  void testEntryAvailabilityHeldReady()
     throws Exception;
 
   /**

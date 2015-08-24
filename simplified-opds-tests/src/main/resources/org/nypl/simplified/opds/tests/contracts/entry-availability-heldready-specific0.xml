@@ -34,7 +34,7 @@
   <link
     href="http://circulation.alpha.librarysimplified.org/works/3M/arzopz9/borrow"
     rel="http://opds-spec.org/acquisition/borrow">
-    <opds:availability status="reserved" until="2015-08-24T00:30:24Z"/>
+    <opds:availability status="ready" until="2015-08-24T00:30:24Z"/>
     <opds:holds total="0"/>
     <opds:copies available="0" total="2"/>
   </link>

@@ -10,12 +10,12 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.opds.core.OPDSAvailabilityReserved;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -386,7 +386,7 @@ final class BooksControllerFeedTask implements Runnable
 
     }
 
-    @Override public Boolean onReserved(final OPDSAvailabilityReserved a)
+    @Override public Boolean onHeldReady(final OPDSAvailabilityHeldReady a)
     {
       return Boolean.FALSE;
     }
@@ -430,7 +430,7 @@ final class BooksControllerFeedTask implements Runnable
 
     }
 
-    @Override public Boolean onReserved(final OPDSAvailabilityReserved a)
+    @Override public Boolean onHeldReady(final OPDSAvailabilityHeldReady a)
     {
       return Boolean.TRUE;
     }
