@@ -21,11 +21,6 @@
     <maven>2.2.1</maven>
   </prerequisites>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>com.io7m.jstructural</groupId>
@@ -33,75 +28,65 @@
       <version>4.0.0</version>
     </dependency>
 
-    <!-- Depend on the javadoc for each module, in order to aggregate it. -->
+    <!-- Depend on each module for aggregation of JavaDoc. -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-books-core</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-http-core</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-opds-core</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-stack</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-files</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-tenprint</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-app</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-assert</artifactId>
       <version>${project.version}</version>
-      <classifier>javadoc</classifier>
       <optional>true</optional>
     </dependency>
 
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
-      <version>${org.nypl.android.packageVersion}</version>
       <optional>true</optional>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>android.support</groupId>
       <artifactId>compatibility-v13</artifactId>
-      <version>${org.nypl.android.support-v13.packageVersion}</version>
       <optional>true</optional>
       <scope>provided</scope>
     </dependency>
@@ -113,7 +98,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.6</version>
         <configuration>
           <archive>
             <manifestEntries>
@@ -135,7 +119,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -165,7 +148,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.7</version>
         <executions>
           <execution>
             <id>copy-documentation-resources</id>
@@ -190,7 +172,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.4.0</version>
         <executions>
           <execution>
             <id>make-documentation-single</id>
@@ -231,8 +212,8 @@
 
       <!-- Javadoc handling -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
         <executions>
           <!-- Produce javadoc jar for Central -->
           <execution>
@@ -279,8 +260,8 @@
 
       <!-- Produce documentation archive -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.5.5</version>
         <configuration>
           <descriptors>
             <descriptor>src/main/assembly/documentation.xml</descriptor>
@@ -295,31 +276,6 @@
             </goals>
             <configuration>
               <appendAssemblyId>false</appendAssemblyId>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- Unpack the documentation archive to the parent's generated site staging directory. -->
-      <!-- This is arguably abusive, but there appears to be no other way to achieve it. -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>truezip-maven-plugin</artifactId>
-        <version>1.2</version>
-        <inherited>false</inherited>
-        <executions>
-          <execution>
-            <id>copy-site-documentation</id>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <phase>site</phase>
-            <configuration>
-              <verbose>true</verbose>
-              <fileset>
-                <directory>${project.build.directory}/${project.name}-${project.version}.zip/${project.name}-${project.version}/</directory>
-                <outputDirectory>${project.parent.build.directory}/staging/documentation/</outputDirectory>
-              </fileset>
             </configuration>
           </execution>
         </executions>

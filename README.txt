@@ -36,7 +36,7 @@ Current build instructions:
   Once this is done, building the package with Adobe DRM support
   enabled is achieved by:
 
-    $ mvn -P nypl-adobe-drm clean package
+    $ mvn -P nypl-drm-adobe clean package
 
 ------------------------------------------------------------------------
 

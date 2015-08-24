@@ -11,6 +11,7 @@ import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
+import org.nypl.drm.core.AdobeLoanID;
 import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadType;
@@ -515,7 +516,9 @@ final class BooksControllerBorrowTask implements Runnable,
 
     @Override public void onFulfillmentSuccess(
       final File file,
-      final byte[] rights)
+      final byte[] rights,
+      final boolean returnable,
+      final AdobeLoanID loan_id)
     {
       try {
         final OptionType<ByteBuffer> rights_data = Option.some(

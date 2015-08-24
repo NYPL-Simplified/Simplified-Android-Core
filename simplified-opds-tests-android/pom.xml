@@ -27,29 +27,16 @@
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
-      <version>${org.nypl.android.packageVersion}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>com.simpligility.maven.plugins</groupId>
-          <artifactId>android-maven-plugin</artifactId>
-          <version>4.3.0</version>
-          <extensions>true</extensions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-
     <plugins>
       <!-- Produce jar files -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.6</version>
         <executions>
           <!-- Produce custom manifest in jar files -->
           <execution>
@@ -98,7 +85,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
