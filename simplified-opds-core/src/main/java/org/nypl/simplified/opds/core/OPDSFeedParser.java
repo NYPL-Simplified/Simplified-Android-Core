@@ -231,115 +231,22 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       time_post_parse = System.nanoTime();
 
       final Node root = NullCheck.notNull(d.getFirstChild());
-      final Element e_feed = OPDSXML.nodeAsElementWithName(
-        root, OPDSFeedConstants.ATOM_URI, "feed");
-
-      final String id = OPDSAtom.findID(e_feed);
-      final String title = OPDSAtom.findTitle(e_feed);
-      final Calendar updated = OPDSAtom.findUpdated(e_feed);
-
-      final OPDSAcquisitionFeedBuilderType b =
-        OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
-
-      final List<Element> links = new ArrayList<Element>(32);
-      final NodeList children = e_feed.getChildNodes();
-
-      for (int index = 0; index < children.getLength(); ++index) {
-        final Node child = NullCheck.notNull(children.item(index));
-
-        if (child instanceof Element) {
-
-          /**
-           * Links.
-           */
-
-          if (OPDSXML.nodeHasName(
-            (Element) child, OPDSFeedConstants.ATOM_URI, "link")) {
-
-            final Element e = OPDSXML.nodeAsElement(child);
-            links.add(e);
-
-            /**
-             * Search links.
-             */
-
-            {
-              final OptionType<OPDSSearchLink> search_opt =
-                OPDSFeedParser.parseSearchLink(e);
-              if (search_opt.isSome()) {
-                b.setSearchOption(search_opt);
-                continue;
-              }
-            }
-
-            /**
-             * Next links.
-             */
-
-            {
-              final OptionType<URI> next_opt = OPDSFeedParser.parseNextLink(e);
-              if (next_opt.isSome()) {
-                b.setNextOption(next_opt);
-                continue;
-              }
-            }
-
-            /**
-             * Facet links.
-             */
-
-            {
-              final OptionType<OPDSFacet> facet_opt =
-                OPDSFeedParser.parseFacet(e);
-              if (facet_opt.isSome()) {
-                b.addFacet(((Some<OPDSFacet>) facet_opt).get());
-                continue;
-              }
-            }
-
-            /**
-             * Terms of service links.
-             */
-
-            {
-              final OptionType<URI> tos_opt =
-                OPDSFeedParser.parseTermsOfService(e);
-              if (tos_opt.isSome()) {
-                b.setTermsOfServiceOption(tos_opt);
-                continue;
-              }
-            }
-
-            /**
-             * Privacy policy links.
-             */
-
-            {
-              final OptionType<URI> pp_opt =
-                OPDSFeedParser.parsePrivacyPolicy(e);
-              if (pp_opt.isSome()) {
-                b.setPrivacyPolicyOption(pp_opt);
-                continue;
-              }
-            }
-
-            continue;
-          }
-
-          /**
-           * Entries.
-           */
-
-          if (OPDSXML.nodeHasName(
-            (Element) child, OPDSFeedConstants.ATOM_URI, "entry")) {
-            final Element e = OPDSXML.nodeAsElement(child);
-            b.addEntry(this.entry_parser.parseEntry(e));
-            continue;
-          }
+      if (root instanceof Element) {
+        final Element root_e = (Element) root;
+        if (OPDSXML.nodeHasName(root_e, OPDSFeedConstants.ATOM_URI, "feed")) {
+          return this.parseAsFeed(uri, root_e);
         }
-      }
+        if (OPDSXML.nodeHasName(root_e, OPDSFeedConstants.ATOM_URI, "entry")) {
+          return this.parseAsEntry(uri, root_e);
+        }
 
-      return b.build();
+        throw new OPDSParseException(
+          String.format(
+            "Feed root is '%s', expected 'feed' or 'entry'",
+            root_e.getLocalName()));
+      } else {
+        throw new OPDSParseException("Feed root is not 'feed' or 'entry'");
+      }
 
     } catch (final ParserConfigurationException e) {
       throw new OPDSParseException(e);
@@ -372,5 +279,138 @@ public final class OPDSFeedParser implements OPDSFeedParserType
             time_interp, TimeUnit.NANOSECONDS)),
         uri);
     }
+  }
+
+  private OPDSAcquisitionFeed parseAsEntry(
+    final URI uri,
+    final Element e)
+    throws OPDSParseException
+  {
+    OPDSFeedParser.LOG.debug("parsing feed as single entry: {}", uri);
+
+    final String id = "urn:simplified-entry";
+    final Calendar updated = Calendar.getInstance();
+    final String title = "Entry";
+    final OPDSAcquisitionFeedBuilderType b =
+      OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
+    b.addEntry(this.entry_parser.parseEntry(e));
+    return b.build();
+  }
+
+  private OPDSAcquisitionFeed parseAsFeed(
+    final URI uri,
+    final Node root)
+    throws OPDSParseException, ParseException, URISyntaxException
+  {
+    OPDSFeedParser.LOG.debug("parsing feed as ordinary feed: {}", uri);
+
+    final Element e_feed = OPDSXML.nodeAsElementWithName(
+      root, OPDSFeedConstants.ATOM_URI, "feed");
+
+    final String id = OPDSAtom.findID(e_feed);
+    final String title = OPDSAtom.findTitle(e_feed);
+    final Calendar updated = OPDSAtom.findUpdated(e_feed);
+
+    final OPDSAcquisitionFeedBuilderType b =
+      OPDSAcquisitionFeed.newBuilder(uri, id, updated, title);
+
+    final List<Element> links = new ArrayList<Element>(32);
+    final NodeList children = e_feed.getChildNodes();
+
+    for (int index = 0; index < children.getLength(); ++index) {
+      final Node child = NullCheck.notNull(children.item(index));
+
+      if (child instanceof Element) {
+
+        /**
+         * Links.
+         */
+
+        if (OPDSXML.nodeHasName(
+          (Element) child, OPDSFeedConstants.ATOM_URI, "link")) {
+
+          final Element e = OPDSXML.nodeAsElement(child);
+          links.add(e);
+
+          /**
+           * Search links.
+           */
+
+          {
+            final OptionType<OPDSSearchLink> search_opt =
+              OPDSFeedParser.parseSearchLink(e);
+            if (search_opt.isSome()) {
+              b.setSearchOption(search_opt);
+              continue;
+            }
+          }
+
+          /**
+           * Next links.
+           */
+
+          {
+            final OptionType<URI> next_opt = OPDSFeedParser.parseNextLink(e);
+            if (next_opt.isSome()) {
+              b.setNextOption(next_opt);
+              continue;
+            }
+          }
+
+          /**
+           * Facet links.
+           */
+
+          {
+            final OptionType<OPDSFacet> facet_opt =
+              OPDSFeedParser.parseFacet(e);
+            if (facet_opt.isSome()) {
+              b.addFacet(((Some<OPDSFacet>) facet_opt).get());
+              continue;
+            }
+          }
+
+          /**
+           * Terms of service links.
+           */
+
+          {
+            final OptionType<URI> tos_opt =
+              OPDSFeedParser.parseTermsOfService(e);
+            if (tos_opt.isSome()) {
+              b.setTermsOfServiceOption(tos_opt);
+              continue;
+            }
+          }
+
+          /**
+           * Privacy policy links.
+           */
+
+          {
+            final OptionType<URI> pp_opt = OPDSFeedParser.parsePrivacyPolicy(e);
+            if (pp_opt.isSome()) {
+              b.setPrivacyPolicyOption(pp_opt);
+              continue;
+            }
+          }
+
+          continue;
+        }
+
+        /**
+         * Entries.
+         */
+
+        if (OPDSXML.nodeHasName(
+          (Element) child, OPDSFeedConstants.ATOM_URI, "entry")) {
+          final Element e = OPDSXML.nodeAsElement(child);
+          b.addEntry(this.entry_parser.parseEntry(e));
+          continue;
+        }
+      }
+    }
+
+    return b.build();
   }
 }

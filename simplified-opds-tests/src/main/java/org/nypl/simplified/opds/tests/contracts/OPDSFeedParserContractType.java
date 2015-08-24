@@ -14,6 +14,9 @@ public interface OPDSFeedParserContractType
   void testEmpty0()
     throws Exception;
 
+  void testEntryAsFeed0()
+    throws Exception;
+
   void testNotXMLException()
     throws Exception;
 

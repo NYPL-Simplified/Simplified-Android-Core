@@ -216,6 +216,21 @@ public final class OPDSFeedParserContract implements OPDSFeedParserContractType
     d.close();
   }
 
+  @Override public void testEntryAsFeed0()
+    throws Exception
+  {
+    final URI uri =
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+    final InputStream d = OPDSFeedParserContract.getResource("entry-0.xml");
+    final OPDSAcquisitionFeed f = NullCheck.notNull(p.parse(uri, d));
+
+    TestUtilities.assertEquals(f.getFeedEntries().size(), 1);
+
+    d.close();
+  }
+
   @Override public void testNotXMLException()
     throws Exception
   {

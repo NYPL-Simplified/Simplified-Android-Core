@@ -56,6 +56,12 @@ public final class OPDSFeedParserTest extends InstrumentationTestCase
     this.contract.testEmpty0();
   }
 
+  @Override public void testEntryAsFeed0()
+    throws Exception
+  {
+    this.contract.testEntryAsFeed0();
+  }
+
   @Override public void testNotXMLException()
     throws Exception
   {
