@@ -19,13 +19,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>simplified-test-utilities</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>com.io7m.jnull</groupId>
       <artifactId>io7m-jnull-core</artifactId>
     </dependency>

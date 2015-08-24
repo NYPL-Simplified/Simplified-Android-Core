@@ -10,7 +10,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="simplified-test-utilities" scope="TEST" />
     <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
