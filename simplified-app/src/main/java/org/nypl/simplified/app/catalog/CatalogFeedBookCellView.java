@@ -299,12 +299,20 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
+    if (d.isReturnable()) {
+      this.cell_buttons.addView(
+        new CatalogBookRevokeButton(
+          this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN));
+    }
+
     this.cell_buttons.addView(
       new CatalogBookDeleteButton(
         this.activity, book_id));
+
     this.cell_buttons.addView(
       new CatalogBookReadButton(
         this.activity, book_id));
+
     return Unit.unit();
   }
 
@@ -420,6 +428,13 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     CatalogAcquisitionButtons.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
+
+    if (s.isRevocable()) {
+      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+      this.cell_buttons.addView(revoke, 0);
+    }
+
     return Unit.unit();
   }
 
@@ -439,6 +454,13 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     CatalogAcquisitionButtons.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
+
+    if (s.isRevocable()) {
+      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+      this.cell_buttons.addView(revoke, 0);
+    }
+
     return Unit.unit();
   }
 
