@@ -8,7 +8,7 @@ import org.nypl.simplified.books.core.BooksFeedSelection;
  * An activity that displays the holds for the current user.
  */
 
-public final class MainHoldsActivity extends CatalogFeedActivity
+public final class MainHoldsActivity extends MainLocalFeedActivity
 {
   /**
    * Construct a new activity.
