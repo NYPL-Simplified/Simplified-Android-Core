@@ -2,7 +2,6 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.widget.Button;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.BookID;
@@ -14,7 +13,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
  * An acquisition button.
  */
 
-public final class CatalogAcquisitionButton extends Button
+public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
   implements CatalogBookButtonType
 {
   /**

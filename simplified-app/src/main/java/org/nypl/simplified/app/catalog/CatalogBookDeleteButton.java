@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.R;
@@ -18,7 +16,7 @@ import org.nypl.simplified.books.core.BooksType;
  * A button for deleting books.
  */
 
-public final class CatalogBookDeleteButton extends Button
+public final class CatalogBookDeleteButton extends CatalogLeftPaddedButton
   implements CatalogBookButtonType
 {
   /**
@@ -33,14 +31,6 @@ public final class CatalogBookDeleteButton extends Button
     final BookID in_book_id)
   {
     super(in_activity);
-
-    final SimplifiedCatalogAppServicesType ss =
-      Simplified.getCatalogAppServices();
-    final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-      android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-      android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-    lp.leftMargin = (int) ss.screenDPToPixels(8);
-    this.setLayoutParams(lp);
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     this.setText(NullCheck.notNull(rr.getString(R.string.catalog_book_delete)));
