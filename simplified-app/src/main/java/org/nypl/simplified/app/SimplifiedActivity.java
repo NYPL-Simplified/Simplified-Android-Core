@@ -530,6 +530,15 @@ public abstract class SimplifiedActivity extends Activity
     final @Nullable Bundle state)
   {
     super.onSaveInstanceState(state);
+
+    /**
+     * Save the state of the navigation drawer. The intention here is that
+     * the draw will correctly be open or closed based on the state it was
+     * in when the user left the activity. In practice, the drawer tends to
+     * close whenever the user moves to a new activity, so saving and restoring
+     * may be redundant.
+     */
+
     final Bundle state_nn = NullCheck.notNull(state);
     final DrawerLayout d = NullCheck.notNull(this.drawer);
     state_nn.putBoolean(

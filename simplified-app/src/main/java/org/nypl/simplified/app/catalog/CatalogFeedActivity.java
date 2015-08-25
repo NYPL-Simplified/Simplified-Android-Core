@@ -45,7 +45,6 @@ import org.nypl.simplified.books.core.FeedFacetMatcherType;
 import org.nypl.simplified.books.core.FeedFacetOPDS;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
-import org.nypl.simplified.books.core.FeedFacetPseudoTitleProviderType;
 import org.nypl.simplified.books.core.FeedFacetType;
 import org.nypl.simplified.books.core.FeedGroup;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
@@ -101,6 +100,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   private @Nullable Future<Unit> loading;
   private @Nullable ViewGroup    progress_layout;
   private           int          saved_scroll_pos;
+  private           boolean      previously_paused;
 
   /**
    * Construct an activity.
@@ -181,6 +181,28 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       });
   }
 
+  @Override protected void onResume()
+  {
+    super.onResume();
+
+    /**
+     * If the activity was previously paused, this means that the user
+     * navigated away from the activity and is now coming back to it. If the
+     * user went into a book detail view and revoked a book, then the feed
+     * should be completely reloaded when the user comes back, to ensure that
+     * the book no longer shows up in the list.
+     *
+     * This obviously only applies to local feeds.
+     */
+
+    if (this.previously_paused == true) {
+      final CatalogFeedArgumentsType args = this.getArguments();
+      if (args.isLocallyGenerated()) {
+        this.retryFeed();
+      }
+    }
+  }
+
   /**
    * Configure the facets layout. This is what causes facets to be shown or not
    * shown at the top of the screen when rendering a feed.
@@ -207,10 +229,20 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final Map<String, List<FeedFacetType>> facet_groups =
       f.getFeedFacetsByGroup();
 
+    /**
+     * If the facet groups are empty, then no facet bar should be displayed.
+     */
+
     if (facet_groups.isEmpty()) {
       facets_view.setVisibility(View.GONE);
       facet_divider.setVisibility(View.GONE);
     } else {
+
+      /**
+       * Otherwise, for each facet group, show a drop-down menu allowing
+       * the selection of individual facets.
+       */
+
       for (final String group_name : facet_groups.keySet()) {
         final List<FeedFacetType> group =
           NullCheck.notNull(facet_groups.get(group_name));
@@ -300,7 +332,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   /**
    * If this activity is being used in a part of the application that generates
    * local feeds, then return the type of feed that should be generated.
-
+   *
    * @return The type of feed that should be generated.
    */
 
@@ -413,6 +445,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final ImmutableStack<CatalogFeedArgumentsType> stack = this.getUpStack();
     this.configureUpButton(stack, args.getTitle());
 
+    /**
+     * Attempt to restore the saved scroll position, if there is one.
+     */
+
     if (state != null) {
       CatalogFeedActivity.LOG.debug("received state");
       this.saved_scroll_pos = state.getInt(CatalogFeedActivity.LIST_STATE_ID);
@@ -431,6 +467,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       app.syncInitial();
     }
 
+    /**
+     * Display a progress bar until the feed is either loaded or fails.
+     */
+
     final LayoutInflater inflater = this.getLayoutInflater();
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup in_progress_layout = NullCheck.notNull(
@@ -441,52 +481,13 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     content_area.requestLayout();
     this.progress_layout = in_progress_layout;
 
-    final Resources rr = NullCheck.notNull(this.getResources());
+    /**
+     * If the feed is not locally generated, and the network is not
+     * available, then fail fast and display an error message.
+     */
+
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final FeedLoaderType feed_loader = app.getFeedLoader();
-
-    final FeedFacetPseudoTitleProviderType facet_title_provider =
-      new CatalogFacetPseudoTitleProvider(rr);
-
-    final CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>
-      matcher =
-      new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>()
-      {
-        @Override public Unit onFeedArgumentsLocalBooks(
-          final CatalogFeedArgumentsLocalBooks c)
-        {
-          final BooksType books = app.getBooks();
-          final Calendar now = NullCheck.notNull(Calendar.getInstance());
-          final URI dummy_uri = NullCheck.notNull(URI.create("Books"));
-          final String dummy_id =
-            NullCheck.notNull(rr.getString(R.string.books));
-          final String title = NullCheck.notNull(rr.getString(R.string.books));
-          final String facet_group =
-            NullCheck.notNull(rr.getString(R.string.books_sort_by));
-          final BooksFeedSelection selection = c.getSelection();
-
-          books.booksGetFeed(
-            dummy_uri,
-            dummy_id,
-            now,
-            title,
-            c.getFacetType(),
-            facet_group,
-            facet_title_provider,
-            c.getSearchTerms(),
-            selection,
-            CatalogFeedActivity.this);
-          return Unit.unit();
-        }
-
-        @Override public Unit onFeedArgumentsRemote(
-          final CatalogFeedArgumentsRemote c)
-        {
-          CatalogFeedActivity.this.loadFeed(feed_loader, c.getURI());
-          return Unit.unit();
-        }
-      };
 
     if (args.isLocallyGenerated() == false) {
       if (app.isNetworkAvailable() == false) {
@@ -495,7 +496,28 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       }
     }
 
-    args.matchArguments(matcher);
+    /**
+     * Create a dispatching function that will load a feed based on the given
+     * arguments, and execute it.
+     */
+
+    args.matchArguments(
+      new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>()
+      {
+        @Override public Unit onFeedArgumentsLocalBooks(
+          final CatalogFeedArgumentsLocalBooks c)
+        {
+          CatalogFeedActivity.this.doLoadLocalFeed(c);
+          return Unit.unit();
+        }
+
+        @Override public Unit onFeedArgumentsRemote(
+          final CatalogFeedArgumentsRemote c)
+        {
+          CatalogFeedActivity.this.doLoadRemoteFeed(c);
+          return Unit.unit();
+        }
+      });
   }
 
   @Override public boolean onCreateOptionsMenu(
@@ -688,7 +710,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         }
       });
 
-    onPossiblyReceivedEULALink(f.getFeedTermsOfService());
+    CatalogFeedActivity.onPossiblyReceivedEULALink(f.getFeedTermsOfService());
     return Unit.unit();
   }
 
@@ -777,7 +799,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         }
       });
 
-    onPossiblyReceivedEULALink(f.getFeedTermsOfService());
+    CatalogFeedActivity.onPossiblyReceivedEULALink(f.getFeedTermsOfService());
     return Unit.unit();
   }
 
@@ -939,6 +961,12 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       });
   }
 
+  @Override protected void onPause()
+  {
+    super.onPause();
+    this.previously_paused = true;
+  }
+
   @Override public boolean onOptionsItemSelected(
     final @Nullable MenuItem item)
   {
@@ -967,6 +995,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     super.onSaveInstanceState(state);
 
     CatalogFeedActivity.LOG.debug("saving state");
+
+    /**
+     * Save the scroll position in the hope that it can be restored later.
+     */
 
     final Bundle nn_state = NullCheck.notNull(state);
     final AbsListView lv = this.list_view;
@@ -1009,28 +1041,33 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     this.catalogActivityForkNew(remote);
   }
 
+  /**
+   * Retry the current feed.
+   */
+
   private void retryFeed()
   {
+    final CatalogFeedArgumentsType args = this.getArguments();
+    LOG.debug("retrying feed {}", args);
+
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final FeedLoaderType loader = app.getFeedLoader();
-    final CatalogFeedArgumentsType args = this.getArguments();
+
     args.matchArguments(
       new CatalogFeedArgumentsMatcherType<Unit, UnreachableCodeException>()
       {
         @Override public Unit onFeedArgumentsLocalBooks(
           final CatalogFeedArgumentsLocalBooks c)
         {
-          // Nothing to refresh for local books. This shouldn't even be
-          // reachable.
-          throw new UnreachableCodeException();
+          CatalogFeedActivity.this.doLoadLocalFeed(c);
+          return Unit.unit();
         }
 
         @Override public Unit onFeedArgumentsRemote(
           final CatalogFeedArgumentsRemote c)
         {
           loader.invalidate(c.getURI());
-
           CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
           return Unit.unit();
         }
@@ -1042,6 +1079,56 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
    */
 
   protected abstract String catalogFeedGetEmptyText();
+
+  /**
+   * Unconditionally load a locally-generated feed.
+   *
+   * @param c The feed arguments
+   */
+
+  private void doLoadLocalFeed(final CatalogFeedArgumentsLocalBooks c)
+  {
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final Resources resources = CatalogFeedActivity.this.getResources();
+
+    final BooksType books = app.getBooks();
+    final Calendar now = NullCheck.notNull(Calendar.getInstance());
+    final URI dummy_uri = NullCheck.notNull(URI.create("Books"));
+    final String dummy_id = NullCheck.notNull(
+      resources.getString(R.string.books));
+    final String title = NullCheck.notNull(
+      resources.getString(R.string.books));
+    final String facet_group = NullCheck.notNull(
+      resources.getString(R.string.books_sort_by));
+    final BooksFeedSelection selection = c.getSelection();
+
+    books.booksGetFeed(
+      dummy_uri,
+      dummy_id,
+      now,
+      title,
+      c.getFacetType(),
+      facet_group,
+      new CatalogFacetPseudoTitleProvider(resources),
+      c.getSearchTerms(),
+      selection,
+      CatalogFeedActivity.this);
+  }
+
+  /**
+   * Unconditionally load a remote feed.
+   *
+   * @param c The feed arguments
+   */
+
+  private void doLoadRemoteFeed(final CatalogFeedArgumentsRemote c)
+  {
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final FeedLoaderType feed_loader = app.getFeedLoader();
+    CatalogFeedActivity.this.loadFeed(feed_loader, c.getURI());
+  }
 
   /**
    * A handler for local book searches.
