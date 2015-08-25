@@ -355,7 +355,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   @Override public void onAccountSyncBook(
     final BookID book)
   {
-    MainSettingsActivity.LOG.error("synced book: {}", book);
+    MainSettingsActivity.LOG.debug("synced book: {}", book);
   }
 
   @Override public void onAccountSyncFailure(
@@ -369,6 +369,11 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   @Override public void onAccountSyncSuccess()
   {
     MainSettingsActivity.LOG.debug("completed sync");
+  }
+
+  @Override public void onAccountSyncBookDeleted(final BookID book)
+  {
+    MainSettingsActivity.LOG.debug("deleted book: {}", book);
   }
 
   @Override protected void onCreate(

@@ -48,4 +48,12 @@ public interface AccountSyncListenerType
    */
 
   void onAccountSyncSuccess();
+
+  /**
+   * The given book was deleted by the synchronization.
+   *
+   * @param book The book ID
+   */
+
+  void onAccountSyncBookDeleted(BookID book);
 }

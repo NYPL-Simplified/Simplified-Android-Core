@@ -476,6 +476,11 @@ public final class Simplified extends Application
       CatalogAppServices.LOG_CA.debug("synced account");
     }
 
+    @Override public void onAccountSyncBookDeleted(final BookID book)
+    {
+      CatalogAppServices.LOG_CA.debug("deleted book: {}", book);
+    }
+
     @Override public void onAccountUnavailable()
     {
       CatalogAppServices.LOG_CA.debug("not logged in, not loading books");

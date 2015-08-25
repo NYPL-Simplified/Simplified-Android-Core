@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 final class BooksControllerSyncTask implements Runnable
 {
@@ -39,7 +41,7 @@ final class BooksControllerSyncTask implements Runnable
   private final OPDSFeedParserType           feed_parser;
   private final HTTPType                     http;
   private final AccountSyncListenerType      listener;
-  private final BooksStatusCacheType         status_cache;
+  private final BooksStatusCacheType         books_status;
 
   BooksControllerSyncTask(
     final BooksControllerConfiguration in_config,
@@ -51,7 +53,7 @@ final class BooksControllerSyncTask implements Runnable
     final AccountSyncListenerType in_listener)
   {
     this.books_database = NullCheck.notNull(in_books_database);
-    this.status_cache = NullCheck.notNull(in_status_cache);
+    this.books_status = NullCheck.notNull(in_status_cache);
     this.config = NullCheck.notNull(in_config);
     this.http = NullCheck.notNull(in_http);
     this.feed_parser = NullCheck.notNull(in_feed_parser);
@@ -137,17 +139,56 @@ final class BooksControllerSyncTask implements Runnable
     final OPDSAcquisitionFeed feed =
       this.feed_parser.parse(loans_uri, r_feed.getValue());
 
+    /**
+     * Obtain the set of books that are on disk already. If any
+     * of these books are not in the received feed, then they have
+     * expired and should be deleted.
+     */
+
+    final List<BookDatabaseEntryType> on_disk_entries =
+      this.books_database.getBookDatabaseEntries();
+    final Set<BookID> existing = new HashSet<BookID>();
+    for (final BookDatabaseEntryType e : on_disk_entries) {
+      existing.add(e.getID());
+    }
+
+    /**
+     * Handle each book in the received feed.
+     */
+
+    final Set<BookID> received = new HashSet<BookID>();
     final List<OPDSAcquisitionFeedEntry> entries = feed.getFeedEntries();
     for (final OPDSAcquisitionFeedEntry e : entries) {
       try {
         final OPDSAcquisitionFeedEntry e_nn = NullCheck.notNull(e);
         final BookID book_id = BookID.newIDFromEntry(e_nn);
+        received.add(book_id);
         BooksController.syncFeedEntry(
-          e_nn, this.books_database, this.status_cache, this.http);
+          e_nn, this.books_database, this.books_status, this.http);
         this.listener.onAccountSyncBook(book_id);
       } catch (final Throwable x) {
         BooksControllerSyncTask.LOG.error(
           "unable to save entry: {}: ", e.getID(), x);
+      }
+    }
+
+    /**
+     * Now delete any book that previously existed, but is not in the
+     * received set.
+     */
+
+    for (final BookID existing_id : existing) {
+      try {
+        if (received.contains(existing_id) == false) {
+          final BookDatabaseEntryType e =
+            this.books_database.getBookDatabaseEntry(existing_id);
+          e.destroy();
+          this.books_status.booksStatusClearFor(existing_id);
+          this.listener.onAccountSyncBookDeleted(existing_id);
+        }
+      } catch (final Throwable x) {
+        BooksControllerSyncTask.LOG.error(
+          "unable to delete entry: {}: ", existing_id, x);
       }
     }
   }

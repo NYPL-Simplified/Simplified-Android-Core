@@ -115,6 +115,11 @@ public final class MainBooksActivity extends CatalogFeedActivity
       });
   }
 
+  @Override public void onAccountSyncBookDeleted(final BookID book)
+  {
+    // Nothing
+  }
+
   @Override public boolean onCreateOptionsMenu(
     final @Nullable Menu in_menu)
   {
