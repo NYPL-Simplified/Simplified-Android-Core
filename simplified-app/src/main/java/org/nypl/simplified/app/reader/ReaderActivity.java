@@ -47,7 +47,6 @@ import java.util.List;
  * The main reader activity for reading an EPUB.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 public final class ReaderActivity extends Activity implements
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,
@@ -477,39 +476,20 @@ public final class ReaderActivity extends Activity implements
 
     final View in_toc = NullCheck.notNull(this.view_toc);
 
-    if (rs.screenIsLarge()) {
-      in_toc.setOnClickListener(
-        new OnClickListener()
+    in_toc.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(
+          final @Nullable View v)
         {
-          @Override public void onClick(
-            final @Nullable View v)
-          {
-            ReaderActivity.LOG.debug("large screen TOC");
+          ReaderActivity.LOG.debug("small screen TOC");
 
-            final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-            final ReaderTOCDialog d =
-              ReaderTOCDialog.newDialog(sent_toc, ReaderActivity.this);
-
-            final FragmentManager fm = ReaderActivity.this.getFragmentManager();
-            d.show(fm, "toc-dialog");
-          }
-        });
-    } else {
-      in_toc.setOnClickListener(
-        new OnClickListener()
-        {
-          @Override public void onClick(
-            final @Nullable View v)
-          {
-            ReaderActivity.LOG.debug("small screen TOC");
-
-            final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-            ReaderTOCActivity.startActivityForResult(
-              ReaderActivity.this, sent_toc);
-            ReaderActivity.this.overridePendingTransition(0, 0);
-          }
-        });
-    }
+          final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
+          ReaderTOCActivity.startActivityForResult(
+            ReaderActivity.this, sent_toc);
+          ReaderActivity.this.overridePendingTransition(0, 0);
+        }
+      });
 
     /**
      * Get a reference to the web server. Start it if necessary (the callbacks
