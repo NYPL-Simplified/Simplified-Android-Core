@@ -47,6 +47,8 @@ import java.util.Map;
 
 /**
  * The type of non-reader activities in the app.
+ *
+ * This is the where navigation drawer configuration takes place.
  */
 
 public abstract class SimplifiedActivity extends Activity
@@ -201,9 +203,15 @@ public abstract class SimplifiedActivity extends Activity
     }
     this.drawer_settings = in_drawer_settings;
 
+    /**
+     * Holds are an optional feature. If they are disabled, then the item
+     * is simply removed from the navigation drawer.
+     */
+
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
+    final boolean holds_enabled = rr.getBoolean(R.bool.feature_holds_enabled);
 
     /**
      * Configure the navigation drawer.
@@ -221,11 +229,12 @@ public abstract class SimplifiedActivity extends Activity
     dl.setOnItemClickListener(this);
 
     final String app_name = NullCheck.notNull(rr.getString(R.string.app_name));
-
     final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);
-    di.add(SimplifiedPart.PART_HOLDS);
+    if (holds_enabled) {
+      di.add(SimplifiedPart.PART_HOLDS);
+    }
     di.add(SimplifiedPart.PART_SETTINGS);
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
@@ -255,7 +264,8 @@ public abstract class SimplifiedActivity extends Activity
     dl.setAdapter(this.adapter);
 
     /**
-     * Set up a map of names ↔ classes.
+     * Set up a map of names ↔ classes. This is used to start an activity
+     * by class, given a {@link SimplifiedPart}.
      */
 
     final Map<SimplifiedPart, Class<? extends Activity>> classes_by_name =
@@ -263,12 +273,16 @@ public abstract class SimplifiedActivity extends Activity
     classes_by_name.put(SimplifiedPart.PART_BOOKS, MainBooksActivity.class);
     classes_by_name.put(
       SimplifiedPart.PART_CATALOG, MainCatalogActivity.class);
-    classes_by_name.put(SimplifiedPart.PART_HOLDS, MainHoldsActivity.class);
-    classes_by_name.put(SimplifiedPart.PART_SETTINGS, MainSettingsActivity.class);
+    if (holds_enabled) {
+      classes_by_name.put(SimplifiedPart.PART_HOLDS, MainHoldsActivity.class);
+    }
+    classes_by_name.put(
+      SimplifiedPart.PART_SETTINGS, MainSettingsActivity.class);
 
     /**
      * Set up a map of part names to functions that configure argument
-     * bundles.
+     * bundles. Given a {@link SimplifiedPart}, this allows the construction
+     * of an argument bundle for the target activity class.
      */
 
     final Map<SimplifiedPart, FunctionType<Bundle, Unit>> da =
@@ -315,26 +329,28 @@ public abstract class SimplifiedActivity extends Activity
         }
       });
 
-    da.put(
-      SimplifiedPart.PART_HOLDS, new FunctionType<Bundle, Unit>()
-      {
-        @Override public Unit call(
-          final Bundle b)
+    if (holds_enabled) {
+      da.put(
+        SimplifiedPart.PART_HOLDS, new FunctionType<Bundle, Unit>()
         {
-          final OptionType<String> no_search = Option.none();
-          final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
-            ImmutableStack.empty();
-          final CatalogFeedArgumentsLocalBooks local =
-            new CatalogFeedArgumentsLocalBooks(
-              empty_stack,
-              SimplifiedPart.PART_HOLDS.getPartName(rr),
-              FeedFacetPseudo.FacetType.SORT_BY_TITLE,
-              no_search,
-              BooksFeedSelection.BOOKS_FEED_HOLDS);
-          CatalogFeedActivity.setActivityArguments(b, local);
-          return Unit.unit();
-        }
-      });
+          @Override public Unit call(
+            final Bundle b)
+          {
+            final OptionType<String> no_search = Option.none();
+            final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
+              ImmutableStack.empty();
+            final CatalogFeedArgumentsLocalBooks local =
+              new CatalogFeedArgumentsLocalBooks(
+                empty_stack,
+                SimplifiedPart.PART_HOLDS.getPartName(rr),
+                FeedFacetPseudo.FacetType.SORT_BY_TITLE,
+                no_search,
+                BooksFeedSelection.BOOKS_FEED_HOLDS);
+            CatalogFeedActivity.setActivityArguments(b, local);
+            return Unit.unit();
+          }
+        });
+    }
 
     da.put(
       SimplifiedPart.PART_SETTINGS, new FunctionType<Bundle, Unit>()
@@ -346,6 +362,10 @@ public abstract class SimplifiedActivity extends Activity
           return Unit.unit();
         }
       });
+
+    /**
+     * Show or hide the three dashes next to the home button.
+     */
 
     if (this.navigationDrawerShouldShowIndicator()) {
       SimplifiedActivity.LOG.debug("setting navigation drawer indicator");
