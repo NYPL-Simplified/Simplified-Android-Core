@@ -11,6 +11,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType;
+import org.nypl.drm.core.AdobeAdeptNetProviderType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.drm.core.AdobeLoanID;
 import org.nypl.drm.core.DRMUnsupportedException;
@@ -105,6 +106,14 @@ final class BooksControllerBorrowTask implements Runnable,
     final BookStatusDownloadFailed failed =
       new BookStatusDownloadFailed(this.book_id, exception, none);
     this.books_status.booksStatusUpdate(failed);
+    this.downloadRemoveFromCurrent();
+  }
+
+  private DownloadType downloadRemoveFromCurrent()
+  {
+    BooksControllerBorrowTask.LOG.debug(
+      "removing download of {} from list", this.book_id);
+    return this.downloads.remove(this.book_id);
   }
 
   @Override public void onDownloadCancelled(
@@ -122,6 +131,7 @@ final class BooksControllerBorrowTask implements Runnable,
       this.books_status.booksSnapshotUpdate(this.book_id, snap);
       final BookStatusType status = BookStatus.fromSnapshot(this.book_id, snap);
       this.books_status.booksStatusUpdate(status);
+      this.downloadRemoveFromCurrent();
     } catch (final IOException e) {
       BooksControllerBorrowTask.LOG.error("i/o error reading snapshot: ", e);
     }
@@ -134,6 +144,8 @@ final class BooksControllerBorrowTask implements Runnable,
   {
     BooksControllerBorrowTask.LOG.debug(
       "download {} completed for {}", d, file);
+
+    this.downloadRemoveFromCurrent();
 
     /**
      * If the downloaded file is an ACSM fulfillment token, then the book
@@ -228,6 +240,29 @@ final class BooksControllerBorrowTask implements Runnable,
       {
         @Override public void executeWith(final AdobeAdeptConnectorType c)
         {
+          /**
+           * Create a fake download that cancels the Adobe download via
+           * the net provider. There can only be one Adobe download in progress
+           * at a time (the {@link AdobeAdeptExecutorType} interface
+           * guarantees this),
+           * so the download must refer to the current one.
+           */
+
+          BooksControllerBorrowTask.this.downloads.put(
+            BooksControllerBorrowTask.this.book_id, new DownloadType()
+            {
+              @Override public void cancel()
+              {
+                final AdobeAdeptNetProviderType net = c.getNetProvider();
+                net.cancel();
+              }
+
+              @Override public String getContentType()
+              {
+                return "application/octet-stream";
+              }
+            });
+
           c.fulfillACSM(new AdobeFulfillmentListener(), acsm);
         }
       });
@@ -384,8 +419,10 @@ final class BooksControllerBorrowTask implements Runnable,
             new BookStatusRequestingDownload(b_id, a.getEndDate());
           stat.booksStatusUpdate(status);
 
+          final DownloadType download =
+            BooksControllerBorrowTask.this.runAcquisitionFulfill(ee);
           BooksControllerBorrowTask.this.downloads.put(
-            b_id, BooksControllerBorrowTask.this.runAcquisitionFulfill(ee));
+            b_id, download);
 
           return Unit.unit();
         }
@@ -403,8 +440,10 @@ final class BooksControllerBorrowTask implements Runnable,
             new BookStatusRequestingDownload(b_id, none);
           stat.booksStatusUpdate(status);
 
+          final DownloadType download =
+            BooksControllerBorrowTask.this.runAcquisitionFulfill(ee);
           BooksControllerBorrowTask.this.downloads.put(
-            b_id, BooksControllerBorrowTask.this.runAcquisitionFulfill(ee));
+            b_id, download);
 
           return Unit.unit();
         }
@@ -490,6 +529,7 @@ final class BooksControllerBorrowTask implements Runnable,
     } catch (final Throwable e) {
       BooksControllerBorrowTask.LOG.error("error: ", e);
       this.listener.onBookBorrowFailure(this.book_id, Option.some(e));
+      this.downloadFailed(Option.some(e));
     }
   }
 
