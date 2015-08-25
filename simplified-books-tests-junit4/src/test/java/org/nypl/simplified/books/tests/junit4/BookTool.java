@@ -173,6 +173,11 @@ public final class BookTool
         books.accountLogout(logout_listener);
       }
 
+      @Override public void onAccountSyncBookDeleted(final BookID book)
+      {
+        System.err.println("info: account-sync: deleted book " + book);
+      }
+
       @Override public void onAccountSyncFailure(
         final OptionType<Throwable> error,
         final String message)

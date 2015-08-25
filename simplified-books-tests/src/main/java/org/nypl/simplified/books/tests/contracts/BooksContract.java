@@ -714,6 +714,12 @@ public final class BooksContract implements BooksContractType
           {
             System.err.println("testBooksSyncFileNotDirectory: synced");
           }
+
+          @Override public void onAccountSyncBookDeleted(final BookID book)
+          {
+            System.err.println(
+              "testBooksSyncFileNotDirectory: deleted book: " + book);
+          }
         };
 
       b.accountSync(sync_listener);
@@ -853,6 +859,11 @@ public final class BooksContract implements BooksContractType
           {
             ok.set(true);
             latch1.countDown();
+          }
+
+          @Override public void onAccountSyncBookDeleted(final BookID book)
+          {
+
           }
         };
 
@@ -1072,6 +1083,11 @@ public final class BooksContract implements BooksContractType
           {
             ok.set(true);
             latch1.countDown();
+          }
+
+          @Override public void onAccountSyncBookDeleted(final BookID book)
+          {
+            System.err.println("testBooksSyncOK: delete: " + book);
           }
         };
 
