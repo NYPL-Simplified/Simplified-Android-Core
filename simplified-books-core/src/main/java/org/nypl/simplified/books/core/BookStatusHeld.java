@@ -18,6 +18,7 @@ public final class BookStatusHeld implements BookStatusType
   private final OptionType<Integer>  queue_position;
   private final Calendar             start_date;
   private final OptionType<Calendar> end_date;
+  private final boolean              revocable;
 
   /**
    * Construct a status value.
@@ -27,18 +28,21 @@ public final class BookStatusHeld implements BookStatusType
    * @param in_start_date     The start date of the hold
    * @param in_end_date       The approximate date that the book will become
    *                          available
+   * @param in_revocable      {@code true} iff the hold is revocable
    */
 
   public BookStatusHeld(
     final BookID in_id,
     final OptionType<Integer> in_queue_position,
     final Calendar in_start_date,
-    final OptionType<Calendar> in_end_date)
+    final OptionType<Calendar> in_end_date,
+    final boolean in_revocable)
   {
     this.id = NullCheck.notNull(in_id);
     this.queue_position = NullCheck.notNull(in_queue_position);
     this.start_date = NullCheck.notNull(in_start_date);
     this.end_date = NullCheck.notNull(in_end_date);
+    this.revocable = in_revocable;
   }
 
   /**
@@ -86,10 +90,19 @@ public final class BookStatusHeld implements BookStatusType
     }
 
     final BookStatusHeld that = (BookStatusHeld) o;
-    return this.id.equals(that.id)
-           && this.queue_position.equals(that.queue_position)
-           && this.start_date.equals(that.start_date)
-           && this.end_date.equals(that.end_date);
+    if (this.isRevocable() != that.isRevocable()) {
+      return false;
+    }
+    if (!this.id.equals(that.id)) {
+      return false;
+    }
+    if (!this.queue_position.equals(that.queue_position)) {
+      return false;
+    }
+    if (!this.start_date.equals(that.start_date)) {
+      return false;
+    }
+    return this.end_date.equals(that.end_date);
   }
 
   @Override public int hashCode()
@@ -98,6 +111,7 @@ public final class BookStatusHeld implements BookStatusType
     result = 31 * result + this.queue_position.hashCode();
     result = 31 * result + this.start_date.hashCode();
     result = 31 * result + this.end_date.hashCode();
+    result = 31 * result + (this.isRevocable() ? 1 : 0);
     return result;
   }
 
@@ -121,7 +135,18 @@ public final class BookStatusHeld implements BookStatusType
             return fmt.format(et.getTime());
           }
         }));
+    b.append(" revocable=");
+    b.append(this.revocable);
     b.append("]");
     return NullCheck.notNull(b.toString());
+  }
+
+  /**
+   * @return {@code true} iff the hold is revocable
+   */
+
+  public boolean isRevocable()
+  {
+    return this.revocable;
   }
 }

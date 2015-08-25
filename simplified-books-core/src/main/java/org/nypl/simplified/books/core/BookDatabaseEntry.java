@@ -73,11 +73,13 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
   {
     this.parser = NullCheck.notNull(in_json_parser);
     this.serializer = NullCheck.notNull(in_json_serializer);
-    this.directory = new File(
-      NullCheck.notNull(parent), NullCheck.notNull(book_id).toString());
-
     this.id = NullCheck.notNull(book_id);
-    this.file_lock = new File(this.directory, "lock");
+
+    NullCheck.notNull(parent);
+
+    this.directory = new File(parent, book_id.toString());
+    this.file_lock = new File(parent, book_id.toString() + ".lock");
+
     this.file_cover = new File(this.directory, "cover.jpg");
     this.file_meta = new File(this.directory, "meta.json");
     this.file_meta_tmp = new File(this.directory, "meta.json.tmp");
@@ -187,14 +189,14 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
     throws IOException
   {
     if (this.directory.isDirectory()) {
-      FileUtilities.fileDelete(this.file_lock);
-      FileUtilities.fileDelete(this.file_cover);
-      FileUtilities.fileDelete(this.file_meta);
-      FileUtilities.fileDelete(this.file_meta_tmp);
-      FileUtilities.fileDelete(this.file_book);
+      final File[] files = this.directory.listFiles();
+      for (final File f : files) {
+        FileUtilities.fileDelete(f);
+      }
     }
 
     FileUtilities.fileDelete(this.directory);
+    FileUtilities.fileDelete(this.file_lock);
   }
 
   @Override public boolean exists()

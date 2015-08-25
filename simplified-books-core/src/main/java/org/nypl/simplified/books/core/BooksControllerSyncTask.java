@@ -25,7 +25,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.List;
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 final class BooksControllerSyncTask implements Runnable
 {
   private static final Logger LOG;

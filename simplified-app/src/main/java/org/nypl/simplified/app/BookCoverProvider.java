@@ -18,6 +18,7 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -32,8 +33,7 @@ import java.util.concurrent.ExecutorService;
  * The default implementation of the {@link BookCoverProviderType} interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class BookCoverProvider
-  implements BookCoverProviderType
+public final class BookCoverProvider implements BookCoverProviderType
 {
   private static final String COVER_TAG;
   private static final Logger LOG;
@@ -167,7 +167,8 @@ import java.util.concurrent.ExecutorService;
   {
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
     final BookID id = e.getBookID();
-    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
+    final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
+    final OptionType<BookSnapshot> snap_opt = status_cache.booksSnapshotGet(id);
     if (snap_opt.isSome()) {
       final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
       final OptionType<File> cover_opt = snap.getCover();
@@ -185,7 +186,8 @@ import java.util.concurrent.ExecutorService;
   {
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
     final BookID id = e.getBookID();
-    final OptionType<BookSnapshot> snap_opt = this.books.booksSnapshotGet(id);
+    final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
+    final OptionType<BookSnapshot> snap_opt = status_cache.booksSnapshotGet(id);
     if (snap_opt.isSome()) {
       final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
       final OptionType<File> cover_opt = snap.getCover();

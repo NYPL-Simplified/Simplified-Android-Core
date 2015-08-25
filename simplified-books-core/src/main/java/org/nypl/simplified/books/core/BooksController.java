@@ -30,7 +30,6 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -309,12 +308,17 @@ public final class BooksController extends Observable implements BooksType
     this.submitRunnable(
       new BooksControllerSyncTask(
         this.config,
-        this,
+        this.books_status,
         this.book_database,
         this.http,
         this.feed_parser,
         this.downloader,
         listener));
+  }
+
+  @Override public BooksStatusCacheType bookGetStatusCache()
+  {
+    return this.books_status;
   }
 
   @Override public void bookBorrow(
@@ -446,65 +450,6 @@ public final class BooksController extends Observable implements BooksType
         in_listener));
   }
 
-  @Override public synchronized void booksObservableAddObserver(
-    final Observer o)
-  {
-    this.books_status.booksObservableAddObserver(o);
-  }
-
-  @Override public synchronized void booksObservableDeleteAllObservers()
-  {
-    this.books_status.booksObservableDeleteAllObservers();
-  }
-
-  @Override public synchronized void booksObservableDeleteObserver(
-    final Observer o)
-  {
-    this.books_status.booksObservableDeleteObserver(o);
-  }
-
-  @Override public void booksObservableNotify(
-    final BookID id)
-  {
-    this.books_status.booksObservableNotify(id);
-  }
-
-  @Override public OptionType<BookSnapshot> booksSnapshotGet(
-    final BookID id)
-  {
-    return this.books_status.booksSnapshotGet(id);
-  }
-
-  @Override public void booksSnapshotUpdate(
-    final BookID id,
-    final BookSnapshot snap)
-  {
-    this.books_status.booksSnapshotUpdate(id, snap);
-  }
-
-  @Override public void booksStatusClearAll()
-  {
-    this.books_status.booksStatusClearAll();
-  }
-
-  @Override public OptionType<BookStatusType> booksStatusGet(
-    final BookID id)
-  {
-    return this.books_status.booksStatusGet(id);
-  }
-
-  @Override public void booksStatusUpdate(
-    final BookStatusType s)
-  {
-    this.books_status.booksStatusUpdate(s);
-  }
-
-  @Override public void booksStatusUpdateIfMoreImportant(
-    final BookStatusType s)
-  {
-    this.books_status.booksStatusUpdateIfMoreImportant(s);
-  }
-
   @Override public void bookUpdateMetadata(
     final BookID id,
     final OPDSAcquisitionFeedEntry e)
@@ -516,6 +461,24 @@ public final class BooksController extends Observable implements BooksType
     this.submitRunnable(
       new BooksControllerUpdateMetadataTask(
         this.http, this.book_database, id, e));
+  }
+
+  @Override public void bookRevoke(final BookID id)
+  {
+    NullCheck.notNull(id);
+
+    this.books_status.booksStatusUpdate(new BookStatusRequestingRevoke(id));
+    this.submitRunnable(
+      new BooksControllerRevokeBookTask(
+        this.book_database, this.books_status, this.http, id, this.adobe_drm));
+  }
+
+  @Override public void bookGetLatestStatusFromDisk(final BookID id)
+  {
+    NullCheck.notNull(id);
+    this.submitRunnable(
+      new BooksControllerGetLatestStatusTask(
+        this.book_database, this.books_status, id));
   }
 
   private void stopAllTasks()

@@ -7,12 +7,14 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.drm.core.AdobeLoanID;
 import org.nypl.drm.core.DRMUnsupportedException;
+import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
@@ -23,12 +25,12 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +102,9 @@ final class BooksControllerBorrowTask implements Runnable,
     final OptionType<Throwable> exception)
   {
     final OptionType<Calendar> none = Option.none();
-    final BookStatusDownloadFailed status =
+    final BookStatusDownloadFailed failed =
       new BookStatusDownloadFailed(this.book_id, exception, none);
-    this.books_status.booksStatusUpdate(status);
+    this.books_status.booksStatusUpdate(failed);
   }
 
   @Override public void onDownloadCancelled(
@@ -113,9 +115,16 @@ final class BooksControllerBorrowTask implements Runnable,
 
   private void downloadCancelled()
   {
-    final OptionType<Calendar> none = Option.none();
-    final BookStatusLoaned status = new BookStatusLoaned(this.book_id, none);
-    this.books_status.booksStatusUpdate(status);
+    try {
+      final BookDatabaseEntryType e =
+        this.books_database.getBookDatabaseEntry(this.book_id);
+      final BookSnapshot snap = e.getSnapshot();
+      this.books_status.booksSnapshotUpdate(this.book_id, snap);
+      final BookStatusType status = BookStatus.fromSnapshot(this.book_id, snap);
+      this.books_status.booksStatusUpdate(status);
+    } catch (final IOException e) {
+      BooksControllerBorrowTask.LOG.error("i/o error reading snapshot: ", e);
+    }
   }
 
   @Override public void onDownloadCompleted(
@@ -163,13 +172,17 @@ final class BooksControllerBorrowTask implements Runnable,
     e.copyInBook(file);
     e.setAdobeRightsInformation(rights);
 
-    final BookSnapshot snap = e.getSnapshot();
-    this.books_status.booksSnapshotUpdate(this.book_id, snap);
+    final BookSnapshot downloaded_snap = e.getSnapshot();
+    final BookStatusType downloaded_status =
+      BookStatus.fromSnapshot(this.book_id, downloaded_snap);
 
-    final OptionType<Calendar> none = Option.none();
-    final BookStatusDownloaded status =
-      new BookStatusDownloaded(this.book_id, none);
-    this.books_status.booksStatusUpdate(status);
+    Assertions.checkPrecondition(
+      downloaded_status instanceof BookStatusDownloaded,
+      "Downloaded book status must be Downloaded (is %s)",
+      downloaded_status);
+
+    this.books_status.booksSnapshotUpdate(this.book_id, downloaded_snap);
+    this.books_status.booksStatusUpdate(downloaded_status);
   }
 
   /**
@@ -271,6 +284,22 @@ final class BooksControllerBorrowTask implements Runnable,
     BooksControllerBorrowTask.LOG.debug("received OPDS feed entry");
 
     final OPDSAcquisitionFeedEntry ee = e.getFeedEntry();
+
+    /**
+     * Update the on-disk data about the book. This ensures that code
+     * requesting snapshots later will get up-to-date availability information.
+     */
+
+    final BookDatabaseEntryType db_e =
+      this.books_database.getBookDatabaseEntry(this.book_id);
+    db_e.setData(ee);
+
+    /**
+     * Then, work out what to do based on the latest availability data.
+     * If the book is loaned, attempt to download it. If it is held, notify
+     * the user.
+     */
+
     final OPDSAvailabilityType availability = ee.getAvailability();
 
     BooksControllerBorrowTask.LOG.debug(
@@ -281,23 +310,45 @@ final class BooksControllerBorrowTask implements Runnable,
     availability.matchAvailability(
       new OPDSAvailabilityMatcherType<Unit, Exception>()
       {
+        /**
+         * If the book is held but is ready for download, just notify
+         * the user of this fact by setting the status.
+         */
+
         @Override public Unit onHeldReady(
           final OPDSAvailabilityHeldReady a)
         {
-          final BookStatusHeldReady status =
-            new BookStatusHeldReady(b_id, a.getEndDate());
+          final BookStatusHeldReady status = new BookStatusHeldReady(
+            b_id, a.getEndDate(), a.getRevoke().isSome());
           stat.booksStatusUpdate(status);
           return Unit.unit();
         }
+
+        /**
+         * If the book is held, just notify the user of this fact by setting
+         * the status.
+         */
 
         @Override public Unit onHeld(
           final OPDSAvailabilityHeld a)
         {
           final BookStatusHeld status = new BookStatusHeld(
-            b_id, a.getPosition(), a.getStartDate(), a.getEndDate());
+            b_id,
+            a.getPosition(),
+            a.getStartDate(),
+            a.getEndDate(),
+            a.getRevoke().isSome());
           stat.booksStatusUpdate(status);
           return Unit.unit();
         }
+
+        /**
+         * If the book is available to be placed on hold, set the appropriate
+         * status.
+         *
+         * XXX: This should not occur in practice! Should this code be
+         * unreachable?
+         */
 
         @Override public Unit onHoldable(
           final OPDSAvailabilityHoldable a)
@@ -307,12 +358,23 @@ final class BooksControllerBorrowTask implements Runnable,
           return Unit.unit();
         }
 
+        /**
+         * If the book claims to be only "loanable", then something is
+         * definitely wrong.
+         *
+         * XXX: This should not occur in practice! Should this code be
+         * unreachable?
+         */
+
         @Override public Unit onLoanable(
           final OPDSAvailabilityLoanable a)
         {
-
-          return Unit.unit();
+          throw new UnreachableCodeException();
         }
+
+        /**
+         * If the book is "loaned", then attempt to fulfill the book.
+         */
 
         @Override public Unit onLoaned(
           final OPDSAvailabilityLoaned a)
@@ -328,9 +390,22 @@ final class BooksControllerBorrowTask implements Runnable,
           return Unit.unit();
         }
 
+        /**
+         * If the book is "open-access", then attempt to fulfill the book.
+         */
+
         @Override public Unit onOpenAccess(
           final OPDSAvailabilityOpenAccess a)
+          throws Exception
         {
+          final OptionType<Calendar> none = Option.none();
+          final BookStatusRequestingDownload status =
+            new BookStatusRequestingDownload(b_id, none);
+          stat.booksStatusUpdate(status);
+
+          BooksControllerBorrowTask.this.downloads.put(
+            b_id, BooksControllerBorrowTask.this.runAcquisitionFulfill(ee));
+
           return Unit.unit();
         }
       });

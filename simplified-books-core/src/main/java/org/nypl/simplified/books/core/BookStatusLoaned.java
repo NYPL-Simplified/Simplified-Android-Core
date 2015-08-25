@@ -14,20 +14,24 @@ public final class BookStatusLoaned implements BookStatusLoanedType
 {
   private final OptionType<Calendar> end_date;
   private final BookID               id;
+  private final boolean              returnable;
 
   /**
    * Construct a status value.
    *
-   * @param in_id       The book ID
-   * @param in_end_date The end date of the loan, if any
+   * @param in_id         The book ID
+   * @param in_end_date   The end date of the loan, if any
+   * @param in_returnable {@code true} if the book is returnable
    */
 
   public BookStatusLoaned(
     final BookID in_id,
-    final OptionType<Calendar> in_end_date)
+    final OptionType<Calendar> in_end_date,
+    final boolean in_returnable)
   {
     this.id = NullCheck.notNull(in_id);
     this.end_date = NullCheck.notNull(in_end_date);
+    this.returnable = in_returnable;
   }
 
   @Override public BookID getID()
@@ -66,5 +70,14 @@ public final class BookStatusLoaned implements BookStatusLoanedType
     b.append(this.id);
     b.append("]");
     return NullCheck.notNull(b.toString());
+  }
+
+  /**
+   * @return {@code true} iff the book is returnable.
+   */
+
+  public boolean isReturnable()
+  {
+    return this.returnable;
   }
 }

@@ -19,6 +19,7 @@ import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
@@ -1085,8 +1086,10 @@ public final class BooksContract implements BooksContractType
        * Assert status of each book.
        */
 
+      final BooksStatusCacheType status_cache = b.bookGetStatusCache();
+
       {
-        final OptionType<BookStatusType> opt = b.booksStatusGet(
+        final OptionType<BookStatusType> opt = status_cache.booksStatusGet(
           BookID.exactString(
             "561c5ecf0d3020e18ff66e17db27ca232898d409e1d7b0a0432dbea848a1abfe"
             + ""));
@@ -1096,7 +1099,7 @@ public final class BooksContract implements BooksContractType
       }
 
       {
-        final OptionType<BookStatusType> opt = b.booksStatusGet(
+        final OptionType<BookStatusType> opt = status_cache.booksStatusGet(
           BookID.exactString(
             "28a0d7122f93e0e052e9e50b35531d01d55056d8fbd3c853e307a0455888150e"
             + ""));
@@ -1106,7 +1109,7 @@ public final class BooksContract implements BooksContractType
       }
 
       {
-        final OptionType<BookStatusType> opt = b.booksStatusGet(
+        final OptionType<BookStatusType> opt = status_cache.booksStatusGet(
           BookID.exactString(
             "8e697815fb146a0ffd0bb3776b8197cea1bd6cb75a95a34053bf2b65e0b7e7e7"
             + ""));
@@ -1116,7 +1119,7 @@ public final class BooksContract implements BooksContractType
       }
 
       {
-        final OptionType<BookStatusType> opt = b.booksStatusGet(
+        final OptionType<BookStatusType> opt = status_cache.booksStatusGet(
           BookID.exactString(
             "284a2dc4e2852f1a69665aa28949e8659cf9d7d53ca11c7bf096403261368ade"
             + ""));

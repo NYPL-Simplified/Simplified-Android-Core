@@ -40,7 +40,10 @@ import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
 import org.nypl.simplified.books.core.BookStatusRequestingDownload;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
+import org.nypl.simplified.books.core.BookStatusRequestingRevoke;
+import org.nypl.simplified.books.core.BookStatusRevokeFailed;
 import org.nypl.simplified.books.core.BookStatusType;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
@@ -142,7 +145,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
      * Receive book status updates.
      */
 
-    this.books.booksObservableAddObserver(this);
+    final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
+    status_cache.booksObservableAddObserver(this);
 
     this.cell_downloading =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_downloading));
@@ -351,6 +355,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       new CatalogAcquisitionButtonController(
         this.activity, this.books, fe.getBookID(), a, fe);
 
+    this.cell_downloading_failed_retry.setVisibility(View.VISIBLE);
+    this.cell_downloading_failed_retry.setEnabled(true);
     this.cell_downloading_failed_retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
@@ -463,6 +469,36 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     return Unit.unit();
   }
 
+  @Override public Unit onBookStatusRevokeFailed(
+    final BookStatusRevokeFailed s)
+  {
+    CatalogFeedBookCellView.LOG.debug("{}: revoke failed", s.getID());
+
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.VISIBLE);
+    this.setDebugCellText("revoke-failed");
+
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
+
+    this.cell_downloading_failed_title.setText(oe.getTitle());
+    this.cell_downloading_failed_dismiss.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          CatalogFeedBookCellView.this.books.bookGetLatestStatusFromDisk(s.getID());
+        }
+      });
+
+    this.cell_downloading_failed_retry.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed_retry.setEnabled(false);
+    return Unit.unit();
+  }
+
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
@@ -476,6 +512,12 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
+
+    if (o.isReturnable()) {
+      this.cell_buttons.addView(
+        new CatalogBookRevokeButton(
+          this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN));
+    }
 
     CatalogAcquisitionButtons.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
@@ -544,6 +586,25 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     return Unit.unit();
   }
 
+  @Override
+  public Unit onBookStatusRequestingRevoke(final BookStatusRequestingRevoke s)
+  {
+    CatalogFeedBookCellView.LOG.debug("{}: requesting revoke", s.getID());
+
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
+    this.setDebugCellText("requesting-revoke");
+
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(fe);
+
+    this.cell_buttons.setVisibility(View.INVISIBLE);
+    this.cell_buttons.removeAllViews();
+    return Unit.unit();
+  }
+
   @Override public Unit onFeedEntryCorrupt(
     final FeedEntryCorrupt e)
   {
@@ -585,9 +646,11 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.entry.set(feed_e);
 
     final BookID book_id = feed_e.getBookID();
-    final OptionType<BookStatusType> stat = this.books.booksStatusGet(book_id);
-    this.onStatus(feed_e, book_id, stat);
+    final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
+    final OptionType<BookStatusType> stat =
+      status_cache.booksStatusGet(book_id);
 
+    this.onStatus(feed_e, book_id, stat);
     return Unit.unit();
   }
 

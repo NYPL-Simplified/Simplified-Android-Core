@@ -11,8 +11,15 @@ import java.util.Calendar;
  * Interface to the book management functions.
  */
 
-public interface BooksControllerType extends BooksStatusCacheType
+public interface BooksControllerType
 {
+  /**
+   * @return A reference to the book status cache that can be used to
+   * subscribe/unsubscribe to book status updates.
+   */
+
+  BooksStatusCacheType bookGetStatusCache();
+
   /**
    * Borrow the given book, delivering the results to the given {@code
    * listener}.
@@ -95,4 +102,22 @@ public interface BooksControllerType extends BooksStatusCacheType
   void bookUpdateMetadata(
     BookID id,
     OPDSAcquisitionFeedEntry e);
+
+  /**
+   * Revoke a loan or hold for the given book.
+   *
+   * @param id The book ID
+   */
+
+  void bookRevoke(
+    BookID id);
+
+  /**
+   * Load the latest book status from disk, and broadcast it to any and all
+   * observers.
+   *
+   * @param id The book ID
+   */
+
+  void bookGetLatestStatusFromDisk(BookID id);
 }

@@ -14,6 +14,7 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.slf4j.Logger;
 
@@ -57,7 +58,9 @@ public final class CatalogBookRead implements OnClickListener
     final BooksType books = app.getBooks();
     final Activity a = this.activity;
 
-    final OptionType<BookSnapshot> snap_opt = books.booksSnapshotGet(this.id);
+    final BooksStatusCacheType status_cache = books.bookGetStatusCache();
+    final OptionType<BookSnapshot> snap_opt =
+      status_cache.booksSnapshotGet(this.id);
 
     if (snap_opt.isSome()) {
       final Some<BookSnapshot> some_snap = (Some<BookSnapshot>) snap_opt;

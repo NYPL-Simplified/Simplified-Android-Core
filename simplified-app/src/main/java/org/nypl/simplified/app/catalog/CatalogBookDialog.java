@@ -18,6 +18,7 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.slf4j.Logger;
@@ -100,7 +101,8 @@ public final class CatalogBookDialog extends DialogFragment
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
-    books.booksObservableAddObserver(detail_view);
+    final BooksStatusCacheType status_cache = books.bookGetStatusCache();
+    status_cache.booksObservableAddObserver(detail_view);
 
     final Dialog d = this.getDialog();
     if (d != null) {
@@ -117,9 +119,10 @@ public final class CatalogBookDialog extends DialogFragment
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
+    final BooksStatusCacheType status_cache = books.bookGetStatusCache();
 
     final CatalogBookDetailView detail_view = NullCheck.notNull(this.view);
-    books.booksObservableDeleteObserver(detail_view);
+    status_cache.booksObservableDeleteObserver(detail_view);
   }
 
   @Override public void onResume()

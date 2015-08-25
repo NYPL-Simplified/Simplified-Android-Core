@@ -13,14 +13,16 @@ import org.nypl.simplified.books.core.BookStatusLoanable;
 import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
+import org.nypl.simplified.books.core.BookStatusRequestingRevoke;
+import org.nypl.simplified.books.core.BookStatusRevokeFailed;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
 import java.util.Calendar;
@@ -148,10 +150,22 @@ public final class CatalogBookAvailabilityStrings
           return "";
         }
 
+        @Override public String onBookStatusRequestingRevoke(
+          final BookStatusRequestingRevoke s)
+        {
+          return "";
+        }
+
         @Override public String onBookStatusLoanable(
           final BookStatusLoanable s)
         {
           return CatalogBookAvailabilityStrings.onLoanable(r);
+        }
+
+        @Override
+        public String onBookStatusRevokeFailed(final BookStatusRevokeFailed s)
+        {
+          return "";
         }
       });
   }

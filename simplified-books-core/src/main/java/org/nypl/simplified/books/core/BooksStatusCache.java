@@ -132,6 +132,14 @@ public final class BooksStatusCache extends Observable
     }
   }
 
+  @Override public synchronized void booksStatusClearFor(final BookID book_id)
+  {
+    BooksStatusCache.LOG.debug("clear {}", book_id);
+    this.snapshots.remove(book_id);
+    this.status.remove(book_id);
+    this.broadcast(book_id);
+  }
+
   private void broadcast(
     final BookID id)
   {

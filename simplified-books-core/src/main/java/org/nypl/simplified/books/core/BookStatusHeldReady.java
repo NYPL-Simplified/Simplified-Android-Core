@@ -17,20 +17,24 @@ public final class BookStatusHeldReady implements BookStatusType
 {
   private final BookID               id;
   private final OptionType<Calendar> end_date;
+  private final boolean              revocable;
 
   /**
    * Construct a status value.
    *
-   * @param in_id       The book ID
-   * @param in_end_date The expiry date
+   * @param in_id        The book ID
+   * @param in_end_date  The expiry date
+   * @param in_revocable {@code true} iff the hold is revocable
    */
 
   public BookStatusHeldReady(
     final BookID in_id,
-    final OptionType<Calendar> in_end_date)
+    final OptionType<Calendar> in_end_date,
+    final boolean in_revocable)
   {
     this.id = NullCheck.notNull(in_id);
     this.end_date = NullCheck.notNull(in_end_date);
+    this.revocable = in_revocable;
   }
 
   /**
@@ -75,7 +79,18 @@ public final class BookStatusHeldReady implements BookStatusType
             return fmt.format(et.getTime());
           }
         }));
+    b.append(" revocable=");
+    b.append(this.revocable);
     b.append("]");
     return NullCheck.notNull(b.toString());
+  }
+
+  /**
+   * @return {@code true} iff the hold is revocable
+   */
+
+  public boolean isRevocable()
+  {
+    return this.revocable;
   }
 }

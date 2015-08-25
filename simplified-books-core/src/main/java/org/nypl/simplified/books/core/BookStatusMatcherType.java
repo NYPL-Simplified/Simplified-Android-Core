@@ -19,8 +19,7 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onBookStatusHoldable(
-    BookStatusHoldable s)
+  A onBookStatusHoldable(BookStatusHoldable s)
     throws E;
 
   /**
@@ -33,8 +32,7 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onBookStatusHeld(
-    BookStatusHeld s)
+  A onBookStatusHeld(BookStatusHeld s)
     throws E;
 
   /**
@@ -47,8 +45,7 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onBookStatusHeldReady(
-    BookStatusHeldReady s)
+  A onBookStatusHeldReady(BookStatusHeldReady s)
     throws E;
 
   /**
@@ -61,8 +58,7 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onBookStatusLoanedType(
-    BookStatusLoanedType s)
+  A onBookStatusLoanedType(BookStatusLoanedType s)
     throws E;
 
   /**
@@ -75,8 +71,7 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onBookStatusRequestingLoan(
-    BookStatusRequestingLoan s)
+  A onBookStatusRequestingLoan(BookStatusRequestingLoan s)
     throws E;
 
   /**
@@ -89,7 +84,32 @@ public interface BookStatusMatcherType<A, E extends Exception>
    * @throws E If required
    */
 
-  A onBookStatusLoanable(
-    BookStatusLoanable s)
+  A onBookStatusRequestingRevoke(BookStatusRequestingRevoke s)
+    throws E;
+
+  /**
+   * Match a status value.
+   *
+   * @param s The status value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
+  A onBookStatusLoanable(BookStatusLoanable s)
+    throws E;
+
+  /**
+   * Match a status value.
+   *
+   * @param s The status value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
+  A onBookStatusRevokeFailed(BookStatusRevokeFailed s)
     throws E;
 }

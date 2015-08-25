@@ -45,7 +45,10 @@ import org.nypl.simplified.books.core.BookStatusLoanedType;
 import org.nypl.simplified.books.core.BookStatusMatcherType;
 import org.nypl.simplified.books.core.BookStatusRequestingDownload;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
+import org.nypl.simplified.books.core.BookStatusRequestingRevoke;
+import org.nypl.simplified.books.core.BookStatusRevokeFailed;
 import org.nypl.simplified.books.core.BookStatusType;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
@@ -233,8 +236,9 @@ public final class CatalogBookDetailView implements Observer,
     CatalogBookDetailView.configureSummaryPublisher(eo, summary_publisher);
 
     final BookID book_id = in_entry.getBookID();
+    final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
     final OptionType<BookStatusType> status_opt =
-      this.books.booksStatusGet(book_id);
+      status_cache.booksStatusGet(book_id);
     this.onStatus(in_entry, status_opt);
 
     CatalogBookDetailView.configureSummaryWebView(eo, summary_text);
@@ -456,13 +460,23 @@ public final class CatalogBookDetailView implements Observer,
     final BookStatusDownloaded d)
   {
     this.book_download_buttons.removeAllViews();
+
+    if (d.isReturnable()) {
+      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+        this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN);
+      this.book_download_buttons.addView(revoke, 0);
+    }
+
     this.book_download_buttons.addView(
       new CatalogBookDeleteButton(
         this.activity, d.getID()));
+
     this.book_download_buttons.addView(
       new CatalogBookReadButton(
         this.activity, d.getID()));
+
     this.book_download_buttons.setVisibility(View.VISIBLE);
+
     CatalogBookDetailView.configureButtonsHeight(
       this.activity.getResources(), this.book_download_buttons);
 
@@ -514,6 +528,9 @@ public final class CatalogBookDetailView implements Observer,
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
         this.activity, this.books, this.entry.getBookID(), a, this.entry);
+
+    retry.setEnabled(true);
+    retry.setVisibility(View.VISIBLE);
     retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
@@ -561,6 +578,16 @@ public final class CatalogBookDetailView implements Observer,
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
+
+    if (s.isRevocable()) {
+      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+      this.book_download_buttons.addView(revoke, 0);
+    }
+
+    CatalogBookDetailView.configureButtonsHeight(
+      rr, this.book_download_buttons);
+
     final String text =
       CatalogBookAvailabilityStrings.getAvailabilityString(rr, s);
     this.book_download_text.setText(text);
@@ -587,6 +614,12 @@ public final class CatalogBookDetailView implements Observer,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
       NullCheck.notNull(this.entry));
+
+    if (s.isRevocable()) {
+      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+      this.book_download_buttons.addView(revoke, 0);
+    }
 
     CatalogBookDetailView.configureButtonsHeight(
       rr, this.book_download_buttons);
@@ -625,6 +658,31 @@ public final class CatalogBookDetailView implements Observer,
     return Unit.unit();
   }
 
+  @Override public Unit onBookStatusRevokeFailed(final BookStatusRevokeFailed s)
+  {
+    this.book_download.setVisibility(View.INVISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.VISIBLE);
+
+    final Button dismiss =
+      NullCheck.notNull(this.book_downloading_failed_dismiss);
+    final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
+
+    dismiss.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          CatalogBookDetailView.this.books.bookGetLatestStatusFromDisk(s.getID());
+        }
+      });
+
+    retry.setEnabled(false);
+    retry.setVisibility(View.INVISIBLE);
+    return Unit.unit();
+  }
+
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
@@ -644,6 +702,12 @@ public final class CatalogBookDetailView implements Observer,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
       NullCheck.notNull(this.entry));
+
+    if (o.isReturnable()) {
+      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+        this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
+      this.book_download_buttons.addView(revoke, 0);
+    }
 
     CatalogBookDetailView.configureButtonsHeight(
       rr, this.book_download_buttons);
@@ -699,6 +763,16 @@ public final class CatalogBookDetailView implements Observer,
     return Unit.unit();
   }
 
+  @Override public Unit onBookStatusRequestingRevoke(
+    final BookStatusRequestingRevoke s)
+  {
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.removeAllViews();
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    return Unit.unit();
+  }
+
   private void onStatus(
     final FeedEntryOPDS e,
     final OptionType<BookStatusType> status_opt)
@@ -736,8 +810,9 @@ public final class CatalogBookDetailView implements Observer,
     final BookID update_id = NullCheck.notNull((BookID) data);
     final BookID current_id = this.entry.getBookID();
     if (current_id.equals(update_id)) {
+      final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
       final OptionType<BookStatusType> status_opt =
-        this.books.booksStatusGet(current_id);
+        status_cache.booksStatusGet(current_id);
       this.onStatus(this.entry, status_opt);
     }
   }

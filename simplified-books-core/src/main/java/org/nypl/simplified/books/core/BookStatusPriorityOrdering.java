@@ -16,6 +16,12 @@ package org.nypl.simplified.books.core;
 public enum BookStatusPriorityOrdering
 {
   /**
+   * {@link BookStatusRevokeFailed}
+   */
+
+  BOOK_STATUS_REVOKE_FAILED(90),
+
+  /**
    * {@link BookStatusDownloadFailed}
    */
 
@@ -73,7 +79,13 @@ public enum BookStatusPriorityOrdering
    * {@link BookStatusLoaned}
    */
 
-  BOOK_STATUS_LOANED(30);
+  BOOK_STATUS_LOANED(30),
+
+  /**
+   * {@link BookStatusRequestingRevoke}
+   */
+
+  BOOK_STATUS_REVOKE_IN_PROGRESS(20);
 
   private final int priority;
 

@@ -6,12 +6,12 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
 import java.util.Calendar;
@@ -42,17 +42,20 @@ final class BookStatus
         @Override public BookStatusType onHeldReady(
           final OPDSAvailabilityHeldReady a)
         {
-          return new BookStatusHeldReady(in_id, a.getEndDate());
+          final boolean revocable = a.getRevoke().isSome();
+          return new BookStatusHeldReady(in_id, a.getEndDate(), revocable);
         }
 
         @Override public BookStatusType onHeld(
           final OPDSAvailabilityHeld a)
         {
+          final boolean revocable = a.getRevoke().isSome();
           return new BookStatusHeld(
             in_id,
             a.getPosition(),
             a.getStartDate(),
-            a.getEndDate());
+            a.getEndDate(),
+            revocable);
         }
 
         @Override public BookStatusType onHoldable(
@@ -64,10 +67,11 @@ final class BookStatus
         @Override public BookStatusType onLoaned(
           final OPDSAvailabilityLoaned a)
         {
+          final boolean returnable = a.getRevoke().isSome();
           if (downloaded) {
-            return new BookStatusDownloaded(in_id, a.getEndDate());
+            return new BookStatusDownloaded(in_id, a.getEndDate(), returnable);
           }
-          return new BookStatusLoaned(in_id, a.getEndDate());
+          return new BookStatusLoaned(in_id, a.getEndDate(), returnable);
         }
 
         @Override public BookStatusType onLoanable(
@@ -79,10 +83,11 @@ final class BookStatus
         @Override public BookStatusType onOpenAccess(
           final OPDSAvailabilityOpenAccess a)
         {
+          final boolean returnable = a.getRevoke().isSome();
           if (downloaded) {
-            return new BookStatusDownloaded(in_id, no_expiry);
+            return new BookStatusDownloaded(in_id, no_expiry, returnable);
           }
-          return new BookStatusLoaned(in_id, no_expiry);
+          return new BookStatusLoaned(in_id, no_expiry, returnable);
         }
       });
   }

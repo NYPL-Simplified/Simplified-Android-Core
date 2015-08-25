@@ -11,6 +11,7 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.SimplifiedPart;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.stack.ImmutableStack;
@@ -130,6 +131,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
+    final BooksStatusCacheType status_cache = books.bookGetStatusCache();
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
@@ -144,7 +146,7 @@ public final class CatalogBookDetailActivity extends CatalogActivity
     content_area.addView(detail_view.getScrollView());
     content_area.requestLayout();
 
-    books.booksObservableAddObserver(detail_view);
+    status_cache.booksObservableAddObserver(detail_view);
   }
 
   @Override protected void onDestroy()
@@ -153,7 +155,9 @@ public final class CatalogBookDetailActivity extends CatalogActivity
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
+
     final BooksType books = app.getBooks();
-    books.booksObservableDeleteObserver(NullCheck.notNull(this.view));
+    final BooksStatusCacheType status_cache = books.bookGetStatusCache();
+    status_cache.booksObservableDeleteObserver(NullCheck.notNull(this.view));
   }
 }

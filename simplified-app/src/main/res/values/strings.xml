@@ -28,20 +28,22 @@
   <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
   <string name="catalog_start_uri">@string/catalog_uri_development</string>
 
-  <string name="catalog_unknown_feed">Unknown</string>
-  <string name="catalog_detail_related">Related Books</string>
-  <string name="catalog_downloading">Downloading</string>
-  <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_book_revoke_loan_confirm">Are you sure you want to return this book?</string>
+  <string name="catalog_book_revoke_hold_confirm">Are you sure you want to cancel this hold?</string>
+  <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
   <string name="catalog_cancel_downloading">Cancel</string>
+  <string name="catalog_categories">Categories</string>
+  <string name="catalog_detail_related">Related Books</string>
+  <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_downloading">Downloading</string>
+  <string name="catalog_empty_feed">No results found.</string>
+  <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your account to fix it.</string>
+  <string name="catalog_meta_corrupt_title">Metadata damaged</string>
   <string name="catalog_publication_date">Published</string>
   <string name="catalog_publisher">Publisher</string>
-  <string name="catalog_categories">Categories</string>
-  <string name="catalog_search">Search</string>
-  <string name="catalog_empty_feed">No results found.</string>
-  <string name="catalog_meta_corrupt_title">Metadata damaged</string>
-  <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your account to fix it.</string>
-  <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
   <string name="catalog_refresh">Refresh Feed</string>
+  <string name="catalog_search">Search</string>
+  <string name="catalog_unknown_feed">Unknown</string>
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Borrow</string>
@@ -51,6 +53,8 @@
   <string name="catalog_book_sync">Sync</string>
   <string name="catalog_book_download">Download</string>
   <string name="catalog_book_delete">Delete</string>
+  <string name="catalog_book_revoke_loan">Return</string>
+  <string name="catalog_book_revoke_hold">Cancel</string>
 
   <string name="catalog_book_availability_loaned_indefinite">You have this book on loan.</string>
   <string name="catalog_book_availability_loaned_timed">You have this book on loan for %s.</string>

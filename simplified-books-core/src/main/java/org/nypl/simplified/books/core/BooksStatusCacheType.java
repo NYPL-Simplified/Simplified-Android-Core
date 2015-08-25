@@ -66,4 +66,12 @@ public interface BooksStatusCacheType extends BooksObservableType
 
   void booksStatusUpdateIfMoreImportant(
     BookStatusType s);
+
+  /**
+   * Clear the book status for the given book.
+   *
+   * @param book_id The book
+   */
+
+  void booksStatusClearFor(BookID book_id);
 }
