@@ -288,6 +288,11 @@
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>1.4</version>
         </plugin>
+        <plugin>
+          <groupId>com.io7m.jstructural</groupId>
+          <artifactId>io7m-jstructural-maven-plugin</artifactId>
+          <version>4.2.0</version>
+        </plugin>
 
         <plugin>
           <groupId>com.simpligility.maven.plugins</groupId>

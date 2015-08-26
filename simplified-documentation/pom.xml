@@ -23,13 +23,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.io7m.jstructural</groupId>
-      <artifactId>io7m-jstructural-tools</artifactId>
-      <version>4.0.0</version>
-    </dependency>
-
-    <!-- Depend on each module for aggregation of JavaDoc. -->
-    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-books-core</artifactId>
       <version>${project.version}</version>
@@ -170,41 +163,33 @@
 
       <!-- Produce documentation -->
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
+        <groupId>com.io7m.jstructural</groupId>
+        <artifactId>io7m-jstructural-maven-plugin</artifactId>
         <executions>
           <execution>
             <id>make-documentation-single</id>
             <phase>prepare-package</phase>
             <goals>
-              <goal>java</goal>
+              <goal>transform</goal>
             </goals>
             <configuration>
-              <mainClass>org.nypl.simplified.documentation.MakeDocumentation</mainClass>
-              <arguments>
-                <argument>--xhtml-single</argument>
-                <argument>${project.build.directory}/documentation/documentation.xml</argument>
-                <argument>${project.build.directory}/documentation/</argument>
-                <argument>--xhtml-body-start</argument>
-                <argument>${project.build.directory}/documentation/brand.xml</argument>
-              </arguments>
+              <documentFile>${project.build.directory}/documentation/documentation.xml</documentFile>
+              <outputDirectory>${project.build.directory}/documentation/</outputDirectory>
+              <brandFile>${project.build.directory}/documentation/brand.xml</brandFile>
+              <pagination>XHTML_SINGLE</pagination>
             </configuration>
           </execution>
           <execution>
             <id>make-documentation-multi</id>
             <phase>prepare-package</phase>
             <goals>
-              <goal>java</goal>
+              <goal>transform</goal>
             </goals>
             <configuration>
-              <mainClass>org.nypl.simplified.documentation.MakeDocumentation</mainClass>
-              <arguments>
-                <argument>--xhtml-multi</argument>
-                <argument>${project.build.directory}/documentation/documentation.xml</argument>
-                <argument>${project.build.directory}/documentation/</argument>
-                <argument>--xhtml-body-start</argument>
-                <argument>${project.build.directory}/documentation/brand.xml</argument>
-              </arguments>
+              <documentFile>${project.build.directory}/documentation/documentation.xml</documentFile>
+              <outputDirectory>${project.build.directory}/documentation/</outputDirectory>
+              <brandFile>${project.build.directory}/documentation/brand.xml</brandFile>
+              <pagination>XHTML_MULTI</pagination>
             </configuration>
           </execution>
         </executions>
