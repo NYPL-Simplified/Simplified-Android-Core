@@ -3,10 +3,10 @@ package org.nypl.simplified.opds.core;
 import java.io.IOException;
 
 /**
- * The type of errors raised during attempts to serialize OPDS feeds.
+ * The type of errors raised during attempts to serialize OPDS objects.
  */
 
-public final class OPDSFeedSerializationException extends IOException
+public final class OPDSSerializationException extends IOException
 {
   private static final long serialVersionUID = 1L;
 
@@ -14,7 +14,7 @@ public final class OPDSFeedSerializationException extends IOException
    * Construct an exception with no message or cause.
    */
 
-  public OPDSFeedSerializationException()
+  public OPDSSerializationException()
   {
     super();
   }
@@ -26,7 +26,7 @@ public final class OPDSFeedSerializationException extends IOException
    *          The message
    */
 
-  public OPDSFeedSerializationException(
+  public OPDSSerializationException(
     final String message)
   {
     super(message);
@@ -41,7 +41,7 @@ public final class OPDSFeedSerializationException extends IOException
    *          The cause
    */
 
-  public OPDSFeedSerializationException(
+  public OPDSSerializationException(
     final String message,
     final Throwable cause)
   {
@@ -55,7 +55,7 @@ public final class OPDSFeedSerializationException extends IOException
    *          The case
    */
 
-  public OPDSFeedSerializationException(
+  public OPDSSerializationException(
     final Throwable cause)
   {
     super(cause);

@@ -434,13 +434,13 @@ public final class OPDSXML
    * @param d The document
    * @param o The output stream
    *
-   * @throws OPDSFeedSerializationException If any errors occur on serialization
+   * @throws OPDSSerializationException If any errors occur on serialization
    */
 
   public static void serializeDocumentToStream(
     final Document d,
     final OutputStream o)
-    throws OPDSFeedSerializationException
+    throws OPDSSerializationException
   {
     NullCheck.notNull(d);
     NullCheck.notNull(o);
@@ -457,11 +457,11 @@ public final class OPDSXML
       final StreamResult target = new StreamResult(o);
       t.transform(source, target);
     } catch (final TransformerConfigurationException ex) {
-      throw new OPDSFeedSerializationException(ex);
+      throw new OPDSSerializationException(ex);
     } catch (final TransformerFactoryConfigurationError ex) {
-      throw new OPDSFeedSerializationException(ex);
+      throw new OPDSSerializationException(ex);
     } catch (final TransformerException ex) {
-      throw new OPDSFeedSerializationException(ex);
+      throw new OPDSSerializationException(ex);
     }
   }
 

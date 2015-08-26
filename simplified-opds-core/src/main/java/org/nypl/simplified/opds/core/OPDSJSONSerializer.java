@@ -1,7 +1,6 @@
 package org.nypl.simplified.opds.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.FunctionType;
@@ -216,7 +215,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
 
   @Override public ObjectNode serializeFeedEntry(
     final OPDSAcquisitionFeedEntry e)
-    throws OPDSFeedSerializationException
+    throws OPDSSerializationException
   {
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode je = jom.createObjectNode();
@@ -317,7 +316,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
 
   @Override public ObjectNode serializeFeed(
     final OPDSAcquisitionFeed e)
-    throws OPDSFeedSerializationException
+    throws OPDSSerializationException
   {
     NullCheck.notNull(e);
 
@@ -384,11 +383,6 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     final OutputStream os)
     throws IOException
   {
-    NullCheck.notNull(d);
-    NullCheck.notNull(os);
-
-    final ObjectMapper jom = new ObjectMapper();
-    final ObjectWriter jw = jom.writerWithDefaultPrettyPrinter();
-    jw.writeValue(os, d);
+    OPDSJSONSerializerUtilities.serialize(d, os);
   }
 }

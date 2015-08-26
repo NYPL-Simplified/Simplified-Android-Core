@@ -19,12 +19,12 @@ public interface OPDSJSONSerializerType
    *
    * @return JSON
    *
-   * @throws OPDSFeedSerializationException On serialization errors
+   * @throws OPDSSerializationException On serialization errors
    */
 
   ObjectNode serializeFeed(
     OPDSAcquisitionFeed e)
-    throws OPDSFeedSerializationException;
+    throws OPDSSerializationException;
 
   /**
    * Serialize the given feed entry to JSON.
@@ -33,12 +33,12 @@ public interface OPDSJSONSerializerType
    *
    * @return JSON
    *
-   * @throws OPDSFeedSerializationException On serialization errors
+   * @throws OPDSSerializationException On serialization errors
    */
 
   ObjectNode serializeFeedEntry(
     OPDSAcquisitionFeedEntry e)
-    throws OPDSFeedSerializationException;
+    throws OPDSSerializationException;
 
   /**
    * Serialize the given availability type to JSON.
