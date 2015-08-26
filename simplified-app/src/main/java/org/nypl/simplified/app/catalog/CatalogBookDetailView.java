@@ -102,6 +102,8 @@ public final class CatalogBookDetailView implements Observer,
   private final BooksType     books;
   private final FeedEntryOPDS entry;
   private final ScrollView    scroll_view;
+  private final TextView      book_downloading_label;
+  private final TextView      book_downloading_failed_text;
 
   /**
    * Construct a detail view.
@@ -184,6 +186,9 @@ public final class CatalogBookDetailView implements Observer,
     final ViewGroup bdd = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_downloading));
     this.book_downloading = bdd;
+
+    this.book_downloading_label = NullCheck.notNull(
+      (TextView) bdd.findViewById(R.id.book_dialog_downloading_label));
     this.book_downloading_percent_text = NullCheck.notNull(
       (TextView) bdd.findViewById(R.id.book_dialog_downloading_percent_text));
     this.book_downloading_progress = NullCheck.notNull(
@@ -193,6 +198,8 @@ public final class CatalogBookDetailView implements Observer,
 
     final ViewGroup bdf = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_downloading_failed));
+    this.book_downloading_failed_text = NullCheck.notNull(
+      (TextView) bdf.findViewById(R.id.book_dialog_downloading_failed_text));
     this.book_downloading_failed_dismiss = NullCheck.notNull(
       (Button) bdf.findViewById(R.id.book_dialog_downloading_failed_dismiss));
     this.book_downloading_failed_retry = NullCheck.notNull(
@@ -493,6 +500,10 @@ public final class CatalogBookDetailView implements Observer,
     this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
 
+    final TextView failed =
+      NullCheck.notNull(this.book_downloading_failed_text);
+    failed.setText(R.string.catalog_download_failed);
+
     final Button dismiss =
       NullCheck.notNull(this.book_downloading_failed_dismiss);
     final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
@@ -548,6 +559,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
 
+    this.book_downloading_label.setText(R.string.catalog_downloading);
     CatalogDownloadProgressBar.setProgressBar(
       d.getCurrentTotalBytes(),
       d.getExpectedTotalBytes(),
@@ -555,6 +567,8 @@ public final class CatalogBookDetailView implements Observer,
       NullCheck.notNull(this.book_downloading_progress));
 
     final Button dc = NullCheck.notNull(this.book_downloading_cancel);
+    dc.setVisibility(View.VISIBLE);
+    dc.setEnabled(true);
     dc.setOnClickListener(
       new OnClickListener()
       {
@@ -664,6 +678,10 @@ public final class CatalogBookDetailView implements Observer,
     this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
 
+    final TextView failed =
+      NullCheck.notNull(this.book_downloading_failed_text);
+    failed.setText(R.string.catalog_revoke_failed);
+
     final Button dismiss =
       NullCheck.notNull(this.book_downloading_failed_dismiss);
     final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
@@ -746,30 +764,66 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusRequestingDownload(
     final BookStatusRequestingDownload d)
   {
-    this.book_download_buttons.setVisibility(View.INVISIBLE);
-    this.book_download_buttons.removeAllViews();
-    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_download.setVisibility(View.INVISIBLE);
+    this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    this.book_downloading_label.setText(R.string.catalog_downloading);
+
+    CatalogDownloadProgressBar.setProgressBar(
+      0,
+      100,
+      NullCheck.notNull(this.book_downloading_percent_text),
+      NullCheck.notNull(this.book_downloading_progress));
+
+    final Button dc = NullCheck.notNull(this.book_downloading_cancel);
+    dc.setEnabled(false);
+    dc.setVisibility(View.INVISIBLE);
+    dc.setOnClickListener(null);
     return Unit.unit();
   }
 
   @Override public Unit onBookStatusRequestingLoan(
     final BookStatusRequestingLoan s)
   {
-    this.book_download_buttons.setVisibility(View.INVISIBLE);
-    this.book_download_buttons.removeAllViews();
-    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_download.setVisibility(View.INVISIBLE);
+    this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    this.book_downloading_label.setText(R.string.catalog_requesting_loan);
+
+    CatalogDownloadProgressBar.setProgressBar(
+      0,
+      100,
+      NullCheck.notNull(this.book_downloading_percent_text),
+      NullCheck.notNull(this.book_downloading_progress));
+
+    final Button dc = NullCheck.notNull(this.book_downloading_cancel);
+    dc.setEnabled(false);
+    dc.setVisibility(View.INVISIBLE);
+    dc.setOnClickListener(null);
     return Unit.unit();
   }
 
   @Override public Unit onBookStatusRequestingRevoke(
     final BookStatusRequestingRevoke s)
   {
-    this.book_download_buttons.setVisibility(View.INVISIBLE);
-    this.book_download_buttons.removeAllViews();
-    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_download.setVisibility(View.INVISIBLE);
+    this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    this.book_downloading_label.setText(R.string.catalog_requesting_loan);
+
+    CatalogDownloadProgressBar.setProgressBar(
+      0,
+      100,
+      NullCheck.notNull(this.book_downloading_percent_text),
+      NullCheck.notNull(this.book_downloading_progress));
+
+    final Button dc = NullCheck.notNull(this.book_downloading_cancel);
+    dc.setEnabled(false);
+    dc.setVisibility(View.INVISIBLE);
+    dc.setOnClickListener(null);
     return Unit.unit();
   }
 

@@ -102,6 +102,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   private final BookCoverProviderType            cover_provider;
   private final boolean                          debug_cell_state;
   private final AtomicReference<FeedEntryOPDS>   entry;
+  private final TextView                         cell_downloading_label;
+  private final TextView                         cell_downloading_failed_label;
   private       CatalogBookSelectionListenerType book_selection_listener;
 
   /**
@@ -156,6 +158,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_downloading_percent_text = NullCheck.notNull(
       (TextView) this.cell_downloading.findViewById(
         R.id.cell_downloading_percent_text));
+    this.cell_downloading_label = NullCheck.notNull(
+      (TextView) this.cell_downloading.findViewById(
+        R.id.cell_downloading_label));
     this.cell_downloading_title = NullCheck.notNull(
       (TextView) this.cell_downloading.findViewById(
         R.id.cell_downloading_title));
@@ -171,6 +176,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_downloading_failed_title = NullCheck.notNull(
       (TextView) this.cell_downloading_failed.findViewById(
         R.id.cell_downloading_failed_title));
+    this.cell_downloading_failed_label = NullCheck.notNull(
+      (TextView) this.cell_downloading_failed.findViewById(
+        R.id.cell_downloading_failed_static_text));
     this.cell_downloading_failed_dismiss = NullCheck.notNull(
       (Button) this.cell_downloading_failed.findViewById(
         R.id.cell_downloading_failed_dismiss));
@@ -330,6 +338,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
+    this.cell_downloading_failed_label.setText(
+      R.string.catalog_download_failed);
     this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss.setOnClickListener(
       new OnClickListener()
@@ -389,6 +399,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     final BookID book_id = d.getID();
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
+    this.cell_downloading_label.setText(R.string.catalog_downloading);
     this.cell_downloading_title.setText(oe.getTitle());
     this.cell_downloading_authors.setText(
       CatalogFeedBookCellView.makeAuthorText(oe));
@@ -399,6 +410,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       this.cell_downloading_percent_text,
       this.cell_downloading_progress);
 
+    this.cell_downloading_cancel.setVisibility(View.VISIBLE);
+    this.cell_downloading_cancel.setEnabled(true);
     this.cell_downloading_cancel.setOnClickListener(
       new OnClickListener()
       {
@@ -505,6 +518,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
+    this.cell_downloading_failed_label.setText(R.string.catalog_revoke_failed);
     this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss.setOnClickListener(
       new OnClickListener()
@@ -516,7 +530,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
         }
       });
 
-    this.cell_downloading_failed_retry.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed_retry.setVisibility(View.GONE);
     this.cell_downloading_failed_retry.setEnabled(false);
     return Unit.unit();
   }
@@ -585,6 +599,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
+    this.cell_downloading_label.setText(R.string.catalog_downloading);
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
     return Unit.unit();
@@ -595,17 +610,29 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     CatalogFeedBookCellView.LOG.debug("{}: requesting loan", s.getID());
 
-    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_corrupt.setVisibility(View.INVISIBLE);
-    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("requesting-loan");
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
-    this.loadImageAndSetVisibility(fe);
+    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
-    this.cell_buttons.setVisibility(View.INVISIBLE);
-    this.cell_buttons.removeAllViews();
+    this.cell_downloading_label.setText(R.string.catalog_requesting_loan);
+    this.cell_downloading_title.setText(oe.getTitle());
+    this.cell_downloading_authors.setText(
+      CatalogFeedBookCellView.makeAuthorText(oe));
+
+    CatalogDownloadProgressBar.setProgressBar(
+      0,
+      100,
+      this.cell_downloading_percent_text,
+      this.cell_downloading_progress);
+
+    this.cell_downloading_cancel.setVisibility(View.INVISIBLE);
+    this.cell_downloading_cancel.setEnabled(false);
+    this.cell_downloading_cancel.setOnClickListener(null);
     return Unit.unit();
   }
 
@@ -614,17 +641,29 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     CatalogFeedBookCellView.LOG.debug("{}: requesting revoke", s.getID());
 
-    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_corrupt.setVisibility(View.INVISIBLE);
-    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.VISIBLE);
     this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("requesting-revoke");
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
-    this.loadImageAndSetVisibility(fe);
+    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
-    this.cell_buttons.setVisibility(View.INVISIBLE);
-    this.cell_buttons.removeAllViews();
+    this.cell_downloading_label.setText(R.string.catalog_requesting_revoke);
+    this.cell_downloading_title.setText(oe.getTitle());
+    this.cell_downloading_authors.setText(
+      CatalogFeedBookCellView.makeAuthorText(oe));
+
+    CatalogDownloadProgressBar.setProgressBar(
+      0,
+      100,
+      this.cell_downloading_percent_text,
+      this.cell_downloading_progress);
+
+    this.cell_downloading_cancel.setVisibility(View.INVISIBLE);
+    this.cell_downloading_cancel.setEnabled(false);
+    this.cell_downloading_cancel.setOnClickListener(null);
     return Unit.unit();
   }
 

@@ -34,6 +34,7 @@
   <string name="catalog_cancel_downloading">Cancel</string>
   <string name="catalog_categories">Categories</string>
   <string name="catalog_detail_related">Related Books</string>
+  <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
   <string name="catalog_downloading">Downloading</string>
   <string name="catalog_empty_feed">No results found.</string>
@@ -44,6 +45,8 @@
   <string name="catalog_refresh">Refresh Feed</string>
   <string name="catalog_search">Search</string>
   <string name="catalog_unknown_feed">Unknown</string>
+  <string name="catalog_requesting_loan">Requesting</string>
+  <string name="catalog_requesting_revoke">Requesting</string>
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Borrow</string>
