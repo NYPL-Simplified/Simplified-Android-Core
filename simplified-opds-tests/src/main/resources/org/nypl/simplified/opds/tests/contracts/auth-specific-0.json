@@ -1,0 +1,25 @@
+{
+   "title" : "Library",
+   "labels" : {
+      "password" : "PIN",
+      "login" : "Barcode"
+   },
+   "links" : {
+      "copyright" : {
+         "href" : "http://www.librarysimplified.org/acknowledgments.html",
+         "type" : "text/html"
+      },
+      "privacy-policy" : {
+         "href" : "http://www.librarysimplified.org/privacypolicy.html",
+         "type" : "text/html"
+      },
+      "terms-of-service" : {
+         "href" : "http://www.librarysimplified.org/EULA.html",
+         "type" : "text/html"
+      }
+   },
+   "id" : "2ba6a1aa-963b-314a-97d1-bdad73bcd6f1",
+   "type" : [
+      "http://opds-spec.org/auth/basic"
+   ]
+}
