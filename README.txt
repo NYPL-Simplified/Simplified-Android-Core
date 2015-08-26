@@ -93,9 +93,10 @@ Release procedure:
 
      $ vim `find . -name AndroidManifest.xml -type f | grep src`
 
-  3. Update the version strings in the Maven POMs:
+  3. Update the version strings in the Maven POMs (where
+     $NEW_VERSION_NUMBER is the new version).
 
-     $ vim pom.xml simplified-*/pom.xml
+     $ mvn versions:set -DnewVersion=$NEW_VERSION_NUMBER
 
   4. Run a build, ensure all tests pass.
 
