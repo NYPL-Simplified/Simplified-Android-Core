@@ -10,6 +10,7 @@
     </content>
     <orderEntry type="jdk" jdkName="java-7-openjdk" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
     <orderEntry type="module" module-name="simplified-books-tests" scope="TEST" />
     <orderEntry type="module" module-name="simplified-books-core" scope="TEST" />
     <orderEntry type="module" module-name="simplified-assert" scope="TEST" />
@@ -24,7 +25,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.nypl.drm:nypl-drm-core:0.3.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.1.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.io7m.jequality:io7m-jequality-core:1.0.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: net.jodah:expiringmap:0.4.0" level="project" />
     <orderEntry type="module" module-name="simplified-test-utilities" scope="TEST" />
