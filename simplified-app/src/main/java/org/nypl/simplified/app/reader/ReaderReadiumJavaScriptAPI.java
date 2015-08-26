@@ -22,7 +22,6 @@ import org.slf4j.Logger;
  * interface.
  */
 
-@SuppressWarnings({ "boxing", "synthetic-access" })
 public final class ReaderReadiumJavaScriptAPI
   implements ReaderReadiumJavaScriptAPIType
 {
@@ -183,40 +182,49 @@ public final class ReaderReadiumJavaScriptAPI
     final ReaderSettingsType r)
   {
     try {
-      final JSONObject decls = new JSONObject();
-
       final ReaderColorScheme cs = r.getColorScheme();
-
       final String color = NullCheck.notNull(
-        String.format(
-          "#%06x", cs.getForegroundColor() & 0xffffff));
+        String.format("#%06x", cs.getForegroundColor() & 0xffffff));
       final String background = NullCheck.notNull(
-        String.format(
-          "#%06x", cs.getBackgroundColor() & 0xffffff));
+        String.format("#%06x", cs.getBackgroundColor() & 0xffffff));
 
+      final JSONObject decls = new JSONObject();
       decls.put("color", color);
       decls.put("backgroundColor", background);
 
+      switch (r.getFontFamily()) {
+        case READER_FONT_SANS_SERIF: {
+          decls.put("font-family", "sans-serif");
+          break;
+        }
+        case READER_FONT_SERIF: {
+          decls.put("font-family", "serif");
+          break;
+        }
+      }
+
       final JSONObject o = new JSONObject();
-      o.put("selector", "body");
+      o.put("selector", "*");
       o.put("declarations", decls);
 
-      final JSONArray a = new JSONArray();
-      a.put(o);
+      final JSONArray styles = new JSONArray();
+      styles.put(o);
 
-      this.evaluate(
-        NullCheck.notNull(
-          String.format(
-            "ReadiumSDK.reader.setBookStyles(%s); document.body.style"
-            + ".backgroundColor = \"%s\";", a, background)));
+      final StringBuilder script = new StringBuilder(256);
+      script.append("ReadiumSDK.reader.setBookStyles(");
+      script.append(styles);
+      script.append("); ");
+      script.append("document.body.style.backgroundColor = \"");
+      script.append(background);
+      script.append("\";");
+      this.evaluate(script.toString());
 
       final ReaderReadiumViewerSettings vs = new ReaderReadiumViewerSettings(
         SyntheticSpreadMode.AUTO, ScrollMode.AUTO, (int) r.getFontScale(), 20);
 
       this.evaluate(
         NullCheck.notNull(
-          String.format(
-            "ReadiumSDK.reader.updateSettings(%s);", vs.toJSON())));
+          String.format("ReadiumSDK.reader.updateSettings(%s);", vs.toJSON())));
 
     } catch (final JSONException e) {
       ReaderReadiumJavaScriptAPI.LOG.error(

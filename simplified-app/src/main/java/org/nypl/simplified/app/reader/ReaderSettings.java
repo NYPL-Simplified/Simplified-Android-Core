@@ -56,6 +56,28 @@ public final class ReaderSettings implements ReaderSettingsType
     this.listeners.put(l, Unit.unit());
   }
 
+  @Override public ReaderFontSelection getFontFamily()
+  {
+    try {
+      final String raw = NullCheck.notNull(
+        this.settings.getString(
+          "font_family", ReaderFontSelection.READER_FONT_SERIF.toString()));
+      return NullCheck.notNull(ReaderFontSelection.valueOf(raw));
+    } catch (final Throwable x) {
+      ReaderSettings.LOG.error(
+        "failed to parse color scheme: {}", x.getMessage(), x);
+      return ReaderFontSelection.READER_FONT_SERIF;
+    }
+  }
+
+  @Override public void setFontFamily(final ReaderFontSelection f)
+  {
+    final Editor e = this.settings.edit();
+    e.putString("font_family", NullCheck.notNull(f).toString());
+    e.apply();
+    this.broadcastChanges();
+  }
+
   private void broadcastChanges()
   {
     for (final ReaderSettingsListenerType l : this.listeners.keySet()) {

@@ -53,6 +53,13 @@ public final class ReaderSettingsDialog extends DialogFragment
       (LinearLayout) inflater.inflate(
         R.layout.reader_settings, container, false));
 
+    final TextView in_view_font_serif = NullCheck.notNull(
+      (TextView) layout.findViewById(
+        R.id.reader_settings_font_serif));
+    final TextView in_view_font_sans = NullCheck.notNull(
+      (TextView) layout.findViewById(
+        R.id.reader_settings_font_sans));
+
     final TextView in_view_black_on_white = NullCheck.notNull(
       (TextView) layout.findViewById(
         R.id.reader_settings_black_on_white));
@@ -62,12 +69,14 @@ public final class ReaderSettingsDialog extends DialogFragment
     final TextView in_view_black_on_beige = NullCheck.notNull(
       (TextView) layout.findViewById(
         R.id.reader_settings_black_on_beige));
+
     final TextView in_view_text_smaller = NullCheck.notNull(
       (TextView) layout.findViewById(
         R.id.reader_settings_text_smaller));
     final TextView in_view_text_larger = NullCheck.notNull(
       (TextView) layout.findViewById(
         R.id.reader_settings_text_larger));
+
     final SeekBar in_view_brightness = NullCheck.notNull(
       (SeekBar) layout.findViewById(
         R.id.reader_settings_brightness));
@@ -79,6 +88,23 @@ public final class ReaderSettingsDialog extends DialogFragment
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
     final ReaderSettingsType settings = rs.getSettings();
+
+    in_view_font_serif.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          settings.setFontFamily(ReaderFontSelection.READER_FONT_SERIF);
+        }
+      });
+    in_view_font_sans.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          settings.setFontFamily(ReaderFontSelection.READER_FONT_SANS_SERIF);
+        }
+      });
 
     in_view_black_on_white.setBackgroundColor(
       ReaderColorScheme.SCHEME_BLACK_ON_WHITE.getBackgroundColor());

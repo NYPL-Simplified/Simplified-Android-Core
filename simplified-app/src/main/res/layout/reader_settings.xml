@@ -9,6 +9,48 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
+  <FrameLayout
+    android:layout_height="1dp"
+    android:layout_width="match_parent"
+    android:background="#eee" />
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_height="48dp">
+
+    <TextView
+      android:id="@+id/reader_settings_font_serif"
+      android:layout_width="48dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:fontFamily="serif"
+      android:text="A" />
+
+    <FrameLayout
+      android:layout_height="48dp"
+      android:layout_width="1dp"
+      android:background="#eee" />
+
+    <TextView
+      android:id="@+id/reader_settings_font_sans"
+      android:layout_width="48dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:fontFamily="sans"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:text="A" />
+
+  </LinearLayout>
+
+  <FrameLayout
+    android:layout_height="1dp"
+    android:layout_width="match_parent"
+    android:background="#eee" />
+
   <LinearLayout
     android:layout_width="match_parent"
     android:orientation="horizontal"

@@ -16,6 +16,20 @@ public interface ReaderSettingsType
     ReaderSettingsListenerType l);
 
   /**
+   * @return The font family to use when rendering
+   */
+
+  ReaderFontSelection getFontFamily();
+
+  /**
+   * Set the font family to use when rendering.
+   *
+   * @param f The font family
+   */
+
+  void setFontFamily(ReaderFontSelection f);
+
+  /**
    * @return The current color scheme
    */
 
