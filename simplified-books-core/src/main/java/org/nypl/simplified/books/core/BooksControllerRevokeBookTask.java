@@ -119,7 +119,11 @@ final class BooksControllerRevokeBookTask
         @Override public Unit onHTTPError(final HTTPResultError<InputStream> e)
           throws IOException
         {
-
+          final OptionType<Throwable> none = Option.none();
+          final BookStatusRevokeFailed status = new BookStatusRevokeFailed(
+            BooksControllerRevokeBookTask.this.book_id, none);
+          BooksControllerRevokeBookTask.this.books_status.booksStatusUpdate(
+            status);
           return Unit.unit();
         }
 
@@ -127,6 +131,12 @@ final class BooksControllerRevokeBookTask
         public Unit onHTTPException(final HTTPResultException<InputStream> e)
           throws IOException
         {
+          final OptionType<Throwable> error =
+            Option.some((Throwable) e.getError());
+          final BookStatusRevokeFailed status = new BookStatusRevokeFailed(
+            BooksControllerRevokeBookTask.this.book_id, error);
+          BooksControllerRevokeBookTask.this.books_status.booksStatusUpdate(
+            status);
           return Unit.unit();
         }
 
