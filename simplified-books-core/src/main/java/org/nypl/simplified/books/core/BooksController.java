@@ -470,7 +470,11 @@ public final class BooksController extends Observable implements BooksType
     this.books_status.booksStatusUpdate(new BookStatusRequestingRevoke(id));
     this.submitRunnable(
       new BooksControllerRevokeBookTask(
-        this.book_database, this.books_status, this.http, id, this.adobe_drm));
+        this.book_database,
+        this.books_status,
+        this.feed_loader,
+        id,
+        this.adobe_drm));
   }
 
   @Override public void bookGetLatestStatusFromDisk(final BookID id)
