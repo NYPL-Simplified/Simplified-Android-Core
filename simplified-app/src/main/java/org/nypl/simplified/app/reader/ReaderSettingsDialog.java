@@ -59,6 +59,9 @@ public final class ReaderSettingsDialog extends DialogFragment
     final TextView in_view_font_sans = NullCheck.notNull(
       (TextView) layout.findViewById(
         R.id.reader_settings_font_sans));
+    final TextView in_view_font_open_dyslexic = NullCheck.notNull(
+      (TextView) layout.findViewById(
+        R.id.reader_settings_font_open_dyslexic));
 
     final TextView in_view_black_on_white = NullCheck.notNull(
       (TextView) layout.findViewById(
@@ -103,6 +106,14 @@ public final class ReaderSettingsDialog extends DialogFragment
         @Override public void onClick(final View v)
         {
           settings.setFontFamily(ReaderFontSelection.READER_FONT_SANS_SERIF);
+        }
+      });
+    in_view_font_open_dyslexic.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          settings.setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC);
         }
       });
 

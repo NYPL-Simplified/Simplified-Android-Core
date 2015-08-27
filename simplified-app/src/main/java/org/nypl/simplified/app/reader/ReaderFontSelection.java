@@ -13,6 +13,12 @@ public enum ReaderFontSelection
   READER_FONT_SANS_SERIF,
 
   /**
+   * Use the OpenDyslexic3 font.
+   */
+
+  READER_FONT_OPEN_DYSLEXIC,
+
+  /**
    * Use a serif font.
    */
 

@@ -197,6 +197,17 @@ public final class ReaderReadiumJavaScriptAPI
           decls.put("font-family", "sans-serif");
           break;
         }
+        case READER_FONT_OPEN_DYSLEXIC:
+        {
+          /**
+           * This is defined as a custom CSS font family inside
+           * OpenDyslexic.css, which is referenced from the initially
+           * loaded reader.html file.
+           */
+
+          decls.put("font-family", "OpenDyslexic3");
+          break;
+        }
         case READER_FONT_SERIF: {
           decls.put("font-family", "serif");
           break;

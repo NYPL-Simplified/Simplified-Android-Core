@@ -12,6 +12,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -40,6 +41,7 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
@@ -119,6 +121,23 @@ public final class ReaderActivity extends Activity implements
     final Intent i = new Intent(from, ReaderActivity.class);
     i.putExtras(b);
     from.startActivity(i);
+  }
+
+  private static @Nullable WebResourceResponse getInterceptedRequestResource(
+    final String url)
+  {
+    if ("simplified-resource:OpenDyslexic3-Regular.ttf".equals(url)) {
+      ReaderActivity.LOG.debug("intercepted {} request", url);
+      final InputStream stream =
+        ReaderActivity.class.getResourceAsStream("OpenDyslexic3-Regular.ttf");
+      if (stream != null) {
+        return new WebResourceResponse("font/truetype", "UTF-8", stream);
+      }
+
+      LOG.error("missing resource for {}", url);
+    }
+
+    return null;
   }
 
   private void applyViewerColorFilters()
@@ -374,6 +393,21 @@ public final class ReaderActivity extends Activity implements
 
         return super.shouldOverrideUrlLoading(view, url);
       }
+
+      @Override public WebResourceResponse shouldInterceptRequest(
+        final WebView view,
+        final String url)
+      {
+        if (url.startsWith("simplified-resource:")) {
+          final WebResourceResponse r =
+            ReaderActivity.getInterceptedRequestResource(url);
+          if (r != null) {
+            return r;
+          }
+        }
+
+        return super.shouldInterceptRequest(view, url);
+      }
     };
     in_webview.setBackgroundColor(0x00000000);
     in_webview.setWebChromeClient(wc_client);
@@ -394,6 +428,8 @@ public final class ReaderActivity extends Activity implements
     s.setAllowFileAccess(false);
     s.setAllowFileAccessFromFileURLs(false);
     s.setAllowContentAccess(false);
+    s.setAllowUniversalAccessFromFileURLs(false);
+    s.setSupportMultipleWindows(false);
     s.setCacheMode(WebSettings.LOAD_NO_CACHE);
     s.setGeolocationEnabled(false);
     s.setJavaScriptEnabled(true);
