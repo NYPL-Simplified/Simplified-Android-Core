@@ -30,6 +30,7 @@
         android:layout_height="wrap_content">
 
         <TextView
+          android:id="@+id/settings_barcode_label"
           android:labelFor="@+id/settings_barcode_edit"
           android:text="@string/settings_barcode"
           android:layout_width="wrap_content"
@@ -51,6 +52,7 @@
         android:layout_height="wrap_content">
 
         <TextView
+          android:id="@+id/settings_pin_label"
           android:labelFor="@+id/settings_pin_edit"
           android:text="@string/settings_pin"
           android:layout_width="wrap_content"

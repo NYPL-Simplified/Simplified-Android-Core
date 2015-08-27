@@ -52,6 +52,8 @@
     <orderEntry type="module" module-name="simplified-http-core" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.iharder:base64:2.3.8" level="project" />
     <orderEntry type="module" module-name="simplified-opds-core" scope="PROVIDED" />
+    <orderEntry type="module" module-name="simplified-json-core" scope="PROVIDED" />
+    <orderEntry type="module" module-name="simplified-rfc3339-core" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.0-rc3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.0-rc3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />

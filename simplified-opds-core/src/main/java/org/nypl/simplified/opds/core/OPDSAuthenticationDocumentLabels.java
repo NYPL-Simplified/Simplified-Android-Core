@@ -26,4 +26,14 @@ public enum OPDSAuthenticationDocumentLabels
   {
     this.name = NullCheck.notNull(in_name);
   }
+
+  /**
+   * @return The name of the label as it would appear in an authentication
+   * document
+   */
+
+  public String getName()
+  {
+    return this.name;
+  }
 }
