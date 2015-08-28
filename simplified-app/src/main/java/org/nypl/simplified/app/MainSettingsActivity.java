@@ -19,10 +19,9 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
+import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -33,8 +32,12 @@ import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
+import org.nypl.simplified.books.core.SyncedDocumentType;
 import org.slf4j.Logger;
 
 /**
@@ -383,6 +386,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
+    final DocumentStoreType docs = app.getDocumentStore();
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
     final Resources resources = NullCheck.notNull(this.getResources());
@@ -394,10 +398,16 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     content_area.addView(layout);
     content_area.requestLayout();
 
+    final TextView in_barcode_label = NullCheck.notNull(
+      (TextView) this.findViewById(R.id.settings_barcode_label));
     final EditText in_barcode_edit = NullCheck.notNull(
       (EditText) this.findViewById(R.id.settings_barcode_edit));
+
+    final TextView in_pin_label = NullCheck.notNull(
+      (TextView) this.findViewById(R.id.settings_pin_label));
     final EditText in_pin_edit =
       NullCheck.notNull((EditText) this.findViewById(R.id.settings_pin_edit));
+
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
     final TextView in_adobe_accounts = NullCheck.notNull(
@@ -411,6 +421,15 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     in_adobe_accounts.setEnabled(false);
 
     /**
+     * Get labels from the current authentication document.
+     */
+
+    final AuthenticationDocumentType auth_doc =
+      docs.getAuthenticationDocument();
+    in_barcode_label.setText(auth_doc.getLabelLoginUserID());
+    in_pin_label.setText(auth_doc.getLabelLoginPassword());
+
+    /**
      * If an EULA is defined, configure the EULA to open a web view displaying
      * the policy on click. Otherwise, disable the text.
      */
@@ -419,10 +438,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_eula));
     in_eula.setEnabled(false);
 
-    app.getEULA().map(
-      new FunctionType<EULAType, Unit>()
+    docs.getEULA().map_(
+      new ProcedureType<EULAType>()
       {
-        @Override public Unit call(final EULAType eula)
+        @Override public void call(final EULAType eula)
         {
           in_eula.setEnabled(true);
           in_eula.setOnClickListener(
@@ -443,7 +462,6 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 MainSettingsActivity.this.overridePendingTransition(0, 0);
               }
             });
-          return Unit.unit();
         }
       });
 
@@ -455,10 +473,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_privacy));
     in_privacy.setEnabled(false);
 
-    app.getPrivacyPolicy().map(
-      new FunctionType<PrivacyPolicyType, Unit>()
+    docs.getPrivacyPolicy().map_(
+      new ProcedureType<SyncedDocumentType>()
       {
-        @Override public Unit call(final PrivacyPolicyType policy)
+        @Override public void call(final SyncedDocumentType policy)
         {
           in_privacy.setEnabled(true);
           in_privacy.setOnClickListener(
@@ -479,7 +497,41 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 MainSettingsActivity.this.overridePendingTransition(0, 0);
               }
             });
-          return Unit.unit();
+        }
+      });
+
+    /**
+     * Enable/disable the acknowledgements field.
+     */
+
+    final TextView in_acknowledgements =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_credits));
+    in_acknowledgements.setEnabled(false);
+
+    docs.getAcknowledgements().map_(
+      new ProcedureType<SyncedDocumentType>()
+      {
+        @Override public void call(final SyncedDocumentType ack)
+        {
+          in_acknowledgements.setEnabled(true);
+          in_acknowledgements.setOnClickListener(
+            new OnClickListener()
+            {
+              @Override public void onClick(final View v)
+              {
+                final Intent i = new Intent(
+                  MainSettingsActivity.this, WebViewActivity.class);
+                final Bundle b = new Bundle();
+                WebViewActivity.setActivityArguments(
+                  b,
+                  ack.documentGetReadableURL().toString(),
+                  resources.getString(R.string.settings_privacy),
+                  SimplifiedPart.PART_SETTINGS);
+                i.putExtras(b);
+                MainSettingsActivity.this.startActivity(i);
+                MainSettingsActivity.this.overridePendingTransition(0, 0);
+              }
+            });
         }
       });
 

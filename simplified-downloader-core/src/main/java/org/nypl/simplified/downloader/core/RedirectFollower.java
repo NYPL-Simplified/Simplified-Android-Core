@@ -28,9 +28,8 @@ import java.util.concurrent.Callable;
  * authentication.
  */
 
-@SuppressWarnings("boxing") final class RedirectFollower
-  implements Callable<HTTPResultOKType<InputStream>>,
-  HTTPResultMatcherType<Unit, Unit, Exception>
+final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
+  HTTPResultMatcherType<InputStream, Unit, Exception>
 {
   private final long                     byte_offset;
   private final HTTPType                 http;
@@ -82,7 +81,7 @@ import java.util.concurrent.Callable;
   }
 
   @Override public Unit onHTTPError(
-    final HTTPResultError<Unit> e)
+    final HTTPResultError<InputStream> e)
     throws Exception
   {
     final int code = e.getStatus();
@@ -110,24 +109,24 @@ import java.util.concurrent.Callable;
   }
 
   @Override public Unit onHTTPException(
-    final HTTPResultException<Unit> e)
+    final HTTPResultException<InputStream> e)
     throws Exception
   {
     throw e.getError();
   }
 
   @Override public Unit onHTTPOK(
-    final HTTPResultOKType<Unit> e)
+    final HTTPResultOKType<InputStream> e)
     throws Exception
   {
     final int code = e.getStatus();
     this.logger.debug("received {} for {}", code, this.current_uri);
 
-    switch (code) {
-      case HttpURLConnection.HTTP_OK: {
-        return Unit.unit();
-      }
+    if (code >= 200 && code < 300) {
+      return Unit.unit();
+    }
 
+    switch (code) {
       case HttpURLConnection.HTTP_MOVED_PERM:
       case HttpURLConnection.HTTP_MOVED_TEMP:
       case 307:
@@ -170,8 +169,8 @@ import java.util.concurrent.Callable;
       throw new IOException("Reached redirect limit");
     }
 
-    final HTTPResultType<Unit> r =
-      this.http.head(this.current_auth, this.current_uri);
+    final HTTPResultType<InputStream> r =
+      this.http.get(this.current_auth, this.current_uri, 0L);
     r.matchResult(this);
   }
 

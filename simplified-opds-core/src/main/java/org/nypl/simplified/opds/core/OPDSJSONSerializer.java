@@ -10,6 +10,8 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.json.core.JSONSerializerUtilities;
+import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,7 +57,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
   {
     NullCheck.notNull(av);
 
-    final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
+    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
     final ObjectMapper jom = new ObjectMapper();
     return av.matchAvailability(
       new OPDSAvailabilityMatcherType<ObjectNode, UnreachableCodeException>()
@@ -219,7 +221,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
   {
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode je = jom.createObjectNode();
-    final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
+    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
 
     {
       final ArrayNode ja = jom.createArrayNode();
@@ -322,7 +324,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
 
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode je = jom.createObjectNode();
-    final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
+    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
 
     je.put("id", e.getFeedID());
     je.put("title", e.getFeedTitle());
@@ -383,6 +385,6 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     final OutputStream os)
     throws IOException
   {
-    OPDSJSONSerializerUtilities.serialize(d, os);
+    JSONSerializerUtilities.serialize(d, os);
   }
 }

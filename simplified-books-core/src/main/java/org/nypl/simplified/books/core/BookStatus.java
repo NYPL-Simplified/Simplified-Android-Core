@@ -2,8 +2,10 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
@@ -33,6 +35,7 @@ final class BookStatus
     final OptionType<Calendar> no_expiry = Option.none();
     final OPDSAcquisitionFeedEntry e = in_snap.getEntry();
     final boolean downloaded = in_snap.getBook().isSome();
+    final boolean adobe_returnable = BookStatus.isAdobeReturnable(in_snap);
 
     final OPDSAvailabilityType availability = e.getAvailability();
     return availability.matchAvailability(
@@ -67,7 +70,9 @@ final class BookStatus
         @Override public BookStatusType onLoaned(
           final OPDSAvailabilityLoaned a)
         {
-          final boolean returnable = a.getRevoke().isSome();
+          final boolean has_revoke = a.getRevoke().isSome();
+          final boolean returnable = has_revoke && adobe_returnable;
+
           if (downloaded) {
             return new BookStatusDownloaded(in_id, a.getEndDate(), returnable);
           }
@@ -90,5 +95,16 @@ final class BookStatus
           return new BookStatusLoaned(in_id, no_expiry, returnable);
         }
       });
+  }
+
+  private static boolean isAdobeReturnable(final BookSnapshot in_snap)
+  {
+    final OptionType<AdobeAdeptLoan> adobe_opt = in_snap.getAdobeRights();
+    if (adobe_opt.isSome()) {
+      final AdobeAdeptLoan adobe = ((Some<AdobeAdeptLoan>) adobe_opt).get();
+      return adobe.isReturnable();
+    } else {
+      return false;
+    }
   }
 }

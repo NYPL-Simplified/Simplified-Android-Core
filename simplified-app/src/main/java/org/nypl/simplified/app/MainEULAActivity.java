@@ -14,6 +14,8 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import org.nypl.drm.core.Assertions;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
+import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 
 /**
  * An activity that shows a license agreement, and aborts if the user does not
@@ -88,7 +90,8 @@ public final class MainEULAActivity extends Activity
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final OptionType<EULAType> eula_opt = app.getEULA();
+    final DocumentStoreType docs = app.getDocumentStore();
+    final OptionType<EULAType> eula_opt = docs.getEULA();
 
     Assertions.checkPrecondition(eula_opt.isSome(), "EULA must be provided");
     final Some<EULAType> some_eula = (Some<EULAType>) eula_opt;

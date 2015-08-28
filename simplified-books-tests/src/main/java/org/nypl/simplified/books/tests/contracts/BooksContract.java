@@ -204,7 +204,12 @@ public final class BooksContract implements BooksContractType
       private <T> HTTPResultType<T> unauthorized()
       {
         return new HTTPResultError<T>(
-          401, "Unauthorized", 0L, empty_headers, 0L);
+          401,
+          "Unauthorized",
+          0L,
+          empty_headers,
+          0L,
+          new ByteArrayInputStream(new byte[0]));
       }
     };
   }

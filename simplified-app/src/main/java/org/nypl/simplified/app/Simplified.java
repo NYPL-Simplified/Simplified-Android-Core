@@ -2,13 +2,16 @@ package org.nypl.simplified.app;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
@@ -27,12 +30,18 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.AuthenticationDocumentValuesType;
+import org.nypl.simplified.books.core.BookDocumentStoreBuilderType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.Clock;
+import org.nypl.simplified.books.core.ClockType;
+import org.nypl.simplified.books.core.DocumentStore;
+import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
@@ -44,6 +53,8 @@ import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParser;
+import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParserType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
@@ -59,6 +70,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -259,8 +271,7 @@ public final class Simplified extends Application
     private final AtomicBoolean                      synced;
     private final DownloaderType                     downloader;
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
-    private final OptionType<EULAType>               eula;
-    private final OptionType<PrivacyPolicyType>      privacy;
+    private final DocumentStoreType                  documents;
 
     private CatalogAppServices(
       final Context in_context,
@@ -360,22 +371,95 @@ public final class Simplified extends Application
        * Configure EULA, privacy policy, etc.
        */
 
-      this.eula = EULA.getEULA(
-        this.http, this.exec_downloader, this.context);
-      this.privacy = PrivacyPolicy.getPrivacyPolicy(
-        this.http, this.exec_downloader, this.context);
+      final ClockType clock = Clock.get();
+      final OPDSAuthenticationDocumentParserType auth_doc_parser =
+        OPDSAuthenticationDocumentParser.get();
 
+      /**
+       * Default authentication document values.
+       */
+
+      final AuthenticationDocumentValuesType auth_doc_values =
+        new AuthenticationDocumentValuesType()
+        {
+          @Override public String getLabelLoginUserID()
+          {
+            return rr.getString(R.string.settings_barcode);
+          }
+
+          @Override public String getLabelLoginPassword()
+          {
+            return rr.getString(R.string.settings_pin);
+          }
+        };
+
+      final BookDocumentStoreBuilderType documents_builder =
+        DocumentStore.newBuilder(
+          clock,
+          this.http,
+          this.exec_books,
+          books_dir,
+          auth_doc_values,
+          auth_doc_parser);
+
+      /**
+       * Conditionally enable each of the documents based on the
+       * presence of assets.
+       */
+
+      final AssetManager assets = this.context.getAssets();
+
+      {
+        try {
+          final InputStream stream = assets.open("eula.html");
+          documents_builder.enableEULA(
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No EULA defined: ", e);
+        }
+
+        try {
+          final InputStream stream = assets.open("privacy.html");
+          documents_builder.enablePrivacyPolicy(
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No privacy policy defined: ", e);
+        }
+
+        try {
+          final InputStream stream = assets.open("acknowledgements.html");
+          documents_builder.enableAcknowledgements(
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No acknowledgements defined: ", e);
+        }
+      }
+
+      this.documents = documents_builder.build();
       this.synced = new AtomicBoolean(false);
     }
 
-    @Override public OptionType<EULAType> getEULA()
+    @Override public DocumentStoreType getDocumentStore()
     {
-      return this.eula;
-    }
-
-    @Override public OptionType<PrivacyPolicyType> getPrivacyPolicy()
-    {
-      return this.privacy;
+      return this.documents;
     }
 
     @Override public BooksType getBooks()

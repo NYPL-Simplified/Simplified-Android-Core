@@ -10,6 +10,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.json.core.JSONParseException;
+import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
 
 import java.io.IOException;
@@ -44,10 +46,10 @@ public final class OPDSJSONParser implements OPDSJSONParserType
   {
     try {
       final Type in_type = Type.valueOf(
-        OPDSJSONParserUtilities.getString(o, "type"));
-      final URI in_uri = new URI(OPDSJSONParserUtilities.getString(o, "uri"));
+        JSONParserUtilities.getString(o, "type"));
+      final URI in_uri = JSONParserUtilities.getURI(o, "uri");
       return new OPDSAcquisition(in_type, in_uri);
-    } catch (final URISyntaxException e) {
+    } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }
   }
@@ -56,57 +58,61 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     final ObjectNode node)
     throws OPDSParseException
   {
-    if (node.has("loanable")) {
-      return OPDSAvailabilityLoanable.get();
-    }
-    if (node.has("holdable")) {
-      return OPDSAvailabilityHoldable.get();
-    }
+    try {
+      if (node.has("loanable")) {
+        return OPDSAvailabilityLoanable.get();
+      }
+      if (node.has("holdable")) {
+        return OPDSAvailabilityHoldable.get();
+      }
 
-    if (node.has("loaned")) {
-      final ObjectNode n = OPDSJSONParserUtilities.getObject(node, "loaned");
-      final Calendar in_start_date =
-        OPDSJSONParserUtilities.getTimestamp(n, "start_date");
-      final OptionType<Calendar> in_end_date =
-        OPDSJSONParserUtilities.getTimestampOptional(n, "end_date");
-      final OptionType<URI> in_revoke =
-        OPDSJSONParserUtilities.getURIOptional(n, "revoke");
-      return OPDSAvailabilityLoaned.get(in_start_date, in_end_date, in_revoke);
-    }
+      if (node.has("loaned")) {
+        final ObjectNode n = JSONParserUtilities.getObject(node, "loaned");
+        final Calendar in_start_date =
+          JSONParserUtilities.getTimestamp(n, "start_date");
+        final OptionType<Calendar> in_end_date =
+          JSONParserUtilities.getTimestampOptional(n, "end_date");
+        final OptionType<URI> in_revoke =
+          JSONParserUtilities.getURIOptional(n, "revoke");
+        return OPDSAvailabilityLoaned.get(
+          in_start_date, in_end_date, in_revoke);
+      }
 
-    if (node.has("held")) {
-      final ObjectNode n = OPDSJSONParserUtilities.getObject(node, "held");
-      final Calendar in_start_date =
-        OPDSJSONParserUtilities.getTimestamp(n, "start_date");
-      final OptionType<Integer> in_position =
-        OPDSJSONParserUtilities.getIntegerOptional(n, "position");
-      final OptionType<Calendar> in_end_date =
-        OPDSJSONParserUtilities.getTimestampOptional(n, "end_date");
-      final OptionType<URI> in_revoke =
-        OPDSJSONParserUtilities.getURIOptional(n, "revoke");
-      return OPDSAvailabilityHeld.get(
-        in_start_date, in_position, in_end_date, in_revoke);
-    }
+      if (node.has("held")) {
+        final ObjectNode n = JSONParserUtilities.getObject(node, "held");
+        final Calendar in_start_date =
+          JSONParserUtilities.getTimestamp(n, "start_date");
+        final OptionType<Integer> in_position =
+          JSONParserUtilities.getIntegerOptional(n, "position");
+        final OptionType<Calendar> in_end_date =
+          JSONParserUtilities.getTimestampOptional(n, "end_date");
+        final OptionType<URI> in_revoke =
+          JSONParserUtilities.getURIOptional(n, "revoke");
+        return OPDSAvailabilityHeld.get(
+          in_start_date, in_position, in_end_date, in_revoke);
+      }
 
-    if (node.has("held_ready")) {
-      final ObjectNode n =
-        OPDSJSONParserUtilities.getObject(node, "held_ready");
-      final OptionType<Calendar> in_end_date =
-        OPDSJSONParserUtilities.getTimestampOptional(n, "end_date");
-      final OptionType<URI> in_revoke =
-        OPDSJSONParserUtilities.getURIOptional(n, "revoke");
-      return OPDSAvailabilityHeldReady.get(in_end_date, in_revoke);
-    }
+      if (node.has("held_ready")) {
+        final ObjectNode n = JSONParserUtilities.getObject(node, "held_ready");
+        final OptionType<Calendar> in_end_date =
+          JSONParserUtilities.getTimestampOptional(n, "end_date");
+        final OptionType<URI> in_revoke =
+          JSONParserUtilities.getURIOptional(n, "revoke");
+        return OPDSAvailabilityHeldReady.get(in_end_date, in_revoke);
+      }
 
-    if (node.has("open_access")) {
-      final ObjectNode n = OPDSJSONParserUtilities.getObject(
-        node, "open_access");
-      final OptionType<URI> in_revoke =
-        OPDSJSONParserUtilities.getURIOptional(n, "revoke");
-      return OPDSAvailabilityOpenAccess.get(in_revoke);
-    }
+      if (node.has("open_access")) {
+        final ObjectNode n = JSONParserUtilities.getObject(
+          node, "open_access");
+        final OptionType<URI> in_revoke =
+          JSONParserUtilities.getURIOptional(n, "revoke");
+        return OPDSAvailabilityOpenAccess.get(in_revoke);
+      }
 
-    throw new OPDSParseException("Expected availability information");
+      throw new OPDSParseException("Expected availability information");
+    } catch (final JSONParseException e) {
+      throw new OPDSParseException(e);
+    }
   }
 
   private static OPDSCategory parseCategory(
@@ -114,12 +120,16 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     throws OPDSParseException
   {
     NullCheck.notNull(jn);
-    final ObjectNode o = OPDSJSONParserUtilities.checkObject(null, jn);
-    final String in_term = OPDSJSONParserUtilities.getString(o, "term");
-    final String in_scheme = OPDSJSONParserUtilities.getString(o, "scheme");
-    final OptionType<String> in_label =
-      OPDSJSONParserUtilities.getStringOptional(o, "label");
-    return new OPDSCategory(in_term, in_scheme, in_label);
+    try {
+      final ObjectNode o = JSONParserUtilities.checkObject(null, jn);
+      final String in_term = JSONParserUtilities.getString(o, "term");
+      final String in_scheme = JSONParserUtilities.getString(o, "scheme");
+      final OptionType<String> in_label =
+        JSONParserUtilities.getStringOptional(o, "label");
+      return new OPDSCategory(in_term, in_scheme, in_label);
+    } catch (final JSONParseException e) {
+      throw new OPDSParseException(e);
+    }
   }
 
   @Override public OPDSAcquisitionFeed parseAcquisitionFeed(
@@ -129,17 +139,17 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     NullCheck.notNull(s);
 
     try {
-      final URI in_uri = new URI(OPDSJSONParserUtilities.getString(s, "uri"));
-      final String in_id = OPDSJSONParserUtilities.getString(s, "id");
-      final Calendar in_updated = OPDSJSONParserUtilities.getTimestamp(
+      final URI in_uri = new URI(JSONParserUtilities.getString(s, "uri"));
+      final String in_id = JSONParserUtilities.getString(s, "id");
+      final Calendar in_updated = JSONParserUtilities.getTimestamp(
         s, "updated");
-      final String in_title = OPDSJSONParserUtilities.getString(s, "title");
+      final String in_title = JSONParserUtilities.getString(s, "title");
 
       final OPDSAcquisitionFeedBuilderType fb =
         OPDSAcquisitionFeed.newBuilder(in_uri, in_id, in_updated, in_title);
 
       fb.setNextOption(
-        OPDSJSONParserUtilities.getStringOptional(s, "next").mapPartial(
+        JSONParserUtilities.getStringOptional(s, "next").mapPartial(
           new PartialFunctionType<String, URI, URISyntaxException>()
           {
             @Override public URI call(
@@ -151,39 +161,34 @@ public final class OPDSJSONParser implements OPDSJSONParserType
           }));
 
       fb.setSearchOption(
-        OPDSJSONParserUtilities.getObjectOptional(s, "search").mapPartial(
+        JSONParserUtilities.getObjectOptional(s, "search").mapPartial(
           new PartialFunctionType<ObjectNode, OPDSSearchLink,
-            OPDSParseException>()
+            JSONParseException>()
           {
             @Override public OPDSSearchLink call(
               final ObjectNode o)
-              throws OPDSParseException
+              throws JSONParseException
             {
-              try {
-                final String in_search_type =
-                  OPDSJSONParserUtilities.getString(o, "type");
-                final URI in_search_uri =
-                  new URI(OPDSJSONParserUtilities.getString(o, "uri"));
-                return new OPDSSearchLink(in_search_type, in_search_uri);
-              } catch (final URISyntaxException e) {
-                throw new OPDSParseException(e);
-              }
+              final String in_search_type =
+                JSONParserUtilities.getString(o, "type");
+              final URI in_search_uri = JSONParserUtilities.getURI(o, "uri");
+              return new OPDSSearchLink(in_search_type, in_search_uri);
             }
           }));
 
       {
-        final ArrayNode fs = OPDSJSONParserUtilities.getArray(s, "facets");
+        final ArrayNode fs = JSONParserUtilities.getArray(s, "facets");
         for (int index = 0; index < fs.size(); ++index) {
-          final ObjectNode o = OPDSJSONParserUtilities.checkObject(
+          final ObjectNode o = JSONParserUtilities.checkObject(
             null, fs.get(index));
           final boolean in_facet_active =
-            OPDSJSONParserUtilities.getBoolean(o, "active");
+            JSONParserUtilities.getBoolean(o, "active");
           final URI in_facet_uri = new URI(
-            OPDSJSONParserUtilities.getString(
+            JSONParserUtilities.getString(
               o, "uri"));
-          final String in_facet_group = OPDSJSONParserUtilities.getString(
+          final String in_facet_group = JSONParserUtilities.getString(
             o, "group");
-          final String in_facet_title = OPDSJSONParserUtilities.getString(
+          final String in_facet_title = JSONParserUtilities.getString(
             o, "title");
           fb.addFacet(
             new OPDSFacet(
@@ -192,9 +197,9 @@ public final class OPDSJSONParser implements OPDSJSONParserType
       }
 
       {
-        final ArrayNode fs = OPDSJSONParserUtilities.getArray(s, "entries");
+        final ArrayNode fs = JSONParserUtilities.getArray(s, "entries");
         for (int index = 0; index < fs.size(); ++index) {
-          final ObjectNode o = OPDSJSONParserUtilities.checkObject(
+          final ObjectNode o = JSONParserUtilities.checkObject(
             null, fs.get(index));
           fb.addEntry(this.parseAcquisitionFeedEntry(o));
         }
@@ -202,6 +207,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType
 
       return fb.build();
     } catch (final URISyntaxException e) {
+      throw new OPDSParseException(e);
+    } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }
   }
@@ -212,106 +219,110 @@ public final class OPDSJSONParser implements OPDSJSONParserType
   {
     NullCheck.notNull(s);
 
-    final String in_id = OPDSJSONParserUtilities.getString(s, "id");
-    final String in_title = OPDSJSONParserUtilities.getString(s, "title");
-    final Calendar in_updated = OPDSJSONParserUtilities.getTimestamp(
-      s, "updated");
+    try {
+      final String in_id = JSONParserUtilities.getString(s, "id");
+      final String in_title = JSONParserUtilities.getString(s, "title");
+      final Calendar in_updated = JSONParserUtilities.getTimestamp(
+        s, "updated");
 
-    final OPDSAvailabilityType in_availability =
-      OPDSJSONParser.parseAvailability(
-        OPDSJSONParserUtilities.getObject(s, "availability"));
+      final OPDSAvailabilityType in_availability =
+        OPDSJSONParser.parseAvailability(
+          JSONParserUtilities.getObject(s, "availability"));
 
-    final OPDSAcquisitionFeedEntryBuilderType fb =
-      OPDSAcquisitionFeedEntry.newBuilder(
-        in_id, in_title, in_updated, in_availability);
+      final OPDSAcquisitionFeedEntryBuilderType fb =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          in_id, in_title, in_updated, in_availability);
 
-    {
-      final ArrayNode a = OPDSJSONParserUtilities.getArray(s, "authors");
-      for (int index = 0; index < a.size(); ++index) {
-        fb.addAuthor(a.get(index).asText());
-      }
-    }
-
-    {
-      final ArrayNode a = OPDSJSONParserUtilities.getArray(s, "acquisitions");
-      for (int index = 0; index < a.size(); ++index) {
-        fb.addAcquisition(
-          OPDSJSONParser.parseAcquisition(
-            OPDSJSONParserUtilities.checkObject(null, a.get(index))));
-      }
-    }
-
-    {
-      final ArrayNode a = OPDSJSONParserUtilities.getArray(s, "categories");
-      for (int index = 0; index < a.size(); ++index) {
-        fb.addCategory(OPDSJSONParser.parseCategory(a.get(index)));
-      }
-    }
-
-    {
-      final ArrayNode a = OPDSJSONParserUtilities.getArray(s, "groups");
-      for (int index = 0; index < a.size(); ++index) {
-        try {
-          final ObjectNode jo = OPDSJSONParserUtilities.checkObject(
-            null, a.get(index));
-          final URI in_uri = new URI(
-            OPDSJSONParserUtilities.getString(
-              jo, "uri"));
-          final String in_name = OPDSJSONParserUtilities.getString(jo, "name");
-          fb.addGroup(in_uri, in_name);
-        } catch (final URISyntaxException e) {
-          throw new OPDSParseException(e);
+      {
+        final ArrayNode a = JSONParserUtilities.getArray(s, "authors");
+        for (int index = 0; index < a.size(); ++index) {
+          fb.addAuthor(a.get(index).asText());
         }
       }
-    }
 
-    {
-      final OptionType<String> o = OPDSJSONParserUtilities.getStringOptional(
-        s, "cover");
-      o.mapPartial(
-        new PartialFunctionType<String, Unit, OPDSParseException>()
-        {
-          @Override public Unit call(
-            final String u)
-            throws OPDSParseException
-          {
-            try {
-              fb.setCoverOption(Option.some(new URI(u)));
-              return Unit.unit();
-            } catch (final URISyntaxException e) {
-              throw new OPDSParseException(e);
-            }
+      {
+        final ArrayNode a = JSONParserUtilities.getArray(s, "acquisitions");
+        for (int index = 0; index < a.size(); ++index) {
+          fb.addAcquisition(
+            OPDSJSONParser.parseAcquisition(
+              JSONParserUtilities.checkObject(null, a.get(index))));
+        }
+      }
+
+      {
+        final ArrayNode a = JSONParserUtilities.getArray(s, "categories");
+        for (int index = 0; index < a.size(); ++index) {
+          fb.addCategory(OPDSJSONParser.parseCategory(a.get(index)));
+        }
+      }
+
+      {
+        final ArrayNode a = JSONParserUtilities.getArray(s, "groups");
+        for (int index = 0; index < a.size(); ++index) {
+          try {
+            final ObjectNode jo = JSONParserUtilities.checkObject(
+              null, a.get(index));
+            final URI in_uri = new URI(
+              JSONParserUtilities.getString(
+                jo, "uri"));
+            final String in_name = JSONParserUtilities.getString(jo, "name");
+            fb.addGroup(in_uri, in_name);
+          } catch (final URISyntaxException e) {
+            throw new OPDSParseException(e);
           }
-        });
-    }
+        }
+      }
 
-    {
-      final OptionType<String> o =
-        OPDSJSONParserUtilities.getStringOptional(s, "thumbnail");
-      o.mapPartial(
-        new PartialFunctionType<String, Unit, OPDSParseException>()
-        {
-          @Override public Unit call(
-            final String u)
-            throws OPDSParseException
+      {
+        final OptionType<String> o = JSONParserUtilities.getStringOptional(
+          s, "cover");
+        o.mapPartial(
+          new PartialFunctionType<String, Unit, OPDSParseException>()
           {
-            try {
-              fb.setThumbnailOption(Option.some(new URI(u)));
-              return Unit.unit();
-            } catch (final URISyntaxException e) {
-              throw new OPDSParseException(e);
+            @Override public Unit call(
+              final String u)
+              throws OPDSParseException
+            {
+              try {
+                fb.setCoverOption(Option.some(new URI(u)));
+                return Unit.unit();
+              } catch (final URISyntaxException e) {
+                throw new OPDSParseException(e);
+              }
             }
-          }
-        });
-    }
+          });
+      }
 
-    fb.setPublishedOption(
-      OPDSJSONParserUtilities.getTimestampOptional(s, "published"));
-    fb.setPublisherOption(
-      OPDSJSONParserUtilities.getStringOptional(s, "publisher"));
-    fb.setSummaryOption(
-      OPDSJSONParserUtilities.getStringOptional(s, "summary"));
-    return fb.build();
+      {
+        final OptionType<String> o =
+          JSONParserUtilities.getStringOptional(s, "thumbnail");
+        o.mapPartial(
+          new PartialFunctionType<String, Unit, OPDSParseException>()
+          {
+            @Override public Unit call(
+              final String u)
+              throws OPDSParseException
+            {
+              try {
+                fb.setThumbnailOption(Option.some(new URI(u)));
+                return Unit.unit();
+              } catch (final URISyntaxException e) {
+                throw new OPDSParseException(e);
+              }
+            }
+          });
+      }
+
+      fb.setPublishedOption(
+        JSONParserUtilities.getTimestampOptional(s, "published"));
+      fb.setPublisherOption(
+        JSONParserUtilities.getStringOptional(s, "publisher"));
+      fb.setSummaryOption(
+        JSONParserUtilities.getStringOptional(s, "summary"));
+      return fb.build();
+    } catch (final JSONParseException e) {
+      throw new OPDSParseException(e);
+    }
   }
 
   @Override public OPDSAcquisitionFeedEntry parseAcquisitionFeedEntryFromStream(
@@ -321,7 +332,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     try {
       final ObjectMapper jom = new ObjectMapper();
       return this.parseAcquisitionFeedEntry(
-        OPDSJSONParserUtilities.checkObject(
+        JSONParserUtilities.checkObject(
           null, jom.readTree(s)));
     } catch (final JsonProcessingException e) {
       throw new OPDSParseException(e);
@@ -337,7 +348,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     try {
       final ObjectMapper jom = new ObjectMapper();
       return this.parseAcquisitionFeed(
-        OPDSJSONParserUtilities.checkObject(
+        JSONParserUtilities.checkObject(
           null, jom.readTree(s)));
     } catch (final JsonProcessingException e) {
       throw new OPDSParseException(e);

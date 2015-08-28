@@ -4,6 +4,7 @@ import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 
 import java.net.URI;
 import java.text.SimpleDateFormat;
@@ -110,7 +111,7 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
 
   @Override public String toString()
   {
-    final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
+    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
     final StringBuilder b = new StringBuilder(128);
     b.append("[OPDSAvailabilityLoaned end_date=");
     b.append(

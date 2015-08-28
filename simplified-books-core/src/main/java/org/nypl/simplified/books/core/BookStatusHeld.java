@@ -3,7 +3,7 @@ package org.nypl.simplified.books.core;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.opds.core.OPDSRFC3339Formatter;
+import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -117,7 +117,7 @@ public final class BookStatusHeld implements BookStatusType
 
   @Override public String toString()
   {
-    final SimpleDateFormat fmt = OPDSRFC3339Formatter.newDateFormatter();
+    final SimpleDateFormat fmt = RFC3339Formatter.newDateFormatter();
     final StringBuilder b = new StringBuilder(128);
     b.append("[BookStatusHeld ");
     b.append(this.id);

@@ -1,11 +1,11 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
+import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * <p>The writable interface supported by book database entries.</p>
@@ -96,11 +96,12 @@ public interface BookDatabaseEntryWritableType
   /**
    * Set the Adobe rights information for the book.
    *
-   * @param rights The rights information
+   * @param loan The loan
    *
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  void setAdobeRightsInformation(OptionType<ByteBuffer> rights)
+  void setAdobeRightsInformation(
+    OptionType<AdobeAdeptLoan> loan)
     throws IOException;
 }
