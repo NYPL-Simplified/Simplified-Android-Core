@@ -25,7 +25,9 @@ import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DocumentStoreType;
 import org.slf4j.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -262,10 +264,17 @@ public final class LoginDialog extends DialogFragment
 
     final TextView in_text = NullCheck.notNull(
       (TextView) in_layout.findViewById(R.id.login_dialog_text));
+
+    final TextView in_barcode_label = NullCheck.notNull(
+      (TextView) in_layout.findViewById(R.id.login_dialog_barcode_text_view));
     final EditText in_barcode_edit = NullCheck.notNull(
       (EditText) in_layout.findViewById(R.id.login_dialog_barcode_text_edit));
+
+    final TextView in_pin_label = NullCheck.notNull(
+      (TextView) in_layout.findViewById(R.id.login_dialog_pin_text_view));
     final EditText in_pin_edit = NullCheck.notNull(
       (EditText) in_layout.findViewById(R.id.login_dialog_pin_text_edit));
+
     final Button in_login_button =
       NullCheck.notNull((Button) in_layout.findViewById(R.id.login_dialog_ok));
     final Button in_login_cancel_button = NullCheck.notNull(
@@ -273,6 +282,13 @@ public final class LoginDialog extends DialogFragment
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
+    final DocumentStoreType docs = app.getDocumentStore();
+
+    final AuthenticationDocumentType auth_doc =
+      docs.getAuthenticationDocument();
+    in_barcode_label.setText(auth_doc.getLabelLoginUserID());
+    in_pin_label.setText(auth_doc.getLabelLoginPassword());
+
     final BooksType books = app.getBooks();
 
     in_text.setText(initial_txt);

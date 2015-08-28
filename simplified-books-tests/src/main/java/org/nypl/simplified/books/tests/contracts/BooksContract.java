@@ -12,6 +12,7 @@ import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BookStatusLoaned;
@@ -21,9 +22,12 @@ import org.nypl.simplified.books.core.BooksControllerConfiguration;
 import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
+import org.nypl.simplified.books.core.SyncedDocumentType;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
@@ -204,7 +208,12 @@ public final class BooksContract implements BooksContractType
       private <T> HTTPResultType<T> unauthorized()
       {
         return new HTTPResultError<T>(
-          401, "Unauthorized", 0L, empty_headers, 0L);
+          401,
+          "Unauthorized",
+          0L,
+          empty_headers,
+          0L,
+          new ByteArrayInputStream(new byte[0]));
       }
     };
   }
@@ -243,6 +252,48 @@ public final class BooksContract implements BooksContractType
       in_exec, in_parser, in_transport, in_search_parser);
   }
 
+  private static DocumentStoreType newFakeDocumentStore()
+  {
+    return new DocumentStoreType()
+    {
+      @Override public OptionType<SyncedDocumentType> getPrivacyPolicy()
+      {
+        return Option.none();
+      }
+
+      @Override public OptionType<SyncedDocumentType> getAcknowledgements()
+      {
+        return Option.none();
+      }
+
+      @Override public AuthenticationDocumentType getAuthenticationDocument()
+      {
+        return new AuthenticationDocumentType()
+        {
+          @Override public String getLabelLoginUserID()
+          {
+            return "Login";
+          }
+
+          @Override public String getLabelLoginPassword()
+          {
+            return "Password";
+          }
+
+          @Override public void documentUpdate(final InputStream data)
+          {
+            // Nothing
+          }
+        };
+      }
+
+      @Override public OptionType<EULAType> getEULA()
+      {
+        return Option.none();
+      }
+    };
+  }
+
   @Override public void testBooksLoadFileNotDirectory()
     throws Exception
   {
@@ -271,7 +322,8 @@ public final class BooksContract implements BooksContractType
         in_json_serializer,
         in_json_parser,
         in_config,
-        none);
+        none,
+        newFakeDocumentStore());
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -350,7 +402,7 @@ public final class BooksContract implements BooksContractType
         in_json_serializer,
         in_json_parser,
         in_config,
-        none);
+        none, newFakeDocumentStore());
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -434,7 +486,7 @@ public final class BooksContract implements BooksContractType
         in_json_serializer,
         in_json_parser,
         in_config,
-        none);
+        none, newFakeDocumentStore());
 
       final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
@@ -523,7 +575,7 @@ public final class BooksContract implements BooksContractType
         in_json_serializer,
         in_json_parser,
         in_config,
-        none);
+        none, newFakeDocumentStore());
 
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -610,7 +662,7 @@ public final class BooksContract implements BooksContractType
         in_json_serializer,
         in_json_parser,
         in_config,
-        none);
+        none, newFakeDocumentStore());
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -763,7 +815,7 @@ public final class BooksContract implements BooksContractType
         in_json_serializer,
         in_json_parser,
         in_config,
-        none);
+        none, newFakeDocumentStore());
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -988,7 +1040,7 @@ public final class BooksContract implements BooksContractType
         in_json_serializer,
         in_json_parser,
         in_config,
-        none);
+        none, newFakeDocumentStore());
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 

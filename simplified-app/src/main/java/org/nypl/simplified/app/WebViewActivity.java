@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.app.utilities.LogUtilities;
+import org.slf4j.Logger;
 
 /**
  * A mindlessly simple activity that displays a given URI in a full-screen web
@@ -34,6 +36,12 @@ public final class WebViewActivity extends SimplifiedActivity
 
   public static final String PART_KEY =
     "org.nypl.simplified.app.WebViewActivity.part";
+
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(WebViewActivity.class);
+  }
 
   private WebView        web_view;
   private SimplifiedPart part;
@@ -95,9 +103,11 @@ public final class WebViewActivity extends SimplifiedActivity
     final String title =
       NullCheck.notNull(i.getStringExtra(WebViewActivity.TITLE_KEY));
 
+    WebViewActivity.LOG.debug("uri: {}", uri);
+    WebViewActivity.LOG.debug("title: {}", title);
+
     this.part = NullCheck.notNull(
       (SimplifiedPart) i.getSerializableExtra(WebViewActivity.PART_KEY));
-
     this.web_view =
       NullCheck.notNull((WebView) this.findViewById(R.id.web_view));
 

@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.3.14</version>
+    <version>0.3.15</version>
   </parent>
   <artifactId>simplified-opds-core</artifactId>
 
@@ -21,6 +21,16 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-assert</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-json-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-rfc3339-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 

@@ -9,6 +9,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.json.core.JSONParseException;
+import org.nypl.simplified.json.core.JSONParserUtilities;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,17 +51,21 @@ public final class OPDSAuthenticationDocumentParser
   {
     NullCheck.notNull(s);
 
-    final String id = OPDSJSONParserUtilities.getString(s, "id");
-    final String title = OPDSJSONParserUtilities.getString(s, "title");
-    final OptionType<String> text_prompt =
-      OPDSJSONParserUtilities.getStringOptional(s, "text");
+    try {
+      final String id = JSONParserUtilities.getString(s, "id");
+      final String title = JSONParserUtilities.getString(s, "title");
+      final OptionType<String> text_prompt =
+        JSONParserUtilities.getStringOptional(s, "text");
 
-    final List<URI> types = this.getTypes(s);
-    final Map<String, OPDSLink> links = this.getLinks(s);
-    final Map<String, String> labels = this.getLabels(s);
+      final List<URI> types = this.getTypes(s);
+      final Map<String, OPDSLink> links = this.getLinks(s);
+      final Map<String, String> labels = this.getLabels(s);
 
-    return new OPDSAuthenticationDocument(
-      id, types, title, text_prompt, links, labels);
+      return new OPDSAuthenticationDocument(
+        id, types, title, text_prompt, links, labels);
+    } catch (final JSONParseException e) {
+      throw new OPDSParseException(e);
+    }
   }
 
   private Map<String, String> getLabels(final ObjectNode s)
@@ -67,22 +73,26 @@ public final class OPDSAuthenticationDocumentParser
   {
     final Map<String, String> m = new HashMap<String, String>();
     if (s.has("labels")) {
-      OPDSJSONParserUtilities.getObjectOptional(s, "labels").mapPartial(
-        new PartialFunctionType<ObjectNode, Unit, OPDSParseException>()
-        {
-          @Override public Unit call(final ObjectNode labels)
-            throws OPDSParseException
+      try {
+        JSONParserUtilities.getObjectOptional(s, "labels").mapPartial(
+          new PartialFunctionType<ObjectNode, Unit, JSONParseException>()
           {
-            final Iterator<String> field_iter = labels.fieldNames();
-            while (field_iter.hasNext()) {
-              final String field = field_iter.next();
-              final String value =
-                OPDSJSONParserUtilities.getString(labels, field);
-              m.put(field, value);
+            @Override public Unit call(final ObjectNode labels)
+              throws JSONParseException
+            {
+              final Iterator<String> field_iter = labels.fieldNames();
+              while (field_iter.hasNext()) {
+                final String field = field_iter.next();
+                final String value =
+                  JSONParserUtilities.getString(labels, field);
+                m.put(field, value);
+              }
+              return Unit.unit();
             }
-            return Unit.unit();
-          }
-        });
+          });
+      } catch (final JSONParseException e) {
+        throw new OPDSParseException(e);
+      }
     }
     return m;
   }
@@ -92,23 +102,31 @@ public final class OPDSAuthenticationDocumentParser
   {
     final Map<String, OPDSLink> m = new HashMap<String, OPDSLink>();
     if (s.has("links")) {
-      OPDSJSONParserUtilities.getObjectOptional(s, "links").mapPartial(
-        new PartialFunctionType<ObjectNode, Unit, OPDSParseException>()
-        {
-          @Override public Unit call(final ObjectNode links)
-            throws OPDSParseException
+      try {
+        JSONParserUtilities.getObjectOptional(s, "links").mapPartial(
+          new PartialFunctionType<ObjectNode, Unit, OPDSParseException>()
           {
-            final Iterator<String> field_iter = links.fieldNames();
-            while (field_iter.hasNext()) {
-              final String field = field_iter.next();
-              final OPDSLink value =
-                OPDSAuthenticationDocumentParser.this.getLink(
-                  OPDSJSONParserUtilities.getObject(links, field));
-              m.put(field, value);
+            @Override public Unit call(final ObjectNode links)
+              throws OPDSParseException
+            {
+              try {
+                final Iterator<String> field_iter = links.fieldNames();
+                while (field_iter.hasNext()) {
+                  final String field = field_iter.next();
+                  final OPDSLink value =
+                    OPDSAuthenticationDocumentParser.this.getLink(
+                      JSONParserUtilities.getObject(links, field));
+                  m.put(field, value);
+                }
+                return Unit.unit();
+              } catch (final JSONParseException e) {
+                throw new OPDSParseException(e);
+              }
             }
-            return Unit.unit();
-          }
-        });
+          });
+      } catch (final JSONParseException e) {
+        throw new OPDSParseException(e);
+      }
     }
     return m;
   }
@@ -116,25 +134,29 @@ public final class OPDSAuthenticationDocumentParser
   private OPDSLink getLink(final ObjectNode link)
     throws OPDSParseException
   {
-    final OptionType<String> hash =
-      OPDSJSONParserUtilities.getStringOptional(link, "hash");
-    final URI href = OPDSJSONParserUtilities.getURI(link, "href");
-    final OptionType<String> title =
-      OPDSJSONParserUtilities.getStringOptional(link, "title");
-    final OptionType<String> type =
-      OPDSJSONParserUtilities.getStringOptional(link, "type");
-    final boolean templated =
-      OPDSJSONParserUtilities.getBooleanDefault(link, "templated", false);
-    final OptionType<BigInteger> length =
-      OPDSJSONParserUtilities.getBigIntegerOptional(link, "length");
-    return new OPDSLink(hash, href, title, type, templated, length);
+    try {
+      final OptionType<String> hash =
+        JSONParserUtilities.getStringOptional(link, "hash");
+      final URI href = JSONParserUtilities.getURI(link, "href");
+      final OptionType<String> title =
+        JSONParserUtilities.getStringOptional(link, "title");
+      final OptionType<String> type =
+        JSONParserUtilities.getStringOptional(link, "type");
+      final boolean templated =
+        JSONParserUtilities.getBooleanDefault(link, "templated", false);
+      final OptionType<BigInteger> length =
+        JSONParserUtilities.getBigIntegerOptional(link, "length");
+      return new OPDSLink(hash, href, title, type, templated, length);
+    } catch (final JSONParseException e) {
+      throw new OPDSParseException(e);
+    }
   }
 
   private List<URI> getTypes(final ObjectNode s)
     throws OPDSParseException
   {
     try {
-      final ArrayNode types = OPDSJSONParserUtilities.getArray(s, "type");
+      final ArrayNode types = JSONParserUtilities.getArray(s, "type");
       final List<URI> r = new ArrayList<URI>(types.size());
       for (int index = 0; index < types.size(); ++index) {
         final JsonNode n = types.get(index);
@@ -142,6 +164,8 @@ public final class OPDSAuthenticationDocumentParser
       }
       return r;
     } catch (final URISyntaxException e) {
+      throw new OPDSParseException(e);
+    } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }
   }
@@ -155,7 +179,7 @@ public final class OPDSAuthenticationDocumentParser
     try {
       final ObjectMapper jom = new ObjectMapper();
       return this.parseFromNode(
-        OPDSJSONParserUtilities.checkObject(null, jom.readTree(s)));
+        JSONParserUtilities.checkObject(null, jom.readTree(s)));
     } catch (final JsonProcessingException e) {
       throw new OPDSParseException(e);
     } catch (final IOException e) {
