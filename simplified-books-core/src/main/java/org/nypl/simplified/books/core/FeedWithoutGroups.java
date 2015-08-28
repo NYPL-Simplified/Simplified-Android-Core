@@ -249,14 +249,14 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   }
 
   /**
-   * @param id The book ID
+   * @param in_id The book ID
    *
-   * @return {@code true} iff the feed contains an entry with {@code id}
+   * @return {@code true} iff the feed contains an entry with {@code in_id}
    */
 
-  public boolean containsID(final BookID id)
+  public boolean containsID(final BookID in_id)
   {
-    NullCheck.notNull(id);
-    return this.entries.containsKey(id);
+    NullCheck.notNull(in_id);
+    return this.entries.containsKey(in_id);
   }
 }
