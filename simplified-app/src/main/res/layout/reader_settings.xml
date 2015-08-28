@@ -44,6 +44,20 @@
       android:textAppearance="?android:attr/textAppearanceLarge"
       android:text="A" />
 
+    <FrameLayout
+      android:layout_height="48dp"
+      android:layout_width="1dp"
+      android:background="#eee" />
+
+    <TextView
+      android:id="@+id/reader_settings_font_open_dyslexic"
+      android:layout_width="48dp"
+      android:layout_height="match_parent"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:textAppearance="?android:attr/textAppearanceLarge"
+      android:text="A" />
+
   </LinearLayout>
 
   <FrameLayout

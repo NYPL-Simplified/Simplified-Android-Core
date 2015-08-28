@@ -160,9 +160,8 @@ import java.util.concurrent.ExecutorService;
         ReaderHTTPServer.class.getResourceAsStream(path);
 
       if (stream != null) {
-        return ReaderHTTPServer.loggedResponse(
-          path, new Response(
-            Response.Status.OK, type, stream));
+        final Response response = new Response(Status.OK, type, stream);
+        return ReaderHTTPServer.loggedResponse(path, response);
       }
     }
 
@@ -188,18 +187,15 @@ import java.util.concurrent.ExecutorService;
 
           status = Response.Status.PARTIAL_CONTENT;
           stream = NullCheck.notNull(
-            (ResourceInputStream) pack.getInputStream(
-              relative, true));
+            (ResourceInputStream) pack.getInputStream(relative, true));
         } else {
           status = Response.Status.OK;
           stream = NullCheck.notNull(
-            (ResourceInputStream) pack.getInputStream(
-              relative, false));
+            (ResourceInputStream) pack.getInputStream(relative, false));
         }
 
-        return ReaderHTTPServer.loggedResponse(
-          path, new Response(
-            status, type, stream));
+        final Response response = new Response(status, type, stream);
+        return ReaderHTTPServer.loggedResponse(path, response);
       }
     }
 
