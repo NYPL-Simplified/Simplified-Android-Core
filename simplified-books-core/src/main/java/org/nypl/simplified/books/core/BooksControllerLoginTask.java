@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class BooksControllerLoginTask implements Runnable,
@@ -89,10 +90,14 @@ final class BooksControllerLoginTask implements Runnable,
      * server and seeing whether or not it rejects the given credentials.
      */
 
+    final URI loans_uri = this.config.getLoansURI();
+
+    BooksControllerLoginTask.LOG.debug(
+      "attempting login on {}", loans_uri);
+
     final HTTPAuthType auth =
       new HTTPAuthBasic(this.barcode.toString(), this.pin.toString());
-    final HTTPResultType<Unit> r =
-      this.http.head(Option.some(auth), this.config.getLoansURI());
+    final HTTPResultType<Unit> r = this.http.head(Option.some(auth), loans_uri);
 
     r.matchResult(
       new HTTPResultMatcherType<Unit, Unit, UnreachableCodeException>()
@@ -117,7 +122,7 @@ final class BooksControllerLoginTask implements Runnable,
       });
   }
 
-  private void onHTTPException(final HTTPResultException<Unit> e)
+  private <T> void onHTTPException(final HTTPResultException<T> e)
   {
     final Exception ex = e.getError();
     this.listener.onAccountLoginFailureLocalError(

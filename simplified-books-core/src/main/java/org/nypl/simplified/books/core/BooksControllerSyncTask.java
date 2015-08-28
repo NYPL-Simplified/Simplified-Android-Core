@@ -75,13 +75,12 @@ final class BooksControllerSyncTask implements Runnable
   private void sync()
     throws Exception
   {
+    final URI loans_uri = this.config.getLoansURI();
     final Pair<AccountBarcode, AccountPIN> pair =
       this.books_database.credentialsGet();
     final AccountBarcode barcode = pair.getLeft();
     final AccountPIN pin = pair.getRight();
-
     final AccountSyncListenerType in_listener = this.listener;
-    final URI loans_uri = this.config.getLoansURI();
 
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());

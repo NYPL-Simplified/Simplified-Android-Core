@@ -10,7 +10,7 @@ import java.io.InputStream;
  * The type of mutable builders for document stores.
  */
 
-public interface BookDocumentStoreBuilderType
+public interface DocumentStoreBuilderType
 {
   /**
    * Enable an EULA.
