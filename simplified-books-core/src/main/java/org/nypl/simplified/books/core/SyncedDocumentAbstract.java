@@ -125,7 +125,8 @@ public abstract class SyncedDocumentAbstract implements SyncedDocumentType
 
       if (c_text.equals(u_text) == false) {
         this.current_url = u;
-        SyncedDocumentAbstract.LOG.debug("new URL {}, fetch_in_progress", u);
+        SyncedDocumentAbstract.LOG.debug(
+          "new URL {}, fetch_in_progress {}", u, this.fetch_in_progress.get());
         this.runCheck(u);
       } else {
 
@@ -140,8 +141,12 @@ public abstract class SyncedDocumentAbstract implements SyncedDocumentType
             this.clock.clockNow() - this.fetch_last_success.get();
           if (diff >= 86400) {
             SyncedDocumentAbstract.LOG.debug(
-              "time difference {} >= 86400, fetch_in_progress", diff);
+              "time difference {} >= 86400, fetch_in_progress {}",
+              diff,
+              this.fetch_in_progress.get());
             this.runCheck(u);
+          } else {
+            this.fetch_in_progress.set(false);
           }
         }
       }
