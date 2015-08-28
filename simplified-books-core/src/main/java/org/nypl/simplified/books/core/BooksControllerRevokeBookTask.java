@@ -9,6 +9,7 @@ import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
@@ -206,8 +207,10 @@ final class BooksControllerRevokeBookTask
   {
     final OptionType<File> no_cover = Option.none();
     final OptionType<File> no_book = Option.none();
+    final OptionType<AdobeAdeptLoan> no_adobe_loan = Option.none();
+
     final BookSnapshot snap =
-      new BookSnapshot(no_cover, no_book, e.getFeedEntry());
+      new BookSnapshot(no_cover, no_book, e.getFeedEntry(), no_adobe_loan);
     final BookStatusType status = BookStatus.fromSnapshot(this.book_id, snap);
     this.books_status.booksSnapshotUpdate(this.book_id, snap);
     this.books_status.booksStatusUpdate(status);
