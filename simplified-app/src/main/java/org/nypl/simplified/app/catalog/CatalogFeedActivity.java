@@ -21,15 +21,14 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
-import org.nypl.simplified.app.EULAType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
@@ -40,6 +39,8 @@ import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookFeedListenerType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedFacetMatcherType;
 import org.nypl.simplified.books.core.FeedFacetOPDS;
@@ -63,6 +64,7 @@ import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -159,24 +161,28 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
   private static void onPossiblyReceivedEULALink(final OptionType<URI> latest)
   {
-    latest.map(
-      new FunctionType<URI, Unit>()
+    latest.map_(
+      new ProcedureType<URI>()
       {
-        @Override public Unit call(final URI latest_actual)
+        @Override public void call(final URI latest_actual)
         {
           final SimplifiedCatalogAppServicesType app =
             Simplified.getCatalogAppServices();
+          final DocumentStoreType docs = app.getDocumentStore();
 
-          app.getEULA().map(
-            new FunctionType<EULAType, Unit>()
+          docs.getEULA().map_(
+            new ProcedureType<EULAType>()
             {
-              @Override public Unit call(final EULAType eula)
+              @Override public void call(final EULAType eula)
               {
-                eula.documentSetLatestURI(latest_actual);
-                return Unit.unit();
+                try {
+                  eula.documentSetLatestURL(latest_actual.toURL());
+                } catch (final MalformedURLException e) {
+                  CatalogFeedActivity.LOG.error(
+                    "could not use latest EULA link: ", e);
+                }
               }
             });
-          return Unit.unit();
         }
       });
   }
@@ -1048,7 +1054,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   private void retryFeed()
   {
     final CatalogFeedArgumentsType args = this.getArguments();
-    LOG.debug("retrying feed {}", args);
+    CatalogFeedActivity.LOG.debug("retrying feed {}", args);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();

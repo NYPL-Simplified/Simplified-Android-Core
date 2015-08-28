@@ -113,7 +113,8 @@ public final class HTTP implements HTTPType
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()),
-          conn.getLastModified());
+          conn.getLastModified(),
+          conn.getErrorStream());
       }
 
       return new HTTPResultOK<InputStream>(
@@ -168,7 +169,8 @@ public final class HTTP implements HTTPType
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()),
-          conn.getLastModified());
+          conn.getLastModified(),
+          conn.getErrorStream());
       }
 
       return new HTTPResultOK<Unit>(

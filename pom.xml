@@ -33,10 +33,18 @@
     <module>simplified-http-tests-android</module>
     <module>simplified-http-tests-junit4</module>
     <module>simplified-http-tests</module>
+    <module>simplified-json-core</module>
+    <module>simplified-json-tests-android</module>
+    <module>simplified-json-tests-junit4</module>
+    <module>simplified-json-tests</module>
     <module>simplified-opds-core</module>
     <module>simplified-opds-tests-android</module>
     <module>simplified-opds-tests-junit4</module>
     <module>simplified-opds-tests</module>
+    <module>simplified-rfc3339-core</module>
+    <module>simplified-rfc3339-tests-android</module>
+    <module>simplified-rfc3339-tests-junit4</module>
+    <module>simplified-rfc3339-tests</module>
     <module>simplified-stack</module>
     <module>simplified-tenprint</module>
     <module>simplified-test-utilities</module>

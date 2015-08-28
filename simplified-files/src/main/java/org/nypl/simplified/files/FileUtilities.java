@@ -303,7 +303,7 @@ public final class FileUtilities
    * @throws IOException On I/O errors
    */
 
-  public static void fileWriteStream(
+  public static void fileWriteStreamAtomically(
     final File file,
     final File file_tmp,
     final InputStream stream)
@@ -313,7 +313,28 @@ public final class FileUtilities
     NullCheck.notNull(file_tmp);
     NullCheck.notNull(stream);
 
-    final FileOutputStream fs = new FileOutputStream(file_tmp);
+    FileUtilities.fileWriteStream(file_tmp, stream);
+    FileUtilities.fileRename(file_tmp, file);
+  }
+
+  /**
+   * Write {@code stream} to {@code file}.
+   *
+   * @param file   The file
+   * @param stream The input stream
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static void fileWriteStream(
+    final File file,
+    final InputStream stream)
+    throws IOException
+  {
+    NullCheck.notNull(file);
+    NullCheck.notNull(stream);
+
+    final FileOutputStream fs = new FileOutputStream(file);
     try {
       final byte[] buffer = new byte[8192];
       while (true) {
@@ -325,9 +346,34 @@ public final class FileUtilities
       }
       fs.flush();
       fs.close();
-      file_tmp.renameTo(file);
     } finally {
       fs.close();
     }
+  }
+
+  /**
+   * Write {@code data} to {@code file_tmp}, atomically renaming {@code
+   * file_tmp} to {@code file} on success. For portability, {@code file_tmp} and
+   * {@code file} should be in the same directory.
+   *
+   * @param file     The file
+   * @param file_tmp The temporary file
+   * @param data     The input data
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static void fileWriteBytesAtomically(
+    final File file,
+    final File file_tmp,
+    final byte[] data)
+    throws IOException
+  {
+    NullCheck.notNull(file);
+    NullCheck.notNull(file_tmp);
+    NullCheck.notNull(data);
+
+    FileUtilities.fileWriteBytes(data, file_tmp);
+    FileUtilities.fileRename(file_tmp, file);
   }
 }

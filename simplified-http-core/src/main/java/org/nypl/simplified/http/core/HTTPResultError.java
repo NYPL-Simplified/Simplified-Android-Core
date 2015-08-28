@@ -2,6 +2,7 @@ package org.nypl.simplified.http.core;
 
 import com.io7m.jnull.NullCheck;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
   private final Map<String, List<String>> headers;
   private final String                    message;
   private final int                       status;
+  private final InputStream               data;
 
   /**
    * Construct an error result.
@@ -27,6 +29,7 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
    * @param in_content_length The content length
    * @param in_headers        The server headers
    * @param in_last_modified  The last-modified time of the remote data
+   * @param in_data           Any data returned by the server
    */
 
   public HTTPResultError(
@@ -34,13 +37,15 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
     final String in_message,
     final long in_content_length,
     final Map<String, List<String>> in_headers,
-    final long in_last_modified)
+    final long in_last_modified,
+    final InputStream in_data)
   {
     this.status = in_status;
     this.content_length = in_content_length;
     this.message = NullCheck.notNull(in_message);
     this.headers = NullCheck.notNull(in_headers);
     this.last_modified = in_last_modified;
+    this.data = NullCheck.notNull(in_data);
   }
 
   @Override public boolean equals(final Object o)
@@ -110,5 +115,14 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
     throws E
   {
     return m.onHTTPError(this);
+  }
+
+  /**
+   * @return Any data returned by the server
+   */
+
+  public InputStream getData()
+  {
+    return this.data;
   }
 }

@@ -4,6 +4,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -381,7 +382,7 @@ public final class OPDSXML
       final OptionType<Calendar> end_date;
       if (e.hasAttribute(name)) {
         return Option.some(
-          OPDSRFC3339Formatter.parseRFC3339Date(e.getAttribute(name)));
+          RFC3339Formatter.parseRFC3339Date(e.getAttribute(name)));
       }
 
       return Option.none();
@@ -413,7 +414,7 @@ public final class OPDSXML
     final OptionType<Calendar> end_date;
     if (e.hasAttribute(name)) {
       try {
-        return OPDSRFC3339Formatter.parseRFC3339Date(e.getAttribute(name));
+        return RFC3339Formatter.parseRFC3339Date(e.getAttribute(name));
       } catch (final ParseException x) {
         throw new OPDSParseException(x);
       }
