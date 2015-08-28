@@ -50,40 +50,36 @@ To produce NYPL-branded packages:
 
   1. Edit `simplified-app/src/main/AndroidManifest.xml.`
 
-     Change:
+Change:
 
-      ```
-      <application
-        android:name="org.nypl.simplified.app.Simplified"
-        android:allowBackup="true"
-        android:icon="@drawable/simplified"
-        android:label="@string/app_name"
-        android:largeHeap="true"
-        android:theme="@style/SimplifiedTheme">
-      ```
+```
+<application
+  android:name="org.nypl.simplified.app.Simplified"
+  android:allowBackup="true"
+  android:icon="@drawable/simplified"
+  android:label="@string/app_name"
+  android:largeHeap="true"
+  android:theme="@style/SimplifiedTheme">
+```
+To:
 
-     To:
+```
+<application
+  android:name="org.nypl.simplified.app.Simplified"
+  android:allowBackup="true"
+  android:icon="@drawable/nypl"
+  android:label="@string/app_name"
+  android:largeHeap="true"
+  android:theme="@style/SimplifiedTheme">
+```
 
-      ```
-      <application
-        android:name="org.nypl.simplified.app.Simplified"
-        android:allowBackup="true"
-        android:icon="@drawable/nypl"
-        android:label="@string/app_name"
-        android:largeHeap="true"
-        android:theme="@style/SimplifiedTheme">
-      ```
+2. Edit `simplified-app/src/main/res/values/colors.xml`
 
-  2. Edit `simplified-app/src/main/res/values/colors.xml`
-
-     Change:
-
+Change:
 ```
 <color name="main_color">#f0731f</color>
 ```
-
-     To:
-
+To:
 ```
 <color name="main_color">@color/nypl_brand_color</color>
 ```
@@ -92,32 +88,32 @@ To produce NYPL-branded packages:
 
 Release procedure:
 
-  0. Disable debugging options in `simplified-app/src/main/res/values/debug.xml.`
+0. Disable debugging options in `simplified-app/src/main/res/values/debug.xml.`
 
-  1. Set log level to `INFO` in `simplified-app/src/main/assets/logback.xml.`
+1. Set log level to `INFO` in `simplified-app/src/main/assets/logback.xml.`
 
-     Note that the application logs *a lot*, and therefore debug
-     logging has a noticeable effect on UI performance. With the log
-     level set to `INFO` or above, logging is completely disabled
-     and does not incur a measurable cost at run-time (log statements
-     are reduced to the equivalent of a single conditional branch and
-     empty method call; no I/O or log message formatting occurs).
+  Note that the application logs *a lot*, and therefore debug
+  logging has a noticeable effect on UI performance. With the log
+  level set to `INFO` or above, logging is completely disabled
+  and does not incur a measurable cost at run-time (log statements
+  are reduced to the equivalent of a single conditional branch and
+  empty method call; no I/O or log message formatting occurs).
 
-  2. Update the version strings in all of the Android manifests:
+2. Update the version strings in all of the Android manifests:
 
 ```
 $ vim `find . -name AndroidManifest.xml -type f | grep src`
 ```
 
-  3. Update the version strings in the Maven POMs (where
-     `$NEW_VERSION_NUMBER` is the new version).
+3. Update the version strings in the Maven POMs (where
+   `$NEW_VERSION_NUMBER` is the new version).
 
 ```
 $ mvn versions:set -DnewVersion=$NEW_VERSION_NUMBER
 ```
 
-  4. Run a build, ensure all tests pass.
+4. Run a build, ensure all tests pass.
 
-  5. Tag in git and pushed signed archives and APK files to wherever
-     they need to go.
+5. Tag in git and pushed signed archives and APK files to wherever they
+   need to go.
 
