@@ -36,7 +36,6 @@
     <orderEntry type="jdk" jdkName="Maven Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
-    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.3.1" level="project" />
     <orderEntry type="module" module-name="simplified-books-tests" />
     <orderEntry type="module" module-name="simplified-books-core" />
     <orderEntry type="module" module-name="simplified-assert" />
@@ -50,7 +49,7 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.0-rc3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.0-rc3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />
-    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.3.3" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.1.0" level="project" />
