@@ -28,11 +28,8 @@
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-tests-junit4/simplified-opds-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-opds-tests-junit4/simplified-opds-tests-junit4.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-core/simplified-rfc3339-core.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-core/simplified-rfc3339-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests/simplified-rfc3339-tests.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests/simplified-rfc3339-tests.iml" />
-      <module fileurl="file://$PROJECT_DIR$/simplified-json-tests/simplified-rfc3339-tests (1).iml" filepath="$PROJECT_DIR$/simplified-json-tests/simplified-rfc3339-tests (1).iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests-android/simplified-rfc3339-tests-android.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests-android/simplified-rfc3339-tests-android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/simplified-json-tests-android/simplified-rfc3339-tests-android (1).iml" filepath="$PROJECT_DIR$/simplified-json-tests-android/simplified-rfc3339-tests-android (1).iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests-junit4/simplified-rfc3339-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests-junit4/simplified-rfc3339-tests-junit4.iml" />
-      <module fileurl="file://$PROJECT_DIR$/simplified-json-tests-junit4/simplified-rfc3339-tests-junit4 (1).iml" filepath="$PROJECT_DIR$/simplified-json-tests-junit4/simplified-rfc3339-tests-junit4 (1).iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-stack/simplified-stack.iml" filepath="$PROJECT_DIR$/simplified-stack/simplified-stack.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-tenprint/simplified-tenprint.iml" filepath="$PROJECT_DIR$/simplified-tenprint/simplified-tenprint.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-test-utilities/simplified-test-utilities.iml" filepath="$PROJECT_DIR$/simplified-test-utilities/simplified-test-utilities.iml" />
