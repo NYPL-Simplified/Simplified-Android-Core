@@ -117,3 +117,15 @@ $ mvn versions:set -DnewVersion=$NEW_VERSION_NUMBER
 * Tag in git and pushed signed archives and APK files to wherever they
    need to go.
 
+# Development
+
+This project is developed using the
+(git-flow)[http://nvie.com/posts/a-successful-git-branching-model/]
+branching model.
+
+The (gitflow AVH edition)[https://github.com/petervanderdoes/gitflow/]
+tool is used to facilitate this. The `master` branch represents the
+current production-ready code, and development occurs on the `develop`
+branch. All commits and tags are PGP-signed for stronger assurances
+of authenticity.
+
