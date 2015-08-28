@@ -18,6 +18,10 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
@@ -30,6 +34,8 @@ import org.nypl.simplified.http.core.HTTPAuthType;
 import org.slf4j.Logger;
 
 import java.net.URI;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +47,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class CatalogFeedWithoutGroups implements ListAdapter,
   OnScrollListener,
   FeedLoaderListenerType,
-  FeedMatcherType<Unit, UnreachableCodeException>
+  FeedMatcherType<Unit, UnreachableCodeException>,
+  Observer
 {
   private static final Logger LOG;
 
@@ -87,6 +94,9 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     this.uri_next = new AtomicReference<OptionType<URI>>(in_feed.getFeedNext());
     this.adapter = new ArrayAdapter<FeedEntryType>(this.activity, 0, this.feed);
     this.loading = new AtomicReference<Pair<Future<Unit>, URI>>();
+
+    final BooksStatusCacheType status = this.books.bookGetStatusCache();
+    status.booksObservableAddObserver(this);
   }
 
   private static boolean shouldLoadNext(
@@ -302,5 +312,34 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     final @Nullable DataSetObserver observer)
   {
     this.adapter.unregisterDataSetObserver(observer);
+  }
+
+  @Override public void update(
+    final Observable observable,
+    final Object data)
+  {
+    Assertions.checkPrecondition(
+      data instanceof BookID, "%s instanceof %s", data, BookID.class);
+
+    CatalogFeedWithoutGroups.LOG.debug("update: {}", data);
+
+    final BookID update_id = (BookID) data;
+    if (this.feed.containsID(update_id)) {
+      final BooksStatusCacheType status = this.books.bookGetStatusCache();
+      final OptionType<FeedEntryType> e = status.booksFeedEntryGet(update_id);
+      if (e.isSome()) {
+        final FeedEntryType ee = ((Some<FeedEntryType>) e).get();
+        this.feed.updateEntry(ee);
+
+        UIThread.runOnUIThread(
+          new Runnable()
+          {
+            @Override public void run()
+            {
+              CatalogFeedWithoutGroups.this.adapter.notifyDataSetChanged();
+            }
+          });
+      }
+    }
   }
 }

@@ -3,7 +3,7 @@ package org.nypl.simplified.books.core;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
-import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
@@ -37,13 +37,13 @@ final class BooksControllerRevokeBookTask
       LoggerFactory.getLogger(BooksControllerRevokeBookTask.class));
   }
 
-  private final BookID                                      book_id;
-  private final BookDatabaseType                            books_database;
-  private final BooksStatusCacheType                        books_status;
-  private final OptionType<AdobeAdeptExecutorType>          adobe_drm;
-  private final PartialFunctionType<URI, Unit, IOException> revoke_hold;
-  private final PartialFunctionType<URI, Unit, IOException> revoke_loan;
-  private final FeedLoaderType                              feed_loader;
+  private final BookID                                 book_id;
+  private final BookDatabaseType                       books_database;
+  private final BooksStatusCacheType                   books_status;
+  private final OptionType<AdobeAdeptExecutorType>     adobe_drm;
+  private final PartialProcedureType<URI, IOException> revoke_hold;
+  private final PartialProcedureType<URI, IOException> revoke_loan;
+  private final FeedLoaderType                         feed_loader;
 
   BooksControllerRevokeBookTask(
     final BookDatabaseType in_books_database,
@@ -58,23 +58,21 @@ final class BooksControllerRevokeBookTask
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.feed_loader = NullCheck.notNull(in_feed_loader);
 
-    this.revoke_hold = new PartialFunctionType<URI, Unit, IOException>()
+    this.revoke_hold = new PartialProcedureType<URI, IOException>()
     {
-      @Override public Unit call(final URI u)
+      @Override public void call(final URI u)
         throws IOException
       {
         BooksControllerRevokeBookTask.this.revoke(u, RevokeType.HOLD);
-        return Unit.unit();
       }
     };
 
-    this.revoke_loan = new PartialFunctionType<URI, Unit, IOException>()
+    this.revoke_loan = new PartialProcedureType<URI, IOException>()
     {
-      @Override public Unit call(final URI u)
+      @Override public void call(final URI u)
         throws IOException
       {
         BooksControllerRevokeBookTask.this.revoke(u, RevokeType.LOAN);
-        return Unit.unit();
       }
     };
   }
@@ -97,7 +95,7 @@ final class BooksControllerRevokeBookTask
   @Override public Unit onHeldReady(final OPDSAvailabilityHeldReady a)
     throws IOException
   {
-    a.getRevoke().mapPartial(this.revoke_hold);
+    a.getRevoke().mapPartial_(this.revoke_hold);
     return Unit.unit();
   }
 
@@ -122,8 +120,10 @@ final class BooksControllerRevokeBookTask
         {
           try {
             BooksControllerRevokeBookTask.this.revokeFeedReceived(f);
-          } catch (final IOException e) {
-            final OptionType<Throwable> es = Option.some((Throwable) e);
+          } catch (final Throwable e) {
+            BooksControllerRevokeBookTask.LOG.error(
+              "revocation failed with feed: ", e);
+            final OptionType<Throwable> es = Option.some(e);
             BooksControllerRevokeBookTask.this.revokeFailed(es);
           }
         }
@@ -132,6 +132,8 @@ final class BooksControllerRevokeBookTask
           final URI u,
           final Throwable x)
         {
+          BooksControllerRevokeBookTask.LOG.error(
+            "revocation failed with feed failure: ", x);
           final OptionType<Throwable> error = Option.some(x);
           BooksControllerRevokeBookTask.this.revokeFailed(error);
         }
@@ -204,16 +206,24 @@ final class BooksControllerRevokeBookTask
    */
 
   private void revokeFeedEntryReceivedOPDS(final FeedEntryOPDS e)
+    throws IOException
   {
+    BooksControllerRevokeBookTask.LOG.debug(
+      "publishing revocation status for {}", this.book_id);
+
     final OptionType<File> no_cover = Option.none();
     final OptionType<File> no_book = Option.none();
     final OptionType<AdobeAdeptLoan> no_adobe_loan = Option.none();
 
     final BookSnapshot snap =
       new BookSnapshot(no_cover, no_book, e.getFeedEntry(), no_adobe_loan);
-    final BookStatusType status = BookStatus.fromSnapshot(this.book_id, snap);
     this.books_status.booksSnapshotUpdate(this.book_id, snap);
-    this.books_status.booksStatusUpdate(status);
+    this.books_status.booksFeedEntryUpdate(e);
+    this.books_status.booksStatusClearFor(this.book_id);
+
+    final BookDatabaseEntryType de =
+      this.books_database.getBookDatabaseEntry(this.book_id);
+    de.destroy();
   }
 
   /**
@@ -222,18 +232,12 @@ final class BooksControllerRevokeBookTask
 
   private void revokeFailed(final OptionType<Throwable> error)
   {
+    BooksControllerRevokeBookTask.LOG.debug(
+      "publishing revocation status for {}", this.book_id);
+
     final BookStatusRevokeFailed status =
       new BookStatusRevokeFailed(this.book_id, error);
     this.books_status.booksStatusUpdate(status);
-  }
-
-  private void deleteBookEntry()
-    throws IOException
-  {
-    final BookDatabaseEntryType e =
-      this.books_database.getBookDatabaseEntry(this.book_id);
-    e.destroy();
-    this.books_status.booksStatusClearFor(this.book_id);
   }
 
   @NonNull private HTTPAuthType getHTTPAuth()
@@ -249,7 +253,7 @@ final class BooksControllerRevokeBookTask
   @Override public Unit onHeld(final OPDSAvailabilityHeld a)
     throws IOException
   {
-    a.getRevoke().mapPartial(this.revoke_hold);
+    a.getRevoke().mapPartial_(this.revoke_hold);
     return Unit.unit();
   }
 
@@ -264,7 +268,7 @@ final class BooksControllerRevokeBookTask
   @Override public Unit onLoaned(final OPDSAvailabilityLoaned a)
     throws IOException
   {
-    a.getRevoke().mapPartial(this.revoke_loan);
+    a.getRevoke().mapPartial_(this.revoke_loan);
     return Unit.unit();
   }
 
@@ -279,7 +283,7 @@ final class BooksControllerRevokeBookTask
   @Override public Unit onOpenAccess(final OPDSAvailabilityOpenAccess a)
     throws IOException
   {
-    a.getRevoke().mapPartial(this.revoke_loan);
+    a.getRevoke().mapPartial_(this.revoke_loan);
     return Unit.unit();
   }
 
