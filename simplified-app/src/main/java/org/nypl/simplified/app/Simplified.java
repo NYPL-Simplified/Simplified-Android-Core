@@ -31,7 +31,6 @@ import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AuthenticationDocumentValuesType;
-import org.nypl.simplified.books.core.BookDocumentStoreBuilderType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksController;
@@ -41,6 +40,7 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.Clock;
 import org.nypl.simplified.books.core.ClockType;
 import org.nypl.simplified.books.core.DocumentStore;
+import org.nypl.simplified.books.core.DocumentStoreBuilderType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
@@ -316,7 +316,7 @@ public final class Simplified extends Application
       this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(this.context);
 
       /**
-       * Book management.
+       * Application paths.
        */
 
       final File base_dir = Simplified.getDiskDataDir(in_context);
@@ -348,25 +348,6 @@ public final class Simplified extends Application
         BooksControllerConfiguration.newBuilder(books_dir);
       final BooksControllerConfiguration books_config = bcb.build();
 
-      this.books = BooksController.newBooks(
-        this.exec_books,
-        this.feed_loader,
-        this.http,
-        this.downloader,
-        in_json_serializer,
-        in_json_parser,
-        books_config,
-        this.adobe_drm);
-
-      /**
-       * Configure cover provider.
-       */
-
-      final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
-      this.cover_generator = new CatalogBookCoverGenerator(ten_print);
-      this.cover_provider = BookCoverProvider.newCoverProvider(
-        in_context, this.books, this.cover_generator, this.exec_covers);
-
       /**
        * Configure EULA, privacy policy, etc.
        */
@@ -393,7 +374,7 @@ public final class Simplified extends Application
           }
         };
 
-      final BookDocumentStoreBuilderType documents_builder =
+      final DocumentStoreBuilderType documents_builder =
         DocumentStore.newBuilder(
           clock,
           this.http,
@@ -454,6 +435,56 @@ public final class Simplified extends Application
       }
 
       this.documents = documents_builder.build();
+
+      /**
+       * Make an attempt to fetch the login form as soon as the application
+       * starts, ignoring any failures.
+       */
+
+      this.exec_downloader.submit(
+        new Runnable()
+        {
+          @Override public void run()
+          {
+            try {
+              DocumentStore.fetchLoginForm(
+                CatalogAppServices.this.documents,
+                CatalogAppServices.this.http,
+                books_config.getLoansURI());
+            } catch (final Throwable x) {
+              LOG.error("could not fetch login form: ", x);
+            }
+          }
+        });
+
+      /**
+       * The main book controller.
+       */
+
+      this.books = BooksController.newBooks(
+        this.exec_books,
+        this.feed_loader,
+        this.http,
+        this.downloader,
+        in_json_serializer,
+        in_json_parser,
+        books_config,
+        this.adobe_drm,
+        this.documents);
+
+      /**
+       * Configure cover provider.
+       */
+
+      final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
+      this.cover_generator = new CatalogBookCoverGenerator(ten_print);
+      this.cover_provider = BookCoverProvider.newCoverProvider(
+        in_context, this.books, this.cover_generator, this.exec_covers);
+
+      /**
+       * Has the initial sync operation been carried out?
+       */
+
       this.synced = new AtomicBoolean(false);
     }
 

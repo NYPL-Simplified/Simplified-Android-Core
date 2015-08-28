@@ -5,12 +5,25 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPResultError;
+import org.nypl.simplified.http.core.HTTPResultException;
+import org.nypl.simplified.http.core.HTTPResultMatcherType;
+import org.nypl.simplified.http.core.HTTPResultOKType;
+import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParserType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -19,6 +32,13 @@ import java.util.concurrent.ExecutorService;
 
 public final class DocumentStore implements DocumentStoreType
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(
+      LoggerFactory.getLogger(DocumentStore.class));
+  }
+
   private final OptionType<SyncedDocumentType> privacy;
   private final OptionType<SyncedDocumentType> acknowledgement;
   private final AuthenticationDocumentType     authentication;
@@ -47,7 +67,7 @@ public final class DocumentStore implements DocumentStoreType
    * @return A new document store builder
    */
 
-  public static BookDocumentStoreBuilderType newBuilder(
+  public static DocumentStoreBuilderType newBuilder(
     final ClockType in_clock,
     final HTTPType in_http,
     final ExecutorService in_exec,
@@ -57,6 +77,78 @@ public final class DocumentStore implements DocumentStoreType
   {
     return new Builder(
       in_clock, in_http, in_exec, in_base, in_auth_values, in_parser);
+  }
+
+  /**
+   * Attempt to fetch the login form (synchronously) at {@code uri}. If the form
+   * cannot be fetched, nothing happens.
+   *
+   * @param http An HTTP interface
+   * @param docs A document store
+   * @param uri  A URI
+   */
+
+  public static void fetchLoginForm(
+    final DocumentStoreType docs,
+    final HTTPType http,
+    final URI uri)
+  {
+    DocumentStore.LOG.debug(
+      "fetching login form on {}", uri);
+
+    final OptionType<HTTPAuthType> no_auth = Option.none();
+    final HTTPResultType<InputStream> r = http.get(no_auth, uri, 0L);
+    r.matchResult(
+      new HTTPResultMatcherType<InputStream, Unit, UnreachableCodeException>()
+      {
+        @Override public Unit onHTTPError(final HTTPResultError<InputStream> e)
+        {
+          DocumentStore.tryUpdateLoginForm(e, docs);
+          return Unit.unit();
+        }
+
+        @Override
+        public Unit onHTTPException(final HTTPResultException<InputStream> e)
+        {
+          DocumentStore.LOG.error(
+            "error connecting to server: ", e.getError());
+          return Unit.unit();
+        }
+
+        @Override public Unit onHTTPOK(final HTTPResultOKType<InputStream> e)
+        {
+          DocumentStore.LOG.error(
+            "server returned status {} for unauthenticated fetch!",
+            e.getStatus());
+          return Unit.unit();
+        }
+      });
+  }
+
+  private static void tryUpdateLoginForm(
+    final HTTPResultError<InputStream> e,
+    final DocumentStoreType docs)
+  {
+    if (e.getStatus() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      DocumentStore.LOG.debug(
+        "login fetch returned {}", e.getStatus());
+
+      String type = "application/octet-stream";
+      final Map<String, List<String>> headers = e.getResponseHeaders();
+      if (headers.containsKey("Content-Type")) {
+        final List<String> types = headers.get("Content-Type");
+        if (types.isEmpty() == false) {
+          type = NullCheck.notNull(types.get(0));
+        }
+      }
+
+      DocumentStore.LOG.debug("login fetch returned type {}", type);
+      if ("application/vnd.opds.authentication.v1.0+json".equals(type)) {
+        final AuthenticationDocumentType auth =
+          docs.getAuthenticationDocument();
+        auth.documentUpdate(e.getData());
+      }
+    }
   }
 
   @Override public OptionType<SyncedDocumentType> getPrivacyPolicy()
@@ -79,7 +171,7 @@ public final class DocumentStore implements DocumentStoreType
     return this.eula;
   }
 
-  private static class Builder implements BookDocumentStoreBuilderType
+  private static class Builder implements DocumentStoreBuilderType
   {
     private final File                                 base;
     private final AuthenticationDocumentValuesType     values;

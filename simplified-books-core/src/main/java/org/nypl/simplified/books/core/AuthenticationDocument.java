@@ -92,6 +92,7 @@ public final class AuthenticationDocument implements AuthenticationDocumentType
   {
     NullCheck.notNull(s);
 
+    LOG.debug("submitting document update");
     this.exec.submit(
       new Runnable()
       {
@@ -109,6 +110,7 @@ public final class AuthenticationDocument implements AuthenticationDocumentType
   private void update(final InputStream s)
     throws OPDSParseException
   {
+    LOG.debug("updating document");
     this.data.set(this.parser.parseFromStream(s));
   }
 }

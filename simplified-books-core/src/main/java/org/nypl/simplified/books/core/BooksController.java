@@ -62,6 +62,7 @@ public final class BooksController extends Observable implements BooksType
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
   private final AtomicInteger                                     task_id;
   private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
+  private final DocumentStoreType                                 docs;
   private       Map<Integer, Future<?>>                           tasks;
 
   private BooksController(
@@ -72,13 +73,19 @@ public final class BooksController extends Observable implements BooksType
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
     final BooksControllerConfiguration in_config,
-    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    final DocumentStoreType in_docs)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.feed_loader = NullCheck.notNull(in_feeds);
     this.http = NullCheck.notNull(in_http);
     this.downloader = NullCheck.notNull(in_downloader);
+    NullCheck.notNull(in_json_serializer);
+    NullCheck.notNull(in_json_parser);
     this.config = NullCheck.notNull(in_config);
+    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
+    this.docs = NullCheck.notNull(in_docs);
+
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
     this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
     this.downloads = new ConcurrentHashMap<BookID, DownloadType>(32);
@@ -88,7 +95,6 @@ public final class BooksController extends Observable implements BooksType
       in_json_serializer, in_json_parser, this.data_directory);
     this.task_id = new AtomicInteger(0);
     this.feed_parser = this.feed_loader.getOPDSFeedParser();
-    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
   }
 
   static OptionType<File> makeCover(
@@ -161,6 +167,7 @@ public final class BooksController extends Observable implements BooksType
    * @param in_json_parser     A JSON parser
    * @param in_config          The controller configuration
    * @param in_adobe_drm       An Adobe DRM interface, if supported
+   * @param in_docs            A document store
    *
    * @return A new books controller
    */
@@ -173,7 +180,8 @@ public final class BooksController extends Observable implements BooksType
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
     final BooksControllerConfiguration in_config,
-    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    final DocumentStoreType in_docs)
   {
     return new BooksController(
       in_exec,
@@ -183,7 +191,8 @@ public final class BooksController extends Observable implements BooksType
       in_json_serializer,
       in_json_parser,
       in_config,
-      in_adobe_drm);
+      in_adobe_drm,
+      in_docs);
   }
 
   /**
