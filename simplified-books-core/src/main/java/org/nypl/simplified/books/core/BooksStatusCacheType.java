@@ -47,6 +47,24 @@ public interface BooksStatusCacheType extends BooksObservableType
     BookID id);
 
   /**
+   * @param id The book ID
+   *
+   * @return The most recent feed entry for the given book ID, if one has been
+   * explicitly published
+   */
+
+  OptionType<FeedEntryType> booksFeedEntryGet(BookID id);
+
+  /**
+   * Broadcast the fact that a feed entry has been updated.
+   *
+   * @param e The feed entry
+   */
+
+  void booksFeedEntryUpdate(
+    FeedEntryType e);
+
+  /**
    * Update the status of the book referred to by {@code s}.
    *
    * @param s The book status

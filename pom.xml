@@ -168,12 +168,12 @@
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-core</artifactId>
-        <version>0.3.0</version>
+        <version>0.3.3</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-adobe</artifactId>
-        <version>0.3.0</version>
+        <version>0.3.3</version>
       </dependency>
 
       <!-- OPDS dependencies -->

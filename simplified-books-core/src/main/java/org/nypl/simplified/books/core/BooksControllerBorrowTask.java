@@ -3,6 +3,7 @@ package org.nypl.simplified.books.core;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -11,9 +12,9 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType;
+import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptNetProviderType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
-import org.nypl.drm.core.AdobeLoanID;
 import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
@@ -39,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -102,6 +102,15 @@ final class BooksControllerBorrowTask implements Runnable,
   private void downloadFailed(
     final OptionType<Throwable> exception)
   {
+    exception.map_(
+      new ProcedureType<Throwable>()
+      {
+        @Override public void call(final Throwable x)
+        {
+          BooksControllerBorrowTask.LOG.error("download failed: ", x);
+        }
+      });
+
     final OptionType<Calendar> none = Option.none();
     final BookStatusDownloadFailed failed =
       new BookStatusDownloadFailed(this.book_id, exception, none);
@@ -160,7 +169,7 @@ final class BooksControllerBorrowTask implements Runnable,
        * Otherwise, assume it's an EPUB and keep it.
        */
 
-      final OptionType<ByteBuffer> none = Option.none();
+      final OptionType<AdobeAdeptLoan> none = Option.none();
       this.saveEPUBAndRights(file, none);
     }
   }
@@ -176,7 +185,7 @@ final class BooksControllerBorrowTask implements Runnable,
 
   private void saveEPUBAndRights(
     final File file,
-    final OptionType<ByteBuffer> rights)
+    final OptionType<AdobeAdeptLoan> rights)
     throws IOException
   {
     final BookDatabaseEntryType e =
@@ -321,13 +330,15 @@ final class BooksControllerBorrowTask implements Runnable,
     final OPDSAcquisitionFeedEntry ee = e.getFeedEntry();
 
     /**
-     * Update the on-disk data about the book. This ensures that code
-     * requesting snapshots later will get up-to-date availability information.
+     * Update the on-disk data about the book and publish a new snapshot.
      */
 
     final BookDatabaseEntryType db_e =
       this.books_database.getBookDatabaseEntry(this.book_id);
     db_e.setData(ee);
+
+    final BookSnapshot snap = db_e.getSnapshot();
+    this.books_status.booksSnapshotUpdate(this.book_id, snap);
 
     /**
      * Then, work out what to do based on the latest availability data.
@@ -468,9 +479,9 @@ final class BooksControllerBorrowTask implements Runnable,
     try {
       BooksControllerBorrowTask.LOG.debug("loaded feed from {}", u);
       f.matchFeed(this);
-    } catch (final Exception e) {
-      this.listener.onBookBorrowFailure(
-        this.book_id, Option.some((Throwable) e));
+    } catch (final Throwable e) {
+      BooksControllerBorrowTask.LOG.error("failure after receiving feed: ", e);
+      this.listener.onBookBorrowFailure(this.book_id, Option.some(e));
     }
   }
 
@@ -631,17 +642,14 @@ final class BooksControllerBorrowTask implements Runnable,
 
     @Override public void onFulfillmentSuccess(
       final File file,
-      final byte[] rights,
-      final boolean returnable,
-      final AdobeLoanID loan_id)
+      final AdobeAdeptLoan loan)
     {
       try {
-        final OptionType<ByteBuffer> rights_data = Option.some(
-          ByteBuffer.wrap(rights));
-        BooksControllerBorrowTask.this.saveEPUBAndRights(file, rights_data);
-      } catch (final IOException x) {
-        BooksControllerBorrowTask.this.downloadFailed(
-          Option.some((Throwable) x));
+        BooksControllerBorrowTask.this.saveEPUBAndRights(
+          file, Option.some(loan));
+      } catch (final Throwable x) {
+        BooksControllerBorrowTask.LOG.error("failure saving rights: ", x);
+        BooksControllerBorrowTask.this.downloadFailed(Option.some(x));
       }
     }
 
