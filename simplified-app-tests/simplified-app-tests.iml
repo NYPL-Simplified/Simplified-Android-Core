@@ -39,6 +39,7 @@
     <orderEntry type="jdk" jdkName="Maven Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.3.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android:android:4.4.2_r4" level="project" />
     <orderEntry type="module" module-name="simplified-app" scope="PROVIDED" />
     <orderEntry type="module" module-name="simplified-books-core" scope="PROVIDED" />
@@ -59,7 +60,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />
     <orderEntry type="module" module-name="simplified-stack" scope="PROVIDED" />
     <orderEntry type="module" module-name="simplified-tenprint" scope="PROVIDED" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.3.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.3.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-sdk-android-runtime:0.17.0" level="project" />
