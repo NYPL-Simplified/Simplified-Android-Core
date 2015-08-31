@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.LogUtilities;
@@ -128,6 +129,46 @@ public abstract class CatalogActivity extends SimplifiedActivity
     FadeUtilities.fadeIn(content_area, FadeUtilities.DEFAULT_FADE_DURATION);
   }
 
+  /**
+   * Decide which class is necessary to show a feed based on the given
+   * arguments.
+   *
+   * @param args The arguments
+   *
+   * @return An activity class
+   */
+
+  private Class<? extends CatalogFeedActivity> getFeedClassForArguments(
+    final CatalogFeedArgumentsType args)
+  {
+    NullCheck.notNull(args);
+    return args.matchArguments(
+      new CatalogFeedArgumentsMatcherType<Class<? extends
+        CatalogFeedActivity>, UnreachableCodeException>()
+      {
+        @Override
+        public Class<? extends CatalogFeedActivity> onFeedArgumentsLocalBooks(
+          final CatalogFeedArgumentsLocalBooks c)
+        {
+          switch (c.getSelection()) {
+            case BOOKS_FEED_LOANED:
+              return MainBooksActivity.class;
+            case BOOKS_FEED_HOLDS:
+              return MainHoldsActivity.class;
+          }
+
+          throw new UnreachableCodeException();
+        }
+
+        @Override
+        public Class<? extends CatalogFeedActivity> onFeedArgumentsRemote(
+          final CatalogFeedArgumentsRemote c)
+        {
+          return MainCatalogActivity.class;
+        }
+      });
+  }
+
   protected final void catalogActivityForkNew(
     final CatalogFeedArgumentsType args)
   {
@@ -135,7 +176,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
     final Bundle b = new Bundle();
     CatalogFeedActivity.setActivityArguments(b, args);
-    final Intent i = new Intent(this, this.getClass());
+    final Intent i = new Intent(this, this.getFeedClassForArguments(args));
     i.putExtras(b);
     i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
     this.startActivity(i);
