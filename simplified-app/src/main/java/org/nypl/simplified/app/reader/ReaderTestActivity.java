@@ -36,7 +36,7 @@ public final class ReaderTestActivity extends Activity
     super.onCreate(state);
 
     final File epub_file =
-      new File("/storage/sdcard0/epub30-test-0120-20140612.epub");
+      new File("/storage/sdcard0//Android/data/org.nypl.simplified.app/files/books/data/d652c5bb62a8a4d6ebfb791766ead779668c51175e6b66757daa147bec20b8ce/book.epub");
     final BookID id = BookID.exactString("0");
 
     ReaderTestActivity.LOG.debug(

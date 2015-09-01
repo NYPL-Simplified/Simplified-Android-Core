@@ -67,7 +67,16 @@ import java.util.concurrent.ExecutorService;
       }
     };
 
+    final Runnable filter_handler = new Runnable()
+    {
+      @Override public void run()
+      {
+        ReaderReadiumEPUBLoader.LOG.debug("filter chain populated");
+      }
+    };
+
     EPub3.setSdkErrorHandler(errors);
+    EPub3.setPostFilterPopulationHandler(filter_handler);
     final Container c = EPub3.openBook(f.toString());
     EPub3.setSdkErrorHandler(null);
 
