@@ -165,15 +165,41 @@
         <artifactId>expiringmap</artifactId>
         <version>0.4.0</version>
       </dependency>
+
+      <!-- NYPL DRM -->
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-core</artifactId>
-        <version>0.3.3</version>
+        <version>0.4.0</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-adobe</artifactId>
-        <version>0.3.3</version>
+        <version>0.4.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nypl.drm</groupId>
+        <artifactId>libnypl_adobe</artifactId>
+        <version>0.4.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nypl.drm</groupId>
+        <artifactId>libnypl_adobe</artifactId>
+        <version>0.4.0</version>
+        <classifier>armeabi-v7a</classifier>
+        <type>so</type>
+      </dependency>
+      <dependency>
+        <groupId>org.nypl.drm</groupId>
+        <artifactId>libnypl_adobe_filter</artifactId>
+        <version>0.4.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nypl.drm</groupId>
+        <artifactId>libnypl_adobe_filter</artifactId>
+        <version>0.4.0</version>
+        <classifier>armeabi-v7a</classifier>
+        <type>so</type>
       </dependency>
 
       <!-- OPDS dependencies -->

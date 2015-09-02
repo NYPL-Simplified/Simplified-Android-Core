@@ -10,6 +10,9 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptConnectorFactory;
 import org.nypl.drm.core.AdobeAdeptConnectorFactoryType;
+import org.nypl.drm.core.AdobeAdeptContentFilterFactory;
+import org.nypl.drm.core.AdobeAdeptContentFilterFactoryType;
+import org.nypl.drm.core.AdobeAdeptContentFilterType;
 import org.nypl.drm.core.AdobeAdeptExecutor;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptNetProvider;
@@ -76,6 +79,68 @@ public final class AdobeDRMServices
 
     settings.edit().putString("adobe-device-serial", serial).apply();
     return serial;
+  }
+
+  /**
+   * Attempt to load an Adobe DRM content filter implementation.
+   *
+   * @param context Application context
+   *
+   * @return A DRM content filter
+   *
+   * @throws DRMException If DRM is unavailable or cannot be initialized.
+   */
+
+  public static AdobeAdeptContentFilterType newAdobeContentFilter(
+    final Context context)
+    throws DRMException
+  {
+    NullCheck.notNull(context);
+
+    final Logger log = AdobeDRMServices.LOG;
+
+    final String device_name =
+      String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
+    final String device_serial = AdobeDRMServices.getDeviceSerial(context);
+    log.debug("adobe device name:            {}", device_name);
+    log.debug("adobe device serial:          {}", device_serial);
+
+    final File app_storage = context.getFilesDir();
+    final File xml_storage = context.getFilesDir();
+
+    final File book_storage =
+      new File(Simplified.getDiskDataDir(context), "adobe-books-tmp");
+    final File temp_storage =
+      new File(Simplified.getDiskDataDir(context), "adobe-tmp");
+
+    log.debug("adobe app storage:            {}", app_storage);
+    log.debug("adobe xml storage:            {}", xml_storage);
+    log.debug("adobe temporary book storage: {}", book_storage);
+    log.debug("adobe temporary storage:      {}", temp_storage);
+
+    final Package p = Simplified.class.getPackage();
+    final String package_name = p.getName();
+    final String package_version = p.getImplementationVersion();
+    final String agent = String.format("%s/%s", package_name, package_version);
+    log.debug("adobe user agent:             {}", agent);
+
+    final AdobeAdeptContentFilterFactoryType factory =
+      AdobeAdeptContentFilterFactory.get();
+    final AdobeAdeptResourceProviderType res = AdobeAdeptResourceProvider.get(
+      AdobeDRMServices.getCertificateAsset(context.getAssets()));
+    final AdobeAdeptNetProviderType net = AdobeAdeptNetProvider.get(agent);
+
+    return factory.get(
+      package_name,
+      package_version,
+      res,
+      net,
+      device_serial,
+      device_name,
+      app_storage,
+      xml_storage,
+      book_storage,
+      temp_storage);
   }
 
   /**

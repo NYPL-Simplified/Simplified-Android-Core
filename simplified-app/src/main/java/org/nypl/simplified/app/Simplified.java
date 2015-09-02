@@ -663,7 +663,8 @@ public final class Simplified extends Application
         ReaderHTTPServer.newServer(this.http_executor, this.mime, 8080);
 
       this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
-      this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
+      this.epub_loader =
+        ReaderReadiumEPUBLoader.newLoader(context, this.epub_exec);
 
       this.settings = ReaderSettings.openSettings(context);
       this.bookmarks = ReaderBookmarks.openBookmarks(context);

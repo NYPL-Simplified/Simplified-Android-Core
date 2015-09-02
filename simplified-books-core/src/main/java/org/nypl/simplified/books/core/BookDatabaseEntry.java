@@ -101,6 +101,27 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
     this.file_adobe_meta_tmp = new File(this.directory, "meta_adobe.json.tmp");
   }
 
+  /**
+   * Given a path to an epub file, return the path to the associated Adobe
+   * rights file, if any.
+   *
+   * @param file The epub file
+   *
+   * @return The Adobe rights file, if any
+   */
+
+  public static OptionType<File> getAdobeRightsFileForEPUB(final File file)
+  {
+    NullCheck.notNull(file);
+
+    final File parent = file.getParentFile();
+    final File adobe = new File(parent, "rights_adobe.xml");
+    if (adobe.isFile()) {
+      return Option.some(adobe);
+    }
+    return Option.none();
+  }
+
   @Override public void copyInBookFromSameFilesystem(
     final File file)
     throws IOException
@@ -460,5 +481,4 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
       this.getAdobeAdobeRightsInformationLocked();
     return new BookSnapshot(in_cover, in_book, in_entry, in_adobe_rights);
   }
-
 }

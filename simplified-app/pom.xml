@@ -117,6 +117,18 @@
           <groupId>org.nypl.drm</groupId>
           <artifactId>nypl-drm-adobe</artifactId>
         </dependency>
+        <dependency>
+          <groupId>org.nypl.drm</groupId>
+          <artifactId>libnypl_adobe</artifactId>
+          <classifier>armeabi-v7a</classifier>
+          <type>so</type>
+        </dependency>
+        <dependency>
+          <groupId>org.nypl.drm</groupId>
+          <artifactId>libnypl_adobe_filter</artifactId>
+          <classifier>armeabi-v7a</classifier>
+          <type>so</type>
+        </dependency>
       </dependencies>
 
       <build>
