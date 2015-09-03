@@ -262,6 +262,8 @@ public final class ReaderActivity extends Activity implements
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
+    LOG.debug("starting");
+
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = NullCheck.notNull(i.getExtras());
 
@@ -269,6 +271,9 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull((File) a.getSerializable(ReaderActivity.FILE_ID));
     this.book_id =
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
+
+    LOG.debug("epub file: {}", in_epub_file);
+    LOG.debug("book id:   {}", this.book_id);
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();

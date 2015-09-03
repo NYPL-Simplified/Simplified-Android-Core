@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.security.SecureRandom;
 
 /**
  * File utility functions.
@@ -88,10 +89,45 @@ public final class FileUtilities
     throws IOException
   {
     NullCheck.notNull(f);
-    f.delete();
+
     if (f.exists()) {
-      throw new IOException(String.format("Could not delete '%s'", f));
+
+      /**
+       * See issue #98.
+       *
+       * This is a workaround for the broken semantics of
+       * Android FAT32 filesystems. Essentially, deleting a file and then
+       * recreating that file with the same name will result in EBUSY for
+       * the life of the process. The entirely imaginary half existing half
+       * not-existing name will disappear when the process exits. The following
+       * code renames files to have random suffixes prior to being deleted, to
+       * work around the issue. This is not a long term solution!
+       */
+
+      final StringBuilder sb = new StringBuilder();
+      sb.append(f.toString());
+      sb.append(".");
+      sb.append(FileUtilities.randomHex(16));
+
+      final File ft = new File(sb.toString());
+      FileUtilities.fileRename(f, ft);
+      ft.delete();
+      if (ft.exists()) {
+        throw new IOException(String.format("Could not delete '%s'", ft));
+      }
     }
+  }
+
+  private static String randomHex(final int i)
+  {
+    final SecureRandom sr = new SecureRandom();
+    final byte[] bytes = new byte[i];
+    final StringBuilder sb = new StringBuilder(i * 2);
+    sr.nextBytes(bytes);
+    for (int index = 0; index < i; ++index) {
+      sb.append(String.format("%02x", bytes[index]));
+    }
+    return sb.toString();
   }
 
   /**

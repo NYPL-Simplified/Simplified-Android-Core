@@ -59,11 +59,11 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />
     <orderEntry type="module" module-name="simplified-stack" scope="PROVIDED" />
     <orderEntry type="module" module-name="simplified-tenprint" scope="PROVIDED" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.3.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.4.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-sdk-android-runtime:0.17.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-shared-js:0.17.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-sdk-android-runtime:0.20.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-shared-js:0.20.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.squareup.picasso:picasso:2.5.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.nanohttpd:nanohttpd:2.1.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.tony19:logback-android-core:1.1.1-3" level="project" />

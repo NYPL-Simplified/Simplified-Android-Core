@@ -50,7 +50,6 @@ public final class BooksController extends Observable implements BooksType
 
   private final BookDatabaseType                                  book_database;
   private final BooksStatusCacheType                              books_status;
-  private final BooksControllerConfiguration                      config;
   private final File
                                                                   data_directory;
   private final DownloaderType                                    downloader;
@@ -63,6 +62,8 @@ public final class BooksController extends Observable implements BooksType
   private final AtomicInteger                                     task_id;
   private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
   private final DocumentStoreType                                 docs;
+  private final File                                              root;
+  private final BooksControllerConfigurationType                  config;
   private       Map<Integer, Future<?>>                           tasks;
 
   private BooksController(
@@ -72,9 +73,10 @@ public final class BooksController extends Observable implements BooksType
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    final DocumentStoreType in_docs)
+    final DocumentStoreType in_docs,
+    final BooksControllerConfigurationType in_config,
+    final File in_root)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.feed_loader = NullCheck.notNull(in_feeds);
@@ -82,15 +84,16 @@ public final class BooksController extends Observable implements BooksType
     this.downloader = NullCheck.notNull(in_downloader);
     NullCheck.notNull(in_json_serializer);
     NullCheck.notNull(in_json_parser);
-    this.config = NullCheck.notNull(in_config);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.docs = NullCheck.notNull(in_docs);
+    this.config = NullCheck.notNull(in_config);
+    this.root = NullCheck.notNull(in_root);
 
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
     this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
     this.downloads = new ConcurrentHashMap<BookID, DownloadType>(32);
     this.books_status = BooksStatusCache.newStatusCache();
-    this.data_directory = new File(this.config.getDirectory(), "data");
+    this.data_directory = new File(in_root, "data");
     this.book_database = BookDatabase.newDatabase(
       in_json_serializer, in_json_parser, this.data_directory);
     this.task_id = new AtomicInteger(0);
@@ -165,9 +168,10 @@ public final class BooksController extends Observable implements BooksType
    * @param in_downloader      A downloader
    * @param in_json_serializer A JSON serializer
    * @param in_json_parser     A JSON parser
-   * @param in_config          The controller configuration
    * @param in_adobe_drm       An Adobe DRM interface, if supported
    * @param in_docs            A document store
+   * @param in_config          Mutable configuration data
+   * @param in_root            The root directory used to hold all data
    *
    * @return A new books controller
    */
@@ -179,9 +183,10 @@ public final class BooksController extends Observable implements BooksType
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    final DocumentStoreType in_docs)
+    final DocumentStoreType in_docs,
+    final BooksControllerConfigurationType in_config,
+    final File in_root)
   {
     return new BooksController(
       in_exec,
@@ -190,9 +195,10 @@ public final class BooksController extends Observable implements BooksType
       in_downloader,
       in_json_serializer,
       in_json_parser,
-      in_config,
       in_adobe_drm,
-      in_docs);
+      in_docs,
+      in_config,
+      in_root);
   }
 
   /**
@@ -306,7 +312,7 @@ public final class BooksController extends Observable implements BooksType
       this.books_status.booksStatusClearAll();
       this.submitRunnable(
         new BooksControllerLogoutTask(
-          this.config, this.adobe_drm, this.login, listener));
+          this.data_directory, this.adobe_drm, this.login, listener));
     }
   }
 
@@ -492,6 +498,11 @@ public final class BooksController extends Observable implements BooksType
     this.submitRunnable(
       new BooksControllerGetLatestStatusTask(
         this.book_database, this.books_status, id));
+  }
+
+  @Override public BooksControllerConfigurationType booksGetConfiguration()
+  {
+    return this.config;
   }
 
   private void stopAllTasks()

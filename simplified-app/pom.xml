@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.3.15</version>
+    <version>0.3.16-b0</version>
   </parent>
   <artifactId>simplified-app</artifactId>
 
@@ -116,6 +116,18 @@
         <dependency>
           <groupId>org.nypl.drm</groupId>
           <artifactId>nypl-drm-adobe</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>org.nypl.drm</groupId>
+          <artifactId>libnypl_adobe</artifactId>
+          <classifier>armeabi-v7a</classifier>
+          <type>so</type>
+        </dependency>
+        <dependency>
+          <groupId>org.nypl.drm</groupId>
+          <artifactId>libnypl_adobe_filter</artifactId>
+          <classifier>armeabi-v7a</classifier>
+          <type>so</type>
         </dependency>
       </dependencies>
 

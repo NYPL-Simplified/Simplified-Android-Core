@@ -37,6 +37,7 @@ import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookFeedListenerType;
+import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
@@ -381,11 +382,15 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
+    final BooksType books = app.getBooks();
+    final BooksControllerConfigurationType books_config =
+      books.booksGetConfiguration();
+
     final boolean in_drawer_open = true;
     final ImmutableStack<CatalogFeedArgumentsType> empty =
       ImmutableStack.empty();
     final String in_title = NullCheck.notNull(rr.getString(R.string.app_name));
-    final URI in_uri = app.getFeedInitialURI();
+    final URI in_uri = books_config.getCurrentRootFeedURI();
 
     return new CatalogFeedArgumentsRemote(
       in_drawer_open, NullCheck.notNull(empty), in_title, in_uri, false);
