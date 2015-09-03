@@ -2,8 +2,8 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.app"
-  android:versionCode="45"
-  android:versionName="0.3.15">
+  android:versionCode="47"
+  android:versionName="0.3.16">
 
   <uses-sdk
     android:minSdkVersion="19"
@@ -105,6 +105,11 @@
     </activity>
     <activity
       android:name="org.nypl.simplified.app.testing.DialogFacet"
+      android:configChanges="orientation|screenSize"
+      android:exported="true">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.testing.AlternateFeedURIsActivity"
       android:configChanges="orientation|screenSize"
       android:exported="true">
     </activity>

@@ -3,9 +3,11 @@ package org.nypl.simplified.app;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.slf4j.Logger;
 
@@ -126,5 +128,25 @@ public final class WebViewActivity extends SimplifiedActivity
     settings.setBlockNetworkLoads(true);
 
     this.web_view.loadUrl(uri);
+  }
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item_mn)
+  {
+    final MenuItem item = NullCheck.notNull(item_mn);
+    switch (item.getItemId()) {
+
+      /**
+       * Configure the home button to finish the activity.
+       */
+
+      case android.R.id.home: {
+        this.finish();
+        this.overridePendingTransition(0, 0);
+        return true;
+      }
+    }
+
+    return super.onOptionsItemSelected(item);
   }
 }
