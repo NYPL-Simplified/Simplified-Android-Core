@@ -91,27 +91,10 @@
       android:layout_marginTop="16dp" />
 
     <TextView
-      android:id="@+id/settings_feedback"
-      android:text="@string/settings_feedback"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_below="@+id/settings_login_divider"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
-
-    <View
-      android:background="#eee"
-      android:id="@+id/settings_feedback_divider"
-      android:layout_below="@+id/settings_feedback"
-      android:layout_width="match_parent"
-      android:layout_height="1dp"
-      android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp" />
-
-    <TextView
       android:id="@+id/settings_credits"
       android:text="@string/settings_credits"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_below="@id/settings_feedback_divider"
+      android:layout_below="@id/settings_login_divider"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" />
 
