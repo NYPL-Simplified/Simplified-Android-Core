@@ -1,9 +1,11 @@
 package org.nypl.simplified.app.testing;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -58,6 +60,11 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
   @Override protected void onCreate(final @Nullable Bundle state)
   {
     super.onCreate(state);
+
+    final ActionBar bar = this.getActionBar();
+    bar.setDisplayHomeAsUpEnabled(true);
+    bar.setHomeButtonEnabled(true);
+    bar.setTitle("Alternate URIs");
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -128,5 +135,25 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
           toast.show();
         }
       });
+  }
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item_mn)
+  {
+    final MenuItem item = NullCheck.notNull(item_mn);
+    switch (item.getItemId()) {
+
+      /**
+       * Configure the home button to finish the activity.
+       */
+
+      case android.R.id.home: {
+        this.finish();
+        this.overridePendingTransition(0, 0);
+        return true;
+      }
+    }
+
+    return super.onOptionsItemSelected(item);
   }
 }
