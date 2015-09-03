@@ -6,8 +6,6 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedLoaderType;
 
-import java.net.URI;
-
 /**
  * Services provided to the main Simplified app.
  */
@@ -35,12 +33,6 @@ public interface SimplifiedCatalogAppServicesType extends
    */
 
   BookCoverProviderType getCoverProvider();
-
-  /**
-   * @return The initial URI for the catalog
-   */
-
-  URI getFeedInitialURI();
 
   /**
    * @return An asynchronous feed loader

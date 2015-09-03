@@ -120,4 +120,10 @@ public interface BooksControllerType
    */
 
   void bookGetLatestStatusFromDisk(BookID id);
+
+  /**
+   * @return The mutable configuration values for the controller.
+   */
+
+  BooksControllerConfigurationType booksGetConfiguration();
 }
