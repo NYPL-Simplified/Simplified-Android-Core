@@ -151,26 +151,33 @@ final class BooksControllerBorrowTask implements Runnable,
     final File file)
     throws IOException
   {
-    BooksControllerBorrowTask.LOG.debug(
-      "download {} completed for {}", d, file);
+    try {
+      BooksControllerBorrowTask.LOG.debug(
+        "download {} completed for {}", d, file);
 
-    this.downloadRemoveFromCurrent();
-
-    /**
-     * If the downloaded file is an ACSM fulfillment token, then the book
-     * must be downloaded using the Adobe DRM interface.
-     */
-
-    if ("application/vnd.adobe.adept+xml".equals(d.getContentType())) {
-      this.runFulfillACSM(file);
-    } else {
+      this.downloadRemoveFromCurrent();
 
       /**
-       * Otherwise, assume it's an EPUB and keep it.
+       * If the downloaded file is an ACSM fulfillment token, then the book
+       * must be downloaded using the Adobe DRM interface.
        */
 
-      final OptionType<AdobeAdeptLoan> none = Option.none();
-      this.saveEPUBAndRights(file, none);
+      if ("application/vnd.adobe.adept+xml".equals(d.getContentType())) {
+        this.runFulfillACSM(file);
+      } else {
+
+        /**
+         * Otherwise, assume it's an EPUB and keep it.
+         */
+
+        final OptionType<AdobeAdeptLoan> none = Option.none();
+        this.saveEPUBAndRights(file, none);
+      }
+    } catch (final IOException e) {
+      BooksControllerBorrowTask.LOG.error(
+        "onDownloadCompleted: i/o exception: ",
+        e);
+      this.downloadFailed(Option.some((Throwable) e));
     }
   }
 
@@ -188,6 +195,9 @@ final class BooksControllerBorrowTask implements Runnable,
     final OptionType<AdobeAdeptLoan> rights)
     throws IOException
   {
+    BooksControllerBorrowTask.LOG.debug("saving file:   {}", file);
+    BooksControllerBorrowTask.LOG.debug("saving rights: {}", rights);
+
     final BookDatabaseEntryType e =
       this.books_database.getBookDatabaseEntry(this.book_id);
     e.copyInBook(file);

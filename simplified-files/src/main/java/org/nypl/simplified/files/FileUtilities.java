@@ -90,28 +90,31 @@ public final class FileUtilities
   {
     NullCheck.notNull(f);
 
-    /**
-     * See issue #98.
-     *
-     * This is a workaround for the broken semantics of
-     * Android FAT32 filesystems. Essentially, deleting a file and then
-     * recreating that file with the same name will result in EBUSY for
-     * the life of the process. The entirely imaginary half existing half
-     * not-existing name will disappear when the process exits. The following
-     * code renames files to have random suffixes prior to being deleted, to
-     * work around the issue. This is not a long term solution!
-     */
+    if (f.exists()) {
 
-    final StringBuilder sb = new StringBuilder();
-    sb.append(f.toString());
-    sb.append(".");
-    sb.append(FileUtilities.randomHex(16));
+      /**
+       * See issue #98.
+       *
+       * This is a workaround for the broken semantics of
+       * Android FAT32 filesystems. Essentially, deleting a file and then
+       * recreating that file with the same name will result in EBUSY for
+       * the life of the process. The entirely imaginary half existing half
+       * not-existing name will disappear when the process exits. The following
+       * code renames files to have random suffixes prior to being deleted, to
+       * work around the issue. This is not a long term solution!
+       */
 
-    final File ft = new File(sb.toString());
-    FileUtilities.fileRename(f, ft);
-    ft.delete();
-    if (ft.exists()) {
-      throw new IOException(String.format("Could not delete '%s'", ft));
+      final StringBuilder sb = new StringBuilder();
+      sb.append(f.toString());
+      sb.append(".");
+      sb.append(FileUtilities.randomHex(16));
+
+      final File ft = new File(sb.toString());
+      FileUtilities.fileRename(f, ft);
+      ft.delete();
+      if (ft.exists()) {
+        throw new IOException(String.format("Could not delete '%s'", ft));
+      }
     }
   }
 
