@@ -36,15 +36,15 @@ final class BooksControllerSyncTask implements Runnable
       LoggerFactory.getLogger(BooksControllerSyncTask.class));
   }
 
-  private final BookDatabaseType             books_database;
-  private final BooksControllerConfiguration config;
-  private final OPDSFeedParserType           feed_parser;
-  private final HTTPType                     http;
-  private final AccountSyncListenerType      listener;
-  private final BooksStatusCacheType         books_status;
+  private final BookDatabaseType                 books_database;
+  private final BooksControllerConfigurationType config;
+  private final OPDSFeedParserType               feed_parser;
+  private final HTTPType                         http;
+  private final AccountSyncListenerType          listener;
+  private final BooksStatusCacheType             books_status;
 
   BooksControllerSyncTask(
-    final BooksControllerConfiguration in_config,
+    final BooksControllerConfigurationType in_config,
     final BooksStatusCacheType in_status_cache,
     final BookDatabaseType in_books_database,
     final HTTPType in_http,
@@ -75,7 +75,7 @@ final class BooksControllerSyncTask implements Runnable
   private void sync()
     throws Exception
   {
-    final URI loans_uri = this.config.getLoansURI();
+    final URI loans_uri = this.config.getCurrentLoansURI();
     final Pair<AccountBarcode, AccountPIN> pair =
       this.books_database.credentialsGet();
     final AccountBarcode barcode = pair.getLeft();

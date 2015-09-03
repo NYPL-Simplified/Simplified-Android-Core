@@ -4,6 +4,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
+import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -18,8 +19,7 @@ import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksController;
-import org.nypl.simplified.books.core.BooksControllerConfiguration;
-import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
@@ -73,6 +73,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class BooksContract implements BooksContractType
 {
   private static final URI LOANS_URI = URI.create("http://example.com/loans");
+  private static final URI ROOT_URI  = URI.create("http://example.com/");
 
   /**
    * Construct a contract.
@@ -301,9 +302,8 @@ public final class BooksContract implements BooksContractType
     try {
       final File tmp = File.createTempFile("books", "");
 
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(tmp);
-      final BooksControllerConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration();
       final HTTPType in_http = BooksContract.makeExceptionHTTP();
 
       final OPDSJSONSerializerType in_json_serializer =
@@ -321,9 +321,10 @@ public final class BooksContract implements BooksContractType
         d,
         in_json_serializer,
         in_json_parser,
-        in_config,
         none,
-        newFakeDocumentStore());
+        newFakeDocumentStore(),
+        books_config,
+        tmp);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -382,9 +383,8 @@ public final class BooksContract implements BooksContractType
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = DirectoryUtilities.directoryCreateTemporary();
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(tmp);
-      final BooksControllerConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration();
       final HTTPType in_http = BooksContract.makeExceptionHTTP();
       final OPDSJSONSerializerType in_json_serializer =
         OPDSJSONSerializer.newSerializer();
@@ -401,8 +401,10 @@ public final class BooksContract implements BooksContractType
         d,
         in_json_serializer,
         in_json_parser,
-        in_config,
-        none, newFakeDocumentStore());
+        none,
+        newFakeDocumentStore(),
+        books_config,
+        tmp);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -460,11 +462,8 @@ public final class BooksContract implements BooksContractType
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = DirectoryUtilities.directoryCreateTemporary();
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksControllerConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration();
 
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
@@ -485,8 +484,10 @@ public final class BooksContract implements BooksContractType
         d,
         in_json_serializer,
         in_json_parser,
-        in_config,
-        none, newFakeDocumentStore());
+        none,
+        newFakeDocumentStore(),
+        books_config,
+        tmp);
 
       final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
@@ -549,12 +550,8 @@ public final class BooksContract implements BooksContractType
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = File.createTempFile("books", "");
-
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksControllerConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -574,8 +571,10 @@ public final class BooksContract implements BooksContractType
         d,
         in_json_serializer,
         in_json_parser,
-        in_config,
-        none, newFakeDocumentStore());
+        none,
+        newFakeDocumentStore(),
+        books_config,
+        tmp);
 
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -637,12 +636,8 @@ public final class BooksContract implements BooksContractType
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = DirectoryUtilities.directoryCreateTemporary();
-
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksControllerConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -661,8 +656,10 @@ public final class BooksContract implements BooksContractType
         d,
         in_json_serializer,
         in_json_parser,
-        in_config,
-        none, newFakeDocumentStore());
+        none,
+        newFakeDocumentStore(),
+        books_config,
+        tmp);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -789,12 +786,8 @@ public final class BooksContract implements BooksContractType
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = DirectoryUtilities.directoryCreateTemporary();
-
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksControllerConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -814,8 +807,10 @@ public final class BooksContract implements BooksContractType
         d,
         in_json_serializer,
         in_json_parser,
-        in_config,
-        none, newFakeDocumentStore());
+        none,
+        newFakeDocumentStore(),
+        books_config,
+        tmp);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -1014,12 +1009,8 @@ public final class BooksContract implements BooksContractType
     final ExecutorService exec = Executors.newFixedThreadPool(4);
     try {
       final File tmp = DirectoryUtilities.directoryCreateTemporary();
-
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(tmp);
-      bcb.setLoansURI(BooksContract.LOANS_URI);
-
-      final BooksControllerConfiguration in_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration();
       final AccountBarcode barcode = new AccountBarcode("barcode");
       final AccountPIN pin = new AccountPIN("pin");
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
@@ -1039,8 +1030,10 @@ public final class BooksContract implements BooksContractType
         d,
         in_json_serializer,
         in_json_parser,
-        in_config,
-        none, newFakeDocumentStore());
+        none,
+        newFakeDocumentStore(),
+        books_config,
+        tmp);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -1198,6 +1191,39 @@ public final class BooksContract implements BooksContractType
 
     } finally {
       exec.shutdown();
+    }
+  }
+
+  private final static class BooksControllerConfiguration
+    implements BooksControllerConfigurationType
+  {
+    private URI current_root;
+    private URI current_loans;
+
+    BooksControllerConfiguration()
+    {
+      this.current_root = NullCheck.notNull(ROOT_URI);
+      this.current_loans = NullCheck.notNull(LOANS_URI);
+    }
+
+    @Override public synchronized URI getCurrentRootFeedURI()
+    {
+      return this.current_root;
+    }
+
+    @Override public synchronized void setCurrentRootFeedURI(final URI u)
+    {
+      this.current_root = NullCheck.notNull(u);
+    }
+
+    @Override public synchronized URI getCurrentLoansURI()
+    {
+      return this.current_loans;
+    }
+
+    @Override public synchronized void setCurrentLoansURI(final URI u)
+    {
+      this.current_loans = NullCheck.notNull(u);
     }
   }
 }

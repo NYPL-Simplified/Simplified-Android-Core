@@ -24,6 +24,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
 import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -393,8 +394,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup layout = NullCheck.notNull(
-      (ViewGroup) inflater.inflate(
-        R.layout.settings, content_area, false));
+      (ViewGroup) inflater.inflate(R.layout.settings, content_area, false));
     content_area.addView(layout);
     content_area.requestLayout();
 
@@ -415,7 +415,8 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     /**
      * If Adobe DRM support is available, then enable the accounts
-     * management section.
+     * management section. This is not yet implemented and is therefore
+     * currently always inactive.
      */
 
     in_adobe_accounts.setEnabled(false);
@@ -599,6 +600,29 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       });
 
     in_login.setEnabled(false);
+
+    /**
+     * Temporary "alternate URIs" selection.
+     */
+
+    final TextView in_alt_uris =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_alt_uris));
+    in_alt_uris.setEnabled(true);
+    in_alt_uris.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          final Bundle b = new Bundle();
+          SimplifiedActivity.setActivityArguments(b, false);
+          final Intent i = new Intent();
+          i.setClass(
+            MainSettingsActivity.this, AlternateFeedURIsActivity.class);
+          i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+          i.putExtras(b);
+          MainSettingsActivity.this.startActivity(i);
+        }
+      });
 
     this.navigationDrawerSetActionBarTitle();
     this.barcode_edit = in_barcode_edit;

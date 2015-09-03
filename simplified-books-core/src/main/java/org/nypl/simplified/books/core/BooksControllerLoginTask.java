@@ -46,7 +46,7 @@ final class BooksControllerLoginTask implements Runnable,
   private final BooksController                                   books;
   private final BookDatabaseType
                                                                   books_database;
-  private final BooksControllerConfiguration                      config;
+  private final BooksControllerConfigurationType                  config;
   private final HTTPType                                          http;
   private final AccountLoginListenerType                          listener;
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
@@ -57,7 +57,7 @@ final class BooksControllerLoginTask implements Runnable,
     final BooksController in_books,
     final BookDatabaseType in_books_database,
     final HTTPType in_http,
-    final BooksControllerConfiguration in_config,
+    final BooksControllerConfigurationType in_config,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AccountBarcode in_barcode,
     final AccountPIN in_pin,
@@ -90,7 +90,7 @@ final class BooksControllerLoginTask implements Runnable,
      * server and seeing whether or not it rejects the given credentials.
      */
 
-    final URI loans_uri = this.config.getLoansURI();
+    final URI loans_uri = this.config.getCurrentLoansURI();
 
     BooksControllerLoginTask.LOG.debug(
       "attempting login on {}", loans_uri);

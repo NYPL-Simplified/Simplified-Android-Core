@@ -34,8 +34,7 @@ import org.nypl.simplified.books.core.AuthenticationDocumentValuesType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksController;
-import org.nypl.simplified.books.core.BooksControllerConfiguration;
-import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.Clock;
 import org.nypl.simplified.books.core.ClockType;
@@ -344,9 +343,10 @@ public final class Simplified extends Application
       this.downloader = DownloaderHTTP.newDownloader(
         this.exec_books, downloads_dir, this.http);
 
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(books_dir);
-      final BooksControllerConfiguration books_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration(
+          URI.create(rr.getString(R.string.catalog_start_uri)),
+          URI.create(rr.getString(R.string.catalog_loans_uri)));
 
       /**
        * Configure EULA, privacy policy, etc.
@@ -450,7 +450,7 @@ public final class Simplified extends Application
               DocumentStore.fetchLoginForm(
                 CatalogAppServices.this.documents,
                 CatalogAppServices.this.http,
-                books_config.getLoansURI());
+                books_config.getCurrentLoansURI());
             } catch (final Throwable x) {
               LOG.error("could not fetch login form: ", x);
             }
@@ -468,9 +468,10 @@ public final class Simplified extends Application
         this.downloader,
         in_json_serializer,
         in_json_parser,
-        books_config,
         this.adobe_drm,
-        this.documents);
+        this.documents,
+        books_config,
+        books_dir);
 
       /**
        * Configure cover provider.
@@ -501,11 +502,6 @@ public final class Simplified extends Application
     @Override public BookCoverProviderType getCoverProvider()
     {
       return this.cover_provider;
-    }
-
-    @Override public URI getFeedInitialURI()
-    {
-      return this.feed_initial_uri;
     }
 
     @Override public FeedLoaderType getFeedLoader()
@@ -795,6 +791,41 @@ public final class Simplified extends Application
       }
 
       return large;
+    }
+  }
+
+  private final static class BooksControllerConfiguration
+    implements BooksControllerConfigurationType
+  {
+    private URI current_root;
+    private URI current_loans;
+
+    BooksControllerConfiguration(
+      final URI in_root,
+      final URI in_loans)
+    {
+      this.current_root = NullCheck.notNull(in_root);
+      this.current_loans = NullCheck.notNull(in_loans);
+    }
+
+    @Override public synchronized URI getCurrentRootFeedURI()
+    {
+      return this.current_root;
+    }
+
+    @Override public synchronized void setCurrentRootFeedURI(final URI u)
+    {
+      this.current_root = NullCheck.notNull(u);
+    }
+
+    @Override public synchronized URI getCurrentLoansURI()
+    {
+      return this.current_loans;
+    }
+
+    @Override public synchronized void setCurrentLoansURI(final URI u)
+    {
+      this.current_loans = NullCheck.notNull(u);
     }
   }
 }

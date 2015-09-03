@@ -25,23 +25,21 @@ final class BooksControllerLogoutTask implements Runnable
   }
 
   private final File                                              base;
-  private final BooksControllerConfiguration                      config;
   private final AccountLogoutListenerType                         listener;
   private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
   private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
 
   BooksControllerLogoutTask(
-    final BooksControllerConfiguration in_config,
+    final File in_root,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login,
     final AccountLogoutListenerType in_listener)
   {
-    this.config = NullCheck.notNull(in_config);
+    this.base = NullCheck.notNull(in_root);
+    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
+    this.login = NullCheck.notNull(in_login);
     this.listener = new AccountLogoutListenerCatcher(
       BooksControllerLogoutTask.LOG, NullCheck.notNull(in_listener));
-    this.login = NullCheck.notNull(in_login);
-    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
-    this.base = new File(this.config.getDirectory(), "data");
   }
 
   @Override public void run()
