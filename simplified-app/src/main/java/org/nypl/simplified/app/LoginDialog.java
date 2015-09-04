@@ -72,6 +72,31 @@ public final class LoginDialog extends DialogFragment
   }
 
   /**
+   * @param rr      The application resources
+   * @param message The error message returned by the device activation code
+   *
+   * @return An appropriate humanly-readable error message
+   */
+
+  public static String getDeviceActivationErrorMessage(
+    final Resources rr,
+    final String message)
+  {
+    /**
+     * This is absolutely not the way to do this. The nypl-drm-adobe
+     * interfaces should be expanded to return values of an enum type. For now,
+     * however, this is the only error code that can be assigned a useful
+     * message.
+     */
+
+    if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
+      return rr.getString(R.string.settings_login_failed_adobe_device_limit);
+    } else {
+      return rr.getString(R.string.settings_login_failed_adobe_device_limit);
+    }
+  }
+
+  /**
    * Create a new login dialog.
    *
    * @param text    The initial dialog text.
@@ -201,10 +226,10 @@ public final class LoginDialog extends DialogFragment
     LoginDialog.LOG.error(
       "onAccountLoginFailureDeviceActivationError: {}", message);
 
-    final Resources rr = NullCheck.notNull(this.getResources());
     final OptionType<Throwable> none = Option.none();
     this.onAccountLoginFailure(
-      none, rr.getString(R.string.settings_login_failed_device));
+      none, LoginDialog.getDeviceActivationErrorMessage(
+        this.getResources(), message));
   }
 
   @Override public void onResume()
