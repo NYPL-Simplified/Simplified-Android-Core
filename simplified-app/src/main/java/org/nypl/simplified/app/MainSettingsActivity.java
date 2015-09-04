@@ -308,7 +308,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final Resources rr = NullCheck.notNull(this.getResources());
     final OptionType<Throwable> none = Option.none();
     this.onAccountLoginFailure(
-      none, rr.getString(R.string.settings_login_failed_device));
+      none, LoginDialog.getDeviceActivationErrorMessage(rr, message));
   }
 
   @Override public void onAccountLogoutFailure(
