@@ -27,14 +27,12 @@ public interface BooksControllerType
    * @param id       The book ID
    * @param acq      The specific acquisition relation
    * @param eo       The feed entry
-   * @param listener The listener
    */
 
   void bookBorrow(
     BookID id,
     OPDSAcquisition acq,
-    OPDSAcquisitionFeedEntry eo,
-    BookBorrowListenerType listener);
+    OPDSAcquisitionFeedEntry eo);
 
   /**
    * Delete the actual book file for the given book, if any.

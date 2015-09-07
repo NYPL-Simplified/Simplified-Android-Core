@@ -10,7 +10,6 @@ import com.io7m.junreachable.UnimplementedCodeException;
 import org.nypl.simplified.app.LoginController;
 import org.nypl.simplified.app.LoginControllerListenerType;
 import org.nypl.simplified.app.utilities.LogUtilities;
-import org.nypl.simplified.books.core.BookBorrowListenerType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
@@ -26,9 +25,7 @@ import org.slf4j.Logger;
  */
 
 public final class CatalogAcquisitionButtonController
-  implements OnClickListener,
-  LoginControllerListenerType,
-  BookBorrowListenerType
+  implements OnClickListener, LoginControllerListenerType
 {
   private static final Logger LOG;
 
@@ -69,20 +66,6 @@ public final class CatalogAcquisitionButtonController
       new LoginController(this.activity, this.books, this);
   }
 
-  @Override public void onBookBorrowFailure(
-    final BookID in_id,
-    final OptionType<Throwable> in_e)
-  {
-    LogUtilities.errorWithOptionalException(
-      CatalogAcquisitionButtonController.LOG, "borrow failed", in_e);
-  }
-
-  @Override public void onBookBorrowSuccess(
-    final BookID in_id)
-  {
-    CatalogAcquisitionButtonController.LOG.debug("borrow succeeded");
-  }
-
   @Override public void onClick(
     final @Nullable View v)
   {
@@ -112,7 +95,7 @@ public final class CatalogAcquisitionButtonController
       case ACQUISITION_GENERIC:
       case ACQUISITION_OPEN_ACCESS: {
         final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
-        this.books.bookBorrow(this.id, this.acq, eo, this);
+        this.books.bookBorrow(this.id, this.acq, eo);
         break;
       }
       case ACQUISITION_BUY:
