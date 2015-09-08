@@ -14,7 +14,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGeneratorRequestHandler;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGeneratorType;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;

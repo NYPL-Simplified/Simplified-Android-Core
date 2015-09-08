@@ -29,13 +29,18 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.app.LoginDialog;
+import org.nypl.simplified.app.LoginListenerType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
+import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AccountsType;
 import org.nypl.simplified.books.core.BookFeedListenerType;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
@@ -49,6 +54,7 @@ import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.books.core.FeedFacetType;
 import org.nypl.simplified.books.core.FeedGroup;
+import org.nypl.simplified.books.core.FeedLoaderAuthenticationListenerType;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.FeedMatcherType;
@@ -59,6 +65,7 @@ import org.nypl.simplified.books.core.FeedSearchType;
 import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
@@ -344,6 +351,91 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
    */
 
   protected abstract BooksFeedSelection getLocalFeedTypeSelection();
+
+  @Override public void onFeedRequiresAuthentication(
+    final URI u,
+    final int attempts,
+    final FeedLoaderAuthenticationListenerType listener)
+  {
+    /**
+     * The feed requires authentication. If an attempt hasn't been made
+     * to fetch it with the current cached credentials (if any), then try
+     * to authenticate with those credentials.
+     */
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final AccountsType accounts = app.getBooks();
+
+    /**
+     * An adapter that will receive cached credentials and forward them
+     * on to the listener.
+     */
+
+    if (attempts == 0) {
+      if (accounts.accountIsLoggedIn()) {
+        accounts.accountGetCachedLoginDetails(
+          new AccountGetCachedCredentialsListenerType()
+          {
+            @Override public void onAccountIsNotLoggedIn()
+            {
+              throw new UnreachableCodeException();
+            }
+
+            @Override public void onAccountIsLoggedIn(
+              final AccountBarcode barcode,
+              final AccountPIN pin)
+            {
+              listener.onAuthenticationProvided(barcode, pin);
+            }
+          });
+      }
+    } else {
+
+      /**
+       * Otherwise, this is a new attempt and the current credentials
+       * are assumed to be stale. Ask the user for new ones.
+       */
+
+      final LoginListenerType login_listener = new LoginListenerType()
+      {
+        @Override public void onLoginAborted()
+        {
+          listener.onAuthenticationNotProvided();
+        }
+
+        @Override public void onLoginFailure(
+          final OptionType<Throwable> error,
+          final String message)
+        {
+          listener.onAuthenticationError(error, message);
+        }
+
+        @Override public void onLoginSuccess(
+          final AccountBarcode user,
+          final AccountPIN password)
+        {
+          listener.onAuthenticationProvided(user, password);
+        }
+      };
+
+      final FragmentManager fm = this.getFragmentManager();
+      UIThread.runOnUIThread(
+        new Runnable()
+        {
+          @Override public void run()
+          {
+            final AccountBarcode barcode = new AccountBarcode("");
+            final AccountPIN pin = new AccountPIN("");
+
+            final LoginDialog df =
+              LoginDialog.newDialog("Login required", barcode, pin);
+            df.setLoginListener(login_listener);
+            df.show(fm, "login-dialog");
+          }
+        });
+    }
+  }
 
   private void configureUpButton(
     final ImmutableStack<CatalogFeedArgumentsType> up_stack,

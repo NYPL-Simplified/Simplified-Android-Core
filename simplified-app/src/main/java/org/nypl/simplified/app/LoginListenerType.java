@@ -1,12 +1,14 @@
 package org.nypl.simplified.app;
 
 import com.io7m.jfunctional.OptionType;
+import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountPIN;
 
 /**
  * A listener that receives the results of login attempts.
  */
 
-public interface LoginControllerListenerType
+public interface LoginListenerType
 {
   /**
    * The user cancelled the login.
@@ -27,7 +29,12 @@ public interface LoginControllerListenerType
 
   /**
    * The user successfully logged in.
+   *
+   * @param user     The current user name
+   * @param password The current password
    */
 
-  void onLoginSuccess();
+  void onLoginSuccess(
+    AccountBarcode user,
+    AccountPIN password);
 }

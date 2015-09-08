@@ -28,8 +28,8 @@
   <string name="catalog_uri_development_loans">http://circulation.alpha.librarysimplified.org/loans/</string>
   <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
   <string name="catalog_uri_qa_loans">http://qa.circulation.librarysimplified.org/loans/</string>
-  <string name="catalog_uri_openebooks">http://circulation.alpha.librarysimplified.org/</string>
-  <string name="catalog_uri_openebooks_loans">http://circulation.alpha.librarysimplified.org/loans/</string>
+  <string name="catalog_uri_openebooks">http://qa.circulation.openebooks.us/</string>
+  <string name="catalog_uri_openebooks_loans">http://qa.circulation.openebooks.us/loans/</string>
   <string name="catalog_start_uri">@string/catalog_uri_development</string>
   <string name="catalog_loans_uri">@string/catalog_uri_development_loans</string>
 

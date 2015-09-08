@@ -1,18 +1,23 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
-import org.nypl.simplified.app.LoginController;
-import org.nypl.simplified.app.LoginControllerListenerType;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.app.LoginDialog;
+import org.nypl.simplified.app.LoginListenerType;
+import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
+import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -25,7 +30,7 @@ import org.slf4j.Logger;
  */
 
 public final class CatalogAcquisitionButtonController
-  implements OnClickListener, LoginControllerListenerType
+  implements OnClickListener, LoginListenerType
 {
   private static final Logger LOG;
 
@@ -38,7 +43,6 @@ public final class CatalogAcquisitionButtonController
   private final BooksType       books;
   private final FeedEntryOPDS   entry;
   private final BookID          id;
-  private final LoginController login_controller;
 
   /**
    * Construct a button controller.
@@ -62,14 +66,45 @@ public final class CatalogAcquisitionButtonController
     this.id = NullCheck.notNull(in_id);
     this.books = NullCheck.notNull(in_books);
     this.entry = NullCheck.notNull(in_entry);
-    this.login_controller =
-      new LoginController(this.activity, this.books, this);
   }
 
   @Override public void onClick(
     final @Nullable View v)
   {
-    this.login_controller.onClick(v);
+    if (this.books.accountIsLoggedIn()) {
+      this.books.accountGetCachedLoginDetails(
+        new AccountGetCachedCredentialsListenerType()
+        {
+          @Override public void onAccountIsNotLoggedIn()
+          {
+            throw new UnreachableCodeException();
+          }
+
+          @Override public void onAccountIsLoggedIn(
+            final AccountBarcode barcode,
+            final AccountPIN pin)
+          {
+            CatalogAcquisitionButtonController.this.onLoginSuccess(
+              barcode,
+              pin);
+          }
+        });
+    } else {
+      this.tryLogin();
+    }
+  }
+
+  private void tryLogin()
+  {
+    final AccountBarcode barcode = new AccountBarcode("");
+    final AccountPIN pin = new AccountPIN("");
+
+    final LoginDialog df =
+      LoginDialog.newDialog("Login required", barcode, pin);
+    df.setLoginListener(this);
+
+    final FragmentManager fm = this.activity.getFragmentManager();
+    df.show(fm, "login-dialog");
   }
 
   @Override public void onLoginAborted()
@@ -84,7 +119,9 @@ public final class CatalogAcquisitionButtonController
     // Nothing
   }
 
-  @Override public void onLoginSuccess()
+  @Override public void onLoginSuccess(
+    final AccountBarcode barcode,
+    final AccountPIN pin)
   {
     CatalogAcquisitionButtonController.LOG.debug("login succeeded");
     CatalogAcquisitionButtonController.LOG.debug(

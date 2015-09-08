@@ -20,7 +20,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
@@ -55,12 +55,12 @@ public final class LoginDialog extends DialogFragment
   }
 
   private @Nullable EditText                    barcode_edit;
-  private @Nullable LoginControllerListenerType listener;
-  private @Nullable Button                      login;
-  private @Nullable EditText                    pin_edit;
-  private @Nullable ViewGroup                   root_layout;
-  private @Nullable TextView                    text;
-  private @Nullable Button                      cancel;
+  private @Nullable LoginListenerType listener;
+  private @Nullable Button            login;
+  private @Nullable EditText          pin_edit;
+  private @Nullable ViewGroup         root_layout;
+  private @Nullable TextView          text;
+  private @Nullable Button            cancel;
 
   /**
    * Construct a new dialog.
@@ -129,8 +129,8 @@ public final class LoginDialog extends DialogFragment
     final OptionType<Throwable> error,
     final String message)
   {
-    final String s =
-      NullCheck.notNull(String.format("login failed: %s", message));
+    final String s = NullCheck.notNull(String.format("login failed: %s",
+                                                     message));
 
     LogUtilities.errorWithOptionalException(LoginDialog.LOG, s, error);
 
@@ -153,7 +153,7 @@ public final class LoginDialog extends DialogFragment
         }
       });
 
-    final LoginControllerListenerType ls = this.listener;
+    final LoginListenerType ls = this.listener;
     if (ls != null) {
       try {
         ls.onLoginFailure(error, message);
@@ -210,10 +210,10 @@ public final class LoginDialog extends DialogFragment
         }
       });
 
-    final LoginControllerListenerType ls = this.listener;
+    final LoginListenerType ls = this.listener;
     if (ls != null) {
       try {
-        ls.onLoginSuccess();
+        ls.onLoginSuccess(barcode, pin);
       } catch (final Throwable e) {
         LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
@@ -251,7 +251,7 @@ public final class LoginDialog extends DialogFragment
   {
     LoginDialog.LOG.debug("login aborted");
 
-    final LoginControllerListenerType ls = this.listener;
+    final LoginListenerType ls = this.listener;
     if (ls != null) {
       try {
         ls.onLoginAborted();
@@ -438,7 +438,7 @@ public final class LoginDialog extends DialogFragment
    */
 
   public void setLoginListener(
-    final LoginControllerListenerType in_listener)
+    final LoginListenerType in_listener)
   {
     this.listener = NullCheck.notNull(in_listener);
   }

@@ -107,29 +107,58 @@ final class BooksControllerRevokeBookTask
      */
 
     final HTTPAuthType auth = this.getHTTPAuth();
-    this.feed_loader.fromURIRefreshing(
-      u, Option.some(auth), new FeedLoaderListenerType()
+    final FeedLoaderListenerType listener = new FeedLoaderListenerType()
+    {
+      @Override public void onFeedLoadSuccess(
+        final URI u,
+        final FeedType f)
       {
-        @Override public void onFeedLoadSuccess(
-          final URI u,
-          final FeedType f)
-        {
-          try {
-            BooksControllerRevokeBookTask.this.revokeFeedReceived(f);
-          } catch (final Throwable e) {
-            BooksControllerRevokeBookTask.this.revokeFailed(
-              Option.some(e), e.getMessage());
-          }
+        try {
+          BooksControllerRevokeBookTask.this.revokeFeedReceived(f);
+        } catch (final Throwable e) {
+          BooksControllerRevokeBookTask.this.revokeFailed(
+            Option.some(e), e.getMessage());
+        }
+      }
+
+      @Override public void onFeedRequiresAuthentication(
+        final URI u,
+        final int attempts,
+        final FeedLoaderAuthenticationListenerType listener)
+      {
+        /**
+         * If the saved authentication details are wrong, give up.
+         */
+
+        if (attempts > 0) {
+          listener.onAuthenticationNotProvided();
         }
 
-        @Override public void onFeedLoadFailure(
-          final URI u,
-          final Throwable x)
-        {
-          BooksControllerRevokeBookTask.this.revokeFailed(
-            Option.some(x), x.getMessage());
+        /**
+         * Otherwise, try the saved authentication details!
+         */
+
+        try {
+          final Pair<AccountBarcode, AccountPIN> creds =
+            BooksControllerRevokeBookTask.this.books_database.credentialsGet();
+          listener.onAuthenticationProvided(creds.getLeft(), creds.getRight());
+        } catch (final IOException e) {
+          listener.onAuthenticationError(
+            Option.some((Throwable) e), e.getMessage());
         }
-      });
+      }
+
+      @Override public void onFeedLoadFailure(
+        final URI u,
+        final Throwable x)
+      {
+        BooksControllerRevokeBookTask.this.revokeFailed(
+          Option.some(x), x.getMessage());
+      }
+    };
+
+    this.feed_loader.fromURIRefreshing(
+      u, Option.some(auth), listener);
   }
 
   private void revokeFeedReceived(final FeedType f)
