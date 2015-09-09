@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * The default implementation of the {@link ReaderHTTPServerType} interface.
@@ -35,6 +36,7 @@ import java.util.concurrent.ExecutorService;
   private final     URI                   base;
   private final     ExecutorService       exec;
   private final     ReaderHTTPMimeMapType mime;
+  private final     ExecutorService       exec_single;
   private @Nullable Package               epub_package;
 
   private ReaderHTTPServer(
@@ -47,6 +49,21 @@ import java.util.concurrent.ExecutorService;
     this.mime = NullCheck.notNull(in_mime);
     this.base =
       NullCheck.notNull(URI.create("http://127.0.0.1:" + in_port + "/"));
+
+    /**
+     * Force all requests to be executed by the same thread. This protects
+     * the content filter, which can only handle single-threaded access.
+     */
+
+    this.exec_single = Executors.newSingleThreadExecutor();
+    this.setAsyncRunner(
+      new AsyncRunner()
+      {
+        @Override public void exec(final Runnable code)
+        {
+          ReaderHTTPServer.this.exec_single.submit(code);
+        }
+      });
   }
 
   private static OptionType<String> getSuffix(
@@ -63,8 +80,13 @@ import java.util.concurrent.ExecutorService;
     final String path,
     final Response r)
   {
+    final long thread_id = Thread.currentThread().getId();
     ReaderHTTPServer.LOG.debug(
-      "response: {} {} {}", r.getStatus(), path, r.getMimeType());
+      "response: [{}] {} {} {}",
+      thread_id,
+      r.getStatus(),
+      path,
+      r.getMimeType());
     return r;
   }
 
@@ -130,20 +152,29 @@ import java.util.concurrent.ExecutorService;
 
     final OptionType<HTTPRangeType> range_opt;
     final Map<String, String> headers = nns.getHeaders();
+    final long thread_id = Thread.currentThread().getId();
     if (headers.containsKey("range")) {
       final String range_text = NullCheck.notNull(headers.get("range"));
       range_opt = HTTPRanges.fromRangeString(range_text);
       if (range_opt.isSome()) {
         final Some<HTTPRangeType> some = (Some<HTTPRangeType>) range_opt;
         ReaderHTTPServer.LOG.debug(
-          "request (ranged {}): {} {}", some.get(), method, path);
+          "request [{}] (ranged {}): {} {}",
+          thread_id,
+          some.get(),
+          method,
+          path);
       } else {
         ReaderHTTPServer.LOG.debug(
-          "request (full - ranged unparseable): {} {}", method, path);
+          "request [{}] (full - ranged unparseable): {} {}",
+          thread_id,
+          method,
+          path);
       }
     } else {
       range_opt = Option.none();
-      ReaderHTTPServer.LOG.debug("request (full): {} {}", method, path);
+      ReaderHTTPServer.LOG.debug(
+        "request [{}] (full): {} {}", thread_id, method, path);
     }
 
     final String type = this.guessMimeTime(path);
