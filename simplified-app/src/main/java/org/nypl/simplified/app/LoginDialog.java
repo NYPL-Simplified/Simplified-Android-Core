@@ -92,7 +92,7 @@ public final class LoginDialog extends DialogFragment
     if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
       return rr.getString(R.string.settings_login_failed_adobe_device_limit);
     } else {
-      return rr.getString(R.string.settings_login_failed_adobe_device_limit);
+      return rr.getString(R.string.settings_login_failed_device);
     }
   }
 
