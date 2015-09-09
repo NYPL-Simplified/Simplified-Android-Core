@@ -452,7 +452,7 @@ public final class Simplified extends Application
                 CatalogAppServices.this.http,
                 books_config.getCurrentLoansURI());
             } catch (final Throwable x) {
-              LOG.error("could not fetch login form: ", x);
+              Simplified.LOG.error("could not fetch login form: ", x);
             }
           }
         });
