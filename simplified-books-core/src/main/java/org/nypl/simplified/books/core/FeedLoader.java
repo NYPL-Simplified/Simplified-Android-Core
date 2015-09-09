@@ -323,7 +323,7 @@ public final class FeedLoader
       uri, attempts.getAndIncrement(), auth_listener);
 
     FeedLoader.LOG.trace("waiting for auth listener completion");
-    auth_listener.waitForCompletion(60L, TimeUnit.SECONDS);
+    auth_listener.waitForCompletion(5L, TimeUnit.MINUTES);
     FeedLoader.LOG.trace("finished waiting for completion");
 
     /**
