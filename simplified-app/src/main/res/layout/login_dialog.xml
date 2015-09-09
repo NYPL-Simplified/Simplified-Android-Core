@@ -21,7 +21,7 @@
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
     android:layout_centerHorizontal="true"
-    android:maxLines="1"
+    android:maxLines="3"
     android:ellipsize="end"
     android:text="@string/settings_login_title" />
 
