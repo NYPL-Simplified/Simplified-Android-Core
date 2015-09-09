@@ -2,7 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.SimplifiedPart;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.slf4j.Logger;
 

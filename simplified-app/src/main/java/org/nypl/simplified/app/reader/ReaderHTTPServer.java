@@ -7,7 +7,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.HTTPRangeType;
 import org.nypl.simplified.http.core.HTTPRanges;
 import org.readium.sdk.android.Package;

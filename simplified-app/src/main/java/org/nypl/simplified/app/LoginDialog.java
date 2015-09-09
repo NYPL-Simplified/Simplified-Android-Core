@@ -20,7 +20,6 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
@@ -28,6 +27,7 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,7 +45,7 @@ public final class LoginDialog extends DialogFragment
   private static final String TEXT_ID;
 
   static {
-    LOG = LogUtilities.getLog(DialogFragment.class);
+    LOG = LogUtilities.getLog(LoginDialog.class);
   }
 
   static {
@@ -54,13 +54,13 @@ public final class LoginDialog extends DialogFragment
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
   }
 
-  private @Nullable EditText                    barcode_edit;
-  private @Nullable LoginControllerListenerType listener;
-  private @Nullable Button                      login;
-  private @Nullable EditText                    pin_edit;
-  private @Nullable ViewGroup                   root_layout;
-  private @Nullable TextView                    text;
-  private @Nullable Button                      cancel;
+  private @Nullable EditText          barcode_edit;
+  private @Nullable LoginListenerType listener;
+  private @Nullable Button            login;
+  private @Nullable EditText          pin_edit;
+  private @Nullable ViewGroup         root_layout;
+  private @Nullable TextView          text;
+  private @Nullable Button            cancel;
 
   /**
    * Construct a new dialog.
@@ -92,7 +92,7 @@ public final class LoginDialog extends DialogFragment
     if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
       return rr.getString(R.string.settings_login_failed_adobe_device_limit);
     } else {
-      return rr.getString(R.string.settings_login_failed_adobe_device_limit);
+      return rr.getString(R.string.settings_login_failed_device);
     }
   }
 
@@ -129,8 +129,9 @@ public final class LoginDialog extends DialogFragment
     final OptionType<Throwable> error,
     final String message)
   {
-    final String s =
-      NullCheck.notNull(String.format("login failed: %s", message));
+    final String s = NullCheck.notNull(
+      String.format(
+        "login failed: %s", message));
 
     LogUtilities.errorWithOptionalException(LoginDialog.LOG, s, error);
 
@@ -153,7 +154,7 @@ public final class LoginDialog extends DialogFragment
         }
       });
 
-    final LoginControllerListenerType ls = this.listener;
+    final LoginListenerType ls = this.listener;
     if (ls != null) {
       try {
         ls.onLoginFailure(error, message);
@@ -210,10 +211,10 @@ public final class LoginDialog extends DialogFragment
         }
       });
 
-    final LoginControllerListenerType ls = this.listener;
+    final LoginListenerType ls = this.listener;
     if (ls != null) {
       try {
-        ls.onLoginSuccess();
+        ls.onLoginSuccess(barcode, pin);
       } catch (final Throwable e) {
         LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
@@ -251,7 +252,7 @@ public final class LoginDialog extends DialogFragment
   {
     LoginDialog.LOG.debug("login aborted");
 
-    final LoginControllerListenerType ls = this.listener;
+    final LoginListenerType ls = this.listener;
     if (ls != null) {
       try {
         ls.onLoginAborted();
@@ -349,6 +350,7 @@ public final class LoginDialog extends DialogFragment
         @Override public void onClick(
           final @Nullable View v)
         {
+          LoginDialog.this.onCancel(null);
           LoginDialog.this.dismiss();
         }
       });
@@ -438,7 +440,7 @@ public final class LoginDialog extends DialogFragment
    */
 
   public void setLoginListener(
-    final LoginControllerListenerType in_listener)
+    final LoginListenerType in_listener)
   {
     this.listener = NullCheck.notNull(in_listener);
   }

@@ -8,7 +8,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.slf4j.Logger;
 

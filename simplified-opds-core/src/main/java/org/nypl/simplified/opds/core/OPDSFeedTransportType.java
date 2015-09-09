@@ -1,6 +1,5 @@
 package org.nypl.simplified.opds.core;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
@@ -21,11 +20,11 @@ public interface OPDSFeedTransportType<A>
    *
    * @return An input stream for the given URI.
    *
-   * @throws IOException On I/O errors
+   * @throws OPDSFeedTransportException On errors
    */
 
   InputStream getStream(
     final A context,
     final URI uri)
-    throws IOException;
+    throws OPDSFeedTransportException;
 }

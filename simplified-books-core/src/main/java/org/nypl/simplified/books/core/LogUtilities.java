@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.utilities;
+package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;

@@ -339,13 +339,11 @@ public final class BooksController extends Observable implements BooksType
   @Override public void bookBorrow(
     final BookID id,
     final OPDSAcquisition acq,
-    final OPDSAcquisitionFeedEntry eo,
-    final BookBorrowListenerType listener)
+    final OPDSAcquisitionFeedEntry eo)
   {
     NullCheck.notNull(id);
     NullCheck.notNull(acq);
     NullCheck.notNull(eo);
-    NullCheck.notNull(listener);
 
     BooksController.LOG.debug("borrow {}", id);
 
@@ -360,7 +358,6 @@ public final class BooksController extends Observable implements BooksType
         id,
         acq,
         eo,
-        listener,
         this.feed_loader,
         this.adobe_drm));
   }

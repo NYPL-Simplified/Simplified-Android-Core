@@ -9,6 +9,9 @@ import org.nypl.simplified.http.core.HTTPResultMatcherType;
 import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.OPDSFeedTransportException;
+import org.nypl.simplified.opds.core.OPDSFeedTransportHTTPException;
+import org.nypl.simplified.opds.core.OPDSFeedTransportIOException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 
 import java.io.IOException;
@@ -46,33 +49,32 @@ public final class FeedHTTPTransport
   @Override public InputStream getStream(
     final OptionType<HTTPAuthType> auth,
     final URI uri)
-    throws IOException
+    throws OPDSFeedTransportException
   {
     final HTTPResultType<InputStream> r = this.http.get(auth, uri, 0L);
     return r.matchResult(
-      new HTTPResultMatcherType<InputStream, InputStream, IOException>()
+      new HTTPResultMatcherType<InputStream, InputStream,
+        OPDSFeedTransportException>()
       {
         @Override
         public InputStream onHTTPError(final HTTPResultError<InputStream> e)
-          throws IOException
+          throws OPDSFeedTransportException
         {
-          throw new IOException(
-            String.format(
-              "Server error for URI %s: %d (%s)",
-              uri, Integer.valueOf(e.getStatus()),
-              e.getMessage()));
+          throw new OPDSFeedTransportHTTPException(e.getMessage(), e.getStatus());
         }
 
         @Override public InputStream onHTTPException(
           final HTTPResultException<InputStream> e)
-          throws IOException
+          throws OPDSFeedTransportException
         {
-          throw new IOException(e.getError());
+          final Exception er = e.getError();
+          final IOException ex = new IOException(er);
+          throw new OPDSFeedTransportIOException(er.getMessage(), ex);
         }
 
         @Override
         public InputStream onHTTPOK(final HTTPResultOKType<InputStream> e)
-          throws IOException
+          throws OPDSFeedTransportException
         {
           return e.getValue();
         }

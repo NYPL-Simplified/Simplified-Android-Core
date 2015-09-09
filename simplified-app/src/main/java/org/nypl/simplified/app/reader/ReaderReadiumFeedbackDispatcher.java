@@ -2,7 +2,7 @@ package org.nypl.simplified.app.reader;
 
 import com.io7m.jnull.NullCheck;
 import org.json.JSONObject;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 import java.net.URI;
