@@ -321,7 +321,10 @@ public final class FeedLoader
       new BlockingAuthenticationListener();
     listener.onFeedRequiresAuthentication(
       uri, attempts.getAndIncrement(), auth_listener);
-    auth_listener.waitForCompletion();
+
+    FeedLoader.LOG.trace("waiting for auth listener completion");
+    auth_listener.waitForCompletion(60L, TimeUnit.SECONDS);
+    FeedLoader.LOG.trace("finished waiting for completion");
 
     /**
      * If no authentication data was provided, the feed can't be loaded.
@@ -464,13 +467,18 @@ public final class FeedLoader
     /**
      * Wait until another thread calls {@link #completeNow()}.
      *
+     * @param unit The time unit
+     * @param time The time to wait
+     *
      * @throws InterruptedException If waiting is interrupted
      */
 
-    public void waitForCompletion()
+    public void waitForCompletion(
+      final long time,
+      final TimeUnit unit)
       throws InterruptedException
     {
-      this.latch.await();
+      this.latch.await(time, unit);
     }
 
     /**

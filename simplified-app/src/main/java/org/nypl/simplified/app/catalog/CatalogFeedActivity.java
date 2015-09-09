@@ -372,8 +372,11 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
      * on to the listener.
      */
 
+    CatalogFeedActivity.LOG.trace("feed auth: attempt {}", attempts);
     if (attempts == 0) {
       if (accounts.accountIsLoggedIn()) {
+        CatalogFeedActivity.LOG.trace("feed auth: using cached credentials");
+
         accounts.accountGetCachedLoginDetails(
           new AccountGetCachedCredentialsListenerType()
           {
@@ -390,7 +393,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
             }
           });
       }
-    } else {
+    }
+
+    if (attempts > 0 || accounts.accountIsLoggedIn() == false) {
+      CatalogFeedActivity.LOG.trace("feed auth: login required");
 
       /**
        * Otherwise, this is a new attempt and the current credentials
@@ -401,6 +407,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       {
         @Override public void onLoginAborted()
         {
+          LOG.trace("feed auth: aborted login");
           listener.onAuthenticationNotProvided();
         }
 
@@ -408,6 +415,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           final OptionType<Throwable> error,
           final String message)
         {
+          LogUtilities.errorWithOptionalException(LOG, "failed login", error);
           listener.onAuthenticationError(error, message);
         }
 
@@ -415,6 +423,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           final AccountBarcode user,
           final AccountPIN password)
         {
+          LOG.trace("feed auth: login supplied new credentials");
           listener.onAuthenticationProvided(user, password);
         }
       };
