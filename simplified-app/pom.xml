@@ -57,6 +57,7 @@
     <dependency>
       <groupId>android</groupId>
       <artifactId>android</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>android.support</groupId>

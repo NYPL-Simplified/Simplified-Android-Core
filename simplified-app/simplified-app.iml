@@ -67,8 +67,8 @@
     <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android:android:4.4.2_r4" level="project" />
     <orderEntry type="library" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
-    <orderEntry type="library" name="Maven: org.readium:readium-sdk-android-runtime:0.20.0" level="project" />
-    <orderEntry type="library" name="Maven: org.readium:readium-shared-js:0.20.0" level="project" />
+    <orderEntry type="library" name="Maven: org.readium:readium-sdk-android-runtime:0.20.0-NYPL-0001" level="project" />
+    <orderEntry type="library" name="Maven: org.readium:readium-shared-js:0.20.0-NYPL-0001" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.picasso:picasso:2.5.2" level="project" />
     <orderEntry type="library" name="Maven: com.nanohttpd:nanohttpd:2.1.1" level="project" />
     <orderEntry type="library" name="Maven: com.github.tony19:logback-android-core:1.1.1-3" level="project" />
