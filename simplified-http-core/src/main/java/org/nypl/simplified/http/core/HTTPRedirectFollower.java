@@ -1,16 +1,9 @@
-package org.nypl.simplified.downloader.core;
+package org.nypl.simplified.http.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.http.core.HTTPAuthType;
-import org.nypl.simplified.http.core.HTTPResultError;
-import org.nypl.simplified.http.core.HTTPResultException;
-import org.nypl.simplified.http.core.HTTPResultMatcherType;
-import org.nypl.simplified.http.core.HTTPResultOKType;
-import org.nypl.simplified.http.core.HTTPResultType;
-import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.assertions.Assertions;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -21,15 +14,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 /**
  * A function to follow redirects and make some attempt to correctly handle
  * authentication.
  */
 
-final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
-  HTTPResultMatcherType<InputStream, Unit, Exception>
+public final class HTTPRedirectFollower
+  implements HTTPResultMatcherType<InputStream, HTTPResultType<InputStream>,
+  Exception>
 {
   private final long                     byte_offset;
   private final HTTPType                 http;
@@ -40,8 +33,21 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
   private       int                      cur_redirects;
   private       OptionType<HTTPAuthType> current_auth;
   private       URI                      current_uri;
+  private       boolean                  used;
 
-  RedirectFollower(
+  /**
+   * Construct a redirect follower capable of making a request to the given
+   * URI.
+   *
+   * @param in_logger        A log interface
+   * @param in_http          An HTTP interface
+   * @param in_auth          Authentication info
+   * @param in_max_redirects The maximum number of redirects to follow
+   * @param in_uri           The target URI
+   * @param in_byte_offset   The byte offset of the request
+   */
+
+  public HTTPRedirectFollower(
     final Logger in_logger,
     final HTTPType in_http,
     final OptionType<HTTPAuthType> in_auth,
@@ -60,27 +66,64 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
     this.tried_auth = new HashSet<URI>(32);
   }
 
-  @Override public HTTPResultOKType<InputStream> call()
+  /**
+   * @return The result of a successful HTTP request
+   *
+   * @throws Exception On any error
+   */
+
+  public HTTPResultOKType<InputStream> runExceptional()
     throws Exception
   {
-    this.processURI();
+    Assertions.checkPrecondition(this.used == false, "Follower already used");
 
-    final HTTPResultType<InputStream> r =
-      this.http.get(this.current_auth, this.current_uri, this.byte_offset);
+    try {
+      this.processURI();
 
-    return r.matchResult(
-      new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>()
-      {
-        @Override public HTTPResultOKType<InputStream> onHTTPOK(
-          final HTTPResultOKType<InputStream> e)
-          throws Exception
+      final HTTPResultType<InputStream> r =
+        this.http.get(this.current_auth, this.current_uri, this.byte_offset);
+
+      return r.matchResult(
+        new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>()
         {
-          return e;
-        }
-      });
+          @Override public HTTPResultOKType<InputStream> onHTTPOK(
+            final HTTPResultOKType<InputStream> e)
+            throws Exception
+          {
+            return e;
+          }
+        });
+    } finally {
+      this.used = true;
+    }
   }
 
-  @Override public Unit onHTTPError(
+  /**
+   * @return The result of the HTTP requests
+   */
+
+  public HTTPResultType<InputStream> run()
+  {
+    Assertions.checkPrecondition(this.used == false, "Follower already used");
+
+    try {
+      try {
+        this.processURI();
+      } catch (final Exception e) {
+        return new HTTPResultException<InputStream>(this.current_uri, e);
+      }
+
+      return this.http.get(
+        this.current_auth,
+        this.current_uri,
+        this.byte_offset);
+
+    } finally {
+      this.used = true;
+    }
+  }
+
+  @Override public HTTPResultType<InputStream> onHTTPError(
     final HTTPResultError<InputStream> e)
     throws Exception
   {
@@ -92,15 +135,12 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
         if (this.tried_auth.contains(this.current_uri)) {
           this.logger.error(
             "already tried authenticating for {}", this.current_uri);
-
-          final String m = String.format("%d: %s", code, e.getMessage());
-          throw new DownloadAuthenticationError(NullCheck.notNull(m));
+          return e;
         }
 
         this.current_auth = this.target_auth;
         this.tried_auth.add(this.current_uri);
-        this.processURI();
-        return Unit.unit();
+        return this.processURI();
       }
     }
 
@@ -108,14 +148,14 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
     throw new IOException(NullCheck.notNull(m));
   }
 
-  @Override public Unit onHTTPException(
+  @Override public HTTPResultType<InputStream> onHTTPException(
     final HTTPResultException<InputStream> e)
     throws Exception
   {
     throw e.getError();
   }
 
-  @Override public Unit onHTTPOK(
+  @Override public HTTPResultType<InputStream> onHTTPOK(
     final HTTPResultOKType<InputStream> e)
     throws Exception
   {
@@ -123,7 +163,7 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
     this.logger.debug("received {} for {}", code, this.current_uri);
 
     if (code >= 200 && code < 300) {
-      return Unit.unit();
+      return e;
     }
 
     switch (code) {
@@ -150,8 +190,7 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
         this.logger.debug(
           "following redirect {} to {}", this.cur_redirects, this.current_uri);
 
-        this.processURI();
-        return Unit.unit();
+        return this.processURI();
       }
     }
 
@@ -160,7 +199,7 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
         "Unhandled http code (%d: %s)", e.getStatus(), e.getMessage()));
   }
 
-  private void processURI()
+  private HTTPResultType<InputStream> processURI()
     throws IOException, Exception
   {
     this.logger.debug("processing {}", this.current_uri);
@@ -171,7 +210,7 @@ final class RedirectFollower implements Callable<HTTPResultOKType<InputStream>>,
 
     final HTTPResultType<InputStream> r =
       this.http.get(this.current_auth, this.current_uri, 0L);
-    r.matchResult(this);
+    return r.matchResult(this);
   }
 
   private abstract static class DownloadErrorFlattener<A, B>

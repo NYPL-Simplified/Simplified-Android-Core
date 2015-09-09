@@ -3,6 +3,7 @@ package org.nypl.simplified.books.core;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPRedirectFollower;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
 import org.nypl.simplified.http.core.HTTPResultMatcherType;
@@ -13,6 +14,8 @@ import org.nypl.simplified.opds.core.OPDSFeedTransportException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportHTTPException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportIOException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +30,12 @@ import java.net.URI;
 public final class FeedHTTPTransport
   implements OPDSFeedTransportType<OptionType<HTTPAuthType>>
 {
+  private static final Logger LOG;
+
+  static {
+    LOG = NullCheck.notNull(LoggerFactory.getLogger(FeedHTTPTransport.class));
+  }
+
   private final HTTPType http;
 
   private FeedHTTPTransport(final HTTPType in_http)
@@ -51,7 +60,10 @@ public final class FeedHTTPTransport
     final URI uri)
     throws OPDSFeedTransportException
   {
-    final HTTPResultType<InputStream> r = this.http.get(auth, uri, 0L);
+    final HTTPRedirectFollower rf = new HTTPRedirectFollower(
+      FeedHTTPTransport.LOG, this.http, auth, 5, uri, 0L);
+
+    final HTTPResultType<InputStream> r = rf.run();
     return r.matchResult(
       new HTTPResultMatcherType<InputStream, InputStream,
         OPDSFeedTransportException>()
@@ -60,7 +72,8 @@ public final class FeedHTTPTransport
         public InputStream onHTTPError(final HTTPResultError<InputStream> e)
           throws OPDSFeedTransportException
         {
-          throw new OPDSFeedTransportHTTPException(e.getMessage(), e.getStatus());
+          throw new OPDSFeedTransportHTTPException(
+            e.getMessage(), e.getStatus());
         }
 
         @Override public InputStream onHTTPException(
