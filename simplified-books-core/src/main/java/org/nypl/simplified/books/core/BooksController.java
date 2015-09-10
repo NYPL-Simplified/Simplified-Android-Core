@@ -2,7 +2,6 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -48,23 +47,22 @@ public final class BooksController extends Observable implements BooksType
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
   }
 
-  private final BookDatabaseType                                  book_database;
-  private final BooksStatusCacheType                              books_status;
-  private final File
-                                                                  data_directory;
-  private final DownloaderType                                    downloader;
-  private final ConcurrentHashMap<BookID, DownloadType>           downloads;
-  private final ExecutorService                                   exec;
-  private final FeedLoaderType                                    feed_loader;
-  private final OPDSFeedParserType                                feed_parser;
-  private final HTTPType                                          http;
-  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
-  private final AtomicInteger                                     task_id;
-  private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
-  private final DocumentStoreType                                 docs;
-  private final File                                              root;
-  private final BooksControllerConfigurationType                  config;
-  private       Map<Integer, Future<?>>                           tasks;
+  private final BookDatabaseType                        book_database;
+  private final BooksStatusCacheType                    books_status;
+  private final File                                    data_directory;
+  private final DownloaderType                          downloader;
+  private final ConcurrentHashMap<BookID, DownloadType> downloads;
+  private final ExecutorService                         exec;
+  private final FeedLoaderType                          feed_loader;
+  private final OPDSFeedParserType                      feed_parser;
+  private final HTTPType                                http;
+  private final AtomicReference<AccountCredentials>     login;
+  private final AtomicInteger                           task_id;
+  private final OptionType<AdobeAdeptExecutorType>      adobe_drm;
+  private final DocumentStoreType                       docs;
+  private final File                                    root;
+  private final BooksControllerConfigurationType        config;
+  private       Map<Integer, Future<?>>                 tasks;
 
   private BooksController(
     final ExecutorService in_exec,
@@ -90,7 +88,7 @@ public final class BooksController extends Observable implements BooksType
     this.root = NullCheck.notNull(in_root);
 
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
-    this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
+    this.login = new AtomicReference<AccountCredentials>();
     this.downloads = new ConcurrentHashMap<BookID, DownloadType>(32);
     this.books_status = BooksStatusCache.newStatusCache();
     this.data_directory = new File(in_root, "data");
@@ -250,10 +248,10 @@ public final class BooksController extends Observable implements BooksType
   @Override public void accountGetCachedLoginDetails(
     final AccountGetCachedCredentialsListenerType listener)
   {
-    final Pair<AccountBarcode, AccountPIN> p = this.login.get();
+    final AccountCredentials p = this.login.get();
     if (p != null) {
       try {
-        listener.onAccountIsLoggedIn(p.getLeft(), p.getRight());
+        listener.onAccountIsLoggedIn(p);
       } catch (final Throwable x) {
         BooksController.LOG.error("listener raised exception: ", x);
       }
@@ -281,12 +279,10 @@ public final class BooksController extends Observable implements BooksType
   }
 
   @Override public void accountLogin(
-    final AccountBarcode barcode,
-    final AccountPIN pin,
+    final AccountCredentials account,
     final AccountLoginListenerType listener)
   {
-    NullCheck.notNull(barcode);
-    NullCheck.notNull(pin);
+    NullCheck.notNull(account);
     NullCheck.notNull(listener);
 
     this.submitRunnable(
@@ -296,8 +292,7 @@ public final class BooksController extends Observable implements BooksType
         this.http,
         this.config,
         this.adobe_drm,
-        barcode,
-        pin,
+        account,
         listener,
         this.login));
   }
@@ -339,13 +334,11 @@ public final class BooksController extends Observable implements BooksType
   @Override public void bookBorrow(
     final BookID id,
     final OPDSAcquisition acq,
-    final OPDSAcquisitionFeedEntry eo,
-    final BookBorrowListenerType listener)
+    final OPDSAcquisitionFeedEntry eo)
   {
     NullCheck.notNull(id);
     NullCheck.notNull(acq);
     NullCheck.notNull(eo);
-    NullCheck.notNull(listener);
 
     BooksController.LOG.debug("borrow {}", id);
 
@@ -360,7 +353,6 @@ public final class BooksController extends Observable implements BooksType
         id,
         acq,
         eo,
-        listener,
         this.feed_loader,
         this.adobe_drm));
   }

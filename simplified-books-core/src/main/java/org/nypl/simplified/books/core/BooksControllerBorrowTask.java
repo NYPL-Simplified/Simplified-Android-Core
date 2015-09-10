@@ -2,16 +2,17 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.drm.core.AdobeAdeptACSMException;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType;
+import org.nypl.drm.core.AdobeAdeptFulfillmentToken;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptNetProviderType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
@@ -69,7 +70,6 @@ final class BooksControllerBorrowTask implements Runnable,
   private final Map<BookID, DownloadType>          downloads;
   private final FeedLoaderType                     feed_loader;
   private final HTTPType                           http;
-  private final BookBorrowListenerType             listener;
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
 
@@ -82,7 +82,6 @@ final class BooksControllerBorrowTask implements Runnable,
     final BookID in_book_id,
     final OPDSAcquisition in_acq,
     final OPDSAcquisitionFeedEntry in_feed_entry,
-    final BookBorrowListenerType in_listener,
     final FeedLoaderType in_feed_loader,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
   {
@@ -92,7 +91,6 @@ final class BooksControllerBorrowTask implements Runnable,
     this.book_id = NullCheck.notNull(in_book_id);
     this.acq = NullCheck.notNull(in_acq);
     this.feed_entry = NullCheck.notNull(in_feed_entry);
-    this.listener = NullCheck.notNull(in_listener);
     this.books_database = NullCheck.notNull(in_books_database);
     this.books_status = NullCheck.notNull(in_books_status);
     this.feed_loader = NullCheck.notNull(in_feed_loader);
@@ -175,8 +173,15 @@ final class BooksControllerBorrowTask implements Runnable,
       }
     } catch (final IOException e) {
       BooksControllerBorrowTask.LOG.error(
-        "onDownloadCompleted: i/o exception: ",
-        e);
+        "onDownloadCompleted: i/o exception: ", e);
+      this.downloadFailed(Option.some((Throwable) e));
+    } catch (final BookUnsupportedTypeException e) {
+      BooksControllerBorrowTask.LOG.error(
+        "onDownloadCompleted: unsupported book exception: ", e);
+      this.downloadFailed(Option.some((Throwable) e));
+    } catch (final AdobeAdeptACSMException e) {
+      BooksControllerBorrowTask.LOG.error(
+        "onDownloadCompleted: acsm exception: ", e);
       this.downloadFailed(Option.some((Throwable) e));
     }
   }
@@ -225,7 +230,7 @@ final class BooksControllerBorrowTask implements Runnable,
    */
 
   private void runFulfillACSM(final File file)
-    throws IOException
+    throws IOException, AdobeAdeptACSMException, BookUnsupportedTypeException
   {
     /**
      * The ACSM file will typically have downloaded almost instantly, leaving
@@ -251,9 +256,17 @@ final class BooksControllerBorrowTask implements Runnable,
   private void runFulfillACSMWithConnector(
     final AdobeAdeptExecutorType adobe,
     final File file)
-    throws IOException
+    throws IOException, AdobeAdeptACSMException, BookUnsupportedTypeException
   {
     final byte[] acsm = FileUtilities.fileReadBytes(file);
+
+    final AdobeAdeptFulfillmentToken parsed =
+      AdobeAdeptFulfillmentToken.parseFromBytes(acsm);
+    final String format = parsed.getFormat();
+    if ("application/epub+zip".equals(format) == false) {
+      throw new BookUnsupportedTypeException(format);
+    }
+
     adobe.execute(
       new AdobeAdeptProcedureType()
       {
@@ -479,7 +492,6 @@ final class BooksControllerBorrowTask implements Runnable,
   {
     BooksControllerBorrowTask.LOG.debug("failed to load feed: {}: ", x);
     this.downloadFailed(Option.some(x));
-    this.listener.onBookBorrowFailure(this.book_id, Option.some(x));
   }
 
   @Override public void onFeedLoadSuccess(
@@ -490,9 +502,27 @@ final class BooksControllerBorrowTask implements Runnable,
       BooksControllerBorrowTask.LOG.debug("loaded feed from {}", u);
       f.matchFeed(this);
     } catch (final Throwable e) {
-      BooksControllerBorrowTask.LOG.error("failure after receiving feed: ", e);
-      this.listener.onBookBorrowFailure(this.book_id, Option.some(e));
+      BooksControllerBorrowTask.LOG.error(
+        "failure after receiving feed: {}: ", u, e);
     }
+  }
+
+  @Override public void onFeedRequiresAuthentication(
+    final URI u,
+    final int attempts,
+    final FeedLoaderAuthenticationListenerType listener)
+  {
+    /**
+     * XXX: If the feed resulting from borrowing a book requires authentication,
+     * then the user should be notified somehow and given a chance to log in.
+     * The app currently has the user log in prior to attempting an operation
+     * that requires credentials, but those credentials could have become stale
+     * in between "logging in" and attempting to borrow a book. We have no way
+     * to notify the user that their credentials are incorrect from here,
+     * however.
+     */
+
+    listener.onAuthenticationNotProvided();
   }
 
   @Override public Unit onFeedWithGroups(
@@ -549,7 +579,6 @@ final class BooksControllerBorrowTask implements Runnable,
 
     } catch (final Throwable e) {
       BooksControllerBorrowTask.LOG.error("error: ", e);
-      this.listener.onBookBorrowFailure(this.book_id, Option.some(e));
       this.downloadFailed(Option.some(e));
     }
   }
@@ -566,10 +595,9 @@ final class BooksControllerBorrowTask implements Runnable,
      * Borrowing requires authentication.
      */
 
-    final Pair<AccountBarcode, AccountPIN> p =
-      this.books_database.credentialsGet();
-    final AccountBarcode barcode = p.getLeft();
-    final AccountPIN pin = p.getRight();
+    final AccountCredentials p = this.books_database.credentialsGet();
+    final AccountBarcode barcode = p.getUser();
+    final AccountPIN pin = p.getPassword();
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 
@@ -592,10 +620,9 @@ final class BooksControllerBorrowTask implements Runnable,
      * Downloading requires authentication.
      */
 
-    final Pair<AccountBarcode, AccountPIN> p =
-      this.books_database.credentialsGet();
-    final AccountBarcode barcode = p.getLeft();
-    final AccountPIN pin = p.getRight();
+    final AccountCredentials p = this.books_database.credentialsGet();
+    final AccountBarcode barcode = p.getUser();
+    final AccountPIN pin = p.getPassword();
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 

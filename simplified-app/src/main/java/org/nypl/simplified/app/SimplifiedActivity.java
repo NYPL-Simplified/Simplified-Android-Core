@@ -34,7 +34,7 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;

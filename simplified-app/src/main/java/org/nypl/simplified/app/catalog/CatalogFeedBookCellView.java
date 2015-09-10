@@ -21,7 +21,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
@@ -49,6 +48,7 @@ import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -338,8 +338,10 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
 
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
     this.cell_downloading_failed_label.setText(
-      R.string.catalog_download_failed);
+      CatalogBookErrorStrings.getFailureString(rr, f));
+
     this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss.setOnClickListener(
       new OnClickListener()

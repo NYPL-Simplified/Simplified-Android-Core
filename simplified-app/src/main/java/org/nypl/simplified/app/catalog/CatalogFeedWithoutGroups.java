@@ -17,7 +17,8 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.FeedLoaderAuthenticationListenerType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
@@ -244,6 +245,19 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     final FeedType f)
   {
     f.matchFeed(this);
+  }
+
+  @Override public void onFeedRequiresAuthentication(
+    final URI u,
+    final int attempts,
+    final FeedLoaderAuthenticationListenerType listener)
+  {
+    /**
+     * XXX: Delegate this to the current activity, as it knows
+     * how to handle authentication!
+     */
+
+    listener.onAuthenticationNotProvided();
   }
 
   @Override public Unit onFeedWithGroups(

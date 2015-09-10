@@ -24,10 +24,11 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
@@ -38,6 +39,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.SyncedDocumentType;
 import org.slf4j.Logger;
 
@@ -101,10 +103,9 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   }
 
   @Override public void onAccountIsLoggedIn(
-    final AccountBarcode barcode,
-    final AccountPIN pin)
+    final AccountCredentials creds)
   {
-    MainSettingsActivity.LOG.debug("account is logged in: {}", barcode);
+    MainSettingsActivity.LOG.debug("account is logged in: {}", creds);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -120,8 +121,8 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       {
         @Override public void run()
         {
-          in_pin_edit.setText(pin.toString());
-          in_barcode_edit.setText(barcode.toString());
+          in_pin_edit.setText(creds.getPassword().toString());
+          in_barcode_edit.setText(creds.getUser().toString());
           MainSettingsActivity.editableDisable(in_barcode_edit);
           MainSettingsActivity.editableDisable(in_pin_edit);
 
@@ -165,6 +166,9 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final EditText in_pin_edit = NullCheck.notNull(this.pin_edit);
     final Button in_login = NullCheck.notNull(this.login);
 
+    final OptionType<AdobeVendorID> adobe_vendor = Option.some(
+      new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
+
     UIThread.runOnUIThread(
       new Runnable()
       {
@@ -194,7 +198,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 final Editable pin_text = in_pin_edit.getText();
                 final AccountPIN pin =
                   new AccountPIN(NullCheck.notNull(pin_text.toString()));
-                books.accountLogin(barcode, pin, MainSettingsActivity.this);
+
+                final AccountCredentials creds =
+                  new AccountCredentials(adobe_vendor, barcode, pin);
+                books.accountLogin(creds, MainSettingsActivity.this);
               }
             });
         }
@@ -271,11 +278,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   }
 
   @Override public void onAccountLoginSuccess(
-    final AccountBarcode barcode,
-    final AccountPIN pin)
+    final AccountCredentials creds)
   {
-    MainSettingsActivity.LOG.debug("account login succeeded: {}", barcode);
-    this.onAccountIsLoggedIn(barcode, pin);
+    MainSettingsActivity.LOG.debug("account login succeeded: {}", creds);
+    this.onAccountIsLoggedIn(creds);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();

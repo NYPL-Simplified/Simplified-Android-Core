@@ -1,8 +1,9 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -33,25 +34,21 @@ final class BooksControllerLoginTask implements Runnable,
   AccountDataSetupListenerType,
   AdobeAdeptActivationReceiverType
 {
-  private static final Logger        LOG;
-  private static final AdobeVendorID VENDOR_ID;
+  private static final Logger LOG;
 
   static {
     LOG = NullCheck.notNull(
       LoggerFactory.getLogger(BooksControllerLoginTask.class));
-    VENDOR_ID = new AdobeVendorID("NYPL");
   }
 
-  private final AccountBarcode                                    barcode;
-  private final BooksController                                   books;
-  private final BookDatabaseType
-                                                                  books_database;
-  private final BooksControllerConfigurationType                  config;
-  private final HTTPType                                          http;
-  private final AccountLoginListenerType                          listener;
-  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
-  private final AccountPIN                                        pin;
-  private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
+  private final BooksController                     books;
+  private final BookDatabaseType                    books_database;
+  private final BooksControllerConfigurationType    config;
+  private final HTTPType                            http;
+  private final AccountLoginListenerType            listener;
+  private final AtomicReference<AccountCredentials> login;
+  private final OptionType<AdobeAdeptExecutorType>  adobe_drm;
+  private final AccountCredentials                  credentials;
 
   BooksControllerLoginTask(
     final BooksController in_books,
@@ -59,18 +56,16 @@ final class BooksControllerLoginTask implements Runnable,
     final HTTPType in_http,
     final BooksControllerConfigurationType in_config,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    final AccountBarcode in_barcode,
-    final AccountPIN in_pin,
+    final AccountCredentials in_credentials,
     final AccountLoginListenerType in_listener,
-    final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login)
+    final AtomicReference<AccountCredentials> in_login)
   {
     this.books = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
     this.http = NullCheck.notNull(in_http);
     this.config = NullCheck.notNull(in_config);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
-    this.barcode = NullCheck.notNull(in_barcode);
-    this.pin = NullCheck.notNull(in_pin);
+    this.credentials = NullCheck.notNull(in_credentials);
     this.listener = new AccountLoginListenerCatcher(
       BooksControllerLoginTask.LOG, NullCheck.notNull(in_listener));
     this.login = NullCheck.notNull(in_login);
@@ -95,8 +90,10 @@ final class BooksControllerLoginTask implements Runnable,
     BooksControllerLoginTask.LOG.debug(
       "attempting login on {}", loans_uri);
 
+    final AccountBarcode user = this.credentials.getUser();
+    final AccountPIN pass = this.credentials.getPassword();
     final HTTPAuthType auth =
-      new HTTPAuthBasic(this.barcode.toString(), this.pin.toString());
+      new HTTPAuthBasic(user.toString(), pass.toString());
     final HTTPResultType<Unit> r = this.http.head(Option.some(auth), loans_uri);
 
     r.matchResult(
@@ -154,20 +151,43 @@ final class BooksControllerLoginTask implements Runnable,
     if (this.adobe_drm.isSome()) {
       final Some<AdobeAdeptExecutorType> some =
         (Some<AdobeAdeptExecutorType>) this.adobe_drm;
-      final AdobeAdeptExecutorType adobe = some.get();
-      adobe.execute(
-        new AdobeAdeptProcedureType()
+      final AdobeAdeptExecutorType adobe_exec = some.get();
+
+      final AccountBarcode user = this.credentials.getUser();
+      final AccountPIN pass = this.credentials.getPassword();
+      final OptionType<AdobeVendorID> vendor_opt =
+        this.credentials.getAdobeVendor();
+
+      vendor_opt.accept(
+        new OptionVisitorType<AdobeVendorID, Unit>()
         {
-          @Override public void executeWith(final AdobeAdeptConnectorType c)
+          @Override public Unit none(final None<AdobeVendorID> n)
           {
-            c.discardDeviceActivations();
-            c.activateDevice(
-              BooksControllerLoginTask.this,
-              BooksControllerLoginTask.VENDOR_ID,
-              BooksControllerLoginTask.this.barcode.toString(),
-              BooksControllerLoginTask.this.pin.toString());
+            BooksControllerLoginTask.this.onActivationError(
+              "No Adobe vendor ID provided");
+            return Unit.unit();
+          }
+
+          @Override public Unit some(final Some<AdobeVendorID> s)
+          {
+            adobe_exec.execute(
+              new AdobeAdeptProcedureType()
+              {
+                @Override
+                public void executeWith(final AdobeAdeptConnectorType c)
+                {
+                  c.discardDeviceActivations();
+                  c.activateDevice(
+                    BooksControllerLoginTask.this,
+                    s.get(),
+                    user.toString(),
+                    pass.toString());
+                }
+              });
+            return Unit.unit();
           }
         });
+
     } else {
 
       /**
@@ -181,8 +201,8 @@ final class BooksControllerLoginTask implements Runnable,
   private void onCompletedSuccessfully()
   {
     try {
-      this.books_database.credentialsSet(this.barcode, this.pin);
-      this.login.set(Pair.pair(this.barcode, this.pin));
+      this.books_database.credentialsSet(this.credentials);
+      this.login.set(this.credentials);
     } catch (final IOException e) {
       this.listener.onAccountLoginFailureLocalError(
         Option.some((Throwable) e), e.getMessage());
@@ -190,9 +210,9 @@ final class BooksControllerLoginTask implements Runnable,
     }
 
     BooksControllerLoginTask.LOG.debug(
-      "logged in as {} successfully", this.barcode);
+      "logged in as {} successfully", this.credentials.getUser());
 
-    this.listener.onAccountLoginSuccess(this.barcode, this.pin);
+    this.listener.onAccountLoginSuccess(this.credentials);
   }
 
   @Override public void run()

@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.3.16-b1</version>
+    <version>0.3.16-b2</version>
   </parent>
   <artifactId>simplified-stack</artifactId>
 
@@ -26,7 +26,7 @@
       <groupId>com.io7m.jfunctional</groupId>
       <artifactId>io7m-jfunctional-core</artifactId>
     </dependency>
-    
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

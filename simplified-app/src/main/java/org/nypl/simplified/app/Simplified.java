@@ -26,7 +26,7 @@ import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
 import org.nypl.simplified.app.reader.ReaderSettings;
 import org.nypl.simplified.app.reader.ReaderSettingsType;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
@@ -291,7 +291,7 @@ public final class Simplified extends Application
        */
 
       this.feed_initial_uri =
-        NullCheck.notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
+        NullCheck.notNull(URI.create(rr.getString(R.string.feature_catalog_start_uri)));
 
       /**
        * Feed loaders and parsers.
@@ -345,8 +345,8 @@ public final class Simplified extends Application
 
       final BooksControllerConfiguration books_config =
         new BooksControllerConfiguration(
-          URI.create(rr.getString(R.string.catalog_start_uri)),
-          URI.create(rr.getString(R.string.catalog_loans_uri)));
+          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
+          URI.create(rr.getString(R.string.feature_catalog_loans_uri)));
 
       /**
        * Configure EULA, privacy policy, etc.
@@ -452,7 +452,7 @@ public final class Simplified extends Application
                 CatalogAppServices.this.http,
                 books_config.getCurrentLoansURI());
             } catch (final Throwable x) {
-              LOG.error("could not fetch login form: ", x);
+              Simplified.LOG.error("could not fetch login form: ", x);
             }
           }
         });

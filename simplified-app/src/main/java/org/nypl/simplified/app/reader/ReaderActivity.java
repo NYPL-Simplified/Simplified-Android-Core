@@ -12,7 +12,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -33,7 +32,7 @@ import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.FadeUtilities;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
 import org.readium.sdk.android.Container;
@@ -41,7 +40,6 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
@@ -121,23 +119,6 @@ public final class ReaderActivity extends Activity implements
     final Intent i = new Intent(from, ReaderActivity.class);
     i.putExtras(b);
     from.startActivity(i);
-  }
-
-  private static @Nullable WebResourceResponse getInterceptedRequestResource(
-    final String url)
-  {
-    if ("simplified-resource:OpenDyslexic3-Regular.ttf".equals(url)) {
-      ReaderActivity.LOG.debug("intercepted {} request", url);
-      final InputStream stream =
-        ReaderActivity.class.getResourceAsStream("OpenDyslexic3-Regular.ttf");
-      if (stream != null) {
-        return new WebResourceResponse("font/truetype", "UTF-8", stream);
-      }
-
-      LOG.error("missing resource for {}", url);
-    }
-
-    return null;
   }
 
   private void applyViewerColorFilters()
@@ -262,7 +243,7 @@ public final class ReaderActivity extends Activity implements
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
-    LOG.debug("starting");
+    ReaderActivity.LOG.debug("starting");
 
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = NullCheck.notNull(i.getExtras());
@@ -272,8 +253,8 @@ public final class ReaderActivity extends Activity implements
     this.book_id =
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
 
-    LOG.debug("epub file: {}", in_epub_file);
-    LOG.debug("book id:   {}", this.book_id);
+    ReaderActivity.LOG.debug("epub file: {}", in_epub_file);
+    ReaderActivity.LOG.debug("book id:   {}", this.book_id);
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
@@ -368,52 +349,8 @@ public final class ReaderActivity extends Activity implements
       }
     };
 
-    final WebViewClient wv_client = new WebViewClient()
-    {
-      @Override public void onLoadResource(
-        final @Nullable WebView view,
-        final @Nullable String url)
-      {
-        ReaderActivity.LOG.debug("web-request: {}", url);
-      }
-
-      @Override public boolean shouldOverrideUrlLoading(
-        final @Nullable WebView view,
-        final @Nullable String url)
-      {
-        final String nu = NullCheck.notNull(url);
-        final URI uu = NullCheck.notNull(URI.create(nu));
-
-        ReaderActivity.LOG.debug("should-intercept: {}", nu);
-
-        if (nu.startsWith("simplified:")) {
-          sd.dispatch(uu, ReaderActivity.this);
-          return true;
-        }
-
-        if (nu.startsWith("readium:")) {
-          rd.dispatch(uu, ReaderActivity.this);
-          return true;
-        }
-
-        return super.shouldOverrideUrlLoading(view, url);
-      }
-
-      @Override public WebResourceResponse shouldInterceptRequest(
-        final WebView view,
-        final String url)
-      {
-        if (url.startsWith("simplified-resource:")) {
-          final WebResourceResponse r =
-            ReaderActivity.getInterceptedRequestResource(url);
-          if (r != null) {
-            return r;
-          }
-        }
-
-        return super.shouldInterceptRequest(view, url);
-      }
-    };
+    final WebViewClient wv_client =
+      new ReaderWebViewClient(this, sd, this, rd, this);
     in_webview.setBackgroundColor(0x00000000);
     in_webview.setWebChromeClient(wc_client);
     in_webview.setWebViewClient(wv_client);
@@ -955,4 +892,5 @@ public final class ReaderActivity extends Activity implements
 
     js.openContentURL(e.getContentRef(), e.getSourceHref());
   }
+
 }

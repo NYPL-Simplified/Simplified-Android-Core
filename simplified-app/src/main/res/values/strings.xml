@@ -23,16 +23,6 @@
   <string name="catalog_load_error_title">Error</string>
   <string name="catalog_load_error_text">An error occurred while loading the catalog. Please try again.</string>
   <string name="catalog_load_not_connected">You are not connected to the internet. Please connect and try again.</string>
-
-  <string name="catalog_uri_development">http://circulation.alpha.librarysimplified.org/groups/</string>
-  <string name="catalog_uri_development_loans">http://circulation.alpha.librarysimplified.org/loans/</string>
-  <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
-  <string name="catalog_uri_qa_loans">http://qa.circulation.librarysimplified.org/loans/</string>
-  <string name="catalog_uri_openebooks">http://circulation.alpha.librarysimplified.org/</string>
-  <string name="catalog_uri_openebooks_loans">http://circulation.alpha.librarysimplified.org/loans/</string>
-  <string name="catalog_start_uri">@string/catalog_uri_development</string>
-  <string name="catalog_loans_uri">@string/catalog_uri_development_loans</string>
-
   <string name="catalog_book_revoke_loan_confirm">Are you sure you want to return this book?</string>
   <string name="catalog_book_revoke_hold_confirm">Are you sure you want to cancel this hold?</string>
   <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
@@ -41,6 +31,8 @@
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_download_failed_unsupported_pdf">This book is an Adobe PDF, which is not supported.</string>
+  <string name="catalog_download_failed_unsupported_unknown">This book is of an unknown type and is not supported.</string>
   <string name="catalog_downloading">Downloading</string>
   <string name="catalog_empty_feed">No results found.</string>
   <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your account to fix it.</string>

@@ -1,7 +1,6 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +18,16 @@ final class BooksControllerDataLoadTask implements Runnable
       LoggerFactory.getLogger(BooksControllerDataLoadTask.class));
   }
 
-  private final BookDatabaseType
-    books_database;
-  private final BooksStatusCacheType                              books_status;
-  private final AccountDataLoadListenerType                       listener;
-  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
+  private final BookDatabaseType                    books_database;
+  private final BooksStatusCacheType                books_status;
+  private final AccountDataLoadListenerType         listener;
+  private final AtomicReference<AccountCredentials> login;
 
   BooksControllerDataLoadTask(
     final BookDatabaseType in_books_database,
     final BooksStatusCacheType in_books_status,
     final AccountDataLoadListenerType in_listener,
-    final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login)
+    final AtomicReference<AccountCredentials> in_login)
   {
     this.books_database = NullCheck.notNull(in_books_database);
     this.books_status = NullCheck.notNull(in_books_status);

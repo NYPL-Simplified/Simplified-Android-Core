@@ -21,7 +21,7 @@ import org.nypl.drm.core.AdobeAdeptResourceProvider;
 import org.nypl.drm.core.AdobeAdeptResourceProviderType;
 import org.nypl.drm.core.DRMException;
 import org.nypl.drm.core.DRMUnsupportedException;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;

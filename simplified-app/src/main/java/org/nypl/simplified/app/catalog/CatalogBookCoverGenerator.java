@@ -8,7 +8,7 @@ import android.graphics.Paint;
 import com.io7m.jnull.NullCheck;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.URIQueryBuilder;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.nypl.simplified.tenprint.TenPrintInput;

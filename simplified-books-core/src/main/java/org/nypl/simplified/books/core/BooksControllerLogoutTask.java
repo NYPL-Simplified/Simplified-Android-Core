@@ -2,7 +2,6 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
@@ -24,15 +23,15 @@ final class BooksControllerLogoutTask implements Runnable
       LoggerFactory.getLogger(BooksControllerLogoutTask.class));
   }
 
-  private final File                                              base;
-  private final AccountLogoutListenerType                         listener;
-  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
-  private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
+  private final File                                base;
+  private final AccountLogoutListenerType           listener;
+  private final AtomicReference<AccountCredentials> login;
+  private final OptionType<AdobeAdeptExecutorType>  adobe_drm;
 
   BooksControllerLogoutTask(
     final File in_root,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    final AtomicReference<Pair<AccountBarcode, AccountPIN>> in_login,
+    final AtomicReference<AccountCredentials> in_login,
     final AccountLogoutListenerType in_listener)
   {
     this.base = NullCheck.notNull(in_root);

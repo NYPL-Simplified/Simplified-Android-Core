@@ -9,7 +9,7 @@ import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 /**

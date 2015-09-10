@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="16dp"
-        android:text="@string/catalog_start_uri"
+        android:text="@string/feature_catalog_start_uri"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:inputType="textNoSuggestions"
         android:maxLines="1" />
@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="16dp"
-        android:text="@string/catalog_loans_uri"
+        android:text="@string/feature_catalog_loans_uri"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:inputType="textNoSuggestions"
         android:maxLines="1" />
