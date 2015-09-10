@@ -17,12 +17,14 @@
 
   <TextView
     android:id="@+id/login_dialog_text"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
     android:layout_centerHorizontal="true"
+    android:layout_marginBottom="16dp"
     android:maxLines="3"
     android:ellipsize="end"
+    android:gravity="center"
     android:text="@string/settings_login_title" />
 
   <TableLayout
@@ -86,6 +88,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
     android:layout_centerHorizontal="true"
+    android:layout_marginTop="16dp"
     android:layout_below="@id/login_dialog_table">
 
     <Button
