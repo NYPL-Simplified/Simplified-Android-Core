@@ -1,12 +1,13 @@
 package org.nypl.simplified.app;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.os.Build;
+import android.provider.Settings;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptConnectorFactory;
 import org.nypl.drm.core.AdobeAdeptConnectorFactoryType;
@@ -28,7 +29,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Functions to initialize and control Adobe DRM.
@@ -48,37 +50,28 @@ public final class AdobeDRMServices
   }
 
   /**
-   * Retrieve or generate a serial number unique to this device.
-   *
-   * @param context The application context
-   *
-   * @return A unique device serial
+   * Retrieve a serial number unique to this device.
    */
 
-  public static String getDeviceSerial(final Context context)
+  public static String getDeviceSerial()
   {
-    NullCheck.notNull(context);
+    try {
+      final MessageDigest md = MessageDigest.getInstance("SHA-256");
+      md.update(Build.SERIAL.getBytes());
+      md.update(Settings.Secure.ANDROID_ID.getBytes());
 
-    final SharedPreferences settings =
-      context.getSharedPreferences("adobe-drm-settings", 0);
-
-    String serial = settings.getString("adobe-device-serial", null);
-    if (serial == null || serial.length() != 64) {
-      AdobeDRMServices.LOG.debug("generating new device serial");
-      final SecureRandom rng = new SecureRandom();
-      final byte[] bytes = new byte[32];
-      rng.nextBytes(bytes);
+      final byte[] digest = md.digest();
       final StringBuilder sb = new StringBuilder();
-      for (int index = 0; index < bytes.length; ++index) {
-        sb.append(String.format("%02x", Byte.valueOf(bytes[index])));
+      for (int index = 0; index < digest.length; ++index) {
+        sb.append(String.format("%02x", Byte.valueOf(digest[index])));
       }
-      serial = sb.toString();
-    } else {
-      AdobeDRMServices.LOG.debug("loaded existing device serial");
-    }
 
-    settings.edit().putString("adobe-device-serial", serial).apply();
-    return serial;
+      final String id = sb.toString();
+      AdobeDRMServices.LOG.debug("device id: {}", id);
+      return id;
+    } catch (final NoSuchAlgorithmException e) {
+      throw new UnimplementedCodeException(e);
+    }
   }
 
   /**
@@ -101,7 +94,7 @@ public final class AdobeDRMServices
 
     final String device_name =
       String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
-    final String device_serial = AdobeDRMServices.getDeviceSerial(context);
+    final String device_serial = AdobeDRMServices.getDeviceSerial();
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
@@ -163,7 +156,7 @@ public final class AdobeDRMServices
 
     final String device_name =
       String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
-    final String device_serial = AdobeDRMServices.getDeviceSerial(context);
+    final String device_serial = AdobeDRMServices.getDeviceSerial();
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
