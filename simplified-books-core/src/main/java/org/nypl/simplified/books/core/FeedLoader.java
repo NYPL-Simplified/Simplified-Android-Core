@@ -2,7 +2,6 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -330,8 +329,7 @@ public final class FeedLoader
      * If no authentication data was provided, the feed can't be loaded.
      */
 
-    final OptionType<Pair<AccountBarcode, AccountPIN>> result_opt =
-      auth_listener.getResult();
+    final OptionType<AccountCredentials> result_opt = auth_listener.getResult();
     if (result_opt.isNone()) {
       throw e;
     }
@@ -340,11 +338,11 @@ public final class FeedLoader
      * Otherwise, record the provided credentials and try again.
      */
 
-    final Some<Pair<AccountBarcode, AccountPIN>> result_some =
-      (Some<Pair<AccountBarcode, AccountPIN>>) result_opt;
-    final Pair<AccountBarcode, AccountPIN> result = result_some.get();
-    final String user = result.getLeft().toString();
-    final String pass = result.getRight().toString();
+    final Some<AccountCredentials> result_some =
+      (Some<AccountCredentials>) result_opt;
+    final AccountCredentials result = result_some.get();
+    final String user = result.getUser().toString();
+    final String pass = result.getPassword().toString();
     return new HTTPAuthBasic(user, pass);
   }
 
@@ -441,26 +439,22 @@ public final class FeedLoader
   private final class BlockingAuthenticationListener
     implements FeedLoaderAuthenticationListenerType
   {
-    private final CountDownLatch latch;
-    private final AtomicReference<OptionType<Pair<AccountBarcode, AccountPIN>>>
-                                 result;
+    private final CountDownLatch                                  latch;
+    private final AtomicReference<OptionType<AccountCredentials>> result;
 
     public BlockingAuthenticationListener()
     {
       this.latch = new CountDownLatch(1);
-      final OptionType<Pair<AccountBarcode, AccountPIN>> none = Option.none();
-      this.result =
-        new AtomicReference<OptionType<Pair<AccountBarcode, AccountPIN>>>(none);
+      final OptionType<AccountCredentials> none = Option.none();
+      this.result = new AtomicReference<OptionType<AccountCredentials>>(none);
     }
 
     /**
      * @return The result, if the listener has completed
      */
 
-    public OptionType<Pair<AccountBarcode, AccountPIN>> getResult()
+    public OptionType<AccountCredentials> getResult()
     {
-      Assertions.checkPrecondition(
-        this.latch.getCount() == 0, "Listener has not completed");
       return this.result.get();
     }
 
@@ -494,10 +488,9 @@ public final class FeedLoader
     }
 
     @Override public void onAuthenticationProvided(
-      final AccountBarcode user,
-      final AccountPIN password)
+      final AccountCredentials credentials)
     {
-      this.result.set(Option.some(Pair.pair(user, password)));
+      this.result.set(Option.some(credentials));
       this.completeNow();
     }
 

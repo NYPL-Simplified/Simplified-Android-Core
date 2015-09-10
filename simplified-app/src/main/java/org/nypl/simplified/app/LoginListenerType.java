@@ -1,8 +1,7 @@
 package org.nypl.simplified.app;
 
 import com.io7m.jfunctional.OptionType;
-import org.nypl.simplified.books.core.AccountBarcode;
-import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AccountCredentials;
 
 /**
  * A listener that receives the results of login attempts.
@@ -30,11 +29,9 @@ public interface LoginListenerType
   /**
    * The user successfully logged in.
    *
-   * @param user     The current user name
-   * @param password The current password
+   * @param creds The account credentials
    */
 
   void onLoginSuccess(
-    AccountBarcode user,
-    AccountPIN password);
+    AccountCredentials creds);
 }

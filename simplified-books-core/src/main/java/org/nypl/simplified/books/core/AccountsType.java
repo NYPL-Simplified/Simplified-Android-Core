@@ -33,14 +33,12 @@ public interface AccountsType
   /**
    * Log in, delivering results to the given {@code listener}.
    *
-   * @param barcode  The barcode
-   * @param pin      The PIN
-   * @param listener The listener
+   * @param credentials The account credentials
+   * @param listener    The listener
    */
 
   void accountLogin(
-    AccountBarcode barcode,
-    AccountPIN pin,
+    AccountCredentials credentials,
     AccountLoginListenerType listener);
 
   /**

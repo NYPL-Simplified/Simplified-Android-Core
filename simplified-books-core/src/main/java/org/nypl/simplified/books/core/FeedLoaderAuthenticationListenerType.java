@@ -12,13 +12,11 @@ public interface FeedLoaderAuthenticationListenerType
   /**
    * Authentication data was provided.
    *
-   * @param user     The user
-   * @param password The password
+   * @param credentials The account credentials
    */
 
   void onAuthenticationProvided(
-    AccountBarcode user,
-    AccountPIN password);
+    AccountCredentials credentials);
 
   /**
    * No authentication data was provided.

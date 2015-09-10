@@ -20,8 +20,10 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
@@ -197,8 +199,7 @@ public final class LoginDialog extends DialogFragment
   }
 
   @Override public void onAccountLoginSuccess(
-    final AccountBarcode barcode,
-    final AccountPIN pin)
+    final AccountCredentials creds)
   {
     LoginDialog.LOG.debug("login succeeded");
 
@@ -214,7 +215,7 @@ public final class LoginDialog extends DialogFragment
     final LoginListenerType ls = this.listener;
     if (ls != null) {
       try {
-        ls.onLoginSuccess(barcode, pin);
+        ls.onLoginSuccess(creds);
       } catch (final Throwable e) {
         LoginDialog.LOG.debug("{}", e.getMessage(), e);
       }
@@ -315,6 +316,10 @@ public final class LoginDialog extends DialogFragment
     in_barcode_label.setText(auth_doc.getLabelLoginUserID());
     in_pin_label.setText(auth_doc.getLabelLoginPassword());
 
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final OptionType<AdobeVendorID> adobe_vendor = Option.some(
+      new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
+
     final BooksType books = app.getBooks();
 
     in_text.setText(initial_txt);
@@ -340,7 +345,10 @@ public final class LoginDialog extends DialogFragment
             new AccountBarcode(NullCheck.notNull(barcode_edit_text.toString()));
           final AccountPIN pin =
             new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
-          books.accountLogin(barcode, pin, LoginDialog.this);
+
+          final AccountCredentials creds =
+            new AccountCredentials(adobe_vendor, barcode, pin);
+          books.accountLogin(creds, LoginDialog.this);
         }
       });
 

@@ -1,7 +1,6 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.downloader.core.DownloaderType;
@@ -76,10 +75,9 @@ final class BooksControllerSyncTask implements Runnable
     throws Exception
   {
     final URI loans_uri = this.config.getCurrentLoansURI();
-    final Pair<AccountBarcode, AccountPIN> pair =
-      this.books_database.credentialsGet();
-    final AccountBarcode barcode = pair.getLeft();
-    final AccountPIN pin = pair.getRight();
+    final AccountCredentials c = this.books_database.credentialsGet();
+    final AccountBarcode barcode = c.getUser();
+    final AccountPIN pin = c.getPassword();
     final AccountSyncListenerType in_listener = this.listener;
 
     final HTTPAuthType auth =

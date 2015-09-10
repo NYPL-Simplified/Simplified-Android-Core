@@ -291,7 +291,7 @@ public final class Simplified extends Application
        */
 
       this.feed_initial_uri =
-        NullCheck.notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
+        NullCheck.notNull(URI.create(rr.getString(R.string.feature_catalog_start_uri)));
 
       /**
        * Feed loaders and parsers.
@@ -345,8 +345,8 @@ public final class Simplified extends Application
 
       final BooksControllerConfiguration books_config =
         new BooksControllerConfiguration(
-          URI.create(rr.getString(R.string.catalog_start_uri)),
-          URI.create(rr.getString(R.string.catalog_loans_uri)));
+          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
+          URI.create(rr.getString(R.string.feature_catalog_loans_uri)));
 
       /**
        * Configure EULA, privacy policy, etc.

@@ -23,16 +23,6 @@
   <string name="catalog_load_error_title">Error</string>
   <string name="catalog_load_error_text">An error occurred while loading the catalog. Please try again.</string>
   <string name="catalog_load_not_connected">You are not connected to the internet. Please connect and try again.</string>
-
-  <string name="catalog_uri_development">http://circulation.alpha.librarysimplified.org/groups/</string>
-  <string name="catalog_uri_development_loans">http://circulation.alpha.librarysimplified.org/loans/</string>
-  <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
-  <string name="catalog_uri_qa_loans">http://qa.circulation.librarysimplified.org/loans/</string>
-  <string name="catalog_uri_openebooks">http://qa.circulation.openebooks.us/</string>
-  <string name="catalog_uri_openebooks_loans">http://qa.circulation.openebooks.us/loans/</string>
-  <string name="catalog_start_uri">@string/catalog_uri_development</string>
-  <string name="catalog_loans_uri">@string/catalog_uri_development_loans</string>
-
   <string name="catalog_book_revoke_loan_confirm">Are you sure you want to return this book?</string>
   <string name="catalog_book_revoke_hold_confirm">Are you sure you want to cancel this hold?</string>
   <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>

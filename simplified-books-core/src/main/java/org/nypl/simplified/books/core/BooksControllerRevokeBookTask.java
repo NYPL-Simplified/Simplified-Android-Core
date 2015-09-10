@@ -4,7 +4,6 @@ import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionPartialVisitorType;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.PartialProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -139,9 +138,9 @@ final class BooksControllerRevokeBookTask
          */
 
         try {
-          final Pair<AccountBarcode, AccountPIN> creds =
+          final AccountCredentials creds =
             BooksControllerRevokeBookTask.this.books_database.credentialsGet();
-          listener.onAuthenticationProvided(creds.getLeft(), creds.getRight());
+          listener.onAuthenticationProvided(creds);
         } catch (final IOException e) {
           listener.onAuthenticationError(
             Option.some((Throwable) e), e.getMessage());
@@ -275,10 +274,10 @@ final class BooksControllerRevokeBookTask
   @NonNull private HTTPAuthType getHTTPAuth()
     throws IOException
   {
-    final Pair<AccountBarcode, AccountPIN> pair =
+    final AccountCredentials c =
       this.books_database.credentialsGet();
-    final AccountBarcode barcode = pair.getLeft();
-    final AccountPIN pin = pair.getRight();
+    final AccountBarcode barcode = c.getUser();
+    final AccountPIN pin = c.getPassword();
     return new HTTPAuthBasic(barcode.toString(), pin.toString());
   }
 

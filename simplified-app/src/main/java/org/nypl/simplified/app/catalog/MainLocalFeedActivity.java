@@ -8,14 +8,13 @@ import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
-import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 /**
@@ -33,8 +32,7 @@ abstract class MainLocalFeedActivity extends CatalogFeedActivity
   }
 
   @Override public void onAccountIsLoggedIn(
-    final AccountBarcode barcode,
-    final AccountPIN pin)
+    final AccountCredentials creds)
   {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();

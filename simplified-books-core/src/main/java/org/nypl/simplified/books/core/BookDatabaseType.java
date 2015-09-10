@@ -1,7 +1,5 @@
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.Pair;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -34,21 +32,19 @@ public interface BookDatabaseType
    * @throws IOException On I/O errors
    */
 
-  Pair<AccountBarcode, AccountPIN> credentialsGet()
+  AccountCredentials credentialsGet()
     throws IOException;
 
   /**
    * Set the user credentials.
    *
-   * @param barcode The barcode
-   * @param pin     The PIN
+   * @param credentials The credentials
    *
    * @throws IOException On I/O errors
    */
 
   void credentialsSet(
-    AccountBarcode barcode,
-    AccountPIN pin)
+    final AccountCredentials credentials)
     throws IOException;
 
   /**

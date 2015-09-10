@@ -38,6 +38,7 @@ import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountsType;
@@ -386,10 +387,9 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
             }
 
             @Override public void onAccountIsLoggedIn(
-              final AccountBarcode barcode,
-              final AccountPIN pin)
+              final AccountCredentials creds)
             {
-              listener.onAuthenticationProvided(barcode, pin);
+              listener.onAuthenticationProvided(creds);
             }
           });
       }
@@ -407,7 +407,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       {
         @Override public void onLoginAborted()
         {
-          LOG.trace("feed auth: aborted login");
+          CatalogFeedActivity.LOG.trace("feed auth: aborted login");
           listener.onAuthenticationNotProvided();
         }
 
@@ -415,16 +415,17 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           final OptionType<Throwable> error,
           final String message)
         {
-          LogUtilities.errorWithOptionalException(LOG, "failed login", error);
+          LogUtilities.errorWithOptionalException(
+            CatalogFeedActivity.LOG, "failed login", error);
           listener.onAuthenticationError(error, message);
         }
 
         @Override public void onLoginSuccess(
-          final AccountBarcode user,
-          final AccountPIN password)
+          final AccountCredentials creds)
         {
-          LOG.trace("feed auth: login supplied new credentials");
-          listener.onAuthenticationProvided(user, password);
+          CatalogFeedActivity.LOG.trace(
+            "feed auth: login supplied new credentials");
+          listener.onAuthenticationProvided(creds);
         }
       };
 

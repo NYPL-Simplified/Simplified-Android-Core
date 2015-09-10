@@ -36,13 +36,11 @@ public interface AccountLoginListenerType
   /**
    * Logging in succeeded.
    *
-   * @param barcode The current barcode
-   * @param pin     The current PIN
+   * @param credentials The current account credentials
    */
 
   void onAccountLoginSuccess(
-    AccountBarcode barcode,
-    AccountPIN pin);
+    AccountCredentials credentials);
 
   /**
    * Logging in failed due to a failure with device activation.

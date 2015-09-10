@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="catalog_uri_development">http://circulation.alpha.librarysimplified.org/groups/</string>
+  <string name="catalog_uri_development_loans">http://circulation.alpha.librarysimplified.org/loans/</string>
+  <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
+  <string name="catalog_uri_qa_loans">http://qa.circulation.librarysimplified.org/loans/</string>
+  <string name="catalog_uri_openebooks">http://qa.circulation.openebooks.us/</string>
+  <string name="catalog_uri_openebooks_loans">http://qa.circulation.openebooks.us/loans/</string>
+</resources>

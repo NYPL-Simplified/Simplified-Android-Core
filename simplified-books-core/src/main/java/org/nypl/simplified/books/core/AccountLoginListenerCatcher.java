@@ -52,11 +52,10 @@ final class AccountLoginListenerCatcher implements AccountLoginListenerType
   }
 
   @Override public void onAccountLoginSuccess(
-    final AccountBarcode barcode,
-    final AccountPIN pin)
+    final AccountCredentials credentials)
   {
     try {
-      this.delegate.onAccountLoginSuccess(barcode, pin);
+      this.delegate.onAccountLoginSuccess(credentials);
     } catch (final Throwable e) {
       this.log.error("onAccountLoginSuccess raised: ", e);
     }

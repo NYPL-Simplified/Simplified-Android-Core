@@ -2,7 +2,6 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -578,10 +577,9 @@ final class BooksControllerBorrowTask implements Runnable,
      * Borrowing requires authentication.
      */
 
-    final Pair<AccountBarcode, AccountPIN> p =
-      this.books_database.credentialsGet();
-    final AccountBarcode barcode = p.getLeft();
-    final AccountPIN pin = p.getRight();
+    final AccountCredentials p = this.books_database.credentialsGet();
+    final AccountBarcode barcode = p.getUser();
+    final AccountPIN pin = p.getPassword();
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 
@@ -604,10 +602,9 @@ final class BooksControllerBorrowTask implements Runnable,
      * Downloading requires authentication.
      */
 
-    final Pair<AccountBarcode, AccountPIN> p =
-      this.books_database.credentialsGet();
-    final AccountBarcode barcode = p.getLeft();
-    final AccountPIN pin = p.getRight();
+    final AccountCredentials p = this.books_database.credentialsGet();
+    final AccountBarcode barcode = p.getUser();
+    final AccountPIN pin = p.getPassword();
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 
