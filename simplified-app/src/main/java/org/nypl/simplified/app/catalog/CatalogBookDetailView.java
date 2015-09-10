@@ -477,6 +477,11 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("downloaded");
     this.book_download_buttons.removeAllViews();
 
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    final String text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(rr, d);
+    this.book_download_text.setText(text);
+
     if (d.isReturnable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
         this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN);
