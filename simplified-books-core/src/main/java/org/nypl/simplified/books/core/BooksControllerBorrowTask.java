@@ -8,9 +8,11 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.drm.core.AdobeAdeptACSMException;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType;
+import org.nypl.drm.core.AdobeAdeptFulfillmentToken;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptNetProviderType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
@@ -173,6 +175,14 @@ final class BooksControllerBorrowTask implements Runnable,
       BooksControllerBorrowTask.LOG.error(
         "onDownloadCompleted: i/o exception: ", e);
       this.downloadFailed(Option.some((Throwable) e));
+    } catch (final BookUnsupportedTypeException e) {
+      BooksControllerBorrowTask.LOG.error(
+        "onDownloadCompleted: unsupported book exception: ", e);
+      this.downloadFailed(Option.some((Throwable) e));
+    } catch (final AdobeAdeptACSMException e) {
+      BooksControllerBorrowTask.LOG.error(
+        "onDownloadCompleted: acsm exception: ", e);
+      this.downloadFailed(Option.some((Throwable) e));
     }
   }
 
@@ -220,7 +230,7 @@ final class BooksControllerBorrowTask implements Runnable,
    */
 
   private void runFulfillACSM(final File file)
-    throws IOException
+    throws IOException, AdobeAdeptACSMException, BookUnsupportedTypeException
   {
     /**
      * The ACSM file will typically have downloaded almost instantly, leaving
@@ -246,9 +256,17 @@ final class BooksControllerBorrowTask implements Runnable,
   private void runFulfillACSMWithConnector(
     final AdobeAdeptExecutorType adobe,
     final File file)
-    throws IOException
+    throws IOException, AdobeAdeptACSMException, BookUnsupportedTypeException
   {
     final byte[] acsm = FileUtilities.fileReadBytes(file);
+
+    final AdobeAdeptFulfillmentToken parsed =
+      AdobeAdeptFulfillmentToken.parseFromBytes(acsm);
+    final String format = parsed.getFormat();
+    if ("application/epub+zip".equals(format) == false) {
+      throw new BookUnsupportedTypeException(format);
+    }
+
     adobe.execute(
       new AdobeAdeptProcedureType()
       {

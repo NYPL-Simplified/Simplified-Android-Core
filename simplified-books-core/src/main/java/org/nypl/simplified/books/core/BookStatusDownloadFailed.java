@@ -43,6 +43,15 @@ public final class BookStatusDownloadFailed implements BookStatusDownloadingType
     return this.loan_end_date;
   }
 
+  /**
+   * @return The exception that caused the failure, if any
+   */
+
+  public OptionType<Throwable> getError()
+  {
+    return this.error;
+  }
+
   @Override public <A, E extends Exception> A matchBookDownloadingStatus(
     final BookStatusDownloadingMatcherType<A, E> m)
     throws E

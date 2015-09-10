@@ -31,6 +31,8 @@
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_download_failed_unsupported_pdf">This book is an Adobe PDF, which is not supported.</string>
+  <string name="catalog_download_failed_unsupported_unknown">This book is of an unknown type and is not supported.</string>
   <string name="catalog_downloading">Downloading</string>
   <string name="catalog_empty_feed">No results found.</string>
   <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your account to fix it.</string>

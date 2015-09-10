@@ -26,7 +26,6 @@ import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
@@ -54,6 +53,7 @@ import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
@@ -511,9 +511,11 @@ public final class CatalogBookDetailView implements Observer,
     this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
 
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+
     final TextView failed =
       NullCheck.notNull(this.book_downloading_failed_text);
-    failed.setText(R.string.catalog_download_failed);
+    failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
 
     final Button dismiss =
       NullCheck.notNull(this.book_downloading_failed_dismiss);

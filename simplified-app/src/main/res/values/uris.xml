@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="catalog_uri_test_books">https://s3.amazonaws.com/epub3.nypl-labs.biz/opds/index.xml</string>
   <string name="catalog_uri_development">http://circulation.alpha.librarysimplified.org/groups/</string>
   <string name="catalog_uri_development_loans">http://circulation.alpha.librarysimplified.org/loans/</string>
   <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
