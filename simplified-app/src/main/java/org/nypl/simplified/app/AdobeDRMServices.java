@@ -50,7 +50,7 @@ public final class AdobeDRMServices
   }
 
   /**
-   * Retrieve a serial number unique to this device.
+   * @return A serial number unique to this device.
    */
 
   public static String getDeviceSerial()
