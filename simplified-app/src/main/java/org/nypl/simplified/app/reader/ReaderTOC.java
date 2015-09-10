@@ -84,8 +84,15 @@ import java.util.List;
   {
     NullCheck.notNull(p);
 
+    final ReaderNativeCodeReadLock read_lock = ReaderNativeCodeReadLock.get();
+
     final List<TOCElement> rs = new ArrayList<TOCElement>();
-    final NavigationTable toc = NullCheck.notNull(p.getTableOfContents());
+    final NavigationTable toc;
+
+    synchronized (read_lock) {
+      toc = NullCheck.notNull(p.getTableOfContents());
+    }
+
     ReaderTOC.accumulate(rs, -1, toc, toc);
     return new ReaderTOC(rs);
   }

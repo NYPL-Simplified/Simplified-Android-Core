@@ -145,9 +145,7 @@ public final class ReaderReadiumJavaScriptAPI
       }
 
       this.evaluate(
-        NullCheck.notNull(
-          String.format(
-            "ReadiumSDK.reader.openBook(%s)", o)));
+        NullCheck.notNull(String.format("ReadiumSDK.reader.openBook(%s)", o)));
     } catch (final JSONException e) {
       throw new IllegalArgumentException(e);
     }
