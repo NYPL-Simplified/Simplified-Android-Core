@@ -230,7 +230,7 @@ public abstract class SimplifiedActivity extends Activity
     d.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
     dl.setOnItemClickListener(this);
 
-    final String app_name = NullCheck.notNull(rr.getString(R.string.app_name));
+    final String app_name = NullCheck.notNull(rr.getString(R.string.feature_app_name));
     final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);

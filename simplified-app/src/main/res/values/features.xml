@@ -17,4 +17,7 @@
   <!-- The configurable main color, used for branding. -->
   <color name="feature_main_color">@color/nypl_brand_color</color>
 
+  <!-- The configurable application name -->
+  <string name="feature_app_name">Simplified</string>
+
 </resources>
