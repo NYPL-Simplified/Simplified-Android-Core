@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <!-- The configurable application name -->
+  <string name="feature_app_name">Simplified</string>
+
+  <!-- The configurable application icon -->
+  <drawable name="feature_app_icon">@drawable/simplified</drawable>
+
+  <!-- The configurable splash screen image -->
+  <drawable name="feature_app_splash">@drawable/simplified</drawable>
+
+  <!-- The configurable main color, used for branding. -->
+  <color name="feature_main_color">@color/simplified_color</color>
+
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>
@@ -13,11 +25,5 @@
 
   <!-- The initial catalog loans URI that will be used to sync accounts -->
   <string name="feature_catalog_loans_uri">@string/catalog_uri_development_loans</string>
-
-  <!-- The configurable main color, used for branding. -->
-  <color name="feature_main_color">@color/nypl_brand_color</color>
-
-  <!-- The configurable application name -->
-  <string name="feature_app_name">Simplified</string>
 
 </resources>
