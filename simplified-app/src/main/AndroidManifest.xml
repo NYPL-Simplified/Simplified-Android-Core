@@ -120,20 +120,20 @@
       android:exported="true"
       android:configChanges="orientation|screenSize"
       android:theme="@style/SimplifiedThemeNoActionBar"
-      android:process=".ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
       android:exported="false"
       android:theme="@style/SimplifiedThemeNoActionBar"
       android:configChanges="orientation|screenSize"
-      android:process=".ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTestActivity"
       android:exported="true"
       android:configChanges="orientation|screenSize"
-      android:process=".ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>
   </application>
 

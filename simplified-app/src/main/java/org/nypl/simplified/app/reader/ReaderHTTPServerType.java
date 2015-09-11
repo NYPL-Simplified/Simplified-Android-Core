@@ -2,13 +2,14 @@ package org.nypl.simplified.app.reader;
 
 import org.readium.sdk.android.Package;
 
+import java.io.Closeable;
 import java.net.URI;
 
 /**
  * The interface exposed by the reader HTTP server.
  */
 
-public interface ReaderHTTPServerType
+public interface ReaderHTTPServerType extends Closeable
 {
   /**
    * @return The base URI used to request resources from the server.

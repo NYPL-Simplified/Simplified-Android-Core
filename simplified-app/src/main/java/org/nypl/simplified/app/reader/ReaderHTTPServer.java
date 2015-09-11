@@ -14,6 +14,7 @@ import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
@@ -23,7 +24,7 @@ import java.util.concurrent.ExecutorService;
  * The default implementation of the {@link ReaderHTTPServerType} interface.
  */
 
-@SuppressWarnings("synthetic-access") public final class ReaderHTTPServer
+public final class ReaderHTTPServer
   extends NanoHTTPD implements ReaderHTTPServerType
 {
   private static final Logger LOG;
@@ -296,5 +297,12 @@ import java.util.concurrent.ExecutorService;
           }
         }
       });
+  }
+
+  @Override public void close()
+    throws IOException
+  {
+    LOG.debug("shutting down server");
+    this.stop();
   }
 }
