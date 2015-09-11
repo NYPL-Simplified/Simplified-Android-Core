@@ -135,7 +135,7 @@ public final class ReaderActivity extends Activity implements
     final ImageView in_media_prev = NullCheck.notNull(this.view_media_prev);
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final int main_color = rr.getColor(R.color.main_color);
+    final int main_color = rr.getColor(R.color.feature_main_color);
     final ColorMatrixColorFilter filter =
       ReaderColorMatrix.getImageFilterMatrix(main_color);
 

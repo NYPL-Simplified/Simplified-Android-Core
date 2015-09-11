@@ -7,5 +7,5 @@
     android:top="1.5dp"
     android:right="1.5dp"
     android:bottom="1.5dp" />
-  <solid android:color="@color/main_color" />
+  <solid android:color="@color/feature_main_color" />
 </shape>

@@ -14,4 +14,7 @@
   <!-- The initial catalog loans URI that will be used to sync accounts -->
   <string name="feature_catalog_loans_uri">@string/catalog_uri_development_loans</string>
 
+  <!-- The configurable main color, used for branding. -->
+  <color name="feature_main_color">@color/nypl_brand_color</color>
+
 </resources>
