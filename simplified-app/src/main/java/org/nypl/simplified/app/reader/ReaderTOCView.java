@@ -119,7 +119,7 @@ import java.util.List;
   {
     UIThread.checkIsUIThread();
 
-    final int main_color = r.getColor(R.color.main_color);
+    final int main_color = r.getColor(R.color.feature_main_color);
     final ImageView in_back = NullCheck.notNull(this.view_back);
     final TextView in_title = NullCheck.notNull(this.view_title);
     final ViewGroup in_root = NullCheck.notNull(this.view_root);

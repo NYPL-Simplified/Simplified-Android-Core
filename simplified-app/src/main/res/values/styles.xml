@@ -16,7 +16,7 @@
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>
-    <item name="android:textColor">@color/main_color</item>
+    <item name="android:textColor">@color/feature_main_color</item>
     <item name="android:textStyle">normal</item>
     <item name="android:typeface">sans</item>
   </style>
