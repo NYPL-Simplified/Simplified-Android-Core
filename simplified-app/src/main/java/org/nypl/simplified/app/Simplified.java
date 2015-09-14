@@ -3,7 +3,6 @@ package org.nypl.simplified.app;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -620,11 +619,6 @@ public final class Simplified extends Application
       return this.screen.screenGetWidthPixels();
     }
 
-    @Override public boolean screenIsLarge()
-    {
-      return this.screen.screenIsLarge();
-    }
-
     @Override public void syncInitial()
     {
       if (this.synced.compareAndSet(false, true)) {
@@ -707,10 +701,6 @@ public final class Simplified extends Application
       return this.screen.screenGetWidthPixels();
     }
 
-    @Override public boolean screenIsLarge()
-    {
-      return this.screen.screenIsLarge();
-    }
   }
 
   private static final class ScreenSizeController
@@ -761,37 +751,6 @@ public final class Simplified extends Application
       return dm.widthPixels;
     }
 
-    @Override public boolean screenIsLarge()
-    {
-      final Resources rr = NullCheck.notNull(this.resources);
-      final Configuration c = NullCheck.notNull(rr.getConfiguration());
-      final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-      boolean large = false;
-      large |= (s & Configuration.SCREENLAYOUT_SIZE_LARGE)
-               == Configuration.SCREENLAYOUT_SIZE_LARGE;
-      large |= (s & Configuration.SCREENLAYOUT_SIZE_XLARGE)
-               == Configuration.SCREENLAYOUT_SIZE_XLARGE;
-
-      if (rr.getBoolean(R.bool.debug_override_large_screen)) {
-        if (large == false) {
-          Simplified.LOG.debug(
-            "screen size overridden to be large by "
-            + "debug_override_large_screen");
-          return true;
-        }
-      }
-
-      if (rr.getBoolean(R.bool.debug_override_small_screen)) {
-        if (large == true) {
-          Simplified.LOG.debug(
-            "screen size overridden to be small by "
-            + "debug_override_small_screen");
-          return false;
-        }
-      }
-
-      return large;
-    }
   }
 
   private final static class BooksControllerConfiguration

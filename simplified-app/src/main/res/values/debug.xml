@@ -12,12 +12,4 @@
     activities/dialogs. -->
   <bool name="debug_catalog_cell_view_states">false</bool>
 
-  <!-- If testing on a device with a screen that's considered to be "large", setting 
-    this variable to true will instead cause the screen to be reported as "not large". -->
-  <bool name="debug_override_small_screen">false</bool>
-
-  <!-- If testing on a device with a screen that's considered to be "not large", 
-    setting this variable to true will instead cause the screen to be reported as "large". -->
-  <bool name="debug_override_large_screen">false</bool>
-
 </resources>

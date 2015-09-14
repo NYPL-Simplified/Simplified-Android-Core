@@ -33,9 +33,4 @@ public interface ScreenSizeControllerType
 
   int screenGetWidthPixels();
 
-  /**
-   * @return {@code true} if the current screen is considered to be "large"
-   */
-
-  boolean screenIsLarge();
 }
