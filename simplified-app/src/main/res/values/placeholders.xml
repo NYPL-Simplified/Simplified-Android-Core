@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="placeholder_short_title">
+    Title Title Title
+  </string>
   <string name="placeholder_long_title">
     Title Title Title Title Title Title Title Title Title
     Title Title Title Title Title Title Title Title Title Title Title Title
