@@ -36,7 +36,6 @@ import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -112,6 +111,7 @@ public final class ReaderHTTPServerAAsync
     final ReaderHTTPServerStartListenerType s)
   {
     final ReaderHTTPServerAAsync as = this;
+
     if (this.started.compareAndSet(false, true)) {
       try {
         final InetSocketAddress host =
@@ -146,13 +146,11 @@ public final class ReaderHTTPServerAAsync
         s.onServerStartFailed(this, e);
         this.started.set(false);
       }
+    } else {
+      ReaderHTTPServerAAsync.LOG.debug("server already running");
+      as.setPackage(p);
+      s.onServerStartSucceeded(as, true);
     }
-  }
-
-  @Override public void close()
-    throws IOException
-  {
-
   }
 
   @Override public void onRequest(

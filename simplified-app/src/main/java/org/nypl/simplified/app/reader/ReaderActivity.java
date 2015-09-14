@@ -40,7 +40,6 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -412,13 +411,6 @@ public final class ReaderActivity extends Activity implements
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
-
-    try {
-      final ReaderHTTPServerType http = rs.getHTTPServer();
-      http.close();
-    } catch (final IOException e) {
-      LOG.error("could not shut down server: ", e);
-    }
 
     final ReaderSettingsType settings = rs.getSettings();
     settings.removeListener(this);
@@ -800,7 +792,11 @@ public final class ReaderActivity extends Activity implements
     final Throwable x)
   {
     ErrorDialogUtilities.showErrorWithRunnable(
-      this, ReaderActivity.LOG, "Could not start http server.", x, new Runnable()
+      this,
+      ReaderActivity.LOG,
+      "Could not start http server.",
+      x,
+      new Runnable()
       {
         @Override public void run()
         {
