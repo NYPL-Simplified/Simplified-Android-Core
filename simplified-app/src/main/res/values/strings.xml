@@ -92,6 +92,7 @@
   <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
   <string name="settings_adobe_accounts">Adobe Accounts</string>
   <string name="settings_alt_uris">Alternate URIs</string>
+  <string name="settings_reveal_password">Show PIN</string>
 
   <!-- Accessibility strings used for content descriptions (Settings) -->
   <string name="settings_accessibility_log_in_cancel">Cancel login</string>
