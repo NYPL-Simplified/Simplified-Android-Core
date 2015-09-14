@@ -78,7 +78,10 @@
       <classifier>armeabi-v7a</classifier>
       <type>so</type>
     </dependency>
-
+    <dependency>
+      <groupId>com.koushikdutta.async</groupId>
+      <artifactId>androidasync</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.squareup.picasso</groupId>
       <artifactId>picasso</artifactId>

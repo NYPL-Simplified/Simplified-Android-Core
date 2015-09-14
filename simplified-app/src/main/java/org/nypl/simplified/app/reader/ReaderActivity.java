@@ -800,7 +800,7 @@ public final class ReaderActivity extends Activity implements
     final Throwable x)
   {
     ErrorDialogUtilities.showErrorWithRunnable(
-      this, ReaderActivity.LOG, "Could not start http server", x, new Runnable()
+      this, ReaderActivity.LOG, "Could not start http server.", x, new Runnable()
       {
         @Override public void run()
         {

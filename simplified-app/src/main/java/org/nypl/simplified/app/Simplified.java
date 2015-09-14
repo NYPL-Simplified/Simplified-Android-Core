@@ -20,7 +20,7 @@ import org.nypl.simplified.app.reader.ReaderBookmarks;
 import org.nypl.simplified.app.reader.ReaderBookmarksType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
-import org.nypl.simplified.app.reader.ReaderHTTPServer;
+import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
@@ -659,8 +659,8 @@ public final class Simplified extends Application
       this.http_executor = Simplified.namedThreadPool(1, "httpd", 19);
       this.http_request_executor =
         Simplified.namedThreadPool(8, "httpd-request", 19);
-      this.httpd = ReaderHTTPServer.newServer(
-        this.http_executor, this.http_request_executor, this.mime, 8080);
+
+      this.httpd = ReaderHTTPServerAAsync.newServer(this.mime, 8080);
 
       this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       this.epub_loader =

@@ -21,16 +21,16 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
- * The default implementation of the {@link ReaderHTTPServerType} interface.
+ * The NanoHTTPd implementation of the {@link ReaderHTTPServerType} interface.
  */
 
-public final class ReaderHTTPServer
+public final class ReaderHTTPServerNano
   extends NanoHTTPD implements ReaderHTTPServerType
 {
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(ReaderHTTPServer.class);
+    LOG = LogUtilities.getLog(ReaderHTTPServerNano.class);
   }
 
   private final     URI                   base;
@@ -39,7 +39,7 @@ public final class ReaderHTTPServer
   private final     ExecutorService       exec_request;
   private @Nullable Package               epub_package;
 
-  private ReaderHTTPServer(
+  private ReaderHTTPServerNano(
     final ExecutorService in_exec,
     final ExecutorService in_request_exec,
     final ReaderHTTPMimeMapType in_mime,
@@ -57,27 +57,19 @@ public final class ReaderHTTPServer
       {
         @Override public void exec(final Runnable code)
         {
-          ReaderHTTPServer.this.exec_request.submit(code);
+          ReaderHTTPServerNano.this.exec_request.submit(code);
         }
       });
   }
 
-  private static OptionType<String> getSuffix(
-    final String path)
-  {
-    final int i = path.lastIndexOf('.');
-    if (i > 0) {
-      return Option.some(NullCheck.notNull(path.substring(i + 1)));
-    }
-    return Option.none();
-  }
+
 
   private static Response loggedResponse(
     final String path,
     final Response r)
   {
     final long thread_id = Thread.currentThread().getId();
-    ReaderHTTPServer.LOG.debug(
+    ReaderHTTPServerNano.LOG.debug(
       "response: [{}] {} {} {}",
       thread_id,
       r.getStatus(),
@@ -104,13 +96,13 @@ public final class ReaderHTTPServer
     final ReaderHTTPMimeMapType in_mime,
     final int in_port)
   {
-    return new ReaderHTTPServer(in_exec, in_request_exec, in_mime, in_port);
+    return new ReaderHTTPServerNano(in_exec, in_request_exec, in_mime, in_port);
   }
 
   private static Response serveError(
     final Throwable x)
   {
-    ReaderHTTPServer.LOG.error("{}", x.getMessage(), x);
+    ReaderHTTPServerNano.LOG.error("{}", x.getMessage(), x);
     return new Response(
       Response.Status.INTERNAL_ERROR, "text/plain", x.getMessage());
   }
@@ -120,17 +112,6 @@ public final class ReaderHTTPServer
     return this.base;
   }
 
-  private String guessMimeType(
-    final String uri)
-  {
-    final OptionType<String> opt = ReaderHTTPServer.getSuffix(uri);
-    if (opt.isSome()) {
-      final String suffix = ((Some<String>) opt).get();
-      return this.mime.getMimeTypeForSuffix(suffix);
-    }
-    return this.mime.getDefaultMimeType();
-  }
-
   @Override public Response serve(
     final @Nullable IHTTPSession session)
   {
@@ -138,7 +119,7 @@ public final class ReaderHTTPServer
       final IHTTPSession nns = NullCheck.notNull(session);
       return this.serveActual(nns);
     } catch (final Throwable x) {
-      return ReaderHTTPServer.serveError(x);
+      return ReaderHTTPServerNano.serveError(x);
     }
   }
 
@@ -158,7 +139,11 @@ public final class ReaderHTTPServer
     final OptionType<HTTPRangeType> range_opt =
       this.getRangeRequestType(nns, method, path, thread_id);
 
-    final String type = this.guessMimeType(path);
+    /**
+     * Guess the mime type.
+     */
+
+    final String type = this.mime.guessMimeTypeForURI(nns.getUri());
 
     /**
      * Try looking at the included Java resources first. This includes all of
@@ -169,11 +154,11 @@ public final class ReaderHTTPServer
 
     {
       final InputStream stream =
-        ReaderHTTPServer.class.getResourceAsStream(path);
+        ReaderHTTPServerNano.class.getResourceAsStream(path);
 
       if (stream != null) {
         final Response response = new Response(Status.OK, type, stream);
-        return ReaderHTTPServer.loggedResponse(path, response);
+        return ReaderHTTPServerNano.loggedResponse(path, response);
       }
     }
 
@@ -186,7 +171,7 @@ public final class ReaderHTTPServer
       final Package pack = NullCheck.notNull(this.epub_package);
       final String relative = path.replaceFirst("^[/]+", "");
 
-      ReaderHTTPServer.LOG.debug("request: trying package path: {}", relative);
+      ReaderHTTPServerNano.LOG.debug("request: trying package path: {}", relative);
 
       final int size;
       synchronized (read_lock) {
@@ -222,11 +207,11 @@ public final class ReaderHTTPServer
         }
 
         final Response response = new Response(status, type, response_stream);
-        return ReaderHTTPServer.loggedResponse(path, response);
+        return ReaderHTTPServerNano.loggedResponse(path, response);
       }
     }
 
-    return ReaderHTTPServer.loggedResponse(
+    return ReaderHTTPServerNano.loggedResponse(
       path, new Response(
         Response.Status.NOT_FOUND, "text/plain", ""));
   }
@@ -245,14 +230,14 @@ public final class ReaderHTTPServer
       range_opt = HTTPRanges.fromRangeString(range_text);
       if (range_opt.isSome()) {
         final Some<HTTPRangeType> some = (Some<HTTPRangeType>) range_opt;
-        ReaderHTTPServer.LOG.debug(
+        ReaderHTTPServerNano.LOG.debug(
           "request [{}] (ranged {}): {} {}",
           thread_id,
           some.get(),
           method,
           path);
       } else {
-        ReaderHTTPServer.LOG.debug(
+        ReaderHTTPServerNano.LOG.debug(
           "request [{}] (full - ranged unparseable): {} {}",
           thread_id,
           method,
@@ -260,7 +245,7 @@ public final class ReaderHTTPServer
       }
     } else {
       range_opt = Option.none();
-      ReaderHTTPServer.LOG.debug(
+      ReaderHTTPServerNano.LOG.debug(
         "request [{}] (full): {} {}", thread_id, method, path);
     }
     return range_opt;
@@ -278,7 +263,7 @@ public final class ReaderHTTPServer
   {
     NullCheck.notNull(p);
     NullCheck.notNull(s);
-    final ReaderHTTPServer hs = this;
+    final ReaderHTTPServerNano hs = this;
     this.exec.submit(
       new Runnable()
       {
