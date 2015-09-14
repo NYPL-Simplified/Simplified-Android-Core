@@ -32,9 +32,9 @@ import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.FadeUtilities;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -792,7 +792,11 @@ public final class ReaderActivity extends Activity implements
     final Throwable x)
   {
     ErrorDialogUtilities.showErrorWithRunnable(
-      this, ReaderActivity.LOG, "Could not start http server", x, new Runnable()
+      this,
+      ReaderActivity.LOG,
+      "Could not start http server.",
+      x,
+      new Runnable()
       {
         @Override public void run()
         {

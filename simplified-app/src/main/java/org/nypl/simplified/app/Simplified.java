@@ -20,7 +20,7 @@ import org.nypl.simplified.app.reader.ReaderBookmarks;
 import org.nypl.simplified.app.reader.ReaderBookmarksType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
-import org.nypl.simplified.app.reader.ReaderHTTPServer;
+import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
@@ -290,9 +290,10 @@ public final class Simplified extends Application
        * Catalog URIs.
        */
 
-      this.feed_initial_uri =
-        NullCheck.notNull(URI.create(rr.getString(R.string
-                                                    .feature_catalog_start_uri)));
+      this.feed_initial_uri = NullCheck.notNull(
+        URI.create(
+          rr.getString(
+            R.string.feature_catalog_start_uri)));
 
       /**
        * Feed loaders and parsers.
@@ -642,12 +643,10 @@ public final class Simplified extends Application
     private final ReaderBookmarksType         bookmarks;
     private final ExecutorService             epub_exec;
     private final ReaderReadiumEPUBLoaderType epub_loader;
-    private final ExecutorService             http_executor;
     private final ReaderHTTPServerType        httpd;
     private final ReaderHTTPMimeMapType       mime;
     private final ScreenSizeControllerType    screen;
     private final ReaderSettingsType          settings;
-    private final ExecutorService             http_request_executor;
 
     private ReaderAppServices(
       final Context context,
@@ -656,11 +655,8 @@ public final class Simplified extends Application
       this.screen = new ScreenSizeController(rr);
 
       this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
-      this.http_executor = Simplified.namedThreadPool(1, "httpd", 19);
-      this.http_request_executor =
-        Simplified.namedThreadPool(8, "httpd-request", 19);
-      this.httpd = ReaderHTTPServer.newServer(
-        this.http_executor, this.http_request_executor, this.mime, 8080);
+
+      this.httpd = ReaderHTTPServerAAsync.newServer(this.mime, 8080);
 
       this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       this.epub_loader =

@@ -491,7 +491,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final boolean in_drawer_open = true;
     final ImmutableStack<CatalogFeedArgumentsType> empty =
       ImmutableStack.empty();
-    final String in_title = NullCheck.notNull(rr.getString(R.string.app_name));
+    final String in_title = NullCheck.notNull(rr.getString(R.string.feature_app_name));
     final URI in_uri = books_config.getCurrentRootFeedURI();
 
     return new CatalogFeedArgumentsRemote(

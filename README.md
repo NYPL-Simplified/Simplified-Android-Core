@@ -44,45 +44,46 @@ enabled is achieved by:
 $ mvn -P nypl-drm-adobe clean package
 ```
 
-## Branding
+## Branding And Configurable Features
 
-To produce NYPL-branded packages:
+The application is designed to support a few features that can be
+configured at build-time. All user configurable values are exposed
+in the file:
 
-* Edit `simplified-app/src/main/AndroidManifest.xml.`
+```simplified-app/src/main/res/features.xml```
+
+For example, to produce NYPL-branded packages:
 
 Change:
 
 ```
-<application
-  android:name="org.nypl.simplified.app.Simplified"
-  android:allowBackup="true"
-  android:icon="@drawable/simplified"
-  android:label="@string/app_name"
-  android:largeHeap="true"
-  android:theme="@style/SimplifiedTheme">
+  <!-- The configurable application icon -->
+  <drawable name="feature_app_icon">@drawable/simplified</drawable>
+
+  <!-- The configurable splash screen image -->
+  <drawable name="feature_app_splash">@drawable/simplified</drawable>
+
+  <!-- The configurable main color, used for branding. -->
+  <color name="feature_main_color">@color/simplified_color</color>
+
 ```
 To:
 
 ```
-<application
-  android:name="org.nypl.simplified.app.Simplified"
-  android:allowBackup="true"
-  android:icon="@drawable/nypl"
-  android:label="@string/app_name"
-  android:largeHeap="true"
-  android:theme="@style/SimplifiedTheme">
+  <!-- The configurable application icon -->
+  <drawable name="feature_app_icon">@drawable/nypl</drawable>
+
+  <!-- The configurable splash screen image -->
+  <drawable name="feature_app_splash">@drawable/nypl_splash</drawable>
+
+  <!-- The configurable main color, used for branding. -->
+  <color name="feature_main_color">@color/nypl_brand_color</color>
 ```
 
-* Edit `simplified-app/src/main/res/values/colors.xml`
-
-Change:
-```
-<color name="main_color">#f0731f</color>
-```
-To:
-```
-<color name="main_color">@color/nypl_brand_color</color>
-```
+Other configurable options include the Adobe Vendor ID, the starting
+URI for the catalog, the displayed application name, and a flag
+to enable or disable holds if the application is to be deployed on
+a collection that does not feature holds.
 
 # Releases
 

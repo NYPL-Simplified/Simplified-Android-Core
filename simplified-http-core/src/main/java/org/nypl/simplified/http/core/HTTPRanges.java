@@ -5,6 +5,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,6 +74,24 @@ public final class HTTPRanges
 
       return Option.none();
     } catch (final NumberFormatException e) {
+      return Option.none();
+    }
+  }
+
+  /**
+   * @param headers A map of HTTP request headers
+   *
+   * @return The parsed byte range
+   */
+
+  public static OptionType<HTTPRangeType> fromHeaders(
+    final Map<String, String> headers)
+  {
+    NullCheck.notNull(headers);
+    if (headers.containsKey("range")) {
+      final String range_text = NullCheck.notNull(headers.get("range"));
+      return HTTPRanges.fromRangeString(range_text);
+    } else {
       return Option.none();
     }
   }

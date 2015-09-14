@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.3.18</version>
+    <version>0.3.19</version>
   </parent>
   <artifactId>simplified-app</artifactId>
 
@@ -78,7 +78,10 @@
       <classifier>armeabi-v7a</classifier>
       <type>so</type>
     </dependency>
-
+    <dependency>
+      <groupId>com.koushikdutta.async</groupId>
+      <artifactId>androidasync</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.squareup.picasso</groupId>
       <artifactId>picasso</artifactId>

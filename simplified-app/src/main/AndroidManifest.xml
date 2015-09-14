@@ -2,8 +2,8 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.app"
-  android:versionCode="51"
-  android:versionName="0.3.18">
+  android:versionCode="52"
+  android:versionName="0.3.19">
 
   <uses-sdk
     android:minSdkVersion="19"
@@ -16,8 +16,8 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:icon="@drawable/nypl"
-    android:label="@string/app_name"
+    android:icon="@drawable/feature_app_icon"
+    android:label="@string/feature_app_name"
     android:largeHeap="true"
     android:theme="@style/SimplifiedTheme">
 
@@ -25,7 +25,7 @@
     <activity
       android:name="org.nypl.simplified.app.MainSplashActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/app_name">
+      android:label="@string/feature_app_name">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
@@ -36,7 +36,7 @@
     <activity
       android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/app_name">
+      android:label="@string/feature_app_name">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
@@ -65,7 +65,7 @@
     <activity
       android:name="org.nypl.simplified.app.MainEULAActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/app_name"
+      android:label="@string/feature_app_name"
       android:exported="true">
     </activity>
 
@@ -120,20 +120,20 @@
       android:exported="true"
       android:configChanges="orientation|screenSize"
       android:theme="@style/SimplifiedThemeNoActionBar"
-      android:process=".ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
       android:exported="false"
       android:theme="@style/SimplifiedThemeNoActionBar"
       android:configChanges="orientation|screenSize"
-      android:process=".ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTestActivity"
       android:exported="true"
       android:configChanges="orientation|screenSize"
-      android:process=".ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>
   </application>
 
