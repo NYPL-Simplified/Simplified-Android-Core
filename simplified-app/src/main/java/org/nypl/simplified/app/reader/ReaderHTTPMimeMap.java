@@ -1,5 +1,8 @@
 package org.nypl.simplified.app.reader;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
 import java.util.Map;
@@ -63,9 +66,31 @@ public final class ReaderHTTPMimeMap implements ReaderHTTPMimeMapType
     return new ReaderHTTPMimeMap(in_default_type);
   }
 
+  private static OptionType<String> getSuffix(
+    final String path)
+  {
+    final int i = path.lastIndexOf('.');
+    if (i > 0) {
+      return Option.some(NullCheck.notNull(path.substring(i + 1)));
+    }
+    return Option.none();
+  }
+
   @Override public String getDefaultMimeType()
   {
     return this.default_type;
+  }
+
+  @Override public String guessMimeTypeForURI(final String u)
+  {
+    NullCheck.notNull(u);
+
+    final OptionType<String> opt = ReaderHTTPMimeMap.getSuffix(u);
+    if (opt.isSome()) {
+      final String suffix = ((Some<String>) opt).get();
+      return this.getMimeTypeForSuffix(suffix);
+    }
+    return this.getDefaultMimeType();
   }
 
   @Override public String getMimeTypeForSuffix(
