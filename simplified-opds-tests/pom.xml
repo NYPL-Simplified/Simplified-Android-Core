@@ -30,37 +30,4 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <!-- Create source jars -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>jar-no-fork</goal>
-              <goal>test-jar-no-fork</goal>
-            </goals>
-            <configuration>
-              <archive>
-                <manifestEntries>
-                  <Specification-Title>${project.name}</Specification-Title>
-                  <Specification-Version>${project.version}</Specification-Version>
-                  <Specification-Vendor>NYPL Labs</Specification-Vendor>
-                  <Implementation-Title>${project.name}</Implementation-Title>
-                  <Implementation-Version>${project.version}</Implementation-Version>
-                  <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
-                  <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-                  <Built-By>NYPL Labs</Built-By>
-                </manifestEntries>
-              </archive>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>
