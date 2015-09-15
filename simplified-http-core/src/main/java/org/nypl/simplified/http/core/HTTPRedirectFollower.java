@@ -78,11 +78,7 @@ public final class HTTPRedirectFollower
     Assertions.checkPrecondition(this.used == false, "Follower already used");
 
     try {
-      this.processURI();
-
-      final HTTPResultType<InputStream> r =
-        this.http.get(this.current_auth, this.current_uri, this.byte_offset);
-
+      final HTTPResultType<InputStream> r = this.processURI();
       return r.matchResult(
         new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>()
         {
@@ -108,15 +104,10 @@ public final class HTTPRedirectFollower
 
     try {
       try {
-        this.processURI();
+        return this.processURI();
       } catch (final Exception e) {
         return new HTTPResultException<InputStream>(this.current_uri, e);
       }
-
-      return this.http.get(
-        this.current_auth,
-        this.current_uri,
-        this.byte_offset);
 
     } finally {
       this.used = true;
