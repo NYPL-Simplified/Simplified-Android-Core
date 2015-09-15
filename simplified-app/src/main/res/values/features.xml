@@ -2,16 +2,16 @@
 <resources>
 
   <!-- The configurable application name -->
-  <string name="feature_app_name">Simplified</string>
+  <string name="feature_app_name">Open eBooks</string>
 
   <!-- The configurable application icon -->
-  <drawable name="feature_app_icon">@drawable/simplified</drawable>
+  <drawable name="feature_app_icon">@drawable/oei</drawable>
 
   <!-- The configurable splash screen image -->
-  <drawable name="feature_app_splash">@drawable/simplified</drawable>
+  <drawable name="feature_app_splash">@drawable/oei_splash</drawable>
 
   <!-- The configurable main color, used for branding. -->
-  <color name="feature_main_color">@color/simplified_color</color>
+  <color name="feature_main_color">@color/openebooks_color</color>
 
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->

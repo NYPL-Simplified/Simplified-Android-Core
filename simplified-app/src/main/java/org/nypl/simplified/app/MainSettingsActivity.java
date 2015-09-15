@@ -10,11 +10,15 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -413,11 +417,36 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       (TextView) this.findViewById(R.id.settings_pin_label));
     final EditText in_pin_edit =
       NullCheck.notNull((EditText) this.findViewById(R.id.settings_pin_edit));
+    final CheckBox in_pin_reveal = NullCheck.notNull(
+      (CheckBox) this.findViewById(R.id.settings_reveal_password));
 
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
     final TextView in_adobe_accounts = NullCheck.notNull(
       (TextView) this.findViewById(R.id.settings_adobe_accounts));
+
+    /**
+     * Add a listener that reveals/hides the password field.
+     */
+
+    in_pin_edit.setTransformationMethod(
+      PasswordTransformationMethod.getInstance());
+    in_pin_reveal.setOnCheckedChangeListener(
+      new CompoundButton.OnCheckedChangeListener()
+      {
+        @Override public void onCheckedChanged(
+          final CompoundButton view,
+          final boolean checked)
+        {
+          if (checked) {
+            in_pin_edit.setTransformationMethod(
+              HideReturnsTransformationMethod.getInstance());
+          } else {
+            in_pin_edit.setTransformationMethod(
+              PasswordTransformationMethod.getInstance());
+          }
+        }
+      });
 
     /**
      * If Adobe DRM support is available, then enable the accounts

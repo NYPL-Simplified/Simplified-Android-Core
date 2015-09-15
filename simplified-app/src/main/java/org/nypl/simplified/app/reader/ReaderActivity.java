@@ -89,6 +89,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
+  private @Nullable ImageView                         view_close;
 
   /**
    * Construct an activity.
@@ -128,6 +129,7 @@ public final class ReaderActivity extends Activity implements
     final TextView in_progress_text =
       NullCheck.notNull(this.view_progress_text);
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
+    final ImageView in_close = NullCheck.notNull(this.view_close);
     final ImageView in_toc = NullCheck.notNull(this.view_toc);
     final ImageView in_settings = NullCheck.notNull(this.view_settings);
     final ImageView in_media_play = NullCheck.notNull(this.view_media_play);
@@ -144,6 +146,7 @@ public final class ReaderActivity extends Activity implements
       {
         @Override public void run()
         {
+          in_close.setColorFilter(filter);
           in_progress_text.setTextColor(main_color);
           in_title_text.setTextColor(main_color);
           in_toc.setColorFilter(filter);
@@ -273,6 +276,8 @@ public final class ReaderActivity extends Activity implements
     final ViewGroup in_hud = NullCheck.notNull(
       (ViewGroup) this.findViewById(
         R.id.reader_hud_container));
+    final ImageView in_close =
+      NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_close));
     final ImageView in_toc =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_toc));
     final ImageView in_settings =
@@ -324,6 +329,15 @@ public final class ReaderActivity extends Activity implements
         }
       });
 
+    in_close.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          ReaderActivity.this.finish();
+        }
+      });
+
     this.view_loading = in_loading;
     this.view_progress_text = in_progress_text;
     this.view_progress_bar = in_progress_bar;
@@ -331,6 +345,7 @@ public final class ReaderActivity extends Activity implements
     this.view_web_view = in_webview;
     this.view_hud = in_hud;
     this.view_toc = in_toc;
+    this.view_close = in_close;
     this.view_settings = in_settings;
     this.web_view_resized = true;
     this.view_media = in_media_overlay;
@@ -460,8 +475,6 @@ public final class ReaderActivity extends Activity implements
         @Override public void onClick(
           final @Nullable View v)
         {
-          ReaderActivity.LOG.debug("small screen TOC");
-
           final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
           ReaderTOCActivity.startActivityForResult(
             ReaderActivity.this, sent_toc);

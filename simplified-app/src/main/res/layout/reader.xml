@@ -20,7 +20,7 @@
       android:layout_height="match_parent"
       android:layout_marginTop="36dp"
       android:layout_marginBottom="50dp"
-      android:id="@+id/reader_webview" />
+      android:id="@+id/reader_webview"/>
 
   </RelativeLayout>
 
@@ -32,40 +32,56 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-      android:id="@+id/reader_hud_top_left"
+      android:id="@+id/reader_hud_controls"
+      android:orientation="horizontal"
       android:layout_marginStart="8dp"
       android:layout_marginTop="8dp"
-      android:orientation="horizontal"
-      android:layout_width="wrap_content"
+      android:layout_marginEnd="8dp"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content">
+
+      <ImageView
+        android:id="@+id/reader_close"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_weight="0"
+        android:contentDescription="@string/reader_accessibility_close"
+        android:src="@drawable/circle_x_8x"/>
+
+      <TextView
+        android:id="@+id/reader_title_text"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:text="@string/placeholder_long_title"/>
 
       <ImageView
         android:id="@+id/reader_toc"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:layout_weight="0"
         android:contentDescription="@string/reader_accessibility_toc"
-        android:src="@drawable/list_8x" />
-    </LinearLayout>
-
-    <LinearLayout
-      android:id="@+id/reader_hud_top_right"
-      android:layout_alignParentEnd="true"
-      android:layout_marginEnd="8dp"
-      android:layout_marginTop="8dp"
-      android:orientation="horizontal"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content">
+        android:src="@drawable/list_8x"/>
 
       <ImageView
         android:id="@+id/reader_settings"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
         android:contentDescription="@string/reader_accessibility_settings"
-        android:src="@drawable/text_8x" />
+        android:src="@drawable/text_8x"
+        android:layout_marginStart="8dp"
+        android:layout_weight="0"
+        android:layout_width="24dp"
+        android:layout_height="24dp"/>
     </LinearLayout>
 
     <LinearLayout
       android:id="@+id/reader_hud_media"
+      android:visibility="invisible"
       android:orientation="horizontal"
       android:layout_alignParentTop="true"
       android:layout_centerHorizontal="true"
@@ -80,31 +96,22 @@
         android:layout_height="24dp"
         android:layout_marginEnd="16dp"
         android:contentDescription="@string/reader_accessibility_media_previous"
-        android:src="@drawable/circle_left_8x" />
+        android:src="@drawable/circle_left_8x"/>
       <ImageView
         android:id="@+id/reader_hud_media_play"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:contentDescription="@string/reader_accessibility_media_play"
-        android:src="@drawable/circle_play_8x" />
+        android:src="@drawable/circle_play_8x"/>
       <ImageView
         android:id="@+id/reader_hud_media_next"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginStart="16dp"
         android:contentDescription="@string/reader_accessibility_media_next"
-        android:src="@drawable/circle_next_8x" />
+        android:src="@drawable/circle_next_8x"/>
     </LinearLayout>
 
-    <TextView
-      android:id="@+id/reader_title_text"
-      android:textAppearance="?android:attr/textAppearanceSmall"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_centerHorizontal="true"
-      android:layout_alignParentTop="true"
-      android:text="Title" />
 
     <RelativeLayout
       android:id="@+id/reader_progress"
@@ -120,7 +127,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
-        android:text="" />
+        android:text=""/>
 
       <ProgressBar
         android:progressDrawable="@drawable/simplified_progress"
@@ -132,7 +139,7 @@
         android:layout_marginBottom="8dp"
         android:layout_height="4dp"
         android:layout_above="@id/reader_position_text"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"/>
     </RelativeLayout>
   </RelativeLayout>
 
@@ -148,7 +155,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_centerHorizontal="true"
-      android:layout_centerVertical="true" />
+      android:layout_centerVertical="true"/>
 
   </RelativeLayout>
 

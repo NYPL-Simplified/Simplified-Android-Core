@@ -262,6 +262,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final ImageView ci = this.cell_cover_image;
     final ProgressBar cp = this.cell_cover_progress;
 
+    ci.setContentDescription(in_e.getFeedEntry().getTitle());
     ci.setVisibility(View.INVISIBLE);
     cp.setVisibility(View.VISIBLE);
 

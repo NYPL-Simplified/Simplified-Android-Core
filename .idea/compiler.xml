@@ -272,6 +272,27 @@
         <processorPath useClasspath="true" />
         <module name="simplified-rfc3339-tests-android (1)" />
       </profile>
+      <profile default="false" name="Annotation profile for simplified-json-tests" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-json-tests" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-json-tests-android" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-json-tests-android" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-json-tests-junit4" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-json-tests-junit4" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="libnypl_adobe" target="1.5" />
@@ -301,6 +322,9 @@
       <module name="simplified-http-tests-android" target="1.6" />
       <module name="simplified-http-tests-junit4" target="1.6" />
       <module name="simplified-json-core" target="1.6" />
+      <module name="simplified-json-tests" target="1.6" />
+      <module name="simplified-json-tests-android" target="1.6" />
+      <module name="simplified-json-tests-junit4" target="1.6" />
       <module name="simplified-opds-core" target="1.6" />
       <module name="simplified-opds-tests" target="1.6" />
       <module name="simplified-opds-tests-android" target="1.6" />

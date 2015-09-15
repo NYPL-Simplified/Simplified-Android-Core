@@ -15,8 +15,7 @@ import java.util.List;
  * The table of contents.
  */
 
-@SuppressWarnings("synthetic-access") public final class ReaderTOC
-  implements Serializable
+public final class ReaderTOC implements Serializable
 {
   private static final Logger LOG;
   private static final long serialVersionUID = 1L;
@@ -39,6 +38,8 @@ import java.util.List;
     final NavigationTable parent,
     final NavigationElement e)
   {
+    ReaderTOC.LOG.debug("accumulate: {}", e);
+
     if (e instanceof NavigationPoint) {
       final NavigationPoint p = (NavigationPoint) e;
       final String title = NullCheck.notNull(p.getTitle());
@@ -65,7 +66,10 @@ import java.util.List;
       // XXX: What's the correct thing to do here? There's no
       // content ref accessible from here...
 
-      for (final NavigationElement ec : e.getChildren()) {
+      final List<NavigationElement> child_elements = e.getChildren();
+      ReaderTOC.LOG.debug(
+        "nav table: {} child elements", child_elements.size());
+      for (final NavigationElement ec : child_elements) {
         ReaderTOC.accumulate(elements, indent + 1, t, NullCheck.notNull(ec));
       }
     }
@@ -84,9 +88,11 @@ import java.util.List;
   {
     NullCheck.notNull(p);
 
+    ReaderTOC.LOG.debug("requesting toc");
+
     final ReaderNativeCodeReadLock read_lock = ReaderNativeCodeReadLock.get();
 
-    final List<TOCElement> rs = new ArrayList<TOCElement>();
+    final List<TOCElement> rs = new ArrayList<TOCElement>(32);
     final NavigationTable toc;
 
     synchronized (read_lock) {

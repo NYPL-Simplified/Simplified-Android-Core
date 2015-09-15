@@ -491,7 +491,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final boolean in_drawer_open = true;
     final ImmutableStack<CatalogFeedArgumentsType> empty =
       ImmutableStack.empty();
-    final String in_title = NullCheck.notNull(rr.getString(R.string.feature_app_name));
+    final String in_title =
+      NullCheck.notNull(rr.getString(R.string.feature_app_name));
     final URI in_uri = books_config.getCurrentRootFeedURI();
 
     return new CatalogFeedArgumentsRemote(
@@ -1129,18 +1130,11 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final FeedEntryOPDS e)
   {
     CatalogFeedActivity.LOG.debug("onSelectedBook: {}", this);
-
-    if (app.screenIsLarge()) {
-      final CatalogBookDialog df = CatalogBookDialog.newDialog(e);
-      final FragmentManager fm = CatalogFeedActivity.this.getFragmentManager();
-      df.show(fm, "book-detail");
-    } else {
-      CatalogBookDetailActivity.startNewActivity(
-        CatalogFeedActivity.this,
-        new_up_stack,
-        this.navigationDrawerGetPart(),
-        e);
-    }
+    CatalogBookDetailActivity.startNewActivity(
+      CatalogFeedActivity.this,
+      new_up_stack,
+      this.navigationDrawerGetPart(),
+      e);
   }
 
   private void onSelectedFeedGroup(

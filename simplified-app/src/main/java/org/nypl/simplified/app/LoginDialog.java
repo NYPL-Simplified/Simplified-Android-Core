@@ -87,12 +87,14 @@ public final class LoginDialog extends DialogFragment
     /**
      * This is absolutely not the way to do this. The nypl-drm-adobe
      * interfaces should be expanded to return values of an enum type. For now,
-     * however, this is the only error code that can be assigned a useful
-     * message.
+     * however, these are the only error codes that can be assigned useful
+     * messages.
      */
 
     if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
       return rr.getString(R.string.settings_login_failed_adobe_device_limit);
+    } else if (message.startsWith("E_ADEPT_REQUEST_EXPIRED")) {
+      return rr.getString(R.string.settings_login_failed_adobe_device_bad_clock);
     } else {
       return rr.getString(R.string.settings_login_failed_device);
     }

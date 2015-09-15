@@ -66,15 +66,23 @@
           android:layout_weight="1"
           android:layout_marginStart="16dp"
           android:inputType="textNoSuggestions"
-          android:maxLength="4"
+          android:maxLength="16"
           android:maxLines="1"/>
+
+        <CheckBox
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical"
+          android:textSize="12dp"
+          android:text="@string/settings_reveal_password"
+          android:id="@+id/settings_reveal_password"/>
       </TableRow>
     </TableLayout>
 
     <Button
       android:id="@+id/settings_login"
       android:background="@drawable/simplified_button"
-      android:layout_gravity="end"
+      android:layout_gravity="start"
       android:layout_width="wrap_content"
       android:layout_height="@dimen/button_standard_height"
       android:textColor="@drawable/simplified_button_text"
