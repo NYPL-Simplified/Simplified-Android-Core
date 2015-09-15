@@ -475,8 +475,6 @@ public final class ReaderActivity extends Activity implements
         @Override public void onClick(
           final @Nullable View v)
         {
-          ReaderActivity.LOG.debug("small screen TOC");
-
           final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
           ReaderTOCActivity.startActivityForResult(
             ReaderActivity.this, sent_toc);
