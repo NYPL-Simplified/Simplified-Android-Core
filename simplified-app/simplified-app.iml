@@ -41,6 +41,7 @@
       <excludeFolder url="file://$MODULE_DIR$/target/maven-archiver" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-status" />
       <excludeFolder url="file://$MODULE_DIR$/target/ndk-libs" />
+      <excludeFolder url="file://$MODULE_DIR$/target/unpacked-libs" />
     </content>
     <orderEntry type="jdk" jdkName="Maven Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -293,11 +293,6 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.6</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>2.4</version>
         </plugin>
@@ -330,6 +325,58 @@
           <groupId>com.io7m.jstructural</groupId>
           <artifactId>io7m-jstructural-maven-plugin</artifactId>
           <version>4.2.0</version>
+        </plugin>
+
+        <!-- Produce jar files -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.6</version>
+          <executions>
+            <!-- Produce jar file with custom manifest -->
+            <execution>
+              <id>default-jar</id>
+              <configuration>
+                <archive>
+                  <manifestEntries>
+                    <Specification-Title>${project.name}</Specification-Title>
+                    <Specification-Version>${project.version}</Specification-Version>
+                    <Specification-Vendor>NYPL Labs</Specification-Vendor>
+                    <Implementation-Title>${project.name}</Implementation-Title>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
+                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                    <Built-By>NYPL Labs</Built-By>
+                    <Sealed>true</Sealed>
+                  </manifestEntries>
+                </archive>
+              </configuration>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+            <!-- Produce jar file of tests -->
+            <execution>
+              <id>test-jar</id>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+              <configuration>
+                <archive>
+                  <manifestEntries>
+                    <Specification-Title>${project.name}</Specification-Title>
+                    <Specification-Version>${project.version}</Specification-Version>
+                    <Specification-Vendor>NYPL Labs</Specification-Vendor>
+                    <Implementation-Title>${project.name}</Implementation-Title>
+                    <Implementation-Version>${project.version}</Implementation-Version>
+                    <Implementation-Vendor>NYPL Labs</Implementation-Vendor>
+                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+                    <Built-By>NYPL Labs</Built-By>
+                  </manifestEntries>
+                </archive>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
