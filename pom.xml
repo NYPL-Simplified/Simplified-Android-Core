@@ -306,11 +306,37 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
         </plugin>
+
+        <!-- Submodule checkstyle configuration. -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
           <version>2.15</version>
+          <dependencies>
+            <dependency>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>simplified-checkstyle</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>validate</id>
+              <phase>validate</phase>
+              <configuration>
+                <configLocation>org/nypl/simplified/checkstyle/checkstyle.xml
+                </configLocation>
+                <encoding>UTF-8</encoding>
+                <consoleOutput>true</consoleOutput>
+                <failsOnError>true</failsOnError>
+              </configuration>
+              <goals>
+                <goal>check</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
+
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
