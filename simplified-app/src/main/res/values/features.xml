@@ -15,7 +15,7 @@
 
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
-  <bool name="feature_holds_enabled">true</bool>
+  <bool name="feature_holds_enabled">false</bool>
 
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">OEI</string>
