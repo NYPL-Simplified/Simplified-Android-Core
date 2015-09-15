@@ -26,15 +26,18 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/target/generated-sources/r" isTestSource="false" generated="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target/apidocs" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/aidl" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/combined-assets" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/combined-resources" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/extracted-dependencies" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/r" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javadoc-bundle-options" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-archiver" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-status" />
       <excludeFolder url="file://$MODULE_DIR$/target/screenshots" />
       <excludeFolder url="file://$MODULE_DIR$/target/surefire-reports" />
+      <excludeFolder url="file://$MODULE_DIR$/target/unpacked-libs" />
     </content>
     <orderEntry type="jdk" jdkName="Maven Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -52,16 +55,19 @@
     <orderEntry type="module" module-name="simplified-http-core" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: net.iharder:base64:2.3.8" level="project" />
     <orderEntry type="module" module-name="simplified-opds-core" scope="PROVIDED" />
+    <orderEntry type="module" module-name="simplified-json-core" scope="PROVIDED" />
+    <orderEntry type="module" module-name="simplified-rfc3339-core" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.0-rc3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.0-rc3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />
     <orderEntry type="module" module-name="simplified-stack" scope="PROVIDED" />
     <orderEntry type="module" module-name="simplified-tenprint" scope="PROVIDED" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.3.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.4.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-sdk-android-runtime:0.17.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-shared-js:0.17.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-sdk-android-runtime:0.20.0-NYPL0001" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-shared-js:0.20.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.koushikdutta.async:androidasync:2.1.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.squareup.picasso:picasso:2.5.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.nanohttpd:nanohttpd:2.1.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.tony19:logback-android-core:1.1.1-3" level="project" />

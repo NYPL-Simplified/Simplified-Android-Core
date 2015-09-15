@@ -34,8 +34,10 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
+import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
@@ -228,7 +230,7 @@ public abstract class SimplifiedActivity extends Activity
     d.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
     dl.setOnItemClickListener(this);
 
-    final String app_name = NullCheck.notNull(rr.getString(R.string.app_name));
+    final String app_name = NullCheck.notNull(rr.getString(R.string.feature_app_name));
     final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);
@@ -315,6 +317,10 @@ public abstract class SimplifiedActivity extends Activity
         @Override public Unit call(
           final Bundle b)
         {
+          final BooksType books = app.getBooks();
+          final BooksControllerConfigurationType config =
+            books.booksGetConfiguration();
+
           final ImmutableStack<CatalogFeedArgumentsType> empty =
             ImmutableStack.empty();
           final CatalogFeedArgumentsRemote remote =
@@ -322,7 +328,7 @@ public abstract class SimplifiedActivity extends Activity
               false,
               NullCheck.notNull(empty),
               app_name,
-              app.getFeedInitialURI(),
+              config.getCurrentRootFeedURI(),
               false);
           CatalogFeedActivity.setActivityArguments(b, remote);
           return Unit.unit();

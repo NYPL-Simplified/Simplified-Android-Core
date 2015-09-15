@@ -2,7 +2,6 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -48,21 +47,22 @@ public final class BooksController extends Observable implements BooksType
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
   }
 
-  private final BookDatabaseType                                  book_database;
-  private final BooksStatusCacheType                              books_status;
-  private final BooksControllerConfiguration                      config;
-  private final File
-                                                                  data_directory;
-  private final DownloaderType                                    downloader;
-  private final ConcurrentHashMap<BookID, DownloadType>           downloads;
-  private final ExecutorService                                   exec;
-  private final FeedLoaderType                                    feed_loader;
-  private final OPDSFeedParserType                                feed_parser;
-  private final HTTPType                                          http;
-  private final AtomicReference<Pair<AccountBarcode, AccountPIN>> login;
-  private final AtomicInteger                                     task_id;
-  private final OptionType<AdobeAdeptExecutorType>                adobe_drm;
-  private       Map<Integer, Future<?>>                           tasks;
+  private final BookDatabaseType                        book_database;
+  private final BooksStatusCacheType                    books_status;
+  private final File                                    data_directory;
+  private final DownloaderType                          downloader;
+  private final ConcurrentHashMap<BookID, DownloadType> downloads;
+  private final ExecutorService                         exec;
+  private final FeedLoaderType                          feed_loader;
+  private final OPDSFeedParserType                      feed_parser;
+  private final HTTPType                                http;
+  private final AtomicReference<AccountCredentials>     login;
+  private final AtomicInteger                           task_id;
+  private final OptionType<AdobeAdeptExecutorType>      adobe_drm;
+  private final DocumentStoreType                       docs;
+  private final File                                    root;
+  private final BooksControllerConfigurationType        config;
+  private       Map<Integer, Future<?>>                 tasks;
 
   private BooksController(
     final ExecutorService in_exec,
@@ -71,24 +71,31 @@ public final class BooksController extends Observable implements BooksType
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config,
-    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    final DocumentStoreType in_docs,
+    final BooksControllerConfigurationType in_config,
+    final File in_root)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.feed_loader = NullCheck.notNull(in_feeds);
     this.http = NullCheck.notNull(in_http);
     this.downloader = NullCheck.notNull(in_downloader);
+    NullCheck.notNull(in_json_serializer);
+    NullCheck.notNull(in_json_parser);
+    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
+    this.docs = NullCheck.notNull(in_docs);
     this.config = NullCheck.notNull(in_config);
+    this.root = NullCheck.notNull(in_root);
+
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
-    this.login = new AtomicReference<Pair<AccountBarcode, AccountPIN>>();
+    this.login = new AtomicReference<AccountCredentials>();
     this.downloads = new ConcurrentHashMap<BookID, DownloadType>(32);
     this.books_status = BooksStatusCache.newStatusCache();
-    this.data_directory = new File(this.config.getDirectory(), "data");
+    this.data_directory = new File(in_root, "data");
     this.book_database = BookDatabase.newDatabase(
       in_json_serializer, in_json_parser, this.data_directory);
     this.task_id = new AtomicInteger(0);
     this.feed_parser = this.feed_loader.getOPDSFeedParser();
-    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
   }
 
   static OptionType<File> makeCover(
@@ -159,8 +166,10 @@ public final class BooksController extends Observable implements BooksType
    * @param in_downloader      A downloader
    * @param in_json_serializer A JSON serializer
    * @param in_json_parser     A JSON parser
-   * @param in_config          The controller configuration
    * @param in_adobe_drm       An Adobe DRM interface, if supported
+   * @param in_docs            A document store
+   * @param in_config          Mutable configuration data
+   * @param in_root            The root directory used to hold all data
    *
    * @return A new books controller
    */
@@ -172,8 +181,10 @@ public final class BooksController extends Observable implements BooksType
     final DownloaderType in_downloader,
     final OPDSJSONSerializerType in_json_serializer,
     final OPDSJSONParserType in_json_parser,
-    final BooksControllerConfiguration in_config,
-    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    final DocumentStoreType in_docs,
+    final BooksControllerConfigurationType in_config,
+    final File in_root)
   {
     return new BooksController(
       in_exec,
@@ -182,8 +193,10 @@ public final class BooksController extends Observable implements BooksType
       in_downloader,
       in_json_serializer,
       in_json_parser,
+      in_adobe_drm,
+      in_docs,
       in_config,
-      in_adobe_drm);
+      in_root);
   }
 
   /**
@@ -235,10 +248,10 @@ public final class BooksController extends Observable implements BooksType
   @Override public void accountGetCachedLoginDetails(
     final AccountGetCachedCredentialsListenerType listener)
   {
-    final Pair<AccountBarcode, AccountPIN> p = this.login.get();
+    final AccountCredentials p = this.login.get();
     if (p != null) {
       try {
-        listener.onAccountIsLoggedIn(p.getLeft(), p.getRight());
+        listener.onAccountIsLoggedIn(p);
       } catch (final Throwable x) {
         BooksController.LOG.error("listener raised exception: ", x);
       }
@@ -266,12 +279,10 @@ public final class BooksController extends Observable implements BooksType
   }
 
   @Override public void accountLogin(
-    final AccountBarcode barcode,
-    final AccountPIN pin,
+    final AccountCredentials account,
     final AccountLoginListenerType listener)
   {
-    NullCheck.notNull(barcode);
-    NullCheck.notNull(pin);
+    NullCheck.notNull(account);
     NullCheck.notNull(listener);
 
     this.submitRunnable(
@@ -281,8 +292,7 @@ public final class BooksController extends Observable implements BooksType
         this.http,
         this.config,
         this.adobe_drm,
-        barcode,
-        pin,
+        account,
         listener,
         this.login));
   }
@@ -297,7 +307,7 @@ public final class BooksController extends Observable implements BooksType
       this.books_status.booksStatusClearAll();
       this.submitRunnable(
         new BooksControllerLogoutTask(
-          this.config, this.adobe_drm, this.login, listener));
+          this.data_directory, this.adobe_drm, this.login, listener));
     }
   }
 
@@ -324,13 +334,11 @@ public final class BooksController extends Observable implements BooksType
   @Override public void bookBorrow(
     final BookID id,
     final OPDSAcquisition acq,
-    final OPDSAcquisitionFeedEntry eo,
-    final BookBorrowListenerType listener)
+    final OPDSAcquisitionFeedEntry eo)
   {
     NullCheck.notNull(id);
     NullCheck.notNull(acq);
     NullCheck.notNull(eo);
-    NullCheck.notNull(listener);
 
     BooksController.LOG.debug("borrow {}", id);
 
@@ -345,7 +353,6 @@ public final class BooksController extends Observable implements BooksType
         id,
         acq,
         eo,
-        listener,
         this.feed_loader,
         this.adobe_drm));
   }
@@ -470,7 +477,11 @@ public final class BooksController extends Observable implements BooksType
     this.books_status.booksStatusUpdate(new BookStatusRequestingRevoke(id));
     this.submitRunnable(
       new BooksControllerRevokeBookTask(
-        this.book_database, this.books_status, this.http, id, this.adobe_drm));
+        this.book_database,
+        this.books_status,
+        this.feed_loader,
+        id,
+        this.adobe_drm));
   }
 
   @Override public void bookGetLatestStatusFromDisk(final BookID id)
@@ -479,6 +490,11 @@ public final class BooksController extends Observable implements BooksType
     this.submitRunnable(
       new BooksControllerGetLatestStatusTask(
         this.book_database, this.books_status, id));
+  }
+
+  @Override public BooksControllerConfigurationType booksGetConfiguration()
+  {
+    return this.config;
   }
 
   private void stopAllTasks()

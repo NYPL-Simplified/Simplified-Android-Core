@@ -6,7 +6,9 @@ import android.os.Bundle;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 import org.slf4j.Logger;
 
 import java.util.Timer;
@@ -55,7 +57,8 @@ public final class MainSplashActivity extends Activity
   {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final OptionType<EULAType> eula_opt = app.getEULA();
+    final DocumentStoreType docs = app.getDocumentStore();
+    final OptionType<EULAType> eula_opt = docs.getEULA();
 
     if (eula_opt.isSome()) {
       final Some<EULAType> some_eula = (Some<EULAType>) eula_opt;

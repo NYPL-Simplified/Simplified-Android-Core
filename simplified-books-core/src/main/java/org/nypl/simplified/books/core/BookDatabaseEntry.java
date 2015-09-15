@@ -1,5 +1,7 @@
 package org.nypl.simplified.books.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -7,15 +9,20 @@ import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import org.nypl.drm.core.AdobeAdeptLoan;
+import org.nypl.drm.core.AdobeLoanID;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
+import org.nypl.simplified.json.core.JSONParserUtilities;
+import org.nypl.simplified.json.core.JSONSerializerUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -46,7 +53,10 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
   }
 
   private final File                   directory;
+  private final File                   file_adobe_rights_tmp;
   private final File                   file_adobe_rights;
+  private final File                   file_adobe_meta;
+  private final File                   file_adobe_meta_tmp;
   private final File                   file_book;
   private final File                   file_cover;
   private final File                   file_lock;
@@ -85,6 +95,31 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
     this.file_meta_tmp = new File(this.directory, "meta.json.tmp");
     this.file_book = new File(this.directory, "book.epub");
     this.file_adobe_rights = new File(this.directory, "rights_adobe.xml");
+    this.file_adobe_rights_tmp =
+      new File(this.directory, "rights_adobe.xml.tmp");
+    this.file_adobe_meta = new File(this.directory, "meta_adobe.json");
+    this.file_adobe_meta_tmp = new File(this.directory, "meta_adobe.json.tmp");
+  }
+
+  /**
+   * Given a path to an epub file, return the path to the associated Adobe
+   * rights file, if any.
+   *
+   * @param file The epub file
+   *
+   * @return The Adobe rights file, if any
+   */
+
+  public static OptionType<File> getAdobeRightsFileForEPUB(final File file)
+  {
+    NullCheck.notNull(file);
+
+    final File parent = file.getParentFile();
+    final File adobe = new File(parent, "rights_adobe.xml");
+    if (adobe.isFile()) {
+      return Option.some(adobe);
+    }
+    return Option.none();
   }
 
   @Override public void copyInBookFromSameFilesystem(
@@ -248,8 +283,8 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
       });
   }
 
-  @Override
-  public void setAdobeRightsInformation(final OptionType<ByteBuffer> rights)
+  @Override public void setAdobeRightsInformation(
+    final OptionType<AdobeAdeptLoan> loan)
     throws IOException
   {
     FileLocking.withFileThreadLocked(
@@ -261,21 +296,64 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
           final Unit x)
           throws IOException
         {
-          BookDatabaseEntry.this.setAdobeRightsInformationLocked(rights);
+          BookDatabaseEntry.this.setAdobeRightsInformationLocked(loan);
           return Unit.unit();
         }
       });
   }
 
   private void setAdobeRightsInformationLocked(
-    final OptionType<ByteBuffer> in_rights)
+    final OptionType<AdobeAdeptLoan> loan)
     throws IOException
   {
-    if (in_rights.isSome()) {
-      final ByteBuffer data = ((Some<ByteBuffer>) in_rights).get();
-      FileUtilities.fileWriteBytes(
-        data.array(), this.file_adobe_rights);
+    if (loan.isSome()) {
+      final AdobeAdeptLoan data = ((Some<AdobeAdeptLoan>) loan).get();
+
+      FileUtilities.fileWriteBytesAtomically(
+        this.file_adobe_rights,
+        this.file_adobe_rights_tmp,
+        data.getSerialized().array());
+
+      final ObjectMapper jom = new ObjectMapper();
+      final ObjectNode o = jom.createObjectNode();
+      o.put("loan-id", data.getID().getValue());
+      o.put("returnable", data.isReturnable());
+
+      final ByteArrayOutputStream bao = new ByteArrayOutputStream();
+      JSONSerializerUtilities.serialize(o, bao);
+
+      FileUtilities.fileWriteUTF8Atomically(
+        this.file_adobe_meta, this.file_adobe_meta_tmp, bao.toString("UTF-8"));
+    } else {
+      FileUtilities.fileDelete(this.file_adobe_meta);
+      FileUtilities.fileDelete(this.file_adobe_meta_tmp);
+      FileUtilities.fileDelete(this.file_adobe_rights);
+      FileUtilities.fileDelete(this.file_adobe_rights_tmp);
     }
+  }
+
+  private OptionType<AdobeAdeptLoan> getAdobeAdobeRightsInformationLocked()
+    throws IOException
+  {
+    if (this.file_adobe_rights.isFile()) {
+      final byte[] serialized = FileUtilities.fileReadBytes(
+        this.file_adobe_rights);
+
+      final ObjectMapper jom = new ObjectMapper();
+      final JsonNode jn = jom.readTree(this.file_adobe_meta);
+      final ObjectNode o = JSONParserUtilities.checkObject(null, jn);
+
+      final AdobeLoanID loan_id =
+        new AdobeLoanID(JSONParserUtilities.getString(o, "loan-id"));
+      final boolean returnable =
+        JSONParserUtilities.getBoolean(o, "returnable");
+
+      final AdobeAdeptLoan loan =
+        new AdobeAdeptLoan(loan_id, ByteBuffer.wrap(serialized), returnable);
+      return Option.some(loan);
+    }
+
+    return Option.none();
   }
 
   private OptionType<File> getCoverLocked()
@@ -399,6 +477,8 @@ public final class BookDatabaseEntry implements BookDatabaseEntryType
     final OPDSAcquisitionFeedEntry in_entry = this.getDataLocked();
     final OptionType<File> in_cover = this.getCoverLocked();
     final OptionType<File> in_book = this.getBookLocked();
-    return new BookSnapshot(in_cover, in_book, in_entry);
+    final OptionType<AdobeAdeptLoan> in_adobe_rights =
+      this.getAdobeAdobeRightsInformationLocked();
+    return new BookSnapshot(in_cover, in_book, in_entry, in_adobe_rights);
   }
 }

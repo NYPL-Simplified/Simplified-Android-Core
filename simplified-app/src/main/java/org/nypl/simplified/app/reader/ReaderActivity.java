@@ -12,7 +12,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -33,15 +32,14 @@ import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.FadeUtilities;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
@@ -91,6 +89,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
+  private @Nullable ImageView                         view_close;
 
   /**
    * Construct an activity.
@@ -123,23 +122,6 @@ public final class ReaderActivity extends Activity implements
     from.startActivity(i);
   }
 
-  private static @Nullable WebResourceResponse getInterceptedRequestResource(
-    final String url)
-  {
-    if ("simplified-resource:OpenDyslexic3-Regular.ttf".equals(url)) {
-      ReaderActivity.LOG.debug("intercepted {} request", url);
-      final InputStream stream =
-        ReaderActivity.class.getResourceAsStream("OpenDyslexic3-Regular.ttf");
-      if (stream != null) {
-        return new WebResourceResponse("font/truetype", "UTF-8", stream);
-      }
-
-      LOG.error("missing resource for {}", url);
-    }
-
-    return null;
-  }
-
   private void applyViewerColorFilters()
   {
     ReaderActivity.LOG.debug("applying color filters");
@@ -147,6 +129,7 @@ public final class ReaderActivity extends Activity implements
     final TextView in_progress_text =
       NullCheck.notNull(this.view_progress_text);
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
+    final ImageView in_close = NullCheck.notNull(this.view_close);
     final ImageView in_toc = NullCheck.notNull(this.view_toc);
     final ImageView in_settings = NullCheck.notNull(this.view_settings);
     final ImageView in_media_play = NullCheck.notNull(this.view_media_play);
@@ -154,7 +137,7 @@ public final class ReaderActivity extends Activity implements
     final ImageView in_media_prev = NullCheck.notNull(this.view_media_prev);
 
     final Resources rr = NullCheck.notNull(this.getResources());
-    final int main_color = rr.getColor(R.color.main_color);
+    final int main_color = rr.getColor(R.color.feature_main_color);
     final ColorMatrixColorFilter filter =
       ReaderColorMatrix.getImageFilterMatrix(main_color);
 
@@ -163,6 +146,7 @@ public final class ReaderActivity extends Activity implements
       {
         @Override public void run()
         {
+          in_close.setColorFilter(filter);
           in_progress_text.setTextColor(main_color);
           in_title_text.setTextColor(main_color);
           in_toc.setColorFilter(filter);
@@ -262,6 +246,8 @@ public final class ReaderActivity extends Activity implements
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
+    ReaderActivity.LOG.debug("starting");
+
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = NullCheck.notNull(i.getExtras());
 
@@ -269,6 +255,9 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull((File) a.getSerializable(ReaderActivity.FILE_ID));
     this.book_id =
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
+
+    ReaderActivity.LOG.debug("epub file: {}", in_epub_file);
+    ReaderActivity.LOG.debug("book id:   {}", this.book_id);
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
@@ -287,6 +276,8 @@ public final class ReaderActivity extends Activity implements
     final ViewGroup in_hud = NullCheck.notNull(
       (ViewGroup) this.findViewById(
         R.id.reader_hud_container));
+    final ImageView in_close =
+      NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_close));
     final ImageView in_toc =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_toc));
     final ImageView in_settings =
@@ -338,6 +329,15 @@ public final class ReaderActivity extends Activity implements
         }
       });
 
+    in_close.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          ReaderActivity.this.finish();
+        }
+      });
+
     this.view_loading = in_loading;
     this.view_progress_text = in_progress_text;
     this.view_progress_bar = in_progress_bar;
@@ -345,6 +345,7 @@ public final class ReaderActivity extends Activity implements
     this.view_web_view = in_webview;
     this.view_hud = in_hud;
     this.view_toc = in_toc;
+    this.view_close = in_close;
     this.view_settings = in_settings;
     this.web_view_resized = true;
     this.view_media = in_media_overlay;
@@ -363,52 +364,8 @@ public final class ReaderActivity extends Activity implements
       }
     };
 
-    final WebViewClient wv_client = new WebViewClient()
-    {
-      @Override public void onLoadResource(
-        final @Nullable WebView view,
-        final @Nullable String url)
-      {
-        ReaderActivity.LOG.debug("web-request: {}", url);
-      }
-
-      @Override public boolean shouldOverrideUrlLoading(
-        final @Nullable WebView view,
-        final @Nullable String url)
-      {
-        final String nu = NullCheck.notNull(url);
-        final URI uu = NullCheck.notNull(URI.create(nu));
-
-        ReaderActivity.LOG.debug("should-intercept: {}", nu);
-
-        if (nu.startsWith("simplified:")) {
-          sd.dispatch(uu, ReaderActivity.this);
-          return true;
-        }
-
-        if (nu.startsWith("readium:")) {
-          rd.dispatch(uu, ReaderActivity.this);
-          return true;
-        }
-
-        return super.shouldOverrideUrlLoading(view, url);
-      }
-
-      @Override public WebResourceResponse shouldInterceptRequest(
-        final WebView view,
-        final String url)
-      {
-        if (url.startsWith("simplified-resource:")) {
-          final WebResourceResponse r =
-            ReaderActivity.getInterceptedRequestResource(url);
-          if (r != null) {
-            return r;
-          }
-        }
-
-        return super.shouldInterceptRequest(view, url);
-      }
-    };
+    final WebViewClient wv_client =
+      new ReaderWebViewClient(this, sd, this, rd, this);
     in_webview.setBackgroundColor(0x00000000);
     in_webview.setWebChromeClient(wc_client);
     in_webview.setWebViewClient(wv_client);
@@ -518,8 +475,6 @@ public final class ReaderActivity extends Activity implements
         @Override public void onClick(
           final @Nullable View v)
         {
-          ReaderActivity.LOG.debug("small screen TOC");
-
           final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
           ReaderTOCActivity.startActivityForResult(
             ReaderActivity.this, sent_toc);
@@ -850,7 +805,11 @@ public final class ReaderActivity extends Activity implements
     final Throwable x)
   {
     ErrorDialogUtilities.showErrorWithRunnable(
-      this, ReaderActivity.LOG, "Could not start http server", x, new Runnable()
+      this,
+      ReaderActivity.LOG,
+      "Could not start http server.",
+      x,
+      new Runnable()
       {
         @Override public void run()
         {
@@ -950,4 +909,5 @@ public final class ReaderActivity extends Activity implements
 
     js.openContentURL(e.getContentRef(), e.getSourceHref());
   }
+
 }

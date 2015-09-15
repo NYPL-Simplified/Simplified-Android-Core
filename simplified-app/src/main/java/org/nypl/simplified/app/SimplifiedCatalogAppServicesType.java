@@ -3,9 +3,8 @@ package org.nypl.simplified.app;
 import com.io7m.jfunctional.OptionType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedLoaderType;
-
-import java.net.URI;
 
 /**
  * Services provided to the main Simplified app.
@@ -16,17 +15,12 @@ public interface SimplifiedCatalogAppServicesType extends
   NetworkConnectivityType,
   SimplifiedAppInitialSyncType
 {
-  /**
-   * @return The EULA, if any
-   */
-
-  OptionType<EULAType> getEULA();
 
   /**
-   * @return The privacy policy, if any
+   * @return A reference to the document store.
    */
 
-  OptionType<PrivacyPolicyType> getPrivacyPolicy();
+  DocumentStoreType getDocumentStore();
 
   /**
    * @return A book management interface
@@ -39,12 +33,6 @@ public interface SimplifiedCatalogAppServicesType extends
    */
 
   BookCoverProviderType getCoverProvider();
-
-  /**
-   * @return The initial URI for the catalog
-   */
-
-  URI getFeedInitialURI();
 
   /**
    * @return An asynchronous feed loader

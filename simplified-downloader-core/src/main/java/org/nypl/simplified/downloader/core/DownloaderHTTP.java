@@ -5,6 +5,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPRedirectFollower;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
 import org.nypl.simplified.http.core.HTTPResultMatcherType;
@@ -145,13 +146,13 @@ public final class DownloaderHTTP implements DownloaderType
     @Override public void run()
     {
       try {
-        final RedirectFollower rf =
-          new RedirectFollower(this.log, this.http, this.auth, 5, this.uri, 0L);
+        final HTTPRedirectFollower rf = new HTTPRedirectFollower(
+          this.log, this.http, this.auth, 5, this.uri, 0L);
 
         this.log.debug(
           "starting download, uri {} to file {}", this.uri, this.file);
 
-        final HTTPResultType<InputStream> r = rf.call();
+        final HTTPResultType<InputStream> r = rf.runExceptional();
         r.matchResult(this);
       } catch (final Throwable e) {
         this.listener.onDownloadFailed(this, -1, this.total, Option.some(e));

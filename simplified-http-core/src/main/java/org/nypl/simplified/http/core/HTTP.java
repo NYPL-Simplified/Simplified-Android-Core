@@ -7,6 +7,7 @@ import com.io7m.jnull.NullCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -113,7 +114,7 @@ public final class HTTP implements HTTPType
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()),
-          conn.getLastModified());
+          conn.getLastModified(), this.getErrorStreamOrEmpty(conn));
       }
 
       return new HTTPResultOK<InputStream>(
@@ -168,7 +169,8 @@ public final class HTTP implements HTTPType
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()),
-          conn.getLastModified());
+          conn.getLastModified(),
+          this.getErrorStreamOrEmpty(conn));
       }
 
       return new HTTPResultOK<Unit>(
@@ -183,5 +185,14 @@ public final class HTTP implements HTTPType
     } catch (final IOException e) {
       return new HTTPResultException<Unit>(uri, e);
     }
+  }
+
+  private InputStream getErrorStreamOrEmpty(final HttpURLConnection conn)
+  {
+    final InputStream stream = conn.getErrorStream();
+    if (stream != null) {
+      return stream;
+    }
+    return new ByteArrayInputStream(new byte[0]);
   }
 }

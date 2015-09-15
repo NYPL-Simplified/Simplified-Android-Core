@@ -1,7 +1,6 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.Pair;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.downloader.core.DownloaderType;
@@ -36,15 +35,15 @@ final class BooksControllerSyncTask implements Runnable
       LoggerFactory.getLogger(BooksControllerSyncTask.class));
   }
 
-  private final BookDatabaseType             books_database;
-  private final BooksControllerConfiguration config;
-  private final OPDSFeedParserType           feed_parser;
-  private final HTTPType                     http;
-  private final AccountSyncListenerType      listener;
-  private final BooksStatusCacheType         books_status;
+  private final BookDatabaseType                 books_database;
+  private final BooksControllerConfigurationType config;
+  private final OPDSFeedParserType               feed_parser;
+  private final HTTPType                         http;
+  private final AccountSyncListenerType          listener;
+  private final BooksStatusCacheType             books_status;
 
   BooksControllerSyncTask(
-    final BooksControllerConfiguration in_config,
+    final BooksControllerConfigurationType in_config,
     final BooksStatusCacheType in_status_cache,
     final BookDatabaseType in_books_database,
     final HTTPType in_http,
@@ -75,13 +74,11 @@ final class BooksControllerSyncTask implements Runnable
   private void sync()
     throws Exception
   {
-    final Pair<AccountBarcode, AccountPIN> pair =
-      this.books_database.credentialsGet();
-    final AccountBarcode barcode = pair.getLeft();
-    final AccountPIN pin = pair.getRight();
-
+    final URI loans_uri = this.config.getCurrentLoansURI();
+    final AccountCredentials c = this.books_database.credentialsGet();
+    final AccountBarcode barcode = c.getUser();
+    final AccountPIN pin = c.getPassword();
     final AccountSyncListenerType in_listener = this.listener;
-    final URI loans_uri = this.config.getLoansURI();
 
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());

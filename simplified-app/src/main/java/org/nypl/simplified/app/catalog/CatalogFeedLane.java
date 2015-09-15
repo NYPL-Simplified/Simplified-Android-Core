@@ -18,12 +18,13 @@ import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ScreenSizeControllerType;
 import org.nypl.simplified.app.utilities.FadeUtilities;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.FeedGroup;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -166,6 +167,8 @@ import java.util.concurrent.atomic.AtomicInteger;
             p.setMargins(
               0, 0, (int) CatalogFeedLane.this.screen.screenDPToPixels(8), 0);
             image_view.setLayoutParams(p);
+            final OPDSAcquisitionFeedEntry eoe = eo.getFeedEntry();
+            image_view.setContentDescription(eoe.getTitle());
             image_view.setOnClickListener(
               new OnClickListener()
               {

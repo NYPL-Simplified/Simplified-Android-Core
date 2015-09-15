@@ -24,11 +24,13 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/gen" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/target/generated-sources/r" isTestSource="false" generated="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target/apidocs" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/aidl" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/combined-assets" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/combined-resources" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/extracted-dependencies" />
       <excludeFolder url="file://$MODULE_DIR$/target/generated-sources/r" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javadoc-bundle-options" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-archiver" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-status" />
       <excludeFolder url="file://$MODULE_DIR$/target/screenshots" />
@@ -40,6 +42,8 @@
     <orderEntry type="module" module-name="simplified-opds-tests" />
     <orderEntry type="module" module-name="simplified-opds-core" />
     <orderEntry type="module" module-name="simplified-assert" />
+    <orderEntry type="module" module-name="simplified-json-core" />
+    <orderEntry type="module" module-name="simplified-rfc3339-core" />
     <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.1.0" level="project" />

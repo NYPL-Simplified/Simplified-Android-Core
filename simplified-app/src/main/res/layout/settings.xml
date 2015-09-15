@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <RelativeLayout
+  <LinearLayout
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="16dp">
+    android:layout_height="wrap_content"
+    android:padding="16dp">
 
     <TextView
       android:id="@+id/settings_login_title"
       android:text="@string/settings_login_title"
       android:textAppearance="?android:attr/textAppearanceMedium"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"/>
 
     <TableLayout
       android:id="@+id/settings_login_table"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_below="@id/settings_login_title"
       android:layout_marginTop="8dp"
       android:layout_marginBottom="16dp">
 
@@ -30,10 +31,11 @@
         android:layout_height="wrap_content">
 
         <TextView
+          android:id="@+id/settings_barcode_label"
           android:labelFor="@+id/settings_barcode_edit"
           android:text="@string/settings_barcode"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
+          android:layout_height="wrap_content"/>
 
         <EditText
           android:id="@+id/settings_barcode_edit"
@@ -43,7 +45,7 @@
           android:layout_marginStart="16dp"
           android:inputType="textNoSuggestions"
           android:maxLength="14"
-          android:maxLines="1" />
+          android:maxLines="1"/>
       </TableRow>
       <TableRow
         android:id="@+id/tableRow2"
@@ -51,10 +53,11 @@
         android:layout_height="wrap_content">
 
         <TextView
+          android:id="@+id/settings_pin_label"
           android:labelFor="@+id/settings_pin_edit"
           android:text="@string/settings_pin"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
+          android:layout_height="wrap_content"/>
 
         <EditText
           android:id="@+id/settings_pin_edit"
@@ -63,117 +66,104 @@
           android:layout_weight="1"
           android:layout_marginStart="16dp"
           android:inputType="textNoSuggestions"
-          android:maxLength="4"
-          android:maxLines="1" />
+          android:maxLength="16"
+          android:maxLines="1"/>
+
+        <CheckBox
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical"
+          android:textSize="12dp"
+          android:text="@string/settings_reveal_password"
+          android:id="@+id/settings_reveal_password"/>
       </TableRow>
     </TableLayout>
 
     <Button
       android:id="@+id/settings_login"
       android:background="@drawable/simplified_button"
-      android:layout_gravity="end"
+      android:layout_gravity="start"
       android:layout_width="wrap_content"
       android:layout_height="@dimen/button_standard_height"
-      android:layout_below="@id/settings_login_table"
       android:textColor="@drawable/simplified_button_text"
       android:textSize="12sp"
-      android:text="@string/settings_log_in" />
+      android:text="@string/settings_log_in"/>
 
     <View
       android:background="#eee"
       android:id="@+id/settings_login_divider"
       android:layout_width="match_parent"
       android:layout_height="1dp"
-      android:layout_below="@+id/settings_login"
       android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp" />
-
-    <TextView
-      android:id="@+id/settings_feedback"
-      android:text="@string/settings_feedback"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_below="@+id/settings_login_divider"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
-
-    <View
-      android:background="#eee"
-      android:id="@+id/settings_feedback_divider"
-      android:layout_below="@+id/settings_feedback"
-      android:layout_width="match_parent"
-      android:layout_height="1dp"
-      android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp" />
+      android:layout_marginTop="16dp"/>
 
     <TextView
       android:id="@+id/settings_credits"
       android:text="@string/settings_credits"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_below="@id/settings_feedback_divider"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"/>
 
     <View
       android:background="#eee"
       android:id="@+id/settings_credits_divider"
       android:layout_width="match_parent"
       android:layout_height="1dp"
-      android:layout_below="@id/settings_credits"
       android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp" />
+      android:layout_marginTop="16dp"/>
 
     <TextView
       android:id="@+id/settings_eula"
       android:text="@string/settings_eula"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_below="@id/settings_credits_divider"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"/>
 
     <View
       android:background="#eee"
       android:id="@+id/settings_eula_divider"
       android:layout_width="match_parent"
       android:layout_height="1dp"
-      android:layout_below="@id/settings_eula"
       android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp" />
+      android:layout_marginTop="16dp"/>
 
     <TextView
       android:id="@+id/settings_privacy"
       android:text="@string/settings_privacy"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_below="@id/settings_eula_divider"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"/>
 
     <View
       android:background="#eee"
       android:id="@+id/settings_privacy_divider"
       android:layout_width="match_parent"
       android:layout_height="1dp"
-      android:layout_below="@id/settings_privacy"
       android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp" />
-
+      android:layout_marginTop="16dp"/>
 
     <TextView
       android:id="@+id/settings_adobe_accounts"
       android:text="@string/settings_adobe_accounts"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_below="@id/settings_privacy_divider"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"/>
 
     <View
       android:background="#eee"
       android:id="@+id/settings_adobe_accounts_divider"
       android:layout_width="match_parent"
       android:layout_height="1dp"
-      android:layout_below="@id/settings_adobe_accounts"
       android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp" />
+      android:layout_marginTop="16dp"/>
 
-  </RelativeLayout>
+    <TextView
+      android:id="@+id/settings_alt_uris"
+      android:text="@string/settings_alt_uris"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"/>
+  </LinearLayout>
 
 </ScrollView>
+

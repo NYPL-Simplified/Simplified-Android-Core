@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
+import org.nypl.simplified.json.core.JSONSerializerUtilities;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -146,6 +147,6 @@ public final class OPDSAuthenticationDocumentSerializer
     final OutputStream os)
     throws IOException
   {
-    OPDSJSONSerializerUtilities.serialize(d, os);
+    JSONSerializerUtilities.serialize(d, os);
   }
 }

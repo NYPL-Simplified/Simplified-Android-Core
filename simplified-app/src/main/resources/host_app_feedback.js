@@ -22,46 +22,76 @@
 //  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 //  OF THE POSSIBILITY OF SUCH DAMAGE.
 
-ReadiumSDK.HostAppFeedback = function() {
-  
-  ReadiumSDK.on(
-    ReadiumSDK.Events.READER_INITIALIZED,
-    function() {
-      window.navigator.epubReadingSystem.name = "Simplified";
-      window.navigator.epubReadingSystem.version = "0.0.0";
-      
-      ReadiumSDK.reader.on(ReadiumSDK.Events.MEDIA_OVERLAY_STATUS_CHANGED, this.onMediaOverlayStatusChanged, this);
-      ReadiumSDK.reader.on(ReadiumSDK.Events.MEDIA_OVERLAY_TTS_SPEAK, this.onMediaOverlayTTSSpeak, this);
-      ReadiumSDK.reader.on(ReadiumSDK.Events.MEDIA_OVERLAY_TTS_STOP, this.onMediaOverlayTTSStop, this);
-      ReadiumSDK.reader.on(ReadiumSDK.Events.PAGINATION_CHANGED, this.onPaginationChanged, this);
-      ReadiumSDK.reader.on(ReadiumSDK.Events.SETTINGS_APPLIED, this.onSettingsApplied, this);
-      
-      window.location.href = "readium:initialize";
-    },
-    this
-  );
-  
-  this.onPaginationChanged = function(pageChangeData) {
-    window.location.href = "readium:pagination-changed/" +
-      encodeURIComponent(JSON.stringify(pageChangeData.paginationInfo));
-  };
-  
-  this.onSettingsApplied = function() {
-    window.location.href = "readium:settings-applied";
-  };
-  
-  this.onMediaOverlayStatusChanged = function(status) {
-    window.location.href = "readium:media-overlay-status-changed/" +
-      encodeURIComponent(JSON.stringify(status));
-  };
-  
-  this.onMediaOverlayTTSSpeak = function(tts) {
-    window.location.href = "readium:media-overlay-tts-speak/" +
-      encodeURIComponent(JSON.stringify(tts));
-  };
-  
-  this.onMediaOverlayTTSStop = function() {
-    window.location.href = "readium:media-overlay-tts-stop";
-  };
-  
-}();
+$(document).ready(function()
+{
+  console.log("DOM READY");
+
+  require(["readium_shared_js/globalsSetup"], function ()
+  {
+    console.log("globalsSetup READY");
+
+    require(['readium_shared_js/views/reader_view'], function (ReaderView)
+    {
+      console.log("reader_view READY");
+
+      ReadiumSDK.HostAppFeedback = function()
+      {
+        ReadiumSDK.on(
+          ReadiumSDK.Events.READER_INITIALIZED,
+          function()
+          {
+            window.navigator.epubReadingSystem.name = "Simplified";
+            window.navigator.epubReadingSystem.version = "0.0.0";
+
+            ReadiumSDK.reader.on(ReadiumSDK.Events.MEDIA_OVERLAY_STATUS_CHANGED, this.onMediaOverlayStatusChanged, this);
+            ReadiumSDK.reader.on(ReadiumSDK.Events.MEDIA_OVERLAY_TTS_SPEAK, this.onMediaOverlayTTSSpeak, this);
+            ReadiumSDK.reader.on(ReadiumSDK.Events.MEDIA_OVERLAY_TTS_STOP, this.onMediaOverlayTTSStop, this);
+            ReadiumSDK.reader.on(ReadiumSDK.Events.PAGINATION_CHANGED, this.onPaginationChanged, this);
+            ReadiumSDK.reader.on(ReadiumSDK.Events.SETTINGS_APPLIED, this.onSettingsApplied, this);
+
+            window.location.href = "readium:initialize";
+          },
+          this
+        );
+
+        this.onPaginationChanged = function(pageChangeData)
+        {
+          window.location.href = "readium:pagination-changed/" +
+            encodeURIComponent(JSON.stringify(pageChangeData.paginationInfo));
+        };
+
+        this.onSettingsApplied = function()
+        {
+          window.location.href = "readium:settings-applied";
+        };
+
+        this.onMediaOverlayStatusChanged = function(status)
+        {
+          window.location.href = "readium:media-overlay-status-changed/" +
+            encodeURIComponent(JSON.stringify(status));
+        };
+
+        this.onMediaOverlayTTSSpeak = function(tts)
+        {
+          window.location.href = "readium:media-overlay-tts-speak/" +
+            encodeURIComponent(JSON.stringify(tts));
+        };
+
+        this.onMediaOverlayTTSStop = function()
+        {
+          window.location.href = "readium:media-overlay-tts-stop";
+        };
+      }();
+
+      var opts = {
+        needsFixedLayoutScalerWorkAround: true,
+        el: "#viewport",
+        annotationCSSUrl: '/readium_Annotations.css'
+      };
+
+      ReadiumSDK.reader = new ReaderView(opts);
+      console.log("DONE READER");
+      ReadiumSDK.emit(ReadiumSDK.Events.READER_INITIALIZED, ReadiumSDK.reader);
+    });
+  });
+});

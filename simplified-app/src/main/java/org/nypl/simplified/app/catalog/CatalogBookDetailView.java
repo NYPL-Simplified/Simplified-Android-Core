@@ -26,7 +26,6 @@ import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
@@ -50,7 +49,11 @@ import org.nypl.simplified.books.core.BookStatusRevokeFailed;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryCorrupt;
+import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
+import org.nypl.simplified.books.core.FeedEntryType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
@@ -63,6 +66,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A book detail view.
@@ -88,22 +92,23 @@ public final class CatalogBookDetailView implements Observer,
       NullCheck.notNull(CatalogBookDetailView.GENRES_URI.toString());
   }
 
-  private final Activity      activity;
-  private final ViewGroup     book_download;
-  private final LinearLayout  book_download_buttons;
-  private final TextView      book_download_text;
-  private final ViewGroup     book_downloading;
-  private final Button        book_downloading_cancel;
-  private final ViewGroup     book_downloading_failed;
-  private final Button        book_downloading_failed_dismiss;
-  private final Button        book_downloading_failed_retry;
-  private final TextView      book_downloading_percent_text;
-  private final ProgressBar   book_downloading_progress;
-  private final BooksType     books;
-  private final FeedEntryOPDS entry;
-  private final ScrollView    scroll_view;
-  private final TextView      book_downloading_label;
-  private final TextView      book_downloading_failed_text;
+  private final Activity                       activity;
+  private final ViewGroup                      book_download;
+  private final LinearLayout                   book_download_buttons;
+  private final TextView                       book_download_text;
+  private final ViewGroup                      book_downloading;
+  private final Button                         book_downloading_cancel;
+  private final ViewGroup                      book_downloading_failed;
+  private final Button                         book_downloading_failed_dismiss;
+  private final Button                         book_downloading_failed_retry;
+  private final TextView                       book_downloading_percent_text;
+  private final ProgressBar                    book_downloading_progress;
+  private final BooksType                      books;
+  private final AtomicReference<FeedEntryOPDS> entry;
+  private final ScrollView                     scroll_view;
+  private final TextView                       book_downloading_label;
+  private final TextView                       book_downloading_failed_text;
+  private final TextView                       book_debug_status;
 
   /**
    * Construct a detail view.
@@ -123,7 +128,8 @@ public final class CatalogBookDetailView implements Observer,
     NullCheck.notNull(in_entry);
 
     this.activity = NullCheck.notNull(in_activity);
-    this.entry = NullCheck.notNull(in_entry);
+    this.entry =
+      new AtomicReference<FeedEntryOPDS>(NullCheck.notNull(in_entry));
 
     final ScrollView sv = new ScrollView(in_activity);
     this.scroll_view = sv;
@@ -164,11 +170,13 @@ public final class CatalogBookDetailView implements Observer,
 
     final TextView in_debug_status = NullCheck.notNull(
       (TextView) layout.findViewById(R.id.book_debug_status));
+
     if (rr.getBoolean(R.bool.debug_catalog_cell_view_states)) {
       in_debug_status.setVisibility(View.VISIBLE);
     } else {
       in_debug_status.setVisibility(View.GONE);
     }
+    this.book_debug_status = in_debug_status;
 
     final ViewGroup header =
       NullCheck.notNull((ViewGroup) layout.findViewById(R.id.book_header));
@@ -466,7 +474,13 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusDownloaded(
     final BookStatusDownloaded d)
   {
+    this.book_debug_status.setText("downloaded");
     this.book_download_buttons.removeAllViews();
+
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    final String text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(rr, d);
+    this.book_download_text.setText(text);
 
     if (d.isReturnable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
@@ -496,13 +510,17 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusDownloadFailed(
     final BookStatusDownloadFailed f)
   {
+    this.book_debug_status.setText("download failed");
+
     this.book_download.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
 
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+
     final TextView failed =
       NullCheck.notNull(this.book_downloading_failed_text);
-    failed.setText(R.string.catalog_download_failed);
+    failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
 
     final Button dismiss =
       NullCheck.notNull(this.book_downloading_failed_dismiss);
@@ -522,7 +540,8 @@ public final class CatalogBookDetailView implements Observer,
      * Manually construct an acquisition controller for the retry button.
      */
 
-    final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
+    final FeedEntryOPDS current_entry = this.entry.get();
+    final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
     final OptionType<OPDSAcquisition> a_opt =
       CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
 
@@ -538,7 +557,7 @@ public final class CatalogBookDetailView implements Observer,
     final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
-        this.activity, this.books, this.entry.getBookID(), a, this.entry);
+        this.activity, this.books, current_entry.getBookID(), a, current_entry);
 
     retry.setEnabled(true);
     retry.setVisibility(View.VISIBLE);
@@ -555,6 +574,8 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusDownloadInProgress(
     final BookStatusDownloadInProgress d)
   {
+    this.book_debug_status.setText("download in progress");
+
     this.book_download.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -585,6 +606,8 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusHeld(
     final BookStatusHeld s)
   {
+    this.book_debug_status.setText("held");
+
     this.book_download_buttons.removeAllViews();
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
@@ -612,6 +635,8 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusHeldReady(
     final BookStatusHeldReady s)
   {
+    this.book_debug_status.setText("held-ready");
+
     this.book_download_buttons.removeAllViews();
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
@@ -627,7 +652,7 @@ public final class CatalogBookDetailView implements Observer,
       this.activity,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
-      NullCheck.notNull(this.entry));
+      NullCheck.notNull(this.entry.get()));
 
     if (s.isRevocable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
@@ -643,6 +668,8 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusHoldable(
     final BookStatusHoldable s)
   {
+    this.book_debug_status.setText("holdable");
+
     this.book_download_buttons.removeAllViews();
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
@@ -658,7 +685,7 @@ public final class CatalogBookDetailView implements Observer,
       this.activity,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
-      NullCheck.notNull(this.entry));
+      NullCheck.notNull(this.entry.get()));
 
     CatalogBookDetailView.configureButtonsHeight(
       rr, this.book_download_buttons);
@@ -668,12 +695,15 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusLoanable(
     final BookStatusLoanable s)
   {
-    this.onBookStatusNone(this.entry);
+    this.onBookStatusNone(this.entry.get());
+    this.book_debug_status.setText("loanable");
     return Unit.unit();
   }
 
   @Override public Unit onBookStatusRevokeFailed(final BookStatusRevokeFailed s)
   {
+    this.book_debug_status.setText("revoke failed");
+
     this.book_download.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
@@ -697,13 +727,15 @@ public final class CatalogBookDetailView implements Observer,
       });
 
     retry.setEnabled(false);
-    retry.setVisibility(View.INVISIBLE);
+    retry.setVisibility(View.GONE);
     return Unit.unit();
   }
 
   @Override public Unit onBookStatusLoaned(
     final BookStatusLoaned o)
   {
+    this.book_debug_status.setText("loaned");
+
     this.book_download_buttons.removeAllViews();
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
@@ -719,7 +751,7 @@ public final class CatalogBookDetailView implements Observer,
       this.activity,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
-      NullCheck.notNull(this.entry));
+      NullCheck.notNull(this.entry.get()));
 
     if (o.isReturnable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
@@ -741,6 +773,8 @@ public final class CatalogBookDetailView implements Observer,
   private void onBookStatusNone(
     final FeedEntryOPDS e)
   {
+    this.book_debug_status.setText("none");
+
     this.book_download_buttons.removeAllViews();
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
@@ -764,6 +798,8 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusRequestingDownload(
     final BookStatusRequestingDownload d)
   {
+    this.book_debug_status.setText("requesting download");
+
     this.book_download.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -786,6 +822,8 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusRequestingLoan(
     final BookStatusRequestingLoan s)
   {
+    this.book_debug_status.setText("requesting loan");
+
     this.book_download.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -808,6 +846,8 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusRequestingRevoke(
     final BookStatusRequestingRevoke s)
   {
+    this.book_debug_status.setText("requesting revoke");
+
     this.book_download.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -862,12 +902,43 @@ public final class CatalogBookDetailView implements Observer,
     CatalogBookDetailView.LOG.debug("update: {} {}", observable, data);
 
     final BookID update_id = NullCheck.notNull((BookID) data);
-    final BookID current_id = this.entry.getBookID();
+    final FeedEntryOPDS current_entry = this.entry.get();
+    final BookID current_id = current_entry.getBookID();
+
     if (current_id.equals(update_id)) {
       final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
       final OptionType<BookStatusType> status_opt =
         status_cache.booksStatusGet(current_id);
-      this.onStatus(this.entry, status_opt);
+
+      CatalogBookDetailView.LOG.debug("received status update {}", status_opt);
+
+      final OptionType<FeedEntryType> update_opt =
+        status_cache.booksFeedEntryGet(current_id);
+
+      if (update_opt.isSome()) {
+        CatalogBookDetailView.LOG.debug("received entry update {}", update_opt);
+
+        final Some<FeedEntryType> some = (Some<FeedEntryType>) update_opt;
+        final FeedEntryType update = some.get();
+        update.matchFeedEntry(
+          new FeedEntryMatcherType<Unit, UnreachableCodeException>()
+          {
+            @Override public Unit onFeedEntryOPDS(final FeedEntryOPDS e)
+            {
+              CatalogBookDetailView.this.entry.set(e);
+              return Unit.unit();
+            }
+
+            @Override public Unit onFeedEntryCorrupt(final FeedEntryCorrupt e)
+            {
+              CatalogBookDetailView.LOG.debug(
+                "cannot render an entry of type {}", e);
+              return Unit.unit();
+            }
+          });
+      }
+
+      this.onStatus(this.entry.get(), status_opt);
     }
   }
 }

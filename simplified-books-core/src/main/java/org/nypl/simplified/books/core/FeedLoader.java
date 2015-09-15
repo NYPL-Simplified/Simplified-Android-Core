@@ -10,12 +10,15 @@ import net.jodah.expiringmap.ExpiringMap;
 import net.jodah.expiringmap.ExpiringMap.Builder;
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
+import org.nypl.drm.core.Assertions;
+import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
+import org.nypl.simplified.opds.core.OPDSFeedTransportException;
+import org.nypl.simplified.opds.core.OPDSFeedTransportHTTPException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
-import org.nypl.simplified.opds.core.OPDSParseException;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.slf4j.Logger;
@@ -25,11 +28,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The default implementation of the {@link FeedLoaderType} interface.
@@ -66,30 +72,6 @@ public final class FeedLoader
     this.transport = NullCheck.notNull(in_transport);
     this.cache = NullCheck.notNull(in_m);
     this.cache.addExpirationListener(this);
-  }
-
-  private static void callErrorListener(
-    final URI uri,
-    final FeedLoaderListenerType listener,
-    final Throwable x)
-  {
-    try {
-      listener.onFeedLoadFailure(uri, x);
-    } catch (final Throwable xe) {
-      FeedLoader.LOG.error("listener raised error: ", xe);
-    }
-  }
-
-  private static void callListener(
-    final URI uri,
-    final FeedLoaderListenerType listener,
-    final FeedType f)
-  {
-    try {
-      listener.onFeedLoadSuccess(uri, f);
-    } catch (final Throwable x) {
-      FeedLoader.callErrorListener(uri, listener, x);
-    }
   }
 
   /**
@@ -158,13 +140,14 @@ public final class FeedLoader
     {
       @Override public Unit call()
       {
+        final ProtectedListener p_listener = new ProtectedListener(listener);
         try {
-          final FeedType f = FeedLoader.this.loadFeed(uri, auth);
+          final FeedType f = FeedLoader.this.loadFeed(uri, auth, p_listener);
           FeedLoader.this.cache.put(uri, f);
           FeedLoader.LOG.debug("added to cache: {}", uri);
-          FeedLoader.callListener(uri, listener, f);
+          p_listener.onFeedLoadSuccess(uri, f);
         } catch (final Throwable x) {
-          FeedLoader.callErrorListener(uri, listener, x);
+          p_listener.onFeedLoadFailure(uri, x);
         }
 
         return Unit.unit();
@@ -186,7 +169,8 @@ public final class FeedLoader
     if (this.cache.containsKey(uri)) {
       FeedLoader.LOG.debug("retrieved from cache: {}", uri);
       final FeedType f = NullCheck.notNull(this.cache.get(uri));
-      FeedLoader.callListener(uri, listener, f);
+      final ProtectedListener p_listener = new ProtectedListener(listener);
+      p_listener.onFeedLoadSuccess(uri, f);
       return new ImmediateFuture<Unit>(Unit.unit());
     }
 
@@ -209,7 +193,8 @@ public final class FeedLoader
     return this.parser;
   }
 
-  @Override public OPDSFeedTransportType<OptionType<HTTPAuthType>> getOPDSFeedTransport()
+  @Override
+  public OPDSFeedTransportType<OptionType<HTTPAuthType>> getOPDSFeedTransport()
   {
     return this.transport;
   }
@@ -228,33 +213,180 @@ public final class FeedLoader
 
   private FeedType loadFeed(
     final URI uri,
-    final OptionType<HTTPAuthType> auth)
-    throws IOException
+    final OptionType<HTTPAuthType> auth,
+    final FeedLoaderListenerType listener)
+    throws InterruptedException, OPDSFeedTransportException, IOException
   {
-    final InputStream s = this.transport.getStream(auth, uri);
+    final AtomicReference<OptionType<HTTPAuthType>> auth_ref =
+      new AtomicReference<OptionType<HTTPAuthType>>(auth);
+
+    final InputStream main_stream =
+      this.loadFeedStreamRetryingAuth(uri, listener, auth_ref);
+
     try {
-      final OPDSAcquisitionFeed parsed = this.parser.parse(uri, s);
+      final OPDSAcquisitionFeed parsed = this.parser.parse(uri, main_stream);
+
+      /**
+       * If a search link was provided, fetch the search link and parse it.
+       */
+
       final OptionType<OPDSSearchLink> search_opt = parsed.getFeedSearchURI();
+
       if (search_opt.isSome()) {
         final Some<OPDSSearchLink> some = (Some<OPDSSearchLink>) search_opt;
         final URI search_uri = some.get().getURI();
-
-        final InputStream ss = this.transport.getStream(auth, search_uri);
+        final InputStream search_stream =
+          this.loadFeedStreamRetryingAuth(search_uri, listener, auth_ref);
         try {
           final OptionType<OPDSOpenSearch1_1> search =
-            Option.some(this.search_parser.parse(search_uri, ss));
+            Option.some(this.search_parser.parse(search_uri, search_stream));
           return Feeds.fromAcquisitionFeed(parsed, search);
-        } catch (final OPDSParseException e) {
-          FeedLoader.LOG.error("could not parse search: ", e);
         } finally {
-          ss.close();
+          search_stream.close();
         }
+      } else {
+
+        /**
+         * Otherwise, return a feed that doesn't have a search link.
+         */
+
+        final OptionType<OPDSOpenSearch1_1> none = Option.none();
+        return Feeds.fromAcquisitionFeed(parsed, none);
       }
 
-      final OptionType<OPDSOpenSearch1_1> none = Option.none();
-      return Feeds.fromAcquisitionFeed(parsed, none);
     } finally {
-      s.close();
+      main_stream.close();
+    }
+  }
+
+  /**
+   * Try to fetch {@code uri}, consulting {@code listener} if authentication
+   * details are required. If the final attempt results in a successful
+   * authentication attempt, the given credentials are saved in {@code auth}.
+   */
+
+  private InputStream loadFeedStreamRetryingAuth(
+    final URI uri,
+    final FeedLoaderListenerType listener,
+    final AtomicReference<OptionType<HTTPAuthType>> auth)
+    throws OPDSFeedTransportException, IOException, InterruptedException
+  {
+    OptionType<HTTPAuthType> auth_current = NullCheck.notNull(auth.get());
+    final AtomicInteger attempts = new AtomicInteger();
+
+    while (true) {
+      InputStream stream = null;
+      try {
+        stream = this.transport.getStream(auth_current, uri);
+        auth.set(auth_current);
+        return stream;
+      } catch (final OPDSFeedTransportHTTPException e) {
+        try {
+          if (e.getCode() == 401) {
+            final HTTPAuthBasic basic =
+              this.getCredentialsAfterError(uri, listener, attempts, e);
+            auth_current = Option.some((HTTPAuthType) basic);
+          } else {
+            throw e;
+          }
+        } finally {
+          if (stream != null) {
+            stream.close();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Ask {@code listener} for credentials after an initial authentication error
+   * has been encountered. If no credentials are provided, {@code e} is
+   * rethrown.
+   */
+
+  private HTTPAuthBasic getCredentialsAfterError(
+    final URI uri,
+    final FeedLoaderListenerType listener,
+    final AtomicInteger attempts,
+    final OPDSFeedTransportHTTPException e)
+    throws InterruptedException, OPDSFeedTransportHTTPException
+  {
+    /**
+     * Call a blocking auth listener and wait for authentication data
+     * to be provided.
+     */
+
+    final BlockingAuthenticationListener auth_listener =
+      new BlockingAuthenticationListener();
+    listener.onFeedRequiresAuthentication(
+      uri, attempts.getAndIncrement(), auth_listener);
+
+    FeedLoader.LOG.trace("waiting for auth listener completion");
+    auth_listener.waitForCompletion(5L, TimeUnit.MINUTES);
+    FeedLoader.LOG.trace("finished waiting for completion");
+
+    /**
+     * If no authentication data was provided, the feed can't be loaded.
+     */
+
+    final OptionType<AccountCredentials> result_opt = auth_listener.getResult();
+    if (result_opt.isNone()) {
+      throw e;
+    }
+
+    /**
+     * Otherwise, record the provided credentials and try again.
+     */
+
+    final Some<AccountCredentials> result_some =
+      (Some<AccountCredentials>) result_opt;
+    final AccountCredentials result = result_some.get();
+    final String user = result.getUser().toString();
+    final String pass = result.getPassword().toString();
+    return new HTTPAuthBasic(user, pass);
+  }
+
+  private static final class ProtectedListener implements FeedLoaderListenerType
+  {
+    private final FeedLoaderListenerType delegate;
+
+    private ProtectedListener(final FeedLoaderListenerType in_delegate)
+    {
+      this.delegate = NullCheck.notNull(in_delegate);
+    }
+
+    @Override public void onFeedLoadFailure(
+      final URI u,
+      final Throwable x)
+    {
+      try {
+        this.delegate.onFeedLoadFailure(u, x);
+      } catch (final Throwable xe) {
+        FeedLoader.LOG.error("listener raised error: ", xe);
+      }
+    }
+
+    @Override public void onFeedLoadSuccess(
+      final URI u,
+      final FeedType f)
+    {
+      try {
+        this.delegate.onFeedLoadSuccess(u, f);
+      } catch (final Throwable x) {
+        this.onFeedLoadFailure(u, x);
+      }
+    }
+
+    @Override public void onFeedRequiresAuthentication(
+      final URI u,
+      final int attempts,
+      final FeedLoaderAuthenticationListenerType listener)
+    {
+      try {
+        this.delegate.onFeedRequiresAuthentication(u, attempts, listener);
+      } catch (final Throwable x) {
+        this.onFeedLoadFailure(u, x);
+      }
     }
   }
 
@@ -296,6 +428,83 @@ public final class FeedLoader
     @Override public boolean isDone()
     {
       return true;
+    }
+  }
+
+  /**
+   * An authentication listener that allows external threads to wait until one
+   * of the listener methods has been called.
+   */
+
+  private final class BlockingAuthenticationListener
+    implements FeedLoaderAuthenticationListenerType
+  {
+    private final CountDownLatch                                  latch;
+    private final AtomicReference<OptionType<AccountCredentials>> result;
+
+    public BlockingAuthenticationListener()
+    {
+      this.latch = new CountDownLatch(1);
+      final OptionType<AccountCredentials> none = Option.none();
+      this.result = new AtomicReference<OptionType<AccountCredentials>>(none);
+    }
+
+    /**
+     * @return The result, if the listener has completed
+     */
+
+    public OptionType<AccountCredentials> getResult()
+    {
+      return this.result.get();
+    }
+
+    /**
+     * Wait until another thread calls {@link #completeNow()}.
+     *
+     * @param unit The time unit
+     * @param time The time to wait
+     *
+     * @throws InterruptedException If waiting is interrupted
+     */
+
+    public void waitForCompletion(
+      final long time,
+      final TimeUnit unit)
+      throws InterruptedException
+    {
+      this.latch.await(time, unit);
+    }
+
+    /**
+     * Complete the authentication process. Any thread blocking on this listener
+     * will be able to retrieve results, if any were provided.
+     */
+
+    public void completeNow()
+    {
+      Assertions.checkPrecondition(
+        this.latch.getCount() == 1, "Listener has already completed");
+      this.latch.countDown();
+    }
+
+    @Override public void onAuthenticationProvided(
+      final AccountCredentials credentials)
+    {
+      this.result.set(Option.some(credentials));
+      this.completeNow();
+    }
+
+    @Override public void onAuthenticationNotProvided()
+    {
+      this.completeNow();
+    }
+
+    @Override public void onAuthenticationError(
+      final OptionType<Throwable> error,
+      final String message)
+    {
+      LogUtilities.errorWithOptionalException(FeedLoader.LOG, message, error);
+      this.completeNow();
     }
   }
 }

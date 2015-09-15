@@ -21,25 +21,33 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
-import org.nypl.simplified.app.EULAType;
+import org.nypl.simplified.app.LoginDialog;
+import org.nypl.simplified.app.LoginListenerType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountCredentials;
+import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
+import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AccountsType;
 import org.nypl.simplified.books.core.BookFeedListenerType;
+import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedFacetMatcherType;
 import org.nypl.simplified.books.core.FeedFacetOPDS;
@@ -47,6 +55,7 @@ import org.nypl.simplified.books.core.FeedFacetPseudo;
 import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.books.core.FeedFacetType;
 import org.nypl.simplified.books.core.FeedGroup;
+import org.nypl.simplified.books.core.FeedLoaderAuthenticationListenerType;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.FeedMatcherType;
@@ -57,12 +66,14 @@ import org.nypl.simplified.books.core.FeedSearchType;
 import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSFacet;
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -159,24 +170,28 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
   private static void onPossiblyReceivedEULALink(final OptionType<URI> latest)
   {
-    latest.map(
-      new FunctionType<URI, Unit>()
+    latest.map_(
+      new ProcedureType<URI>()
       {
-        @Override public Unit call(final URI latest_actual)
+        @Override public void call(final URI latest_actual)
         {
           final SimplifiedCatalogAppServicesType app =
             Simplified.getCatalogAppServices();
+          final DocumentStoreType docs = app.getDocumentStore();
 
-          app.getEULA().map(
-            new FunctionType<EULAType, Unit>()
+          docs.getEULA().map_(
+            new ProcedureType<EULAType>()
             {
-              @Override public Unit call(final EULAType eula)
+              @Override public void call(final EULAType eula)
               {
-                eula.documentSetLatestURI(latest_actual);
-                return Unit.unit();
+                try {
+                  eula.documentSetLatestURL(latest_actual.toURL());
+                } catch (final MalformedURLException e) {
+                  CatalogFeedActivity.LOG.error(
+                    "could not use latest EULA link: ", e);
+                }
               }
             });
-          return Unit.unit();
         }
       });
   }
@@ -338,6 +353,100 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
   protected abstract BooksFeedSelection getLocalFeedTypeSelection();
 
+  @Override public void onFeedRequiresAuthentication(
+    final URI u,
+    final int attempts,
+    final FeedLoaderAuthenticationListenerType listener)
+  {
+    /**
+     * The feed requires authentication. If an attempt hasn't been made
+     * to fetch it with the current cached credentials (if any), then try
+     * to authenticate with those credentials.
+     */
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+    final AccountsType accounts = app.getBooks();
+
+    /**
+     * An adapter that will receive cached credentials and forward them
+     * on to the listener.
+     */
+
+    CatalogFeedActivity.LOG.trace("feed auth: attempt {}", attempts);
+    if (attempts == 0) {
+      if (accounts.accountIsLoggedIn()) {
+        CatalogFeedActivity.LOG.trace("feed auth: using cached credentials");
+
+        accounts.accountGetCachedLoginDetails(
+          new AccountGetCachedCredentialsListenerType()
+          {
+            @Override public void onAccountIsNotLoggedIn()
+            {
+              throw new UnreachableCodeException();
+            }
+
+            @Override public void onAccountIsLoggedIn(
+              final AccountCredentials creds)
+            {
+              listener.onAuthenticationProvided(creds);
+            }
+          });
+      }
+    }
+
+    if (attempts > 0 || accounts.accountIsLoggedIn() == false) {
+      CatalogFeedActivity.LOG.trace("feed auth: login required");
+
+      /**
+       * Otherwise, this is a new attempt and the current credentials
+       * are assumed to be stale. Ask the user for new ones.
+       */
+
+      final LoginListenerType login_listener = new LoginListenerType()
+      {
+        @Override public void onLoginAborted()
+        {
+          CatalogFeedActivity.LOG.trace("feed auth: aborted login");
+          listener.onAuthenticationNotProvided();
+        }
+
+        @Override public void onLoginFailure(
+          final OptionType<Throwable> error,
+          final String message)
+        {
+          LogUtilities.errorWithOptionalException(
+            CatalogFeedActivity.LOG, "failed login", error);
+          listener.onAuthenticationError(error, message);
+        }
+
+        @Override public void onLoginSuccess(
+          final AccountCredentials creds)
+        {
+          CatalogFeedActivity.LOG.trace(
+            "feed auth: login supplied new credentials");
+          listener.onAuthenticationProvided(creds);
+        }
+      };
+
+      final FragmentManager fm = this.getFragmentManager();
+      UIThread.runOnUIThread(
+        new Runnable()
+        {
+          @Override public void run()
+          {
+            final AccountBarcode barcode = new AccountBarcode("");
+            final AccountPIN pin = new AccountPIN("");
+
+            final LoginDialog df =
+              LoginDialog.newDialog("Login required", barcode, pin);
+            df.setLoginListener(login_listener);
+            df.show(fm, "login-dialog");
+          }
+        });
+    }
+  }
+
   private void configureUpButton(
     final ImmutableStack<CatalogFeedArgumentsType> up_stack,
     final String title)
@@ -375,11 +484,16 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
+    final BooksType books = app.getBooks();
+    final BooksControllerConfigurationType books_config =
+      books.booksGetConfiguration();
+
     final boolean in_drawer_open = true;
     final ImmutableStack<CatalogFeedArgumentsType> empty =
       ImmutableStack.empty();
-    final String in_title = NullCheck.notNull(rr.getString(R.string.app_name));
-    final URI in_uri = app.getFeedInitialURI();
+    final String in_title =
+      NullCheck.notNull(rr.getString(R.string.feature_app_name));
+    final URI in_uri = books_config.getCurrentRootFeedURI();
 
     return new CatalogFeedArgumentsRemote(
       in_drawer_open, NullCheck.notNull(empty), in_title, in_uri, false);
@@ -1016,18 +1130,11 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final FeedEntryOPDS e)
   {
     CatalogFeedActivity.LOG.debug("onSelectedBook: {}", this);
-
-    if (app.screenIsLarge()) {
-      final CatalogBookDialog df = CatalogBookDialog.newDialog(e);
-      final FragmentManager fm = CatalogFeedActivity.this.getFragmentManager();
-      df.show(fm, "book-detail");
-    } else {
-      CatalogBookDetailActivity.startNewActivity(
-        CatalogFeedActivity.this,
-        new_up_stack,
-        this.navigationDrawerGetPart(),
-        e);
-    }
+    CatalogBookDetailActivity.startNewActivity(
+      CatalogFeedActivity.this,
+      new_up_stack,
+      this.navigationDrawerGetPart(),
+      e);
   }
 
   private void onSelectedFeedGroup(
@@ -1048,7 +1155,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   private void retryFeed()
   {
     final CatalogFeedArgumentsType args = this.getArguments();
-    LOG.debug("retrying feed {}", args);
+    CatalogFeedActivity.LOG.debug("retrying feed {}", args);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();

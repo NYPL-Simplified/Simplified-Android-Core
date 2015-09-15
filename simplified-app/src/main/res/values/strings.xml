@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Simplified</string>
-  <string name="holds">Holds</string>
-
   <!-- EULA strings -->
   <string name="eula_disagree">Disagree</string>
   <string name="eula_agree">Agree</string>
@@ -16,6 +13,7 @@
   <string name="books_sort_by_title">Title</string>
 
   <!-- Holds strings -->
+  <string name="holds">Holds</string>
   <string name="holds_empty">When you reserve a book from the catalog it will show up here. Look here from time to time to see if your book is available to download.</string>
 
   <!-- Catalog strings -->
@@ -23,11 +21,6 @@
   <string name="catalog_load_error_title">Error</string>
   <string name="catalog_load_error_text">An error occurred while loading the catalog. Please try again.</string>
   <string name="catalog_load_not_connected">You are not connected to the internet. Please connect and try again.</string>
-
-  <string name="catalog_uri_development">http://circulation.alpha.librarysimplified.org/groups/</string>
-  <string name="catalog_uri_qa">http://qa.circulation.librarysimplified.org/groups/</string>
-  <string name="catalog_start_uri">@string/catalog_uri_development</string>
-
   <string name="catalog_book_revoke_loan_confirm">Are you sure you want to return this book?</string>
   <string name="catalog_book_revoke_hold_confirm">Are you sure you want to cancel this hold?</string>
   <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
@@ -36,6 +29,8 @@
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_download_failed_unsupported_pdf">This book is an Adobe PDF, which is not supported.</string>
+  <string name="catalog_download_failed_unsupported_unknown">This book is of an unknown type and is not supported.</string>
   <string name="catalog_downloading">Downloading</string>
   <string name="catalog_empty_feed">No results found.</string>
   <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your account to fix it.</string>
@@ -88,6 +83,8 @@
   <string name="settings_login_failed_credentials">Your barcode and pin combination was not valid. Please try again.</string>
   <string name="settings_login_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
   <string name="settings_login_failed_device">An error occurred when activating your device. Please check your connection or try again later.</string>
+  <string name="settings_login_failed_adobe_device_limit">Too many devices have been registered on this account. Please contact Adobe support for assistance.</string>
+  <string name="settings_login_failed_adobe_device_bad_clock">An error occurred when activating your device. Please check that your device clock is set to the correct time.</string>
   <string name="settings_logout_failed">Logout Failed</string>
   <string name="settings_feedback">Feedback</string>
   <string name="settings_credits">Acknowledgements</string>
@@ -95,6 +92,8 @@
   <string name="settings_privacy">Privacy Policy</string>
   <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
   <string name="settings_adobe_accounts">Adobe Accounts</string>
+  <string name="settings_alt_uris">Alternate URIs</string>
+  <string name="settings_reveal_password">Show PIN</string>
 
   <!-- Accessibility strings used for content descriptions (Settings) -->
   <string name="settings_accessibility_log_in_cancel">Cancel login</string>
@@ -107,9 +106,9 @@
 
   <!-- Accessibility strings used for content descriptions (Reader) -->
   <string name="reader_accessibility_toc">Show table of contents</string>
-  <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item
-  </string>
+  <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item</string>
   <string name="reader_accessibility_settings">Show reader settings</string>
+  <string name="reader_accessibility_close">Close the book</string>
   <string name="reader_accessibility_media_previous">Go to previous media item</string>
   <string name="reader_accessibility_media_next">Go to next media item</string>
   <string name="reader_accessibility_media_play">Play or pause current media item</string>

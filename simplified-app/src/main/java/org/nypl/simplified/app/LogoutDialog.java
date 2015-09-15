@@ -14,7 +14,7 @@ import android.widget.Button;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.slf4j.Logger;
 

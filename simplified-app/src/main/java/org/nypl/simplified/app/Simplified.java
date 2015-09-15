@@ -2,13 +2,15 @@ package org.nypl.simplified.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.res.Configuration;
+import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
@@ -17,25 +19,30 @@ import org.nypl.simplified.app.reader.ReaderBookmarks;
 import org.nypl.simplified.app.reader.ReaderBookmarksType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
-import org.nypl.simplified.app.reader.ReaderHTTPServer;
+import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
 import org.nypl.simplified.app.reader.ReaderSettings;
 import org.nypl.simplified.app.reader.ReaderSettingsType;
-import org.nypl.simplified.app.utilities.LogUtilities;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.AuthenticationDocumentValuesType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksController;
-import org.nypl.simplified.books.core.BooksControllerConfiguration;
-import org.nypl.simplified.books.core.BooksControllerConfigurationBuilderType;
+import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.Clock;
+import org.nypl.simplified.books.core.ClockType;
+import org.nypl.simplified.books.core.DocumentStore;
+import org.nypl.simplified.books.core.DocumentStoreBuilderType;
+import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
@@ -44,6 +51,8 @@ import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParser;
+import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParserType;
 import org.nypl.simplified.opds.core.OPDSFeedParser;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
@@ -59,6 +68,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -259,8 +269,7 @@ public final class Simplified extends Application
     private final AtomicBoolean                      synced;
     private final DownloaderType                     downloader;
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
-    private final OptionType<EULAType>               eula;
-    private final OptionType<PrivacyPolicyType>      privacy;
+    private final DocumentStoreType                  documents;
 
     private CatalogAppServices(
       final Context in_context,
@@ -280,8 +289,10 @@ public final class Simplified extends Application
        * Catalog URIs.
        */
 
-      this.feed_initial_uri =
-        NullCheck.notNull(URI.create(rr.getString(R.string.catalog_start_uri)));
+      this.feed_initial_uri = NullCheck.notNull(
+        URI.create(
+          rr.getString(
+            R.string.feature_catalog_start_uri)));
 
       /**
        * Feed loaders and parsers.
@@ -305,7 +316,7 @@ public final class Simplified extends Application
       this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(this.context);
 
       /**
-       * Book management.
+       * Application paths.
        */
 
       final File base_dir = Simplified.getDiskDataDir(in_context);
@@ -333,9 +344,123 @@ public final class Simplified extends Application
       this.downloader = DownloaderHTTP.newDownloader(
         this.exec_books, downloads_dir, this.http);
 
-      final BooksControllerConfigurationBuilderType bcb =
-        BooksControllerConfiguration.newBuilder(books_dir);
-      final BooksControllerConfiguration books_config = bcb.build();
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration(
+          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
+          URI.create(rr.getString(R.string.feature_catalog_loans_uri)));
+
+      /**
+       * Configure EULA, privacy policy, etc.
+       */
+
+      final ClockType clock = Clock.get();
+      final OPDSAuthenticationDocumentParserType auth_doc_parser =
+        OPDSAuthenticationDocumentParser.get();
+
+      /**
+       * Default authentication document values.
+       */
+
+      final AuthenticationDocumentValuesType auth_doc_values =
+        new AuthenticationDocumentValuesType()
+        {
+          @Override public String getLabelLoginUserID()
+          {
+            return rr.getString(R.string.settings_barcode);
+          }
+
+          @Override public String getLabelLoginPassword()
+          {
+            return rr.getString(R.string.settings_pin);
+          }
+        };
+
+      final DocumentStoreBuilderType documents_builder =
+        DocumentStore.newBuilder(
+          clock,
+          this.http,
+          this.exec_books,
+          books_dir,
+          auth_doc_values,
+          auth_doc_parser);
+
+      /**
+       * Conditionally enable each of the documents based on the
+       * presence of assets.
+       */
+
+      final AssetManager assets = this.context.getAssets();
+
+      {
+        try {
+          final InputStream stream = assets.open("eula.html");
+          documents_builder.enableEULA(
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No EULA defined: ", e);
+        }
+
+        try {
+          final InputStream stream = assets.open("privacy.html");
+          documents_builder.enablePrivacyPolicy(
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No privacy policy defined: ", e);
+        }
+
+        try {
+          final InputStream stream = assets.open("acknowledgements.html");
+          documents_builder.enableAcknowledgements(
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No acknowledgements defined: ", e);
+        }
+      }
+
+      this.documents = documents_builder.build();
+
+      /**
+       * Make an attempt to fetch the login form as soon as the application
+       * starts, ignoring any failures.
+       */
+
+      this.exec_downloader.submit(
+        new Runnable()
+        {
+          @Override public void run()
+          {
+            try {
+              DocumentStore.fetchLoginForm(
+                CatalogAppServices.this.documents,
+                CatalogAppServices.this.http,
+                books_config.getCurrentLoansURI());
+            } catch (final Throwable x) {
+              Simplified.LOG.error("could not fetch login form: ", x);
+            }
+          }
+        });
+
+      /**
+       * The main book controller.
+       */
 
       this.books = BooksController.newBooks(
         this.exec_books,
@@ -344,8 +469,10 @@ public final class Simplified extends Application
         this.downloader,
         in_json_serializer,
         in_json_parser,
+        this.adobe_drm,
+        this.documents,
         books_config,
-        this.adobe_drm);
+        books_dir);
 
       /**
        * Configure cover provider.
@@ -357,25 +484,15 @@ public final class Simplified extends Application
         in_context, this.books, this.cover_generator, this.exec_covers);
 
       /**
-       * Configure EULA, privacy policy, etc.
+       * Has the initial sync operation been carried out?
        */
-
-      this.eula = EULA.getEULA(
-        this.http, this.exec_downloader, this.context);
-      this.privacy = PrivacyPolicy.getPrivacyPolicy(
-        this.http, this.exec_downloader, this.context);
 
       this.synced = new AtomicBoolean(false);
     }
 
-    @Override public OptionType<EULAType> getEULA()
+    @Override public DocumentStoreType getDocumentStore()
     {
-      return this.eula;
-    }
-
-    @Override public OptionType<PrivacyPolicyType> getPrivacyPolicy()
-    {
-      return this.privacy;
+      return this.documents;
     }
 
     @Override public BooksType getBooks()
@@ -386,11 +503,6 @@ public final class Simplified extends Application
     @Override public BookCoverProviderType getCoverProvider()
     {
       return this.cover_provider;
-    }
-
-    @Override public URI getFeedInitialURI()
-    {
-      return this.feed_initial_uri;
     }
 
     @Override public FeedLoaderType getFeedLoader()
@@ -507,11 +619,6 @@ public final class Simplified extends Application
       return this.screen.screenGetWidthPixels();
     }
 
-    @Override public boolean screenIsLarge()
-    {
-      return this.screen.screenIsLarge();
-    }
-
     @Override public void syncInitial()
     {
       if (this.synced.compareAndSet(false, true)) {
@@ -530,7 +637,6 @@ public final class Simplified extends Application
     private final ReaderBookmarksType         bookmarks;
     private final ExecutorService             epub_exec;
     private final ReaderReadiumEPUBLoaderType epub_loader;
-    private final ExecutorService             http_executor;
     private final ReaderHTTPServerType        httpd;
     private final ReaderHTTPMimeMapType       mime;
     private final ScreenSizeControllerType    screen;
@@ -543,12 +649,12 @@ public final class Simplified extends Application
       this.screen = new ScreenSizeController(rr);
 
       this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
-      this.http_executor = Simplified.namedThreadPool(1, "httpd", 19);
-      this.httpd =
-        ReaderHTTPServer.newServer(this.http_executor, this.mime, 8080);
+
+      this.httpd = ReaderHTTPServerAAsync.newServer(this.mime, 8080);
 
       this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
-      this.epub_loader = ReaderReadiumEPUBLoader.newLoader(this.epub_exec);
+      this.epub_loader =
+        ReaderReadiumEPUBLoader.newLoader(context, this.epub_exec);
 
       this.settings = ReaderSettings.openSettings(context);
       this.bookmarks = ReaderBookmarks.openBookmarks(context);
@@ -595,10 +701,6 @@ public final class Simplified extends Application
       return this.screen.screenGetWidthPixels();
     }
 
-    @Override public boolean screenIsLarge()
-    {
-      return this.screen.screenIsLarge();
-    }
   }
 
   private static final class ScreenSizeController
@@ -649,36 +751,40 @@ public final class Simplified extends Application
       return dm.widthPixels;
     }
 
-    @Override public boolean screenIsLarge()
+  }
+
+  private final static class BooksControllerConfiguration
+    implements BooksControllerConfigurationType
+  {
+    private URI current_root;
+    private URI current_loans;
+
+    BooksControllerConfiguration(
+      final URI in_root,
+      final URI in_loans)
     {
-      final Resources rr = NullCheck.notNull(this.resources);
-      final Configuration c = NullCheck.notNull(rr.getConfiguration());
-      final int s = c.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-      boolean large = false;
-      large |= (s & Configuration.SCREENLAYOUT_SIZE_LARGE)
-               == Configuration.SCREENLAYOUT_SIZE_LARGE;
-      large |= (s & Configuration.SCREENLAYOUT_SIZE_XLARGE)
-               == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+      this.current_root = NullCheck.notNull(in_root);
+      this.current_loans = NullCheck.notNull(in_loans);
+    }
 
-      if (rr.getBoolean(R.bool.debug_override_large_screen)) {
-        if (large == false) {
-          Simplified.LOG.debug(
-            "screen size overridden to be large by "
-            + "debug_override_large_screen");
-          return true;
-        }
-      }
+    @Override public synchronized URI getCurrentRootFeedURI()
+    {
+      return this.current_root;
+    }
 
-      if (rr.getBoolean(R.bool.debug_override_small_screen)) {
-        if (large == true) {
-          Simplified.LOG.debug(
-            "screen size overridden to be small by "
-            + "debug_override_small_screen");
-          return false;
-        }
-      }
+    @Override public synchronized void setCurrentRootFeedURI(final URI u)
+    {
+      this.current_root = NullCheck.notNull(u);
+    }
 
-      return large;
+    @Override public synchronized URI getCurrentLoansURI()
+    {
+      return this.current_loans;
+    }
+
+    @Override public synchronized void setCurrentLoansURI(final URI u)
+    {
+      this.current_loans = NullCheck.notNull(u);
     }
   }
 }

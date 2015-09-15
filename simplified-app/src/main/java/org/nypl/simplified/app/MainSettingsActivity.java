@@ -10,31 +10,41 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
+import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.app.utilities.LogUtilities;
+import org.nypl.drm.core.AdobeVendorID;
+import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
+import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.core.SyncedDocumentType;
 import org.slf4j.Logger;
 
 /**
@@ -97,10 +107,9 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   }
 
   @Override public void onAccountIsLoggedIn(
-    final AccountBarcode barcode,
-    final AccountPIN pin)
+    final AccountCredentials creds)
   {
-    MainSettingsActivity.LOG.debug("account is logged in: {}", barcode);
+    MainSettingsActivity.LOG.debug("account is logged in: {}", creds);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -116,8 +125,8 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       {
         @Override public void run()
         {
-          in_pin_edit.setText(pin.toString());
-          in_barcode_edit.setText(barcode.toString());
+          in_pin_edit.setText(creds.getPassword().toString());
+          in_barcode_edit.setText(creds.getUser().toString());
           MainSettingsActivity.editableDisable(in_barcode_edit);
           MainSettingsActivity.editableDisable(in_pin_edit);
 
@@ -161,6 +170,9 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final EditText in_pin_edit = NullCheck.notNull(this.pin_edit);
     final Button in_login = NullCheck.notNull(this.login);
 
+    final OptionType<AdobeVendorID> adobe_vendor = Option.some(
+      new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
+
     UIThread.runOnUIThread(
       new Runnable()
       {
@@ -190,7 +202,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 final Editable pin_text = in_pin_edit.getText();
                 final AccountPIN pin =
                   new AccountPIN(NullCheck.notNull(pin_text.toString()));
-                books.accountLogin(barcode, pin, MainSettingsActivity.this);
+
+                final AccountCredentials creds =
+                  new AccountCredentials(adobe_vendor, barcode, pin);
+                books.accountLogin(creds, MainSettingsActivity.this);
               }
             });
         }
@@ -267,11 +282,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   }
 
   @Override public void onAccountLoginSuccess(
-    final AccountBarcode barcode,
-    final AccountPIN pin)
+    final AccountCredentials creds)
   {
-    MainSettingsActivity.LOG.debug("account login succeeded: {}", barcode);
-    this.onAccountIsLoggedIn(barcode, pin);
+    MainSettingsActivity.LOG.debug("account login succeeded: {}", creds);
+    this.onAccountIsLoggedIn(creds);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -304,7 +318,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final Resources rr = NullCheck.notNull(this.getResources());
     final OptionType<Throwable> none = Option.none();
     this.onAccountLoginFailure(
-      none, rr.getString(R.string.settings_login_failed_device));
+      none, LoginDialog.getDeviceActivationErrorMessage(rr, message));
   }
 
   @Override public void onAccountLogoutFailure(
@@ -383,32 +397,73 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
+    final DocumentStoreType docs = app.getDocumentStore();
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
     final Resources resources = NullCheck.notNull(this.getResources());
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup layout = NullCheck.notNull(
-      (ViewGroup) inflater.inflate(
-        R.layout.settings, content_area, false));
+      (ViewGroup) inflater.inflate(R.layout.settings, content_area, false));
     content_area.addView(layout);
     content_area.requestLayout();
 
+    final TextView in_barcode_label = NullCheck.notNull(
+      (TextView) this.findViewById(R.id.settings_barcode_label));
     final EditText in_barcode_edit = NullCheck.notNull(
       (EditText) this.findViewById(R.id.settings_barcode_edit));
+
+    final TextView in_pin_label = NullCheck.notNull(
+      (TextView) this.findViewById(R.id.settings_pin_label));
     final EditText in_pin_edit =
       NullCheck.notNull((EditText) this.findViewById(R.id.settings_pin_edit));
+    final CheckBox in_pin_reveal = NullCheck.notNull(
+      (CheckBox) this.findViewById(R.id.settings_reveal_password));
+
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
     final TextView in_adobe_accounts = NullCheck.notNull(
       (TextView) this.findViewById(R.id.settings_adobe_accounts));
 
     /**
+     * Add a listener that reveals/hides the password field.
+     */
+
+    in_pin_edit.setTransformationMethod(
+      PasswordTransformationMethod.getInstance());
+    in_pin_reveal.setOnCheckedChangeListener(
+      new CompoundButton.OnCheckedChangeListener()
+      {
+        @Override public void onCheckedChanged(
+          final CompoundButton view,
+          final boolean checked)
+        {
+          if (checked) {
+            in_pin_edit.setTransformationMethod(
+              HideReturnsTransformationMethod.getInstance());
+          } else {
+            in_pin_edit.setTransformationMethod(
+              PasswordTransformationMethod.getInstance());
+          }
+        }
+      });
+
+    /**
      * If Adobe DRM support is available, then enable the accounts
-     * management section.
+     * management section. This is not yet implemented and is therefore
+     * currently always inactive.
      */
 
     in_adobe_accounts.setEnabled(false);
+
+    /**
+     * Get labels from the current authentication document.
+     */
+
+    final AuthenticationDocumentType auth_doc =
+      docs.getAuthenticationDocument();
+    in_barcode_label.setText(auth_doc.getLabelLoginUserID());
+    in_pin_label.setText(auth_doc.getLabelLoginPassword());
 
     /**
      * If an EULA is defined, configure the EULA to open a web view displaying
@@ -419,10 +474,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_eula));
     in_eula.setEnabled(false);
 
-    app.getEULA().map(
-      new FunctionType<EULAType, Unit>()
+    docs.getEULA().map_(
+      new ProcedureType<EULAType>()
       {
-        @Override public Unit call(final EULAType eula)
+        @Override public void call(final EULAType eula)
         {
           in_eula.setEnabled(true);
           in_eula.setOnClickListener(
@@ -443,7 +498,6 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 MainSettingsActivity.this.overridePendingTransition(0, 0);
               }
             });
-          return Unit.unit();
         }
       });
 
@@ -455,10 +509,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_privacy));
     in_privacy.setEnabled(false);
 
-    app.getPrivacyPolicy().map(
-      new FunctionType<PrivacyPolicyType, Unit>()
+    docs.getPrivacyPolicy().map_(
+      new ProcedureType<SyncedDocumentType>()
       {
-        @Override public Unit call(final PrivacyPolicyType policy)
+        @Override public void call(final SyncedDocumentType policy)
         {
           in_privacy.setEnabled(true);
           in_privacy.setOnClickListener(
@@ -479,7 +533,41 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 MainSettingsActivity.this.overridePendingTransition(0, 0);
               }
             });
-          return Unit.unit();
+        }
+      });
+
+    /**
+     * Enable/disable the acknowledgements field.
+     */
+
+    final TextView in_acknowledgements =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_credits));
+    in_acknowledgements.setEnabled(false);
+
+    docs.getAcknowledgements().map_(
+      new ProcedureType<SyncedDocumentType>()
+      {
+        @Override public void call(final SyncedDocumentType ack)
+        {
+          in_acknowledgements.setEnabled(true);
+          in_acknowledgements.setOnClickListener(
+            new OnClickListener()
+            {
+              @Override public void onClick(final View v)
+              {
+                final Intent i = new Intent(
+                  MainSettingsActivity.this, WebViewActivity.class);
+                final Bundle b = new Bundle();
+                WebViewActivity.setActivityArguments(
+                  b,
+                  ack.documentGetReadableURL().toString(),
+                  resources.getString(R.string.settings_privacy),
+                  SimplifiedPart.PART_SETTINGS);
+                i.putExtras(b);
+                MainSettingsActivity.this.startActivity(i);
+                MainSettingsActivity.this.overridePendingTransition(0, 0);
+              }
+            });
         }
       });
 
@@ -547,6 +635,29 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       });
 
     in_login.setEnabled(false);
+
+    /**
+     * Temporary "alternate URIs" selection.
+     */
+
+    final TextView in_alt_uris =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_alt_uris));
+    in_alt_uris.setEnabled(true);
+    in_alt_uris.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          final Bundle b = new Bundle();
+          SimplifiedActivity.setActivityArguments(b, false);
+          final Intent i = new Intent();
+          i.setClass(
+            MainSettingsActivity.this, AlternateFeedURIsActivity.class);
+          i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+          i.putExtras(b);
+          MainSettingsActivity.this.startActivity(i);
+        }
+      });
 
     this.navigationDrawerSetActionBarTitle();
     this.barcode_edit = in_barcode_edit;

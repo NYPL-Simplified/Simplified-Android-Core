@@ -8,9 +8,9 @@ import java.net.URI;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A (mutable) feed without groups.
@@ -93,7 +93,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   {
     final List<BookID> in_entries_order = new ArrayList<BookID>(32);
     final Map<BookID, FeedEntryType> in_entries =
-      new HashMap<BookID, FeedEntryType>(32);
+      new ConcurrentHashMap<BookID, FeedEntryType>(32);
 
     return new FeedWithoutGroups(
       in_uri,
@@ -229,5 +229,34 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   @Override public int size()
   {
     return this.entries_order.size();
+  }
+
+  /**
+   * Update the entry with the same ID as {@code e}. If no such entry exists, do
+   * nothing.
+   *
+   * @param e The entry
+   */
+
+  public void updateEntry(final FeedEntryType e)
+  {
+    NullCheck.notNull(e);
+
+    final BookID book_id = e.getBookID();
+    if (this.entries.containsKey(book_id)) {
+      this.entries.put(book_id, e);
+    }
+  }
+
+  /**
+   * @param in_id The book ID
+   *
+   * @return {@code true} iff the feed contains an entry with {@code in_id}
+   */
+
+  public boolean containsID(final BookID in_id)
+  {
+    NullCheck.notNull(in_id);
+    return this.entries.containsKey(in_id);
   }
 }

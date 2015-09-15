@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.WeakHashMap;
 
 /**
  * The default implementation of the {@link BooksStatusCacheType} interface.
@@ -24,13 +25,15 @@ public final class BooksStatusCache extends Observable
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksStatusCache.class));
   }
 
-  private final Map<BookID, BookSnapshot>   snapshots;
+  private final Map<BookID, BookSnapshot> snapshots;
   private final Map<BookID, BookStatusType> status;
+  private final Map<BookID, FeedEntryType> entries;
 
   private BooksStatusCache()
   {
     this.status = new HashMap<BookID, BookStatusType>(32);
     this.snapshots = new HashMap<BookID, BookSnapshot>(32);
+    this.entries = new WeakHashMap<BookID, FeedEntryType>(32);
   }
 
   /**
@@ -97,6 +100,28 @@ public final class BooksStatusCache extends Observable
       return Option.some(NullCheck.notNull(this.status.get(id)));
     }
     return Option.none();
+  }
+
+  @Override
+  public synchronized OptionType<FeedEntryType> booksFeedEntryGet(final
+  BookID id)
+  {
+    NullCheck.notNull(id);
+    if (this.entries.containsKey(id)) {
+      return Option.some(NullCheck.notNull(this.entries.get(id)));
+    }
+    return Option.none();
+  }
+
+  @Override public synchronized void booksFeedEntryUpdate(
+    final FeedEntryType e)
+  {
+    NullCheck.notNull(e);
+
+    final BookID id = e.getBookID();
+    BooksStatusCache.LOG.debug("entry update {} → {}", id, e);
+    this.entries.put(id, e);
+    this.broadcast(id);
   }
 
   @Override public synchronized void booksStatusUpdate(

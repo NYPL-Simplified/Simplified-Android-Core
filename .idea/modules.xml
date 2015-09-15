@@ -21,10 +21,18 @@
       <module fileurl="file://$PROJECT_DIR$/simplified-http-tests/simplified-http-tests.iml" filepath="$PROJECT_DIR$/simplified-http-tests/simplified-http-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-http-tests-android/simplified-http-tests-android.iml" filepath="$PROJECT_DIR$/simplified-http-tests-android/simplified-http-tests-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-http-tests-junit4/simplified-http-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-http-tests-junit4/simplified-http-tests-junit4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-json-core/simplified-json-core.iml" filepath="$PROJECT_DIR$/simplified-json-core/simplified-json-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-json-tests/simplified-json-tests.iml" filepath="$PROJECT_DIR$/simplified-json-tests/simplified-json-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-json-tests-android/simplified-json-tests-android.iml" filepath="$PROJECT_DIR$/simplified-json-tests-android/simplified-json-tests-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-json-tests-junit4/simplified-json-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-json-tests-junit4/simplified-json-tests-junit4.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-core/simplified-opds-core.iml" filepath="$PROJECT_DIR$/simplified-opds-core/simplified-opds-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-tests/simplified-opds-tests.iml" filepath="$PROJECT_DIR$/simplified-opds-tests/simplified-opds-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-tests-android/simplified-opds-tests-android.iml" filepath="$PROJECT_DIR$/simplified-opds-tests-android/simplified-opds-tests-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-tests-junit4/simplified-opds-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-opds-tests-junit4/simplified-opds-tests-junit4.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-core/simplified-rfc3339-core.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-core/simplified-rfc3339-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests/simplified-rfc3339-tests.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests/simplified-rfc3339-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests-android/simplified-rfc3339-tests-android.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests-android/simplified-rfc3339-tests-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests-junit4/simplified-rfc3339-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests-junit4/simplified-rfc3339-tests-junit4.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-stack/simplified-stack.iml" filepath="$PROJECT_DIR$/simplified-stack/simplified-stack.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-tenprint/simplified-tenprint.iml" filepath="$PROJECT_DIR$/simplified-tenprint/simplified-tenprint.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-test-utilities/simplified-test-utilities.iml" filepath="$PROJECT_DIR$/simplified-test-utilities/simplified-test-utilities.iml" />
