@@ -671,10 +671,17 @@ final class BooksControllerBorrowTask implements Runnable,
 
     }
 
-    @Override public void onFulfillmentFailure(final String error)
+    @Override public void onFulfillmentFailure(final String message)
     {
-      final OptionType<Throwable> none = Option.none();
-      BooksControllerBorrowTask.this.downloadFailed(none);
+      final OptionType<Throwable> error;
+
+      if (message.startsWith("NYPL_UNSUPPORTED requestPasshash")) {
+        error = Option.some((Throwable) new BookUnsupportedPasshashException());
+      } else {
+        error = Option.none();
+      }
+
+      BooksControllerBorrowTask.this.downloadFailed(error);
     }
 
     @Override public void onFulfillmentSuccess(
