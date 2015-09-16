@@ -39,12 +39,6 @@ public final class BooksTest extends InstrumentationTestCase implements
     this.contract.testBooksLoginFileNotDirectory();
   }
 
-  @Override public void testBooksSyncFileNotDirectory()
-    throws Exception
-  {
-    this.contract.testBooksSyncFileNotDirectory();
-  }
-
   @Override public void testBooksSyncLoadLogoutOK()
     throws Exception
   {

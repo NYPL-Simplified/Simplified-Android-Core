@@ -292,6 +292,8 @@ public final class BooksController extends Observable implements BooksType
         this.http,
         this.config,
         this.adobe_drm,
+        this.feed_parser,
+        this.downloader,
         account,
         listener,
         this.login));

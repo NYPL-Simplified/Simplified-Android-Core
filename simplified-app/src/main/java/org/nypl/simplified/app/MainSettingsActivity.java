@@ -304,7 +304,6 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
         {
           final Toast toast = Toast.makeText(context, text, duration);
           toast.show();
-          books.accountSync(MainSettingsActivity.this);
         }
       });
   }

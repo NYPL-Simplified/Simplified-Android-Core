@@ -70,4 +70,51 @@ final class AccountLoginListenerCatcher implements AccountLoginListenerType
       this.log.error("onAccountLoginFailureDeviceActivationError raised: ", e);
     }
   }
+
+  @Override public void onAccountSyncAuthenticationFailure(final String message)
+  {
+    try {
+      this.delegate.onAccountSyncAuthenticationFailure(message);
+    } catch (final Throwable e) {
+      this.log.error("onAccountSyncAuthenticationFailure raised: ", e);
+    }
+  }
+
+  @Override public void onAccountSyncBook(final BookID book)
+  {
+    try {
+      this.delegate.onAccountSyncBook(book);
+    } catch (final Throwable e) {
+      this.log.error("onAccountSyncBook raised: ", e);
+    }
+  }
+
+  @Override public void onAccountSyncFailure(
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    try {
+      this.delegate.onAccountSyncFailure(error, message);
+    } catch (final Throwable e) {
+      this.log.error("onAccountSyncFailure raised: ", e);
+    }
+  }
+
+  @Override public void onAccountSyncSuccess()
+  {
+    try {
+      this.delegate.onAccountSyncSuccess();
+    } catch (final Throwable e) {
+      this.log.error("onAccountSyncSuccess raised: ", e);
+    }
+  }
+
+  @Override public void onAccountSyncBookDeleted(final BookID book)
+  {
+    try {
+      this.delegate.onAccountSyncBookDeleted(book);
+    } catch (final Throwable e) {
+      this.log.error("onAccountSyncBookDeleted raised: ", e);
+    }
+  }
 }
