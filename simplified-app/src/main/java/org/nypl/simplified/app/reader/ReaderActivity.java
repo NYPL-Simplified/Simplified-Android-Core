@@ -572,6 +572,7 @@ public final class ReaderActivity extends Activity implements
         }
       });
 
+    js.injectFonts();
     js.openBook(p, vs, page_request);
 
     /**

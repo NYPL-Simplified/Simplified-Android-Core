@@ -243,6 +243,30 @@ public final class ReaderReadiumJavaScriptAPI
     }
   }
 
+  @Override public void injectFonts()
+  {
+    try {
+      final JSONObject s = new JSONObject();
+      s.put("truetype", "OpenDyslexic3-Regular.ttf");
+
+      final JSONObject o = new JSONObject();
+      o.put("fontFamily", "OpenDyslexic3");
+      o.put("fontWeight", "normal");
+      o.put("fontStyle", "normal");
+      o.put("sources", s);
+
+      final StringBuilder script = new StringBuilder(256);
+      script.append("ReadiumSDK.reader.plugins.injectFonts.registerFontFace(");
+      script.append(o);
+      script.append(");");
+
+      this.evaluate(script.toString());
+    } catch (final JSONException e) {
+      ReaderReadiumJavaScriptAPI.LOG.error(
+        "error constructing json: {}", e.getMessage(), e);
+    }
+  }
+
   @Override public void mediaOverlayIsAvailable(
     final ReaderMediaOverlayAvailabilityListenerType l)
   {
