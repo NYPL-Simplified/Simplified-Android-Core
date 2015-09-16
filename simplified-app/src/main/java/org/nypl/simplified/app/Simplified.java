@@ -650,7 +650,8 @@ public final class Simplified extends Application
 
       this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
 
-      this.httpd = ReaderHTTPServerAAsync.newServer(this.mime, 8080);
+      this.httpd =
+        ReaderHTTPServerAAsync.newServer(context.getAssets(), this.mime, 8080);
 
       this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       this.epub_loader =
