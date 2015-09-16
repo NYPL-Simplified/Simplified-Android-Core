@@ -3,6 +3,7 @@ package org.nypl.simplified.app.reader;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -116,6 +117,10 @@ public final class ReaderSettingsDialog extends DialogFragment
           settings.setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC);
         }
       });
+
+    final Typeface od = Typeface.createFromAsset(
+      this.getActivity().getAssets(), "OpenDyslexic3-Regular.ttf");
+    in_view_font_open_dyslexic.setTypeface(od);
 
     in_view_black_on_white.setBackgroundColor(
       ReaderColorScheme.SCHEME_BLACK_ON_WHITE.getBackgroundColor());

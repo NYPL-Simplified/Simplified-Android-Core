@@ -27,7 +27,7 @@
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
       android:fontFamily="serif"
-      android:text="A" />
+      android:text="ABC" />
 
     <FrameLayout
       android:layout_height="48dp"
@@ -42,7 +42,7 @@
       android:gravity="center"
       android:fontFamily="sans"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:text="A" />
+      android:text="ABC" />
 
     <FrameLayout
       android:layout_height="48dp"
@@ -56,7 +56,7 @@
       android:layout_weight="1"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:text="A" />
+      android:text="ABC" />
 
   </LinearLayout>
 
