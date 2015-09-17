@@ -65,8 +65,8 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.drm:nypl-drm-core:0.5.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-sdk-android-runtime:0.20.0-NYPL0001" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.readium:readium-shared-js:0.22.0-NYPL0001" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.readium:readium-sdk-android-runtime:0.22.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.nypl.readium:readium-shared-js:0.22.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.koushikdutta.async:androidasync:2.1.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.squareup.picasso:picasso:2.5.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.nanohttpd:nanohttpd:2.1.1" level="project" />
