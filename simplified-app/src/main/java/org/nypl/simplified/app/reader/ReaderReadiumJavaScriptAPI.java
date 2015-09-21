@@ -12,9 +12,9 @@ import org.json.JSONObject;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings
   .SyntheticSpreadMode;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 /**
@@ -195,8 +195,7 @@ public final class ReaderReadiumJavaScriptAPI
           decls.put("font-family", "sans-serif");
           break;
         }
-        case READER_FONT_OPEN_DYSLEXIC:
-        {
+        case READER_FONT_OPEN_DYSLEXIC: {
           /**
            * This is defined as a custom CSS font family inside
            * OpenDyslexic.css, which is referenced from the initially
@@ -229,12 +228,39 @@ public final class ReaderReadiumJavaScriptAPI
       this.evaluate(script.toString());
 
       final ReaderReadiumViewerSettings vs = new ReaderReadiumViewerSettings(
-        SyntheticSpreadMode.AUTO, ScrollMode.AUTO, (int) r.getFontScale(), 20);
+        SyntheticSpreadMode.SINGLE,
+        ScrollMode.AUTO,
+        (int) r.getFontScale(),
+        20);
 
       this.evaluate(
         NullCheck.notNull(
           String.format("ReadiumSDK.reader.updateSettings(%s);", vs.toJSON())));
 
+    } catch (final JSONException e) {
+      ReaderReadiumJavaScriptAPI.LOG.error(
+        "error constructing json: {}", e.getMessage(), e);
+    }
+  }
+
+  @Override public void injectFonts()
+  {
+    try {
+      final JSONObject s = new JSONObject();
+      s.put("truetype", "OpenDyslexic3-Regular.ttf");
+
+      final JSONObject o = new JSONObject();
+      o.put("fontFamily", "OpenDyslexic3");
+      o.put("fontWeight", "normal");
+      o.put("fontStyle", "normal");
+      o.put("sources", s);
+
+      final StringBuilder script = new StringBuilder(256);
+      script.append("ReadiumSDK.reader.plugins.injectFonts.registerFontFace(");
+      script.append(o);
+      script.append(");");
+
+      this.evaluate(script.toString());
     } catch (final JSONException e) {
       ReaderReadiumJavaScriptAPI.LOG.error(
         "error constructing json: {}", e.getMessage(), e);

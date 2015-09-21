@@ -7,6 +7,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
+import org.nypl.simplified.books.core.BookUnsupportedPasshashException;
 import org.nypl.simplified.books.core.BookUnsupportedTypeException;
 
 final class CatalogBookErrorStrings
@@ -34,6 +35,11 @@ final class CatalogBookErrorStrings
     if (error_opt.isSome()) {
       final Some<Throwable> error_some = (Some<Throwable>) error_opt;
       final Throwable error = error_some.get();
+
+      if (error instanceof BookUnsupportedPasshashException) {
+        return r.getString(
+          R.string.catalog_download_failed_unsupported_passhash);
+      }
 
       if (error instanceof BookUnsupportedTypeException) {
         final BookUnsupportedTypeException unsupported =

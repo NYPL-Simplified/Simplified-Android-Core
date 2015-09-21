@@ -91,6 +91,7 @@ $(document).ready(function()
 
       ReadiumSDK.reader = new ReaderView(opts);
       console.log("DONE READER");
+
       ReadiumSDK.emit(ReadiumSDK.Events.READER_INITIALIZED, ReadiumSDK.reader);
     });
   });

@@ -13,7 +13,7 @@
     <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
     <orderEntry type="module" module-name="simplified-books-core" />
     <orderEntry type="module" module-name="simplified-downloader-core" />
-    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.6.0" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.junreachable:io7m-junreachable-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.1.0" level="project" />
@@ -32,8 +32,8 @@
     <orderEntry type="module" module-name="simplified-files" />
     <orderEntry type="module" module-name="simplified-tenprint" />
     <orderEntry type="module" module-name="simplified-app" />
-    <orderEntry type="library" name="Maven: org.readium:readium-sdk-android-runtime:0.20.0-NYPL0001" level="project" />
-    <orderEntry type="library" name="Maven: org.readium:readium-shared-js:0.20.0" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.readium:readium-sdk-android-runtime:0.22.0" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.readium:readium-shared-js:0.22.0" level="project" />
     <orderEntry type="library" name="Maven: com.koushikdutta.async:androidasync:2.1.6" level="project" />
     <orderEntry type="library" name="Maven: com.squareup.picasso:picasso:2.5.2" level="project" />
     <orderEntry type="library" name="Maven: com.nanohttpd:nanohttpd:2.1.1" level="project" />

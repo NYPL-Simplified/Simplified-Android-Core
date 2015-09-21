@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.3.22</version>
+    <version>0.3.23</version>
   </parent>
   <artifactId>simplified-app</artifactId>
 
@@ -65,15 +65,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.readium</groupId>
+      <groupId>org.nypl.readium</groupId>
       <artifactId>readium-sdk-android-runtime</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.readium</groupId>
+      <groupId>org.nypl.readium</groupId>
       <artifactId>readium-shared-js</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.readium</groupId>
+      <groupId>org.nypl.readium</groupId>
       <artifactId>libepub3</artifactId>
       <classifier>armeabi-v7a</classifier>
       <type>so</type>
@@ -119,7 +119,7 @@
       <dependencies>
         <dependency>
           <groupId>org.nypl.drm</groupId>
-          <artifactId>nypl-drm-adobe</artifactId>
+          <artifactId>nypl-drm-adobe-provider</artifactId>
         </dependency>
         <dependency>
           <groupId>org.nypl.drm</groupId>

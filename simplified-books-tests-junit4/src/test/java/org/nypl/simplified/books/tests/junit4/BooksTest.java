@@ -41,12 +41,6 @@ public final class BooksTest implements BooksContractType
     this.contract.testBooksLoginFileNotDirectory();
   }
 
-  @Override @Test public void testBooksSyncFileNotDirectory()
-    throws Exception
-  {
-    this.contract.testBooksSyncFileNotDirectory();
-  }
-
   @Override @Test public void testBooksSyncLoadLogoutOK()
     throws Exception
   {

@@ -6,7 +6,7 @@ import com.io7m.jfunctional.OptionType;
  * The type of listeners for account login operations.
  */
 
-public interface AccountLoginListenerType
+public interface AccountLoginListenerType extends AccountSyncListenerType
 {
   /**
    * Logging in failed due to rejected credentials.

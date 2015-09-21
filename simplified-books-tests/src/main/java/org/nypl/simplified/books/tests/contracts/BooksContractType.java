@@ -14,9 +14,6 @@ public interface BooksContractType
   void testBooksLoginFileNotDirectory()
     throws Exception;
 
-  void testBooksSyncFileNotDirectory()
-    throws Exception;
-
   void testBooksSyncOK()
     throws Exception;
 

@@ -14,6 +14,7 @@ import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.AdobeVendorID;
+import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -22,6 +23,7 @@ import org.nypl.simplified.http.core.HTTPResultMatcherType;
 import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,8 @@ final class BooksControllerLoginTask implements Runnable,
   private final AtomicReference<AccountCredentials> login;
   private final OptionType<AdobeAdeptExecutorType>  adobe_drm;
   private final AccountCredentials                  credentials;
+  private final OPDSFeedParserType                  parser;
+  private final DownloaderType                      downloader;
 
   BooksControllerLoginTask(
     final BooksController in_books,
@@ -56,6 +60,8 @@ final class BooksControllerLoginTask implements Runnable,
     final HTTPType in_http,
     final BooksControllerConfigurationType in_config,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    final OPDSFeedParserType in_feed_parser,
+    final DownloaderType in_downloader,
     final AccountCredentials in_credentials,
     final AccountLoginListenerType in_listener,
     final AtomicReference<AccountCredentials> in_login)
@@ -65,6 +71,8 @@ final class BooksControllerLoginTask implements Runnable,
     this.http = NullCheck.notNull(in_http);
     this.config = NullCheck.notNull(in_config);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
+    this.parser = NullCheck.notNull(in_feed_parser);
+    this.downloader = NullCheck.notNull(in_downloader);
     this.credentials = NullCheck.notNull(in_credentials);
     this.listener = new AccountLoginListenerCatcher(
       BooksControllerLoginTask.LOG, NullCheck.notNull(in_listener));
@@ -211,6 +219,20 @@ final class BooksControllerLoginTask implements Runnable,
 
     BooksControllerLoginTask.LOG.debug(
       "logged in as {} successfully", this.credentials.getUser());
+
+    try {
+      final BooksControllerSyncTask sync = new BooksControllerSyncTask(
+        this.config,
+        this.books.bookGetStatusCache(),
+        this.books_database,
+        this.http,
+        this.parser,
+        this.downloader,
+        this.listener);
+      sync.run();
+    } catch (final Throwable e) {
+      BooksControllerLoginTask.LOG.debug("sync task raised error: ", e);
+    }
 
     this.listener.onAccountLoginSuccess(this.credentials);
   }

@@ -34,10 +34,7 @@ abstract class MainLocalFeedActivity extends CatalogFeedActivity
   @Override public void onAccountIsLoggedIn(
     final AccountCredentials creds)
   {
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
-    books.accountSync(this);
+    MainLocalFeedActivity.LOG.debug("account is logged in");
   }
 
   @Override public void onAccountIsNotLoggedIn()

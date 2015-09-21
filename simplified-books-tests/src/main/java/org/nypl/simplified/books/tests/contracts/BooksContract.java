@@ -33,6 +33,7 @@ import org.nypl.simplified.books.core.SyncedDocumentType;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
+import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthMatcherType;
@@ -500,6 +501,34 @@ public final class BooksContract implements BooksContractType
 
       final AccountLoginListenerType listener = new AccountLoginListenerType()
       {
+        @Override
+        public void onAccountSyncAuthenticationFailure(final String message)
+        {
+          // Nothing
+        }
+
+        @Override public void onAccountSyncBook(final BookID book)
+        {
+          // Nothing
+        }
+
+        @Override public void onAccountSyncFailure(
+          final OptionType<Throwable> error,
+          final String message)
+        {
+          // Nothing
+        }
+
+        @Override public void onAccountSyncSuccess()
+        {
+          // Nothing
+        }
+
+        @Override public void onAccountSyncBookDeleted(final BookID book)
+        {
+          // Nothing
+        }
+
         @Override public void onAccountLoginFailureCredentialsIncorrect()
         {
           // Nothing
@@ -591,6 +620,34 @@ public final class BooksContract implements BooksContractType
       final AccountLoginListenerType login_listener =
         new AccountLoginListenerType()
         {
+          @Override
+          public void onAccountSyncAuthenticationFailure(final String message)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncBook(final BookID book)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncFailure(
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncSuccess()
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncBookDeleted(final BookID book)
+          {
+            // Nothing
+          }
+
           @Override public void onAccountLoginFailureCredentialsIncorrect()
           {
             // Nothing
@@ -631,160 +688,6 @@ public final class BooksContract implements BooksContractType
       b.accountLogin(creds, login_listener);
 
       latch.await();
-      TestUtilities.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
-
-    } finally {
-      exec.shutdown();
-    }
-  }
-
-  @Override public void testBooksSyncFileNotDirectory()
-    throws Exception
-  {
-    final ExecutorService exec = Executors.newFixedThreadPool(4);
-    try {
-      final File tmp = DirectoryUtilities.directoryCreateTemporary();
-      final BooksControllerConfiguration books_config =
-        new BooksControllerConfiguration();
-
-      final AccountBarcode barcode = new AccountBarcode("barcode");
-      final AccountPIN pin = new AccountPIN("pin");
-      final OptionType<AdobeVendorID> no_vendor = Option.none();
-      final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin);
-
-      final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
-      final OPDSJSONSerializerType in_json_serializer =
-        OPDSJSONSerializer.newSerializer();
-      final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
-
-      final DownloaderType d = DownloaderHTTP.newDownloader(
-        exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
-
-      final OptionType<AdobeAdeptExecutorType> none = Option.none();
-      final BooksType b = BooksController.newBooks(
-        exec,
-        BooksContract.newParser(),
-        in_http,
-        d,
-        in_json_serializer,
-        in_json_parser,
-        none,
-        BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
-
-      final CountDownLatch latch0 = new CountDownLatch(1);
-
-      final AccountLoginListenerType login_listener =
-        new AccountLoginListenerType()
-        {
-          @Override public void onAccountLoginFailureCredentialsIncorrect()
-          {
-            // Nothing
-          }
-
-          @Override public void onAccountLoginFailureServerError(final int code)
-          {
-            // Nothing
-          }
-
-          @Override public void onAccountLoginFailureLocalError(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-            try {
-              System.err.println(
-                "testBooksSyncFileNotDirectory: login failed: " + message);
-              ((Some<Throwable>) error).get().printStackTrace();
-            } finally {
-              latch0.countDown();
-            }
-          }
-
-          @Override public void onAccountLoginSuccess(
-            final AccountCredentials credentials)
-          {
-            try {
-              System.err.println(
-                "testBooksSyncFileNotDirectory: login succeeded");
-            } finally {
-              latch0.countDown();
-            }
-          }
-
-          @Override public void onAccountLoginFailureDeviceActivationError(
-            final String message)
-          {
-            // Nothing
-          }
-        };
-
-      b.accountLogin(creds, login_listener);
-
-      latch0.await();
-
-      final File data = new File(tmp, "data");
-      new File(data, "account.json").delete();
-      data.delete();
-      tmp.delete();
-      tmp.createNewFile();
-
-      TestUtilities.assertTrue(tmp.isFile());
-
-      final CountDownLatch latch1 = new CountDownLatch(1);
-      final AtomicBoolean failed = new AtomicBoolean(false);
-
-      final AccountSyncListenerType sync_listener =
-        new AccountSyncListenerType()
-        {
-          @Override public void onAccountSyncAuthenticationFailure(
-            final String message)
-          {
-            try {
-              failed.set(true);
-              System.err.println(
-                "testBooksSyncFileNotDirectory: login failed: " + message);
-            } finally {
-              latch1.countDown();
-            }
-          }
-
-          @Override public void onAccountSyncBook(
-            final BookID book)
-          {
-            System.err.println(
-              "testBooksSyncFileNotDirectory: synced book: " + book);
-          }
-
-          @Override public void onAccountSyncFailure(
-            final OptionType<Throwable> error,
-            final String message)
-          {
-            try {
-              failed.set(true);
-              System.err.println(
-                "testBooksSyncFileNotDirectory: login failed: " + message);
-              ((Some<Throwable>) error).get().printStackTrace();
-            } finally {
-              latch1.countDown();
-            }
-          }
-
-          @Override public void onAccountSyncSuccess()
-          {
-            System.err.println("testBooksSyncFileNotDirectory: synced");
-          }
-
-          @Override public void onAccountSyncBookDeleted(final BookID book)
-          {
-            System.err.println(
-              "testBooksSyncFileNotDirectory: deleted book: " + book);
-          }
-        };
-
-      b.accountSync(sync_listener);
-      latch1.await();
       TestUtilities.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
 
     } finally {
@@ -834,6 +737,34 @@ public final class BooksContract implements BooksContractType
       final AccountLoginListenerType login_listener =
         new AccountLoginListenerType()
         {
+
+          @Override
+          public void onAccountSyncAuthenticationFailure(final String message)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncBook(final BookID book)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncFailure(
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncSuccess()
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncBookDeleted(final BookID book)
+          {
+            // Nothing
+          }
 
           @Override public void onAccountLoginFailureCredentialsIncorrect()
           {
@@ -1061,6 +992,34 @@ public final class BooksContract implements BooksContractType
       final AccountLoginListenerType login_listener =
         new AccountLoginListenerType()
         {
+
+          @Override
+          public void onAccountSyncAuthenticationFailure(final String message)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncBook(final BookID book)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncFailure(
+            final OptionType<Throwable> error,
+            final String message)
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncSuccess()
+          {
+            // Nothing
+          }
+
+          @Override public void onAccountSyncBookDeleted(final BookID book)
+          {
+            // Nothing
+          }
 
           @Override public void onAccountLoginFailureCredentialsIncorrect()
           {

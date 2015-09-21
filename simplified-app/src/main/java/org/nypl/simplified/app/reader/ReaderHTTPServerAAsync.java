@@ -1,21 +1,6 @@
-/*
- * Copyright © 2015 <code@io7m.com> http://io7m.com
- *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
- * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
 package org.nypl.simplified.app.reader;
 
+import android.content.res.AssetManager;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
@@ -36,6 +21,7 @@ import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;
 import org.slf4j.Logger;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
@@ -61,15 +47,18 @@ public final class ReaderHTTPServerAAsync
   private final     AsyncServer           server;
   private final     AtomicBoolean         started;
   private final     AsyncHttpServer       server_http;
+  private final     AssetManager          assets;
   private @Nullable Package               epub_package;
   private @Nullable AsyncServerSocket     socket;
 
   private ReaderHTTPServerAAsync(
+    final AssetManager in_assets,
     final ReaderHTTPMimeMapType in_mime,
     final int in_port)
   {
-    this.port = in_port;
+    this.assets = NullCheck.notNull(in_assets);
     this.mime = NullCheck.notNull(in_mime);
+    this.port = in_port;
     this.base =
       NullCheck.notNull(URI.create("http://127.0.0.1:" + in_port + "/"));
 
@@ -88,17 +77,19 @@ public final class ReaderHTTPServerAAsync
   /**
    * Create a new HTTP server.
    *
-   * @param mime The server mime map
-   * @param port The port
+   * @param in_assets The assets
+   * @param mime      The server mime map
+   * @param port      The port
    *
    * @return A new HTTP server
    */
 
   public static ReaderHTTPServerType newServer(
+    final AssetManager in_assets,
     final ReaderHTTPMimeMapType mime,
     final int port)
   {
-    return new ReaderHTTPServerAAsync(mime, port);
+    return new ReaderHTTPServerAAsync(in_assets, mime, port);
   }
 
   @Override public URI getURIBase()
@@ -175,10 +166,33 @@ public final class ReaderHTTPServerAAsync
       final String type = this.mime.guessMimeTypeForURI(path);
 
       /**
-       * Try looking at the included Java resources first. This includes all of
-       * the readium shared javascript content. For resources served in this
-       * manner, range requests are ignored and the full entity is always
-       * served.
+       * First, try looking at the available Android assets.
+       */
+
+      {
+        try {
+          final String asset_path = path.replaceFirst("^/+", "");
+          ReaderHTTPServerAAsync.LOG.debug("opening asset: {}", asset_path);
+
+          final InputStream stream =
+            this.assets.open(asset_path, AssetManager.ACCESS_STREAMING);
+
+          response.code(200);
+          response.setContentType(type);
+          response.sendStream(stream, stream.available());
+          ReaderHTTPServerAAsync.LOG.debug(
+            "request: (asset) {} {}", response.code(), path);
+          return;
+        } catch (final FileNotFoundException e) {
+          ReaderHTTPServerAAsync.LOG.debug("asset not found: {}", path);
+        }
+      }
+
+      /**
+       * Otherwise, try looking at the included Java resources. This includes
+       * all of the readium shared javascript content. For resources served
+       * in this manner, range requests are ignored and the full entity is
+       * always served.
        */
 
       {

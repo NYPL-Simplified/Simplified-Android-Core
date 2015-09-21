@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nypl.simplified</groupId>
   <artifactId>simplified</artifactId>
-  <version>0.3.22</version>
+  <version>0.3.23</version>
 
   <packaging>pom</packaging>
   <name>simplified</name>
@@ -131,19 +131,19 @@
 
       <!-- Reader dependencies -->
       <dependency>
-        <groupId>org.readium</groupId>
+        <groupId>org.nypl.readium</groupId>
         <artifactId>readium-sdk-android-runtime</artifactId>
-        <version>0.20.0-NYPL0001</version>
+        <version>0.22.0</version>
       </dependency>
       <dependency>
-        <groupId>org.readium</groupId>
+        <groupId>org.nypl.readium</groupId>
         <artifactId>readium-shared-js</artifactId>
-        <version>0.20.0</version>
+        <version>0.22.0</version>
       </dependency>
       <dependency>
-        <groupId>org.readium</groupId>
+        <groupId>org.nypl.readium</groupId>
         <artifactId>libepub3</artifactId>
-        <version>0.20.0-NYPL0001</version>
+        <version>0.22.0</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
@@ -174,34 +174,34 @@
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-core</artifactId>
-        <version>0.4.1</version>
+        <version>0.6.0</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
-        <artifactId>nypl-drm-adobe</artifactId>
-        <version>0.4.1</version>
-      </dependency>
-      <dependency>
-        <groupId>org.nypl.drm</groupId>
-        <artifactId>libnypl_adobe</artifactId>
-        <version>0.4.1</version>
+        <artifactId>nypl-drm-adobe-provider</artifactId>
+        <version>0.6.0</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe</artifactId>
-        <version>0.4.1</version>
+        <version>0.6.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nypl.drm</groupId>
+        <artifactId>libnypl_adobe</artifactId>
+        <version>0.6.0</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe_filter</artifactId>
-        <version>0.4.1</version>
+        <version>0.6.0</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe_filter</artifactId>
-        <version>0.4.1</version>
+        <version>0.6.0</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>

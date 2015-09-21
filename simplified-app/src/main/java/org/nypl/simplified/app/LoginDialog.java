@@ -27,6 +27,7 @@ import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
+import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.LogUtilities;
@@ -94,7 +95,8 @@ public final class LoginDialog extends DialogFragment
     if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
       return rr.getString(R.string.settings_login_failed_adobe_device_limit);
     } else if (message.startsWith("E_ADEPT_REQUEST_EXPIRED")) {
-      return rr.getString(R.string.settings_login_failed_adobe_device_bad_clock);
+      return rr.getString(
+        R.string.settings_login_failed_adobe_device_bad_clock);
     } else {
       return rr.getString(R.string.settings_login_failed_device);
     }
@@ -453,5 +455,32 @@ public final class LoginDialog extends DialogFragment
     final LoginListenerType in_listener)
   {
     this.listener = NullCheck.notNull(in_listener);
+  }
+
+  @Override public void onAccountSyncAuthenticationFailure(final String message)
+  {
+    // Nothing
+  }
+
+  @Override public void onAccountSyncBook(final BookID book)
+  {
+    // Nothing
+  }
+
+  @Override public void onAccountSyncFailure(
+    final OptionType<Throwable> error,
+    final String message)
+  {
+    LogUtilities.errorWithOptionalException(LoginDialog.LOG, message, error);
+  }
+
+  @Override public void onAccountSyncSuccess()
+  {
+    // Nothing
+  }
+
+  @Override public void onAccountSyncBookDeleted(final BookID book)
+  {
+    // Nothing
   }
 }
