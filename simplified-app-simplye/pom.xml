@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.nypl.simplified</groupId>
+    <artifactId>simplified</artifactId>
+    <version>0.3.23</version>
+  </parent>
+  <artifactId>simplified-app-simplye</artifactId>
+
+  <packaging>apk</packaging>
+  <name>simplified-app-simplye</name>
+  <description>Simplified (SimplyE branded frontend)</description>
+  <url>https://github.com/NYPL/Simplified-Android</url>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-app-shared</artifactId>
+      <version>${project.version}</version>
+      <type>aar</type>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <!-- The optional Adobe DRM profile. -->
+    <profile>
+      <id>nypl-drm-adobe</id>
+      <build>
+        <plugins>
+          <!-- If DRM is enabled, the certificate must exist. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>check-certificate</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireFilesExist>
+                      <files>
+                        <file>src/main/assets/ReaderClientCert.sig</file>
+                      </files>
+                    </requireFilesExist>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <!-- Android plugin configuration -->
+      <plugin>
+        <groupId>com.simpligility.maven.plugins</groupId>
+        <artifactId>android-maven-plugin</artifactId>
+        <configuration>
+          <sdk>
+            <platform>${org.nypl.android.sdkVersion}</platform>
+          </sdk>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

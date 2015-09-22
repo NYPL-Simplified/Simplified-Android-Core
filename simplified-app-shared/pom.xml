@@ -115,7 +115,6 @@
     <!-- The optional Adobe DRM profile. -->
     <profile>
       <id>nypl-drm-adobe</id>
-
       <dependencies>
         <dependency>
           <groupId>org.nypl.drm</groupId>
@@ -134,34 +133,6 @@
           <type>so</type>
         </dependency>
       </dependencies>
-
-      <build>
-        <plugins>
-          <!-- If DRM is enabled, the certificate must exist. -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>check-certificate</id>
-                <phase>process-resources</phase>
-                <goals>
-                  <goal>enforce</goal>
-                </goals>
-                <configuration>
-                  <rules>
-                    <requireFilesExist>
-                      <files>
-                        <file>src/main/assets/ReaderClientCert.sig</file>
-                      </files>
-                    </requireFilesExist>
-                  </rules>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
     </profile>
   </profiles>
 

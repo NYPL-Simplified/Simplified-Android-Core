@@ -2,16 +2,16 @@
 <resources>
 
   <!-- The configurable application name -->
-  <string name="feature_app_name">Simplified</string>
+  <string name="feature_app_name">SimplyE</string>
 
   <!-- The configurable application icon -->
-  <drawable name="feature_app_icon">@drawable/simplified</drawable>
+  <drawable name="feature_app_icon">@drawable/nypl</drawable>
 
   <!-- The configurable splash screen image -->
-  <drawable name="feature_app_splash">@drawable/simplified</drawable>
+  <drawable name="feature_app_splash">@drawable/nypl_splash</drawable>
 
   <!-- The configurable main color, used for branding. -->
-  <color name="feature_main_color">#f0731f</color>
+  <color name="feature_main_color">#cc1a16</color>
 
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
@@ -28,7 +28,7 @@
 
   <!-- A non-empty string here will override the package name given to
        the Adobe DRM implementation. An empty string will cause the
-        implementation to use the package name defined in the Android manifest. -->
+       implementation to use the package name defined in the Android manifest. -->
   <string name="feature_adobe_package_override">org.nypl.simplified.app</string>
 
 </resources>

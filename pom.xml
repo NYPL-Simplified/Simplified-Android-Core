@@ -15,8 +15,11 @@
   <url>https://github.com/NYPL/Simplified-Android</url>
 
   <modules>
+    <module>simplified-app-openebooks</module>
     <module>simplified-app-shared</module>
+    <module>simplified-app-simplye</module>
     <module>simplified-app-tests</module>
+    <module>simplified-app-vanilla</module>
     <module>simplified-assert</module>
     <module>simplified-books-core</module>
     <module>simplified-books-tests-android</module>

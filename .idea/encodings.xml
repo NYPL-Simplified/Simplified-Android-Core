@@ -3,8 +3,12 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/simplified-app" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/simplified-app-nypl" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/simplified-app-openebooks" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/simplified-app-shared" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/simplified-app-simplye" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/simplified-app-tests" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/simplified-app-vanilla" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/simplified-assert" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/simplified-books-core" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/simplified-books-tests" charset="UTF-8" />

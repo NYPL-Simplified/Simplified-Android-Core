@@ -313,7 +313,8 @@ public final class Simplified extends Application
        * DRM.
        */
 
-      this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(this.context);
+      this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
+        this.context, AdobeDRMServices.getPackageOverride(rr));
 
       /**
        * Application paths.

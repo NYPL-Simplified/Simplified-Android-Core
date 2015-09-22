@@ -10,8 +10,8 @@ import org.nypl.drm.core.AdobeAdeptContentRightsClientType;
 import org.nypl.drm.core.DRMException;
 import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.app.AdobeDRMServices;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BookDatabaseEntry;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.files.FileUtilities;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.EPub3;
@@ -137,8 +137,10 @@ public final class ReaderReadiumEPUBLoader
         ReaderReadiumEPUBLoader.LOG.debug("Registering content filter");
 
         try {
+
           final AdobeAdeptContentFilterType adobe =
-            AdobeDRMServices.newAdobeContentFilter(ctx);
+            AdobeDRMServices.newAdobeContentFilter(
+              ctx, AdobeDRMServices.getPackageOverride(ctx.getResources()));
           adobe.registerFilter(rights_client);
           ReaderReadiumEPUBLoader.LOG.debug("Content filter registered");
         } catch (final DRMUnsupportedException e) {
