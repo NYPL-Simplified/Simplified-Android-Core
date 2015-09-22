@@ -1085,19 +1085,18 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final @Nullable MenuItem item)
   {
     final MenuItem item_nn = NullCheck.notNull(item);
-    switch (item_nn.getItemId()) {
+    final int id = item_nn.getItemId();
 
-      /**
-       * The menu option to refresh feeds. Essentially, the feed is invalidated
-       * in the cache and a new activity is started that loads the same feed
-       * again (replacing the current activity).
-       */
+    /**
+     * The menu option to refresh feeds. Essentially, the feed is invalidated
+     * in the cache and a new activity is started that loads the same feed
+     * again (replacing the current activity).
+     */
 
-      case R.id.catalog_action_refresh: {
-        CatalogFeedActivity.LOG.debug("refreshing feed");
-        this.retryFeed();
-        return true;
-      }
+    if (id == R.id.catalog_action_refresh) {
+      CatalogFeedActivity.LOG.debug("refreshing feed");
+      this.retryFeed();
+      return true;
     }
 
     return super.onOptionsItemSelected(item_nn);

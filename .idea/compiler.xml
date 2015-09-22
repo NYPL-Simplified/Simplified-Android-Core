@@ -113,7 +113,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="simplified-app" />
       </profile>
       <profile default="false" name="Annotation profile for simplified-books-tests-android" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -300,6 +299,13 @@
         <processorPath useClasspath="true" />
         <module name="simplified-resources" />
       </profile>
+      <profile default="false" name="Annotation profile for simplified-app-shared" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-app-shared" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="libnypl_adobe" target="1.5" />
@@ -311,6 +317,7 @@
       <module name="nypl-drm-core-tests" target="1.6" />
       <module name="simplified" target="1.5" />
       <module name="simplified-app" target="1.6" />
+      <module name="simplified-app-shared" target="1.6" />
       <module name="simplified-app-tests" target="1.6" />
       <module name="simplified-assert" target="1.6" />
       <module name="simplified-books-core" target="1.6" />

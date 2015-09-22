@@ -115,16 +115,16 @@ abstract class MainLocalFeedActivity extends CatalogFeedActivity
     final @Nullable MenuItem item)
   {
     final MenuItem item_nn = NullCheck.notNull(item);
-    switch (item_nn.getItemId()) {
-      case R.id.catalog_action_sync_books: {
-        final SimplifiedCatalogAppServicesType app =
-          Simplified.getCatalogAppServices();
-        final BooksType books = app.getBooks();
+    final int id = item_nn.getItemId();
 
-        item_nn.setEnabled(false);
-        books.accountGetCachedLoginDetails(this);
-        return true;
-      }
+    if (id == R.id.catalog_action_sync_books) {
+      final SimplifiedCatalogAppServicesType app =
+        Simplified.getCatalogAppServices();
+      final BooksType books = app.getBooks();
+
+      item_nn.setEnabled(false);
+      books.accountGetCachedLoginDetails(this);
+      return true;
     }
 
     return super.onOptionsItemSelected(item_nn);

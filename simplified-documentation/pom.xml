@@ -60,9 +60,10 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>simplified-app</artifactId>
+      <artifactId>simplified-app-shared</artifactId>
       <version>${project.version}</version>
       <optional>true</optional>
+      <type>aar</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
