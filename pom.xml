@@ -41,6 +41,7 @@
     <module>simplified-opds-tests-android</module>
     <module>simplified-opds-tests-junit4</module>
     <module>simplified-opds-tests</module>
+    <module>simplified-resources</module>
     <module>simplified-rfc3339-core</module>
     <module>simplified-rfc3339-tests-android</module>
     <module>simplified-rfc3339-tests-junit4</module>

@@ -62,6 +62,7 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.0-rc3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.0-rc3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />
+    <orderEntry type="module" module-name="simplified-resources" />
     <orderEntry type="module" module-name="simplified-stack" />
     <orderEntry type="module" module-name="simplified-tenprint" />
     <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.6.0" level="project" />
@@ -79,5 +80,6 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.12" level="project" />
     <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-adobe-provider:0.6.0" level="project" />
     <orderEntry type="library" name="Maven: org.nypl.drm:libnypl_adobe:0.6.0" level="project" />
+    <orderEntry type="module" module-name="simplified-resources" />
   </component>
 </module>
