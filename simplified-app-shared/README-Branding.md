@@ -13,13 +13,13 @@ image resources and a configuration resource.
 The project currently has three predefined branded applications, and
 these serve as practical examples of how to produce your own:
 
-  * [../simplified-app-openebooks](simplified-app-openebooks)
-  * [../simplified-app-vanilla](simplified-app-vanilla)
-  * [../simplified-app-simplye](simplified-app-simplye)
+  * [simplified-app-openebooks](../simplified-app-openebooks)
+  * [simplified-app-vanilla](../simplified-app-vanilla)
+  * [simplified-app-simplye](../simplified-app-simplye)
 
 The rest of this documentation assumes that the user has at least
-a passing familiarity with either [http://maven.apache.org](Maven)
-or [http://gradle.org](Gradle). The process is not tied to either
+a passing familiarity with either [Maven](http://maven.apache.org)
+or [Gradle](http://gradle.org). The process is not tied to either
 of these build systems but the user is expected to understand, for
 example, what it means to declare a dependency on an AAR package,
 and how Android projects are typically organized.
