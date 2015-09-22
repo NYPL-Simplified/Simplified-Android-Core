@@ -54,6 +54,7 @@ application (this is due to a limitation in Android).
 The file provides the following configuration variables:
 
 |Variable|Type|Description|
+|--------|----|-----------|
 |`feature_app_name`|`string`|This is the name that will be displayed for the application.|
 |`feature_app_icon`|`drawable`|An Android `drawable` resource that will be used for the application icon.|
 |`feature_app_splash`|`drawable`|An Android `drawable` resource that will be used for the application splash screen.|
