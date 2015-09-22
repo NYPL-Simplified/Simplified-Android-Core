@@ -26,7 +26,6 @@
     <module>simplified-books-tests-junit4</module>
     <module>simplified-books-tests</module>
     <module>simplified-checkstyle</module>
-    <module>simplified-documentation</module>
     <module>simplified-downloader-core</module>
     <module>simplified-files-tests-android</module>
     <module>simplified-files-tests-junit4</module>
@@ -349,11 +348,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>1.4</version>
-        </plugin>
-        <plugin>
-          <groupId>com.io7m.jstructural</groupId>
-          <artifactId>io7m-jstructural-maven-plugin</artifactId>
-          <version>4.2.0</version>
         </plugin>
 
         <!-- Produce jar files -->

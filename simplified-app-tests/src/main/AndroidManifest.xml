@@ -9,7 +9,7 @@
   </application>
   <instrumentation
     android:name="android.test.InstrumentationTestRunner"
-    android:targetPackage="org.nypl.simplified.app"
+    android:targetPackage="org.nypl.simplified.app.tests"
     android:label="Tests."/>
   <uses-sdk
     android:minSdkVersion="19"

@@ -28,7 +28,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-app-shared</artifactId>
       <version>${project.version}</version>
-      <scope>provided</scope>
       <type>aar</type>
     </dependency>
   </dependencies>
