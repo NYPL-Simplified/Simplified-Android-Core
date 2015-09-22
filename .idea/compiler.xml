@@ -113,7 +113,6 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="simplified-app" />
       </profile>
       <profile default="false" name="Annotation profile for simplified-books-tests-android" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -293,6 +292,55 @@
         <processorPath useClasspath="true" />
         <module name="simplified-json-tests-junit4" />
       </profile>
+      <profile default="false" name="Annotation profile for simplified-resources" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-resources" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-app-shared" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-app-shared" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-app-openebooks" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-app-openebooks" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-app-openebooks (1)" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-app-openebooks (1)" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-app-openebooks (2)" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-app-openebooks (2)" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-app-vanilla" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-app-vanilla" />
+      </profile>
+      <profile default="false" name="Annotation profile for simplified-app-simplye" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="simplified-app-simplye" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="libnypl_adobe" target="1.5" />
@@ -304,7 +352,13 @@
       <module name="nypl-drm-core-tests" target="1.6" />
       <module name="simplified" target="1.5" />
       <module name="simplified-app" target="1.6" />
+      <module name="simplified-app-openebooks" target="1.6" />
+      <module name="simplified-app-openebooks (1)" target="1.6" />
+      <module name="simplified-app-openebooks (2)" target="1.6" />
+      <module name="simplified-app-shared" target="1.6" />
+      <module name="simplified-app-simplye" target="1.6" />
       <module name="simplified-app-tests" target="1.6" />
+      <module name="simplified-app-vanilla" target="1.6" />
       <module name="simplified-assert" target="1.6" />
       <module name="simplified-books-core" target="1.6" />
       <module name="simplified-books-tests" target="1.6" />
@@ -329,6 +383,7 @@
       <module name="simplified-opds-tests" target="1.6" />
       <module name="simplified-opds-tests-android" target="1.6" />
       <module name="simplified-opds-tests-junit4" target="1.6" />
+      <module name="simplified-resources" target="1.6" />
       <module name="simplified-rfc3339-core" target="1.6" />
       <module name="simplified-rfc3339-tests" target="1.6" />
       <module name="simplified-rfc3339-tests (1)" target="1.6" />
