@@ -50,7 +50,7 @@ See [simplified-app-shared/README-Branding.md](simplified-app-shared/README-Bran
 for documentation on how to produce your own branded and configured
 application.
 
-# Development
+## Development
 
 This project is developed using the
 [git-flow](http://nvie.com/posts/a-successful-git-branching-model/)
@@ -62,7 +62,7 @@ current production-ready code, and development occurs on the `develop`
 branch. All commits and tags are PGP-signed for stronger assurances
 of authenticity.
 
-# License
+## License
 
 ```
 © 2015 The New York Public Library, Astor, Lenox, and Tilden Foundations
