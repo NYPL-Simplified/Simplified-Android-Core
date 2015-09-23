@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <!-- The configurable application name -->
+  <string name="feature_app_name">Simplified</string>
+
+  <!-- The configurable application icon -->
+  <drawable name="feature_app_icon">@drawable/simplified</drawable>
+
+  <!-- The configurable splash screen image -->
+  <drawable name="feature_app_splash">@drawable/simplified</drawable>
+
+  <!-- The configurable main color, used for branding. -->
+  <color name="feature_main_color">#f0731f</color>
+
+  <!-- If true, a Holds tab is shown. -->
+  <!-- This can be disabled for book collections that do not have holds. -->
+  <bool name="feature_holds_enabled">true</bool>
+
+  <!-- The default Adobe vendor ID -->
+  <string name="feature_adobe_vendor_id">NYPL</string>
+
+  <!-- The initial catalog URI that will be loaded on program start -->
+  <string name="feature_catalog_start_uri">http://circulation.alpha.librarysimplified.org/groups/</string>
+
+  <!-- The initial catalog loans URI that will be used to sync accounts -->
+  <string name="feature_catalog_loans_uri">http://circulation.alpha.librarysimplified.org/loans/</string>
+
+  <!-- A non-empty string here will override the package name given to
+       the Adobe DRM implementation. An empty string will cause the
+        implementation to use the package name defined in the Android manifest. -->
+  <string name="feature_adobe_package_override">org.nypl.simplified.app</string>
+
+</resources>

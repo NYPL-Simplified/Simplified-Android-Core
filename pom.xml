@@ -7,23 +7,25 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nypl.simplified</groupId>
   <artifactId>simplified</artifactId>
-  <version>0.3.23</version>
+  <version>0.4.0</version>
 
   <packaging>pom</packaging>
   <name>simplified</name>
-  <description>Simplified</description>
+  <description>Library Simplified</description>
   <url>https://github.com/NYPL/Simplified-Android</url>
 
   <modules>
+    <module>simplified-app-openebooks</module>
+    <module>simplified-app-shared</module>
+    <module>simplified-app-simplye</module>
     <module>simplified-app-tests</module>
-    <module>simplified-app</module>
+    <module>simplified-app-vanilla</module>
     <module>simplified-assert</module>
     <module>simplified-books-core</module>
     <module>simplified-books-tests-android</module>
     <module>simplified-books-tests-junit4</module>
     <module>simplified-books-tests</module>
     <module>simplified-checkstyle</module>
-    <module>simplified-documentation</module>
     <module>simplified-downloader-core</module>
     <module>simplified-files-tests-android</module>
     <module>simplified-files-tests-junit4</module>
@@ -63,6 +65,17 @@
     <developerConnection>scm:https://github.com/NYPL/Simplified-Android</developerConnection>
   </scm>
 
+  <developers>
+    <developer>
+      <name>Mark Raynsford</name>
+      <email>code@io7m.com</email>
+      <organization>New York Public Library</organization>
+      <organizationUrl>http://www.nypl.org/</organizationUrl>
+    </developer>
+  </developers>
+
+  <inceptionYear>2015</inceptionYear>
+
   <issueManagement>
     <url>https://github.com/NYPL/Simplified-Android/issues</url>
     <system>GitHub</system>
@@ -75,6 +88,17 @@
       <url>${project.url}</url>
     </site>
   </distributionManagement>
+
+  <licenses>
+    <license>
+      <name>Apache 2.0 License</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+    <license>
+      <name>3-Clause BSD License</name>
+      <url>http://opensource.org/licenses/BSD-3-Clause</url>
+    </license>
+  </licenses>
 
   <prerequisites>
     <maven>3.2.1</maven>
@@ -346,11 +370,6 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
           <version>1.4</version>
-        </plugin>
-        <plugin>
-          <groupId>com.io7m.jstructural</groupId>
-          <artifactId>io7m-jstructural-maven-plugin</artifactId>
-          <version>4.2.0</version>
         </plugin>
 
         <!-- Produce jar files -->

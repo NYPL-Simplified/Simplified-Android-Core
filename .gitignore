@@ -9,6 +9,6 @@ simplified-*/.project
 simplified-*/.settings
 simplified-*/bin
 simplified-*/target
-simplified-app/src/main/assets/ReaderClientCert.sig
+ReaderClientCert.sig
 target
 pom.xml.versionsBackup
