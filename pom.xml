@@ -11,7 +11,7 @@
 
   <packaging>pom</packaging>
   <name>simplified</name>
-  <description>Simplified</description>
+  <description>Library Simplified</description>
   <url>https://github.com/NYPL/Simplified-Android</url>
 
   <modules>
@@ -64,6 +64,17 @@
     <connection>scm:https://github.com/NYPL/Simplified-Android</connection>
     <developerConnection>scm:https://github.com/NYPL/Simplified-Android</developerConnection>
   </scm>
+
+  <developers>
+    <developer>
+      <name>Mark Raynsford</name>
+      <email>code@io7m.com</email>
+      <organization>New York Public Library</organization>
+      <organizationUrl>http://www.nypl.org/</organizationUrl>
+    </developer>
+  </developers>
+
+  <inceptionYear>2015</inceptionYear>
 
   <issueManagement>
     <url>https://github.com/NYPL/Simplified-Android/issues</url>
