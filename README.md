@@ -80,8 +80,8 @@ or implied. See the License for the specific language governing
 permissions and limitations under the License.
 ```
 
-This product includes code derived from the Readium Android SDK
-Launcher (https://github.com/readium/SDKLauncher-Android), which
+This product includes code derived from the [Readium Android SDK
+Launcher](https://github.com/readium/SDKLauncher-Android), which
 is distributed under the following license:
 
 ```

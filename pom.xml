@@ -83,6 +83,10 @@
       <name>Apache 2.0 License</name>
       <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
+    <license>
+      <name>3-Clause BSD License</name>
+      <url>http://opensource.org/licenses/BSD-3-Clause</url>
+    </license>
   </licenses>
 
   <prerequisites>
