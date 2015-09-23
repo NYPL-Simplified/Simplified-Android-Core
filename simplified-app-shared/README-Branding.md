@@ -5,7 +5,7 @@ The application is designed as a reusable and generic core that can
 be customized and branded without necessarily needing to make any
 changes to source code. The main code and resources are defined in
 the module that you are currently looking at, and are packaged as an
-Android AAR library. Producing a custom branded application is therefor
+Android AAR library. Producing a custom branded application is therefore
 simply a case of declaring a dependency on the `simplified-app-shared`
 package in your Maven or Gradle build, and then providing your own
 image resources and a configuration resource.
