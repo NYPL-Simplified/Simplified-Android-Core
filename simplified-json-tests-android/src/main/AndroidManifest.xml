@@ -3,7 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.json.tests.android"
   android:versionCode="58"
-  android:versionName="0.4.1-SNAPSHOT">
+  android:versionName="0.4.1-b0">
   <application>
     <uses-library android:name="android.test.runner"/>
   </application>
