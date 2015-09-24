@@ -13,7 +13,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: com.io7m.jfunctional:io7m-jfunctional-core:1.0.1" level="project" />
     <orderEntry type="module" module-name="simplified-opds-tests" scope="TEST" />
     <orderEntry type="module" module-name="simplified-opds-core" scope="TEST" />
-    <orderEntry type="module" module-name="simplified-assert" scope="TEST" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.nypl.simplified:simplified-assert:0.4.0" level="project" />
     <orderEntry type="module" module-name="simplified-json-core" scope="TEST" />
     <orderEntry type="module" module-name="simplified-rfc3339-core" scope="TEST" />
     <orderEntry type="library" scope="TEST" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
