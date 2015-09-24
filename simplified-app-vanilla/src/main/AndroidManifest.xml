@@ -2,8 +2,8 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.app.vanilla"
-  android:versionCode="57"
-  android:versionName="0.4.0">
+  android:versionCode="58"
+  android:versionName="0.4.1-SNAPSHOT">
 
   <uses-sdk
     android:minSdkVersion="19"
@@ -89,6 +89,13 @@
       android:theme="@style/SimplifiedThemeNoActionBar"
       android:configChanges="orientation|screenSize"
       android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
+    </activity>
+
+    <!-- Testing -->
+    <activity
+      android:name="org.nypl.simplified.app.testing.AlternateFeedURIsActivity"
+      android:configChanges="orientation|screenSize"
+      android:exported="true">
     </activity>
   </application>
 
