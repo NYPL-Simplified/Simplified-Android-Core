@@ -40,6 +40,21 @@ enabled is achieved by:
 $ mvn -P nypl-drm-adobe clean package
 ```
 
+## HelpStack
+
+If HelpStack is to be used, a configuration file must be provided
+in the `assets` directory of the application being built. So, to
+enable Zendesk for the `SimplyE` application, create a file at
+`simplified-app-simplye/src/main/assets/helpstack.conf` with the
+correct URL and credentials:
+
+```
+helpstack.gear                 = zendesk
+helpstack.zendesk.instance_url = https://nonexistent.zendesk.com
+helpstack.zendesk.staff_email  = nobody@example.com
+helpstack.zendesk.api_token    = bmljZSBjYXRjaAo=
+```
+
 ## Branding And Configurable Features
 
 See [simplified-app-shared/README-Branding.md](simplified-app-shared/README-Branding.md)

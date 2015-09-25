@@ -3,12 +3,13 @@
 .idea/workspace.xml
 .project
 .settings
+ReaderClientCert.sig
 gen
+helpstack.conf
+pom.xml.versionsBackup
 simplified-*/.classpath
 simplified-*/.project
 simplified-*/.settings
 simplified-*/bin
 simplified-*/target
-ReaderClientCert.sig
 target
-pom.xml.versionsBackup
