@@ -109,9 +109,17 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+
+    <!-- HelpStack -->
+    <dependency>
+      <groupId>org.nypl.helpstack</groupId>
+      <artifactId>helpstack-android</artifactId>
+      <type>aar</type>
+    </dependency>
   </dependencies>
 
   <profiles>
+
     <!-- The optional Adobe DRM profile. -->
     <profile>
       <id>nypl-drm-adobe</id>

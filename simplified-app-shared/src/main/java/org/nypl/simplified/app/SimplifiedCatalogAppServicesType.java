@@ -45,4 +45,10 @@ public interface SimplifiedCatalogAppServicesType extends
    */
 
   OptionType<AdobeAdeptExecutorType> getAdobeDRMExecutor();
+
+  /**
+   * @return HelpStack services, if any are available
+   */
+
+  OptionType<HelpstackType> getHelpStack();
 }

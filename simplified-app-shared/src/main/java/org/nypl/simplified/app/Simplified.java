@@ -220,7 +220,8 @@ public final class Simplified extends Application
     if (as != null) {
       return as;
     }
-    as = new CatalogAppServices(this, NullCheck.notNull(this.getResources()));
+    as = new CatalogAppServices(
+      this, this, NullCheck.notNull(this.getResources()));
     this.app_services = as;
     return as;
   }
@@ -270,8 +271,10 @@ public final class Simplified extends Application
     private final DownloaderType                     downloader;
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
     private final DocumentStoreType                  documents;
+    private final OptionType<HelpstackType>          helpstack;
 
     private CatalogAppServices(
+      final Application in_app,
       final Context in_context,
       final Resources rr)
     {
@@ -489,6 +492,12 @@ public final class Simplified extends Application
        */
 
       this.synced = new AtomicBoolean(false);
+
+      /**
+       * HelpStack.
+       */
+
+      this.helpstack = Helpstack.get(in_app, in_context.getAssets());
     }
 
     @Override public DocumentStoreType getDocumentStore()
@@ -514,6 +523,11 @@ public final class Simplified extends Application
     @Override public OptionType<AdobeAdeptExecutorType> getAdobeDRMExecutor()
     {
       return this.adobe_drm;
+    }
+
+    @Override public OptionType<HelpstackType> getHelpStack()
+    {
+      return this.helpstack;
     }
 
     @Override public boolean isNetworkAvailable()
