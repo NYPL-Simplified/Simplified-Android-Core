@@ -11,7 +11,6 @@ import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportException;
-import org.nypl.simplified.opds.core.OPDSFeedTransportHTTPException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportIOException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.slf4j.Logger;
@@ -72,8 +71,8 @@ public final class FeedHTTPTransport
         public InputStream onHTTPError(final HTTPResultError<InputStream> e)
           throws OPDSFeedTransportException
         {
-          throw new OPDSFeedTransportHTTPException(
-            e.getMessage(), e.getStatus());
+          throw new FeedTransportHTTPException(
+            e.getMessage(), e.getStatus(), e.getProblemReport());
         }
 
         @Override public InputStream onHTTPException(

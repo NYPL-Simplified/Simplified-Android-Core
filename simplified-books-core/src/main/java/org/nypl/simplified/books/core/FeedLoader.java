@@ -16,7 +16,6 @@ import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSFeedTransportException;
-import org.nypl.simplified.opds.core.OPDSFeedTransportHTTPException;
 import org.nypl.simplified.opds.core.OPDSFeedTransportType;
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 import org.nypl.simplified.opds.core.OPDSSearchLink;
@@ -280,7 +279,7 @@ public final class FeedLoader
         stream = this.transport.getStream(auth_current, uri);
         auth.set(auth_current);
         return stream;
-      } catch (final OPDSFeedTransportHTTPException e) {
+      } catch (final FeedTransportHTTPException e) {
         try {
           if (e.getCode() == 401) {
             final HTTPAuthBasic basic =
@@ -308,8 +307,8 @@ public final class FeedLoader
     final URI uri,
     final FeedLoaderListenerType listener,
     final AtomicInteger attempts,
-    final OPDSFeedTransportHTTPException e)
-    throws InterruptedException, OPDSFeedTransportHTTPException
+    final FeedTransportHTTPException e)
+    throws InterruptedException, FeedTransportHTTPException
   {
     /**
      * Call a blocking auth listener and wait for authentication data
