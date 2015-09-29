@@ -21,14 +21,6 @@ public final class FeedHTTPTransportException extends OPDSFeedTransportException
   private final int                           code;
   private final OptionType<HTTPProblemReport> report;
 
-  /**
-   * Construct an exception.
-   *
-   * @param message   The message
-   * @param in_code   The HTTP status code
-   * @param in_report The HTTP problem report, if any
-   */
-
   private FeedHTTPTransportException(
     final String message,
     final int in_code,
@@ -38,6 +30,14 @@ public final class FeedHTTPTransportException extends OPDSFeedTransportException
     this.code = in_code;
     this.report = NullCheck.notNull(in_report);
   }
+
+  /**
+   * Construct an exception.
+   *
+   * @param message   The message
+   * @param in_code   The HTTP status code
+   * @param in_report The HTTP problem report, if any
+   */
 
   public static FeedHTTPTransportException newException(
     final String message,
