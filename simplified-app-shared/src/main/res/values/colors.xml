@@ -22,7 +22,4 @@
   <color name="normal_text_major">#000000</color>
   <color name="normal_text_minor">#a0a0a0</color>
 
-  <!-- HelpStack theme values -->
-  <color name="hs_header_background_color">@color/feature_main_color</color>
-
 </resources>
