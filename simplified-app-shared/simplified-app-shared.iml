@@ -47,7 +47,7 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />
     <orderEntry type="module" module-name="simplified-stack" />
     <orderEntry type="module" module-name="simplified-tenprint" />
-    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.6.1" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: android:android:4.4.2_r4" level="project" />
     <orderEntry type="library" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
@@ -66,8 +66,8 @@
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.2.6" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.2.5" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.3" level="project" />
-    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-adobe-provider:0.6.0" level="project" />
-    <orderEntry type="library" name="Maven: org.nypl.drm:libnypl_adobe:0.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-adobe-provider:0.6.1" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.drm:libnypl_adobe:0.6.1" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: org.nypl.com.polites:gesture-imageview:1.0.0">
         <CLASSES>
