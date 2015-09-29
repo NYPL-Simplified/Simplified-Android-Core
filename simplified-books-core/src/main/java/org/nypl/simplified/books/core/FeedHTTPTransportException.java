@@ -37,6 +37,7 @@ public final class FeedHTTPTransportException extends OPDSFeedTransportException
    * @param message   The message
    * @param in_code   The HTTP status code
    * @param in_report The HTTP problem report, if any
+   * @return          A new exception
    */
 
   public static FeedHTTPTransportException newException(
