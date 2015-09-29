@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nypl.simplified</groupId>
   <artifactId>simplified</artifactId>
-  <version>0.4.1-b0</version>
+  <version>0.4.1</version>
 
   <packaging>pom</packaging>
   <name>simplified</name>
@@ -198,34 +198,34 @@
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-core</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-adobe-provider</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.1</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe_filter</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe_filter</artifactId>
-        <version>0.6.0</version>
+        <version>0.6.1</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
@@ -288,6 +288,14 @@
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
         <version>1.1.3</version>
+      </dependency>
+
+      <!-- HelpStack -->
+      <dependency>
+        <groupId>org.nypl.helpstack</groupId>
+        <artifactId>helpstack-android</artifactId>
+        <version>1.2.0</version>
+        <type>aar</type>
       </dependency>
     </dependencies>
   </dependencyManagement>

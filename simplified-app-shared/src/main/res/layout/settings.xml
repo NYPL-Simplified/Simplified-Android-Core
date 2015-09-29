@@ -143,6 +143,21 @@
       android:layout_marginTop="16dp"/>
 
     <TextView
+      android:id="@+id/settings_help"
+      android:text="@string/settings_help"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"/>
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_help_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp"/>
+
+    <TextView
       android:id="@+id/settings_adobe_accounts"
       android:text="@string/settings_adobe_accounts"
       android:textAppearance="?android:attr/textAppearanceMedium"

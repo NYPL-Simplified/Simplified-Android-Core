@@ -4,8 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/simplified.iml" filepath="$PROJECT_DIR$/simplified.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app-openebooks/simplified-app-openebooks.iml" filepath="$PROJECT_DIR$/simplified-app-openebooks/simplified-app-openebooks.iml" />
-      <module fileurl="file://$PROJECT_DIR$/simplified-app-nypl/simplified-app-openebooks (1).iml" filepath="$PROJECT_DIR$/simplified-app-nypl/simplified-app-openebooks (1).iml" />
-      <module fileurl="file://$PROJECT_DIR$/simplified-app-vanilla/simplified-app-openebooks (2).iml" filepath="$PROJECT_DIR$/simplified-app-vanilla/simplified-app-openebooks (2).iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app-shared/simplified-app-shared.iml" filepath="$PROJECT_DIR$/simplified-app-shared/simplified-app-shared.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app-simplye/simplified-app-simplye.iml" filepath="$PROJECT_DIR$/simplified-app-simplye/simplified-app-simplye.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app-tests/simplified-app-tests.iml" filepath="$PROJECT_DIR$/simplified-app-tests/simplified-app-tests.iml" />
@@ -16,7 +14,6 @@
       <module fileurl="file://$PROJECT_DIR$/simplified-books-tests-android/simplified-books-tests-android.iml" filepath="$PROJECT_DIR$/simplified-books-tests-android/simplified-books-tests-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-books-tests-junit4/simplified-books-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-books-tests-junit4/simplified-books-tests-junit4.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-checkstyle/simplified-checkstyle.iml" filepath="$PROJECT_DIR$/simplified-checkstyle/simplified-checkstyle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/simplified-documentation/simplified-documentation.iml" filepath="$PROJECT_DIR$/simplified-documentation/simplified-documentation.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-downloader-core/simplified-downloader-core.iml" filepath="$PROJECT_DIR$/simplified-downloader-core/simplified-downloader-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-files/simplified-files.iml" filepath="$PROJECT_DIR$/simplified-files/simplified-files.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-files-tests/simplified-files-tests.iml" filepath="$PROJECT_DIR$/simplified-files-tests/simplified-files-tests.iml" />
@@ -34,7 +31,6 @@
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-tests/simplified-opds-tests.iml" filepath="$PROJECT_DIR$/simplified-opds-tests/simplified-opds-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-tests-android/simplified-opds-tests-android.iml" filepath="$PROJECT_DIR$/simplified-opds-tests-android/simplified-opds-tests-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-opds-tests-junit4/simplified-opds-tests-junit4.iml" filepath="$PROJECT_DIR$/simplified-opds-tests-junit4/simplified-opds-tests-junit4.iml" />
-      <module fileurl="file://$PROJECT_DIR$/simplified-resources/simplified-resources.iml" filepath="$PROJECT_DIR$/simplified-resources/simplified-resources.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-core/simplified-rfc3339-core.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-core/simplified-rfc3339-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests/simplified-rfc3339-tests.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests/simplified-rfc3339-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-rfc3339-tests-android/simplified-rfc3339-tests-android.iml" filepath="$PROJECT_DIR$/simplified-rfc3339-tests-android/simplified-rfc3339-tests-android.iml" />

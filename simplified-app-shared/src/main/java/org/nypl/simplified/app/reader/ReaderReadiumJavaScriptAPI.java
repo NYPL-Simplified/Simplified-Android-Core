@@ -228,7 +228,7 @@ public final class ReaderReadiumJavaScriptAPI
       this.evaluate(script.toString());
 
       final ReaderReadiumViewerSettings vs = new ReaderReadiumViewerSettings(
-        SyntheticSpreadMode.SINGLE,
+        SyntheticSpreadMode.AUTO,
         ScrollMode.AUTO,
         (int) r.getFontScale(),
         20);

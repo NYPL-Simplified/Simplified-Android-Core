@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.4.1-b0</version>
+    <version>0.4.1</version>
   </parent>
   <artifactId>simplified-app-shared</artifactId>
 
@@ -109,9 +109,17 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+
+    <!-- HelpStack -->
+    <dependency>
+      <groupId>org.nypl.helpstack</groupId>
+      <artifactId>helpstack-android</artifactId>
+      <type>aar</type>
+    </dependency>
   </dependencies>
 
   <profiles>
+
     <!-- The optional Adobe DRM profile. -->
     <profile>
       <id>nypl-drm-adobe</id>

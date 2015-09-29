@@ -397,6 +397,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final DocumentStoreType docs = app.getDocumentStore();
+    final OptionType<HelpstackType> helpstack = app.getHelpStack();
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
     final Resources resources = NullCheck.notNull(this.getResources());
@@ -565,6 +566,31 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 i.putExtras(b);
                 MainSettingsActivity.this.startActivity(i);
                 MainSettingsActivity.this.overridePendingTransition(0, 0);
+              }
+            });
+        }
+      });
+
+    /**
+     * Enable/disable the HelpStack item.
+     */
+
+    final TextView in_help =
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_help));
+    in_help.setEnabled(false);
+
+    helpstack.map_(
+      new ProcedureType<HelpstackType>()
+      {
+        @Override public void call(final HelpstackType hs)
+        {
+          in_help.setEnabled(true);
+          in_help.setOnClickListener(
+            new OnClickListener()
+            {
+              @Override public void onClick(final View v)
+              {
+                hs.show(MainSettingsActivity.this);
               }
             });
         }

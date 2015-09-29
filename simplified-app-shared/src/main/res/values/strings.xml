@@ -90,6 +90,7 @@
   <string name="settings_feedback">Feedback</string>
   <string name="settings_credits">Acknowledgements</string>
   <string name="settings_eula">User Agreement</string>
+  <string name="settings_help">Help</string>
   <string name="settings_privacy">Privacy Policy</string>
   <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
   <string name="settings_adobe_accounts">Adobe Accounts</string>
