@@ -59,6 +59,8 @@ public final class FeedHTTPTransport
     final URI uri)
     throws OPDSFeedTransportException
   {
+    FeedHTTPTransport.LOG.debug("get stream: {} {}", uri, auth);
+
     final HTTPRedirectFollower rf = new HTTPRedirectFollower(
       FeedHTTPTransport.LOG, this.http, auth, 5, uri, 0L);
 
@@ -71,7 +73,7 @@ public final class FeedHTTPTransport
         public InputStream onHTTPError(final HTTPResultError<InputStream> e)
           throws OPDSFeedTransportException
         {
-          throw FeedTransportHTTPException.newException(
+          throw FeedHTTPTransportException.newException(
             e.getMessage(), e.getStatus(), e.getProblemReport());
         }
 

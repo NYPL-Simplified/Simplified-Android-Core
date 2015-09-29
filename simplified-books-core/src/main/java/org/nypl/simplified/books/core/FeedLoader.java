@@ -276,10 +276,12 @@ public final class FeedLoader
     while (true) {
       InputStream stream = null;
       try {
+        FeedLoader.LOG.debug("fetching stream for {}", uri);
         stream = this.transport.getStream(auth_current, uri);
+        FeedLoader.LOG.debug("received stream for {}", uri);
         auth.set(auth_current);
         return stream;
-      } catch (final FeedTransportHTTPException e) {
+      } catch (final FeedHTTPTransportException e) {
         try {
           if (e.getCode() == 401) {
             final HTTPAuthBasic basic =
@@ -307,8 +309,8 @@ public final class FeedLoader
     final URI uri,
     final FeedLoaderListenerType listener,
     final AtomicInteger attempts,
-    final FeedTransportHTTPException e)
-    throws InterruptedException, FeedTransportHTTPException
+    final FeedHTTPTransportException e)
+    throws InterruptedException, FeedHTTPTransportException
   {
     /**
      * Call a blocking auth listener and wait for authentication data
