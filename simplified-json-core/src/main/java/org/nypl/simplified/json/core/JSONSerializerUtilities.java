@@ -41,4 +41,25 @@ public final class JSONSerializerUtilities
     final ObjectWriter jw = jom.writerWithDefaultPrettyPrinter();
     jw.writeValue(os, d);
   }
+
+  /**
+   * Serialize the given object node to a string.
+   *
+   * @param d The node
+   *
+   * @return Pretty-printed JSON
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static String serializeToString(
+    final ObjectNode d)
+    throws IOException
+  {
+    NullCheck.notNull(d);
+
+    final ObjectMapper jom = new ObjectMapper();
+    final ObjectWriter jw = jom.writerWithDefaultPrettyPrinter();
+    return jw.writeValueAsString(d);
+  }
 }

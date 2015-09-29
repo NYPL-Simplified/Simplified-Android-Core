@@ -71,7 +71,7 @@ public final class FeedHTTPTransport
         public InputStream onHTTPError(final HTTPResultError<InputStream> e)
           throws OPDSFeedTransportException
         {
-          throw new FeedTransportHTTPException(
+          throw FeedTransportHTTPException.newException(
             e.getMessage(), e.getStatus(), e.getProblemReport());
         }
 
