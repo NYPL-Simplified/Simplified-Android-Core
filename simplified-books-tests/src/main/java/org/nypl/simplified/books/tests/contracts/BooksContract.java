@@ -33,11 +33,11 @@ import org.nypl.simplified.books.core.SyncedDocumentType;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
-import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthMatcherType;
 import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
 import org.nypl.simplified.http.core.HTTPResultOK;
@@ -211,13 +211,15 @@ public final class BooksContract implements BooksContractType
 
       private <T> HTTPResultType<T> unauthorized()
       {
+        final OptionType<HTTPProblemReport> report = Option.none();
         return new HTTPResultError<T>(
           401,
           "Unauthorized",
           0L,
           empty_headers,
           0L,
-          new ByteArrayInputStream(new byte[0]));
+          new ByteArrayInputStream(new byte[0]),
+          report);
       }
     };
   }
