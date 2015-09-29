@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2</version>
   </parent>
   <artifactId>simplified-http-core</artifactId>
 
@@ -21,6 +21,11 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-assert</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-json-core</artifactId>
       <version>${project.version}</version>
     </dependency>
 

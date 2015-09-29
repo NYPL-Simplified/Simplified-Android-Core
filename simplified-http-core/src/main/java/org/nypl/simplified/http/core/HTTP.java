@@ -1,5 +1,6 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -109,12 +110,16 @@ public final class HTTP implements HTTPType
 
       conn.getLastModified();
       if (code >= 400) {
+        final OptionType<HTTPProblemReport> report =
+          this.getReportFromError(conn);
         return new HTTPResultError<InputStream>(
           code,
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()),
-          conn.getLastModified(), this.getErrorStreamOrEmpty(conn));
+          conn.getLastModified(),
+          this.getErrorStreamOrEmpty(conn),
+          report);
       }
 
       return new HTTPResultOK<InputStream>(
@@ -129,6 +134,21 @@ public final class HTTP implements HTTPType
     } catch (final IOException e) {
       return new HTTPResultException<InputStream>(uri, e);
     }
+  }
+
+  private OptionType<HTTPProblemReport> getReportFromError(
+    final HttpURLConnection conn)
+    throws IOException
+  {
+    final OptionType<HTTPProblemReport> report;
+    if ("application/problem+json".equals(conn.getContentType())) {
+      final HTTPProblemReport r =
+        HTTPProblemReport.fromStream(conn.getErrorStream());
+      report = Option.some(r);
+    } else {
+      report = Option.none();
+    }
+    return report;
   }
 
   @Override public HTTPResultType<Unit> head(
@@ -164,13 +184,16 @@ public final class HTTP implements HTTPType
         "HEAD {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
 
       if (code >= 400) {
+        final OptionType<HTTPProblemReport> report =
+          this.getReportFromError(conn);
         return new HTTPResultError<Unit>(
           code,
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
           NullCheck.notNull(conn.getHeaderFields()),
           conn.getLastModified(),
-          this.getErrorStreamOrEmpty(conn));
+          this.getErrorStreamOrEmpty(conn),
+          report);
       }
 
       return new HTTPResultOK<Unit>(
