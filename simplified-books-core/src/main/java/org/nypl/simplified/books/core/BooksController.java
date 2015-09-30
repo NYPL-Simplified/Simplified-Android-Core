@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -8,9 +7,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
-import org.nypl.simplified.http.core.HTTPAuthType;
-import org.nypl.simplified.http.core.HTTPResultOKType;
-import org.nypl.simplified.http.core.HTTPResultToException;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -21,9 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -98,65 +91,6 @@ public final class BooksController extends Observable implements BooksType
     this.feed_parser = this.feed_loader.getOPDSFeedParser();
   }
 
-  static OptionType<File> makeCover(
-    final HTTPType http,
-    final OptionType<URI> cover_opt)
-    throws IOException
-  {
-    if (cover_opt.isSome()) {
-      final Some<URI> some = (Some<URI>) cover_opt;
-      final URI cover_uri = some.get();
-
-      final File cover_file_tmp = File.createTempFile("cover", ".jpg");
-      cover_file_tmp.deleteOnExit();
-      BooksController.makeCoverDownload(http, cover_file_tmp, cover_uri);
-      return Option.some(cover_file_tmp);
-    }
-
-    return Option.none();
-  }
-
-  private static void makeCoverDownload(
-    final HTTPType http,
-    final File cover_file_tmp,
-    final URI cover_uri)
-    throws IOException
-  {
-    BooksController.LOG.debug("fetching cover {}", cover_uri);
-
-    final OptionType<HTTPAuthType> no_auth = Option.none();
-    final HTTPResultOKType<InputStream> r =
-      http.get(no_auth, cover_uri, 0L).matchResult(
-        new HTTPResultToException<InputStream>(cover_uri));
-
-    try {
-      final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
-      try {
-        final InputStream in = NullCheck.notNull(r.getValue());
-        try {
-          final byte[] buffer = new byte[8192];
-          while (true) {
-            final int rb = in.read(buffer);
-            if (rb == -1) {
-              break;
-            }
-            fs.write(buffer, 0, rb);
-          }
-        } finally {
-          in.close();
-        }
-
-        fs.flush();
-      } finally {
-        fs.close();
-      }
-    } finally {
-      r.close();
-    }
-
-    BooksController.LOG.debug("fetched cover {}", cover_uri);
-  }
-
   /**
    * Construct a new books controller.
    *
@@ -197,52 +131,6 @@ public final class BooksController extends Observable implements BooksType
       in_docs,
       in_config,
       in_root);
-  }
-
-  /**
-   * Convenience function to update a given book database entry and download a
-   * cover.
-   *
-   * @param e             The acquisition feed entry
-   * @param book_database The book database
-   * @param books_status  The book status cache
-   * @param http          An HTTP implementation
-   *
-   * @throws IOException On I/O errors
-   */
-
-  static void syncFeedEntry(
-    final OPDSAcquisitionFeedEntry e,
-    final BookDatabaseType book_database,
-    final BooksStatusCacheType books_status,
-    final HTTPType http)
-    throws IOException
-  {
-    final BookID book_id = BookID.newIDFromEntry(e);
-
-    BooksController.LOG.debug("book {}: synchronizing book entry", book_id);
-    final BookDatabaseEntryType book_dir =
-      book_database.getBookDatabaseEntry(book_id);
-    book_dir.create();
-    book_dir.setData(e);
-
-    BooksController.LOG.debug("book {}: fetching cover", book_id);
-    final OptionType<File> cover =
-      BooksController.makeCover(http, e.getCover());
-    book_dir.setCover(cover);
-
-    BooksController.LOG.debug("book {}: getting snapshot", book_id);
-    final BookSnapshot snap = book_dir.getSnapshot();
-    BooksController.LOG.debug("book {}: determining status", book_id);
-    final BookStatusType status = BookStatus.fromSnapshot(book_id, snap);
-
-    BooksController.LOG.debug("book {}: updating status", book_id);
-    books_status.booksStatusUpdateIfMoreImportant(status);
-    BooksController.LOG.debug("book {}: updating snapshot", book_id);
-    books_status.booksSnapshotUpdate(book_id, snap);
-
-    BooksController.LOG.debug(
-      "book {}: finished synchronizing book entry", book_id);
   }
 
   @Override public void accountGetCachedLoginDetails(
@@ -333,6 +221,11 @@ public final class BooksController extends Observable implements BooksType
     return this.books_status;
   }
 
+  @Override public BookDatabaseReadableType bookGetDatabase()
+  {
+    return this.book_database;
+  }
+
   @Override public void bookBorrow(
     final BookID id,
     final OPDSAcquisition acq,
@@ -385,11 +278,12 @@ public final class BooksController extends Observable implements BooksType
         "status of book {} is currently {}", id, status);
 
       if (status instanceof BookStatusDownloadFailed) {
-        final OptionType<BookSnapshot> snap_opt =
-          this.books_status.booksSnapshotGet(id);
+        final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+          this.book_database.databaseGetEntrySnapshot(id);
         if (snap_opt.isSome()) {
-          final Some<BookSnapshot> snap_some = (Some<BookSnapshot>) snap_opt;
-          final BookSnapshot snap = snap_some.get();
+          final Some<BookDatabaseEntrySnapshot> snap_some =
+            (Some<BookDatabaseEntrySnapshot>) snap_opt;
+          final BookDatabaseEntrySnapshot snap = snap_some.get();
           this.books_status.booksStatusUpdate(
             BookStatus.fromSnapshot(
               id, snap));
@@ -457,19 +351,6 @@ public final class BooksController extends Observable implements BooksType
         in_search,
         in_selection,
         in_listener));
-  }
-
-  @Override public void bookUpdateMetadata(
-    final BookID id,
-    final OPDSAcquisitionFeedEntry e)
-  {
-    NullCheck.notNull(id);
-    NullCheck.notNull(e);
-
-    BooksController.LOG.debug("update metadata {}: {}", id, e);
-    this.submitRunnable(
-      new BooksControllerUpdateMetadataTask(
-        this.http, this.book_database, id, e));
   }
 
   @Override public void bookRevoke(final BookID id)

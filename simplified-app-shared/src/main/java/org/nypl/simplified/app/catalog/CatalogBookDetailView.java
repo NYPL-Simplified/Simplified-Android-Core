@@ -914,10 +914,11 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookDetailView.LOG.debug("received status update {}", status_opt);
 
       final OptionType<FeedEntryType> update_opt =
-        status_cache.booksFeedEntryGet(current_id);
+        status_cache.booksRevocationFeedEntryGet(current_id);
 
       if (update_opt.isSome()) {
-        CatalogBookDetailView.LOG.debug("received entry update {}", update_opt);
+        CatalogBookDetailView.LOG.debug(
+          "received revocation entry update {}", update_opt);
 
         final Some<FeedEntryType> some = (Some<FeedEntryType>) update_opt;
         final FeedEntryType update = some.get();

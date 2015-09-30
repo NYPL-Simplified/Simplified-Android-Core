@@ -29,8 +29,8 @@ import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AuthenticationDocumentValuesType;
+import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksType;
@@ -485,7 +485,10 @@ public final class Simplified extends Application
       final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
       this.cover_generator = new CatalogBookCoverGenerator(ten_print);
       this.cover_provider = BookCoverProvider.newCoverProvider(
-        in_context, this.books, this.cover_generator, this.exec_covers);
+        in_context,
+        this.books.bookGetDatabase(),
+        this.cover_generator,
+        this.exec_covers);
 
       /**
        * Has the initial sync operation been carried out?
@@ -564,7 +567,7 @@ public final class Simplified extends Application
 
     @Override public void onAccountDataBookLoadSucceeded(
       final BookID book,
-      final BookSnapshot snap)
+      final BookDatabaseEntrySnapshot snap)
     {
       CatalogAppServices.LOG_CA.debug("loaded book: {}", book);
     }

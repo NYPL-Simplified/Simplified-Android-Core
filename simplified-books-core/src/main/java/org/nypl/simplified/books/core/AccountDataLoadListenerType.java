@@ -8,7 +8,7 @@ import com.io7m.jfunctional.OptionType;
  * If the user has not logged into an account, {@link #onAccountUnavailable()}
  * will be called. Otherwise, for each book, either {@link
  * #onAccountDataBookLoadFailed(BookID, OptionType, String)} or {@link
- * #onAccountDataBookLoadSucceeded(BookID, BookSnapshot)} will be called.
+ * #onAccountDataBookLoadSucceeded(BookID, BookDatabaseEntrySnapshot)} will be called.
  * Finally, {@link #onAccountDataBookLoadFinished()} will be called.
  */
 
@@ -39,7 +39,7 @@ public interface AccountDataLoadListenerType
   /**
    * The loading operation has completed. Will be called regardless of whether
    * {@link #onAccountDataBookLoadFailed(BookID, OptionType, String)} or {@link
-   * #onAccountDataBookLoadSucceeded(BookID, BookSnapshot)} was called.
+   * #onAccountDataBookLoadSucceeded(BookID, BookDatabaseEntrySnapshot)} was called.
    */
 
   void onAccountDataBookLoadFinished();
@@ -53,7 +53,7 @@ public interface AccountDataLoadListenerType
 
   void onAccountDataBookLoadSucceeded(
     final BookID book,
-    final BookSnapshot snap);
+    final BookDatabaseEntrySnapshot snap);
 
   /**
    * The user has not logged into an account, so no data can be loaded.

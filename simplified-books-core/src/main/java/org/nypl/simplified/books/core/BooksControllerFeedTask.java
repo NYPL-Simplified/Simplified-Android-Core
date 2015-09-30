@@ -3,6 +3,7 @@ package org.nypl.simplified.books.core;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class BooksControllerFeedTask implements Runnable
 {
@@ -81,37 +83,43 @@ final class BooksControllerFeedTask implements Runnable
   /**
    * Load all the entries that are applicable for the selected type of feed.
    *
+   * @param database  The book database
    * @param f         The feed being built
-   * @param dirs      The list of database entries
+   * @param ids       The set of book IDs
    * @param selection The type of feed
    * @param entries   The resulting entries
    */
 
   private static void entriesLoad(
+    final BookDatabaseType database,
     final FeedWithoutGroups f,
-    final List<BookDatabaseEntryType> dirs,
+    final Set<BookID> ids,
     final BooksFeedSelection selection,
     final AbstractList<FeedEntryType> entries)
   {
-    for (int index = 0; index < dirs.size(); ++index) {
-      final BookDatabaseEntryReadableType dir =
-        NullCheck.notNull(dirs.get(index));
-      final BookID book_id = dir.getID();
+    for (final BookID id : ids) {
+      final OptionType<BookDatabaseEntrySnapshot> e_opt =
+        database.databaseGetEntrySnapshot(id);
+      if (e_opt.isSome()) {
+        final Some<BookDatabaseEntrySnapshot> some =
+          (Some<BookDatabaseEntrySnapshot>) e_opt;
+        final BookDatabaseEntrySnapshot snap = some.get();
 
-      try {
-        final OPDSAcquisitionFeedEntry data = dir.getData();
-        final OPDSAvailabilityType availability = data.getAvailability();
+        try {
+          final OPDSAcquisitionFeedEntry data = snap.getEntry();
+          final OPDSAvailabilityType availability = data.getAvailability();
 
-        final Boolean use = availability.matchAvailability(
-          BooksControllerFeedTask.matcherForSelection(selection));
+          final Boolean use = availability.matchAvailability(
+            BooksControllerFeedTask.matcherForSelection(selection));
 
-        if (use.booleanValue()) {
-          entries.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
+          if (use.booleanValue()) {
+            entries.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
+          }
+        } catch (final Throwable x) {
+          BooksControllerFeedTask.LOG.error(
+            "[{}]: unable to load book metadata: ", id.getShortID(), x);
+          f.add(FeedEntryCorrupt.fromIDAndError(id, x));
         }
-      } catch (final Throwable x) {
-        BooksControllerFeedTask.LOG.error(
-          "unable to load book {} metadata: ", book_id, x);
-        f.add(FeedEntryCorrupt.fromIDAndError(book_id, x));
       }
     }
   }
@@ -339,13 +347,13 @@ final class BooksControllerFeedTask implements Runnable
       no_terms,
       no_privacy);
 
-    final List<BookDatabaseEntryType> dirs =
-      this.books_database.getBookDatabaseEntries();
-
+    final Set<BookID> ids = this.books_database.databaseGetBooks();
     final AbstractList<FeedEntryType> entries =
-      new ArrayList<FeedEntryType>(dirs.size());
+      new ArrayList<FeedEntryType>(ids.size());
 
-    BooksControllerFeedTask.entriesLoad(f, dirs, this.selection, entries);
+    BooksControllerFeedTask.entriesLoad(
+      this.books_database, f, ids, this.selection, entries);
+
     this.search.map(
       new FunctionType<String, Unit>()
       {

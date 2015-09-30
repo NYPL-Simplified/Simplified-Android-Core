@@ -10,7 +10,7 @@ import org.nypl.drm.core.AdobeAdeptContentRightsClientType;
 import org.nypl.drm.core.DRMException;
 import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.app.AdobeDRMServices;
-import org.nypl.simplified.books.core.BookDatabaseEntry;
+import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.files.FileUtilities;
 import org.readium.sdk.android.Container;
@@ -78,7 +78,7 @@ public final class ReaderReadiumEPUBLoader
      */
 
     final OptionType<File> adobe_rights =
-      BookDatabaseEntry.getAdobeRightsFileForEPUB(f);
+      BookDatabase.getAdobeRightsFileForEPUB(f);
 
     final byte[] adobe_rights_data;
     if (adobe_rights.isSome()) {

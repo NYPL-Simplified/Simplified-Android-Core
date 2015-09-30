@@ -11,11 +11,11 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.reader.ReaderActivity;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
-import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
+import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookSnapshot;
-import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -56,15 +56,16 @@ public final class CatalogBookRead implements OnClickListener
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
+    final BookDatabaseReadableType db = books.bookGetDatabase();
     final Activity a = this.activity;
 
-    final BooksStatusCacheType status_cache = books.bookGetStatusCache();
-    final OptionType<BookSnapshot> snap_opt =
-      status_cache.booksSnapshotGet(this.id);
+    final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+      db.databaseGetEntrySnapshot(this.id);
 
     if (snap_opt.isSome()) {
-      final Some<BookSnapshot> some_snap = (Some<BookSnapshot>) snap_opt;
-      final BookSnapshot snap = some_snap.get();
+      final Some<BookDatabaseEntrySnapshot> some_snap =
+        (Some<BookDatabaseEntrySnapshot>) snap_opt;
+      final BookDatabaseEntrySnapshot snap = some_snap.get();
       final OptionType<File> book_opt = snap.getBook();
       if (book_opt.isSome()) {
         final Some<File> some_book = (Some<File>) book_opt;

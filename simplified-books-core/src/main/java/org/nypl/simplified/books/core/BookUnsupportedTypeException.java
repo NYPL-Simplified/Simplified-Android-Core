@@ -7,7 +7,7 @@ import com.io7m.jnull.NullCheck;
  * unsupported type.
  */
 
-public final class BookUnsupportedTypeException extends Exception
+public final class BookUnsupportedTypeException extends BookException
 {
   private final String type;
 

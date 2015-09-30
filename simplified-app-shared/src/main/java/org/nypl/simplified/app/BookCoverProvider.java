@@ -14,13 +14,12 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGeneratorRequestHandler;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGeneratorType;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
+import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookSnapshot;
-import org.nypl.simplified.books.core.BooksStatusCacheType;
-import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
@@ -45,13 +44,13 @@ public final class BookCoverProvider implements BookCoverProviderType
     COVER_TAG = "cover";
   }
 
-  private final BooksType                     books;
+  private final BookDatabaseReadableType      books;
   private final CatalogBookCoverGeneratorType cover_gen;
   private final Picasso                       picasso;
 
   private BookCoverProvider(
     final Picasso in_p,
-    final BooksType in_books,
+    final BookDatabaseReadableType in_books,
     final CatalogBookCoverGeneratorType in_cover_gen)
   {
     this.picasso = NullCheck.notNull(in_p);
@@ -144,7 +143,7 @@ public final class BookCoverProvider implements BookCoverProviderType
 
   public static BookCoverProviderType newCoverProvider(
     final Context in_c,
-    final BooksType in_books,
+    final BookDatabaseReadableType in_books,
     final CatalogBookCoverGeneratorType in_generator,
     final ExecutorService in_exec)
   {
@@ -167,10 +166,11 @@ public final class BookCoverProvider implements BookCoverProviderType
   {
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
     final BookID id = e.getBookID();
-    final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
-    final OptionType<BookSnapshot> snap_opt = status_cache.booksSnapshotGet(id);
+    final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+      this.books.databaseGetEntrySnapshot(id);
     if (snap_opt.isSome()) {
-      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
+      final BookDatabaseEntrySnapshot snap =
+        ((Some<BookDatabaseEntrySnapshot>) snap_opt).get();
       final OptionType<File> cover_opt = snap.getCover();
       if (cover_opt.isSome()) {
         final Some<File> some = (Some<File>) cover_opt;
@@ -186,10 +186,12 @@ public final class BookCoverProvider implements BookCoverProviderType
   {
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
     final BookID id = e.getBookID();
-    final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
-    final OptionType<BookSnapshot> snap_opt = status_cache.booksSnapshotGet(id);
+    final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+      this.books.databaseGetEntrySnapshot(id);
+
     if (snap_opt.isSome()) {
-      final BookSnapshot snap = ((Some<BookSnapshot>) snap_opt).get();
+      final BookDatabaseEntrySnapshot snap =
+        ((Some<BookDatabaseEntrySnapshot>) snap_opt).get();
       final OptionType<File> cover_opt = snap.getCover();
       if (cover_opt.isSome()) {
         final Some<File> some = (Some<File>) cover_opt;

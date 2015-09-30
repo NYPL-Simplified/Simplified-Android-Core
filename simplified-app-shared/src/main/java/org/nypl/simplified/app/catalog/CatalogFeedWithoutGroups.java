@@ -341,7 +341,8 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     if (this.feed.containsID(update_id)) {
       CatalogFeedWithoutGroups.LOG.debug("update: feed does contain book id");
       final BooksStatusCacheType status = this.books.bookGetStatusCache();
-      final OptionType<FeedEntryType> e = status.booksFeedEntryGet(update_id);
+      final OptionType<FeedEntryType> e = status.booksRevocationFeedEntryGet(
+        update_id);
 
       if (e.isSome()) {
         CatalogFeedWithoutGroups.LOG.debug(

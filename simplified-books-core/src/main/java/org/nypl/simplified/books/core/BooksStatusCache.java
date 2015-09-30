@@ -25,14 +25,12 @@ public final class BooksStatusCache extends Observable
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksStatusCache.class));
   }
 
-  private final Map<BookID, BookSnapshot> snapshots;
-  private final Map<BookID, BookStatusType> status;
-  private final Map<BookID, FeedEntryType> entries;
+  private final Map<BookID, BookStatusType>            status;
+  private final Map<BookID, FeedEntryType>             entries;
 
   private BooksStatusCache()
   {
     this.status = new HashMap<BookID, BookStatusType>(32);
-    this.snapshots = new HashMap<BookID, BookSnapshot>(32);
     this.entries = new WeakHashMap<BookID, FeedEntryType>(32);
   }
 
@@ -68,28 +66,9 @@ public final class BooksStatusCache extends Observable
     this.broadcast(NullCheck.notNull(in_id));
   }
 
-  @Override public synchronized OptionType<BookSnapshot> booksSnapshotGet(
-    final BookID id)
-  {
-    final BookID nid = NullCheck.notNull(id);
-    if (this.snapshots.containsKey(nid)) {
-      return Option.some(NullCheck.notNull(this.snapshots.get(nid)));
-    }
-    return Option.none();
-  }
-
-  @Override public synchronized void booksSnapshotUpdate(
-    final BookID id,
-    final BookSnapshot snap)
-  {
-    BooksStatusCache.LOG.debug("update snapshot: {} {}", id, snap);
-    this.snapshots.put(id, snap);
-  }
-
   @Override public synchronized void booksStatusClearAll()
   {
     this.status.clear();
-    this.snapshots.clear();
   }
 
   @Override public synchronized OptionType<BookStatusType> booksStatusGet(
@@ -103,8 +82,8 @@ public final class BooksStatusCache extends Observable
   }
 
   @Override
-  public synchronized OptionType<FeedEntryType> booksFeedEntryGet(final
-  BookID id)
+  public synchronized OptionType<FeedEntryType> booksRevocationFeedEntryGet(
+    final BookID id)
   {
     NullCheck.notNull(id);
     if (this.entries.containsKey(id)) {
@@ -113,7 +92,7 @@ public final class BooksStatusCache extends Observable
     return Option.none();
   }
 
-  @Override public synchronized void booksFeedEntryUpdate(
+  @Override public synchronized void booksRevocationFeedEntryUpdate(
     final FeedEntryType e)
   {
     NullCheck.notNull(e);
@@ -160,7 +139,6 @@ public final class BooksStatusCache extends Observable
   @Override public synchronized void booksStatusClearFor(final BookID book_id)
   {
     BooksStatusCache.LOG.debug("clear {}", book_id);
-    this.snapshots.remove(book_id);
     this.status.remove(book_id);
     this.broadcast(book_id);
   }

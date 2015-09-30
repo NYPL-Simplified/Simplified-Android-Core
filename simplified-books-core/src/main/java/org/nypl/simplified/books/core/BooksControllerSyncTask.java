@@ -75,7 +75,8 @@ final class BooksControllerSyncTask implements Runnable
     throws Exception
   {
     final URI loans_uri = this.config.getCurrentLoansURI();
-    final AccountCredentials c = this.books_database.credentialsGet();
+    final AccountCredentials c =
+      this.books_database.databaseAccountCredentialsGet();
     final AccountBarcode barcode = c.getUser();
     final AccountPIN pin = c.getPassword();
     final AccountSyncListenerType in_listener = this.listener;
@@ -142,30 +143,28 @@ final class BooksControllerSyncTask implements Runnable
      * expired and should be deleted.
      */
 
-    final List<BookDatabaseEntryType> on_disk_entries =
-      this.books_database.getBookDatabaseEntries();
-    final Set<BookID> existing = new HashSet<BookID>();
-    for (final BookDatabaseEntryType e : on_disk_entries) {
-      existing.add(e.getID());
-    }
+    final Set<BookID> existing = this.books_database.databaseGetBooks();
 
     /**
      * Handle each book in the received feed.
      */
 
-    final Set<BookID> received = new HashSet<BookID>();
+    final Set<BookID> received = new HashSet<BookID>(64);
     final List<OPDSAcquisitionFeedEntry> entries = feed.getFeedEntries();
     for (final OPDSAcquisitionFeedEntry e : entries) {
+      final OPDSAcquisitionFeedEntry e_nn = NullCheck.notNull(e);
+      final BookID book_id = BookID.newIDFromEntry(e_nn);
+
       try {
-        final OPDSAcquisitionFeedEntry e_nn = NullCheck.notNull(e);
-        final BookID book_id = BookID.newIDFromEntry(e_nn);
         received.add(book_id);
-        BooksController.syncFeedEntry(
-          e_nn, this.books_database, this.books_status, this.http);
+        final BookDatabaseEntryType db_e =
+          this.books_database.databaseOpenEntryForWriting(book_id);
+        db_e.entryUpdateAll(e_nn, this.books_status, this.http);
+
         this.listener.onAccountSyncBook(book_id);
       } catch (final Throwable x) {
         BooksControllerSyncTask.LOG.error(
-          "unable to save entry: {}: ", e.getID(), x);
+          "[{}]: unable to save entry: {}: ", book_id.getShortID(), x);
       }
     }
 
@@ -178,14 +177,14 @@ final class BooksControllerSyncTask implements Runnable
       try {
         if (received.contains(existing_id) == false) {
           final BookDatabaseEntryType e =
-            this.books_database.getBookDatabaseEntry(existing_id);
-          e.destroy();
+            this.books_database.databaseOpenEntryForWriting(existing_id);
+          e.entryDestroy();
           this.books_status.booksStatusClearFor(existing_id);
           this.listener.onAccountSyncBookDeleted(existing_id);
         }
       } catch (final Throwable x) {
         BooksControllerSyncTask.LOG.error(
-          "unable to delete entry: {}: ", existing_id, x);
+          "[{}]: unable to delete entry: ", existing_id.getShortID(), x);
       }
     }
   }
