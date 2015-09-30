@@ -17,20 +17,20 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
-import org.nypl.simplified.books.core.FeedLoaderAuthenticationListenerType;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryType;
+import org.nypl.simplified.books.core.FeedLoaderAuthenticationListenerType;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.FeedMatcherType;
 import org.nypl.simplified.books.core.FeedType;
 import org.nypl.simplified.books.core.FeedWithGroups;
 import org.nypl.simplified.books.core.FeedWithoutGroups;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.slf4j.Logger;
 
@@ -339,12 +339,17 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
 
     final BookID update_id = (BookID) data;
     if (this.feed.containsID(update_id)) {
+      CatalogFeedWithoutGroups.LOG.debug("update: feed does contain book id");
       final BooksStatusCacheType status = this.books.bookGetStatusCache();
       final OptionType<FeedEntryType> e = status.booksFeedEntryGet(update_id);
+
       if (e.isSome()) {
+        CatalogFeedWithoutGroups.LOG.debug(
+          "update: feed entry is {}, updating!", e);
         final FeedEntryType ee = ((Some<FeedEntryType>) e).get();
         this.feed.updateEntry(ee);
 
+        CatalogFeedWithoutGroups.LOG.debug("update: updated feed entry");
         UIThread.runOnUIThread(
           new Runnable()
           {
@@ -353,6 +358,9 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
               CatalogFeedWithoutGroups.this.adapter.notifyDataSetChanged();
             }
           });
+      } else {
+        CatalogFeedWithoutGroups.LOG.debug(
+          "update: feed entry is {}, ignoring!", e);
       }
     }
   }

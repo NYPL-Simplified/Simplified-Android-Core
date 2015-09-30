@@ -543,7 +543,8 @@ public final class CatalogBookDetailView implements Observer,
     final FeedEntryOPDS current_entry = this.entry.get();
     final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
     final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
+      CatalogAcquisitionButtons.getPreferredAcquisition(
+        f.getID(), eo.getAcquisitions());
 
     /**
      * Theoretically, if the book has ever been downloaded, then the
