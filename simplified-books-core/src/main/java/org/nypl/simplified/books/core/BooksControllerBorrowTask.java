@@ -72,6 +72,7 @@ final class BooksControllerBorrowTask implements Runnable,
   private final HTTPType                           http;
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
+  private final String                             short_id;
 
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
@@ -95,17 +96,24 @@ final class BooksControllerBorrowTask implements Runnable,
     this.books_status = NullCheck.notNull(in_books_status);
     this.feed_loader = NullCheck.notNull(in_feed_loader);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
+
+    final String bs = this.book_id.toString();
+    this.short_id = bs.substring(0, Math.min(8, bs.length()));
   }
 
   private void downloadFailed(
     final OptionType<Throwable> exception)
   {
+    final String sid = this.short_id;
+    BooksControllerBorrowTask.LOG.error("[{}]: download failed", sid);
+
     exception.map_(
       new ProcedureType<Throwable>()
       {
         @Override public void call(final Throwable x)
         {
-          BooksControllerBorrowTask.LOG.error("download failed: ", x);
+          BooksControllerBorrowTask.LOG.error(
+            "[{}]: download failed: ", sid, x);
         }
       });
 
@@ -151,7 +159,7 @@ final class BooksControllerBorrowTask implements Runnable,
   {
     try {
       BooksControllerBorrowTask.LOG.debug(
-        "download {} completed for {}", d, file);
+        "[{}]: download {} completed for {}", this.short_id, d, file);
 
       this.downloadRemoveFromCurrent();
 
@@ -160,7 +168,11 @@ final class BooksControllerBorrowTask implements Runnable,
        * must be downloaded using the Adobe DRM interface.
        */
 
-      if ("application/vnd.adobe.adept+xml".equals(d.getContentType())) {
+      final String content_type = d.getContentType();
+      BooksControllerBorrowTask.LOG.debug(
+        "[{}]: content type is {}", this.short_id, content_type);
+
+      if ("application/vnd.adobe.adept+xml".equals(content_type)) {
         this.runFulfillACSM(file);
       } else {
 
@@ -200,8 +212,10 @@ final class BooksControllerBorrowTask implements Runnable,
     final OptionType<AdobeAdeptLoan> rights)
     throws IOException
   {
-    BooksControllerBorrowTask.LOG.debug("saving file:   {}", file);
-    BooksControllerBorrowTask.LOG.debug("saving rights: {}", rights);
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}] saving file:   {}", this.short_id, file);
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}] saving rights: {}", this.short_id, rights);
 
     final BookDatabaseEntryType e =
       this.books_database.getBookDatabaseEntry(this.book_id);
@@ -232,6 +246,9 @@ final class BooksControllerBorrowTask implements Runnable,
   private void runFulfillACSM(final File file)
     throws IOException, AdobeAdeptACSMException, BookUnsupportedTypeException
   {
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: fulfilling ACSM file", this.short_id);
+
     /**
      * The ACSM file will typically have downloaded almost instantly, leaving
      * the download progress bar at 100%. The Adobe library will then take up
@@ -243,10 +260,16 @@ final class BooksControllerBorrowTask implements Runnable,
     this.downloadDataReceived(0L, 100L);
 
     if (this.adobe_drm.isSome()) {
+      BooksControllerBorrowTask.LOG.debug(
+        "[{}]: DRM support is available, using DRM connector", this.short_id);
+
       final AdobeAdeptExecutorType adobe =
         ((Some<AdobeAdeptExecutorType>) this.adobe_drm).get();
       this.runFulfillACSMWithConnector(adobe, file);
     } else {
+      BooksControllerBorrowTask.LOG.debug(
+        "[{}]: DRM support is unavailable, cannot continue!", this.short_id);
+
       final DRMUnsupportedException ex =
         new DRMUnsupportedException("DRM support is not available");
       this.downloadFailed(Option.some((Throwable) ex));
@@ -340,7 +363,7 @@ final class BooksControllerBorrowTask implements Runnable,
     throws IOException
   {
     BooksControllerBorrowTask.LOG.error(
-      "unexpectedly received corrupt feed entry");
+      "[{}]: unexpectedly received corrupt feed entry", this.short_id);
     throw new IOException(e.getError());
   }
 
@@ -348,17 +371,30 @@ final class BooksControllerBorrowTask implements Runnable,
     final FeedEntryOPDS e)
     throws Exception
   {
-    BooksControllerBorrowTask.LOG.debug("received OPDS feed entry");
+    final String sid = this.short_id;
+
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: received OPDS feed entry", sid);
 
     final OPDSAcquisitionFeedEntry ee = e.getFeedEntry();
+    final OPDSAvailabilityType availability = ee.getAvailability();
+
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: book availability is {}", sid, availability);
 
     /**
      * Update the on-disk data about the book and publish a new snapshot.
      */
 
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: saving state to database", sid);
+
     final BookDatabaseEntryType db_e =
       this.books_database.getBookDatabaseEntry(this.book_id);
     db_e.setData(ee);
+
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: updating snapshot", sid);
 
     final BookSnapshot snap = db_e.getSnapshot();
     this.books_status.booksSnapshotUpdate(this.book_id, snap);
@@ -369,10 +405,8 @@ final class BooksControllerBorrowTask implements Runnable,
      * the user.
      */
 
-    final OPDSAvailabilityType availability = ee.getAvailability();
-
     BooksControllerBorrowTask.LOG.debug(
-      "book availability is {}", availability);
+      "[{}]: continuing borrow based on availability", sid);
 
     final BookID b_id = this.book_id;
     final BooksStatusCacheType stat = this.books_status;
@@ -387,6 +421,9 @@ final class BooksControllerBorrowTask implements Runnable,
         @Override public Unit onHeldReady(
           final OPDSAvailabilityHeldReady a)
         {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: book is held but is ready, nothing more to do", sid);
+
           final BookStatusHeldReady status = new BookStatusHeldReady(
             b_id, a.getEndDate(), a.getRevoke().isSome());
           stat.booksStatusUpdate(status);
@@ -401,6 +438,9 @@ final class BooksControllerBorrowTask implements Runnable,
         @Override public Unit onHeld(
           final OPDSAvailabilityHeld a)
         {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: book is held, nothing more to do", sid);
+
           final BookStatusHeld status = new BookStatusHeld(
             b_id,
             a.getPosition(),
@@ -422,6 +462,9 @@ final class BooksControllerBorrowTask implements Runnable,
         @Override public Unit onHoldable(
           final OPDSAvailabilityHoldable a)
         {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: book is holdable, cannot continue!", sid);
+
           final BookStatusHoldable status = new BookStatusHoldable(b_id);
           stat.booksStatusUpdate(status);
           return Unit.unit();
@@ -438,6 +481,9 @@ final class BooksControllerBorrowTask implements Runnable,
         @Override public Unit onLoanable(
           final OPDSAvailabilityLoanable a)
         {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: book is loanable, this is a server bug!", sid);
+
           throw new UnreachableCodeException();
         }
 
@@ -449,6 +495,9 @@ final class BooksControllerBorrowTask implements Runnable,
           final OPDSAvailabilityLoaned a)
           throws Exception
         {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: book is loaned, fulfilling", sid);
+
           final BookStatusRequestingDownload status =
             new BookStatusRequestingDownload(b_id, a.getEndDate());
           stat.booksStatusUpdate(status);
@@ -469,6 +518,9 @@ final class BooksControllerBorrowTask implements Runnable,
           final OPDSAvailabilityOpenAccess a)
           throws Exception
         {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: book is open access, fulfilling", sid);
+
           final OptionType<Calendar> none = Option.none();
           final BookStatusRequestingDownload status =
             new BookStatusRequestingDownload(b_id, none);
@@ -490,7 +542,8 @@ final class BooksControllerBorrowTask implements Runnable,
     final URI u,
     final Throwable x)
   {
-    BooksControllerBorrowTask.LOG.debug("failed to load feed: {}: ", x);
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: failed to load feed: ", this.short_id, x);
     this.downloadFailed(Option.some(x));
   }
 
@@ -499,11 +552,12 @@ final class BooksControllerBorrowTask implements Runnable,
     final FeedType f)
   {
     try {
-      BooksControllerBorrowTask.LOG.debug("loaded feed from {}", u);
+      BooksControllerBorrowTask.LOG.debug(
+        "[{}]: loaded feed from {}", this.short_id, u);
       f.matchFeed(this);
     } catch (final Throwable e) {
       BooksControllerBorrowTask.LOG.error(
-        "failure after receiving feed: {}: ", u, e);
+        "[{}]: failure after receiving feed: {}: ", this.short_id, u, e);
     }
   }
 
@@ -512,6 +566,11 @@ final class BooksControllerBorrowTask implements Runnable,
     final int attempts,
     final FeedLoaderAuthenticationListenerType listener)
   {
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: feed {} requires authentication but none can be provided",
+      this.short_id,
+      u);
+
     /**
      * XXX: If the feed resulting from borrowing a book requires authentication,
      * then the user should be notified somehow and given a chance to log in.
@@ -529,6 +588,9 @@ final class BooksControllerBorrowTask implements Runnable,
     final FeedWithGroups f)
     throws Exception
   {
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: received feed with groups, using first entry", this.short_id);
+
     final FeedGroup g = NullCheck.notNull(f.get(0));
     final FeedEntryType e = NullCheck.notNull(g.getGroupEntries().get(0));
     return e.matchFeedEntry(this);
@@ -538,6 +600,9 @@ final class BooksControllerBorrowTask implements Runnable,
     final FeedWithoutGroups f)
     throws Exception
   {
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: received feed without groups, using first entry", this.short_id);
+
     final FeedEntryType e = NullCheck.notNull(f.get(0));
     return e.matchFeedEntry(this);
   }
@@ -545,7 +610,10 @@ final class BooksControllerBorrowTask implements Runnable,
   @Override public void run()
   {
     try {
-      BooksControllerBorrowTask.LOG.debug("creating feed entry");
+      BooksControllerBorrowTask.LOG.debug(
+        "[{}]: starting borrow (full id {})", this.short_id, this.book_id);
+      BooksControllerBorrowTask.LOG.debug(
+        "[{}]: creating feed entry", this.short_id);
 
       /**
        * First, create the on-disk database entry for the book.
@@ -560,25 +628,39 @@ final class BooksControllerBorrowTask implements Runnable,
        * Then, run the appropriate acquisition type for the book.
        */
 
-      switch (this.acq.getType()) {
+      final OPDSAcquisition.Type at = this.acq.getType();
+      switch (at) {
         case ACQUISITION_BORROW: {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: acquisition type is {}, performing borrow",
+            this.short_id,
+            at);
           this.runAcquisitionBorrow();
           break;
         }
         case ACQUISITION_GENERIC:
         case ACQUISITION_OPEN_ACCESS: {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: acquisition type is {}, performing fulfillment",
+            this.short_id,
+            at);
           this.runAcquisitionFulfill(this.feed_entry);
           break;
         }
         case ACQUISITION_BUY:
         case ACQUISITION_SAMPLE:
         case ACQUISITION_SUBSCRIBE: {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: acquisition type is {}, cannot continue!",
+            this.short_id,
+            at);
+
           throw new UnimplementedCodeException();
         }
       }
 
     } catch (final Throwable e) {
-      BooksControllerBorrowTask.LOG.error("error: ", e);
+      BooksControllerBorrowTask.LOG.error("[{}]: error: ", this.short_id, e);
       this.downloadFailed(Option.some(e));
     }
   }
@@ -591,6 +673,8 @@ final class BooksControllerBorrowTask implements Runnable,
   private void runAcquisitionBorrow()
     throws IOException
   {
+    BooksControllerBorrowTask.LOG.debug("[{}]: borrowing", this.short_id);
+
     /**
      * Borrowing requires authentication.
      */
@@ -606,7 +690,7 @@ final class BooksControllerBorrowTask implements Runnable,
      */
 
     BooksControllerBorrowTask.LOG.debug(
-      "fetching item feed: {}", this.acq.getURI());
+      "[{}]: fetching item feed: {}", this.short_id, this.acq.getURI());
 
     this.feed_loader.fromURIRefreshing(
       this.acq.getURI(), Option.some(auth), this);
@@ -627,7 +711,7 @@ final class BooksControllerBorrowTask implements Runnable,
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 
     BooksControllerBorrowTask.LOG.debug(
-      "book {}: starting download", this.book_id);
+      "[{}]: starting download", this.short_id);
 
     return this.downloader.download(a.getURI(), Option.some(auth), this);
   }
@@ -640,6 +724,9 @@ final class BooksControllerBorrowTask implements Runnable,
     final OPDSAcquisitionFeedEntry ee)
     throws Exception
   {
+    BooksControllerBorrowTask.LOG.debug(
+      "[{}]: fulfilling book", this.short_id);
+
     for (final OPDSAcquisition ea : ee.getAcquisitions()) {
       switch (ea.getType()) {
         case ACQUISITION_GENERIC:
