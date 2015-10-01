@@ -19,6 +19,7 @@ import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptConnectorFactory;
 import org.nypl.drm.core.AdobeAdeptConnectorFactoryType;
+import org.nypl.drm.core.AdobeAdeptConnectorParameters;
 import org.nypl.drm.core.AdobeAdeptContentFilterFactory;
 import org.nypl.drm.core.AdobeAdeptContentFilterFactoryType;
 import org.nypl.drm.core.AdobeAdeptContentFilterType;
@@ -274,8 +275,10 @@ public final class AdobeDRMServices
     final AdobeAdeptNetProviderType net = AdobeAdeptNetProvider.get(agent);
 
     try {
-      return AdobeAdeptExecutor.newExecutor(
-        factory,
+      final Resources rr = context.getResources();
+      final boolean logging = rr.getBoolean(R.bool.debug_adobe_drm_logging);
+
+      final AdobeAdeptConnectorParameters p = new AdobeAdeptConnectorParameters(
         package_name,
         package_version,
         res,
@@ -285,7 +288,10 @@ public final class AdobeDRMServices
         app_storage,
         xml_storage,
         book_storage,
-        temp_storage);
+        temp_storage,
+        logging);
+
+      return AdobeAdeptExecutor.newExecutor(factory, p);
     } catch (final InterruptedException e) {
       throw new UnreachableCodeException();
     }
