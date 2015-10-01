@@ -31,16 +31,15 @@ final class BooksControllerDeleteBookDataTask implements Runnable
   {
     try {
       final BookDatabaseEntryType e =
-        this.book_database.getBookDatabaseEntry(this.book_id);
-      e.destroyBookData();
+        this.book_database.databaseOpenEntryForWriting(this.book_id);
+      e.entryDeleteBookData();
 
-      final BookSnapshot snap = e.getSnapshot();
-      this.books_status.booksSnapshotUpdate(this.book_id, snap);
+      final BookDatabaseEntrySnapshot snap = e.entryGetSnapshot();
       final BookStatusType status = BookStatus.fromSnapshot(this.book_id, snap);
       this.books_status.booksStatusUpdate(status);
     } catch (final Throwable e) {
       BooksControllerDeleteBookDataTask.LOG.error(
-        "could not destroy book data for {}: ", this.book_id, e);
+        "[{}]: could not destroy book data: ", this.book_id.getShortID(), e);
     }
   }
 }

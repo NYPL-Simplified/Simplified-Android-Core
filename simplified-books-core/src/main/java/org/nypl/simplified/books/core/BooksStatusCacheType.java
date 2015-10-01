@@ -12,26 +12,6 @@ import com.io7m.jfunctional.OptionType;
 public interface BooksStatusCacheType extends BooksObservableType
 {
   /**
-   * @param id The book ID
-   *
-   * @return A snapshot of the status of the given book.
-   */
-
-  OptionType<BookSnapshot> booksSnapshotGet(
-    BookID id);
-
-  /**
-   * Update the status of the given book.
-   *
-   * @param id   The book ID
-   * @param snap A book status snapshot
-   */
-
-  void booksSnapshotUpdate(
-    BookID id,
-    BookSnapshot snap);
-
-  /**
    * Clear the cache.
    */
 
@@ -51,17 +31,24 @@ public interface BooksStatusCacheType extends BooksObservableType
    *
    * @return The most recent feed entry for the given book ID, if one has been
    * explicitly published
+   *
+   * @see #booksRevocationFeedEntryUpdate(FeedEntryType)
    */
 
-  OptionType<FeedEntryType> booksFeedEntryGet(BookID id);
+  OptionType<FeedEntryType> booksRevocationFeedEntryGet(BookID id);
 
   /**
-   * Broadcast the fact that a feed entry has been updated.
+   * Broadcast the fact that a feed entry has been published for a book after
+   * the book's loan was revoked. The sole reason this exists is because a view
+   * may still be open and observing a book during the revocation process, and
+   * when that process has completed, the application has no way retrieve the
+   * current state of the book. The feed entry broadcast here is used for that
+   * view.
    *
    * @param e The feed entry
    */
 
-  void booksFeedEntryUpdate(
+  void booksRevocationFeedEntryUpdate(
     FeedEntryType e);
 
   /**

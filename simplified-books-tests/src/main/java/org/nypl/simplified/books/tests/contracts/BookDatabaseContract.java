@@ -51,10 +51,10 @@ public final class BookDatabaseContract implements BookDatabaseContractType
     final BookDatabaseType bd = BookDatabase.newDatabase(
       in_json_serializer, in_json_parser, in_directory);
 
-    bd.create();
+    bd.databaseCreate();
     TestUtilities.assertTrue(in_directory.isDirectory());
-    bd.destroy();
-    TestUtilities.assertTrue(bd.getBookDatabaseEntries().isEmpty());
+    bd.databaseDestroy();
+    TestUtilities.assertTrue(bd.databaseGetBooks().isEmpty());
   }
 
   @Override public void testBooksDatabaseEntry()
@@ -68,7 +68,7 @@ public final class BookDatabaseContract implements BookDatabaseContractType
 
     final BookDatabaseType bd = BookDatabase.newDatabase(
       in_json_serializer, in_json_parser, in_directory);
-    bd.create();
+    bd.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;
     {
@@ -86,11 +86,10 @@ public final class BookDatabaseContract implements BookDatabaseContractType
     }
 
     final BookDatabaseEntryType e =
-      bd.getBookDatabaseEntry(BookID.exactString("abcd"));
-    e.create();
-    e.setData(ee);
+      bd.databaseOpenEntryForWriting(BookID.exactString("abcd"));
+    e.entryCreate(ee);
 
-    final OPDSAcquisitionFeedEntry ef = e.getData();
+    final OPDSAcquisitionFeedEntry ef = e.entryGetFeedData();
     TestUtilities.assertEquals(ee.getID(), ef.getID());
   }
 
@@ -112,7 +111,7 @@ public final class BookDatabaseContract implements BookDatabaseContractType
           final Unit x)
           throws Exception
         {
-          bd.create();
+          bd.databaseCreate();
         }
       });
   }

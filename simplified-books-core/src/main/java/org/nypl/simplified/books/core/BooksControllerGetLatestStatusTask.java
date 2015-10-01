@@ -37,15 +37,15 @@ final class BooksControllerGetLatestStatusTask implements Runnable
   @Override public void run()
   {
     try {
-      final BookDatabaseEntryType e =
-        this.books_database.getBookDatabaseEntry(this.book_id);
-      final BookSnapshot snap = e.getSnapshot();
+      final BookDatabaseEntryReadableType e =
+        this.books_database.databaseOpenEntryForReading(this.book_id);
+      final BookDatabaseEntrySnapshot snap = e.entryGetSnapshot();
       this.book_status.booksStatusUpdate(
         BookStatus.fromSnapshot(
           this.book_id, snap));
     } catch (final IOException e) {
       BooksControllerGetLatestStatusTask.LOG.error(
-        "unable to fetch status: ", e);
+        "[{}]: unable to fetch status: ", this.book_id.getShortID(), e);
     }
   }
 }

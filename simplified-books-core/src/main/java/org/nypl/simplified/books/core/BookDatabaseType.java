@@ -1,14 +1,15 @@
 package org.nypl.simplified.books.core;
 
-import java.io.File;
+import com.io7m.jfunctional.Pair;
+import com.io7m.jfunctional.ProcedureType;
+
 import java.io.IOException;
-import java.util.List;
 
 /**
  * The type of book databases.
  */
 
-public interface BookDatabaseType
+public interface BookDatabaseType extends BookDatabaseReadableType
 {
   /**
    * Create the initial empty database. Has no effect if the database already
@@ -17,22 +18,7 @@ public interface BookDatabaseType
    * @throws IOException On I/O errors
    */
 
-  void create()
-    throws IOException;
-
-  /**
-   * @return {@code true} if user credentials exist in the database.
-   */
-
-  boolean credentialsExist();
-
-  /**
-   * @return The user credentials
-   *
-   * @throws IOException On I/O errors
-   */
-
-  AccountCredentials credentialsGet()
+  void databaseCreate()
     throws IOException;
 
   /**
@@ -43,7 +29,7 @@ public interface BookDatabaseType
    * @throws IOException On I/O errors
    */
 
-  void credentialsSet(
+  void databaseAccountCredentialsSet(
     final AccountCredentials credentials)
     throws IOException;
 
@@ -53,27 +39,44 @@ public interface BookDatabaseType
    * @throws IOException On I/O errors
    */
 
-  void destroy()
+  void databaseDestroy()
     throws IOException;
 
   /**
-   * @return The list of database entries
-   */
-
-  List<BookDatabaseEntryType> getBookDatabaseEntries();
-
-  /**
+   * Create a new book database entry. If an entry already exists, return that
+   * without creating a new one.
+   *
    * @param book_id The book ID
    *
    * @return The database entry for {@code book_id}
    */
 
-  BookDatabaseEntryType getBookDatabaseEntry(
-    BookID book_id);
+  BookDatabaseEntryType databaseOpenEntryForWriting(BookID book_id);
 
   /**
-   * @return The location of the database
+   * Open an existing database entry for reading.
+   *
+   * @param book_id The book ID
+   *
+   * @return The database entry for {@code book_id}
+   *
+   * @throws IOException If the entry does not exist
    */
 
-  File getLocation();
+  BookDatabaseEntryReadableType databaseOpenEntryForReading(BookID book_id)
+    throws IOException;
+
+  /**
+   * Notify the given status cache of the status of all books within the
+   * database.
+   *
+   * @param cache      The status cache
+   * @param on_load    A procedure called for each successfully loaded book
+   * @param on_failure A procedure called for each failed book
+   */
+
+  void databaseNotifyAllBookStatus(
+    BooksStatusCacheType cache,
+    ProcedureType<Pair<BookID, BookDatabaseEntrySnapshot>> on_load,
+    ProcedureType<Pair<BookID, Throwable>> on_failure);
 }

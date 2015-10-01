@@ -16,8 +16,11 @@ import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
+import org.nypl.simplified.books.core.BookDatabase;
+import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
+import org.nypl.simplified.books.core.BookDatabaseReadableType;
+import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BookSnapshot;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksController;
@@ -245,7 +248,7 @@ public final class BooksContract implements BooksContractType
     };
   }
 
-  private static FeedLoaderType newParser()
+  private static FeedLoaderType newParser(final BookDatabaseReadableType db)
   {
     final OPDSFeedParserType in_parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
@@ -255,7 +258,7 @@ public final class BooksContract implements BooksContractType
       FeedHTTPTransport.newTransport(http);
     final OPDSSearchParserType in_search_parser = OPDSSearchParser.newParser();
     return FeedLoader.newFeedLoader(
-      in_exec, in_parser, in_transport, in_search_parser);
+      in_exec, db, in_parser, in_transport, in_search_parser);
   }
 
   private static DocumentStoreType newFakeDocumentStore()
@@ -318,18 +321,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -352,7 +358,7 @@ public final class BooksContract implements BooksContractType
 
           @Override public void onAccountDataBookLoadSucceeded(
             final BookID book,
-            final BookSnapshot snap)
+            final BookDatabaseEntrySnapshot snap)
           {
             System.out.println("testBooksLoadFileNotDirectory: load succeeded");
             ok.set(false);
@@ -398,18 +404,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -432,7 +441,7 @@ public final class BooksContract implements BooksContractType
 
           @Override public void onAccountDataBookLoadSucceeded(
             final BookID book,
-            final BookSnapshot snap)
+            final BookDatabaseEntrySnapshot snap)
           {
             System.out.println("testBooksLoadNotLoggedIn: load succeeded");
             ok.set(false);
@@ -484,18 +493,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
@@ -603,18 +615,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -665,7 +680,7 @@ public final class BooksContract implements BooksContractType
             final String message)
           {
             try {
-              System.err.println(
+              System.out.println(
                 "testBooksLoginFileNotDirectory: login failed: " + message);
               ((Some<Throwable>) error).get().printStackTrace();
               failed.set(true);
@@ -721,18 +736,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -776,7 +794,7 @@ public final class BooksContract implements BooksContractType
           @Override public void onAccountLoginFailureServerError(final int code)
           {
             try {
-              System.err.println(
+              System.out.println(
                 "testBooksSyncLoadOK: login failed: " + code);
             } finally {
               latch0.countDown();
@@ -794,7 +812,7 @@ public final class BooksContract implements BooksContractType
             final AccountCredentials credentials)
           {
             try {
-              System.err.println("testBooksSyncLoadOK: login succeeded");
+              System.out.println("testBooksSyncLoadOK: login succeeded");
             } finally {
               latch0.countDown();
             }
@@ -807,9 +825,11 @@ public final class BooksContract implements BooksContractType
           }
         };
 
+      System.out.println("starting login");
       b.accountLogin(creds, login_listener);
-
+      System.out.println("awaiting login completion");
       latch0.await();
+      System.out.println("login completed");
 
       final CountDownLatch latch1 = new CountDownLatch(1);
       final AtomicBoolean ok = new AtomicBoolean(false);
@@ -824,7 +844,7 @@ public final class BooksContract implements BooksContractType
           {
             try {
               ok.set(false);
-              System.err.println(
+              System.out.println(
                 "testBooksSyncLoadOK: login failed: " + message);
             } finally {
               latch1.countDown();
@@ -834,6 +854,8 @@ public final class BooksContract implements BooksContractType
           @Override public void onAccountSyncBook(
             final BookID book)
           {
+            System.out.println(
+              "onAccountSyncBook: synced: " + book);
             count.incrementAndGet();
           }
 
@@ -843,7 +865,7 @@ public final class BooksContract implements BooksContractType
           {
             try {
               ok.set(false);
-              System.err.println(
+              System.out.println(
                 "testBooksSyncLoadOK: login failed: " + message);
               ((Some<Throwable>) error).get().printStackTrace();
             } finally {
@@ -863,8 +885,11 @@ public final class BooksContract implements BooksContractType
           }
         };
 
+      System.out.println("syncing account");
       b.accountSync(sync_listener);
+      System.out.println("awaiting account sync");
       latch1.await();
+      System.out.println("account synced");
 
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
       TestUtilities.assertEquals(
@@ -893,7 +918,7 @@ public final class BooksContract implements BooksContractType
 
           @Override public void onAccountDataBookLoadSucceeded(
             final BookID book,
-            final BookSnapshot snap)
+            final BookDatabaseEntrySnapshot snap)
           {
             try {
               count.incrementAndGet();
@@ -915,9 +940,11 @@ public final class BooksContract implements BooksContractType
           }
         };
 
+      System.out.println("loading books");
       b.accountLoadBooks(load_listener);
-
+      System.out.println("waiting for book load completion");
       latch2.await();
+      System.out.println("book load completed");
 
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
       TestUtilities.assertEquals(
@@ -940,9 +967,11 @@ public final class BooksContract implements BooksContractType
           }
         };
 
+      System.out.println("logging out");
       b.accountLogout(logout_listener);
-
+      System.out.println("awaiting logout completion");
       latch3.await();
+      System.out.println("logged out");
 
       final File data = new File(tmp, "data");
       TestUtilities.assertTrue(data.exists() == false);
@@ -976,18 +1005,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -1031,7 +1063,7 @@ public final class BooksContract implements BooksContractType
           @Override public void onAccountLoginFailureServerError(final int code)
           {
             try {
-              System.err.println("testBooksSyncOK: login failed: " + code);
+              System.out.println("testBooksSyncOK: login failed: " + code);
             } finally {
               latch0.countDown();
             }
@@ -1049,7 +1081,7 @@ public final class BooksContract implements BooksContractType
             final AccountCredentials credentials)
           {
             try {
-              System.err.println("testBooksSyncOK: login succeeded");
+              System.out.println("testBooksSyncOK: login succeeded");
             } finally {
               latch0.countDown();
             }
@@ -1079,7 +1111,7 @@ public final class BooksContract implements BooksContractType
           {
             try {
               ok.set(false);
-              System.err.println("testBooksSyncOK: sync failed: " + message);
+              System.out.println("testBooksSyncOK: sync failed: " + message);
             } finally {
               latch1.countDown();
             }
@@ -1088,7 +1120,7 @@ public final class BooksContract implements BooksContractType
           @Override public void onAccountSyncBook(
             final BookID book)
           {
-            System.err.println("testBooksSyncOK: sync: " + book);
+            System.out.println("testBooksSyncOK: sync: " + book);
             count.incrementAndGet();
           }
 
@@ -1098,7 +1130,7 @@ public final class BooksContract implements BooksContractType
           {
             try {
               ok.set(false);
-              System.err.println("testBooksSyncOK: sync failed: " + message);
+              System.out.println("testBooksSyncOK: sync failed: " + message);
               ((Some<Throwable>) error).get().printStackTrace();
             } finally {
               latch1.countDown();
@@ -1113,7 +1145,7 @@ public final class BooksContract implements BooksContractType
 
           @Override public void onAccountSyncBookDeleted(final BookID book)
           {
-            System.err.println("testBooksSyncOK: delete: " + book);
+            System.out.println("testBooksSyncOK: delete: " + book);
           }
         };
 

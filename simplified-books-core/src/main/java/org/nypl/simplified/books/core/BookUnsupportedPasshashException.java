@@ -5,7 +5,7 @@ package org.nypl.simplified.books.core;
  * protected by the unsupported "passhash" protection.
  */
 
-public final class BookUnsupportedPasshashException extends Exception
+public final class BookUnsupportedPasshashException extends BookException
 {
   /**
    * Construct an exception.
@@ -13,6 +13,6 @@ public final class BookUnsupportedPasshashException extends Exception
 
   public BookUnsupportedPasshashException()
   {
-    super();
+    super("Not supported");
   }
 }

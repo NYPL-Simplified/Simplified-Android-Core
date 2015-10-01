@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -8,9 +7,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
-import org.nypl.simplified.http.core.HTTPAuthType;
-import org.nypl.simplified.http.core.HTTPResultOKType;
-import org.nypl.simplified.http.core.HTTPResultToException;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -20,10 +16,6 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -47,9 +39,7 @@ public final class BooksController extends Observable implements BooksType
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
   }
 
-  private final BookDatabaseType                        book_database;
   private final BooksStatusCacheType                    books_status;
-  private final File                                    data_directory;
   private final DownloaderType                          downloader;
   private final ConcurrentHashMap<BookID, DownloadType> downloads;
   private final ExecutorService                         exec;
@@ -60,8 +50,8 @@ public final class BooksController extends Observable implements BooksType
   private final AtomicInteger                           task_id;
   private final OptionType<AdobeAdeptExecutorType>      adobe_drm;
   private final DocumentStoreType                       docs;
-  private final File                                    root;
   private final BooksControllerConfigurationType        config;
+  private final BookDatabaseType                        book_database;
   private       Map<Integer, Future<?>>                 tasks;
 
   private BooksController(
@@ -73,8 +63,8 @@ public final class BooksController extends Observable implements BooksType
     final OPDSJSONParserType in_json_parser,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final DocumentStoreType in_docs,
-    final BooksControllerConfigurationType in_config,
-    final File in_root)
+    final BookDatabaseType in_book_database,
+    final BooksControllerConfigurationType in_config)
   {
     this.exec = NullCheck.notNull(in_exec);
     this.feed_loader = NullCheck.notNull(in_feeds);
@@ -85,76 +75,14 @@ public final class BooksController extends Observable implements BooksType
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.docs = NullCheck.notNull(in_docs);
     this.config = NullCheck.notNull(in_config);
-    this.root = NullCheck.notNull(in_root);
+    this.book_database = NullCheck.notNull(in_book_database);
 
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
     this.login = new AtomicReference<AccountCredentials>();
     this.downloads = new ConcurrentHashMap<BookID, DownloadType>(32);
     this.books_status = BooksStatusCache.newStatusCache();
-    this.data_directory = new File(in_root, "data");
-    this.book_database = BookDatabase.newDatabase(
-      in_json_serializer, in_json_parser, this.data_directory);
     this.task_id = new AtomicInteger(0);
     this.feed_parser = this.feed_loader.getOPDSFeedParser();
-  }
-
-  static OptionType<File> makeCover(
-    final HTTPType http,
-    final OptionType<URI> cover_opt)
-    throws IOException
-  {
-    if (cover_opt.isSome()) {
-      final Some<URI> some = (Some<URI>) cover_opt;
-      final URI cover_uri = some.get();
-
-      final File cover_file_tmp = File.createTempFile("cover", ".jpg");
-      cover_file_tmp.deleteOnExit();
-      BooksController.makeCoverDownload(http, cover_file_tmp, cover_uri);
-      return Option.some(cover_file_tmp);
-    }
-
-    return Option.none();
-  }
-
-  private static void makeCoverDownload(
-    final HTTPType http,
-    final File cover_file_tmp,
-    final URI cover_uri)
-    throws IOException
-  {
-    BooksController.LOG.debug("fetching cover {}", cover_uri);
-
-    final OptionType<HTTPAuthType> no_auth = Option.none();
-    final HTTPResultOKType<InputStream> r =
-      http.get(no_auth, cover_uri, 0L).matchResult(
-        new HTTPResultToException<InputStream>(cover_uri));
-
-    try {
-      final FileOutputStream fs = new FileOutputStream(cover_file_tmp);
-      try {
-        final InputStream in = NullCheck.notNull(r.getValue());
-        try {
-          final byte[] buffer = new byte[8192];
-          while (true) {
-            final int rb = in.read(buffer);
-            if (rb == -1) {
-              break;
-            }
-            fs.write(buffer, 0, rb);
-          }
-        } finally {
-          in.close();
-        }
-
-        fs.flush();
-      } finally {
-        fs.close();
-      }
-    } finally {
-      r.close();
-    }
-
-    BooksController.LOG.debug("fetched cover {}", cover_uri);
   }
 
   /**
@@ -168,8 +96,8 @@ public final class BooksController extends Observable implements BooksType
    * @param in_json_parser     A JSON parser
    * @param in_adobe_drm       An Adobe DRM interface, if supported
    * @param in_docs            A document store
+   * @param in_book_database   A book database
    * @param in_config          Mutable configuration data
-   * @param in_root            The root directory used to hold all data
    *
    * @return A new books controller
    */
@@ -183,8 +111,8 @@ public final class BooksController extends Observable implements BooksType
     final OPDSJSONParserType in_json_parser,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final DocumentStoreType in_docs,
-    final BooksControllerConfigurationType in_config,
-    final File in_root)
+    final BookDatabaseType in_book_database,
+    final BooksControllerConfigurationType in_config)
   {
     return new BooksController(
       in_exec,
@@ -195,54 +123,8 @@ public final class BooksController extends Observable implements BooksType
       in_json_parser,
       in_adobe_drm,
       in_docs,
-      in_config,
-      in_root);
-  }
-
-  /**
-   * Convenience function to update a given book database entry and download a
-   * cover.
-   *
-   * @param e             The acquisition feed entry
-   * @param book_database The book database
-   * @param books_status  The book status cache
-   * @param http          An HTTP implementation
-   *
-   * @throws IOException On I/O errors
-   */
-
-  static void syncFeedEntry(
-    final OPDSAcquisitionFeedEntry e,
-    final BookDatabaseType book_database,
-    final BooksStatusCacheType books_status,
-    final HTTPType http)
-    throws IOException
-  {
-    final BookID book_id = BookID.newIDFromEntry(e);
-
-    BooksController.LOG.debug("book {}: synchronizing book entry", book_id);
-    final BookDatabaseEntryType book_dir =
-      book_database.getBookDatabaseEntry(book_id);
-    book_dir.create();
-    book_dir.setData(e);
-
-    BooksController.LOG.debug("book {}: fetching cover", book_id);
-    final OptionType<File> cover =
-      BooksController.makeCover(http, e.getCover());
-    book_dir.setCover(cover);
-
-    BooksController.LOG.debug("book {}: getting snapshot", book_id);
-    final BookSnapshot snap = book_dir.getSnapshot();
-    BooksController.LOG.debug("book {}: determining status", book_id);
-    final BookStatusType status = BookStatus.fromSnapshot(book_id, snap);
-
-    BooksController.LOG.debug("book {}: updating status", book_id);
-    books_status.booksStatusUpdateIfMoreImportant(status);
-    BooksController.LOG.debug("book {}: updating snapshot", book_id);
-    books_status.booksSnapshotUpdate(book_id, snap);
-
-    BooksController.LOG.debug(
-      "book {}: finished synchronizing book entry", book_id);
+      in_book_database,
+      in_config);
   }
 
   @Override public void accountGetCachedLoginDetails(
@@ -309,7 +191,7 @@ public final class BooksController extends Observable implements BooksType
       this.books_status.booksStatusClearAll();
       this.submitRunnable(
         new BooksControllerLogoutTask(
-          this.data_directory, this.adobe_drm, this.login, listener));
+          this.book_database, this.adobe_drm, this.login, listener));
     }
   }
 
@@ -331,6 +213,11 @@ public final class BooksController extends Observable implements BooksType
   @Override public BooksStatusCacheType bookGetStatusCache()
   {
     return this.books_status;
+  }
+
+  @Override public BookDatabaseReadableType bookGetDatabase()
+  {
+    return this.book_database;
   }
 
   @Override public void bookBorrow(
@@ -385,11 +272,12 @@ public final class BooksController extends Observable implements BooksType
         "status of book {} is currently {}", id, status);
 
       if (status instanceof BookStatusDownloadFailed) {
-        final OptionType<BookSnapshot> snap_opt =
-          this.books_status.booksSnapshotGet(id);
+        final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+          this.book_database.databaseGetEntrySnapshot(id);
         if (snap_opt.isSome()) {
-          final Some<BookSnapshot> snap_some = (Some<BookSnapshot>) snap_opt;
-          final BookSnapshot snap = snap_some.get();
+          final Some<BookDatabaseEntrySnapshot> snap_some =
+            (Some<BookDatabaseEntrySnapshot>) snap_opt;
+          final BookDatabaseEntrySnapshot snap = snap_some.get();
           this.books_status.booksStatusUpdate(
             BookStatus.fromSnapshot(
               id, snap));
@@ -457,19 +345,6 @@ public final class BooksController extends Observable implements BooksType
         in_search,
         in_selection,
         in_listener));
-  }
-
-  @Override public void bookUpdateMetadata(
-    final BookID id,
-    final OPDSAcquisitionFeedEntry e)
-  {
-    NullCheck.notNull(id);
-    NullCheck.notNull(e);
-
-    BooksController.LOG.debug("update metadata {}: {}", id, e);
-    this.submitRunnable(
-      new BooksControllerUpdateMetadataTask(
-        this.http, this.book_database, id, e));
   }
 
   @Override public void bookRevoke(final BookID id)

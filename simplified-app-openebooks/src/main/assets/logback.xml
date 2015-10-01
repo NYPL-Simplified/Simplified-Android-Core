@@ -22,6 +22,10 @@
     </rollingPolicy>
   </appender>
 
+  <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FILE" />
+  </appender>
+
   <logger
     name="org.nypl.simplified.app.catalog.CatalogFeedBookCellView"
     level="INFO" />
@@ -37,7 +41,7 @@
   <!-- Log level - change this to ERROR on release -->
   <root level="TRACE">
     <appender-ref ref="LOG_CAT" />
-    <appender-ref ref="FILE" />
+    <appender-ref ref="ASYNC_FILE" />
   </root>
 
 </configuration>
