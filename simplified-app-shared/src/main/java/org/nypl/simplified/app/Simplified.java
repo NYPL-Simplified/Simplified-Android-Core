@@ -29,7 +29,10 @@ import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AuthenticationDocumentValuesType;
+import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
+import org.nypl.simplified.books.core.BookDatabaseReadableType;
+import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
@@ -165,13 +168,14 @@ public final class Simplified extends Application
 
   private static FeedLoaderType makeFeedLoader(
     final ExecutorService exec,
+    final BookDatabaseReadableType db,
     final HTTPType http,
     final OPDSSearchParserType s,
     final OPDSFeedParserType p)
   {
     final OPDSFeedTransportType<OptionType<HTTPAuthType>> t =
       FeedHTTPTransport.newTransport(http);
-    return FeedLoader.newFeedLoader(exec, p, t, s);
+    return FeedLoader.newFeedLoader(exec, db, p, t, s);
   }
 
   private static ExecutorService namedThreadPool(
@@ -272,6 +276,7 @@ public final class Simplified extends Application
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
     private final DocumentStoreType                  documents;
     private final OptionType<HelpstackType>          helpstack;
+    private final BookDatabaseType                   books_database;
 
     private CatalogAppServices(
       final Application in_app,
@@ -287,6 +292,15 @@ public final class Simplified extends Application
       this.exec_covers = Simplified.namedThreadPool(2, "cover", 19);
       this.exec_downloader = Simplified.namedThreadPool(4, "downloader", 19);
       this.exec_books = Simplified.namedThreadPool(1, "books", 19);
+
+      /**
+       * Application paths.
+       */
+
+      final File base_dir = Simplified.getDiskDataDir(in_context);
+      final File downloads_dir = new File(base_dir, "downloads");
+      final File books_dir = new File(base_dir, "books");
+      final File books_database_directory = new File(books_dir, "data");
 
       /**
        * Catalog URIs.
@@ -309,8 +323,12 @@ public final class Simplified extends Application
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
       final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
       final OPDSSearchParserType s = OPDSSearchParser.newParser();
-      this.feed_loader =
-        Simplified.makeFeedLoader(this.exec_catalog_feeds, this.http, s, p);
+
+      this.books_database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, books_database_directory);
+
+      this.feed_loader = Simplified.makeFeedLoader(
+        this.exec_catalog_feeds, this.books_database, this.http, s, p);
 
       /**
        * DRM.
@@ -318,14 +336,6 @@ public final class Simplified extends Application
 
       this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
         this.context, AdobeDRMServices.getPackageOverride(rr));
-
-      /**
-       * Application paths.
-       */
-
-      final File base_dir = Simplified.getDiskDataDir(in_context);
-      final File downloads_dir = new File(base_dir, "downloads");
-      final File books_dir = new File(base_dir, "books");
 
       /**
        * Make sure the required directories exist. There is no sane way to
@@ -475,8 +485,8 @@ public final class Simplified extends Application
         in_json_parser,
         this.adobe_drm,
         this.documents,
-        books_config,
-        books_dir);
+        this.books_database,
+        books_config);
 
       /**
        * Configure cover provider.

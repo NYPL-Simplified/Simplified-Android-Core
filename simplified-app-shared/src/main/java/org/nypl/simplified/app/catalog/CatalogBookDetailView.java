@@ -28,6 +28,8 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
+import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
 import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
@@ -268,7 +270,6 @@ public final class CatalogBookDetailView implements Observer,
 
     cover_provider.loadCoverInto(
       in_entry, header_cover, cover_width, cover_height);
-
   }
 
   private static void configureButtonsHeight(
@@ -906,6 +907,13 @@ public final class CatalogBookDetailView implements Observer,
     final FeedEntryOPDS current_entry = this.entry.get();
     final BookID current_id = current_entry.getBookID();
 
+    /**
+     * If the book for this view has been updated in some way, first check
+     * the book database and replace the current feed entry with any snapshot
+     * that exists. Then, check to see if a revocation feed entry has been
+     * posted and use that.
+     */
+
     if (current_id.equals(update_id)) {
       final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
       final OptionType<BookStatusType> status_opt =
@@ -913,34 +921,62 @@ public final class CatalogBookDetailView implements Observer,
 
       CatalogBookDetailView.LOG.debug("received status update {}", status_opt);
 
-      final OptionType<FeedEntryType> update_opt =
-        status_cache.booksRevocationFeedEntryGet(current_id);
-
-      if (update_opt.isSome()) {
-        CatalogBookDetailView.LOG.debug(
-          "received revocation entry update {}", update_opt);
-
-        final Some<FeedEntryType> some = (Some<FeedEntryType>) update_opt;
-        final FeedEntryType update = some.get();
-        update.matchFeedEntry(
-          new FeedEntryMatcherType<Unit, UnreachableCodeException>()
-          {
-            @Override public Unit onFeedEntryOPDS(final FeedEntryOPDS e)
-            {
-              CatalogBookDetailView.this.entry.set(e);
-              return Unit.unit();
-            }
-
-            @Override public Unit onFeedEntryCorrupt(final FeedEntryCorrupt e)
-            {
-              CatalogBookDetailView.LOG.debug(
-                "cannot render an entry of type {}", e);
-              return Unit.unit();
-            }
-          });
-      }
-
+      this.updateFetchDatabaseSnapshot(
+        current_id, this.books.bookGetDatabase());
+      this.updateCheckForRevocationEntry(current_id, status_cache);
       this.onStatus(this.entry.get(), status_opt);
+    }
+  }
+
+  private void updateFetchDatabaseSnapshot(
+    final BookID current_id,
+    final BookDatabaseReadableType db)
+  {
+    final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+      db.databaseGetEntrySnapshot(current_id);
+
+    CatalogBookDetailView.LOG.debug(
+      "database snapshot is {}", snap_opt);
+
+    if (snap_opt.isSome()) {
+      final Some<BookDatabaseEntrySnapshot> some =
+        (Some<BookDatabaseEntrySnapshot>) snap_opt;
+      final BookDatabaseEntrySnapshot snap = some.get();
+      this.entry.set(
+        (FeedEntryOPDS) FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(
+          snap.getEntry()));
+    }
+  }
+
+  private void updateCheckForRevocationEntry(
+    final BookID current_id,
+    final BooksStatusCacheType status_cache)
+  {
+    final OptionType<FeedEntryType> revoke_opt =
+      status_cache.booksRevocationFeedEntryGet(current_id);
+
+    CatalogBookDetailView.LOG.debug(
+      "revocation entry update is {}", revoke_opt);
+
+    if (revoke_opt.isSome()) {
+      final Some<FeedEntryType> some = (Some<FeedEntryType>) revoke_opt;
+      final FeedEntryType update = some.get();
+      update.matchFeedEntry(
+        new FeedEntryMatcherType<Unit, UnreachableCodeException>()
+        {
+          @Override public Unit onFeedEntryOPDS(final FeedEntryOPDS e)
+          {
+            CatalogBookDetailView.this.entry.set(e);
+            return Unit.unit();
+          }
+
+          @Override public Unit onFeedEntryCorrupt(final FeedEntryCorrupt e)
+          {
+            CatalogBookDetailView.LOG.debug(
+              "cannot render an entry of type {}", e);
+            return Unit.unit();
+          }
+        });
     }
   }
 }

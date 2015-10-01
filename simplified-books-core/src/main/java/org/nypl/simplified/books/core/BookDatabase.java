@@ -224,6 +224,9 @@ public final class BookDatabase implements BookDatabaseType
       for (final BookDatabaseEntryType e : es) {
         e.entryDestroy();
       }
+      FileUtilities.fileDelete(this.file_credentials_tmp);
+      FileUtilities.fileDelete(this.file_credentials);
+      FileUtilities.fileDelete(this.directory);
     } else {
       throw new IllegalStateException("Not logged in");
     }

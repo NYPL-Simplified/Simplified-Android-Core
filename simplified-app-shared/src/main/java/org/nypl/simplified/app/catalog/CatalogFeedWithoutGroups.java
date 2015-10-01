@@ -19,9 +19,12 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
+import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.FeedLoaderAuthenticationListenerType;
 import org.nypl.simplified.books.core.FeedLoaderListenerType;
@@ -224,7 +227,8 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
   {
     CatalogFeedWithoutGroups.LOG.debug("loading: {}", next);
     final OptionType<HTTPAuthType> none = Option.none();
-    final Future<Unit> r = this.feed_loader.fromURI(next, none, this);
+    final Future<Unit> r = this.feed_loader.fromURIWithDatabaseEntries(
+      next, none, this);
     this.loading.set(Pair.pair(r, next));
     return r;
   }
@@ -328,6 +332,48 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     this.adapter.unregisterDataSetObserver(observer);
   }
 
+  private boolean updateFetchDatabaseSnapshot(
+    final BookID current_id,
+    final BookDatabaseReadableType db)
+  {
+    final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+      db.databaseGetEntrySnapshot(current_id);
+
+    CatalogFeedWithoutGroups.LOG.debug(
+      "database snapshot is {}", snap_opt);
+
+    if (snap_opt.isSome()) {
+      final Some<BookDatabaseEntrySnapshot> some =
+        (Some<BookDatabaseEntrySnapshot>) snap_opt;
+      final BookDatabaseEntrySnapshot snap = some.get();
+      final FeedEntryType re =
+        FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(snap.getEntry());
+      this.feed.updateEntry(re);
+      return true;
+    }
+
+    return false;
+  }
+
+  private boolean updateCheckForRevocationEntry(
+    final BookID current_id,
+    final BooksStatusCacheType status_cache)
+  {
+    final OptionType<FeedEntryType> revoke_opt =
+      status_cache.booksRevocationFeedEntryGet(current_id);
+
+    CatalogFeedWithoutGroups.LOG.debug(
+      "revocation entry update is {}", revoke_opt);
+
+    if (revoke_opt.isSome()) {
+      final Some<FeedEntryType> some = (Some<FeedEntryType>) revoke_opt;
+      this.feed.updateEntry(some.get());
+      return true;
+    }
+
+    return false;
+  }
+
   @Override public void update(
     final Observable observable,
     final Object data)
@@ -340,16 +386,13 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     final BookID update_id = (BookID) data;
     if (this.feed.containsID(update_id)) {
       CatalogFeedWithoutGroups.LOG.debug("update: feed does contain book id");
-      final BooksStatusCacheType status = this.books.bookGetStatusCache();
-      final OptionType<FeedEntryType> e = status.booksRevocationFeedEntryGet(
-        update_id);
 
-      if (e.isSome()) {
-        CatalogFeedWithoutGroups.LOG.debug(
-          "update: feed entry is {}, updating!", e);
-        final FeedEntryType ee = ((Some<FeedEntryType>) e).get();
-        this.feed.updateEntry(ee);
+      final boolean updated_snap = this.updateFetchDatabaseSnapshot(
+        update_id, this.books.bookGetDatabase());
+      final boolean updated_revoke = this.updateCheckForRevocationEntry(
+        update_id, this.books.bookGetStatusCache());
 
+      if (updated_snap || updated_revoke) {
         CatalogFeedWithoutGroups.LOG.debug("update: updated feed entry");
         UIThread.runOnUIThread(
           new Runnable()
@@ -359,9 +402,6 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
               CatalogFeedWithoutGroups.this.adapter.notifyDataSetChanged();
             }
           });
-      } else {
-        CatalogFeedWithoutGroups.LOG.debug(
-          "update: feed entry is {}, ignoring!", e);
       }
     }
   }

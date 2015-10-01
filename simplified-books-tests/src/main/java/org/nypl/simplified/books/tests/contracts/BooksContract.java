@@ -16,8 +16,11 @@ import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
-import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
+import org.nypl.simplified.books.core.BookDatabaseReadableType;
+import org.nypl.simplified.books.core.BookDatabaseType;
+import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksController;
@@ -245,7 +248,7 @@ public final class BooksContract implements BooksContractType
     };
   }
 
-  private static FeedLoaderType newParser()
+  private static FeedLoaderType newParser(final BookDatabaseReadableType db)
   {
     final OPDSFeedParserType in_parser =
       OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
@@ -255,7 +258,7 @@ public final class BooksContract implements BooksContractType
       FeedHTTPTransport.newTransport(http);
     final OPDSSearchParserType in_search_parser = OPDSSearchParser.newParser();
     return FeedLoader.newFeedLoader(
-      in_exec, in_parser, in_transport, in_search_parser);
+      in_exec, db, in_parser, in_transport, in_search_parser);
   }
 
   private static DocumentStoreType newFakeDocumentStore()
@@ -318,18 +321,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -398,18 +404,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -484,18 +493,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
@@ -603,18 +615,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -721,18 +736,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -987,18 +1005,21 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final BookDatabaseType database = BookDatabase.newDatabase(
+        in_json_serializer, in_json_parser, new File(tmp, "data"));
+
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
         exec,
-        BooksContract.newParser(),
+        BooksContract.newParser(database),
         in_http,
         d,
         in_json_serializer,
         in_json_parser,
         none,
         BooksContract.newFakeDocumentStore(),
-        books_config,
-        tmp);
+        database,
+        books_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 

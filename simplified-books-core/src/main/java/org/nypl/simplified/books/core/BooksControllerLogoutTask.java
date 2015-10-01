@@ -7,11 +7,9 @@ import com.io7m.jnull.NullCheck;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
-import org.nypl.simplified.files.DirectoryUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class BooksControllerLogoutTask implements Runnable
@@ -23,18 +21,18 @@ final class BooksControllerLogoutTask implements Runnable
       LoggerFactory.getLogger(BooksControllerLogoutTask.class));
   }
 
-  private final File                                base;
   private final AccountLogoutListenerType           listener;
   private final AtomicReference<AccountCredentials> login;
   private final OptionType<AdobeAdeptExecutorType>  adobe_drm;
+  private final BookDatabaseType                    database;
 
   BooksControllerLogoutTask(
-    final File in_root,
+    final BookDatabaseType in_book_database,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AtomicReference<AccountCredentials> in_login,
     final AccountLogoutListenerType in_listener)
   {
-    this.base = NullCheck.notNull(in_root);
+    this.database = NullCheck.notNull(in_book_database);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.login = NullCheck.notNull(in_login);
     this.listener = new AccountLogoutListenerCatcher(
@@ -68,11 +66,7 @@ final class BooksControllerLogoutTask implements Runnable
        * Delete the books database.
        */
 
-      if (this.base.isDirectory()) {
-        DirectoryUtilities.directoryDelete(this.base);
-      } else {
-        throw new IllegalStateException("Not logged in");
-      }
+      this.database.databaseDestroy();
 
       this.listener.onAccountLogoutSuccess();
     } catch (final Throwable e) {

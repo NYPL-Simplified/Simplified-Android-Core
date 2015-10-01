@@ -50,6 +50,44 @@ public interface FeedLoaderType
     FeedLoaderListenerType listener);
 
   /**
+   * Load a feed from the given URI, caching feeds that are successfully
+   * fetched. The feed (or errors) are delivered to the given listener. For each
+   * returned entry in the feed, the local book database is examined and any
+   * matching entries are replaced with the data most recently written into the
+   * database.
+   *
+   * @param uri      The URI
+   * @param auth     HTTP authentication details, if any
+   * @param listener The listener
+   *
+   * @return A future that can be used to cancel the loading feed
+   */
+
+  Future<Unit> fromURIWithDatabaseEntries(
+    URI uri,
+    OptionType<HTTPAuthType> auth,
+    FeedLoaderListenerType listener);
+
+  /**
+   * Load a feed from the given URI, bypassing any cache, and caching feeds that
+   * are successfully fetched. The feed (or errors) are delivered to the given
+   * listener. For each returned entry in the feed, the local book database is
+   * examined and any matching entries are replaced with the data most recently
+   * written into the database.
+   *
+   * @param uri      The URI
+   * @param auth     HTTP authentication details, if any
+   * @param listener The listener
+   *
+   * @return A future that can be used to cancel the loading feed
+   */
+
+  Future<Unit> fromURIRefreshingWithDatabaseEntries(
+    URI uri,
+    OptionType<HTTPAuthType> auth,
+    FeedLoaderListenerType listener);
+
+  /**
    * @return The feed parser that backs this loader.
    */
 
