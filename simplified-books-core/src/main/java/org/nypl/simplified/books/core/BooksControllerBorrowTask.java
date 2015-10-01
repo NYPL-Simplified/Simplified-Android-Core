@@ -72,6 +72,7 @@ final class BooksControllerBorrowTask implements Runnable
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final String                             short_id;
+  private long download_running_total;
 
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
@@ -271,11 +272,27 @@ final class BooksControllerBorrowTask implements Runnable
     final long running_total,
     final long expected_total)
   {
-    final OptionType<Calendar> none = Option.none();
-    final BookStatusDownloadInProgress status =
-      new BookStatusDownloadInProgress(
-        this.book_id, running_total, expected_total, none);
-    this.books_status.booksStatusUpdate(status);
+    /**
+     * Because "data received" updates happen at such a huge rate, we want
+     * to ensure that updates to the book status are rate limited to avoid
+     * overwhelming the UI. Book updates are only published at the start of
+     * downloads, or if a large enough chunk of data has now been received
+     * to justify a UI update.
+     */
+
+    final boolean at_start = running_total == 0L;
+    final double divider = (double) expected_total / 10.0;
+    final boolean long_enough =
+      (double) running_total > (double) this.download_running_total + divider;
+
+    if (long_enough || at_start) {
+      final OptionType<Calendar> none = Option.none();
+      final BookStatusDownloadInProgress status =
+        new BookStatusDownloadInProgress(
+          this.book_id, running_total, expected_total, none);
+      this.books_status.booksStatusUpdate(status);
+      this.download_running_total = running_total;
+    }
   }
 
   @Override public void run()
