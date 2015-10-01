@@ -12,4 +12,7 @@
     activities/dialogs. -->
   <bool name="debug_catalog_cell_view_states">false</bool>
 
+  <!-- If true, the Adobe DRM connector will log (excessively) about what it's doing. -->
+  <bool name="debug_adobe_drm_logging">false</bool>
+
 </resources>
