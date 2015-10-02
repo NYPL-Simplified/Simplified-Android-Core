@@ -40,7 +40,7 @@
 
   <logger
     name="org.nypl.drm"
-    level="INFO" />
+    level="DEBUG" />
 
   <!-- Log level - change this to ERROR on release -->
   <root level="DEBUG">
