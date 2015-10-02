@@ -209,7 +209,7 @@ final class BooksControllerLoginTask implements Runnable,
   private void onCompletedSuccessfully()
   {
     try {
-      this.books_database.credentialsSet(this.credentials);
+      this.books_database.databaseAccountCredentialsSet(this.credentials);
       this.login.set(this.credentials);
     } catch (final IOException e) {
       this.listener.onAccountLoginFailureLocalError(

@@ -18,11 +18,13 @@ public final class BookID implements Serializable
 {
   private static final long serialVersionUID = 1L;
   private final String id;
+  private final String short_id;
 
   private BookID(
     final String in_id)
   {
     this.id = NullCheck.notNull(in_id);
+    this.short_id = in_id.substring(0, Math.min(8, in_id.length()));
   }
 
   /**
@@ -80,6 +82,17 @@ public final class BookID implements Serializable
   {
     NullCheck.notNull(e);
     return BookID.newFromText(e.getID());
+  }
+
+  /**
+   * @return A shortened form of the main book ID (at most eight characters),
+   * intended to make it somewhat easier to read book IDs when they appear in
+   * log files
+   */
+
+  public String getShortID()
+  {
+    return this.short_id;
   }
 
   @Override public boolean equals(

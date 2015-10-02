@@ -360,7 +360,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
      */
 
     final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(oe.getAcquisitions());
+      CatalogAcquisitionButtons.getPreferredAcquisition(
+        f.getID(), oe.getAcquisitions());
 
     /**
      * Theoretically, if the book has ever been downloaded, then the

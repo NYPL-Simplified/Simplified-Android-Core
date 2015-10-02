@@ -8,11 +8,12 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import java.io.File;
 
 /**
- * A snapshot of the state of a book.
+ * A snapshot of the most recent state of a book in the database.
  */
 
-public final class BookSnapshot
+public final class BookDatabaseEntrySnapshot
 {
+  private final BookID                     id;
   private final OptionType<AdobeAdeptLoan> adobe_rights;
   private final OptionType<File>           book;
   private final OptionType<File>           cover;
@@ -21,6 +22,7 @@ public final class BookSnapshot
   /**
    * Construct a book snapshot.
    *
+   * @param in_id           The book ID
    * @param in_cover        The cover file, if any
    * @param in_book         The actual book (typically an EPUB), if any
    * @param in_entry        The acquisition feed entry
@@ -28,12 +30,14 @@ public final class BookSnapshot
    *                        any
    */
 
-  public BookSnapshot(
+  public BookDatabaseEntrySnapshot(
+    final BookID in_id,
     final OptionType<File> in_cover,
     final OptionType<File> in_book,
     final OPDSAcquisitionFeedEntry in_entry,
     final OptionType<AdobeAdeptLoan> in_adobe_rights)
   {
+    this.id = NullCheck.notNull(in_id);
     this.cover = NullCheck.notNull(in_cover);
     this.book = NullCheck.notNull(in_book);
     this.entry = NullCheck.notNull(in_entry);
@@ -47,6 +51,15 @@ public final class BookSnapshot
   public OptionType<File> getBook()
   {
     return this.book;
+  }
+
+  /**
+   * @return The book ID
+   */
+
+  public BookID getBookID()
+  {
+    return this.id;
   }
 
   /**
@@ -78,14 +91,13 @@ public final class BookSnapshot
 
   @Override public String toString()
   {
-    final StringBuilder b = new StringBuilder(64);
-    b.append("[BookSnapshot book=");
-    b.append(this.book);
-    b.append(" cover=");
-    b.append(this.cover);
-    b.append(" entry=");
-    b.append(this.entry.getClass().getCanonicalName());
-    b.append("]");
-    return NullCheck.notNull(b.toString());
+    final StringBuilder sb = new StringBuilder("BookDatabaseEntrySnapshot{");
+    sb.append("adobe_rights=").append(this.adobe_rights);
+    sb.append(", id=").append(this.id);
+    sb.append(", book=").append(this.book);
+    sb.append(", cover=").append(this.cover);
+    sb.append(", entry=").append(this.entry.getAvailability());
+    sb.append('}');
+    return sb.toString();
   }
 }

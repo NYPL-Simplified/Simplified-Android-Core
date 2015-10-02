@@ -28,16 +28,16 @@
     <orderEntry type="library" name="Maven: com.io7m.jequality:io7m-jequality-core:1.0.2" level="project" />
     <orderEntry type="library" name="Maven: net.jodah:expiringmap:0.4.0" level="project" />
     <orderEntry type="module" module-name="simplified-http-core" />
+    <orderEntry type="module" module-name="simplified-json-core" />
     <orderEntry type="library" name="Maven: net.iharder:base64:2.3.8" level="project" />
     <orderEntry type="module" module-name="simplified-opds-core" />
-    <orderEntry type="module" module-name="simplified-json-core" />
     <orderEntry type="module" module-name="simplified-rfc3339-core" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.6.0-rc3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.6.0-rc3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.6.0-rc3" level="project" />
     <orderEntry type="module" module-name="simplified-stack" />
     <orderEntry type="module" module-name="simplified-tenprint" />
-    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.6.1" level="project" />
+    <orderEntry type="library" name="Maven: org.nypl.drm:nypl-drm-core:0.7.0" level="project" />
     <orderEntry type="library" name="Maven: com.io7m.jnull:io7m-jnull-core:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: android.support:compatibility-v13:21.0.3" level="project" />
     <orderEntry type="library" name="Maven: org.nypl.readium:readium-sdk-android-runtime:0.22.0" level="project" />
@@ -64,7 +64,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="simplified-app-shared" />
     <orderEntry type="module-library">
       <library name="Maven: org.nypl.helpstack:helpstack-android:1.2.0">
         <CLASSES>
@@ -74,5 +73,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="simplified-app-shared" />
   </component>
 </module>

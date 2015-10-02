@@ -16,7 +16,7 @@ public interface BookDatabaseEntryReadableType
    * @return {@code true} if the book directory exists.
    */
 
-  boolean exists();
+  boolean entryExists();
 
   /**
    * @return The cover of the book, if any
@@ -24,7 +24,7 @@ public interface BookDatabaseEntryReadableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  OptionType<File> getCover()
+  OptionType<File> entryGetCover()
     throws IOException;
 
   /**
@@ -33,27 +33,27 @@ public interface BookDatabaseEntryReadableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  OPDSAcquisitionFeedEntry getData()
+  OPDSAcquisitionFeedEntry entryGetFeedData()
     throws IOException;
 
   /**
    * @return The database entry directory
    */
 
-  File getDirectory();
+  File entryGetDirectory();
 
   /**
    * @return The ID of the book
    */
 
-  BookID getID();
+  BookID entryGetBookID();
 
   /**
-   * @return A snapshot of the current book state
+   * @return A snapshot of the current entry state
    *
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookSnapshot getSnapshot()
+  BookDatabaseEntrySnapshot entryGetSnapshot()
     throws IOException;
 }

@@ -19,7 +19,7 @@ final class BooksControllerDataSetupTask implements Runnable
   @Override public void run()
   {
     try {
-      this.books_database.create();
+      this.books_database.databaseCreate();
       this.listener.onAccountDataSetupSuccess();
     } catch (final Throwable x) {
       this.listener.onAccountDataSetupFailure(

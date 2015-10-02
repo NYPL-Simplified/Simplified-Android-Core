@@ -8,10 +8,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -63,7 +63,8 @@ public final class CatalogAcquisitionButtons
     final OPDSAcquisitionFeedEntry eo = in_e.getFeedEntry();
 
     final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(eo.getAcquisitions());
+      CatalogAcquisitionButtons.getPreferredAcquisition(
+        book_id, eo.getAcquisitions());
     if (a_opt.isSome()) {
       final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
       final CatalogAcquisitionButton b =
@@ -75,17 +76,21 @@ public final class CatalogAcquisitionButtons
   /**
    * Return the preferred acquisition type, from the list of types.
    *
+   * @param book_id      The book ID
    * @param acquisitions The list of acquisition types
    *
    * @return The preferred acquisition, if any
    */
 
   public static OptionType<OPDSAcquisition> getPreferredAcquisition(
+    final BookID book_id,
     final List<OPDSAcquisition> acquisitions)
   {
     NullCheck.notNull(acquisitions);
 
     if (acquisitions.isEmpty()) {
+      CatalogAcquisitionButtons.LOG.debug(
+        "[{}]: no acquisitions, so no best acquisition!", book_id);
       return Option.none();
     }
 
@@ -99,7 +104,7 @@ public final class CatalogAcquisitionButtons
     }
 
     CatalogAcquisitionButtons.LOG.debug(
-      "best acquisition of {} was {}", acquisitions, best);
+      "[{}]: best acquisition of {} was {}", book_id, acquisitions, best);
 
     return Option.some(best);
   }

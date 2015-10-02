@@ -27,7 +27,7 @@ final class BookStatus
 
   public static BookStatusType fromSnapshot(
     final BookID in_id,
-    final BookSnapshot in_snap)
+    final BookDatabaseEntrySnapshot in_snap)
   {
     NullCheck.notNull(in_id);
     NullCheck.notNull(in_snap);
@@ -97,7 +97,7 @@ final class BookStatus
       });
   }
 
-  private static boolean isAdobeReturnable(final BookSnapshot in_snap)
+  private static boolean isAdobeReturnable(final BookDatabaseEntrySnapshot in_snap)
   {
     final OptionType<AdobeAdeptLoan> adobe_opt = in_snap.getAdobeRights();
     if (adobe_opt.isSome()) {

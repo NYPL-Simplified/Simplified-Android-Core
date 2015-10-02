@@ -28,7 +28,6 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
@@ -67,14 +66,19 @@ final class BooksControllerRevokeBookTask
   @Override public void run()
   {
     try {
-      final BookDatabaseEntryType e =
-        this.books_database.getBookDatabaseEntry(this.book_id);
-      final BookSnapshot snap = e.getSnapshot();
+      BooksControllerRevokeBookTask.LOG.debug(
+        "[{}]: revoking", this.book_id.getShortID());
+
+      final BookDatabaseEntryReadableType e =
+        this.books_database.databaseOpenEntryForReading(this.book_id);
+      final BookDatabaseEntrySnapshot snap = e.entryGetSnapshot();
       final OPDSAvailabilityType avail = snap.getEntry().getAvailability();
+      BooksControllerRevokeBookTask.LOG.debug(
+        "[{}]: availability is {}", this.book_id.getShortID(), avail);
       avail.matchAvailability(this);
     } catch (final Throwable e) {
       BooksControllerRevokeBookTask.LOG.error(
-        "could not revoke book {}: ", this.book_id, e);
+        "[{}]: could not revoke book: ", this.book_id.getShortID(), e);
     }
   }
 
@@ -99,6 +103,9 @@ final class BooksControllerRevokeBookTask
     final RevokeType type)
     throws IOException
   {
+    BooksControllerRevokeBookTask.LOG.debug(
+      "[{}]: revoking URI {} of type {}", this.book_id.getShortID(), u, type);
+
     /**
      * Hitting a revoke link yields a single OPDS entry indicating
      * the current state of the book. It should be equivalent to the
@@ -139,7 +146,8 @@ final class BooksControllerRevokeBookTask
 
         try {
           final AccountCredentials creds =
-            BooksControllerRevokeBookTask.this.books_database.credentialsGet();
+            BooksControllerRevokeBookTask.this.books_database
+              .databaseAccountCredentialsGet();
           listener.onAuthenticationProvided(creds);
         } catch (final IOException e) {
           listener.onAuthenticationError(
@@ -163,6 +171,11 @@ final class BooksControllerRevokeBookTask
   private void revokeFeedReceived(final FeedType f)
     throws IOException
   {
+    BooksControllerRevokeBookTask.LOG.debug(
+      "[{}]: received a feed of type {}",
+      this.book_id.getShortID(),
+      f.getClass());
+
     f.matchFeed(
       new FeedMatcherType<Unit, IOException>()
       {
@@ -195,6 +208,11 @@ final class BooksControllerRevokeBookTask
   private void revokeFeedEntryReceived(final FeedEntryType e)
     throws IOException
   {
+    BooksControllerRevokeBookTask.LOG.debug(
+      "[{}]: received a feed entry of type {}",
+      this.book_id.getShortID(),
+      e.getClass());
+
     e.matchFeedEntry(
       new FeedEntryMatcherType<Unit, IOException>()
       {
@@ -229,21 +247,14 @@ final class BooksControllerRevokeBookTask
     throws IOException
   {
     BooksControllerRevokeBookTask.LOG.debug(
-      "publishing revocation status for {}", this.book_id);
+      "[{}]: publishing revocation status", this.book_id.getShortID());
 
-    final OptionType<File> no_cover = Option.none();
-    final OptionType<File> no_book = Option.none();
-    final OptionType<AdobeAdeptLoan> no_adobe_loan = Option.none();
-
-    final BookSnapshot snap =
-      new BookSnapshot(no_cover, no_book, e.getFeedEntry(), no_adobe_loan);
-    this.books_status.booksSnapshotUpdate(this.book_id, snap);
-    this.books_status.booksFeedEntryUpdate(e);
+    this.books_status.booksRevocationFeedEntryUpdate(e);
     this.books_status.booksStatusClearFor(this.book_id);
 
     final BookDatabaseEntryType de =
-      this.books_database.getBookDatabaseEntry(this.book_id);
-    de.destroy();
+      this.books_database.databaseOpenEntryForWriting(this.book_id);
+    de.entryDestroy();
   }
 
   /**
@@ -255,16 +266,16 @@ final class BooksControllerRevokeBookTask
     final String message)
   {
     BooksControllerRevokeBookTask.LOG.error(
-      "revocation failed: {}: ", message);
+      "[{}]: revocation failed: ", this.book_id.getShortID(), message);
 
     if (error.isSome()) {
       final Throwable ex = ((Some<Throwable>) error).get();
       BooksControllerRevokeBookTask.LOG.error(
-        "revocation failed, exception: ", ex);
+        "[{}]: revocation failed, exception: ", this.book_id.getShortID(), ex);
     }
 
     BooksControllerRevokeBookTask.LOG.debug(
-      "publishing revocation status for {}", this.book_id);
+      "[{}] publishing failure status", this.book_id.getShortID());
 
     final BookStatusRevokeFailed status =
       new BookStatusRevokeFailed(this.book_id, error);
@@ -275,7 +286,7 @@ final class BooksControllerRevokeBookTask
     throws IOException
   {
     final AccountCredentials c =
-      this.books_database.credentialsGet();
+      this.books_database.databaseAccountCredentialsGet();
     final AccountBarcode barcode = c.getUser();
     final AccountPIN pin = c.getPassword();
     return new HTTPAuthBasic(barcode.toString(), pin.toString());
@@ -342,9 +353,9 @@ final class BooksControllerRevokeBookTask
       final AdobeAdeptExecutorType adobe =
         ((Some<AdobeAdeptExecutorType>) this.adobe_drm).get();
 
-      final BookDatabaseEntryType e =
-        this.books_database.getBookDatabaseEntry(this.book_id);
-      final BookSnapshot snap = e.getSnapshot();
+      final BookDatabaseEntryReadableType e =
+        this.books_database.databaseOpenEntryForReading(this.book_id);
+      final BookDatabaseEntrySnapshot snap = e.entryGetSnapshot();
 
       /**
        * If the loan information is gone, well, there's nothing we can

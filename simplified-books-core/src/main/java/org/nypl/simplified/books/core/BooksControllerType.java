@@ -21,6 +21,12 @@ public interface BooksControllerType
   BooksStatusCacheType bookGetStatusCache();
 
   /**
+   * @return A read-only reference to the current book database.
+   */
+
+  BookDatabaseReadableType bookGetDatabase();
+
+  /**
    * Borrow the given book, delivering the results to the given {@code
    * listener}.
    *
@@ -89,17 +95,6 @@ public interface BooksControllerType
     OptionType<String> in_search,
     BooksFeedSelection in_selection,
     BookFeedListenerType in_listener);
-
-  /**
-   * Update metadata for the given book.
-   *
-   * @param id The book ID
-   * @param e  The feed entry
-   */
-
-  void bookUpdateMetadata(
-    BookID id,
-    OPDSAcquisitionFeedEntry e);
 
   /**
    * Revoke a loan or hold for the given book.

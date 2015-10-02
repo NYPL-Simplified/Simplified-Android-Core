@@ -505,7 +505,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   {
     CatalogFeedActivity.LOG.debug("loading feed: {}", u);
     final OptionType<HTTPAuthType> none = Option.none();
-    this.loading = feed_loader.fromURI(u, none, this);
+    this.loading = feed_loader.fromURIWithDatabaseEntries(u, none, this);
   }
 
   @Override protected boolean navigationDrawerShouldShowIndicator()

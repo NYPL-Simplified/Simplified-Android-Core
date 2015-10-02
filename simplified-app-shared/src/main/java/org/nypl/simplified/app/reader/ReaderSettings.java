@@ -95,12 +95,12 @@ public final class ReaderSettings implements ReaderSettingsType
     try {
       final String raw = NullCheck.notNull(
         this.settings.getString(
-          "color_scheme", ReaderColorScheme.SCHEME_BLACK_ON_BEIGE.toString()));
+          "color_scheme", ReaderColorScheme.SCHEME_BLACK_ON_WHITE.toString()));
       return NullCheck.notNull(ReaderColorScheme.valueOf(raw));
     } catch (final Throwable x) {
       ReaderSettings.LOG.error(
         "failed to parse color scheme: {}", x.getMessage(), x);
-      return ReaderColorScheme.SCHEME_BLACK_ON_BEIGE;
+      return ReaderColorScheme.SCHEME_BLACK_ON_WHITE;
     }
   }
 
