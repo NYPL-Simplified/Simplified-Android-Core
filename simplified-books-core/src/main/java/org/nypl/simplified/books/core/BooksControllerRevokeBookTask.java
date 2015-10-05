@@ -17,6 +17,8 @@ import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
@@ -24,6 +26,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -353,9 +356,9 @@ final class BooksControllerRevokeBookTask
       final AdobeAdeptExecutorType adobe =
         ((Some<AdobeAdeptExecutorType>) this.adobe_drm).get();
 
-      final BookDatabaseEntryReadableType e =
+      final BookDatabaseEntryReadableType er =
         this.books_database.databaseOpenEntryForReading(this.book_id);
-      final BookDatabaseEntrySnapshot snap = e.entryGetSnapshot();
+      final BookDatabaseEntrySnapshot snap = er.entryGetSnapshot();
 
       /**
        * If the loan information is gone, well, there's nothing we can
@@ -422,6 +425,20 @@ final class BooksControllerRevokeBookTask
       }
 
       /**
+       * Save the "revoked" state of the book.
+       */
+
+      {
+        final OPDSAcquisitionFeedEntryBuilderType b =
+          OPDSAcquisitionFeedEntry.newBuilderFrom(snap.getEntry());
+        b.setAvailability(OPDSAvailabilityRevoked.get(revoke_uri));
+        final OPDSAcquisitionFeedEntry ee = b.build();
+        final BookDatabaseEntryWritableType ew =
+          this.books_database.databaseOpenEntryForWriting(this.book_id);
+        ew.entrySetFeedData(ee);
+      }
+
+      /**
        * Everything went well... Finish the revocation by telling
        * the server about it.
        */
@@ -460,6 +477,14 @@ final class BooksControllerRevokeBookTask
             revoke_uri, RevokeType.LOAN);
         }
       });
+    return Unit.unit();
+  }
+
+  @Override public Unit onRevoked(final OPDSAvailabilityRevoked a)
+    throws IOException
+  {
+    BooksControllerRevokeBookTask.this.revokeUsingURI(
+      a.getRevoke(), RevokeType.LOAN);
     return Unit.unit();
   }
 

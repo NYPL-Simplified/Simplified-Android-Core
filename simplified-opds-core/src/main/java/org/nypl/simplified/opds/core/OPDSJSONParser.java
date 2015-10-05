@@ -109,6 +109,13 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         return OPDSAvailabilityOpenAccess.get(in_revoke);
       }
 
+      if (node.has("revoked")) {
+        final ObjectNode n = JSONParserUtilities.getObject(
+          node, "revoked");
+        final URI in_revoke = JSONParserUtilities.getURI(n, "revoke");
+        return OPDSAvailabilityRevoked.get(in_revoke);
+      }
+
       throw new OPDSParseException("Expected availability information");
     } catch (final JSONParseException e) {
       throw new OPDSParseException(e);

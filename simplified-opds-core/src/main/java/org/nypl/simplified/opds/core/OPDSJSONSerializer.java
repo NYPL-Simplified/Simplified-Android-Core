@@ -193,6 +193,15 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
           o.set("open_access", oh);
           return o;
         }
+
+        @Override public ObjectNode onRevoked(final OPDSAvailabilityRevoked a)
+        {
+          final ObjectNode o = jom.createObjectNode();
+          final ObjectNode oh = jom.createObjectNode();
+          oh.put("revoke", a.getRevoke().toString());
+          o.set("revoked", oh);
+          return o;
+        }
       });
   }
 

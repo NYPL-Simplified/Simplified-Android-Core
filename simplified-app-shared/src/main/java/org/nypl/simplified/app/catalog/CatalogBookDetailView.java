@@ -48,6 +48,7 @@ import org.nypl.simplified.books.core.BookStatusRequestingDownload;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
 import org.nypl.simplified.books.core.BookStatusRequestingRevoke;
 import org.nypl.simplified.books.core.BookStatusRevokeFailed;
+import org.nypl.simplified.books.core.BookStatusRevoked;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
@@ -730,6 +731,31 @@ public final class CatalogBookDetailView implements Observer,
 
     retry.setEnabled(false);
     retry.setVisibility(View.GONE);
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusRevoked(final BookStatusRevoked o)
+  {
+    this.book_debug_status.setText("revoked");
+
+    this.book_download_buttons.removeAllViews();
+    this.book_download_buttons.setVisibility(View.VISIBLE);
+    this.book_download.setVisibility(View.VISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.INVISIBLE);
+
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
+    final String text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(rr, o);
+    this.book_download_text.setText(text);
+
+    final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+      this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
+    this.book_download_buttons.addView(revoke, 0);
+
+    CatalogBookDetailView.configureButtonsHeight(
+      rr, this.book_download_buttons);
+
     return Unit.unit();
   }
 

@@ -13,6 +13,8 @@ import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
+import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,25 +37,25 @@ final class BooksControllerSyncTask implements Runnable
       LoggerFactory.getLogger(BooksControllerSyncTask.class));
   }
 
-  private final BookDatabaseType                 books_database;
   private final BooksControllerConfigurationType config;
   private final OPDSFeedParserType               feed_parser;
   private final HTTPType                         http;
   private final AccountSyncListenerType          listener;
-  private final BooksStatusCacheType             books_status;
   private final AtomicBoolean                    running;
+  private final BooksControllerType              books_controller;
+  private final BookDatabaseType                 books_database;
 
   BooksControllerSyncTask(
-    final BooksControllerConfigurationType in_config,
-    final BooksStatusCacheType in_status_cache,
+    final BooksControllerType in_books,
     final BookDatabaseType in_books_database,
+    final BooksControllerConfigurationType in_config,
     final HTTPType in_http,
     final OPDSFeedParserType in_feed_parser,
     final AccountSyncListenerType in_listener,
     final AtomicBoolean in_running)
   {
+    this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
-    this.books_status = NullCheck.notNull(in_status_cache);
     this.config = NullCheck.notNull(in_config);
     this.http = NullCheck.notNull(in_http);
     this.feed_parser = NullCheck.notNull(in_feed_parser);
@@ -143,6 +145,9 @@ final class BooksControllerSyncTask implements Runnable
     final HTTPResultOKType<InputStream> r_feed)
     throws Exception
   {
+    final BooksStatusCacheType books_status =
+      this.books_controller.bookGetStatusCache();
+
     final OPDSAcquisitionFeed feed =
       this.feed_parser.parse(loans_uri, r_feed.getValue());
 
@@ -168,7 +173,7 @@ final class BooksControllerSyncTask implements Runnable
         received.add(book_id);
         final BookDatabaseEntryType db_e =
           this.books_database.databaseOpenEntryForWriting(book_id);
-        db_e.entryUpdateAll(e_nn, this.books_status, this.http);
+        db_e.entryUpdateAll(e_nn, books_status, this.http);
 
         this.listener.onAccountSyncBook(book_id);
       } catch (final Throwable x) {
@@ -179,22 +184,38 @@ final class BooksControllerSyncTask implements Runnable
 
     /**
      * Now delete any book that previously existed, but is not in the
-     * received set.
+     * received set. Queue any revoked books for completion and then
+     * deletion.
      */
 
+    final Set<BookID> revoking = new HashSet<BookID>(existing.size());
     for (final BookID existing_id : existing) {
       try {
         if (received.contains(existing_id) == false) {
           final BookDatabaseEntryType e =
             this.books_database.databaseOpenEntryForWriting(existing_id);
+
+          final OPDSAvailabilityType a = e.entryGetFeedData().getAvailability();
+          if (a instanceof OPDSAvailabilityRevoked) {
+            revoking.add(existing_id);
+          }
+
           e.entryDestroy();
-          this.books_status.booksStatusClearFor(existing_id);
+          books_status.booksStatusClearFor(existing_id);
           this.listener.onAccountSyncBookDeleted(existing_id);
         }
       } catch (final Throwable x) {
         BooksControllerSyncTask.LOG.error(
           "[{}]: unable to delete entry: ", existing_id.getShortID(), x);
       }
+    }
+
+    /**
+     * Try to finish the revocation of any books that require it.
+     */
+
+    for (final BookID existing_id : revoking) {
+      this.books_controller.bookRevoke(existing_id);
     }
   }
 }

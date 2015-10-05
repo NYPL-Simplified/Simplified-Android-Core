@@ -204,9 +204,9 @@ public final class BooksController implements BooksType
     NullCheck.notNull(listener);
     this.submitRunnable(
       new BooksControllerSyncTask(
-        this.config,
-        this.books_status,
+        this,
         this.book_database,
+        this.config,
         this.http,
         this.feed_parser,
         listener,

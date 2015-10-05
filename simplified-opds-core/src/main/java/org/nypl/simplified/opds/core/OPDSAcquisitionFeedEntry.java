@@ -89,6 +89,54 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     return new Builder(in_id, in_title, in_updated, in_availability);
   }
 
+  /**
+   * Construct a new mutable builder for feed entries. The builder will be
+   * initialized with the values of the existing entry {@code e}.
+   *
+   * @param e An existing entry
+   *
+   * @return A new builder
+   */
+
+  public static OPDSAcquisitionFeedEntryBuilderType newBuilderFrom(
+    final OPDSAcquisitionFeedEntry e)
+  {
+    final Builder b = new Builder(
+      e.getID(), e.getTitle(), e.getUpdated(), e.getAvailability());
+
+    for (final OPDSAcquisition a : e.getAcquisitions()) {
+      b.addAcquisition(a);
+    }
+
+    for (final Pair<String, URI> a : e.getGroups()) {
+      b.addGroup(a.getRight(), a.getLeft());
+    }
+
+    for (final String a : e.getAuthors()) {
+      b.addAuthor(a);
+    }
+
+    b.setAvailability(e.getAvailability());
+
+    for (final OPDSCategory c : e.getCategories()) {
+      b.addCategory(c);
+    }
+
+    b.setCoverOption(e.getCover());
+    b.setPublishedOption(e.getPublished());
+    b.setPublisherOption(e.getPublisher());
+
+    {
+      final String summary = e.getSummary();
+      if (!summary.isEmpty()) {
+        b.setSummaryOption(Option.some(summary));
+      }
+    }
+
+    b.setThumbnailOption(e.getThumbnail());
+    return b;
+  }
+
   @Override public boolean equals(
     final @Nullable Object obj)
   {

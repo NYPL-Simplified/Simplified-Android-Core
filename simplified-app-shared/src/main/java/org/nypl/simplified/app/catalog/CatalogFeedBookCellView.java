@@ -41,6 +41,7 @@ import org.nypl.simplified.books.core.BookStatusRequestingDownload;
 import org.nypl.simplified.books.core.BookStatusRequestingLoan;
 import org.nypl.simplified.books.core.BookStatusRequestingRevoke;
 import org.nypl.simplified.books.core.BookStatusRevokeFailed;
+import org.nypl.simplified.books.core.BookStatusRevoked;
 import org.nypl.simplified.books.core.BookStatusType;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
@@ -536,6 +537,26 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_downloading_failed_retry.setVisibility(View.GONE);
     this.cell_downloading_failed_retry.setEnabled(false);
+    return Unit.unit();
+  }
+
+  @Override public Unit onBookStatusRevoked(final BookStatusRevoked o)
+  {
+    CatalogFeedBookCellView.LOG.debug("{}: revoked", o.getID());
+
+    this.cell_book.setVisibility(View.VISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.INVISIBLE);
+    this.setDebugCellText("revoked");
+
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    this.loadImageAndSetVisibility(fe);
+
+    final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
+      this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
+    this.cell_buttons.addView(revoke, 0);
+
     return Unit.unit();
   }
 

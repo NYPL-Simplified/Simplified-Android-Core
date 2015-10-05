@@ -14,6 +14,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
 import java.util.Calendar;
@@ -94,10 +95,17 @@ final class BookStatus
           }
           return new BookStatusLoaned(in_id, no_expiry, returnable);
         }
+
+        @Override
+        public BookStatusType onRevoked(final OPDSAvailabilityRevoked a)
+        {
+          return new BookStatusRevoked(in_id, a.getRevoke());
+        }
       });
   }
 
-  private static boolean isAdobeReturnable(final BookDatabaseEntrySnapshot in_snap)
+  private static boolean isAdobeReturnable(
+    final BookDatabaseEntrySnapshot in_snap)
   {
     final OptionType<AdobeAdeptLoan> adobe_opt = in_snap.getAdobeRights();
     if (adobe_opt.isSome()) {

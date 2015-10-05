@@ -34,6 +34,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSParseException;
 import org.slf4j.Logger;
@@ -644,6 +645,16 @@ final class BooksControllerBorrowTask implements Runnable
             new BookStatusRequestingDownload(b_id, none);
           stat.booksStatusUpdate(status);
           return Boolean.TRUE;
+        }
+
+        /**
+         * The server cannot return a "revoked" representation. Reaching
+         * this code indicates a serious bug in the application.
+         */
+
+        @Override public Boolean onRevoked(final OPDSAvailabilityRevoked a)
+        {
+          throw new UnreachableCodeException();
         }
       });
 

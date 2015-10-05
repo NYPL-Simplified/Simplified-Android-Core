@@ -226,9 +226,9 @@ final class BooksControllerLoginTask implements Runnable,
 
     try {
       final BooksControllerSyncTask sync = new BooksControllerSyncTask(
-        this.config,
-        this.books.bookGetStatusCache(),
+        this.books,
         this.books_database,
+        this.config,
         this.http,
         this.parser,
         this.listener,
