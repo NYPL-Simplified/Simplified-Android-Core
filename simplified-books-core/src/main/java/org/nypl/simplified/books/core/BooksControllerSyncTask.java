@@ -3,7 +3,6 @@ package org.nypl.simplified.books.core;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -25,6 +24,7 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 final class BooksControllerSyncTask implements Runnable
 {
@@ -41,6 +41,7 @@ final class BooksControllerSyncTask implements Runnable
   private final HTTPType                         http;
   private final AccountSyncListenerType          listener;
   private final BooksStatusCacheType             books_status;
+  private final AtomicBoolean                    running;
 
   BooksControllerSyncTask(
     final BooksControllerConfigurationType in_config,
@@ -48,8 +49,8 @@ final class BooksControllerSyncTask implements Runnable
     final BookDatabaseType in_books_database,
     final HTTPType in_http,
     final OPDSFeedParserType in_feed_parser,
-    final DownloaderType in_downloader,
-    final AccountSyncListenerType in_listener)
+    final AccountSyncListenerType in_listener,
+    final AtomicBoolean in_running)
   {
     this.books_database = NullCheck.notNull(in_books_database);
     this.books_status = NullCheck.notNull(in_status_cache);
@@ -57,17 +58,25 @@ final class BooksControllerSyncTask implements Runnable
     this.http = NullCheck.notNull(in_http);
     this.feed_parser = NullCheck.notNull(in_feed_parser);
     this.listener = NullCheck.notNull(in_listener);
-    NullCheck.notNull(in_downloader);
+    this.running = NullCheck.notNull(in_running);
   }
 
   @Override public void run()
   {
-    try {
-      this.sync();
-      this.listener.onAccountSyncSuccess();
-    } catch (final Throwable x) {
-      this.listener.onAccountSyncFailure(
-        Option.some(x), NullCheck.notNull(x.getMessage()));
+    if (this.running.compareAndSet(false, true)) {
+      try {
+        BooksControllerSyncTask.LOG.debug("running");
+        this.sync();
+        this.listener.onAccountSyncSuccess();
+      } catch (final Throwable x) {
+        this.listener.onAccountSyncFailure(
+          Option.some(x), NullCheck.notNull(x.getMessage()));
+      } finally {
+        this.running.set(false);
+        BooksControllerSyncTask.LOG.debug("completed");
+      }
+    } else {
+      BooksControllerSyncTask.LOG.debug("sync already in progress, exiting");
     }
   }
 

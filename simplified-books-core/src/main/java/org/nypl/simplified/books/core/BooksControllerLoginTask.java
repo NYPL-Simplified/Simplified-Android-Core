@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 final class BooksControllerLoginTask implements Runnable,
@@ -53,6 +54,7 @@ final class BooksControllerLoginTask implements Runnable,
   private final AccountCredentials                  credentials;
   private final OPDSFeedParserType                  parser;
   private final DownloaderType                      downloader;
+  private final AtomicBoolean                       syncing;
 
   BooksControllerLoginTask(
     final BooksController in_books,
@@ -64,7 +66,8 @@ final class BooksControllerLoginTask implements Runnable,
     final DownloaderType in_downloader,
     final AccountCredentials in_credentials,
     final AccountLoginListenerType in_listener,
-    final AtomicReference<AccountCredentials> in_login)
+    final AtomicReference<AccountCredentials> in_login,
+    final AtomicBoolean in_syncing)
   {
     this.books = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
@@ -77,6 +80,7 @@ final class BooksControllerLoginTask implements Runnable,
     this.listener = new AccountLoginListenerCatcher(
       BooksControllerLoginTask.LOG, NullCheck.notNull(in_listener));
     this.login = NullCheck.notNull(in_login);
+    this.syncing = NullCheck.notNull(in_syncing);
   }
 
   @Override public void onAccountDataSetupFailure(
@@ -227,8 +231,8 @@ final class BooksControllerLoginTask implements Runnable,
         this.books_database,
         this.http,
         this.parser,
-        this.downloader,
-        this.listener);
+        this.listener,
+        this.syncing);
       sync.run();
     } catch (final Throwable e) {
       BooksControllerLoginTask.LOG.debug("sync task raised error: ", e);

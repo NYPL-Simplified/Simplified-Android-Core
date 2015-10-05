@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,6 +52,7 @@ public final class BooksController implements BooksType
   private final DocumentStoreType                       docs;
   private final BooksControllerConfigurationType        config;
   private final BookDatabaseType                        book_database;
+  private final AtomicBoolean                           syncing;
   private       Map<Integer, Future<?>>                 tasks;
 
   private BooksController(
@@ -82,6 +84,7 @@ public final class BooksController implements BooksType
     this.books_status = BooksStatusCache.newStatusCache();
     this.task_id = new AtomicInteger(0);
     this.feed_parser = this.feed_loader.getOPDSFeedParser();
+    this.syncing = new AtomicBoolean(false);
   }
 
   /**
@@ -177,7 +180,8 @@ public final class BooksController implements BooksType
         this.downloader,
         account,
         listener,
-        this.login));
+        this.login,
+        this.syncing));
   }
 
   @Override public void accountLogout(
@@ -205,8 +209,8 @@ public final class BooksController implements BooksType
         this.book_database,
         this.http,
         this.feed_parser,
-        this.downloader,
-        listener));
+        listener,
+        this.syncing));
   }
 
   @Override public BooksStatusCacheType bookGetStatusCache()
@@ -390,7 +394,7 @@ public final class BooksController implements BooksType
     }
   }
 
-  private synchronized void submitRunnable(
+  protected synchronized void submitRunnable(
     final Runnable r)
   {
     final int id = this.task_id.incrementAndGet();

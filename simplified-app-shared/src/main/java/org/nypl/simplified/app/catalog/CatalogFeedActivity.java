@@ -1151,7 +1151,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
    * Retry the current feed.
    */
 
-  private void retryFeed()
+  protected final void retryFeed()
   {
     final CatalogFeedArgumentsType args = this.getArguments();
     CatalogFeedActivity.LOG.debug("retrying feed {}", args);
@@ -1166,7 +1166,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         @Override public Unit onFeedArgumentsLocalBooks(
           final CatalogFeedArgumentsLocalBooks c)
         {
-          CatalogFeedActivity.this.doLoadLocalFeed(c);
+          CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
           return Unit.unit();
         }
 
