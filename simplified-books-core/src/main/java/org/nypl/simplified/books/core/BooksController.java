@@ -374,42 +374,38 @@ public final class BooksController extends Observable implements BooksType
     return this.config;
   }
 
-  private void stopAllTasks()
+  private synchronized void stopAllTasks()
   {
-    synchronized (this) {
-      final Map<Integer, Future<?>> t_old = this.tasks;
-      this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
+    final Map<Integer, Future<?>> t_old = this.tasks;
+    this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
 
-      final Iterator<Future<?>> iter = t_old.values().iterator();
-      while (iter.hasNext()) {
-        try {
-          final Future<?> f = iter.next();
-          f.cancel(true);
-          iter.remove();
-        } catch (final Throwable x) {
-          // Ignore
-        }
+    final Iterator<Future<?>> iter = t_old.values().iterator();
+    while (iter.hasNext()) {
+      try {
+        final Future<?> f = iter.next();
+        f.cancel(true);
+        iter.remove();
+      } catch (final Throwable x) {
+        // Ignore
       }
     }
   }
 
-  void submitRunnable(
+  private synchronized void submitRunnable(
     final Runnable r)
   {
-    synchronized (this) {
-      final int id = this.task_id.incrementAndGet();
-      final Runnable rb = new Runnable()
+    final int id = this.task_id.incrementAndGet();
+    final Runnable rb = new Runnable()
+    {
+      @Override public void run()
       {
-        @Override public void run()
-        {
-          try {
-            r.run();
-          } finally {
-            BooksController.this.tasks.remove(id);
-          }
+        try {
+          r.run();
+        } finally {
+          BooksController.this.tasks.remove(id);
         }
-      };
-      this.tasks.put(id, this.exec.submit(rb));
-    }
+      }
+    };
+    this.tasks.put(id, this.exec.submit(rb));
   }
 }
