@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -31,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * The default implementation of the {@link BooksType} interface.
  */
 
-public final class BooksController extends Observable implements BooksType
+public final class BooksController implements BooksType
 {
   private static final Logger LOG;
 
