@@ -91,7 +91,8 @@ public final class HTTP implements HTTPType
       conn.setInstanceFollowRedirects(false);
       conn.setRequestMethod("GET");
       conn.setDoInput(true);
-      conn.setReadTimeout(10000);
+      conn.setReadTimeout(
+        (int) TimeUnit.MILLISECONDS.convert(60L, TimeUnit.SECONDS));
       conn.setRequestProperty("Range", "bytes=" + offset + "-");
       conn.setRequestProperty("User-Agent", this.user_agent);
       conn.setRequestProperty("Accept-Encoding", "identity");
@@ -168,7 +169,8 @@ public final class HTTP implements HTTPType
       conn.setInstanceFollowRedirects(false);
       conn.setRequestMethod("HEAD");
       conn.setRequestProperty("User-Agent", this.user_agent);
-      conn.setReadTimeout(10000);
+      conn.setReadTimeout(
+        (int) TimeUnit.MILLISECONDS.convert(60L, TimeUnit.SECONDS));
       conn.setRequestProperty("Accept-Encoding", "identity");
 
       if (auth_opt.isSome()) {

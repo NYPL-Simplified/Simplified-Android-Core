@@ -198,34 +198,34 @@
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-core</artifactId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>nypl-drm-adobe-provider</artifactId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe</artifactId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe</artifactId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe_filter</artifactId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.drm</groupId>
         <artifactId>libnypl_adobe_filter</artifactId>
-        <version>0.7.0</version>
+        <version>0.7.1</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
