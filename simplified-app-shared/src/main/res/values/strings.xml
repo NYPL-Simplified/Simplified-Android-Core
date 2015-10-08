@@ -65,6 +65,7 @@
   <string name="catalog_book_availability_reserved_indefinite">You have this book reserved.</string>
   <string name="catalog_book_availability_loanable">This book is available for loan.</string>
   <string name="catalog_book_availability_holdable">This book may be placed on hold.</string>
+  <string name="catalog_book_availability_revoked">This book is waiting to be returned.</string>
   <string name="catalog_book_interval_days">days</string>
   <string name="catalog_book_interval_hours">hours</string>
   <string name="catalog_book_interval_sub_hour">less than an hour</string>

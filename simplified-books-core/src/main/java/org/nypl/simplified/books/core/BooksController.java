@@ -20,10 +20,10 @@ import java.net.URI;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * The default implementation of the {@link BooksType} interface.
  */
 
-public final class BooksController extends Observable implements BooksType
+public final class BooksController implements BooksType
 {
   private static final Logger LOG;
 
@@ -52,6 +52,7 @@ public final class BooksController extends Observable implements BooksType
   private final DocumentStoreType                       docs;
   private final BooksControllerConfigurationType        config;
   private final BookDatabaseType                        book_database;
+  private final AtomicBoolean                           syncing;
   private       Map<Integer, Future<?>>                 tasks;
 
   private BooksController(
@@ -83,6 +84,7 @@ public final class BooksController extends Observable implements BooksType
     this.books_status = BooksStatusCache.newStatusCache();
     this.task_id = new AtomicInteger(0);
     this.feed_parser = this.feed_loader.getOPDSFeedParser();
+    this.syncing = new AtomicBoolean(false);
   }
 
   /**
@@ -178,7 +180,8 @@ public final class BooksController extends Observable implements BooksType
         this.downloader,
         account,
         listener,
-        this.login));
+        this.login,
+        this.syncing));
   }
 
   @Override public void accountLogout(
@@ -201,13 +204,13 @@ public final class BooksController extends Observable implements BooksType
     NullCheck.notNull(listener);
     this.submitRunnable(
       new BooksControllerSyncTask(
-        this.config,
-        this.books_status,
+        this,
         this.book_database,
+        this.config,
         this.http,
         this.feed_parser,
-        this.downloader,
-        listener));
+        listener,
+        this.syncing));
   }
 
   @Override public BooksStatusCacheType bookGetStatusCache()
@@ -374,42 +377,38 @@ public final class BooksController extends Observable implements BooksType
     return this.config;
   }
 
-  private void stopAllTasks()
+  private synchronized void stopAllTasks()
   {
-    synchronized (this) {
-      final Map<Integer, Future<?>> t_old = this.tasks;
-      this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
+    final Map<Integer, Future<?>> t_old = this.tasks;
+    this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
 
-      final Iterator<Future<?>> iter = t_old.values().iterator();
-      while (iter.hasNext()) {
-        try {
-          final Future<?> f = iter.next();
-          f.cancel(true);
-          iter.remove();
-        } catch (final Throwable x) {
-          // Ignore
-        }
+    final Iterator<Future<?>> iter = t_old.values().iterator();
+    while (iter.hasNext()) {
+      try {
+        final Future<?> f = iter.next();
+        f.cancel(true);
+        iter.remove();
+      } catch (final Throwable x) {
+        // Ignore
       }
     }
   }
 
-  void submitRunnable(
+  protected synchronized void submitRunnable(
     final Runnable r)
   {
-    synchronized (this) {
-      final int id = this.task_id.incrementAndGet();
-      final Runnable rb = new Runnable()
+    final int id = this.task_id.incrementAndGet();
+    final Runnable rb = new Runnable()
+    {
+      @Override public void run()
       {
-        @Override public void run()
-        {
-          try {
-            r.run();
-          } finally {
-            BooksController.this.tasks.remove(id);
-          }
+        try {
+          r.run();
+        } finally {
+          BooksController.this.tasks.remove(id);
         }
-      };
-      this.tasks.put(id, this.exec.submit(rb));
-    }
+      }
+    };
+    this.tasks.put(id, this.exec.submit(rb));
   }
 }

@@ -112,4 +112,17 @@ public interface BookStatusMatcherType<A, E extends Exception>
 
   A onBookStatusRevokeFailed(BookStatusRevokeFailed s)
     throws E;
+
+  /**
+   * Match a status value.
+   *
+   * @param s The status value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
+  A onBookStatusRevoked(BookStatusRevoked s)
+    throws E;
 }

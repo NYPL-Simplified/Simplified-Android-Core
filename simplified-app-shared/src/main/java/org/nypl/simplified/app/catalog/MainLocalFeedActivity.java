@@ -8,9 +8,6 @@ import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.core.AccountCredentials;
-import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
@@ -23,66 +20,11 @@ import org.slf4j.Logger;
  */
 
 abstract class MainLocalFeedActivity extends CatalogFeedActivity
-  implements AccountGetCachedCredentialsListenerType, AccountSyncListenerType
 {
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(MainLocalFeedActivity.class);
-  }
-
-  @Override public void onAccountIsLoggedIn(
-    final AccountCredentials creds)
-  {
-    MainLocalFeedActivity.LOG.debug("account is logged in");
-  }
-
-  @Override public void onAccountIsNotLoggedIn()
-  {
-    MainLocalFeedActivity.LOG.debug("account is not logged in");
-  }
-
-  @Override public void onAccountSyncAuthenticationFailure(
-    final String message)
-  {
-    // Nothing
-  }
-
-  @Override public void onAccountSyncBook(
-    final BookID book)
-  {
-    // Nothing
-  }
-
-  @Override public void onAccountSyncFailure(
-    final OptionType<Throwable> error,
-    final String message)
-  {
-    UIThread.runOnUIThread(
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          MainLocalFeedActivity.this.invalidateOptionsMenu();
-        }
-      });
-  }
-
-  @Override public void onAccountSyncSuccess()
-  {
-    UIThread.runOnUIThread(
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          MainLocalFeedActivity.this.invalidateOptionsMenu();
-        }
-      });
-  }
-
-  @Override public void onAccountSyncBookDeleted(final BookID book)
-  {
-    // Nothing
   }
 
   @Override public boolean onCreateOptionsMenu(
@@ -123,10 +65,48 @@ abstract class MainLocalFeedActivity extends CatalogFeedActivity
       final BooksType books = app.getBooks();
 
       item_nn.setEnabled(false);
-      books.accountGetCachedLoginDetails(this);
+      books.accountSync(new SyncListener());
+      MainLocalFeedActivity.this.retryFeed();
       return true;
     }
 
     return super.onOptionsItemSelected(item_nn);
+  }
+
+  private static final class SyncListener implements AccountSyncListenerType
+  {
+    SyncListener()
+    {
+
+    }
+
+    @Override
+    public void onAccountSyncAuthenticationFailure(final String message)
+    {
+      MainLocalFeedActivity.LOG.debug("account syncing failed: {}", message);
+    }
+
+    @Override public void onAccountSyncBook(final BookID book)
+    {
+      MainLocalFeedActivity.LOG.debug("synced: {}", book);
+    }
+
+    @Override public void onAccountSyncFailure(
+      final OptionType<Throwable> error,
+      final String message)
+    {
+      LogUtilities.errorWithOptionalException(
+        MainLocalFeedActivity.LOG, message, error);
+    }
+
+    @Override public void onAccountSyncSuccess()
+    {
+      MainLocalFeedActivity.LOG.debug("account syncing finished");
+    }
+
+    @Override public void onAccountSyncBookDeleted(final BookID book)
+    {
+      MainLocalFeedActivity.LOG.debug("book deleted: {}", book);
+    }
   }
 }

@@ -17,6 +17,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -423,6 +424,11 @@ final class BooksControllerFeedTask implements Runnable
     {
       return Boolean.TRUE;
     }
+
+    @Override public Boolean onRevoked(final OPDSAvailabilityRevoked a)
+    {
+      return Boolean.TRUE;
+    }
   }
 
   /**
@@ -464,6 +470,11 @@ final class BooksControllerFeedTask implements Runnable
     }
 
     @Override public Boolean onOpenAccess(final OPDSAvailabilityOpenAccess a)
+    {
+      return Boolean.FALSE;
+    }
+
+    @Override public Boolean onRevoked(final OPDSAvailabilityRevoked a)
     {
       return Boolean.FALSE;
     }

@@ -92,4 +92,18 @@ public interface OPDSAvailabilityMatcherType<A, E extends Exception>
   A onOpenAccess(
     OPDSAvailabilityOpenAccess a)
     throws E;
+
+  /**
+   * Match an availability value.
+   *
+   * @param a The value
+   *
+   * @return A value of {@code A}
+   *
+   * @throws E If required
+   */
+
+  A onRevoked(
+    OPDSAvailabilityRevoked a)
+    throws E;
 }
