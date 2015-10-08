@@ -40,12 +40,12 @@
 
   <logger
     name="org.nypl.drm"
-    level="DEBUG" />
+    level="INFO" />
 
   <!-- Log level - change this to ERROR on release -->
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="LOG_CAT" />
-    <appender-ref ref="ASYNC_FILE" />
+    <!-- <appender-ref ref="ASYNC_FILE" /> -->
   </root>
 
 </configuration>
