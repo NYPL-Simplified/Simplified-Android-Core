@@ -10,8 +10,6 @@ import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 final class BooksControllerLogoutTask implements Runnable
 {
   private static final Logger LOG;
@@ -21,20 +19,20 @@ final class BooksControllerLogoutTask implements Runnable
       LoggerFactory.getLogger(BooksControllerLogoutTask.class));
   }
 
-  private final AccountLogoutListenerType           listener;
-  private final AtomicReference<AccountCredentials> login;
-  private final OptionType<AdobeAdeptExecutorType>  adobe_drm;
-  private final BookDatabaseType                    database;
+  private final AccountLogoutListenerType          listener;
+  private final OptionType<AdobeAdeptExecutorType> adobe_drm;
+  private final BookDatabaseType                   database;
+  private final AccountsDatabaseType               accounts_database;
 
   BooksControllerLogoutTask(
     final BookDatabaseType in_book_database,
+    final AccountsDatabaseType in_accounts_database,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    final AtomicReference<AccountCredentials> in_login,
     final AccountLogoutListenerType in_listener)
   {
     this.database = NullCheck.notNull(in_book_database);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
-    this.login = NullCheck.notNull(in_login);
+    this.accounts_database = NullCheck.notNull(in_accounts_database);
     this.listener = new AccountLogoutListenerCatcher(
       BooksControllerLogoutTask.LOG, NullCheck.notNull(in_listener));
   }
@@ -42,7 +40,7 @@ final class BooksControllerLogoutTask implements Runnable
   @Override public void run()
   {
     try {
-      this.login.set(null);
+      this.accounts_database.accountRemoveCredentials();
 
       /**
        * Discard any device activations.

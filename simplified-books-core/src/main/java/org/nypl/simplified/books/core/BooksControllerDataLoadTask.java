@@ -8,9 +8,6 @@ import com.io7m.jnull.NullCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
 final class BooksControllerDataLoadTask implements Runnable
 {
   private static final Logger LOG;
@@ -20,37 +17,29 @@ final class BooksControllerDataLoadTask implements Runnable
       LoggerFactory.getLogger(BooksControllerDataLoadTask.class));
   }
 
-  private final BookDatabaseType                    books_database;
-  private final BooksStatusCacheType                books_status;
-  private final AccountDataLoadListenerType         listener;
-  private final AtomicReference<AccountCredentials> login;
+  private final BookDatabaseType             books_database;
+  private final BooksStatusCacheType         books_status;
+  private final AccountDataLoadListenerType  listener;
+  private final AccountsDatabaseReadableType accounts;
 
   BooksControllerDataLoadTask(
     final BookDatabaseType in_books_database,
     final BooksStatusCacheType in_books_status,
-    final AccountDataLoadListenerType in_listener,
-    final AtomicReference<AccountCredentials> in_login)
+    final AccountsDatabaseReadableType in_accounts_database,
+    final AccountDataLoadListenerType in_listener)
   {
     this.books_database = NullCheck.notNull(in_books_database);
     this.books_status = NullCheck.notNull(in_books_status);
     this.listener = NullCheck.notNull(in_listener);
-    this.login = NullCheck.notNull(in_login);
+    this.accounts = NullCheck.notNull(in_accounts_database);
   }
 
   @Override public void run()
   {
-    if (this.books_database.databaseAccountCredentialsExist()) {
-      try {
-        this.login.set(this.books_database.databaseAccountCredentialsGet());
-      } catch (final IOException e) {
-        try {
-          this.listener.onAccountDataLoadFailedImmediately(e);
-        } catch (final Throwable x) {
-          BooksControllerDataLoadTask.LOG.error(
-            "listener raised exception: ", x);
-        }
-      }
+    final OptionType<AccountCredentials> credentials_opt =
+      this.accounts.accountGetCredentials();
 
+    if (credentials_opt.isSome()) {
       this.books_database.databaseNotifyAllBookStatus(
         this.books_status,
         new ProcedureType<Pair<BookID, BookDatabaseEntrySnapshot>>()
@@ -58,9 +47,11 @@ final class BooksControllerDataLoadTask implements Runnable
           @Override
           public void call(final Pair<BookID, BookDatabaseEntrySnapshot> p)
           {
+            final BookID id = p.getLeft();
+            final BookDatabaseEntrySnapshot snap = p.getRight();
             BooksControllerDataLoadTask.this.listener
               .onAccountDataBookLoadSucceeded(
-                p.getLeft(), p.getRight());
+                id, snap);
           }
         },
         new ProcedureType<Pair<BookID, Throwable>>()
@@ -69,11 +60,13 @@ final class BooksControllerDataLoadTask implements Runnable
           {
             final Throwable e = p.getRight();
             final OptionType<Throwable> ex = Option.some(e);
+            final BookID id = p.getLeft();
             BooksControllerDataLoadTask.this.listener
               .onAccountDataBookLoadFailed(
-                p.getLeft(), ex, e.getMessage());
+                id, ex, e.getMessage());
           }
         });
+
     } else {
       try {
         this.listener.onAccountUnavailable();

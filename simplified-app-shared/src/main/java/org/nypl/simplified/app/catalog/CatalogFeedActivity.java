@@ -41,7 +41,7 @@ import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
-import org.nypl.simplified.books.core.AccountsType;
+import org.nypl.simplified.books.core.AccountsControllerType;
 import org.nypl.simplified.books.core.BookFeedListenerType;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
@@ -366,7 +366,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final AccountsType accounts = app.getBooks();
+    final AccountsControllerType accounts = app.getBooks();
 
     /**
      * An adapter that will receive cached credentials and forward them

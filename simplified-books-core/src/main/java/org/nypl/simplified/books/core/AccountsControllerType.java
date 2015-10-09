@@ -4,7 +4,7 @@ package org.nypl.simplified.books.core;
  * The main interface to carry out operations relating to accounts.
  */
 
-public interface AccountsType
+public interface AccountsControllerType
 {
   /**
    * @return {@code true} if the user is currently logged into an account.

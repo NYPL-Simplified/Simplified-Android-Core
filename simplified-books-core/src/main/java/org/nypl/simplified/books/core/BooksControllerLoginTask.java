@@ -14,7 +14,6 @@ import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.AdobeVendorID;
-import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 final class BooksControllerLoginTask implements Runnable,
   AccountDataSetupListenerType,
@@ -44,42 +42,39 @@ final class BooksControllerLoginTask implements Runnable,
       LoggerFactory.getLogger(BooksControllerLoginTask.class));
   }
 
-  private final BooksController                     books;
-  private final BookDatabaseType                    books_database;
-  private final BooksControllerConfigurationType    config;
-  private final HTTPType                            http;
-  private final AccountLoginListenerType            listener;
-  private final AtomicReference<AccountCredentials> login;
-  private final OptionType<AdobeAdeptExecutorType>  adobe_drm;
-  private final AccountCredentials                  credentials;
-  private final OPDSFeedParserType                  parser;
-  private final DownloaderType                      downloader;
-  private final AtomicBoolean                       syncing;
+  private final BooksController                    books;
+  private final BookDatabaseType                   books_database;
+  private final BooksControllerConfigurationType   config;
+  private final HTTPType                           http;
+  private final AccountLoginListenerType           listener;
+  private final OptionType<AdobeAdeptExecutorType> adobe_drm;
+  private final AccountCredentials                 credentials;
+  private final OPDSFeedParserType                 parser;
+  private final AtomicBoolean                      syncing;
+  private final AccountsDatabaseType               accounts_database;
 
   BooksControllerLoginTask(
     final BooksController in_books,
     final BookDatabaseType in_books_database,
+    final AccountsDatabaseType in_accounts_database,
     final HTTPType in_http,
     final BooksControllerConfigurationType in_config,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final OPDSFeedParserType in_feed_parser,
-    final DownloaderType in_downloader,
     final AccountCredentials in_credentials,
     final AccountLoginListenerType in_listener,
-    final AtomicReference<AccountCredentials> in_login,
     final AtomicBoolean in_syncing)
   {
     this.books = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
+    this.accounts_database = NullCheck.notNull(in_accounts_database);
     this.http = NullCheck.notNull(in_http);
     this.config = NullCheck.notNull(in_config);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.parser = NullCheck.notNull(in_feed_parser);
-    this.downloader = NullCheck.notNull(in_downloader);
     this.credentials = NullCheck.notNull(in_credentials);
     this.listener = new AccountLoginListenerCatcher(
       BooksControllerLoginTask.LOG, NullCheck.notNull(in_listener));
-    this.login = NullCheck.notNull(in_login);
     this.syncing = NullCheck.notNull(in_syncing);
   }
 
@@ -213,9 +208,9 @@ final class BooksControllerLoginTask implements Runnable,
   private void onCompletedSuccessfully()
   {
     try {
-      this.books_database.databaseAccountCredentialsSet(this.credentials);
-      this.login.set(this.credentials);
+      this.accounts_database.accountSetCredentials(this.credentials);
     } catch (final IOException e) {
+      BooksControllerLoginTask.LOG.error("could not save credentials: ", e);
       this.listener.onAccountLoginFailureLocalError(
         Option.some((Throwable) e), e.getMessage());
       return;
@@ -228,6 +223,7 @@ final class BooksControllerLoginTask implements Runnable,
       final BooksControllerSyncTask sync = new BooksControllerSyncTask(
         this.books,
         this.books_database,
+        this.accounts_database,
         this.config,
         this.http,
         this.parser,

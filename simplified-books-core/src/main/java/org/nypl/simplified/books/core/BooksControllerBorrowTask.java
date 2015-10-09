@@ -73,10 +73,12 @@ final class BooksControllerBorrowTask implements Runnable
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final String                             short_id;
-  private long download_running_total;
+  private final AccountsDatabaseReadableType       accounts_database;
+  private       long                               download_running_total;
 
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
+    final AccountsDatabaseReadableType in_accounts_database,
     final BooksStatusCacheType in_books_status,
     final DownloaderType in_downloader,
     final HTTPType in_http,
@@ -94,6 +96,7 @@ final class BooksControllerBorrowTask implements Runnable
     this.acq = NullCheck.notNull(in_acq);
     this.feed_entry = NullCheck.notNull(in_feed_entry);
     this.books_database = NullCheck.notNull(in_books_database);
+    this.accounts_database = NullCheck.notNull(in_accounts_database);
     this.books_status = NullCheck.notNull(in_books_status);
     this.feed_loader = NullCheck.notNull(in_feed_loader);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
@@ -371,10 +374,9 @@ final class BooksControllerBorrowTask implements Runnable
      * Borrowing requires authentication.
      */
 
-    final AccountCredentials p =
-      this.books_database.databaseAccountCredentialsGet();
-    final AccountBarcode barcode = p.getUser();
-    final AccountPIN pin = p.getPassword();
+    final AccountCredentials credentials = this.getAccountCredentials();
+    final AccountBarcode barcode = credentials.getUser();
+    final AccountPIN pin = credentials.getPassword();
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 
@@ -497,6 +499,17 @@ final class BooksControllerBorrowTask implements Runnable
           BooksControllerBorrowTask.this.downloadFailed(Option.some(ex));
         }
       });
+  }
+
+  private AccountCredentials getAccountCredentials()
+  {
+    final OptionType<AccountCredentials> credentials_opt =
+      this.accounts_database.accountGetCredentials();
+    if (credentials_opt.isNone()) {
+      throw new IllegalStateException("Not logged in!");
+    }
+
+    return ((Some<AccountCredentials>) credentials_opt).get();
   }
 
   private void runAcquisitionBorrowGotOPDSEntry(final FeedEntryOPDS e)
@@ -674,10 +687,9 @@ final class BooksControllerBorrowTask implements Runnable
      * Downloading requires authentication.
      */
 
-    final AccountCredentials p =
-      this.books_database.databaseAccountCredentialsGet();
-    final AccountBarcode barcode = p.getUser();
-    final AccountPIN pin = p.getPassword();
+    final AccountCredentials credentials = this.getAccountCredentials();
+    final AccountBarcode barcode = credentials.getUser();
+    final AccountPIN pin = credentials.getPassword();
     final HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 

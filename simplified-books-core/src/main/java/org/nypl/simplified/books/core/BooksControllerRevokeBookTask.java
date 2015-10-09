@@ -51,9 +51,11 @@ final class BooksControllerRevokeBookTask
   private final BooksStatusCacheType               books_status;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final FeedLoaderType                     feed_loader;
+  private final AccountsDatabaseReadableType       accounts_database;
 
   BooksControllerRevokeBookTask(
     final BookDatabaseType in_books_database,
+    final AccountsDatabaseReadableType in_accounts_database,
     final BooksStatusCacheType in_books_status,
     final FeedLoaderType in_feed_loader,
     final BookID in_book_id,
@@ -61,6 +63,7 @@ final class BooksControllerRevokeBookTask
   {
     this.book_id = NullCheck.notNull(in_book_id);
     this.books_database = NullCheck.notNull(in_books_database);
+    this.accounts_database = NullCheck.notNull(in_accounts_database);
     this.books_status = NullCheck.notNull(in_books_status);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.feed_loader = NullCheck.notNull(in_feed_loader);
@@ -149,12 +152,11 @@ final class BooksControllerRevokeBookTask
 
         try {
           final AccountCredentials creds =
-            BooksControllerRevokeBookTask.this.books_database
-              .databaseAccountCredentialsGet();
+            BooksControllerRevokeBookTask.this.getAccountCredentials();
           listener.onAuthenticationProvided(creds);
-        } catch (final IOException e) {
+        } catch (final Throwable e) {
           listener.onAuthenticationError(
-            Option.some((Throwable) e), e.getMessage());
+            Option.some(e), e.getMessage());
         }
       }
 
@@ -288,11 +290,21 @@ final class BooksControllerRevokeBookTask
   @NonNull private HTTPAuthType getHTTPAuth()
     throws IOException
   {
-    final AccountCredentials c =
-      this.books_database.databaseAccountCredentialsGet();
-    final AccountBarcode barcode = c.getUser();
-    final AccountPIN pin = c.getPassword();
+    final AccountCredentials credentials = this.getAccountCredentials();
+    final AccountBarcode barcode = credentials.getUser();
+    final AccountPIN pin = credentials.getPassword();
     return new HTTPAuthBasic(barcode.toString(), pin.toString());
+  }
+
+  private AccountCredentials getAccountCredentials()
+  {
+    final OptionType<AccountCredentials> credentials_opt =
+      this.accounts_database.accountGetCredentials();
+    if (credentials_opt.isNone()) {
+      throw new IllegalStateException("Not logged in!");
+    }
+
+    return ((Some<AccountCredentials>) credentials_opt).get();
   }
 
   @Override public Unit onHeld(final OPDSAvailabilityHeld a)
