@@ -18,27 +18,15 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
 
-import java.util.Set;
-
 /**
- * A read-only interface to the book database.
+ * <p>The readable interface supported by the accounts database.</p>
  */
 
-public interface BookDatabaseReadableType
+public interface AccountsDatabaseReadableType
 {
   /**
-   * @param book The book ID
-   *
-   * @return A snapshot of the most recently written data for the given book, if
-   * the book exists
+   * @return The current account credentials, if any exist
    */
 
-  OptionType<BookDatabaseEntrySnapshot> databaseGetEntrySnapshot(
-    BookID book);
-
-  /**
-   * @return The set of books currently in the database
-   */
-
-  Set<BookID> databaseGetBooks();
+  OptionType<AccountCredentials> accountGetCredentials();
 }

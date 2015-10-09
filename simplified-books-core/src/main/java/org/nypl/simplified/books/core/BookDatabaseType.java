@@ -22,18 +22,6 @@ public interface BookDatabaseType extends BookDatabaseReadableType
     throws IOException;
 
   /**
-   * Set the user credentials.
-   *
-   * @param credentials The credentials
-   *
-   * @throws IOException On I/O errors
-   */
-
-  void databaseAccountCredentialsSet(
-    final AccountCredentials credentials)
-    throws IOException;
-
-  /**
    * Destroy the database.
    *
    * @throws IOException On I/O errors

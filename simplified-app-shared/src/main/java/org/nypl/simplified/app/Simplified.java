@@ -28,6 +28,8 @@ import org.nypl.simplified.app.reader.ReaderSettingsType;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.AccountsDatabase;
+import org.nypl.simplified.books.core.AccountsDatabaseType;
 import org.nypl.simplified.books.core.AuthenticationDocumentValuesType;
 import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
@@ -277,6 +279,7 @@ public final class Simplified extends Application
     private final DocumentStoreType                  documents;
     private final OptionType<HelpstackType>          helpstack;
     private final BookDatabaseType                   books_database;
+    private final AccountsDatabaseType               accounts_database;
 
     private CatalogAppServices(
       final Application in_app,
@@ -297,10 +300,33 @@ public final class Simplified extends Application
        * Application paths.
        */
 
+      final File accounts_dir =
+        new File(this.context.getFilesDir(), "accounts");
+
       final File base_dir = Simplified.getDiskDataDir(in_context);
       final File downloads_dir = new File(base_dir, "downloads");
       final File books_dir = new File(base_dir, "books");
       final File books_database_directory = new File(books_dir, "data");
+
+      /**
+       * Make sure the required directories exist. There is no sane way to
+       * recover if they cannot be created!
+       */
+
+      try {
+        DirectoryUtilities.directoryCreate(accounts_dir);
+        DirectoryUtilities.directoryCreate(downloads_dir);
+        DirectoryUtilities.directoryCreate(books_dir);
+      } catch (final IOException e) {
+        Simplified.LOG.error(
+          "could not create directories: {}", e.getMessage(), e);
+        throw new IllegalStateException(e);
+      }
+
+      CatalogAppServices.LOG_CA.debug("base:      {}", base_dir);
+      CatalogAppServices.LOG_CA.debug("accounts:  {}", accounts_dir);
+      CatalogAppServices.LOG_CA.debug("downloads: {}", downloads_dir);
+      CatalogAppServices.LOG_CA.debug("books:     {}", books_dir);
 
       /**
        * Catalog URIs.
@@ -326,6 +352,7 @@ public final class Simplified extends Application
 
       this.books_database = BookDatabase.newDatabase(
         in_json_serializer, in_json_parser, books_database_directory);
+      this.accounts_database = AccountsDatabase.openDatabase(accounts_dir);
 
       this.feed_loader = Simplified.makeFeedLoader(
         this.exec_catalog_feeds, this.books_database, this.http, s, p);
@@ -336,24 +363,6 @@ public final class Simplified extends Application
 
       this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
         this.context, AdobeDRMServices.getPackageOverride(rr));
-
-      /**
-       * Make sure the required directories exist. There is no sane way to
-       * recover if they cannot be created!
-       */
-
-      try {
-        DirectoryUtilities.directoryCreate(downloads_dir);
-        DirectoryUtilities.directoryCreate(books_dir);
-      } catch (final IOException e) {
-        Simplified.LOG.error(
-          "could not create directories: {}", e.getMessage(), e);
-        throw new IllegalStateException(e);
-      }
-
-      CatalogAppServices.LOG_CA.debug("base:      {}", base_dir);
-      CatalogAppServices.LOG_CA.debug("downloads: {}", downloads_dir);
-      CatalogAppServices.LOG_CA.debug("books:     {}", books_dir);
 
       this.downloader = DownloaderHTTP.newDownloader(
         this.exec_books, downloads_dir, this.http);
@@ -486,6 +495,7 @@ public final class Simplified extends Application
         this.adobe_drm,
         this.documents,
         this.books_database,
+        this.accounts_database,
         books_config);
 
       /**

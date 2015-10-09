@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
@@ -44,10 +46,12 @@ final class BooksControllerSyncTask implements Runnable
   private final AtomicBoolean                    running;
   private final BooksControllerType              books_controller;
   private final BookDatabaseType                 books_database;
+  private final AccountsDatabaseReadableType     accounts_database;
 
   BooksControllerSyncTask(
     final BooksControllerType in_books,
     final BookDatabaseType in_books_database,
+    final AccountsDatabaseReadableType in_accounts_database,
     final BooksControllerConfigurationType in_config,
     final HTTPType in_http,
     final OPDSFeedParserType in_feed_parser,
@@ -56,6 +60,7 @@ final class BooksControllerSyncTask implements Runnable
   {
     this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
+    this.accounts_database = NullCheck.notNull(in_accounts_database);
     this.config = NullCheck.notNull(in_config);
     this.http = NullCheck.notNull(in_http);
     this.feed_parser = NullCheck.notNull(in_feed_parser);
@@ -86,10 +91,17 @@ final class BooksControllerSyncTask implements Runnable
     throws Exception
   {
     final URI loans_uri = this.config.getCurrentLoansURI();
-    final AccountCredentials c =
-      this.books_database.databaseAccountCredentialsGet();
-    final AccountBarcode barcode = c.getUser();
-    final AccountPIN pin = c.getPassword();
+
+    final OptionType<AccountCredentials> credentials_opt =
+      this.accounts_database.accountGetCredentials();
+    if (credentials_opt.isNone()) {
+      throw new IllegalStateException("Not logged in!");
+    }
+
+    final AccountCredentials credentials =
+      ((Some<AccountCredentials>) credentials_opt).get();
+    final AccountBarcode barcode = credentials.getUser();
+    final AccountPIN pin = credentials.getPassword();
     final AccountSyncListenerType in_listener = this.listener;
 
     final HTTPAuthType auth =

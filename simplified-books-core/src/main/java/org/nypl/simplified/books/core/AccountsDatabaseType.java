@@ -16,29 +16,31 @@
 
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.OptionType;
-
-import java.util.Set;
+import java.io.IOException;
 
 /**
- * A read-only interface to the book database.
+ * <p>The interface exposed by the accounts database.</p>
  */
 
-public interface BookDatabaseReadableType
+public interface AccountsDatabaseType extends AccountsDatabaseReadableType
 {
   /**
-   * @param book The book ID
+   * Set the account credentials.
    *
-   * @return A snapshot of the most recently written data for the given book, if
-   * the book exists
+   * @param c The credentials
+   *
+   * @throws IOException On I/O errors
    */
 
-  OptionType<BookDatabaseEntrySnapshot> databaseGetEntrySnapshot(
-    BookID book);
+  void accountSetCredentials(AccountCredentials c)
+    throws IOException;
 
   /**
-   * @return The set of books currently in the database
+   * Delete the account credentials.
+   *
+   * @throws IOException On I/O errors
    */
 
-  Set<BookID> databaseGetBooks();
+  void accountRemoveCredentials()
+    throws IOException;
 }

@@ -1,7 +1,10 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
@@ -25,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The default implementation of the {@link BooksType} interface.
@@ -46,13 +48,13 @@ public final class BooksController implements BooksType
   private final FeedLoaderType                          feed_loader;
   private final OPDSFeedParserType                      feed_parser;
   private final HTTPType                                http;
-  private final AtomicReference<AccountCredentials>     login;
   private final AtomicInteger                           task_id;
   private final OptionType<AdobeAdeptExecutorType>      adobe_drm;
   private final DocumentStoreType                       docs;
   private final BooksControllerConfigurationType        config;
   private final BookDatabaseType                        book_database;
   private final AtomicBoolean                           syncing;
+  private final AccountsDatabaseType                    accounts_database;
   private       Map<Integer, Future<?>>                 tasks;
 
   private BooksController(
@@ -65,6 +67,7 @@ public final class BooksController implements BooksType
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final DocumentStoreType in_docs,
     final BookDatabaseType in_book_database,
+    final AccountsDatabaseType in_accounts_database,
     final BooksControllerConfigurationType in_config)
   {
     this.exec = NullCheck.notNull(in_exec);
@@ -77,9 +80,9 @@ public final class BooksController implements BooksType
     this.docs = NullCheck.notNull(in_docs);
     this.config = NullCheck.notNull(in_config);
     this.book_database = NullCheck.notNull(in_book_database);
+    this.accounts_database = NullCheck.notNull(in_accounts_database);
 
     this.tasks = new ConcurrentHashMap<Integer, Future<?>>(32);
-    this.login = new AtomicReference<AccountCredentials>();
     this.downloads = new ConcurrentHashMap<BookID, DownloadType>(32);
     this.books_status = BooksStatusCache.newStatusCache();
     this.task_id = new AtomicInteger(0);
@@ -90,16 +93,17 @@ public final class BooksController implements BooksType
   /**
    * Construct a new books controller.
    *
-   * @param in_exec            An executor
-   * @param in_feeds           An asynchronous feed loader
-   * @param in_http            An HTTP interface
-   * @param in_downloader      A downloader
-   * @param in_json_serializer A JSON serializer
-   * @param in_json_parser     A JSON parser
-   * @param in_adobe_drm       An Adobe DRM interface, if supported
-   * @param in_docs            A document store
-   * @param in_book_database   A book database
-   * @param in_config          Mutable configuration data
+   * @param in_exec              An executor
+   * @param in_feeds             An asynchronous feed loader
+   * @param in_http              An HTTP interface
+   * @param in_downloader        A downloader
+   * @param in_json_serializer   A JSON serializer
+   * @param in_json_parser       A JSON parser
+   * @param in_adobe_drm         An Adobe DRM interface, if supported
+   * @param in_docs              A document store
+   * @param in_book_database     A book database
+   * @param in_accounts_database The accounts database
+   * @param in_config            Mutable configuration data
    *
    * @return A new books controller
    */
@@ -114,6 +118,7 @@ public final class BooksController implements BooksType
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final DocumentStoreType in_docs,
     final BookDatabaseType in_book_database,
+    final AccountsDatabaseType in_accounts_database,
     final BooksControllerConfigurationType in_config)
   {
     return new BooksController(
@@ -126,31 +131,44 @@ public final class BooksController implements BooksType
       in_adobe_drm,
       in_docs,
       in_book_database,
+      in_accounts_database,
       in_config);
   }
 
   @Override public void accountGetCachedLoginDetails(
     final AccountGetCachedCredentialsListenerType listener)
   {
-    final AccountCredentials p = this.login.get();
-    if (p != null) {
-      try {
-        listener.onAccountIsLoggedIn(p);
-      } catch (final Throwable x) {
-        BooksController.LOG.error("listener raised exception: ", x);
-      }
-    } else {
-      try {
-        listener.onAccountIsNotLoggedIn();
-      } catch (final Throwable x) {
-        BooksController.LOG.error("listener raised exception: ", x);
-      }
-    }
+    final OptionType<AccountCredentials> p =
+      this.accounts_database.accountGetCredentials();
+
+    p.accept(
+      new OptionVisitorType<AccountCredentials, Unit>()
+      {
+        @Override public Unit none(final None<AccountCredentials> n)
+        {
+          try {
+            listener.onAccountIsNotLoggedIn();
+          } catch (final Throwable x) {
+            BooksController.LOG.error("listener raised exception: ", x);
+          }
+          return Unit.unit();
+        }
+
+        @Override public Unit some(final Some<AccountCredentials> s)
+        {
+          try {
+            listener.onAccountIsLoggedIn(s.get());
+          } catch (final Throwable x) {
+            BooksController.LOG.error("listener raised exception: ", x);
+          }
+          return Unit.unit();
+        }
+      });
   }
 
   @Override public boolean accountIsLoggedIn()
   {
-    return this.login.get() != null;
+    return this.accounts_database.accountGetCredentials().isSome();
   }
 
   @Override public void accountLoadBooks(
@@ -159,7 +177,10 @@ public final class BooksController implements BooksType
     NullCheck.notNull(listener);
     this.submitRunnable(
       new BooksControllerDataLoadTask(
-        this.book_database, this.books_status, listener, this.login));
+        this.book_database,
+        this.books_status,
+        this.accounts_database,
+        listener));
   }
 
   @Override public void accountLogin(
@@ -173,14 +194,13 @@ public final class BooksController implements BooksType
       new BooksControllerLoginTask(
         this,
         this.book_database,
+        this.accounts_database,
         this.http,
         this.config,
         this.adobe_drm,
         this.feed_parser,
-        this.downloader,
         account,
         listener,
-        this.login,
         this.syncing));
   }
 
@@ -194,7 +214,10 @@ public final class BooksController implements BooksType
       this.books_status.booksStatusClearAll();
       this.submitRunnable(
         new BooksControllerLogoutTask(
-          this.book_database, this.adobe_drm, this.login, listener));
+          this.book_database,
+          this.accounts_database,
+          this.adobe_drm,
+          listener));
     }
   }
 
@@ -206,6 +229,7 @@ public final class BooksController implements BooksType
       new BooksControllerSyncTask(
         this,
         this.book_database,
+        this.accounts_database,
         this.config,
         this.http,
         this.feed_parser,
@@ -238,6 +262,7 @@ public final class BooksController implements BooksType
     this.submitRunnable(
       new BooksControllerBorrowTask(
         this.book_database,
+        this.accounts_database,
         this.books_status,
         this.downloader,
         this.http,
@@ -358,6 +383,7 @@ public final class BooksController implements BooksType
     this.submitRunnable(
       new BooksControllerRevokeBookTask(
         this.book_database,
+        this.accounts_database,
         this.books_status,
         this.feed_loader,
         id,

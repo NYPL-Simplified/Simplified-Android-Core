@@ -63,8 +63,6 @@ public final class BookDatabase implements BookDatabaseType
   }
 
   private final File                                   directory;
-  private final File                                   file_credentials;
-  private final File                                   file_credentials_tmp;
   private final OPDSJSONParserType                     parser;
   private final OPDSJSONSerializerType                 serializer;
   private final Map<BookID, BookDatabaseEntrySnapshot> snapshots;
@@ -77,10 +75,6 @@ public final class BookDatabase implements BookDatabaseType
     this.directory = NullCheck.notNull(in_directory);
     this.parser = NullCheck.notNull(in_json_parser);
     this.serializer = NullCheck.notNull(in_json_serializer);
-
-    this.file_credentials = new File(this.directory, "account.json");
-    this.file_credentials_tmp = new File(this.directory, "account.json.tmp");
-
     this.snapshots = new HashMap<BookID, BookDatabaseEntrySnapshot>(64);
 
     BookDatabase.LOG.debug("opened database {}", this.directory);
@@ -193,29 +187,6 @@ public final class BookDatabase implements BookDatabaseType
     DirectoryUtilities.directoryCreate(this.directory);
   }
 
-  @Override public boolean databaseAccountCredentialsExist()
-  {
-    return this.file_credentials.isFile();
-  }
-
-  @Override public AccountCredentials databaseAccountCredentialsGet()
-    throws IOException
-  {
-    final String text = FileUtilities.fileReadUTF8(this.file_credentials);
-    return AccountCredentialsJSON.deserializeFromText(text);
-  }
-
-  @Override public void databaseAccountCredentialsSet(
-    final AccountCredentials credentials)
-    throws IOException
-  {
-    NullCheck.notNull(credentials);
-
-    final String text = AccountCredentialsJSON.serializeToText(credentials);
-    FileUtilities.fileWriteUTF8Atomically(
-      this.file_credentials, this.file_credentials_tmp, text);
-  }
-
   @Override public void databaseDestroy()
     throws IOException
   {
@@ -224,11 +195,7 @@ public final class BookDatabase implements BookDatabaseType
       for (final BookDatabaseEntryType e : es) {
         e.entryDestroy();
       }
-      FileUtilities.fileDelete(this.file_credentials_tmp);
-      FileUtilities.fileDelete(this.file_credentials);
       FileUtilities.fileDelete(this.directory);
-    } else {
-      throw new IllegalStateException("Not logged in");
     }
   }
 

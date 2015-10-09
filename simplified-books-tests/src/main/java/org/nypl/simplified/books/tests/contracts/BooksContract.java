@@ -15,6 +15,8 @@ import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
+import org.nypl.simplified.books.core.AccountsDatabase;
+import org.nypl.simplified.books.core.AccountsDatabaseType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
@@ -69,6 +71,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -321,6 +324,8 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final AccountsDatabaseType accounts =
+        AccountsDatabase.openDatabase(new File(tmp, "accounts"));
       final BookDatabaseType database = BookDatabase.newDatabase(
         in_json_serializer, in_json_parser, new File(tmp, "data"));
 
@@ -335,6 +340,7 @@ public final class BooksContract implements BooksContractType
         none,
         BooksContract.newFakeDocumentStore(),
         database,
+        accounts,
         books_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
@@ -380,7 +386,7 @@ public final class BooksContract implements BooksContractType
           }
         });
 
-      latch.await();
+      latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
 
     } finally {
@@ -404,6 +410,8 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final AccountsDatabaseType accounts =
+        AccountsDatabase.openDatabase(new File(tmp, "accounts"));
       final BookDatabaseType database = BookDatabase.newDatabase(
         in_json_serializer, in_json_parser, new File(tmp, "data"));
 
@@ -418,6 +426,7 @@ public final class BooksContract implements BooksContractType
         none,
         BooksContract.newFakeDocumentStore(),
         database,
+        accounts,
         books_config);
 
       final AtomicBoolean ok = new AtomicBoolean(false);
@@ -462,7 +471,7 @@ public final class BooksContract implements BooksContractType
           }
         });
 
-      latch.await();
+      latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
 
     } finally {
@@ -493,6 +502,8 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final AccountsDatabaseType accounts =
+        AccountsDatabase.openDatabase(new File(tmp, "accounts"));
       final BookDatabaseType database = BookDatabase.newDatabase(
         in_json_serializer, in_json_parser, new File(tmp, "data"));
 
@@ -507,9 +518,9 @@ public final class BooksContract implements BooksContractType
         none,
         BooksContract.newFakeDocumentStore(),
         database,
+        accounts,
         books_config);
 
-      final AtomicBoolean rejected = new AtomicBoolean(false);
       final AtomicBoolean succeeded = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
 
@@ -518,46 +529,46 @@ public final class BooksContract implements BooksContractType
         @Override
         public void onAccountSyncAuthenticationFailure(final String message)
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountSyncBook(final BookID book)
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountSyncFailure(
           final OptionType<Throwable> error,
           final String message)
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountSyncSuccess()
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountSyncBookDeleted(final BookID book)
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountLoginFailureCredentialsIncorrect()
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountLoginFailureServerError(final int code)
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountLoginFailureLocalError(
           final OptionType<Throwable> error,
           final String message)
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
 
         @Override public void onAccountLoginSuccess(
@@ -574,15 +585,13 @@ public final class BooksContract implements BooksContractType
         @Override public void onAccountLoginFailureDeviceActivationError(
           final String message)
         {
-          // Nothing
+          throw new UnreachableCodeException();
         }
       };
 
       b.accountLogin(creds, listener);
 
-      latch.await();
-      TestUtilities.assertEquals(
-        Boolean.valueOf(rejected.get()), Boolean.FALSE);
+      latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(
         Boolean.valueOf(succeeded.get()), Boolean.TRUE);
 
@@ -615,6 +624,8 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final AccountsDatabaseType accounts =
+        AccountsDatabase.openDatabase(new File(tmp, "accounts"));
       final BookDatabaseType database = BookDatabase.newDatabase(
         in_json_serializer, in_json_parser, new File(tmp, "data"));
 
@@ -629,6 +640,7 @@ public final class BooksContract implements BooksContractType
         none,
         BooksContract.newFakeDocumentStore(),
         database,
+        accounts,
         books_config);
 
       final AtomicBoolean failed = new AtomicBoolean(false);
@@ -704,7 +716,7 @@ public final class BooksContract implements BooksContractType
 
       b.accountLogin(creds, login_listener);
 
-      latch.await();
+      latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
 
     } finally {
@@ -736,6 +748,8 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final AccountsDatabaseType accounts =
+        AccountsDatabase.openDatabase(new File(tmp, "accounts"));
       final BookDatabaseType database = BookDatabase.newDatabase(
         in_json_serializer, in_json_parser, new File(tmp, "data"));
 
@@ -750,6 +764,7 @@ public final class BooksContract implements BooksContractType
         none,
         BooksContract.newFakeDocumentStore(),
         database,
+        accounts,
         books_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
@@ -828,7 +843,7 @@ public final class BooksContract implements BooksContractType
       System.out.println("starting login");
       b.accountLogin(creds, login_listener);
       System.out.println("awaiting login completion");
-      latch0.await();
+      latch0.await(10L, TimeUnit.SECONDS);
       System.out.println("login completed");
 
       final CountDownLatch latch1 = new CountDownLatch(1);
@@ -888,7 +903,7 @@ public final class BooksContract implements BooksContractType
       System.out.println("syncing account");
       b.accountSync(sync_listener);
       System.out.println("awaiting account sync");
-      latch1.await();
+      latch1.await(10L, TimeUnit.SECONDS);
       System.out.println("account synced");
 
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
@@ -943,7 +958,7 @@ public final class BooksContract implements BooksContractType
       System.out.println("loading books");
       b.accountLoadBooks(load_listener);
       System.out.println("waiting for book load completion");
-      latch2.await();
+      latch2.await(10L, TimeUnit.SECONDS);
       System.out.println("book load completed");
 
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
@@ -970,7 +985,7 @@ public final class BooksContract implements BooksContractType
       System.out.println("logging out");
       b.accountLogout(logout_listener);
       System.out.println("awaiting logout completion");
-      latch3.await();
+      latch3.await(10L, TimeUnit.SECONDS);
       System.out.println("logged out");
 
       final File data = new File(tmp, "data");
@@ -1005,6 +1020,8 @@ public final class BooksContract implements BooksContractType
       final DownloaderType d = DownloaderHTTP.newDownloader(
         exec, DirectoryUtilities.directoryCreateTemporary(), in_http);
 
+      final AccountsDatabaseType accounts =
+        AccountsDatabase.openDatabase(new File(tmp, "accounts"));
       final BookDatabaseType database = BookDatabase.newDatabase(
         in_json_serializer, in_json_parser, new File(tmp, "data"));
 
@@ -1019,6 +1036,7 @@ public final class BooksContract implements BooksContractType
         none,
         BooksContract.newFakeDocumentStore(),
         database,
+        accounts,
         books_config);
 
       final CountDownLatch latch0 = new CountDownLatch(1);
@@ -1096,7 +1114,7 @@ public final class BooksContract implements BooksContractType
 
       b.accountLogin(creds, login_listener);
 
-      latch0.await();
+      latch0.await(10L, TimeUnit.SECONDS);
 
       final CountDownLatch latch1 = new CountDownLatch(1);
       final AtomicBoolean ok = new AtomicBoolean(false);
@@ -1150,7 +1168,7 @@ public final class BooksContract implements BooksContractType
         };
 
       b.accountSync(sync_listener);
-      latch1.await();
+      latch1.await(10L, TimeUnit.SECONDS);
 
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
       TestUtilities.assertEquals(
