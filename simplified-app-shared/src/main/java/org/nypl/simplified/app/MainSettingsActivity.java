@@ -561,7 +561,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 WebViewActivity.setActivityArguments(
                   b,
                   ack.documentGetReadableURL().toString(),
-                  resources.getString(R.string.settings_privacy),
+                  resources.getString(R.string.settings_credits),
                   SimplifiedPart.PART_SETTINGS);
                 i.putExtras(b);
                 MainSettingsActivity.this.startActivity(i);
