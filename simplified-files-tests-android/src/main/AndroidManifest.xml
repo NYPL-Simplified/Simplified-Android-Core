@@ -2,8 +2,8 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.tests.files.android"
-  android:versionCode="102"
-  android:versionName="1.0.2">
+  android:versionCode="103"
+  android:versionName="1.0.3">
   <application>
     <uses-library android:name="android.test.runner"/>
   </application>
