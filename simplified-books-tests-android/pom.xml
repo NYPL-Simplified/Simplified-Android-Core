@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
   </parent>
   <artifactId>simplified-books-tests-android</artifactId>
 

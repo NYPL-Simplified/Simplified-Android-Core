@@ -2,8 +2,8 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.labs.OpenEbooks.app"
-  android:versionCode="102"
-  android:versionName="1.0.2">
+  android:versionCode="103"
+  android:versionName="1.0.3">
 
   <uses-sdk
     android:minSdkVersion="19"
@@ -97,6 +97,51 @@
       android:configChanges="orientation|screenSize"
       android:exported="true">
     </activity>
+    
+    <!-- HelpStack -->
+    <activity
+      android:name="com.tenmiles.helpstack.activities.HomeActivity"
+      android:label="@string/hs_app_name" android:exported="false">
+      <intent-filter>
+        <action android:name="com.tenmiles.helpstack.ShowHelp"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
+    <activity
+      android:name="com.tenmiles.helpstack.activities.NewIssueActivity"
+      android:windowSoftInputMode="adjustResize">
+    </activity>
+    <activity
+      android:name="com.tenmiles.helpstack.activities.NewUserActivity"
+      android:windowSoftInputMode="adjustResize">
+    </activity>
+    <activity
+      android:name="com.tenmiles.helpstack.activities.IssueDetailActivity"
+      android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+    </activity>
+    <activity
+      android:name="com.tenmiles.helpstack.activities.ArticleActivity">
+    </activity>
+    <activity
+      android:name="com.tenmiles.helpstack.activities.SectionActivity">
+    </activity>
+    <activity
+      android:name="com.tenmiles.helpstack.activities.ImageAttachmentDisplayActivity">
+    </activity>
+    <activity
+      android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
+      android:screenOrientation="portrait">
+    </activity>
+
+    <receiver
+      android:name="com.tenmiles.helpstack.service.AttachmentDownloadReceiver"
+      android:enabled="true">
+      <intent-filter>
+        <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
+        <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
+        <category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </receiver>
   </application>
 
 </manifest>
