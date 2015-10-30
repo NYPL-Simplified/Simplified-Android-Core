@@ -157,7 +157,7 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>readium-sdk-android-runtime</artifactId>
-        <version>0.22.0</version>
+        <version>0.22.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.readium</groupId>
@@ -167,7 +167,7 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>libepub3</artifactId>
-        <version>0.22.0</version>
+        <version>0.22.1</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
