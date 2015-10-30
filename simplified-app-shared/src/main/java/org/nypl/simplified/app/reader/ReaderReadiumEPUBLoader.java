@@ -14,6 +14,7 @@ import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.files.FileUtilities;
 import org.readium.sdk.android.Container;
+import org.readium.sdk.android.ContentFilterErrorHandler;
 import org.readium.sdk.android.EPub3;
 import org.readium.sdk.android.Package;
 import org.readium.sdk.android.SdkErrorHandler;
@@ -106,6 +107,16 @@ public final class ReaderReadiumEPUBLoader
         return true;
       }
     };
+    final ContentFilterErrorHandler content_filter_errors = new ContentFilterErrorHandler()
+    {
+      @Override public void handleContentFilterError(
+        final @Nullable String filter_id,
+        final long error_code,
+        final @Nullable String message)
+      {
+        ReaderReadiumEPUBLoader.LOG.error("{}:{}: {}", error_code, filter_id, message);
+      }
+    };
 
     /**
      * The Readium SDK will call the given filter handler when the
@@ -154,6 +165,7 @@ public final class ReaderReadiumEPUBLoader
     };
 
     EPub3.setSdkErrorHandler(errors);
+    EPub3.setContentFilterErrorHandler(content_filter_errors);
     EPub3.setPostFilterPopulationHandler(filter_handler);
     final Container c = EPub3.openBook(f.toString());
     EPub3.setSdkErrorHandler(null);
