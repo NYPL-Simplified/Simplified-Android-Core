@@ -144,10 +144,11 @@
 
     <TextView
       android:id="@+id/settings_help"
-      android:text="@string/settings_help"
+      android:text="@string/help"
       android:textAppearance="?android:attr/textAppearanceMedium"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
+      android:layout_height="wrap_content"
+      android:visibility="gone"/>
 
     <View
       android:background="#eee"
@@ -155,7 +156,8 @@
       android:layout_width="match_parent"
       android:layout_height="1dp"
       android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp"/>
+      android:layout_marginTop="16dp"
+      android:visibility="gone"/>
 
     <TextView
       android:id="@+id/settings_adobe_accounts"
@@ -170,14 +172,16 @@
       android:layout_width="match_parent"
       android:layout_height="1dp"
       android:layout_marginBottom="16dp"
-      android:layout_marginTop="16dp"/>
+      android:layout_marginTop="16dp"
+      android:visibility="gone"/>
 
     <TextView
       android:id="@+id/settings_alt_uris"
       android:text="@string/settings_alt_uris"
       android:textAppearance="?android:attr/textAppearanceMedium"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"/>
+      android:layout_height="wrap_content"
+      android:visibility="gone"/>
   </LinearLayout>
 
 </ScrollView>

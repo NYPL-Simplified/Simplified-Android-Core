@@ -214,6 +214,7 @@ public abstract class SimplifiedActivity extends Activity
       Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
     final boolean holds_enabled = rr.getBoolean(R.bool.feature_holds_enabled);
+    final boolean help_enabled = app.getHelpStack().isSome();
 
     /**
      * Configure the navigation drawer.
@@ -237,7 +238,11 @@ public abstract class SimplifiedActivity extends Activity
     if (holds_enabled) {
       di.add(SimplifiedPart.PART_HOLDS);
     }
+    if (help_enabled) {
+      di.add(SimplifiedPart.PART_HELP);
+    }
     di.add(SimplifiedPart.PART_SETTINGS);
+
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
     this.adapter =
@@ -280,6 +285,9 @@ public abstract class SimplifiedActivity extends Activity
     }
     classes_by_name.put(
       SimplifiedPart.PART_SETTINGS, MainSettingsActivity.class);
+    if (help_enabled) {
+      classes_by_name.put(SimplifiedPart.PART_HELP, HelpActivity.class);
+    }
 
     /**
      * Set up a map of part names to functions that configure argument
@@ -369,6 +377,19 @@ public abstract class SimplifiedActivity extends Activity
         }
       });
 
+    if (help_enabled) {
+      da.put(
+        SimplifiedPart.PART_HELP, new FunctionType<Bundle, Unit>()
+        {
+          @Override
+          public Unit call(
+              final Bundle b)
+          {
+            SimplifiedActivity.setActivityArguments(b, false);
+            return Unit.unit();
+          }
+        });
+    }
     /**
      * Show or hide the three dashes next to the home button.
      */

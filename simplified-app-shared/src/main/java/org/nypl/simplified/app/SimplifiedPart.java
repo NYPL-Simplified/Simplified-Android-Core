@@ -36,7 +36,13 @@ public enum SimplifiedPart
    * The settings section.
    */
 
-  PART_SETTINGS;
+  PART_SETTINGS,
+
+  /**
+   * The help section.
+   */
+
+  PART_HELP;
 
   /**
    * @param r The application resources
@@ -60,6 +66,9 @@ public enum SimplifiedPart
       }
       case PART_SETTINGS: {
         return NullCheck.notNull(r.getString(R.string.settings));
+      }
+      case PART_HELP: {
+        return NullCheck.notNull(r.getString(R.string.help));
       }
     }
 

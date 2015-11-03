@@ -53,6 +53,12 @@
       android:configChanges="orientation|screenSize"
       android:exported="false">
     </activity>
+    <activity
+      android:name="org.nypl.simplified.app.HelpActivity"
+      android:configChanges="orientation|screenSize"
+      android:noHistory="true"
+      android:exported="false">
+    </activity>
 
     <!-- General components -->
     <activity
