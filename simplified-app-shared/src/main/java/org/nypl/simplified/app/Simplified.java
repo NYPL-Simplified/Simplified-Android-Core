@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.util.DisplayMetrics;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -48,6 +49,7 @@ import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
@@ -243,11 +245,25 @@ public final class Simplified extends Application
     return as;
   }
 
+  private void initBugsnag(OptionType<String> api_token_opt)
+  {
+    if (api_token_opt.isSome()) {
+      final String api_token = ((Some<String>) api_token_opt).get();
+      Simplified.LOG.debug("IfBugsnag: init live interface");
+      IfBugsnag.init(this, api_token);
+    } else {
+      Simplified.LOG.debug("IfBugsnag: init no-op interface");
+      IfBugsnag.init();
+    }
+  }
+
   @Override public void onCreate()
   {
     Simplified.LOG.debug(
       "starting app: pid {}", Integer.valueOf(android.os.Process.myPid()));
     Simplified.INSTANCE = this;
+
+    initBugsnag(Bugsnag.getApiToken(this.getAssets()));
   }
 
   private static final class CatalogAppServices implements
@@ -278,7 +294,6 @@ public final class Simplified extends Application
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
     private final DocumentStoreType                  documents;
     private final OptionType<HelpstackType>          helpstack;
-    private final OptionType<String>                 bugsnag_api_token;
     private final BookDatabaseType                   books_database;
     private final AccountsDatabaseType               accounts_database;
 
@@ -522,12 +537,6 @@ public final class Simplified extends Application
        */
 
       this.helpstack = Helpstack.get(in_app, in_context.getAssets());
-
-      /**
-       * BugSnag.
-       */
-
-      this.bugsnag_api_token = Bugsnag.getApiToken(in_context.getAssets());
     }
 
     @Override public DocumentStoreType getDocumentStore()
@@ -558,11 +567,6 @@ public final class Simplified extends Application
     @Override public OptionType<HelpstackType> getHelpStack()
     {
       return this.helpstack;
-    }
-
-    @Override public OptionType<String> getBugsnagApiToken()
-    {
-      return this.bugsnag_api_token;
     }
 
     @Override public boolean isNetworkAvailable()
