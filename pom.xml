@@ -50,6 +50,8 @@
     <module>simplified-stack</module>
     <module>simplified-tenprint</module>
     <module>simplified-test-utilities</module>
+    <module>simplified-bugsnag</module>
+
   </modules>
 
   <properties>
@@ -297,6 +299,15 @@
         <version>1.2.0</version>
         <type>aar</type>
       </dependency>
+
+      <!-- BugSnag -->
+      <dependency>
+        <groupId>com.bugsnag</groupId>
+        <artifactId>bugsnag-android</artifactId>
+        <version>LATEST</version>
+        <type>aar</type>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 

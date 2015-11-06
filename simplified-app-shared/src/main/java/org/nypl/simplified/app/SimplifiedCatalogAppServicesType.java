@@ -51,4 +51,10 @@ public interface SimplifiedCatalogAppServicesType extends
    */
 
   OptionType<HelpstackType> getHelpStack();
+
+  /**
+   * @return BugSnag API token, if it's available
+   */
+
+  OptionType<String> getBugsnagApiToken();
 }

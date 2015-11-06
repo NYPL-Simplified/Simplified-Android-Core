@@ -1,0 +1,63 @@
+package org.nypl.simplified.bugsnag;
+
+
+import com.bugsnag.android.Severity;
+
+import org.nypl.simplified.books.core.LogUtilities;
+import org.slf4j.Logger;
+
+/**
+ * Bugsnag no-op interface
+ */
+public class BugsnagDummy implements BugsnagType
+{
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(BugsnagDummy.class);
+  }
+
+  /**
+   *
+   */
+  public BugsnagDummy()
+  {
+    LOG.debug("created.");
+  }
+
+  /**
+   * @param exception Exception
+   */
+  @Override public void notify(final Throwable exception)
+  {
+    LOG.debug("notify: ", exception);
+  }
+
+
+  /**
+   * @param exception Exception
+   * @param severity  Severity
+   */
+  @Override public void notify(Throwable exception, Severity severity)
+  {
+    LOG.debug("notify: ", exception, severity) ;
+  }
+
+  /**
+   * @param tab   Tab
+   * @param key   Key
+   * @param value Value
+   */
+  @Override public void addToTab(final String tab, final String key, final Object value)
+  {
+    LOG.debug("addToTab: ", tab, key, value);
+  }
+
+  /**
+   * @param message Message
+   */
+  @Override public void leaveBreadcrumb(final String message)
+  {
+    LOG.debug("message: ", message);
+  }
+}

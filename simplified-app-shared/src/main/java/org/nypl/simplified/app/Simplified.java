@@ -278,6 +278,7 @@ public final class Simplified extends Application
     private final OptionType<AdobeAdeptExecutorType> adobe_drm;
     private final DocumentStoreType                  documents;
     private final OptionType<HelpstackType>          helpstack;
+    private final OptionType<String>                 bugsnag_api_token;
     private final BookDatabaseType                   books_database;
     private final AccountsDatabaseType               accounts_database;
 
@@ -521,6 +522,12 @@ public final class Simplified extends Application
        */
 
       this.helpstack = Helpstack.get(in_app, in_context.getAssets());
+
+      /**
+       * BugSnag.
+       */
+
+      this.bugsnag_api_token = Bugsnag.getApiToken(in_context.getAssets());
     }
 
     @Override public DocumentStoreType getDocumentStore()
@@ -551,6 +558,11 @@ public final class Simplified extends Application
     @Override public OptionType<HelpstackType> getHelpStack()
     {
       return this.helpstack;
+    }
+
+    @Override public OptionType<String> getBugsnagApiToken()
+    {
+      return this.bugsnag_api_token;
     }
 
     @Override public boolean isNetworkAvailable()

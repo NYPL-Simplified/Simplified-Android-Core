@@ -1,6 +1,8 @@
 package org.nypl.simplified.app.reader;
 
 import android.content.Context;
+
+import com.bugsnag.android.Severity;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -12,6 +14,7 @@ import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.app.AdobeDRMServices;
 import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.files.FileUtilities;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.ContentFilterErrorHandler;
@@ -104,6 +107,9 @@ public final class ReaderReadiumEPUBLoader
         final boolean is_severe)
       {
         ReaderReadiumEPUBLoader.LOG.debug("{}", message);
+        if (is_severe) {
+          IfBugsnag.get().notify(new ReaderReadiumSdkException(message), Severity.ERROR);
+        }
         return true;
       }
     };
@@ -114,7 +120,11 @@ public final class ReaderReadiumEPUBLoader
         final long error_code,
         final @Nullable String message)
       {
-        ReaderReadiumEPUBLoader.LOG.error("{}:{}: {}", error_code, filter_id, message);
+        ReaderReadiumEPUBLoader.LOG.error("{}:{}: {}", filter_id, error_code, message);
+        IfBugsnag.get().notify(
+          new ReaderReadiumContentFilterException(
+            String.format("%s:%d: %s", filter_id, error_code, message)),
+          Severity.ERROR);
       }
     };
 
@@ -237,5 +247,29 @@ public final class ReaderReadiumEPUBLoader
           }
         }
       });
+  }
+
+  private static abstract class ReaderReadiumRuntimeException extends Exception
+  {
+    ReaderReadiumRuntimeException(final String in_message)
+    {
+      super(in_message);
+    }
+  }
+
+  private static final class ReaderReadiumSdkException extends ReaderReadiumRuntimeException
+  {
+    ReaderReadiumSdkException(final String in_message)
+    {
+      super(in_message);
+    }
+  }
+
+  private static final class ReaderReadiumContentFilterException extends ReaderReadiumRuntimeException
+  {
+    ReaderReadiumContentFilterException(final String in_message)
+    {
+      super(in_message);
+    }
   }
 }

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.nypl.simplified</groupId>
+        <artifactId>simplified</artifactId>
+        <version>1.0.3</version>
+    </parent>
+    <artifactId>simplified-bugsnag</artifactId>
+
+    <packaging>aar</packaging>
+    <name>simplified-bugsnag</name>
+    <description>Simplified (BugSnag integration)</description>
+    <url>https://github.com/NYPL/Simplified-Android</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>simplified-books-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.io7m.jnull</groupId>
+            <artifactId>io7m-jnull-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>android</groupId>
+            <artifactId>android</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>android.support</groupId>
+            <artifactId>compatibility-v13</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.bugsnag</groupId>
+            <artifactId>bugsnag-android</artifactId>
+            <version>LATEST</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Check style -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+
+            <!-- Android plugin configuration -->
+            <plugin>
+                <groupId>com.simpligility.maven.plugins</groupId>
+                <artifactId>android-maven-plugin</artifactId>
+                <configuration>
+                    <sdk>
+                        <platform>${org.nypl.android.sdkVersion}</platform>
+                    </sdk>
+                    <nativeLibrariesDirectory>libs</nativeLibrariesDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
