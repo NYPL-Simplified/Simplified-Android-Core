@@ -38,9 +38,9 @@ public class BugsnagDummy implements BugsnagType
    * @param exception Exception
    * @param severity  Severity
    */
-  @Override public void notify(Throwable exception, Severity severity)
+  @Override public void notify(final Throwable exception, final Severity severity)
   {
-    LOG.debug("notify: ", exception, severity) ;
+    LOG.debug("notify: ", exception, severity);
   }
 
   /**
