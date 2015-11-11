@@ -62,12 +62,10 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     return av.matchAvailability(
       new OPDSAvailabilityMatcherType<ObjectNode, UnreachableCodeException>()
       {
-        @Override public ObjectNode onHeldReady(
-          final OPDSAvailabilityHeldReady a)
+        @Override public ObjectNode onHeldReady(final OPDSAvailabilityHeldReady a)
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
-
           a.getEndDate().map(
             new FunctionType<Calendar, Unit>()
             {
@@ -78,7 +76,6 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
                 return Unit.unit();
               }
             });
-
           a.getRevoke().map(
             new FunctionType<URI, Unit>()
             {
@@ -88,18 +85,25 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
                 return Unit.unit();
               }
             });
-
           o.set("held_ready", oh);
           return o;
         }
 
-        @Override public ObjectNode onHeld(
-          final OPDSAvailabilityHeld a)
+        @Override public ObjectNode onHeld(final OPDSAvailabilityHeld a)
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
-          oh.put("start_date", fmt.format(a.getStartDate().getTime()));
-
+          a.getStartDate().map(
+            new FunctionType<Calendar, Unit>()
+            {
+              @Override
+              public Unit call(
+                final Calendar t)
+              {
+                oh.put("start_date", fmt.format(t.getTime()));
+                return Unit.unit();
+              }
+            });
           a.getPosition().map(
             new FunctionType<Integer, Unit>()
             {
@@ -109,7 +113,6 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
                 return Unit.unit();
               }
             });
-
           a.getRevoke().map(
             new FunctionType<URI, Unit>()
             {
@@ -124,8 +127,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
           return o;
         }
 
-        @Override public ObjectNode onHoldable(
-          final OPDSAvailabilityHoldable a)
+        @Override public ObjectNode onHoldable(final OPDSAvailabilityHoldable a)
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
@@ -133,8 +135,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
           return o;
         }
 
-        @Override public ObjectNode onLoanable(
-          final OPDSAvailabilityLoanable a)
+        @Override public ObjectNode onLoanable(final OPDSAvailabilityLoanable a)
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
@@ -142,13 +143,21 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
           return o;
         }
 
-        @Override public ObjectNode onLoaned(
-          final OPDSAvailabilityLoaned a)
+        @Override public ObjectNode onLoaned(final OPDSAvailabilityLoaned a)
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
-          oh.put("start_date", fmt.format(a.getStartDate().getTime()));
-
+          a.getStartDate().map(
+            new FunctionType<Calendar, Unit>()
+            {
+              @Override
+              public Unit call(
+                final Calendar t)
+              {
+                oh.put("start_date", fmt.format(t.getTime()));
+                return Unit.unit();
+              }
+            });
           a.getEndDate().map(
             new FunctionType<Calendar, Unit>()
             {
@@ -159,7 +168,6 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
                 return Unit.unit();
               }
             });
-
           a.getRevoke().map(
             new FunctionType<URI, Unit>()
             {
@@ -174,12 +182,10 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
           return o;
         }
 
-        @Override public ObjectNode onOpenAccess(
-          final OPDSAvailabilityOpenAccess a)
+        @Override public ObjectNode onOpenAccess(final OPDSAvailabilityOpenAccess a)
         {
           final ObjectNode o = jom.createObjectNode();
           final ObjectNode oh = jom.createObjectNode();
-
           a.getRevoke().map(
             new FunctionType<URI, Unit>()
             {
@@ -189,7 +195,6 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
                 return Unit.unit();
               }
             });
-
           o.set("open_access", oh);
           return o;
         }

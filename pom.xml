@@ -50,6 +50,8 @@
     <module>simplified-stack</module>
     <module>simplified-tenprint</module>
     <module>simplified-test-utilities</module>
+    <module>simplified-bugsnag</module>
+
   </modules>
 
   <properties>
@@ -157,7 +159,7 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>readium-sdk-android-runtime</artifactId>
-        <version>0.22.0</version>
+        <version>0.22.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.readium</groupId>
@@ -167,7 +169,7 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>libepub3</artifactId>
-        <version>0.22.0</version>
+        <version>0.22.1</version>
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
@@ -297,6 +299,15 @@
         <version>1.2.0</version>
         <type>aar</type>
       </dependency>
+
+      <!-- BugSnag -->
+      <dependency>
+        <groupId>com.bugsnag</groupId>
+        <artifactId>bugsnag-android</artifactId>
+        <version>LATEST</version>
+        <type>aar</type>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 

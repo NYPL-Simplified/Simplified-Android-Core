@@ -16,7 +16,7 @@ public final class BookStatusHeld implements BookStatusType
 {
   private final BookID               id;
   private final OptionType<Integer>  queue_position;
-  private final Calendar             start_date;
+  private final OptionType<Calendar> start_date;
   private final OptionType<Calendar> end_date;
   private final boolean              revocable;
 
@@ -34,7 +34,7 @@ public final class BookStatusHeld implements BookStatusType
   public BookStatusHeld(
     final BookID in_id,
     final OptionType<Integer> in_queue_position,
-    final Calendar in_start_date,
+    final OptionType<Calendar> in_start_date,
     final OptionType<Calendar> in_end_date,
     final boolean in_revocable)
   {
@@ -124,7 +124,16 @@ public final class BookStatusHeld implements BookStatusType
     b.append(" ");
     b.append(this.queue_position);
     b.append(" ");
-    b.append(fmt.format(this.start_date.getTime()));
+    b.append(
+      this.start_date.map(
+        new FunctionType<Calendar, String>()
+        {
+          @Override
+          public String call(final Calendar et)
+          {
+            return fmt.format(et.getTime());
+          }
+        }));
     b.append(" ");
     b.append(
       this.end_date.map(

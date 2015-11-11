@@ -68,8 +68,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType
 
       if (node.has("loaned")) {
         final ObjectNode n = JSONParserUtilities.getObject(node, "loaned");
-        final Calendar in_start_date =
-          JSONParserUtilities.getTimestamp(n, "start_date");
+        final OptionType<Calendar> in_start_date =
+          JSONParserUtilities.getTimestampOptional(n, "start_date");
         final OptionType<Calendar> in_end_date =
           JSONParserUtilities.getTimestampOptional(n, "end_date");
         final OptionType<URI> in_revoke =
@@ -80,8 +80,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType
 
       if (node.has("held")) {
         final ObjectNode n = JSONParserUtilities.getObject(node, "held");
-        final Calendar in_start_date =
-          JSONParserUtilities.getTimestamp(n, "start_date");
+        final OptionType<Calendar> in_start_date =
+          JSONParserUtilities.getTimestampOptional(n, "start_date");
         final OptionType<Integer> in_position =
           JSONParserUtilities.getIntegerOptional(n, "position");
         final OptionType<Calendar> in_end_date =

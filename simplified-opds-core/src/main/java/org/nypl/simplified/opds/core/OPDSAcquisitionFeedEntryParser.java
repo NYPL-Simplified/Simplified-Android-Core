@@ -265,8 +265,8 @@ public final class OPDSAcquisitionFeedEntryParser
       if ("reserved".equals(status)) {
         final OptionType<Calendar> end_date =
           OPDSXML.getAttributeRFC3339Optional(available, "until");
-        final Calendar start_date =
-          OPDSXML.getAttributeRFC3339(available, "since");
+        final OptionType<Calendar> start_date =
+          OPDSXML.getAttributeRFC3339Optional(available, "since");
         final OptionType<Integer> queue =
           OPDSXML.getAttributeIntegerOptional(holds, "position");
         return OPDSAvailabilityHeld.get(start_date, queue, end_date, revoke);
@@ -275,8 +275,8 @@ public final class OPDSAcquisitionFeedEntryParser
       if ("available".equals(status)) {
         final OptionType<Calendar> end_date =
           OPDSXML.getAttributeRFC3339Optional(available, "until");
-        final Calendar start_date =
-          OPDSXML.getAttributeRFC3339(available, "since");
+        final OptionType<Calendar> start_date =
+          OPDSXML.getAttributeRFC3339Optional(available, "since");
         return OPDSAvailabilityLoaned.get(start_date, end_date, revoke);
       }
     }

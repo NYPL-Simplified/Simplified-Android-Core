@@ -43,6 +43,12 @@
       <artifactId>simplified-tenprint</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-bugsnag</artifactId>
+      <version>${project.version}</version>
+      <type>aar</type>
+    </dependency>
 
     <dependency>
       <groupId>org.nypl.drm</groupId>
@@ -115,6 +121,13 @@
       <groupId>org.nypl.helpstack</groupId>
       <artifactId>helpstack-android</artifactId>
       <type>aar</type>
+    </dependency>
+
+    <!-- Bugsnag -->
+    <dependency>
+      <groupId>com.bugsnag</groupId>
+      <artifactId>bugsnag-android</artifactId>
+      <version>LATEST</version>
     </dependency>
   </dependencies>
 

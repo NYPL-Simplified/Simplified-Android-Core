@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
+
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.DocumentStoreType;

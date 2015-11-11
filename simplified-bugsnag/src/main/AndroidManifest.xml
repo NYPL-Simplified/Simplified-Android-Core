@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.nypl.simplified.bugsnag"
+    android:versionCode="103"
+    android:versionName="1.0.3">
+
+    <!-- Required: Used to deliver Bugsnag crash reports -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Optional: To provide network connectivity information to Bugsnag -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- Optional: To see which Activity was active at the time of a crash -->
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+
+</manifest>
