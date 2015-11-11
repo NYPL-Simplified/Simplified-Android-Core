@@ -18,11 +18,11 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
 {
   private static final long serialVersionUID = 1L;
   private final OptionType<Calendar> end_date;
-  private final Calendar             start_date;
+  private final OptionType<Calendar> start_date;
   private final OptionType<URI>      revoke;
 
   private OPDSAvailabilityLoaned(
-    final Calendar in_start_date,
+    final OptionType<Calendar> in_start_date,
     final OptionType<Calendar> in_end_date,
     final OptionType<URI> in_revoke)
   {
@@ -40,7 +40,7 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
    */
 
   public static OPDSAvailabilityLoaned get(
-    final Calendar in_start_date,
+    final OptionType<Calendar> in_start_date,
     final OptionType<Calendar> in_end_date,
     final OptionType<URI> in_revoke)
   {
@@ -84,10 +84,10 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
   }
 
   /**
-   * @return The start date for the loan
+   * @return The start date for the loan, if any
    */
 
-  public Calendar getStartDate()
+  public OptionType<Calendar> getStartDate()
   {
     return this.start_date;
   }
@@ -125,7 +125,17 @@ public final class OPDSAvailabilityLoaned implements OPDSAvailabilityType
           }
         }));
     b.append(" start_date=");
-    b.append(fmt.format(this.start_date.getTime()));
+    b.append(
+      this.start_date.map(
+        new FunctionType<Calendar, String>()
+        {
+          @Override
+          public String call(
+            final Calendar c)
+          {
+            return NullCheck.notNull(fmt.format(c.getTime()));
+          }
+        }));
     b.append(" revoke=");
     b.append(this.revoke);
     b.append("]");

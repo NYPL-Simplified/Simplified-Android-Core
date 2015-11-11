@@ -18,12 +18,12 @@ public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
 {
   private static final long serialVersionUID = 1L;
   private final OptionType<Integer>  position;
-  private final Calendar             start_date;
+  private final OptionType<Calendar> start_date;
   private final OptionType<Calendar> end_date;
   private final OptionType<URI>      revoke;
 
   private OPDSAvailabilityHeld(
-    final Calendar in_start_date,
+    final OptionType<Calendar> in_start_date,
     final OptionType<Integer> in_position,
     final OptionType<Calendar> in_end_date,
     final OptionType<URI> in_revoke)
@@ -35,7 +35,7 @@ public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
   }
 
   /**
-   * @param in_start_date The start date
+   * @param in_start_date The start date (if known)
    * @param in_position   The queue position
    * @param in_end_date   The end date (if known)
    * @param in_revoke     An optional revocation link for the hold
@@ -44,7 +44,7 @@ public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
    */
 
   public static OPDSAvailabilityHeld get(
-    final Calendar in_start_date,
+    final OptionType<Calendar> in_start_date,
     final OptionType<Integer> in_position,
     final OptionType<Calendar> in_end_date,
     final OptionType<URI> in_revoke)
@@ -110,7 +110,7 @@ public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
    * @return The start date
    */
 
-  public Calendar getStartDate()
+  public OptionType<Calendar> getStartDate()
   {
     return this.start_date;
   }
@@ -129,7 +129,16 @@ public final class OPDSAvailabilityHeld implements OPDSAvailabilityType
     b.append("[OPDSAvailabilityHeld position=");
     b.append(this.position);
     b.append(" start_date=");
-    b.append(fmt.format(this.start_date.getTime()));
+    this.start_date.map(
+      new FunctionType<Calendar, Unit>()
+      {
+        @Override
+        public Unit call(final Calendar e)
+        {
+          b.append(fmt.format(e.getTime()));
+          return Unit.unit();
+        }
+      });
     b.append(" end_date=");
     this.end_date.map(
       new FunctionType<Calendar, Unit>()

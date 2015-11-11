@@ -68,8 +68,8 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
-    final Calendar expected_start_date =
-      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
+    final OptionType<Calendar> expected_start_date = Option.some(
+      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z"));
     final OptionType<Calendar> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
       Option.some(new URI("http://example.com/revoke"));
@@ -89,8 +89,8 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
-    final Calendar expected_start_date =
-      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
+    final OptionType<Calendar> expected_start_date = Option.some(
+      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z"));
     final OptionType<Calendar> expected_end_date = Option.some(
       RFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
     final OptionType<URI> expected_revoke =
@@ -125,8 +125,8 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
-    final Calendar expected_start_date =
-      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
+    final OptionType<Calendar> expected_start_date = Option.some(
+      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.none();
     final OptionType<Calendar> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
@@ -147,8 +147,8 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
-    final Calendar expected_start_date =
-      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
+    final OptionType<Calendar> expected_start_date = Option.some(
+      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z"));
     final OptionType<Calendar> expected_end_date = Option.some(
       RFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.none();
@@ -170,8 +170,8 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
-    final Calendar expected_start_date =
-      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
+    final OptionType<Calendar> expected_start_date = Option.some(
+      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.some(3);
     final OptionType<Calendar> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
@@ -192,8 +192,8 @@ public final class OPDSFeedEntryParserContract
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
-    final Calendar expected_start_date =
-      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z");
+    final OptionType<Calendar> expected_start_date = Option.some(
+      RFC3339Formatter.parseRFC3339Date("2000-01-01T00:00:00Z"));
     final OptionType<Calendar> expected_end_date = Option.some(
       RFC3339Formatter.parseRFC3339Date("2010-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.some(3);
