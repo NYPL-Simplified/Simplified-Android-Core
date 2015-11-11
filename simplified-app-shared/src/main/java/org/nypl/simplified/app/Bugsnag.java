@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-
+/**
+ * Bugsnag config loader
+ */
 public final class Bugsnag
 {
   private static final Logger LOG;
@@ -22,6 +24,9 @@ public final class Bugsnag
     LOG = LogUtilities.getLog(Helpstack.class);
   }
 
+  /**
+   * Construct bugsnag
+   */
   private Bugsnag()
   {
   }

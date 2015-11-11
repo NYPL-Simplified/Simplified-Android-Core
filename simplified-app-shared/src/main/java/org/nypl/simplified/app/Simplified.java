@@ -245,7 +245,7 @@ public final class Simplified extends Application
     return as;
   }
 
-  private void initBugsnag(OptionType<String> api_token_opt)
+  private void initBugsnag(final OptionType<String> api_token_opt)
   {
     if (api_token_opt.isSome()) {
       final String api_token = ((Some<String>) api_token_opt).get();
@@ -263,7 +263,7 @@ public final class Simplified extends Application
       "starting app: pid {}", Integer.valueOf(android.os.Process.myPid()));
     Simplified.INSTANCE = this;
 
-    initBugsnag(Bugsnag.getApiToken(this.getAssets()));
+    this.initBugsnag(Bugsnag.getApiToken(this.getAssets()));
   }
 
   private static final class CatalogAppServices implements
