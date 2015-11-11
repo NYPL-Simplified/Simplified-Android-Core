@@ -6,6 +6,7 @@
 ReaderClientCert.sig
 gen
 helpstack.conf
+bugsnag.conf
 pom.xml.versionsBackup
 simplified-*/.classpath
 simplified-*/.project
@@ -13,3 +14,7 @@ simplified-*/.settings
 simplified-*/bin
 simplified-*/target
 target
+.idea
+gen-external-apklibs
+*.iml
+build.sh
