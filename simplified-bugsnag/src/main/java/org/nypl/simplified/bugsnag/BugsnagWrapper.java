@@ -29,7 +29,6 @@ public class BugsnagWrapper implements BugsnagType
     this.client.notify(exception);
   }
 
-
   /**
    * Notify Bugsnag of a handled exception
    *
@@ -70,5 +69,17 @@ public class BugsnagWrapper implements BugsnagType
   @Override public void leaveBreadcrumb(final String message)
   {
     this.client.leaveBreadcrumb(message);
+  }
+
+  /**
+   * Set the context sent to Bugsnag. By default we'll attempt to detect the
+   * name of the top-most activity at the time of a notification, and use this
+   * as the context, but sometime this is not possible.
+   *
+   * @param context  set what was happening at the time of a crash
+   */
+  @Override public void setContext(final String context)
+  {
+    this.client.setContext(context);
   }
 }

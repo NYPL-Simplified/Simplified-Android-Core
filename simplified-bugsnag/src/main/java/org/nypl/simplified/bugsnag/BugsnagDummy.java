@@ -30,7 +30,7 @@ public class BugsnagDummy implements BugsnagType
    */
   @Override public void notify(final Throwable exception)
   {
-    LOG.debug("notify: ", exception);
+    LOG.trace("notify: ", exception);
   }
 
 
@@ -40,7 +40,7 @@ public class BugsnagDummy implements BugsnagType
    */
   @Override public void notify(final Throwable exception, final Severity severity)
   {
-    LOG.debug("notify: ", exception, severity);
+    LOG.trace("notify: ", exception, severity);
   }
 
   /**
@@ -50,7 +50,7 @@ public class BugsnagDummy implements BugsnagType
    */
   @Override public void addToTab(final String tab, final String key, final Object value)
   {
-    LOG.debug("addToTab: ", tab, key, value);
+    LOG.trace("addToTab: ", tab, key, value);
   }
 
   /**
@@ -58,6 +58,14 @@ public class BugsnagDummy implements BugsnagType
    */
   @Override public void leaveBreadcrumb(final String message)
   {
-    LOG.debug("message: ", message);
+    LOG.trace("leaveBreadcrumb: ", message);
+  }
+
+  /**
+   * @param context Context
+   */
+  @Override public void setContext(final String context)
+  {
+    LOG.trace("setContext: ", context);
   }
 }

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
 
+  <appender
+    name="BUGSNAG"
+    class="org.nypl.simplified.bugsnag.BugsnagLogbackAppender"/>
+
   <!-- Create a logcat appender -->
   <appender
     name="LOG_CAT"
@@ -46,6 +50,7 @@
   <root level="DEBUG">
     <appender-ref ref="LOG_CAT" />
     <appender-ref ref="ASYNC_FILE" />
+    <appender-ref ref="BUGSNAG" />
   </root>
 
 </configuration>

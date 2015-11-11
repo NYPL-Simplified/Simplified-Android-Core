@@ -46,4 +46,14 @@ public interface BugsnagType
    * @param  message  the log message to leave (max 140 chars)
    */
   void leaveBreadcrumb(final String message);
+
+  /**
+   * Set the context sent to Bugsnag. By default we'll attempt to detect the
+   * name of the top-most activity at the time of a notification, and use this
+   * as the context, but sometime this is not possible.
+   *
+   * @param  context  set what was happening at the time of a crash
+   */
+  void setContext(final String context);
+
 }
