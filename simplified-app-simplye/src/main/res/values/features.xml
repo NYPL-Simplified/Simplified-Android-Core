@@ -29,6 +29,6 @@
   <!-- A non-empty string here will override the package name given to
        the Adobe DRM implementation. An empty string will cause the
        implementation to use the package name defined in the Android manifest. -->
-  <string name="feature_adobe_package_override">org.nypl.simplified.app</string>
+  <string name="feature_adobe_package_override">org.nypl.simplified.simplye</string>
 
 </resources>
