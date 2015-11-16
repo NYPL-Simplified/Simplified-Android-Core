@@ -428,11 +428,9 @@ final class BooksControllerRevokeBookTask
        * The user can try again later.
        */
 
-      final OptionType<String> error_opt = listener.getError();
+      final OptionType<Throwable> error_opt = listener.getError();
       if (error_opt.isSome()) {
-        final String message = ((Some<String>) error_opt).get();
-        final OptionType<Throwable> no_exception = Option.none();
-        this.revokeFailed(no_exception, message);
+        this.revokeFailed(error_opt, null);
         return;
       }
 
@@ -509,15 +507,15 @@ final class BooksControllerRevokeBookTask
     implements AdobeAdeptLoanReturnListenerType
   {
     private final CountDownLatch     latch;
-    private       OptionType<String> error;
+    private       OptionType<Throwable> error;
 
     public AdobeLoanReturnResult(final CountDownLatch in_latch)
     {
       this.latch = NullCheck.notNull(in_latch);
-      this.error = Option.some("Revoke still in progress!");
+      this.error = Option.some((Throwable) new BookRevokeExceptionNotReady());
     }
 
-    public OptionType<String> getError()
+    public OptionType<Throwable> getError()
     {
       return this.error;
     }
@@ -537,7 +535,8 @@ final class BooksControllerRevokeBookTask
       try {
         BooksControllerRevokeBookTask.LOG.debug(
           "onLoanReturnFailure: {}", in_error);
-        this.error = Option.some(in_error);
+        this.error = Option.some(
+          (Throwable) new BookRevokeExceptionDRMWorkflowError(in_error));
       } finally {
         this.latch.countDown();
       }

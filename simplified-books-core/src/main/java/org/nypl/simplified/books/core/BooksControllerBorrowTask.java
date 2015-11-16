@@ -853,7 +853,7 @@ final class BooksControllerBorrowTask implements Runnable
       if (message.startsWith("NYPL_UNSUPPORTED requestPasshash")) {
         error = Option.some((Throwable) new BookUnsupportedPasshashException());
       } else {
-        error = Option.none();
+        error = Option.some((Throwable) new BookBorrowExceptionDRMWorkflowError(message));
       }
 
       BooksControllerBorrowTask.this.downloadFailed(error);
