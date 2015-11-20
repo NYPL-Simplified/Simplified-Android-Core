@@ -4,7 +4,6 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,43 +212,24 @@ public final class OPDSAcquisitionFeedEntryParser
     final OptionType<URI> revoke)
     throws OPDSParseException, ParseException
   {
-    final OptionType<Element> copies_opt =
-      OPDSXML.getFirstChildElementWithNameOptional(
-        e, OPDSFeedConstants.OPDS_URI, "copies");
     final OptionType<Element> holds_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
         e, OPDSFeedConstants.OPDS_URI, "holds");
 
-    if (copies_opt.isSome()) {
-      Assertions.checkPrecondition(
-        holds_opt.isSome(), "If opds:copies exists, opds:holds must exist");
-
-      final Some<Element> copies_some = (Some<Element>) copies_opt;
-      final Some<Element> holds_some = (Some<Element>) holds_opt;
-      final Element copies = copies_some.get();
-      final Element holds = holds_some.get();
-      eb.setAvailability(
-        OPDSAcquisitionFeedEntryParser.inferAvailability(
-          e, copies, holds, revoke));
-    }
+    eb.setAvailability(
+      OPDSAcquisitionFeedEntryParser.inferAvailability(
+        e, holds_opt, revoke));
   }
 
   private static OPDSAvailabilityType inferAvailability(
     final Element e,
-    final Element copies,
-    final Element holds,
+    final OptionType<Element> holds_opt,
     final OptionType<URI> revoke)
     throws OPDSParseException
   {
-    /**
-     * If there is an "available" element, then the user has interacted
-     * with the book in some manner, such as attempting to borrow it or
-     * place a hold on it.
-     */
-
     final OptionType<Element> available_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
-        e, OPDSFeedConstants.OPDS_URI, "availability");
+          e, OPDSFeedConstants.OPDS_URI, "availability");
 
     if (available_opt.isSome()) {
       final Some<Element> available_some = (Some<Element>) available_opt;
@@ -267,8 +247,11 @@ public final class OPDSAcquisitionFeedEntryParser
           OPDSXML.getAttributeRFC3339Optional(available, "until");
         final OptionType<Calendar> start_date =
           OPDSXML.getAttributeRFC3339Optional(available, "since");
-        final OptionType<Integer> queue =
-          OPDSXML.getAttributeIntegerOptional(holds, "position");
+        OptionType<Integer> queue = Option.none();
+        if (holds_opt.isSome()) {
+          final Some<Element> holds_some = (Some<Element>) holds_opt;
+          queue = OPDSXML.getAttributeIntegerOptional(holds_some.get(), "position");
+        }
         return OPDSAvailabilityHeld.get(start_date, queue, end_date, revoke);
       }
 
@@ -277,22 +260,21 @@ public final class OPDSAcquisitionFeedEntryParser
           OPDSXML.getAttributeRFC3339Optional(available, "until");
         final OptionType<Calendar> start_date =
           OPDSXML.getAttributeRFC3339Optional(available, "since");
-        return OPDSAvailabilityLoaned.get(start_date, end_date, revoke);
+        final String rel = NullCheck.notNull(e.getAttribute("rel"));
+        if (Type.ACQUISITION_BORROW.getURI().toString().equals(rel)) {
+          return OPDSAvailabilityLoanable.get();
+        }
+        else if (Type.ACQUISITION_GENERIC.getURI().toString().equals(rel)) {
+          return OPDSAvailabilityLoaned.get(start_date, end_date, revoke);
+        }
       }
     }
 
     /**
-     * Otherwise, the user has never seen the book before, and the book
-     * is either holdable or loanable. If there are available copies, the
-     * book is loanable. Otherwise, all that can be done is to place a hold.
+     * The user has never seen the book before, and the book
+     * did not have an availability:available element for its
+     * borrow link, so it must be holdable.
      */
-
-    final int copies_available =
-      OPDSXML.getAttributeInteger(copies, "available");
-
-    if (copies_available > 0) {
-      return OPDSAvailabilityLoanable.get();
-    }
 
     return OPDSAvailabilityHoldable.get();
   }
