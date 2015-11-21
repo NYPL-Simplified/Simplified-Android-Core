@@ -212,17 +212,21 @@ public final class OPDSAcquisitionFeedEntryParser
     final OptionType<URI> revoke)
     throws OPDSParseException, ParseException
   {
+    final OptionType<Element> copies_opt =
+      OPDSXML.getFirstChildElementWithNameOptional(
+        e, OPDSFeedConstants.OPDS_URI, "copies");
     final OptionType<Element> holds_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
         e, OPDSFeedConstants.OPDS_URI, "holds");
 
     eb.setAvailability(
       OPDSAcquisitionFeedEntryParser.inferAvailability(
-        e, holds_opt, revoke));
+        e, copies_opt, holds_opt, revoke));
   }
 
   private static OPDSAvailabilityType inferAvailability(
     final Element e,
+    final OptionType<Element> copies_opt,
     final OptionType<Element> holds_opt,
     final OptionType<URI> revoke)
     throws OPDSParseException
@@ -275,6 +279,16 @@ public final class OPDSAcquisitionFeedEntryParser
      * did not have an availability:available element for its
      * borrow link, so it must be holdable.
      */
+
+    if (copies_opt.isSome()) {
+      final Some<Element> copies_some = (Some<Element>) copies_opt;
+      final int copies_available =
+          OPDSXML.getAttributeInteger(copies_some.get(), "available");
+
+      if (copies_available > 0) {
+        return OPDSAvailabilityLoanable.get();
+      }
+    }
 
     return OPDSAvailabilityHoldable.get();
   }
