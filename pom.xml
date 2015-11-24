@@ -450,6 +450,17 @@
           <extensions>true</extensions>
         </plugin>
 
+        <plugin>
+          <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+          <artifactId>android-maven-plugin</artifactId>
+          <version>4.0.0-rc.2</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-jarsigner-plugin</artifactId>
+          <version>1.2</version>
+        </plugin>
+
         <!-- Require JDK >= 1.6 -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
