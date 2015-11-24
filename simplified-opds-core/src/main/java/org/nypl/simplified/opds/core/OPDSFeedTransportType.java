@@ -17,6 +17,7 @@ public interface OPDSFeedTransportType<A>
   /**
    * @param context Implementation-specific per-URI context data
    * @param uri     The URI
+   * @param method  HTTP method to use (GET/PUT)
    *
    * @return An input stream for the given URI.
    *
@@ -25,6 +26,7 @@ public interface OPDSFeedTransportType<A>
 
   InputStream getStream(
     final A context,
-    final URI uri)
+    final URI uri,
+    final String method)
     throws OPDSFeedTransportException;
 }

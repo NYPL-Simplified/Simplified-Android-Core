@@ -170,7 +170,7 @@ final class BooksControllerRevokeBookTask
     };
 
     this.feed_loader.fromURIRefreshing(
-      u, Option.some(auth), listener);
+      u, Option.some(auth), "GET", listener);
   }
 
   private void revokeFeedReceived(final FeedType f)

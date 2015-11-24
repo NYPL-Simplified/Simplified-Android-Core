@@ -26,6 +26,7 @@ public final class HTTPRedirectFollower
 {
   private final long                     byte_offset;
   private final HTTPType                 http;
+  private final String                   method;
   private final int                      max_redirects;
   private final OptionType<HTTPAuthType> target_auth;
   private final Set<URI>                 tried_auth;
@@ -41,6 +42,7 @@ public final class HTTPRedirectFollower
    *
    * @param in_logger        A log interface
    * @param in_http          An HTTP interface
+   * @param in_method        HTTP method to use (GET/PUT)
    * @param in_auth          Authentication info
    * @param in_max_redirects The maximum number of redirects to follow
    * @param in_uri           The target URI
@@ -50,6 +52,7 @@ public final class HTTPRedirectFollower
   public HTTPRedirectFollower(
     final Logger in_logger,
     final HTTPType in_http,
+    final String in_method,
     final OptionType<HTTPAuthType> in_auth,
     final int in_max_redirects,
     final URI in_uri,
@@ -57,6 +60,7 @@ public final class HTTPRedirectFollower
   {
     this.logger = NullCheck.notNull(in_logger);
     this.http = NullCheck.notNull(in_http);
+    this.method = NullCheck.notNull(in_method);
     this.target_auth = NullCheck.notNull(in_auth);
     this.current_auth = Option.none();
     this.current_uri = NullCheck.notNull(in_uri);
@@ -199,8 +203,12 @@ public final class HTTPRedirectFollower
       throw new IOException("Reached redirect limit");
     }
 
-    final HTTPResultType<InputStream> r =
-      this.http.get(this.current_auth, this.current_uri, 0L);
+    HTTPResultType<InputStream> r;
+    if (this.method.equals("PUT")) {
+      r = this.http.put(this.current_auth, this.current_uri);
+    } else {
+      r = this.http.get(this.current_auth, this.current_uri, 0L);
+    }
     return r.matchResult(this);
   }
 

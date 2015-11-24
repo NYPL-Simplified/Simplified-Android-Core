@@ -79,22 +79,41 @@ public final class HTTP implements HTTPType
     final URI uri,
     final long offset)
   {
+    return this.getInternal("GET", auth_opt, uri, offset);
+  }
+
+  @Override public HTTPResultType<InputStream> put(
+      final OptionType<HTTPAuthType> auth_opt,
+      final URI uri)
+  {
+    return this.getInternal("PUT", auth_opt, uri, 0);
+  }
+
+  private HTTPResultType<InputStream> getInternal(
+      final String method,
+      final OptionType<HTTPAuthType> auth_opt,
+      final URI uri,
+      final long offset)
+  {
+    NullCheck.notNull(method);
     NullCheck.notNull(auth_opt);
     HTTP.checkURI(uri);
 
     try {
-      HTTP.LOG.trace("GET {} (auth {})", uri, auth_opt);
+      HTTP.LOG.trace("{} {} (auth {})", method, uri, auth_opt);
 
       final URL url = NullCheck.notNull(uri.toURL());
       final HttpURLConnection conn =
-        NullCheck.notNull((HttpURLConnection) url.openConnection());
+          NullCheck.notNull((HttpURLConnection) url.openConnection());
 
       conn.setInstanceFollowRedirects(false);
-      conn.setRequestMethod("GET");
+      conn.setRequestMethod(method);
       conn.setDoInput(true);
       conn.setReadTimeout(
-        (int) TimeUnit.MILLISECONDS.convert(60L, TimeUnit.SECONDS));
-      conn.setRequestProperty("Range", "bytes=" + offset + "-");
+          (int) TimeUnit.MILLISECONDS.convert(60L, TimeUnit.SECONDS));
+      if (offset > 0) {
+        conn.setRequestProperty("Range", "bytes=" + offset + "-");
+      }
       conn.setRequestProperty("User-Agent", this.user_agent);
       conn.setRequestProperty("Accept-Encoding", "identity");
 
@@ -108,29 +127,29 @@ public final class HTTP implements HTTPType
 
       final int code = conn.getResponseCode();
       HTTP.LOG.trace(
-        "GET {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
+          "{} {} (auth {}) (result {})", method, uri, auth_opt, Integer.valueOf(code));
 
       conn.getLastModified();
       if (code >= 400) {
         final OptionType<HTTPProblemReport> report =
-          this.getReportFromError(conn);
+            this.getReportFromError(conn);
         return new HTTPResultError<InputStream>(
-          code,
-          NullCheck.notNull(conn.getResponseMessage()),
-          (long) conn.getContentLength(),
-          NullCheck.notNull(conn.getHeaderFields()),
-          conn.getLastModified(),
-          this.getErrorStreamOrEmpty(conn),
-          report);
+            code,
+            NullCheck.notNull(conn.getResponseMessage()),
+            (long) conn.getContentLength(),
+            NullCheck.notNull(conn.getHeaderFields()),
+            conn.getLastModified(),
+            this.getErrorStreamOrEmpty(conn),
+            report);
       }
 
       return new HTTPResultOK<InputStream>(
-        NullCheck.notNull(conn.getResponseMessage()),
-        code,
-        conn.getInputStream(),
-        (long) conn.getContentLength(),
-        NullCheck.notNull(conn.getHeaderFields()),
-        conn.getLastModified());
+          NullCheck.notNull(conn.getResponseMessage()),
+          code,
+          conn.getInputStream(),
+          (long) conn.getContentLength(),
+          NullCheck.notNull(conn.getHeaderFields()),
+          conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final IOException e) {

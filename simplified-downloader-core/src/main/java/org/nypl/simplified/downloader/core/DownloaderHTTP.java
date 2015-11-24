@@ -147,7 +147,7 @@ public final class DownloaderHTTP implements DownloaderType
     {
       try {
         final HTTPRedirectFollower rf = new HTTPRedirectFollower(
-          this.log, this.http, this.auth, 5, this.uri, 0L);
+          this.log, this.http, "GET", this.auth, 5, this.uri, 0L);
 
         this.log.debug(
           "starting download, uri {} to file {}", this.uri, this.file);

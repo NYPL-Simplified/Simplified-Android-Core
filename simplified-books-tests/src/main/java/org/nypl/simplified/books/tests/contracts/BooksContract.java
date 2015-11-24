@@ -121,6 +121,13 @@ public final class BooksContract implements BooksContractType
           0L);
       }
 
+      @Override public HTTPResultType<InputStream> put(
+          final OptionType<HTTPAuthType> auth_opt,
+          final URI uri)
+      {
+        return this.get(auth_opt, uri, 0);
+      }
+
       private HTTPResultType<InputStream> getLoans(
         final OptionType<HTTPAuthType> auth_opt)
       {
@@ -238,6 +245,13 @@ public final class BooksContract implements BooksContractType
         final OptionType<HTTPAuthType> auth,
         final URI uri,
         final long offset)
+      {
+        return new HTTPResultException<InputStream>(uri, new IOException());
+      }
+
+      @Override public HTTPResultType<InputStream> put(
+        final OptionType<HTTPAuthType> auth,
+        final URI uri)
       {
         return new HTTPResultException<InputStream>(uri, new IOException());
       }

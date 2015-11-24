@@ -30,6 +30,20 @@ public interface HTTPType
     final long offset);
 
   /**
+   * Make a put request to {@code uri}, and return the results,
+   * using authentication details {@code auth}.
+   *
+   * @param auth   The authentication details, if any
+   * @param uri    The URI
+   *
+   * @return A result
+   */
+
+  HTTPResultType<InputStream> put(
+      final OptionType<HTTPAuthType> auth,
+      final URI uri);
+
+  /**
    * Peek at the URI {@code uri}, using authentication details {@code auth}.
    *
    * @param auth The authentication details, if any

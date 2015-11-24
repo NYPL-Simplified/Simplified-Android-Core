@@ -442,7 +442,7 @@ final class BooksControllerBorrowTask implements Runnable
       };
 
     this.feed_loader.fromURIRefreshing(
-      this.acq.getURI(), Option.some(auth), new FeedLoaderListenerType()
+      this.acq.getURI(), Option.some(auth), "PUT", new FeedLoaderListenerType()
       {
         @Override public void onFeedLoadSuccess(
           final URI u,

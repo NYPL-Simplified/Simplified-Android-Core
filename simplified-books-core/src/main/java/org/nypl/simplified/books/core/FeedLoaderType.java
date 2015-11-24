@@ -39,6 +39,7 @@ public interface FeedLoaderType
    *
    * @param uri      The URI
    * @param auth     HTTP authentication details, if any
+   * @param method   HTTP method to use (GET/PUT)
    * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
@@ -47,6 +48,7 @@ public interface FeedLoaderType
   Future<Unit> fromURIRefreshing(
     URI uri,
     OptionType<HTTPAuthType> auth,
+    String method,
     FeedLoaderListenerType listener);
 
   /**

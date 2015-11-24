@@ -211,11 +211,12 @@ public final class FeedLoader
 
   private Future<Unit> fetch(
     final URI uri,
+    final String method,
     final OptionType<HTTPAuthType> auth,
     final FeedLoaderListenerType listener,
     final boolean update_from_database)
   {
-    FeedLoader.LOG.debug("not cached, fetching: {} (auth {})", uri, auth);
+    FeedLoader.LOG.debug("not cached, fetching ({}): {} (auth {})", method, uri, auth);
 
     final Callable<Unit> c = new Callable<Unit>()
     {
@@ -223,7 +224,7 @@ public final class FeedLoader
       {
         final ProtectedListener p_listener = new ProtectedListener(listener);
         try {
-          final FeedType f = FeedLoader.this.loadFeed(uri, auth, p_listener);
+          final FeedType f = FeedLoader.this.loadFeed(uri, method, auth, p_listener);
           if (update_from_database) {
             FeedLoader.updateFeedFromDatabase(FeedLoader.this.database, f);
           }
@@ -258,18 +259,19 @@ public final class FeedLoader
       return new ImmediateFuture<Unit>(Unit.unit());
     }
 
-    return this.fetch(uri, auth, listener, false);
+    return this.fetch(uri, "GET", auth, listener, false);
   }
 
   @Override public Future<Unit> fromURIRefreshing(
     final URI uri,
     final OptionType<HTTPAuthType> auth,
+    final String method,
     final FeedLoaderListenerType listener)
   {
     NullCheck.notNull(uri);
     NullCheck.notNull(auth);
     NullCheck.notNull(listener);
-    return this.fetch(uri, auth, listener, false);
+    return this.fetch(uri, method, auth, listener, false);
   }
 
   @Override public Future<Unit> fromURIWithDatabaseEntries(
@@ -290,7 +292,7 @@ public final class FeedLoader
       return new ImmediateFuture<Unit>(Unit.unit());
     }
 
-    return this.fetch(uri, auth, listener, true);
+    return this.fetch(uri, "GET", auth, listener, true);
   }
 
   @Override public Future<Unit> fromURIRefreshingWithDatabaseEntries(
@@ -301,7 +303,7 @@ public final class FeedLoader
     NullCheck.notNull(uri);
     NullCheck.notNull(auth);
     NullCheck.notNull(listener);
-    return this.fetch(uri, auth, listener, true);
+    return this.fetch(uri, "GET", auth, listener, true);
   }
 
   @Override public OPDSFeedParserType getOPDSFeedParser()
@@ -329,6 +331,7 @@ public final class FeedLoader
 
   private FeedType loadFeed(
     final URI uri,
+    final String method,
     final OptionType<HTTPAuthType> auth,
     final FeedLoaderListenerType listener)
     throws InterruptedException, OPDSFeedTransportException, IOException
@@ -337,7 +340,7 @@ public final class FeedLoader
       new AtomicReference<OptionType<HTTPAuthType>>(auth);
 
     final InputStream main_stream =
-      this.loadFeedStreamRetryingAuth(uri, listener, auth_ref);
+      this.loadFeedStreamRetryingAuth(uri, method, listener, auth_ref);
 
     try {
       final OPDSAcquisitionFeed parsed = this.parser.parse(uri, main_stream);
@@ -352,7 +355,7 @@ public final class FeedLoader
         final Some<OPDSSearchLink> some = (Some<OPDSSearchLink>) search_opt;
         final URI search_uri = some.get().getURI();
         final InputStream search_stream =
-          this.loadFeedStreamRetryingAuth(search_uri, listener, auth_ref);
+          this.loadFeedStreamRetryingAuth(search_uri, method, listener, auth_ref);
         try {
           final OptionType<OPDSOpenSearch1_1> search =
             Option.some(this.search_parser.parse(search_uri, search_stream));
@@ -383,6 +386,7 @@ public final class FeedLoader
 
   private InputStream loadFeedStreamRetryingAuth(
     final URI uri,
+    final String method,
     final FeedLoaderListenerType listener,
     final AtomicReference<OptionType<HTTPAuthType>> auth)
     throws OPDSFeedTransportException, IOException, InterruptedException
@@ -394,7 +398,7 @@ public final class FeedLoader
       InputStream stream = null;
       try {
         FeedLoader.LOG.debug("fetching stream for {}", uri);
-        stream = this.transport.getStream(auth_current, uri);
+        stream = this.transport.getStream(auth_current, uri, method);
         FeedLoader.LOG.debug("received stream for {}", uri);
         auth.set(auth_current);
         return stream;

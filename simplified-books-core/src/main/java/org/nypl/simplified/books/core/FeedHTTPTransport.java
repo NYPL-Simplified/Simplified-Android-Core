@@ -56,13 +56,14 @@ public final class FeedHTTPTransport
 
   @Override public InputStream getStream(
     final OptionType<HTTPAuthType> auth,
-    final URI uri)
+    final URI uri,
+    final String method)
     throws OPDSFeedTransportException
   {
     FeedHTTPTransport.LOG.debug("get stream: {} {}", uri, auth);
 
     final HTTPRedirectFollower rf = new HTTPRedirectFollower(
-      FeedHTTPTransport.LOG, this.http, auth, 5, uri, 0L);
+      FeedHTTPTransport.LOG, this.http, method, auth, 5, uri, 0L);
 
     final HTTPResultType<InputStream> r = rf.run();
     return r.matchResult(
