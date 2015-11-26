@@ -58,4 +58,9 @@ public interface AccountsControllerType
 
   void accountSync(
     AccountSyncListenerType listener);
+
+  /**
+   * Activate the device with the currently logged in account (if you are logged in).
+   */
+  void accountActivateDevice();
 }

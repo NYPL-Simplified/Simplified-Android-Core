@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -56,9 +58,10 @@ import java.util.Map;
 public abstract class SimplifiedActivity extends Activity
   implements DrawerListener, OnItemClickListener
 {
-  private static final Logger LOG;
-  private static final String NAVIGATION_DRAWER_OPEN_ID;
-  private static       int    ACTIVITY_COUNT;
+  private static final Logger  LOG;
+  private static final String  NAVIGATION_DRAWER_OPEN_ID;
+  private static       int     ACTIVITY_COUNT;
+  private static       boolean DEVICE_ACTIVATED;
 
   static {
     LOG = LogUtilities.getLog(SimplifiedActivity.class);
@@ -420,6 +423,17 @@ public abstract class SimplifiedActivity extends Activity
     SimplifiedActivity.ACTIVITY_COUNT = SimplifiedActivity.ACTIVITY_COUNT + 1;
     SimplifiedActivity.LOG.debug(
       "activity count: {}", SimplifiedActivity.ACTIVITY_COUNT);
+
+    if (!SimplifiedActivity.DEVICE_ACTIVATED) {
+      // Don't try to activate the device unless we're connected to the Internet, since
+      // it will discard its credentials if it fails.
+      final ConnectivityManager connectivity_manager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+      final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
+      if (network_info != null && network_info.isConnected()) {
+        app.getBooks().accountActivateDevice();
+        SimplifiedActivity.DEVICE_ACTIVATED = true;
+      }
+    }
   }
 
   @Override protected void onDestroy()

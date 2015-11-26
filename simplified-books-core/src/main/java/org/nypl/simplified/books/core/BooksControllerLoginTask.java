@@ -1,19 +1,11 @@
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.OptionVisitorType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
-import org.nypl.drm.core.AdobeAdeptActivationReceiverType;
-import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
-import org.nypl.drm.core.AdobeAdeptProcedureType;
-import org.nypl.drm.core.AdobeUserID;
-import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -32,8 +24,7 @@ import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class BooksControllerLoginTask implements Runnable,
-  AccountDataSetupListenerType,
-  AdobeAdeptActivationReceiverType
+  AccountDataSetupListenerType
 {
   private static final Logger LOG;
 
@@ -106,19 +97,22 @@ final class BooksControllerLoginTask implements Runnable,
     r.matchResult(
       new HTTPResultMatcherType<Unit, Unit, UnreachableCodeException>()
       {
-        @Override public Unit onHTTPError(final HTTPResultError<Unit> e)
+        @Override
+        public Unit onHTTPError(final HTTPResultError<Unit> e)
         {
           BooksControllerLoginTask.this.onHTTPServerReturnedError(e);
           return Unit.unit();
         }
 
-        @Override public Unit onHTTPException(final HTTPResultException<Unit> e)
+        @Override
+        public Unit onHTTPException(final HTTPResultException<Unit> e)
         {
           BooksControllerLoginTask.this.onHTTPException(e);
           return Unit.unit();
         }
 
-        @Override public Unit onHTTPOK(final HTTPResultOKType<Unit> e)
+        @Override
+        public Unit onHTTPOK(final HTTPResultOKType<Unit> e)
         {
           BooksControllerLoginTask.this.onHTTPServerAcceptedCredentials();
           return Unit.unit();
@@ -156,44 +150,27 @@ final class BooksControllerLoginTask implements Runnable,
      */
 
     if (this.adobe_drm.isSome()) {
-      final Some<AdobeAdeptExecutorType> some =
-        (Some<AdobeAdeptExecutorType>) this.adobe_drm;
-      final AdobeAdeptExecutorType adobe_exec = some.get();
 
-      final AccountBarcode user = this.credentials.getUser();
-      final AccountPIN pass = this.credentials.getPassword();
-      final OptionType<AdobeVendorID> vendor_opt =
-        this.credentials.getAdobeVendor();
-
-      vendor_opt.accept(
-        new OptionVisitorType<AdobeVendorID, Unit>()
+      BooksControllerDeviceActivationTask activation_task =
+        new BooksControllerDeviceActivationTask(this.adobe_drm,
+          this.credentials,
+          this.accounts_database)
         {
-          @Override public Unit none(final None<AdobeVendorID> n)
+          @Override public void onActivationsCount(final int count)
           {
-            BooksControllerLoginTask.this.onActivationError(
-              "No Adobe vendor ID provided");
-            return Unit.unit();
+            /**
+             * Device activation succeeded.
+             */
+
+            BooksControllerLoginTask.this.onCompletedSuccessfully();
           }
 
-          @Override public Unit some(final Some<AdobeVendorID> s)
+          @Override public void onActivationError(final String message)
           {
-            adobe_exec.execute(
-              new AdobeAdeptProcedureType()
-              {
-                @Override
-                public void executeWith(final AdobeAdeptConnectorType c)
-                {
-                  c.discardDeviceActivations();
-                  c.activateDevice(
-                    BooksControllerLoginTask.this,
-                    s.get(),
-                    user.toString(),
-                    pass.toString());
-                }
-              });
-            return Unit.unit();
+            BooksControllerLoginTask.this.listener.onAccountLoginFailureDeviceActivationError(message);
           }
-        });
+        };
+      activation_task.run();
 
     } else {
 
@@ -247,39 +224,5 @@ final class BooksControllerLoginTask implements Runnable,
 
     this.books.submitRunnable(
       new BooksControllerDataSetupTask(this.books_database, this));
-  }
-
-  @Override public void onActivationsCount(final int count)
-  {
-    /**
-     * Device activation succeeded.
-     */
-
-    this.onCompletedSuccessfully();
-  }
-
-  @Override public void onActivation(
-    final int index,
-    final AdobeVendorID authority,
-    final String device_id,
-    final String user_name,
-    final AdobeUserID user_id,
-    final String expires)
-  {
-    BooksControllerLoginTask.LOG.debug(
-      "Activation [{}]: authority: {}", Integer.valueOf(index), authority);
-    BooksControllerLoginTask.LOG.debug(
-      "Activation [{}]: device_id: {}", Integer.valueOf(index), device_id);
-    BooksControllerLoginTask.LOG.debug(
-      "Activation [{}]: user_name: {}", Integer.valueOf(index), user_name);
-    BooksControllerLoginTask.LOG.debug(
-      "Activation [{}]: user_id: {}", Integer.valueOf(index), user_id);
-    BooksControllerLoginTask.LOG.debug(
-      "Activation [{}]: expires: {}", Integer.valueOf(index), expires);
-  }
-
-  @Override public void onActivationError(final String message)
-  {
-    this.listener.onAccountLoginFailureDeviceActivationError(message);
   }
 }

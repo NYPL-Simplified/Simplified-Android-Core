@@ -237,6 +237,20 @@ public final class BooksController implements BooksType
         this.syncing));
   }
 
+  @Override public void accountActivateDevice()
+  {
+    final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
+    if (credentials_opt.isSome()) {
+      final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+      final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
+        this.adobe_drm,
+        credentials_some.get(),
+        this.accounts_database
+      );
+      this.submitRunnable(activation_task);
+    }
+  }
+
   @Override public BooksStatusCacheType bookGetStatusCache()
   {
     return this.books_status;
