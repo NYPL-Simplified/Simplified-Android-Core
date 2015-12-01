@@ -212,6 +212,11 @@ public final class OPDSAcquisitionFeedEntryParser
   {
     final List<Element> top_level_list = OPDSXML.getChildElementsWithName(
       link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
+
+    if (top_level_list.size() == 0) {
+      return true;
+    }
+
     for (Element top_level_e : top_level_list) {
       if ("vnd.adobe/adept+xml".equals(top_level_e.getAttribute("type"))) {
         final List<Element> second_level_list = OPDSXML.getChildElementsWithName(
@@ -225,6 +230,7 @@ public final class OPDSAcquisitionFeedEntryParser
         return true;
       }
     }
+
     return false;
   }
 
