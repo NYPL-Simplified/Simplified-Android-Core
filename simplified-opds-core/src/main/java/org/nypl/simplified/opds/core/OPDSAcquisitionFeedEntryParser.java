@@ -157,7 +157,8 @@ public final class OPDSAcquisitionFeedEntryParser
          */
 
         if (rel_text.startsWith(
-          OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT)) {
+          OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT)
+          && OPDSAcquisitionFeedEntryParser.linkIsSupported(e_link)) {
 
           boolean open_access = false;
           for (final Type v : OPDSAcquisition.Type.values()) {
@@ -204,6 +205,27 @@ public final class OPDSAcquisitionFeedEntryParser
         e, OPDSFeedConstants.ATOM_URI, "summary"));
 
     return eb.build();
+  }
+
+  private static boolean linkIsSupported(
+    final Element link)
+  {
+    final List<Element> top_level_list = OPDSXML.getChildElementsWithName(
+      link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
+    for (Element top_level_e : top_level_list) {
+      if ("vnd.adobe/adept+xml".equals(top_level_e.getAttribute("type"))) {
+        final List<Element> second_level_list = OPDSXML.getChildElementsWithName(
+          link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
+        for (Element second_level_e : second_level_list) {
+          if ("application/epub+zip".equals(second_level_e.getAttribute("type"))) {
+            return true;
+          }
+        }
+      } else if ("application/epub+zip".equals(top_level_e.getAttribute("type"))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static void tryAvailability(
