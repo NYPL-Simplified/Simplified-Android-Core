@@ -72,4 +72,34 @@ public final class HTTPProblemReport
   {
     return this.raw;
   }
+
+  /**
+   * @return The problem type from the JSON data
+   */
+
+  public ProblemType getProblemType()
+  {
+    if (this.raw.has("type")) {
+      final String type_value = this.raw.get("type").asText();
+      if ("http://librarysimplified.org/terms/problem/loan-limit-reached".equals(type_value)) {
+        return ProblemType.LoanLimitReached;
+      }
+    }
+    return ProblemType.Unknown;
+  }
+
+  /**
+   * Problem type enum.
+   */
+  public enum ProblemType
+  {
+    /**
+     * Loan limit reached problem.
+     */
+    LoanLimitReached,
+    /**
+     * Unknown problem.
+     */
+    Unknown
+  }
 }

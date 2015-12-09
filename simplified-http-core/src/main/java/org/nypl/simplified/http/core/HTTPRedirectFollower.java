@@ -137,6 +137,10 @@ public final class HTTPRedirectFollower
         this.tried_auth.add(this.current_uri);
         return this.processURI();
       }
+
+      case HttpURLConnection.HTTP_FORBIDDEN: {
+        return e;
+      }
     }
 
     final String m = String.format("%d: %s", code, e.getMessage());

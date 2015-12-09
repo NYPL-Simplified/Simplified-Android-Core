@@ -29,6 +29,7 @@
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_download_failed_loan_limit_reached">Book loan limit reached.</string>
   <string name="catalog_download_failed_unsupported_pdf">This book is an Adobe PDF, which is not supported.</string>
   <string name="catalog_download_failed_unsupported_unknown">This book is of an unknown type and is not supported.</string>
   <string name="catalog_download_failed_unsupported_passhash">Passhash protected books are not supported.</string>

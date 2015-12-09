@@ -24,6 +24,7 @@ import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -489,11 +490,22 @@ final class BooksControllerBorrowTask implements Runnable
           BooksControllerBorrowTask.LOG.debug(
             "[{}]: failed to load feed", sid);
 
-          final Throwable ex;
+          Throwable ex = new BookBorrowExceptionFetchingBorrowFeedFailed(x);
+
           if (x instanceof OPDSParseException) {
             ex = new BookBorrowExceptionBadBorrowFeed(x);
-          } else {
-            ex = new BookBorrowExceptionFetchingBorrowFeedFailed(x);
+          } else if (x instanceof FeedHTTPTransportException) {
+            final OptionType<HTTPProblemReport> problem_report_opt =
+              ((FeedHTTPTransportException) x).getProblemReport();
+            if (problem_report_opt.isSome()) {
+              final HTTPProblemReport problem_report =
+                ((Some<HTTPProblemReport>) problem_report_opt).get();
+              final HTTPProblemReport.ProblemType problem_type =
+                problem_report.getProblemType();
+              if (problem_type == HTTPProblemReport.ProblemType.LoanLimitReached) {
+                ex = new BookBorrowExceptionLoanLimitReached(x);
+              }
+            }
           }
 
           BooksControllerBorrowTask.this.downloadFailed(Option.some(ex));
