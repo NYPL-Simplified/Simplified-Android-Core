@@ -164,7 +164,7 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>readium-shared-js</artifactId>
-        <version>0.22.0</version>
+        <version>0.22.1</version>
       </dependency>
       <dependency>
         <groupId>org.nypl.readium</groupId>
