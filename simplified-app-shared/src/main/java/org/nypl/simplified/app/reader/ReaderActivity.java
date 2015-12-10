@@ -3,9 +3,11 @@ package org.nypl.simplified.app.reader;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.ColorMatrixColorFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -379,6 +381,13 @@ public final class ReaderActivity extends Activity implements
           return true;
         }
       });
+
+    // Allow the webview to be debuggable only if this is a dev build
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      if ((getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+        WebView.setWebContentsDebuggingEnabled(true);
+      }
+    }
 
     final WebSettings s = NullCheck.notNull(in_webview.getSettings());
     s.setAppCacheEnabled(false);
