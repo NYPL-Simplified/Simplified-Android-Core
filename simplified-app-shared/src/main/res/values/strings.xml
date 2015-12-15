@@ -55,6 +55,7 @@
   <string name="catalog_book_delete">Delete</string>
   <string name="catalog_book_revoke_loan">Return</string>
   <string name="catalog_book_revoke_hold">Cancel</string>
+  <string name="catalog_book_report">Report Issue</string>
 
   <string name="catalog_book_availability_loaned_indefinite">You have this book on loan.</string>
   <string name="catalog_book_availability_loaned_timed">You have this book on loan for %s.</string>
@@ -70,6 +71,22 @@
   <string name="catalog_book_interval_days">days</string>
   <string name="catalog_book_interval_hours">hours</string>
   <string name="catalog_book_interval_sub_hour">less than an hour</string>
+
+  <!-- Catalog book report strings -->
+  <string name="catalog_book_report_wrong_genre">Wrong Genre</string>
+  <string name="catalog_book_report_wrong_audience">Wrong Audience</string>
+  <string name="catalog_book_report_wrong_age_range">Wrong Age Range</string>
+  <string name="catalog_book_report_wrong_title">Wrong Title</string>
+  <string name="catalog_book_report_wrong_medium">Wrong Medium</string>
+  <string name="catalog_book_report_wrong_author">Wrong Author</string>
+  <string name="catalog_book_report_wrong_cover_image">Wrong/Missing Cover Image</string>
+  <string name="catalog_book_report_wrong_description">Wrong/Mismatched Description</string>
+  <string name="catalog_book_report_cant_download">Can\'t Download</string>
+  <string name="catalog_book_report_cant_borrow">Can\'t Borrow</string>
+  <string name="catalog_book_report_incorrect_contents">Book Contents Blank or Incorrect</string>
+
+  <string name="catalog_book_report_cancel">Cancel</string>
+  <string name="catalog_book_report_submit">Submit</string>
 
   <!-- Help strings -->
   <string name="help">Help</string>

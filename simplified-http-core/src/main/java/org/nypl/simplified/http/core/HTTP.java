@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -79,21 +80,36 @@ public final class HTTP implements HTTPType
     final URI uri,
     final long offset)
   {
-    return this.getInternal("GET", auth_opt, uri, offset);
+    final OptionType<byte[]> data = Option.none();
+    final OptionType<String> content_type = Option.none();
+    return this.requestInternal("GET", auth_opt, uri, offset, data, content_type);
   }
 
   @Override public HTTPResultType<InputStream> put(
       final OptionType<HTTPAuthType> auth_opt,
       final URI uri)
   {
-    return this.getInternal("PUT", auth_opt, uri, 0);
+    final OptionType<byte[]> data = Option.none();
+    final OptionType<String> content_type = Option.none();
+    return this.requestInternal("PUT", auth_opt, uri, 0, data, content_type);
   }
 
-  private HTTPResultType<InputStream> getInternal(
+  @Override public HTTPResultType<InputStream> post(
+    final OptionType<HTTPAuthType> auth_opt,
+    final URI uri,
+    final byte[] data,
+    final String content_type)
+  {
+    return this.requestInternal("POST", auth_opt, uri, 0, Option.some(data), Option.some(content_type));
+  }
+
+  private HTTPResultType<InputStream> requestInternal(
       final String method,
       final OptionType<HTTPAuthType> auth_opt,
       final URI uri,
-      final long offset)
+      final long offset,
+      final OptionType<byte[]> data_opt,
+      final OptionType<String> content_type_opt)
   {
     NullCheck.notNull(method);
     NullCheck.notNull(auth_opt);
@@ -110,12 +126,16 @@ public final class HTTP implements HTTPType
       conn.setRequestMethod(method);
       conn.setDoInput(true);
       conn.setReadTimeout(
-          (int) TimeUnit.MILLISECONDS.convert(60L, TimeUnit.SECONDS));
+        (int) TimeUnit.MILLISECONDS.convert(60L, TimeUnit.SECONDS));
       if (offset > 0) {
         conn.setRequestProperty("Range", "bytes=" + offset + "-");
       }
       conn.setRequestProperty("User-Agent", this.user_agent);
       conn.setRequestProperty("Accept-Encoding", "identity");
+
+      if (content_type_opt.isSome()) {
+        conn.setRequestProperty("Content-Type", ((Some<String>) content_type_opt).get());
+      }
 
       if (auth_opt.isSome()) {
         final Some<HTTPAuthType> some = (Some<HTTPAuthType>) auth_opt;
@@ -123,11 +143,20 @@ public final class HTTP implements HTTPType
         auth.setConnectionParameters(conn);
       }
 
+      if (data_opt.isSome()) {
+        final Some<byte[]> data_some = (Some<byte[]>) data_opt;
+        final byte[] data = data_some.get();
+        conn.setDoOutput(true);
+        final OutputStream os = conn.getOutputStream();
+        os.write(data);
+        os.close();
+      }
+
       conn.connect();
 
       final int code = conn.getResponseCode();
       HTTP.LOG.trace(
-          "{} {} (auth {}) (result {})", method, uri, auth_opt, Integer.valueOf(code));
+          "{} {} (auth {}) (result {})", method, uri, auth_opt, code);
 
       conn.getLastModified();
       if (code >= 400) {
@@ -203,7 +232,7 @@ public final class HTTP implements HTTPType
 
       final int code = conn.getResponseCode();
       HTTP.LOG.trace(
-        "HEAD {} (auth {}) (result {})", uri, auth_opt, Integer.valueOf(code));
+        "HEAD {} (auth {}) (result {})", uri, auth_opt, code);
 
       if (code >= 400) {
         final OptionType<HTTPProblemReport> report =

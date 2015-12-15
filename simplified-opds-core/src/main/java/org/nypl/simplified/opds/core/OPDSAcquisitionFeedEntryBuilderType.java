@@ -81,6 +81,15 @@ public interface OPDSAcquisitionFeedEntryBuilderType
     OptionType<URI> uri);
 
   /**
+   * Set the report issues URI.
+   *
+   * @param uri The report issues URI
+   */
+
+  void setIssuesOption(
+    OptionType<URI> uri);
+
+  /**
    * Set the publication date.
    *
    * @param pub The publication date

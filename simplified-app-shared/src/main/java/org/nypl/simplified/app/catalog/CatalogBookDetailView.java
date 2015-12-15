@@ -817,7 +817,11 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity, this.book_download_buttons, this.books, e);
+        this.activity, this.book_download_buttons, this.books, e);
+
+    final CatalogBookReportButton report = new CatalogBookReportButton(
+        this.activity, e);
+    this.book_download_buttons.addView(report, this.book_download_buttons.getChildCount());
 
     CatalogBookDetailView.configureButtonsHeight(
       rr, this.book_download_buttons);

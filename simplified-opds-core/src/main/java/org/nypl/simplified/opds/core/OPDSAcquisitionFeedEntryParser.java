@@ -128,6 +128,14 @@ public final class OPDSAcquisitionFeedEntryParser
           continue;
         }
 
+        if (rel_text.equals(OPDSFeedConstants.ISSUES_REL_TEXT)) {
+          final String uri_text =
+            NullCheck.notNull(e_link.getAttribute("href"));
+          final URI uri = new URI(uri_text);
+          eb.setIssuesOption(Option.some(uri));
+          continue;
+        }
+
         /**
          * Thumbnail.
          */

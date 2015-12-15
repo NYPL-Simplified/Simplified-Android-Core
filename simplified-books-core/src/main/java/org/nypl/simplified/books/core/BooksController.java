@@ -389,6 +389,20 @@ public final class BooksController implements BooksType
         in_listener));
   }
 
+  @Override public void bookReport(
+    final FeedEntryOPDS feed_entry,
+    final String report_type)
+  {
+    NullCheck.notNull(feed_entry);
+    NullCheck.notNull(report_type);
+    this.submitRunnable(
+      new BooksControllerReportTask(
+        report_type,
+        feed_entry,
+        this.http,
+        this.accounts_database));
+  }
+
   @Override public void bookRevoke(final BookID id)
   {
     NullCheck.notNull(id);

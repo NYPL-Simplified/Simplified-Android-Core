@@ -31,6 +31,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   private final OptionType<URI>        cover;
   private final Set<Pair<String, URI>> groups;
   private final String                 id;
+  private final OptionType<URI>        issues;
   private final OptionType<Calendar>   published;
   private final OptionType<String>     publisher;
   private final String                 summary;
@@ -45,6 +46,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     final Set<Pair<String, URI>> in_groups,
     final OptionType<URI> in_cover,
     final String in_id,
+    final OptionType<URI> in_issues,
     final String in_title,
     final OptionType<URI> in_thumbnail,
     final Calendar in_updated,
@@ -60,6 +62,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     this.groups = NullCheck.notNull(in_groups);
     this.cover = NullCheck.notNull(in_cover);
     this.id = NullCheck.notNull(in_id);
+    this.issues = NullCheck.notNull(in_issues);
     this.title = NullCheck.notNull(in_title);
     this.thumbnail = NullCheck.notNull(in_thumbnail);
     this.updated = NullCheck.notNull(in_updated);
@@ -123,6 +126,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     }
 
     b.setCoverOption(e.getCover());
+    b.setIssuesOption(e.getIssues());
     b.setPublishedOption(e.getPublished());
     b.setPublisherOption(e.getPublisher());
 
@@ -157,6 +161,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
            && this.categories.equals(other.categories)
            && this.cover.equals(other.cover)
            && this.id.equals(other.id)
+           && this.issues.equals(other.issues)
            && this.summary.equals(other.summary)
            && this.thumbnail.equals(other.thumbnail)
            && this.title.equals(other.title)
@@ -208,6 +213,15 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   public OptionType<URI> getCover()
   {
     return this.cover;
+  }
+
+  /**
+   * @return The report issues URI
+   */
+
+  public OptionType<URI> getIssues()
+  {
+    return this.issues;
   }
 
   /**
@@ -293,6 +307,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     result = (prime * result) + this.cover.hashCode();
     result = (prime * result) + this.categories.hashCode();
     result = (prime * result) + this.id.hashCode();
+    result = (prime * result) + this.issues.hashCode();
     result = (prime * result) + this.summary.hashCode();
     result = (prime * result) + this.thumbnail.hashCode();
     result = (prime * result) + this.title.hashCode();
@@ -319,6 +334,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.append(this.groups);
     b.append(", id=");
     b.append(this.id);
+    b.append(", issues=");
+    b.append(this.issues);
     b.append(", published=");
     b.append(this.published);
     b.append(", publisher=");
@@ -347,6 +364,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     private final Calendar               updated;
     private       OPDSAvailabilityType   availability;
     private       OptionType<URI>        cover;
+    private       OptionType<URI>        issues;
     private       OptionType<Calendar>   published;
     private       OptionType<String>     publisher;
     private       String                 summary;
@@ -359,6 +377,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       final OPDSAvailabilityType in_availability)
     {
       this.id = NullCheck.notNull(in_id);
+      this.issues = Option.none();
       this.title = NullCheck.notNull(in_title);
       this.updated = NullCheck.notNull(in_updated);
       this.availability = NullCheck.notNull(in_availability);
@@ -410,6 +429,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
         this.groups,
         this.cover,
         this.id,
+        this.issues,
         this.title,
         this.thumbnail,
         this.updated,
@@ -434,6 +454,12 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       final OptionType<URI> uri)
     {
       this.cover = NullCheck.notNull(uri);
+    }
+
+    @Override public void setIssuesOption(
+      final OptionType<URI> uri)
+    {
+      this.issues = NullCheck.notNull(uri);
     }
 
     @Override public void setPublishedOption(

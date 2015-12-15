@@ -44,6 +44,24 @@ public interface HTTPType
       final URI uri);
 
   /**
+   * Make a post request to {@code uri}, post {@code data}, and return the results,
+   * using authentication details {@code auth}.
+   *
+   * @param auth          The authentication details, if any
+   * @param uri           The URI
+   * @param data          The data to post
+   * @param content_type  The content type to send with the post request
+   *
+   * @return A result
+   */
+
+  HTTPResultType<InputStream> post(
+    final OptionType<HTTPAuthType> auth,
+    final URI uri,
+    final byte[] data,
+    final String content_type);
+
+  /**
    * Peek at the URI {@code uri}, using authentication details {@code auth}.
    *
    * @param auth The authentication details, if any

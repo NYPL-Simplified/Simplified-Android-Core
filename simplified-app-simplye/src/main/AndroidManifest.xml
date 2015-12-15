@@ -80,6 +80,10 @@
       android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
       android:exported="false">
     </activity>
+    <activity
+        android:name="org.nypl.simplified.app.catalog.CatalogBookReportActivity"
+        android:exported="false">
+    </activity>
 
     <!-- Reader -->
     <activity

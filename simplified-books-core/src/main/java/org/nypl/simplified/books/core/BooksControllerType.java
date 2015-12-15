@@ -106,6 +106,17 @@ public interface BooksControllerType
     BookID id);
 
   /**
+   * Submit a problem report for a book
+   *
+   * @param feed_entry  Feed entry, used to get the URI to submit to
+   * @param report_type Type of report to submit
+   */
+
+  void bookReport(
+    final FeedEntryOPDS feed_entry,
+    final String report_type);
+
+  /**
    * Load the latest book status from disk, and broadcast it to any and all
    * observers.
    *
