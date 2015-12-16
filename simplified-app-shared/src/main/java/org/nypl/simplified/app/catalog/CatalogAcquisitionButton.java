@@ -8,6 +8,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 
 /**
  * An acquisition button.
@@ -38,15 +39,21 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
     final Resources rr = NullCheck.notNull(in_activity.getResources());
 
     switch (in_acq.getType()) {
+      case ACQUISITION_OPEN_ACCESS:
       case ACQUISITION_BORROW: {
-        this.setText(
-          NullCheck.notNull(
-            rr.getString(R.string.catalog_book_borrow)));
+        if (in_entry.getFeedEntry().getAvailability() instanceof OPDSAvailabilityHoldable) {
+          this.setText(
+            NullCheck.notNull(
+              rr.getString(R.string.catalog_book_reserve)));
+        } else {
+          this.setText(
+            NullCheck.notNull(
+              rr.getString(R.string.catalog_book_borrow)));
+        }
         break;
       }
       case ACQUISITION_BUY:
       case ACQUISITION_GENERIC:
-      case ACQUISITION_OPEN_ACCESS:
       case ACQUISITION_SAMPLE:
       case ACQUISITION_SUBSCRIBE: {
         this.setText(

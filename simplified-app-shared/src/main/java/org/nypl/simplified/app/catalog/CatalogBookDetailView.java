@@ -59,6 +59,7 @@ import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSCategory;
 import org.slf4j.Logger;
@@ -488,11 +489,11 @@ public final class CatalogBookDetailView implements Observer,
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
         this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN);
       this.book_download_buttons.addView(revoke, 0);
+    } else if (this.entry.get().getFeedEntry().getAvailability() instanceof OPDSAvailabilityOpenAccess) {
+      this.book_download_buttons.addView(
+        new CatalogBookDeleteButton(
+          this.activity, d.getID()));
     }
-
-    this.book_download_buttons.addView(
-      new CatalogBookDeleteButton(
-        this.activity, d.getID()));
 
     this.book_download_buttons.addView(
       new CatalogBookReadButton(

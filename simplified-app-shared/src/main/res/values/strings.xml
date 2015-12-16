@@ -46,7 +46,8 @@
   <string name="catalog_requesting_revoke">Requesting</string>
 
   <!-- Catalog book detail strings -->
-  <string name="catalog_book_borrow">Borrow</string>
+  <string name="catalog_book_borrow">Get</string>
+  <string name="catalog_book_reserve">Reserve</string>
   <string name="catalog_book_read">Read</string>
   <string name="catalog_book_error_dismiss">Dismiss</string>
   <string name="catalog_book_error_retry">Retry</string>
@@ -66,7 +67,7 @@
   <string name="catalog_book_availability_reserved_timed">Your reservation expires in %s.</string>
   <string name="catalog_book_availability_reserved_indefinite">You have this book reserved.</string>
   <string name="catalog_book_availability_loanable">This book is available for loan.</string>
-  <string name="catalog_book_availability_holdable">This book may be placed on hold.</string>
+  <string name="catalog_book_availability_holdable">All copies of this book are currently on loan.</string>
   <string name="catalog_book_availability_revoked">This book is waiting to be returned.</string>
   <string name="catalog_book_interval_days">days</string>
   <string name="catalog_book_interval_hours">hours</string>

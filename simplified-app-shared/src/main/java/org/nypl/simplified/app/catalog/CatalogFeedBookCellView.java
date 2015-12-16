@@ -52,6 +52,7 @@ import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -313,11 +314,11 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
         this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN);
       this.cell_buttons.addView(revoke, 0);
+    } else if (e.getFeedEntry().getAvailability() instanceof OPDSAvailabilityOpenAccess) {
+      this.cell_buttons.addView(
+        new CatalogBookDeleteButton(
+          this.activity, book_id));
     }
-
-    this.cell_buttons.addView(
-      new CatalogBookDeleteButton(
-        this.activity, book_id));
 
     this.cell_buttons.addView(
       new CatalogBookReadButton(
