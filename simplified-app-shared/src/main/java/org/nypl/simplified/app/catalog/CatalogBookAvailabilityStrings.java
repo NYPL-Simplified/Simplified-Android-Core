@@ -335,7 +335,7 @@ public final class CatalogBookAvailabilityStrings
       return String.format("%d %s", hours, base);
     }
 
-    final String base = r.getString(R.string.catalog_book_interval_hours);
+    final String base = r.getString(R.string.catalog_book_interval_days);
     return String.format("%d %s", TimeUnit.HOURS.toDays(hours), base);
   }
 
@@ -343,15 +343,7 @@ public final class CatalogBookAvailabilityStrings
     final Calendar in_start,
     final Calendar in_end)
   {
-    final Calendar start = Calendar.getInstance();
-    start.setTimeZone(start.getTimeZone());
-    start.setTimeInMillis(start.getTimeInMillis());
-
-    final Calendar end = Calendar.getInstance();
-    end.setTimeZone(end.getTimeZone());
-    end.setTimeInMillis(end.getTimeInMillis());
-
     return TimeUnit.MILLISECONDS.toHours(
-      Math.abs(end.getTimeInMillis() - start.getTimeInMillis()));
+      Math.abs(in_end.getTimeInMillis() - in_start.getTimeInMillis()));
   }
 }
