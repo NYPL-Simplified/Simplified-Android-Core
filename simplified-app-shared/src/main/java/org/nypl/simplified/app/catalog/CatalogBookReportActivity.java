@@ -1,9 +1,11 @@
 package org.nypl.simplified.app.catalog;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -50,12 +52,20 @@ public class CatalogBookReportActivity extends SimplifiedActivity
 
   @Override protected boolean navigationDrawerShouldShowIndicator()
   {
-    return true;
+    return false;
   }
 
   @Override protected SimplifiedPart navigationDrawerGetPart()
   {
     return SimplifiedPart.PART_CATALOG;
+  }
+
+  private void configureUpButton()
+  {
+    final ActionBar bar = this.getActionBar();
+    bar.setDisplayHomeAsUpEnabled(true);
+    bar.setHomeButtonEnabled(true);
+    bar.setTitle(this.getResources().getString(R.string.catalog_book_report));
   }
 
   /**
@@ -73,7 +83,14 @@ public class CatalogBookReportActivity extends SimplifiedActivity
     b.putSerializable(CatalogBookReportActivity.FEED_ENTRY, feed_entry);
     final Intent i = new Intent(from, CatalogBookReportActivity.class);
     i.putExtras(b);
+    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
     from.startActivity(i);
+  }
+
+  @Override protected void onResume()
+  {
+    super.onResume();
+    this.configureUpButton();
   }
 
   @Override protected void onCreate(
@@ -122,18 +139,6 @@ public class CatalogBookReportActivity extends SimplifiedActivity
       }
     }
 
-    final Button cancel_button = NullCheck.notNull(
-      (Button) layout.findViewById(R.id.report_cancel)
-    );
-    cancel_button.setOnClickListener(new View.OnClickListener()
-    {
-      @Override
-      public void onClick(final View view)
-      {
-        CatalogBookReportActivity.this.finish();
-      }
-    });
-
     final Button submit_button = NullCheck.notNull(
       (Button) layout.findViewById(R.id.report_submit)
     );
@@ -145,6 +150,29 @@ public class CatalogBookReportActivity extends SimplifiedActivity
         CatalogBookReportActivity.this.submitReport();
       }
     });
+  }
+
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item_mn)
+  {
+    final MenuItem item = NullCheck.notNull(item_mn);
+    switch (item.getItemId()) {
+
+      /**
+       * Configure the home button to simply close this activity.
+       */
+
+      case android.R.id.home: {
+        this.finish();
+        this.overridePendingTransition(0, 0);
+
+        return true;
+      }
+
+      default: {
+        return super.onOptionsItemSelected(item);
+      }
+    }
   }
 
   private void submitReport()

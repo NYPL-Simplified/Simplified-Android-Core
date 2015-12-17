@@ -99,6 +99,7 @@ public final class CatalogBookDetailView implements Observer,
   private final Activity                       activity;
   private final ViewGroup                      book_download;
   private final LinearLayout                   book_download_buttons;
+  private final Button                         book_download_report_button;
   private final TextView                       book_download_text;
   private final ViewGroup                      book_downloading;
   private final Button                         book_downloading_cancel;
@@ -223,6 +224,8 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download = bd;
     this.book_download_buttons = NullCheck.notNull(
       (LinearLayout) bd.findViewById(R.id.book_dialog_download_buttons));
+    this.book_download_report_button = NullCheck.notNull(
+      (Button) bd.findViewById(R.id.book_dialog_report_button));
     this.book_download_text = NullCheck.notNull(
       (TextView) bd.findViewById(R.id.book_dialog_download_text));
 
@@ -820,10 +823,6 @@ public final class CatalogBookDetailView implements Observer,
     CatalogAcquisitionButtons.addButtons(
         this.activity, this.book_download_buttons, this.books, e);
 
-    final CatalogBookReportButton report = new CatalogBookReportButton(
-        this.activity, e);
-    this.book_download_buttons.addView(report, this.book_download_buttons.getChildCount());
-
     CatalogBookDetailView.configureButtonsHeight(
       rr, this.book_download_buttons);
   }
@@ -924,6 +923,9 @@ public final class CatalogBookDetailView implements Observer,
           }
         });
     }
+
+    final Button report_button = this.book_download_report_button;
+    report_button.setOnClickListener(new CatalogBookReport(this.activity, e));
   }
 
   @Override public void update(
