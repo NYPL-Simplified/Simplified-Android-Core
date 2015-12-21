@@ -15,9 +15,9 @@
         android:tint="@color/button_foreground"/>
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1d"
+        android:text="14d"
         android:textSize="12dp"
         android:textColor="@drawable/simplified_button_text"
         android:id="@+id/catalog_button_expiry_date"
