@@ -60,38 +60,45 @@ public final class CatalogBookAvailabilityStrings
     return s.matchAvailability(
       new OPDSAvailabilityMatcherType<String, UnreachableCodeException>()
       {
-        @Override public String onHeldReady(final OPDSAvailabilityHeldReady a)
+        @Override
+        public String onHeldReady(final OPDSAvailabilityHeldReady a)
         {
           return CatalogBookAvailabilityStrings.onReserved(a.getEndDate(), r);
         }
 
-        @Override public String onHeld(final OPDSAvailabilityHeld a)
+        @Override
+        public String onHeld(final OPDSAvailabilityHeld a)
         {
           return CatalogBookAvailabilityStrings.onHeld(
             a.getEndDate(), a.getPosition(), r);
         }
 
-        @Override public String onHoldable(final OPDSAvailabilityHoldable a)
+        @Override
+        public String onHoldable(final OPDSAvailabilityHoldable a)
         {
           return CatalogBookAvailabilityStrings.onHoldable(r);
         }
 
-        @Override public String onLoaned(final OPDSAvailabilityLoaned a)
+        @Override
+        public String onLoaned(final OPDSAvailabilityLoaned a)
         {
           return CatalogBookAvailabilityStrings.onLoaned(a.getEndDate(), r);
         }
 
-        @Override public String onLoanable(final OPDSAvailabilityLoanable a)
+        @Override
+        public String onLoanable(final OPDSAvailabilityLoanable a)
         {
           return CatalogBookAvailabilityStrings.onLoanable(r);
         }
 
-        @Override public String onOpenAccess(final OPDSAvailabilityOpenAccess a)
+        @Override
+        public String onOpenAccess(final OPDSAvailabilityOpenAccess a)
         {
           return CatalogBookAvailabilityStrings.onOpenAccess(r);
         }
 
-        @Override public String onRevoked(final OPDSAvailabilityRevoked a)
+        @Override
+        public String onRevoked(final OPDSAvailabilityRevoked a)
         {
           return CatalogBookAvailabilityStrings.onRevoked(r);
         }
@@ -127,13 +134,15 @@ public final class CatalogBookAvailabilityStrings
     return s.matchBookStatus(
       new BookStatusMatcherType<String, UnreachableCodeException>()
       {
-        @Override public String onBookStatusHoldable(
+        @Override
+        public String onBookStatusHoldable(
           final BookStatusHoldable s)
         {
           return CatalogBookAvailabilityStrings.onHoldable(r);
         }
 
-        @Override public String onBookStatusHeld(
+        @Override
+        public String onBookStatusHeld(
           final BookStatusHeld s)
         {
           final OptionType<Calendar> end_date_opt = s.getEndDate();
@@ -142,33 +151,38 @@ public final class CatalogBookAvailabilityStrings
             end_date_opt, queue_opt, r);
         }
 
-        @Override public String onBookStatusHeldReady(
+        @Override
+        public String onBookStatusHeldReady(
           final BookStatusHeldReady s)
         {
           return CatalogBookAvailabilityStrings.onReserved(
             s.getExpiryDate(), r);
         }
 
-        @Override public String onBookStatusLoanedType(
+        @Override
+        public String onBookStatusLoanedType(
           final BookStatusLoanedType s)
         {
           return CatalogBookAvailabilityStrings.onLoaned(
             s.getLoanExpiryDate(), r);
         }
 
-        @Override public String onBookStatusRequestingLoan(
+        @Override
+        public String onBookStatusRequestingLoan(
           final BookStatusRequestingLoan s)
         {
           return "";
         }
 
-        @Override public String onBookStatusRequestingRevoke(
+        @Override
+        public String onBookStatusRequestingRevoke(
           final BookStatusRequestingRevoke s)
         {
           return "";
         }
 
-        @Override public String onBookStatusLoanable(
+        @Override
+        public String onBookStatusLoanable(
           final BookStatusLoanable s)
         {
           return CatalogBookAvailabilityStrings.onLoanable(r);
@@ -180,7 +194,8 @@ public final class CatalogBookAvailabilityStrings
           return "";
         }
 
-        @Override public String onBookStatusRevoked(final BookStatusRevoked s)
+        @Override
+        public String onBookStatusRevoked(final BookStatusRevoked s)
           throws UnreachableCodeException
         {
           return CatalogBookAvailabilityStrings.onRevoked(r);
@@ -337,6 +352,54 @@ public final class CatalogBookAvailabilityStrings
 
     final String base = r.getString(R.string.catalog_book_interval_days);
     return String.format("%d %s", TimeUnit.HOURS.toDays(hours), base);
+  }
+
+  /**
+   * Construct a short time interval string like "3w", with units up to a year.
+   *
+   * @param r The application resources
+   * @param lower The lower bound of the time period
+   * @param upper The upper bound of the time period
+   *
+   * @return A time interval string
+   */
+  public static String getIntervalStringShort(
+    final Resources r,
+    final Calendar lower,
+    final Calendar upper)
+  {
+    NullCheck.notNull(r);
+    NullCheck.notNull(lower);
+    NullCheck.notNull(upper);
+
+    final long hours =
+      CatalogBookAvailabilityStrings.calendarHoursBetween(lower, upper);
+    final long days = TimeUnit.HOURS.toDays(hours);
+    final long weeks = days / 7;
+    final long months = days / 30;
+    final long years = days / 365;
+
+    String unit = "";
+    long value = 0;
+
+    if (years > 0) {
+      unit = r.getString(R.string.catalog_book_interval_years_short);
+      value = years;
+    } else if (weeks > 8) {
+      unit = r.getString(R.string.catalog_book_interval_months_short);
+      value = months;
+    } else if (weeks > 0) {
+      unit = r.getString(R.string.catalog_book_interval_weeks_short);
+      value = weeks;
+    } else if (days > 0) {
+      unit = r.getString(R.string.catalog_book_interval_days_short);
+      value = days;
+    } else {
+      unit = r.getString(R.string.catalog_book_interval_hours_short);
+      value = hours;
+    }
+
+    return String.format("%d%s", value, unit);
   }
 
   private static long calendarHoursBetween(

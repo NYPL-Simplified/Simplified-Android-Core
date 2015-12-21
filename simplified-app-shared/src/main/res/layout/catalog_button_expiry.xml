@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center_vertical"
+              android:layout_marginRight="8dp">
+
+    <ImageView
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:id="@+id/clock_icon"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/clock_icon"
+        android:tint="@color/button_foreground"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1d"
+        android:textSize="12dp"
+        android:textColor="@drawable/simplified_button_text"
+        android:id="@+id/catalog_button_expiry_date"
+        android:layout_gravity="center_horizontal"/>
+</LinearLayout>

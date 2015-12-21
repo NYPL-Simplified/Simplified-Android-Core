@@ -40,20 +40,20 @@ public final class CatalogBookRevokeButton extends CatalogLeftPaddedButton
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     switch (in_revoke_type) {
       case REVOKE_LOAN: {
-        this.setText(
+        this.getTextView().setText(
           NullCheck.notNull(rr.getString(R.string.catalog_book_revoke_loan)));
         break;
       }
       case REVOKE_HOLD: {
-        this.setText(
+        this.getTextView().setText(
           NullCheck.notNull(rr.getString(R.string.catalog_book_revoke_hold)));
         break;
       }
     }
 
-    this.setTextSize(12.0f);
+    this.getTextView().setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
-    this.setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
+    this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
 
     this.setOnClickListener(
       new OnClickListener()

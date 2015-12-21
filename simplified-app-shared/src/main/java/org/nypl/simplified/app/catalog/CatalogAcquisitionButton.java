@@ -2,13 +2,22 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.content.res.Resources;
+
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
+import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
+import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
+import org.nypl.simplified.opds.core.OPDSAvailabilityType;
+
+import java.util.Calendar;
 
 /**
  * An acquisition button.
@@ -38,15 +47,17 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
 
+    final OPDSAvailabilityType availability = in_entry.getFeedEntry().getAvailability();
+
     switch (in_acq.getType()) {
       case ACQUISITION_OPEN_ACCESS:
       case ACQUISITION_BORROW: {
-        if (in_entry.getFeedEntry().getAvailability() instanceof OPDSAvailabilityHoldable) {
-          this.setText(
+        if (availability instanceof OPDSAvailabilityHoldable) {
+          this.getTextView().setText(
             NullCheck.notNull(
               rr.getString(R.string.catalog_book_reserve)));
         } else {
-          this.setText(
+          this.getTextView().setText(
             NullCheck.notNull(
               rr.getString(R.string.catalog_book_borrow)));
         }
@@ -56,16 +67,28 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
       case ACQUISITION_GENERIC:
       case ACQUISITION_SAMPLE:
       case ACQUISITION_SUBSCRIBE: {
-        this.setText(
+        this.getTextView().setText(
           NullCheck.notNull(
             rr.getString(R.string.catalog_book_download)));
         break;
       }
     }
 
-    this.setTextSize(12.0f);
+    OptionType<Calendar> end_date = Option.none();
+    if (availability instanceof OPDSAvailabilityLoaned) {
+      end_date = ((OPDSAvailabilityLoaned) availability).getEndDate();
+    } else if (availability instanceof OPDSAvailabilityHeldReady) {
+      end_date = ((OPDSAvailabilityHeldReady) availability).getEndDate();
+    }
+    if (end_date.isSome()) {
+      final CatalogButtonExpiryView expiry_view = new CatalogButtonExpiryView(in_activity);
+      expiry_view.setDate(((Some<Calendar>) end_date).get());
+      this.addView(expiry_view, 0);
+    }
+
+    this.getTextView().setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
-    this.setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
+    this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
     this.setOnClickListener(
       new CatalogAcquisitionButtonController(
         in_activity, in_books, in_book_id, in_acq, in_entry));
