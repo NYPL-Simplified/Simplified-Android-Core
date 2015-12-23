@@ -154,7 +154,7 @@ public final class Simplified extends Application
 
     final File r = context.getFilesDir();
     Simplified.LOG.debug(
-      "no non-removable external storage, using internal storage ({})");
+      "no non-removable external storage, using internal storage ({})", r);
     Assertions.checkPrecondition(
       r.isDirectory(), "Data directory {} is a directory", r);
     return NullCheck.notNull(r);
