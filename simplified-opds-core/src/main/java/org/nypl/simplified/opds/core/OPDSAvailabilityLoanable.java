@@ -1,5 +1,10 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+
+import java.util.Calendar;
+
 /**
  * The book is available for borrowing.
  */
@@ -16,6 +21,15 @@ public final class OPDSAvailabilityLoanable implements OPDSAvailabilityType
   private OPDSAvailabilityLoanable()
   {
 
+  }
+
+  /**
+   * Get availability end date (always none for Loanable)
+   * @return end_date
+   */
+  public OptionType<Calendar> getEndDate()
+  {
+    return Option.none();
   }
 
   /**

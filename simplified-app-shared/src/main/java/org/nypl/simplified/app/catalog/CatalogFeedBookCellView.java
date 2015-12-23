@@ -322,7 +322,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_buttons.addView(
       new CatalogBookReadButton(
-        this.activity, book_id));
+        this.activity, book_id, this.entry.get()));
 
     return Unit.unit();
   }

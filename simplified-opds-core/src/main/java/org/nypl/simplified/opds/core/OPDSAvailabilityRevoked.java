@@ -1,8 +1,11 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 import java.net.URI;
+import java.util.Calendar;
 
 /**
  * The has been revoked via whatever DRM system it uses, but the server has yet
@@ -29,6 +32,15 @@ public final class OPDSAvailabilityRevoked implements OPDSAvailabilityType
     final URI revoke)
   {
     return new OPDSAvailabilityRevoked(revoke);
+  }
+
+  /**
+   * Get availability end date (always none for Revoked)
+   * @return end_date
+   */
+  public OptionType<Calendar> getEndDate()
+  {
+    return Option.none();
   }
 
   @Override public String toString()

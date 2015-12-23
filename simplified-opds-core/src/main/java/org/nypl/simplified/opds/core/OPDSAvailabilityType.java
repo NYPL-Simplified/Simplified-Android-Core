@@ -1,6 +1,9 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jfunctional.OptionType;
+
 import java.io.Serializable;
+import java.util.Calendar;
 
 /**
  * <p> The type of book availability. </p> <p> OPDS does not have a standard way
@@ -10,6 +13,14 @@ import java.io.Serializable;
 
 public interface OPDSAvailabilityType extends Serializable
 {
+
+  /**
+   * The date when the availability expires, if there is one
+   *
+   * @return end_date
+   */
+  OptionType<Calendar> getEndDate();
+
   /**
    * Match the type of availability.
    *

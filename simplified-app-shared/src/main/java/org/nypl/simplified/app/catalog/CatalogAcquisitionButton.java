@@ -3,7 +3,6 @@ package org.nypl.simplified.app.catalog;
 import android.app.Activity;
 import android.content.res.Resources;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -12,9 +11,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
 import java.util.Calendar;
@@ -74,12 +71,7 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
       }
     }
 
-    OptionType<Calendar> end_date = Option.none();
-    if (availability instanceof OPDSAvailabilityLoaned) {
-      end_date = ((OPDSAvailabilityLoaned) availability).getEndDate();
-    } else if (availability instanceof OPDSAvailabilityHeldReady) {
-      end_date = ((OPDSAvailabilityHeldReady) availability).getEndDate();
-    }
+    final OptionType<Calendar> end_date = availability.getEndDate();
     if (end_date.isSome()) {
       final CatalogButtonExpiryView expiry_view = new CatalogButtonExpiryView(in_activity);
       expiry_view.setDate(((Some<Calendar>) end_date).get());

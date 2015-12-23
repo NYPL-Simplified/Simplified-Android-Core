@@ -500,7 +500,7 @@ public final class CatalogBookDetailView implements Observer,
 
     this.book_download_buttons.addView(
       new CatalogBookReadButton(
-        this.activity, d.getID()));
+        this.activity, d.getID(), this.entry.get()));
 
     this.book_download_buttons.setVisibility(View.VISIBLE);
 

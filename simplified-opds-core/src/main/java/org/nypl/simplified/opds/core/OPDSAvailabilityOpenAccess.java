@@ -1,9 +1,11 @@
 package org.nypl.simplified.opds.core;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 import java.net.URI;
+import java.util.Calendar;
 
 /**
  * The book is public domain.
@@ -17,6 +19,15 @@ public final class OPDSAvailabilityOpenAccess implements OPDSAvailabilityType
   private OPDSAvailabilityOpenAccess(final OptionType<URI> in_revoke)
   {
     this.revoke = NullCheck.notNull(in_revoke);
+  }
+
+  /**
+   * Get availability end date (always none for OpenAccess)
+   * @return end_date
+   */
+  public OptionType<Calendar> getEndDate()
+  {
+    return Option.none();
   }
 
   /**
