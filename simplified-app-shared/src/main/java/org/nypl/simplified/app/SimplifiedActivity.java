@@ -430,7 +430,9 @@ public abstract class SimplifiedActivity extends Activity
       final ConnectivityManager connectivity_manager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
       final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
       if (network_info != null && network_info.isConnected()) {
-        app.getBooks().accountActivateDevice();
+        // This is commented out because it turns out that activating the device on startup breaks
+        // decryption until a book is fulfilled.
+        //app.getBooks().accountActivateDevice();
         SimplifiedActivity.DEVICE_ACTIVATED = true;
       }
     }
