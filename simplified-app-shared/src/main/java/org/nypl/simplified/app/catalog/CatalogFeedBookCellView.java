@@ -445,8 +445,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
-    CatalogAcquisitionButtons.addButtons(
-      this.activity, this.cell_buttons, this.books, fe);
+    this.cell_buttons.setVisibility(View.VISIBLE);
+    this.cell_buttons.removeAllViews();
 
     if (s.isRevocable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
@@ -496,6 +496,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
+
+    this.cell_buttons.setVisibility(View.VISIBLE);
+    this.cell_buttons.removeAllViews();
 
     CatalogAcquisitionButtons.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
@@ -572,6 +575,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_downloading_failed.setVisibility(View.INVISIBLE);
     this.setDebugCellText("loaned");
 
+    this.cell_buttons.setVisibility(View.VISIBLE);
+    this.cell_buttons.removeAllViews();
+
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
@@ -606,6 +612,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.setDebugCellText("none");
 
     this.loadImageAndSetVisibility(in_entry);
+
+    this.cell_buttons.setVisibility(View.VISIBLE);
+    this.cell_buttons.removeAllViews();
 
     CatalogAcquisitionButtons.addButtons(
       this.activity, this.cell_buttons, this.books, in_entry);
