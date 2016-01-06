@@ -33,7 +33,7 @@ public abstract class CatalogLeftPaddedButton extends LinearLayout
       Simplified.getCatalogAppServices();
     final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
       android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-      34);
+      (int) ss.screenDPToPixels(34));
     lp.leftMargin = (int) ss.screenDPToPixels(8);
     this.setLayoutParams(lp);
     this.text_view = new TextView(context);
