@@ -74,6 +74,29 @@ public final class HTTPProblemReport
   }
 
   /**
+   * @return The "detail" field from the problem document
+   */
+  public String getProblemDetail()
+  {
+    if (this.raw.has("detail")) {
+      return this.raw.get("detail").asText();
+    }
+    return null;
+  }
+
+  /**
+   * @return The "title" field from the problem document
+   */
+  public String getProblemTitle()
+  {
+    if (this.raw.has("title")) {
+      return this.raw.get("title").asText();
+    }
+    return null;
+  }
+
+
+  /**
    * @return The problem type from the JSON data
    */
 

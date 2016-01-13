@@ -191,7 +191,7 @@ public final class HTTP implements HTTPType
     throws IOException
   {
     final OptionType<HTTPProblemReport> report;
-    if ("application/problem+json".equals(conn.getContentType())) {
+    if ("application/api-problem+json".equals(conn.getContentType())) {
       final HTTPProblemReport r =
         HTTPProblemReport.fromStream(conn.getErrorStream());
       report = Option.some(r);
