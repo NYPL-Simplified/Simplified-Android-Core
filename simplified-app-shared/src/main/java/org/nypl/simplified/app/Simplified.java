@@ -76,6 +76,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -704,8 +705,18 @@ public final class Simplified extends Application
 
       this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
 
+      // Fallback port
+      Integer port = 8080;
+      try {
+        final ServerSocket s = new ServerSocket(0);
+        port = s.getLocalPort();
+        s.close();
+      } catch (IOException e) {
+        // Ignore
+      }
+
       this.httpd =
-        ReaderHTTPServerAAsync.newServer(context.getAssets(), this.mime, 8080);
+        ReaderHTTPServerAAsync.newServer(context.getAssets(), this.mime, port);
 
       this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       this.epub_loader =
