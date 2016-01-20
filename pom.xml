@@ -304,8 +304,7 @@
       <dependency>
         <groupId>com.bugsnag</groupId>
         <artifactId>bugsnag-android</artifactId>
-        <version>LATEST</version>
-        <type>aar</type>
+        <version>3.2.7</version>
       </dependency>
 
     </dependencies>

@@ -54,7 +54,6 @@
         <dependency>
             <groupId>com.bugsnag</groupId>
             <artifactId>bugsnag-android</artifactId>
-            <version>LATEST</version>
         </dependency>
     </dependencies>
 
