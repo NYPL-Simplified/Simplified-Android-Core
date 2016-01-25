@@ -12,7 +12,9 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    android:textColor="@color/normal_text_major"
+    android:textColor="@color/normal_text_minor"
+    android:textSize="21dp"
+    android:textStyle="bold"
     android:text="@string/holds_empty" />
 
 </FrameLayout>

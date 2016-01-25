@@ -44,6 +44,6 @@ public final class MainBooksActivity extends MainLocalFeedActivity
 
   @Override protected String catalogFeedGetEmptyText()
   {
-    return this.getResources().getString(R.string.catalog_empty_feed);
+    return this.getResources().getString(R.string.catalog_empty_my_books);
   }
 }
