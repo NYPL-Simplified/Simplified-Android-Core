@@ -23,9 +23,10 @@
 
     <!-- Main entry point for the application. -->
     <activity
-      android:name="org.nypl.simplified.app.MainSplashActivity"
+      android:name="org.nypl.labs.OpenEbooks.app.OESplashActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/feature_app_name">
+      android:label="@string/feature_app_name"
+      android:theme="@style/SimplifiedThemeNoActionBar">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
@@ -73,6 +74,14 @@
       android:configChanges="orientation|screenSize"
       android:label="@string/feature_app_name"
       android:exported="true">
+    </activity>
+
+    <!-- Open eBooks-specific -->
+    <activity
+        android:name="org.nypl.labs.OpenEbooks.app.OEIntroActivity"
+        android:configChanges="orientation|screenSize"
+        android:theme="@style/SimplifiedThemeNoActionBar"
+        android:exported="false">
     </activity>
 
     <!-- Catalog -->

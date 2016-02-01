@@ -19,10 +19,35 @@
 
   <dependencies>
     <dependency>
+      <groupId>android</groupId>
+      <artifactId>android</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>android.support</groupId>
+      <artifactId>compatibility-v13</artifactId>
+      <version>23.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-app-shared</artifactId>
       <version>${project.version}</version>
       <type>aar</type>
+    </dependency>
+
+    <dependency>
+      <groupId>com.viewpagerindicator</groupId>
+      <artifactId>library</artifactId>
+      <version>2.4.1</version>
+      <type>apklib</type>
+      <exclusions>
+        <exclusion>
+          <groupId>android</groupId>
+          <artifactId>android</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 

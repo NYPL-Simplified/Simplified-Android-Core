@@ -21,7 +21,7 @@ import java.util.TimerTask;
  * already agreed to the license.
  */
 
-public final class MainSplashActivity extends Activity
+public class MainSplashActivity extends Activity
 {
   private static final Logger LOG;
 
@@ -66,14 +66,14 @@ public final class MainSplashActivity extends Activity
       final EULAType eula = some_eula.get();
       if (eula.eulaHasAgreed()) {
         MainSplashActivity.LOG.debug("EULA: agreed");
-        this.openCatalog();
+        this.afterEULA();
       } else {
         MainSplashActivity.LOG.debug("EULA: not agreed");
         this.openEULA();
       }
     } else {
       MainSplashActivity.LOG.debug("EULA: unavailable");
-      this.openCatalog();
+      this.afterEULA();
     }
   }
 
@@ -91,5 +91,10 @@ public final class MainSplashActivity extends Activity
     this.startActivity(i);
     this.overridePendingTransition(0, 0);
     this.finish();
+  }
+
+  protected void afterEULA()
+  {
+    this.openCatalog();
   }
 }
