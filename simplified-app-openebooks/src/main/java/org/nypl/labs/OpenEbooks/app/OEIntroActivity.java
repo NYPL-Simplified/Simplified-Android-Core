@@ -52,9 +52,10 @@ public class OEIntroActivity extends Activity implements IntroListenerType
     startActivity(browserIntent);
   }
 
-  private class IntroPagerAdapter extends FragmentPagerAdapter {
-    public IntroPagerAdapter(
-      FragmentManager fm)
+  private class IntroPagerAdapter extends FragmentPagerAdapter
+  {
+
+    public IntroPagerAdapter(FragmentManager fm)
     {
       super(fm);
     }
