@@ -38,7 +38,8 @@ public class MainSplashActivity extends Activity
 
   }
 
-  @Override protected void onCreate(final Bundle state)
+  @Override
+  protected void onCreate(final Bundle state)
   {
     super.onCreate(state);
     this.setContentView(R.layout.splash);
@@ -47,14 +48,23 @@ public class MainSplashActivity extends Activity
     timer.schedule(
       new TimerTask()
       {
-        @Override public void run()
+        @Override
+        public void run()
         {
-          MainSplashActivity.this.finishSplash();
+          MainSplashActivity.this.finishSplash(true);
         }
       }, 2000L);
   }
 
-  private void finishSplash()
+  @Override
+  protected void onRestart()
+  {
+    super.onRestart();
+    this.finishSplash(false);
+  }
+
+  private void finishSplash(
+    final boolean showEULA)
   {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -69,7 +79,11 @@ public class MainSplashActivity extends Activity
         this.afterEULA();
       } else {
         MainSplashActivity.LOG.debug("EULA: not agreed");
-        this.openEULA();
+        if (showEULA) {
+          this.openEULA();
+        } else {
+          this.finish();
+        }
       }
     } else {
       MainSplashActivity.LOG.debug("EULA: unavailable");
@@ -82,7 +96,6 @@ public class MainSplashActivity extends Activity
     final Intent i = new Intent(this, MainEULAActivity.class);
     this.startActivity(i);
     this.overridePendingTransition(0, 0);
-    this.finish();
   }
 
   private void openCatalog()

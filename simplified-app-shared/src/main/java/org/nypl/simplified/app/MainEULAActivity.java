@@ -134,16 +134,7 @@ public final class MainEULAActivity extends Activity
   private void eulaAccepted(final EULAType eula)
   {
     eula.eulaSetHasAgreed(true);
-    MainEULAActivity.this.openCatalog();
-  }
-
-  private void openCatalog()
-  {
-    final Intent i = new Intent(this, MainCatalogActivity.class);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-    i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-    this.startActivity(i);
-    this.finish();
-    this.overridePendingTransition(0, 0);
+    // Go back to Splash activity, which will take us to the catalog or intro
+    MainEULAActivity.this.finish();
   }
 }

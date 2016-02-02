@@ -20,11 +20,11 @@ public class OESplashActivity extends MainSplashActivity
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final AccountsControllerType accounts = app.getBooks();
-//    if (accounts.accountIsLoggedIn()) {
-//      super.afterEULA();
-//    } else {
+    if (accounts.accountIsLoggedIn()) {
+      super.afterEULA();
+    } else {
       this.openTutorial();
-//    }
+    }
   }
 
   private void openTutorial()
