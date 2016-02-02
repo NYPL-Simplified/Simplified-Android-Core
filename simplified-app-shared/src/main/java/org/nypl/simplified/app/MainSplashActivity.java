@@ -64,7 +64,7 @@ public class MainSplashActivity extends Activity
   }
 
   private void finishSplash(
-    final boolean showEULA)
+    final boolean show_eula)
   {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -79,7 +79,7 @@ public class MainSplashActivity extends Activity
         this.afterEULA();
       } else {
         MainSplashActivity.LOG.debug("EULA: not agreed");
-        if (showEULA) {
+        if (show_eula) {
           this.openEULA();
         } else {
           this.finish();

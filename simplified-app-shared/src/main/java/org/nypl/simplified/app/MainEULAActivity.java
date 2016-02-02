@@ -13,7 +13,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import org.nypl.drm.core.Assertions;
-import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 
