@@ -44,11 +44,11 @@ public class BugsnagWrapper implements BugsnagType
   /**
    * Add diagnostic information to every error report.
    * Diagnostic information is collected in "tabs" on your dashboard.
-   * <p/>
-   * For example:
-   * <p/>
+   * <p>For example:</p>
+   * <pre>
    * Bugsnag.addToTab("account", "name", "Acme Co.");
    * Bugsnag.addToTab("account", "payingCustomer", true);
+   * </pre>
    *
    * @param tab   the dashboard tab to add diagnostic data to
    * @param key   the name of the diagnostic information
