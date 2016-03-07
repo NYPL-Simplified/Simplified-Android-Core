@@ -9,6 +9,7 @@ import com.io7m.jfunctional.Pair;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.books.core.LogUtilities;
@@ -55,6 +56,7 @@ public abstract class CatalogActivity extends SimplifiedActivity
 
     final ActionBar bar = this.getActionBar();
     if (up_stack.isEmpty() == false) {
+      bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
       bar.setDisplayHomeAsUpEnabled(true);
       bar.setHomeButtonEnabled(true);
     }
@@ -77,47 +79,6 @@ public abstract class CatalogActivity extends SimplifiedActivity
     final ImmutableStack<CatalogFeedArgumentsType> empty =
       ImmutableStack.empty();
     return NullCheck.notNull(empty);
-  }
-
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item_mn)
-  {
-    final MenuItem item = NullCheck.notNull(item_mn);
-    switch (item.getItemId()) {
-
-      /**
-       * Configure the home button to start a new activity with a popped
-       * up-stack.
-       */
-
-      case android.R.id.home: {
-        final ImmutableStack<CatalogFeedArgumentsType> us = this.getUpStack();
-
-        /**
-         * If the stack is non-empty, then the user is not at the root of the
-         * catalog. If it is empty, then the button is only enabled to control
-         * the navigation drawer and therefore the event should be propagated.
-         */
-
-        if (us.isEmpty() == false) {
-          CatalogActivity.LOG.debug("up stack before pop: {}", us);
-
-          final Pair<CatalogFeedArgumentsType,
-            ImmutableStack<CatalogFeedArgumentsType>>
-            p = us.pop();
-
-          final CatalogFeedArgumentsType top = p.getLeft();
-          this.catalogActivityForkNew(top);
-          return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-      }
-
-      default: {
-        return super.onOptionsItemSelected(item);
-      }
-    }
   }
 
   @Override protected void onResume()

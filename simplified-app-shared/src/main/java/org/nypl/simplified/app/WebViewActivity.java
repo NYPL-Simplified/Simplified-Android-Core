@@ -115,6 +115,7 @@ public final class WebViewActivity extends SimplifiedActivity
 
     final ActionBar bar = this.getActionBar();
     bar.setTitle(title);
+    bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
     bar.setDisplayHomeAsUpEnabled(true);
     bar.setHomeButtonEnabled(true);
 
@@ -128,25 +129,5 @@ public final class WebViewActivity extends SimplifiedActivity
     settings.setBlockNetworkLoads(true);
 
     this.web_view.loadUrl(uri);
-  }
-
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item_mn)
-  {
-    final MenuItem item = NullCheck.notNull(item_mn);
-    switch (item.getItemId()) {
-
-      /**
-       * Configure the home button to finish the activity.
-       */
-
-      case android.R.id.home: {
-        this.finish();
-        this.overridePendingTransition(0, 0);
-        return true;
-      }
-    }
-
-    return super.onOptionsItemSelected(item);
   }
 }

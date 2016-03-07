@@ -158,8 +158,64 @@ public abstract class SimplifiedActivity extends Activity
        * transition animation.
        */
 
-      this.finishWithConditionalAnimationOverride();
+
+      if (SimplifiedActivity.ACTIVITY_COUNT == 1)
+      {
+
+        if (this.getClass() != MainCatalogActivity.class ) {
+          // got to main catalog activity
+          //final DrawerLayout d = NullCheck.notNull(this.drawer);
+          this.selected = 0;
+          startSideBarActivity();
+
+
+        }
+        else
+        {
+          d.openDrawer(GravityCompat.START);
+        }
+      }
+      else {
+        this.finishWithConditionalAnimationOverride();
+      }
     }
+  }
+
+  private void startSideBarActivity() {
+    if (this.selected != -1) {
+      final List<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
+      final Map<SimplifiedPart, Class<? extends Activity>> dc =
+              NullCheck.notNull(this.drawer_classes_by_name);
+      final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
+              NullCheck.notNull(this.drawer_arg_funcs);
+
+      final SimplifiedPart name = NullCheck.notNull(di.get(this.selected));
+      final Class<? extends Activity> c = NullCheck.notNull(dc.get(name));
+      final FunctionType<Bundle, Unit> fa = NullCheck.notNull(fas.get(name));
+
+      final Bundle b = new Bundle();
+      SimplifiedActivity.setActivityArguments(b, false);
+      fa.call(b);
+
+      final Intent i = new Intent();
+      i.setClass(this, c);
+      i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+      //TODO AM: // reset menu // temporary fix
+      i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+      i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+
+      i.putExtras(b);
+      this.startActivity(i);
+
+      //TODO AM: // hide task transitions // temporary fix
+      this.overridePendingTransition(0, 0);
+
+    }
+    this.selected = -1;
+
   }
 
   @Override protected void onCreate(
@@ -466,29 +522,8 @@ public abstract class SimplifiedActivity extends Activity
      * relevant activity.
      */
 
-    if (this.selected != -1) {
-      final List<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
-      final Map<SimplifiedPart, Class<? extends Activity>> dc =
-        NullCheck.notNull(this.drawer_classes_by_name);
-      final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
-        NullCheck.notNull(this.drawer_arg_funcs);
+    startSideBarActivity();
 
-      final SimplifiedPart name = NullCheck.notNull(di.get(this.selected));
-      final Class<? extends Activity> c = NullCheck.notNull(dc.get(name));
-      final FunctionType<Bundle, Unit> fa = NullCheck.notNull(fas.get(name));
-
-      final Bundle b = new Bundle();
-      SimplifiedActivity.setActivityArguments(b, false);
-      fa.call(b);
-
-      final Intent i = new Intent();
-      i.setClass(this, c);
-      i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-      i.putExtras(b);
-      this.startActivity(i);
-    }
-
-    this.selected = -1;
   }
 
   @Override public final void onDrawerOpened(

@@ -453,6 +453,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   {
     final ActionBar bar = this.getActionBar();
     if (up_stack.isEmpty() == false) {
+      bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
       bar.setDisplayHomeAsUpEnabled(true);
       bar.setHomeButtonEnabled(true);
       bar.setTitle(title);
