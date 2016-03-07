@@ -25,7 +25,8 @@
     <activity
       android:name="org.nypl.simplified.app.MainSplashActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/feature_app_name">
+      android:label="@string/feature_app_name"
+      android:theme="@style/SimplifiedThemeNoActionBar">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
