@@ -573,7 +573,7 @@ public final class BookDatabase implements BookDatabaseType
 
       BookDatabase.LOG.debug("[{}]: fetching cover", sid);
       final OptionType<File> cover =
-        BookDatabase.makeCover(http, this.id, e.getCover());
+        BookDatabase.makeCover(http, this.id, e.getThumbnail());
       this.entrySetCover(cover);
 
       BookDatabase.LOG.debug("[{}]: getting snapshot", sid);
