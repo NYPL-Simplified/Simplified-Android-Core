@@ -18,6 +18,12 @@ public interface DocumentStoreType
    * @return The application acknowledgements, if any.
    */
 
+  OptionType<SyncedDocumentType> getAbout();
+
+  /**
+   * @return The application acknowledgements, if any.
+   */
+
   OptionType<SyncedDocumentType> getAcknowledgements();
 
   /**

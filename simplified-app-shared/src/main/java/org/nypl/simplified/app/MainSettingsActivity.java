@@ -540,6 +540,50 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
      * Enable/disable the acknowledgements field.
      */
 
+    final View settings_about_divider =
+            NullCheck.notNull((View) this.findViewById(R.id.settings_about_divider));
+
+    final TextView in_about =
+            NullCheck.notNull((TextView) this.findViewById(R.id.settings_about));
+    in_about.setEnabled(false);
+
+    if (docs.getAbout().isNone())
+    {
+      // remove about and divider if there is nowthing to show.
+      ((ViewGroup) settings_about_divider.getParent()).removeView(settings_about_divider);
+      ((ViewGroup) in_about.getParent()).removeView(in_about);
+    }
+
+    docs.getAbout().map_(
+            new ProcedureType<SyncedDocumentType>() {
+              @Override
+              public void call(final SyncedDocumentType ack) {
+                in_about.setEnabled(true);
+                in_about.setOnClickListener(
+                        new OnClickListener() {
+                          @Override
+                          public void onClick(final View v) {
+                            final Intent i = new Intent(
+                                    MainSettingsActivity.this, WebViewActivity.class);
+                            final Bundle b = new Bundle();
+                            WebViewActivity.setActivityArguments(
+                                    b,
+                                    ack.documentGetReadableURL().toString(),
+                                    resources.getString(R.string.settings_about),
+                                    SimplifiedPart.PART_SETTINGS);
+                            i.putExtras(b);
+                            MainSettingsActivity.this.startActivity(i);
+                            MainSettingsActivity.this.overridePendingTransition(0, 0);
+                          }
+                        });
+              }
+            });
+
+
+    /**
+     * Enable/disable the acknowledgements field.
+     */
+
     final TextView in_acknowledgements =
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_credits));
     in_acknowledgements.setEnabled(false);

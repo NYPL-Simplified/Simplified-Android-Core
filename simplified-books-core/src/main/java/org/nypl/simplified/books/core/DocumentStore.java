@@ -40,6 +40,7 @@ public final class DocumentStore implements DocumentStoreType
   }
 
   private final OptionType<SyncedDocumentType> privacy;
+  private final OptionType<SyncedDocumentType> about;
   private final OptionType<SyncedDocumentType> acknowledgement;
   private final AuthenticationDocumentType     authentication;
   private final OptionType<EULAType>           eula;
@@ -47,10 +48,12 @@ public final class DocumentStore implements DocumentStoreType
   private DocumentStore(
     final OptionType<SyncedDocumentType> in_acknowledgement,
     final OptionType<SyncedDocumentType> in_privacy,
+    final OptionType<SyncedDocumentType> in_about,
     final AuthenticationDocumentType in_authentication,
     final OptionType<EULAType> in_eula)
   {
     this.acknowledgement = NullCheck.notNull(in_acknowledgement);
+    this.about = NullCheck.notNull(in_about);
     this.privacy = NullCheck.notNull(in_privacy);
     this.authentication = NullCheck.notNull(in_authentication);
     this.eula = NullCheck.notNull(in_eula);
@@ -156,6 +159,11 @@ public final class DocumentStore implements DocumentStoreType
     return this.privacy;
   }
 
+  @Override public OptionType<SyncedDocumentType> getAbout()
+  {
+    return this.about;
+  }
+
   @Override public OptionType<SyncedDocumentType> getAcknowledgements()
   {
     return this.acknowledgement;
@@ -181,6 +189,7 @@ public final class DocumentStore implements DocumentStoreType
     private final OPDSAuthenticationDocumentParserType parser;
     private       OptionType<SyncedDocumentType>       privacy;
     private       OptionType<SyncedDocumentType>       acknowledgments;
+    private       OptionType<SyncedDocumentType>       about;
     private       OptionType<EULAType>                 eula;
 
     Builder(
@@ -199,6 +208,7 @@ public final class DocumentStore implements DocumentStoreType
       this.parser = NullCheck.notNull(in_parser);
 
       this.privacy = Option.none();
+      this.about = Option.none();
       this.acknowledgments = Option.none();
       this.eula = Option.none();
     }
@@ -233,12 +243,26 @@ public final class DocumentStore implements DocumentStoreType
           f));
     }
 
+    @Override
+    public void enableAbout(final FunctionType<Unit, InputStream> f)
+            throws IOException
+    {
+      this.about = Option.some(
+              SyncedDocument.newDocument(
+                      this.clock,
+                      this.http,
+                      this.exec,
+                      this.base,
+                      "about.html",
+                      f));
+    }
+
     @Override public DocumentStoreType build()
     {
       final AuthenticationDocumentType auth =
         AuthenticationDocument.newDocument(this.exec, this.parser, this.values);
       return new DocumentStore(
-        this.acknowledgments, this.privacy, auth, this.eula);
+        this.acknowledgments, this.privacy, this.about, auth, this.eula);
     }
   }
 }
