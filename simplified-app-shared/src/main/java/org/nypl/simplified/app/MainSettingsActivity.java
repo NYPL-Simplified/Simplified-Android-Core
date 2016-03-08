@@ -709,9 +709,17 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
      * Temporary "alternate URIs" selection.
      */
 
+    final View settings_adobe_accounts_divider =
+            NullCheck.notNull((View) this.findViewById(R.id.settings_adobe_accounts_divider));
+    ((ViewGroup) settings_adobe_accounts_divider.getParent()).removeView(settings_adobe_accounts_divider);
+
     final TextView in_alt_uris =
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_alt_uris));
     in_alt_uris.setEnabled(true);
+    in_alt_uris.setVisibility(View.INVISIBLE);
+
+    ((ViewGroup) in_alt_uris.getParent()).removeView(in_alt_uris);
+
     in_alt_uris.setOnClickListener(
       new OnClickListener()
       {
