@@ -455,6 +455,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
      */
 
     in_adobe_accounts.setEnabled(false);
+    in_adobe_accounts.setVisibility(View.INVISIBLE);
 
     /**
      * Get labels from the current authentication document.
