@@ -98,6 +98,21 @@
       android:layout_marginTop="16dp"/>
 
     <TextView
+        android:id="@+id/settings_about"
+        android:text="@string/settings_about"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <View
+        android:background="#eee"
+        android:id="@+id/settings_about_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
       android:id="@+id/settings_credits"
       android:text="@string/settings_credits"
       android:textAppearance="?android:attr/textAppearanceMedium"
