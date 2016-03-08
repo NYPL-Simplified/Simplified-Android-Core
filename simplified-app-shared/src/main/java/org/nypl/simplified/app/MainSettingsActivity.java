@@ -422,6 +422,11 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
+
+    final View settings_privacy_divider =
+      NullCheck.notNull((View) this.findViewById(R.id.settings_privacy_divider));
+    settings_privacy_divider.setVisibility(View.GONE);
+
     final TextView in_adobe_accounts = NullCheck.notNull(
       (TextView) this.findViewById(R.id.settings_adobe_accounts));
 
@@ -455,7 +460,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
      */
 
     in_adobe_accounts.setEnabled(false);
-    in_adobe_accounts.setVisibility(View.INVISIBLE);
+    in_adobe_accounts.setVisibility(View.GONE);
 
     /**
      * Get labels from the current authentication document.
