@@ -46,6 +46,17 @@ public interface DocumentStoreBuilderType
     throws IOException;
 
   /**
+   * Enable an about document.
+   *
+   * @param f A function that returns an about document
+   *
+   * @throws IOException On I/O errors during initialization
+   */
+
+  void enableAbout(FunctionType<Unit, InputStream> f)
+          throws IOException;
+
+  /**
    * @return A new document store configuration
    */
 
