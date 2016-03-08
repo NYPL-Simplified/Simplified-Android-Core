@@ -7,6 +7,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.tenmiles.helpstack.HSHelpStack;
+import com.tenmiles.helpstack.gears.HSDeskGear;
 import com.tenmiles.helpstack.gears.HSZendeskGear;
 import com.tenmiles.helpstack.logic.HSGear;
 import org.nypl.simplified.books.core.LogUtilities;
@@ -111,6 +112,9 @@ public final class Helpstack implements HelpstackType
     if ("zendesk".equals(gear_name)) {
       return Helpstack.getZendeskGear(p);
     }
+    else  if ("desk".equals(gear_name)) {
+      return Helpstack.getDeskGear(p);
+    }
 
     throw new HelpstackConfigurationUnknownGear(gear_name);
   }
@@ -138,6 +142,37 @@ public final class Helpstack implements HelpstackType
     }
 
     return new HSZendeskGear(url, email, api_token);
+  }
+
+  private static HSDeskGear getDeskGear(final Properties p)
+          throws HelpstackConfigurationMissingParameter
+  {
+    final HSGear zg;
+    final String instanceUrl = p.getProperty("helpstack.desk.instance_url");
+    if (instanceUrl == null) {
+      throw new HelpstackConfigurationMissingParameter(
+              "helpstack.desk.instance_url");
+    }
+
+    final String toHelpEmail = p.getProperty("helpstack.desk.to_help_email");
+    if (toHelpEmail == null) {
+      throw new HelpstackConfigurationMissingParameter(
+              "helpstack.desk.to_help_email");
+    }
+
+    final String staffLoginEmail = p.getProperty("helpstack.desk.staff_login_email");
+    if (staffLoginEmail == null) {
+      throw new HelpstackConfigurationMissingParameter(
+              "helpstack.desk.staff_login_email");
+    }
+
+    final String staffLoginPassword = p.getProperty("helpstack.desk.staff_login_password");
+    if (staffLoginPassword == null) {
+      throw new HelpstackConfigurationMissingParameter(
+              "helpstack.desk.staff_login_password");
+    }
+
+    return new HSDeskGear(instanceUrl, toHelpEmail, staffLoginEmail, staffLoginPassword);
   }
 
   @Override public void show(final Activity a)
