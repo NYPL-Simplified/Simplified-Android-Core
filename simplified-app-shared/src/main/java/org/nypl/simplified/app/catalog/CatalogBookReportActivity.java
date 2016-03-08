@@ -63,6 +63,7 @@ public class CatalogBookReportActivity extends SimplifiedActivity
   private void configureUpButton()
   {
     final ActionBar bar = this.getActionBar();
+    bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
     bar.setDisplayHomeAsUpEnabled(true);
     bar.setHomeButtonEnabled(true);
     bar.setTitle(this.getResources().getString(R.string.catalog_book_report));
@@ -150,29 +151,6 @@ public class CatalogBookReportActivity extends SimplifiedActivity
         CatalogBookReportActivity.this.submitReport();
       }
     });
-  }
-
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item_mn)
-  {
-    final MenuItem item = NullCheck.notNull(item_mn);
-    switch (item.getItemId()) {
-
-      /**
-       * Configure the home button to simply close this activity.
-       */
-
-      case android.R.id.home: {
-        this.finish();
-        this.overridePendingTransition(0, 0);
-
-        return true;
-      }
-
-      default: {
-        return super.onOptionsItemSelected(item);
-      }
-    }
   }
 
   private void submitReport()

@@ -62,6 +62,7 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
     super.onCreate(state);
 
     final ActionBar bar = this.getActionBar();
+    bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
     bar.setDisplayHomeAsUpEnabled(true);
     bar.setHomeButtonEnabled(true);
     bar.setTitle("Alternate URIs");
