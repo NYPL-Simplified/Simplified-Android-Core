@@ -117,6 +117,7 @@
   <string name="settings_login_failed_adobe_device_bad_clock">An error occurred when activating your device. Please check that your device clock is set to the correct time.</string>
   <string name="settings_logout_failed">Logout Failed</string>
   <string name="settings_feedback">Feedback</string>
+  <string name="settings_about">About</string>
   <string name="settings_credits">Acknowledgements</string>
   <string name="settings_eula">User Agreement</string>
   <string name="settings_privacy">Privacy Policy</string>

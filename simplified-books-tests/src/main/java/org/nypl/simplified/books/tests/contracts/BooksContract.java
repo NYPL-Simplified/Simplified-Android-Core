@@ -318,6 +318,11 @@ public final class BooksContract implements BooksContractType
         return Option.none();
       }
 
+      @Override public OptionType<SyncedDocumentType> getAbout()
+      {
+        return Option.none();
+      }
+
       @Override public AuthenticationDocumentType getAuthenticationDocument()
       {
         return new AuthenticationDocumentType()
