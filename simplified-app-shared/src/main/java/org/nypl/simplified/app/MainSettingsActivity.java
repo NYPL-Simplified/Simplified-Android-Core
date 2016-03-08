@@ -668,6 +668,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final TextView in_alt_uris =
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_alt_uris));
     in_alt_uris.setEnabled(true);
+    in_alt_uris.setVisibility(View.INVISIBLE);
     in_alt_uris.setOnClickListener(
       new OnClickListener()
       {
