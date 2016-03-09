@@ -189,6 +189,31 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     return Option.none();
   }
 
+  private static OptionType<URI> parseAbout(final Element e)
+          throws URISyntaxException
+  {
+    NullCheck.notNull(e);
+
+    final boolean has_name = OPDSXML.nodeHasName(
+            NullCheck.notNull(e), OPDSFeedConstants.ATOM_URI, "link");
+
+    Assertions.checkPrecondition(has_name, "Node has name 'link'");
+
+    final boolean has_everything =
+            e.hasAttribute("rel") && e.hasAttribute("href");
+
+    if (has_everything) {
+      final String r = NullCheck.notNull(e.getAttribute("rel"));
+      final String h = NullCheck.notNull(e.getAttribute("href"));
+
+      if ("about".equals(r)) {
+        return Option.some(new URI(h));
+      }
+    }
+
+    return Option.none();
+  }
+
   private static OptionType<URI> parsePrivacyPolicy(final Element e)
     throws URISyntaxException
   {
@@ -366,6 +391,19 @@ public final class OPDSFeedParser implements OPDSFeedParserType
               OPDSFeedParser.parseFacet(e);
             if (facet_opt.isSome()) {
               b.addFacet(((Some<OPDSFacet>) facet_opt).get());
+              continue;
+            }
+          }
+
+          /**
+           * App About links.
+           */
+
+          {
+            final OptionType<URI> about_opt =
+                    OPDSFeedParser.parseAbout(e);
+            if (about_opt.isSome()) {
+              b.setAboutOption(about_opt);
               continue;
             }
           }

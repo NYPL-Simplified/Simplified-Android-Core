@@ -36,6 +36,7 @@ public final class OPDSAcquisitionFeed implements Serializable
   private final Calendar                       updated;
   private final URI                            uri;
   private final OptionType<URI>                terms_of_service;
+  private final OptionType<URI>                about;
   private final OptionType<URI>                privacy_policy;
 
   private OPDSAcquisitionFeed(
@@ -51,6 +52,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     final List<OPDSFacet> in_facets_order,
     final Map<String, List<OPDSFacet>> in_facets,
     final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_about,
     final OptionType<URI> in_privacy_policy)
   {
     this.uri = NullCheck.notNull(in_uri);
@@ -68,6 +70,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     this.next = NullCheck.notNull(in_next);
     this.search = NullCheck.notNull(in_search);
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
+    this.about = NullCheck.notNull(in_about);
     this.privacy_policy = NullCheck.notNull(in_privacy_policy);
   }
 
@@ -115,8 +118,9 @@ public final class OPDSAcquisitionFeed implements Serializable
            && this.updated.equals(other.updated)
            && this.next.equals(other.next)
            && this.search.equals(other.search)
-           && this.terms_of_service.equals(other.terms_of_service)
-           && this.privacy_policy.equals(other.privacy_policy);
+            && this.terms_of_service.equals(other.terms_of_service)
+            && this.about.equals(other.about)
+            && this.privacy_policy.equals(other.privacy_policy);
   }
 
   /**
@@ -210,6 +214,15 @@ public final class OPDSAcquisitionFeed implements Serializable
   }
 
   /**
+   * @return The link to the app about, if any
+   */
+
+  public OptionType<URI> getFeedAbout()
+  {
+    return this.about;
+  }
+
+  /**
    * @return The link to the terms of service, if any
    */
 
@@ -252,6 +265,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     result = (prime * result) + this.next.hashCode();
     result = (prime * result) + this.search.hashCode();
     result = (prime * result) + this.terms_of_service.hashCode();
+    result = (prime * result) + this.about.hashCode();
     result = (prime * result) + this.privacy_policy.hashCode();
     return result;
   }
@@ -272,6 +286,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     private       OptionType<OPDSSearchLink>                  search;
     private       OptionType<URI>                             terms_of_service;
     private       OptionType<URI>                             privacy_policy;
+    private       OptionType<URI>                             about;
 
     private Builder(
       final URI in_uri,
@@ -293,6 +308,7 @@ public final class OPDSAcquisitionFeed implements Serializable
       this.search = Option.none();
       this.terms_of_service = Option.none();
       this.privacy_policy = Option.none();
+      this.about = Option.none();
     }
 
     @Override public void addEntry(
@@ -341,6 +357,11 @@ public final class OPDSAcquisitionFeed implements Serializable
       this.facets_order.add(f);
     }
 
+    @Override public void setAboutOption(final OptionType<URI> u)
+    {
+      this.about = NullCheck.notNull(u);
+    }
+
     @Override public void setTermsOfServiceOption(final OptionType<URI> u)
     {
       this.terms_of_service = NullCheck.notNull(u);
@@ -377,7 +398,9 @@ public final class OPDSAcquisitionFeed implements Serializable
         this.facets_order,
         this.facets_by_group,
         this.terms_of_service,
-        this.privacy_policy);
+              this.about,
+              this.privacy_policy
+        );
     }
 
     @Override public void setNextOption(

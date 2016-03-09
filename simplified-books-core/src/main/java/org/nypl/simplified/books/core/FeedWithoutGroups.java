@@ -31,6 +31,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   private final URI                              uri;
   private final OptionType<URI>                  terms_of_service;
   private final OptionType<URI>                  privacy_policy;
+  private final OptionType<URI>                  about;
 
   private FeedWithoutGroups(
     final URI in_uri,
@@ -44,6 +45,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     final Map<String, List<FeedFacetType>> in_facets_by_group,
     final List<FeedFacetType> in_facets_order,
     final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_about,
     final OptionType<URI> in_privacy_policy)
   {
     this.uri = NullCheck.notNull(in_uri);
@@ -57,6 +59,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     this.facets_by_group = NullCheck.notNull(in_facets_by_group);
     this.facets_order = NullCheck.notNull(in_facets_order);
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
+    this.about = NullCheck.notNull(in_about);
     this.privacy_policy = NullCheck.notNull(in_privacy_policy);
   }
 
@@ -89,6 +92,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     final Map<String, List<FeedFacetType>> in_facets_by_group,
     final List<FeedFacetType> in_facets_order,
     final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_about,
     final OptionType<URI> in_privacy_policy)
   {
     final List<BookID> in_entries_order = new ArrayList<BookID>(32);
@@ -106,7 +110,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
       in_entries,
       in_facets_by_group,
       in_facets_order,
-      in_terms_of_service,
+            in_terms_of_service,
+            in_about,
       in_privacy_policy);
   }
 
@@ -168,6 +173,15 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   public OptionType<URI> getFeedPrivacyPolicy()
   {
     return this.privacy_policy;
+  }
+
+  /**
+   * @return A link to the privacy policy, if any
+   */
+
+  public OptionType<URI> getFeedAbout()
+  {
+    return this.about;
   }
 
   /**
