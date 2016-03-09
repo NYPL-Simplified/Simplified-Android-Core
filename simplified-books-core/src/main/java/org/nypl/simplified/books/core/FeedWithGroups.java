@@ -29,6 +29,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
   private final URI                        uri;
   private final OptionType<URI>            terms_of_service;
   private final OptionType<URI>            privacy_policy;
+  private final OptionType<URI>            about;
 
   private FeedWithGroups(
     final URI in_uri,
@@ -39,6 +40,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     final List<String> in_blocks_order,
     final Map<String, FeedGroup> in_blocks,
     final OptionType<URI> in_terms_of_service,
+    final OptionType<URI> in_about,
     final OptionType<URI> in_privacy_policy)
   {
     this.uri = NullCheck.notNull(in_uri);
@@ -49,6 +51,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     this.blocks_order = NullCheck.notNull(in_blocks_order);
     this.blocks = NullCheck.notNull(in_blocks);
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
+    this.about = NullCheck.notNull(in_about);
     this.privacy_policy = NullCheck.notNull(in_privacy_policy);
   }
 
@@ -90,7 +93,18 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
       order,
       blocks,
       f.getFeedTermsOfService(),
-      f.getFeedPrivacyPolicy());
+            f.getFeedAbout(),
+            f.getFeedPrivacyPolicy()
+            );
+  }
+
+  /**
+   * @return A link to the terms of service, if any
+   */
+
+  public OptionType<URI> getFeedAbout()
+  {
+    return this.about;
   }
 
   /**

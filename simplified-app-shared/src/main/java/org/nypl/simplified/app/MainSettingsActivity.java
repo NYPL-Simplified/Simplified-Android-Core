@@ -552,19 +552,17 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final TextView in_about =
             NullCheck.notNull((TextView) this.findViewById(R.id.settings_about));
     in_about.setEnabled(false);
-
-    if (docs.getAbout().isNone())
-    {
-      // remove about and divider if there is nowthing to show.
-      ((ViewGroup) settings_about_divider.getParent()).removeView(settings_about_divider);
-      ((ViewGroup) in_about.getParent()).removeView(in_about);
-    }
+    in_about.setVisibility(View.GONE);
+    settings_about_divider.setVisibility(View.GONE);
 
     docs.getAbout().map_(
             new ProcedureType<SyncedDocumentType>() {
               @Override
               public void call(final SyncedDocumentType ack) {
                 in_about.setEnabled(true);
+                in_about.setVisibility(View.VISIBLE);
+                settings_about_divider.setVisibility(View.VISIBLE);
+
                 in_about.setOnClickListener(
                         new OnClickListener() {
                           @Override

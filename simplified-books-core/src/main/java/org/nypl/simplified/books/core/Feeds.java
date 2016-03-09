@@ -94,6 +94,7 @@ public final class Feeds
       facets_by_group,
       facets_order,
       f.getFeedTermsOfService(),
+            f.getFeedAbout(),
       f.getFeedPrivacyPolicy());
 
     final List<OPDSAcquisitionFeedEntry> in_entries = f.getFeedEntries();

@@ -335,6 +335,7 @@ final class BooksControllerFeedTask implements Runnable
     facet_groups.put(this.facet_group, facets);
 
     final OptionType<URI> no_terms = Option.none();
+    final OptionType<URI> no_about = Option.none();
     final OptionType<URI> no_privacy = Option.none();
     final FeedWithoutGroups f = FeedWithoutGroups.newEmptyFeed(
       this.uri,
@@ -346,6 +347,7 @@ final class BooksControllerFeedTask implements Runnable
       facet_groups,
       facets,
       no_terms,
+            no_about,
       no_privacy);
 
     final Set<BookID> ids = this.books_database.databaseGetBooks();

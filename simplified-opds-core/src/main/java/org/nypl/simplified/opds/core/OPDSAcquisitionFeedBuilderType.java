@@ -61,6 +61,14 @@ public interface OPDSAcquisitionFeedBuilderType
     OPDSFacet f);
 
   /**
+   * Set the URI of the app about document for the feed, if any
+   *
+   * @param u The App About URI, if any
+   */
+
+  void setAboutOption(OptionType<URI> u);
+
+  /**
    * Set the URI of the terms of service document for the feed, if any
    *
    * @param u The terms of service URI, if any

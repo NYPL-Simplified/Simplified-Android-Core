@@ -461,6 +461,20 @@ public final class Simplified extends Application
         }
 
         try {
+          final InputStream stream = assets.open("about.html");
+          documents_builder.enableAbout(
+                  new FunctionType<Unit, InputStream>()
+                  {
+                    @Override public InputStream call(final Unit x)
+                    {
+                      return stream;
+                    }
+                  });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No about defined: ", e);
+        }
+
+        try {
           final InputStream stream = assets.open("acknowledgements.html");
           documents_builder.enableAcknowledgements(
             new FunctionType<Unit, InputStream>()
