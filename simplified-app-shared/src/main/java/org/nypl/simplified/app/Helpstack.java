@@ -148,31 +148,31 @@ public final class Helpstack implements HelpstackType
           throws HelpstackConfigurationMissingParameter
   {
     final HSGear zg;
-    final String instanceUrl = p.getProperty("helpstack.desk.instance_url");
-    if (instanceUrl == null) {
+    final String instance_url = p.getProperty("helpstack.desk.instance_url");
+    if (instance_url == null) {
       throw new HelpstackConfigurationMissingParameter(
               "helpstack.desk.instance_url");
     }
 
-    final String toHelpEmail = p.getProperty("helpstack.desk.to_help_email");
-    if (toHelpEmail == null) {
+    final String to_help_email = p.getProperty("helpstack.desk.to_help_email");
+    if (to_help_email == null) {
       throw new HelpstackConfigurationMissingParameter(
               "helpstack.desk.to_help_email");
     }
 
-    final String staffLoginEmail = p.getProperty("helpstack.desk.staff_login_email");
-    if (staffLoginEmail == null) {
+    final String staff_login_email = p.getProperty("helpstack.desk.staff_login_email");
+    if (staff_login_email == null) {
       throw new HelpstackConfigurationMissingParameter(
               "helpstack.desk.staff_login_email");
     }
 
-    final String staffLoginPassword = p.getProperty("helpstack.desk.staff_login_password");
-    if (staffLoginPassword == null) {
+    final String staff_login_password = p.getProperty("helpstack.desk.staff_login_password");
+    if (staff_login_password == null) {
       throw new HelpstackConfigurationMissingParameter(
               "helpstack.desk.staff_login_password");
     }
 
-    return new HSDeskGear(instanceUrl, toHelpEmail, staffLoginEmail, staffLoginPassword);
+    return new HSDeskGear(instance_url, to_help_email, staff_login_email, staff_login_password);
   }
 
   @Override public void show(final Activity a)

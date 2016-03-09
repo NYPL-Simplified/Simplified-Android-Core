@@ -76,6 +76,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
    * @param in_facets_order     The facets arranged in order
    * @param in_terms_of_service An optional link to the terms of service for the
    *                            feed
+   * @param in_about            An optional link to the about for the feed
    * @param in_privacy_policy   An optional link to the privacy policy for the
    *                            feed
    *
