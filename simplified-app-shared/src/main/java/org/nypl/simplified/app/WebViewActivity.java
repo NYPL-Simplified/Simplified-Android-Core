@@ -3,11 +3,9 @@ package org.nypl.simplified.app;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
