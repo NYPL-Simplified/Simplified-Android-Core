@@ -31,7 +31,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <RelativeLayout
       android:id="@+id/reader_hud_controls"
       android:orientation="horizontal"
       android:layout_marginStart="8dp"
@@ -40,14 +40,6 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content">
 
-      <ImageView
-        android:id="@+id/reader_close"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_weight="0"
-        android:contentDescription="@string/reader_accessibility_close"
-        android:src="@drawable/circle_x_8x"/>
-
       <TextView
         android:id="@+id/reader_title_text"
         android:textAppearance="?android:attr/textAppearanceSmall"
@@ -55,17 +47,20 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="90dp"
         android:maxLines="1"
         android:ellipsize="end"
-        android:gravity="center"
+        android:gravity="left"
         android:text="@string/placeholder_long_title"/>
 
       <ImageView
         android:id="@+id/reader_toc"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_weight="0"
+        android:layout_width="40dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_alignParentRight="true"
         android:contentDescription="@string/reader_accessibility_toc"
         android:src="@drawable/list_8x"/>
 
@@ -73,11 +68,13 @@
         android:id="@+id/reader_settings"
         android:contentDescription="@string/reader_accessibility_settings"
         android:src="@drawable/text_8x"
-        android:layout_marginStart="8dp"
-        android:layout_weight="0"
-        android:layout_width="24dp"
-        android:layout_height="24dp"/>
-    </LinearLayout>
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:layout_toLeftOf="@id/reader_toc"
+        android:layout_width="40dp"
+        android:layout_height="30dp"/>
+
+    </RelativeLayout>
 
     <LinearLayout
       android:id="@+id/reader_hud_media"

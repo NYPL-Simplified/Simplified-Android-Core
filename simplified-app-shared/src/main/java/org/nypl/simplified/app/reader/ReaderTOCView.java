@@ -42,7 +42,6 @@ import java.util.List;
   private final Context                            context;
   private final LayoutInflater                     inflater;
   private final ReaderTOCViewSelectionListenerType listener;
-  private final ImageView                          view_back;
   private final ViewGroup                          view_layout;
   private final ViewGroup                          view_root;
   private final TextView                           view_title;
@@ -77,8 +76,6 @@ import java.util.List;
       (ViewGroup) in_inflater.inflate(
         R.layout.reader_toc, null));
 
-    final ImageView in_back = NullCheck.notNull(
-      (ImageView) in_layout.findViewById(R.id.reader_toc_back));
     final ListView in_list_view = NullCheck.notNull(
       (ListView) in_layout.findViewById(R.id.reader_toc_list));
     final TextView in_title = NullCheck.notNull(
@@ -89,21 +86,10 @@ import java.util.List;
     final List<TOCElement> es = in_toc.getElements();
     this.adapter = new ArrayAdapter<TOCElement>(in_context, 0, es);
 
-    in_back.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          in_listener.onTOCBackSelected();
-        }
-      });
-
     in_list_view.setAdapter(this);
 
     this.context = in_context;
     this.view_layout = in_layout;
-    this.view_back = in_back;
     this.view_root = in_root;
     this.view_title = in_title;
     this.inflater = in_inflater;
@@ -120,13 +106,11 @@ import java.util.List;
     UIThread.checkIsUIThread();
 
     final int main_color = r.getColor(R.color.feature_main_color);
-    final ImageView in_back = NullCheck.notNull(this.view_back);
     final TextView in_title = NullCheck.notNull(this.view_title);
     final ViewGroup in_root = NullCheck.notNull(this.view_root);
 
     in_root.setBackgroundColor(cs.getBackgroundColor());
     in_title.setTextColor(main_color);
-    in_back.setColorFilter(ReaderColorMatrix.getImageFilterMatrix(main_color));
   }
 
   @Override public boolean areAllItemsEnabled()
@@ -227,12 +211,6 @@ import java.util.List;
   /**
    * Hide the back button!
    */
-
-  public void hideTOCBackButton()
-  {
-    this.view_back.setEnabled(false);
-    this.view_back.setVisibility(View.GONE);
-  }
 
   @Override public boolean isEmpty()
   {

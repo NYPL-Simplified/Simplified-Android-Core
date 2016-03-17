@@ -310,19 +310,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    if (d.isReturnable()) {
-      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN);
-      this.cell_buttons.addView(revoke, 0);
-    } else if (e.getFeedEntry().getAvailability() instanceof OPDSAvailabilityOpenAccess) {
-      this.cell_buttons.addView(
-        new CatalogBookDeleteButton(
-          this.activity, book_id));
-    }
-
     this.cell_buttons.addView(
       new CatalogBookReadButton(
-        this.activity, book_id, this.entry.get()));
+        this.activity, book_id, this.entry.get()), 0);
 
     return Unit.unit();
   }
