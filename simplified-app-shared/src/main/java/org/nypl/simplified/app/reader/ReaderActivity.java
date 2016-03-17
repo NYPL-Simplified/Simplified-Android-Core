@@ -91,7 +91,6 @@ public final class ReaderActivity extends Activity implements
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
-  private @Nullable ImageView                         view_close;
 
   /**
    * Construct an activity.
@@ -703,9 +702,10 @@ public final class ReaderActivity extends Activity implements
             in_progress_text.setText(
               NullCheck.notNull(
                 String.format(
-                  "Page %d of %d",
+                  "Page %d of %d (%d%% left in chapter)",
                   page.getSpineItemPageIndex() + 1,
-                  page.getSpineItemPageCount())));
+                  page.getSpineItemPageCount(),
+                  in_progress_bar.getMax()-in_progress_bar.getProgress())));
           }
         }
       });
