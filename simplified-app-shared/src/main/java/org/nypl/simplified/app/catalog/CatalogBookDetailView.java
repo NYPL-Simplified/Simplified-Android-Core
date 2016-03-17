@@ -499,7 +499,7 @@ public final class CatalogBookDetailView implements Observer,
     } else if (this.entry.get().getFeedEntry().getAvailability() instanceof OPDSAvailabilityOpenAccess) {
       this.book_download_buttons.addView(
         new CatalogBookDeleteButton(
-          this.activity, d.getID()),1);
+          this.activity, d.getID()), 1);
     }
 
 

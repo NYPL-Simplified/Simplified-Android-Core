@@ -705,7 +705,7 @@ public final class ReaderActivity extends Activity implements
                   "Page %d of %d (%d%% left in chapter)",
                   page.getSpineItemPageIndex() + 1,
                   page.getSpineItemPageCount(),
-                  in_progress_bar.getMax()-in_progress_bar.getProgress())));
+                  in_progress_bar.getMax() - in_progress_bar.getProgress())));
           }
         }
       });

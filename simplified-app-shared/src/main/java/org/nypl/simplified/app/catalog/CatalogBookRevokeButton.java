@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.view.View;
 import com.io7m.jnull.NullCheck;
