@@ -602,6 +602,14 @@ public abstract class SimplifiedActivity extends Activity
 
     dl.setSelection(pos);
     dl.setItemChecked(pos, true);
+
+    // opening the drawer, when the user comes back from the help section, the view will not be empty.
+    if (p == SimplifiedPart.PART_HELP)
+    {
+      final DrawerLayout d = NullCheck.notNull(this.drawer);
+      d.openDrawer(GravityCompat.START);
+    }
+
   }
 
   @Override protected void onSaveInstanceState(
