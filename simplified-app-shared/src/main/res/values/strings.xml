@@ -43,7 +43,7 @@
   <string name="catalog_refresh">Refresh Feed</string>
   <string name="catalog_search">Search</string>
   <string name="catalog_unknown_feed">Unknown</string>
-  <string name="catalog_more_feed">More...</string>
+  <string name="catalog_more_feed">More&#8230;</string>
   <string name="catalog_requesting_loan">Requesting</string>
   <string name="catalog_requesting_revoke">Requesting</string>
 
@@ -56,7 +56,7 @@
   <string name="catalog_book_sync">Sync</string>
   <string name="catalog_book_download">Download</string>
   <string name="catalog_book_delete">Delete</string>
-  <string name="catalog_book_revoke_loan">Return now</string>
+  <string name="catalog_book_revoke_loan">Return Now</string>
   <string name="catalog_book_revoke_hold">Cancel</string>
   <string name="catalog_book_report">Report Issue</string>
 
