@@ -488,19 +488,20 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookAvailabilityStrings.getAvailabilityString(rr, d);
     this.book_download_text.setText(text);
 
+    this.book_download_buttons.addView(
+      new CatalogBookReadButton(
+        this.activity, d.getID(), this.entry.get()), 0);
+
     if (d.isReturnable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
         this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN);
-      this.book_download_buttons.addView(revoke, 0);
+      this.book_download_buttons.addView(revoke, 1);
     } else if (this.entry.get().getFeedEntry().getAvailability() instanceof OPDSAvailabilityOpenAccess) {
       this.book_download_buttons.addView(
         new CatalogBookDeleteButton(
-          this.activity, d.getID()));
+          this.activity, d.getID()), 1);
     }
 
-    this.book_download_buttons.addView(
-      new CatalogBookReadButton(
-        this.activity, d.getID(), this.entry.get()));
 
     this.book_download_buttons.setVisibility(View.VISIBLE);
 

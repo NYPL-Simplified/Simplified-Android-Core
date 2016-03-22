@@ -4,16 +4,6 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <ImageView
-    android:id="@+id/reader_toc_back"
-    android:src="@drawable/left_8x"
-    android:contentDescription="@string/reader_accessibility_toc_back"
-    android:layout_alignParentStart="true"
-    android:layout_alignParentTop="true"
-    android:layout_margin="8dp"
-    android:layout_width="24dp"
-    android:layout_height="24dp" />
-
   <TextView
     android:id="@+id/reader_toc_title"
     android:layout_margin="8dp"

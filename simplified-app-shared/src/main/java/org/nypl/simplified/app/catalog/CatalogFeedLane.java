@@ -8,6 +8,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
@@ -52,6 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
   private final HorizontalScrollView        scroller;
   private final ViewGroup                   scroller_contents;
   private final TextView                    title;
+  private final RelativeLayout              header;
 
   /**
    * Construct a feed lane.
@@ -80,6 +82,8 @@ import java.util.concurrent.atomic.AtomicInteger;
         Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.catalog_feed_groups_lane, this, true);
 
+    this.header =
+      NullCheck.notNull((RelativeLayout) this.findViewById(R.id.feed_header));
     this.title =
       NullCheck.notNull((TextView) this.findViewById(R.id.feed_title));
     this.progress =
@@ -128,7 +132,7 @@ import java.util.concurrent.atomic.AtomicInteger;
     this.scroller_contents.removeAllViews();
 
     this.title.setText(in_group.getGroupTitle());
-    this.title.setOnClickListener(
+    this.header.setOnClickListener(
       new OnClickListener()
       {
         @Override public void onClick(
