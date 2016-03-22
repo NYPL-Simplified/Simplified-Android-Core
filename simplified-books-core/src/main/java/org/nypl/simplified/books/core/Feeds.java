@@ -1,9 +1,11 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFacet;
@@ -101,9 +103,43 @@ public final class Feeds
     for (int index = 0; index < in_entries.size(); ++index) {
       final OPDSAcquisitionFeedEntry fe =
         NullCheck.notNull(in_entries.get(index));
-      rf.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(fe));
+      if (!fe.getAcquisitions().isEmpty()) {
+        OPDSAcquisition best = NullCheck.notNull(fe.getAcquisitions().get(0));
+        for (final OPDSAcquisition current : fe.getAcquisitions()) {
+          final OPDSAcquisition nn_current = NullCheck.notNull(current);
+          if (Feeds.priority(nn_current)
+            > Feeds.priority(best)) {
+            best = nn_current;
+          }
+        }
+        final OptionType<OPDSAcquisition> a_opt = Option.some(best);
+        if (a_opt.isSome()) {
+          rf.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(fe));
+        }
+      }
     }
 
     return rf;
+  }
+
+  private static int priority(
+    final OPDSAcquisition a)
+  {
+    switch (a.getType()) {
+      case ACQUISITION_BORROW:
+        return 6;
+      case ACQUISITION_OPEN_ACCESS:
+        return 4;
+      case ACQUISITION_GENERIC:
+        return 5;
+      case ACQUISITION_SAMPLE:
+        return 3;
+      case ACQUISITION_BUY:
+        return 2;
+      case ACQUISITION_SUBSCRIBE:
+        return 1;
+    }
+
+    return 0;
   }
 }
