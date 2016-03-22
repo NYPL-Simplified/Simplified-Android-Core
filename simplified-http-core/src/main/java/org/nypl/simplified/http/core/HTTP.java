@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -181,6 +182,8 @@ public final class HTTP implements HTTPType
           conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
+    } catch (final UnknownHostException e) {
+      return new HTTPResultException<InputStream>(uri, e);
     } catch (final IOException e) {
       return new HTTPResultException<InputStream>(uri, e);
     }
@@ -256,6 +259,8 @@ public final class HTTP implements HTTPType
         conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
+    } catch (final UnknownHostException e) {
+      return new HTTPResultException<Unit>(uri, e);
     } catch (final IOException e) {
       return new HTTPResultException<Unit>(uri, e);
     }
