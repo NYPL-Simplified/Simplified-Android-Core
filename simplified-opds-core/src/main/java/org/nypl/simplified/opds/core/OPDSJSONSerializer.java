@@ -312,6 +312,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
         }
       });
 
+    je.put("distribution", e.getDistribution());
     je.put("summary", e.getSummary());
     je.put("title", e.getTitle());
 

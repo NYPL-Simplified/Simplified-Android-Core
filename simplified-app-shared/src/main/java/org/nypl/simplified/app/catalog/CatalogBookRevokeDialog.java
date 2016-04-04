@@ -120,6 +120,19 @@ public final class CatalogBookRevokeDialog extends DialogFragment
       }
     }
 
+    final Button in_logout_cancel_button =
+      NullCheck.notNull((Button) layout.findViewById(R.id.book_revoke_cancel));
+
+    in_logout_cancel_button.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          CatalogBookRevokeDialog.this.dismiss();
+        }
+      });
+
     final Dialog d = this.getDialog();
     if (d != null) {
       d.setCanceledOnTouchOutside(true);

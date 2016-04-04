@@ -108,6 +108,15 @@ public interface OPDSAcquisitionFeedEntryBuilderType
     OptionType<String> pub);
 
   /**
+   * Set the distribution.
+   *
+   * @param dist The distribution
+   */
+
+  void setDistribution(
+    String dist);
+
+  /**
    * Set the summary.
    *
    * @param text The summary

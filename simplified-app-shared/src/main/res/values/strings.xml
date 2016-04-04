@@ -13,7 +13,7 @@
   <string name="books_sort_by_title">Title</string>
 
   <!-- Holds strings -->
-  <string name="holds">Holds</string>
+  <string name="holds">Reservations</string>
   <string name="holds_empty">When you reserve a book from the catalog it will show up here. Look here from time to time to see if your book is available to download.</string>
 
   <!-- Catalog strings -->
@@ -22,7 +22,7 @@
   <string name="catalog_load_error_text">An error occurred while loading the catalog. Please try again.</string>
   <string name="catalog_load_not_connected">You are not connected to the internet. Please connect and try again.</string>
   <string name="catalog_book_revoke_loan_confirm">Are you sure you want to return this book?</string>
-  <string name="catalog_book_revoke_hold_confirm">Are you sure you want to cancel this hold?</string>
+  <string name="catalog_book_revoke_hold_confirm">Are you sure you want to remove this reservation?</string>
   <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
   <string name="catalog_cancel_downloading">Cancel</string>
   <string name="catalog_categories">Categories</string>
@@ -57,8 +57,9 @@
   <string name="catalog_book_download">Download</string>
   <string name="catalog_book_delete">Delete</string>
   <string name="catalog_book_revoke_loan">Return Now</string>
-  <string name="catalog_book_revoke_hold">Cancel</string>
+  <string name="catalog_book_revoke_hold">Remove</string>
   <string name="catalog_book_report">Report Issue</string>
+  <string name="catalog_book_distribution">Distributed by: %s</string>
 
   <string name="catalog_book_availability_loaned_indefinite">You have this book on loan.</string>
   <string name="catalog_book_availability_loaned_timed">You have this book on loan for %s.</string>

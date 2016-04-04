@@ -63,6 +63,13 @@ public final class OPDSAcquisitionFeedEntryParser
       e, OPDSFeedConstants.DUBLIN_CORE_TERMS_URI, "publisher");
   }
 
+  private static String findDistribution(
+    final Element e)
+  {
+    return OPDSXML.getFirstChildElementTextWithName(
+      e, OPDSFeedConstants.BIBFRAME_URI, "distribution", "ProviderName");
+  }
+
   /**
    * @return A new feed entry parser
    */
@@ -207,6 +214,7 @@ public final class OPDSAcquisitionFeedEntryParser
 
     OPDSAcquisitionFeedEntryParser.findAcquisitionAuthors(e, eb);
     eb.setPublisherOption(OPDSAcquisitionFeedEntryParser.findPublisher(e));
+    eb.setDistribution(OPDSAcquisitionFeedEntryParser.findDistribution(e));
     eb.setPublishedOption(OPDSAtom.findPublished(e));
     eb.setSummaryOption(
       OPDSXML.getFirstChildElementTextWithNameOptional(

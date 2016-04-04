@@ -324,6 +324,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         JSONParserUtilities.getTimestampOptional(s, "published"));
       fb.setPublisherOption(
         JSONParserUtilities.getStringOptional(s, "publisher"));
+      fb.setDistribution(
+        JSONParserUtilities.getString(s, "distribution"));
       fb.setSummaryOption(
         JSONParserUtilities.getStringOptional(s, "summary"));
       return fb.build();

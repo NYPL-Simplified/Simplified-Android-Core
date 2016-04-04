@@ -34,6 +34,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   private final OptionType<URI>        issues;
   private final OptionType<Calendar>   published;
   private final OptionType<String>     publisher;
+  private final String                 distribution;
   private final String                 summary;
   private final OptionType<URI>        thumbnail;
   private final String                 title;
@@ -53,6 +54,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     final String in_summary,
     final OptionType<Calendar> in_published,
     final OptionType<String> in_publisher,
+    final String in_distribution,
     final List<OPDSCategory> in_categories)
   {
     this.authors = NullCheck.notNull(Collections.unmodifiableList(in_authors));
@@ -69,6 +71,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     this.summary = NullCheck.notNull(in_summary);
     this.published = NullCheck.notNull(in_published);
     this.publisher = NullCheck.notNull(in_publisher);
+    this.distribution = NullCheck.notNull(in_distribution);
     this.categories = NullCheck.notNull(in_categories);
   }
 
@@ -129,6 +132,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.setIssuesOption(e.getIssues());
     b.setPublishedOption(e.getPublished());
     b.setPublisherOption(e.getPublisher());
+    b.setDistribution(e.getDistribution());
 
     {
       final String summary = e.getSummary();
@@ -167,7 +171,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
            && this.title.equals(other.title)
            && this.updated.equals(other.updated)
            && this.published.equals(other.published)
-           && this.publisher.equals(other.publisher);
+           && this.publisher.equals(other.publisher)
+           && this.distribution.equals(other.distribution);
   }
 
   /**
@@ -261,6 +266,15 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   }
 
   /**
+   * @return The distribution, if any
+   */
+
+  public String getDistribution()
+  {
+    return this.distribution;
+  }
+
+  /**
    * @return The summary
    */
 
@@ -314,6 +328,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     result = (prime * result) + this.updated.hashCode();
     result = (prime * result) + this.published.hashCode();
     result = (prime * result) + this.publisher.hashCode();
+    result = (prime * result) + this.distribution.hashCode();
     return result;
   }
 
@@ -340,6 +355,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.append(this.published);
     b.append(", publisher=");
     b.append(this.publisher);
+    b.append(", distribution=");
+    b.append(this.distribution);
     b.append(", summary=");
     b.append(this.summary);
     b.append(", thumbnail=");
@@ -367,6 +384,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     private       OptionType<URI>        issues;
     private       OptionType<Calendar>   published;
     private       OptionType<String>     publisher;
+    private       String                 distribution;
     private       String                 summary;
     private       OptionType<URI>        thumbnail;
 
@@ -389,6 +407,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       this.authors = new ArrayList<String>(4);
       this.published = Option.none();
       this.publisher = Option.none();
+      this.distribution = "";
       this.categories = new ArrayList<OPDSCategory>(8);
       this.groups = new HashSet<Pair<String, URI>>(8);
     }
@@ -436,6 +455,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
         this.summary,
         this.published,
         this.publisher,
+        this.distribution,
         this.categories);
     }
 
@@ -472,6 +492,12 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       final OptionType<String> pub)
     {
       this.publisher = NullCheck.notNull(pub);
+    }
+
+    @Override public void setDistribution(
+      final String dist)
+    {
+      this.distribution = NullCheck.notNull(dist);
     }
 
     @Override public void setSummaryOption(

@@ -546,10 +546,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
-    final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-      this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
-    this.cell_buttons.addView(revoke, 0);
-
     return Unit.unit();
   }
 
@@ -572,12 +568,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     CatalogAcquisitionButtons.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
-
-    if (o.isReturnable()) {
-      final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
-      this.cell_buttons.addView(revoke, 0);
-    }
 
     return Unit.unit();
   }

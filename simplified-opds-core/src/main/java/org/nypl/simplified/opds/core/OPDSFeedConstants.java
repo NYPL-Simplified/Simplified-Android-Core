@@ -10,6 +10,7 @@ final class OPDSFeedConstants
   public static final String ACQUISITION_URI_PREFIX_TEXT;
   public static final URI    ATOM_URI;
   public static final URI    DUBLIN_CORE_TERMS_URI;
+  public static final URI    BIBFRAME_URI;
   public static final String FACET_URI_TEXT;
   public static final String GROUP_REL_TEXT;
   public static final String IMAGE_URI_TEXT;
@@ -34,6 +35,8 @@ final class OPDSFeedConstants
     ATOM_URI = NullCheck.notNull(URI.create("http://www.w3.org/2005/Atom"));
     ATOM_URI_TEXT = NullCheck.notNull(OPDSFeedConstants.ATOM_URI.toString());
 
+    BIBFRAME_URI =
+      NullCheck.notNull(URI.create("http://bibframe.org/vocab/"));
     DUBLIN_CORE_TERMS_URI =
       NullCheck.notNull(URI.create("http://purl.org/dc/terms/"));
     DUBLIN_CORE_TERMS_URI_TEXT =
