@@ -171,6 +171,43 @@ public final class OPDSXML
   }
 
   /**
+   * Return the (optional) text of the first child element of {@code node} that
+   * has name {@code name} in namespace {@code namespace}.
+   *
+   * @param node      The node
+   * @param namespace The child namespace
+   * @param name      The child name
+   * @param attribute      The child name
+   *
+   * @return The text of the child element, if any
+   */
+
+  public static String getFirstChildElementTextWithName(
+    final Element node,
+    final URI namespace,
+    final String name,
+    final String attribute)
+  {
+    NullCheck.notNull(node);
+    NullCheck.notNull(namespace);
+    NullCheck.notNull(name);
+
+    final NodeList children = node.getChildNodes();
+    for (int index = 0; index < children.getLength(); ++index) {
+      final Node child = NullCheck.notNull(children.item(index));
+      if (child instanceof Element) {
+        if (OPDSXML.nodeHasName((Element) child, namespace, name)) {
+
+          final String text = ((Element) child).getAttributes().getNamedItemNS(namespace.toString(), attribute).getNodeValue();
+          return NullCheck.notNull(text.trim());
+        }
+      }
+    }
+
+    return "";
+  }
+
+  /**
    * Return the first child element of {@code node} that has name {@code name}
    * in namespace {@code namespace}.
    *

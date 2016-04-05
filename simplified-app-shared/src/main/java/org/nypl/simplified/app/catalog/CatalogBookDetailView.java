@@ -239,6 +239,8 @@ public final class CatalogBookDetailView implements Observer,
     final ViewGroup related_layout = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_related_layout));
 
+    final TextView book_distribution = NullCheck.notNull(
+      (TextView) layout.findViewById(R.id.book_distribution));
     /**
      * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
      * ratio and set the width of the cover layout.
@@ -268,6 +270,9 @@ public final class CatalogBookDetailView implements Observer,
 
     header_title.setText(eo.getTitle());
 
+    book_distribution.setText(String.format(
+      rr.getString(R.string.catalog_book_distribution),
+      eo.getDistribution()));
     CatalogBookDetailView.configureViewTextAuthor(eo, header_authors);
     CatalogBookDetailView.configureViewTextMeta(rr, eo, header_meta);
 
@@ -789,7 +794,7 @@ public final class CatalogBookDetailView implements Observer,
     if (o.isReturnable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
         this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
-      this.book_download_buttons.addView(revoke, 0);
+      this.book_download_buttons.addView(revoke, 1);
     }
 
     CatalogBookDetailView.configureButtonsHeight(

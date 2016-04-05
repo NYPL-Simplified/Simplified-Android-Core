@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.view.View;
 import com.io7m.jnull.NullCheck;
@@ -60,10 +61,21 @@ public final class CatalogBookRevokeButton extends CatalogLeftPaddedButton
         @Override public void onClick(
           final @Nullable View v)
         {
-          final SimplifiedCatalogAppServicesType app =
-            Simplified.getCatalogAppServices();
-          final BooksType books = app.getBooks();
-          books.bookRevoke(in_book_id);
+          final CatalogBookRevokeDialog d =
+            CatalogBookRevokeDialog.newDialog(in_revoke_type);
+          d.setOnConfirmListener(
+            new Runnable()
+            {
+              @Override public void run()
+              {
+                final SimplifiedCatalogAppServicesType app =
+                  Simplified.getCatalogAppServices();
+                final BooksType books = app.getBooks();
+                books.bookRevoke(in_book_id);
+              }
+            });
+          final FragmentManager fm = in_activity.getFragmentManager();
+          d.show(fm, "revoke-confirm");
         }
       });
   }

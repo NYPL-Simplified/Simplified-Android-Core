@@ -110,6 +110,22 @@
       android:layout_width="match_parent"
       android:visibility="visible" />
   </FrameLayout>
+  <LinearLayout
+    android:id="@+id/book_distribution_layout"
+    android:layout_width="match_parent"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+   >
+  <TextView
+    android:id="@+id/book_distribution"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/catalog_book_distribution"
+    android:textColor="@color/normal_text_major"
+    android:layout_gravity="center"/>
+</LinearLayout>
 
   <LinearLayout
     android:id="@+id/book_summary_layout"
