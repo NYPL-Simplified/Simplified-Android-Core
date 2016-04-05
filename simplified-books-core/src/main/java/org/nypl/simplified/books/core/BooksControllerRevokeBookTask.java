@@ -372,88 +372,94 @@ final class BooksControllerRevokeBookTask
         this.books_database.databaseOpenEntryForReading(this.book_id);
       final BookDatabaseEntrySnapshot snap = er.entryGetSnapshot();
 
-      /**
-       * If the loan information is gone, well, there's nothing we can
-       * do about that. This is a bug in the program.
-       */
-
-      final OptionType<AdobeAdeptLoan> loan_opt = snap.getAdobeRights();
-      if (loan_opt.isNone()) {
-        throw new UnreachableCodeException();
-      }
-
-      /**
-       * If it turns out that the loan is not actually returnable, well, there's
-       * nothing we can do about that. This is a bug in the program.
-       */
-
-      final AdobeAdeptLoan loan = ((Some<AdobeAdeptLoan>) loan_opt).get();
-      if (loan.isReturnable() == false) {
-        throw new UnreachableCodeException();
-      }
-
-      /**
-       * Execute a task using the Adobe DRM library, and wait for it to
-       * finish. The reason for the waiting, as opposed to calling further
-       * methods from inside the listener callbacks is to avoid any chance
-       * of the methods in question propagating an unchecked exception back
-       * to the native code. This will obviously crash the whole process,
-       * rather than just failing the revocation.
-       */
-
-      final CountDownLatch latch = new CountDownLatch(1);
-      final AdobeLoanReturnResult listener = new AdobeLoanReturnResult(latch);
-      adobe.execute(
-        new AdobeAdeptProcedureType()
-        {
-          @Override public void executeWith(final AdobeAdeptConnectorType c)
-          {
-            c.loanReturn(listener, loan.getID());
-          }
-        });
-
-      /**
-       * Wait for the Adobe task to finish. Give up if it appears to be
-       * hanging.
-       */
-
-      try {
-        latch.await(3, TimeUnit.MINUTES);
-      } catch (final InterruptedException x) {
-        throw new IOException("Timed out waiting for Adobe revocation!", x);
-      }
-
-      /**
-       * If Adobe couldn't revoke the book, then the book isn't revoked.
-       * The user can try again later.
-       */
-
-      final OptionType<Throwable> error_opt = listener.getError();
-      if (error_opt.isSome()) {
-        this.revokeFailed(error_opt, null);
-        return;
-      }
-
-      /**
-       * Save the "revoked" state of the book.
-       */
-
+      if ("3M".equals(snap.getEntry().getDistribution()))
       {
-        final OPDSAcquisitionFeedEntryBuilderType b =
-          OPDSAcquisitionFeedEntry.newBuilderFrom(snap.getEntry());
-        b.setAvailability(OPDSAvailabilityRevoked.get(revoke_uri));
-        final OPDSAcquisitionFeedEntry ee = b.build();
-        final BookDatabaseEntryWritableType ew =
-          this.books_database.databaseOpenEntryForWriting(this.book_id);
-        ew.entrySetFeedData(ee);
+        this.revokeUsingURI(revoke_uri, RevokeType.LOAN);
       }
+      else {
+        /**
+         * If the loan information is gone, well, there's nothing we can
+         * do about that. This is a bug in the program.
+         */
 
-      /**
-       * Everything went well... Finish the revocation by telling
-       * the server about it.
-       */
+        final OptionType<AdobeAdeptLoan> loan_opt = snap.getAdobeRights();
+        if (loan_opt.isNone()) {
+          throw new UnreachableCodeException();
+        }
 
-      this.revokeUsingURI(revoke_uri, RevokeType.LOAN);
+        /**
+         * If it turns out that the loan is not actually returnable, well, there's
+         * nothing we can do about that. This is a bug in the program.
+         */
+
+        final AdobeAdeptLoan loan = ((Some<AdobeAdeptLoan>) loan_opt).get();
+        if (loan.isReturnable() == false) {
+          throw new UnreachableCodeException();
+        }
+
+        /**
+         * Execute a task using the Adobe DRM library, and wait for it to
+         * finish. The reason for the waiting, as opposed to calling further
+         * methods from inside the listener callbacks is to avoid any chance
+         * of the methods in question propagating an unchecked exception back
+         * to the native code. This will obviously crash the whole process,
+         * rather than just failing the revocation.
+         */
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AdobeLoanReturnResult listener = new AdobeLoanReturnResult(latch);
+        adobe.execute(
+          new AdobeAdeptProcedureType()
+          {
+            @Override public void executeWith(final AdobeAdeptConnectorType c)
+            {
+              c.loanReturn(listener, loan.getID());
+            }
+          });
+
+        /**
+         * Wait for the Adobe task to finish. Give up if it appears to be
+         * hanging.
+         */
+
+        try {
+          latch.await(3, TimeUnit.MINUTES);
+        } catch (final InterruptedException x) {
+          throw new IOException("Timed out waiting for Adobe revocation!", x);
+        }
+
+        /**
+         * If Adobe couldn't revoke the book, then the book isn't revoked.
+         * The user can try again later.
+         */
+
+        final OptionType<Throwable> error_opt = listener.getError();
+        if (error_opt.isSome()) {
+          this.revokeFailed(error_opt, null);
+          return;
+        }
+
+        /**
+         * Save the "revoked" state of the book.
+         */
+
+        {
+          final OPDSAcquisitionFeedEntryBuilderType b =
+            OPDSAcquisitionFeedEntry.newBuilderFrom(snap.getEntry());
+          b.setAvailability(OPDSAvailabilityRevoked.get(revoke_uri));
+          final OPDSAcquisitionFeedEntry ee = b.build();
+          final BookDatabaseEntryWritableType ew =
+            this.books_database.databaseOpenEntryForWriting(this.book_id);
+          ew.entrySetFeedData(ee);
+        }
+
+        /**
+         * Everything went well... Finish the revocation by telling
+         * the server about it.
+         */
+
+        this.revokeUsingURI(revoke_uri, RevokeType.LOAN);
+      }
     } else {
 
       /**
