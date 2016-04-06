@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -41,8 +42,10 @@ import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
 import org.nypl.simplified.books.core.BookFeedListenerType;
+import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
@@ -108,6 +111,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
   private @Nullable FeedType     feed;
   private @Nullable AbsListView  list_view;
+  private @Nullable SwipeRefreshLayout swipe_refresh_layout;
   private @Nullable Future<Unit> loading;
   private @Nullable ViewGroup    progress_layout;
   private           int          saved_scroll_pos;
@@ -654,16 +658,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       "menu creation requested and feed is " + "present");
 
     this.onCreateOptionsMenuSearchItem(menu_nn);
-    this.onCreateOptionsMenuRefreshItem(menu_nn);
     return true;
-  }
-
-  private void onCreateOptionsMenuRefreshItem(
-    final Menu menu_nn)
-  {
-    final MenuItem refresh_item = menu_nn.findItem(R.id.catalog_action_refresh);
-    refresh_item.setEnabled(true);
-    refresh_item.setVisible(true);
   }
 
   private void onCreateOptionsMenuSearchItem(
@@ -858,6 +853,18 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final ListView list = NullCheck.notNull(
       (ListView) layout.findViewById(
         R.id.catalog_feed_blocks_list));
+
+    this.swipe_refresh_layout = NullCheck.notNull((SwipeRefreshLayout) layout.findViewById(R.id.swipe_refresh_layout));
+
+    this.swipe_refresh_layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+      @Override
+      public void onRefresh() {
+
+        CatalogFeedActivity.this.retryFeed();
+
+      }
+    });
+
     list.post(
       new Runnable()
       {
@@ -989,6 +996,22 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       (GridView) layout.findViewById(
         R.id.catalog_feed_nogroups_grid));
 
+    this.swipe_refresh_layout = NullCheck.notNull((SwipeRefreshLayout) layout.findViewById(R.id.swipe_refresh_layout));
+
+    this.swipe_refresh_layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+      @Override
+      public void onRefresh() {
+
+        final SimplifiedCatalogAppServicesType app =
+          Simplified.getCatalogAppServices();
+        final BooksType books = app.getBooks();
+
+        books.accountSync(new SyncListener());
+        CatalogFeedActivity.this.retryFeed();
+
+      }
+    });
+
     this.configureFacets(f, layout, app, rr);
 
     grid_view.post(
@@ -1082,27 +1105,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     this.previously_paused = true;
   }
 
-  @Override public boolean onOptionsItemSelected(
-    final @Nullable MenuItem item)
-  {
-    final MenuItem item_nn = NullCheck.notNull(item);
-    final int id = item_nn.getItemId();
-
-    /**
-     * The menu option to refresh feeds. Essentially, the feed is invalidated
-     * in the cache and a new activity is started that loads the same feed
-     * again (replacing the current activity).
-     */
-
-    if (id == R.id.catalog_action_refresh) {
-      CatalogFeedActivity.LOG.debug("refreshing feed");
-      this.retryFeed();
-      return true;
-    }
-
-    return super.onOptionsItemSelected(item_nn);
-  }
-
   @Override protected void onSaveInstanceState(
     final @Nullable Bundle state)
   {
@@ -1168,6 +1170,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           final CatalogFeedArgumentsLocalBooks c)
         {
           CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
+          CatalogFeedActivity.this.swipe_refresh_layout.setRefreshing(false);
           return Unit.unit();
         }
 
@@ -1176,6 +1179,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         {
           loader.invalidate(c.getURI());
           CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
+          CatalogFeedActivity.this.swipe_refresh_layout.setRefreshing(false);
           return Unit.unit();
         }
       });
@@ -1333,6 +1337,43 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
       cfa.catalogActivityForkNew(new_args);
       return true;
+    }
+  }
+
+  private static final class SyncListener implements AccountSyncListenerType
+  {
+    SyncListener()
+    {
+
+    }
+
+    @Override
+    public void onAccountSyncAuthenticationFailure(final String message)
+    {
+      CatalogFeedActivity.LOG.debug("account syncing failed: {}", message);
+    }
+
+    @Override public void onAccountSyncBook(final BookID book)
+    {
+      CatalogFeedActivity.LOG.debug("synced: {}", book);
+    }
+
+    @Override public void onAccountSyncFailure(
+      final OptionType<Throwable> error,
+      final String message)
+    {
+      LogUtilities.errorWithOptionalException(
+        CatalogFeedActivity.LOG, message, error);
+    }
+
+    @Override public void onAccountSyncSuccess()
+    {
+      CatalogFeedActivity.LOG.debug("account syncing finished");
+    }
+
+    @Override public void onAccountSyncBookDeleted(final BookID book)
+    {
+      CatalogFeedActivity.LOG.debug("book deleted: {}", book);
     }
   }
 }
