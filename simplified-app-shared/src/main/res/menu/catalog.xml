@@ -9,19 +9,4 @@
     android:visible="false"
     android:actionViewClass="android.widget.SearchView"
     android:showAsAction="ifRoom|collapseActionView" />
-
-  <item
-    android:id="@+id/catalog_action_sync_books"
-    android:title="@string/books_sync"
-    android:enabled="false"
-    android:visible="false"
-    android:showAsAction="never|withText|collapseActionView" />
-
-  <item
-    android:id="@+id/catalog_action_refresh"
-    android:title="@string/catalog_refresh"
-    android:enabled="false"
-    android:visible="false"
-    android:showAsAction="never|withText|collapseActionView" />
-
 </menu>
