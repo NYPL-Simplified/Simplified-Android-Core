@@ -173,7 +173,9 @@
       android:progressDrawable="@drawable/simplified_progress"
       android:layout_width="match_parent"
       android:layout_weight="1"
-      android:layout_height="wrap_content" />
+      android:layout_height="wrap_content"
+      android:max="255"
+      />
 
     <ImageView
       android:layout_width="24dp"
