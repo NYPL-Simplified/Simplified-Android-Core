@@ -265,7 +265,7 @@ public final class ReaderActivity extends Activity implements
     settings.addListener(this);
 
     this.viewer_settings = new ReaderReadiumViewerSettings(
-      SyntheticSpreadMode.AUTO, ScrollMode.AUTO, 100, 30);
+      SyntheticSpreadMode.SINGLE, ScrollMode.AUTO, (int) settings.getFontScale(), 20);
 
     final ReaderReadiumFeedbackDispatcherType rd =
       ReaderReadiumFeedbackDispatcher.newDispatcher();
