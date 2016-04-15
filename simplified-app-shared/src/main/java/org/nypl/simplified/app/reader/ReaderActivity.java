@@ -685,6 +685,10 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull(this.view_progress_text);
     final ProgressBar in_progress_bar =
       NullCheck.notNull(this.view_progress_bar);
+
+    final Container container = NullCheck.notNull(this.epub_container);
+    final Package default_package = NullCheck.notNull(container.getDefaultPackage());
+
     UIThread.runOnUIThread(
       new Runnable()
       {
@@ -702,10 +706,10 @@ public final class ReaderActivity extends Activity implements
             in_progress_text.setText(
               NullCheck.notNull(
                 String.format(
-                  "Page %d of %d (%d%% left in chapter)",
+                  "Page %d of %d (%s)",
                   page.getSpineItemPageIndex() + 1,
                   page.getSpineItemPageCount(),
-                  in_progress_bar.getMax() - in_progress_bar.getProgress())));
+                  default_package.getSpineItem(page.getIDRef()).getTitle())));
           }
         }
       });
