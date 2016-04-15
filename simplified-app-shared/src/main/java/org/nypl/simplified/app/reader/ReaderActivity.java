@@ -237,6 +237,16 @@ public final class ReaderActivity extends Activity implements
     in_progress_bar.setVisibility(View.INVISIBLE);
 
     this.web_view_resized = true;
+    UIThread.runOnUIThreadDelayed(
+      new Runnable() {
+        @Override
+        public void run() {
+          final ReaderReadiumJavaScriptAPIType readium_js =
+            NullCheck.notNull(ReaderActivity.this.readium_js_api);
+          readium_js.getCurrentPage(ReaderActivity.this);
+          readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+        }
+      }, 300L);
   }
 
   @Override protected void onCreate(
@@ -418,6 +428,11 @@ public final class ReaderActivity extends Activity implements
   {
     super.onDestroy();
 
+    final ReaderReadiumJavaScriptAPIType readium_js =
+      NullCheck.notNull(ReaderActivity.this.readium_js_api);
+    readium_js.getCurrentPage(ReaderActivity.this);
+    readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
 
@@ -522,6 +537,17 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderColorScheme cs = s.getColorScheme();
     this.applyViewerColorScheme(cs);
+
+    UIThread.runOnUIThreadDelayed(
+      new Runnable() {
+        @Override
+        public void run() {
+          final ReaderReadiumJavaScriptAPIType readium_js =
+            NullCheck.notNull(ReaderActivity.this.readium_js_api);
+          readium_js.getCurrentPage(ReaderActivity.this);
+          readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+        }
+      }, 300L);
   }
 
   @Override public void onReadiumFunctionDispatchError(
@@ -666,16 +692,7 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.debug("pagination changed: {}", e);
     final WebView in_web_view = NullCheck.notNull(this.view_web_view);
 
-    /**
-     * Ask for Readium to deliver the unique identifier of the current page,
-     * and tell Simplified that the page has changed and so any Javascript
-     * state should be reconfigured.
-     */
 
-    final ReaderReadiumJavaScriptAPIType readium_js =
-      NullCheck.notNull(this.readium_js_api);
-    readium_js.getCurrentPage(this);
-    readium_js.mediaOverlayIsAvailable(this);
 
     /**
      * Configure the progress bar and text.
@@ -711,6 +728,22 @@ public final class ReaderActivity extends Activity implements
                   page.getSpineItemPageCount(),
                   default_package.getSpineItem(page.getIDRef()).getTitle())));
           }
+
+          /**
+           * Ask for Readium to deliver the unique identifier of the current page,
+           * and tell Simplified that the page has changed and so any Javascript
+           * state should be reconfigured.
+           */
+          UIThread.runOnUIThreadDelayed(
+            new Runnable() {
+              @Override
+              public void run() {
+                final ReaderReadiumJavaScriptAPIType readium_js =
+                  NullCheck.notNull(ReaderActivity.this.readium_js_api);
+                readium_js.getCurrentPage(ReaderActivity.this);
+                readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+              }
+            }, 300L);
         }
       });
 

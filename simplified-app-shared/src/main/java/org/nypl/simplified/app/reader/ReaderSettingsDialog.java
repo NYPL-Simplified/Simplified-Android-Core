@@ -1,17 +1,16 @@
 package org.nypl.simplified.app.reader;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -170,7 +169,9 @@ public final class ReaderSettingsDialog extends DialogFragment
         @Override public void onClick(
           final @Nullable View v)
         {
-          settings.setFontScale(settings.getFontScale() + 25.0f);
+          if (settings.getFontScale() < 200) {
+            settings.setFontScale(settings.getFontScale() + 25.0f);
+          }
         }
       });
 
@@ -180,7 +181,9 @@ public final class ReaderSettingsDialog extends DialogFragment
         @Override public void onClick(
           final @Nullable View v)
         {
-          settings.setFontScale(settings.getFontScale() - 25.0f);
+          if (settings.getFontScale() > 75) {
+            settings.setFontScale(settings.getFontScale() - 25.0f);
+          }
         }
       });
 
@@ -188,10 +191,8 @@ public final class ReaderSettingsDialog extends DialogFragment
      * Configure brightness controller.
      */
 
-    final Activity activity = this.getActivity();
-    final Window window = activity.getWindow();
-    in_view_brightness.setProgress(
-      (int) (window.getAttributes().screenBrightness * 100.0F));
+    final int brightness = this.getScreenBrightness();
+    in_view_brightness.setProgress(brightness);
     in_view_brightness.setOnSeekBarChangeListener(
       new OnSeekBarChangeListener()
       {
@@ -200,9 +201,7 @@ public final class ReaderSettingsDialog extends DialogFragment
           final int progress,
           final boolean from_user)
         {
-          final WindowManager.LayoutParams params = window.getAttributes();
-          params.screenBrightness = (float) progress / 100.0f;
-          window.setAttributes(params);
+         ReaderSettingsDialog.this.setScreenBrightness(progress);
         }
 
         @Override public void onStartTrackingTouch(
@@ -224,6 +223,30 @@ public final class ReaderSettingsDialog extends DialogFragment
     }
 
     return layout;
+  }
+
+  // Change current screen brightness
+  private void setScreenBrightness(final int brightness_value) {
+
+    // Make sure brightness value is between 0 to 255
+    if (brightness_value >= 0 && brightness_value <= 255) {
+      Settings.System.putInt(
+        this.getActivity().getApplicationContext().getContentResolver(),
+        Settings.System.SCREEN_BRIGHTNESS,
+        brightness_value
+      );
+    }
+  }
+
+  // Get current screen brightness
+  protected int getScreenBrightness() {
+
+    final int brightness_value = Settings.System.getInt(
+      this.getActivity().getApplicationContext().getContentResolver(),
+      Settings.System.SCREEN_BRIGHTNESS,
+      0
+    );
+    return brightness_value;
   }
 
   @Override public void onResume()
