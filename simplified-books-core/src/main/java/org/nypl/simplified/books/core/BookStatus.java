@@ -37,7 +37,6 @@ final class BookStatus
     final OPDSAcquisitionFeedEntry e = in_snap.getEntry();
     final boolean downloaded = in_snap.getBook().isSome();
     final boolean adobe_returnable = BookStatus.isAdobeReturnable(in_snap);
-    final boolean is_3M = BookStatus.is3M(in_snap);
 
     final OPDSAvailabilityType availability = e.getAvailability();
     return availability.matchAvailability(
@@ -73,7 +72,7 @@ final class BookStatus
           final OPDSAvailabilityLoaned a)
         {
           final boolean has_revoke = a.getRevoke().isSome();
-          final boolean returnable = (has_revoke && adobe_returnable) || (has_revoke && is_3M);
+          final boolean returnable = (has_revoke && adobe_returnable) || (has_revoke && downloaded);
 
           if (downloaded) {
             return new BookStatusDownloaded(in_id, a.getEndDate(), returnable);
@@ -115,13 +114,6 @@ final class BookStatus
     } else {
       return false;
     }
-  }
-
-  private static boolean is3M(
-    final BookDatabaseEntrySnapshot in_snap)
-  {
-    final String distribution = in_snap.getEntry().getDistribution();
-    return "3M".equals(distribution);
   }
 
 }

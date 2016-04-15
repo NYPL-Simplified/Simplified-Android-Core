@@ -372,11 +372,6 @@ final class BooksControllerRevokeBookTask
         this.books_database.databaseOpenEntryForReading(this.book_id);
       final BookDatabaseEntrySnapshot snap = er.entryGetSnapshot();
 
-      if ("3M".equals(snap.getEntry().getDistribution()))
-      {
-        this.revokeUsingURI(revoke_uri, RevokeType.LOAN);
-      }
-      else {
         /**
          * If the loan information is gone, well, there's nothing we can
          * do about that. This is a bug in the program.
@@ -393,57 +388,54 @@ final class BooksControllerRevokeBookTask
          */
 
         final AdobeAdeptLoan loan = ((Some<AdobeAdeptLoan>) loan_opt).get();
-        if (loan.isReturnable() == false) {
-          throw new UnreachableCodeException();
-        }
+        if (loan.isReturnable() == true) {
 
-        /**
-         * Execute a task using the Adobe DRM library, and wait for it to
-         * finish. The reason for the waiting, as opposed to calling further
-         * methods from inside the listener callbacks is to avoid any chance
-         * of the methods in question propagating an unchecked exception back
-         * to the native code. This will obviously crash the whole process,
-         * rather than just failing the revocation.
-         */
+          /**
+           * Execute a task using the Adobe DRM library, and wait for it to
+           * finish. The reason for the waiting, as opposed to calling further
+           * methods from inside the listener callbacks is to avoid any chance
+           * of the methods in question propagating an unchecked exception back
+           * to the native code. This will obviously crash the whole process,
+           * rather than just failing the revocation.
+           */
 
-        final CountDownLatch latch = new CountDownLatch(1);
-        final AdobeLoanReturnResult listener = new AdobeLoanReturnResult(latch);
-        adobe.execute(
-          new AdobeAdeptProcedureType()
-          {
-            @Override public void executeWith(final AdobeAdeptConnectorType c)
+          final CountDownLatch latch = new CountDownLatch(1);
+          final AdobeLoanReturnResult listener = new AdobeLoanReturnResult(latch);
+          adobe.execute(
+            new AdobeAdeptProcedureType()
             {
-              c.loanReturn(listener, loan.getID());
-            }
-          });
+              @Override public void executeWith(final AdobeAdeptConnectorType c)
+              {
+                c.loanReturn(listener, loan.getID());
+              }
+            });
 
-        /**
-         * Wait for the Adobe task to finish. Give up if it appears to be
-         * hanging.
-         */
+          /**
+           * Wait for the Adobe task to finish. Give up if it appears to be
+           * hanging.
+           */
 
-        try {
-          latch.await(3, TimeUnit.MINUTES);
-        } catch (final InterruptedException x) {
-          throw new IOException("Timed out waiting for Adobe revocation!", x);
-        }
+          try {
+            latch.await(3, TimeUnit.MINUTES);
+          } catch (final InterruptedException x) {
+            throw new IOException("Timed out waiting for Adobe revocation!", x);
+          }
 
-        /**
-         * If Adobe couldn't revoke the book, then the book isn't revoked.
-         * The user can try again later.
-         */
+          /**
+           * If Adobe couldn't revoke the book, then the book isn't revoked.
+           * The user can try again later.
+           */
 
-        final OptionType<Throwable> error_opt = listener.getError();
-        if (error_opt.isSome()) {
-          this.revokeFailed(error_opt, null);
-          return;
-        }
+          final OptionType<Throwable> error_opt = listener.getError();
+          if (error_opt.isSome()) {
+            this.revokeFailed(error_opt, null);
+            return;
+          }
 
-        /**
-         * Save the "revoked" state of the book.
-         */
+          /**
+           * Save the "revoked" state of the book.
+           */
 
-        {
           final OPDSAcquisitionFeedEntryBuilderType b =
             OPDSAcquisitionFeedEntry.newBuilderFrom(snap.getEntry());
           b.setAvailability(OPDSAvailabilityRevoked.get(revoke_uri));
@@ -459,7 +451,6 @@ final class BooksControllerRevokeBookTask
          */
 
         this.revokeUsingURI(revoke_uri, RevokeType.LOAN);
-      }
     } else {
 
       /**
