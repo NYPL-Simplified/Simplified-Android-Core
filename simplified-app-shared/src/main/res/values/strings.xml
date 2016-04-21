@@ -105,6 +105,7 @@
   <string name="settings_login_title">Library Card</string>
   <string name="settings_barcode">Barcode</string>
   <string name="settings_pin">PIN</string>
+  <string name="settings_screen_Lock_not_setup">"Secure lock screen hasn't been set up. Go to 'Settings -> Security -> Screenlock' to set up a lock screen"</string>
   <string name="settings_log_in_cancel">Cancel</string>
   <string name="settings_log_in">Log In</string>
   <string name="settings_log_out">Log Out</string>
