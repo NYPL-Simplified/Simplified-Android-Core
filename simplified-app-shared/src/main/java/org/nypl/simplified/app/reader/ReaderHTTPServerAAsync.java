@@ -171,7 +171,11 @@ public final class ReaderHTTPServerAAsync
 
       {
         try {
-          final String asset_path = path.replaceFirst("^/+", "");
+          String asset_path = path.replaceFirst("^/+", "");
+          if (asset_path.contains("OpenDyslexic"))
+          {
+            asset_path = "OpenDyslexic3-Regular.ttf";
+          }
           ReaderHTTPServerAAsync.LOG.debug("opening asset: {}", asset_path);
 
           final InputStream stream =
