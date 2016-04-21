@@ -147,7 +147,7 @@
       <dependency>
         <groupId>android</groupId>
         <artifactId>android</artifactId>
-        <version>4.4.2_r4</version>
+        <version>5.0.1_r2</version>
       </dependency>
       <dependency>
         <groupId>android.support</groupId>

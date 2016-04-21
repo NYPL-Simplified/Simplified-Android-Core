@@ -1,7 +1,9 @@
 package org.nypl.simplified.app;
 
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -388,7 +390,28 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   {
     MainSettingsActivity.LOG.debug("deleted book: {}", book);
   }
+  @Override
+  protected void onActivityResult(final int request_code, final int result_code, final Intent data) {
+    if (request_code == 1) {
+      // Challenge completed, proceed with using cipher
+      final CheckBox in_pin_reveal = NullCheck.notNull(
+        (CheckBox) this.findViewById(R.id.settings_reveal_password));
 
+      if (result_code == RESULT_OK) {
+
+        final EditText in_pin_edit =
+          NullCheck.notNull((EditText) this.findViewById(R.id.settings_pin_edit));
+
+        in_pin_edit.setTransformationMethod(
+          HideReturnsTransformationMethod.getInstance());
+        in_pin_reveal.setChecked(true);
+      } else {
+        // The user canceled or didnât complete the lock screen
+        // operation. Go to error/cancellation flow.
+        in_pin_reveal.setChecked(false);
+      }
+    }
+  }
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -430,29 +453,11 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final TextView in_adobe_accounts = NullCheck.notNull(
       (TextView) this.findViewById(R.id.settings_adobe_accounts));
 
-    /**
-     * Add a listener that reveals/hides the password field.
-     */
-
-    in_pin_edit.setTransformationMethod(
-      PasswordTransformationMethod.getInstance());
-    in_pin_reveal.setOnCheckedChangeListener(
-      new CompoundButton.OnCheckedChangeListener()
-      {
-        @Override public void onCheckedChanged(
-          final CompoundButton view,
-          final boolean checked)
-        {
-          if (checked) {
-            in_pin_edit.setTransformationMethod(
-              HideReturnsTransformationMethod.getInstance());
-          } else {
-            in_pin_edit.setTransformationMethod(
-              PasswordTransformationMethod.getInstance());
-          }
-        }
-      });
-
+    if (android.os.Build.VERSION.SDK_INT >= 21) {
+      this.handle_pin_reveal(in_pin_edit, in_pin_reveal);
+    } else {
+      in_pin_reveal.setVisibility(View.GONE);
+    }
     /**
      * If Adobe DRM support is available, then enable the accounts
      * management section. This is not yet implemented and is therefore
@@ -547,41 +552,41 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
      */
 
     final View settings_about_divider =
-            NullCheck.notNull((View) this.findViewById(R.id.settings_about_divider));
+      NullCheck.notNull((View) this.findViewById(R.id.settings_about_divider));
 
     final TextView in_about =
-            NullCheck.notNull((TextView) this.findViewById(R.id.settings_about));
+      NullCheck.notNull((TextView) this.findViewById(R.id.settings_about));
     in_about.setEnabled(false);
     in_about.setVisibility(View.GONE);
     settings_about_divider.setVisibility(View.GONE);
 
     docs.getAbout().map_(
-            new ProcedureType<SyncedDocumentType>() {
-              @Override
-              public void call(final SyncedDocumentType ack) {
-                in_about.setEnabled(true);
-                in_about.setVisibility(View.VISIBLE);
-                settings_about_divider.setVisibility(View.VISIBLE);
+      new ProcedureType<SyncedDocumentType>() {
+        @Override
+        public void call(final SyncedDocumentType ack) {
+          in_about.setEnabled(true);
+          in_about.setVisibility(View.VISIBLE);
+          settings_about_divider.setVisibility(View.VISIBLE);
 
-                in_about.setOnClickListener(
-                        new OnClickListener() {
-                          @Override
-                          public void onClick(final View v) {
-                            final Intent i = new Intent(
-                                    MainSettingsActivity.this, WebViewActivity.class);
-                            final Bundle b = new Bundle();
-                            WebViewActivity.setActivityArguments(
-                                    b,
-                                    ack.documentGetReadableURL().toString(),
-                                    resources.getString(R.string.settings_about),
-                                    SimplifiedPart.PART_SETTINGS);
-                            i.putExtras(b);
-                            MainSettingsActivity.this.startActivity(i);
-                            MainSettingsActivity.this.overridePendingTransition(0, 0);
-                          }
-                        });
+          in_about.setOnClickListener(
+            new OnClickListener() {
+              @Override
+              public void onClick(final View v) {
+                final Intent i = new Intent(
+                  MainSettingsActivity.this, WebViewActivity.class);
+                final Bundle b = new Bundle();
+                WebViewActivity.setActivityArguments(
+                  b,
+                  ack.documentGetReadableURL().toString(),
+                  resources.getString(R.string.settings_about),
+                  SimplifiedPart.PART_SETTINGS);
+                i.putExtras(b);
+                MainSettingsActivity.this.startActivity(i);
+                MainSettingsActivity.this.overridePendingTransition(0, 0);
               }
             });
+        }
+      });
 
 
     /**
@@ -714,7 +719,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
      */
 
     final View settings_adobe_accounts_divider =
-            NullCheck.notNull((View) this.findViewById(R.id.settings_adobe_accounts_divider));
+      NullCheck.notNull((View) this.findViewById(R.id.settings_adobe_accounts_divider));
     ((ViewGroup) settings_adobe_accounts_divider.getParent()).removeView(settings_adobe_accounts_divider);
 
     final TextView in_alt_uris =
@@ -744,6 +749,42 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     this.barcode_edit = in_barcode_edit;
     this.pin_edit = in_pin_edit;
     this.login = in_login;
+  }
+
+  @TargetApi(21)
+  private void handle_pin_reveal(final EditText in_pin_edit, final CheckBox in_pin_reveal) {
+    /**
+     * Add a listener that reveals/hides the password field.
+     */
+    in_pin_edit.setTransformationMethod(
+      PasswordTransformationMethod.getInstance());
+    in_pin_reveal.setOnCheckedChangeListener(
+      new CompoundButton.OnCheckedChangeListener()
+      {
+        @Override public void onCheckedChanged(
+          final CompoundButton view,
+          final boolean checked)
+        {
+          if (checked) {
+            final KeyguardManager keyguard_manager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+            if (!keyguard_manager.isKeyguardSecure()) {
+              // Show a message that the user hasn't set up a lock screen.
+              Toast.makeText(MainSettingsActivity.this, R.string.settings_screen_Lock_not_setup,
+                Toast.LENGTH_LONG).show();
+              in_pin_reveal.setChecked(false);
+            }
+            else {
+              final Intent intent = keyguard_manager.createConfirmDeviceCredentialIntent(null, null);
+              if (intent != null) {
+                startActivityForResult(intent, 1);
+              }
+            }
+          } else {
+            in_pin_edit.setTransformationMethod(
+              PasswordTransformationMethod.getInstance());
+          }
+        }
+      });
   }
 
   private void enableLoginIfFieldsNonEmpty(
