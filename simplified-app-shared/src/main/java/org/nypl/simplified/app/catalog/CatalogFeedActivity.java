@@ -757,7 +757,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   {
     UIThread.checkIsUIThread();
 
-    CatalogFeedActivity.LOG.error("Failed to get feed: ", e);
     this.invalidateOptionsMenu();
 
     final FrameLayout content_area = this.getContentFrame();
