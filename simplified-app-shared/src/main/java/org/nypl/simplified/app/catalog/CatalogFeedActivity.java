@@ -1170,7 +1170,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           final CatalogFeedArgumentsLocalBooks c)
         {
           CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
-          CatalogFeedActivity.this.swipe_refresh_layout.setRefreshing(false);
+          if (CatalogFeedActivity.this.swipe_refresh_layout != null)
+          {
+            CatalogFeedActivity.this.swipe_refresh_layout.setRefreshing(false);
+          }
           return Unit.unit();
         }
 
@@ -1179,7 +1182,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         {
           loader.invalidate(c.getURI());
           CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);
-          CatalogFeedActivity.this.swipe_refresh_layout.setRefreshing(false);
+          if (CatalogFeedActivity.this.swipe_refresh_layout != null)
+          {
+            CatalogFeedActivity.this.swipe_refresh_layout.setRefreshing(false);
+          }
           return Unit.unit();
         }
       });
