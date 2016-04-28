@@ -94,62 +94,60 @@ final class BooksControllerSyncTask implements Runnable
 
     final OptionType<AccountCredentials> credentials_opt =
       this.accounts_database.accountGetCredentials();
-    if (credentials_opt.isNone()) {
-      throw new IllegalStateException("Not logged in!");
-    }
+    if (credentials_opt.isSome()) {
 
-    final AccountCredentials credentials =
-      ((Some<AccountCredentials>) credentials_opt).get();
-    final AccountBarcode barcode = credentials.getUser();
-    final AccountPIN pin = credentials.getPassword();
-    final AccountSyncListenerType in_listener = this.listener;
+      final AccountCredentials credentials =
+        ((Some<AccountCredentials>) credentials_opt).get();
+      final AccountBarcode barcode = credentials.getUser();
+      final AccountPIN pin = credentials.getPassword();
+      final AccountSyncListenerType in_listener = this.listener;
 
-    final HTTPAuthType auth =
-      new HTTPAuthBasic(barcode.toString(), pin.toString());
-    final HTTPResultType<InputStream> r =
-      this.http.get(Option.some(auth), loans_uri, 0L);
+      final HTTPAuthType auth =
+        new HTTPAuthBasic(barcode.toString(), pin.toString());
+      final HTTPResultType<InputStream> r =
+        this.http.get(Option.some(auth), loans_uri, 0L);
 
-    r.matchResult(
-      new HTTPResultMatcherType<InputStream, Unit, Exception>()
-      {
-        @Override public Unit onHTTPError(
-          final HTTPResultError<InputStream> e)
-          throws Exception
-        {
-          final String m = NullCheck.notNull(
-            String.format(
-              "%s: %d: %s", loans_uri, e.getStatus(), e.getMessage()));
+      r.matchResult(
+        new HTTPResultMatcherType<InputStream, Unit, Exception>() {
+          @Override
+          public Unit onHTTPError(
+            final HTTPResultError<InputStream> e)
+            throws Exception {
+            final String m = NullCheck.notNull(
+              String.format(
+                "%s: %d: %s", loans_uri, e.getStatus(), e.getMessage()));
 
-          switch (e.getStatus()) {
-            case HttpURLConnection.HTTP_UNAUTHORIZED: {
-              in_listener.onAccountSyncAuthenticationFailure("Invalid PIN");
+            switch (e.getStatus()) {
+              case HttpURLConnection.HTTP_UNAUTHORIZED: {
+                in_listener.onAccountSyncAuthenticationFailure("Invalid PIN");
+                return Unit.unit();
+              }
+              default: {
+                throw new IOException(m);
+              }
+            }
+          }
+
+          @Override
+          public Unit onHTTPException(
+            final HTTPResultException<InputStream> e)
+            throws Exception {
+            throw e.getError();
+          }
+
+          @Override
+          public Unit onHTTPOK(
+            final HTTPResultOKType<InputStream> e)
+            throws Exception {
+            try {
+              BooksControllerSyncTask.this.syncFeedEntries(loans_uri, e);
               return Unit.unit();
-            }
-            default: {
-              throw new IOException(m);
+            } finally {
+              e.close();
             }
           }
-        }
-
-        @Override public Unit onHTTPException(
-          final HTTPResultException<InputStream> e)
-          throws Exception
-        {
-          throw e.getError();
-        }
-
-        @Override public Unit onHTTPOK(
-          final HTTPResultOKType<InputStream> e)
-          throws Exception
-        {
-          try {
-            BooksControllerSyncTask.this.syncFeedEntries(loans_uri, e);
-            return Unit.unit();
-          } finally {
-            e.close();
-          }
-        }
-      });
+        });
+    }
   }
 
   private void syncFeedEntries(
