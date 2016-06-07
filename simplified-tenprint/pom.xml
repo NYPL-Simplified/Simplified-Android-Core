@@ -34,10 +34,6 @@
       <artifactId>android</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>android.support</groupId>
-      <artifactId>compatibility-v13</artifactId>
-    </dependency>
   </dependencies>
 
   <build>

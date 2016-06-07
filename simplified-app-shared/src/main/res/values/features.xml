@@ -13,6 +13,9 @@
   <!-- The configurable main color, used for branding. -->
   <color name="feature_main_color">#f0731f</color>
 
+  <!-- The configurable secondary color, used for branding. -->
+  <color name="feature_secondary_color">#d76e1e</color>
+
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>

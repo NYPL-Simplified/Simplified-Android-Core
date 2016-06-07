@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -59,13 +60,38 @@ public class CatalogBookReportActivity extends SimplifiedActivity
     return SimplifiedPart.PART_CATALOG;
   }
 
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item_mn)
+  {
+    final MenuItem item = NullCheck.notNull(item_mn);
+    switch (item.getItemId()) {
+
+      case android.R.id.home: {
+        onBackPressed();
+        return true;
+      }
+
+      default: {
+        return super.onOptionsItemSelected(item);
+      }
+    }
+  }
+
   private void configureUpButton()
   {
     final ActionBar bar = this.getActionBar();
-    bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
-    bar.setDisplayHomeAsUpEnabled(true);
-    bar.setHomeButtonEnabled(true);
     bar.setTitle(this.getResources().getString(R.string.catalog_book_report));
+    if (android.os.Build.VERSION.SDK_INT < 21) {
+      bar.setDisplayHomeAsUpEnabled(false);
+      bar.setHomeButtonEnabled(true);
+      bar.setIcon(R.drawable.ic_arrow_back);
+    }
+    else
+    {
+      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(false);
+    }
   }
 
   /**
