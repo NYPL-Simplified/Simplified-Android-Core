@@ -116,6 +116,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
   private @Nullable ViewGroup    progress_layout;
   private           int          saved_scroll_pos;
   private           boolean      previously_paused;
+  private           SearchView   search_view;
 
   /**
    * Construct an activity.
@@ -199,7 +200,11 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         }
       });
   }
+  @Override public void onBackPressed() {
 
+    this.invalidateOptionsMenu();
+    super.onBackPressed();
+  }
   @Override protected void onResume()
   {
     super.onResume();
@@ -213,6 +218,12 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
      *
      * This obviously only applies to local feeds.
      */
+
+    if (this.search_view != null)
+    {
+      this.search_view.setQuery("", false);
+      this.search_view.clearFocus();
+    }
 
     if (this.previously_paused == true) {
       final CatalogFeedArgumentsType args = this.getArguments();
@@ -579,10 +590,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
      * If this is the root of the catalog, attempt the initial load/login/sync
      * of books.
      */
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
 
     if (stack.isEmpty()) {
-      final SimplifiedCatalogAppServicesType app =
-        Simplified.getCatalogAppServices();
       app.syncInitial();
     }
 
@@ -605,8 +616,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
      * available, then fail fast and display an error message.
      */
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
 
     if (args.isLocallyGenerated() == false) {
       if (app.isNetworkAvailable() == false) {
@@ -678,18 +687,21 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       final Some<FeedSearchType> search_some =
         (Some<FeedSearchType>) search_opt;
 
-      final SearchView sv = (SearchView) search_item.getActionView();
-      sv.setSubmitButtonEnabled(true);
+      this.search_view = (SearchView) search_item.getActionView();
+      this.search_view.setSubmitButtonEnabled(true);
+      this.search_view.setIconifiedByDefault(false);
+      search_item.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+      search_item.expandActionView();
 
       /**
        * Set some placeholder text
        */
 
       final CatalogFeedArgumentsType args = this.getArguments();
-      if (this.getUpStack().isEmpty()) {
-        sv.setQueryHint("Search");
-      } else {
-        sv.setQueryHint("Search " + args.getTitle());
+      this.search_view.setQueryHint("Search " + this.feed.getFeedTitle());
+      if (args.getTitle().startsWith("Search"))
+      {
+        this.search_view.setQueryHint(args.getTitle());
       }
 
       /**
@@ -699,26 +711,25 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       final Resources rr = NullCheck.notNull(this.getResources());
       final FeedSearchType search = search_some.get();
       search_ok = search.matchSearch(
-        new FeedSearchMatcherType<Boolean, UnreachableCodeException>()
-        {
-          @Override public Boolean onFeedSearchOpen1_1(
-            final FeedSearchOpen1_1 fs)
-          {
-            sv.setOnQueryTextListener(
+        new FeedSearchMatcherType<Boolean, UnreachableCodeException>() {
+          @Override
+          public Boolean onFeedSearchOpen1_1(
+            final FeedSearchOpen1_1 fs) {
+            CatalogFeedActivity.this.search_view.setOnQueryTextListener(
               new OpenSearchQueryHandler(
                 rr, args, fs.getSearch()));
             return NullCheck.notNull(Boolean.TRUE);
           }
 
-          @Override public Boolean onFeedSearchLocal(
-            final FeedSearchLocal f)
-          {
-            sv.setOnQueryTextListener(
+          @Override
+          public Boolean onFeedSearchLocal(
+            final FeedSearchLocal f) {
+            CatalogFeedActivity.this.search_view.setOnQueryTextListener(
               new BooksLocalSearchQueryHandler(
                 rr, args, FacetType.SORT_BY_TITLE));
             return NullCheck.notNull(Boolean.TRUE);
           }
-        }).booleanValue();
+        });
     }
 
     if (search_ok) {
@@ -881,7 +892,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     final CatalogFeedArgumentsType args = this.getArguments();
     final ImmutableStack<CatalogFeedArgumentsType> new_up_stack =
-      this.newUpStack(args);
+    this.newUpStack(args);
 
     final CatalogFeedLaneListenerType in_lane_listener =
       new CatalogFeedLaneListenerType()
@@ -1026,7 +1037,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     final CatalogFeedArgumentsType args = this.getArguments();
     final ImmutableStack<CatalogFeedArgumentsType> new_up_stack =
-      this.newUpStack(args);
+    this.newUpStack(args);
 
     final CatalogBookSelectionListenerType book_select_listener =
       new CatalogBookSelectionListenerType()
@@ -1281,7 +1292,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
       final ImmutableStack<CatalogFeedArgumentsType> us =
-        cfa.newUpStack(this.args);
+      ImmutableStack.empty();
+
 
       final String title =
         this.resources.getString(R.string.catalog_search) + ": " + qnn;
@@ -1293,8 +1305,15 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           this.facet_active,
           Option.some(qnn),
           cfa.getLocalFeedTypeSelection());
+      if ("Search".equals(CatalogFeedActivity.this.feed.getFeedTitle())) {
+        cfa.catalogActivityForkNewReplacing(new_args);
+      }
+      else
+      {
+        cfa.catalogActivityForkNew(new_args);
+      }
 
-      cfa.catalogActivityForkNew(new_args);
+
       return true;
     }
   }
@@ -1333,7 +1352,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
       final ImmutableStack<CatalogFeedArgumentsType> us =
-        cfa.newUpStack(this.args);
+        ImmutableStack.empty();
 
       final String title =
         this.resources.getString(R.string.catalog_search) + ": " + qnn;
@@ -1341,7 +1360,13 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       final CatalogFeedArgumentsRemote new_args =
         new CatalogFeedArgumentsRemote(false, us, title, target, true);
 
-      cfa.catalogActivityForkNew(new_args);
+      if ("Search".equals(CatalogFeedActivity.this.feed.getFeedTitle())) {
+        cfa.catalogActivityForkNewReplacing(new_args);
+      }
+      else
+      {
+        cfa.catalogActivityForkNew(new_args);
+      }
       return true;
     }
   }
