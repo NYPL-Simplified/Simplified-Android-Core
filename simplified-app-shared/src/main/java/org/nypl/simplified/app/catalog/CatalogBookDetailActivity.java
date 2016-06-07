@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.catalog;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -140,8 +139,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity
       new CatalogBookDetailView(this, inflater, this.getFeedEntry());
     this.view = detail_view;
     this.part = this.getPart();
-    final ActionBar bar = this.getActionBar();
-    bar.setTitle("Details");
 
     final FrameLayout content_area = this.getContentFrame();
     content_area.removeAllViews();

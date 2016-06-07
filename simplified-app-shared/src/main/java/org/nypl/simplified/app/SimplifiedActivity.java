@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -146,11 +147,14 @@ public abstract class SimplifiedActivity extends Activity
   @Override public void onBackPressed()
   {
     SimplifiedActivity.LOG.debug("onBackPressed: {}", this);
+    final Resources rr = NullCheck.notNull(this.getResources());
 
     final DrawerLayout d = NullCheck.notNull(this.drawer);
+    final ActionBar bar = this.getActionBar();
     if (d.isDrawerOpen(GravityCompat.START)) {
       this.finishing = true;
       d.closeDrawer(GravityCompat.START);
+      bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
     } else {
 
       /**
@@ -173,6 +177,7 @@ public abstract class SimplifiedActivity extends Activity
         else
         {
           d.openDrawer(GravityCompat.START);
+          bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_hide));
         }
       }
       else {
@@ -216,6 +221,8 @@ public abstract class SimplifiedActivity extends Activity
     }
     this.selected = -1;
 
+    final DrawerLayout d = NullCheck.notNull(this.drawer);
+    d.closeDrawer(GravityCompat.START);
   }
 
   @Override protected void onCreate(
@@ -289,6 +296,7 @@ public abstract class SimplifiedActivity extends Activity
     d.setDrawerListener(this);
     d.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
     dl.setOnItemClickListener(this);
+    d.setDrawerTitle(Gravity.LEFT, rr.getString(R.string.navigation_accessibility));
 
     final String app_name = NullCheck.notNull(rr.getString(R.string.feature_app_name));
     final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
@@ -323,6 +331,11 @@ public abstract class SimplifiedActivity extends Activity
           final TextView tv =
             NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
           tv.setText(part.getPartName(rr));
+
+          if (dl.getCheckedItemPosition() == position) {
+            tv.setContentDescription(tv.getText() + ". selected.");
+          }
+
           return v;
         }
       };
@@ -453,12 +466,13 @@ public abstract class SimplifiedActivity extends Activity
      * Show or hide the three dashes next to the home button.
      */
 
+    final ActionBar bar = this.getActionBar();
     if (this.navigationDrawerShouldShowIndicator()) {
       SimplifiedActivity.LOG.debug("setting navigation drawer indicator");
-      final ActionBar bar = this.getActionBar();
-      bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
-      bar.setDisplayHomeAsUpEnabled(true);
-      bar.setHomeButtonEnabled(true);
+      if (android.os.Build.VERSION.SDK_INT < 21) {
+        bar.setDisplayHomeAsUpEnabled(false);
+        bar.setHomeButtonEnabled(true);
+      }
     }
 
     /**
@@ -467,6 +481,7 @@ public abstract class SimplifiedActivity extends Activity
 
     if (open_drawer) {
       d.openDrawer(GravityCompat.START);
+      bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_hide));
     }
 
     this.drawer_items = di;
@@ -522,7 +537,6 @@ public abstract class SimplifiedActivity extends Activity
      * relevant activity.
      */
 
-    this.startSideBarActivity();
 
   }
 
@@ -559,24 +573,32 @@ public abstract class SimplifiedActivity extends Activity
     final long id)
   {
     SimplifiedActivity.LOG.debug("onItemClick: {}", position);
+    final Resources rr = NullCheck.notNull(this.getResources());
 
     final DrawerLayout d = NullCheck.notNull(this.drawer);
-    d.closeDrawer(GravityCompat.START);
+    final ActionBar bar = this.getActionBar();
+    bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
     this.selected = position;
+    this.startSideBarActivity();
   }
 
   @Override public boolean onOptionsItemSelected(
     final @Nullable MenuItem item_mn)
   {
     final MenuItem item = NullCheck.notNull(item_mn);
+    final Resources rr = NullCheck.notNull(this.getResources());
+
     switch (item.getItemId()) {
 
       case android.R.id.home: {
         final DrawerLayout d = NullCheck.notNull(this.drawer);
+        final ActionBar bar = this.getActionBar();
         if (d.isDrawerOpen(GravityCompat.START)) {
           d.closeDrawer(GravityCompat.START);
+          bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
         } else {
           d.openDrawer(GravityCompat.START);
+          bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_hide));
         }
 
         return super.onOptionsItemSelected(item);

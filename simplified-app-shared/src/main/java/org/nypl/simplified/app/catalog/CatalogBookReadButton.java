@@ -3,14 +3,11 @@ package org.nypl.simplified.app.catalog;
 import android.app.Activity;
 import android.content.res.Resources;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 
-import java.util.Calendar;
 
 /**
  * A button that opens a given book for reading.
@@ -34,15 +31,10 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
   {
     super(in_activity);
 
-    final OptionType<Calendar> end_date = in_entry.getFeedEntry().getAvailability().getEndDate();
-    if (end_date.isSome()) {
-      final CatalogButtonExpiryView expiry_view = new CatalogButtonExpiryView(in_activity);
-      expiry_view.setDate(((Some<Calendar>) end_date).get());
-      this.addView(expiry_view, 0);
-    }
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
+    this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_read)));
     this.getTextView().setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
     this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));

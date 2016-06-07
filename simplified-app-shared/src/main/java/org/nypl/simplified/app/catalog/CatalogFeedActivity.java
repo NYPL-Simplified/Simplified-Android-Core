@@ -564,6 +564,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     final ImmutableStack<CatalogFeedArgumentsType> stack = this.getUpStack();
     this.configureUpButton(stack, args.getTitle());
 
+    final Resources rr = NullCheck.notNull(this.getResources());
+    setTitle(args.getTitle().equals(NullCheck.notNull(rr.getString(R.string.feature_app_name))) ? rr.getString(R.string.catalog) : args.getTitle());
     /**
      * Attempt to restore the saved scroll position, if there is one.
      */

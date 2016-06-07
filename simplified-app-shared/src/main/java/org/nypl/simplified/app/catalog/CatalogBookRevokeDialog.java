@@ -106,22 +106,26 @@ public final class CatalogBookRevokeDialog extends DialogFragment
 
     final TextView message =
       NullCheck.notNull((TextView) layout.findViewById(R.id.book_revoke_text));
+    final Button in_logout_cancel_button =
+      NullCheck.notNull((Button) layout.findViewById(R.id.book_revoke_cancel));
+
+    final Resources rr = NullCheck.notNull(this.getResources());
 
     switch (this.type) {
       case REVOKE_LOAN: {
         message.setText(R.string.catalog_book_revoke_loan_confirm);
         button.setText(R.string.catalog_book_revoke_loan);
+        in_logout_cancel_button.setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_loan_cancel)));
         break;
       }
       case REVOKE_HOLD: {
         message.setText(R.string.catalog_book_revoke_hold_confirm);
         button.setText(R.string.catalog_book_revoke_hold);
+        in_logout_cancel_button.setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_hold_cancel)));
         break;
       }
     }
 
-    final Button in_logout_cancel_button =
-      NullCheck.notNull((Button) layout.findViewById(R.id.book_revoke_cancel));
 
     in_logout_cancel_button.setOnClickListener(
       new OnClickListener()

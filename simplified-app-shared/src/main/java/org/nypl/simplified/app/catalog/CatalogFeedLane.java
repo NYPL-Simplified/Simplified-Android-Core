@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -132,6 +133,10 @@ import java.util.concurrent.atomic.AtomicInteger;
     this.scroller_contents.removeAllViews();
 
     this.title.setText(in_group.getGroupTitle());
+
+    final Resources rr = NullCheck.notNull(this.getResources());
+
+    this.header.setContentDescription(String.format(rr.getString(R.string.catalog_accessibility_header_show_more), this.title.getText()));
     this.header.setOnClickListener(
       new OnClickListener()
       {

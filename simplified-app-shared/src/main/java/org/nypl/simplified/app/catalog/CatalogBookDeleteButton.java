@@ -34,6 +34,7 @@ public final class CatalogBookDeleteButton extends CatalogLeftPaddedButton
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_delete)));
+    this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_delete)));
     this.getTextView().setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
     this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
