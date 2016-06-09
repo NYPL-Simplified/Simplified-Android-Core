@@ -1,37 +1,152 @@
 Simplified
 ==========
 
+## IDE, Plugins, Versions, etc.
+
+##### JDK 1.8 (min required 1.7) [download](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) 
+
+##### Maven 3.3.9 [download](https://maven.apache.org/download.cgi)
+add settings.xml to .m2 directory
+
+request nexus credentials on slack [librarysimplified](https://librarysimplified.slack.com/messages/simplified-android/)
+ 
+```
+  <?xml version="1.0" encoding="UTF-8"?>
+  <settings
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+   <servers>
+      <server>
+        <id>nypl-nexus-group</id>
+        <username>****</username>
+        <password>****</password>
+      </server>
+    </servers>
+    <profiles>
+      <profile>
+        <id>nypl</id>
+        //keystore for signing the app, remove this property if you don't have a keystore yet.
+        <properties>
+            <sign.keystore>****</sign.keystore>
+            <sign.alias>nypl</sign.alias>
+            <sign.storepass><![CDATA[****]]></sign.storepass>
+            <sign.keypass><![CDATA[****]]></sign.keypass>
+        </properties>
+        <repositories>
+          <repository>
+            <id>nypl-nexus-group</id>
+            <name>NYPL nexus repo group</name>
+            <url>https://nexus.librarysimplified.org:8443/nexus/content/groups/external</url>
+            <layout>default</layout>
+          </repository>
+        </repositories>
+      </profile>
+    </profiles>
+    <activeProfiles>
+      <activeProfile>nypl</activeProfile>
+    </activeProfiles>
+  </settings>
+```
+
+
+
+### Android Studio 
+
+[Download](http://tools.android.com/download/studio/builds/1-5) Version 1.5 of Android Studio. 
+
+##### SDK Manager
+Install at least the Android SDK Package 4.4.2
+ 
+##### Other SDK Tools needed: 
+```
+Android SDK Build Tools
+Android SDK Tools
+Android SDK Platform Tools
+Local Maven repository for Support Libraries
+Android Support Library
+Google Play Service
+Google Play APK Expansion Library
+Google Play Licensing Library
+Android NDK
+```
+
+##### Environment Variables
+
+```
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_74.jdk/Contents/Home
+export ANDROID_HOME=$HOME/Library/Android/sdk
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
+export PATH=$PATH:$ANDROID_HOME/platform-tools/
+export PATH=$PATH:$HOME/Library/Maven/bin/
+```
+
+![config](https://www.dropbox.com/s/e60sexwzwlmdzg1/androidSdkManager.png?dl=1)
+
+
+#### Clone this repository or your forked repository
+
+
+##### Import cloned project
+
+![config](https://www.dropbox.com/s/nn0f7vs20p4s545/1.png?dl=1)
+![config](https://www.dropbox.com/s/4ofkxd1teqh7rft/2.png?dl=1)
+![config](https://www.dropbox.com/s/8xdz3cqi1w4ooa0/3.png?dl=1)
+
+
+##### Build Configuration
+
+Select a Module: simplye, openebooks, vanilla...
+
+![config](https://www.dropbox.com/s/gchjcg4d8wjby7m/buildConfiguration.png?dl=1)
+
+Add a Maven goal with the following command. Any other goal which might be added automatically, should be removed.
+
+```
+-pl simplified-app-shared,simplified-app-simplye -am clean package -U -P nypl
+```
+
+```
+-pl simplified-app-shared,simplified-app-openebooks -am clean package -U -P nypl
+```
+
+With Adobe DRM (NYPL and licensees only!)
+
+```
+-pl simplified-app-shared,simplified-app-simplye -am clean package -U -P nypl,nypl-drm-adobe
+```
+
+```
+-pl simplified-app-shared,simplified-app-openebooks -am clean package -U -P nypl,nypl-drm-adobe
+```
+
+
+### IntelliJ IDEA 
+[Download](https://www.jetbrains.com/idea/#chooseYourEdition), if you prefer using IntelliJ over Android Studio.
+After setup with Android Studio, you can use IntelliJ going forward with the following modifications.
+
+##### Build Configuration
+Make sure any other goal is removed, only the maven goal should remain.
+
+
+
+
+
 ## Building
 
-First, deploy the Android SDK artifacts to a repository using
-the following tool from Simpligility:
-
-  https://github.com/simpligility/maven-android-sdk-deployer
-
-Once the Android artifacts are deployed, and your copy of Maven
-knows how to find the repository in which they were deployed, it's
-necessary to set `$ANDROID_HOME` to the location of the Android SDK
-tools. For example, if the SDK is at `${HOME}/local/android-sdk-linux`,
-then:
-
-```
-$ export ANDROID_HOME=${HOME}/local/android-sdk-linux
-```
-
-Then, simply run:
+#### Without DRM
 
 ```
 $ mvn clean package
 ```
 
-### DRM (NYPL and licensees only!)
+#### With DRM (NYPL and licensees only!)
 
 If the application is to be built with support for Adobe DRM, the
 the Adobe-provided `ReaderClientCert.sig` files must be placed in
 `src/main/assets` for each of the current application frontends.
 The build will check for the existence of these files and fail if
-they do not exist. Additionally, the NYPL Adobe DRM package(s) must
-be deployed to a local repository.
+they do not exist. 
 
 Once this is done, building the package with Adobe DRM support
 enabled is achieved by:
@@ -48,11 +163,23 @@ enable Zendesk for the `SimplyE` application, create a file at
 `simplified-app-simplye/src/main/assets/helpstack.conf` with the
 correct URL and credentials:
 
+Configuration for Zendesk:
+
 ```
 helpstack.gear                 = zendesk
 helpstack.zendesk.instance_url = https://nonexistent.zendesk.com
 helpstack.zendesk.staff_email  = nobody@example.com
-helpstack.zendesk.api_token    = bmljZSBjYXRjaAo=
+helpstack.zendesk.api_token    = *************
+```
+
+Configuration for Desk.com:
+
+```
+helpstack.gear                        = desk
+helpstack.desk.instance_url           = https://nonexistent.desk.com
+helpstack.desk.to_help_email          = nobody@example.com
+helpstack.desk.staff_login_email      = nobody@example.com
+helpstack.desk.staff_login_password   = *************
 ```
 
 ## Branding And Configurable Features
@@ -61,17 +188,6 @@ See [simplified-app-shared/README-Branding.md](simplified-app-shared/README-Bran
 for documentation on how to produce your own branded and configured
 application.
 
-## Development
-
-This project is developed using the
-[git-flow](http://nvie.com/posts/a-successful-git-branching-model/)
-branching model.
-
-The [gitflow AVH edition](https://github.com/petervanderdoes/gitflow/)
-tool is used to facilitate this. The `master` branch represents the
-current production-ready code, and development occurs on the `develop`
-branch. All commits and tags are PGP-signed for stronger assurances
-of authenticity.
 
 ## License
 
