@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -66,6 +68,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
   }
 
   private @Nullable EditText barcode_edit;
+  private @Nullable TextView barcode_text;
   private @Nullable Button   login;
   private @Nullable EditText pin_edit;
 
@@ -119,6 +122,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final EditText in_barcode_edit = NullCheck.notNull(this.barcode_edit);
+    final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final EditText in_pin_edit = NullCheck.notNull(this.pin_edit);
     final Button in_login = NullCheck.notNull(this.login);
 
@@ -129,6 +133,10 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
         {
           in_pin_edit.setText(creds.getPassword().toString());
           in_barcode_edit.setText(creds.getUser().toString());
+          in_barcode_text.setText(creds.getUser().toString());
+          in_barcode_text.setContentDescription(creds.getUser().toString().replaceAll(".(?=.)", "$0,"));
+          in_barcode_edit.setVisibility(View.GONE);
+          in_barcode_text.setVisibility(View.VISIBLE);
           MainSettingsActivity.editableDisable(in_barcode_edit);
           MainSettingsActivity.editableDisable(in_pin_edit);
 
@@ -149,6 +157,8 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                       in_login.setEnabled(false);
                       MainSettingsActivity.editableDisable(in_pin_edit);
                       MainSettingsActivity.editableDisable(in_barcode_edit);
+                      in_barcode_edit.setVisibility(View.GONE);
+                      in_barcode_text.setVisibility(View.VISIBLE);
                       books.accountLogout(MainSettingsActivity.this);
                     }
                   });
@@ -169,6 +179,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final EditText in_barcode_edit = NullCheck.notNull(this.barcode_edit);
+    final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final EditText in_pin_edit = NullCheck.notNull(this.pin_edit);
     final Button in_login = NullCheck.notNull(this.login);
 
@@ -182,6 +193,8 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
         {
           MainSettingsActivity.editableEnable(in_barcode_edit);
           MainSettingsActivity.editableEnable(in_pin_edit);
+          in_barcode_edit.setVisibility(View.VISIBLE);
+          in_barcode_text.setVisibility(View.GONE);
 
           MainSettingsActivity.this.enableLoginIfFieldsNonEmpty(
             in_login, in_pin_edit, in_barcode_edit);
@@ -196,11 +209,13 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
                 in_login.setEnabled(false);
                 MainSettingsActivity.editableDisable(in_pin_edit);
                 MainSettingsActivity.editableDisable(in_barcode_edit);
+                in_barcode_edit.setVisibility(View.GONE);
+                in_barcode_text.setVisibility(View.VISIBLE);
 
-                final Editable barcode_text = in_barcode_edit.getText();
+                final Editable barcode_edit_text = in_barcode_edit.getText();
                 final AccountBarcode barcode = new AccountBarcode(
                   NullCheck.notNull(
-                    barcode_text.toString()));
+                    barcode_edit_text.toString()));
                 final Editable pin_text = in_pin_edit.getText();
                 final AccountPIN pin =
                   new AccountPIN(NullCheck.notNull(pin_text.toString()));
@@ -343,6 +358,7 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     final int duration = Toast.LENGTH_SHORT;
 
     final EditText be = NullCheck.notNull(this.barcode_edit);
+    final TextView bt = NullCheck.notNull(this.barcode_text);
     final EditText pe = NullCheck.notNull(this.pin_edit);
 
     UIThread.runOnUIThread(
@@ -352,6 +368,8 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
         {
           MainSettingsActivity.editableEnable(be);
           MainSettingsActivity.editableEnable(pe);
+          be.setVisibility(View.VISIBLE);
+          bt.setVisibility(View.GONE);
           be.setText("");
           pe.setText("");
 
@@ -435,6 +453,8 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       (TextView) this.findViewById(R.id.settings_barcode_label));
     final EditText in_barcode_edit = NullCheck.notNull(
       (EditText) this.findViewById(R.id.settings_barcode_edit));
+    final TextView in_barcode_text = NullCheck.notNull(
+      (TextView) this.findViewById(R.id.settings_barcode_text));
 
     final TextView in_pin_label = NullCheck.notNull(
       (TextView) this.findViewById(R.id.settings_pin_label));
@@ -448,11 +468,12 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     final View settings_privacy_divider =
       NullCheck.notNull((View) this.findViewById(R.id.settings_privacy_divider));
-    settings_privacy_divider.setVisibility(View.GONE);
 
     final TextView in_adobe_accounts = NullCheck.notNull(
       (TextView) this.findViewById(R.id.settings_adobe_accounts));
 
+    in_pin_edit.setTransformationMethod(
+      PasswordTransformationMethod.getInstance());
     if (android.os.Build.VERSION.SDK_INT >= 21) {
       this.handle_pin_reveal(in_pin_edit, in_pin_reveal);
     } else {
@@ -752,8 +773,13 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
 
     this.navigationDrawerSetActionBarTitle();
     this.barcode_edit = in_barcode_edit;
+    this.barcode_text = in_barcode_text;
     this.pin_edit = in_pin_edit;
+    this.pin_edit.clearFocus();
     this.login = in_login;
+    this.getWindow().setSoftInputMode(
+      WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    this.barcode_edit.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
   }
 
   @TargetApi(21)
@@ -761,8 +787,6 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
     /**
      * Add a listener that reveals/hides the password field.
      */
-    in_pin_edit.setTransformationMethod(
-      PasswordTransformationMethod.getInstance());
     in_pin_reveal.setOnCheckedChangeListener(
       new CompoundButton.OnCheckedChangeListener()
       {

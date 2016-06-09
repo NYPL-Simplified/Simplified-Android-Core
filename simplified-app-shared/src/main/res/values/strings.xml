@@ -18,6 +18,7 @@
 
   <!-- Catalog strings -->
   <string name="catalog">Catalog</string>
+  <string name="catalog_book_detail">Details</string>
   <string name="catalog_load_error_title">Error</string>
   <string name="catalog_load_error_text">An error occurred while loading the catalog. Please try again.</string>
   <string name="catalog_load_not_connected">You are not connected to the internet. Please connect and try again.</string>
@@ -60,6 +61,7 @@
   <string name="catalog_book_revoke_hold">Remove</string>
   <string name="catalog_book_report">Report Issue</string>
   <string name="catalog_book_distribution">Distributed by: %s</string>
+  <string name="catalog_book_revoke_cancel">Cancel</string>
 
   <string name="catalog_book_availability_loaned_indefinite">You have this book on loan.</string>
   <string name="catalog_book_availability_loaned_timed">You have this book on loan for %s.</string>
@@ -129,13 +131,32 @@
   <string name="settings_alt_uris">Alternate URIs</string>
   <string name="settings_reveal_password">Show PIN</string>
 
+  <string name="navigation_accessibility">Navigation</string>
+  <string name="navigation_accessibility_drawer_show">Show navigation drawer. button.</string>
+  <string name="navigation_accessibility_drawer_hide">Hide navigation drawer. button.</string>
+
   <!-- Accessibility strings used for content descriptions (Settings) -->
   <string name="settings_accessibility_log_in_cancel">Cancel login</string>
   <string name="settings_accessibility_log_in">Log in</string>
   <string name="settings_accessibility_log_out_cancel">Cancel logout</string>
   <string name="settings_accessibility_log_out">Log out</string>
 
+  <string name="catalog_accessibility_book_borrow">Get Button</string>
+  <string name="catalog_accessibility_book_reserve">Reserve Button</string>
+  <string name="catalog_accessibility_book_read">Read Button</string>
+  <string name="catalog_accessibility_book_error_dismiss">Dismiss Button</string>
+  <string name="catalog_accessibility_book_error_retry">Retry Button</string>
+  <string name="catalog_accessibility_book_sync">Sync Button</string>
+  <string name="catalog_accessibility_book_download">Download Button</string>
+  <string name="catalog_accessibility_book_delete">Delete Button</string>
+  <string name="catalog_accessibility_book_revoke_loan">Return Now Button</string>
+  <string name="catalog_accessibility_book_revoke_hold">Remove Button</string>
+  <string name="catalog_accessibility_book_revoke_loan_cancel">Cancel Return Now</string>
+  <string name="catalog_accessibility_book_revoke_hold_cancel">Cancel Remove</string>
+  <string name="catalog_accessibility_header_show_more">show more in %1$s</string>
+
   <!-- Reader strings -->
+  <string name="reader">Reader</string>
   <string name="reader_toc">Table Of Contents</string>
 
   <!-- Accessibility strings used for content descriptions (Reader) -->
@@ -146,5 +167,22 @@
   <string name="reader_accessibility_media_previous">Go to previous media item</string>
   <string name="reader_accessibility_media_next">Go to next media item</string>
   <string name="reader_accessibility_media_play">Play or pause current media item</string>
+
+
+  <string name="reader_accessibility_settings_sans_font">Sans font</string>
+  <string name="reader_accessibility_settings_serif_font">Serif font</string>
+  <string name="reader_accessibility_settings_open_dyslexic_font">Open dyslexic font</string>
+  <string name="reader_accessibility_settings_white_on_black_text">White on black text</string>
+  <string name="reader_accessibility_settings_black_on_sepia_text">Black on sepia text</string>
+  <string name="reader_accessibility_settings_black_on_white_text">Black on white text</string>
+  <string name="reader_accessibility_settings_decrease_font_size">Decrease font size</string>
+  <string name="reader_accessibility_settings_increase_font_size">Increase font size</string>
+  <string name="reader_accessibility_settings_brightness_slider">Brightness slider</string>
+  <string name="reader_accessibility_settings_close">Close reader settings</string>
+  <string name="reader_settings_close">Close</string>
+
+
+
+
 
 </resources>

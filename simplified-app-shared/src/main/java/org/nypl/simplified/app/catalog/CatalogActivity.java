@@ -2,10 +2,12 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
@@ -52,11 +54,14 @@ public abstract class CatalogActivity extends SimplifiedActivity
     CatalogActivity.LOG.debug("up stack: {}", up_stack);
 
     final ActionBar bar = this.getActionBar();
-    if (up_stack.isEmpty() == false) {
-      bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
-      bar.setDisplayHomeAsUpEnabled(true);
-      bar.setHomeButtonEnabled(true);
+    if (android.os.Build.VERSION.SDK_INT < 21) {
+      if (up_stack.isEmpty() == false) {
+        bar.setDisplayHomeAsUpEnabled(false);
+        bar.setHomeButtonEnabled(true);
+      }
     }
+    final Resources rr = NullCheck.notNull(this.getResources());
+    bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
   }
 
   @SuppressWarnings("unchecked")

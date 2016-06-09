@@ -19,15 +19,19 @@
     android:allowBackup="true"
     android:icon="@drawable/feature_app_icon"
     android:label="@string/feature_app_name"
+    android:contentDescription="@string/feature_app_name"
     android:largeHeap="true"
-    android:theme="@style/SimplifiedTheme">
+    android:theme="@style/SimplifiedTheme"
+>
 
     <!-- Main entry point for the application. -->
     <activity
       android:name="org.nypl.simplified.app.MainSplashActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/feature_app_name"
-      android:theme="@style/SimplifiedThemeNoActionBar">
+      android:contentDescription="@string/feature_app_name"
+      android:theme="@style/SimplifiedThemeNoActionBar"
+>
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
@@ -38,26 +42,36 @@
     <activity
       android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/feature_app_name">
+      android:label="@string/catalog"
+      android:contentDescription="@string/catalog"
+      >
     </activity>
     <activity
       android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
       android:configChanges="orientation|screenSize"
+      android:label="@string/catalog"
+      android:contentDescription="@string/catalog"
       android:exported="false">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.catalog.MainHoldsActivity"
       android:configChanges="orientation|screenSize"
+      android:label="@string/holds"
+      android:contentDescription="@string/holds"
       android:exported="false">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.MainSettingsActivity"
       android:configChanges="orientation|screenSize"
+      android:label="@string/settings"
+      android:contentDescription="@string/settings"
       android:exported="false">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.HelpActivity"
       android:configChanges="orientation|screenSize"
+      android:label="@string/help"
+      android:contentDescription="@string/help"
       android:exported="false">
     </activity>
 
@@ -72,17 +86,20 @@
     <activity
       android:name="org.nypl.simplified.app.MainEULAActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/feature_app_name"
       android:exported="true">
     </activity>
 
     <!-- Catalog -->
     <activity
       android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
+      android:label="@string/catalog_book_detail"
+      android:contentDescription="@string/catalog_book_detail"
       android:exported="false">
     </activity>
     <activity
         android:name="org.nypl.simplified.app.catalog.CatalogBookReportActivity"
+        android:label="@string/catalog_book_report"
+        android:contentDescription="@string/catalog_book_report"
         android:exported="false">
     </activity>
 
@@ -92,14 +109,20 @@
       android:exported="true"
       android:configChanges="orientation|screenSize"
       android:theme="@style/SimplifiedThemeNoActionBar"
-      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess"
+      android:label="@string/reader"
+      android:contentDescription="@string/reader"
+      >
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
       android:exported="false"
       android:theme="@style/SimplifiedThemeNoActionBar"
       android:configChanges="orientation|screenSize"
-      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
+      android:process="org.nypl.simplified.app.reader.ReaderActivityProcess"
+      android:label="@string/reader_toc"
+      android:contentDescription="@string/reader_toc"
+      >
     </activity>
 
     <!-- Testing -->
@@ -112,7 +135,7 @@
     <!-- HelpStack -->
     <activity
       android:name="com.tenmiles.helpstack.activities.HomeActivity"
-      android:label="@string/hs_app_name" android:exported="false">
+      android:label="@string/hs_help_title" android:exported="false">
       <intent-filter>
         <action android:name="com.tenmiles.helpstack.ShowHelp"/>
         <category android:name="android.intent.category.DEFAULT"/>
@@ -120,7 +143,9 @@
     </activity>
     <activity
       android:name="com.tenmiles.helpstack.activities.NewIssueActivity"
-      android:windowSoftInputMode="adjustResize">
+      android:windowSoftInputMode="adjustResize"
+      android:label="@string/hs_issuebutton_title"
+      android:contentDescription="@string/hs_issuebutton_title">
     </activity>
     <activity
       android:name="com.tenmiles.helpstack.activities.NewUserActivity"

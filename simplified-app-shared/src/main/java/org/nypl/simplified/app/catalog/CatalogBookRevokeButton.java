@@ -42,11 +42,15 @@ public final class CatalogBookRevokeButton extends CatalogLeftPaddedButton
       case REVOKE_LOAN: {
         this.getTextView().setText(
           NullCheck.notNull(rr.getString(R.string.catalog_book_revoke_loan)));
+        this.getTextView().setContentDescription(
+          NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_loan)));
         break;
       }
       case REVOKE_HOLD: {
         this.getTextView().setText(
           NullCheck.notNull(rr.getString(R.string.catalog_book_revoke_hold)));
+        this.getTextView().setContentDescription(
+          NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_hold)));
         break;
       }
     }

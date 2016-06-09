@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -83,6 +84,8 @@ public final class ReaderSettingsDialog extends DialogFragment
     final SeekBar in_view_brightness = NullCheck.notNull(
       (SeekBar) layout.findViewById(
         R.id.reader_settings_brightness));
+
+    final Button in_view_close_button = NullCheck.notNull((Button) layout.findViewById(R.id.reader_settings_close));
 
     /**
      * Configure the settings buttons.
@@ -187,6 +190,15 @@ public final class ReaderSettingsDialog extends DialogFragment
         }
       });
 
+    in_view_close_button.setOnClickListener(
+      new OnClickListener() {
+        @Override
+        public void onClick(
+          final @Nullable View v) {
+            ReaderSettingsDialog.this.dismiss();
+        }
+      }
+    );
     /**
      * Configure brightness controller.
      */

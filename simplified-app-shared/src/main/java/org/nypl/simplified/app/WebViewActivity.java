@@ -122,6 +122,7 @@ public final class WebViewActivity extends SimplifiedActivity
     final String title =
       NullCheck.notNull(i.getStringExtra(WebViewActivity.TITLE_KEY));
 
+    setTitle(title);
     WebViewActivity.LOG.debug("uri: {}", uri);
     WebViewActivity.LOG.debug("title: {}", title);
 

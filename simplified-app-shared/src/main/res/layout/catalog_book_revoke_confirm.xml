@@ -30,8 +30,8 @@
     android:layout_width="wrap_content"
     android:layout_height="@dimen/button_standard_height"
     android:background="@drawable/simplified_button"
-    android:contentDescription="@string/settings_accessibility_log_out_cancel"
-    android:text="@string/settings_log_out_cancel"
+    android:contentDescription="@string/catalog_accessibility_book_revoke_loan_cancel"
+    android:text="@string/catalog_book_revoke_cancel"
     android:textColor="@drawable/simplified_button_text" />
 
   <Button

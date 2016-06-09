@@ -3,8 +3,6 @@ package org.nypl.simplified.app.catalog;
 import android.app.Activity;
 import android.content.res.Resources;
 
-import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.BookID;
@@ -14,7 +12,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
-import java.util.Calendar;
 
 /**
  * An acquisition button.
@@ -53,10 +50,16 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
           this.getTextView().setText(
             NullCheck.notNull(
               rr.getString(R.string.catalog_book_reserve)));
+          this.getTextView().setContentDescription(
+            NullCheck.notNull(
+              rr.getString(R.string.catalog_accessibility_book_reserve)));
         } else {
           this.getTextView().setText(
             NullCheck.notNull(
               rr.getString(R.string.catalog_book_borrow)));
+          this.getTextView().setContentDescription(
+            NullCheck.notNull(
+              rr.getString(R.string.catalog_accessibility_book_borrow)));
         }
         break;
       }
@@ -67,16 +70,13 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
         this.getTextView().setText(
           NullCheck.notNull(
             rr.getString(R.string.catalog_book_download)));
+        this.getTextView().setContentDescription(
+          NullCheck.notNull(
+            rr.getString(R.string.catalog_accessibility_book_download)));
         break;
       }
     }
 
-    final OptionType<Calendar> end_date = availability.getEndDate();
-    if (end_date.isSome()) {
-      final CatalogButtonExpiryView expiry_view = new CatalogButtonExpiryView(in_activity);
-      expiry_view.setDate(((Some<Calendar>) end_date).get());
-      this.addView(expiry_view, 0);
-    }
 
     this.getTextView().setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
