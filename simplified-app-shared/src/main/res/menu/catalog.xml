@@ -6,7 +6,7 @@
     android:icon="@drawable/ic_search_black_48dp"
     android:title="@string/catalog_search"
     android:enabled="false"
-    android:visible="false"
+    android:visible="true"
     android:actionViewClass="android.widget.SearchView"
-    android:showAsAction="ifRoom|collapseActionView" />
+    android:showAsAction="always"/>
 </menu>
