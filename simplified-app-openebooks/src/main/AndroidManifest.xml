@@ -40,36 +40,36 @@
     <activity
       android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
       android:configChanges="orientation|screenSize"
-      android:label="Catalog"
-      android:contentDescription="Catalog"
+      android:label="@string/catalog"
+      android:contentDescription="@string/catalog"
       >
     </activity>
     <activity
       android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
       android:configChanges="orientation|screenSize"
-      android:label="Catalog"
-      android:contentDescription="Catalog"
+      android:label="@string/catalog"
+      android:contentDescription="@string/catalog"
       android:exported="false">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.catalog.MainHoldsActivity"
       android:configChanges="orientation|screenSize"
-      android:label="Reservations"
-      android:contentDescription="Reservations"
+      android:label="@string/holds"
+      android:contentDescription="@string/holds"
       android:exported="false">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.MainSettingsActivity"
       android:configChanges="orientation|screenSize"
-      android:label="Settings"
-      android:contentDescription="Settings"
+      android:label="@string/settings"
+      android:contentDescription="@string/settings"
       android:exported="false">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.HelpActivity"
       android:configChanges="orientation|screenSize"
-      android:label="Help"
-      android:contentDescription="Help"
+      android:label="@string/help"
+      android:contentDescription="@string/help"
       android:exported="false">
     </activity>
 
@@ -98,14 +98,14 @@
     <!-- Catalog -->
     <activity
       android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
-      android:label="Details"
-      android:contentDescription="Details"
+      android:label="@string/catalog_book_detail"
+      android:contentDescription="@string/catalog_book_detail"
       android:exported="false">
     </activity>
     <activity
         android:name="org.nypl.simplified.app.catalog.CatalogBookReportActivity"
-  android:label="Report Issue"
-        android:contentDescription="Report Issue"
+  android:label="@string/catalog_book_report"
+        android:contentDescription="@string/catalog_book_report"
       android:exported="false">
     </activity>
 
@@ -116,8 +116,8 @@
       android:configChanges="orientation|screenSize"
       android:theme="@style/SimplifiedThemeNoActionBar"
       android:process="org.nypl.simplified.app.reader.ReaderActivityProcess"
-      android:label="Reader"
-      android:contentDescription="Reader"
+      android:label="@string/reader"
+      android:contentDescription="@string/reader"
       >
     </activity>
     <activity
@@ -126,8 +126,8 @@
       android:theme="@style/SimplifiedThemeNoActionBar"
       android:configChanges="orientation|screenSize"
       android:process="org.nypl.simplified.app.reader.ReaderActivityProcess"
-      android:label="Table of Contents"
-      android:contentDescription="Table of Contents"
+      android:label="@string/reader_toc"
+      android:contentDescription="@string/reader_toc"
       >
     </activity>
 
@@ -137,7 +137,7 @@
       android:configChanges="orientation|screenSize"
       android:exported="true">
     </activity>
-    
+
     <!-- HelpStack -->
     <activity
       android:name="com.tenmiles.helpstack.activities.HomeActivity"
@@ -150,8 +150,8 @@
     <activity
       android:name="com.tenmiles.helpstack.activities.NewIssueActivity"
       android:windowSoftInputMode="adjustResize"
-      android:label="Report an Issue"
-      android:contentDescription="Report an Issue">
+      android:label="@string/hs_issuebutton_title"
+      android:contentDescription="@string/hs_issuebutton_title">
     </activity>
     <activity
       android:name="com.tenmiles.helpstack.activities.NewUserActivity"
