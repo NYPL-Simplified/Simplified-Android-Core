@@ -168,4 +168,21 @@
   <string name="reader_accessibility_media_next">Go to next media item</string>
   <string name="reader_accessibility_media_play">Play or pause current media item</string>
 
+
+  <string name="reader_accessibility_settings_sans_font">Sans font</string>
+  <string name="reader_accessibility_settings_serif_font">Serif font</string>
+  <string name="reader_accessibility_settings_open_dyslexic_font">Open dyslexic font</string>
+  <string name="reader_accessibility_settings_white_on_black_text">White on black text</string>
+  <string name="reader_accessibility_settings_black_on_sepia_text">Black on sepia text</string>
+  <string name="reader_accessibility_settings_black_on_white_text">Black on white text</string>
+  <string name="reader_accessibility_settings_decrease_font_size">Decrease font size</string>
+  <string name="reader_accessibility_settings_increase_font_size">Increase font size</string>
+  <string name="reader_accessibility_settings_brightness_slider">Brightness slider</string>
+  <string name="reader_accessibility_settings_close">Close reader settings</string>
+  <string name="reader_settings_close">Close</string>
+
+
+
+
+
 </resources>

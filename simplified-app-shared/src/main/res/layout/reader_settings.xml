@@ -27,7 +27,8 @@
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
       android:fontFamily="serif"
-      android:text="ABC" />
+      android:text="ABC"
+      android:contentDescription="@string/reader_accessibility_settings_serif_font"/>
 
     <FrameLayout
       android:layout_height="48dp"
@@ -42,7 +43,8 @@
       android:gravity="center"
       android:fontFamily="sans"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:text="ABC" />
+      android:text="ABC"
+      android:contentDescription="@string/reader_accessibility_settings_sans_font"/>
 
     <FrameLayout
       android:layout_height="48dp"
@@ -56,7 +58,8 @@
       android:layout_weight="1"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:text="ABC" />
+      android:text="ABC"
+      android:contentDescription="@string/reader_accessibility_settings_open_dyslexic_font"/>
 
   </LinearLayout>
 
@@ -77,7 +80,8 @@
       android:layout_weight="1"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:text="A a" />
+      android:text="A a"
+      android:contentDescription="@string/reader_accessibility_settings_black_on_white_text"/>
 
     <FrameLayout
       android:layout_height="48dp"
@@ -91,7 +95,8 @@
       android:layout_height="match_parent"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:text="A a" />
+      android:text="A a"
+      android:contentDescription="@string/reader_accessibility_settings_white_on_black_text"/>
 
     <FrameLayout
       android:layout_height="48dp"
@@ -105,7 +110,8 @@
       android:layout_height="match_parent"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceLarge"
-      android:text="A a" />
+      android:text="A a"
+      android:contentDescription="@string/reader_accessibility_settings_black_on_sepia_text"/>
   </LinearLayout>
 
   <FrameLayout
@@ -125,7 +131,8 @@
       android:layout_weight="1"
       android:gravity="center"
       android:textSize="12sp"
-      android:text="A" />
+      android:text="A"
+      android:contentDescription="@string/reader_accessibility_settings_decrease_font_size"/>
 
     <FrameLayout
       android:layout_height="48dp"
@@ -139,7 +146,8 @@
       android:layout_weight="1"
       android:gravity="center"
       android:textSize="24sp"
-      android:text="A" />
+      android:text="A"
+      android:contentDescription="@string/reader_accessibility_settings_increase_font_size"/>
 
   </LinearLayout>
 
@@ -171,10 +179,11 @@
       android:maxHeight="4dp"
       android:thumb="@drawable/simplified_progress_thumb"
       android:progressDrawable="@drawable/simplified_progress"
-      android:layout_width="match_parent"
+      android:layout_width="0dp"
       android:layout_weight="1"
       android:layout_height="wrap_content"
       android:max="255"
+      android:contentDescription="@string/reader_accessibility_settings_brightness_slider"
       />
 
     <ImageView
@@ -183,6 +192,30 @@
       android:layout_gravity="center_vertical"
       android:src="@drawable/brightness_8x" />
 
+  </LinearLayout>
+  <FrameLayout
+    android:layout_height="1dp"
+    android:layout_width="match_parent"
+    android:background="#eee" />
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:gravity="end"
+    android:layout_height="48dp"
+    android:paddingTop="10dp"
+
+    >
+
+    <Button
+      android:id="@+id/reader_settings_close"
+      android:background="@drawable/simplified_button"
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/button_standard_height"
+      android:textColor="@drawable/simplified_button_text"
+      android:textSize="12sp"
+      android:text="@string/reader_settings_close"
+      android:contentDescription="@string/reader_accessibility_settings_close"/>
   </LinearLayout>
 
   <FrameLayout
