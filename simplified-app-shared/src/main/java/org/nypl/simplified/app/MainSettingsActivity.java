@@ -632,23 +632,28 @@ public final class MainSettingsActivity extends SimplifiedActivity implements
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_help));
     in_help.setEnabled(false);
 
-    helpstack.map_(
-      new ProcedureType<HelpstackType>()
-      {
-        @Override public void call(final HelpstackType hs)
-        {
-          in_help.setEnabled(true);
-          in_help.setOnClickListener(
-            new OnClickListener()
-            {
-              @Override public void onClick(final View v)
-              {
-                hs.show(MainSettingsActivity.this);
-              }
-            });
-        }
-      });
-
+    if (helpstack.isSome())
+    {
+      helpstack.map_(
+        new ProcedureType<HelpstackType>() {
+          @Override
+          public void call(final HelpstackType hs) {
+            in_help.setEnabled(true);
+            in_help.setOnClickListener(
+              new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                  hs.show(MainSettingsActivity.this);
+                  MainSettingsActivity.this.overridePendingTransition(0, 0);
+                }
+              });
+          }
+        });
+    }
+    else {
+      in_help.setVisibility(View.GONE);
+      settings_privacy_divider.setVisibility(View.GONE);
+    }
     /**
      * Set a text change listener on both login fields that enables the login
      * button if both fields are non-empty.

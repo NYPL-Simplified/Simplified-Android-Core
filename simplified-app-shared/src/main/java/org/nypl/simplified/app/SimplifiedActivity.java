@@ -201,7 +201,6 @@ public abstract class SimplifiedActivity extends Activity
       i.setClass(this, c);
       i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-      //TODO AM: // reset menu // temporary fix
       i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
       i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -210,7 +209,6 @@ public abstract class SimplifiedActivity extends Activity
       i.putExtras(b);
       this.startActivity(i);
 
-      //TODO AM: // hide task transitions // temporary fix
       this.overridePendingTransition(0, 0);
 
     }
@@ -273,7 +271,6 @@ public abstract class SimplifiedActivity extends Activity
       Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
     final boolean holds_enabled = rr.getBoolean(R.bool.feature_holds_enabled);
-    final boolean help_enabled = app.getHelpStack().isSome();
 
     /**
      * Configure the navigation drawer.
@@ -296,9 +293,6 @@ public abstract class SimplifiedActivity extends Activity
     di.add(SimplifiedPart.PART_BOOKS);
     if (holds_enabled) {
       di.add(SimplifiedPart.PART_HOLDS);
-    }
-    if (help_enabled) {
-      di.add(SimplifiedPart.PART_HELP);
     }
     di.add(SimplifiedPart.PART_SETTINGS);
 
@@ -344,9 +338,6 @@ public abstract class SimplifiedActivity extends Activity
     }
     classes_by_name.put(
       SimplifiedPart.PART_SETTINGS, MainSettingsActivity.class);
-    if (help_enabled) {
-      classes_by_name.put(SimplifiedPart.PART_HELP, HelpActivity.class);
-    }
 
     /**
      * Set up a map of part names to functions that configure argument
@@ -436,19 +427,6 @@ public abstract class SimplifiedActivity extends Activity
         }
       });
 
-    if (help_enabled) {
-      da.put(
-        SimplifiedPart.PART_HELP, new FunctionType<Bundle, Unit>()
-        {
-          @Override
-          public Unit call(
-              final Bundle b)
-          {
-            SimplifiedActivity.setActivityArguments(b, false);
-            return Unit.unit();
-          }
-        });
-    }
     /**
      * Show or hide the three dashes next to the home button.
      */
@@ -604,11 +582,6 @@ public abstract class SimplifiedActivity extends Activity
     dl.setItemChecked(pos, true);
 
     // opening the drawer, when the user comes back from the help section, the view will not be empty.
-    if (p == SimplifiedPart.PART_HELP)
-    {
-      final DrawerLayout d = NullCheck.notNull(this.drawer);
-      d.openDrawer(GravityCompat.START);
-    }
 
   }
 
