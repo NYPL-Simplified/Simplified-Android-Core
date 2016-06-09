@@ -141,11 +141,6 @@
       <groupId>com.bugsnag</groupId>
       <artifactId>bugsnag-android</artifactId>
     </dependency>
-    <dependency>
-      <groupId>android.support</groupId>
-      <artifactId>compatibility-v13</artifactId>
-      <version>23.1.0</version>
-    </dependency>
   </dependencies>
 
   <profiles>
