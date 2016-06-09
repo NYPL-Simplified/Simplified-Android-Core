@@ -11,10 +11,8 @@
   <drawable name="feature_app_splash">@drawable/nypl_splash</drawable>
 
   <!-- The configurable main color, used for branding. -->
-  <color name="feature_main_color">#cc1a16</color>
+  <color name="feature_main_color">#eb1f2e</color>
 
-  <!-- The configurable secondary color, used for branding. -->
-  <color name="feature_secondary_color">#af1a16</color>
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>
