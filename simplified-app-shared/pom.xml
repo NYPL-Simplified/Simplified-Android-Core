@@ -70,9 +70,17 @@
       <artifactId>android</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>android.support</groupId>
+      <artifactId>compatibility-v7-appcompat</artifactId>
+      <version>23.1.1</version>
+    </dependency>
+
     <dependency>
       <groupId>android.support</groupId>
       <artifactId>compatibility-v13</artifactId>
+      <version>23.1.1</version>
     </dependency>
 
     <dependency>
@@ -132,6 +140,11 @@
     <dependency>
       <groupId>com.bugsnag</groupId>
       <artifactId>bugsnag-android</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>android.support</groupId>
+      <artifactId>compatibility-v13</artifactId>
+      <version>23.1.0</version>
     </dependency>
   </dependencies>
 

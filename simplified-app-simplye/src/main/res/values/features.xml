@@ -2,7 +2,7 @@
 <resources>
 
   <!-- The configurable application name -->
-  <string name="feature_app_name">SimplyE</string>
+  <string name="feature_app_name">NYPL Simply\uFEFFE</string>
 
   <!-- The configurable application icon -->
   <drawable name="feature_app_icon">@drawable/nypl</drawable>
@@ -12,6 +12,9 @@
 
   <!-- The configurable main color, used for branding. -->
   <color name="feature_main_color">#eb1f2e</color>
+
+  <!-- The configurable secondary color, used for branding. -->
+  <color name="feature_secondary_color">#d71e31</color>
 
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->

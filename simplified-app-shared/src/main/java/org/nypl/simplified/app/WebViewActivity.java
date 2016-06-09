@@ -3,9 +3,11 @@ package org.nypl.simplified.app;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
@@ -81,6 +83,23 @@ public final class WebViewActivity extends SimplifiedActivity
     b.putSerializable(WebViewActivity.PART_KEY, part);
   }
 
+  @Override public boolean onOptionsItemSelected(
+    final @Nullable MenuItem item_mn)
+  {
+    final MenuItem item = NullCheck.notNull(item_mn);
+    switch (item.getItemId()) {
+
+      case android.R.id.home: {
+        onBackPressed();
+        return true;
+      }
+
+      default: {
+        return super.onOptionsItemSelected(item);
+      }
+    }
+  }
+
   @Override protected SimplifiedPart navigationDrawerGetPart()
   {
     return this.part;
@@ -113,9 +132,17 @@ public final class WebViewActivity extends SimplifiedActivity
 
     final ActionBar bar = this.getActionBar();
     bar.setTitle(title);
-    bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
-    bar.setDisplayHomeAsUpEnabled(true);
-    bar.setHomeButtonEnabled(true);
+    if (android.os.Build.VERSION.SDK_INT < 21) {
+      bar.setDisplayHomeAsUpEnabled(false);
+      bar.setHomeButtonEnabled(true);
+      bar.setIcon(R.drawable.ic_arrow_back);
+    }
+    else
+    {
+      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(false);
+    }
 
     final WebSettings settings = this.web_view.getSettings();
     settings.setAllowFileAccess(true);

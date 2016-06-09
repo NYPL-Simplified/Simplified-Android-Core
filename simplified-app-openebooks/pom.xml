@@ -23,20 +23,12 @@
       <artifactId>android</artifactId>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>android.support</groupId>
-      <artifactId>compatibility-v13</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-app-shared</artifactId>
       <version>${project.version}</version>
       <exclusions>
-        <exclusion>
-          <groupId>android.support</groupId>
-          <artifactId>compatibility-v13</artifactId>
-        </exclusion>
       </exclusions>
       <type>aar</type>
     </dependency>

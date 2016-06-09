@@ -3,16 +3,27 @@
 
   <style
     name="SimplifiedTheme"
-    parent="android:Theme.Holo.Light">
+    parent="android:Theme.Material.Light.DarkActionBar">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
-    <item name="android:icon">@drawable/ic_menu</item>
+    <item name="android:colorPrimary">@color/feature_main_color</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color</item>
+    <item name="android:colorAccent">@color/feature_main_color</item>
+    <item name="android:actionBarStyle">@style/ActionBar</item>
+  </style>
+
+  <style name="ActionBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">
+    <item name="android:displayOptions">homeAsUp|showTitle</item>
+    <item name="android:homeAsUpIndicator">@drawable/ic_menu</item>
   </style>
 
   <style
     name="SimplifiedThemeNoActionBar"
-    parent="android:Theme.Holo.Light.NoActionBar">
+    parent="android:Theme.Material.Light.NoActionBar">
     <item name="android:windowActionBar">false</item>
     <item name="android:windowNoTitle">true</item>
+    <item name="android:colorPrimary">@color/feature_main_color</item>
+    <item name="android:colorPrimaryDark">@color/feature_main_color</item>
+    <item name="android:colorAccent">@color/feature_main_color</item>
   </style>
 
   <style name="SimplifiedTheme.LaneTitle">

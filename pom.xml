@@ -57,7 +57,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <org.nypl.android.sdkVersion>19</org.nypl.android.sdkVersion>
+    <org.nypl.android.sdkVersion>21</org.nypl.android.sdkVersion>
     <org.nypl.simplified.tests.http_server_port>9999</org.nypl.simplified.tests.http_server_port>
   </properties>
 
@@ -149,10 +149,17 @@
         <artifactId>android</artifactId>
         <version>5.0.1_r2</version>
       </dependency>
+
+      <dependency>
+        <groupId>android.support</groupId>
+        <artifactId>compatibility-v7-appcompat</artifactId>
+        <version>23.1.1</version>
+      </dependency>
+
       <dependency>
         <groupId>android.support</groupId>
         <artifactId>compatibility-v13</artifactId>
-        <version>23.1.0</version>
+        <version>23.1.1</version>
       </dependency>
 
       <!-- Reader dependencies -->
