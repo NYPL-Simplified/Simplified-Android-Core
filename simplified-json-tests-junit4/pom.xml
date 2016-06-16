@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
   </parent>
   <artifactId>simplified-json-tests-junit4</artifactId>
 

@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.11</version>
   </parent>
   <artifactId>simplified-app-shared</artifactId>
 
@@ -140,11 +140,6 @@
     <dependency>
       <groupId>com.bugsnag</groupId>
       <artifactId>bugsnag-android</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>android.support</groupId>
-      <artifactId>compatibility-v13</artifactId>
-      <version>23.1.0</version>
     </dependency>
   </dependencies>
 
