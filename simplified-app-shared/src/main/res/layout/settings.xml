@@ -43,8 +43,7 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:layout_marginStart="16dp"
-          android:inputType="number"
-          android:maxLength="14"
+          android:inputType="textNoSuggestions"
           android:maxLines="1"/>
         <TextView
           android:id="@+id/settings_barcode_text"
@@ -52,7 +51,6 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:layout_marginStart="20dp"
-          android:maxLength="14"
           android:maxLines="1"
           android:visibility="gone"/>
       </TableRow>
