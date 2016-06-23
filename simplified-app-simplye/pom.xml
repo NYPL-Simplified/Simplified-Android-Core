@@ -65,13 +65,6 @@
       <build>
         <plugins>
           <!-- Android plugin configuration -->
-          <plugin>
-            <groupId>com.simpligility.maven.plugins</groupId>
-            <artifactId>android-maven-plugin</artifactId>
-            <configuration>
-              <release>true</release>
-            </configuration>
-          </plugin>
 
           <!-- Jarsigner -->
           <plugin>
@@ -104,9 +97,9 @@
 
           <!-- the signed apk then needs to be zipaligned -->
           <plugin>
-            <groupId>com.jayway.maven.plugins.android.generation2</groupId>
+            <groupId>com.simpligility.maven.plugins</groupId>
             <artifactId>android-maven-plugin</artifactId>
-            <inherited>true</inherited>
+            <version>4.4.1</version>
             <configuration>
               <sign>
                 <debug>false</debug>
