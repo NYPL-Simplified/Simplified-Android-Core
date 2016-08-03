@@ -23,6 +23,7 @@ import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.nypl.simplified.http.core.HTTPType;
@@ -378,9 +379,15 @@ final class BooksControllerBorrowTask implements Runnable
     final AccountCredentials credentials = this.getAccountCredentials();
     final AccountBarcode barcode = credentials.getUser();
     final AccountPIN pin = credentials.getPassword();
-    final HTTPAuthType auth =
+     HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 
+    if (credentials.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+      if (token != null) {
+        auth = new HTTPAuthOAuth(token.toString());
+      }
+    }
     /**
      * Grab the feed for the borrow link.
      */
@@ -702,8 +709,17 @@ final class BooksControllerBorrowTask implements Runnable
     final AccountCredentials credentials = this.getAccountCredentials();
     final AccountBarcode barcode = credentials.getUser();
     final AccountPIN pin = credentials.getPassword();
-    final HTTPAuthType auth =
+//    final HTTPAuthType auth =
+//      new HTTPAuthBasic(barcode.toString(), pin.toString());
+    HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
+
+    if (credentials.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+      if (token != null) {
+        auth = new HTTPAuthOAuth(token.toString());
+      }
+    }
 
     final String sid = this.short_id;
     BooksControllerBorrowTask.LOG.debug(
