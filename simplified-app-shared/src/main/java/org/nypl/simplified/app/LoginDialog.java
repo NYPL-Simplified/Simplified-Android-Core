@@ -3,7 +3,9 @@ package org.nypl.simplified.app;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,6 +24,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.core.AccountAuthProvider;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
@@ -61,7 +64,6 @@ public final class LoginDialog extends DialogFragment
   private @Nullable LoginListenerType listener;
   private @Nullable Button            login;
   private @Nullable EditText          pin_edit;
-  private @Nullable ViewGroup         root_layout;
   private @Nullable TextView          text;
   private @Nullable Button            cancel;
 
@@ -183,7 +185,7 @@ public final class LoginDialog extends DialogFragment
   @Override public void onAccountLoginFailureServerError(final int code)
   {
     LoginDialog.LOG.error(
-      "onAccountLoginFailureServerError: {}", Integer.valueOf(code));
+      "onAccountLoginFailureServerError: {}", code);
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final OptionType<Throwable> none = Option.none();
@@ -291,7 +293,6 @@ public final class LoginDialog extends DialogFragment
     final ViewGroup in_layout = NullCheck.notNull(
       (ViewGroup) inflater.inflate(
         R.layout.login_dialog, container, false));
-    this.root_layout = in_layout;
 
     final TextView in_text = NullCheck.notNull(
       (TextView) in_layout.findViewById(R.id.login_dialog_text));
@@ -310,6 +311,9 @@ public final class LoginDialog extends DialogFragment
       NullCheck.notNull((Button) in_layout.findViewById(R.id.login_dialog_ok));
     final Button in_login_cancel_button = NullCheck.notNull(
       (Button) in_layout.findViewById(R.id.login_dialog_cancel));
+
+    final Button in_login_request_new_code = NullCheck.notNull(
+      (Button) in_layout.findViewById(R.id.request_new_codes));
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -349,9 +353,11 @@ public final class LoginDialog extends DialogFragment
             new AccountBarcode(NullCheck.notNull(barcode_edit_text.toString()));
           final AccountPIN pin =
             new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
+          final AccountAuthProvider provider =
+            new AccountAuthProvider(rr.getString(R.string.feature_default_provider));
 
           final AccountCredentials creds =
-            new AccountCredentials(adobe_vendor, barcode, pin);
+            new AccountCredentials(adobe_vendor, barcode, pin, provider);
           books.accountLogin(creds, LoginDialog.this);
         }
       });
@@ -366,6 +372,25 @@ public final class LoginDialog extends DialogFragment
           LoginDialog.this.dismiss();
         }
       });
+
+    final boolean firstbook_enabled = rr.getBoolean(R.bool.feature_login_firstbook);
+
+    if (firstbook_enabled) {
+      in_login_request_new_code.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+            final Intent browser_intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://openebooks.net/getstarted.html"));
+            startActivity(browser_intent);
+          }
+        });
+    }
+    else
+    {
+      in_login_request_new_code.setVisibility(View.GONE);
+    }
+
 
     final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
     final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
@@ -396,7 +421,7 @@ public final class LoginDialog extends DialogFragment
         {
           in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
           in_login_button.setEnabled(
-            (in_barcode_empty.get() == false) && (in_pin_empty.get() == false));
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()));
         }
       });
 
@@ -426,7 +451,7 @@ public final class LoginDialog extends DialogFragment
         {
           in_pin_empty.set(NullCheck.notNull(s).length() == 0);
           in_login_button.setEnabled(
-            (in_barcode_empty.get() == false) && (in_pin_empty.get() == false));
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()));
         }
       });
 

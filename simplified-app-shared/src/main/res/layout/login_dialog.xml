@@ -10,7 +10,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/login_dialog"
   android:layout_width="280dp"
-  android:layout_height="280dp"
+  android:layout_height="320dp"
   android:gravity="center"
   android:background="@color/normal_background"
   android:padding="16dp">
@@ -83,6 +83,7 @@
   </TableLayout>
 
   <RelativeLayout
+    android:id="@+id/login_buttons"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal"
@@ -94,7 +95,8 @@
       android:id="@+id/login_dialog_cancel"
       style="?android:attr/buttonStyleSmall"
       android:layout_marginTop="16dp"
-      android:layout_width="wrap_content"
+      android:layout_marginEnd="8dp"
+      android:layout_width="110dp"
       android:layout_height="@dimen/button_standard_height"
       android:background="@drawable/simplified_button"
       android:contentDescription="@string/settings_accessibility_log_in_cancel"
@@ -104,10 +106,10 @@
     <Button
       android:id="@+id/login_dialog_ok"
       android:layout_toEndOf="@id/login_dialog_cancel"
-      android:layout_marginStart="16dp"
+      android:layout_marginStart="8dp"
       style="?android:attr/buttonStyleSmall"
       android:layout_marginTop="16dp"
-      android:layout_width="wrap_content"
+      android:layout_width="110dp"
       android:layout_height="@dimen/button_standard_height"
       android:background="@drawable/simplified_button"
       android:contentDescription="@string/settings_accessibility_log_in"
@@ -115,5 +117,24 @@
       android:textColor="@drawable/simplified_button_text" />
 
   </RelativeLayout>
+
+  <RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="16dp"
+    android:layout_below="@id/login_buttons">
+
+  <Button
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/button_standard_height"
+    android:text="@string/request_new_codes"
+    android:id="@+id/request_new_codes"
+    android:layout_gravity="center_horizontal"
+    style="?android:attr/borderlessButtonStyle"
+    android:background="@drawable/simplified_button"
+    android:textColor="@drawable/simplified_button_text"/>
+</RelativeLayout>
 
 </RelativeLayout>
