@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textAlignment="center"
-            android:text="@string/access_code_needed"
+            android:text="@string/login_needed"
             android:id="@+id/access_code_needed"
             android:gravity="center"
             android:layout_gravity="center"
@@ -23,22 +23,24 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"/>
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/use_existing_code"
-            android:id="@+id/use_existing_code"
+            android:text="@string/login_with_barcode"
+            android:id="@+id/login_with_barcode"
             android:layout_gravity="center_horizontal"
             style="?android:attr/borderlessButtonStyle"
-            android:textColor="@color/button_foreground"/>
+            android:textColor="@color/button_foreground"
+          android:src="@drawable/sign_in_with_firstbook_full"/>
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/request_new_codes"
-            android:id="@+id/request_new_codes"
+            android:text="@string/login_with_clever"
+            android:id="@+id/login_with_clever"
             android:layout_gravity="center_horizontal"
             style="?android:attr/borderlessButtonStyle"
-            android:textColor="@color/button_foreground"/>
+            android:textColor="@color/button_foreground"
+          android:src="@drawable/sign_in_with_clever_full"/>
     </LinearLayout>
 </RelativeLayout>

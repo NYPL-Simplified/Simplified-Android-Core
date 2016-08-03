@@ -4,5 +4,8 @@
     <string name="intro_message">The Open eBooks app provides free books to the children who need them the most.\n\nThe collection includes thousands of popular and award-winning titles as well as hundreds of public domain works.\n\nChildren from low-income areas may qualify for access in several ways.</string>
     <string name="access_code_needed">You need an access code and PIN to access the collection.</string>
     <string name="use_existing_code">Use Existing Code</string>
-    <string name="request_new_codes">Request New Codes</string>
+    <string name="request_new_codes">Request New Code</string>
+    <string name="login_needed">You need to login to access the collection.</string>
+    <string name="login_with_barcode">Login with FirstBook</string>
+    <string name="login_with_clever">Login with Clever</string>
 </resources>

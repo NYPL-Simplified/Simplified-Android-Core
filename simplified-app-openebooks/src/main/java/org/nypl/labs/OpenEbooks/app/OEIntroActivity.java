@@ -4,18 +4,26 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 
 import com.viewpagerindicator.CirclePageIndicator;
 
-import org.nypl.simplified.app.catalog.MainCatalogActivity;
+import org.nypl.simplified.app.LoginActivity;
+import org.nypl.simplified.books.core.LogUtilities;
+import org.slf4j.Logger;
 
-public class OEIntroActivity extends Activity implements IntroListenerType
+public class OEIntroActivity extends Activity
 {
+  private static final Logger LOG;
+  private ViewPager view_pager;
+
+  static {
+    LOG = LogUtilities.getLog(OEIntroActivity.class);
+  }
 
   @Override
   protected void onCreate(final Bundle state)
@@ -23,39 +31,41 @@ public class OEIntroActivity extends Activity implements IntroListenerType
     super.onCreate(state);
     this.setContentView(R.layout.oe_intro);
 
-    final ViewPager view_pager = (ViewPager) this.findViewById(R.id.intro_pager);
+    this.view_pager = (ViewPager) this.findViewById(R.id.intro_pager);
     final PagerAdapter pager_adater = new IntroPagerAdapter(getFragmentManager());
-    view_pager.setAdapter(pager_adater);
+    this.view_pager.setAdapter(pager_adater);
 
     final CirclePageIndicator indicator = (CirclePageIndicator) this.findViewById(R.id.intro_pager_indicator);
-    indicator.setViewPager(view_pager);
-  }
+    indicator.setViewPager(this.view_pager);
 
-  private void openCatalog()
-  {
-    final Intent i = new Intent(this, MainCatalogActivity.class);
-    this.startActivity(i);
-    this.overridePendingTransition(0, 0);
-    this.finish();
-  }
+    this.view_pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
-  @Override
-  public void onUseExistingCodes()
-  {
-    this.openCatalog();
-  }
+      // This method will be invoked when a new page becomes selected.
+      @Override
+      public void onPageSelected(final int position) {
+        if (position == 2)
+        {
+          final Intent i = new Intent(OEIntroActivity.this, LoginActivity.class);
+          OEIntroActivity.this.startActivity(i);
+          OEIntroActivity.this.overridePendingTransition(0, 0);
+          final Handler handler = new Handler();
+          final Runnable r = new Runnable() {
+            public void run() {
+              OEIntroActivity.this.view_pager.setCurrentItem(1);
+            }
+          };
+          handler.postDelayed(r, 500);
+        }
+      }
 
-  @Override
-  public void onRequestNewCodes()
-  {
-    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://openebooks.net/getstarted.html"));
-    startActivity(browserIntent);
+    });
+
   }
 
   private class IntroPagerAdapter extends FragmentPagerAdapter
   {
 
-    public IntroPagerAdapter(FragmentManager fm)
+    IntroPagerAdapter(final FragmentManager fm)
     {
       super(fm);
     }
@@ -64,9 +74,7 @@ public class OEIntroActivity extends Activity implements IntroListenerType
     public Fragment getItem(
       final int position)
     {
-      IntroSlideFragment fragment = IntroSlideFragment.create(position);
-      fragment.listener = OEIntroActivity.this;
-      return fragment;
+      return IntroSlideFragment.create(position);
     }
 
     @Override
