@@ -20,6 +20,13 @@
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>
 
+  <bool name="feature_login_clever">false</bool>
+
+  <bool name="feature_login_firstbook">false</bool>
+
+  <string name="feature_default_provider">Library</string>
+
+
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">NYPL</string>
 

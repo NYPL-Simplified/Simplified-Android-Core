@@ -107,22 +107,28 @@
   <string name="settings_login_title">Library Card</string>
   <string name="settings_barcode">Barcode</string>
   <string name="settings_pin">PIN</string>
+  <string name="settings_name">Name</string>
   <string name="settings_screen_Lock_not_setup">"Secure lock screen hasn't been set up. Go to 'Settings -> Security -> Screenlock' to set up a lock screen"</string>
   <string name="settings_log_in_cancel">Cancel</string>
   <string name="settings_log_in">Log In</string>
   <string name="settings_log_out">Log Out</string>
+  <string name="settings_log_out">Log Out</string>
+  <string name="settings_activate_this_device">Activate this Device</string>
+  <string name="settings_deactivate_this_device">Deactivate this Device</string>
   <string name="settings_log_out_cancel">Cancel</string>
   <string name="settings_login_succeeded">Logged in successfully</string>
   <string name="settings_logout_succeeded">Logged out successfully</string>
   <string name="settings_login_failed">Login Failed</string>
   <string name="settings_login_failed_credentials">Your barcode and pin combination was not valid. Please try again.</string>
   <string name="settings_login_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
+  <string name="settings_logout_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
   <string name="settings_login_failed_device">An error occurred when activating your device. Please check your connection or try again later.</string>
   <string name="settings_login_failed_adobe_device_limit">Too many devices have been registered on this account. Please contact Adobe support for assistance.</string>
   <string name="settings_login_failed_adobe_device_bad_clock">An error occurred when activating your device. Please check that your device clock is set to the correct time.</string>
   <string name="settings_logout_failed">Logout Failed</string>
   <string name="settings_feedback">Feedback</string>
   <string name="settings_about">About</string>
+  <string name="settings_account">Account</string>
   <string name="settings_credits">Acknowledgements</string>
   <string name="settings_eula">User Agreement</string>
   <string name="settings_privacy">Privacy Policy</string>
@@ -130,6 +136,11 @@
   <string name="settings_adobe_accounts">Adobe Accounts</string>
   <string name="settings_alt_uris">Alternate URIs</string>
   <string name="settings_reveal_password">Show PIN</string>
+
+  <string name="login_needed">You need to login to access the collection.</string>
+  <string name="login_with_barcode">Login with Barcode</string>
+  <string name="login_with_clever">Login with Clever</string>
+  <string name="request_new_codes">Request New Code</string>
 
   <string name="navigation_accessibility">Navigation</string>
   <string name="navigation_accessibility_drawer_show">Show navigation drawer. button.</string>

@@ -47,6 +47,12 @@
       >
     </activity>
     <activity
+      android:name="org.nypl.simplified.app.LoginActivity"
+      android:configChanges="orientation|screenSize"
+      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:exported="false">
+    </activity>
+    <activity
       android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/catalog"
@@ -65,6 +71,13 @@
       android:configChanges="orientation|screenSize"
       android:label="@string/settings"
       android:contentDescription="@string/settings"
+      android:exported="false">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.MainSettingsAccountActivity"
+      android:configChanges="orientation|screenSize"
+      android:label="@string/settings_account"
+      android:contentDescription="@string/settings_account"
       android:exported="false">
     </activity>
     <activity
