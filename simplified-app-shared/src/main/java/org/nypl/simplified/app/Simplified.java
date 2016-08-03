@@ -349,10 +349,12 @@ public final class Simplified extends Application
        * Catalog URIs.
        */
 
-      this.feed_initial_uri = NullCheck.notNull(
-        URI.create(
-          rr.getString(
-            R.string.feature_catalog_start_uri)));
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration(
+          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
+          URI.create(rr.getString(R.string.feature_catalog_loans_uri)));
+
+      this.feed_initial_uri = books_config.getCurrentRootFeedURI();
 
       /**
        * Feed loaders and parsers.
@@ -384,10 +386,6 @@ public final class Simplified extends Application
       this.downloader = DownloaderHTTP.newDownloader(
         this.exec_books, downloads_dir, this.http);
 
-      final BooksControllerConfiguration books_config =
-        new BooksControllerConfiguration(
-          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
-          URI.create(rr.getString(R.string.feature_catalog_loans_uri)));
 
       /**
        * Configure EULA, privacy policy, etc.
@@ -412,6 +410,10 @@ public final class Simplified extends Application
           @Override public String getLabelLoginPassword()
           {
             return rr.getString(R.string.settings_pin);
+          }
+          @Override public String getLabelLoginName()
+          {
+            return rr.getString(R.string.settings_name);
           }
         };
 
@@ -838,6 +840,8 @@ public final class Simplified extends Application
   {
     private URI current_root;
     private URI current_loans;
+    private URI alternate_root;
+    private URI alternate_loans;
 
     BooksControllerConfiguration(
       final URI in_root,
@@ -849,6 +853,11 @@ public final class Simplified extends Application
 
     @Override public synchronized URI getCurrentRootFeedURI()
     {
+      if (this.alternate_root != null)
+      {
+        return this.alternate_root;
+      }
+
       return this.current_root;
     }
 
@@ -859,12 +868,36 @@ public final class Simplified extends Application
 
     @Override public synchronized URI getCurrentLoansURI()
     {
+      if (this.alternate_loans != null)
+      {
+        return this.alternate_loans;
+      }
       return this.current_loans;
     }
 
     @Override public synchronized void setCurrentLoansURI(final URI u)
     {
       this.current_loans = NullCheck.notNull(u);
+    }
+
+    @Override public synchronized URI getAlternateRootFeedURI()
+    {
+      return this.alternate_root;
+    }
+
+    @Override public synchronized void setAlternateRootFeedURI(final URI u)
+    {
+      this.alternate_root = u;
+    }
+
+    @Override public synchronized URI getAlternateLoansURI()
+    {
+      return this.alternate_loans;
+    }
+
+    @Override public synchronized void setAlternateLoansURI(final URI u)
+    {
+      this.alternate_loans = u;
     }
   }
 }
