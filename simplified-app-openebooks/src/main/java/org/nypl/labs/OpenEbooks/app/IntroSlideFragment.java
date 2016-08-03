@@ -50,7 +50,7 @@ public class IntroSlideFragment extends Fragment
         root_view = (ViewGroup) inflater.inflate(R.layout.intro_slide_2, container, false);
         break;
       case 2:
-        root_view = (ViewGroup) inflater.inflate(R.layout.intro_slide_3, container, false);
+        root_view = (ViewGroup) inflater.inflate(R.layout.login_view, container, false);
         break;
       default:
         root_view = (ViewGroup) inflater.inflate(R.layout.intro_slide_1, container, false);
