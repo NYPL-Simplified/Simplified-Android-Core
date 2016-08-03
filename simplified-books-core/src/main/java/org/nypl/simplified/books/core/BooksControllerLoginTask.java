@@ -206,7 +206,8 @@ final class BooksControllerLoginTask implements Runnable,
         this.parser,
         this.listener,
         this.syncing);
-      sync.run();
+//      sync.run(); // was causing login to take forever
+      new Thread(sync).run();
     } catch (final Throwable e) {
       BooksControllerLoginTask.LOG.debug("sync task raised error: ", e);
     }
