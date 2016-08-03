@@ -411,7 +411,7 @@ public final class Simplified extends Application
           {
             return rr.getString(R.string.settings_pin);
           }
-          @Override public String getLabelLoginName()
+          @Override public String getLabelLoginPatronName()
           {
             return rr.getString(R.string.settings_name);
           }

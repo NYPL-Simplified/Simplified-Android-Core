@@ -447,7 +447,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       docs.getAuthenticationDocument();
     in_barcode_label.setText(auth_doc.getLabelLoginUserID());
     in_pin_label.setText(auth_doc.getLabelLoginPassword());
-    in_name_label.setText(auth_doc.getLabelLoginName());
+    in_name_label.setText(auth_doc.getLabelLoginPatronName());
 
 
     final TableLayout in_table_with_code =
