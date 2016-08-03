@@ -48,6 +48,7 @@ public interface AccountsControllerType
    */
 
   void accountLogout(
+    AccountCredentials credentials,
     AccountLogoutListenerType listener);
 
   /**
@@ -63,4 +64,15 @@ public interface AccountsControllerType
    * Activate the device with the currently logged in account (if you are logged in).
    */
   void accountActivateDevice();
+
+  /**
+   * Deactivate the device with the currently logged in account (if you are logged in).
+   */
+  void accountDeActivateDevice();
+
+  /**
+   * determine is device is active with the currently logged account.
+   */
+  boolean accountIsDeviceActive();
+
 }

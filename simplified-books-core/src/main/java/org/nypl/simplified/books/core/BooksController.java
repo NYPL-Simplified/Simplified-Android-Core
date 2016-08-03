@@ -8,6 +8,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.drm.core.AdobeUserID;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPType;
@@ -170,6 +171,19 @@ public final class BooksController implements BooksType
   {
     return this.accounts_database.accountGetCredentials().isSome();
   }
+  @Override public boolean accountIsDeviceActive()
+  {
+    final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
+    if (credentials_opt.isSome()) {
+      final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+
+      final OptionType<AdobeUserID> adobe_user_id =  credentials_some.get().getAdobeUserID();
+
+      return adobe_user_id.isSome();
+
+    }
+    return false;
+  }
 
   @Override public void accountLoadBooks(
     final AccountDataLoadListenerType listener)
@@ -205,6 +219,7 @@ public final class BooksController implements BooksType
   }
 
   @Override public void accountLogout(
+    final AccountCredentials account,
     final AccountLogoutListenerType listener)
   {
     NullCheck.notNull(listener);
@@ -217,7 +232,10 @@ public final class BooksController implements BooksType
           this.book_database,
           this.accounts_database,
           this.adobe_drm,
-          listener));
+          listener,
+          this.config,
+          this.http,
+          account));
     }
   }
 
@@ -248,6 +266,19 @@ public final class BooksController implements BooksType
         this.accounts_database
       );
       this.submitRunnable(activation_task);
+    }
+  }
+
+  @Override public void accountDeActivateDevice()
+  {
+    final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
+    if (credentials_opt.isSome()) {
+      final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+      final BooksControllerDeviceDeActivationTask deactivation_task = new BooksControllerDeviceDeActivationTask(
+        this.adobe_drm,
+        credentials_some.get()
+      );
+      this.submitRunnable(deactivation_task);
     }
   }
 
