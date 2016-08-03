@@ -22,4 +22,8 @@ public interface HTTPAuthMatcherType<A, E extends Exception>
   A onAuthBasic(
     HTTPAuthBasic b)
     throws E;
+
+  A onAuthOAuth(
+    HTTPAuthOAuth b)
+    throws E;
 }

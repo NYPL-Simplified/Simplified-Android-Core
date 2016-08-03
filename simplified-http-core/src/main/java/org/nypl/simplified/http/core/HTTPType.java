@@ -70,7 +70,7 @@ public interface HTTPType
    * @return A result
    */
 
-  HTTPResultType<Unit> head(
+  HTTPResultType<InputStream> head(
     final OptionType<HTTPAuthType> auth,
     final URI uri);
 }

@@ -3,8 +3,8 @@ package org.nypl.simplified.http.core;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,16 +195,23 @@ public final class HTTP implements HTTPType
   {
     final OptionType<HTTPProblemReport> report;
     if ("application/api-problem+json".equals(conn.getContentType())) {
-      final HTTPProblemReport r =
-        HTTPProblemReport.fromStream(conn.getErrorStream());
-      report = Option.some(r);
+      if (conn.getErrorStream() != null){
+        final HTTPProblemReport r =
+          HTTPProblemReport.fromStream(conn.getErrorStream());
+        report = Option.some(r);
+      }
+      else
+      {
+        report = Option.none();
+      }
+
     } else {
       report = Option.none();
     }
     return report;
   }
 
-  @Override public HTTPResultType<Unit> head(
+  @Override public HTTPResultType<InputStream> head(
     final OptionType<HTTPAuthType> auth_opt,
     final URI uri)
   {
@@ -240,7 +247,7 @@ public final class HTTP implements HTTPType
       if (code >= 400) {
         final OptionType<HTTPProblemReport> report =
           this.getReportFromError(conn);
-        return new HTTPResultError<Unit>(
+        return new HTTPResultError<InputStream>(
           code,
           NullCheck.notNull(conn.getResponseMessage()),
           (long) conn.getContentLength(),
@@ -250,19 +257,19 @@ public final class HTTP implements HTTPType
           report);
       }
 
-      return new HTTPResultOK<Unit>(
+      return new HTTPResultOK<InputStream>(
         NullCheck.notNull(conn.getResponseMessage()),
         code,
-        Unit.unit(),
+        new ByteArrayInputStream(new byte[0]),
         (long) conn.getContentLength(),
         NullCheck.notNull(conn.getHeaderFields()),
         conn.getLastModified());
     } catch (final MalformedURLException e) {
       throw new IllegalArgumentException(e);
     } catch (final UnknownHostException e) {
-      return new HTTPResultException<Unit>(uri, e);
+      return new HTTPResultException<InputStream>(uri, e);
     } catch (final IOException e) {
-      return new HTTPResultException<Unit>(uri, e);
+      return new HTTPResultException<InputStream>(uri, e);
     }
   }
 
