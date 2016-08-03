@@ -8,6 +8,9 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
+import org.nypl.drm.core.AdobeDeviceID;
+import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
@@ -65,6 +68,12 @@ public final class AccountCredentialsJSON
     final ObjectNode jo = jom.createObjectNode();
     jo.put("username", credentials.getUser().toString());
     jo.put("password", credentials.getPassword().toString());
+    jo.put("provider", credentials.getProvider().toString());
+//    jo.put("user_id", credentials.getAdobeUserID().toString());
+//    jo.put("device_id", credentials.getAdobeDeviceID().toString());
+//    jo.put("patron", credentials.getPatron().toString());
+//    jo.put("auth_token", credentials.getAuthToken().toString());
+//    jo.put("adobe_token", credentials.getAdobeToken().toString());
 
     credentials.getAdobeVendor().map_(
       new ProcedureType<AdobeVendorID>()
@@ -117,6 +126,56 @@ public final class AccountCredentialsJSON
       new AccountBarcode(JSONParserUtilities.getString(obj, "username"));
     final AccountPIN pass =
       new AccountPIN(JSONParserUtilities.getString(obj, "password"));
+
+    final AccountAuthProvider provider =
+      new AccountAuthProvider(JSONParserUtilities.getString(obj, "provider"));
+
+    final OptionType<AccountPatron> patron =
+      JSONParserUtilities.getStringOptional(obj, "patron").map(
+      new FunctionType<String, AccountPatron>()
+      {
+        @Override public AccountPatron call(final String x)
+        {
+          return new AccountPatron(x);
+        }
+      });
+    final OptionType<AccountAuthToken> auth_token =
+      JSONParserUtilities.getStringOptional(obj, "auth_token").map(
+      new FunctionType<String, AccountAuthToken>()
+      {
+        @Override public AccountAuthToken call(final String x)
+        {
+          return new AccountAuthToken(x);
+        }
+      });
+    final OptionType<AccountAdobeToken> adobe_token =
+      JSONParserUtilities.getStringOptional(obj, "adobe_token").map(
+      new FunctionType<String, AccountAdobeToken>()
+      {
+        @Override public AccountAdobeToken call(final String x)
+        {
+          return new AccountAdobeToken(x);
+        }
+      });
+
+    final OptionType<AdobeUserID> adobe_user =
+      JSONParserUtilities.getStringOptional(obj, "user_id").map(
+      new FunctionType<String, AdobeUserID>()
+      {
+        @Override public AdobeUserID call(final String x)
+        {
+          return new AdobeUserID(x);
+        }
+      });
+    final OptionType<AdobeDeviceID> adobe_device = JSONParserUtilities.getStringOptional(obj, "device_id").map(
+      new FunctionType<String, AdobeDeviceID>()
+      {
+        @Override public AdobeDeviceID call(final String x)
+        {
+          return new AdobeDeviceID(x);
+        }
+      });
+
     final OptionType<AdobeVendorID> vendor =
       JSONParserUtilities.getStringOptional(obj, "adobe-vendor").map(
         new FunctionType<String, AdobeVendorID>()
@@ -127,6 +186,14 @@ public final class AccountCredentialsJSON
           }
         });
 
-    return new AccountCredentials(vendor, user, pass);
+
+
+    final AccountCredentials creds = new AccountCredentials(vendor, user, pass, provider,auth_token,adobe_token,patron);
+    creds.setAdobeUserID(adobe_user);
+    creds.setAdobeDeviceID(adobe_device);
+//    creds.setAdobeToken(adobe_token);
+//    creds.setAuthToken(auth_token);
+
+    return creds;
   }
 }
