@@ -56,6 +56,7 @@ public class LoginActivity extends Activity {
           LoginActivity.this.onLoginWithClever();
         }
       });
+      clever.setVisibility(View.VISIBLE);
 
     } else {
       clever.setVisibility(View.GONE);
