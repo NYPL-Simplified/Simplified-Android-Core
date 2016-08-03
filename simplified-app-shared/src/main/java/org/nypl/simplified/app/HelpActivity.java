@@ -41,6 +41,8 @@ public final class HelpActivity extends SimplifiedActivity
           @Override public void call(final HelpstackType hs)
           {
             hs.show(HelpActivity.this);
+            HelpActivity.this.overridePendingTransition(0, 0);
+            HelpActivity.this.finish();
           }
         });
   }
