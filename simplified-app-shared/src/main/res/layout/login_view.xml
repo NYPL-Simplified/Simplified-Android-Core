@@ -41,6 +41,7 @@
       android:layout_gravity="center_horizontal"
       style="?android:attr/borderlessButtonStyle"
       android:textColor="@color/button_foreground"
-      android:src="@drawable/sign_in_with_clever_full"/>
+      android:src="@drawable/sign_in_with_clever_full"
+      android:visibility="gone"/>
   </LinearLayout>
 </RelativeLayout>
