@@ -1,14 +1,13 @@
 package org.nypl.simplified.opds.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 
@@ -16,11 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,16 +49,11 @@ public final class OPDSAuthenticationDocumentParser
 
     try {
       final String id = JSONParserUtilities.getString(s, "id");
-      final String title = JSONParserUtilities.getString(s, "title");
-      final OptionType<String> text_prompt =
-        JSONParserUtilities.getStringOptional(s, "text");
-
-      final List<URI> types = this.getTypes(s);
       final Map<String, OPDSLink> links = this.getLinks(s);
       final Map<String, String> labels = this.getLabels(s);
 
       return new OPDSAuthenticationDocument(
-        id, types, title, text_prompt, links, labels);
+        id,  links, labels);
     } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }
@@ -131,6 +122,7 @@ public final class OPDSAuthenticationDocumentParser
     return m;
   }
 
+
   private OPDSLink getLink(final ObjectNode link)
     throws OPDSParseException
   {
@@ -138,33 +130,11 @@ public final class OPDSAuthenticationDocumentParser
       final OptionType<String> hash =
         JSONParserUtilities.getStringOptional(link, "hash");
       final URI href = JSONParserUtilities.getURI(link, "href");
-      final OptionType<String> title =
-        JSONParserUtilities.getStringOptional(link, "title");
       final OptionType<String> type =
         JSONParserUtilities.getStringOptional(link, "type");
-      final boolean templated =
-        JSONParserUtilities.getBooleanDefault(link, "templated", false);
       final OptionType<BigInteger> length =
         JSONParserUtilities.getBigIntegerOptional(link, "length");
-      return new OPDSLink(hash, href, title, type, templated, length);
-    } catch (final JSONParseException e) {
-      throw new OPDSParseException(e);
-    }
-  }
-
-  private List<URI> getTypes(final ObjectNode s)
-    throws OPDSParseException
-  {
-    try {
-      final ArrayNode types = JSONParserUtilities.getArray(s, "type");
-      final List<URI> r = new ArrayList<URI>(types.size());
-      for (int index = 0; index < types.size(); ++index) {
-        final JsonNode n = types.get(index);
-        r.add(new URI(n.asText()));
-      }
-      return r;
-    } catch (final URISyntaxException e) {
-      throw new OPDSParseException(e);
+      return new OPDSLink(hash, href,  type, length);
     } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }
