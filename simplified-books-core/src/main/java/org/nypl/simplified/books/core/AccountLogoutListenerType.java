@@ -24,4 +24,11 @@ public interface AccountLogoutListenerType
    */
 
   void onAccountLogoutSuccess();
+
+  /**
+   * Logout failed
+   * @param code
+   */
+  void onAccountLogoutFailureServerError(int code);
+
 }

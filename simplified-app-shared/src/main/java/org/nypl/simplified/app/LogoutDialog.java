@@ -14,8 +14,8 @@ import android.widget.Button;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 /**
@@ -63,6 +63,13 @@ import org.slf4j.Logger;
   @Override public void onAccountLogoutSuccess()
   {
     // Nothing
+  }
+
+  @Override
+  public void onAccountLogoutFailureServerError(final int code) {
+    final String s =
+      NullCheck.notNull(String.format("logout failed: %s", code));
+    LogUtilities.errorWithOptionalException(LogoutDialog.LOG, s, null);
   }
 
   @Override public void onResume()
