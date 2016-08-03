@@ -22,7 +22,7 @@
 
   <bool name="feature_login_firstbook">true</bool>
 
-  <bool name="feature_login_clever">true</bool>
+  <bool name="feature_login_clever">false</bool>
 
   <string name="feature_default_provider">FirstBook</string>
 
