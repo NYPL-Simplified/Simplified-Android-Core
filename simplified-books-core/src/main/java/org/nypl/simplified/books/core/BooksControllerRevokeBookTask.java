@@ -16,6 +16,7 @@ import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
@@ -293,7 +294,18 @@ final class BooksControllerRevokeBookTask
     final AccountCredentials credentials = this.getAccountCredentials();
     final AccountBarcode barcode = credentials.getUser();
     final AccountPIN pin = credentials.getPassword();
-    return new HTTPAuthBasic(barcode.toString(), pin.toString());
+
+    HTTPAuthType auth =
+      new HTTPAuthBasic(barcode.toString(), pin.toString());
+
+    if (credentials.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+      if (token != null) {
+        auth = new HTTPAuthOAuth(token.toString());
+      }
+    }
+
+    return auth;
   }
 
   private AccountCredentials getAccountCredentials()

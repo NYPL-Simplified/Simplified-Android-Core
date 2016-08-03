@@ -6,6 +6,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
@@ -101,9 +102,16 @@ final class BooksControllerSyncTask implements Runnable
       final AccountBarcode barcode = credentials.getUser();
       final AccountPIN pin = credentials.getPassword();
       final AccountSyncListenerType in_listener = this.listener;
-
-      final HTTPAuthType auth =
+      HTTPAuthType auth =
         new HTTPAuthBasic(barcode.toString(), pin.toString());
+
+      if (credentials.getAuthToken().isSome()) {
+        final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+        if (token != null) {
+          auth = new HTTPAuthOAuth(token.toString());
+        }
+      }
+
       final HTTPResultType<InputStream> r =
         this.http.get(Option.some(auth), loans_uri, 0L);
 
