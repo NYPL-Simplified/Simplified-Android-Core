@@ -67,25 +67,25 @@ public final class OPDSAuthenticationDocumentParserContract
     final OPDSLink link_copyright = new OPDSLink(
       no_text,
       URI.create("http://www.librarysimplified.org/acknowledgments.html"),
-      no_text,
+//      no_text,
       type_html,
-      false,
+//      false,
       no_length);
 
     final OPDSLink link_privacy = new OPDSLink(
       no_text,
       URI.create("http://www.librarysimplified.org/privacypolicy.html"),
-      no_text,
+//      no_text,
       type_html,
-      false,
+//      false,
       no_length);
 
     final OPDSLink link_terms = new OPDSLink(
       no_text,
       URI.create("http://www.librarysimplified.org/EULA.html"),
-      no_text,
+//      no_text,
       type_html,
-      false,
+//      false,
       no_length);
 
     expected_links.put("copyright", link_copyright);
@@ -95,10 +95,11 @@ public final class OPDSAuthenticationDocumentParserContract
     final OPDSAuthenticationDocument expected_doc =
       new OPDSAuthenticationDocument(
         expected_id,
-        expected_type,
-        expected_title,
-        expected_text,
+//        expected_type,
+//        expected_title,
+//        expected_text,
         expected_links,
+        null,
         expected_labels);
 
     TestUtilities.assertEquals(expected_doc, doc);
