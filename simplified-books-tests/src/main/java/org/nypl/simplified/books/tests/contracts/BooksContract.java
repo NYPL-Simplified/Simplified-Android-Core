@@ -8,6 +8,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeVendorID;
+import org.nypl.simplified.books.core.AccountAuthProvider;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountDataLoadListenerType;
@@ -41,6 +42,7 @@ import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthMatcherType;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.nypl.simplified.http.core.HTTPResultError;
@@ -181,13 +183,19 @@ public final class BooksContract implements BooksContractType
                 return new HTTPResultOK<InputStream>(
                   "OK", 200, stream, 1L, empty_headers, 0L);
               }
+
+              @Override
+              public HTTPResultType<InputStream> onAuthOAuth(HTTPAuthOAuth b)
+                throws IOException {
+                return null;
+              }
             });
         } catch (final IOException e) {
           throw new UnreachableCodeException(e);
         }
       }
 
-      @Override public HTTPResultType<Unit> head(
+      @Override public HTTPResultType<InputStream> head(
         final OptionType<HTTPAuthType> auth_opt,
         final URI uri)
       {
@@ -195,11 +203,11 @@ public final class BooksContract implements BooksContractType
           return this.headLoans(auth_opt);
         }
 
-        return new HTTPResultOK<Unit>(
-          "OK", 200, Unit.unit(), 1L, empty_headers, 0L);
+        return new HTTPResultOK<InputStream>(
+          "OK", 200, new ByteArrayInputStream("DATA".getBytes()), 1L, empty_headers, 0L);
       }
 
-      private HTTPResultType<Unit> headLoans(
+      private HTTPResultType<InputStream> headLoans(
         final OptionType<HTTPAuthType> auth_opt)
       {
         if (auth_opt.isNone()) {
@@ -210,7 +218,7 @@ public final class BooksContract implements BooksContractType
         final HTTPAuthType auth = some.get();
         try {
           return auth.matchAuthType(
-            new HTTPAuthMatcherType<HTTPResultType<Unit>, IOException>()
+            new HTTPAuthMatcherType<HTTPResultType<InputStream>, IOException>()
             {
               private boolean isAuthorized(
                 final HTTPAuthBasic b)
@@ -220,7 +228,7 @@ public final class BooksContract implements BooksContractType
                 return ok;
               }
 
-              @Override public HTTPResultType<Unit> onAuthBasic(
+              @Override public HTTPResultType<InputStream> onAuthBasic(
                 final HTTPAuthBasic b)
                 throws IOException
               {
@@ -229,8 +237,13 @@ public final class BooksContract implements BooksContractType
                   return unauthorized();
                 }
 
-                return new HTTPResultOK<Unit>(
-                  "OK", 200, Unit.unit(), 1L, empty_headers, 0L);
+                return new HTTPResultOK<InputStream>(
+                  "OK", 200, new ByteArrayInputStream("DATA".getBytes()), 1L, empty_headers, 0L);
+              }
+
+              @Override
+              public HTTPResultType<InputStream> onAuthOAuth(HTTPAuthOAuth b) throws IOException {
+                return null;
               }
             });
         } catch (final IOException e) {
@@ -272,11 +285,11 @@ public final class BooksContract implements BooksContractType
         return new HTTPResultException<InputStream>(uri, new IOException());
       }
 
-      @Override public HTTPResultType<Unit> head(
+      @Override public HTTPResultType<InputStream> head(
         final OptionType<HTTPAuthType> auth,
         final URI uri)
       {
-        return new HTTPResultException<Unit>(uri, new IOException());
+        return new HTTPResultException<InputStream>(uri, new IOException());
       }
 
       @Override
@@ -335,6 +348,11 @@ public final class BooksContract implements BooksContractType
           @Override public String getLabelLoginPassword()
           {
             return "Password";
+          }
+
+          @Override
+          public String getLabelLoginPatronName() {
+            return "Name";
           }
 
           @Override public void documentUpdate(final InputStream data)
@@ -537,7 +555,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin);
+        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
       final OPDSJSONSerializerType in_json_serializer =
@@ -658,7 +676,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin);
+        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
@@ -782,7 +800,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin);
+        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
@@ -1025,10 +1043,15 @@ public final class BooksContract implements BooksContractType
           {
             latch3.countDown();
           }
+
+          @Override
+          public void onAccountLogoutFailureServerError(int code) {
+
+          }
         };
 
       System.out.println("logging out");
-      b.accountLogout(logout_listener);
+      b.accountLogout(creds,logout_listener);
       System.out.println("awaiting logout completion");
       latch3.await(10L, TimeUnit.SECONDS);
       System.out.println("logged out");
@@ -1054,7 +1077,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin);
+        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
@@ -1300,6 +1323,26 @@ public final class BooksContract implements BooksContractType
     @Override public synchronized void setCurrentLoansURI(final URI u)
     {
       this.current_loans = NullCheck.notNull(u);
+    }
+
+    @Override
+    public URI getAlternateRootFeedURI() {
+      return null;
+    }
+
+    @Override
+    public void setAlternateRootFeedURI(URI u) {
+
+    }
+
+    @Override
+    public URI getAlternateLoansURI() {
+      return null;
+    }
+
+    @Override
+    public void setAlternateLoansURI(URI u) {
+
     }
   }
 }
