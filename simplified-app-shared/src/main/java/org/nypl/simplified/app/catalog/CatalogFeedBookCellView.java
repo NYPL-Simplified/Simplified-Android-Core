@@ -308,9 +308,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    this.cell_buttons.addView(
-      new CatalogBookReadButton(
-        this.activity, book_id, this.entry.get()), 0);
+      this.cell_buttons.addView(
+        new CatalogBookReadButton(
+          this.activity, book_id, this.entry.get(), this.books), 0);
 
     return Unit.unit();
   }
@@ -332,6 +332,12 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     this.cell_downloading_failed_label.setText(
       CatalogBookErrorStrings.getFailureString(rr, f));
+
+    if (CatalogBookUnauthorized.isUnAuthorized(f))
+    {
+      CatalogFeedBookCellView.this.books.accountRemoveCredentials();
+
+    }
 
     this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss.setOnClickListener(
@@ -438,7 +444,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     if (s.isRevocable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD, this.books);
       this.cell_buttons.addView(revoke, 0);
     }
 
@@ -464,7 +470,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     if (s.isRevocable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD, this.books);
       this.cell_buttons.addView(revoke, 0);
     }
 
