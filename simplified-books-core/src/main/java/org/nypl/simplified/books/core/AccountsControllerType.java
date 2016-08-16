@@ -75,4 +75,7 @@ public interface AccountsControllerType
    */
   boolean accountIsDeviceActive();
 
+  void accountRemoveCredentials();
+
+  void accountActivateDeviceAndFulFillBook(BookID in_book_id);
 }

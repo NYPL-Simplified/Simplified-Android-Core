@@ -75,12 +75,12 @@ final class BooksControllerBorrowTask implements Runnable
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final String                             short_id;
-  private final AccountsDatabaseReadableType       accounts_database;
+  private final AccountsDatabaseType       accounts_database;
   private       long                               download_running_total;
 
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
-    final AccountsDatabaseReadableType in_accounts_database,
+    final AccountsDatabaseType in_accounts_database,
     final BooksStatusCacheType in_books_status,
     final DownloaderType in_downloader,
     final HTTPType in_http,
@@ -511,6 +511,14 @@ final class BooksControllerBorrowTask implements Runnable
                 problem_report.getProblemType();
               if (problem_type == HTTPProblemReport.ProblemType.LoanLimitReached) {
                 ex = new BookBorrowExceptionLoanLimitReached(x);
+              }
+              if (HTTPProblemReport.ProblemStatus.Unauthorized == problem_report.getProblemStatus())
+              {
+                try {
+                  BooksControllerBorrowTask.this.accounts_database.accountRemoveCredentials();
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
               }
             }
           }
