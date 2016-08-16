@@ -2,11 +2,9 @@ package org.nypl.simplified.http.core;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import net.iharder.Base64;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.nio.charset.Charset;
 
 /**
  * HTTP Basic Auth functions.

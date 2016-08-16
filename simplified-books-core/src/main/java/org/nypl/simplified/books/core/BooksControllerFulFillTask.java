@@ -64,7 +64,7 @@ final class BooksControllerFulFillTask implements Runnable
     this.book_id = NullCheck.notNull(in_book_id);
   }
 
-  public BooksControllerFulFillTask( final BooksControllerType in_books,
+   BooksControllerFulFillTask(final BooksControllerType in_books,
                                      final AccountsDatabaseType in_accounts_database,
                                      final HTTPType in_http,
                                      final OPDSFeedParserType in_feed_parser,
@@ -88,6 +88,7 @@ final class BooksControllerFulFillTask implements Runnable
         this.sync();
 
       } catch (final Throwable x) {
+        BooksControllerFulFillTask.LOG.debug("failed");
 
       } finally {
         this.running.set(false);
@@ -158,7 +159,7 @@ final class BooksControllerFulFillTask implements Runnable
             final HTTPResultOKType<InputStream> e)
             throws Exception {
             try {
-              BooksControllerFulFillTask.this.fulFillEntries(BooksControllerFulFillTask.this.loans_uri, e);
+              BooksControllerFulFillTask.this.fulFillEntries(e);
               return Unit.unit();
             } finally {
               e.close();
@@ -169,7 +170,6 @@ final class BooksControllerFulFillTask implements Runnable
   }
 
   private void fulFillEntries(
-    final URI loans_uri,
     final HTTPResultOKType<InputStream> r_feed)
     throws Exception
   {
@@ -177,7 +177,7 @@ final class BooksControllerFulFillTask implements Runnable
       this.books_controller.bookGetStatusCache();
 
     final OPDSAcquisitionFeed feed =
-      this.feed_parser.parse(loans_uri, r_feed.getValue());
+      this.feed_parser.parse(this.loans_uri, r_feed.getValue());
 
     /**
      * Handle each book in the received feed.
@@ -186,29 +186,29 @@ final class BooksControllerFulFillTask implements Runnable
     final List<OPDSAcquisitionFeedEntry> entries = feed.getFeedEntries();
     for (final OPDSAcquisitionFeedEntry e : entries) {
       final OPDSAcquisitionFeedEntry e_nn = NullCheck.notNull(e);
-      final BookID book_id = BookID.newIDFromEntry(e_nn);
+      final BookID in_book_id = BookID.newIDFromEntry(e_nn);
 
-      if (this.book_id == null || this.book_id.equals(book_id)) {
+      if (this.book_id == null || this.book_id.equals(in_book_id)) {
         try {
 
 
           final OptionType<BookStatusType> stat =
-            books_status.booksStatusGet(book_id);
+            books_status.booksStatusGet(in_book_id);
 
           if (stat.isSome() && ((Some<BookStatusType>) stat).get() instanceof BookStatusDownloaded) {
             final OptionType<OPDSAcquisition> a_opt =
               BooksControllerFulFillTask.getPreferredAcquisition(
-                book_id, e_nn.getAcquisitions());
+                in_book_id, e_nn.getAcquisitions());
             if (a_opt.isSome()) {
               final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-              this.books_controller.bookBorrow(book_id, a, e_nn);
+              this.books_controller.bookBorrow(in_book_id, a, e_nn);
             }
 
           }
 
         } catch (final Throwable x) {
           BooksControllerFulFillTask.LOG.error(
-            "[{}]: unable to save entry: {}: ", book_id.getShortID(), x);
+            "[{}]: unable to save entry: {}: ", in_book_id.getShortID(), x);
         }
       }
     }

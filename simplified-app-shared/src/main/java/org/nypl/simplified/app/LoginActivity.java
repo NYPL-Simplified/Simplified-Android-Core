@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.io7m.jfunctional.OptionType;
@@ -20,7 +19,15 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
+/**
+ *
+ */
 public class LoginActivity extends Activity {
+
+  LoginActivity()
+  {
+
+  }
 
   private static final Logger LOG;
 
@@ -42,7 +49,7 @@ public class LoginActivity extends Activity {
 
     barcode.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(View view) {
+      public void onClick(final View view) {
         LoginActivity.this.onLoginWithBarcode();
       }
     });
@@ -52,7 +59,7 @@ public class LoginActivity extends Activity {
     if (clever_enabled) {
       clever.setOnClickListener(new View.OnClickListener() {
         @Override
-        public void onClick(View view) {
+        public void onClick(final View view) {
           LoginActivity.this.onLoginWithClever();
         }
       });
@@ -75,6 +82,9 @@ public class LoginActivity extends Activity {
   }
 
 
+  /**
+   *
+   */
   public void onLoginWithBarcode() {
 
 
@@ -122,6 +132,9 @@ public class LoginActivity extends Activity {
 
   }
 
+  /**
+   *
+   */
   public void onLoginWithClever() {
 
     final Intent i = new Intent(this, CleverLoginActivity.class);
@@ -133,8 +146,8 @@ public class LoginActivity extends Activity {
   }
 
   @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    super.onActivityResult(requestCode, resultCode, data);
+  protected void onActivityResult(final int request_code, final int result_code, final Intent data) {
+    super.onActivityResult(request_code, result_code, data);
 // and check if logged in
 //    if(resultCode == Activity.RESULT_OK) {
     this.openCatalog();

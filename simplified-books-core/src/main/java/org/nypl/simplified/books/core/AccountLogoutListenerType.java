@@ -27,8 +27,8 @@ public interface AccountLogoutListenerType
 
   /**
    * Logout failed
-   * @param code
+   * @param code error code
    */
-  void onAccountLogoutFailureServerError(int code);
+  void onAccountLogoutFailureServerError(final int code);
 
 }

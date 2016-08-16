@@ -1,7 +1,6 @@
 package org.nypl.simplified.http.core;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
 
 import java.io.InputStream;
 import java.net.URI;

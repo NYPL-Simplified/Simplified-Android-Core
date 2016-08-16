@@ -108,6 +108,7 @@ public final class BooksController implements BooksType {
    * @param in_book_database     A book database
    * @param in_accounts_database The accounts database
    * @param in_config            Mutable configuration data
+   * @param in_loans_url         loans url
    * @return A new books controller
    */
 
@@ -271,8 +272,11 @@ public final class BooksController implements BooksType {
   }
 
 
+  /**
+   * @param in_book_id book id to be fulfilled
+   */
   @Override
-  public void accountActivateDeviceAndFulFillBook(BookID in_book_id) {
+  public void accountActivateDeviceAndFulFillBook(final BookID in_book_id) {
 
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {

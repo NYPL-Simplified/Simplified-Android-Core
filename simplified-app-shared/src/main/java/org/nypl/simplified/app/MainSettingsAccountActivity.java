@@ -41,16 +41,12 @@ import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
-import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPatron;
-import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
-import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
 /**
@@ -126,12 +122,12 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         public void run() {
           in_provider_text.setText(creds.getProvider().toString());
 
-          if (creds.getProvider().toString().equals("Clever")) {
+          if ("Clever".equals(creds.getProvider().toString())) {
             in_table_with_code.setVisibility(View.GONE);
             in_table_with_token.setVisibility(View.VISIBLE);
             try {
 
-              final JSONObject name = new JSONObject(((Some<AccountPatron>)creds.getPatron()).get().toString()).getJSONObject("name");
+              final JSONObject name = new JSONObject(((Some<AccountPatron>) creds.getPatron()).get().toString()).getJSONObject("name");
               in_name_text.setText(name.getString("first") + " " + name.getString("middle") + " " + name.getString("last"));
 
             } catch (JSONException e) {
@@ -291,13 +287,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       CookieManager.getInstance().removeAllCookies(null);
       CookieManager.getInstance().flush();
     } else {
-      CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(MainSettingsAccountActivity.this);
-      cookieSyncMngr.startSync();
-      CookieManager cookieManager = CookieManager.getInstance();
-      cookieManager.removeAllCookie();
-      cookieManager.removeSessionCookie();
-      cookieSyncMngr.stopSync();
-      cookieSyncMngr.sync();
+      final CookieSyncManager cookie_sync_manager = CookieSyncManager.createInstance(MainSettingsAccountActivity.this);
+      cookie_sync_manager.startSync();
+      final CookieManager cookie_manager = CookieManager.getInstance();
+      cookie_manager.removeAllCookie();
+      cookie_manager.removeSessionCookie();
+      cookie_sync_manager.stopSync();
+      cookie_sync_manager.sync();
     }
 
 

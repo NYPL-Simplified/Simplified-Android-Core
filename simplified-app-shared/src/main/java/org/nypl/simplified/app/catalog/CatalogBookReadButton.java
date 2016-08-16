@@ -28,7 +28,7 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
    * @param in_activity The activity
    * @param in_book_id  The book ID
    * @param in_entry    The associated feed entry
-   * @param in_books
+   * @param in_books    books
    */
 
   public CatalogBookReadButton(
@@ -48,7 +48,7 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
     final OptionType<BookDatabaseEntrySnapshot> snap_opt =
       in_books.bookGetDatabase().databaseGetEntrySnapshot(in_book_id);
 
-    if(in_books.accountIsDeviceActive() || ((Some<BookDatabaseEntrySnapshot>) snap_opt).get().getAdobeRights().isNone()) {
+    if (in_books.accountIsDeviceActive() || ((Some<BookDatabaseEntrySnapshot>) snap_opt).get().getAdobeRights().isNone()) {
 
       this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
       this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_read)));

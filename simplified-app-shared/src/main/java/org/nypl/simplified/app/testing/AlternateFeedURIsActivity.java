@@ -99,12 +99,9 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
 
     final BooksControllerConfigurationType books_config =
       app.getBooks().booksGetConfiguration();
-    if (books_config.getAlternateRootFeedURI()!=null) {
+    if (books_config.getAlternateRootFeedURI() != null) {
       in_uri_feed.setText(books_config.getAlternateRootFeedURI().toString());
     }
-//     if (books_config.getAlternateLoansURI()!=null) {
-//       in_uri_loans.setText(books_config.getAlternateLoansURI().toString());
-//     }
 
     in_set.setOnClickListener(
       new View.OnClickListener()

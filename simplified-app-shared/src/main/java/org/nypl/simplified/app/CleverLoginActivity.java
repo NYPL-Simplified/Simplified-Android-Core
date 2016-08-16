@@ -113,7 +113,7 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
       NullCheck.notNull((WebView) this.findViewById(R.id.web_view));
 
 
-    this.web_view.getSettings().setJavaScriptEnabled(true); // enable javascript
+    this.web_view.getSettings().setJavaScriptEnabled(true);
 
 
     this.web_view.setWebViewClient(new WebViewClient() {
@@ -161,16 +161,16 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
             if (kvpair.hasMoreTokens()) {
               final String key = kvpair.nextToken();
               final String value = kvpair.nextToken();
-              if (key.equalsIgnoreCase("access_token")) {
+              if ("access_token".equalsIgnoreCase(key)) {
                 access_token = value;
-              } else if (key.equalsIgnoreCase("patron_info")) {
+              } else if ("patron_info".equalsIgnoreCase(key)) {
                 try {
                   patron_info = URLDecoder.decode(value, "UTF-8");
 
                 } catch (UnsupportedEncodingException e) {
                   e.printStackTrace();
                 }
-              } else if (key.equalsIgnoreCase("error")) {
+              } else if ("error".equalsIgnoreCase(key)) {
 
                 try {
                   error = URLDecoder.decode(value, "UTF-8");
@@ -228,7 +228,8 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
             final AccountAdobeToken adobe_token = new AccountAdobeToken("");
             final AccountAuthProvider auth_provider = new AccountAuthProvider("Clever");
 
-            final AccountCredentials creds = new AccountCredentials(adobe_vendor, barcode, pin, auth_provider, Option.some(auth_token), Option.some(adobe_token), Option.some(patron));
+            final AccountCredentials creds =
+              new AccountCredentials(adobe_vendor, barcode, pin, auth_provider, Option.some(auth_token), Option.some(adobe_token), Option.some(patron));
             creds.setAdobeDeviceID(Option.<AdobeDeviceID>none());
             creds.setAdobeUserID(Option.<AdobeUserID>none());
             books.accountLogin(creds, CleverLoginActivity.this);
@@ -241,13 +242,13 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
               CookieManager.getInstance().removeAllCookies(null);
               CookieManager.getInstance().flush();
             } else {
-              CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(CleverLoginActivity.this);
-              cookieSyncMngr.startSync();
-              CookieManager cookieManager = CookieManager.getInstance();
-              cookieManager.removeAllCookie();
-              cookieManager.removeSessionCookie();
-              cookieSyncMngr.stopSync();
-              cookieSyncMngr.sync();
+              final CookieSyncManager cookie_sync_manager = CookieSyncManager.createInstance(CleverLoginActivity.this);
+              cookie_sync_manager.startSync();
+              final CookieManager cookie_manager = CookieManager.getInstance();
+              cookie_manager.removeAllCookie();
+              cookie_manager.removeSessionCookie();
+              cookie_sync_manager.stopSync();
+              cookie_sync_manager.sync();
             }
             CleverLoginActivity.this.web_view.reload();
           }
@@ -384,6 +385,11 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
     }
   }
 
+  /**
+   * @param rr resources
+   * @param message error message
+   * @return string
+   */
   public static String getDeviceActivationErrorMessage(
     final Resources rr,
     final String message) {

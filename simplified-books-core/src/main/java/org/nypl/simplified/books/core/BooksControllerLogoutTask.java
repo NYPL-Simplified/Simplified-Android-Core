@@ -72,8 +72,8 @@ final class BooksControllerLogoutTask implements Runnable {
 
   private void onHTTPServerAcceptedCredentials(final InputStream data) {
 
-    Scanner scanner = new Scanner(data).useDelimiter("\\A");
-    String adobe_token = scanner.hasNext() ? scanner.next() : "";
+    final Scanner scanner = new Scanner(data).useDelimiter("\\A");
+    final String adobe_token = scanner.hasNext() ? scanner.next() : "";
     BooksControllerLogoutTask.LOG.debug("adobe temporary token: {}", adobe_token);
     this.credentials.setAdobeToken(Option.some(new AccountAdobeToken(adobe_token)));
 
@@ -90,7 +90,7 @@ final class BooksControllerLogoutTask implements Runnable {
 
     if (this.adobe_drm.isSome() && this.credentials.getAdobeUserID().isSome()) {
 
-      BooksControllerDeviceDeActivationTask device_deactivationTask = new BooksControllerDeviceDeActivationTask(this.adobe_drm,
+      BooksControllerDeviceDeActivationTask device_deactivation_task = new BooksControllerDeviceDeActivationTask(this.adobe_drm,
         this.credentials, this.accounts_database, this.database) {
 
         @Override
@@ -109,7 +109,7 @@ final class BooksControllerLogoutTask implements Runnable {
         }
 
       };
-      device_deactivationTask.run();
+      device_deactivation_task.run();
 
     } else {
 
@@ -149,15 +149,15 @@ final class BooksControllerLogoutTask implements Runnable {
       HTTPAuthType auth =
         new HTTPAuthBasic(user.toString(), pass.toString());
 
-      if (credentials.getAuthToken().isSome()) {
-        final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+      if (this.credentials.getAuthToken().isSome()) {
+        final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
         if (token != null) {
           auth = new HTTPAuthOAuth(token.toString());
         }
       }
 
       URI auth_uri = this.config.getCurrentRootFeedURI();
-      HTTPResultType<InputStream> r;
+      final HTTPResultType<InputStream> r;
       if (this.adobe_drm.isSome()) {
 
         auth_uri = this.config.getAdobeAuthURI().resolve("AdobeAuth/authdata");

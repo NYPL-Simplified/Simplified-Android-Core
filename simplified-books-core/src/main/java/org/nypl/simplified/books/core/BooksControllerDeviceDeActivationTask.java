@@ -98,11 +98,11 @@ public class BooksControllerDeviceDeActivationTask implements Runnable,
                                                final String expires) {
 
 
-                        AdobeDeviceID adobeDeviceID = new AdobeDeviceID(device_id);
+                        final AdobeDeviceID adobe_device_id = new AdobeDeviceID(device_id);
 
 
                         BooksControllerDeviceDeActivationTask.this.credentials.setAdobeUserID(Option.some(in_user_id));
-                        BooksControllerDeviceDeActivationTask.this.credentials.setAdobeDeviceID(Option.some(adobeDeviceID));
+                        BooksControllerDeviceDeActivationTask.this.credentials.setAdobeDeviceID(Option.some(adobe_device_id));
 
                         try {
 

@@ -31,6 +31,7 @@ public final class CatalogBookRevokeButton extends CatalogLeftPaddedButton
    * @param in_book_id     The book ID
    * @param in_revoke_type The revocation type (to show the correct button text
    *                       and dialog messages)
+   * @param in_books       The books
    */
 
   public CatalogBookRevokeButton(
@@ -46,7 +47,7 @@ public final class CatalogBookRevokeButton extends CatalogLeftPaddedButton
     final OptionType<BookDatabaseEntrySnapshot> snap_opt =
       in_books.bookGetDatabase().databaseGetEntrySnapshot(in_book_id);
 
-    if(in_books.accountIsDeviceActive() || ((Some<BookDatabaseEntrySnapshot>) snap_opt).get().getAdobeRights().isNone()) {
+    if (in_books.accountIsDeviceActive() || ((Some<BookDatabaseEntrySnapshot>) snap_opt).get().getAdobeRights().isNone()) {
 
       final Resources rr = NullCheck.notNull(in_activity.getResources());
 

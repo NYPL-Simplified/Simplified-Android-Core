@@ -64,6 +64,11 @@ public final class HTTPProblemReport
     return new HTTPProblemReport(o);
   }
 
+  /**
+   * @param s string value
+   * @return problem report
+   * @throws IOException exception
+   */
   public static HTTPProblemReport fromString(final String s)
     throws IOException
   {
@@ -121,6 +126,9 @@ public final class HTTPProblemReport
     return ProblemType.Unknown;
   }
 
+  /**
+   * @return problem status
+   */
   public ProblemStatus getProblemStatus()
   {
     if (this.raw.has("status")) {
@@ -148,9 +156,15 @@ public final class HTTPProblemReport
   }
 
 
+  /**
+   *
+   */
   public enum ProblemStatus
   {
 
+    /**
+     * Unauthorized problem
+     */
     Unauthorized,
     /**
      * Unknown problem.

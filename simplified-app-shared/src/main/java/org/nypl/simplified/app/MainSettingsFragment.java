@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -70,7 +71,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
       preferences.setIntent(null);
       preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
         @Override
-        public boolean onPreferenceClick(Preference preference) {
+        public boolean onPreferenceClick(final Preference preference) {
 
           final AccountBarcode barcode = new AccountBarcode("");
           final AccountPIN pin = new AccountPIN("");
@@ -143,8 +144,8 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
   }
 
   @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  public void onCreate(final Bundle saved_instance_state) {
+    super.onCreate(saved_instance_state);
 
     addPreferencesFromResource(R.xml.preferences);
 

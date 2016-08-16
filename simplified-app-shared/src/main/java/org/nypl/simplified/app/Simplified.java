@@ -518,7 +518,7 @@ public final class Simplified extends Application
        * The main book controller.
        */
 
-      URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(rr.getString(R.string.feature_catalog_loans_uri_component));
+      final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(rr.getString(R.string.feature_catalog_loans_uri_component));
 
       this.books = BooksController.newBooks(
         this.exec_books,
@@ -874,7 +874,7 @@ public final class Simplified extends Application
     }
 
     @Override
-    public void setAdobeAuthURI(URI u) {
+    public void setAdobeAuthURI(final URI u) {
       this.adobe_auth_root = u;
     }
 

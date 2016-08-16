@@ -1,9 +1,11 @@
 package org.nypl.simplified.app.testing;
 
 import android.preference.Preference;
-import android.view.View;
 
 
+/**
+ *
+ */
 public abstract class OnMultipleClickListener implements Preference.OnPreferenceClickListener {
   private static final String TAG = OnMultipleClickListener.class.getSimpleName();
 
@@ -11,7 +13,7 @@ public abstract class OnMultipleClickListener implements Preference.OnPreference
 
   private long last_click_time;
 
-  private int clicks = 0;
+  private int clicks;
 
 
   @Override
@@ -40,21 +42,22 @@ public abstract class OnMultipleClickListener implements Preference.OnPreference
    * Called when a view has been clicked.
    *
    * @param v The view that was clicked.
+   * @return boolean
    */
   public abstract boolean onMultipleClick(Preference v);
 
   /**
-   * Wraps an {@link View.OnClickListener} into an {@link OnMultipleClickListener}.<br/>
-   * The argument's {@link View.OnClickListener#onClick(View)} method will be called when a single click is registered.
+   * Wraps an {View.OnClickListener} into an {@link OnMultipleClickListener}.<br/>
+   * The argument's {View.OnClickListener#onClick(View)} method will be called when a single click is registered.
    *
-   * @param onClickListener The listener to wrap.
+   * @param listener The listener to wrap.
    * @return the wrapped listener.
    */
-  public static Preference.OnPreferenceClickListener wrap(final Preference.OnPreferenceClickListener onClickListener) {
+  public static Preference.OnPreferenceClickListener wrap(final Preference.OnPreferenceClickListener listener) {
     return new OnMultipleClickListener() {
       @Override
-      public boolean onMultipleClick(Preference v) {
-        return onClickListener.onPreferenceClick(v);
+      public boolean onMultipleClick(final Preference v) {
+        return listener.onPreferenceClick(v);
       }
     };
   }

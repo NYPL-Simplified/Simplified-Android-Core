@@ -44,7 +44,7 @@ final class AccountLogoutListenerCatcher implements AccountLogoutListenerType
   }
 
   @Override
-  public void onAccountLogoutFailureServerError(int code) {
+  public void onAccountLogoutFailureServerError(final int code) {
     try {
       this.delegate.onAccountLogoutFailureServerError(code);
     } catch (final Throwable e) {

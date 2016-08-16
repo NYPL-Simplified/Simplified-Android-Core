@@ -67,7 +67,7 @@ public class BooksControllerReportTask
       if (account_credentials.getAuthToken().isSome()) {
         final AccountAuthToken token = ((Some<AccountAuthToken>) account_credentials.getAuthToken()).get();
         if (token != null) {
-          http_auth = Option.some((HTTPAuthType)new HTTPAuthOAuth(token.toString()));
+          http_auth = Option.some((HTTPAuthType) new HTTPAuthOAuth(token.toString()));
         }
       }
 

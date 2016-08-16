@@ -150,7 +150,7 @@ final class BooksControllerSyncTask implements Runnable
             final HTTPResultOKType<InputStream> e)
             throws Exception {
             try {
-              BooksControllerSyncTask.this.syncFeedEntries(BooksControllerSyncTask.this.loans_uri, e);
+              BooksControllerSyncTask.this.syncFeedEntries(e);
               return Unit.unit();
             } finally {
               e.close();
@@ -161,7 +161,6 @@ final class BooksControllerSyncTask implements Runnable
   }
 
   private void syncFeedEntries(
-    final URI loans_uri,
     final HTTPResultOKType<InputStream> r_feed)
     throws Exception
   {
@@ -169,7 +168,7 @@ final class BooksControllerSyncTask implements Runnable
       this.books_controller.bookGetStatusCache();
 
     final OPDSAcquisitionFeed feed =
-      this.feed_parser.parse(loans_uri, r_feed.getValue());
+      this.feed_parser.parse(this.loans_uri, r_feed.getValue());
 
     /**
      * Obtain the set of books that are on disk already. If any

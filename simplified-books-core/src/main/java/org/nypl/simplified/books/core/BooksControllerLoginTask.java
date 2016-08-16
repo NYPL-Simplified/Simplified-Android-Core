@@ -93,15 +93,15 @@ final class BooksControllerLoginTask implements Runnable,
     HTTPAuthType auth =
       new HTTPAuthBasic(user.toString(), pass.toString());
 
-    if (credentials.getAuthToken().isSome()) {
-      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+    if (this.credentials.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
       if (token != null) {
         auth = new HTTPAuthOAuth(token.toString());
       }
     }
 
     URI auth_uri = this.config.getCurrentRootFeedURI();
-    HTTPResultType<InputStream> r;
+    final HTTPResultType<InputStream> r;
     if (this.adobe_drm.isSome()) {
       auth_uri = this.config.getAdobeAuthURI().resolve("AdobeAuth/authdata");
       r = this.http.get(Option.some(auth), auth_uri, 0);
@@ -164,8 +164,8 @@ final class BooksControllerLoginTask implements Runnable,
     if (this.adobe_drm.isSome()) {
 
 
-      Scanner scanner = new Scanner(data).useDelimiter("\\A");
-      String adobe_token = scanner.hasNext() ? scanner.next() : "";
+      final Scanner scanner = new Scanner(data).useDelimiter("\\A");
+      final String adobe_token = scanner.hasNext() ? scanner.next() : "";
       this.credentials.setAdobeToken(Option.some(new AccountAdobeToken(adobe_token)));
 
       BooksControllerDeviceActivationTask activation_task =
@@ -181,12 +181,14 @@ final class BooksControllerLoginTask implements Runnable,
           }
 
           @Override
-          public void onActivation(int index, AdobeVendorID authority, String device_id, String user_name, AdobeUserID user_id, String expires) {
+          public void onActivation(final int index, final AdobeVendorID authority,
+                                   final String device_id, final String user_name,
+                                   final AdobeUserID user_id, final String expires) {
             super.onActivation(index, authority, device_id, user_name, user_id, expires);
 
-            AdobeDeviceID adobeDeviceID = new AdobeDeviceID(device_id);
+            final AdobeDeviceID adobe_device_id = new AdobeDeviceID(device_id);
 
-            BooksControllerLoginTask.this.credentials.setAdobeDeviceID(Option.some(adobeDeviceID));
+            BooksControllerLoginTask.this.credentials.setAdobeDeviceID(Option.some(adobe_device_id));
             BooksControllerLoginTask.this.credentials.setAdobeUserID(Option.some(user_id));
             BooksControllerLoginTask.this.onCompletedSuccessfully();
           }
@@ -214,7 +216,7 @@ final class BooksControllerLoginTask implements Runnable,
     BooksControllerLoginTask.LOG.debug(
       "logged in as {} successfully", this.credentials.getBarcode());
 
-    books.accountSync(this.listener);
+    this.books.accountSync(this.listener);
 
     try {
       this.accounts_database.accountSetCredentials(this.credentials);

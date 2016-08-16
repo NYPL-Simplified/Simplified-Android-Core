@@ -207,8 +207,8 @@ public final class HTTPRedirectFollower
       throw new IOException("Reached redirect limit");
     }
 
-    HTTPResultType<InputStream> r;
-    if (this.method.equals("PUT")) {
+    final HTTPResultType<InputStream> r;
+    if ("PUT".equals(this.method)) {
       r = this.http.put(this.current_auth, this.current_uri);
     } else {
       r = this.http.get(this.current_auth, this.current_uri, 0L);

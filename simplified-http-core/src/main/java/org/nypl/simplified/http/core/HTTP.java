@@ -195,7 +195,7 @@ public final class HTTP implements HTTPType
   {
     final OptionType<HTTPProblemReport> report;
     if ("application/api-problem+json".equals(conn.getContentType())) {
-      if (conn.getErrorStream() != null){
+      if (conn.getErrorStream() != null) {
         final HTTPProblemReport r =
           HTTPProblemReport.fromStream(conn.getErrorStream());
         report = Option.some(r);

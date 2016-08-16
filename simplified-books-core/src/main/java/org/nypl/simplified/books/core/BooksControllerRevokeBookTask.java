@@ -518,7 +518,7 @@ final class BooksControllerRevokeBookTask
     private final CountDownLatch     latch;
     private       OptionType<Throwable> error;
 
-    public AdobeLoanReturnResult(final CountDownLatch in_latch)
+    AdobeLoanReturnResult(final CountDownLatch in_latch)
     {
       this.latch = NullCheck.notNull(in_latch);
       this.error = Option.some((Throwable) new BookRevokeExceptionNotReady());
