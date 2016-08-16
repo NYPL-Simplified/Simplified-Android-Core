@@ -252,6 +252,27 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
         }
       });
 
+    docs.getLicenses().map_(
+      new ProcedureType<SyncedDocumentType>() {
+        @Override
+        public void call(final SyncedDocumentType licenses) {
+
+          final Intent intent = new Intent(
+            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+          final Bundle b = new Bundle();
+          WebViewActivity.setActivityArguments(
+            b,
+            licenses.documentGetReadableURL().toString(),
+            resources.getString(R.string.settings_licences),
+            SimplifiedPart.PART_SETTINGS);
+          intent.putExtras(b);
+
+          final Preference preferences = findPreference(resources.getString(R.string.settings_licences));
+          preferences.setIntent(intent);
+
+        }
+      });
+
 
   }
 

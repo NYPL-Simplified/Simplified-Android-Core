@@ -7,6 +7,11 @@
     </Preference>
 
     <Preference
+      android:key="@string/help"
+      android:title="@string/help">
+    </Preference>
+
+    <Preference
       android:key="@string/settings_about"
       android:title="@string/settings_about">
     </Preference>
@@ -27,8 +32,8 @@
     </Preference>
 
     <Preference
-      android:key="@string/help"
-      android:title="@string/help">
+      android:key="@string/settings_licences"
+      android:title="@string/settings_licences">
     </Preference>
 
     <Preference
