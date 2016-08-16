@@ -69,11 +69,48 @@ public final class AccountCredentialsJSON
     jo.put("username", credentials.getBarcode().toString());
     jo.put("password", credentials.getPin().toString());
     jo.put("provider", credentials.getProvider().toString());
-//    jo.put("user_id", credentials.getAdobeUserID().toString());
-//    jo.put("device_id", credentials.getAdobeDeviceID().toString());
-//    jo.put("patron", credentials.getPatron().toString());
-//    jo.put("auth_token", credentials.getAuthToken().toString());
-//    jo.put("adobe_token", credentials.getAdobeToken().toString());
+
+    credentials.getAdobeUserID().map_(
+      new ProcedureType<AdobeUserID>()
+      {
+        @Override public void call(final AdobeUserID x)
+        {
+          jo.put("user_id", x.toString());
+        }
+      });
+    credentials.getAdobeDeviceID().map_(
+      new ProcedureType<AdobeDeviceID>()
+      {
+        @Override public void call(final AdobeDeviceID x)
+        {
+          jo.put("device_id", x.toString());
+        }
+      });
+    credentials.getPatron().map_(
+      new ProcedureType<AccountPatron>()
+      {
+        @Override public void call(final AccountPatron x)
+        {
+          jo.put("patron", x.toString());
+        }
+      });
+    credentials.getAuthToken().map_(
+      new ProcedureType<AccountAuthToken>()
+      {
+        @Override public void call(final AccountAuthToken x)
+        {
+          jo.put("auth_token", x.toString());
+        }
+      });
+    credentials.getAdobeToken().map_(
+      new ProcedureType<AccountAdobeToken>()
+      {
+        @Override public void call(final AccountAdobeToken x)
+        {
+          jo.put("adobe_token", x.toString());
+        }
+      });
+
 
     credentials.getAdobeVendor().map_(
       new ProcedureType<AdobeVendorID>()
@@ -167,7 +204,8 @@ public final class AccountCredentialsJSON
           return new AdobeUserID(x);
         }
       });
-    final OptionType<AdobeDeviceID> adobe_device = JSONParserUtilities.getStringOptional(obj, "device_id").map(
+    final OptionType<AdobeDeviceID> adobe_device =
+      JSONParserUtilities.getStringOptional(obj, "device_id").map(
       new FunctionType<String, AdobeDeviceID>()
       {
         @Override public AdobeDeviceID call(final String x)
@@ -188,10 +226,9 @@ public final class AccountCredentialsJSON
 
 
 
+    final AccountCredentials creds = new AccountCredentials(vendor, user, pass, provider, auth_token, adobe_token, patron);
     creds.setAdobeUserID(adobe_user);
     creds.setAdobeDeviceID(adobe_device);
-//    creds.setAdobeToken(adobe_token);
-//    creds.setAuthToken(auth_token);
 
     return creds;
   }
