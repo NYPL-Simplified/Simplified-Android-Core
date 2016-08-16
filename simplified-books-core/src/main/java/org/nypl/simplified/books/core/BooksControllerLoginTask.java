@@ -7,8 +7,10 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-import org.nypl.drm.core.*;
+import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.drm.core.AdobeDeviceID;
 import org.nypl.drm.core.AdobeUserID;
+import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -33,7 +35,7 @@ final class BooksControllerLoginTask implements Runnable,
   private static final Logger LOG;
 
   static {
-    LOG =  LogUtilities.getLog(BooksControllerLoginTask.class);
+    LOG = LogUtilities.getLog(BooksControllerLoginTask.class);
   }
 
   private final BooksController books;
@@ -169,14 +171,13 @@ final class BooksControllerLoginTask implements Runnable,
       BooksControllerDeviceActivationTask activation_task =
         new BooksControllerDeviceActivationTask(this.adobe_drm,
           this.credentials,
-          this.accounts_database) {
+          this.accounts_database,
+          this.books_database) {
           @Override
           public void onActivationsCount(final int count) {
             /**
              * Device activation succeeded.
              */
-
-            BooksControllerLoginTask.this.onCompletedSuccessfully();
           }
 
           @Override
@@ -187,6 +188,7 @@ final class BooksControllerLoginTask implements Runnable,
 
             BooksControllerLoginTask.this.credentials.setAdobeDeviceID(Option.some(adobeDeviceID));
             BooksControllerLoginTask.this.credentials.setAdobeUserID(Option.some(user_id));
+            BooksControllerLoginTask.this.onCompletedSuccessfully();
           }
 
           @Override
@@ -207,36 +209,20 @@ final class BooksControllerLoginTask implements Runnable,
   }
 
   private void onCompletedSuccessfully() {
-    try {
-      //fake invalid pin
-      //this.credentials.setAdobePIN(new AccountPIN("bla"));
+    this.listener.onAccountLoginSuccess(this.credentials);
 
+    BooksControllerLoginTask.LOG.debug(
+      "logged in as {} successfully", this.credentials.getBarcode());
+
+    books.accountSync(this.listener);
+
+    try {
       this.accounts_database.accountSetCredentials(this.credentials);
     } catch (final IOException e) {
       BooksControllerLoginTask.LOG.error("could not save credentials: ", e);
       this.listener.onAccountLoginFailureLocalError(
         Option.some((Throwable) e), e.getMessage());
       return;
-    }
-    this.listener.onAccountLoginSuccess(this.credentials);
-
-    BooksControllerLoginTask.LOG.debug(
-      "logged in as {} successfully", this.credentials.getUser());
-
-    try {
-      final BooksControllerSyncTask sync = new BooksControllerSyncTask(
-        this.books,
-        this.books_database,
-        this.accounts_database,
-        this.config,
-        this.http,
-        this.parser,
-        this.listener,
-        this.syncing);
-//      sync.run(); // was causing login to take forever
-      new Thread(sync).run();
-    } catch (final Throwable e) {
-      BooksControllerLoginTask.LOG.debug("sync task raised error: ", e);
     }
 
   }

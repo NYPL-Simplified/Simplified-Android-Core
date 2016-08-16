@@ -6,7 +6,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
 
 import org.nypl.drm.core.AdobeAdeptActivationReceiverType;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
@@ -16,7 +15,6 @@ import org.nypl.drm.core.AdobeDeviceID;
 import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.AdobeVendorID;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -34,14 +32,14 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   private static final Logger LOG;
 
   static {
-    LOG =  LogUtilities.getLog(BooksControllerDeviceActivationTask.class);
+    LOG = LogUtilities.getLog(BooksControllerDeviceActivationTask.class);
   }
 
   BooksControllerDeviceActivationTask(
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AccountCredentials in_credentials,
-    final AccountsDatabaseType in_accounts_database
-  ) {
+    final AccountsDatabaseType in_accounts_database,
+    final BookDatabaseType book_database) {
     this.adobe_drm = in_adobe_drm;
     this.credentials = in_credentials;
     this.accounts_database = in_accounts_database;
@@ -77,7 +75,7 @@ public class BooksControllerDeviceActivationTask implements Runnable,
                   c.discardDeviceActivations();
 
                   //check if clever active
-                  if (BooksControllerDeviceActivationTask.this.credentials.getAuthToken().isNone()) {
+                  if (adobe_token.isNone()) {
                     c.activateDevice(
                       BooksControllerDeviceActivationTask.this,
                       s.get(),
@@ -87,7 +85,7 @@ public class BooksControllerDeviceActivationTask implements Runnable,
                     c.activateDevice(
                       BooksControllerDeviceActivationTask.this,
                       s.get(),
-                      adobe_token.toString(),
+                      ((Some<AccountAdobeToken>) adobe_token).get().toString(),
                       "");
                   }
                 }
@@ -119,6 +117,12 @@ public class BooksControllerDeviceActivationTask implements Runnable,
 
     BooksControllerDeviceActivationTask.this.credentials.setAdobeUserID(Option.some(user_id));
     BooksControllerDeviceActivationTask.this.credentials.setAdobeDeviceID(Option.some(new AdobeDeviceID(device_id)));
+
+    try {
+      this.accounts_database.accountSetCredentials(this.credentials);
+    } catch (final IOException e) {
+      BooksControllerDeviceActivationTask.LOG.error("could not save credentials: ", e);
+    }
 
   }
 
