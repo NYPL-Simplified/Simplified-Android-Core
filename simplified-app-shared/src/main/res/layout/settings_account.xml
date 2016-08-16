@@ -12,12 +12,12 @@
     android:padding="16dp">
 
     <TextView
-      android:id="@+id/settings_login_title"
-      android:text="@string/settings_login_title"
+      android:id="@+id/settings_authentication_title"
+      android:text="@string/settings_authentication_title"
       android:textAppearance="?android:attr/textAppearanceMedium"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:visibility="gone"/>
+      />
 
 
     <TableLayout
@@ -154,6 +154,14 @@
       android:textSize="12sp"
       android:text="@string/settings_log_in"/>
 
+    <TextView
+      android:id="@+id/settings_device_title"
+      android:text="@string/settings_device_title"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="30dp"
+      />
     <Button
       android:id="@+id/settings_activate_this_device"
       android:background="@drawable/simplified_button"
@@ -162,9 +170,9 @@
       android:layout_height="@dimen/button_standard_height"
       android:textColor="@drawable/simplified_button_text"
       android:textSize="12sp"
-      android:layout_marginTop="30dp"
+      android:layout_marginTop="8dp"
       android:text="@string/settings_deactivate_this_device"
-      android:visibility="gone"/>
+      />
 
     <Button
       android:id="@+id/settings_deactivate_all_devices"

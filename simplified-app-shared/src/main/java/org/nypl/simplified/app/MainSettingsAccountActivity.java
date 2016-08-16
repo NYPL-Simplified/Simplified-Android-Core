@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -40,11 +41,16 @@ import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
+import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
+import org.nypl.simplified.books.core.AccountPatron;
+import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
+import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
 /**
@@ -60,32 +66,17 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     LOG = LogUtilities.getLog(MainSettingsActivity.class);
   }
 
-  private
-  @Nullable
-  TextView barcode_text;
-  private
-  @Nullable
-  TextView pin_text;
-  private
-  @Nullable
-  TextView name_text;
-  private
-  @Nullable
-  TextView provider_text;
+  private @Nullable TextView barcode_text;
+  private @Nullable TextView pin_text;
+  private @Nullable TextView name_text;
+  private @Nullable TextView provider_text;
+  private @Nullable TextView table_device_title;
 
-  private
-  @Nullable
-  TableLayout table_with_code;
-  private
-  @Nullable
-  TableLayout table_with_token;
+  private @Nullable TableLayout table_with_code;
+  private @Nullable TableLayout table_with_token;
 
-  private
-  @Nullable
-  Button login;
-  private
-  @Nullable
-  Button activate;
+  private @Nullable Button login;
+  private @Nullable Button activate;
 
   /**
    * Construct an activity.
@@ -121,6 +112,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final TextView in_name_text = NullCheck.notNull(this.name_text);
     final TextView in_provider_text = NullCheck.notNull(this.provider_text);
 
+    final TextView in_table_device_title = NullCheck.notNull(this.table_device_title);
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
     final TableLayout in_table_with_token = NullCheck.notNull(this.table_with_token);
 
@@ -138,14 +130,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_table_with_code.setVisibility(View.GONE);
             in_table_with_token.setVisibility(View.VISIBLE);
             try {
-//              JSONObject patron = new JSONObject(creds.getPatron().toString());
-              final JSONObject name = new JSONObject(creds.getPatron().toString()).getJSONObject("name");
+
+              final JSONObject name = new JSONObject(((Some<AccountPatron>)creds.getPatron()).get().toString()).getJSONObject("name");
               in_name_text.setText(name.getString("first") + " " + name.getString("middle") + " " + name.getString("last"));
 
             } catch (JSONException e) {
               e.printStackTrace();
             }
-//            in_name_text.setText(creds.getPatron().toString());
           } else {
             in_table_with_code.setVisibility(View.VISIBLE);
             in_table_with_token.setVisibility(View.GONE);
@@ -188,11 +179,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
               @Override
               public void onClick(
                 final @Nullable View v) {
-//                final LogoutDialog d = LogoutDialog.newDialog();
-//                d.setOnConfirmListener(
-//                  new Runnable() {
-//                    @Override
-//                    public void run() {
                 if (books.accountIsDeviceActive()) {
                   //deactivate account with adobe
                   books.accountDeActivateDevice();
@@ -201,20 +187,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                 } else {
                   books.accountActivateDevice();
                   in_activate.setText(rr.getString(R.string.settings_deactivate_this_device));
-                  // sync book shelf
-
+                  in_activate.setVisibility(View.GONE);
+                  in_table_device_title.setVisibility(View.GONE);
                 }
-//                    }
-//                  });
-//                final FragmentManager fm =
-//                  MainSettingsAccountActivity.this.getFragmentManager();
-//                if (books.accountIsDeviceActive()) {
-//                  d.show(fm, "deactivate-confirm");
-//                }
-//                else
-//                {
-//                  d.show(fm, "activate-confirm");
-//                }
               }
             });
 
@@ -425,6 +400,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
 
+    final TextView in_table_device_title = NullCheck.notNull(
+      (TextView) this.findViewById(R.id.settings_device_title));
+
     final Button in_activate =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_activate_this_device));
 
@@ -470,6 +448,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     this.name_text = in_name_text;
     this.login = in_login;
     this.activate = in_activate;
+    this.table_device_title = in_table_device_title;
     this.table_with_code = in_table_with_code;
     this.table_with_token = in_table_with_token;
 
@@ -520,8 +499,11 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final Resources rr = NullCheck.notNull(this.getResources());
 
     final Button in_activate = NullCheck.notNull(this.activate);
+    final TextView in_table_device_title = NullCheck.notNull(this.table_device_title);
     if (books.accountIsDeviceActive()) {
       in_activate.setText(rr.getString(R.string.settings_deactivate_this_device));
+      in_activate.setVisibility(View.GONE);
+      in_table_device_title.setVisibility(View.GONE);
     } else {
       in_activate.setText(rr.getString(R.string.settings_activate_this_device));
     }

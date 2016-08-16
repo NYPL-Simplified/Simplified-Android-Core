@@ -30,6 +30,7 @@
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_download_failed_account_not_active">This device has not been activated. Go to account settings to activate.</string>
   <string name="catalog_download_failed_loan_limit_reached">Book loan limit reached.</string>
   <string name="catalog_download_failed_unsupported_pdf">This book is an Adobe PDF, which is not supported.</string>
   <string name="catalog_download_failed_unsupported_unknown">This book is of an unknown type and is not supported.</string>
@@ -112,7 +113,8 @@
   <string name="settings_log_in_cancel">Cancel</string>
   <string name="settings_log_in">Log In</string>
   <string name="settings_log_out">Log Out</string>
-  <string name="settings_log_out">Log Out</string>
+  <string name="settings_authentication_title">Authentication</string>
+  <string name="settings_device_title">Device</string>
   <string name="settings_activate_this_device">Activate this Device</string>
   <string name="settings_deactivate_this_device">Deactivate this Device</string>
   <string name="settings_log_out_cancel">Cancel</string>
