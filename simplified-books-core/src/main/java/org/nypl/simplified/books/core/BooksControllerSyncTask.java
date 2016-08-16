@@ -99,8 +99,8 @@ final class BooksControllerSyncTask implements Runnable
 
       final AccountCredentials credentials =
         ((Some<AccountCredentials>) credentials_opt).get();
-      final AccountBarcode barcode = credentials.getUser();
-      final AccountPIN pin = credentials.getPassword();
+      final AccountBarcode barcode = credentials.getBarcode();
+      final AccountPIN pin = credentials.getPin();
       final AccountSyncListenerType in_listener = this.listener;
       HTTPAuthType auth =
         new HTTPAuthBasic(barcode.toString(), pin.toString());

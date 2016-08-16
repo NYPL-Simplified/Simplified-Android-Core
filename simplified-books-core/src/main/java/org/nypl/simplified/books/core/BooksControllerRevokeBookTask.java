@@ -292,8 +292,8 @@ final class BooksControllerRevokeBookTask
     throws IOException
   {
     final AccountCredentials credentials = this.getAccountCredentials();
-    final AccountBarcode barcode = credentials.getUser();
-    final AccountPIN pin = credentials.getPassword();
+    final AccountBarcode barcode = credentials.getBarcode();
+    final AccountPIN pin = credentials.getPin();
 
     HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());

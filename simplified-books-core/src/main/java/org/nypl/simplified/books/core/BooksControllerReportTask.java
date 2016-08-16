@@ -58,8 +58,8 @@ public class BooksControllerReportTask
     OptionType<HTTPAuthType> http_auth = Option.none();
     if (credentials_opt.isSome()) {
       final AccountCredentials account_credentials = ((Some<AccountCredentials>) credentials_opt).get();
-      final AccountBarcode barcode = account_credentials.getUser();
-      final AccountPIN pin = account_credentials.getPassword();
+      final AccountBarcode barcode = account_credentials.getBarcode();
+      final AccountPIN pin = account_credentials.getPin();
 
       http_auth =
         Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));

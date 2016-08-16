@@ -464,8 +464,8 @@ public final class FeedLoader
     final Some<AccountCredentials> result_some =
       (Some<AccountCredentials>) result_opt;
     final AccountCredentials result = result_some.get();
-    final String user = result.getUser().toString();
-    final String pass = result.getPassword().toString();
+    final String user = result.getBarcode().toString();
+    final String pass = result.getPin().toString();
 
     HTTPAuthType auth =
       new HTTPAuthBasic(user, pass);

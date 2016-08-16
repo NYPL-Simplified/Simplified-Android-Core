@@ -149,10 +149,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           } else {
             in_table_with_code.setVisibility(View.VISIBLE);
             in_table_with_token.setVisibility(View.GONE);
-            in_barcode_text.setText(creds.getUser().toString());
-            in_barcode_text.setContentDescription(creds.getUser().toString().replaceAll(".(?=.)", "$0,"));
-            in_pin_text.setText(creds.getPassword().toString());
-            in_pin_text.setContentDescription(creds.getPassword().toString().replaceAll(".(?=.)", "$0,"));
+            in_barcode_text.setText(creds.getBarcode().toString());
+            in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
+            in_pin_text.setText(creds.getPin().toString());
+            in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
           }
 
           in_login.setEnabled(true);

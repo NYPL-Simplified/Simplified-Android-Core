@@ -54,8 +54,8 @@ public class BooksControllerDeviceActivationTask implements Runnable,
         (Some<AdobeAdeptExecutorType>) this.adobe_drm;
       final AdobeAdeptExecutorType adobe_exec = some.get();
 
-      final AccountBarcode user = this.credentials.getUser();
-      final AccountPIN pass = this.credentials.getPassword();
+      final AccountBarcode user = this.credentials.getBarcode();
+      final AccountPIN pass = this.credentials.getPin();
       final OptionType<AccountAdobeToken> adobe_token = this.credentials.getAdobeToken();
       final OptionType<AdobeVendorID> vendor_opt = this.credentials.getAdobeVendor();
 

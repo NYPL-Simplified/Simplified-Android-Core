@@ -66,8 +66,8 @@ public final class AccountCredentialsJSON
 
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode jo = jom.createObjectNode();
-    jo.put("username", credentials.getUser().toString());
-    jo.put("password", credentials.getPassword().toString());
+    jo.put("username", credentials.getBarcode().toString());
+    jo.put("password", credentials.getPin().toString());
     jo.put("provider", credentials.getProvider().toString());
 //    jo.put("user_id", credentials.getAdobeUserID().toString());
 //    jo.put("device_id", credentials.getAdobeDeviceID().toString());
@@ -188,7 +188,6 @@ public final class AccountCredentialsJSON
 
 
 
-    final AccountCredentials creds = new AccountCredentials(vendor, user, pass, provider,auth_token,adobe_token,patron);
     creds.setAdobeUserID(adobe_user);
     creds.setAdobeDeviceID(adobe_device);
 //    creds.setAdobeToken(adobe_token);

@@ -86,8 +86,8 @@ final class BooksControllerLoginTask implements Runnable,
      */
 
 
-    final AccountBarcode user = this.credentials.getUser();
-    final AccountPIN pass = this.credentials.getPassword();
+    final AccountBarcode user = this.credentials.getBarcode();
+    final AccountPIN pass = this.credentials.getPin();
     HTTPAuthType auth =
       new HTTPAuthBasic(user.toString(), pass.toString());
 

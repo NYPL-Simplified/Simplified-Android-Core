@@ -14,10 +14,10 @@ import org.nypl.drm.core.AdobeVendorID;
 
 public final class AccountCredentials
 {
-  private final AccountBarcode            user;
-  private final AccountPIN                password;
-  private final OptionType<AdobeVendorID> adobe_vendor;
-  private final AccountAuthProvider       provider;
+  private AccountBarcode                              barcode;
+  private AccountPIN                                  pin;
+  private final OptionType<AdobeVendorID>             adobe_vendor;
+  private final AccountAuthProvider                   provider;
   private final OptionType<AccountPatron>             patron;
   private OptionType<AccountAuthToken>                auth_token;
   private OptionType<AccountAdobeToken>               adobe_token;
@@ -33,20 +33,20 @@ public final class AccountCredentials
    * @param in_adobe_vendor The Adobe vendor ID that will be used to log into
    *                        the account. If no vendor ID is provided, no Adobe
    *                        login can occur.
-   * @param in_user         The account username
-   * @param in_password     The account password
+   * @param in_barcode         The account username
+   * @param in_pin     The account password
    * @param in_provider     The account authentication provider
    */
 
   public AccountCredentials(
     final OptionType<AdobeVendorID> in_adobe_vendor,
-    final AccountBarcode in_user,
-    final AccountPIN in_password,
+    final AccountBarcode in_barcode,
+    final AccountPIN in_pin,
     final AccountAuthProvider in_provider)
   {
     this.adobe_vendor = NullCheck.notNull(in_adobe_vendor);
-    this.user = NullCheck.notNull(in_user);
-    this.password = NullCheck.notNull(in_password);
+    this.barcode = NullCheck.notNull(in_barcode);
+    this.pin = NullCheck.notNull(in_pin);
     this.provider = NullCheck.notNull(in_provider);
     this.user_id = Option.none();
     this.device_id = Option.none();
@@ -62,8 +62,8 @@ public final class AccountCredentials
    * @param in_adobe_vendor The Adobe vendor ID that will be used to log into
    *                        the account. If no vendor ID is provided, no Adobe
    *                        login can occur.
-   * @param in_user         The account username
-   * @param in_password     The account password
+   * @param in_barcode         The account username
+   * @param in_pin     The account password
    * @param in_provider     The account authentication provider
    * @param in_auth_token   The account authentication token
    * @param in_adobe_token  The adobe auth data token
@@ -72,16 +72,16 @@ public final class AccountCredentials
 
   public AccountCredentials(
     final OptionType<AdobeVendorID> in_adobe_vendor,
-    final AccountBarcode in_user,
-    final AccountPIN in_password,
+    final AccountBarcode in_barcode,
+    final AccountPIN in_pin,
     final AccountAuthProvider in_provider,
     final OptionType<AccountAuthToken> in_auth_token,
     final OptionType<AccountAdobeToken> in_adobe_token,
     final OptionType<AccountPatron> in_patron)
   {
     this.adobe_vendor = NullCheck.notNull(in_adobe_vendor);
-    this.user = NullCheck.notNull(in_user);
-    this.password = NullCheck.notNull(in_password);
+    this.barcode = NullCheck.notNull(in_barcode);
+    this.pin = NullCheck.notNull(in_pin);
     this.auth_token = NullCheck.notNull(in_auth_token);
     this.adobe_token = in_adobe_token;
     this.provider = in_provider;
@@ -95,8 +95,8 @@ public final class AccountCredentials
   {
     final StringBuilder sb = new StringBuilder("AccountCredentials{");
     sb.append("adobe_vendor=").append(this.adobe_vendor);
-    sb.append(", user=").append(this.user);
-    sb.append(", password=").append(this.password);
+    sb.append(", barcode=").append(this.barcode);
+    sb.append(", pin=").append(this.pin);
     sb.append(", adobe_token=").append(this.adobe_token);
     sb.append(", auth_token=").append(this.auth_token);
     sb.append(", user_id=").append(this.user_id);
@@ -118,10 +118,10 @@ public final class AccountCredentials
 
     final AccountCredentials that = (AccountCredentials) o;
 
-    if (!this.getUser().equals(that.getUser())) {
+    if (!this.getBarcode().equals(that.getBarcode())) {
       return false;
     }
-    if (!this.getPassword().equals(that.getPassword())) {
+    if (!this.getPin().equals(that.getPin())) {
       return false;
     }
     return this.adobe_vendor.equals(that.adobe_vendor);
@@ -129,8 +129,8 @@ public final class AccountCredentials
 
   @Override public int hashCode()
   {
-    int result = this.getUser().hashCode();
-    result = 31 * result + this.getPassword().hashCode();
+    int result = this.getBarcode().hashCode();
+    result = 31 * result + this.getPin().hashCode();
     result = 31 * result + this.adobe_vendor.hashCode();
     result = 31 * result + this.adobe_token.hashCode();
     result = 31 * result + this.auth_token.hashCode();
@@ -154,18 +154,18 @@ public final class AccountCredentials
    * @return The account password
    */
 
-  public AccountPIN getPassword()
+  public AccountPIN getPin()
   {
-    return this.password;
+    return this.pin;
   }
 
   /**
    * @return The account username
    */
 
-  public AccountBarcode getUser()
+  public AccountBarcode getBarcode()
   {
-    return this.user;
+    return this.barcode;
   }
 
   /**
@@ -233,5 +233,12 @@ public final class AccountCredentials
   }
   public void setAdobeUserID(final OptionType<AdobeUserID> in_user_id) {
     this.user_id = in_user_id;
+  }
+
+  public void setAdobePIN(final AccountPIN in_pin) {
+    this.pin = in_pin;
+  }
+  public void setUser(final AccountBarcode in_barcode) {
+    this.barcode = in_barcode;
   }
 }
