@@ -2,6 +2,8 @@ package org.nypl.simplified.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -18,9 +20,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.nypl.drm.core.AdobeDeviceID;
+import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.AdobeVendorID;
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountAdobeToken;
 import org.nypl.simplified.books.core.AccountAuthProvider;
 import org.nypl.simplified.books.core.AccountAuthToken;
@@ -32,8 +35,10 @@ import org.nypl.simplified.books.core.AccountPatron;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.StringTokenizer;
@@ -52,9 +57,6 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
   }
 
   private WebView web_view;
-  private String redirect_uri = "open-ebooks-clever://oauth";
-  private String provider = "Clever";
-  private String feed_initial_uri;
 
   private
   @Nullable
@@ -96,11 +98,10 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
 
     final String title = "Login with Clever";
     final Resources rr = NullCheck.notNull(this.getResources());
-    this.feed_initial_uri = NullCheck.notNull(
-      rr.getString(
-        R.string.feature_catalog_start_uri));
 
-    final String uri = "" + feed_initial_uri + "oauth_authenticate?provider=" + provider + "&redirect_uri=" + redirect_uri + "";
+    final String uri =  NullCheck.notNull(
+      rr.getString(
+        R.string.feature_auth_provider_clever_uri));
 
 
     setTitle(title);
@@ -114,7 +115,6 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
 
     this.web_view.getSettings().setJavaScriptEnabled(true); // enable javascript
 
-//    final Activity activity = this;
 
     this.web_view.setWebViewClient(new WebViewClient() {
 
@@ -153,8 +153,6 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
           String access_token = null;
           String error = null;
           String patron_info = null;
-          JSONObject patron_json = null;
-          JSONObject error_json = null;
 
           while (stok.hasMoreTokens()) {
             final String token = stok.nextToken();
@@ -166,25 +164,46 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
               if (key.equalsIgnoreCase("access_token")) {
                 access_token = value;
               } else if (key.equalsIgnoreCase("patron_info")) {
-                // json object
                 try {
                   patron_info = URLDecoder.decode(value, "UTF-8");
 
-                 patron_json = new JSONObject(patron_info);
-
                 } catch (UnsupportedEncodingException e) {
-                  e.printStackTrace();
-                } catch (JSONException e) {
                   e.printStackTrace();
                 }
               } else if (key.equalsIgnoreCase("error")) {
-//                error = value;
+
                 try {
                   error = URLDecoder.decode(value, "UTF-8");
-                  error_json = new JSONObject(error);
+
+                  final HTTPProblemReport r = HTTPProblemReport.fromString(error);
+
+                  UIThread.runOnUIThread(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        final AlertDialog.Builder b = new AlertDialog.Builder(CleverLoginActivity.this);
+                        b.setNeutralButton("Try Again", null);
+                        b.setMessage(r.getProblemDetail());
+                        b.setTitle(r.getProblemTitle());
+                        b.setCancelable(true);
+
+                        final AlertDialog a = b.create();
+                        a.setOnDismissListener(
+                          new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(
+                              final @Nullable DialogInterface d) {
+
+                            }
+                          });
+                        a.show();
+                      }
+                    });
+
+
                 } catch (UnsupportedEncodingException e) {
                   e.printStackTrace();
-                } catch (JSONException e) {
+                } catch (IOException e) {
                   e.printStackTrace();
                 }
               }
@@ -210,6 +229,8 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
             final AccountAuthProvider auth_provider = new AccountAuthProvider("Clever");
 
             final AccountCredentials creds = new AccountCredentials(adobe_vendor, barcode, pin, auth_provider, Option.some(auth_token), Option.some(adobe_token), Option.some(patron));
+            creds.setAdobeDeviceID(Option.<AdobeDeviceID>none());
+            creds.setAdobeUserID(Option.<AdobeUserID>none());
             books.accountLogin(creds, CleverLoginActivity.this);
 
 

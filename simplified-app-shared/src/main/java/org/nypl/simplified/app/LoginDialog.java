@@ -354,7 +354,7 @@ public final class LoginDialog extends DialogFragment
           final AccountPIN pin =
             new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
           final AccountAuthProvider provider =
-            new AccountAuthProvider(rr.getString(R.string.feature_default_provider));
+            new AccountAuthProvider(rr.getString(R.string.feature_default_auth_provider_name));
 
           final AccountCredentials creds =
             new AccountCredentials(adobe_vendor, barcode, pin, provider);
@@ -373,15 +373,15 @@ public final class LoginDialog extends DialogFragment
         }
       });
 
-    final boolean firstbook_enabled = rr.getBoolean(R.bool.feature_login_firstbook);
+    final boolean request_new_code = rr.getBoolean(R.bool.feature_default_auth_provider_request_new_code);
 
-    if (firstbook_enabled) {
+    if (request_new_code) {
       in_login_request_new_code.setOnClickListener(
         new OnClickListener() {
           @Override
           public void onClick(
             final @Nullable View v) {
-            final Intent browser_intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://openebooks.net/getstarted.html"));
+            final Intent browser_intent = new Intent(Intent.ACTION_VIEW, Uri.parse(rr.getString(R.string.feature_default_auth_provider_request_new_code_uri)));
             startActivity(browser_intent);
           }
         });

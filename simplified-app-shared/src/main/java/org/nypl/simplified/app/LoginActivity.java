@@ -36,7 +36,7 @@ public class LoginActivity extends Activity {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
-    final boolean clever_enabled = rr.getBoolean(org.nypl.simplified.app.R.bool.feature_login_clever);
+    final boolean clever_enabled = rr.getBoolean(R.bool.feature_auth_provider_clever);
 
     final ImageButton barcode = NullCheck.notNull((ImageButton) findViewById(R.id.login_with_barcode));
 

@@ -45,7 +45,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     final BooksType books = app.getBooks();
     final Resources resources = NullCheck.notNull(this.getResources());
 
-    final boolean clever_enabled = resources.getBoolean(R.bool.feature_login_clever);
+    final boolean clever_enabled = resources.getBoolean(R.bool.feature_auth_provider_clever);
 
 
     if (books.accountIsLoggedIn()) {
