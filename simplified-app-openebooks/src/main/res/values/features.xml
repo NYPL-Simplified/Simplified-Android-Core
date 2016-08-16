@@ -32,7 +32,7 @@
   <string name="feature_default_auth_provider_request_new_code_uri">http://openebooks.net/getstarted.html</string>
 
   <!-- clever authentication provider -->
-  <bool name="feature_auth_provider_clever">true</bool>
+  <bool name="feature_auth_provider_clever">false</bool>
   <string name="feature_auth_provider_clever_name">Clever</string>
   <string name="feature_auth_provider_clever_uri">https://circulation.openebooks.us/oauth_authenticate?provider=Clever&amp;redirect_uri=open-ebooks-clever://oauth</string>
 
