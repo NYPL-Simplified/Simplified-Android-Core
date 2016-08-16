@@ -18,7 +18,6 @@ import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +28,7 @@ final class BooksControllerLogoutTask implements Runnable {
   private static final Logger LOG;
 
   static {
-    LOG =  LogUtilities.getLog(BooksControllerLogoutTask.class);
+    LOG = LogUtilities.getLog(BooksControllerLogoutTask.class);
   }
 
   private final AccountLogoutListenerType listener;
@@ -72,23 +71,27 @@ final class BooksControllerLogoutTask implements Runnable {
   }
 
   private void onHTTPServerAcceptedCredentials(final InputStream data) {
+
+    Scanner scanner = new Scanner(data).useDelimiter("\\A");
+    String adobe_token = scanner.hasNext() ? scanner.next() : "";
+    BooksControllerLogoutTask.LOG.debug("adobe temporary token: {}", adobe_token);
+    this.credentials.setAdobeToken(Option.some(new AccountAdobeToken(adobe_token)));
+
+    BooksControllerLogoutTask.this.deactivateDevice();
+
+  }
+
+  private void deactivateDevice() {
     /**
      * If an Adobe DRM implementation is available, activate the device
      * with the credentials. If the Adobe server rejects the credentials,
      * then the login attempt is still considered to have failed.
      */
 
-    if (this.adobe_drm.isSome()) {
-
-/* remove this , once permanent token is implemented*/
-      Scanner scanner = new Scanner(data).useDelimiter("\\A");
-      String adobe_token = scanner.hasNext() ? scanner.next() : "";
-      BooksControllerLogoutTask.LOG.debug("adobe temporary token: {}", adobe_token);
-      this.credentials.setAdobeToken(Option.some(new AccountAdobeToken(adobe_token)));
-/**/
+    if (this.adobe_drm.isSome() && this.credentials.getAdobeUserID().isSome()) {
 
       BooksControllerDeviceDeActivationTask device_deactivationTask = new BooksControllerDeviceDeActivationTask(this.adobe_drm,
-        this.credentials) {
+        this.credentials, this.accounts_database, this.database) {
 
         @Override
         public void onDeactivationError(final String message) {
@@ -138,52 +141,57 @@ final class BooksControllerLogoutTask implements Runnable {
   public void run() {
 
 
-    final AccountBarcode user = this.credentials.getUser();
-    final AccountPIN pass = this.credentials.getPassword();
-    HTTPAuthType auth =
-      new HTTPAuthBasic(user.toString(), pass.toString());
-
-    if (credentials.getAuthToken().isSome()) {
-      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
-      if (token != null) {
-        auth = new HTTPAuthOAuth(token.toString());
-      }
-    }
-
-
-    URI auth_uri = this.config.getCurrentLoansURI();
-    HTTPResultType<InputStream> r;
-    if (this.adobe_drm.isSome()) {
-      auth_uri = this.config.getCurrentRootFeedURI().resolve("AdobeAuth/authdata");
-      r = this.http.get(Option.some(auth), auth_uri, 0);
+    if (this.credentials.getAdobeToken().isSome()) {
+      BooksControllerLogoutTask.this.deactivateDevice();
     } else {
-      r = this.http.head(Option.some(auth), auth_uri);
+      final AccountBarcode user = this.credentials.getBarcode();
+      final AccountPIN pass = this.credentials.getPin();
+      HTTPAuthType auth =
+        new HTTPAuthBasic(user.toString(), pass.toString());
+
+      if (credentials.getAuthToken().isSome()) {
+        final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+        if (token != null) {
+          auth = new HTTPAuthOAuth(token.toString());
+        }
+      }
+
+      URI auth_uri = this.config.getCurrentRootFeedURI();
+      HTTPResultType<InputStream> r;
+      if (this.adobe_drm.isSome()) {
+
+        auth_uri = this.config.getAdobeAuthURI().resolve("AdobeAuth/authdata");
+        r = this.http.get(Option.some(auth), auth_uri, 0);
+      } else {
+        r = this.http.head(Option.some(auth), auth_uri);
+      }
+
+
+      BooksControllerLogoutTask.LOG.debug(
+        "attempting login on {}", auth_uri);
+
+
+      r.matchResult(
+        new HTTPResultMatcherType<InputStream, Unit, UnreachableCodeException>() {
+          @Override
+          public Unit onHTTPError(final HTTPResultError<InputStream> e) {
+            BooksControllerLogoutTask.this.onHTTPServerReturnedError(e);
+            return Unit.unit();
+          }
+
+          @Override
+          public Unit onHTTPException(final HTTPResultException<InputStream> e) {
+            BooksControllerLogoutTask.this.onHTTPException(e);
+            return Unit.unit();
+          }
+
+          @Override
+          public Unit onHTTPOK(final HTTPResultOKType<InputStream> e) {
+            BooksControllerLogoutTask.this.onHTTPServerAcceptedCredentials(e.getValue());
+            return Unit.unit();
+          }
+        });
     }
-
-    BooksControllerLogoutTask.LOG.debug(
-      "attempting login on {}", auth_uri);
-
-
-    r.matchResult(
-      new HTTPResultMatcherType<InputStream, Unit, UnreachableCodeException>() {
-        @Override
-        public Unit onHTTPError(final HTTPResultError<InputStream> e) {
-          BooksControllerLogoutTask.this.onHTTPServerReturnedError(e);
-          return Unit.unit();
-        }
-
-        @Override
-        public Unit onHTTPException(final HTTPResultException<InputStream> e) {
-          BooksControllerLogoutTask.this.onHTTPException(e);
-          return Unit.unit();
-        }
-
-        @Override
-        public Unit onHTTPOK(final HTTPResultOKType<InputStream> e) {
-          BooksControllerLogoutTask.this.onHTTPServerAcceptedCredentials(e.getValue());
-          return Unit.unit();
-        }
-      });
 
 
   }
