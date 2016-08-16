@@ -40,20 +40,19 @@ final class BooksControllerSyncTask implements Runnable
       LoggerFactory.getLogger(BooksControllerSyncTask.class));
   }
 
-  private final BooksControllerConfigurationType config;
   private final OPDSFeedParserType               feed_parser;
   private final HTTPType                         http;
   private final AccountSyncListenerType          listener;
   private final AtomicBoolean                    running;
   private final BooksControllerType              books_controller;
   private final BookDatabaseType                 books_database;
-  private final AccountsDatabaseReadableType     accounts_database;
+  private final AccountsDatabaseType             accounts_database;
   private final URI                              loans_uri;
 
   BooksControllerSyncTask(
     final BooksControllerType in_books,
     final BookDatabaseType in_books_database,
-    final AccountsDatabaseReadableType in_accounts_database,
+    final AccountsDatabaseType in_accounts_database,
     final BooksControllerConfigurationType in_config,
     final HTTPType in_http,
     final OPDSFeedParserType in_feed_parser,
@@ -64,7 +63,6 @@ final class BooksControllerSyncTask implements Runnable
     this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
     this.accounts_database = NullCheck.notNull(in_accounts_database);
-    this.config = NullCheck.notNull(in_config);
     this.http = NullCheck.notNull(in_http);
     this.feed_parser = NullCheck.notNull(in_feed_parser);
     this.listener = NullCheck.notNull(in_listener);
@@ -131,6 +129,7 @@ final class BooksControllerSyncTask implements Runnable
             switch (e.getStatus()) {
               case HttpURLConnection.HTTP_UNAUTHORIZED: {
                 in_listener.onAccountSyncAuthenticationFailure("Invalid PIN");
+                BooksControllerSyncTask.this.accounts_database.accountRemoveCredentials();
                 return Unit.unit();
               }
               default: {
