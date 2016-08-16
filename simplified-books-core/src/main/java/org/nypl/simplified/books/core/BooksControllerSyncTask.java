@@ -48,6 +48,7 @@ final class BooksControllerSyncTask implements Runnable
   private final BooksControllerType              books_controller;
   private final BookDatabaseType                 books_database;
   private final AccountsDatabaseReadableType     accounts_database;
+  private final URI                              loans_uri;
 
   BooksControllerSyncTask(
     final BooksControllerType in_books,
@@ -57,7 +58,8 @@ final class BooksControllerSyncTask implements Runnable
     final HTTPType in_http,
     final OPDSFeedParserType in_feed_parser,
     final AccountSyncListenerType in_listener,
-    final AtomicBoolean in_running)
+    final AtomicBoolean in_running,
+    final URI in_loans_uri)
   {
     this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
@@ -67,6 +69,7 @@ final class BooksControllerSyncTask implements Runnable
     this.feed_parser = NullCheck.notNull(in_feed_parser);
     this.listener = NullCheck.notNull(in_listener);
     this.running = NullCheck.notNull(in_running);
+    this.loans_uri = NullCheck.notNull(in_loans_uri);
   }
 
   @Override public void run()
@@ -91,7 +94,7 @@ final class BooksControllerSyncTask implements Runnable
   private void sync()
     throws Exception
   {
-    final URI loans_uri = this.config.getCurrentLoansURI();
+//    final URI loans_uri = this.config.getCurrentRootFeedURI().resolve("loans/");
 
     final OptionType<AccountCredentials> credentials_opt =
       this.accounts_database.accountGetCredentials();
@@ -113,7 +116,7 @@ final class BooksControllerSyncTask implements Runnable
       }
 
       final HTTPResultType<InputStream> r =
-        this.http.get(Option.some(auth), loans_uri, 0L);
+        this.http.get(Option.some(auth), this.loans_uri, 0L);
 
       r.matchResult(
         new HTTPResultMatcherType<InputStream, Unit, Exception>() {
@@ -123,7 +126,7 @@ final class BooksControllerSyncTask implements Runnable
             throws Exception {
             final String m = NullCheck.notNull(
               String.format(
-                "%s: %d: %s", loans_uri, e.getStatus(), e.getMessage()));
+                "%s: %d: %s", BooksControllerSyncTask.this.loans_uri, e.getStatus(), e.getMessage()));
 
             switch (e.getStatus()) {
               case HttpURLConnection.HTTP_UNAUTHORIZED: {
@@ -148,7 +151,7 @@ final class BooksControllerSyncTask implements Runnable
             final HTTPResultOKType<InputStream> e)
             throws Exception {
             try {
-              BooksControllerSyncTask.this.syncFeedEntries(loans_uri, e);
+              BooksControllerSyncTask.this.syncFeedEntries(BooksControllerSyncTask.this.loans_uri, e);
               return Unit.unit();
             } finally {
               e.close();

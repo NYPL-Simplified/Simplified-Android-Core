@@ -22,21 +22,20 @@ public interface BooksControllerConfigurationType
 
   void setCurrentRootFeedURI(URI u);
 
+
   /**
-   * @return The current loans URI
+   * @return The current feed URI
    */
 
-  URI getCurrentLoansURI();
+  URI getAdobeAuthURI();
 
   /**
-   * Set the current loans URI.
+   * Set the current URI of the root of the catalog.
    *
    * @param u The URI
    */
 
-  void setCurrentLoansURI(URI u);
-
-
+  void setAdobeAuthURI(URI u);
 
   /**
    * @return The alternate feed URI
@@ -51,20 +50,5 @@ public interface BooksControllerConfigurationType
    */
 
   void setAlternateRootFeedURI(URI u);
-
-  /**
-   * @return The alternate loans URI
-   */
-
-  URI getAlternateLoansURI();
-
-  /**
-   * Set the alternate loans URI.
-   *
-   * @param u The URI
-   */
-
-  void setAlternateLoansURI(URI u);
-
 
 }

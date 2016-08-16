@@ -98,10 +98,10 @@ final class BooksControllerLoginTask implements Runnable,
       }
     }
 
-    URI auth_uri = this.config.getCurrentLoansURI();
+    URI auth_uri = this.config.getCurrentRootFeedURI();
     HTTPResultType<InputStream> r;
     if (this.adobe_drm.isSome()) {
-      auth_uri = this.config.getCurrentRootFeedURI().resolve("AdobeAuth/authdata");
+      auth_uri = this.config.getAdobeAuthURI().resolve("AdobeAuth/authdata");
       r = this.http.get(Option.some(auth), auth_uri, 0);
     } else {
       r = this.http.head(Option.some(auth), auth_uri);
@@ -164,9 +164,6 @@ final class BooksControllerLoginTask implements Runnable,
 
       Scanner scanner = new Scanner(data).useDelimiter("\\A");
       String adobe_token = scanner.hasNext() ? scanner.next() : "";
-
-      BooksControllerLoginTask.LOG.debug("adobe temporary token: {}", adobe_token);
-
       this.credentials.setAdobeToken(Option.some(new AccountAdobeToken(adobe_token)));
 
       BooksControllerDeviceActivationTask activation_task =

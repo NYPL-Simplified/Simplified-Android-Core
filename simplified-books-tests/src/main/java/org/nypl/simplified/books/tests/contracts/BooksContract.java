@@ -404,7 +404,8 @@ public final class BooksContract implements BooksContractType
         BooksContract.newFakeDocumentStore(),
         database,
         accounts,
-        books_config);
+        books_config,
+        books_config.getCurrentRootFeedURI().resolve("loans/"));
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -490,7 +491,8 @@ public final class BooksContract implements BooksContractType
         BooksContract.newFakeDocumentStore(),
         database,
         accounts,
-        books_config);
+        books_config,
+        books_config.getCurrentRootFeedURI().resolve("loans/"));
 
       final AtomicBoolean ok = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -582,7 +584,8 @@ public final class BooksContract implements BooksContractType
         BooksContract.newFakeDocumentStore(),
         database,
         accounts,
-        books_config);
+        books_config,
+        books_config.getCurrentRootFeedURI().resolve("loans/"));
 
       final AtomicBoolean succeeded = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -704,7 +707,8 @@ public final class BooksContract implements BooksContractType
         BooksContract.newFakeDocumentStore(),
         database,
         accounts,
-        books_config);
+        books_config,
+        books_config.getCurrentRootFeedURI().resolve("loans/"));
 
       final AtomicBoolean failed = new AtomicBoolean(false);
       final CountDownLatch latch = new CountDownLatch(1);
@@ -828,7 +832,8 @@ public final class BooksContract implements BooksContractType
         BooksContract.newFakeDocumentStore(),
         database,
         accounts,
-        books_config);
+        books_config,
+        books_config.getCurrentRootFeedURI().resolve("loans/"));
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -1105,7 +1110,8 @@ public final class BooksContract implements BooksContractType
         BooksContract.newFakeDocumentStore(),
         database,
         accounts,
-        books_config);
+        books_config,
+        books_config.getCurrentRootFeedURI().resolve("loans/"));
 
       final CountDownLatch latch0 = new CountDownLatch(1);
 
@@ -1297,12 +1303,10 @@ public final class BooksContract implements BooksContractType
     implements BooksControllerConfigurationType
   {
     private URI current_root;
-    private URI current_loans;
 
     BooksControllerConfiguration()
     {
       this.current_root = NullCheck.notNull(BooksContract.ROOT_URI);
-      this.current_loans = NullCheck.notNull(BooksContract.LOANS_URI);
     }
 
     @Override public synchronized URI getCurrentRootFeedURI()
@@ -1315,16 +1319,6 @@ public final class BooksContract implements BooksContractType
       this.current_root = NullCheck.notNull(u);
     }
 
-    @Override public synchronized URI getCurrentLoansURI()
-    {
-      return this.current_loans;
-    }
-
-    @Override public synchronized void setCurrentLoansURI(final URI u)
-    {
-      this.current_loans = NullCheck.notNull(u);
-    }
-
     @Override
     public URI getAlternateRootFeedURI() {
       return null;
@@ -1335,14 +1329,5 @@ public final class BooksContract implements BooksContractType
 
     }
 
-    @Override
-    public URI getAlternateLoansURI() {
-      return null;
-    }
-
-    @Override
-    public void setAlternateLoansURI(URI u) {
-
-    }
   }
 }
