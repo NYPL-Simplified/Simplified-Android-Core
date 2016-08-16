@@ -544,8 +544,14 @@ final class BooksControllerRevokeBookTask
       try {
         BooksControllerRevokeBookTask.LOG.debug(
           "onLoanReturnFailure: {}", in_error);
-        this.error = Option.some(
-          (Throwable) new BookRevokeExceptionDRMWorkflowError(in_error));
+
+        if (in_error.startsWith("E_ACT_NOT_READY")) {
+          this.error = Option.some((Throwable) new AccountNotReadyException(in_error));
+        }
+        else {
+          this.error = Option.some((Throwable) new BookRevokeExceptionDRMWorkflowError(in_error));
+        }
+
       } finally {
         this.latch.countDown();
       }
