@@ -102,9 +102,9 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
     if (books_config.getAlternateRootFeedURI()!=null) {
       in_uri_feed.setText(books_config.getAlternateRootFeedURI().toString());
     }
-     if (books_config.getAlternateLoansURI()!=null) {
-       in_uri_loans.setText(books_config.getAlternateLoansURI().toString());
-     }
+//     if (books_config.getAlternateLoansURI()!=null) {
+//       in_uri_loans.setText(books_config.getAlternateLoansURI().toString());
+//     }
 
     in_set.setOnClickListener(
       new View.OnClickListener()
@@ -139,7 +139,7 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
             return;
           }
 
-          books_config.setAlternateLoansURI(new_loans);
+//          books_config.setAlternateLoansURI(new_loans);
           books_config.setAlternateRootFeedURI(new_root);
 
           final CharSequence text =
@@ -161,7 +161,7 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
 
           in_uri_loans.setText(null);
           in_uri_feed.setText(null);
-          books_config.setAlternateLoansURI(null);
+//          books_config.setAlternateLoansURI(null);
           books_config.setAlternateRootFeedURI(null);
 
         }
