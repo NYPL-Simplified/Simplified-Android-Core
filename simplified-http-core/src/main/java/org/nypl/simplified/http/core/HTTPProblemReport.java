@@ -64,6 +64,16 @@ public final class HTTPProblemReport
     return new HTTPProblemReport(o);
   }
 
+  public static HTTPProblemReport fromString(final String s)
+    throws IOException
+  {
+    NullCheck.notNull(s);
+    final ObjectMapper jom = new ObjectMapper();
+    final JsonNode n = jom.readTree(s);
+    final ObjectNode o = JSONParserUtilities.checkObject(null, n);
+    return new HTTPProblemReport(o);
+  }
+
   /**
    * @return The raw JSON data
    */
@@ -111,6 +121,17 @@ public final class HTTPProblemReport
     return ProblemType.Unknown;
   }
 
+  public ProblemStatus getProblemStatus()
+  {
+    if (this.raw.has("status")) {
+      final String type_value = this.raw.get("status").asText();
+      if ("401".equals(type_value)) {
+        return ProblemStatus.Unauthorized;
+      }
+    }
+    return ProblemStatus.Unknown;
+  }
+
   /**
    * Problem type enum.
    */
@@ -120,6 +141,17 @@ public final class HTTPProblemReport
      * Loan limit reached problem.
      */
     LoanLimitReached,
+    /**
+     * Unknown problem.
+     */
+    Unknown
+  }
+
+
+  public enum ProblemStatus
+  {
+
+    Unauthorized,
     /**
      * Unknown problem.
      */
