@@ -22,11 +22,14 @@ import org.slf4j.Logger;
 /**
  *
  */
-public class LoginActivity extends Activity {
+public final class LoginActivity extends Activity {
 
-  LoginActivity()
+
+  /**
+   * Construct login activity
+   */
+  public LoginActivity()
   {
-
   }
 
   private static final Logger LOG;
@@ -109,7 +112,6 @@ public class LoginActivity extends Activity {
         final AccountCredentials creds) {
         LoginActivity.LOG.trace(
           "feed auth: login supplied new credentials");
-//        listener.onAuthenticationProvided(creds);
         LoginActivity.this.openCatalog();
       }
     };
