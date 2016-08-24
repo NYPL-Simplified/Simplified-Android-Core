@@ -68,7 +68,15 @@ public final class AccountCredentialsJSON
     final ObjectNode jo = jom.createObjectNode();
     jo.put("username", credentials.getBarcode().toString());
     jo.put("password", credentials.getPin().toString());
-    jo.put("provider", credentials.getProvider().toString());
+
+    credentials.getProvider().map_(
+      new ProcedureType<AccountAuthProvider>()
+      {
+        @Override public void call(final AccountAuthProvider x)
+        {
+          jo.put("provider", x.toString());
+        }
+      });
 
     credentials.getAdobeUserID().map_(
       new ProcedureType<AdobeUserID>()
