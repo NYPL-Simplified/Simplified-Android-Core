@@ -357,7 +357,7 @@ public final class LoginDialog extends DialogFragment
             new AccountAuthProvider(rr.getString(R.string.feature_default_auth_provider_name));
 
           final AccountCredentials creds =
-            new AccountCredentials(adobe_vendor, barcode, pin, provider);
+            new AccountCredentials(adobe_vendor, barcode, pin,  Option.some(provider));
           books.accountLogin(creds, LoginDialog.this);
         }
       });

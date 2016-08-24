@@ -39,6 +39,7 @@ import com.io7m.jnull.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.core.AccountAuthProvider;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
@@ -120,7 +121,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       new Runnable() {
         @Override
         public void run() {
-          in_provider_text.setText(creds.getProvider().toString());
+          
+          if (creds.getProvider().isNone())
+          {
+            in_provider_text.setText(rr.getString(R.string.feature_default_auth_provider_name));
+          }
+          else
+          {
+            in_provider_text.setText(((Some<AccountAuthProvider>) creds.getProvider()).get().toString());
+          }
 
           if ("Clever".equals(creds.getProvider().toString())) {
             in_table_with_code.setVisibility(View.GONE);

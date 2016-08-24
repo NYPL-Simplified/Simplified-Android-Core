@@ -163,9 +163,17 @@ public final class AccountCredentialsJSON
       new AccountBarcode(JSONParserUtilities.getString(obj, "username"));
     final AccountPIN pass =
       new AccountPIN(JSONParserUtilities.getString(obj, "password"));
+    
+    final OptionType<AccountAuthProvider> provider =
+      JSONParserUtilities.getStringOptional(obj, "provider").map(
+        new FunctionType<String, AccountAuthProvider>()
+        {
+          @Override public AccountAuthProvider call(final String x)
+          {
+            return new AccountAuthProvider(x);
+          }
+        });
 
-    final AccountAuthProvider provider =
-      new AccountAuthProvider(JSONParserUtilities.getString(obj, "provider"));
 
     final OptionType<AccountPatron> patron =
       JSONParserUtilities.getStringOptional(obj, "patron").map(

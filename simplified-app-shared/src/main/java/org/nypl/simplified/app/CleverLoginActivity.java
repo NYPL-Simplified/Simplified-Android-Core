@@ -229,7 +229,7 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
             final AccountAuthProvider auth_provider = new AccountAuthProvider("Clever");
 
             final AccountCredentials creds =
-              new AccountCredentials(adobe_vendor, barcode, pin, auth_provider, Option.some(auth_token), Option.some(adobe_token), Option.some(patron));
+              new AccountCredentials(adobe_vendor, barcode, pin,  Option.some(auth_provider), Option.some(auth_token), Option.some(adobe_token), Option.some(patron));
             creds.setAdobeDeviceID(Option.<AdobeDeviceID>none());
             creds.setAdobeUserID(Option.<AdobeUserID>none());
             books.accountLogin(creds, CleverLoginActivity.this);

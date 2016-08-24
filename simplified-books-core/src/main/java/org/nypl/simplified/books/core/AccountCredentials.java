@@ -17,7 +17,7 @@ public final class AccountCredentials
   private AccountBarcode                              barcode;
   private AccountPIN                                  pin;
   private final OptionType<AdobeVendorID>             adobe_vendor;
-  private final AccountAuthProvider                   provider;
+  private final OptionType<AccountAuthProvider>       provider;
   private final OptionType<AccountPatron>             patron;
   private OptionType<AccountAuthToken>                auth_token;
   private OptionType<AccountAdobeToken>               adobe_token;
@@ -42,7 +42,7 @@ public final class AccountCredentials
     final OptionType<AdobeVendorID> in_adobe_vendor,
     final AccountBarcode in_barcode,
     final AccountPIN in_pin,
-    final AccountAuthProvider in_provider)
+    final OptionType<AccountAuthProvider> in_provider)
   {
     this.adobe_vendor = NullCheck.notNull(in_adobe_vendor);
     this.barcode = NullCheck.notNull(in_barcode);
@@ -74,7 +74,7 @@ public final class AccountCredentials
     final OptionType<AdobeVendorID> in_adobe_vendor,
     final AccountBarcode in_barcode,
     final AccountPIN in_pin,
-    final AccountAuthProvider in_provider,
+    final OptionType<AccountAuthProvider> in_provider,
     final OptionType<AccountAuthToken> in_auth_token,
     final OptionType<AccountAdobeToken> in_adobe_token,
     final OptionType<AccountPatron> in_patron)
@@ -208,7 +208,7 @@ public final class AccountCredentials
    * @return The authentication provider
    */
 
-  public AccountAuthProvider getProvider()
+  public OptionType<AccountAuthProvider> getProvider()
   {
     return this.provider;
   }
