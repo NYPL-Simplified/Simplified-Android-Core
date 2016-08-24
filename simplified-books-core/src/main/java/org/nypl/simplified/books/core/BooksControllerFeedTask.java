@@ -337,6 +337,7 @@ final class BooksControllerFeedTask implements Runnable
     final OptionType<URI> no_terms = Option.none();
     final OptionType<URI> no_about = Option.none();
     final OptionType<URI> no_privacy = Option.none();
+    final OptionType<URI> no_licenses = Option.none();
     final FeedWithoutGroups f = FeedWithoutGroups.newEmptyFeed(
       this.uri,
       this.id,
@@ -347,8 +348,9 @@ final class BooksControllerFeedTask implements Runnable
       facet_groups,
       facets,
       no_terms,
-            no_about,
-      no_privacy);
+      no_about,
+      no_privacy,
+      no_licenses);
 
     final Set<BookID> ids = this.books_database.databaseGetBooks();
     final AbstractList<FeedEntryType> entries =

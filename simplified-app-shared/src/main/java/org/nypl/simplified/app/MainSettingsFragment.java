@@ -253,6 +253,9 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
         }
       });
 
+    final Preference licenses_preference = findPreference(resources.getString(R.string.settings_licences));
+    screen.removePreference(licenses_preference);
+
     docs.getLicenses().map_(
       new ProcedureType<SyncedDocumentType>() {
         @Override
@@ -268,8 +271,9 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
             SimplifiedPart.PART_SETTINGS);
           intent.putExtras(b);
 
-          final Preference preferences = findPreference(resources.getString(R.string.settings_licences));
-          preferences.setIntent(intent);
+
+          licenses_preference.setIntent(intent);
+          screen.addPreference(licenses_preference);
 
         }
       });
