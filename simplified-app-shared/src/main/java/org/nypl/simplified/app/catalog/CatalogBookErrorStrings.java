@@ -66,8 +66,7 @@ final class CatalogBookErrorStrings
 
       if (error instanceof AccountNotReadyException)
       {
-        return r.getString(
-          R.string.catalog_download_failed_account_not_active);
+        return r.getString(R.string.catalog_download_failed);
       }
     }
 

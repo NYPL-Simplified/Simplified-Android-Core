@@ -23,6 +23,7 @@ import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.AccountNotReadyException;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
 import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
@@ -336,6 +337,20 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     if (CatalogBookUnauthorized.isUnAuthorized(f))
     {
       CatalogFeedBookCellView.this.books.accountRemoveCredentials();
+
+    }
+
+    final OptionType<Throwable> error_opt = f.getError();
+    if (error_opt.isSome()) {
+      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
+      final Throwable error = error_some.get();
+
+      if (error instanceof AccountNotReadyException)
+      {
+
+        this.books.accountActivateDeviceAndFulFillBook(fe.getBookID());
+
+      }
 
     }
 
