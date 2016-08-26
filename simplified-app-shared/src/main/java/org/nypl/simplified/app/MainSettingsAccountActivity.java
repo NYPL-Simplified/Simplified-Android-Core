@@ -131,7 +131,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_provider_text.setText(((Some<AccountAuthProvider>) creds.getProvider()).get().toString());
           }
 
-          if ("Clever".equals(creds.getProvider().toString())) {
+          if ("Clever".equals(((Some<AccountAuthProvider>) creds.getProvider()).get().toString())) {
             in_table_with_code.setVisibility(View.GONE);
             in_table_with_token.setVisibility(View.VISIBLE);
             try {
