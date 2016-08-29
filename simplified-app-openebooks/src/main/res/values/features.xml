@@ -23,11 +23,26 @@
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">OEI</string>
 
+  <!-- authentication providers -->
+  <!-- default authentication provider -->
+  <bool name="feature_default_auth_provider">true</bool>
+  <string name="feature_default_auth_provider_name">FirstBook</string>
+  <string name="feature_default_auth_provider_uri">https://circulation.openebooks.us/</string>
+  <bool name="feature_default_auth_provider_request_new_code">true</bool>
+  <string name="feature_default_auth_provider_request_new_code_uri">http://openebooks.net/getstarted.html</string>
+
+  <!-- clever authentication provider -->
+  <bool name="feature_auth_provider_clever">false</bool>
+  <string name="feature_auth_provider_clever_name">Clever</string>
+  <string name="feature_auth_provider_clever_uri">https://circulation.openebooks.us/oauth_authenticate?provider=Clever&amp;redirect_uri=open-ebooks-clever://oauth</string>
+
+
   <!-- The initial catalog URI that will be loaded on program start -->
   <string name="feature_catalog_start_uri">https://circulation.openebooks.us/</string>
+  <string name="feature_adobe_auth_uri">https://circulation.openebooks.us/</string>
 
   <!-- The initial catalog loans URI that will be used to sync accounts -->
-  <string name="feature_catalog_loans_uri">https://circulation.openebooks.us/loans/</string>
+  <string name="feature_catalog_loans_uri_component">loans/</string>
 
   <!-- A non-empty string here will override the package name given to
      the Adobe DRM implementation. An empty string will cause the

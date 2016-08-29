@@ -88,6 +88,21 @@ public final class AuthenticationDocument implements AuthenticationDocumentType
     return this.defaults.getLabelLoginPassword();
   }
 
+  @Override
+  public String getLabelLoginPatronName() {
+    final OPDSAuthenticationDocument opds = this.data.get();
+    if (opds != null) {
+      final Map<String, String> labels = opds.getLabels();
+      final String name =
+        OPDSAuthenticationDocumentLabels.LABEL_NAME.getName();
+      if (labels.containsKey(name)) {
+        return NullCheck.notNull(labels.get(name));
+      }
+    }
+
+    return this.defaults.getLabelLoginPatronName();
+  }
+
   @Override public void documentUpdate(final InputStream s)
   {
     NullCheck.notNull(s);

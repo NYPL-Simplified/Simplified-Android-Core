@@ -45,6 +45,25 @@
       >
     </activity>
     <activity
+      android:name="org.nypl.simplified.app.CleverLoginActivity"
+      android:configChanges="orientation|screenSize"
+      android:theme="@style/SimplifiedThemeNoActionBar"
+      >
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="open-ebooks-clever"/>
+      </intent-filter>
+
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.LoginActivity"
+      android:configChanges="orientation|screenSize"
+      android:theme="@style/SimplifiedThemeNoActionBar"
+      >
+    </activity>
+    <activity
       android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/catalog"
@@ -63,6 +82,13 @@
       android:configChanges="orientation|screenSize"
       android:label="@string/settings"
       android:contentDescription="@string/settings"
+      android:exported="false">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.MainSettingsAccountActivity"
+      android:configChanges="orientation|screenSize"
+      android:label="@string/settings_account"
+      android:contentDescription="@string/settings_account"
       android:exported="false">
     </activity>
     <activity

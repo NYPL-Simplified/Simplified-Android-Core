@@ -72,7 +72,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
     Assertions.checkPrecondition(has_name, "Node has name 'link'");
 
     boolean has_everything = true;
-    has_everything = has_everything && e.hasAttribute("title");
+    has_everything = e.hasAttribute("title");
     has_everything = has_everything && e.hasAttribute("href");
     has_everything = has_everything && e.hasAttribute("rel");
     has_everything = has_everything && e.hasAttributeNS(
@@ -92,7 +92,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           final String text =
             e.getAttributeNS(OPDSFeedConstants.OPDS_URI_TEXT, "activeFacet");
           final Boolean b = Boolean.valueOf(text);
-          in_active = b.booleanValue();
+          in_active = b;
         } else {
           in_active = false;
         }
@@ -293,15 +293,12 @@ public final class OPDSFeedParser implements OPDSFeedParserType
       final long time_interp = time_now - time_post_parse;
       OPDSFeedParser.LOG.debug(
         "parsing completed ({}ms - parse: {}ms, interp: {}ms): {}",
-        Long.valueOf(
           TimeUnit.MILLISECONDS.convert(
-            time_parse + time_interp, TimeUnit.NANOSECONDS)),
-        Long.valueOf(
+            time_parse + time_interp, TimeUnit.NANOSECONDS),
           TimeUnit.MILLISECONDS.convert(
-            time_parse, TimeUnit.NANOSECONDS)),
-        Long.valueOf(
+            time_parse, TimeUnit.NANOSECONDS),
           TimeUnit.MILLISECONDS.convert(
-            time_interp, TimeUnit.NANOSECONDS)),
+            time_interp, TimeUnit.NANOSECONDS),
         uri);
     }
   }
@@ -444,7 +441,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           (Element) child, OPDSFeedConstants.ATOM_URI, "entry")) {
           final Element e = OPDSXML.nodeAsElement(child);
           b.addEntry(this.entry_parser.parseEntry(e));
-          continue;
+//          continue;
         }
       }
     }

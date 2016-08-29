@@ -18,7 +18,13 @@ public enum OPDSAuthenticationDocumentLabels
    * Alternate label for a password.
    */
 
-  LABEL_PASSWORD("password");
+  LABEL_PASSWORD("password"),
+
+  /**
+   * Alternate label for a name.
+   */
+
+  LABEL_NAME("name");
 
   private final String name;
 

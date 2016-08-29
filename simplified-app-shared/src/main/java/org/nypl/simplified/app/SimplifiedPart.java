@@ -38,6 +38,13 @@ public enum SimplifiedPart
 
   PART_SETTINGS,
 
+
+  /**
+   * The account section.
+   */
+
+  PART_ACCOUNT,
+
   /**
    * The help section.
    */
@@ -69,6 +76,9 @@ public enum SimplifiedPart
       }
       case PART_HELP: {
         return NullCheck.notNull(r.getString(R.string.help));
+      }
+      case PART_ACCOUNT: {
+        return NullCheck.notNull(r.getString(R.string.settings_account));
       }
     }
 

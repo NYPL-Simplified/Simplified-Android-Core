@@ -7,6 +7,7 @@
   android:layout_height="match_parent">
 
   <TableLayout
+    android:background="@color/normal_background"
     android:id="@+id/alt_feeds_table"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -23,30 +24,37 @@
         android:labelFor="@+id/alt_root_url"
         android:text="Feed URI"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-      <EditText
-        android:id="@+id/alt_root_url"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="16dp"
-        android:text="@string/feature_catalog_start_uri"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:inputType="textNoSuggestions"
-        android:maxLines="1" />
+        android:layout_marginTop="10dp"/>
+
     </TableRow>
     <TableRow
       android:id="@+id/tableRow2"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content">
 
+      <EditText
+        android:id="@+id/alt_root_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:inputType="textUri"
+        android:layout_marginTop="10dp"
+        android:maxLines="1" android:background="@drawable/textview_underline"/>
+    </TableRow>
+
+    <TableRow
+      android:id="@+id/tableRow3"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content" android:visibility="gone">
+
       <TextView
         android:id="@+id/alt_loans_label"
         android:labelFor="@+id/alt_loans_url"
         android:text="Feed Loans"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"/>
 
       <EditText
         android:id="@+id/alt_loans_url"
@@ -54,22 +62,42 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="16dp"
-        android:text="@string/feature_catalog_loans_uri"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:inputType="textNoSuggestions"
-        android:maxLines="1" />
+        android:inputType="textUri"
+        android:maxLines="1"/>
     </TableRow>
+
+    <TableRow
+      android:id="@+id/tableRow4"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:gravity="center" android:layout_marginTop="30dp">
+
+      <Button
+        android:id="@+id/alt_set"
+        android:background="@drawable/simplified_button"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_standard_height"
+        android:textColor="@drawable/simplified_button_text"
+        android:textSize="12sp"
+        android:text="Set"
+        android:layout_marginEnd="20dp"
+        style="?android:attr/borderlessButtonStyle"/>
+
+      <Button
+        android:id="@+id/alt_reset"
+        android:background="@drawable/simplified_button"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_standard_height"
+        android:textColor="@drawable/simplified_button_text"
+        android:textSize="12sp"
+        android:text="Reset"
+        android:layout_marginStart="20dp"
+        style="?android:attr/borderlessButtonStyle"/>
+
+    </TableRow>
+
   </TableLayout>
 
-  <Button
-    android:id="@+id/alt_set"
-    android:background="@drawable/simplified_button"
-    android:layout_gravity="end"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/button_standard_height"
-    android:layout_below="@id/alt_feeds_table"
-    android:textColor="@drawable/simplified_button_text"
-    android:textSize="12sp"
-    android:text="Set" />
 
 </RelativeLayout>

@@ -28,6 +28,7 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.AccountNotReadyException;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
@@ -495,11 +496,11 @@ public final class CatalogBookDetailView implements Observer,
 
     this.book_download_buttons.addView(
       new CatalogBookReadButton(
-        this.activity, d.getID(), this.entry.get()), 0);
+        this.activity, d.getID(), this.entry.get(), this.books), 0);
 
     if (d.isReturnable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN);
+        this.activity, d.getID(), CatalogBookRevokeType.REVOKE_LOAN, this.books);
       this.book_download_buttons.addView(revoke, 1);
     } else if (this.entry.get().getFeedEntry().getAvailability() instanceof OPDSAvailabilityOpenAccess) {
       this.book_download_buttons.addView(
@@ -530,51 +531,79 @@ public final class CatalogBookDetailView implements Observer,
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
 
-    final TextView failed =
-      NullCheck.notNull(this.book_downloading_failed_text);
-    failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
 
-    final Button dismiss =
-      NullCheck.notNull(this.book_downloading_failed_dismiss);
-    final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
 
-    dismiss.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          CatalogBookDetailView.this.books.bookDownloadAcknowledge(f.getID());
-        }
-      });
+    if (CatalogBookUnauthorized.isUnAuthorized(f))
+    {
 
-    /**
-     * Manually construct an acquisition controller for the retry button.
-     */
 
-    final FeedEntryOPDS current_entry = this.entry.get();
-    final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
-    final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(
-        f.getID(), eo.getAcquisitions());
+      CatalogBookDetailView.this.books.accountRemoveCredentials();
 
-    /**
-     * Theoretically, if the book has ever been downloaded, then the
-     * acquisition list must have contained one usable acquisition relation...
-     */
 
-    if (a_opt.isNone()) {
-      throw new UnreachableCodeException();
+
     }
 
-    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-    final CatalogAcquisitionButtonController retry_ctl =
-      new CatalogAcquisitionButtonController(
-        this.activity, this.books, current_entry.getBookID(), a, current_entry);
+    final FeedEntryOPDS current_entry = this.entry.get();
 
-    retry.setEnabled(true);
-    retry.setVisibility(View.VISIBLE);
-    retry.setOnClickListener(retry_ctl);
+    final OptionType<Throwable> error_opt = f.getError();
+    if (error_opt.isSome()) {
+      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
+      final Throwable error = error_some.get();
+
+      if (error instanceof AccountNotReadyException)
+      {
+
+        this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
+
+      }
+
+    }
+
+
+      final TextView failed =
+        NullCheck.notNull(this.book_downloading_failed_text);
+      failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
+
+      final Button dismiss =
+        NullCheck.notNull(this.book_downloading_failed_dismiss);
+      final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
+
+      dismiss.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+            CatalogBookDetailView.this.books.bookDownloadAcknowledge(f.getID());
+          }
+        });
+
+      /**
+       * Manually construct an acquisition controller for the retry button.
+       */
+
+      final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
+      final OptionType<OPDSAcquisition> a_opt =
+        CatalogAcquisitionButtons.getPreferredAcquisition(
+          f.getID(), eo.getAcquisitions());
+
+      /**
+       * Theoretically, if the book has ever been downloaded, then the
+       * acquisition list must have contained one usable acquisition relation...
+       */
+
+      if (a_opt.isNone()) {
+        throw new UnreachableCodeException();
+      }
+
+      final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
+      final CatalogAcquisitionButtonController retry_ctl =
+        new CatalogAcquisitionButtonController(
+          this.activity, this.books, current_entry.getBookID(), a, current_entry);
+
+      retry.setEnabled(true);
+      retry.setVisibility(View.VISIBLE);
+      retry.setOnClickListener(retry_ctl);
+
     return Unit.unit();
   }
 
@@ -631,7 +660,7 @@ public final class CatalogBookDetailView implements Observer,
 
     if (s.isRevocable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD, this.books);
       this.book_download_buttons.addView(revoke, 0);
     }
 
@@ -669,7 +698,7 @@ public final class CatalogBookDetailView implements Observer,
 
     if (s.isRevocable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD);
+        this.activity, s.getID(), CatalogBookRevokeType.REVOKE_HOLD, this.books);
       this.book_download_buttons.addView(revoke, 0);
     }
 
@@ -760,7 +789,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_text.setText(text);
 
     final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-      this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
+      this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN, this.books);
     this.book_download_buttons.addView(revoke, 0);
 
     CatalogBookDetailView.configureButtonsHeight(
@@ -793,7 +822,7 @@ public final class CatalogBookDetailView implements Observer,
 
     if (o.isReturnable()) {
       final CatalogBookRevokeButton revoke = new CatalogBookRevokeButton(
-        this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN);
+        this.activity, o.getID(), CatalogBookRevokeType.REVOKE_LOAN, this.books);
       this.book_download_buttons.addView(revoke, 1);
     }
 

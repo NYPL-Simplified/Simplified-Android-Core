@@ -16,6 +16,7 @@ import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
@@ -291,9 +292,20 @@ final class BooksControllerRevokeBookTask
     throws IOException
   {
     final AccountCredentials credentials = this.getAccountCredentials();
-    final AccountBarcode barcode = credentials.getUser();
-    final AccountPIN pin = credentials.getPassword();
-    return new HTTPAuthBasic(barcode.toString(), pin.toString());
+    final AccountBarcode barcode = credentials.getBarcode();
+    final AccountPIN pin = credentials.getPin();
+
+    HTTPAuthType auth =
+      new HTTPAuthBasic(barcode.toString(), pin.toString());
+
+    if (credentials.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+      if (token != null) {
+        auth = new HTTPAuthOAuth(token.toString());
+      }
+    }
+
+    return auth;
   }
 
   private AccountCredentials getAccountCredentials()
@@ -506,7 +518,7 @@ final class BooksControllerRevokeBookTask
     private final CountDownLatch     latch;
     private       OptionType<Throwable> error;
 
-    public AdobeLoanReturnResult(final CountDownLatch in_latch)
+    AdobeLoanReturnResult(final CountDownLatch in_latch)
     {
       this.latch = NullCheck.notNull(in_latch);
       this.error = Option.some((Throwable) new BookRevokeExceptionNotReady());
@@ -532,8 +544,14 @@ final class BooksControllerRevokeBookTask
       try {
         BooksControllerRevokeBookTask.LOG.debug(
           "onLoanReturnFailure: {}", in_error);
-        this.error = Option.some(
-          (Throwable) new BookRevokeExceptionDRMWorkflowError(in_error));
+
+        if (in_error.startsWith("E_ACT_NOT_READY")) {
+          this.error = Option.some((Throwable) new AccountNotReadyException(in_error));
+        }
+        else {
+          this.error = Option.some((Throwable) new BookRevokeExceptionDRMWorkflowError(in_error));
+        }
+
       } finally {
         this.latch.countDown();
       }

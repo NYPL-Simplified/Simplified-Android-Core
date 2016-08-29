@@ -373,7 +373,7 @@ public final class AdobeDRMServices
       if (appid.equals(package_name)) {
         return r;
       }
-      if (appid.equals("dev." + package_name)) {
+      if (("dev." + package_name).equals(appid)) {
         return r;
       }
 

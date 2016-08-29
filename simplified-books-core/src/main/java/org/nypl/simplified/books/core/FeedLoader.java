@@ -13,6 +13,7 @@ import net.jodah.expiringmap.ExpiringMap.ExpirationListener;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
 import org.nypl.drm.core.Assertions;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -405,7 +406,7 @@ public final class FeedLoader
       } catch (final FeedHTTPTransportException e) {
         try {
           if (e.getCode() == 401) {
-            final HTTPAuthBasic basic =
+            final HTTPAuthType basic =
               this.getCredentialsAfterError(uri, listener, attempts, e);
             auth_current = Option.some((HTTPAuthType) basic);
           } else {
@@ -426,7 +427,7 @@ public final class FeedLoader
    * rethrown.
    */
 
-  private HTTPAuthBasic getCredentialsAfterError(
+  private HTTPAuthType getCredentialsAfterError(
     final URI uri,
     final FeedLoaderListenerType listener,
     final AtomicInteger attempts,
@@ -463,9 +464,21 @@ public final class FeedLoader
     final Some<AccountCredentials> result_some =
       (Some<AccountCredentials>) result_opt;
     final AccountCredentials result = result_some.get();
-    final String user = result.getUser().toString();
-    final String pass = result.getPassword().toString();
-    return new HTTPAuthBasic(user, pass);
+    final String user = result.getBarcode().toString();
+    final String pass = result.getPin().toString();
+
+    HTTPAuthType auth =
+      new HTTPAuthBasic(user, pass);
+
+
+    if (result.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) result.getAuthToken()).get();
+      if (token != null) {
+        auth = new HTTPAuthOAuth(token.toString());
+      }
+    }
+
+    return auth;
   }
 
   private static final class ProtectedListener implements FeedLoaderListenerType

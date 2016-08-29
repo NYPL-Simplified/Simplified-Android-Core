@@ -2,10 +2,16 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.content.res.Resources;
+import android.view.View;
 
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 
 
@@ -22,22 +28,52 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
    * @param in_activity The activity
    * @param in_book_id  The book ID
    * @param in_entry    The associated feed entry
+   * @param in_books    books
    */
 
   public CatalogBookReadButton(
     final Activity in_activity,
     final BookID in_book_id,
-    final FeedEntryOPDS in_entry)
+    final FeedEntryOPDS in_entry,
+    final BooksType in_books)
   {
     super(in_activity);
 
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
-    this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
-    this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_read)));
     this.getTextView().setTextSize(12.0f);
     this.setBackground(rr.getDrawable(R.drawable.simplified_button));
     this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
-    this.setOnClickListener(new CatalogBookRead(in_activity, in_book_id));
+
+    final OptionType<BookDatabaseEntrySnapshot> snap_opt =
+      in_books.bookGetDatabase().databaseGetEntrySnapshot(in_book_id);
+
+    if (in_books.accountIsDeviceActive() || ((Some<BookDatabaseEntrySnapshot>) snap_opt).get().getAdobeRights().isNone()) {
+
+      this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
+      this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_read)));
+
+      this.setOnClickListener(new CatalogBookRead(in_activity, in_book_id));
+    }
+    else
+    {
+      this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_download)));
+      this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_download)));
+
+      this.setOnClickListener(
+
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+
+            in_books.accountActivateDeviceAndFulFillBook(in_book_id);
+
+          }
+        }
+      );
+    }
+
+
   }
 }

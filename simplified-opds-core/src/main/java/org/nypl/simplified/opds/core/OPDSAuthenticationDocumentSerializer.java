@@ -1,7 +1,6 @@
 package org.nypl.simplified.opds.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.ProcedureType;
@@ -11,8 +10,6 @@ import org.nypl.simplified.json.core.JSONSerializerUtilities;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,25 +45,6 @@ public final class OPDSAuthenticationDocumentSerializer
     final ObjectNode je = jom.createObjectNode();
 
     je.put("id", e.getId());
-    je.put("title", e.getTitle());
-
-    e.getTextPrompt().map_(
-      new ProcedureType<String>()
-      {
-        @Override public void call(final String text)
-        {
-          je.put("text", text);
-        }
-      });
-
-    {
-      final List<URI> types = e.getTypes();
-      final ArrayNode jt = jom.createArrayNode();
-      for (int index = 0; index < types.size(); ++index) {
-        jt.add(types.get(index).toString());
-      }
-      je.set("types", jt);
-    }
 
     {
       final Map<String, String> labels = e.getLabels();
@@ -129,16 +107,6 @@ public final class OPDSAuthenticationDocumentSerializer
         }
       });
 
-    v.getTitle().map_(
-      new ProcedureType<String>()
-      {
-        @Override public void call(final String title)
-        {
-          n.put("title", title);
-        }
-      });
-
-    n.put("templated", v.getTemplated());
     return n;
   }
 

@@ -349,10 +349,12 @@ public final class Simplified extends Application
        * Catalog URIs.
        */
 
-      this.feed_initial_uri = NullCheck.notNull(
-        URI.create(
-          rr.getString(
-            R.string.feature_catalog_start_uri)));
+      final BooksControllerConfiguration books_config =
+        new BooksControllerConfiguration(
+          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
+          URI.create(rr.getString(R.string.feature_adobe_auth_uri)));
+
+      this.feed_initial_uri = books_config.getCurrentRootFeedURI();
 
       /**
        * Feed loaders and parsers.
@@ -384,10 +386,6 @@ public final class Simplified extends Application
       this.downloader = DownloaderHTTP.newDownloader(
         this.exec_books, downloads_dir, this.http);
 
-      final BooksControllerConfiguration books_config =
-        new BooksControllerConfiguration(
-          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
-          URI.create(rr.getString(R.string.feature_catalog_loans_uri)));
 
       /**
        * Configure EULA, privacy policy, etc.
@@ -412,6 +410,10 @@ public final class Simplified extends Application
           @Override public String getLabelLoginPassword()
           {
             return rr.getString(R.string.settings_pin);
+          }
+          @Override public String getLabelLoginPatronName()
+          {
+            return rr.getString(R.string.settings_name);
           }
         };
 
@@ -475,6 +477,20 @@ public final class Simplified extends Application
         }
 
         try {
+          final InputStream stream = assets.open("licenses.html");
+          documents_builder.enableLicenses(
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
+        } catch (final IOException e) {
+          Simplified.LOG.debug("No licenses defined: ", e);
+        }
+
+        try {
           final InputStream stream = assets.open("acknowledgements.html");
           documents_builder.enableAcknowledgements(
             new FunctionType<Unit, InputStream>()
@@ -505,7 +521,7 @@ public final class Simplified extends Application
               DocumentStore.fetchLoginForm(
                 CatalogAppServices.this.documents,
                 CatalogAppServices.this.http,
-                books_config.getCurrentLoansURI());
+                CatalogAppServices.this.feed_initial_uri);
             } catch (final Throwable x) {
               Simplified.LOG.error("could not fetch login form: ", x);
             }
@@ -515,6 +531,8 @@ public final class Simplified extends Application
       /**
        * The main book controller.
        */
+
+      final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(rr.getString(R.string.feature_catalog_loans_uri_component));
 
       this.books = BooksController.newBooks(
         this.exec_books,
@@ -527,7 +545,8 @@ public final class Simplified extends Application
         this.documents,
         this.books_database,
         this.accounts_database,
-        books_config);
+        books_config,
+        loans_url_component);
 
       /**
        * Configure cover provider.
@@ -837,18 +856,24 @@ public final class Simplified extends Application
     implements BooksControllerConfigurationType
   {
     private URI current_root;
-    private URI current_loans;
+    private URI alternate_root;
+    private URI adobe_auth_root;
 
     BooksControllerConfiguration(
       final URI in_root,
-      final URI in_loans)
+      final URI in_adobe_auth)
     {
       this.current_root = NullCheck.notNull(in_root);
-      this.current_loans = NullCheck.notNull(in_loans);
+      this.adobe_auth_root = NullCheck.notNull(in_adobe_auth);
     }
 
     @Override public synchronized URI getCurrentRootFeedURI()
     {
+      if (this.alternate_root != null)
+      {
+        return this.alternate_root;
+      }
+
       return this.current_root;
     }
 
@@ -857,14 +882,24 @@ public final class Simplified extends Application
       this.current_root = NullCheck.notNull(u);
     }
 
-    @Override public synchronized URI getCurrentLoansURI()
-    {
-      return this.current_loans;
+    @Override
+    public URI getAdobeAuthURI() {
+      return this.adobe_auth_root;
     }
 
-    @Override public synchronized void setCurrentLoansURI(final URI u)
+    @Override
+    public void setAdobeAuthURI(final URI u) {
+      this.adobe_auth_root = u;
+    }
+
+    @Override public synchronized URI getAlternateRootFeedURI()
     {
-      this.current_loans = NullCheck.notNull(u);
+      return this.alternate_root;
+    }
+
+    @Override public synchronized void setAlternateRootFeedURI(final URI u)
+    {
+      this.alternate_root = u;
     }
   }
 }

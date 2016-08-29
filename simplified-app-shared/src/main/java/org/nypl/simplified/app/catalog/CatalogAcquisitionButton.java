@@ -42,6 +42,9 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
     final Resources rr = NullCheck.notNull(in_activity.getResources());
 
     final OPDSAvailabilityType availability = in_entry.getFeedEntry().getAvailability();
+    this.getTextView().setTextSize(12.0f);
+    this.setBackground(rr.getDrawable(R.drawable.simplified_button));
+    this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
 
     switch (in_acq.getType()) {
       case ACQUISITION_OPEN_ACCESS:
@@ -78,9 +81,6 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
     }
 
 
-    this.getTextView().setTextSize(12.0f);
-    this.setBackground(rr.getDrawable(R.drawable.simplified_button));
-    this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
     this.setOnClickListener(
       new CatalogAcquisitionButtonController(
         in_activity, in_books, in_book_id, in_acq, in_entry));

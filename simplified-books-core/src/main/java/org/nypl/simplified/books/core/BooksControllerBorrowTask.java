@@ -23,6 +23,7 @@ import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.FileUtilities;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.nypl.simplified.http.core.HTTPType;
@@ -74,12 +75,12 @@ final class BooksControllerBorrowTask implements Runnable
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final String                             short_id;
-  private final AccountsDatabaseReadableType       accounts_database;
+  private final AccountsDatabaseType       accounts_database;
   private       long                               download_running_total;
 
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
-    final AccountsDatabaseReadableType in_accounts_database,
+    final AccountsDatabaseType in_accounts_database,
     final BooksStatusCacheType in_books_status,
     final DownloaderType in_downloader,
     final HTTPType in_http,
@@ -376,11 +377,17 @@ final class BooksControllerBorrowTask implements Runnable
      */
 
     final AccountCredentials credentials = this.getAccountCredentials();
-    final AccountBarcode barcode = credentials.getUser();
-    final AccountPIN pin = credentials.getPassword();
-    final HTTPAuthType auth =
+    final AccountBarcode barcode = credentials.getBarcode();
+    final AccountPIN pin = credentials.getPin();
+     HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
 
+    if (credentials.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+      if (token != null) {
+        auth = new HTTPAuthOAuth(token.toString());
+      }
+    }
     /**
      * Grab the feed for the borrow link.
      */
@@ -504,6 +511,14 @@ final class BooksControllerBorrowTask implements Runnable
                 problem_report.getProblemType();
               if (problem_type == HTTPProblemReport.ProblemType.LoanLimitReached) {
                 ex = new BookBorrowExceptionLoanLimitReached(x);
+              }
+              if (HTTPProblemReport.ProblemStatus.Unauthorized == problem_report.getProblemStatus())
+              {
+                try {
+                  BooksControllerBorrowTask.this.accounts_database.accountRemoveCredentials();
+                } catch (IOException e) {
+                  e.printStackTrace();
+                }
               }
             }
           }
@@ -700,10 +715,19 @@ final class BooksControllerBorrowTask implements Runnable
      */
 
     final AccountCredentials credentials = this.getAccountCredentials();
-    final AccountBarcode barcode = credentials.getUser();
-    final AccountPIN pin = credentials.getPassword();
-    final HTTPAuthType auth =
+    final AccountBarcode barcode = credentials.getBarcode();
+    final AccountPIN pin = credentials.getPin();
+//    final HTTPAuthType auth =
+//      new HTTPAuthBasic(barcode.toString(), pin.toString());
+    HTTPAuthType auth =
       new HTTPAuthBasic(barcode.toString(), pin.toString());
+
+    if (credentials.getAuthToken().isSome()) {
+      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+      if (token != null) {
+        auth = new HTTPAuthOAuth(token.toString());
+      }
+    }
 
     final String sid = this.short_id;
     BooksControllerBorrowTask.LOG.debug(
@@ -864,7 +888,11 @@ final class BooksControllerBorrowTask implements Runnable
 
       if (message.startsWith("NYPL_UNSUPPORTED requestPasshash")) {
         error = Option.some((Throwable) new BookUnsupportedPasshashException());
-      } else {
+      }
+      else if (message.startsWith("E_ACT_NOT_READY")) {
+        error = Option.some((Throwable) new AccountNotReadyException(message));
+      }
+      else {
         error = Option.some((Throwable) new BookBorrowExceptionDRMWorkflowError(message));
       }
 

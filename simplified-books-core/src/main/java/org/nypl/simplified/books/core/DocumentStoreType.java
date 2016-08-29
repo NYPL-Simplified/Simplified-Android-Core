@@ -37,4 +37,11 @@ public interface DocumentStoreType
    */
 
   OptionType<EULAType> getEULA();
+
+  /**
+   * @return The application licenses, if any.
+   */
+
+  OptionType<SyncedDocumentType> getLicenses();
+
 }

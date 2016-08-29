@@ -22,4 +22,13 @@ public interface HTTPAuthMatcherType<A, E extends Exception>
   A onAuthBasic(
     HTTPAuthBasic b)
     throws E;
+
+  /**
+   * @param b the value
+   * @return A value of {@code A}
+   * @throws E If required
+   */
+  A onAuthOAuth(
+    HTTPAuthOAuth b)
+    throws E;
 }

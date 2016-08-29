@@ -32,6 +32,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   private final OptionType<URI>                  terms_of_service;
   private final OptionType<URI>                  privacy_policy;
   private final OptionType<URI>                  about;
+  private final OptionType<URI>                  licenses;
 
   private FeedWithoutGroups(
     final URI in_uri,
@@ -46,7 +47,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     final List<FeedFacetType> in_facets_order,
     final OptionType<URI> in_terms_of_service,
     final OptionType<URI> in_about,
-    final OptionType<URI> in_privacy_policy)
+    final OptionType<URI> in_privacy_policy,
+    final OptionType<URI> in_licenses)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -61,6 +63,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
     this.about = NullCheck.notNull(in_about);
     this.privacy_policy = NullCheck.notNull(in_privacy_policy);
+    this.licenses = NullCheck.notNull(in_licenses);
   }
 
   /**
@@ -80,6 +83,7 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
    * @param in_privacy_policy   An optional link to the privacy policy for the
    *                            feed
    *
+   * @param in_licenses          An optional link to the licenses for the feed
    * @return An empty feed
    */
 
@@ -94,7 +98,8 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
     final List<FeedFacetType> in_facets_order,
     final OptionType<URI> in_terms_of_service,
     final OptionType<URI> in_about,
-    final OptionType<URI> in_privacy_policy)
+    final OptionType<URI> in_privacy_policy,
+    final OptionType<URI> in_licenses)
   {
     final List<BookID> in_entries_order = new ArrayList<BookID>(32);
     final Map<BookID, FeedEntryType> in_entries =
@@ -111,9 +116,10 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
       in_entries,
       in_facets_by_group,
       in_facets_order,
-            in_terms_of_service,
-            in_about,
-      in_privacy_policy);
+      in_terms_of_service,
+      in_about,
+      in_privacy_policy,
+      in_licenses);
   }
 
   @Override public void add(
@@ -177,12 +183,21 @@ public final class FeedWithoutGroups extends AbstractList<FeedEntryType>
   }
 
   /**
-   * @return A link to the privacy policy, if any
+   * @return A link to the about, if any
    */
 
   public OptionType<URI> getFeedAbout()
   {
     return this.about;
+  }
+
+  /**
+   * @return A link to the licenses, if any
+   */
+
+  public OptionType<URI> getFeedLicenses()
+  {
+    return this.licenses;
   }
 
   /**

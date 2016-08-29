@@ -2,7 +2,6 @@ package org.nypl.simplified.app.testing;
 
 import android.app.ActionBar;
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -12,15 +11,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.SimplifiedPart;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -62,16 +63,23 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
     super.onCreate(state);
 
     final ActionBar bar = this.getActionBar();
-    bar.setDisplayHomeAsUpEnabled(false);
-    bar.setHomeButtonEnabled(true);
-    bar.setIcon(R.drawable.ic_drawer);
     bar.setTitle("Alternate URIs");
+    if (android.os.Build.VERSION.SDK_INT < 21) {
+      bar.setDisplayHomeAsUpEnabled(false);
+      bar.setHomeButtonEnabled(true);
+      bar.setIcon(R.drawable.ic_arrow_back);
+    }
+    else
+    {
+      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(false);
+    }
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
-    final Resources resources = NullCheck.notNull(this.getResources());
 
     final FrameLayout content_area = this.getContentFrame();
     final ViewGroup layout = NullCheck.notNull(
@@ -86,11 +94,14 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
       NullCheck.notNull((EditText) layout.findViewById(R.id.alt_loans_url));
     final Button in_set =
       NullCheck.notNull((Button) layout.findViewById(R.id.alt_set));
+    final Button in_reset =
+      NullCheck.notNull((Button) layout.findViewById(R.id.alt_reset));
 
     final BooksControllerConfigurationType books_config =
       app.getBooks().booksGetConfiguration();
-    in_uri_feed.setText(books_config.getCurrentRootFeedURI().toString());
-    in_uri_loans.setText(books_config.getCurrentLoansURI().toString());
+    if (books_config.getAlternateRootFeedURI() != null) {
+      in_uri_feed.setText(books_config.getAlternateRootFeedURI().toString());
+    }
 
     in_set.setOnClickListener(
       new View.OnClickListener()
@@ -125,8 +136,8 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
             return;
           }
 
-          books_config.setCurrentLoansURI(new_loans);
-          books_config.setCurrentRootFeedURI(new_root);
+//          books_config.setAlternateLoansURI(new_loans);
+          books_config.setAlternateRootFeedURI(new_root);
 
           final CharSequence text =
             "URIs configured! Please open the catalog from the navigation "
@@ -134,6 +145,22 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
           final int duration = Toast.LENGTH_LONG;
           final Toast toast = Toast.makeText(context, text, duration);
           toast.show();
+        }
+      });
+
+    in_reset.setOnClickListener(
+      new View.OnClickListener()
+      {
+        @Override public void onClick(final View v)
+        {
+          final Context context =
+            AlternateFeedURIsActivity.this.getApplicationContext();
+
+          in_uri_loans.setText(null);
+          in_uri_feed.setText(null);
+//          books_config.setAlternateLoansURI(null);
+          books_config.setAlternateRootFeedURI(null);
+
         }
       });
   }
@@ -144,17 +171,14 @@ public final class AlternateFeedURIsActivity extends SimplifiedActivity
     final MenuItem item = NullCheck.notNull(item_mn);
     switch (item.getItemId()) {
 
-      /**
-       * Configure the home button to finish the activity.
-       */
-
       case android.R.id.home: {
-        this.finish();
-        this.overridePendingTransition(0, 0);
+        onBackPressed();
         return true;
       }
-    }
 
-    return super.onOptionsItemSelected(item);
+      default: {
+        return super.onOptionsItemSelected(item);
+      }
+    }
   }
 }

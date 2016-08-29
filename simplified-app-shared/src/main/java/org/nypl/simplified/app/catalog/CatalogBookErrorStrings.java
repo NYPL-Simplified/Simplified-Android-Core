@@ -6,6 +6,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.books.core.AccountNotReadyException;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
 import org.nypl.simplified.books.core.BookUnsupportedPasshashException;
 import org.nypl.simplified.books.core.BookUnsupportedTypeException;
@@ -61,6 +62,11 @@ final class CatalogBookErrorStrings
 
         return r.getString(
           R.string.catalog_download_failed_unsupported_unknown);
+      }
+
+      if (error instanceof AccountNotReadyException)
+      {
+        return r.getString(R.string.catalog_download_failed);
       }
     }
 

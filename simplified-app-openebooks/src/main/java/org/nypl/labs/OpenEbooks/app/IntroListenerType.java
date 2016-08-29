@@ -5,7 +5,5 @@ package org.nypl.labs.OpenEbooks.app;
  */
 public interface IntroListenerType
 {
-  void onUseExistingCodes();
 
-  void onRequestNewCodes();
 }

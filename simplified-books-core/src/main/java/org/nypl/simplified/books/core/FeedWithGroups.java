@@ -30,6 +30,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
   private final OptionType<URI>            terms_of_service;
   private final OptionType<URI>            privacy_policy;
   private final OptionType<URI>            about;
+  private final OptionType<URI>            licenses;
 
   private FeedWithGroups(
     final URI in_uri,
@@ -41,7 +42,8 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     final Map<String, FeedGroup> in_blocks,
     final OptionType<URI> in_terms_of_service,
     final OptionType<URI> in_about,
-    final OptionType<URI> in_privacy_policy)
+    final OptionType<URI> in_privacy_policy,
+    final OptionType<URI> in_licenses)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.id = NullCheck.notNull(in_id);
@@ -53,6 +55,7 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
     this.about = NullCheck.notNull(in_about);
     this.privacy_policy = NullCheck.notNull(in_privacy_policy);
+    this.licenses = NullCheck.notNull(in_licenses);
   }
 
   /**
@@ -93,18 +96,28 @@ public final class FeedWithGroups extends AbstractList<FeedGroup>
       order,
       blocks,
       f.getFeedTermsOfService(),
-            f.getFeedAbout(),
-            f.getFeedPrivacyPolicy()
-            );
+      f.getFeedAbout(),
+      f.getFeedPrivacyPolicy(),
+      f.getFeedLicenses()
+      );
   }
 
   /**
-   * @return A link to the terms of service, if any
+   * @return A link to the about, if any
    */
 
   public OptionType<URI> getFeedAbout()
   {
     return this.about;
+  }
+
+  /**
+   * @return A link to the licenses, if any
+   */
+
+  public OptionType<URI> getFeedLicenses()
+  {
+    return this.licenses;
   }
 
   /**

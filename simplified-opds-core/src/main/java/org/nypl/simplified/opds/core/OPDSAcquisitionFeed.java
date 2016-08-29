@@ -37,6 +37,7 @@ public final class OPDSAcquisitionFeed implements Serializable
   private final URI                            uri;
   private final OptionType<URI>                terms_of_service;
   private final OptionType<URI>                about;
+  private final OptionType<URI>                licenses;
   private final OptionType<URI>                privacy_policy;
 
   private OPDSAcquisitionFeed(
@@ -53,7 +54,8 @@ public final class OPDSAcquisitionFeed implements Serializable
     final Map<String, List<OPDSFacet>> in_facets,
     final OptionType<URI> in_terms_of_service,
     final OptionType<URI> in_about,
-    final OptionType<URI> in_privacy_policy)
+    final OptionType<URI> in_privacy_policy,
+    final OptionType<URI> in_licenses)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.entries = NullCheck.notNull(Collections.unmodifiableList(in_entries));
@@ -72,6 +74,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     this.terms_of_service = NullCheck.notNull(in_terms_of_service);
     this.about = NullCheck.notNull(in_about);
     this.privacy_policy = NullCheck.notNull(in_privacy_policy);
+    this.licenses = NullCheck.notNull(in_licenses);
   }
 
   /**
@@ -223,6 +226,15 @@ public final class OPDSAcquisitionFeed implements Serializable
   }
 
   /**
+   * @return The link to the app about, if any
+   */
+
+  public OptionType<URI> getFeedLicenses()
+  {
+    return this.licenses;
+  }
+
+  /**
    * @return The link to the terms of service, if any
    */
 
@@ -267,6 +279,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     result = (prime * result) + this.terms_of_service.hashCode();
     result = (prime * result) + this.about.hashCode();
     result = (prime * result) + this.privacy_policy.hashCode();
+    result = (prime * result) + this.licenses.hashCode();
     return result;
   }
 
@@ -287,6 +300,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     private       OptionType<URI>                             terms_of_service;
     private       OptionType<URI>                             privacy_policy;
     private       OptionType<URI>                             about;
+    private       OptionType<URI>                             licenses;
 
     private Builder(
       final URI in_uri,
@@ -309,6 +323,7 @@ public final class OPDSAcquisitionFeed implements Serializable
       this.terms_of_service = Option.none();
       this.privacy_policy = Option.none();
       this.about = Option.none();
+      this.licenses = Option.none();
     }
 
     @Override public void addEntry(
@@ -398,8 +413,9 @@ public final class OPDSAcquisitionFeed implements Serializable
         this.facets_order,
         this.facets_by_group,
         this.terms_of_service,
-              this.about,
-              this.privacy_policy
+        this.about,
+        this.privacy_policy,
+        this.licenses
         );
     }
 

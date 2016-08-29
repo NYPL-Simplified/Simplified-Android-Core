@@ -17,4 +17,10 @@ public interface AuthenticationDocumentValuesType
    */
 
   String getLabelLoginPassword();
+
+  /**
+   * @return The label defined for the name field of the login form
+   */
+
+  String getLabelLoginPatronName();
 }

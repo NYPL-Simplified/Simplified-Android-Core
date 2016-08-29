@@ -23,11 +23,25 @@
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">NYPL</string>
 
+  <!-- authentication providers -->
+  <!-- default authentication provider -->
+  <bool name="feature_default_auth_provider">true</bool>
+  <string name="feature_default_auth_provider_name">New York Public Library</string>
+  <string name="feature_default_auth_provider_uri">https://circulation.librarysimplified.org/</string>
+  <bool name="feature_default_auth_provider_request_new_code">false</bool>
+  <string name="feature_default_auth_provider_request_new_code_uri"> </string>
+
+  <!-- clever authentication provider -->
+  <bool name="feature_auth_provider_clever">false</bool>
+  <string name="feature_auth_provider_clever_name">Clever</string>
+  <string name="feature_auth_provider_clever_uri"> </string>
+
   <!-- The initial catalog URI that will be loaded on program start -->
-  <string name="feature_catalog_start_uri">https://circulation.librarysimplified.org/groups/</string>
+  <string name="feature_catalog_start_uri">https://circulation.librarysimplified.org/</string>
+  <string name="feature_adobe_auth_uri">https://circulation.librarysimplified.org/</string>
 
   <!-- The initial catalog loans URI that will be used to sync accounts -->
-  <string name="feature_catalog_loans_uri">https://circulation.librarysimplified.org/loans/</string>
+  <string name="feature_catalog_loans_uri_component">loans/</string>
 
   <!-- A non-empty string here will override the package name given to
        the Adobe DRM implementation. An empty string will cause the

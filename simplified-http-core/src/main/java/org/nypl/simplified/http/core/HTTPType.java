@@ -1,7 +1,6 @@
 package org.nypl.simplified.http.core;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Unit;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -70,7 +69,7 @@ public interface HTTPType
    * @return A result
    */
 
-  HTTPResultType<Unit> head(
+  HTTPResultType<InputStream> head(
     final OptionType<HTTPAuthType> auth,
     final URI uri);
 }

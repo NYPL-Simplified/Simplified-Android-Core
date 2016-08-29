@@ -8,6 +8,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.http.core.HTTPAuthBasic;
+import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.json.core.JSONSerializerUtilities;
@@ -57,10 +58,19 @@ public class BooksControllerReportTask
     OptionType<HTTPAuthType> http_auth = Option.none();
     if (credentials_opt.isSome()) {
       final AccountCredentials account_credentials = ((Some<AccountCredentials>) credentials_opt).get();
-      final AccountBarcode barcode = account_credentials.getUser();
-      final AccountPIN pin = account_credentials.getPassword();
+      final AccountBarcode barcode = account_credentials.getBarcode();
+      final AccountPIN pin = account_credentials.getPin();
+
       http_auth =
         Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
+
+      if (account_credentials.getAuthToken().isSome()) {
+        final AccountAuthToken token = ((Some<AccountAuthToken>) account_credentials.getAuthToken()).get();
+        if (token != null) {
+          http_auth = Option.some((HTTPAuthType) new HTTPAuthOAuth(token.toString()));
+        }
+      }
+
     }
 
     try {
