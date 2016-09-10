@@ -232,6 +232,16 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         this.retryFeed();
       }
     }
+
+    Bundle extras = getIntent().getExtras();
+    if (extras != null) {
+      boolean reload = extras.getBoolean("reload");
+      if (reload)
+      {
+        CatalogFeedActivity.this.retryFeed();
+      }
+    }
+
   }
 
   /**
