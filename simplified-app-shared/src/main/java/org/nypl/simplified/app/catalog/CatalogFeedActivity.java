@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.ActionBar;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.LoginActivity;
+import org.nypl.simplified.app.LoginDialog;
 import org.nypl.simplified.app.LoginListenerType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
@@ -37,8 +39,10 @@ import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
+import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
 import org.nypl.simplified.books.core.BookFeedListenerType;
@@ -1366,7 +1370,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     }
   }
 
-  private static final class SyncListener implements AccountSyncListenerType
+  private final class SyncListener implements AccountSyncListenerType
   {
     SyncListener()
     {
@@ -1377,6 +1381,29 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     public void onAccountSyncAuthenticationFailure(final String message)
     {
       CatalogFeedActivity.LOG.debug("account syncing failed: {}", message);
+
+      final boolean clever_enabled = CatalogFeedActivity.this.getResources().getBoolean(R.bool.feature_auth_provider_clever);
+
+      if (clever_enabled) {
+
+        final Intent account =
+          new Intent(CatalogFeedActivity.this, LoginActivity.class);
+
+        CatalogFeedActivity.this.startActivityForResult(account, 1);
+
+        CatalogFeedActivity.this.overridePendingTransition(0, 0);
+
+      } else {
+
+        final AccountBarcode barcode = new AccountBarcode("");
+        final AccountPIN pin = new AccountPIN("");
+
+        final LoginDialog df =
+          LoginDialog.newDialog("Login required", barcode, pin);
+
+        final FragmentManager fm = CatalogFeedActivity.this.getFragmentManager();
+        df.show(fm, "login-dialog");
+      }
     }
 
     @Override public void onAccountSyncBook(final BookID book)
