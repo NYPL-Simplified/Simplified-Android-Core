@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,11 +24,13 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
+import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountNotReadyException;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
@@ -742,34 +745,48 @@ public final class CatalogBookDetailView implements Observer,
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusRevokeFailed(final BookStatusRevokeFailed s)
-  {
-    this.book_debug_status.setText("revoke failed");
+  @Override
+  public Unit onBookStatusRevokeFailed(final BookStatusRevokeFailed s) {
+    if (CatalogBookUnauthorized.isUnAuthorized(s)) {
+      CatalogBookDetailView.this.books.accountRemoveCredentials();
+      UIThread.runOnUIThread(
+        new Runnable() {
+          @Override
+          public void run() {
 
-    this.book_download.setVisibility(View.INVISIBLE);
-    this.book_downloading.setVisibility(View.INVISIBLE);
-    this.book_downloading_failed.setVisibility(View.VISIBLE);
+            final Intent i = new Intent(CatalogBookDetailView.this.activity, LoginActivity.class);
+            CatalogBookDetailView.this.activity.startActivity(i);
+            CatalogBookDetailView.this.activity.overridePendingTransition(0, 0);
+            CatalogBookDetailView.this.activity.finish();
 
-    final TextView failed =
-      NullCheck.notNull(this.book_downloading_failed_text);
-    failed.setText(R.string.catalog_revoke_failed);
+          }
+        });
+    } else {
+      this.book_debug_status.setText("revoke failed");
+      this.book_download.setVisibility(View.INVISIBLE);
+      this.book_downloading.setVisibility(View.INVISIBLE);
+      this.book_downloading_failed.setVisibility(View.VISIBLE);
 
-    final Button dismiss =
-      NullCheck.notNull(this.book_downloading_failed_dismiss);
-    final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
+      final TextView failed =
+        NullCheck.notNull(this.book_downloading_failed_text);
+      failed.setText(R.string.catalog_revoke_failed);
 
-    dismiss.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          CatalogBookDetailView.this.books.bookGetLatestStatusFromDisk(s.getID());
-        }
-      });
+      final Button dismiss =
+        NullCheck.notNull(this.book_downloading_failed_dismiss);
+      final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
 
-    retry.setEnabled(false);
-    retry.setVisibility(View.GONE);
+      dismiss.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+            CatalogBookDetailView.this.books.bookGetLatestStatusFromDisk(s.getID());
+
+          }
+        });
+      retry.setEnabled(false);
+      retry.setVisibility(View.GONE);
+    }
     return Unit.unit();
   }
 
