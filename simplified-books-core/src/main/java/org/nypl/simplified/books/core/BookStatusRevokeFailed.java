@@ -32,6 +32,11 @@ public final class BookStatusRevokeFailed implements BookStatusType
     return this.id;
   }
 
+  public OptionType<Throwable> getError()
+  {
+    return this.error;
+  }
+
   @Override public <A, E extends Exception> A matchBookStatus(
     final BookStatusMatcherType<A, E> m)
     throws E
