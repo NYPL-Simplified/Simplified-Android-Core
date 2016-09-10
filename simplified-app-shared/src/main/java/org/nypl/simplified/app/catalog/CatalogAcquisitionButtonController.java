@@ -2,6 +2,8 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.Intent;
+import android.preference.Preference;
 import android.view.View;
 import android.view.View.OnClickListener;
 import com.io7m.jfunctional.OptionType;
@@ -9,8 +11,12 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+
+import org.nypl.simplified.app.CleverLoginActivity;
+import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.app.LoginDialog;
 import org.nypl.simplified.app.LoginListenerType;
+import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
@@ -94,15 +100,30 @@ public final class CatalogAcquisitionButtonController
 
   private void tryLogin()
   {
-    final AccountBarcode barcode = new AccountBarcode("");
-    final AccountPIN pin = new AccountPIN("");
 
-    final LoginDialog df =
-      LoginDialog.newDialog("Login required", barcode, pin);
-    df.setLoginListener(this);
+    final boolean clever_enabled = this.activity.getResources().getBoolean(R.bool.feature_auth_provider_clever);
 
-    final FragmentManager fm = this.activity.getFragmentManager();
-    df.show(fm, "login-dialog");
+    if (clever_enabled) {
+
+      final Intent account =
+        new Intent(this.activity, LoginActivity.class);
+
+      this.activity.startActivityForResult(account, 1);
+
+      this.activity.overridePendingTransition(0, 0);
+
+    } else {
+
+      final AccountBarcode barcode = new AccountBarcode("");
+      final AccountPIN pin = new AccountPIN("");
+
+      final LoginDialog df =
+        LoginDialog.newDialog("Login required", barcode, pin);
+      df.setLoginListener(this);
+
+      final FragmentManager fm = this.activity.getFragmentManager();
+      df.show(fm, "login-dialog");
+    }
   }
 
   @Override public void onLoginAborted()
