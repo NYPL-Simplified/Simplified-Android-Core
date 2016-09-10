@@ -86,10 +86,10 @@ public final class CatalogBookRevokeDialog extends DialogFragment
       (ViewGroup) inflater.inflate(
         R.layout.catalog_book_revoke_confirm, container, false));
 
-    final Button button = NullCheck.notNull(
+    final Button in_revoke_confirm_button = NullCheck.notNull(
       (Button) layout.findViewById(R.id.book_revoke_confirm));
 
-    button.setOnClickListener(
+    in_revoke_confirm_button.setOnClickListener(
       new OnClickListener()
       {
         @Override public void onClick(
@@ -106,7 +106,7 @@ public final class CatalogBookRevokeDialog extends DialogFragment
 
     final TextView message =
       NullCheck.notNull((TextView) layout.findViewById(R.id.book_revoke_text));
-    final Button in_logout_cancel_button =
+    final Button in_revoke_cancel_button =
       NullCheck.notNull((Button) layout.findViewById(R.id.book_revoke_cancel));
 
     final Resources rr = NullCheck.notNull(this.getResources());
@@ -114,20 +114,20 @@ public final class CatalogBookRevokeDialog extends DialogFragment
     switch (this.type) {
       case REVOKE_LOAN: {
         message.setText(R.string.catalog_book_revoke_loan_confirm);
-        button.setText(R.string.catalog_book_revoke_loan);
-        in_logout_cancel_button.setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_loan_cancel)));
+        in_revoke_confirm_button.setText(R.string.catalog_book_revoke_loan);
+        in_revoke_cancel_button.setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_loan_cancel)));
         break;
       }
       case REVOKE_HOLD: {
         message.setText(R.string.catalog_book_revoke_hold_confirm);
-        button.setText(R.string.catalog_book_revoke_hold);
-        in_logout_cancel_button.setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_hold_cancel)));
+        in_revoke_confirm_button.setText(R.string.catalog_book_revoke_hold);
+        in_revoke_cancel_button.setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_revoke_hold_cancel)));
         break;
       }
     }
 
 
-    in_logout_cancel_button.setOnClickListener(
+    in_revoke_cancel_button.setOnClickListener(
       new OnClickListener()
       {
         @Override public void onClick(
