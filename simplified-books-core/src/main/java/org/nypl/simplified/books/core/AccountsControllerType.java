@@ -66,6 +66,9 @@ public interface AccountsControllerType
    */
   void accountActivateDevice();
 
+
+  void fulfillExistingBooks();
+
   /**
    * Deactivate the device with the currently logged in account (if you are logged in).
    */

@@ -307,6 +307,21 @@ public final class BooksController implements BooksType {
   }
 
   @Override
+  public void fulfillExistingBooks() {
+
+      //fulfill book which were already downloaded when device was active.
+      this.submitRunnable(
+        new BooksControllerFulFillTask(
+          this,
+          this.accounts_database,
+          this.http,
+          this.feed_parser,
+          this.syncing,
+          this.loans_uri));
+
+  }
+
+  @Override
   public void accountActivateDevice() {
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {
@@ -320,14 +335,8 @@ public final class BooksController implements BooksType {
       this.submitRunnable(activation_task);
 
       //fulfill book which were already downloaded when device was active.
-      this.submitRunnable(
-        new BooksControllerFulFillTask(
-          this,
-          this.accounts_database,
-          this.http,
-          this.feed_parser,
-          this.syncing,
-          this.loans_uri));
+      this.fulfillExistingBooks();
+
     }
   }
 
