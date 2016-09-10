@@ -12,19 +12,16 @@ import org.nypl.drm.core.AdobeVendorID;
  * The type representing account credentials.
  */
 
-public final class AccountCredentials
-{
-  private AccountBarcode                              barcode;
-  private AccountPIN                                  pin;
-  private final OptionType<AdobeVendorID>             adobe_vendor;
-  private OptionType<AccountAuthProvider>       provider;
-  private final OptionType<AccountPatron>             patron;
-  private OptionType<AccountAuthToken>                auth_token;
-  private OptionType<AccountAdobeToken>               adobe_token;
-  private OptionType<AdobeUserID>                     user_id;
-  private OptionType<AdobeDeviceID>                   device_id;
-
-
+public final class AccountCredentials {
+  private AccountBarcode barcode;
+  private AccountPIN pin;
+  private final OptionType<AdobeVendorID> adobe_vendor;
+  private OptionType<AccountAuthProvider> provider;
+  private final OptionType<AccountPatron> patron;
+  private OptionType<AccountAuthToken> auth_token;
+  private OptionType<AccountAdobeToken> adobe_token;
+  private OptionType<AdobeUserID> user_id;
+  private OptionType<AdobeDeviceID> device_id;
 
 
   /**
@@ -33,8 +30,8 @@ public final class AccountCredentials
    * @param in_adobe_vendor The Adobe vendor ID that will be used to log into
    *                        the account. If no vendor ID is provided, no Adobe
    *                        login can occur.
-   * @param in_barcode         The account username
-   * @param in_pin     The account password
+   * @param in_barcode      The account username
+   * @param in_pin          The account password
    * @param in_provider     The account authentication provider
    */
 
@@ -42,8 +39,7 @@ public final class AccountCredentials
     final OptionType<AdobeVendorID> in_adobe_vendor,
     final AccountBarcode in_barcode,
     final AccountPIN in_pin,
-    final OptionType<AccountAuthProvider> in_provider)
-  {
+    final OptionType<AccountAuthProvider> in_provider) {
     this.adobe_vendor = NullCheck.notNull(in_adobe_vendor);
     this.barcode = NullCheck.notNull(in_barcode);
     this.pin = NullCheck.notNull(in_pin);
@@ -62,8 +58,8 @@ public final class AccountCredentials
    * @param in_adobe_vendor The Adobe vendor ID that will be used to log into
    *                        the account. If no vendor ID is provided, no Adobe
    *                        login can occur.
-   * @param in_barcode         The account username
-   * @param in_pin     The account password
+   * @param in_barcode      The account username
+   * @param in_pin          The account password
    * @param in_provider     The account authentication provider
    * @param in_auth_token   The account authentication token
    * @param in_adobe_token  The adobe auth data token
@@ -77,8 +73,7 @@ public final class AccountCredentials
     final OptionType<AccountAuthProvider> in_provider,
     final OptionType<AccountAuthToken> in_auth_token,
     final OptionType<AccountAdobeToken> in_adobe_token,
-    final OptionType<AccountPatron> in_patron)
-  {
+    final OptionType<AccountPatron> in_patron) {
     this.adobe_vendor = NullCheck.notNull(in_adobe_vendor);
     this.barcode = NullCheck.notNull(in_barcode);
     this.pin = NullCheck.notNull(in_pin);
@@ -91,8 +86,8 @@ public final class AccountCredentials
 
   }
 
-  @Override public String toString()
-  {
+  @Override
+  public String toString() {
     final StringBuilder sb = new StringBuilder("AccountCredentials{");
     sb.append("adobe_vendor=").append(this.adobe_vendor);
     sb.append(", barcode=").append(this.barcode);
@@ -107,8 +102,8 @@ public final class AccountCredentials
     return sb.toString();
   }
 
-  @Override public boolean equals(final Object o)
-  {
+  @Override
+  public boolean equals(final Object o) {
     if (this == o) {
       return true;
     }
@@ -127,8 +122,8 @@ public final class AccountCredentials
     return this.adobe_vendor.equals(that.adobe_vendor);
   }
 
-  @Override public int hashCode()
-  {
+  @Override
+  public int hashCode() {
     int result = this.getBarcode().hashCode();
     result = 31 * result + this.getPin().hashCode();
     result = 31 * result + this.adobe_vendor.hashCode();
@@ -145,8 +140,7 @@ public final class AccountCredentials
    * @return The Adobe vendor ID, if any
    */
 
-  public OptionType<AdobeVendorID> getAdobeVendor()
-  {
+  public OptionType<AdobeVendorID> getAdobeVendor() {
     return this.adobe_vendor;
   }
 
@@ -154,8 +148,7 @@ public final class AccountCredentials
    * @return The account password
    */
 
-  public AccountPIN getPin()
-  {
+  public AccountPIN getPin() {
     return this.pin;
   }
 
@@ -163,8 +156,7 @@ public final class AccountCredentials
    * @return The account username
    */
 
-  public AccountBarcode getBarcode()
-  {
+  public AccountBarcode getBarcode() {
     return this.barcode;
   }
 
@@ -172,8 +164,7 @@ public final class AccountCredentials
    * @return The aut token
    */
 
-  public OptionType<AccountAuthToken> getAuthToken()
-  {
+  public OptionType<AccountAuthToken> getAuthToken() {
     return this.auth_token;
   }
 
@@ -181,8 +172,7 @@ public final class AccountCredentials
    * @return The adobe token
    */
 
-  public OptionType<AccountAdobeToken> getAdobeToken()
-  {
+  public OptionType<AccountAdobeToken> getAdobeToken() {
     return this.adobe_token;
   }
 
@@ -190,8 +180,7 @@ public final class AccountCredentials
    * @return The adobe user id
    */
 
-  public OptionType<AdobeUserID> getAdobeUserID()
-  {
+  public OptionType<AdobeUserID> getAdobeUserID() {
     return this.user_id;
   }
 
@@ -199,8 +188,7 @@ public final class AccountCredentials
    * @return The adobe device id
    */
 
-  public OptionType<AdobeDeviceID> getAdobeDeviceID()
-  {
+  public OptionType<AdobeDeviceID> getAdobeDeviceID() {
     return this.device_id;
   }
 
@@ -208,8 +196,7 @@ public final class AccountCredentials
    * @return The authentication provider
    */
 
-  public OptionType<AccountAuthProvider> getProvider()
-  {
+  public OptionType<AccountAuthProvider> getProvider() {
     return this.provider;
   }
 
@@ -217,8 +204,7 @@ public final class AccountCredentials
    * @return The patron information
    */
 
-  public OptionType<AccountPatron> getPatron()
-  {
+  public OptionType<AccountPatron> getPatron() {
     return this.patron;
   }
 
@@ -257,7 +243,7 @@ public final class AccountCredentials
     this.pin = in_pin;
   }
 
-  public void setProvider(final  OptionType<AccountAuthProvider> in_provider) {
+  public void setProvider(final OptionType<AccountAuthProvider> in_provider) {
     this.provider = in_provider;
   }
 
