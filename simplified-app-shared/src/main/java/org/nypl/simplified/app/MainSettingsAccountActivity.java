@@ -124,6 +124,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           
           if (creds.getProvider().isNone())
           {
+            creds.setProvider(Option.some(new AccountAuthProvider(rr.getString(R.string.feature_default_auth_provider_name))));
             in_provider_text.setText(rr.getString(R.string.feature_default_auth_provider_name));
           }
           else
