@@ -67,6 +67,9 @@ public interface AccountsControllerType
   void accountActivateDevice();
 
 
+  /**
+   *  fulfill all existing books which were download before
+   */
   void fulfillExistingBooks();
 
   /**

@@ -8,11 +8,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -154,7 +152,7 @@ public final class LoginActivity extends Activity {
   protected void onActivityResult(final int request_code, final int result_code, final Intent data) {
     super.onActivityResult(request_code, result_code, data);
 
-    if(result_code == 1) {
+    if (result_code == 1) {
 
       this.openCatalog();
       final SimplifiedCatalogAppServicesType app =
