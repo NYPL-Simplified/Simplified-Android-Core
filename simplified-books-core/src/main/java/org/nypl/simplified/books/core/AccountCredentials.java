@@ -17,7 +17,7 @@ public final class AccountCredentials
   private AccountBarcode                              barcode;
   private AccountPIN                                  pin;
   private final OptionType<AdobeVendorID>             adobe_vendor;
-  private final OptionType<AccountAuthProvider>       provider;
+  private OptionType<AccountAuthProvider>       provider;
   private final OptionType<AccountPatron>             patron;
   private OptionType<AccountAuthToken>                auth_token;
   private OptionType<AccountAdobeToken>               adobe_token;
@@ -255,6 +255,10 @@ public final class AccountCredentials
    */
   public void setAdobePIN(final AccountPIN in_pin) {
     this.pin = in_pin;
+  }
+
+  public void setProvider(final  OptionType<AccountAuthProvider> in_provider) {
+    this.provider = in_provider;
   }
 
   /**
