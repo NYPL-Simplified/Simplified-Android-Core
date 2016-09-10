@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 import org.nypl.simplified.app.BookCoverProviderType;
+import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
@@ -321,76 +323,85 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     CatalogFeedBookCellView.LOG.debug("{}: download failed", f.getID());
 
-    this.cell_book.setVisibility(View.INVISIBLE);
-    this.cell_corrupt.setVisibility(View.INVISIBLE);
-    this.cell_downloading.setVisibility(View.INVISIBLE);
-    this.cell_downloading_failed.setVisibility(View.VISIBLE);
-    this.setDebugCellText("download-failed");
-
-    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
-    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
-
-    final Resources rr = NullCheck.notNull(this.activity.getResources());
-    this.cell_downloading_failed_label.setText(
-      CatalogBookErrorStrings.getFailureString(rr, f));
-
-    if (CatalogBookUnauthorized.isUnAuthorized(f))
-    {
+    if (CatalogBookUnauthorized.isUnAuthorized(f)) {
       CatalogFeedBookCellView.this.books.accountRemoveCredentials();
+      UIThread.runOnUIThread(
+        new Runnable() {
+          @Override
+          public void run() {
 
-    }
+            final Intent i = new Intent(CatalogFeedBookCellView.this.activity, LoginActivity.class);
+            CatalogFeedBookCellView.this.activity.startActivity(i);
+            CatalogFeedBookCellView.this.activity.overridePendingTransition(0, 0);
+            CatalogFeedBookCellView.this.activity.finish();
 
-    final OptionType<Throwable> error_opt = f.getError();
-    if (error_opt.isSome()) {
-      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
-      final Throwable error = error_some.get();
+          }
+        });
+    } else {
 
-      if (error instanceof AccountNotReadyException)
-      {
+      this.cell_book.setVisibility(View.INVISIBLE);
+      this.cell_corrupt.setVisibility(View.INVISIBLE);
+      this.cell_downloading.setVisibility(View.INVISIBLE);
+      this.cell_downloading_failed.setVisibility(View.VISIBLE);
+      this.setDebugCellText("download-failed");
 
-        this.books.accountActivateDeviceAndFulFillBook(fe.getBookID());
+      final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+      final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
+
+      final Resources rr = NullCheck.notNull(this.activity.getResources());
+      this.cell_downloading_failed_label.setText(
+        CatalogBookErrorStrings.getFailureString(rr, f));
+
+      final OptionType<Throwable> error_opt = f.getError();
+      if (error_opt.isSome()) {
+        final Some<Throwable> error_some = (Some<Throwable>) error_opt;
+        final Throwable error = error_some.get();
+
+        if (error instanceof AccountNotReadyException) {
+
+          this.books.accountActivateDeviceAndFulFillBook(fe.getBookID());
+
+        }
 
       }
 
+      this.cell_downloading_failed_title.setText(oe.getTitle());
+      this.cell_downloading_failed_dismiss.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+            CatalogFeedBookCellView.this.books.bookDownloadAcknowledge(
+              f.getID());
+          }
+        });
+
+      /**
+       * Manually construct an acquisition controller for the retry button.
+       */
+
+      final OptionType<OPDSAcquisition> a_opt =
+        CatalogAcquisitionButtons.getPreferredAcquisition(
+          f.getID(), oe.getAcquisitions());
+
+      /**
+       * Theoretically, if the book has ever been downloaded, then the
+       * acquisition list must have contained one usable acquisition relation...
+       */
+
+      if (a_opt.isNone()) {
+        throw new UnreachableCodeException();
+      }
+
+      final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
+      final CatalogAcquisitionButtonController retry_ctl =
+        new CatalogAcquisitionButtonController(
+          this.activity, this.books, fe.getBookID(), a, fe);
+
+      this.cell_downloading_failed_retry.setVisibility(View.VISIBLE);
+      this.cell_downloading_failed_retry.setEnabled(true);
+      this.cell_downloading_failed_retry.setOnClickListener(retry_ctl);
     }
-
-    this.cell_downloading_failed_title.setText(oe.getTitle());
-    this.cell_downloading_failed_dismiss.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          CatalogFeedBookCellView.this.books.bookDownloadAcknowledge(
-            f.getID());
-        }
-      });
-
-    /**
-     * Manually construct an acquisition controller for the retry button.
-     */
-
-    final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(
-        f.getID(), oe.getAcquisitions());
-
-    /**
-     * Theoretically, if the book has ever been downloaded, then the
-     * acquisition list must have contained one usable acquisition relation...
-     */
-
-    if (a_opt.isNone()) {
-      throw new UnreachableCodeException();
-    }
-
-    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-    final CatalogAcquisitionButtonController retry_ctl =
-      new CatalogAcquisitionButtonController(
-        this.activity, this.books, fe.getBookID(), a, fe);
-
-    this.cell_downloading_failed_retry.setVisibility(View.VISIBLE);
-    this.cell_downloading_failed_retry.setEnabled(true);
-    this.cell_downloading_failed_retry.setOnClickListener(retry_ctl);
     return Unit.unit();
   }
 

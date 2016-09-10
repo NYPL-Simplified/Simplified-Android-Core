@@ -10,6 +10,8 @@ import org.nypl.simplified.books.core.BookStatusRevokeFailed;
 import org.nypl.simplified.books.core.FeedHTTPTransportException;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 
+import java.io.IOException;
+
 final class CatalogBookUnauthorized
 {
   private CatalogBookUnauthorized()
@@ -42,7 +44,12 @@ final class CatalogBookUnauthorized
           return problem.getProblemStatus() == HTTPProblemReport.ProblemStatus.Unauthorized;
         }
       }
+      else if (cause != null && cause.getMessage().contains("401: UNAUTHORIZED"))
+      {
+          return true;
+      }
     }
+
     return false;
   }
 

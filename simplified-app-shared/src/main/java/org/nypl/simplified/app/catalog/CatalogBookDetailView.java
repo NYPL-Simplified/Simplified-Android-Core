@@ -526,41 +526,46 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusDownloadFailed(
     final BookStatusDownloadFailed f)
   {
-    this.book_debug_status.setText("download failed");
 
-    this.book_download.setVisibility(View.INVISIBLE);
-    this.book_downloading.setVisibility(View.INVISIBLE);
-    this.book_downloading_failed.setVisibility(View.VISIBLE);
-
-    final Resources rr = NullCheck.notNull(this.activity.getResources());
-
-
-
-    if (CatalogBookUnauthorized.isUnAuthorized(f))
-    {
-
-
+    if (CatalogBookUnauthorized.isUnAuthorized(f)) {
       CatalogBookDetailView.this.books.accountRemoveCredentials();
+      UIThread.runOnUIThread(
+        new Runnable() {
+          @Override
+          public void run() {
+
+            final Intent i = new Intent(CatalogBookDetailView.this.activity, LoginActivity.class);
+            CatalogBookDetailView.this.activity.startActivity(i);
+            CatalogBookDetailView.this.activity.overridePendingTransition(0, 0);
+            CatalogBookDetailView.this.activity.finish();
+
+          }
+        });
+    } else {
 
 
+      this.book_debug_status.setText("download failed");
 
-    }
+      this.book_download.setVisibility(View.INVISIBLE);
+      this.book_downloading.setVisibility(View.INVISIBLE);
+      this.book_downloading_failed.setVisibility(View.VISIBLE);
 
-    final FeedEntryOPDS current_entry = this.entry.get();
+      final Resources rr = NullCheck.notNull(this.activity.getResources());
 
-    final OptionType<Throwable> error_opt = f.getError();
-    if (error_opt.isSome()) {
-      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
-      final Throwable error = error_some.get();
+      final FeedEntryOPDS current_entry = this.entry.get();
 
-      if (error instanceof AccountNotReadyException)
-      {
+      final OptionType<Throwable> error_opt = f.getError();
+      if (error_opt.isSome()) {
+        final Some<Throwable> error_some = (Some<Throwable>) error_opt;
+        final Throwable error = error_some.get();
 
-        this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
+        if (error instanceof AccountNotReadyException) {
+
+          this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
+
+        }
 
       }
-
-    }
 
 
       final TextView failed =
@@ -606,7 +611,7 @@ public final class CatalogBookDetailView implements Observer,
       retry.setEnabled(true);
       retry.setVisibility(View.VISIBLE);
       retry.setOnClickListener(retry_ctl);
-
+    }
     return Unit.unit();
   }
 
