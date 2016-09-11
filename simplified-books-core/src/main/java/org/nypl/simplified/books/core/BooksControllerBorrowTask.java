@@ -784,7 +784,15 @@ final class BooksControllerBorrowTask implements Runnable
             ex = BookBorrowExceptionFetchingBookFailed.newException(exception);
           }
 
-          BooksControllerBorrowTask.this.downloadFailed(Option.some(ex));
+          if (ex.getCause().getMessage().contains("401: UNAUTHORIZED"))
+          {
+            try {
+              BooksControllerBorrowTask.this.accounts_database.accountRemoveCredentials();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
+            BooksControllerBorrowTask.this.downloadFailed(Option.some(ex));
 
         }
 

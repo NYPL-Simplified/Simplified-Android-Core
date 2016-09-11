@@ -44,10 +44,10 @@ final class CatalogBookUnauthorized
           return problem.getProblemStatus() == HTTPProblemReport.ProblemStatus.Unauthorized;
         }
       }
-      else if (cause != null && cause.getMessage().contains("401: UNAUTHORIZED"))
-      {
-          return true;
-      }
+//      else if (cause != null && cause.getMessage().contains("401: UNAUTHORIZED"))
+//      {
+//          return true;
+//      }
     }
 
     return false;
