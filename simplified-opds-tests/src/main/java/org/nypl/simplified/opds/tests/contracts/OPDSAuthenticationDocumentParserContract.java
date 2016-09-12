@@ -95,11 +95,7 @@ public final class OPDSAuthenticationDocumentParserContract
     final OPDSAuthenticationDocument expected_doc =
       new OPDSAuthenticationDocument(
         expected_id,
-//        expected_type,
-//        expected_title,
-//        expected_text,
         expected_links,
-        null,
         expected_labels);
 
     TestUtilities.assertEquals(expected_doc, doc);
