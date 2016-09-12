@@ -13,15 +13,15 @@ import org.nypl.drm.core.AdobeVendorID;
  */
 
 public final class AccountCredentials {
-  private AccountBarcode barcode;
-  private AccountPIN pin;
-  private final OptionType<AdobeVendorID> adobe_vendor;
-  private OptionType<AccountAuthProvider> provider;
-  private final OptionType<AccountPatron> patron;
-  private OptionType<AccountAuthToken> auth_token;
-  private OptionType<AccountAdobeToken> adobe_token;
-  private OptionType<AdobeUserID> user_id;
-  private OptionType<AdobeDeviceID> device_id;
+  private final OptionType<AdobeVendorID>   adobe_vendor;
+  private final OptionType<AccountPatron>   patron;
+  private AccountBarcode                    barcode;
+  private AccountPIN                        pin;
+  private OptionType<AccountAuthProvider>   provider;
+  private OptionType<AccountAuthToken>      auth_token;
+  private OptionType<AccountAdobeToken>     adobe_token;
+  private OptionType<AdobeUserID>           user_id;
+  private OptionType<AdobeDeviceID>         device_id;
 
 
   /**
@@ -169,11 +169,25 @@ public final class AccountCredentials {
   }
 
   /**
+   * @param in_auth_token token for registration and deregistration
+   */
+  public void setAuthToken(final OptionType<AccountAuthToken> in_auth_token) {
+    this.auth_token = in_auth_token;
+  }
+
+  /**
    * @return The adobe token
    */
 
   public OptionType<AccountAdobeToken> getAdobeToken() {
     return this.adobe_token;
+  }
+
+  /**
+   * @param in_adobe_token token for registration and deregistration
+   */
+  public void setAdobeToken(final OptionType<AccountAdobeToken> in_adobe_token) {
+    this.adobe_token = in_adobe_token;
   }
 
   /**
@@ -185,11 +199,25 @@ public final class AccountCredentials {
   }
 
   /**
+   * @param in_user_id user id used by adobe to register/deregister a device
+   */
+  public void setAdobeUserID(final OptionType<AdobeUserID> in_user_id) {
+    this.user_id = in_user_id;
+  }
+
+  /**
    * @return The adobe device id
    */
 
   public OptionType<AdobeDeviceID> getAdobeDeviceID() {
     return this.device_id;
+  }
+
+  /**
+   * @param in_device_id device id used by adobe to register/deregister a device
+   */
+  public void setAdobeDeviceID(final OptionType<AdobeDeviceID> in_device_id) {
+    this.device_id = in_device_id;
   }
 
   /**
@@ -201,6 +229,13 @@ public final class AccountCredentials {
   }
 
   /**
+   * @param in_provider provider name
+   */
+  public void setProvider(final OptionType<AccountAuthProvider> in_provider) {
+    this.provider = in_provider;
+  }
+
+  /**
    * @return The patron information
    */
 
@@ -209,45 +244,10 @@ public final class AccountCredentials {
   }
 
   /**
-   * @param in_adobe_token token for registration and deregistration
-   */
-  public void setAdobeToken(final OptionType<AccountAdobeToken> in_adobe_token) {
-    this.adobe_token = in_adobe_token;
-  }
-
-  /**
-   * @param in_auth_token token for registration and deregistration
-   */
-  public void setAuthToken(final OptionType<AccountAuthToken> in_auth_token) {
-    this.auth_token = in_auth_token;
-  }
-
-  /**
-   * @param in_device_id device id used by adobe to register/deregister a device
-   */
-  public void setAdobeDeviceID(final OptionType<AdobeDeviceID> in_device_id) {
-    this.device_id = in_device_id;
-  }
-
-  /**
-   * @param in_user_id user id used by adobe to register/deregister a device
-   */
-  public void setAdobeUserID(final OptionType<AdobeUserID> in_user_id) {
-    this.user_id = in_user_id;
-  }
-
-  /**
    * @param in_pin library card pin
    */
   public void setAdobePIN(final AccountPIN in_pin) {
     this.pin = in_pin;
-  }
-
-  /**
-   * @param in_provider provider name
-   */
-  public void setProvider(final OptionType<AccountAuthProvider> in_provider) {
-    this.provider = in_provider;
   }
 
   /**
