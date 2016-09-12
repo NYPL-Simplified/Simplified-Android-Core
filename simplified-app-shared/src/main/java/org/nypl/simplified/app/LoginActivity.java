@@ -81,7 +81,7 @@ public final class LoginActivity extends Activity {
   private void openCatalog() {
     final Intent i = new Intent(this, MainCatalogActivity.class);
 
-    i.putExtra("reload",true);
+    i.putExtra("reload", true);
 
     this.startActivity(i);
     this.overridePendingTransition(0, 0);

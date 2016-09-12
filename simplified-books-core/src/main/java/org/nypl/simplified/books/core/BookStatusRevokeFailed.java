@@ -32,6 +32,9 @@ public final class BookStatusRevokeFailed implements BookStatusType
     return this.id;
   }
 
+  /**
+   * @return error
+   */
   public OptionType<Throwable> getError()
   {
     return this.error;

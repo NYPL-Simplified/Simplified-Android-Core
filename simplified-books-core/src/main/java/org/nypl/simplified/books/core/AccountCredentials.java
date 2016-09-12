@@ -243,6 +243,9 @@ public final class AccountCredentials {
     this.pin = in_pin;
   }
 
+  /**
+   * @param in_provider provider name
+   */
   public void setProvider(final OptionType<AccountAuthProvider> in_provider) {
     this.provider = in_provider;
   }
