@@ -525,31 +525,31 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   @Override public Unit onBookStatusRevokeFailed(
     final BookStatusRevokeFailed s)
   {
-//    CatalogFeedBookCellView.LOG.debug("{}: revoke failed", s.getID());
-//
-//    this.cell_book.setVisibility(View.INVISIBLE);
-//    this.cell_corrupt.setVisibility(View.INVISIBLE);
-//    this.cell_downloading.setVisibility(View.INVISIBLE);
-//    this.cell_downloading_failed.setVisibility(View.VISIBLE);
-//    this.setDebugCellText("revoke-failed");
-//
-//    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
-//    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
-//
-//    this.cell_downloading_failed_label.setText(R.string.catalog_revoke_failed);
-//    this.cell_downloading_failed_title.setText(oe.getTitle());
-//    this.cell_downloading_failed_dismiss.setOnClickListener(
-//      new OnClickListener()
-//      {
-//        @Override public void onClick(
-//          final @Nullable View v)
-//        {
-//          CatalogFeedBookCellView.this.books.bookGetLatestStatusFromDisk(s.getID());
-//        }
-//      });
-//
-//    this.cell_downloading_failed_retry.setVisibility(View.GONE);
-//    this.cell_downloading_failed_retry.setEnabled(false);
+    CatalogFeedBookCellView.LOG.debug("{}: revoke failed", s.getID());
+
+    this.cell_book.setVisibility(View.INVISIBLE);
+    this.cell_corrupt.setVisibility(View.INVISIBLE);
+    this.cell_downloading.setVisibility(View.INVISIBLE);
+    this.cell_downloading_failed.setVisibility(View.VISIBLE);
+    this.setDebugCellText("revoke-failed");
+
+    final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
+    final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
+
+    this.cell_downloading_failed_label.setText(R.string.catalog_revoke_failed);
+    this.cell_downloading_failed_title.setText(oe.getTitle());
+    this.cell_downloading_failed_dismiss.setOnClickListener(
+      new OnClickListener()
+      {
+        @Override public void onClick(
+          final @Nullable View v)
+        {
+          CatalogFeedBookCellView.this.books.bookGetLatestStatusFromDisk(s.getID());
+        }
+      });
+
+    this.cell_downloading_failed_retry.setVisibility(View.GONE);
+    this.cell_downloading_failed_retry.setEnabled(false);
     return Unit.unit();
   }
 
