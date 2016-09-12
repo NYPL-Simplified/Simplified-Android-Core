@@ -226,21 +226,25 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       this.search_view.clearFocus();
     }
 
-    if (this.previously_paused == true) {
+    boolean did_retry = false;
+    final Bundle extras = getIntent().getExtras();
+    if (extras != null) {
+      final boolean reload = extras.getBoolean("reload");
+      if (reload == true)
+      {
+        did_retry = true;
+        CatalogFeedActivity.this.retryFeed();
+        extras.putBoolean("reload", false);
+      }
+    }
+
+    if (this.previously_paused == true && did_retry == false) {
       final CatalogFeedArgumentsType args = this.getArguments();
       if (args.isLocallyGenerated()) {
         this.retryFeed();
       }
     }
 
-    Bundle extras = getIntent().getExtras();
-    if (extras != null) {
-      boolean reload = extras.getBoolean("reload");
-      if (reload)
-      {
-        CatalogFeedActivity.this.retryFeed();
-      }
-    }
 
   }
 
