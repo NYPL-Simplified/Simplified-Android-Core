@@ -54,6 +54,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
       final Intent account =
         new Intent(this.getActivity(), MainSettingsAccountActivity.class);
       final Preference preferences = findPreference(resources.getString(R.string.settings_account));
+      account.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
       preferences.setIntent(account);
       preferences.setOnPreferenceClickListener(null);
 
@@ -160,6 +161,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
       final Intent help =
         new Intent(this.getActivity(), HelpActivity.class);
       final Preference preference = findPreference(resources.getString(R.string.help));
+      help.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
       preference.setIntent(help);
 
     }
@@ -181,6 +183,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
             resources.getString(R.string.settings_about),
             SimplifiedPart.PART_SETTINGS);
           intent.putExtras(b);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
           about_preference.setIntent(intent);
           screen.addPreference(about_preference);
@@ -203,6 +206,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
             resources.getString(R.string.settings_eula),
             SimplifiedPart.PART_SETTINGS);
           intent.putExtras(b);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
 
           final Preference preferences = findPreference(resources.getString(R.string.settings_eula));
@@ -225,6 +229,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
             resources.getString(R.string.settings_privacy),
             SimplifiedPart.PART_SETTINGS);
           intent.putExtras(b);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
           final Preference preferences = findPreference(resources.getString(R.string.settings_privacy));
           preferences.setIntent(intent);
@@ -246,6 +251,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
             resources.getString(R.string.settings_credits),
             SimplifiedPart.PART_SETTINGS);
           intent.putExtras(b);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
           final Preference preferences = findPreference(resources.getString(R.string.settings_credits));
           preferences.setIntent(intent);
@@ -270,6 +276,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
             resources.getString(R.string.settings_licences),
             SimplifiedPart.PART_SETTINGS);
           intent.putExtras(b);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
 
           licenses_preference.setIntent(intent);

@@ -143,22 +143,8 @@ final class BooksControllerRevokeBookTask
          * If the saved authentication details are wrong, give up.
          */
 
-        if (attempts > 0) {
           listener.onAuthenticationNotProvided();
-        }
 
-        /**
-         * Otherwise, try the saved authentication details!
-         */
-
-        try {
-          final AccountCredentials creds =
-            BooksControllerRevokeBookTask.this.getAccountCredentials();
-          listener.onAuthenticationProvided(creds);
-        } catch (final Throwable e) {
-          listener.onAuthenticationError(
-            Option.some(e), e.getMessage());
-        }
       }
 
       @Override public void onFeedLoadFailure(

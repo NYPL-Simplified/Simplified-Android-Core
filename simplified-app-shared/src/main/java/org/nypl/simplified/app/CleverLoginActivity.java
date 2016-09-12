@@ -1,7 +1,7 @@
 package org.nypl.simplified.app;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,7 +48,7 @@ import java.util.StringTokenizer;
  * view.
  */
 
-public final class CleverLoginActivity extends Activity implements AccountLoginListenerType {
+public final class CleverLoginActivity extends SimplifiedActivity implements AccountLoginListenerType {
 
   private static final Logger LOG;
 
@@ -88,6 +88,16 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
     }
   }
 
+
+  @Override protected SimplifiedPart navigationDrawerGetPart()
+  {
+    return SimplifiedPart.PART_ACCOUNT;
+  }
+
+  @Override protected boolean navigationDrawerShouldShowIndicator()
+  {
+    return false;
+  }
 
   @SuppressLint("JavascriptInterface")
   @Override
@@ -257,6 +267,22 @@ public final class CleverLoginActivity extends Activity implements AccountLoginL
     });
 
     this.web_view.loadUrl(uri);
+
+
+    final ActionBar bar = this.getActionBar();
+    bar.setTitle(null);
+    if (android.os.Build.VERSION.SDK_INT < 21) {
+      bar.setDisplayHomeAsUpEnabled(false);
+      bar.setHomeButtonEnabled(true);
+      bar.setIcon(R.drawable.ic_arrow_back);
+    }
+    else
+    {
+      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+      bar.setDisplayHomeAsUpEnabled(true);
+      bar.setHomeButtonEnabled(false);
+    }
+
 
   }
 

@@ -47,7 +47,6 @@
     <activity
       android:name="org.nypl.simplified.app.CleverLoginActivity"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedThemeNoActionBar"
       >
       <intent-filter>
         <action android:name="android.intent.action.VIEW"/>

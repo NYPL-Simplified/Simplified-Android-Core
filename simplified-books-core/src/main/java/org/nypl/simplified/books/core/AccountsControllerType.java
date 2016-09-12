@@ -66,6 +66,12 @@ public interface AccountsControllerType
    */
   void accountActivateDevice();
 
+
+  /**
+   *  fulfill all existing books which were download before
+   */
+  void fulfillExistingBooks();
+
   /**
    * Deactivate the device with the currently logged in account (if you are logged in).
    */

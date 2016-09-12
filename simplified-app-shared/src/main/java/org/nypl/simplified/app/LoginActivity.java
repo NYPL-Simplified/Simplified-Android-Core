@@ -16,6 +16,7 @@ import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
@@ -79,6 +80,9 @@ public final class LoginActivity extends Activity {
 
   private void openCatalog() {
     final Intent i = new Intent(this, MainCatalogActivity.class);
+
+    i.putExtra("reload", true);
+
     this.startActivity(i);
     this.overridePendingTransition(0, 0);
     this.finish();
@@ -150,9 +154,16 @@ public final class LoginActivity extends Activity {
   @Override
   protected void onActivityResult(final int request_code, final int result_code, final Intent data) {
     super.onActivityResult(request_code, result_code, data);
-// and check if logged in
-//    if(resultCode == Activity.RESULT_OK) {
-    this.openCatalog();
-//    }
+
+    if (result_code == 1) {
+
+      this.openCatalog();
+      final SimplifiedCatalogAppServicesType app =
+        Simplified.getCatalogAppServices();
+
+      final BooksType books = app.getBooks();
+      books.fulfillExistingBooks();
+
+    }
   }
 }

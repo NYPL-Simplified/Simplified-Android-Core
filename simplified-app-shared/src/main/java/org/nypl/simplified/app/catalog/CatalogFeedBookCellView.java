@@ -321,6 +321,12 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     CatalogFeedBookCellView.LOG.debug("{}: download failed", f.getID());
 
+    if (CatalogBookUnauthorized.isUnAuthorized(f))
+    {
+      CatalogFeedBookCellView.this.books.accountRemoveCredentials();
+    }
+
+
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_corrupt.setVisibility(View.INVISIBLE);
     this.cell_downloading.setVisibility(View.INVISIBLE);
@@ -334,11 +340,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_downloading_failed_label.setText(
       CatalogBookErrorStrings.getFailureString(rr, f));
 
-    if (CatalogBookUnauthorized.isUnAuthorized(f))
-    {
-      CatalogFeedBookCellView.this.books.accountRemoveCredentials();
-
-    }
 
     final OptionType<Throwable> error_opt = f.getError();
     if (error_opt.isSome()) {
@@ -347,9 +348,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
       if (error instanceof AccountNotReadyException)
       {
-
         this.books.accountActivateDeviceAndFulFillBook(fe.getBookID());
-
       }
 
     }
@@ -391,6 +390,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_downloading_failed_retry.setVisibility(View.VISIBLE);
     this.cell_downloading_failed_retry.setEnabled(true);
     this.cell_downloading_failed_retry.setOnClickListener(retry_ctl);
+
     return Unit.unit();
   }
 

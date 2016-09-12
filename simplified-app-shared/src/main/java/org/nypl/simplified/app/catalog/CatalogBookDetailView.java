@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.BookCoverProviderType;
+import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
@@ -523,6 +525,11 @@ public final class CatalogBookDetailView implements Observer,
   @Override public Unit onBookStatusDownloadFailed(
     final BookStatusDownloadFailed f)
   {
+
+    if (CatalogBookUnauthorized.isUnAuthorized(f)) {
+      CatalogBookDetailView.this.books.accountRemoveCredentials();
+    }
+
     this.book_debug_status.setText("download failed");
 
     this.book_download.setVisibility(View.INVISIBLE);
@@ -531,18 +538,6 @@ public final class CatalogBookDetailView implements Observer,
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
 
-
-
-    if (CatalogBookUnauthorized.isUnAuthorized(f))
-    {
-
-
-      CatalogBookDetailView.this.books.accountRemoveCredentials();
-
-
-
-    }
-
     final FeedEntryOPDS current_entry = this.entry.get();
 
     final OptionType<Throwable> error_opt = f.getError();
@@ -550,8 +545,7 @@ public final class CatalogBookDetailView implements Observer,
       final Some<Throwable> error_some = (Some<Throwable>) error_opt;
       final Throwable error = error_some.get();
 
-      if (error instanceof AccountNotReadyException)
-      {
+      if (error instanceof AccountNotReadyException) {
 
         this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
 
@@ -560,49 +554,50 @@ public final class CatalogBookDetailView implements Observer,
     }
 
 
-      final TextView failed =
-        NullCheck.notNull(this.book_downloading_failed_text);
-      failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
+    final TextView failed =
+      NullCheck.notNull(this.book_downloading_failed_text);
+    failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
 
-      final Button dismiss =
-        NullCheck.notNull(this.book_downloading_failed_dismiss);
-      final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
+    final Button dismiss =
+      NullCheck.notNull(this.book_downloading_failed_dismiss);
+    final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
 
-      dismiss.setOnClickListener(
-        new OnClickListener() {
-          @Override
-          public void onClick(
-            final @Nullable View v) {
-            CatalogBookDetailView.this.books.bookDownloadAcknowledge(f.getID());
-          }
-        });
+    dismiss.setOnClickListener(
+      new OnClickListener() {
+        @Override
+        public void onClick(
+          final @Nullable View v) {
+          CatalogBookDetailView.this.books.bookDownloadAcknowledge(f.getID());
+        }
+      });
 
-      /**
-       * Manually construct an acquisition controller for the retry button.
-       */
+    /**
+     * Manually construct an acquisition controller for the retry button.
+     */
 
-      final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
-      final OptionType<OPDSAcquisition> a_opt =
-        CatalogAcquisitionButtons.getPreferredAcquisition(
-          f.getID(), eo.getAcquisitions());
+    final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
+    final OptionType<OPDSAcquisition> a_opt =
+      CatalogAcquisitionButtons.getPreferredAcquisition(
+        f.getID(), eo.getAcquisitions());
 
-      /**
-       * Theoretically, if the book has ever been downloaded, then the
-       * acquisition list must have contained one usable acquisition relation...
-       */
+    /**
+     * Theoretically, if the book has ever been downloaded, then the
+     * acquisition list must have contained one usable acquisition relation...
+     */
 
-      if (a_opt.isNone()) {
-        throw new UnreachableCodeException();
-      }
+    if (a_opt.isNone()) {
+      throw new UnreachableCodeException();
+    }
 
-      final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-      final CatalogAcquisitionButtonController retry_ctl =
-        new CatalogAcquisitionButtonController(
-          this.activity, this.books, current_entry.getBookID(), a, current_entry);
+    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
+    final CatalogAcquisitionButtonController retry_ctl =
+      new CatalogAcquisitionButtonController(
+        this.activity, this.books, current_entry.getBookID(), a, current_entry);
 
-      retry.setEnabled(true);
-      retry.setVisibility(View.VISIBLE);
-      retry.setOnClickListener(retry_ctl);
+    retry.setEnabled(true);
+    retry.setVisibility(View.VISIBLE);
+    retry.setOnClickListener(retry_ctl);
+
 
     return Unit.unit();
   }
@@ -742,34 +737,48 @@ public final class CatalogBookDetailView implements Observer,
     return Unit.unit();
   }
 
-  @Override public Unit onBookStatusRevokeFailed(final BookStatusRevokeFailed s)
-  {
-    this.book_debug_status.setText("revoke failed");
+  @Override
+  public Unit onBookStatusRevokeFailed(final BookStatusRevokeFailed s) {
+    if (CatalogBookUnauthorized.isUnAuthorized(s)) {
+      CatalogBookDetailView.this.books.accountRemoveCredentials();
+      UIThread.runOnUIThread(
+        new Runnable() {
+          @Override
+          public void run() {
 
-    this.book_download.setVisibility(View.INVISIBLE);
-    this.book_downloading.setVisibility(View.INVISIBLE);
-    this.book_downloading_failed.setVisibility(View.VISIBLE);
+            final Intent i = new Intent(CatalogBookDetailView.this.activity, LoginActivity.class);
+            CatalogBookDetailView.this.activity.startActivity(i);
+            CatalogBookDetailView.this.activity.overridePendingTransition(0, 0);
+            CatalogBookDetailView.this.activity.finish();
 
-    final TextView failed =
-      NullCheck.notNull(this.book_downloading_failed_text);
-    failed.setText(R.string.catalog_revoke_failed);
+          }
+        });
+    } else {
+      this.book_debug_status.setText("revoke failed");
+      this.book_download.setVisibility(View.INVISIBLE);
+      this.book_downloading.setVisibility(View.INVISIBLE);
+      this.book_downloading_failed.setVisibility(View.VISIBLE);
 
-    final Button dismiss =
-      NullCheck.notNull(this.book_downloading_failed_dismiss);
-    final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
+      final TextView failed =
+        NullCheck.notNull(this.book_downloading_failed_text);
+      failed.setText(R.string.catalog_revoke_failed);
 
-    dismiss.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          CatalogBookDetailView.this.books.bookGetLatestStatusFromDisk(s.getID());
-        }
-      });
+      final Button dismiss =
+        NullCheck.notNull(this.book_downloading_failed_dismiss);
+      final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
 
-    retry.setEnabled(false);
-    retry.setVisibility(View.GONE);
+      dismiss.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+            CatalogBookDetailView.this.books.bookGetLatestStatusFromDisk(s.getID());
+
+          }
+        });
+      retry.setEnabled(false);
+      retry.setVisibility(View.GONE);
+    }
     return Unit.unit();
   }
 
@@ -856,7 +865,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
-        this.activity, this.book_download_buttons, this.books, e);
+      this.activity, this.book_download_buttons, this.books, e);
 
     CatalogBookDetailView.configureButtonsHeight(
       rr, this.book_download_buttons);
