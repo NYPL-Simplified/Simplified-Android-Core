@@ -530,89 +530,73 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookDetailView.this.books.accountRemoveCredentials();
     }
 
-//    if (CatalogBookUnauthorized.isUnAuthorized(f)) {
-//      CatalogBookDetailView.this.books.accountRemoveCredentials();
-//      UIThread.runOnUIThread(
-//        new Runnable() {
-//          @Override
-//          public void run() {
-//
-//            final Intent i = new Intent(CatalogBookDetailView.this.activity, LoginActivity.class);
-//            CatalogBookDetailView.this.activity.startActivity(i);
-//            CatalogBookDetailView.this.activity.overridePendingTransition(0, 0);
-//            CatalogBookDetailView.this.activity.finish();
-//
-//          }
-//        });
-//    }
+    this.book_debug_status.setText("download failed");
 
-      this.book_debug_status.setText("download failed");
+    this.book_download.setVisibility(View.INVISIBLE);
+    this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed.setVisibility(View.VISIBLE);
 
-      this.book_download.setVisibility(View.INVISIBLE);
-      this.book_downloading.setVisibility(View.INVISIBLE);
-      this.book_downloading_failed.setVisibility(View.VISIBLE);
+    final Resources rr = NullCheck.notNull(this.activity.getResources());
 
-      final Resources rr = NullCheck.notNull(this.activity.getResources());
+    final FeedEntryOPDS current_entry = this.entry.get();
 
-      final FeedEntryOPDS current_entry = this.entry.get();
+    final OptionType<Throwable> error_opt = f.getError();
+    if (error_opt.isSome()) {
+      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
+      final Throwable error = error_some.get();
 
-      final OptionType<Throwable> error_opt = f.getError();
-      if (error_opt.isSome()) {
-        final Some<Throwable> error_some = (Some<Throwable>) error_opt;
-        final Throwable error = error_some.get();
+      if (error instanceof AccountNotReadyException) {
 
-        if (error instanceof AccountNotReadyException) {
+        this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
 
-          this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
+      }
 
+    }
+
+
+    final TextView failed =
+      NullCheck.notNull(this.book_downloading_failed_text);
+    failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
+
+    final Button dismiss =
+      NullCheck.notNull(this.book_downloading_failed_dismiss);
+    final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
+
+    dismiss.setOnClickListener(
+      new OnClickListener() {
+        @Override
+        public void onClick(
+          final @Nullable View v) {
+          CatalogBookDetailView.this.books.bookDownloadAcknowledge(f.getID());
         }
+      });
 
-      }
+    /**
+     * Manually construct an acquisition controller for the retry button.
+     */
 
+    final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
+    final OptionType<OPDSAcquisition> a_opt =
+      CatalogAcquisitionButtons.getPreferredAcquisition(
+        f.getID(), eo.getAcquisitions());
 
-      final TextView failed =
-        NullCheck.notNull(this.book_downloading_failed_text);
-      failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
+    /**
+     * Theoretically, if the book has ever been downloaded, then the
+     * acquisition list must have contained one usable acquisition relation...
+     */
 
-      final Button dismiss =
-        NullCheck.notNull(this.book_downloading_failed_dismiss);
-      final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
+    if (a_opt.isNone()) {
+      throw new UnreachableCodeException();
+    }
 
-      dismiss.setOnClickListener(
-        new OnClickListener() {
-          @Override
-          public void onClick(
-            final @Nullable View v) {
-            CatalogBookDetailView.this.books.bookDownloadAcknowledge(f.getID());
-          }
-        });
+    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
+    final CatalogAcquisitionButtonController retry_ctl =
+      new CatalogAcquisitionButtonController(
+        this.activity, this.books, current_entry.getBookID(), a, current_entry);
 
-      /**
-       * Manually construct an acquisition controller for the retry button.
-       */
-
-      final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
-      final OptionType<OPDSAcquisition> a_opt =
-        CatalogAcquisitionButtons.getPreferredAcquisition(
-          f.getID(), eo.getAcquisitions());
-
-      /**
-       * Theoretically, if the book has ever been downloaded, then the
-       * acquisition list must have contained one usable acquisition relation...
-       */
-
-      if (a_opt.isNone()) {
-        throw new UnreachableCodeException();
-      }
-
-      final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-      final CatalogAcquisitionButtonController retry_ctl =
-        new CatalogAcquisitionButtonController(
-          this.activity, this.books, current_entry.getBookID(), a, current_entry);
-
-      retry.setEnabled(true);
-      retry.setVisibility(View.VISIBLE);
-      retry.setOnClickListener(retry_ctl);
+    retry.setEnabled(true);
+    retry.setVisibility(View.VISIBLE);
+    retry.setOnClickListener(retry_ctl);
 
 
     return Unit.unit();
@@ -881,7 +865,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_text.setText(text);
 
     CatalogAcquisitionButtons.addButtons(
-        this.activity, this.book_download_buttons, this.books, e);
+      this.activity, this.book_download_buttons, this.books, e);
 
     CatalogBookDetailView.configureButtonsHeight(
       rr, this.book_download_buttons);
