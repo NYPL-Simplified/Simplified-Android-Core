@@ -530,22 +530,6 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookDetailView.this.books.accountRemoveCredentials();
     }
 
-//    if (CatalogBookUnauthorized.isUnAuthorized(f)) {
-//      CatalogBookDetailView.this.books.accountRemoveCredentials();
-//      UIThread.runOnUIThread(
-//        new Runnable() {
-//          @Override
-//          public void run() {
-//
-//            final Intent i = new Intent(CatalogBookDetailView.this.activity, LoginActivity.class);
-//            CatalogBookDetailView.this.activity.startActivity(i);
-//            CatalogBookDetailView.this.activity.overridePendingTransition(0, 0);
-//            CatalogBookDetailView.this.activity.finish();
-//
-//          }
-//        });
-//    }
-
       this.book_debug_status.setText("download failed");
 
       this.book_download.setVisibility(View.INVISIBLE);
