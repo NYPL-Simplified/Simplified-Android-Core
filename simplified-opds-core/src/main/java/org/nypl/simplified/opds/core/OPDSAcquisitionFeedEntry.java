@@ -231,6 +231,10 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   }
 
 
+  /**
+   * @return the annotations url
+   */
+
   public OptionType<URI> getAnnotations()
   {
     return this.annotations;
@@ -244,6 +248,10 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   {
     return this.issues;
   }
+
+  /**
+   * @return The related feed url
+   */
 
   public OptionType<URI> getRelated()
   {

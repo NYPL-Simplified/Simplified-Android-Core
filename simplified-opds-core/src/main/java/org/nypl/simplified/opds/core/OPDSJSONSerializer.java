@@ -15,7 +15,6 @@ import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

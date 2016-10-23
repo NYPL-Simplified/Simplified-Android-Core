@@ -81,6 +81,10 @@ public interface OPDSAcquisitionFeedEntryBuilderType
     OptionType<URI> uri);
 
 
+  /**
+   * @param uri The annotations URI
+   */
+
   void setAnnotationsOption(
     OptionType<URI> uri);
 
@@ -93,6 +97,10 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void setIssuesOption(
     OptionType<URI> uri);
 
+
+  /**
+   * @param uri The Related feed URI
+   */
 
   void setRelatedOption(
     OptionType<URI> uri);
