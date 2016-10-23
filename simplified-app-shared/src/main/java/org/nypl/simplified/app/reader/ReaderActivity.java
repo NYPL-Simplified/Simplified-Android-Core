@@ -87,6 +87,7 @@ public final class ReaderActivity extends Activity implements
 {
   private static final String BOOK_ID;
   private static final String FILE_ID;
+  private static final String ENTRY;
   private static final Logger LOG;
 
   static {
@@ -96,9 +97,11 @@ public final class ReaderActivity extends Activity implements
   static {
     BOOK_ID = "org.nypl.simplified.app.ReaderActivity.book";
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
+    ENTRY = "org.nypl.simplified.app.ReaderActivity.entry";
   }
 
   private @Nullable BookID                            book_id;
+  private @Nullable FeedEntryOPDS                     entry;
   private @Nullable Container                         epub_container;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
@@ -133,17 +136,20 @@ public final class ReaderActivity extends Activity implements
    * @param from The parent activity
    * @param book The unique ID of the book
    * @param file The actual EPUB file
+   * @param entry The OPD feed entry
    */
 
   public static void startActivity(
     final Activity from,
     final BookID book,
-    final File file)
+    final File file,
+    final FeedEntryOPDS entry)
   {
     NullCheck.notNull(file);
     final Bundle b = new Bundle();
     b.putSerializable(ReaderActivity.BOOK_ID, book);
     b.putSerializable(ReaderActivity.FILE_ID, file);
+    b.putSerializable(ReaderActivity.ENTRY, entry);
     final Intent i = new Intent(from, ReaderActivity.class);
     i.putExtras(b);
     from.startActivity(i);
@@ -290,9 +296,12 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull((File) a.getSerializable(ReaderActivity.FILE_ID));
     this.book_id =
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
+    this.entry =
+      NullCheck.notNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
 
     ReaderActivity.LOG.debug("epub file: {}", in_epub_file);
     ReaderActivity.LOG.debug("book id:   {}", this.book_id);
+    ReaderActivity.LOG.debug("entry id:   {}", this.entry.getFeedEntry().getID());
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
