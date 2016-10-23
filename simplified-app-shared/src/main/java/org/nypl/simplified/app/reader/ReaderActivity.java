@@ -121,6 +121,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
 
+  private           AccountCredentials                credentials;
   /**
    * Construct an activity.
    */
@@ -439,6 +440,28 @@ public final class ReaderActivity extends Activity implements
     pl.loadEPUB(in_epub_file, this);
 
     this.applyViewerColorFilters();
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+
+    final BooksType books = app.getBooks();
+
+    books.accountGetCachedLoginDetails(
+      new AccountGetCachedCredentialsListenerType()
+      {
+        @Override public void onAccountIsNotLoggedIn()
+        {
+          throw new UnreachableCodeException();
+        }
+
+        @Override public void onAccountIsLoggedIn(
+          final AccountCredentials creds) {
+
+          ReaderActivity.this.credentials = creds;
+
+        }
+      }
+    );
   }
 
   @Override public void onCurrentPageError(
