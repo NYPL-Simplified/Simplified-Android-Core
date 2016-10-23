@@ -453,10 +453,21 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.debug("received book location: {}", l);
 
     final BookID in_book_id = NullCheck.notNull(this.book_id);
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
+
     final ReaderBookmarksType bm = rs.getBookmarks();
-    bm.setBookmark(in_book_id, l);
+
+    LOG.debug("CurrentPage prefs {}", this.prefs.getBoolean("post_last_read"));
+
+    final RequestQueue queue = Volley.newRequestQueue(this);
+
+    if (this.prefs.getBoolean("post_last_read")) {
+      bm.setBookmark(in_book_id, l, in_entry, this.credentials, queue);
+    }
+
   }
 
   @Override protected void onDestroy()
@@ -725,21 +736,27 @@ public final class ReaderActivity extends Activity implements
      */
 
     final BookID in_book_id = NullCheck.notNull(this.book_id);
+
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+
     final ReaderBookmarksType bookmarks = rs.getBookmarks();
     final OptionType<ReaderBookLocation> mark =
-      bookmarks.getBookmark(in_book_id);
-
+      bookmarks.getBookmark(in_book_id, in_entry);
+    
     final OptionType<ReaderOpenPageRequestType> page_request = mark.map(
       new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>()
       {
         @Override public ReaderOpenPageRequestType call(
           final ReaderBookLocation l)
         {
+          ReaderActivity.this.current_location = l;
           return ReaderOpenPageRequest.fromBookLocation(l);
         }
       });
-
+    // is this correct? inject fonts before book opens or after
     js.injectFonts();
+
+    // open book with page request, vs = view settings, p = package , what is package actually ? page_request = idref + contentcfi
     js.openBook(p, vs, page_request);
 
     /**
