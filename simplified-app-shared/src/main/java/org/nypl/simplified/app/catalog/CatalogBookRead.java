@@ -17,7 +17,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.cardcreator.Prefs;
+import org.nypl.simplified.app.Prefs;
 import org.slf4j.Logger;
 
 import java.io.File;
