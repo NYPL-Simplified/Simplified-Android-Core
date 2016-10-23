@@ -51,6 +51,7 @@
     <module>simplified-tenprint</module>
     <module>simplified-test-utilities</module>
     <module>simplified-bugsnag</module>
+    <module>simplified-cardcreator</module>
 
   </modules>
 

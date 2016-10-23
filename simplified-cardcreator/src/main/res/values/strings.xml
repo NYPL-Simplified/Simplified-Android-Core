@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="next">Next</string>
+  <string name="prev">Previous</string>
+  <string name="finish">Register</string>
+  <string name="review">Review</string>
+
+
+  <string name="label_street1">Street 1</string>
+  <string name="label_street2">Street 2</string>
+  <string name="label_city">City</string>
+  <string name="label_region">Region</string>
+  <string name="label_zip">Zip</string>
+
+
+  <string name="label_address_home">Home Address</string>
+  <string name="label_address_work">Work Address</string>
+  <string name="label_address_school">School Address</string>
+  <string name="label_name">Name</string>
+  <string name="label_email">Email</string>
+  <string name="label_username">Username</string>
+  <string name="label_pin">PIN</string>
+  <string name="label_barcode">Barcode</string>
+
+  <string name="submit_confirm_message">You will receive an email confirmation.</string>
+  <string name="submit_confirm_button">Register</string>
+
+
+  <string name="no_geocoder_available">No geocoder available</string>
+
+  <string name="fetch_address">Fetch address</string>
+
+  <string name="address_found">Address found</string>
+
+  <string name="no_address_found">Sorry, no address found</string>
+  <string name="no_location_data_provided">No location data provided</string>
+  <string name="service_not_available">Sorry, the service is not available</string>
+  <string name="invalid_lat_long_used">Invalid latitude or longitude used</string>
+
+</resources>

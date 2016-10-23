@@ -54,6 +54,12 @@
       <version>${project.version}</version>
       <type>aar</type>
     </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-cardcreator</artifactId>
+      <version>${project.version}</version>
+      <type>aar</type>
+    </dependency>
 
     <dependency>
       <groupId>org.nypl.drm</groupId>
