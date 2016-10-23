@@ -122,6 +122,7 @@ public final class ReaderActivity extends Activity implements
   private           boolean                           web_view_resized;
 
   private           AccountCredentials                credentials;
+  private           Prefs                             prefs;
   /**
    * Construct an activity.
    */
@@ -299,6 +300,8 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
     this.entry =
       NullCheck.notNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
+
+    this.prefs =  new Prefs(ReaderActivity.this);
 
     ReaderActivity.LOG.debug("epub file: {}", in_epub_file);
     ReaderActivity.LOG.debug("book id:   {}", this.book_id);
