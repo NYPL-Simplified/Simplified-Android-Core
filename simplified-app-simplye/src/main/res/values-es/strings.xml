@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_needed">Es necesario iniciar sesión para ver la colección.</string>
+    <string name="login_with_barcode">Ingresar con Tarjeta de la Biblioteca NYPL</string>
+
+</resources>

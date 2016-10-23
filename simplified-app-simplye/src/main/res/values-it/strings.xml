@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_needed">Devi effettuare il login per accedere alla collezione.</string>
+    <string name="login_with_barcode">Accesso con NYPL tessera della biblioteca</string>
+
+</resources>
