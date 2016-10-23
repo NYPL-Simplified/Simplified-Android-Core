@@ -66,10 +66,8 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * The main reader activity for reading an EPUB.
@@ -120,7 +118,8 @@ public final class ReaderActivity extends Activity implements
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
-
+  private           ReaderBookLocation                current_location;
+  private           ReaderBookLocation                sync_location;
   private           AccountCredentials                credentials;
   private           Prefs                             prefs;
   /**
@@ -281,6 +280,12 @@ public final class ReaderActivity extends Activity implements
           readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
         }
       }, 300L);
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    this.syncLastRead();
   }
 
   @Override protected void onCreate(
@@ -846,6 +851,62 @@ public final class ReaderActivity extends Activity implements
             });
         }
       });
+  }
+
+  private void syncLastRead() {
+
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+    final ReaderBookmarksType bm = rs.getBookmarks();
+    final BookID in_book_id = NullCheck.notNull(this.book_id);
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+    final ReaderBookmarksType bookmarks = rs.getBookmarks();
+
+    final OptionType<ReaderBookLocation> mark =
+      bookmarks.getBookmark(in_book_id, in_entry);
+
+    final OptionType<ReaderOpenPageRequestType> page_request = mark.map(
+      new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
+        @Override
+        public ReaderOpenPageRequestType call(
+          final ReaderBookLocation l) {
+          LOG.debug("CurrentPage location {}", l);
+          ReaderActivity.this.current_location = l;
+          return ReaderOpenPageRequest.fromBookLocation(l);
+        }
+      });
+
+    // Instantiate the RequestQueue.
+    final RequestQueue queue = Volley.newRequestQueue(this);
+    final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
+
+    // Request a string response from the provided URL.
+    final NYPLStringRequest request = new NYPLStringRequest(Request.Method.GET, url, this.credentials,
+      new Response.Listener<String>() {
+
+
+        @Override
+        public void onResponse(final String response) {
+
+          LOG.debug("CurrentPage onResponse {}", response);
+          ReaderActivity.this.showBookLocationDialog(response);
+
+        }
+      }, new Response.ErrorListener() {
+
+      @Override
+      public void onErrorResponse(final VolleyError error) {
+
+        LOG.debug("CurrentPage onErrorResponse {}", error);
+        final int duration = Toast.LENGTH_LONG;
+        final Toast toast = Toast.makeText(ReaderActivity.this, error.toString(), duration);
+        toast.show();
+
+      }
+    });
+
+    // Add the request to the RequestQueue.
+    queue.add(request);
   }
 
   @Override public void onReadiumFunctionInitializeError(
