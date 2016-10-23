@@ -15,6 +15,7 @@ import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -323,6 +324,18 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
           final URI u)
         {
           je.put("thumbnail", u.toString());
+          return Unit.unit();
+        }
+      });
+
+
+    e.getAnnotations().map(
+      new FunctionType<URI, Unit>()
+      {
+        @Override public Unit call(
+          final URI u)
+        {
+          je.put("annotations", u.toString());
           return Unit.unit();
         }
       });
