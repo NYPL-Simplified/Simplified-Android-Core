@@ -27,6 +27,7 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.volley.NYPLJsonObjectRequest;
 import org.slf4j.Logger;
 
 import java.net.URI;

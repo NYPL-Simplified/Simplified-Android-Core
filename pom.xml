@@ -51,8 +51,8 @@
     <module>simplified-tenprint</module>
     <module>simplified-test-utilities</module>
     <module>simplified-bugsnag</module>
-    <module>../../volley</module>
-
+    <module>simplified-volley</module>
+    <module>simplified-jobqueue</module>
   </modules>
 
   <properties>
