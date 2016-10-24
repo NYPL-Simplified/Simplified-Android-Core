@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <!-- EULA strings -->
+  <string name="eula_disagree">Не соглашаться</string>
+  <string name="eula_agree">Согласиться</string>
+
+  <!-- Books strings -->
+  <string name="books">Мои книги</string>
+  <string name="books_sync">Синхронизация учетной записи</string>
+  <string name="books_sort_by">Сортировать по</string>
+  <string name="books_sort_by_author">Автор</string>
+  <string name="books_sort_by_title">Заглавие</string>
+
+  <!-- Holds strings -->
+  <string name="holds">Оговорки</string>
+  <string name="holds_empty">Когда вы бронируете книгу из каталога он будет отображаться здесь. Посмотрите сюда время от времени, чтобы увидеть, если ваша книга доступна для загрузки.</string>
+
+  <!-- Catalog strings -->
+  <string name="catalog">Каталог</string>
+  <string name="catalog_book_detail">Детали</string>
+  <string name="catalog_load_error_title">Ошибка</string>
+  <string name="catalog_load_error_text">Произошла ошибка при загрузке каталога. Пожалуйста, попробуйте еще раз.</string>
+  <string name="catalog_load_not_connected">Вы не подключены к Интернету. Пожалуйста, подключите и повторите попытку.</string>
+  <string name="catalog_book_revoke_loan_confirm">Вы уверены, что хотите вернуть эту книгу?</string>
+  <string name="catalog_book_revoke_hold_confirm">Вы уверены, что хотите удалить эту оговорку?</string>
+  <string name="catalog_book_delete_confirm">Вы уверены, что хотите удалить эту книгу?</string>
+  <string name="catalog_cancel_downloading">Отмена</string>
+  <string name="catalog_categories">категории</string>
+  <string name="catalog_detail_related">Книги по этой теме</string>
+  <string name="catalog_revoke_failed">Операция не может быть завершена.</string>
+  <string name="catalog_download_failed">Загрузки не может быть завершена.</string>
+  <string name="catalog_download_failed_loan_limit_reached">Книга кредитный лимит достиг.</string>
+  <string name="catalog_download_failed_unsupported_pdf">Эта книга представляет собой Adobe PDF, который не поддерживается.</string>
+  <string name="catalog_download_failed_unsupported_unknown">Эта книга неизвестного типа и не поддерживается.</string>
+  <string name="catalog_download_failed_unsupported_passhash">Passhash защищенные книги не поддерживаются.</string>
+  <string name="catalog_downloading">загрузка</string>
+  <string name="catalog_empty_feed">Результатов не найдено.</string>
+  <string name="catalog_empty_my_books">Посетите каталог, чтобы добавить книги Мои книги</string>
+  <string name="catalog_meta_corrupt">Метаданные для этой книги поврежден. Пожалуйста синхронизировать свою учетную запись, чтобы исправить это.</string>
+  <string name="catalog_meta_corrupt_title">Метаданные повреждены</string>
+  <string name="catalog_publication_date">опубликованный</string>
+  <string name="catalog_publisher">издатель</string>
+  <string name="catalog_refresh">Обновить поток</string>
+  <string name="catalog_search">Поиск</string>
+  <string name="catalog_unknown_feed">неизвестный</string>
+  <string name="catalog_more_feed">Больше</string>
+  <string name="catalog_requesting_loan">запрашивающий</string>
+  <string name="catalog_requesting_revoke">запрашивающий</string>
+
+  <!-- Catalog book detail strings -->
+  <string name="catalog_book_borrow">Получить</string>
+  <string name="catalog_book_reserve">резерв</string>
+  <string name="catalog_book_read">Читать</string>
+  <string name="catalog_book_error_dismiss">увольнять</string>
+  <string name="catalog_book_error_retry">повторить попытку</string>
+  <string name="catalog_book_sync">синхронизировать</string>
+  <string name="catalog_book_download">Скачать</string>
+  <string name="catalog_book_delete">Удалить</string>
+  <string name="catalog_book_revoke_loan">вернуться в настоящее время</string>
+  <string name="catalog_book_revoke_hold">Удалить</string>
+  <string name="catalog_book_report">отчет об итогах выпуска</string>
+  <string name="catalog_book_distribution">Распространяется</string>
+  <string name="catalog_book_revoke_cancel">Отмена</string>
+
+  <string name="catalog_book_availability_loaned_indefinite">Эта книга уже одолжена</string>
+  <string name="catalog_book_availability_loaned_timed">У вас есть эта книга по кредиту для% с.</string>
+  <string name="catalog_book_availability_open_access">Эта книга является Вашим, чтобы сохранить.</string>
+  <string name="catalog_book_availability_held_indefinite">У вас есть эта книга на удержание.</string>
+  <string name="catalog_book_availability_held_timed">Вы сможете брать эту книгу в% с.</string>
+  <string name="catalog_book_availability_held_queue">Вы находитесь в позиции% D в очереди для этой книги.</string>
+  <string name="catalog_book_availability_reserved_timed">Процедура оформления бронирования истекает в% с.</string>
+  <string name="catalog_book_availability_reserved_indefinite">У вас есть эта книга защищены.</string>
+  <string name="catalog_book_availability_loanable">Эта книга доступна для кредита.</string>
+  <string name="catalog_book_availability_holdable">Все экземпляры этой книги в настоящее время на правах аренды.</string>
+  <string name="catalog_book_availability_revoked">Эта книга ждет, чтобы быть возвращены.</string>
+  <string name="catalog_book_interval_days">дней</string>
+  <string name="catalog_book_interval_hours">часов</string>
+  <string name="catalog_book_interval_sub_hour">меньше часа</string>
+  <string name="catalog_book_interval_years_short">у = лет</string>
+  <string name="catalog_book_interval_months_short">м = месяцев</string>
+  <string name="catalog_book_interval_weeks_short">W = недели</string>
+  <string name="catalog_book_interval_days_short">D = дни</string>
+  <string name="catalog_book_interval_hours_short">ч = часы</string>
+
+  <!-- Catalog book report strings -->
+  <string name="catalog_book_report_wrong_genre">Неправильный Жанр</string>
+  <string name="catalog_book_report_wrong_audience">Wrong аудитория</string>
+  <string name="catalog_book_report_wrong_age_range">Неправильный Возрастной диапазон</string>
+  <string name="catalog_book_report_wrong_title">Неправильный заголовок</string>
+  <string name="catalog_book_report_wrong_medium">Неправильный средний</string>
+  <string name="catalog_book_report_wrong_author">Неправильный Автор</string>
+  <string name="catalog_book_report_wrong_cover_image">Неправильно / отсутствует изображение обложки</string>
+  <string name="catalog_book_report_wrong_description">Неправильный / Несовместимость описание</string>
+  <string name="catalog_book_report_cant_download">Не удается загрузить</string>
+  <string name="catalog_book_report_cant_borrow">Не могу Занять</string>
+  <string name="catalog_book_report_incorrect_contents">Содержание книги Неустановленный или неправильно</string>
+
+  <string name="catalog_book_report_cancel">Отмена</string>
+  <string name="catalog_book_report_submit">Отправить</string>
+
+  <!-- Help strings -->
+  <string name="help">Помогите</string>
+
+  <!-- Settings strings -->
+  <string name="settings">настройки</string>
+  <string name="settings_login_title">Библиотечная карта</string>
+  <string name="settings_barcode">Штрих-код</string>
+  <string name="settings_pin">PIN</string>
+  <string name="settings_screen_Lock_not_setup">защищенный экран блокировки не был создан -> Перейти в "Настройки -> Безопасность -> Блокировка экрана для настройки блокировки экрана</string>
+  <string name="settings_log_in_cancel">Отмена</string>
+  <string name="settings_log_in">Авторизоваться</string>
+  <string name="settings_log_out">Выйти</string>
+  <string name="settings_log_out_cancel">Отмена</string>
+  <string name="settings_login_succeeded">Помнить успешно</string>
+  <string name="settings_logout_succeeded">Записан успешно</string>
+  <string name="settings_login_failed">Авторизация не удалась</string>
+  <string name="settings_login_failed_credentials">Ваш штрих-код и пин-код комбинация не является действительным. Пожалуйста, попробуйте еще раз.</string>
+  <string name="settings_login_failed_server">Произошла неизвестная ошибка. Пожалуйста, проверьте подключение или повторите попытку позже.</string>
+  <string name="settings_login_failed_device">при активации устройства произошла ошибка. Пожалуйста, проверьте подключение или повторите попытку позже.</string>
+  <string name="settings_login_failed_adobe_device_limit">Слишком большое количество устройств было зарегистрировано на этот счет. Обратитесь в службу поддержки Adobe для получения помощи.</string>
+  <string name="settings_login_failed_adobe_device_bad_clock">при активации устройства произошла ошибка. Пожалуйста, убедитесь, что ваши часы устройство настроено на правильное время.</string>
+  <string name="settings_logout_failed">Выйти не удалось</string>
+  <string name="settings_feedback">Обратная связь</string>
+  <string name="settings_about">Около</string>
+  <string name="settings_credits">подтверждения</string>
+  <string name="settings_eula">Пользовательское Соглашение</string>
+  <string name="settings_privacy">политика конфиденциальности</string>
+  <string name="settings_logout_confirm">Если вы выходите из своего аккаунта, все содержимое будет удалено из этого устройства.</string>
+  <string name="settings_adobe_accounts">Adobe Accounts</string>
+  <string name="settings_alt_uris">Альтернативные URL-адреса</string>
+  <string name="settings_reveal_password">Показать PIN</string>
+
+  <string name="navigation_accessibility">навигация</string>
+  <string name="navigation_accessibility_drawer_show">Показать панель навигации. Кнопка.</string>
+  <string name="navigation_accessibility_drawer_hide">Скрыть панель навигации. Кнопка.</string>
+
+  <!-- Accessibility strings used for content descriptions (Settings) -->
+  <string name="settings_accessibility_log_in_cancel">Отменить логин</string>
+  <string name="settings_accessibility_log_in">Авторизоваться</string>
+  <string name="settings_accessibility_log_out_cancel">Отменить выход из системы</string>
+  <string name="settings_accessibility_log_out">Выйти</string>
+
+  <string name="catalog_accessibility_book_borrow">кнопку получить</string>
+  <string name="catalog_accessibility_book_reserve">кнопка резерва</string>
+  <string name="catalog_accessibility_book_read">кнопку чтения</string>
+  <string name="catalog_accessibility_book_error_dismiss">кнопку увольнять</string>
+  <string name="catalog_accessibility_book_error_retry">кнопку повтора</string>
+  <string name="catalog_accessibility_book_sync">кнопка синхронизации</string>
+  <string name="catalog_accessibility_book_download">кнопка Загрузить</string>
+  <string name="catalog_accessibility_book_delete">кнопка Удалить</string>
+  <string name="catalog_accessibility_book_revoke_loan">вернуться теперь кнопку</string>
+  <string name="catalog_accessibility_book_revoke_hold">кнопку удалить</string>
+  <string name="catalog_accessibility_book_revoke_loan_cancel">отменить возвращение в настоящее время</string>
+  <string name="catalog_accessibility_book_revoke_hold_cancel">отменить удалить</string>
+  <string name="catalog_accessibility_header_show_more">mostrar más en% 1 $ s</string>
+
+  <!-- Reader strings -->
+  <string name="reader">читатель</string>
+  <string name="reader_toc">Содержание</string>
+
+  <!-- Accessibility strings used for content descriptions (Reader) -->
+  <string name="reader_accessibility_toc">Показывать оглавление</string>
+  <string name="reader_accessibility_toc_back">Закройте таблицу содержимого без выбора элемента</string>
+  <string name="reader_accessibility_settings">Показать настройки чтения</string>
+  <string name="reader_accessibility_close">Закрой книгу</string>
+  <string name="reader_accessibility_media_previous">Переход к предыдущему пункту медиа</string>
+  <string name="reader_accessibility_media_next">Переход к следующему пункту медиа</string>
+  <string name="reader_accessibility_media_play">Воспроизведение или пауза текущего элемента медиа</string>
+
+
+  <string name="reader_accessibility_settings_sans_font">Шрифт Sans</string>
+  <string name="reader_accessibility_settings_serif_font">Шрифт Serif</string>
+  <string name="reader_accessibility_settings_open_dyslexic_font">Шрифт Open Dyslexic</string>
+  <string name="reader_accessibility_settings_white_on_black_text">Белый по чёрному текст.</string>
+  <string name="reader_accessibility_settings_black_on_sepia_text">Чёрный по се́пия текст.</string>
+  <string name="reader_accessibility_settings_black_on_white_text">Чёрный по белому текст.</string>
+  <string name="reader_accessibility_settings_decrease_font_size">Уменьшить шрифт</string>
+  <string name="reader_accessibility_settings_increase_font_size">Увеличить шрифт</string>
+  <string name="reader_accessibility_settings_brightness_slider">Контроль яркости</string>
+  <string name="reader_accessibility_settings_close">Закрыть Настройки чтения</string>
+  <string name="reader_settings_close">Закрыть</string>
+
+
+
+
+
+</resources>
