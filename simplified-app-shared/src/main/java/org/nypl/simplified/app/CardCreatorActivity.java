@@ -33,8 +33,7 @@ import org.nypl.simplified.books.core.AccountLoginListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.cardcreator.Constants;
-import org.nypl.simplified.cardcreator.LocationTracker;
+import org.nypl.simplified.cardcreator.validation.LocationTracker;
 import org.nypl.simplified.cardcreator.fragments.AddressFragment;
 import org.nypl.simplified.cardcreator.fragments.AgeFragment;
 import org.nypl.simplified.cardcreator.fragments.ConfirmationFragment;
@@ -57,6 +56,7 @@ import org.nypl.simplified.cardcreator.model.UsernameResponse;
 import org.nypl.simplified.cardcreator.validation.AddressValidationTask;
 import org.nypl.simplified.cardcreator.validation.CreatePatronTask;
 import org.nypl.simplified.cardcreator.validation.UsernameValidationTask;
+import org.nypl.simplified.prefs.Prefs;
 
 import java.util.List;
 
@@ -109,9 +109,9 @@ public class CardCreatorActivity extends FragmentActivity implements
 
     bar.setTitle("Sign Up for a Library Card");
 
-    findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_PREV_BUTTON));
+    findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
 
-    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
     final StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
@@ -146,24 +146,24 @@ public class CardCreatorActivity extends FragmentActivity implements
     super.onResume();
 
     if (this.getVisibleFragment() == null) {
-      this.prefs.putBoolean(Constants.SHOW_PREV_BUTTON, false);
-      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_PREV_BUTTON));
-      if (this.prefs.getBoolean(Constants.EQUAL_OR_OLDER_13)) {
-        this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON), false);
+      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
+      if (this.prefs.getBoolean(this.getResources().getString(R.string.EQUAL_OR_OLDER_13))) {
+        this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
       }
-      if (this.prefs.getBoolean(Constants.UNDER_13)) {
-        this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
+      if (this.prefs.getBoolean(this.getResources().getString(R.string.UNDER_13))) {
+        this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
         ((Button) findViewById(R.id.next_button)).setText("Done");
         ((TextView) findViewById(R.id.error)).setText("You are not old enough to sign up for a library card.");
         (findViewById(R.id.error)).setVisibility(View.VISIBLE);
 
       }
-      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
     } else {
 
-      this.prefs.putBoolean(Constants.SHOW_PREV_BUTTON, true);
-      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_PREV_BUTTON));
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON), true);
+      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
 
     }
 
@@ -197,8 +197,8 @@ public class CardCreatorActivity extends FragmentActivity implements
       return;
     }
 
-    this.prefs.putBoolean(Constants.SHOW_PREV_BUTTON, true);
-    findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_PREV_BUTTON));
+    this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON), true);
+    findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
 
     final Fragment current_fragment = this.getVisibleFragment();
     final Fragment new_fragment;
@@ -206,7 +206,8 @@ public class CardCreatorActivity extends FragmentActivity implements
     if (current_fragment instanceof AgeFragment) {
 
       // show location fragment
-      new_fragment = new LocationFragment().newInstance(this.prefs.getString(Constants.ADDRESS_OUTPUT), this.prefs.getString(Constants.ADDRESS_STATUS));
+      new_fragment = new LocationFragment().newInstance(this.prefs.getString(this.getResources().getString(R.string.ADDRESS_OUTPUT)),
+        this.prefs.getString(this.getResources().getString(R.string.ADDRESS_STATUS)));
       this.replace(new_fragment);
 
     } else if (current_fragment instanceof LocationFragment) {
@@ -226,11 +227,11 @@ public class CardCreatorActivity extends FragmentActivity implements
 
       new AddressValidationTask(
         this,
-        ((HomeAddressFragment) current_fragment).line_1.getText().toString(),
-        ((HomeAddressFragment) current_fragment).line_2.getText().toString(),
-        ((HomeAddressFragment) current_fragment).city.getText().toString(),
-        ((HomeAddressFragment) current_fragment).state.getText().toString(),
-        ((HomeAddressFragment) current_fragment).zip.getText().toString(), false, Simplified.getCardCreator()).run();
+        ((HomeAddressFragment) current_fragment).getLine_1().getText().toString(),
+        ((HomeAddressFragment) current_fragment).getLine_2().getText().toString(),
+        ((HomeAddressFragment) current_fragment).getCity().getText().toString(),
+        ((HomeAddressFragment) current_fragment).getState().getText().toString(),
+        ((HomeAddressFragment) current_fragment).getZip().getText().toString(), false, Simplified.getCardCreator()).run();
 
     } else if (current_fragment instanceof HomeAddressConfirmFragment) {
 
@@ -238,19 +239,19 @@ public class CardCreatorActivity extends FragmentActivity implements
 
         ((Button) findViewById(R.id.next_button)).setText("Next");
 
-        if (!"NY".equals(this.prefs.getString(Constants.STATE_H_DATA_KEY))) {
+        if (!"NY".equals(this.prefs.getString(this.getResources().getString(R.string.STATE_H_DATA_KEY)))) {
 
           new_fragment = new AddressFragment().newInstance();
           this.replace(new_fragment);
 
-          if (this.prefs.getBoolean(Constants.LIVE_IN_NY_DATA_KEY)
-            || this.prefs.getBoolean(Constants.WORK_IN_NY_DATA_KEY)
-            || this.prefs.getBoolean(Constants.SCHOOL_IN_NY_DATA_KEY)) {
-            this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-            findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+          if (this.prefs.getBoolean(this.getResources().getString(R.string.LIVE_IN_NY_DATA_KEY))
+            || this.prefs.getBoolean(this.getResources().getString(R.string.WORK_IN_NY_DATA_KEY))
+            || this.prefs.getBoolean(this.getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY))) {
+            this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+            findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
           } else {
-            this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, false);
-            findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+            this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), false);
+            findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
           }
 
         } else {
@@ -263,11 +264,11 @@ public class CardCreatorActivity extends FragmentActivity implements
 
       new AddressValidationTask(
         this,
-        ((WorkAddressFragment) current_fragment).line_1.getText().toString(),
-        ((WorkAddressFragment) current_fragment).line_2.getText().toString(),
-        ((WorkAddressFragment) current_fragment).city.getText().toString(),
-        ((WorkAddressFragment) current_fragment).state.getText().toString(),
-        ((WorkAddressFragment) current_fragment).zip.getText().toString(), true,  Simplified.getCardCreator()).run();
+        ((WorkAddressFragment) current_fragment).getLine_1().getText().toString(),
+        ((WorkAddressFragment) current_fragment).getLine_2().getText().toString(),
+        ((WorkAddressFragment) current_fragment).getCity().getText().toString(),
+        ((WorkAddressFragment) current_fragment).getState().getText().toString(),
+        ((WorkAddressFragment) current_fragment).getZip().getText().toString(), true,  Simplified.getCardCreator()).run();
 
     } else if (current_fragment instanceof WorkAddressConfirmFragment) {
       if ("Confirm".equals(((Button) findViewById(R.id.next_button)).getText())) {
@@ -281,13 +282,13 @@ public class CardCreatorActivity extends FragmentActivity implements
 
       new_fragment = new CredentialsFragment().newInstance();
       this.replace(new_fragment);
-      this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
     } else if (current_fragment instanceof CredentialsFragment) {
 
       new UsernameValidationTask(this,
-        ((CredentialsFragment) current_fragment).username.getText().toString(),  Simplified.getCardCreator()).run();
+        ((CredentialsFragment) current_fragment).getUsername().getText().toString(),  Simplified.getCardCreator()).run();
 
     } else if (current_fragment instanceof ReviewFragment) {
 
@@ -345,10 +346,10 @@ public class CardCreatorActivity extends FragmentActivity implements
     if (i == R.id.under13 && checked) {
         ((Button) findViewById(R.id.next_button)).setText("Done");
 
-        this.prefs.putBoolean(Constants.UNDER_13, true);
-        this.prefs.putBoolean(Constants.EQUAL_OR_OLDER_13, false);
-        this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-        findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+        this.prefs.putBoolean(this.getResources().getString(R.string.UNDER_13), true);
+        this.prefs.putBoolean(this.getResources().getString(R.string.EQUAL_OR_OLDER_13), false);
+        this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+        findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
         ((TextView) findViewById(R.id.error)).setText("You are not old enough to sign up for a library card.");
         (findViewById(R.id.error)).setVisibility(View.VISIBLE);
@@ -357,10 +358,10 @@ public class CardCreatorActivity extends FragmentActivity implements
 
         ((Button) findViewById(R.id.next_button)).setText("Next");
 
-        this.prefs.putBoolean(Constants.UNDER_13, false);
-        this.prefs.putBoolean(Constants.EQUAL_OR_OLDER_13, true);
-        this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-        findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+        this.prefs.putBoolean(this.getResources().getString(R.string.UNDER_13), false);
+        this.prefs.putBoolean(this.getResources().getString(R.string.EQUAL_OR_OLDER_13), true);
+        this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+        findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
         (findViewById(R.id.error)).setVisibility(View.GONE);
     }
   }
@@ -393,8 +394,8 @@ public class CardCreatorActivity extends FragmentActivity implements
         ((TextView) findViewById(android.R.id.text1)).setText("You must be in New York to sign up for a library card. "
           + "Please try to sign up again when you are in another location.");
       }
-      this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
     } else {
       // Can't get location.
@@ -414,21 +415,21 @@ public class CardCreatorActivity extends FragmentActivity implements
   public void onAddressRadioButtonClicked(final View view) {
     final boolean checked = ((RadioButton) view).isChecked();
 
-    this.prefs.putBoolean(Constants.LIVE_IN_NY_DATA_KEY, false);
-    this.prefs.putBoolean(Constants.WORK_IN_NY_DATA_KEY, false);
-    this.prefs.putBoolean(Constants.SCHOOL_IN_NY_DATA_KEY, false);
+    this.prefs.putBoolean(this.getResources().getString(R.string.LIVE_IN_NY_DATA_KEY), false);
+    this.prefs.putBoolean(this.getResources().getString(R.string.WORK_IN_NY_DATA_KEY), false);
+    this.prefs.putBoolean(this.getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY), false);
 
-    this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+    this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
     // Check which radio button was clicked
     final int i = view.getId();
     if (i == R.id.liveInNYC && checked) {
-        this.prefs.putBoolean(Constants.LIVE_IN_NY_DATA_KEY, true);
+        this.prefs.putBoolean(this.getResources().getString(R.string.LIVE_IN_NY_DATA_KEY), true);
     } else if (i == R.id.workInNYC && checked) {
-        this.prefs.putBoolean(Constants.WORK_IN_NY_DATA_KEY, true);
+        this.prefs.putBoolean(this.getResources().getString(R.string.WORK_IN_NY_DATA_KEY), true);
     } else if (i == R.id.goToSchoolInNYC && checked) {
-        this.prefs.putBoolean(Constants.SCHOOL_IN_NY_DATA_KEY, true);
+        this.prefs.putBoolean(this.getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY), true);
     }
   }
 
@@ -439,18 +440,18 @@ public class CardCreatorActivity extends FragmentActivity implements
     ((Button) findViewById(R.id.next_button)).setText("Next");
 
     if (this.getVisibleFragment() == null || this.getVisibleFragment() instanceof AgeFragment) {
-      this.prefs.putBoolean(Constants.SHOW_PREV_BUTTON, false);
-      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_PREV_BUTTON));
-      if (this.prefs.getBoolean(Constants.EQUAL_OR_OLDER_13)) {
-        this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON), false);
+      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
+      if (this.prefs.getBoolean(this.getResources().getString(R.string.EQUAL_OR_OLDER_13))) {
+        this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
       }
-      if (this.prefs.getBoolean(Constants.UNDER_13)) {
-        this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
+      if (this.prefs.getBoolean(this.getResources().getString(R.string.UNDER_13))) {
+        this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
       }
-      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
     } else {
-      this.prefs.putBoolean(Constants.SHOW_PREV_BUTTON, true);
-      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_PREV_BUTTON));
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON), true);
+      findViewById(R.id.prev_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_PREV_BUTTON)));
     }
 
     if (this.getVisibleFragment() instanceof LocationFragment)
@@ -459,22 +460,23 @@ public class CardCreatorActivity extends FragmentActivity implements
     }
 
     if (this.getVisibleFragment() instanceof AddressFragment
-      && (this.prefs.getBoolean(Constants.WORK_IN_NY_DATA_KEY) || this.prefs.getBoolean(Constants.SCHOOL_IN_NY_DATA_KEY))) {
-      this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+      && (this.prefs.getBoolean(this.getResources().getString(R.string.WORK_IN_NY_DATA_KEY))
+      || this.prefs.getBoolean(this.getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY)))) {
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
     }
 
     if (this.getVisibleFragment() instanceof WorkAddressConfirmFragment || this.getVisibleFragment() instanceof HomeAddressConfirmFragment) {
       ((Button) findViewById(R.id.next_button)).setText("Confirm");
 
-      this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, false);
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), false);
 
-      if ((this.prefs.contains(Constants.SELECTED_WORK_ADDRESS) && this.getVisibleFragment() instanceof WorkAddressConfirmFragment)
-        || (this.prefs.contains(Constants.SELECTED_ADDRESS) && this.getVisibleFragment() instanceof HomeAddressConfirmFragment)) {
-        this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
+      if ((this.prefs.contains(this.getResources().getString(R.string.SELECTED_WORK_ADDRESS)) && this.getVisibleFragment() instanceof WorkAddressConfirmFragment)
+        || (this.prefs.contains(this.getResources().getString(R.string.SELECTED_ADDRESS)) && this.getVisibleFragment() instanceof HomeAddressConfirmFragment)) {
+        this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
       }
 
-      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
     }
 
   }
@@ -498,31 +500,31 @@ public class CardCreatorActivity extends FragmentActivity implements
   @Override
   public void onInputComplete() {
 
-    this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+    this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
   }
 
   @Override
   public void onInputInComplete() {
 
-    this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, false);
-    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+    this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), false);
+    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
   }
 
   @Override
   public void onAddressValidationSucceeded(final AddressResponse response) {
 
-    Log.i(TAG, response.message);
+    Log.i(TAG, response.getMessage());
 
-    this.prefs.putString(Constants.CARD_TYPE_DATA_KEY, response.message);
+    this.prefs.putString(getResources().getString(R.string.CARD_TYPE_DATA_KEY), response.getMessage());
 
     final Fragment current_fragment = this.getVisibleFragment();
     final Fragment new_fragment;
     if (current_fragment instanceof HomeAddressFragment) {
 
 
-      if (response.addresses != null || response.address != null) {
+      if (response.getAddresses() != null || response.getAddress() != null) {
         ((Button) findViewById(R.id.next_button)).setText("Confirm");
         new_fragment = new HomeAddressConfirmFragment().newInstance(response);
         this.replace(new_fragment);
@@ -535,10 +537,10 @@ public class CardCreatorActivity extends FragmentActivity implements
 
     } else if (current_fragment instanceof WorkAddressFragment) {
 
-      if (!response.card_type.equals("null")) {
+      if (!"null".equals(response.getCard_type())) {
         ((Button) findViewById(R.id.next_button)).setText("Confirm");
 
-        if (response.addresses != null || response.address != null) {
+        if (response.getAddresses() != null || response.getAddress() != null) {
 
 
           new_fragment = new WorkAddressConfirmFragment().newInstance(response);
@@ -547,20 +549,20 @@ public class CardCreatorActivity extends FragmentActivity implements
         }
 
       } else {
-        ((TextView) findViewById(android.R.id.text1)).setText(response.message);
+        ((TextView) findViewById(android.R.id.text1)).setText(response.getMessage());
         ((TextView) findViewById(android.R.id.text1)).setTextAppearance(getApplicationContext(), R.style.WizardPageError);
 
       }
     }
 
-    this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+    this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
   }
 
   @Override
   public void onAddressValidationFailed(final AddressResponse response) {
-    Log.i(TAG, response.message);
-    ((TextView) findViewById(android.R.id.text1)).setText(response.message);
+    Log.i(TAG, response.getMessage());
+    ((TextView) findViewById(android.R.id.text1)).setText(response.getMessage());
     ((TextView) findViewById(android.R.id.text1)).setTextAppearance(getApplicationContext(), R.style.WizardPageError);
 
   }
@@ -574,21 +576,21 @@ public class CardCreatorActivity extends FragmentActivity implements
 
   @Override
   public void onUsernameValidationSucceeded(final UsernameResponse response) {
-    Log.i(TAG, response.message);
+    Log.i(TAG, response.getMessage());
 
     ((Button) findViewById(R.id.next_button)).setText("Create Card");
 
     final Fragment new_fragment = new ReviewFragment().newInstance();
     this.replace(new_fragment);
-    this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+    this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
   }
 
   @Override
   public void onUsernameValidationFailed(final UsernameResponse response) {
-    Log.i(TAG, response.message);
-    ((TextView) findViewById(android.R.id.text1)).setText(response.message);
+    Log.i(TAG, response.getMessage());
+    ((TextView) findViewById(android.R.id.text1)).setText(response.getMessage());
     ((TextView) findViewById(android.R.id.text1)).setTextAppearance(getApplicationContext(), R.style.WizardPageError);
   }
 
@@ -604,12 +606,12 @@ public class CardCreatorActivity extends FragmentActivity implements
   @Override
   public void onAccountCreationSucceeded(final NewPatronResponse response) {
 
-    Log.i(TAG, response.message);
+    Log.i(TAG, response.getMessage());
 
-    this.prefs.putString(Constants.BARCODE_DATA_KEY, response.barcode);
-    this.prefs.putString(Constants.PIN_DATA_KEY, response.pin);
-    this.prefs.putString(Constants.USERNAME_DATA_KEY, response.username);
-    this.prefs.putString(Constants.MESSAGE_DATA_KEY, response.message);
+    this.prefs.putString(this.getResources().getString(R.string.BARCODE_DATA_KEY), response.getBarcode());
+    this.prefs.putString(this.getResources().getString(R.string.PIN_DATA_KEY), response.getPin());
+    this.prefs.putString(this.getResources().getString(R.string.USERNAME_DATA_KEY), response.getUsername());
+    this.prefs.putString(this.getResources().getString(R.string.MESSAGE_DATA_KEY), response.getMessage());
 
     final Fragment new_fragment = new ConfirmationFragment().newInstance();
 
@@ -619,8 +621,8 @@ public class CardCreatorActivity extends FragmentActivity implements
 
     findViewById(R.id.prev_button).setVisibility(View.GONE);
 
-    this.prefs.putBoolean(Constants.SHOW_NEXT_BUTTON, true);
-    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(Constants.SHOW_NEXT_BUTTON));
+    this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
+    findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
 
     final SimplifiedCatalogAppServicesType app =
@@ -632,8 +634,8 @@ public class CardCreatorActivity extends FragmentActivity implements
       new AdobeVendorID(rr.getString(org.nypl.simplified.app.R.string.feature_adobe_vendor_id)));
     final BooksType books = app.getBooks();
 
-    final AccountBarcode barcode = new AccountBarcode(this.prefs.getString(Constants.USERNAME_DATA_KEY));
-    final AccountPIN pin = new AccountPIN(this.prefs.getString(Constants.PIN_DATA_KEY));
+    final AccountBarcode barcode = new AccountBarcode(this.prefs.getString(this.getResources().getString(R.string.USERNAME_DATA_KEY)));
+    final AccountPIN pin = new AccountPIN(this.prefs.getString(this.getResources().getString(R.string.PIN_DATA_KEY)));
     final AccountAuthProvider auth_provider = new AccountAuthProvider(rr.getString(org.nypl.simplified.app.R.string.feature_default_auth_provider_name));
 
     final AccountCredentials creds =
@@ -645,9 +647,8 @@ public class CardCreatorActivity extends FragmentActivity implements
 
   @Override
   public void onAccountCreationFailed(final NewPatronResponse response) {
-    Log.i(TAG, response.message);
-//    showToast(response.message);
-    ((TextView) findViewById(android.R.id.text1)).setText(response.message);
+    Log.i(TAG, response.getMessage());
+    ((TextView) findViewById(android.R.id.text1)).setText(response.getMessage());
     ((TextView) findViewById(android.R.id.text1)).setTextAppearance(getApplicationContext(), R.style.WizardPageError);
 
   }
