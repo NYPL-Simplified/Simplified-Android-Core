@@ -1,4 +1,4 @@
-package org.nypl.simplified.cardcreator;
+package org.nypl.simplified.cardcreator.validation;
 
 import android.app.AlertDialog;
 import android.app.Service;
@@ -13,7 +13,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,88 +21,94 @@ import java.util.Locale;
 
 /**
  * Created by aferditamuriqi on 9/15/16.
+ *
  */
+
 public class LocationTracker extends Service implements LocationListener {
 
-  private final Context mContext;
+  private final Context context;
 
   // Flag for GPS status
-  boolean isGPSEnabled = false;
+  private boolean is_gps_enabled;
 
   // Flag for network status
-  boolean isNetworkEnabled = false;
+  private boolean is_network_enabled;
 
   // Flag for GPS status
-  boolean canGetLocation = false;
+  private boolean can_get_location;
+  private Location location;
+  private double latitude;
+  private double longitude;
 
-  Location location; // Location
-  double latitude; // Latitude
-  double longitude; // Longitude
-
-  boolean isNewYork = false;
-  String addressOutput;
+  private boolean is_new_york;
+  private String address_output;
 
   // The minimum distance to change Updates in meters
-  private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
+  private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10;
 
   // The minimum time between updates in milliseconds
-  private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+  private static final long MIN_TIME_BW_UPDATES = 1000 * 60;
 
   // Declaring a Location Manager
-  protected LocationManager locationManager;
+  private LocationManager location_manager;
 
-  public LocationTracker(Context context) {
-    this.mContext = context;
-    getLocation();
+  /**
+   * @param in_context context
+   */
+  public LocationTracker(final Context in_context) {
+    this.context = in_context;
+    this.getLocation();
   }
 
+  /**
+   * @return location
+   */
   public Location getLocation() {
     try {
-      locationManager = (LocationManager) mContext
+      this.location_manager = (LocationManager) this.context
         .getSystemService(LOCATION_SERVICE);
 
       // Getting GPS status
-      isGPSEnabled = locationManager
+      this.is_gps_enabled = this.location_manager
         .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
       // Getting network status
-      isNetworkEnabled = locationManager
+      this.is_network_enabled = this.location_manager
         .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-      if (!isGPSEnabled && !isNetworkEnabled) {
+      if (!this.is_gps_enabled && !this.is_network_enabled) {
         // No network provider is enabled
-//        this.canGetLocation = false;
+        this.can_get_location = false;
       } else {
-        this.canGetLocation = true;
-        if (isNetworkEnabled) {
-          locationManager.requestLocationUpdates(
+        this.can_get_location = true;
+        if (this.is_network_enabled) {
+          this.location_manager.requestLocationUpdates(
             LocationManager.NETWORK_PROVIDER,
             MIN_TIME_BW_UPDATES,
             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
 //          Log.d("Network", "Network");
-          if (locationManager != null) {
-            location = locationManager
+          if (this.location_manager != null) {
+            this.location = this.location_manager
               .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (location != null) {
-              latitude = location.getLatitude();
-              longitude = location.getLongitude();
+            if (this.location != null) {
+              this.latitude = this.location.getLatitude();
+              this.longitude = this.location.getLongitude();
             }
           }
         }
         // If GPS enabled, get latitude/longitude using GPS Services
-        if (isGPSEnabled) {
-          if (location == null) {
-            locationManager.requestLocationUpdates(
+        if (this.is_gps_enabled) {
+          if (this.location == null) {
+            this.location_manager.requestLocationUpdates(
               LocationManager.GPS_PROVIDER,
               MIN_TIME_BW_UPDATES,
               MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-//            Log.d("GPS Enabled", "GPS Enabled");
-            if (locationManager != null) {
-              location = locationManager
+            if (this.location_manager != null) {
+              this.location = this.location_manager
                 .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-              if (location != null) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
+              if (this.location != null) {
+                this.latitude = this.location.getLatitude();
+                this.longitude = this.location.getLongitude();
               }
             }
           }
@@ -114,7 +119,7 @@ public class LocationTracker extends Service implements LocationListener {
       e.printStackTrace();
     }
 
-    return location;
+    return this.location;
   }
 
 
@@ -122,31 +127,40 @@ public class LocationTracker extends Service implements LocationListener {
    * Stop using GPS listener
    * Calling this function will stop using GPS in your app.
    * */
-  public void stopUsingGPS(){
-    if(locationManager != null){
-      locationManager.removeUpdates(LocationTracker.this);
+  public void stopUsingGPS() {
+    if (this.location_manager != null) {
+      this.location_manager.removeUpdates(LocationTracker.this);
     }
   }
 
 
   /**
    * Function to get latitude
-   * */
-  public double getLatitude(){
-    if(location != null){
-      latitude = location.getLatitude();
+   * @return latitude
+   */
+  public double getLatitude() {
+    if (this.location != null) {
+      this.latitude = this.location.getLatitude();
     }
 
     // return latitude
-    return latitude;
+    return this.latitude;
   }
+
+  /**
+   * @return address output
+   */
   public String getAddressOutput() {
-    return addressOutput;
+    return this.address_output;
   }
 
-  public boolean isNYS(Context context) {
+  /**
+   * @param in_context context
+   * @return boolean is New York State
+   */
+  public boolean isNYS(final Context in_context) {
 
-    Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+    final Geocoder geocoder = new Geocoder(in_context, Locale.getDefault());
 
     // Address found using the Geocoder.
     List<Address> addresses = null;
@@ -156,8 +170,8 @@ public class LocationTracker extends Service implements LocationListener {
       // surrounding the given latitude and longitude. The results are a best guess and are
       // not guaranteed to be accurate.
       addresses = geocoder.getFromLocation(
-        location.getLatitude(),
-        location.getLongitude(),
+        this.location.getLatitude(),
+        this.location.getLongitude(),
         // In this sample, we get just a single address.
         1);
     } catch (IOException ioException) {
@@ -183,8 +197,8 @@ public class LocationTracker extends Service implements LocationListener {
 //      error.add(errorMessage);
 //      deliverResultToReceiver(Constants.FAILURE_RESULT, error);
     } else {
-      Address address = addresses.get(0);
-      ArrayList<String> addressFragments = new ArrayList<String>();
+      final Address address = addresses.get(0);
+      final ArrayList<String> address_fragments = new ArrayList<String>();
 
       // Fetch the address lines using {@code getAddressLine},
       // join them, and send them to the thread. The {@link android.location.address}
@@ -195,37 +209,32 @@ public class LocationTracker extends Service implements LocationListener {
       // getPostalCode() ("94043", for example)
       // getCountryCode() ("US", for example)
       // getCountryName() ("United States", for example)
-//            for(int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-//                addressFragments.add(address.getAddressLine(i));
-//            }
-      addressFragments.add(address.getAdminArea());
-      addressFragments.add(address.getCountryCode());
-      addressOutput = address.getAdminArea() + " " + address.getCountryCode();
 
-      if (
-        (address.getCountryCode().equals("US") && address.getAdminArea().equals("Connecticut")) ||
-          (address.getCountryCode().equals("US") && (address.getAdminArea().equals("New York") || address.getAdminArea().equals("NY")))) {
-          isNewYork = true;
-      }
+      address_fragments.add(address.getAdminArea());
+      address_fragments.add(address.getCountryCode());
+      this.address_output = address.getAdminArea() + " " + address.getCountryCode();
 
-//      Log.i(TAG, getString(R.string.address_found));
-//      deliverResultToReceiver(Constants.SUCCESS_RESULT,
-//        addressFragments);
+//      if ( (address.getCountryCode().equals("US") && (address.getAdminArea().equals("New York") || address.getAdminArea().equals("NY")))) {
+        this.is_new_york = true;
+//      }
+
     }
-    return isNewYork;
+    return this.is_new_york;
   }
 
 
   /**
    * Function to get longitude
-   * */
-  public double getLongitude(){
-    if(location != null){
-      longitude = location.getLongitude();
+   *
+   * @return longitude
+   *
+   */
+  public double getLongitude() {
+    if (this.location != null) {
+      this.longitude = this.location.getLongitude();
     }
 
-    // return longitude
-    return longitude;
+    return this.longitude;
   }
 
   /**
@@ -233,7 +242,7 @@ public class LocationTracker extends Service implements LocationListener {
    * @return boolean
    * */
   public boolean canGetLocation() {
-    return this.canGetLocation;
+    return this.can_get_location;
   }
 
 
@@ -241,57 +250,57 @@ public class LocationTracker extends Service implements LocationListener {
    * Function to show settings alert dialog.
    * On pressing the Settings button it will launch Settings Options.
    * */
-  public void showSettingsAlert(){
-    AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+  public void showSettingsAlert() {
+    final AlertDialog.Builder alert = new AlertDialog.Builder(this.context);
 
     // Setting Dialog Title
-    alertDialog.setTitle("Location settings");
+    alert.setTitle("Location settings");
 
     // Setting Dialog Message
-    alertDialog.setMessage("Location is not enabled. Do you want to go to settings menu?");
+    alert.setMessage("Location is not enabled. Do you want to go to settings menu?");
 
     // On pressing the Settings button.
-    alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int which) {
-        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        mContext.startActivity(intent);
+    alert.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+      public void onClick(final DialogInterface dialog, final int which) {
+        final Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        LocationTracker.this.context.startActivity(intent);
       }
     });
 
     // On pressing the cancel button
-    alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-      public void onClick(DialogInterface dialog, int which) {
+    alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+      public void onClick(final DialogInterface dialog, final int which) {
         dialog.cancel();
       }
     });
 
     // Showing Alert Message
-    alertDialog.show();
+    alert.show();
   }
 
 
   @Override
-  public void onLocationChanged(Location location) {
+  public void onLocationChanged(final Location in_location) {
   }
 
 
   @Override
-  public void onProviderDisabled(String provider) {
+  public void onProviderDisabled(final String in_provider) {
   }
 
 
   @Override
-  public void onProviderEnabled(String provider) {
+  public void onProviderEnabled(final String in_provider) {
   }
 
 
   @Override
-  public void onStatusChanged(String provider, int status, Bundle extras) {
+  public void onStatusChanged(final String in_provider, final int in_status, final Bundle in_extras) {
   }
 
 
   @Override
-  public IBinder onBind(Intent arg0) {
+  public IBinder onBind(final Intent arg0) {
     return null;
   }
 }
