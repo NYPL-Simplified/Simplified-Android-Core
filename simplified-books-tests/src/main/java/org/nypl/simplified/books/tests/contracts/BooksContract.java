@@ -366,6 +366,11 @@ public final class BooksContract implements BooksContractType
       {
         return Option.none();
       }
+
+      @Override
+      public OptionType<SyncedDocumentType> getLicenses() {
+        return Option.none();
+      }
     };
   }
 
@@ -557,7 +562,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
+        new AccountCredentials(no_vendor, barcode, pin,Option.some(new AccountAuthProvider("Library")));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
       final OPDSJSONSerializerType in_json_serializer =
@@ -679,7 +684,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
+        new AccountCredentials(no_vendor, barcode, pin,Option.some(new AccountAuthProvider("Library")));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
@@ -804,7 +809,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
+        new AccountCredentials(no_vendor, barcode, pin,Option.some(new AccountAuthProvider("Library")));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
@@ -1082,7 +1087,7 @@ public final class BooksContract implements BooksContractType
       final AccountPIN pin = new AccountPIN("pin");
       final OptionType<AdobeVendorID> no_vendor = Option.none();
       final AccountCredentials creds =
-        new AccountCredentials(no_vendor, barcode, pin,new AccountAuthProvider("Library"));
+        new AccountCredentials(no_vendor, barcode, pin,Option.some(new AccountAuthProvider("Library")));
 
       final HTTPType in_http = BooksContract.makeAuthHTTP(barcode, pin);
 
@@ -1317,6 +1322,16 @@ public final class BooksContract implements BooksContractType
     @Override public synchronized void setCurrentRootFeedURI(final URI u)
     {
       this.current_root = NullCheck.notNull(u);
+    }
+
+    @Override
+    public URI getAdobeAuthURI() {
+      return null;
+    }
+
+    @Override
+    public void setAdobeAuthURI(URI u) {
+
     }
 
     @Override
