@@ -242,7 +242,7 @@ public final class Simplified extends Application
       return as;
     }
     as = new CardCreator(
-      this.getAssets(), this.getResources().getString(R.string.feature_environment));
+      this.getAssets(), this.getResources().getString(R.string.feature_environment), this.getResources());
     this.cardcreator = as;
     return as;
   }
@@ -291,7 +291,7 @@ public final class Simplified extends Application
 
     this.initBugsnag(Bugsnag.getApiToken(this.getAssets()));
 
-    this.cardcreator = new CardCreator(this.getAssets(), this.getResources().getString(R.string.feature_environment));
+    this.cardcreator = new CardCreator(this.getAssets(), this.getResources().getString(R.string.feature_environment), this.getResources());
 
   }
 
