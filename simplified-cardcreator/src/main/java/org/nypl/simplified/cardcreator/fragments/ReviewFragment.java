@@ -8,8 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.nypl.simplified.cardcreator.Constants;
-import org.nypl.simplified.cardcreator.Prefs;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;
 
 
@@ -21,17 +20,20 @@ import org.nypl.simplified.cardcreator.R;
 public class ReviewFragment extends Fragment {
 
 
-    public TextView username;
-    public TextView pin;
-    public TextView name;
-    public TextView email;
-    public TextView homeAddress;
-    public TextView workSchoolAddress;
-    public TextView labelWorkAddress;
-    public TextView labelSchoolAddress;
-    private Prefs mPrefs;
+    private TextView username;
+    private TextView pin;
+    private TextView name;
+    private TextView email;
+    private TextView home_address;
+    private TextView work_school_address;
+    private TextView label_work_address;
+    private TextView label_school_address;
+    private Prefs prefs;
 
 
+    /**
+     *
+     */
     public ReviewFragment() {
         // Required empty public constructor
     }
@@ -43,81 +45,81 @@ public class ReviewFragment extends Fragment {
      * @return A new instance of fragment ConfimrationFragment.
      */
     public  ReviewFragment newInstance() {
-        ReviewFragment fragment = new ReviewFragment();
-        Bundle args = new Bundle();
+        final ReviewFragment fragment = new ReviewFragment();
+        final Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
-        mPrefs = new Prefs(getContext());
+    public void onCreate(final Bundle state) {
+        super.onCreate(state);
+
+       this.prefs = new Prefs(getContext());
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle state) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_review, container, false);
-        ((TextView) rootView.findViewById(android.R.id.title)).setText("Review");
-        ((TextView) rootView.findViewById(android.R.id.text1)).setText(mPrefs.getString(Constants.CARD_TYPE_DATA_KEY));
+        final View root_view = inflater.inflate(R.layout.fragment_review, container, false);
+        ((TextView) root_view.findViewById(android.R.id.title)).setText("Review");
+        ((TextView) root_view.findViewById(android.R.id.text1)).setText(this.prefs.getString(getResources().getString(R.string.CARD_TYPE_DATA_KEY)));
 
-        username = ((TextView) rootView.findViewById(R.id.username));
-        pin = ((TextView) rootView.findViewById(R.id.pin));
-        email = ((TextView) rootView.findViewById(R.id.email));
-        name = ((TextView) rootView.findViewById(R.id.name));
-        homeAddress = ((TextView) rootView.findViewById(R.id.address_home));
-        workSchoolAddress = ((TextView) rootView.findViewById(R.id.address_work_school));
-        labelSchoolAddress = ((TextView) rootView.findViewById(R.id.Label_address_school));
-        labelWorkAddress = ((TextView) rootView.findViewById(R.id.label_address_work));
+        this.username = ((TextView) root_view.findViewById(R.id.username));
+        this.pin = ((TextView) root_view.findViewById(R.id.pin));
+        this.email = ((TextView) root_view.findViewById(R.id.email));
+        this.name = ((TextView) root_view.findViewById(R.id.name));
+        this.home_address = ((TextView) root_view.findViewById(R.id.address_home));
+        this.work_school_address = ((TextView) root_view.findViewById(R.id.address_work_school));
+        this.label_school_address = ((TextView) root_view.findViewById(R.id.Label_address_school));
+        this.label_work_address = ((TextView) root_view.findViewById(R.id.label_address_work));
 
 
-        if (mPrefs.getBoolean(Constants.WORK_IN_NY_DATA_KEY)) {
-            labelWorkAddress.setVisibility(View.VISIBLE);
+        if (this.prefs.getBoolean(getResources().getString(R.string.WORK_IN_NY_DATA_KEY))) {
+            this.label_work_address.setVisibility(View.VISIBLE);
         } else {
-            labelWorkAddress.setVisibility(View.GONE);
+            this.label_work_address.setVisibility(View.GONE);
         }
-        if (mPrefs.getBoolean(Constants.SCHOOL_IN_NY_DATA_KEY)) {
-            labelSchoolAddress.setVisibility(View.VISIBLE);
+        if (this.prefs.getBoolean(getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY))) {
+            this.label_school_address.setVisibility(View.VISIBLE);
         } else {
-            labelSchoolAddress.setVisibility(View.GONE);
+            this.label_school_address.setVisibility(View.GONE);
         }
 
-        if (mPrefs.getBoolean(Constants.SCHOOL_IN_NY_DATA_KEY) || mPrefs.getBoolean(Constants.WORK_IN_NY_DATA_KEY)) {
-            StringBuilder work = new StringBuilder();
-            work.append(mPrefs.getString(Constants.STREET1_W_DATA_KEY) + "\n");
-            if (mPrefs.getString(Constants.STREET2_W_DATA_KEY) != null) {
-                work.append(mPrefs.getString(Constants.STREET2_W_DATA_KEY) + "\n");
+        if (this.prefs.getBoolean(getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY)) || this.prefs.getBoolean(getResources().getString(R.string.WORK_IN_NY_DATA_KEY))) {
+            final StringBuilder work = new StringBuilder();
+            work.append(this.prefs.getString(getResources().getString(R.string.STREET1_W_DATA_KEY)) + "\n");
+            if (this.prefs.getString(getResources().getString(R.string.STREET2_W_DATA_KEY)) != null) {
+                work.append(this.prefs.getString(getResources().getString(R.string.STREET2_W_DATA_KEY)) + "\n");
             }
-            work.append(mPrefs.getString(Constants.CITY_W_DATA_KEY) + "\n");
-            work.append(mPrefs.getString(Constants.STATE_W_DATA_KEY) + "\n");
-            work.append(mPrefs.getString(Constants.ZIP_W_DATA_KEY) + "\n");
+            work.append(this.prefs.getString(getResources().getString(R.string.CITY_W_DATA_KEY)) + "\n");
+            work.append(this.prefs.getString(getResources().getString(R.string.STATE_W_DATA_KEY)) + "\n");
+            work.append(this.prefs.getString(getResources().getString(R.string.ZIP_W_DATA_KEY)) + "\n");
 
-            workSchoolAddress.setText(work.toString());
+            this.work_school_address.setText(work.toString());
 
         }
 
-        username.setText(mPrefs.getString(Constants.USERNAME_DATA_KEY));
-        pin.setText(mPrefs.getString(Constants.PIN_DATA_KEY));
-        name.setText(mPrefs.getString(Constants.NAME_DATA_KEY));
-        email.setText(mPrefs.getString(Constants.EMAIL_DATA_KEY));
+        this.username.setText(this.prefs.getString(getResources().getString(R.string.USERNAME_DATA_KEY)));
+        this.pin.setText(this.prefs.getString(getResources().getString(R.string.PIN_DATA_KEY)));
+        this.name.setText(this.prefs.getString(getResources().getString(R.string.NAME_DATA_KEY)));
+        this.email.setText(this.prefs.getString(getResources().getString(R.string.EMAIL_DATA_KEY)));
 
-        StringBuilder home = new StringBuilder();
-        home.append(mPrefs.getString(Constants.STREET1_H_DATA_KEY) + "\n");
-        if (mPrefs.getString(Constants.STREET2_H_DATA_KEY) != null) {
-            home.append(mPrefs.getString(Constants.STREET2_H_DATA_KEY) + "\n");
+        final StringBuilder home = new StringBuilder();
+        home.append(this.prefs.getString(getResources().getString(R.string.STREET1_H_DATA_KEY)) + "\n");
+        if (this.prefs.getString(getResources().getString(R.string.STREET2_H_DATA_KEY)) != null) {
+            home.append(this.prefs.getString(getResources().getString(R.string.STREET2_H_DATA_KEY)) + "\n");
         }
-        home.append(mPrefs.getString(Constants.CITY_H_DATA_KEY) + "\n");
-        home.append(mPrefs.getString(Constants.STATE_H_DATA_KEY) + "\n");
-        home.append(mPrefs.getString(Constants.ZIP_H_DATA_KEY) + "\n");
+        home.append(this.prefs.getString(getResources().getString(R.string.CITY_H_DATA_KEY)) + "\n");
+        home.append(this.prefs.getString(getResources().getString(R.string.STATE_H_DATA_KEY)) + "\n");
+        home.append(this.prefs.getString(getResources().getString(R.string.ZIP_H_DATA_KEY)) + "\n");
 
-        homeAddress.setText(home.toString());
+        this.home_address.setText(home.toString());
 
 
-        return rootView;
+        return root_view;
     }
 
 }

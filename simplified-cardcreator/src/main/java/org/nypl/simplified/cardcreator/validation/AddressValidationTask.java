@@ -7,7 +7,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.cardcreator.CardCreator;
-import org.nypl.simplified.cardcreator.Constants;
 import org.nypl.simplified.cardcreator.listener.AddressListenerType;
 import org.nypl.simplified.cardcreator.model.AddressResponse;
 import org.nypl.simplified.http.core.HTTP;
@@ -32,8 +31,6 @@ import java.net.URISyntaxException;
 
 public class AddressValidationTask implements Runnable {
 
-    private static final String TAG = "AddressValidationTask";
-
     private final AddressListenerType listener;
 
     private final String line_1;
@@ -46,14 +43,24 @@ public class AddressValidationTask implements Runnable {
 
     private final CardCreator card_creator;
 
-    public AddressValidationTask(AddressListenerType in_listener,
-                                 String in_line_1,
-                                 String in_line_2,
-                                 String in_city,
-                                 String in_state,
-                                 String in_zip,
-                                 boolean in_is_work_address,
-                                 CardCreator in_card_creator) {
+    /**
+     * @param in_listener address listener
+     * @param in_line_1 address line 1
+     * @param in_line_2 address line 2
+     * @param in_city address state
+     * @param in_state address state
+     * @param in_zip address zip
+     * @param in_is_work_address address is work address
+     * @param in_card_creator card creator
+     */
+    public AddressValidationTask(final AddressListenerType in_listener,
+                                 final String in_line_1,
+                                 final String in_line_2,
+                                 final String in_city,
+                                 final String in_state,
+                                 final String in_zip,
+                                 final boolean in_is_work_address,
+                                 final CardCreator in_card_creator) {
         this.line_1 = in_line_1;
         this.line_2 = in_line_2;
         this.city = in_city;
@@ -68,7 +75,6 @@ public class AddressValidationTask implements Runnable {
     @Override
     public void run() {
 
-        HTTPType http = HTTP.newHTTP();
         URI uri = null;
 
         try {
@@ -77,53 +83,54 @@ public class AddressValidationTask implements Runnable {
             e.printStackTrace();
         }
 
-        final OptionType<HTTPAuthType> auth =
-          Option.some((HTTPAuthType) new HTTPAuthBasic(this.card_creator.getUsername(), this.card_creator.getPassword()));
 
         final ObjectNode address = JsonNodeFactory.instance.objectNode();
-        address.set("line_1", JsonNodeFactory.instance.textNode(this.line_1.toString()));
-        address.set("line_2", JsonNodeFactory.instance.textNode(this.line_2.toString()));
-        address.set("city", JsonNodeFactory.instance.textNode(this.city.toString()));
-        address.set("state", JsonNodeFactory.instance.textNode(this.state.toString()));
-        address.set("zip", JsonNodeFactory.instance.textNode(this.zip.toString()));
+        address.set("line_1", JsonNodeFactory.instance.textNode(this.line_1));
+        address.set("line_2", JsonNodeFactory.instance.textNode(this.line_2));
+        address.set("city", JsonNodeFactory.instance.textNode(this.city));
+        address.set("state", JsonNodeFactory.instance.textNode(this.state));
+        address.set("zip", JsonNodeFactory.instance.textNode(this.zip));
 
 
-        final ObjectNode name = JsonNodeFactory.instance.objectNode();
-        name.set("address", address);
-        name.set("is_work_or_school_address", JsonNodeFactory.instance.booleanNode(this.is_work_address));
+        final ObjectNode obj = JsonNodeFactory.instance.objectNode();
+        obj.set("address", address);
+        obj.set("is_work_or_school_address", JsonNodeFactory.instance.booleanNode(this.is_work_address));
 
+        final HTTPType http = HTTP.newHTTP();
+
+        final OptionType<HTTPAuthType> auth =
+          Option.some((HTTPAuthType) new HTTPAuthBasic(this.card_creator.getUsername(), this.card_creator.getPassword()));
 
         final HTTPResultType<InputStream> result;
 
         try {
-            String user = JSONSerializerUtilities.serializeToString(name);
+            final String body = JSONSerializerUtilities.serializeToString(obj);
 
-            result = http.post(auth, uri, user.getBytes(), "application/json");
-
+            result = http.post(auth, uri, body.getBytes(), "application/json");
             result.matchResult(
 
                     new HTTPResultMatcherType<InputStream, Unit, Exception>() {
                         @Override
-                        public Unit onHTTPError(HTTPResultError<InputStream> httpResultError) throws Exception {
-                            AddressValidationTask.this.listener.onAddressValidationError(httpResultError.getMessage());
+                        public Unit onHTTPError(final HTTPResultError<InputStream> error) throws Exception {
+                            AddressValidationTask.this.listener.onAddressValidationError(error.getMessage());
                             return Unit.unit();
                         }
 
                         @Override
-                        public Unit onHTTPException(HTTPResultException<InputStream> httpResultException) throws Exception {
-                            AddressValidationTask.this.listener.onAddressValidationError(httpResultException.getError().getMessage());
+                        public Unit onHTTPException(final HTTPResultException<InputStream> exception) throws Exception {
+                            AddressValidationTask.this.listener.onAddressValidationError(exception.getError().getMessage());
                             return Unit.unit();
                         }
 
                         @Override
-                        public Unit onHTTPOK(HTTPResultOKType<InputStream> httpResultOKType) throws Exception {
+                        public Unit onHTTPOK(final HTTPResultOKType<InputStream> result) throws Exception {
 
-                            AddressResponse addressResponse = new AddressResponse(httpResultOKType.getValue());
+                            final AddressResponse address_response = new AddressResponse(result.getValue());
 
-                            if (addressResponse.type.equals("valid-address") || addressResponse.type.equals("alternate-addresses")) {
-                                AddressValidationTask.this.listener.onAddressValidationSucceeded(addressResponse);
+                            if (address_response.getType().equals("valid-address") || address_response.getType().equals("alternate-addresses")) {
+                                AddressValidationTask.this.listener.onAddressValidationSucceeded(address_response);
                             } else {
-                                AddressValidationTask.this.listener.onAddressValidationFailed(addressResponse);
+                                AddressValidationTask.this.listener.onAddressValidationFailed(address_response);
                             }
 
                             return Unit.unit();

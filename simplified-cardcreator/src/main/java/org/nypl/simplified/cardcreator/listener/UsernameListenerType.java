@@ -9,10 +9,19 @@ import org.nypl.simplified.cardcreator.model.UsernameResponse;
 
 public interface UsernameListenerType {
 
+    /**
+     * @param response username response
+     */
     void onUsernameValidationSucceeded(UsernameResponse response);
 
+    /**
+     * @param response username response
+     */
     void onUsernameValidationFailed(UsernameResponse response);
 
+    /**
+     * @param message message
+     */
     void onUsernameValidationError(String message);
 
 }

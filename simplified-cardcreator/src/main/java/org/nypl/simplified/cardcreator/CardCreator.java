@@ -1,6 +1,7 @@
 package org.nypl.simplified.cardcreator;
 
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 
 import com.io7m.jnull.NullCheck;
 
@@ -24,30 +25,42 @@ public final class CardCreator {
     LOG = LogUtilities.getLog(CardCreator.class);
   }
 
+  private String url;
+  private String username;
+  private String password;
+  private Resources resources;
+
   /**
-   *
+   * @param in_manager asset manager
+   * @param in_environment development environment
+   * @param in_resources resources
    */
-  public CardCreator(final AssetManager in_mgr, final String env) {
-    NullCheck.notNull(in_mgr);
+  public CardCreator(final AssetManager in_manager,
+                     final String in_environment,
+                     final Resources in_resources) {
+
+    NullCheck.notNull(in_manager);
+
+    this.resources = in_resources;
 
     InputStream s = null;
     try {
-      s = in_mgr.open("cardcreator.conf");
+      s = in_manager.open("cardcreator.conf");
       final Properties p = new Properties();
       p.load(s);
 
-      this.url = p.getProperty("cardcreator." + env + ".url");
-      this.username = p.getProperty("cardcreator." + env + ".username");
-      this.password = p.getProperty("cardcreator." + env + ".password");
+      this.url = p.getProperty("cardcreator." + in_environment + ".url");
+      this.username = p.getProperty("cardcreator." + in_environment + ".username");
+      this.password = p.getProperty("cardcreator." + in_environment + ".password");
 
       if (this.url == null) {
-        throw new CardCreatorConfigurationMissingParameter("cardcreator." + env + ".url");
+        throw new CardCreatorConfigurationMissingParameter("cardcreator." + in_environment + ".url");
       }
       if (this.username == null) {
-        throw new CardCreatorConfigurationMissingParameter("cardcreator." + env + ".username");
+        throw new CardCreatorConfigurationMissingParameter("cardcreator." + in_environment + ".username");
       }
       if (this.password == null) {
-        throw new CardCreatorConfigurationMissingParameter("cardcreator." + env + ".password");
+        throw new CardCreatorConfigurationMissingParameter("cardcreator." + in_environment + ".password");
       }
     } catch (final IOException e) {
       CardCreator.LOG.debug(
@@ -67,11 +80,6 @@ public final class CardCreator {
     }
   }
 
-  private String url;
-
-  private String username;
-
-  private String password;
 
   /**
    * @return card creator url
@@ -92,6 +100,13 @@ public final class CardCreator {
    */
   public String getUsername() {
     return this.username;
+  }
+
+  /**
+   * @return context resources
+   */
+  public Resources getResources() {
+    return this.resources;
   }
 
 

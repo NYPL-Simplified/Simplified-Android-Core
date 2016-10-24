@@ -7,8 +7,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.cardcreator.CardCreator;
-import org.nypl.simplified.cardcreator.Constants;
-import org.nypl.simplified.cardcreator.Prefs;
+import org.nypl.simplified.cardcreator.R;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.listener.AccountListenerType;
 import org.nypl.simplified.cardcreator.model.NewPatronResponse;
 import org.nypl.simplified.http.core.HTTP;
@@ -33,15 +33,18 @@ import java.net.URISyntaxException;
 
 public class CreatePatronTask implements Runnable {
 
-    private static final String TAG = "CreatePatronTask";
-
-    private final Prefs mPrefs;
+    private final Prefs prefs;
 
     private final AccountListenerType listener;
     private  final CardCreator card_creator;
 
-    public CreatePatronTask(AccountListenerType in_listener, Prefs in_prefs, CardCreator in_card_creator) {
-        this.mPrefs = in_prefs;
+    /**
+     * @param in_listener account listener
+     * @param in_prefs share prefs
+     * @param in_card_creator card creator
+     */
+    public CreatePatronTask(final AccountListenerType in_listener, final Prefs in_prefs, final CardCreator in_card_creator) {
+        this.prefs = in_prefs;
         this.listener = in_listener;
         this.card_creator = in_card_creator;
     }
@@ -63,26 +66,27 @@ public class CreatePatronTask implements Runnable {
           Option.some((HTTPAuthType) new HTTPAuthBasic(this.card_creator.getUsername(), this.card_creator.getPassword()));
 
         final ObjectNode card = JsonNodeFactory.instance.objectNode();
-        card.set("name", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.NAME_DATA_KEY)));
-        card.set("email", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.EMAIL_DATA_KEY)));
-        card.set("pin", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.PIN_DATA_KEY)));
-        card.set("username", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.USERNAME_DATA_KEY)));
+        card.set("name", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.NAME_DATA_KEY))));
+        card.set("email", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.EMAIL_DATA_KEY))));
+        card.set("pin", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.PIN_DATA_KEY))));
+        card.set("username", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.USERNAME_DATA_KEY))));
 
         final ObjectNode address = JsonNodeFactory.instance.objectNode();
-        address.set("line_1", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.STREET1_H_DATA_KEY)));
-        address.set("line_2", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.STREET2_H_DATA_KEY)));
-        address.set("city", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.CITY_H_DATA_KEY)));
-        address.set("state", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.STATE_H_DATA_KEY)));
-        address.set("zip", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.ZIP_H_DATA_KEY)));
+        address.set("line_1", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.STREET1_H_DATA_KEY))));
+        address.set("line_2", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.STREET2_H_DATA_KEY))));
+        address.set("city", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.CITY_H_DATA_KEY))));
+        address.set("state", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.STATE_H_DATA_KEY))));
+        address.set("zip", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.ZIP_H_DATA_KEY))));
         card.set("address", address);
 
-        if (mPrefs.getBoolean(Constants.WORK_IN_NY_DATA_KEY) || mPrefs.getBoolean(Constants.SCHOOL_IN_NY_DATA_KEY)) {
+        if (this.prefs.getBoolean(this.card_creator.getResources().getString(R.string.WORK_IN_NY_DATA_KEY))
+          || this.prefs.getBoolean(this.card_creator.getResources().getString(R.string.SCHOOL_IN_NY_DATA_KEY))) {
             final ObjectNode work_address = JsonNodeFactory.instance.objectNode();
-            work_address.set("line_1", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.STREET1_W_DATA_KEY)));
-            work_address.set("line_2", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.STREET2_W_DATA_KEY)));
-            work_address.set("city", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.CITY_W_DATA_KEY)));
-            work_address.set("state", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.STATE_W_DATA_KEY)));
-            work_address.set("zip", JsonNodeFactory.instance.textNode(mPrefs.getString(Constants.ZIP_W_DATA_KEY)));
+            work_address.set("line_1", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.STREET1_W_DATA_KEY))));
+            work_address.set("line_2", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.STREET2_W_DATA_KEY))));
+            work_address.set("city", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.CITY_W_DATA_KEY))));
+            work_address.set("state", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.STATE_W_DATA_KEY))));
+            work_address.set("zip", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.ZIP_W_DATA_KEY))));
             card.set("work_address", work_address);
         }
 
@@ -90,38 +94,38 @@ public class CreatePatronTask implements Runnable {
         final HTTPResultType<InputStream> result;
 
         try {
-            String cardString = JSONSerializerUtilities.serializeToString(card);
+            final String card_string = JSONSerializerUtilities.serializeToString(card);
 
-            result = http.post(auth, uri, cardString.getBytes(), "application/json");
+            result = http.post(auth, uri, card_string.getBytes(), "application/json");
 
             result.matchResult(
 
                     new HTTPResultMatcherType<InputStream, Unit, Exception>() {
                         @Override
-                        public Unit onHTTPError(HTTPResultError<InputStream> httpResultError) throws Exception {
+                        public Unit onHTTPError(final HTTPResultError<InputStream> error) throws Exception {
 
-                            CreatePatronTask.this.listener.onAccountCreationError(httpResultError.getMessage());
-
-                            return Unit.unit();
-                        }
-
-                        @Override
-                        public Unit onHTTPException(HTTPResultException<InputStream> httpResultException) throws Exception {
-
-                            CreatePatronTask.this.listener.onAccountCreationError(httpResultException.getError().getMessage());
+                            CreatePatronTask.this.listener.onAccountCreationError(error.getMessage());
 
                             return Unit.unit();
                         }
 
                         @Override
-                        public Unit onHTTPOK(HTTPResultOKType<InputStream> httpResultOKType) throws Exception {
+                        public Unit onHTTPException(final HTTPResultException<InputStream> exceptin) throws Exception {
 
-                            NewPatronResponse nameResponse = new NewPatronResponse(httpResultOKType.getValue());
+                            CreatePatronTask.this.listener.onAccountCreationError(exceptin.getError().getMessage());
 
-                            if (nameResponse.type.equals("card-granted")) {
-                                CreatePatronTask.this.listener.onAccountCreationSucceeded(nameResponse);
+                            return Unit.unit();
+                        }
+
+                        @Override
+                        public Unit onHTTPOK(final HTTPResultOKType<InputStream> result) throws Exception {
+
+                            final NewPatronResponse name_response = new NewPatronResponse(result.getValue());
+
+                            if (name_response.getType().equals("card-granted")) {
+                                CreatePatronTask.this.listener.onAccountCreationSucceeded(name_response);
                             } else {
-                                CreatePatronTask.this.listener.onAccountCreationFailed(nameResponse);
+                                CreatePatronTask.this.listener.onAccountCreationFailed(name_response);
                             }
 
                             return Unit.unit();

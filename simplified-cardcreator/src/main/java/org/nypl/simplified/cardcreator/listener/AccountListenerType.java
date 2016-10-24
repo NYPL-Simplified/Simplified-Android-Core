@@ -9,10 +9,19 @@ import org.nypl.simplified.cardcreator.model.NewPatronResponse;
 
 public interface AccountListenerType {
 
+    /**
+     * @param response new patron response
+     */
     void onAccountCreationSucceeded(NewPatronResponse response);
 
+    /**
+     * @param response  new patron response
+     */
     void onAccountCreationFailed(NewPatronResponse response);
 
-    void onAccountCreationError(String message);
+    /**
+     * @param message message
+     */
+    void onAccountCreationError(final String message);
 
 }

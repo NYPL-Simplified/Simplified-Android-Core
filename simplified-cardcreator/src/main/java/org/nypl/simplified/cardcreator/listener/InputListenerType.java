@@ -7,7 +7,14 @@ package org.nypl.simplified.cardcreator.listener;
 
 public interface InputListenerType {
 
+    /**
+     *
+     */
     void onInputComplete();
+
+    /**
+     *
+     */
     void onInputInComplete();
 
 }

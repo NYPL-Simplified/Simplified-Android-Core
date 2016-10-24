@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Scanner;
 
 /**
  * Created by aferditamuriqi on 8/29/16.
@@ -14,18 +15,42 @@ import java.io.Serializable;
 public class UsernameResponse  implements Serializable {
 
 
-    public String type;
-    public String card_type;
-    public String message;
+    private String type;
+    private String card_type;
+    private String message;
 
-    public UsernameResponse(InputStream inputStream) {
+    /**
+     * @return type
+     */
+    public String getType() {
+        return this.type;
+    }
+
+    /**
+     * @return card type
+     */
+    public String getCard_type() {
+        return this.card_type;
+    }
+
+    /**
+     * @return message
+     */
+    public String getMessage() {
+        return this.message;
+    }
+
+    /**
+     * @param input_stream input stream
+     */
+    public UsernameResponse(final InputStream input_stream) {
 
         try {
-            JSONObject json = new JSONObject(convertStreamToString(inputStream));
+            final JSONObject json = new JSONObject(convertStreamToString(input_stream));
 
-            type = json.getString("type");
-            card_type = json.getString("card_type");
-            message = json.getString("message");
+            this.type = json.getString("type");
+            this.card_type = json.getString("card_type");
+            this.message = json.getString("message");
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -33,8 +58,8 @@ public class UsernameResponse  implements Serializable {
 
     }
 
-    public static String convertStreamToString(java.io.InputStream is) {
-        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    private static String convertStreamToString(final InputStream is) {
+        final Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
 }

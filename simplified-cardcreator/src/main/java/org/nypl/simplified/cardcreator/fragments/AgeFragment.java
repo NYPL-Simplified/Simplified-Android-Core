@@ -9,8 +9,7 @@ import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import org.nypl.simplified.cardcreator.Constants;
-import org.nypl.simplified.cardcreator.Prefs;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;
 
 
@@ -58,12 +57,15 @@ public class AgeFragment extends Fragment {
 
     final View root_view = inflater.inflate(R.layout.fragment_age, container, false);
 
-    ((TextView) root_view.findViewById(android.R.id.text1)).setText("To obtain a digital library card from the New York Public Library, you must live, work, or attend school in New York State. You must also be at least 13 years of age and be physically present in New York at the time of sign-up.\n\n\nYou must be 13 years of age or older to sign up for a library card. How old are you?");
+    ((TextView) root_view.findViewById(android.R.id.text1)).setText("To obtain a digital library card from the "
+      + "New York Public Library, you must live, work, or attend school in New York State. "
+      + "You must also be at least 13 years of age and be physically present in New York at the time of sign-up."
+      + "\n\n\nYou must be 13 years of age or older to sign up for a library card. How old are you?");
 
     root_view.findViewById(android.R.id.text1).setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 
-    ((RadioButton) root_view.findViewById(R.id.under13)).setChecked(this.prefs.getBoolean(Constants.UNDER_13));
-    ((RadioButton) root_view.findViewById(R.id.equalOrOlder)).setChecked(this.prefs.getBoolean(Constants.EQUAL_OR_OLDER_13));
+    ((RadioButton) root_view.findViewById(R.id.under13)).setChecked(this.prefs.getBoolean(getResources().getString(R.string.UNDER_13)));
+    ((RadioButton) root_view.findViewById(R.id.equalOrOlder)).setChecked(this.prefs.getBoolean(getResources().getString(R.string.EQUAL_OR_OLDER_13)));
 
 
     return root_view;

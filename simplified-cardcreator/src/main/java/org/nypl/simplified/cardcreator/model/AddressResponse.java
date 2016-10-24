@@ -16,30 +16,77 @@ import java.util.Scanner;
 public class AddressResponse implements Serializable {
 
 
-    public String type;
-    public String card_type;
-    public String message;
-    public JSONArray addresses;
-    public Address address;
-    public Address original_address;
+    private String type;
+    private String card_type;
+    private String message;
+    private JSONArray addresses;
+    private Address address;
+    private Address original_address;
 
-    public AddressResponse(InputStream inputStream) {
+
+
+    /**
+     * @return original address
+     */
+    public Address getOriginal_address() {
+        return this.original_address;
+    }
+
+    /**
+     * @return type
+     */
+    public String getType() {
+        return this.type;
+    }
+
+    /**
+     * @return message
+     */
+    public String getMessage() {
+        return this.message;
+    }
+
+    /**
+     * @return addresses
+     */
+    public JSONArray getAddresses() {
+        return this.addresses;
+    }
+
+    /**
+     * @return address
+     */
+    public Address getAddress() {
+        return this.address;
+    }
+
+    /**
+     * @return card type
+     */
+    public String getCard_type() {
+        return this.card_type;
+    }
+
+    /**
+     * @param input_stream input stream
+     */
+    public AddressResponse(final InputStream input_stream) {
 
 
         try {
-            JSONObject json = new JSONObject(convertStreamToString(inputStream));
+            final JSONObject json = new JSONObject(convertStreamToString(input_stream));
 
-            type = json.getString("type");
-            card_type = json.getString("card_type");
-            message = json.getString("message");
+            this.type = json.getString("type");
+            this.card_type = json.getString("card_type");
+            this.message = json.getString("message");
 
             if (!json.isNull("addresses")) {
-                addresses = json.getJSONArray("addresses");
+                this.addresses = json.getJSONArray("addresses");
             }
-            if (!json.isNull("address")){
-                address = new Address(json.getJSONObject("address"));
+            if (!json.isNull("address")) {
+                this.address = new Address(json.getJSONObject("address"));
             }
-            original_address = new Address(json.getJSONObject("original_address"));
+            this.original_address = new Address(json.getJSONObject("original_address"));
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -47,7 +94,7 @@ public class AddressResponse implements Serializable {
 
     }
 
-    private static String convertStreamToString(java.io.InputStream is) {
+    private static String convertStreamToString(final InputStream is) {
         final Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }

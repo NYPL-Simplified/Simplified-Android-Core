@@ -7,7 +7,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.cardcreator.CardCreator;
-import org.nypl.simplified.cardcreator.Constants;
 import org.nypl.simplified.cardcreator.listener.UsernameListenerType;
 import org.nypl.simplified.cardcreator.model.UsernameResponse;
 import org.nypl.simplified.http.core.HTTP;
@@ -40,7 +39,13 @@ public class UsernameValidationTask implements Runnable {
 
   private final CardCreator card_creator;
 
-  public UsernameValidationTask(UsernameListenerType in_listener, String in_username, CardCreator in_card_creator) {
+  /**
+   * @param in_listener username listener
+   * @param in_username username
+   * @param in_card_creator card creator
+   */
+
+  public UsernameValidationTask(final UsernameListenerType in_listener, final String in_username, final CardCreator in_card_creator) {
     this.username = in_username;
     this.listener = in_listener;
     this.card_creator = in_card_creator;
@@ -49,7 +54,7 @@ public class UsernameValidationTask implements Runnable {
   @Override
   public void run() {
 
-    HTTPType http = HTTP.newHTTP();
+    final HTTPType http = HTTP.newHTTP();
     URI uri = null;
 
     try {
@@ -61,41 +66,41 @@ public class UsernameValidationTask implements Runnable {
     final OptionType<HTTPAuthType> auth =
       Option.some((HTTPAuthType) new HTTPAuthBasic(this.card_creator.getUsername(), this.card_creator.getPassword()));
 
-    final ObjectNode name = JsonNodeFactory.instance.objectNode();
+    final ObjectNode obj = JsonNodeFactory.instance.objectNode();
 
-    name.set("username", JsonNodeFactory.instance.textNode(this.username.toString()));
+    obj.set("username", JsonNodeFactory.instance.textNode(this.username));
 
     final HTTPResultType<InputStream> result;
 
     try {
-      String user = JSONSerializerUtilities.serializeToString(name);
+      final String body = JSONSerializerUtilities.serializeToString(obj);
 
-      result = http.post( auth, uri, user.getBytes(), "application/json");
+      result = http.post(auth, uri, body.getBytes(), "application/json");
 
       result.matchResult(
 
         new HTTPResultMatcherType<InputStream, Unit, Exception>() {
           @Override
-          public Unit onHTTPError(HTTPResultError<InputStream> httpResultError) throws Exception {
-            UsernameValidationTask.this.listener.onUsernameValidationError(httpResultError.getMessage());
+          public Unit onHTTPError(final HTTPResultError<InputStream> error) throws Exception {
+            UsernameValidationTask.this.listener.onUsernameValidationError(error.getMessage());
             return Unit.unit();
           }
 
           @Override
-          public Unit onHTTPException(HTTPResultException<InputStream> httpResultException) throws Exception {
-            UsernameValidationTask.this.listener.onUsernameValidationError(httpResultException.getError().getMessage());
+          public Unit onHTTPException(final HTTPResultException<InputStream> exception) throws Exception {
+            UsernameValidationTask.this.listener.onUsernameValidationError(exception.getError().getMessage());
             return Unit.unit();
           }
 
           @Override
-          public Unit onHTTPOK(HTTPResultOKType<InputStream> httpResultOKType) throws Exception {
+          public Unit onHTTPOK(final HTTPResultOKType<InputStream> result) throws Exception {
 
-            UsernameResponse nameResponse = new UsernameResponse(httpResultOKType.getValue());
+            final UsernameResponse name_response = new UsernameResponse(result.getValue());
 
-            if (nameResponse.type.equals("available-username")) {
-              UsernameValidationTask.this.listener.onUsernameValidationSucceeded(nameResponse);
+            if (name_response.getType().equals("available-username")) {
+              UsernameValidationTask.this.listener.onUsernameValidationSucceeded(name_response);
             } else {
-              UsernameValidationTask.this.listener.onUsernameValidationFailed(nameResponse);
+              UsernameValidationTask.this.listener.onUsernameValidationFailed(name_response);
             }
 
             return Unit.unit();

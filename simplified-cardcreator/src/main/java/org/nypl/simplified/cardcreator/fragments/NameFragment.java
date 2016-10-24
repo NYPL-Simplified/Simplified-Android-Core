@@ -12,8 +12,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.nypl.simplified.cardcreator.Constants;
-import org.nypl.simplified.cardcreator.Prefs;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;
 import org.nypl.simplified.cardcreator.listener.InputListenerType;
 
@@ -28,11 +27,27 @@ import java.util.regex.Pattern;
  */
 public class NameFragment extends Fragment {
 
-    public EditText name;
-    public EditText email;
-    private Prefs mPrefs;
+    private EditText name;
+    private EditText email;
+    private Prefs prefs;
 
+    /**
+     * @return name
+     */
+    public EditText getName() {
+        return this.name;
+    }
 
+    /**
+     * @return email
+     */
+    public EditText getEmail() {
+        return this.email;
+    }
+
+    /**
+     *
+     */
     public NameFragment() {
         // Required empty public constructor
     }
@@ -44,54 +59,54 @@ public class NameFragment extends Fragment {
      * @return A new instance of fragment NameFragment.
      */
     public  NameFragment newInstance() {
-        NameFragment fragment = new NameFragment();
-        Bundle args = new Bundle();
+        final NameFragment fragment = new NameFragment();
+        final Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
-        mPrefs = new Prefs(getContext());
+    public void onCreate(final Bundle state) {
+        super.onCreate(state);
+
+        this.prefs = new Prefs(getContext());
 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle state) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_name, container, false);
-        ((TextView) rootView.findViewById(android.R.id.title)).setText("Personal Information");
+        final View root_view = inflater.inflate(R.layout.fragment_name, container, false);
+        ((TextView) root_view.findViewById(android.R.id.title)).setText("Personal Information");
 
-        name = (EditText) rootView.findViewById(R.id.name);
-        email = (EditText) rootView.findViewById(R.id.email);
-        name.setText(mPrefs.getString(Constants.NAME_DATA_KEY));
-        email.setText(mPrefs.getString(Constants.EMAIL_DATA_KEY));
+        this.name = (EditText) root_view.findViewById(R.id.name);
+        this.email = (EditText) root_view.findViewById(R.id.email);
+        this.name.setText(this.prefs.getString(getResources().getString(R.string.NAME_DATA_KEY)));
+        this.email.setText(this.prefs.getString(getResources().getString(R.string.EMAIL_DATA_KEY)));
 
-        if (isCompleted()) {
+        if (this.isCompleted()) {
             ((InputListenerType) getActivity()).onInputComplete();
         }
         else {
             ((InputListenerType) getActivity()).onInputInComplete();
         }
 
-        name.addTextChangedListener(new TextWatcher() {
+        this.name.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                mPrefs.putString(Constants.NAME_DATA_KEY, (s != null) ? s.toString() : null);
+            public void afterTextChanged(final Editable s) {
+                NameFragment.this.prefs.putString(getResources().getString(R.string.NAME_DATA_KEY), (s != null) ? s.toString() : null);
 
-                if (isCompleted()) {
+                if (NameFragment.this.isCompleted()) {
                     ((InputListenerType) getActivity()).onInputComplete();
                 }
                 else {
@@ -99,28 +114,28 @@ public class NameFragment extends Fragment {
                 }
             }
         });
-        email.addTextChangedListener(new TextWatcher() {
+        this.email.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                mPrefs.putString(Constants.EMAIL_DATA_KEY, (s != null) ? s.toString() : null);
+            public void afterTextChanged(final Editable s) {
+                NameFragment.this.prefs.putString(getResources().getString(R.string.EMAIL_DATA_KEY), (s != null) ? s.toString() : null);
 
-                if (isCompleted()) {
-                    if (isEmailAddress()) {
+                if (NameFragment.this.isCompleted()) {
+                    if (NameFragment.this.isEmailAddress()) {
                         ((InputListenerType) getActivity()).onInputComplete();
-                        email.setTextAppearance(getContext(), R.style.WizardPageSuccess);
+                        NameFragment.this.email.setTextAppearance(getContext(), R.style.WizardPageSuccess);
 
                     }
                     else {
                         ((InputListenerType) getActivity()).onInputInComplete();
-                        email.setTextAppearance(getContext(), R.style.WizardPageError);
+                        NameFragment.this.email.setTextAppearance(getContext(), R.style.WizardPageError);
                     }
                 }
                 else {
@@ -129,21 +144,26 @@ public class NameFragment extends Fragment {
             }
         });
 
-        return rootView;
+        return root_view;
     }
 
+    /**
+     * @return validate if email
+     */
     public boolean isEmailAddress() {
 
         final Pattern p = Pattern.compile(".+@.+\\.[a-z]+");
-//        this.email.setText(this.email.getText().toString().toLowerCase());
         final Matcher m = p.matcher(this.email.getText());
         return m.matches();
 
     }
 
+    /**
+     * @return validate if all required field are completed
+     */
     public boolean isCompleted() {
-        return !TextUtils.isEmpty(mPrefs.getString(Constants.NAME_DATA_KEY))
-                && !TextUtils.isEmpty(mPrefs.getString(Constants.EMAIL_DATA_KEY));
+        return !TextUtils.isEmpty(this.prefs.getString(getResources().getString(R.string.NAME_DATA_KEY)))
+                && !TextUtils.isEmpty(this.prefs.getString(getResources().getString(R.string.EMAIL_DATA_KEY)));
     }
 
 }

@@ -12,8 +12,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.nypl.simplified.cardcreator.Constants;
-import org.nypl.simplified.cardcreator.Prefs;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;
 import org.nypl.simplified.cardcreator.listener.InputListenerType;
 
@@ -26,10 +25,27 @@ import org.nypl.simplified.cardcreator.listener.InputListenerType;
 public class CredentialsFragment extends Fragment {
 
 
-    public EditText username;
-    public EditText pin;
-    private Prefs mPrefs;
+    private EditText username;
+    private EditText pin;
+    private Prefs prefs;
 
+    /**
+     * @return username
+     */
+    public EditText getUsername() {
+        return this.username;
+    }
+
+    /**
+     * @return pin
+     */
+    public EditText getPin() {
+        return this.pin;
+    }
+
+    /**
+     *
+     */
     public CredentialsFragment() {
         // Required empty public constructor
     }
@@ -41,59 +57,58 @@ public class CredentialsFragment extends Fragment {
      * @return A new instance of fragment CredentialsFragment.
      */
     public  CredentialsFragment newInstance() {
-        CredentialsFragment fragment = new CredentialsFragment();
-        Bundle args = new Bundle();
+        final CredentialsFragment fragment = new CredentialsFragment();
+        final Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
-        mPrefs = new Prefs(getContext());
+    public void onCreate(final Bundle state) {
+        super.onCreate(state);
+        this.prefs = new Prefs(getContext());
 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle state) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_credentials, container, false);
+        final View root_view = inflater.inflate(R.layout.fragment_credentials, container, false);
 
-        ((TextView) rootView.findViewById(android.R.id.title)).setText("Account Information");
-        ((TextView) rootView.findViewById(android.R.id.text2)).setText("Usernames must be 5–25 letters or numbers only. PINs must be four digits.");
-
-
-        username = ((EditText) rootView.findViewById(R.id.username));
-        pin = ((EditText) rootView.findViewById(R.id.pin));
-
-        username.setText(mPrefs.getString(Constants.USERNAME_DATA_KEY));
-        pin.setText(mPrefs.getString(Constants.PIN_DATA_KEY));
+        ((TextView) root_view.findViewById(android.R.id.title)).setText("Account Information");
+        ((TextView) root_view.findViewById(android.R.id.text2)).setText("Usernames must be 5–25 letters or numbers only. PINs must be four digits.");
 
 
-        if (isCompleted()) {
+        this.username = ((EditText) root_view.findViewById(R.id.username));
+        this.pin = ((EditText) root_view.findViewById(R.id.pin));
+
+        this.username.setText(this.prefs.getString(getResources().getString(R.string.USERNAME_DATA_KEY)));
+        this.pin.setText(this.prefs.getString(getResources().getString(R.string.PIN_DATA_KEY)));
+
+
+        if (this.isCompleted()) {
             ((InputListenerType) getActivity()).onInputComplete();
         }
         else {
             ((InputListenerType) getActivity()).onInputInComplete();
         }
 
-        username.addTextChangedListener(new TextWatcher() {
+        this.username.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                mPrefs.putString(Constants.USERNAME_DATA_KEY, (s != null) ? s.toString() : null);
+            public void afterTextChanged(final Editable s) {
+                CredentialsFragment.this.prefs.putString(getResources().getString(R.string.USERNAME_DATA_KEY), (s != null) ? s.toString() : null);
 
-                if (isCompleted()) {
+                if (CredentialsFragment.this.isCompleted()) {
                     ((InputListenerType) getActivity()).onInputComplete();
                 }
                 else {
@@ -102,20 +117,20 @@ public class CredentialsFragment extends Fragment {
             }
         });
 
-        pin.addTextChangedListener(new TextWatcher() {
+        this.pin.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(final CharSequence s, final int start, final int count, final int after) {
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(final CharSequence s, final int start, final int before, final int count) {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                mPrefs.putString(Constants.PIN_DATA_KEY, (s != null) ? s.toString() : null);
+            public void afterTextChanged(final Editable s) {
+                CredentialsFragment.this.prefs.putString(getResources().getString(R.string.PIN_DATA_KEY), (s != null) ? s.toString() : null);
 
-                if (isCompleted()) {
+                if (CredentialsFragment.this.isCompleted()) {
                     ((InputListenerType) getActivity()).onInputComplete();
                 }
                 else {
@@ -124,12 +139,15 @@ public class CredentialsFragment extends Fragment {
             }
         });
 
-        return rootView;
+        return root_view;
     }
 
+    /**
+     * @return all required fields completed
+     */
     public boolean isCompleted() {
-        return !TextUtils.isEmpty(mPrefs.getString(Constants.USERNAME_DATA_KEY))
-                && !TextUtils.isEmpty(mPrefs.getString(Constants.PIN_DATA_KEY));
+        return !TextUtils.isEmpty(this.prefs.getString(getResources().getString(R.string.USERNAME_DATA_KEY)))
+                && !TextUtils.isEmpty(this.prefs.getString(getResources().getString(R.string.PIN_DATA_KEY)));
     }
 
 

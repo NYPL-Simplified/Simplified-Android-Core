@@ -12,8 +12,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import org.json.JSONException;
-import org.nypl.simplified.cardcreator.Constants;
-import org.nypl.simplified.cardcreator.Prefs;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.cardcreator.R;
 import org.nypl.simplified.cardcreator.model.Address;
 import org.nypl.simplified.cardcreator.model.AddressResponse;
@@ -24,157 +23,156 @@ import org.nypl.simplified.cardcreator.model.AddressResponse;
 public class WorkAddressConfirmFragment extends Fragment {
 
     private static final String ARG_PARAM2 = "response";
-    public AddressResponse mResponse;
-    private Prefs mPrefs;
+    private AddressResponse response;
+    private Prefs prefs;
 
+    /**
+     *
+     */
     public WorkAddressConfirmFragment() {
         // Required empty public constructor
     }
 
 
-    public  WorkAddressConfirmFragment newInstance(AddressResponse response) {
-        WorkAddressConfirmFragment fragment = new WorkAddressConfirmFragment();
-        Bundle args = new Bundle();
-        args.putSerializable(ARG_PARAM2, response);
+    /**
+     * @param in_response address response
+     * @return address confirmation fragment
+     */
+    public  WorkAddressConfirmFragment newInstance(final AddressResponse in_response) {
+        final WorkAddressConfirmFragment fragment = new WorkAddressConfirmFragment();
+        final Bundle args = new Bundle();
+        args.putSerializable(ARG_PARAM2, in_response);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate(final Bundle state) {
+        super.onCreate(state);
         if (getArguments() != null) {
-            mResponse = (AddressResponse) getArguments().getSerializable(ARG_PARAM2);
+            this.response = (AddressResponse) getArguments().getSerializable(ARG_PARAM2);
         }
-        mPrefs = new Prefs(getContext());
+        this.prefs = new Prefs(getContext());
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle state) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_work_address_confirm, container, false);
+        final View root_view = inflater.inflate(R.layout.fragment_work_address_confirm, container, false);
 
-        if (mPrefs.getBoolean(Constants.WORK_IN_NY_DATA_KEY)) {
-            ((TextView) rootView.findViewById(android.R.id.title)).setText("Confirm Work Address");
+        if (this.prefs.getBoolean(getResources().getString(R.string.WORK_IN_NY_DATA_KEY))) {
+            ((TextView) root_view.findViewById(android.R.id.title)).setText("Confirm Work Address");
         } else {
-            ((TextView) rootView.findViewById(android.R.id.title)).setText("Confirm School Address");
+            ((TextView) root_view.findViewById(android.R.id.title)).setText("Confirm School Address");
         }
 
-        ((TextView) rootView.findViewById(android.R.id.text1)).setText("Tap confirm if this is your correct address or previous to change your entry");
+        ((TextView) root_view.findViewById(android.R.id.text1)).setText("Tap confirm if this is your correct address or previous to change your entry");
 
-        LinearLayout mLinearLayout = (LinearLayout) rootView.findViewById(R.id.address_list);
+        final LinearLayout linear_layout = (LinearLayout) root_view.findViewById(R.id.address_list);
 
         int addresslength = 1;
-        if (mResponse.addresses != null)
+        if (this.response.getAddresses() != null)
         {
-            addresslength = mResponse.addresses.length();
+            addresslength = this.response.getAddresses().length();
         }
 
         final RadioButton[] rb = new RadioButton[addresslength];
-
-        TextView title = new TextView(getContext());
-
-        TextView space = new TextView(getContext());
+        final TextView title = new TextView(getContext());
+        final TextView space = new TextView(getContext());
         space.setText("\n");
 
-        RadioGroup rg = new RadioGroup(getContext());
-
+        final RadioGroup rg = new RadioGroup(getContext());
         rg.setOrientation(RadioGroup.VERTICAL);
-
         rg.addView(title);
 
-
         {
-            if (mResponse.type.equals("valid-address"))
+            if (this.response.getType().equals("valid-address"))
             {
                 title.setText("\nYour Address:\n");
-                final Address alternate_address = mResponse.address;
+                final Address alternate_address = this.response.getAddress();
 
-                final int finalIndex = 0;
+                final int final_index = 0;
 
-
-                StringBuilder work = new StringBuilder();
-                work.append(alternate_address.line_1 + "\n");
-                if (!alternate_address.line_2.isEmpty()) {
-                    work.append(alternate_address.line_2 + "\n");
+                final StringBuilder work = new StringBuilder();
+                work.append(alternate_address.getLine_1() + "\n");
+                if (!alternate_address.getLine_2().isEmpty()) {
+                    work.append(alternate_address.getLine_2() + "\n");
                 }
-                work.append(alternate_address.city + "\n");
-                work.append(alternate_address.state + " ");
-                work.append(alternate_address.zip);
+                work.append(alternate_address.getCity() + "\n");
+                work.append(alternate_address.getState() + " ");
+                work.append(alternate_address.getZip());
 
-                rb[finalIndex] = new RadioButton(getContext());
-                rg.addView(rb[finalIndex]);
-                rb[finalIndex].setText(work.toString());
-                if (mPrefs.getInt(Constants.SELECTED_WORK_ADDRESS) == finalIndex) {
-                    rb[finalIndex].setChecked(true);
-                    mPrefs.putString(Constants.STREET1_W_DATA_KEY, alternate_address.line_1);
-                    mPrefs.putString(Constants.STREET2_W_DATA_KEY, alternate_address.line_2);
-                    mPrefs.putString(Constants.CITY_W_DATA_KEY, alternate_address.city);
-                    mPrefs.putString(Constants.STATE_W_DATA_KEY, alternate_address.state);
-                    mPrefs.putString(Constants.ZIP_W_DATA_KEY, alternate_address.zip);
-
+                rb[final_index] = new RadioButton(getContext());
+                rg.addView(rb[final_index]);
+                rb[final_index].setText(work.toString());
+                if (this.prefs.getInt(getResources().getString(R.string.SELECTED_WORK_ADDRESS)) == final_index) {
+                    rb[final_index].setChecked(true);
+                    this.prefs.putString(getResources().getString(R.string.STREET1_W_DATA_KEY), alternate_address.getLine_1());
+                    this.prefs.putString(getResources().getString(R.string.STREET2_W_DATA_KEY), alternate_address.getLine_2());
+                    this.prefs.putString(getResources().getString(R.string.CITY_W_DATA_KEY), alternate_address.getCity());
+                    this.prefs.putString(getResources().getString(R.string.STATE_W_DATA_KEY), alternate_address.getState());
+                    this.prefs.putString(getResources().getString(R.string.ZIP_W_DATA_KEY), alternate_address.getZip());
                 }
 
-
-                rb[finalIndex].setOnClickListener(new View.OnClickListener() {
+                rb[final_index].setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public void onClick(final View v) {
 
-                        mPrefs.putInt(Constants.SELECTED_WORK_ADDRESS, finalIndex);
-                        mPrefs.putString(Constants.STREET1_W_DATA_KEY, alternate_address.line_1);
-                        mPrefs.putString(Constants.STREET2_W_DATA_KEY, alternate_address.line_2);
-                        mPrefs.putString(Constants.CITY_W_DATA_KEY, alternate_address.city);
-                        mPrefs.putString(Constants.STATE_W_DATA_KEY, alternate_address.state);
-                        mPrefs.putString(Constants.ZIP_W_DATA_KEY, alternate_address.zip);
+                        WorkAddressConfirmFragment.this.prefs.putInt(getResources().getString(R.string.SELECTED_WORK_ADDRESS), final_index);
+                        WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.STREET1_W_DATA_KEY), alternate_address.getLine_1());
+                        WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.STREET2_W_DATA_KEY), alternate_address.getLine_2());
+                        WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.CITY_W_DATA_KEY), alternate_address.getCity());
+                        WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.STATE_W_DATA_KEY), alternate_address.getState());
+                        WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.ZIP_W_DATA_KEY), alternate_address.getZip());
                     }
                 });
 
-
             }
-            if (mResponse.type.equals("alternate-addresses")) {
+
+            if (this.response.getType().equals("alternate-addresses")) {
                 title.setText("\nAlternate Addresses:\n");
-                for (int index = 0; index < mResponse.addresses.length(); ++index) {
+                for (int index = 0; index < this.response.getAddresses().length(); ++index) {
 
                     try {
-                        final Address alternate_address = new Address(mResponse.addresses.getJSONObject(index).getJSONObject("address"));
+                        final Address alternate_address = new Address(this.response.getAddresses().getJSONObject(index).getJSONObject("address"));
 
-                        final int finalIndex = index;
+                        final int final_index = index;
 
-
-                        StringBuilder work = new StringBuilder();
-                        work.append(alternate_address.line_1 + "\n");
-                        if (!alternate_address.line_2.isEmpty()) {
-                            work.append(alternate_address.line_2 + "\n");
+                        final StringBuilder work = new StringBuilder();
+                        work.append(alternate_address.getLine_1() + "\n");
+                        if (!alternate_address.getLine_2().isEmpty()) {
+                            work.append(alternate_address.getLine_2() + "\n");
                         }
-                        work.append(alternate_address.city + "\n");
-                        work.append(alternate_address.state + " ");
-                        work.append(alternate_address.zip);
+                        work.append(alternate_address.getCity() + "\n");
+                        work.append(alternate_address.getState() + " ");
+                        work.append(alternate_address.getZip());
 
-                        rb[finalIndex] = new RadioButton(getContext());
-                        rg.addView(rb[finalIndex]);
-                        rb[finalIndex].setText(work.toString());
-                        if (mPrefs.getInt(Constants.SELECTED_WORK_ADDRESS) == finalIndex) {
-                            rb[finalIndex].setChecked(true);
-                            mPrefs.putString(Constants.STREET1_W_DATA_KEY, alternate_address.line_1);
-                            mPrefs.putString(Constants.STREET2_W_DATA_KEY, alternate_address.line_2);
-                            mPrefs.putString(Constants.CITY_W_DATA_KEY, alternate_address.city);
-                            mPrefs.putString(Constants.STATE_W_DATA_KEY, alternate_address.state);
-                            mPrefs.putString(Constants.ZIP_W_DATA_KEY, alternate_address.zip);
+                        rb[final_index] = new RadioButton(getContext());
+                        rg.addView(rb[final_index]);
+                        rb[final_index].setText(work.toString());
+                        if (this.prefs.getInt(getResources().getString(R.string.SELECTED_WORK_ADDRESS)) == final_index) {
+                            rb[final_index].setChecked(true);
+                            this.prefs.putString(getResources().getString(R.string.STREET1_W_DATA_KEY), alternate_address.getLine_1());
+                            this.prefs.putString(getResources().getString(R.string.STREET2_W_DATA_KEY), alternate_address.getLine_2());
+                            this.prefs.putString(getResources().getString(R.string.CITY_W_DATA_KEY), alternate_address.getCity());
+                            this.prefs.putString(getResources().getString(R.string.STATE_W_DATA_KEY), alternate_address.getState());
+                            this.prefs.putString(getResources().getString(R.string.ZIP_W_DATA_KEY), alternate_address.getZip());
 
                         }
 
-
-                        rb[finalIndex].setOnClickListener(new View.OnClickListener() {
+                        rb[final_index].setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(View v) {
+                            public void onClick(final View v) {
 
-                                mPrefs.putInt(Constants.SELECTED_WORK_ADDRESS, finalIndex);
-                                mPrefs.putString(Constants.STREET1_W_DATA_KEY, alternate_address.line_1);
-                                mPrefs.putString(Constants.STREET2_W_DATA_KEY, alternate_address.line_2);
-                                mPrefs.putString(Constants.CITY_W_DATA_KEY, alternate_address.city);
-                                mPrefs.putString(Constants.STATE_W_DATA_KEY, alternate_address.state);
-                                mPrefs.putString(Constants.ZIP_W_DATA_KEY, alternate_address.zip);
+                                WorkAddressConfirmFragment.this.prefs.putInt(getResources().getString(R.string.SELECTED_WORK_ADDRESS), final_index);
+                                WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.STREET1_W_DATA_KEY), alternate_address.getLine_1());
+                                WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.STREET2_W_DATA_KEY), alternate_address.getLine_2());
+                                WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.CITY_W_DATA_KEY), alternate_address.getCity());
+                                WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.STATE_W_DATA_KEY), alternate_address.getState());
+                                WorkAddressConfirmFragment.this.prefs.putString(getResources().getString(R.string.ZIP_W_DATA_KEY), alternate_address.getZip());
+
                             }
                         });
 
@@ -183,19 +181,14 @@ public class WorkAddressConfirmFragment extends Fragment {
                         e.printStackTrace();
                     }
 
-//                    rg.addView(space);
-
                 }
             }
 
-
-
         }
 
+        linear_layout.addView(rg);
 
-        mLinearLayout.addView(rg);
-
-        return rootView;
+        return root_view;
     }
 
 }

@@ -6,13 +6,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.nypl.simplified.cardcreator.R;
-import org.nypl.simplified.cardcreator.listener.InputListenerType;
 import org.nypl.simplified.cardcreator.listener.LocationListenerType;
 
 
@@ -27,11 +24,12 @@ public class LocationFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM2 = "region";
     private static final String ARG_PARAM3 = "status";
-    public ProgressBar mProgressBar;
-    public Button mFetchAddressButton;
-    private String mRegion;
-    private String mStatus;
+    private String region;
+    private String status;
 
+    /**
+     *
+     */
     public LocationFragment() {
         // Required empty public constructor
     }
@@ -40,45 +38,41 @@ public class LocationFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param region Parameter 1.
+     * @param in_region region param
+     * @param in_status status param
      * @return A new instance of fragment LocationFragment.
      */
 
-    public  LocationFragment newInstance(String region, String status) {
-        LocationFragment fragment = new LocationFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM2, region);
-        args.putString(ARG_PARAM3, status);
+    public  LocationFragment newInstance(final String in_region, final String in_status) {
+        final LocationFragment fragment = new LocationFragment();
+        final Bundle args = new Bundle();
+        args.putString(ARG_PARAM2, in_region);
+        args.putString(ARG_PARAM3, in_status);
         fragment.setArguments(args);
         return fragment;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate(final Bundle state) {
+        super.onCreate(state);
         if (getArguments() != null) {
-            mRegion = getArguments().getString(ARG_PARAM2);
-            mStatus = getArguments().getString(ARG_PARAM3);
+            this.region = getArguments().getString(ARG_PARAM2);
+            this.status = getArguments().getString(ARG_PARAM3);
         }
 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater,
+                             final ViewGroup container,
+                             final Bundle state) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_location, container, false);
-        ((TextView) rootView.findViewById(android.R.id.title)).setText("Location Check");
-        ((TextView) rootView.findViewById(android.R.id.text1)).setText(mStatus);
+        final View root_view = inflater.inflate(R.layout.fragment_location, container, false);
+        ((TextView) root_view.findViewById(android.R.id.title)).setText("Location Check");
+        ((TextView) root_view.findViewById(android.R.id.text1)).setText(this.status);
+        ((EditText) root_view.findViewById(R.id.region)).setText(this.region);
 
-        ((EditText) rootView.findViewById(R.id.region)).setText(mRegion);
-
-
-        mProgressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-        mFetchAddressButton = (Button) rootView.findViewById(R.id.fetch_address_button);
-
-
-        return rootView;
+        return root_view;
     }
 
     @Override

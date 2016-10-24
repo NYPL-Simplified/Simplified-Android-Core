@@ -9,10 +9,19 @@ import org.nypl.simplified.cardcreator.model.AddressResponse;
 
 public interface AddressListenerType {
 
+    /**
+     * @param response address response
+     */
     void onAddressValidationSucceeded(AddressResponse response);
 
+    /**
+     * @param response address response
+     */
     void onAddressValidationFailed(AddressResponse response);
 
+    /**
+     * @param message message
+     */
     void onAddressValidationError(String message);
 
 }

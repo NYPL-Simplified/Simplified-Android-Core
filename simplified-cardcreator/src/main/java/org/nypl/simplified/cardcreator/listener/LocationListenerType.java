@@ -8,6 +8,9 @@ package org.nypl.simplified.cardcreator.listener;
 
 public interface LocationListenerType {
 
+    /**
+     *
+     */
     void onCheckLocation();
 
 }
