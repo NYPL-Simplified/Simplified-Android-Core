@@ -23,6 +23,9 @@
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">NYPL</string>
 
+   <!-- qa or prod -->
+  <string name="feature_environment">prod</string>
+
   <!-- authentication providers -->
   <!-- default authentication provider -->
   <bool name="feature_default_auth_provider">true</bool>
