@@ -51,6 +51,12 @@
 
     <dependency>
       <groupId>org.nypl.simplified</groupId>
+      <artifactId>simplified-prefs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-volley</artifactId>
       <version>${project.version}</version>
     </dependency>

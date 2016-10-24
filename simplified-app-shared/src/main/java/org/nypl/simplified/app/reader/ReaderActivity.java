@@ -59,7 +59,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.app.Prefs;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.volley.NYPLStringRequest;
 import org.readium.sdk.android.Container;

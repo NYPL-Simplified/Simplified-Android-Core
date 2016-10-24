@@ -53,6 +53,7 @@
     <module>simplified-bugsnag</module>
     <module>simplified-volley</module>
     <module>simplified-jobqueue</module>
+    <module>simplified-prefs</module>
   </modules>
 
   <properties>
