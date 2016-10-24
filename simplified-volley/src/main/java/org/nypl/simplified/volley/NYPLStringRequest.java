@@ -3,9 +3,12 @@ package org.nypl.simplified.volley;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.Nullable;
 
 import net.iharder.Base64;
 
+import org.nypl.simplified.books.core.AccountAuthToken;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountPIN;
@@ -21,7 +24,10 @@ import java.util.Map;
 
 public class NYPLStringRequest extends StringRequest {
 
-  private final AccountCredentials credentials;
+  private @Nullable
+  AccountCredentials credentials;
+  private @Nullable String username;
+  private @Nullable String password;
 
   /**
    * @param method request method
@@ -54,21 +60,58 @@ public class NYPLStringRequest extends StringRequest {
 
   }
 
+  /**
+   * @param method request method
+   * @param url request url
+   * @param in_username basic auth username
+   * @param in_password basic auth password
+   * @param listener response listener
+   * @param error_listener error listener
+   */
+  public NYPLStringRequest(final int method,
+                           final String url,
+                           final String in_username,
+                           final String in_password,
+                           final Response.Listener<String> listener,
+                           final Response.ErrorListener error_listener) {
+    super(method, url, listener, error_listener);
+    this.username = in_username;
+    this.password = in_password;
+  }
+
+
   @Override
   public Map<String, String> getHeaders() throws AuthFailureError {
 
     final Map<String, String> params = new HashMap<String, String>();
 
-    final AccountBarcode barcode = this.credentials.getBarcode();
-    final AccountPIN pin = this.credentials.getPin();
+    if (this.credentials != null) {
 
-    //add oauth/////
+      if (this.credentials.getAuthToken().isSome()) {
 
-    final String text = barcode.toString() + ":" + pin.toString();
-    final String encoded =
-      Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+        final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
+        params.put("Authorization", "Bearer " + token);
 
-    params.put("Authorization", "Basic " + encoded);
+      } else {
+
+        final AccountBarcode barcode = this.credentials.getBarcode();
+        final AccountPIN pin = this.credentials.getPin();
+
+        final String text = barcode.toString() + ":" + pin.toString();
+        final String encoded =
+          Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+
+        params.put("Authorization", "Basic " + encoded);
+      }
+    }
+    else
+    {
+      final String text = this.username + ":" + this.password;
+      final String encoded =
+        Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+      params.put("Authorization", "Basic " + encoded);
+
+    }
     return params;
   }
 
