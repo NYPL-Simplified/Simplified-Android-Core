@@ -899,9 +899,6 @@ public final class ReaderActivity extends Activity implements
       public void onErrorResponse(final VolleyError error) {
 
         LOG.debug("CurrentPage onErrorResponse {}", error);
-        final int duration = Toast.LENGTH_LONG;
-        final Toast toast = Toast.makeText(ReaderActivity.this, error.toString(), duration);
-        toast.show();
 
       }
     });
