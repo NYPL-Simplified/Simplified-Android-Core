@@ -1,42 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <style
-    name="SimplifiedTheme"
-    parent="android:Theme.Holo.Light">
-    <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
-    <item name="android:icon">@drawable/ic_menu</item>
-  </style>
-
-  <style
-    name="SimplifiedThemeNoActionBar"
-    parent="android:Theme.Holo.Light.NoActionBar">
-    <item name="android:windowActionBar">false</item>
-    <item name="android:windowNoTitle">true</item>
-  </style>
-
-  <style name="SimplifiedTheme.LaneTitle">
-    <item name="android:textSize">21sp</item>
-    <item name="android:textColor">@color/feature_main_color</item>
-    <item name="android:textStyle">normal</item>
-    <item name="android:typeface">sans</item>
-  </style>
-
-  <style
-    name="SimplifiedBookDialog"
-    parent="SimplifiedTheme">
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">false</item>
-    <item name="android:windowIsFloating">true</item>
-  </style>
-
-  <style
-    name="SimplifiedLoginDialog"
-    parent="SimplifiedTheme">
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">false</item>
-    <item name="android:windowIsFloating">true</item>
-  </style>
 
   <style name="TextAppearanceFinish" parent="android:TextAppearance.Holo.Medium">
     <item name="android:textColor">#fff</item>
@@ -68,12 +32,38 @@
     <item name="android:layout_marginBottom">8dp</item>
     <item name="android:layout_marginLeft">8dp</item>
     <item name="android:layout_marginRight">8dp</item>
-
     <item name="android:textSize">16sp</item>
     <item name="android:textColor">@color/text_light</item>
     <item name="android:fontFamily">sans-serif</item>
-
+    <item name="android:gravity">center</item>
   </style>
+
+  <style name="WizardPageError">
+    <item name="android:id">@android:id/text1</item>
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginBottom">8dp</item>
+    <item name="android:layout_marginLeft">8dp</item>
+    <item name="android:layout_marginRight">8dp</item>
+    <item name="android:textSize">16sp</item>
+    <item name="android:textColor">@color/step_pager_selected_tab_color</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:gravity">center</item>
+  </style>
+
+  <style name="WizardPageSuccess">
+    <item name="android:id">@android:id/text1</item>
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginBottom">8dp</item>
+    <item name="android:layout_marginLeft">8dp</item>
+    <item name="android:layout_marginRight">8dp</item>
+    <item name="android:textSize">16sp</item>
+    <item name="android:textColor">@color/text_black</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:gravity">center</item>
+  </style>
+
 
   <style name="WizardPageFooter">
     <item name="android:id">@android:id/text2</item>

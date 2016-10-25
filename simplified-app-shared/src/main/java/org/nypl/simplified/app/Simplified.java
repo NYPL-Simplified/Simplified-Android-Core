@@ -50,6 +50,7 @@ import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.bugsnag.IfBugsnag;
+import org.nypl.simplified.cardcreator.CardCreator;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.files.DirectoryUtilities;
@@ -98,6 +99,7 @@ public final class Simplified extends Application
 
   private @Nullable CatalogAppServices app_services;
   private @Nullable ReaderAppServices  reader_services;
+  private @Nullable CardCreator cardcreator;
 
   /**
    * Construct the application.
@@ -116,6 +118,16 @@ public final class Simplified extends Application
     }
     return i;
   }
+
+  /**
+   * @return cardcreator
+   */
+  public static CardCreator getCardCreator()
+  {
+    final Simplified i = Simplified.checkInitialized();
+    return i.getActualCardCreator();
+  }
+
 
   /**
    * @return The application services provided to the Catalog.
@@ -223,6 +235,19 @@ public final class Simplified extends Application
     return NullCheck.notNull(pool);
   }
 
+  private synchronized CardCreator getActualCardCreator()
+  {
+    CardCreator as = this.cardcreator;
+    if (as != null) {
+      return as;
+    }
+    as = new CardCreator(
+      this.getAssets(), this.getResources().getString(R.string.feature_environment), this.getResources());
+    this.cardcreator = as;
+    return as;
+  }
+
+
   private synchronized SimplifiedCatalogAppServicesType getActualAppServices()
   {
     CatalogAppServices as = this.app_services;
@@ -265,6 +290,9 @@ public final class Simplified extends Application
     Simplified.INSTANCE = this;
 
     this.initBugsnag(Bugsnag.getApiToken(this.getAssets()));
+
+    this.cardcreator = new CardCreator(this.getAssets(), this.getResources().getString(R.string.feature_environment), this.getResources());
+
   }
 
   private static final class CatalogAppServices implements
