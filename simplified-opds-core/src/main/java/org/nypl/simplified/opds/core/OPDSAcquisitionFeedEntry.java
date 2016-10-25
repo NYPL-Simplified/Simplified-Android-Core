@@ -565,6 +565,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       final OptionType<URI> uri)
     {
       this.analytics = NullCheck.notNull(uri);
+    }
+
     @Override public void setAnnotationsOption(
       final OptionType<URI> uri)
     {

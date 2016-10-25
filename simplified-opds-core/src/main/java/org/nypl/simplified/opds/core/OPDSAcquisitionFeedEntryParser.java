@@ -150,11 +150,13 @@ public final class OPDSAcquisitionFeedEntryParser
           eb.setAlternateOption(Option.some(uri));
 
           final String uri_text_analytics =
-            uri_text.replace("/works/","/analytics/");
+            uri_text.replace("/works/", "/analytics/");
 
           final URI uri_analytics = new URI(uri_text_analytics);
           eb.setAnalyticsOption(Option.some(uri_analytics));
           continue;
+        }
+
         if (rel_text.equals(OPDSFeedConstants.RELATED_REL_TEXT)) {
           if (e_link.hasAttribute("href")) {
             final URI u = new URI(e_link.getAttribute("href"));
