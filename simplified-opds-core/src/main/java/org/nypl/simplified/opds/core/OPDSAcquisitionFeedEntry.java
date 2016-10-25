@@ -41,6 +41,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   private final OptionType<URI>        thumbnail;
   private final String                 title;
   private final Calendar               updated;
+  private final OptionType<URI>        alternate;
+  private final OptionType<URI>        analytics;
 
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
@@ -59,7 +61,9 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     final OptionType<Calendar> in_published,
     final OptionType<String> in_publisher,
     final String in_distribution,
-    final List<OPDSCategory> in_categories)
+    final List<OPDSCategory> in_categories,
+    final OptionType<URI> in_alternate,
+    final OptionType<URI> in_analytics)
   {
     this.authors = NullCheck.notNull(Collections.unmodifiableList(in_authors));
     this.acquisitions =
@@ -79,6 +83,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     this.publisher = NullCheck.notNull(in_publisher);
     this.distribution = NullCheck.notNull(in_distribution);
     this.categories = NullCheck.notNull(in_categories);
+    this.alternate = NullCheck.notNull(in_alternate);
+    this.analytics = NullCheck.notNull(in_analytics);
   }
 
   /**
@@ -141,6 +147,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.setPublishedOption(e.getPublished());
     b.setPublisherOption(e.getPublisher());
     b.setDistribution(e.getDistribution());
+    b.setAlternateOption(e.getAlternate());
+    b.setAnalyticsOption(e.getAnalytics());
 
     {
       final String summary = e.getSummary();
@@ -172,6 +180,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
            && this.groups.equals(other.groups)
            && this.categories.equals(other.categories)
            && this.cover.equals(other.cover)
+           && this.alternate.equals(other.alternate)
+           && this.analytics.equals(other.analytics)
            && this.annotations.equals(other.annotations)
            && this.id.equals(other.id)
            && this.issues.equals(other.issues)
@@ -238,6 +248,22 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   public OptionType<URI> getAnnotations()
   {
     return this.annotations;
+  }
+
+  /**
+   * @return alternate url
+   */
+  public OptionType<URI> getAlternate()
+  {
+    return this.alternate;
+  }
+
+  /**
+   * @return analytics url
+   */
+  public OptionType<URI> getAnalytics()
+  {
+    return this.analytics;
   }
 
   /**
@@ -348,6 +374,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     result = (prime * result) + this.authors.hashCode();
     result = (prime * result) + this.groups.hashCode();
     result = (prime * result) + this.cover.hashCode();
+    result = (prime * result) + this.alternate.hashCode();
+    result = (prime * result) + this.analytics.hashCode();
     result = (prime * result) + this.annotations.hashCode();
     result = (prime * result) + this.categories.hashCode();
     result = (prime * result) + this.id.hashCode();
@@ -376,6 +404,10 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.append(this.categories);
     b.append(", cover=");
     b.append(this.cover);
+    b.append(", alternate=");
+    b.append(this.alternate);
+    b.append(", analytics=");
+    b.append(this.analytics);
     b.append(", annotations=");
     b.append(this.annotations);
     b.append(", groups=");
@@ -416,6 +448,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     private final Calendar               updated;
     private       OPDSAvailabilityType   availability;
     private       OptionType<URI>        cover;
+    private       OptionType<URI>        alternate;
+    private       OptionType<URI>        analytics;
     private       OptionType<URI>        annotations;
     private       OptionType<URI>        issues;
     private       OptionType<URI>        related;
@@ -440,6 +474,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       this.summary = "";
       this.thumbnail = Option.none();
       this.cover = Option.none();
+      this.alternate = Option.none();
+      this.analytics = Option.none();
       this.annotations = Option.none();
       this.acquisitions = new ArrayList<OPDSAcquisition>(8);
       this.authors = new ArrayList<String>(4);
@@ -496,7 +532,9 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
         this.published,
         this.publisher,
         this.distribution,
-        this.categories);
+        this.categories,
+        this.alternate,
+        this.analytics);
     }
 
     @Override public List<OPDSAcquisition> getAcquisitions()
@@ -514,6 +552,19 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       final OptionType<URI> uri)
     {
       this.cover = NullCheck.notNull(uri);
+    }
+
+
+    @Override public void setAlternateOption(
+      final OptionType<URI> uri)
+    {
+      this.alternate = NullCheck.notNull(uri);
+    }
+
+    @Override public void setAnalyticsOption(
+      final OptionType<URI> uri)
+    {
+      this.analytics = NullCheck.notNull(uri);
     }
 
     @Override public void setAnnotationsOption(

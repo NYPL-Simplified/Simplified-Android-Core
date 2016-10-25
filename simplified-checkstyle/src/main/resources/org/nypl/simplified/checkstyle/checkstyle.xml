@@ -180,7 +180,7 @@
       <property name="format" value="^([a-z][a-z0-9_]*|_)$"/>
     </module>
     <module name="ParameterNumber">
-      <property name="max" value="17"/>
+      <property name="max" value="19"/>
     </module>
     <module name="ParenPad"/>
     <module name="RedundantImport"/>

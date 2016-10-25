@@ -55,6 +55,7 @@
     <module>simplified-prefs</module>
     <module>simplified-volley</module>
 
+    <module>simplified-circ-analytics</module>
   </modules>
 
   <properties>

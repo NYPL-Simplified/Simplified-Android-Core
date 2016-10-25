@@ -7,16 +7,20 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.reader.ReaderActivity;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
+import org.nypl.simplified.books.core.AccountCredentials;
+import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.circanalytics.CirculationAnalytics;
 import org.nypl.simplified.prefs.Prefs;
 import org.slf4j.Logger;
 
@@ -66,6 +70,24 @@ public final class CatalogBookRead implements OnClickListener
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
+
+    books.accountGetCachedLoginDetails(
+      new AccountGetCachedCredentialsListenerType()
+      {
+        @Override public void onAccountIsNotLoggedIn()
+        {
+          throw new UnreachableCodeException();
+        }
+
+        @Override public void onAccountIsLoggedIn(
+          final AccountCredentials creds) {
+
+          CirculationAnalytics.postEvent(creds, CatalogBookRead.this.activity, CatalogBookRead.this.entry, "open_book");
+
+        }
+      }
+    );
+
     final BookDatabaseReadableType db = books.bookGetDatabase();
     final Activity a = this.activity;
 

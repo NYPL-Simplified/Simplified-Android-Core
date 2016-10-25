@@ -320,6 +320,36 @@ public final class OPDSJSONParser implements OPDSJSONParserType
           });
       }
 
+
+      {
+        final OptionType<URI> o =
+          JSONParserUtilities.getURIOptional(s, "alternate");
+        o.mapPartial(
+          new PartialFunctionType<URI, Unit, OPDSParseException>() {
+            @Override
+            public Unit call(
+              final URI u)
+              throws OPDSParseException {
+              fb.setAlternateOption(Option.some(u));
+              return Unit.unit();
+            }
+          });
+      }
+
+      {
+        final OptionType<URI> o =
+          JSONParserUtilities.getURIOptional(s, "analytics");
+        o.mapPartial(
+          new PartialFunctionType<URI, Unit, OPDSParseException>() {
+            @Override
+            public Unit call(
+              final URI u)
+              throws OPDSParseException {
+              fb.setAnalyticsOption(Option.some(u));
+              return Unit.unit();
+            }
+          });
+      }
       {
         final OptionType<URI> o =
           JSONParserUtilities.getURIOptional(s, "annotations");

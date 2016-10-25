@@ -328,6 +328,18 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
       });
 
 
+    e.getAlternate().map(
+      new FunctionType<URI, Unit>()
+      {
+        @Override public Unit call(
+          final URI u)
+        {
+          je.put("alternate", u.toString());
+          je.put("analytics", u.toString().replace("/works/", "/analytics/"));
+          return Unit.unit();
+        }
+      });
+
     e.getAnnotations().map(
       new FunctionType<URI, Unit>()
       {

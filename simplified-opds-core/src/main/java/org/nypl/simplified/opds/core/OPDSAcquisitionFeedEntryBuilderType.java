@@ -89,6 +89,18 @@ public interface OPDSAcquisitionFeedEntryBuilderType
     OptionType<URI> uri);
 
   /**
+   * @param uri The alternate URI
+   */
+  void setAlternateOption(
+    OptionType<URI> uri);
+
+  /**
+   * @param uri The analytics URI
+   */
+  void setAnalyticsOption(
+    OptionType<URI> uri);
+
+  /**
    * Set the report issues URI.
    *
    * @param uri The report issues URI
