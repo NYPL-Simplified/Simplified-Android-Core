@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="login_needed">Вам необходимо авторизоваться на сайте, чтобы получить доступ к коллекции.</string>
-    <string name="login_with_barcode">Вход с NYPL Library Card</string>
-
-</resources>
