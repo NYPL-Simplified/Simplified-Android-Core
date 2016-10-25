@@ -339,6 +339,9 @@ public final class OPDSJSONParser implements OPDSJSONParserType
       {
         final OptionType<URI> o =
           JSONParserUtilities.getURIOptional(s, "analytics");
+      {
+        final OptionType<URI> o =
+          JSONParserUtilities.getURIOptional(s, "annotations");
         o.mapPartial(
           new PartialFunctionType<URI, Unit, OPDSParseException>() {
             @Override
@@ -347,6 +350,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType
               throws OPDSParseException {
               fb.setAnalyticsOption(Option.some(u));
               return Unit.unit();
+                fb.setAnnotationsOption(Option.some(u));
+                return Unit.unit();
             }
           });
       }

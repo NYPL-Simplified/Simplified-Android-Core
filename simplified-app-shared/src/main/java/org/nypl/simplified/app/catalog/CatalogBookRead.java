@@ -19,6 +19,7 @@ import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.circanalytics.CirculationAnalytics;
 import org.nypl.simplified.prefs.Prefs;
@@ -42,25 +43,33 @@ public final class CatalogBookRead implements OnClickListener
 
   private final Activity activity;
   private final BookID   id;
+  private final FeedEntryOPDS entry;
 
   /**
    * The parent activity.
-   *
-   * @param in_activity The activity
-   * @param in_id       The book ID
+   * @param in_activity   The activity
+   * @param in_id         The book ID
+   * @param in_entry      The OPDS feed entry
    */
 
   public CatalogBookRead(
     final Activity in_activity,
-    final BookID in_id)
+    final BookID in_id,
+    final FeedEntryOPDS in_entry)
   {
     this.activity = NullCheck.notNull(in_activity);
     this.id = NullCheck.notNull(in_id);
+    this.entry = NullCheck.notNull(in_entry);
   }
 
   @Override public void onClick(
     final @Nullable View v)
   {
+
+    final Prefs prefs = new Prefs(this.activity);
+    prefs.putBoolean("post_last_read", false);
+    LOG.debug("CurrentPage prefs {}", prefs.getBoolean("post_last_read"));
+
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
@@ -96,7 +105,7 @@ public final class CatalogBookRead implements OnClickListener
       if (book_opt.isSome()) {
         final Some<File> some_book = (Some<File>) book_opt;
         final File book = some_book.get();
-        ReaderActivity.startActivity(a, this.id, book);
+        ReaderActivity.startActivity(a, this.id, book, this.entry);
       } else {
         ErrorDialogUtilities.showError(
           a,

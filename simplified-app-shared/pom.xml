@@ -48,6 +48,24 @@
       <artifactId>simplified-tenprint</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.nypl.simplified</groupId>
+      <artifactId>simplified-prefs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.nypl.simplified</groupId>
+      <artifactId>simplified-volley</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.nypl.simplified</groupId>
+      <artifactId>simplified-prefs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-circ-analytics</artifactId>
@@ -56,6 +74,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>simplified-bugsnag</artifactId>
+      <version>${project.version}</version>
+      <type>aar</type>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>simplified-cardcreator</artifactId>
       <version>${project.version}</version>
       <type>aar</type>
     </dependency>
@@ -145,6 +169,17 @@
     <dependency>
       <groupId>com.bugsnag</groupId>
       <artifactId>bugsnag-android</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.3</version>
     </dependency>
   </dependencies>
 
