@@ -143,6 +143,22 @@ public final class OPDSAcquisitionFeedEntryParser
           continue;
         }
 
+        if (rel_text.equals(OPDSFeedConstants.RELATED_REL_TEXT)) {
+          if (e_link.hasAttribute("href")) {
+            final URI u = new URI(e_link.getAttribute("href"));
+            eb.setRelatedOption(Option.some(u));
+            continue;
+          }
+        }
+
+        if (rel_text.equals(OPDSFeedConstants.ANNOTATION_URI_TEXT)) {
+          if (e_link.hasAttribute("href")) {
+            final URI u = new URI(e_link.getAttribute("href"));
+            eb.setAnnotationsOption(Option.some(u));
+            continue;
+          }
+        }
+
         /**
          * Thumbnail.
          */

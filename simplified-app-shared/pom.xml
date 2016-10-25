@@ -48,6 +48,19 @@
       <artifactId>simplified-tenprint</artifactId>
       <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.nypl.simplified</groupId>
+      <artifactId>simplified-prefs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.nypl.simplified</groupId>
+      <artifactId>simplified-volley</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-prefs</artifactId>
@@ -151,6 +164,17 @@
     <dependency>
       <groupId>com.bugsnag</groupId>
       <artifactId>bugsnag-android</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.3</version>
     </dependency>
   </dependencies>
 

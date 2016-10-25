@@ -1,7 +1,9 @@
 package org.nypl.simplified.app.reader;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -20,23 +22,46 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+import com.google.gson.Gson;
 import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnreachableCodeException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
+import org.nypl.simplified.app.catalog.annotation.Annotation;
+import org.nypl.simplified.app.catalog.annotation.AnnotationResult;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
-import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings
-  .SyntheticSpreadMode;
+import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.core.AccountCredentials;
+import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.prefs.Prefs;
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.volley.NYPLStringRequest;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -61,6 +86,7 @@ public final class ReaderActivity extends Activity implements
 {
   private static final String BOOK_ID;
   private static final String FILE_ID;
+  private static final String ENTRY;
   private static final Logger LOG;
 
   static {
@@ -70,9 +96,11 @@ public final class ReaderActivity extends Activity implements
   static {
     BOOK_ID = "org.nypl.simplified.app.ReaderActivity.book";
     FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
+    ENTRY = "org.nypl.simplified.app.ReaderActivity.entry";
   }
 
   private @Nullable BookID                            book_id;
+  private @Nullable FeedEntryOPDS                     entry;
   private @Nullable Container                         epub_container;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
@@ -91,7 +119,10 @@ public final class ReaderActivity extends Activity implements
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
-
+  private           ReaderBookLocation                current_location;
+  private           ReaderBookLocation                sync_location;
+  private           AccountCredentials                credentials;
+  private           Prefs                             prefs;
   /**
    * Construct an activity.
    */
@@ -107,17 +138,20 @@ public final class ReaderActivity extends Activity implements
    * @param from The parent activity
    * @param book The unique ID of the book
    * @param file The actual EPUB file
+   * @param entry The OPD feed entry
    */
 
   public static void startActivity(
     final Activity from,
     final BookID book,
-    final File file)
+    final File file,
+    final FeedEntryOPDS entry)
   {
     NullCheck.notNull(file);
     final Bundle b = new Bundle();
     b.putSerializable(ReaderActivity.BOOK_ID, book);
     b.putSerializable(ReaderActivity.FILE_ID, file);
+    b.putSerializable(ReaderActivity.ENTRY, entry);
     final Intent i = new Intent(from, ReaderActivity.class);
     i.putExtras(b);
     from.startActivity(i);
@@ -249,6 +283,12 @@ public final class ReaderActivity extends Activity implements
       }, 300L);
   }
 
+  @Override
+  protected void onResume() {
+    super.onResume();
+    this.syncLastRead();
+  }
+
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
@@ -264,9 +304,14 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull((File) a.getSerializable(ReaderActivity.FILE_ID));
     this.book_id =
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
+    this.entry =
+      NullCheck.notNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
+
+    this.prefs =  new Prefs(ReaderActivity.this);
 
     ReaderActivity.LOG.debug("epub file: {}", in_epub_file);
     ReaderActivity.LOG.debug("book id:   {}", this.book_id);
+    ReaderActivity.LOG.debug("entry id:   {}", this.entry.getFeedEntry().getID());
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
@@ -404,6 +449,28 @@ public final class ReaderActivity extends Activity implements
     pl.loadEPUB(in_epub_file, this);
 
     this.applyViewerColorFilters();
+
+    final SimplifiedCatalogAppServicesType app =
+      Simplified.getCatalogAppServices();
+
+    final BooksType books = app.getBooks();
+
+    books.accountGetCachedLoginDetails(
+      new AccountGetCachedCredentialsListenerType()
+      {
+        @Override public void onAccountIsNotLoggedIn()
+        {
+          throw new UnreachableCodeException();
+        }
+
+        @Override public void onAccountIsLoggedIn(
+          final AccountCredentials creds) {
+
+          ReaderActivity.this.credentials = creds;
+
+        }
+      }
+    );
   }
 
   @Override public void onCurrentPageError(
@@ -418,10 +485,21 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.debug("received book location: {}", l);
 
     final BookID in_book_id = NullCheck.notNull(this.book_id);
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
+
     final ReaderBookmarksType bm = rs.getBookmarks();
-    bm.setBookmark(in_book_id, l);
+
+    LOG.debug("CurrentPage prefs {}", this.prefs.getBoolean("post_last_read"));
+
+    final RequestQueue queue = Volley.newRequestQueue(this);
+
+    if (this.prefs.getBoolean("post_last_read")) {
+      bm.setBookmark(in_book_id, l, in_entry, this.credentials, queue);
+    }
+
   }
 
   @Override protected void onDestroy()
@@ -438,7 +516,6 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderSettingsType settings = rs.getSettings();
     settings.removeListener(this);
-    System.exit(0);
   }
 
   @Override public void onEPUBLoadFailed(
@@ -556,6 +633,117 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 
+  private void showBookLocationDialog(final String response) {
+
+    final AlertDialog.Builder builder = new AlertDialog.Builder(ReaderActivity.this);
+    builder.setTitle("Sync Reading Position");
+
+    final Container container = NullCheck.notNull(ReaderActivity.this.epub_container);
+
+    final Package default_package = NullCheck.notNull(container.getDefaultPackage());
+    final AnnotationResult result = new Gson().fromJson(response, AnnotationResult.class);
+    OptionType<ReaderOpenPageRequestType> page_request = null;
+
+    for (final Annotation annotation : result.getFirst().getItems())
+    {
+      if ("http://librarysimplified.org/terms/annotation/idling".equals(annotation.getMotivation())) {
+
+        final String text = NullCheck.notNull(annotation.getTarget().getSelector().getValue());
+        LOG.debug("CurrentPage text {}", text);
+
+        final String key = NullCheck.notNull(this.book_id.toString());
+        LOG.debug("CurrentPage key {}", key);
+
+        try {
+          final JSONObject o = new JSONObject(text);
+
+          final OptionType<ReaderBookLocation> mark = Option.some(ReaderBookLocation.fromJSON(o));
+
+          page_request = mark.map(
+            new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>()
+            {
+              @Override public ReaderOpenPageRequestType call(
+                final ReaderBookLocation l)
+              {
+                LOG.debug("CurrentPage location {}", l);
+
+                final String chapter = default_package.getSpineItem(l.getIDRef()).getTitle();
+                builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\" " + chapter + "\"");
+
+                ReaderActivity.this.sync_location = l;
+                return ReaderOpenPageRequest.fromBookLocation(l);
+              }
+            });
+
+
+          LOG.debug("CurrentPage sync {}", text);
+
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+
+      }
+    }
+
+    final OptionType<ReaderOpenPageRequestType> page = page_request;
+
+    builder.setPositiveButton("YES",
+      new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(final DialogInterface dialog, final int which) {
+          // positive button logic
+
+          final ReaderReadiumJavaScriptAPIType js =
+            NullCheck.notNull(ReaderActivity.this.readium_js_api);
+          final ReaderReadiumViewerSettings vs =
+            NullCheck.notNull(ReaderActivity.this.viewer_settings);
+          final Container c = NullCheck.notNull(ReaderActivity.this.epub_container);
+          final Package p = NullCheck.notNull(c.getDefaultPackage());
+
+          js.openBook(p, vs, page);
+
+          ReaderActivity.this.prefs.putBoolean("post_last_read", true);
+          LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
+
+        }
+      });
+
+    builder.setNegativeButton("NO",
+      new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(final DialogInterface dialog, final int which) {
+          // negative button logic
+          ReaderActivity.this.prefs.putBoolean("post_last_read", true);
+          LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
+
+        }
+      });
+
+    LOG.debug("CurrentPage current_location {}", this.current_location);
+    LOG.debug("CurrentPage sync_location {}", this.sync_location);
+
+    if ((this.current_location == null && this.sync_location == null) || this.current_location != null && this.sync_location == null)
+    {
+      this.prefs.putBoolean("post_last_read", true);
+      LOG.debug("CurrentPage set prefs {}", this.prefs.getBoolean("post_last_read"));
+    }
+    else if (this.current_location == null && this.sync_location != null)
+    {
+      final AlertDialog dialog = builder.create();
+      dialog.show();
+    }
+    else if (!(this.current_location.getIDRef().equals(this.sync_location.getIDRef()) && this.current_location.getContentCFI().equals(this.sync_location.getContentCFI())))
+    {
+      final AlertDialog dialog = builder.create();
+      dialog.show();
+    }
+    else
+    {
+      this.prefs.putBoolean("post_last_read", true);
+      LOG.debug("CurrentPage set prefs {}", this.prefs.getBoolean("post_last_read"));
+    }
+  }
+
   @Override public void onReadiumFunctionInitialize()
   {
     ReaderActivity.LOG.debug("readium initialize requested");
@@ -579,21 +767,27 @@ public final class ReaderActivity extends Activity implements
      */
 
     final BookID in_book_id = NullCheck.notNull(this.book_id);
+
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+
     final ReaderBookmarksType bookmarks = rs.getBookmarks();
     final OptionType<ReaderBookLocation> mark =
-      bookmarks.getBookmark(in_book_id);
-
+      bookmarks.getBookmark(in_book_id, in_entry);
+    
     final OptionType<ReaderOpenPageRequestType> page_request = mark.map(
       new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>()
       {
         @Override public ReaderOpenPageRequestType call(
           final ReaderBookLocation l)
         {
+          ReaderActivity.this.current_location = l;
           return ReaderOpenPageRequest.fromBookLocation(l);
         }
       });
-
+    // is this correct? inject fonts before book opens or after
     js.injectFonts();
+
+    // open book with page request, vs = view settings, p = package , what is package actually ? page_request = idref + contentcfi
     js.openBook(p, vs, page_request);
 
     /**
@@ -657,6 +851,59 @@ public final class ReaderActivity extends Activity implements
             });
         }
       });
+  }
+
+  private void syncLastRead() {
+
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+    final ReaderBookmarksType bm = rs.getBookmarks();
+    final BookID in_book_id = NullCheck.notNull(this.book_id);
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+    final ReaderBookmarksType bookmarks = rs.getBookmarks();
+
+    final OptionType<ReaderBookLocation> mark =
+      bookmarks.getBookmark(in_book_id, in_entry);
+
+    final OptionType<ReaderOpenPageRequestType> page_request = mark.map(
+      new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
+        @Override
+        public ReaderOpenPageRequestType call(
+          final ReaderBookLocation l) {
+          LOG.debug("CurrentPage location {}", l);
+          ReaderActivity.this.current_location = l;
+          return ReaderOpenPageRequest.fromBookLocation(l);
+        }
+      });
+
+    // Instantiate the RequestQueue.
+    final RequestQueue queue = Volley.newRequestQueue(this);
+    final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
+
+    // Request a string response from the provided URL.
+    final NYPLStringRequest request = new NYPLStringRequest(Request.Method.GET, url, this.credentials,
+      new Response.Listener<String>() {
+
+
+        @Override
+        public void onResponse(final String response) {
+
+          LOG.debug("CurrentPage onResponse {}", response);
+          ReaderActivity.this.showBookLocationDialog(response);
+
+        }
+      }, new Response.ErrorListener() {
+
+      @Override
+      public void onErrorResponse(final VolleyError error) {
+
+        LOG.debug("CurrentPage onErrorResponse {}", error);
+
+      }
+    });
+
+    // Add the request to the RequestQueue.
+    queue.add(request);
   }
 
   @Override public void onReadiumFunctionInitializeError(
