@@ -80,6 +80,14 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void setCoverOption(
     OptionType<URI> uri);
 
+
+  /**
+   * @param uri The annotations URI
+   */
+
+  void setAnnotationsOption(
+    OptionType<URI> uri);
+
   /**
    * Set the report issues URI.
    *
@@ -87,6 +95,14 @@ public interface OPDSAcquisitionFeedEntryBuilderType
    */
 
   void setIssuesOption(
+    OptionType<URI> uri);
+
+
+  /**
+   * @param uri The Related feed URI
+   */
+
+  void setRelatedOption(
     OptionType<URI> uri);
 
   /**

@@ -48,7 +48,7 @@ public final class ReaderTestActivity extends Activity
     ReaderTestActivity.LOG.debug(
       "forking reader activity with {} : {}", id, epub_file);
 
-    ReaderActivity.startActivity(this, id, epub_file);
+//    ReaderActivity.startActivity(this, id, epub_file);
     this.finish();
   }
 }
