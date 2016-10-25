@@ -327,6 +327,19 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
         }
       });
 
+
+    e.getAlternate().map(
+      new FunctionType<URI, Unit>()
+      {
+        @Override public Unit call(
+          final URI u)
+        {
+          je.put("alternate", u.toString());
+          je.put("analytics", u.toString().replace("/works/", "/analytics/"));
+          return Unit.unit();
+        }
+      });
+
     je.put("updated", fmt.format(e.getUpdated().getTime()));
     return NullCheck.notNull(je);
   }

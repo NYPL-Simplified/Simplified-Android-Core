@@ -17,6 +17,7 @@ final class OPDSFeedConstants
   public static final String OPDS_URI_TEXT;
   public static final String THUMBNAIL_URI_TEXT;
   public static final String ISSUES_REL_TEXT;
+  public static final String ALTERNATE_REL_TEXT;
   public static final URI    SCHEMA_URI;
   public static final URI    SIMPLIFIED_URI;
   public static final URI    OPDS_URI;
@@ -62,6 +63,9 @@ final class OPDSFeedConstants
       NullCheck.notNull(OPDSFeedConstants.THUMBNAIL_URI.toString());
 
     ISSUES_REL_TEXT = "issues";
+
+
+    ALTERNATE_REL_TEXT = "alternate";
 
     IMAGE_URI = NullCheck.notNull(URI.create("http://opds-spec.org/image"));
     IMAGE_URI_TEXT = NullCheck.notNull(OPDSFeedConstants.IMAGE_URI.toString());

@@ -143,6 +143,20 @@ public final class OPDSAcquisitionFeedEntryParser
           continue;
         }
 
+        if (rel_text.equals(OPDSFeedConstants.ALTERNATE_REL_TEXT)) {
+          final String uri_text =
+            NullCheck.notNull(e_link.getAttribute("href"));
+          final URI uri = new URI(uri_text);
+          eb.setAlternateOption(Option.some(uri));
+
+          final String uri_text_analytics =
+            uri_text.replace("/works/","/analytics/");
+
+          final URI uri_analytics = new URI(uri_text_analytics);
+          eb.setAnalyticsOption(Option.some(uri_analytics));
+          continue;
+        }
+
         /**
          * Thumbnail.
          */
