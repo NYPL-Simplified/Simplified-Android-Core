@@ -60,7 +60,7 @@
   <string name="catalog_book_revoke_loan">Jetzt zuückgeben</string>
   <string name="catalog_book_revoke_hold">Entfernen</string>
   <string name="catalog_book_report">Problem melden</string>
-  <string name="catalog_book_distribution">Vertrieben durch</string>
+  <string name="catalog_book_distribution">Vertrieben durch: %s</string>
   <string name="catalog_book_revoke_cancel">Abbrechen</string>
 
   <string name="catalog_book_availability_loaned_indefinite">Sie haben dieses Buch ausgeliehen.</string>
@@ -68,7 +68,7 @@
   <string name="catalog_book_availability_open_access">Dieses Buch können Sie behalten.</string>
   <string name="catalog_book_availability_held_indefinite">Sie haben dieses Buch in Ihrer Warteliste.</string>
   <string name="catalog_book_availability_held_timed">Sie können dieses Buch in %s leihen.</string>
-  <string name="catalog_book_availability_held_queue">Sie befinden sich an Position% d in der Warteliste für dieses Buch.</string>
+  <string name="catalog_book_availability_held_queue">Sie befinden sich an Position %d in der Warteliste für dieses Buch.</string>
   <string name="catalog_book_availability_reserved_timed">Ihre Reservierung läuft in %s.</string>
   <string name="catalog_book_availability_reserved_indefinite">Sie haben dieses Buch reserviert.</string>
   <string name="catalog_book_availability_loanable">Dieses Buch ist zum Ausleihen verfügbar.</string>

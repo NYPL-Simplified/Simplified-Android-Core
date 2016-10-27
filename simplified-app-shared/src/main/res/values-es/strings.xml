@@ -60,7 +60,7 @@
   <string name="catalog_book_revoke_loan">volver ahora</string>
   <string name="catalog_book_revoke_hold">Cancelar</string>
   <string name="catalog_book_report">Reportar problema</string>
-  <string name="catalog_book_distribution">Distribuido por</string>
+  <string name="catalog_book_distribution">Distribuido por: %s</string>
   <string name="catalog_book_revoke_cancel">Cancelar</string>
 
   <string name="catalog_book_availability_loaned_indefinite">Tienes este libro prestado</string>
