@@ -14,7 +14,7 @@
 
   <!-- Holds strings -->
   <string name="holds">Reservierungen</string>
-  <string name="holds_empty">Wenn Sie ein Buch aus dem Katalog zu buchen wird es hier angezeigt. Schauen Sie hier von Zeit zu Zeit, um zu sehen, ob Ihr Buch zum Download zur Verfügung steht.</string>
+  <string name="holds_empty">Wenn Sie ein Buch aus dem Katalog leihen wird es hier angezeigt. Schauen Sie hier von Zeit zu Zeit, um zu sehen, ob Ihr Buch zum Download zur Verfügung steht.</string>
 
   <!-- Catalog strings -->
   <string name="catalog">Katalog</string>
@@ -25,7 +25,7 @@
   <string name="catalog_book_revoke_loan_confirm">Sind Sie sicher, dass Sie dieses Buch zurück geben möchten?</string>
   <string name="catalog_book_revoke_hold_confirm">Sind Sie sicher, dass Sie diese Reservierung entfernen möchten?</string>
   <string name="catalog_book_delete_confirm">Sind Sie sicher, dass Sie dieses Buch zu löschen?</string>
-  <string name="catalog_cancel_downloading">Stornieren</string>
+  <string name="catalog_cancel_downloading">Abbrechen</string>
   <string name="catalog_categories">Kategorien</string>
   <string name="catalog_detail_related">Verwandte Bücher</string>
   <string name="catalog_revoke_failed">Der Vorgang konnte nicht durchgeführt werden.</string>
@@ -147,13 +147,13 @@
   <string name="catalog_accessibility_book_error_dismiss">Verwerfen Taste</string>
   <string name="catalog_accessibility_book_error_retry">Wiederholen Taste</string>
   <string name="catalog_accessibility_book_sync">Synchronisieren Taste</string>
-  <string name="catalog_accessibility_book_download">Taste zum Download</string>
-  <string name="catalog_accessibility_book_delete">löschen-Taste</string>
-  <string name="catalog_accessibility_book_revoke_loan">Rückkehr jetzt Taste</string>
-  <string name="catalog_accessibility_book_revoke_hold">entfernen-Taste</string>
-  <string name="catalog_accessibility_book_revoke_loan_cancel">Abbrechen Rückkehr jetzt</string>
-  <string name="catalog_accessibility_book_revoke_hold_cancel">abbrechen Entfernen</string>
-  <string name="catalog_accessibility_header_show_more">zeigen mehr in% 1 $ s</string>
+  <string name="catalog_accessibility_book_download">Download-Taste</string>
+  <string name="catalog_accessibility_book_delete">Löschen-Taste</string>
+  <string name="catalog_accessibility_book_revoke_loan">Zurückgeben-Taste</string>
+  <string name="catalog_accessibility_book_revoke_hold">Entfernen-Taste</string>
+  <string name="catalog_accessibility_book_revoke_loan_cancel">Zurückgeben jetzt abbrechen</string>
+  <string name="catalog_accessibility_book_revoke_hold_cancel">Entfernen abbrechen</string>
+  <string name="catalog_accessibility_header_show_more">mehr anzeigen in %1$s</string>
 
   <!-- Reader strings -->
   <string name="reader">Leser</string>
@@ -162,19 +162,19 @@
   <!-- Accessibility strings used for content descriptions (Reader) -->
   <string name="reader_accessibility_toc">Inhaltsverzeichnis anzeigen</string>
   <string name="reader_accessibility_toc_back">Schließen Sie das Inhaltsverzeichnis ohne Auswahl eines Elements</string>
-  <string name="reader_accessibility_settings">Zeigen Leser Einstellungen</string>
-  <string name="reader_accessibility_close">Schliesse das Buch</string>
-  <string name="reader_accessibility_media_previous">Zum vorherigen Medien Artikel</string>
+  <string name="reader_accessibility_settings">Leser Einstellungen anzeigen</string>
+  <string name="reader_accessibility_close">das Buch schliessen</string>
+  <string name="reader_accessibility_media_previous">Zum vorherigen Medienelement</string>
   <string name="reader_accessibility_media_next">Zum nächsten Medienelement</string>
-  <string name="reader_accessibility_media_play">Play oder aktuellen Medien Artikel pausieren</string>
+  <string name="reader_accessibility_media_play">Abspielen oder pausieren des aktuellen Medienelement</string>
 
 
-  <string name="reader_accessibility_settings_sans_font">sans Schriftart</string>
+  <string name="reader_accessibility_settings_sans_font">Serifenlose Schrift</string>
   <string name="reader_accessibility_settings_serif_font">Serifenschrift</string>
   <string name="reader_accessibility_settings_open_dyslexic_font">opendyslexic Schriftart</string>
-  <string name="reader_accessibility_settings_white_on_black_text">Weiß auf schwarzem Text</string>
-  <string name="reader_accessibility_settings_black_on_sepia_text">Schwarz auf Sepia Text</string>
-  <string name="reader_accessibility_settings_black_on_white_text">Schwarz auf Weiß Text</string>
+  <string name="reader_accessibility_settings_white_on_black_text">Weißer Text auf Schwarzem Hintergrund</string>
+  <string name="reader_accessibility_settings_black_on_sepia_text">Schwarzer Text  auf Sepia Hintergrund</string>
+  <string name="reader_accessibility_settings_black_on_white_text">Schwarzer Text auf Weißem Hintergrund</string>
   <string name="reader_accessibility_settings_decrease_font_size">Schriftgröße verkleinern</string>
   <string name="reader_accessibility_settings_increase_font_size">Schriftgröße vergrößern</string>
   <string name="reader_accessibility_settings_brightness_slider">Helligkeitsregler</string>

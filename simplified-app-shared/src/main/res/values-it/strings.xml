@@ -28,7 +28,7 @@
   <string name="catalog_cancel_downloading">Annulla</string>
   <string name="catalog_categories">Categorie</string>
   <string name="catalog_detail_related">libri correlati</string>
-  <string name="catalog_revoke_failed">"L'operazione non può essere completata."</string>
+  <string name="catalog_revoke_failed">\"L\'operazione non può essere completata.\"</string>
   <string name="catalog_download_failed">Il download non è stata completata.</string>
   <string name="catalog_download_failed_loan_limit_reached"> Limite di presto del libro  raggiunto.</string>
   <string name="catalog_download_failed_unsupported_pdf">Questo libro è un PDF di Adobe, che non è supportato.</string>
@@ -68,15 +68,15 @@
   <string name="catalog_book_availability_open_access">Questo libro è il vostro da mantenere.</string>
   <string name="catalog_book_availability_held_indefinite">Hai questo libro in attesa.</string>
   <string name="catalog_book_availability_held_timed">Sei in grado di prendere in prestito questo libro in %s. </string>
-  <string name="catalog_book_availability_held_queue">Sei alla posizione% d in coda per questo libro.</string>
-  <string name="catalog_book_availability_reserved_timed">La vostra prenotazione scade in% s.</string>
+  <string name="catalog_book_availability_held_queue">Sei alla posizione %d in coda per questo libro.</string>
+  <string name="catalog_book_availability_reserved_timed">La vostra prenotazione scade in %s.</string>
   <string name="catalog_book_availability_reserved_indefinite">Hai riservato questo libro.</string>
   <string name="catalog_book_availability_loanable">Questo libro è disponibile per il prestito.</string>
   <string name="catalog_book_availability_holdable">Tutte le copie di questo libro sono attualmente in prestito.</string>
   <string name="catalog_book_availability_revoked">Questo libro è in attesa di essere restituito.</string>
   <string name="catalog_book_interval_days">giorni</string>
   <string name="catalog_book_interval_hours">ore</string>
-  <string name="catalog_book_interval_sub_hour">"meno di un'ora"</string>
+  <string name="catalog_book_interval_sub_hour">\"meno di un\'ora\"</string>
   <string name="catalog_book_interval_years_short">y = anni</string>
   <string name="catalog_book_interval_months_short">m = mesi</string>
   <string name="catalog_book_interval_weeks_short">w = settimane</string>
@@ -90,7 +90,7 @@
   <string name="catalog_book_report_wrong_title">titolo sbagliato</string>
   <string name="catalog_book_report_wrong_medium">Media sbagliato</string>
   <string name="catalog_book_report_wrong_author">Autore sbagliato</string>
-  <string name="catalog_book_report_wrong_cover_image">Sbagliata / manca l\'immagine di copertina</string>
+  <string name="catalog_book_report_wrong_cover_image">\"Sbagliata / manca l\'immagine di copertina\"</string>
   <string name="catalog_book_report_wrong_description">Descrizione sbagliata / non corrispondente</string>
   <string name="catalog_book_report_cant_download">Impossibile scaricare</string>
   <string name="catalog_book_report_cant_borrow">Impossibile il prestito</string>
@@ -107,7 +107,7 @@
   <string name="settings_login_title">Tessera della biblioteca</string>
   <string name="settings_barcode">Codice a barre</string>
   <string name="settings_pin">PIN</string>
-  <string name="settings_screen_Lock_not_setup">la schermata di blocco sicuro non è stato impostato -> Vai a \'Impostazioni -> Sicurezza ->  Blocco schermo per impostare un blocco sicuro.</string>
+  <string name="settings_screen_Lock_not_setup">\"la schermata di blocco sicuro non è stato impostato -> Vai a \'Impostazioni -> Sicurezza ->  Blocco schermo per impostare un blocco sicuro.\"</string>
   <string name="settings_log_in_cancel">Annulla</string>
   <string name="settings_log_in">Login</string>
   <string name="settings_log_out">Log out</string>
@@ -117,9 +117,9 @@
   <string name="settings_login_failed">Accesso fallito</string>
   <string name="settings_login_failed_credentials">La combinazione di codici a barre e il pin non era valido. Riprova.</string>
   <string name="settings_login_failed_server">Si è verificato un errore sconosciuto. Controlla la connessione o riprova più tardi.</string>
-  <string name="settings_login_failed_device">"Si è verificato un errore durante l'attivazione del dispositivo. Controlla la connessione o riprova più tardi."</string>
+  <string name="settings_login_failed_device">\"Si è verificato un errore durante l\'attivazione del dispositivo. Controlla la connessione o riprova più tardi.\"</string>
   <string name="settings_login_failed_adobe_device_limit">Troppi dispositivi sono stati registrati su questo account. Si prega di contattare il supporto di Adobe per ottenere assistenza.</string>
-  <string name="settings_login_failed_adobe_device_bad_clock">Si è verificato un errore durante l\'attivazione del dispositivo. Si prega di verificare che l\'orologio di dispositivo è regolato sull\'ora corretta.</string>
+  <string name="settings_login_failed_adobe_device_bad_clock">\"Si è verificato un errore durante l\'attivazione del dispositivo. Si prega di verificare che l\'orologio di dispositivo è regolato sull\'ora corretta.\"</string>
   <string name="settings_logout_failed">Logout fallito</string>
   <string name="settings_feedback">Risposta</string>
   <string name="settings_about">Di per</string>
@@ -153,14 +153,14 @@
   <string name="catalog_accessibility_book_revoke_hold">rimuovere il pulsante</string>
   <string name="catalog_accessibility_book_revoke_loan_cancel">annullare ritorno ora</string>
   <string name="catalog_accessibility_book_revoke_hold_cancel">cancella Rimuovi</string>
-  <string name="catalog_accessibility_header_show_more">Mostra altro Nel% 1 $ s</string>
+  <string name="catalog_accessibility_header_show_more">Mostra altro Nel %1$s</string>
 
   <!-- Reader strings -->
   <string name="reader">Lettore</string>
   <string name="reader_toc">Sommario</string>
 
   <!-- Accessibility strings used for content descriptions (Reader) -->
-  <string name="reader_accessibility_toc">"Mostra l'indice"</string>
+  <string name="reader_accessibility_toc">\"Mostra l\'indice\"</string>
   <string name="reader_accessibility_toc_back">Chiudere la tabella dei contenuti senza selezionare una voce</string>
   <string name="reader_accessibility_settings">Mostra impostazioni del lettore</string>
   <string name="reader_accessibility_close">Chiudi il libro</string>

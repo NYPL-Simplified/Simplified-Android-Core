@@ -67,9 +67,9 @@
   <string name="catalog_book_availability_loaned_timed">Tienes este libro prestado por %s</string>
   <string name="catalog_book_availability_open_access">Puede conservar una copia de este libro</string>
   <string name="catalog_book_availability_held_indefinite">Tienes este libro en retencion.</string>
-  <string name="catalog_book_availability_held_timed">podrás tomar este libro prestado en % s.</string>
+  <string name="catalog_book_availability_held_timed">podrás tomar este libro prestado en %s.</string>
   <string name="catalog_book_availability_held_queue">Estas en la posición %d de la cola para este libro.</string>
-  <string name="catalog_book_availability_reserved_timed">Su reserva expira en % s.</string>
+  <string name="catalog_book_availability_reserved_timed">Su reserva expira en %s.</string>
   <string name="catalog_book_availability_reserved_indefinite">Tiene este libro reservado.</string>
   <string name="catalog_book_availability_loanable">Este libro está disponible para prestar.</string>
   <string name="catalog_book_availability_holdable">Todas las copias de este libro están en uso</string>
