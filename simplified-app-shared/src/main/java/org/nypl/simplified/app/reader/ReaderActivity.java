@@ -637,89 +637,89 @@ public final class ReaderActivity extends Activity implements
     final AlertDialog.Builder builder = new AlertDialog.Builder(ReaderActivity.this);
     builder.setTitle("Sync Reading Position");
 
-    final Container container = NullCheck.notNull(ReaderActivity.this.epub_container);
+    if (ReaderActivity.this.epub_container != null) {
+      final Container container = NullCheck.notNull(ReaderActivity.this.epub_container);
 
-    final Package default_package = NullCheck.notNull(container.getDefaultPackage());
-    final AnnotationResult result = new Gson().fromJson(response, AnnotationResult.class);
-    OptionType<ReaderOpenPageRequestType> page_request = null;
+      final Package default_package = NullCheck.notNull(container.getDefaultPackage());
+      final AnnotationResult result = new Gson().fromJson(response, AnnotationResult.class);
+      OptionType<ReaderOpenPageRequestType> page_request = null;
 
-    for (final Annotation annotation : result.getFirst().getItems())
-    {
-      if ("http://librarysimplified.org/terms/annotation/idling".equals(annotation.getMotivation())) {
+      for (final Annotation annotation : result.getFirst().getItems()) {
+        if ("http://librarysimplified.org/terms/annotation/idling".equals(annotation.getMotivation())) {
 
-        final String text = NullCheck.notNull(annotation.getTarget().getSelector().getValue());
-        LOG.debug("CurrentPage text {}", text);
+          final String text = NullCheck.notNull(annotation.getTarget().getSelector().getValue());
+          LOG.debug("CurrentPage text {}", text);
 
-        final String key = NullCheck.notNull(this.book_id.toString());
-        LOG.debug("CurrentPage key {}", key);
+          final String key = NullCheck.notNull(this.book_id.toString());
+          LOG.debug("CurrentPage key {}", key);
 
-        try {
-          final JSONObject o = new JSONObject(text);
+          try {
+            final JSONObject o = new JSONObject(text);
 
-          final OptionType<ReaderBookLocation> mark = Option.some(ReaderBookLocation.fromJSON(o));
+            final OptionType<ReaderBookLocation> mark = Option.some(ReaderBookLocation.fromJSON(o));
 
-          page_request = mark.map(
-            new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>()
-            {
-              @Override public ReaderOpenPageRequestType call(
-                final ReaderBookLocation l)
-              {
-                LOG.debug("CurrentPage location {}", l);
+            page_request = mark.map(
+              new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
+                @Override
+                public ReaderOpenPageRequestType call(
+                  final ReaderBookLocation l) {
+                  LOG.debug("CurrentPage location {}", l);
 
-                final String chapter = default_package.getSpineItem(l.getIDRef()).getTitle();
-                builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\" " + chapter + "\"");
+                  final String chapter = default_package.getSpineItem(l.getIDRef()).getTitle();
+                  builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\" " + chapter + "\"");
 
-                ReaderActivity.this.sync_location = l;
-                return ReaderOpenPageRequest.fromBookLocation(l);
-              }
-            });
+                  ReaderActivity.this.sync_location = l;
+                  return ReaderOpenPageRequest.fromBookLocation(l);
+                }
+              });
 
 
-          LOG.debug("CurrentPage sync {}", text);
+            LOG.debug("CurrentPage sync {}", text);
 
-        } catch (JSONException e) {
-          e.printStackTrace();
+          } catch (JSONException e) {
+            e.printStackTrace();
+          }
+
         }
-
       }
+
+      final OptionType<ReaderOpenPageRequestType> page = page_request;
+
+      builder.setPositiveButton("YES",
+        new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(final DialogInterface dialog, final int which) {
+            // positive button logic
+
+            final ReaderReadiumJavaScriptAPIType js =
+              NullCheck.notNull(ReaderActivity.this.readium_js_api);
+            final ReaderReadiumViewerSettings vs =
+              NullCheck.notNull(ReaderActivity.this.viewer_settings);
+            final Container c = NullCheck.notNull(ReaderActivity.this.epub_container);
+            final Package p = NullCheck.notNull(c.getDefaultPackage());
+
+            js.openBook(p, vs, page);
+
+            ReaderActivity.this.prefs.putBoolean("post_last_read", true);
+            LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
+
+          }
+        });
+
+      builder.setNegativeButton("NO",
+        new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(final DialogInterface dialog, final int which) {
+            // negative button logic
+            ReaderActivity.this.prefs.putBoolean("post_last_read", true);
+            LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
+
+          }
+        });
+
+      LOG.debug("CurrentPage current_location {}", this.current_location);
+      LOG.debug("CurrentPage sync_location {}", this.sync_location);
     }
-
-    final OptionType<ReaderOpenPageRequestType> page = page_request;
-
-    builder.setPositiveButton("YES",
-      new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(final DialogInterface dialog, final int which) {
-          // positive button logic
-
-          final ReaderReadiumJavaScriptAPIType js =
-            NullCheck.notNull(ReaderActivity.this.readium_js_api);
-          final ReaderReadiumViewerSettings vs =
-            NullCheck.notNull(ReaderActivity.this.viewer_settings);
-          final Container c = NullCheck.notNull(ReaderActivity.this.epub_container);
-          final Package p = NullCheck.notNull(c.getDefaultPackage());
-
-          js.openBook(p, vs, page);
-
-          ReaderActivity.this.prefs.putBoolean("post_last_read", true);
-          LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
-
-        }
-      });
-
-    builder.setNegativeButton("NO",
-      new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(final DialogInterface dialog, final int which) {
-          // negative button logic
-          ReaderActivity.this.prefs.putBoolean("post_last_read", true);
-          LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
-
-        }
-      });
-
-    LOG.debug("CurrentPage current_location {}", this.current_location);
-    LOG.debug("CurrentPage sync_location {}", this.sync_location);
 
     if ((this.current_location == null && this.sync_location == null) || this.current_location != null && this.sync_location == null)
     {
@@ -741,6 +741,7 @@ public final class ReaderActivity extends Activity implements
       this.prefs.putBoolean("post_last_read", true);
       LOG.debug("CurrentPage set prefs {}", this.prefs.getBoolean("post_last_read"));
     }
+
   }
 
   @Override public void onReadiumFunctionInitialize()
@@ -876,33 +877,36 @@ public final class ReaderActivity extends Activity implements
       });
 
     // Instantiate the RequestQueue.
-    final RequestQueue queue = Volley.newRequestQueue(this);
-    final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
+    if (in_entry.getAnnotations().isSome()) {
 
-    // Request a string response from the provided URL.
-    final NYPLStringRequest request = new NYPLStringRequest(Request.Method.GET, url, this.credentials,
-      new Response.Listener<String>() {
+      final RequestQueue queue = Volley.newRequestQueue(this);
+      final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
 
+      // Request a string response from the provided URL.
+      final NYPLStringRequest request = new NYPLStringRequest(Request.Method.GET, url, this.credentials,
+        new Response.Listener<String>() {
+
+
+          @Override
+          public void onResponse(final String response) {
+
+            LOG.debug("CurrentPage onResponse {}", response);
+            ReaderActivity.this.showBookLocationDialog(response);
+
+          }
+        }, new Response.ErrorListener() {
 
         @Override
-        public void onResponse(final String response) {
+        public void onErrorResponse(final VolleyError error) {
 
-          LOG.debug("CurrentPage onResponse {}", response);
-          ReaderActivity.this.showBookLocationDialog(response);
+          LOG.debug("CurrentPage onErrorResponse {}", error);
 
         }
-      }, new Response.ErrorListener() {
+      });
 
-      @Override
-      public void onErrorResponse(final VolleyError error) {
-
-        LOG.debug("CurrentPage onErrorResponse {}", error);
-
-      }
-    });
-
-    // Add the request to the RequestQueue.
-    queue.add(request);
+      // Add the request to the RequestQueue.
+      queue.add(request);
+    }
   }
 
   @Override public void onReadiumFunctionInitializeError(
