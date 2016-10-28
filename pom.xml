@@ -7,7 +7,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nypl.simplified</groupId>
   <artifactId>simplified</artifactId>
-  <version>1.1.1</version>
+  <version>1.2.0</version>
 
   <packaging>pom</packaging>
   <name>simplified</name>
@@ -307,7 +307,7 @@
       <dependency>
         <groupId>org.nypl.helpstack</groupId>
         <artifactId>helpstack-android</artifactId>
-        <version>1.2.0</version>
+        <version>${project.version}</version>
         <type>aar</type>
       </dependency>
 

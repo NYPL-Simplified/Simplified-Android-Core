@@ -5,7 +5,7 @@
   <parent>
     <artifactId>simplified</artifactId>
     <groupId>org.nypl.simplified</groupId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -41,12 +41,12 @@
     <dependency>
       <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-json-core</artifactId>
-      <version>1.1.1</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-books-core</artifactId>
-      <version>1.1.1</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -64,7 +64,7 @@
     <dependency>
       <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-volley</artifactId>
-      <version>1.1.1</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
