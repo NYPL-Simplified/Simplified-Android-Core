@@ -54,8 +54,9 @@
     <module>simplified-cardcreator</module>
     <module>simplified-prefs</module>
     <module>simplified-volley</module>
-
     <module>simplified-circ-analytics</module>
+    <module>simplified-multilibrary</module>
+
   </modules>
 
   <properties>
