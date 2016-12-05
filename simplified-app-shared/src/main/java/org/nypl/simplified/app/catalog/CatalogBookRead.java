@@ -41,7 +41,7 @@ public final class CatalogBookRead implements OnClickListener
   private final Activity activity;
   private final BookID   id;
   private final FeedEntryOPDS entry;
-
+  private final CirculationAnalytics circulationAnalytics;
   /**
    * The parent activity.
    * @param in_activity   The activity
@@ -57,6 +57,7 @@ public final class CatalogBookRead implements OnClickListener
     this.activity = NullCheck.notNull(in_activity);
     this.id = NullCheck.notNull(in_id);
     this.entry = NullCheck.notNull(in_entry);
+    circulationAnalytics = new CirculationAnalytics(in_activity);
   }
 
   @Override public void onClick(
@@ -82,7 +83,7 @@ public final class CatalogBookRead implements OnClickListener
         @Override public void onAccountIsLoggedIn(
           final AccountCredentials creds) {
 
-          CirculationAnalytics.postEvent(creds, CatalogBookRead.this.activity, CatalogBookRead.this.entry, "open_book");
+          circulationAnalytics.postEvent(creds, CatalogBookRead.this.entry, "open_book");
 
         }
       }
