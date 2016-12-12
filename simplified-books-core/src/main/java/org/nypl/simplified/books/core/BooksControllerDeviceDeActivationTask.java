@@ -92,13 +92,13 @@ public class BooksControllerDeviceDeActivationTask implements Runnable,
                       @Override
                       public void onActivation(final int index,
                                                final AdobeVendorID authority,
-                                               final String device_id,
+                                               final AdobeDeviceID device_id,
                                                final String user_name,
                                                final AdobeUserID in_user_id,
                                                final String expires) {
 
 
-                        final AdobeDeviceID adobe_device_id = new AdobeDeviceID(device_id);
+                        final AdobeDeviceID adobe_device_id = device_id;
 
 
                         BooksControllerDeviceDeActivationTask.this.credentials.setAdobeUserID(Option.some(in_user_id));

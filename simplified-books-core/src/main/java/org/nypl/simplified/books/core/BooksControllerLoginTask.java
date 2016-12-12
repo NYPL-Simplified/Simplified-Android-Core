@@ -182,11 +182,11 @@ final class BooksControllerLoginTask implements Runnable,
 
           @Override
           public void onActivation(final int index, final AdobeVendorID authority,
-                                   final String device_id, final String user_name,
+                                   final AdobeDeviceID device_id, final String user_name,
                                    final AdobeUserID user_id, final String expires) {
             super.onActivation(index, authority, device_id, user_name, user_id, expires);
 
-            final AdobeDeviceID adobe_device_id = new AdobeDeviceID(device_id);
+            final AdobeDeviceID adobe_device_id = device_id;
 
             BooksControllerLoginTask.this.credentials.setAdobeDeviceID(Option.some(adobe_device_id));
             BooksControllerLoginTask.this.credentials.setAdobeUserID(Option.some(user_id));
