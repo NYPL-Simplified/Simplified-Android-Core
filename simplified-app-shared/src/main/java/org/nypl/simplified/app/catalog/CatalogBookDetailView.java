@@ -540,20 +540,6 @@ public final class CatalogBookDetailView implements Observer,
 
     final FeedEntryOPDS current_entry = this.entry.get();
 
-    final OptionType<Throwable> error_opt = f.getError();
-    if (error_opt.isSome()) {
-      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
-      final Throwable error = error_some.get();
-
-      if (error instanceof AccountNotReadyException) {
-
-        this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
-
-      }
-
-    }
-
-
     final TextView failed =
       NullCheck.notNull(this.book_downloading_failed_text);
     failed.setText(CatalogBookErrorStrings.getFailureString(rr, f));
