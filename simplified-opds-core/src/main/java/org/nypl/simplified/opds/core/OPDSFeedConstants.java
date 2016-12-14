@@ -15,6 +15,7 @@ final class OPDSFeedConstants
   public static final String GROUP_REL_TEXT;
   public static final String IMAGE_URI_TEXT;
   public static final String OPDS_URI_TEXT;
+  public static final String DRM_URI_TEXT;
   public static final String THUMBNAIL_URI_TEXT;
   public static final String ISSUES_REL_TEXT;
   public static final String ALTERNATE_REL_TEXT;
@@ -22,6 +23,7 @@ final class OPDSFeedConstants
   public static final URI    SCHEMA_URI;
   public static final URI    SIMPLIFIED_URI;
   public static final URI    OPDS_URI;
+  public static final URI    DRM_URI;
   public static final URI    REVOKE_URI;
   public static final String REVOKE_URI_TEXT;
   public static final URI    ANNOTATION_URI;
@@ -59,6 +61,12 @@ final class OPDSFeedConstants
     OPDS_URI =
       NullCheck.notNull(URI.create("http://opds-spec.org/2010/catalog"));
     OPDS_URI_TEXT = NullCheck.notNull(OPDSFeedConstants.OPDS_URI.toString());
+
+
+    DRM_URI =
+      NullCheck.notNull(URI.create("http://librarysimplified.org/terms/drm"));
+    DRM_URI_TEXT = NullCheck.notNull(OPDSFeedConstants.DRM_URI.toString());
+
 
     THUMBNAIL_URI =
       NullCheck.notNull(URI.create("http://opds-spec.org/image/thumbnail"));

@@ -43,6 +43,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   private final Calendar               updated;
   private final OptionType<URI>        alternate;
   private final OptionType<URI>        analytics;
+  private final OptionType<DRMLicensor> licensor;
 
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
@@ -63,7 +64,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     final String in_distribution,
     final List<OPDSCategory> in_categories,
     final OptionType<URI> in_alternate,
-    final OptionType<URI> in_analytics)
+    final OptionType<URI> in_analytics,
+    final OptionType<DRMLicensor> in_licensor)
   {
     this.authors = NullCheck.notNull(Collections.unmodifiableList(in_authors));
     this.acquisitions =
@@ -85,6 +87,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     this.categories = NullCheck.notNull(in_categories);
     this.alternate = NullCheck.notNull(in_alternate);
     this.analytics = NullCheck.notNull(in_analytics);
+    this.licensor = NullCheck.notNull(in_licensor);
   }
 
   /**
@@ -149,6 +152,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.setDistribution(e.getDistribution());
     b.setAlternateOption(e.getAlternate());
     b.setAnalyticsOption(e.getAnalytics());
+    b.setLicensorOption(e.getLicensor());
 
     {
       final String summary = e.getSummary();
@@ -156,6 +160,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
         b.setSummaryOption(Option.some(summary));
       }
     }
+
 
     b.setThumbnailOption(e.getThumbnail());
     return b;
@@ -192,6 +197,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
            && this.updated.equals(other.updated)
            && this.published.equals(other.published)
            && this.publisher.equals(other.publisher)
+           && this.licensor.equals(other.licensor)
            && this.distribution.equals(other.distribution);
   }
 
@@ -348,6 +354,14 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   }
 
   /**
+   * @return The licensor
+   */
+  public OptionType<DRMLicensor> getLicensor()
+  {
+    return this.licensor;
+  }
+
+  /**
    * @return The title
    */
 
@@ -388,6 +402,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     result = (prime * result) + this.published.hashCode();
     result = (prime * result) + this.publisher.hashCode();
     result = (prime * result) + this.distribution.hashCode();
+    result = (prime * result) + this.licensor.hashCode();
     return result;
   }
 
@@ -432,6 +447,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.append(this.title);
     b.append(", updated=");
     b.append(this.updated);
+    b.append(", licensor=");
+    b.append(this.licensor);
     b.append("]");
     return NullCheck.notNull(b.toString());
   }
@@ -458,6 +475,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     private       String                 distribution;
     private       String                 summary;
     private       OptionType<URI>        thumbnail;
+    private       OptionType<DRMLicensor>        licensor;
 
     private Builder(
       final String in_id,
@@ -484,6 +502,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       this.distribution = "";
       this.categories = new ArrayList<OPDSCategory>(8);
       this.groups = new HashSet<Pair<String, URI>>(8);
+      this.licensor = Option.none();
     }
 
     @Override public void addAcquisition(
@@ -534,7 +553,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
         this.distribution,
         this.categories,
         this.alternate,
-        this.analytics);
+        this.analytics,
+        this.licensor);
     }
 
     @Override public List<OPDSAcquisition> getAcquisitions()
@@ -617,6 +637,12 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       final OptionType<URI> uri)
     {
       this.thumbnail = NullCheck.notNull(uri);
+    }
+
+    @Override public void setLicensorOption(
+      final OptionType<DRMLicensor> lic)
+    {
+      this.licensor = NullCheck.notNull(lic);
     }
   }
 }

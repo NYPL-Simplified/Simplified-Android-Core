@@ -67,7 +67,7 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
           public void onClick(
             final @Nullable View v) {
 
-            in_books.accountActivateDeviceAndFulFillBook(in_book_id);
+            in_books.accountActivateDeviceAndFulFillBook(in_book_id, in_entry.getFeedEntry().getLicensor());
 
           }
         }

@@ -161,4 +161,11 @@ public interface OPDSAcquisitionFeedEntryBuilderType
 
   void setThumbnailOption(
     OptionType<URI> uri);
+
+  /**
+   * @param licensor The Licensor
+   */
+  void setLicensorOption(
+    OptionType<DRMLicensor> licensor);
+
 }

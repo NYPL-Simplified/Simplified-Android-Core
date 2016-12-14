@@ -73,6 +73,15 @@ public interface OPDSJSONSerializerType
   ObjectNode serializeCategory(
     OPDSCategory c);
 
+
+  /**
+   * @param l the licensor
+   * @return JSON
+   */
+  ObjectNode serializeLicensor(
+    DRMLicensor l);
+
+
   /**
    * Serialize the given JSON to the given output stream.
    *

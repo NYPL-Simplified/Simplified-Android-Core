@@ -229,6 +229,19 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     return je;
   }
 
+  @Override
+  public ObjectNode serializeLicensor(final DRMLicensor l) {
+    NullCheck.notNull(l);
+
+    final ObjectMapper jom = new ObjectMapper();
+    final ObjectNode je = jom.createObjectNode();
+    je.put("vendor", l.getVendor());
+    je.put("clientToken", l.getClientToken());
+
+
+    return je;
+  }
+
   @Override public ObjectNode serializeFeedEntry(
     final OPDSAcquisitionFeedEntry e)
     throws OPDSSerializationException
@@ -255,6 +268,13 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
 
     {
       je.set("availability", this.serializeAvailability(e.getAvailability()));
+    }
+
+    {
+      if (e.getLicensor().isSome())
+      {
+        je.set("licensor", this.serializeLicensor(((Some<DRMLicensor>) e.getLicensor()).get()));
+      }
     }
 
     {
