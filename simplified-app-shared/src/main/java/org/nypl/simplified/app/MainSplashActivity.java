@@ -51,7 +51,7 @@ public class MainSplashActivity extends Activity
         @Override
         public void run()
         {
-          MainSplashActivity.this.finishSplash(true);
+          MainSplashActivity.this.finishSplash(false);
         }
       }, 2000L);
   }
