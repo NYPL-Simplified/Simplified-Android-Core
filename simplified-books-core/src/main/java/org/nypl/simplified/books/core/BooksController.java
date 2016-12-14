@@ -13,6 +13,7 @@ import org.nypl.drm.core.AdobeUserID;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -276,7 +277,7 @@ public final class BooksController implements BooksType {
    * @param in_book_id book id to be fulfilled
    */
   @Override
-  public void accountActivateDeviceAndFulFillBook(final BookID in_book_id) {
+  public void accountActivateDeviceAndFulFillBook(final BookID in_book_id, final OptionType<DRMLicensor> licensor) {
 
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {
@@ -285,7 +286,8 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database
+        this.book_database,
+        licensor
       );
       this.submitRunnable(activation_task);
 
@@ -301,6 +303,26 @@ public final class BooksController implements BooksType {
           this.loans_uri,
           in_book_id));
 
+
+    }
+
+  }
+
+
+  @Override
+  public void accountActivateDevice(final OptionType<DRMLicensor> licensor) {
+
+    final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
+    if (credentials_opt.isSome()) {
+      final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+      final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
+        this.adobe_drm,
+        credentials_some.get(),
+        this.accounts_database,
+        this.book_database,
+        licensor
+      );
+      this.submitRunnable(activation_task);
 
     }
 
