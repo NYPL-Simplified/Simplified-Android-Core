@@ -169,7 +169,7 @@ public abstract class SimplifiedActivity extends Activity
         if (this.getClass() != MainCatalogActivity.class) {
           // got to main catalog activity
           //final DrawerLayout d = NullCheck.notNull(this.drawer);
-          this.selected = 0;
+          this.selected = 1;
           this.startSideBarActivity();
 
 
