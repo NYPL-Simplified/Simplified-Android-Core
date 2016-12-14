@@ -344,7 +344,7 @@ public final class BooksController implements BooksType {
   }
 
   @Override
-  public void accountActivateDevice() {
+  public void accountActivateDeviceAndFulfillBooks(final OptionType<DRMLicensor> licensor) {
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {
       final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
@@ -352,8 +352,8 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database
-      );
+        this.book_database,
+        licensor);
       this.submitRunnable(activation_task);
 
       //fulfill book which were already downloaded when device was active.
