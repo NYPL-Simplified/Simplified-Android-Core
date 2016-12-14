@@ -131,10 +131,13 @@
   <string name="settings_feedback">Feedback</string>
   <string name="settings_about">About</string>
   <string name="settings_account">Account</string>
+  <string name="settings_accounts">Accounts</string>
   <string name="settings_credits">Acknowledgements</string>
   <string name="settings_eula">User Agreement</string>
   <string name="settings_privacy">Privacy Policy</string>
   <string name="settings_licences">Licenses</string>
+  <string name="settings_licence_software">Software License</string>
+  <string name="settings_licence_content">Content License</string>
   <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
   <string name="settings_adobe_accounts">Adobe Accounts</string>
   <string name="settings_alt_uris">Alternate URIs</string>
