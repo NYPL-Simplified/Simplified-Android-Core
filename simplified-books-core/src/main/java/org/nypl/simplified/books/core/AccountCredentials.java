@@ -13,7 +13,7 @@ import org.nypl.drm.core.AdobeVendorID;
  */
 
 public final class AccountCredentials {
-  private final OptionType<AdobeVendorID>   adobe_vendor;
+  private OptionType<AdobeVendorID>   adobe_vendor;
   private final OptionType<AccountPatron>   patron;
   private AccountBarcode                    barcode;
   private AccountPIN                        pin;
@@ -188,6 +188,13 @@ public final class AccountCredentials {
    */
   public void setAdobeToken(final OptionType<AccountAdobeToken> in_adobe_token) {
     this.adobe_token = in_adobe_token;
+  }
+
+  /**
+   * @param in_adobe_vendor vendor for registration and deregistration
+   */
+  public void setAdobeVendor(final OptionType<AdobeVendorID> in_adobe_vendor) {
+    this.adobe_vendor = in_adobe_vendor;
   }
 
   /**
