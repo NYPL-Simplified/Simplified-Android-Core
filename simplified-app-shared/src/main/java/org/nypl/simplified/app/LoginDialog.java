@@ -389,17 +389,17 @@ public final class LoginDialog extends DialogFragment
     else
     {
       // card creator (currently deactivated)
-//      in_login_request_new_code.setOnClickListener(
-//        new OnClickListener() {
-//          @Override
-//          public void onClick(
-//            final @Nullable View v) {
-//            final Intent cardcreator = new Intent(LoginDialog.this.getActivity(), CardCreatorActivity.class);
-//            startActivity(cardcreator);
-//          }
-//        });
-//      in_login_request_new_code.setText("Sign Up");
-      in_login_request_new_code.setVisibility(View.GONE);
+      in_login_request_new_code.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+            final Intent cardcreator = new Intent(LoginDialog.this.getActivity(), CardCreatorActivity.class);
+            startActivity(cardcreator);
+          }
+        });
+      in_login_request_new_code.setText("Sign Up");
+//      in_login_request_new_code.setVisibility(View.GONE);
     }
 
 
