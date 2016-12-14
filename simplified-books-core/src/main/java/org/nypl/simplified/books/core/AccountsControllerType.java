@@ -68,8 +68,12 @@ public interface AccountsControllerType
   /**
    * Activate the device with the currently logged in account (if you are logged in).
    */
-  void accountActivateDevice();
+  void accountActivateDeviceAndFulfillBooks(OptionType<DRMLicensor> licensor);
 
+  /**
+   * Activate the device with the currently logged in account (if you are logged in).
+   */
+  void accountActivateDevice(OptionType<DRMLicensor> licensor);
 
   /**
    *  fulfill all existing books which were download before
@@ -98,7 +102,6 @@ public interface AccountsControllerType
    */
   void accountActivateDeviceAndFulFillBook(BookID in_book_id, OptionType<DRMLicensor> licensor);
 
-  void accountActivateDevice(OptionType<DRMLicensor> licensor);
 
 
 }
