@@ -16,6 +16,7 @@ import org.nypl.drm.core.AdobeAdeptFulfillmentToken;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptNetProviderType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
+import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
@@ -75,7 +76,7 @@ final class BooksControllerBorrowTask implements Runnable
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final String                             short_id;
-  private final AccountsDatabaseType       accounts_database;
+  private final AccountsDatabaseType               accounts_database;
   private       long                               download_running_total;
 
   BooksControllerBorrowTask(
@@ -336,11 +337,35 @@ final class BooksControllerBorrowTask implements Runnable
         }
         case ACQUISITION_GENERIC:
         case ACQUISITION_OPEN_ACCESS: {
-          BooksControllerBorrowTask.LOG.debug(
-            "[{}]: acquisition type is {}, performing fulfillment",
-            this.short_id,
-            at);
-          this.runAcquisitionFulfill(this.feed_entry);
+          
+          if (this.adobe_drm.isSome()) {
+            final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
+            if (credentials_opt.isSome()) {
+              final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+
+              final OptionType<AdobeUserID> adobe_user_id = credentials_some.get().getAdobeUserID();
+
+              if (adobe_user_id.isSome()) {
+                BooksControllerBorrowTask.LOG.debug(
+                  "[{}]: acquisition type is {}, performing fulfillment",
+                  this.short_id,
+                  at);
+                this.runAcquisitionFulfill(this.feed_entry);
+
+              }
+              else {
+                final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
+                  this.adobe_drm,
+                  credentials_some.get(),
+                  this.accounts_database,
+                  this.books_database,
+                  this.feed_entry.getLicensor()
+                );
+                activation_task.run();
+              }
+            }
+          }
+
           break;
         }
         case ACQUISITION_BUY:
