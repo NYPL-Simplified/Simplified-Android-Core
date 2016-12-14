@@ -496,7 +496,9 @@ public final class ReaderActivity extends Activity implements
     final RequestQueue queue = Volley.newRequestQueue(this);
 
     if (this.prefs.getBoolean("post_last_read")) {
-      bm.setBookmark(in_book_id, l, in_entry, this.credentials, queue);
+
+      this.postLastRead(l);
+
     }
 
   }
@@ -851,6 +853,92 @@ public final class ReaderActivity extends Activity implements
             });
         }
       });
+  }
+
+  private void postLastRead(final ReaderBookLocation l) {
+
+    final SimplifiedReaderAppServicesType rs =
+      Simplified.getReaderAppServices();
+    final ReaderBookmarksType bm = rs.getBookmarks();
+    final BookID in_book_id = NullCheck.notNull(this.book_id);
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+    final ReaderBookmarksType bookmarks = rs.getBookmarks();
+
+    final OptionType<ReaderBookLocation> mark =
+      bookmarks.getBookmark(in_book_id, in_entry);
+
+    final OptionType<ReaderOpenPageRequestType> page_request = mark.map(
+      new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
+        @Override
+        public ReaderOpenPageRequestType call(
+          final ReaderBookLocation l) {
+          LOG.debug("CurrentPage location {}", l);
+          ReaderActivity.this.current_location = l;
+          return ReaderOpenPageRequest.fromBookLocation(l);
+        }
+      });
+
+    // Instantiate the RequestQueue.
+    if (in_entry.getAnnotations().isSome()) {
+
+      final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
+
+      // Request a string response from the provided URL.
+      final NYPLStringRequest request = new NYPLStringRequest(Request.Method.GET, url, this.credentials,
+        new Response.Listener<String>() {
+
+
+          @Override
+          public void onResponse(final String response) {
+
+            LOG.debug("CurrentPage onResponse {}", response);
+
+            final AnnotationResult result = new Gson().fromJson(response, AnnotationResult.class);
+
+            if (result.getTotal() == 0)
+            {
+              bm.setBookmark(in_book_id, l, in_entry, ReaderActivity.this.credentials, ReaderActivity.this.queue);
+
+            }
+            else {
+
+
+            for (final Annotation annotation : result.getFirst().getItems()) {
+
+              final JsonObject body =  annotation.getBody();
+
+              final JsonPrimitive time  = body.getAsJsonPrimitive("http://librarysimplified.org/terms/time");
+
+              LOG.debug("CurrentPage time {}", time.getAsString());
+
+              final Instant server_instant =  new Instant(time.getAsString());
+              final Instant current_local_instant = new Instant();
+
+              final long local_new = current_local_instant.getMillis() - server_instant.getMillis();
+              LOG.debug("CurrentPage local_new {}", local_new);
+              final long server_new = server_instant.getMillis() - current_local_instant.getMillis();
+              LOG.debug("CurrentPage server_new {}", server_new);
+
+              if (local_new>0) {
+                bm.setBookmark(in_book_id, l, in_entry, ReaderActivity.this.credentials, ReaderActivity.this.queue);
+              }
+            }
+            }
+
+          }
+        }, new Response.ErrorListener() {
+
+        @Override
+        public void onErrorResponse(final VolleyError error) {
+
+          LOG.debug("CurrentPage onErrorResponse {}", error);
+
+        }
+      });
+
+      // Add the request to the RequestQueue.
+      this.queue.add(request);
+    }
   }
 
   private void syncLastRead() {
