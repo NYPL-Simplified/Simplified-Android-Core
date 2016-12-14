@@ -1,5 +1,9 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.OptionType;
+
+import org.nypl.simplified.opds.core.DRMLicensor;
+
 /**
  * The main interface to carry out operations relating to accounts.
  */
@@ -90,6 +94,11 @@ public interface AccountsControllerType
 
   /**
    * @param in_book_id book id to be fulfilled
+   * @param licensor licensor data
    */
-  void accountActivateDeviceAndFulFillBook(BookID in_book_id);
+  void accountActivateDeviceAndFulFillBook(BookID in_book_id, OptionType<DRMLicensor> licensor);
+
+  void accountActivateDevice(OptionType<DRMLicensor> licensor);
+
+
 }
