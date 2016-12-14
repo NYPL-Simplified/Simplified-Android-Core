@@ -340,19 +340,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_downloading_failed_label.setText(
       CatalogBookErrorStrings.getFailureString(rr, f));
 
-
-    final OptionType<Throwable> error_opt = f.getError();
-    if (error_opt.isSome()) {
-      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
-      final Throwable error = error_some.get();
-
-      if (error instanceof AccountNotReadyException)
-      {
-        this.books.accountActivateDeviceAndFulFillBook(fe.getBookID());
-      }
-
-    }
-
     this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss.setOnClickListener(
       new OnClickListener()
