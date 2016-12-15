@@ -14,6 +14,9 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
 import org.nypl.simplified.app.reader.ReaderBookmarks;
@@ -57,6 +60,8 @@ import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.multilibrary.Account;
+import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
 import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParser;
@@ -70,6 +75,7 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializer;
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.tenprint.TenPrintGenerator;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.slf4j.Logger;
@@ -136,7 +142,9 @@ public final class Simplified extends Application
   public static SimplifiedCatalogAppServicesType getCatalogAppServices()
   {
     final Simplified i = Simplified.checkInitialized();
-    return i.getActualAppServices();
+    final Prefs prefs = new Prefs(i.getApplicationContext());
+
+    return i.getActualAppServices(prefs.getString("library"));
   }
 
   static File getDiskDataDir(
@@ -248,14 +256,14 @@ public final class Simplified extends Application
   }
 
 
-  private synchronized SimplifiedCatalogAppServicesType getActualAppServices()
+  private synchronized SimplifiedCatalogAppServicesType getActualAppServices(final String in_library)
   {
     CatalogAppServices as = this.app_services;
-    if (as != null) {
+    if (as != null && this.app_services.library.equals(in_library)) {
       return as;
     }
     as = new CatalogAppServices(
-      this, this, NullCheck.notNull(this.getResources()));
+      this, this, NullCheck.notNull(this.getResources()), in_library);
     this.app_services = as;
     return as;
   }
@@ -326,12 +334,18 @@ public final class Simplified extends Application
     private final BookDatabaseType                   books_database;
     private final AccountsDatabaseType               accounts_database;
 
+    private final String library;
+
     private CatalogAppServices(
       final Application in_app,
       final Context in_context,
-      final Resources rr)
+      final Resources rr,
+      final String in_library)
     {
       NullCheck.notNull(rr);
+
+
+      this.library = in_library;
 
       this.context = NullCheck.notNull(in_context);
       this.screen = new ScreenSizeController(rr);
@@ -341,16 +355,33 @@ public final class Simplified extends Application
       this.exec_downloader = Simplified.namedThreadPool(4, "downloader", 19);
       this.exec_books = Simplified.namedThreadPool(1, "books", 19);
 
+
+      final Prefs prefs = new Prefs(this.context);
+
+      Account account = new AccountsRegistry(this.context).getAccount(prefs.getInt("current_account"));
+
       /**
        * Application paths.
        */
 
+      // add library abbreviation to create direct per library
+      // NYPL = New York
+      // BPL = Brooklyn
+      // without = Open Access // not used anyways.
+
       final File accounts_dir =
-        new File(this.context.getFilesDir(), "accounts");
+        new File(this.context.getFilesDir(), "accounts" + this.library);
 
       final File base_dir = Simplified.getDiskDataDir(in_context);
       final File downloads_dir = new File(base_dir, "downloads");
-      final File books_dir = new File(base_dir, "books");
+
+
+      // add library abbreviation to create direct per library
+      // NYPL = New York
+      // BPL = Brooklyn
+      // without = Open Access
+
+      final File books_dir = new File(base_dir, "books" + this.library);
       final File books_database_directory = new File(books_dir, "data");
 
       /**
@@ -377,10 +408,21 @@ public final class Simplified extends Application
        * Catalog URIs.
        */
 
+      String catalog = account.getCatalogUrl();//rr.getString(R.string.feature_catalog_start_uri);
+      String adobe = account.getCatalogUrl();//rr.getString(R.string.feature_adobe_auth_uri);
+
+      if ("openebooks".equals(this.library))
+      {
+        catalog = "https://circulation.openebooks.us/";
+        adobe = "https://circulation.openebooks.us/";
+      }
+      CatalogAppServices.LOG_CA.debug("catalog:     {}", catalog);
+      CatalogAppServices.LOG_CA.debug("this.library:     {}", this.library);
+
       final BooksControllerConfiguration books_config =
         new BooksControllerConfiguration(
-          URI.create(rr.getString(R.string.feature_catalog_start_uri)),
-          URI.create(rr.getString(R.string.feature_adobe_auth_uri)));
+          URI.create(catalog),
+          URI.create(adobe));
 
       this.feed_initial_uri = books_config.getCurrentRootFeedURI();
 
@@ -444,6 +486,14 @@ public final class Simplified extends Application
             return rr.getString(R.string.settings_name);
           }
         };
+
+
+
+//      final Account bpl =  new AccountsRegistry(this.context).getAccount(1);
+//
+//      Simplified.LOG.debug(bpl.getName());
+
+
 
       final DocumentStoreBuilderType documents_builder =
         DocumentStore.newBuilder(

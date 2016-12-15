@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.io7m.jfunctional.FunctionType;
@@ -30,6 +31,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
@@ -37,11 +42,15 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
+import org.nypl.simplified.multilibrary.Account;
+import org.nypl.simplified.multilibrary.AccountsRegistry;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
@@ -74,6 +83,7 @@ public abstract class SimplifiedActivity extends Activity
   }
 
   private @Nullable ArrayAdapter<SimplifiedPart> adapter;
+  private @Nullable ArrayAdapter<Account>        adapter_accounts;
   private @Nullable FrameLayout                  content_frame;
   private @Nullable DrawerLayout                 drawer;
   private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>>
@@ -85,7 +95,7 @@ public abstract class SimplifiedActivity extends Activity
   private @Nullable SharedPreferences            drawer_settings;
   private           boolean                      finishing;
   private           int                          selected;
-
+  private           SimplifiedCatalogAppServicesType app;
   /**
    * Set the arguments for the activity that will be created.
    *
@@ -189,38 +199,57 @@ public abstract class SimplifiedActivity extends Activity
   private void startSideBarActivity() {
     if (this.selected != -1) {
       final List<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
-      final Map<SimplifiedPart, Class<? extends Activity>> dc =
-              NullCheck.notNull(this.drawer_classes_by_name);
-      final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
-              NullCheck.notNull(this.drawer_arg_funcs);
 
       final SimplifiedPart name = NullCheck.notNull(di.get(this.selected));
-      final Class<? extends Activity> c = NullCheck.notNull(dc.get(name));
-      final FunctionType<Bundle, Unit> fa = NullCheck.notNull(fas.get(name));
 
-      final Bundle b = new Bundle();
-      SimplifiedActivity.setActivityArguments(b, false);
-      fa.call(b);
+      if (this.selected > 0) {
+        final Map<SimplifiedPart, Class<? extends Activity>> dc =
+          NullCheck.notNull(this.drawer_classes_by_name);
+        final Class<? extends Activity> c = NullCheck.notNull(dc.get(name));
 
-      final Intent i = new Intent();
-      i.setClass(this, c);
-      i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
+          NullCheck.notNull(this.drawer_arg_funcs);
+        final FunctionType<Bundle, Unit> fa = NullCheck.notNull(fas.get(name));
 
-      i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-      i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final Bundle b = new Bundle();
+        SimplifiedActivity.setActivityArguments(b, false);
+        fa.call(b);
+
+        final Intent i = new Intent();
+        i.setClass(this, c);
+        i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 
-      i.putExtras(b);
-      this.startActivity(i);
+        i.putExtras(b);
+        this.startActivity(i);
 
-      this.overridePendingTransition(0, 0);
+        this.overridePendingTransition(0, 0);
+      }
+      else
+      {
+        // replace drawer with selection of libraries
+        final ListView dl =
+          NullCheck.notNull((ListView) this.findViewById(R.id.left_drawer));
+        final FrameLayout fl =
+          NullCheck.notNull((FrameLayout) this.findViewById(R.id.content_frame));
 
+        dl.setOnItemClickListener(this);
+        dl.setAdapter(this.adapter_accounts);
+
+      }
     }
-    this.selected = -1;
 
-    final DrawerLayout d = NullCheck.notNull(this.drawer);
-    d.closeDrawer(GravityCompat.START);
+    if (this.selected > 0) {
+
+      this.selected = -1;
+
+      final DrawerLayout d = NullCheck.notNull(this.drawer);
+      d.closeDrawer(GravityCompat.START);
+    }
   }
 
   @Override protected void onCreate(
@@ -274,7 +303,7 @@ public abstract class SimplifiedActivity extends Activity
      * is simply removed from the navigation drawer.
      */
 
-    final SimplifiedCatalogAppServicesType app =
+    this.app =
       Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
     final boolean holds_enabled = rr.getBoolean(R.bool.feature_holds_enabled);
@@ -297,6 +326,8 @@ public abstract class SimplifiedActivity extends Activity
 
     final String app_name = NullCheck.notNull(rr.getString(R.string.feature_app_name));
     final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
+    di.add(SimplifiedPart.PART_SWITCHER);
+
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);
     if (holds_enabled) {
@@ -305,7 +336,50 @@ public abstract class SimplifiedActivity extends Activity
     di.add(SimplifiedPart.PART_SETTINGS);
 
 
+    final List<Account> dia = new ArrayList<Account>();
+
+    JSONArray registry = new AccountsRegistry(this).getAccounts();
+    for (int index = 0; index < registry.length(); ++index) {
+      try {
+
+        final JSONObject obj = registry.getJSONObject(index);
+
+        Account account = new Account(obj);
+        dia.add(account);
+
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+    }
+
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
+
+    this.adapter_accounts =
+      new ArrayAdapter<Account>(this,  R.layout.drawer_item, dia)
+      {
+        @Override public View getView(
+          final int position,
+          final @Nullable View reuse,
+          final @Nullable ViewGroup parent)
+        {
+          final View v;
+          if (reuse != null) {
+            v = reuse;
+          } else {
+            v = inflater.inflate(R.layout.drawer_item, parent, false);
+          }
+
+          final Account part = NullCheck.notNull(dia.get(position));
+          final TextView tv =
+            NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+          tv.setText(part.getName());
+
+
+          return v;
+        }
+      };
+
+
     this.adapter =
       new ArrayAdapter<SimplifiedPart>(this, R.layout.drawer_item, di)
       {
@@ -324,8 +398,19 @@ public abstract class SimplifiedActivity extends Activity
           final SimplifiedPart part = NullCheck.notNull(di.get(position));
           final TextView tv =
             NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
-          tv.setText(part.getPartName(rr));
-
+          final ImageView image_wiew =
+            NullCheck.notNull((ImageView) v.findViewById(R.id.imageView));
+          if (part.equals(SimplifiedPart.PART_SWITCHER))
+          {
+            final Prefs prefs = new Prefs(SimplifiedActivity.this.getApplicationContext());
+            final Account account = new AccountsRegistry(SimplifiedActivity.this).getAccount(prefs.getInt("current_account"));
+            tv.setText(account.getName());
+            image_wiew.setVisibility(View.VISIBLE);
+          }
+          else {
+            tv.setText(part.getPartName(rr));
+            image_wiew.setVisibility(View.GONE);
+          }
           if (dl.getCheckedItemPosition() == position) {
             tv.setContentDescription(tv.getText() + ". selected.");
           }
@@ -388,7 +473,7 @@ public abstract class SimplifiedActivity extends Activity
         @Override public Unit call(
           final Bundle b)
         {
-          final BooksType books = app.getBooks();
+          final BooksType books = SimplifiedActivity.this.app.getBooks();
           final BooksControllerConfigurationType config =
             books.booksGetConfiguration();
 
@@ -431,6 +516,16 @@ public abstract class SimplifiedActivity extends Activity
 
     da.put(
       SimplifiedPart.PART_SETTINGS, new FunctionType<Bundle, Unit>()
+      {
+        @Override public Unit call(
+          final Bundle b)
+        {
+          SimplifiedActivity.setActivityArguments(b, false);
+          return Unit.unit();
+        }
+      });
+    da.put(
+      SimplifiedPart.PART_SWITCHER, new FunctionType<Bundle, Unit>()
       {
         @Override public Unit call(
           final Bundle b)
@@ -550,14 +645,61 @@ public abstract class SimplifiedActivity extends Activity
     final int position,
     final long id)
   {
-    SimplifiedActivity.LOG.debug("onItemClick: {}", position);
-    final Resources rr = NullCheck.notNull(this.getResources());
+    final ListView dl =
+      NullCheck.notNull((ListView) this.findViewById(R.id.left_drawer));
 
-    final DrawerLayout d = NullCheck.notNull(this.drawer);
-    final ActionBar bar = this.getActionBar();
-    bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
-    this.selected = position;
-    this.startSideBarActivity();
+    if (dl.getAdapter().equals(this.adapter)) {
+
+      SimplifiedActivity.LOG.debug("onItemClick: {}", position);
+      final Resources rr = NullCheck.notNull(this.getResources());
+
+//      final DrawerLayout d = NullCheck.notNull(this.drawer);
+      final ActionBar bar = this.getActionBar();
+      bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
+      this.selected = position;
+      this.startSideBarActivity();
+    }
+    else {
+      // select library
+
+      final Account account = new AccountsRegistry(this).getAccount(position);
+
+      final Prefs prefs = new Prefs(this.getApplicationContext());
+
+      prefs.putInt("current_account", account.getId());
+
+      if (account.getId() == 0)
+      {
+        prefs.putString("library", "");
+      }
+      else {
+        prefs.putString("library", "_" + account.getPathComponent());
+      }
+
+      dl.setAdapter(this.adapter);
+
+      this.app =
+        Simplified.getCatalogAppServices();
+
+
+      UIThread.runOnUIThreadDelayed(
+        new Runnable() {
+          @Override
+          public void run() {
+
+            final Resources rr = NullCheck.notNull(SimplifiedActivity.this.getResources());
+            final ActionBar bar = SimplifiedActivity.this.getActionBar();
+            bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
+            SimplifiedActivity.this.selected = 1;
+            SimplifiedActivity.this.startSideBarActivity();
+
+
+          }
+        }, 300L);
+
+
+
+    }
   }
 
   @Override public boolean onOptionsItemSelected(
