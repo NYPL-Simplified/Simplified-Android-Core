@@ -82,7 +82,8 @@ public class MainSplashActivity extends Activity
         if (show_eula) {
           this.openEULA();
         } else {
-          this.finish();
+//          this.finish();
+          this.afterEULA();
         }
       }
     } else {
