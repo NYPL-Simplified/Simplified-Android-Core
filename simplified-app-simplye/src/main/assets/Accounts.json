@@ -1,34 +1,38 @@
 [
  {
-  "id" : 0,
-  "pathComponent" : "0",
-  "name" : "New York Public Library",
-  "subtitle" : "Inspiring lifelong learning, advancing knowledge, and strengthening our communities.",
-  "logo" : "LibraryLogoNYPL",
-  "needsAuth" : true,
-  "supportsReservations" : true,
-  "catalogUrl" : "https://circulation.librarysimplified.org",
-  "mainColor" : "da2527"
+ "id" : 0,
+ "pathComponent" : "0",
+ "name" : "New York Public Library",
+ "subtitle" : "Inspiring lifelong learning, advancing knowledge, and strengthening our communities.",
+ "logo" : "LibraryLogoNYPL",
+ "needsAuth" : true,
+ "supportsReservations" : true,
+ "supportsCardCreator" : true,
+ "catalogUrl" : "https://circulation.librarysimplified.org/",
+ "mainColor" : "da2527"
  },
  {
-  "id" : 1,
-  "pathComponent" : "1",
-  "name" : "Brooklyn Public Library",
-  "subtitle" : "Connecting people to resources to achieve their goals.",
-  "logo" : "LibraryLogoBrooklyn",
-  "needsAuth" : true,
-  "supportsReservations" : true,
-  "catalogUrl" : "https://circulation.librarysimplified.org",
-  "mainColor" : "446ebf"
+ "id" : 1,
+ "pathComponent" : "1",
+ "name" : "Brooklyn Public Library",
+ "subtitle" : "Connecting people to resources to achieve their goals.",
+ "logo" : "LibraryLogoBrooklyn",
+ "needsAuth" : true,
+ "supportsReservations" : true,
+ "supportsCardCreator" : false,
+ "catalogUrl" : "http://qa-bplapp-elasticl-1x9n88b7wl4x7-162943333.us-east-1.elb.amazonaws.com/",
+ "mainColor" : "446ebf"
  },
  {
-  "id" : 2,
-  "pathComponent" : "2",
-  "name" : "Instant Classics",
-  "subtitle" : "Open access to the literature of our shared culture.",
-  "logo" : "LibraryLogoMagic",
-  "needsAuth" : false,
-  "supportsReservations" : false,
-  "catalogUrl" : "https://dev-mta.nypl.org/index.xml"
+ "id" : 2,
+ "pathComponent" : "2",
+ "name" : "Instant Classics",
+ "subtitle" : "Open access to the literature of our shared culture.",
+ "logo" : "LibraryLogoMagic",
+ "needsAuth" : false,
+ "supportsCardCreator" : false,
+ "supportsReservations" : false,
+ "catalogUrl" : "http://dev-mta.nypl.org/index.xml/",
+ "mainColor" : "497049"
  }
 ]
