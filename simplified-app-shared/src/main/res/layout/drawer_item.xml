@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:orientation="horizontal"
+  android:weightSum="1">
 <TextView
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@android:id/text1"
@@ -11,5 +17,16 @@
   android:textColor="@drawable/drawer_list_text"
   android:text="Item"
   android:background="?android:attr/activatedBackgroundIndicator"
-  android:minHeight="?android:attr/listPreferredItemHeightSmall" />
+  android:minHeight="?android:attr/listPreferredItemHeightSmall"
+  android:layout_weight="0.10"/>
 
+  <ImageView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/imageView"
+    android:src="@drawable/scroll_down_arrow_grey"
+    android:layout_weight="0.90"
+    android:visibility="gone"/>
+
+
+</LinearLayout>
