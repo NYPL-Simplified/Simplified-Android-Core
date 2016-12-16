@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
+  <PreferenceCategory>
     <Preference
-      android:key="@string/settings_account"
-      android:title="@string/settings_account">
+      android:key="@string/settings_accounts"
+      android:title="@string/settings_accounts">
     </Preference>
-
+  </PreferenceCategory>
+  <PreferenceCategory>
     <Preference
       android:key="@string/help"
       android:title="@string/help">
     </Preference>
-
+  </PreferenceCategory>
+  <PreferenceCategory>
     <Preference
       android:key="@string/settings_about"
       android:title="@string/settings_about">
-    </Preference>
-
-    <Preference
-      android:key="@string/settings_credits"
-      android:title="@string/settings_credits">
     </Preference>
 
     <Preference
@@ -27,18 +25,15 @@
     </Preference>
 
     <Preference
-      android:key="@string/settings_privacy"
-      android:title="@string/settings_privacy">
+      android:key="@string/settings_licence_software"
+      android:title="@string/settings_licence_software">
     </Preference>
-
-    <Preference
-      android:key="@string/settings_licences"
-      android:title="@string/settings_licences">
-    </Preference>
-
+  </PreferenceCategory>
+  <PreferenceCategory>
     <Preference
       android:key="@string/settings_alt_uris"
       android:title="@string/settings_alt_uris">
     </Preference>
+  </PreferenceCategory>
 
 </PreferenceScreen>

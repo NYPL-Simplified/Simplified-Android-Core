@@ -10,14 +10,15 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.view.View;
 import android.widget.Toast;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.app.testing.OnMultipleClickListener;
 import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
+import org.nypl.simplified.app.testing.OnMultipleClickListener;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountPIN;
@@ -25,10 +26,19 @@ import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.SyncedDocumentType;
+import org.slf4j.Logger;
 
 class MainSettingsFragment extends PreferenceFragment implements LoginListenerType {
 
+
+  private static final Logger LOG;
+
+
+  static {
+    LOG = LogUtilities.getLog(MainSettingsFragment.class);
+  }
   /**
    * Construct an Fragment.
    */
@@ -53,7 +63,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
 
       final Intent account =
         new Intent(this.getActivity(), MainSettingsAccountActivity.class);
-      final Preference preferences = findPreference(resources.getString(R.string.settings_account));
+      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
       account.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
       preferences.setIntent(account);
       preferences.setOnPreferenceClickListener(null);
@@ -62,13 +72,13 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
 
       final Intent account =
         new Intent(this.getActivity(), LoginActivity.class);
-      final Preference preferences = findPreference(resources.getString(R.string.settings_account));
+      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
       preferences.setIntent(account);
       preferences.setOnPreferenceClickListener(null);
 
     } else {
 
-      final Preference preferences = findPreference(resources.getString(R.string.settings_account));
+      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
       preferences.setIntent(null);
       preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
         @Override
@@ -145,6 +155,12 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
   }
 
   @Override
+  public void onViewCreated(final View view, final Bundle state) {
+    super.onViewCreated(view, state);
+    view.setBackgroundColor(getResources().getColor(R.color.light_background));
+  }
+
+  @Override
   public void onCreate(final Bundle saved_instance_state) {
     super.onCreate(saved_instance_state);
 
@@ -156,6 +172,35 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     final DocumentStoreType docs = app.getDocumentStore();
     final OptionType<HelpstackType> helpstack = app.getHelpStack();
 
+    final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
+    preferences.setIntent(null);
+    preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+      @Override
+      public boolean onPreferenceClick(final Preference preference) {
+
+        final AccountBarcode barcode = new AccountBarcode("");
+        final AccountPIN pin = new AccountPIN("");
+
+        final LoginDialog df =
+          LoginDialog.newDialog("Login required", barcode, pin);
+        df.setLoginListener(MainSettingsFragment.this);
+
+        final FragmentManager fm = MainSettingsFragment.this.getActivity().getFragmentManager();
+        df.show(fm, "login-dialog");
+
+//        final Bundle b = new Bundle();
+//        SimplifiedActivity.setActivityArguments(b, false);
+//        final Intent intent = new Intent();
+//        intent.setClass(
+//          MainSettingsFragment.this.getActivity(), MainSettingsAccountsActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//        intent.putExtras(b);
+//
+//        preferences.setIntent(intent);
+
+        return false;
+      }
+    });
 
     if (helpstack.isSome()) {
       final Intent help =
@@ -165,9 +210,6 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
       preference.setIntent(help);
 
     }
-    final PreferenceScreen screen = getPreferenceScreen();
-    final Preference about_preference = findPreference(resources.getString(R.string.settings_about));
-    screen.removePreference(about_preference);
 
     docs.getAbout().map_(
       new ProcedureType<SyncedDocumentType>() {
@@ -185,8 +227,8 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
           intent.putExtras(b);
           intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-          about_preference.setIntent(intent);
-          screen.addPreference(about_preference);
+          final Preference preferences = findPreference(resources.getString(R.string.settings_about));
+          preferences.setIntent(intent);
         }
 
       });
@@ -215,53 +257,6 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
         }
       });
 
-    docs.getPrivacyPolicy().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType policy) {
-
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            policy.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_privacy),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-
-          final Preference preferences = findPreference(resources.getString(R.string.settings_privacy));
-          preferences.setIntent(intent);
-
-        }
-      });
-
-
-    docs.getAcknowledgements().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType ack) {
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            ack.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_credits),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-
-          final Preference preferences = findPreference(resources.getString(R.string.settings_credits));
-          preferences.setIntent(intent);
-
-        }
-      });
-
-    final Preference licenses_preference = findPreference(resources.getString(R.string.settings_licences));
-    screen.removePreference(licenses_preference);
-
     docs.getLicenses().map_(
       new ProcedureType<SyncedDocumentType>() {
         @Override
@@ -278,13 +273,11 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
           intent.putExtras(b);
           intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-
-          licenses_preference.setIntent(intent);
-          screen.addPreference(licenses_preference);
+          final Preference preferences = findPreference(resources.getString(R.string.settings_licence_software));
+          preferences.setIntent(intent);
 
         }
       });
-
 
   }
 
