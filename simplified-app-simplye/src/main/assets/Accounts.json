@@ -9,7 +9,7 @@
  "supportsReservations" : true,
  "supportsCardCreator" : true,
  "catalogUrl" : "https://circulation.librarysimplified.org/",
- "mainColor" : "da2527"
+ "mainColor" : "#da2527"
  },
  {
  "id" : 1,
@@ -20,8 +20,8 @@
  "needsAuth" : true,
  "supportsReservations" : true,
  "supportsCardCreator" : false,
- "catalogUrl" : "http://qa-bplapp-elasticl-1x9n88b7wl4x7-162943333.us-east-1.elb.amazonaws.com/",
- "mainColor" : "446ebf"
+ "catalogUrl" : "https://bplsimplye.bklynlibrary.org/",
+ "mainColor" : "#446ebf"
  },
  {
  "id" : 2,
@@ -32,7 +32,7 @@
  "needsAuth" : false,
  "supportsCardCreator" : false,
  "supportsReservations" : false,
- "catalogUrl" : "http://dev-mta.nypl.org/index.xml/",
- "mainColor" : "497049"
+  "catalogUrl" : "http://dev-mta.nypl.org/all-books.xml",
+  "mainColor" : "#497049"
  }
 ]

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
@@ -92,6 +94,17 @@ public final class ReaderTOCActivity extends Activity
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
+    int id = Simplified.getCurrentAccount().getId();
+    if (id == 0) {
+      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
+    }
+    else if (id == 1) {
+      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
+    }
+    else {
+      setTheme(R.style.SimplifiedThemeNoActionBar);
+    }
+
     super.onCreate(state);
 
     ReaderTOCActivity.LOG.debug("onCreate");

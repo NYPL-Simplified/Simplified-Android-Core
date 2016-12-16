@@ -2,9 +2,11 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.Color;
 
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
@@ -43,8 +45,8 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
 
     final OPDSAvailabilityType availability = in_entry.getFeedEntry().getAvailability();
     this.getTextView().setTextSize(12.0f);
-    this.setBackground(rr.getDrawable(R.drawable.simplified_button));
-    this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
+    this.setBackgroundResource(R.drawable.simplified_button);
+    this.getTextView().setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
 
     switch (in_acq.getType()) {
       case ACQUISITION_OPEN_ACCESS:

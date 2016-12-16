@@ -255,6 +255,18 @@ public abstract class SimplifiedActivity extends Activity
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
+
+    final int id = Simplified.getCurrentAccount().getId();
+    if (id == 0) {
+      setTheme(R.style.SimplifiedTheme_NYPL);
+    }
+    else if (id == 1) {
+      setTheme(R.style.SimplifiedTheme_BPL);
+    }
+    else {
+      setTheme(R.style.SimplifiedTheme_Magic);
+    }
+
     super.onCreate(state);
 
     SimplifiedActivity.LOG.debug("onCreate: {}", this);
@@ -664,7 +676,7 @@ public abstract class SimplifiedActivity extends Activity
 
       final Account account = new AccountsRegistry(this).getAccount(position);
 
-      final Prefs prefs = new Prefs(this.getApplicationContext());
+      final Prefs prefs = Simplified.getSharedPrefs();
 
       prefs.putInt("current_account", account.getId());
 

@@ -2,7 +2,9 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountNotReadyException;
@@ -154,6 +157,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_downloading =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_downloading));
+    this.cell_downloading.setBackgroundColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+
     this.cell_downloading_progress = NullCheck.notNull(
       (ProgressBar) this.cell_downloading.findViewById(
         R.id.cell_downloading_progress));
@@ -188,6 +193,16 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       (Button) this.cell_downloading_failed.findViewById(
         R.id.cell_downloading_failed_retry));
 
+    this.cell_downloading_cancel.setBackgroundResource(R.drawable.simplified_button);
+    this.cell_downloading_cancel.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+
+    this.cell_downloading_failed_dismiss.setBackgroundResource(R.drawable.simplified_button);
+    this.cell_downloading_failed_dismiss.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+
+    this.cell_downloading_failed_retry.setBackgroundResource(R.drawable.simplified_button);
+    this.cell_downloading_failed_retry.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+
+
     this.cell_corrupt =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_corrupt));
     this.cell_corrupt_text = NullCheck.notNull(
@@ -221,6 +236,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       (ProgressBar) this.cell_cover_layout.findViewById(
         R.id.cell_cover_loading));
 
+    this.cell_cover_progress.getIndeterminateDrawable().setColorFilter(
+      Color.parseColor(Simplified.getCurrentAccount().getMainColor()),
+      android.graphics.PorterDuff.Mode.SRC_IN);
     /**
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
      * for cover images and calculate the width of the cover layout in pixels.

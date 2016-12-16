@@ -4,7 +4,7 @@
   android:id="@+id/book_dialog_downloading"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="@color/downloading_background"
+  android:background="?attr/downloading_background"
   android:orientation="vertical">
 
   <LinearLayout

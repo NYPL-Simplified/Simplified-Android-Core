@@ -41,6 +41,16 @@ public class MainSplashActivity extends Activity
   @Override
   protected void onCreate(final Bundle state)
   {
+    int id = Simplified.getCurrentAccount().getId();
+    if (id == 0) {
+      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
+    }
+    else if (id == 1) {
+      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
+    }
+    else {
+      setTheme(R.style.SimplifiedThemeNoActionBar);
+    }
     super.onCreate(state);
     this.setContentView(R.layout.splash);
 

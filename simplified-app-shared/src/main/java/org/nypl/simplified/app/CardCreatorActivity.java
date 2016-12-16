@@ -74,7 +74,7 @@ public class CardCreatorActivity extends FragmentActivity implements
 
 
   protected static final String TAG = "CardCreatorActivity";
-  private Prefs prefs = new Prefs(this);
+  private Prefs prefs = Simplified.getSharedPrefs();
 
   /**
    *

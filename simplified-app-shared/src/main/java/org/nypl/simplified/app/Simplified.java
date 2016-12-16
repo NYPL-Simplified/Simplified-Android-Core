@@ -147,6 +147,34 @@ public final class Simplified extends Application
     return i.getActualAppServices(prefs.getString("library"));
   }
 
+  /**
+   * @return
+   */
+  public static Prefs getSharedPrefs() {
+    final Simplified i = Simplified.checkInitialized();
+    final Prefs prefs = new Prefs(i.getApplicationContext());
+    return prefs;
+  }
+
+  /**
+   * @return
+   */
+  public static Account getCurrentAccount() {
+    final Simplified i = Simplified.checkInitialized();
+    Account account = new AccountsRegistry(i.getApplicationContext()).getAccount(Simplified.getSharedPrefs().getInt("current_account"));
+    if (account == null)
+    {
+      account = new AccountsRegistry(i.getApplicationContext()).getAccount(0);
+    }
+    return account;
+  }
+
+  public static Resources.Theme getCurrentTheme() {
+    final Simplified i = Simplified.checkInitialized();
+
+    return i.getApplicationContext().getTheme();
+  }
+
   static File getDiskDataDir(
     final Context context)
   {

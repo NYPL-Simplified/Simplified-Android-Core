@@ -30,7 +30,7 @@
       android:id="@+id/login_with_barcode"
       android:layout_gravity="center_horizontal"
       style="?android:attr/borderlessButtonStyle"
-      android:textColor="@color/button_foreground"
+      android:textColor="?button_foreground"
       android:src="@drawable/sign_in_with_firstbook_full"/>
 
     <ImageButton
@@ -40,7 +40,7 @@
       android:id="@+id/login_with_clever"
       android:layout_gravity="center_horizontal"
       style="?android:attr/borderlessButtonStyle"
-      android:textColor="@color/button_foreground"
+      android:textColor="?button_foreground"
       android:src="@drawable/sign_in_with_clever_full"
       android:visibility="gone"/>
   </LinearLayout>
