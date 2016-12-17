@@ -24,7 +24,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,7 +36,6 @@ import com.io7m.jnull.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
@@ -90,9 +88,9 @@ public abstract class SimplifiedActivity extends Activity
   private @Nullable FrameLayout                  content_frame;
   private @Nullable DrawerLayout                 drawer;
   private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>>
-                                                 drawer_arg_funcs;
+    drawer_arg_funcs;
   private @Nullable Map<SimplifiedPart, Class<? extends Activity>>
-                                                 drawer_classes_by_name;
+    drawer_classes_by_name;
   private @Nullable List<SimplifiedPart>         drawer_items;
   private @Nullable ListView                     drawer_list;
   private @Nullable SharedPreferences            drawer_settings;
@@ -380,9 +378,6 @@ public abstract class SimplifiedActivity extends Activity
 
             final ImageView icon_view =
               NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
-//            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
-//            params.weight = 0.88f;
-//            icon_view.setLayoutParams(params);
             if (account.getId() == 0) {
               icon_view.setImageResource(R.drawable.account_logo_nypl);
             } else if (account.getId() == 1) {
@@ -397,9 +392,6 @@ public abstract class SimplifiedActivity extends Activity
             final TextView tv =
               NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
             tv.setText("Manage Accounts");
-//            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
-//            params.weight = 0.88f;
-//            icon_view.setLayoutParams(params);
 
           }
           return v;
