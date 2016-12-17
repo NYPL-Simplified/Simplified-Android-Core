@@ -355,7 +355,7 @@ public abstract class SimplifiedActivity extends Activity
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
     this.adapter_accounts =
-      new ArrayAdapter<Object>(this,  R.layout.drawer_item, dia)
+      new ArrayAdapter<Object>(this,  R.layout.drawer_item_account, dia)
       {
         @Override public View getView(
           final int position,
@@ -366,7 +366,7 @@ public abstract class SimplifiedActivity extends Activity
           if (reuse != null) {
             v = reuse;
           } else {
-            v = inflater.inflate(R.layout.drawer_item, parent, false);
+            v = inflater.inflate(R.layout.drawer_item_account, parent, false);
           }
 
           final Object object = NullCheck.notNull(dia.get(position));
@@ -380,9 +380,9 @@ public abstract class SimplifiedActivity extends Activity
 
             final ImageView icon_view =
               NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
-            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
-            params.weight = 0.88f;
-            icon_view.setLayoutParams(params);
+//            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
+//            params.weight = 0.88f;
+//            icon_view.setLayoutParams(params);
             if (account.getId() == 0) {
               icon_view.setImageResource(R.drawable.account_logo_nypl);
             } else if (account.getId() == 1) {
@@ -397,9 +397,9 @@ public abstract class SimplifiedActivity extends Activity
             final TextView tv =
               NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
             tv.setText("Manage Accounts");
-            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
-            params.weight = 0.88f;
-            icon_view.setLayoutParams(params);
+//            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
+//            params.weight = 0.88f;
+//            icon_view.setLayoutParams(params);
 
           }
           return v;
@@ -415,33 +415,32 @@ public abstract class SimplifiedActivity extends Activity
           final @Nullable View reuse,
           final @Nullable ViewGroup parent)
         {
-          final View v;
+          View v;
           if (reuse != null) {
             v = reuse;
           } else {
             v = inflater.inflate(R.layout.drawer_item, parent, false);
           }
-
           final SimplifiedPart part = NullCheck.notNull(di.get(position));
+
+          if (part.equals(SimplifiedPart.PART_SWITCHER)) {
+            v = inflater.inflate(R.layout.drawer_item_current_account, parent, false);
+          }
+
           final TextView tv =
             NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
-          final ImageView image_wiew =
-            NullCheck.notNull((ImageView) v.findViewById(R.id.imageView));
+
           final ImageView icon_view =
             NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
 
 
           if (part.equals(SimplifiedPart.PART_SWITCHER)) {
-
             v.setBackgroundResource(R.drawable.textview_underline);
             final Prefs prefs = new Prefs(SimplifiedActivity.this.getApplicationContext());
             final Account account = new AccountsRegistry(SimplifiedActivity.this).getAccount(prefs.getInt("current_account"));
             tv.setText(account.getName());
             tv.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
-            image_wiew.setVisibility(View.VISIBLE);
-            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
-            params.weight = 0.43f;
-            icon_view.setLayoutParams(params);
+
             if (account.getId() == 0) {
               icon_view.setImageResource(R.drawable.account_logo_nypl);
             } else if (account.getId() == 1) {
@@ -451,10 +450,6 @@ public abstract class SimplifiedActivity extends Activity
             }
           } else {
             tv.setText(part.getPartName(rr));
-            image_wiew.setVisibility(View.GONE);
-            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
-            params.weight = 0.88f;
-            icon_view.setLayoutParams(params);
             if (dl.getCheckedItemPosition() == position) {
               tv.setContentDescription(tv.getText() + ". selected.");
               if (SimplifiedPart.PART_CATALOG == part) {
