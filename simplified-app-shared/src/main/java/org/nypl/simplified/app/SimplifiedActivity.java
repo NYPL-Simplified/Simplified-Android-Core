@@ -86,7 +86,7 @@ public abstract class SimplifiedActivity extends Activity
   }
 
   private @Nullable ArrayAdapter<SimplifiedPart> adapter;
-  private @Nullable ArrayAdapter<Account>        adapter_accounts;
+  private @Nullable ArrayAdapter<Object>        adapter_accounts;
   private @Nullable FrameLayout                  content_frame;
   private @Nullable DrawerLayout                 drawer;
   private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>>
@@ -357,7 +357,7 @@ public abstract class SimplifiedActivity extends Activity
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
     this.adapter_accounts =
-      new ArrayAdapter<Account>(this,  R.layout.drawer_item, dia)
+      new ArrayAdapter<Object>(this,  R.layout.drawer_item, dia)
       {
         @Override public View getView(
           final int position,
