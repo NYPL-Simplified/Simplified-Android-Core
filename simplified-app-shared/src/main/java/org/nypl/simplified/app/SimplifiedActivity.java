@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -23,8 +24,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -43,11 +46,11 @@ import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.nypl.simplified.prefs.Prefs;
@@ -183,14 +186,11 @@ public abstract class SimplifiedActivity extends Activity
           this.startSideBarActivity();
 
 
-        }
-        else
-        {
+        } else {
           d.openDrawer(GravityCompat.START);
           bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_hide));
         }
-      }
-      else {
+      } else {
         this.finishWithConditionalAnimationOverride();
       }
     }
@@ -228,9 +228,7 @@ public abstract class SimplifiedActivity extends Activity
         this.startActivity(i);
 
         this.overridePendingTransition(0, 0);
-      }
-      else
-      {
+      } else {
         // replace drawer with selection of libraries
         final ListView dl =
           NullCheck.notNull((ListView) this.findViewById(R.id.left_drawer));
@@ -244,9 +242,7 @@ public abstract class SimplifiedActivity extends Activity
     }
 
     if (this.selected > 0) {
-
       this.selected = -1;
-
       final DrawerLayout d = NullCheck.notNull(this.drawer);
       d.closeDrawer(GravityCompat.START);
     }
@@ -259,11 +255,9 @@ public abstract class SimplifiedActivity extends Activity
     final int id = Simplified.getCurrentAccount().getId();
     if (id == 0) {
       setTheme(R.style.SimplifiedTheme_NYPL);
-    }
-    else if (id == 1) {
+    } else if (id == 1) {
       setTheme(R.style.SimplifiedTheme_BPL);
-    }
-    else {
+    } else {
       setTheme(R.style.SimplifiedTheme_Magic);
     }
 
@@ -342,27 +336,23 @@ public abstract class SimplifiedActivity extends Activity
 
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);
-    if (holds_enabled) {
+    if (holds_enabled && Simplified.getCurrentAccount().supportsReservations()) {
       di.add(SimplifiedPart.PART_HOLDS);
     }
     di.add(SimplifiedPart.PART_SETTINGS);
 
 
-    final List<Account> dia = new ArrayList<Account>();
+    final List<Object> dia = new ArrayList<Object>();
 
-    JSONArray registry = new AccountsRegistry(this).getAccounts();
+    final JSONArray registry = new AccountsRegistry(this).getCurrentAccounts(Simplified.getSharedPrefs());
     for (int index = 0; index < registry.length(); ++index) {
       try {
-
-        final JSONObject obj = registry.getJSONObject(index);
-
-        Account account = new Account(obj);
-        dia.add(account);
-
+        dia.add(new Account(registry.getJSONObject(index)));
       } catch (JSONException e) {
         e.printStackTrace();
       }
     }
+    dia.add(SimplifiedPart.PART_MANAGE_ACCOUNTS);
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
@@ -381,12 +371,39 @@ public abstract class SimplifiedActivity extends Activity
             v = inflater.inflate(R.layout.drawer_item, parent, false);
           }
 
-          final Account part = NullCheck.notNull(dia.get(position));
-          final TextView tv =
-            NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
-          tv.setText(part.getName());
+          final Object object = NullCheck.notNull(dia.get(position));
 
+          if (object instanceof Account) {
 
+            final Account account = (Account) object;
+            final TextView tv =
+              NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+            tv.setText(account.getName());
+
+            final ImageView icon_view =
+              NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
+            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
+            params.weight = 0.88f;
+            icon_view.setLayoutParams(params);
+            if (account.getId() == 0) {
+              icon_view.setImageResource(R.drawable.account_logo_nypl);
+            } else if (account.getId() == 1) {
+              icon_view.setImageResource(R.drawable.account_logo_bpl);
+            } else if (account.getId() == 2) {
+              icon_view.setImageResource(R.drawable.account_logo_instant);
+            }
+          } else {
+            final ImageView icon_view =
+              NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
+            icon_view.setImageResource(R.drawable.menu_icon_settings);
+            final TextView tv =
+              NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+            tv.setText("Manage Accounts");
+            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
+            params.weight = 0.88f;
+            icon_view.setLayoutParams(params);
+
+          }
           return v;
         }
       };
@@ -412,19 +429,60 @@ public abstract class SimplifiedActivity extends Activity
             NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
           final ImageView image_wiew =
             NullCheck.notNull((ImageView) v.findViewById(R.id.imageView));
-          if (part.equals(SimplifiedPart.PART_SWITCHER))
-          {
+          final ImageView icon_view =
+            NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
+
+
+          if (part.equals(SimplifiedPart.PART_SWITCHER)) {
+
+            v.setBackgroundResource(R.drawable.textview_underline);
             final Prefs prefs = new Prefs(SimplifiedActivity.this.getApplicationContext());
             final Account account = new AccountsRegistry(SimplifiedActivity.this).getAccount(prefs.getInt("current_account"));
             tv.setText(account.getName());
+            tv.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
             image_wiew.setVisibility(View.VISIBLE);
-          }
-          else {
+            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
+            params.weight = 0.43f;
+            icon_view.setLayoutParams(params);
+            if (account.getId() == 0) {
+              icon_view.setImageResource(R.drawable.account_logo_nypl);
+            } else if (account.getId() == 1) {
+              icon_view.setImageResource(R.drawable.account_logo_bpl);
+            } else if (account.getId() == 2) {
+              icon_view.setImageResource(R.drawable.account_logo_instant);
+            }
+          } else {
             tv.setText(part.getPartName(rr));
             image_wiew.setVisibility(View.GONE);
-          }
-          if (dl.getCheckedItemPosition() == position) {
-            tv.setContentDescription(tv.getText() + ". selected.");
+            final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) icon_view.getLayoutParams();
+            params.weight = 0.88f;
+            icon_view.setLayoutParams(params);
+            if (dl.getCheckedItemPosition() == position) {
+              tv.setContentDescription(tv.getText() + ". selected.");
+              if (SimplifiedPart.PART_CATALOG == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_catalog_white);
+              } else if (SimplifiedPart.PART_BOOKS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_books_white);
+              } else if (SimplifiedPart.PART_HOLDS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_holds_white);
+              } else if (SimplifiedPart.PART_SETTINGS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_settings_white);
+              }
+
+            }
+            else
+            {
+              if (SimplifiedPart.PART_CATALOG == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_catalog);
+              } else if (SimplifiedPart.PART_BOOKS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_books);
+              } else if (SimplifiedPart.PART_HOLDS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_holds);
+              } else if (SimplifiedPart.PART_SETTINGS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_settings);
+              }
+
+            }
           }
 
           return v;
@@ -443,7 +501,7 @@ public abstract class SimplifiedActivity extends Activity
     classes_by_name.put(SimplifiedPart.PART_BOOKS, MainBooksActivity.class);
     classes_by_name.put(
       SimplifiedPart.PART_CATALOG, MainCatalogActivity.class);
-    if (holds_enabled) {
+    if (holds_enabled && Simplified.getCurrentAccount().supportsReservations()) {
       classes_by_name.put(SimplifiedPart.PART_HOLDS, MainHoldsActivity.class);
     }
     classes_by_name.put(
@@ -503,7 +561,7 @@ public abstract class SimplifiedActivity extends Activity
         }
       });
 
-    if (holds_enabled) {
+    if (holds_enabled && Simplified.getCurrentAccount().supportsReservations()) {
       da.put(
         SimplifiedPart.PART_HOLDS, new FunctionType<Bundle, Unit>()
         {
@@ -665,53 +723,55 @@ public abstract class SimplifiedActivity extends Activity
       SimplifiedActivity.LOG.debug("onItemClick: {}", position);
       final Resources rr = NullCheck.notNull(this.getResources());
 
-//      final DrawerLayout d = NullCheck.notNull(this.drawer);
       final ActionBar bar = this.getActionBar();
       bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
       this.selected = position;
       this.startSideBarActivity();
-    }
-    else {
+    } else {
       // select library
 
-      final Account account = new AccountsRegistry(this).getAccount(position);
+      final Object object = this.adapter_accounts.getItem(position);
 
-      final Prefs prefs = Simplified.getSharedPrefs();
-
-      prefs.putInt("current_account", account.getId());
-
-      if (account.getId() == 0)
-      {
-        prefs.putString("library", "");
-      }
-      else {
-        prefs.putString("library", "_" + account.getPathComponent());
-      }
-
-      dl.setAdapter(this.adapter);
-
-      this.app =
-        Simplified.getCatalogAppServices();
+      if (object instanceof Account) {
+        final Account account = (Account) object;
 
 
-      UIThread.runOnUIThreadDelayed(
-        new Runnable() {
-          @Override
-          public void run() {
-
-            final Resources rr = NullCheck.notNull(SimplifiedActivity.this.getResources());
-            final ActionBar bar = SimplifiedActivity.this.getActionBar();
-            bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
-            SimplifiedActivity.this.selected = 1;
-            SimplifiedActivity.this.startSideBarActivity();
-
-
+        if (account.getId() != Simplified.getCurrentAccount().getId()) {
+          final Prefs prefs = Simplified.getSharedPrefs();
+          prefs.putInt("current_account", account.getId());
+          if (account.getId() == 0) {
+            prefs.putString("library", "");
+          } else {
+            prefs.putString("library", "_" + account.getPathComponent());
           }
-        }, 300L);
 
+          dl.setAdapter(this.adapter);
 
+          this.app =
+            Simplified.getCatalogAppServices();
 
+          UIThread.runOnUIThreadDelayed(
+            new Runnable() {
+              @Override
+              public void run() {
+
+                final Resources rr = NullCheck.notNull(SimplifiedActivity.this.getResources());
+                final ActionBar bar = SimplifiedActivity.this.getActionBar();
+                bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
+                SimplifiedActivity.this.selected = 1;
+                SimplifiedActivity.this.startSideBarActivity();
+
+              }
+            }, 300L);
+        } else {
+          dl.setAdapter(this.adapter);
+        }
+      } else {
+        this.selected = this.adapter.getCount() - 1;
+        this.startSideBarActivity();
+      }
     }
+
   }
 
   @Override public boolean onOptionsItemSelected(

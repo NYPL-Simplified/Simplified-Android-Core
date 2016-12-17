@@ -45,6 +45,11 @@ public enum SimplifiedPart
 
   PART_SETTINGS,
 
+  /**
+   * The settings section.
+   */
+
+  PART_MANAGE_ACCOUNTS,
 
   /**
    * The account section.

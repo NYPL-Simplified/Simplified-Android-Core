@@ -11,12 +11,14 @@ import java.io.Serializable;
 
 public class Account implements Serializable {
 
-
   private Integer id;
   private String path_component;
   private String name;
+  private String subtitle;
   private String logo;
   private Boolean needs_auth;
+  private Boolean supports_reservations;
+  private Boolean supports_card_creator;
   private String catalog_url;
   private String main_color;
 
@@ -119,6 +121,49 @@ public class Account implements Serializable {
     this.main_color = in_main_color;
   }
 
+  /**
+   * @return
+   */
+  public boolean supportsCardCreator() {
+    return supports_card_creator;
+  }
+
+  /**
+   * @param supports_card_creator
+   */
+  public void setSupportsCardCreator(final boolean supports_card_creator) {
+    this.supports_card_creator = supports_card_creator;
+  }
+
+  /**
+   * @return
+   */
+  public boolean supportsReservations() {
+    return supports_reservations;
+  }
+
+  /**
+   * @param supports_reservations
+   */
+  public void setSupportsReservations(final boolean supports_reservations) {
+    this.supports_reservations = supports_reservations;
+  }
+
+  /**
+   * @return
+   */
+  public String getSubtitle() {
+    return subtitle;
+  }
+
+  /**
+   * @param subtitle
+   */
+  public void setSubtitle(final String subtitle) {
+    this.subtitle = subtitle;
+  }
+
+
 
   /**
    * @param account The Json Account
@@ -133,6 +178,8 @@ public class Account implements Serializable {
       this.logo = account.getString("logo");
       this.catalog_url = account.getString("catalogUrl");
       this.needs_auth = account.getBoolean("needsAuth");
+      this.supports_reservations = account.getBoolean("supportsReservations");
+      this.supports_card_creator = account.getBoolean("supportsCardCreator");
 
       if (!account.isNull("mainColor")) {
         this.main_color = account.getString("mainColor");
@@ -142,5 +189,28 @@ public class Account implements Serializable {
       e.printStackTrace();
     }
 
+  }
+
+  /**
+   * @return
+   */
+  public JSONObject getJsonObject()
+  {
+    final JSONObject object = new JSONObject();
+    try {
+      object.put("id",this.id);
+      object.put("pathComponent",this.path_component);
+      object.put("name",this.name);
+      object.put("logo",this.logo);
+      object.put("catalogUrl",this.catalog_url);
+      object.put("needsAuth",this.needs_auth);
+      object.put("supportsReservations",this.supports_reservations);
+      object.put("supportsCardCreator",this.supports_card_creator);
+      object.put("mainColor",this.main_color);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+
+    return object;
   }
 }
