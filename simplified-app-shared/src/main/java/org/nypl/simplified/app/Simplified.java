@@ -583,7 +583,7 @@ public final class Simplified extends Application
         }
 
         try {
-          final InputStream stream = assets.open("licenses.html");
+          final InputStream stream = assets.open("software-licenses.html");
           documents_builder.enableLicenses(
             new FunctionType<Unit, InputStream>()
             {

@@ -9,7 +9,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import android.view.View;
 import android.widget.Toast;
 
@@ -25,7 +24,6 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
-import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.SyncedDocumentType;
 import org.slf4j.Logger;
@@ -172,21 +170,22 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     final DocumentStoreType docs = app.getDocumentStore();
     final OptionType<HelpstackType> helpstack = app.getHelpStack();
 
-    final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
-    preferences.setIntent(null);
-    preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-      @Override
-      public boolean onPreferenceClick(final Preference preference) {
+    {
+      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
+      preferences.setIntent(null);
+      preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(final Preference preference) {
 
-        final AccountBarcode barcode = new AccountBarcode("");
-        final AccountPIN pin = new AccountPIN("");
+          final AccountBarcode barcode = new AccountBarcode("");
+          final AccountPIN pin = new AccountPIN("");
 
-        final LoginDialog df =
-          LoginDialog.newDialog("Login required", barcode, pin);
-        df.setLoginListener(MainSettingsFragment.this);
+          final LoginDialog df =
+            LoginDialog.newDialog("Login required", barcode, pin);
+          df.setLoginListener(MainSettingsFragment.this);
 
-        final FragmentManager fm = MainSettingsFragment.this.getActivity().getFragmentManager();
-        df.show(fm, "login-dialog");
+          final FragmentManager fm = MainSettingsFragment.this.getActivity().getFragmentManager();
+          df.show(fm, "login-dialog");
 
 //        final Bundle b = new Bundle();
 //        SimplifiedActivity.setActivityArguments(b, false);
@@ -198,87 +197,73 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
 //
 //        preferences.setIntent(intent);
 
-        return false;
-      }
-    });
-
-    if (helpstack.isSome()) {
-      final Intent help =
-        new Intent(this.getActivity(), HelpActivity.class);
-      final Preference preference = findPreference(resources.getString(R.string.help));
-      help.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-      preference.setIntent(help);
-
+          return false;
+        }
+      });
     }
 
-    docs.getAbout().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType ack) {
+    {
+      if (helpstack.isSome()) {
+        final Intent help =
+          new Intent(this.getActivity(), HelpActivity.class);
+        final Preference preference = findPreference(resources.getString(R.string.help));
+        help.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        preference.setIntent(help);
 
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            ack.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_about),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+      }
+    }
 
-          final Preference preferences = findPreference(resources.getString(R.string.settings_about));
-          preferences.setIntent(intent);
-        }
+    {
+      final Intent intent = new Intent(
+        MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+      WebViewActivity.setActivityArguments(
+        new Bundle(),
+        "http://www.librarysimplified.org/acknowledgments.html",
+        resources.getString(R.string.settings_about),
+        SimplifiedPart.PART_SETTINGS);
+      intent.putExtras(new Bundle());
+      intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-      });
+      final Preference preferences = findPreference(resources.getString(R.string.settings_about));
+      preferences.setIntent(intent);
+    }
 
+    {
+      final Intent intent =
+        new Intent(MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+      WebViewActivity.setActivityArguments(
+        new Bundle(),
+        "http://www.librarysimplified.org/EULA.html",
+        resources.getString(R.string.settings_eula),
+        SimplifiedPart.PART_SETTINGS);
+      intent.putExtras(new Bundle());
+      intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-    docs.getEULA().map_(
-      new ProcedureType<EULAType>() {
-        @Override
-        public void call(final EULAType eula) {
+      final Preference preferences = findPreference(resources.getString(R.string.settings_eula));
+      preferences.setIntent(intent);
+    }
 
-          final Intent intent =
-            new Intent(MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            eula.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_eula),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    {
+      docs.getLicenses().map_(
+        new ProcedureType<SyncedDocumentType>() {
+          @Override
+          public void call(final SyncedDocumentType licenses) {
 
+            final Intent intent = new Intent(
+              MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+            WebViewActivity.setActivityArguments(
+              new Bundle(),
+              licenses.documentGetReadableURL().toString(),
+              resources.getString(R.string.settings_licence_software),
+              SimplifiedPart.PART_SETTINGS);
+            intent.putExtras(new Bundle());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-          final Preference preferences = findPreference(resources.getString(R.string.settings_eula));
-          preferences.setIntent(intent);
-
-        }
-      });
-
-    docs.getLicenses().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType licenses) {
-
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            licenses.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_licences),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-
-          final Preference preferences = findPreference(resources.getString(R.string.settings_licence_software));
-          preferences.setIntent(intent);
-
-        }
-      });
-
+            final Preference preferences = findPreference(resources.getString(R.string.settings_licence_software));
+            preferences.setIntent(intent);
+          }
+        });
+    }
   }
 
   @Override
