@@ -232,8 +232,6 @@ public abstract class SimplifiedActivity extends Activity
         // replace drawer with selection of libraries
         final ListView dl =
           NullCheck.notNull((ListView) this.findViewById(R.id.left_drawer));
-        final FrameLayout fl =
-          NullCheck.notNull((FrameLayout) this.findViewById(R.id.content_frame));
 
         dl.setOnItemClickListener(this);
         dl.setAdapter(this.adapter_accounts);
