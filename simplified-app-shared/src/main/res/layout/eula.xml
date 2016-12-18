@@ -15,7 +15,8 @@
     android:layout_height="wrap_content"
     android:minWidth="100dp"
     android:background="@drawable/simplified_button"
-    android:textColor="@drawable/simplified_button_text"/>
+    android:textColor="@drawable/simplified_button_text"
+    android:visibility="gone"/>
 
   <Button
     android:id="@+id/eula_disagree"
@@ -26,7 +27,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/simplified_button"
-    android:textColor="@drawable/simplified_button_text"/>
+    android:textColor="@drawable/simplified_button_text"
+    android:visibility="gone"/>
 
   <WebView
     android:layout_width="match_parent"

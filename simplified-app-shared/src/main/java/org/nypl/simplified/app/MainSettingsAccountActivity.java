@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,6 +37,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+import org.json.JSONArray;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
@@ -285,6 +288,16 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   public boolean onOptionsItemSelected(
     final @Nullable MenuItem item_mn) {
     final MenuItem item = NullCheck.notNull(item_mn);
+
+    if (item.getItemId() == R.id.show_eula) {
+
+      final Intent eula_intent = new Intent(MainSettingsAccountActivity.this, MainEULAActivity.class);
+      eula_intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+      startActivity(eula_intent);
+
+      return true;
+    }
+
     switch (item.getItemId()) {
 
       case android.R.id.home: {
@@ -596,4 +609,17 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     }
 
   }
+
+
+  @Override
+  public boolean onCreateOptionsMenu(
+    final @Nullable Menu in_menu) {
+
+      final Menu menu_nn = NullCheck.notNull(in_menu);
+      final MenuInflater inflater = this.getMenuInflater();
+      inflater.inflate(R.menu.eula, menu_nn);
+
+    return true;
+  }
+
 }
