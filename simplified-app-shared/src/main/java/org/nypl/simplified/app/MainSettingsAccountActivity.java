@@ -565,10 +565,19 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           final AccountBarcode barcode = new AccountBarcode("");
           final AccountPIN pin = new AccountPIN("");
 
-          final LoginDialog df =
-            LoginDialog.newDialog("Login required", barcode, pin, account);
-          df.setLoginListener(login_listener);
-          df.show(fm, "login-dialog");
+          if (Simplified.getCurrentAccount().getId() == account.getId())
+          {
+            final LoginDialog df =
+              LoginDialog.newDialog("Login required", barcode, pin);
+            df.setLoginListener(login_listener);
+            df.show(fm, "login-dialog");
+          }
+          else {
+            final LoginDialog df =
+              LoginDialog.newDialog("Login required", barcode, pin, account);
+            df.setLoginListener(login_listener);
+            df.show(fm, "login-dialog");
+          }
         }
       });
 

@@ -142,6 +142,15 @@ public final class LoginDialog extends DialogFragment
     d.setArguments(b);
     return d;
   }
+
+  /**
+   * @param text
+   * @param barcode
+   * @param pin
+   * @param account
+   * @return
+   */
+
   public static LoginDialog newDialog(
     final String text,
     final AccountBarcode barcode,
@@ -323,7 +332,7 @@ public final class LoginDialog extends DialogFragment
       NullCheck.notNull(b.getString(LoginDialog.TEXT_ID));
 
     final String account_id =
-      NullCheck.notNull(b.getString(LoginDialog.ACCOUNT_ID));
+      b.getString(LoginDialog.ACCOUNT_ID);
 
     final ViewGroup in_layout = NullCheck.notNull(
       (ViewGroup) inflater.inflate(
@@ -358,7 +367,7 @@ public final class LoginDialog extends DialogFragment
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final DocumentStoreType docs = app.getDocumentStore();
+    DocumentStoreType docs = app.getDocumentStore();
 
     final AuthenticationDocumentType auth_doc =
       docs.getAuthenticationDocument();
@@ -370,10 +379,12 @@ public final class LoginDialog extends DialogFragment
       new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
 
     BooksType books = app.getBooks();
-    if (account_id != null)
+
+    if (account_id != null )
     {
       Account account = new AccountsRegistry(getActivity()).getAccount(Integer.valueOf(account_id));
       books = Simplified.getBooks(account, getActivity());
+      docs = Simplified.getDocumentStore(account, getActivity().getResources());
     }
 
     in_text.setText(initial_txt);
