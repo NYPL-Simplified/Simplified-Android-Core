@@ -11,14 +11,6 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
-    <TextView
-      android:id="@+id/settings_authentication_title"
-      android:text="@string/settings_authentication_title"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      />
-
 
     <TableLayout
       android:id="@+id/settings_login_table_provider"
@@ -32,21 +24,52 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <TextView
-          android:id="@+id/settings_provider_label"
-          android:labelFor="@+id/settings_barcode_edit"
-          android:text="Provider"
-          android:layout_width="60dp"
-          android:layout_height="wrap_content"/>
+        <ImageView
+          android:layout_width="80dp"
+          android:layout_height="80dp"
+          android:id="@+id/account_icon"
+          android:src="@drawable/simplye_logo"
+          android:paddingLeft="10dp"
+          android:paddingRight="0dp"
+          android:layout_weight="0"
+          />
 
-        <TextView
-          android:id="@+id/settings_provider_name_text"
-          android:layout_width="wrap_content"
+        <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
+          android:layout_margin="10dp"
           android:layout_weight="1"
-          android:layout_marginStart="20dp"
-          android:background="@drawable/textview_underline"
-          android:maxLines="1"/>
+
+          >
+
+          <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@android:id/text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceListItem"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center_vertical"
+            android:paddingLeft="11dp"
+            android:paddingRight="11dp"
+            android:textColor="@drawable/drawer_list_text"
+            />
+
+          <TextView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@android:id/text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            android:textSize="14sp"
+            android:gravity="center_vertical"
+            android:paddingLeft="11dp"
+            android:paddingRight="11dp"
+            android:textColor="@drawable/drawer_list_text"
+            />
+        </LinearLayout>
       </TableRow>
 
     </TableLayout>
@@ -111,80 +134,19 @@
       </TableRow>
     </TableLayout>
 
-    <TableLayout
-      android:id="@+id/settings_login_table_with_token"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="16dp">
-
-      <TableRow
-        android:id="@+id/tableRowName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <TextView
-          android:id="@+id/settings_name_label"
-          android:labelFor="@+id/settings_barcode_edit"
-          android:text="Name"
-          android:layout_width="60dp"
-          android:layout_height="wrap_content"/>
-
-        <TextView
-          android:id="@+id/settings_name_text"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          android:layout_marginStart="20dp"
-          android:background="@drawable/textview_underline"
-          android:maxLines="1"/>
-      </TableRow>
-
-    </TableLayout>
-
-
     <Button
       android:id="@+id/settings_login"
       android:background="@drawable/simplified_button"
       android:layout_gravity="center"
-      android:layout_width="match_parent"
+      android:layout_width="wrap_content"
       android:layout_height="@dimen/button_standard_height"
       android:layout_marginTop="30dp"
+      android:paddingLeft="30dp"
+      android:paddingRight="30dp"
       android:textColor="@drawable/simplified_button_text"
       android:textSize="12sp"
       android:text="@string/settings_log_in"/>
 
-    <TextView
-      android:id="@+id/settings_device_title"
-      android:text="@string/settings_device_title"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="30dp"
-      />
-    <Button
-      android:id="@+id/settings_activate_this_device"
-      android:background="@drawable/simplified_button"
-      android:layout_gravity="center"
-      android:layout_width="match_parent"
-      android:layout_height="@dimen/button_standard_height"
-      android:textColor="@drawable/simplified_button_text"
-      android:textSize="12sp"
-      android:layout_marginTop="8dp"
-      android:text="@string/settings_deactivate_this_device"
-      />
-
-    <Button
-      android:id="@+id/settings_deactivate_all_devices"
-      android:background="@drawable/simplified_button"
-      android:layout_gravity="center"
-      android:layout_width="match_parent"
-      android:layout_height="@dimen/button_standard_height"
-      android:textColor="@drawable/simplified_button_text"
-      android:textSize="12sp"
-      android:layout_marginTop="10dp"
-      android:text="Deactivate All Devices"
-      android:visibility="gone"/>
 
   </LinearLayout>
 

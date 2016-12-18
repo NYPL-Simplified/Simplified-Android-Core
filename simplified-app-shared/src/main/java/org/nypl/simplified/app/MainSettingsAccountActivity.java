@@ -6,8 +6,6 @@ import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
@@ -26,6 +24,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,18 +35,19 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.core.AccountAuthProvider;
+import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
-import org.nypl.simplified.books.core.AccountPatron;
+import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AccountsDatabaseType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.multilibrary.Account;
+import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
 /**
@@ -63,17 +63,17 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     LOG = LogUtilities.getLog(MainSettingsActivity.class);
   }
 
+  private @Nullable TextView account_name_text;
+  private @Nullable TextView account_subtitle_text;
+  private @Nullable ImageView account_icon;
+
   private @Nullable TextView barcode_text;
   private @Nullable TextView pin_text;
-  private @Nullable TextView name_text;
-  private @Nullable TextView provider_text;
-  private @Nullable TextView table_device_title;
-
   private @Nullable TableLayout table_with_code;
-  private @Nullable TableLayout table_with_token;
 
   private @Nullable Button login;
-  private @Nullable Button activate;
+
+  private Account account;
 
   /**
    * Construct an activity.
@@ -104,55 +104,37 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final Resources rr = NullCheck.notNull(this.getResources());
 
+
+    final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
+    final TextView in_account_name_text = NullCheck.notNull(this.account_name_text);
+    final TextView in_account_subtitle_text = NullCheck.notNull(this.account_subtitle_text);
+    final ImageView in_account_icon = NullCheck.notNull(this.account_icon);
+
     final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final TextView in_pin_text = NullCheck.notNull(this.pin_text);
-    final TextView in_name_text = NullCheck.notNull(this.name_text);
-    final TextView in_provider_text = NullCheck.notNull(this.provider_text);
-
-    final TextView in_table_device_title = NullCheck.notNull(this.table_device_title);
-    final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
-    final TableLayout in_table_with_token = NullCheck.notNull(this.table_with_token);
-
     final Button in_login = NullCheck.notNull(this.login);
-    final Button in_activate = NullCheck.notNull(this.activate);
-
 
     UIThread.runOnUIThread(
       new Runnable() {
         @Override
         public void run() {
-          
-          if (creds.getProvider().isNone())
-          {
-            creds.setProvider(Option.some(new AccountAuthProvider(rr.getString(R.string.feature_default_auth_provider_name))));
-            in_provider_text.setText(rr.getString(R.string.feature_default_auth_provider_name));
-          }
-          else
-          {
-            in_provider_text.setText(((Some<AccountAuthProvider>) creds.getProvider()).get().toString());
-          }
 
-          if ("Clever".equals(((Some<AccountAuthProvider>) creds.getProvider()).get().toString())) {
-            in_table_with_code.setVisibility(View.GONE);
-            in_table_with_token.setVisibility(View.VISIBLE);
-            try {
-
-              final JSONObject name = new JSONObject(((Some<AccountPatron>) creds.getPatron()).get().toString()).getJSONObject("name");
-              in_name_text.setText(name.getString("first") + " " + name.getString("middle") + " " + name.getString("last"));
-
-            } catch (JSONException e) {
-              e.printStackTrace();
-            }
-          } else {
-            in_table_with_code.setVisibility(View.VISIBLE);
-            in_table_with_token.setVisibility(View.GONE);
-            in_barcode_text.setText(creds.getBarcode().toString());
-            in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
-            in_pin_text.setText(creds.getPin().toString());
-            in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+          in_table_with_code.setVisibility(View.VISIBLE);
+          in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
+          in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
+          if (MainSettingsAccountActivity.this.account.getId() == 0) {
+            in_account_icon.setImageResource(R.drawable.account_logo_nypl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 1) {
+            in_account_icon.setImageResource(R.drawable.account_logo_bpl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
+            in_account_icon.setImageResource(R.drawable.account_logo_instant);
           }
 
-          in_login.setEnabled(true);
+          in_barcode_text.setText(creds.getBarcode().toString());
+          in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
+          in_pin_text.setText(creds.getPin().toString());
+          in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+
           in_login.setText(rr.getString(R.string.settings_log_out));
           in_login.setOnClickListener(
             new OnClickListener() {
@@ -170,32 +152,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                 final FragmentManager fm =
                   MainSettingsAccountActivity.this.getFragmentManager();
                 d.show(fm, "logout-confirm");
-              }
-            });
-
-
-          in_activate.setEnabled(true);
-          if (books.accountIsDeviceActive()) {
-            in_activate.setText(rr.getString(R.string.settings_deactivate_this_device));
-          } else {
-            in_activate.setText(rr.getString(R.string.settings_activate_this_device));
-          }
-          in_activate.setOnClickListener(
-            new OnClickListener() {
-              @Override
-              public void onClick(
-                final @Nullable View v) {
-                if (books.accountIsDeviceActive()) {
-                  //deactivate account with adobe
-                  books.accountDeActivateDevice();
-                  in_activate.setText(rr.getString(R.string.settings_activate_this_device));
-
-                } else {
-                  books.accountActivateDevice();
-                  in_activate.setText(rr.getString(R.string.settings_deactivate_this_device));
-                  in_activate.setVisibility(View.GONE);
-                  in_table_device_title.setVisibility(View.GONE);
-                }
               }
             });
 
@@ -230,18 +186,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           b.setTitle(rr.getString(R.string.settings_logout_failed));
           b.setCancelable(true);
 
-          final AlertDialog a = b.create();
-          a.setOnDismissListener(
-            new OnDismissListener() {
-              @Override
-              public void onDismiss(
-                final @Nullable DialogInterface d) {
-                final Button in_login = NullCheck.notNull(MainSettingsAccountActivity.this.login);
-                in_login.setEnabled(true);
-
-              }
-            });
-          a.show();
         }
       });
   }
@@ -271,7 +215,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final TextView bt = NullCheck.notNull(this.barcode_text);
     final TextView pt = NullCheck.notNull(this.pin_text);
-    final TextView nt = NullCheck.notNull(this.name_text);
 
     UIThread.runOnUIThread(
       new Runnable() {
@@ -280,11 +223,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
           bt.setVisibility(View.GONE);
           pt.setVisibility(View.GONE);
-          nt.setVisibility(View.GONE);
 
           final Toast toast = Toast.makeText(context, text, duration);
           toast.show();
-          MainSettingsAccountActivity.this.finish();
+          finish();
+          overridePendingTransition(0, 0);
+          startActivity(getIntent());
+          overridePendingTransition(0, 0);
 
         }
       });
@@ -356,6 +301,16 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     super.onCreate(state);
 
 
+    final Bundle extras = getIntent().getExtras();
+    if (extras != null) {
+      this.account = new AccountsRegistry(this).getAccount(extras.getInt("selected_account"));
+    }
+    else
+    {
+      this.account = Simplified.getCurrentAccount();
+    }
+
+
     final ActionBar bar = this.getActionBar();
     if (android.os.Build.VERSION.SDK_INT < 21) {
       bar.setDisplayHomeAsUpEnabled(false);
@@ -395,25 +350,17 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final CheckBox in_pin_reveal = NullCheck.notNull(
       (CheckBox) this.findViewById(R.id.settings_reveal_password));
 
-
-    final TextView in_name_label = NullCheck.notNull(
-      (TextView) this.findViewById(R.id.settings_name_label));
-
-    final TextView in_name_text = NullCheck.notNull(
-      (TextView) this.findViewById(R.id.settings_name_text));
-
-
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
 
-    final TextView in_table_device_title = NullCheck.notNull(
-      (TextView) this.findViewById(R.id.settings_device_title));
 
-    final Button in_activate =
-      NullCheck.notNull((Button) this.findViewById(R.id.settings_activate_this_device));
+    final TextView account_name = NullCheck.notNull(
+      (TextView) this.findViewById(android.R.id.text1));
+    final TextView account_subtitle = NullCheck.notNull(
+      (TextView) this.findViewById(android.R.id.text2));
 
-    final TextView in_provider_text = NullCheck.notNull(
-      (TextView) this.findViewById(R.id.settings_provider_name_text));
+    final ImageView in_account_icon = NullCheck.notNull(
+      (ImageView) this.findViewById(R.id.account_icon));
 
     in_pin_text.setTransformationMethod(
       PasswordTransformationMethod.getInstance());
@@ -431,35 +378,91 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       docs.getAuthenticationDocument();
     in_barcode_label.setText(auth_doc.getLabelLoginUserID());
     in_pin_label.setText(auth_doc.getLabelLoginPassword());
-    in_name_label.setText(auth_doc.getLabelLoginPatronName());
 
 
     final TableLayout in_table_with_code =
       NullCheck.notNull((TableLayout) this.findViewById(R.id.settings_login_table_with_code));
-    final TableLayout in_table_with_token =
-      NullCheck.notNull((TableLayout) this.findViewById(R.id.settings_login_table_with_token));
-
-
     in_table_with_code.setVisibility(View.GONE);
-    in_table_with_token.setVisibility(View.GONE);
 
-    in_login.setEnabled(false);
-    in_activate.setEnabled(false);
+    in_login.setOnClickListener(
+      new OnClickListener() {
+        @Override
+        public void onClick(
+          final @Nullable View v) {
+
+          MainSettingsAccountActivity.this.onLoginWithBarcode();
+
+        }
+      });
 
 
     this.navigationDrawerSetActionBarTitle();
-    this.provider_text = in_provider_text;
+
+    this.account_name_text = account_name;
+    this.account_subtitle_text = account_subtitle;
+    this.account_icon = in_account_icon;
     this.barcode_text = in_barcode_text;
     this.pin_text = in_pin_text;
-    this.name_text = in_name_text;
     this.login = in_login;
-    this.activate = in_activate;
-    this.table_device_title = in_table_device_title;
     this.table_with_code = in_table_with_code;
-    this.table_with_token = in_table_with_token;
 
     this.getWindow().setSoftInputMode(
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+  }
+
+  /**
+   *
+   */
+  public void onLoginWithBarcode() {
+
+
+    final LoginListenerType login_listener = new LoginListenerType() {
+      @Override
+      public void onLoginAborted() {
+        MainSettingsAccountActivity.LOG.trace("feed auth: aborted login");
+//        listener.onAuthenticationNotProvided();
+      }
+
+      @Override
+      public void onLoginFailure(
+        final OptionType<Throwable> error,
+        final String message) {
+        LogUtilities.errorWithOptionalException(
+          MainSettingsAccountActivity.LOG, "failed login", error);
+//        listener.onAuthenticationError(error, message);
+      }
+
+      @Override
+      public void onLoginSuccess(
+        final AccountCredentials creds) {
+        MainSettingsAccountActivity.LOG.trace(
+          "feed auth: login supplied new credentials");
+//        LoginActivity.this.openCatalog();
+
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
+
+      }
+    };
+
+
+    final FragmentManager fm = this.getFragmentManager();
+    UIThread.runOnUIThread(
+      new Runnable() {
+        @Override
+        public void run() {
+          final AccountBarcode barcode = new AccountBarcode("");
+          final AccountPIN pin = new AccountPIN("");
+
+          final LoginDialog df =
+            LoginDialog.newDialog("Login required", barcode, pin);
+          df.setLoginListener(login_listener);
+          df.show(fm, "login-dialog");
+        }
+      });
+
   }
 
   @TargetApi(21)
@@ -501,17 +504,67 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
-    books.accountGetCachedLoginDetails(this);
-    final Resources rr = NullCheck.notNull(this.getResources());
 
-    final Button in_activate = NullCheck.notNull(this.activate);
-    final TextView in_table_device_title = NullCheck.notNull(this.table_device_title);
-    if (books.accountIsDeviceActive()) {
-      in_activate.setText(rr.getString(R.string.settings_deactivate_this_device));
-      in_activate.setVisibility(View.GONE);
-      in_table_device_title.setVisibility(View.GONE);
-    } else {
-      in_activate.setText(rr.getString(R.string.settings_activate_this_device));
+    final Resources rr = NullCheck.notNull(this.getResources());
+    final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
+    final TextView in_account_name_text = NullCheck.notNull(this.account_name_text);
+    final TextView in_account_subtitle_text = NullCheck.notNull(this.account_subtitle_text);
+    final ImageView in_account_icon = NullCheck.notNull(this.account_icon);
+
+    final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
+    final TextView in_pin_text = NullCheck.notNull(this.pin_text);
+    final Button in_login = NullCheck.notNull(this.login);
+
+    in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
+    in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
+
+    if (MainSettingsAccountActivity.this.account.getId() == 0) {
+      in_account_icon.setImageResource(R.drawable.account_logo_nypl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 1) {
+      in_account_icon.setImageResource(R.drawable.account_logo_bpl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
+      in_account_icon.setImageResource(R.drawable.account_logo_instant);
     }
+
+    final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
+    if (accounts_database.accountGetCredentials().isSome()) {
+      final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();
+
+      UIThread.runOnUIThread(
+        new Runnable() {
+          @Override
+          public void run() {
+
+            in_table_with_code.setVisibility(View.VISIBLE);
+
+            in_barcode_text.setText(creds.getBarcode().toString());
+            in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
+            in_pin_text.setText(creds.getPin().toString());
+            in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+
+            in_login.setText(rr.getString(R.string.settings_log_out));
+            in_login.setOnClickListener(
+              new OnClickListener() {
+                @Override
+                public void onClick(
+                  final @Nullable View v) {
+                  final LogoutDialog d = LogoutDialog.newDialog();
+                  d.setOnConfirmListener(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        books.accountLogout(creds, MainSettingsAccountActivity.this);
+                      }
+                    });
+                  final FragmentManager fm =
+                    MainSettingsAccountActivity.this.getFragmentManager();
+                  d.show(fm, "logout-confirm");
+                }
+              });
+
+          }
+        });
+    }
+
   }
 }
