@@ -29,16 +29,17 @@ public interface BooksControllerType
   /**
    * Borrow the given book, delivering the results to the given {@code
    * listener}.
-   *
-   * @param id       The book ID
+   *  @param id       The book ID
    * @param acq      The specific acquisition relation
    * @param eo       The feed entry
+   * @param needs_auth
    */
 
   void bookBorrow(
     BookID id,
     OPDSAcquisition acq,
-    OPDSAcquisitionFeedEntry eo);
+    OPDSAcquisitionFeedEntry eo,
+    boolean needs_auth);
 
   /**
    * Delete the actual book file for the given book, if any.

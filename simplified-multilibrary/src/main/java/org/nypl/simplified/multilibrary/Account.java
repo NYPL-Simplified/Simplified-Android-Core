@@ -83,7 +83,7 @@ public class Account implements Serializable {
   /**
    * @return Needs Authentication
    */
-  public boolean isNeedsAuth() {
+  public boolean needsAuth() {
     return this.needs_auth;
   }
 

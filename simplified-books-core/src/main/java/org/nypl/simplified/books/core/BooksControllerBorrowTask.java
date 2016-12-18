@@ -78,7 +78,7 @@ final class BooksControllerBorrowTask implements Runnable
   private final String                             short_id;
   private final AccountsDatabaseType               accounts_database;
   private       long                               download_running_total;
-
+  private       boolean                            needs_auth;
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
     final AccountsDatabaseType in_accounts_database,
@@ -90,7 +90,8 @@ final class BooksControllerBorrowTask implements Runnable
     final OPDSAcquisition in_acq,
     final OPDSAcquisitionFeedEntry in_feed_entry,
     final FeedLoaderType in_feed_loader,
-    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    boolean in_needs_auth)
   {
     this.downloader = NullCheck.notNull(in_downloader);
     this.downloads = NullCheck.notNull(in_downloads);
@@ -104,6 +105,7 @@ final class BooksControllerBorrowTask implements Runnable
     this.feed_loader = NullCheck.notNull(in_feed_loader);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.short_id = this.book_id.getShortID();
+    this.needs_auth = in_needs_auth;
   }
 
   private void downloadFailed(
@@ -338,7 +340,7 @@ final class BooksControllerBorrowTask implements Runnable
         case ACQUISITION_GENERIC:
         case ACQUISITION_OPEN_ACCESS: {
           
-          if (this.adobe_drm.isSome()) {
+          if (this.adobe_drm.isSome() && this.needs_auth) {
             final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
             if (credentials_opt.isSome()) {
               final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
@@ -365,7 +367,14 @@ final class BooksControllerBorrowTask implements Runnable
               }
             }
           }
-
+          else if (!this.needs_auth)
+          {
+            BooksControllerBorrowTask.LOG.debug(
+              "[{}]: acquisition type is {}, performing fulfillment",
+              this.short_id,
+              at);
+            this.runAcquisitionFulfill(this.feed_entry);
+          }
           break;
         }
         case ACQUISITION_BUY:
@@ -738,22 +747,21 @@ final class BooksControllerBorrowTask implements Runnable
     /**
      * Downloading requires authentication.
      */
+    OptionType<HTTPAuthType> auth = Option.none();
+    if (this.needs_auth) {
+      final AccountCredentials credentials = this.getAccountCredentials();
+      final AccountBarcode barcode = credentials.getBarcode();
+      final AccountPIN pin = credentials.getPin();
+      auth =
+        Option.some((HTTPAuthType)new HTTPAuthBasic(barcode.toString(), pin.toString()));
 
-    final AccountCredentials credentials = this.getAccountCredentials();
-    final AccountBarcode barcode = credentials.getBarcode();
-    final AccountPIN pin = credentials.getPin();
-//    final HTTPAuthType auth =
-//      new HTTPAuthBasic(barcode.toString(), pin.toString());
-    HTTPAuthType auth =
-      new HTTPAuthBasic(barcode.toString(), pin.toString());
-
-    if (credentials.getAuthToken().isSome()) {
-      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
-      if (token != null) {
-        auth = new HTTPAuthOAuth(token.toString());
+      if (credentials.getAuthToken().isSome()) {
+        final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+        if (token != null) {
+          auth = Option.some((HTTPAuthType)new HTTPAuthOAuth(token.toString()));
+        }
       }
     }
-
     final String sid = this.short_id;
     BooksControllerBorrowTask.LOG.debug(
       "[{}]: starting download", sid);
@@ -765,7 +773,7 @@ final class BooksControllerBorrowTask implements Runnable
      */
 
     return this.downloader.download(
-      a.getURI(), Option.some(auth), new DownloadListenerType()
+      a.getURI(), auth, new DownloadListenerType()
       {
         @Override public void onDownloadStarted(
           final DownloadType d,
