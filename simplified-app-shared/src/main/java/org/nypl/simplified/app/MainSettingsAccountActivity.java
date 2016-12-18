@@ -70,6 +70,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   private @Nullable TextView barcode_text;
   private @Nullable TextView pin_text;
   private @Nullable TableLayout table_with_code;
+  private @Nullable TableLayout table_signup;
 
   private @Nullable Button login;
 
@@ -106,6 +107,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
 
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
+    final TableLayout in_table_signup = NullCheck.notNull(this.table_signup);
+
     final TextView in_account_name_text = NullCheck.notNull(this.account_name_text);
     final TextView in_account_subtitle_text = NullCheck.notNull(this.account_subtitle_text);
     final ImageView in_account_icon = NullCheck.notNull(this.account_icon);
@@ -120,6 +123,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         public void run() {
 
           in_table_with_code.setVisibility(View.VISIBLE);
+          in_table_signup.setVisibility(View.GONE);
           in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
           in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
           if (MainSettingsAccountActivity.this.account.getId() == 0) {
@@ -353,6 +357,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
 
+    final Button in_signup =
+      NullCheck.notNull((Button) this.findViewById(R.id.settings_signup));
 
     final TextView account_name = NullCheck.notNull(
       (TextView) this.findViewById(android.R.id.text1));
@@ -383,7 +389,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final TableLayout in_table_with_code =
       NullCheck.notNull((TableLayout) this.findViewById(R.id.settings_login_table_with_code));
     in_table_with_code.setVisibility(View.GONE);
+    final TableLayout in_table_signup =
+      NullCheck.notNull((TableLayout) this.findViewById(R.id.settings_signup_table));
 
+    if (this.account.supportsCardCreator()) {
+      in_table_signup.setVisibility(View.VISIBLE);
+    }
+    else {
+      in_table_signup.setVisibility(View.GONE);
+    }
     in_login.setOnClickListener(
       new OnClickListener() {
         @Override
@@ -395,6 +409,17 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         }
       });
 
+    in_signup.setOnClickListener(
+      new OnClickListener() {
+        @Override
+        public void onClick(
+          final @Nullable View v) {
+          final Intent cardcreator = new Intent(MainSettingsAccountActivity.this, CardCreatorActivity.class);
+          startActivity(cardcreator);
+        }
+      });
+    in_signup.setText("Sign Up");
+
 
     this.navigationDrawerSetActionBarTitle();
 
@@ -405,6 +430,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     this.pin_text = in_pin_text;
     this.login = in_login;
     this.table_with_code = in_table_with_code;
+    this.table_signup = in_table_signup;
 
     this.getWindow().setSoftInputMode(
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -507,6 +533,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
+    final TableLayout in_table_signup = NullCheck.notNull(this.table_signup);
+
     final TextView in_account_name_text = NullCheck.notNull(this.account_name_text);
     final TextView in_account_subtitle_text = NullCheck.notNull(this.account_subtitle_text);
     final ImageView in_account_icon = NullCheck.notNull(this.account_icon);
@@ -536,6 +564,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           public void run() {
 
             in_table_with_code.setVisibility(View.VISIBLE);
+            in_table_signup.setVisibility(View.GONE);
 
             in_barcode_text.setText(creds.getBarcode().toString());
             in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
