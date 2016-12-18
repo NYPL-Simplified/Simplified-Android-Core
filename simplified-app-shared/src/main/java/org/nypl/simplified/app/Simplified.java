@@ -460,11 +460,6 @@ public final class Simplified extends Application
       final String catalog = account.getCatalogUrl();
       final String adobe = account.getCatalogUrl();
 
-//      if ("openebooks".equals(this.library))
-//      {
-//        catalog = "https://circulation.openebooks.us/";
-//        adobe = "https://circulation.openebooks.us/";
-//      }
       CatalogAppServices.LOG_CA.debug("catalog:     {}", catalog);
       CatalogAppServices.LOG_CA.debug("this.library:     {}", account.getName());
 

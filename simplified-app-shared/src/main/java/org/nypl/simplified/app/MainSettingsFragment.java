@@ -51,53 +51,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
 
-    final BooksType books = app.getBooks();
     final Resources resources = NullCheck.notNull(this.getResources());
-
-    final boolean clever_enabled = resources.getBoolean(R.bool.feature_auth_provider_clever);
-
-
-    if (books.accountIsLoggedIn()) {
-
-      final Intent account =
-        new Intent(this.getActivity(), MainSettingsAccountActivity.class);
-      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
-      account.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-      preferences.setIntent(account);
-      preferences.setOnPreferenceClickListener(null);
-
-    } else if (clever_enabled) {
-
-      final Intent account =
-        new Intent(this.getActivity(), LoginActivity.class);
-      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
-      preferences.setIntent(account);
-      preferences.setOnPreferenceClickListener(null);
-
-    } else {
-
-      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
-      preferences.setIntent(null);
-      preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(final Preference preference) {
-
-          final AccountBarcode barcode = new AccountBarcode("");
-          final AccountPIN pin = new AccountPIN("");
-
-          final LoginDialog df =
-            LoginDialog.newDialog("Login required", barcode, pin);
-          df.setLoginListener(MainSettingsFragment.this);
-
-          final FragmentManager fm = MainSettingsFragment.this.getActivity().getFragmentManager();
-          df.show(fm, "login-dialog");
-
-          return false;
-        }
-      });
-
-    }
-
     final Preference secret = findPreference(resources.getString(R.string.settings_alt_uris));
 
     try {
@@ -177,25 +131,15 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
         @Override
         public boolean onPreferenceClick(final Preference preference) {
 
-          final AccountBarcode barcode = new AccountBarcode("");
-          final AccountPIN pin = new AccountPIN("");
+          final Bundle b = new Bundle();
+          SimplifiedActivity.setActivityArguments(b, false);
+          final Intent intent = new Intent();
+          intent.setClass(
+            MainSettingsFragment.this.getActivity(), MainSettingsAccountsActivity.class);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+          intent.putExtras(b);
 
-          final LoginDialog df =
-            LoginDialog.newDialog("Login required", barcode, pin);
-          df.setLoginListener(MainSettingsFragment.this);
-
-          final FragmentManager fm = MainSettingsFragment.this.getActivity().getFragmentManager();
-          df.show(fm, "login-dialog");
-
-//        final Bundle b = new Bundle();
-//        SimplifiedActivity.setActivityArguments(b, false);
-//        final Intent intent = new Intent();
-//        intent.setClass(
-//          MainSettingsFragment.this.getActivity(), MainSettingsAccountsActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//        intent.putExtras(b);
-//
-//        preferences.setIntent(intent);
+          preferences.setIntent(intent);
 
           return false;
         }
