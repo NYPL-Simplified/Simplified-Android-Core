@@ -566,7 +566,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           final AccountPIN pin = new AccountPIN("");
 
           final LoginDialog df =
-            LoginDialog.newDialog("Login required", barcode, pin);
+            LoginDialog.newDialog("Login required", barcode, pin, account);
           df.setLoginListener(login_listener);
           df.show(fm, "login-dialog");
         }
@@ -612,7 +612,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final BooksType books = app.getBooks();
+
+
+    BooksType books = app.getBooks();
+    if (this.account != null)
+    {
+      books = Simplified.getBooks(this.account, this);
+    }
 
     final Resources rr = NullCheck.notNull(this.getResources());
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
@@ -641,6 +647,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     if (accounts_database.accountGetCredentials().isSome()) {
       final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();
 
+      final BooksType finalBooks = books;
       UIThread.runOnUIThread(
         new Runnable() {
           @Override
@@ -665,7 +672,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                     new Runnable() {
                       @Override
                       public void run() {
-                        books.accountLogout(creds, MainSettingsAccountActivity.this);
+                        finalBooks.accountLogout(creds, MainSettingsAccountActivity.this);
                       }
                     });
                   final FragmentManager fm =

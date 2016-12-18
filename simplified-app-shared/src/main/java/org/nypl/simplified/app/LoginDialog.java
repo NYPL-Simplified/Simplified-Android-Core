@@ -20,11 +20,13 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
 import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountAuthProvider;
@@ -38,6 +40,8 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.multilibrary.Account;
+import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -53,6 +57,7 @@ public final class LoginDialog extends DialogFragment
   private static final Logger LOG;
   private static final String PIN_ID;
   private static final String TEXT_ID;
+  private static final String ACCOUNT_ID;
 
   static {
     LOG = LogUtilities.getLog(LoginDialog.class);
@@ -62,6 +67,7 @@ public final class LoginDialog extends DialogFragment
     BARCODE_ID = "org.nypl.simplified.app.LoginDialog.barcode";
     PIN_ID = "org.nypl.simplified.app.LoginDialog.pin";
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
+    ACCOUNT_ID = "org.nypl.simplified.app.LoginDialog.accountid";
   }
 
   private @Nullable EditText          barcode_edit;
@@ -135,6 +141,28 @@ public final class LoginDialog extends DialogFragment
     final LoginDialog d = new LoginDialog();
     d.setArguments(b);
     return d;
+  }
+  public static LoginDialog newDialog(
+    final String text,
+    final AccountBarcode barcode,
+    final AccountPIN pin,
+    final Account account) {
+
+    NullCheck.notNull(text);
+    NullCheck.notNull(barcode);
+    NullCheck.notNull(pin);
+    NullCheck.notNull(account);
+
+    final Bundle b = new Bundle();
+    b.putSerializable(LoginDialog.TEXT_ID, text);
+    b.putSerializable(LoginDialog.PIN_ID, pin);
+    b.putSerializable(LoginDialog.BARCODE_ID, barcode);
+    b.putSerializable(LoginDialog.ACCOUNT_ID, account.getPathComponent());
+
+    final LoginDialog d = new LoginDialog();
+    d.setArguments(b);
+    return d;
+
   }
 
   private void onAccountLoginFailure(
@@ -294,6 +322,9 @@ public final class LoginDialog extends DialogFragment
     final String initial_txt =
       NullCheck.notNull(b.getString(LoginDialog.TEXT_ID));
 
+    final String account_id =
+      NullCheck.notNull(b.getString(LoginDialog.ACCOUNT_ID));
+
     final ViewGroup in_layout = NullCheck.notNull(
       (ViewGroup) inflater.inflate(
         R.layout.login_dialog, container, false));
@@ -338,13 +369,19 @@ public final class LoginDialog extends DialogFragment
     final OptionType<AdobeVendorID> adobe_vendor = Option.some(
       new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
 
-    final BooksType books = app.getBooks();
+    BooksType books = app.getBooks();
+    if (account_id != null)
+    {
+      Account account = new AccountsRegistry(getActivity()).getAccount(Integer.valueOf(account_id));
+      books = Simplified.getBooks(account, getActivity());
+    }
 
     in_text.setText(initial_txt);
     in_barcode_edit.setText(initial_bar.toString());
     in_pin_edit.setText(initial_pin.toString());
 
     in_login_button.setEnabled(false);
+    final BooksType finalBooks = books;
     in_login_button.setOnClickListener(
       new OnClickListener()
       {
@@ -368,7 +405,7 @@ public final class LoginDialog extends DialogFragment
 
           final AccountCredentials creds =
             new AccountCredentials(adobe_vendor, barcode, pin,  Option.some(provider));
-          books.accountLogin(creds, LoginDialog.this);
+          finalBooks.accountLogin(creds, LoginDialog.this);
         }
       });
 
@@ -382,9 +419,6 @@ public final class LoginDialog extends DialogFragment
           LoginDialog.this.dismiss();
         }
       });
-
-
-
 
     final boolean request_new_code = rr.getBoolean(R.bool.feature_default_auth_provider_request_new_code);
 
@@ -564,4 +598,6 @@ public final class LoginDialog extends DialogFragment
   {
     // Nothing
   }
+
+
 }

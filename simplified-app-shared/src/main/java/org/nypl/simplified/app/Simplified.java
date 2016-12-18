@@ -15,8 +15,6 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
 import org.nypl.simplified.app.reader.ReaderBookmarks;
@@ -375,6 +373,78 @@ public final class Simplified extends Application
     return documents_builder.build();
   }
 
+  /**
+   * @param account
+   * @param context
+   * @return
+   */
+  public static BooksType getBooks(final Account account, Context context) {
+
+    final ExecutorService  exec_books = Simplified.namedThreadPool(1, "books", 19);
+    final HTTPType http = HTTP.newHTTP();
+
+    final File base_accounts_dir =
+      new File(context.getFilesDir(), account.getPathComponent());
+    final File accounts_dir = new File(base_accounts_dir, "accounts");
+
+
+    final File base_dir = Simplified.getDiskDataDir(context);
+    final File base_library_dir = new File(base_dir, account.getPathComponent());
+    final File downloads_dir = new File(base_library_dir, "downloads");
+    final File books_dir = new File(base_library_dir, "books");
+    final File books_database_directory = new File(books_dir, "data");
+
+    final DownloaderType downloader = DownloaderHTTP.newDownloader(
+      exec_books, downloads_dir, http);
+
+    final ExecutorService exec_catalog_feeds = Simplified.namedThreadPool(1, "catalog-feed", 19);
+
+    final OPDSJSONSerializerType in_json_serializer =
+      OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
+
+    final BookDatabaseType books_database = BookDatabase.newDatabase(
+      in_json_serializer, in_json_parser, books_database_directory);
+
+    final OPDSAcquisitionFeedEntryParserType in_entry_parser =
+      OPDSAcquisitionFeedEntryParser.newParser();
+
+    final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
+    final OPDSSearchParserType s = OPDSSearchParser.newParser();
+
+    final FeedLoaderType  feed_loader = Simplified.makeFeedLoader(
+      exec_catalog_feeds, books_database, http, s, p);
+
+
+    final AccountsDatabaseType accounts_database = AccountsDatabase.openDatabase(accounts_dir);
+
+    final BooksControllerConfiguration books_config =
+      new BooksControllerConfiguration(
+        URI.create(account.getCatalogUrl()),
+        URI.create(account.getCatalogUrl()));
+
+    final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(context.getResources().getString(R.string.feature_catalog_loans_uri_component));
+
+
+    final OptionType<AdobeAdeptExecutorType> adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
+      context, AdobeDRMServices.getPackageOverride(context.getResources()));
+
+    return  BooksController.newBooks(
+      exec_books,
+      feed_loader,
+      http,
+      downloader,
+      in_json_serializer,
+      in_json_parser,
+      adobe_drm,
+      Simplified.getDocumentStore(account, context.getResources()),
+      books_database,
+      accounts_database,
+      books_config,
+      loans_url_component);
+
+  }
+
   private synchronized CardCreator getActualCardCreator()
   {
     CardCreator as = this.cardcreator;
@@ -656,13 +726,13 @@ public final class Simplified extends Application
         try {
           final InputStream stream = assets.open("about.html");
           documents_builder.enableAbout(
-                  new FunctionType<Unit, InputStream>()
-                  {
-                    @Override public InputStream call(final Unit x)
-                    {
-                      return stream;
-                    }
-                  });
+            new FunctionType<Unit, InputStream>()
+            {
+              @Override public InputStream call(final Unit x)
+              {
+                return stream;
+              }
+            });
         } catch (final IOException e) {
           Simplified.LOG.debug("No about defined: ", e);
         }
