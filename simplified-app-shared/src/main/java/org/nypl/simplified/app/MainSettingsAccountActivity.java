@@ -37,7 +37,6 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.json.JSONArray;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
@@ -48,6 +47,7 @@ import org.nypl.simplified.books.core.AccountsDatabaseType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
@@ -340,9 +340,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     }
 
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-    final DocumentStoreType docs = app.getDocumentStore();
+    final DocumentStoreType docs = Simplified.getDocumentStore(this.account, getResources());
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
@@ -405,6 +403,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final TableLayout in_table_signup =
       NullCheck.notNull((TableLayout) this.findViewById(R.id.settings_signup_table));
 
+
+
     if (this.account.supportsCardCreator()) {
       in_table_signup.setVisibility(View.VISIBLE);
     }
@@ -421,6 +421,40 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
         }
       });
+
+    final CheckBox in_age13_checkbox =
+      NullCheck.notNull((CheckBox) this.findViewById(R.id.age13_checkbox));
+
+    // check if key exists, if doesn't ask user how old they are, move this to catalog activity
+    //Simplified.getSharedPrefs().contains("age13")
+
+    if (Simplified.getSharedPrefs().contains("age13"))
+    {
+      in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
+    }
+
+    in_age13_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+      @Override
+      public void onCheckedChanged(final CompoundButton button, final boolean checked) {
+
+        Simplified.getSharedPrefs().putBoolean("age13", checked);
+
+      }
+    });
+
+
+    if (this.account.needsAuth())
+    {
+      in_login.setVisibility(View.VISIBLE);
+      in_age13_checkbox.setVisibility(View.GONE);
+
+    }
+    else {
+      in_login.setVisibility(View.GONE);
+      // show age checkbox
+      in_age13_checkbox.setVisibility(View.VISIBLE);
+    }
+
 
     in_signup.setOnClickListener(
       new OnClickListener() {
@@ -444,6 +478,42 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     this.login = in_login;
     this.table_with_code = in_table_with_code;
     this.table_signup = in_table_signup;
+
+    final CheckBox in_eula_checkbox =
+      NullCheck.notNull((CheckBox) this.findViewById(R.id.eula_checkbox));
+
+
+    final OptionType<EULAType> eula_opt = docs.getEULA();
+
+    if (eula_opt.isSome()) {
+      final Some<EULAType> some_eula = (Some<EULAType>) eula_opt;
+      final EULAType eula = some_eula.get();
+
+
+      in_eula_checkbox.setChecked(eula.eulaHasAgreed());
+
+      in_eula_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(final CompoundButton button, final boolean checked) {
+
+          eula.eulaSetHasAgreed(checked);
+
+        }
+      });
+
+      if (eula.eulaHasAgreed()) {
+        MainSettingsAccountActivity.LOG.debug("EULA: agreed");
+
+      } else {
+        MainSettingsAccountActivity.LOG.debug("EULA: not agreed");
+
+      }
+    } else {
+      MainSettingsAccountActivity.LOG.debug("EULA: unavailable");
+    }
+
+
+
 
     this.getWindow().setSoftInputMode(
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -615,9 +685,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   public boolean onCreateOptionsMenu(
     final @Nullable Menu in_menu) {
 
-      final Menu menu_nn = NullCheck.notNull(in_menu);
-      final MenuInflater inflater = this.getMenuInflater();
-      inflater.inflate(R.menu.eula, menu_nn);
+    final Menu menu_nn = NullCheck.notNull(in_menu);
+    final MenuInflater inflater = this.getMenuInflater();
+    inflater.inflate(R.menu.eula, menu_nn);
 
     return true;
   }

@@ -130,9 +130,41 @@
           android:layout_gravity="center_vertical"
           android:textSize="12sp"
           android:text="@string/settings_reveal_password"
-          android:id="@+id/settings_reveal_password"/>
+          android:id="@+id/settings_reveal_password"
+          android:checked="false"/>
+      </TableRow>
+
+      <TableRow
+        android:id="@+id/tableRow3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        >
+
+        <CheckBox
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_vertical"
+          android:textSize="12sp"
+          android:text="I agree to the terms of the End User License Agreement."
+          android:id="@+id/eula_checkbox"
+          android:checked="false"
+          android:layout_span="2"
+          android:layout_weight="1"/>
+
       </TableRow>
     </TableLayout>
+
+    <CheckBox
+      android:layout_width="wrap_content"
+      android:layout_height="0dp"
+      android:layout_gravity="center_vertical"
+      android:text="I am 13 years of age or older."
+      android:id="@+id/age13_checkbox"
+      android:checked="false"
+      android:layout_weight="1"
+      android:textAppearance="?android:attr/textAppearanceListItem"
+      />
 
     <Button
       android:id="@+id/settings_login"

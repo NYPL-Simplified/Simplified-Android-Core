@@ -16,10 +16,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.drm.core.AdobeVendorID;
@@ -33,6 +36,7 @@ import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
@@ -312,6 +316,12 @@ public final class LoginDialog extends DialogFragment
     final Button in_login_cancel_button = NullCheck.notNull(
       (Button) in_layout.findViewById(R.id.login_dialog_cancel));
 
+    final CheckBox in_eula_checkbox =
+      NullCheck.notNull((CheckBox) in_layout.findViewById(R.id.eula_checkbox));
+
+
+
+
     final Button in_login_request_new_code = NullCheck.notNull(
       (Button) in_layout.findViewById(R.id.request_new_codes));
 
@@ -373,6 +383,9 @@ public final class LoginDialog extends DialogFragment
         }
       });
 
+
+
+
     final boolean request_new_code = rr.getBoolean(R.bool.feature_default_auth_provider_request_new_code);
 
     if (request_new_code) {
@@ -406,6 +419,38 @@ public final class LoginDialog extends DialogFragment
     final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
     final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
 
+
+    final OptionType<EULAType> eula_opt = docs.getEULA();
+
+    if (eula_opt.isSome()) {
+      final Some<EULAType> some_eula = (Some<EULAType>) eula_opt;
+      final EULAType eula = some_eula.get();
+
+
+      in_eula_checkbox.setChecked(eula.eulaHasAgreed());
+
+      in_eula_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(final CompoundButton button, final boolean checked) {
+
+          eula.eulaSetHasAgreed(checked);
+          in_login_button.setEnabled(
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()) && in_eula_checkbox.isChecked());
+
+        }
+      });
+
+      if (eula.eulaHasAgreed()) {
+        LoginDialog.LOG.debug("EULA: agreed");
+
+      } else {
+        LoginDialog.LOG.debug("EULA: not agreed");
+
+      }
+    } else {
+      LoginDialog.LOG.debug("EULA: unavailable");
+    }
+
     in_barcode_edit.addTextChangedListener(
       new TextWatcher()
       {
@@ -432,7 +477,7 @@ public final class LoginDialog extends DialogFragment
         {
           in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
           in_login_button.setEnabled(
-            (!in_barcode_empty.get()) && (!in_pin_empty.get()));
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()) && in_eula_checkbox.isChecked());
         }
       });
 
@@ -462,7 +507,7 @@ public final class LoginDialog extends DialogFragment
         {
           in_pin_empty.set(NullCheck.notNull(s).length() == 0);
           in_login_button.setEnabled(
-            (!in_barcode_empty.get()) && (!in_pin_empty.get()));
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()) && in_eula_checkbox.isChecked());
         }
       });
 

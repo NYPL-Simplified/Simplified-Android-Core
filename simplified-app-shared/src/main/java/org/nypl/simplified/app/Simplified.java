@@ -300,6 +300,81 @@ public final class Simplified extends Application
     return NullCheck.notNull(pool);
   }
 
+  /**
+   * @param account
+   * @param rr
+   * @return
+   */
+  public static DocumentStoreType getDocumentStore(final Account account, final Resources rr) {
+
+    final Simplified i = Simplified.checkInitialized();
+    final ClockType clock = Clock.get();
+    final OPDSAuthenticationDocumentParserType auth_doc_parser =
+      OPDSAuthenticationDocumentParser.get();
+
+    /**
+     * Default authentication document values.
+     */
+
+    final AuthenticationDocumentValuesType auth_doc_values =
+      new AuthenticationDocumentValuesType()
+      {
+        @Override public String getLabelLoginUserID()
+        {
+          return rr.getString(R.string.settings_barcode);
+        }
+
+        @Override public String getLabelLoginPassword()
+        {
+          return rr.getString(R.string.settings_pin);
+        }
+        @Override public String getLabelLoginPatronName()
+        {
+          return rr.getString(R.string.settings_name);
+        }
+      };
+
+    final File base_dir = Simplified.getDiskDataDir(i.getApplicationContext());
+    final File base_library_dir = new File(base_dir, account.getPathComponent());
+    final File books_dir = new File(base_library_dir, "books");
+
+
+    final DocumentStoreBuilderType documents_builder =
+      DocumentStore.newBuilder(
+        clock,
+        HTTP.newHTTP(),
+        Simplified.namedThreadPool(1, "books", 19),
+        books_dir,
+        auth_doc_values,
+        auth_doc_parser);
+
+    /**
+     * Conditionally enable each of the documents based on the
+     * presence of assets.
+     */
+
+    final AssetManager assets = i.getApplicationContext().getAssets();
+
+    {
+      try {
+        final InputStream stream = assets.open("eula.html");
+        documents_builder.enableEULA(
+          new FunctionType<Unit, InputStream>()
+          {
+            @Override public InputStream call(final Unit x)
+            {
+              return stream;
+            }
+          });
+      } catch (final IOException e) {
+        Simplified.LOG.debug("No EULA defined: ", e);
+      }
+      
+    }
+
+    return documents_builder.build();
+  }
+
   private synchronized CardCreator getActualCardCreator()
   {
     CardCreator as = this.cardcreator;
@@ -530,12 +605,6 @@ public final class Simplified extends Application
             return rr.getString(R.string.settings_name);
           }
         };
-
-
-
-//      final Account bpl =  new AccountsRegistry(this.context).getAccount(1);
-//
-//      Simplified.LOG.debug(bpl.getName());
 
 
 
