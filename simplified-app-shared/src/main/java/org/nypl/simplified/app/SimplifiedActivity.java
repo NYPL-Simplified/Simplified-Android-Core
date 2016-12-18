@@ -742,7 +742,7 @@ public abstract class SimplifiedActivity extends Activity
                 SimplifiedActivity.this.startSideBarActivity();
 
               }
-            }, 300L);
+            }, 30L);
         } else {
           dl.setAdapter(this.adapter);
         }
