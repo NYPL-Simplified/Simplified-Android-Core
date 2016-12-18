@@ -63,7 +63,7 @@ public final class CatalogBookRead implements OnClickListener
     final @Nullable View v)
   {
 
-    final Prefs prefs = new Prefs(this.activity);
+    final Prefs prefs = Simplified.getSharedPrefs();
     prefs.putBoolean("post_last_read", false);
     LOG.debug("CurrentPage prefs {}", prefs.getBoolean("post_last_read"));
 

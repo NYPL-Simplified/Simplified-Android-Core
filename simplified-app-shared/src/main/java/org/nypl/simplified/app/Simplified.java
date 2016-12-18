@@ -142,9 +142,8 @@ public final class Simplified extends Application
   public static SimplifiedCatalogAppServicesType getCatalogAppServices()
   {
     final Simplified i = Simplified.checkInitialized();
-    final Prefs prefs = new Prefs(i.getApplicationContext());
 
-    return i.getActualAppServices(prefs.getString("library"));
+    return i.getActualAppServices(Simplified.getCurrentAccount().getPathComponent());
   }
 
   /**
@@ -167,6 +166,36 @@ public final class Simplified extends Application
       account = new AccountsRegistry(i.getApplicationContext()).getAccount(0);
     }
     return account;
+  }
+
+  /**
+   * @return
+   */
+  public static AccountsDatabaseType getAccountsDatabase(Account account, Context context)
+  {
+
+    final File base_accounts_dir =
+      new File(context.getFilesDir(), account.getPathComponent());
+    final File accounts_dir = new File(base_accounts_dir, "accounts");
+
+    final File base_dir = Simplified.getDiskDataDir(context);
+    final File base_library_dir = new File(base_dir, account.getPathComponent());
+    final File downloads_dir = new File(base_library_dir, "downloads");
+    final File books_dir = new File(base_library_dir, "books");
+
+    try {
+      DirectoryUtilities.directoryCreate(accounts_dir);
+      DirectoryUtilities.directoryCreate(downloads_dir);
+      DirectoryUtilities.directoryCreate(books_dir);
+    } catch (final IOException e) {
+      Simplified.LOG.error(
+        "could not create directories: {}", e.getMessage(), e);
+      throw new IllegalStateException(e);
+    }
+
+    AccountsDatabase.openDatabase(accounts_dir);
+
+    return AccountsDatabase.openDatabase(accounts_dir);
   }
 
   public static Resources.Theme getCurrentTheme() {
@@ -384,7 +413,7 @@ public final class Simplified extends Application
       this.exec_books = Simplified.namedThreadPool(1, "books", 19);
 
 
-      final Prefs prefs = new Prefs(this.context);
+      final Prefs prefs = getSharedPrefs();
 
       Account account = new AccountsRegistry(this.context).getAccount(prefs.getInt("current_account"));
 
@@ -392,24 +421,14 @@ public final class Simplified extends Application
        * Application paths.
        */
 
-      // add library abbreviation to create direct per library
-      // NYPL = New York
-      // BPL = Brooklyn
-      // without = Open Access // not used anyways.
-
-      final File accounts_dir =
-        new File(this.context.getFilesDir(), "accounts" + this.library);
+      final File base_accounts_dir =
+        new File(this.context.getFilesDir(), account.getPathComponent());
+      final File accounts_dir = new File(base_accounts_dir, "accounts");
 
       final File base_dir = Simplified.getDiskDataDir(in_context);
-      final File downloads_dir = new File(base_dir, "downloads");
-
-
-      // add library abbreviation to create direct per library
-      // NYPL = New York
-      // BPL = Brooklyn
-      // without = Open Access
-
-      final File books_dir = new File(base_dir, "books" + this.library);
+      final File base_library_dir = new File(base_dir, account.getPathComponent());
+      final File downloads_dir = new File(base_library_dir, "downloads");
+      final File books_dir = new File(base_library_dir, "books");
       final File books_database_directory = new File(books_dir, "data");
 
       /**
@@ -427,25 +446,27 @@ public final class Simplified extends Application
         throw new IllegalStateException(e);
       }
 
-      CatalogAppServices.LOG_CA.debug("base:      {}", base_dir);
-      CatalogAppServices.LOG_CA.debug("accounts:  {}", accounts_dir);
-      CatalogAppServices.LOG_CA.debug("downloads: {}", downloads_dir);
-      CatalogAppServices.LOG_CA.debug("books:     {}", books_dir);
+      CatalogAppServices.LOG_CA.debug("base:                {}", base_dir);
+      CatalogAppServices.LOG_CA.debug("base_accounts_dir:   {}", base_accounts_dir);
+      CatalogAppServices.LOG_CA.debug("base_library_dir:    {}", base_library_dir);
+      CatalogAppServices.LOG_CA.debug("accounts:            {}", accounts_dir);
+      CatalogAppServices.LOG_CA.debug("downloads:           {}", downloads_dir);
+      CatalogAppServices.LOG_CA.debug("books:               {}", books_dir);
 
       /**
        * Catalog URIs.
        */
 
-      String catalog = account.getCatalogUrl();//rr.getString(R.string.feature_catalog_start_uri);
-      String adobe = account.getCatalogUrl();//rr.getString(R.string.feature_adobe_auth_uri);
+      final String catalog = account.getCatalogUrl();
+      final String adobe = account.getCatalogUrl();
 
-      if ("openebooks".equals(this.library))
-      {
-        catalog = "https://circulation.openebooks.us/";
-        adobe = "https://circulation.openebooks.us/";
-      }
+//      if ("openebooks".equals(this.library))
+//      {
+//        catalog = "https://circulation.openebooks.us/";
+//        adobe = "https://circulation.openebooks.us/";
+//      }
       CatalogAppServices.LOG_CA.debug("catalog:     {}", catalog);
-      CatalogAppServices.LOG_CA.debug("this.library:     {}", this.library);
+      CatalogAppServices.LOG_CA.debug("this.library:     {}", account.getName());
 
       final BooksControllerConfiguration books_config =
         new BooksControllerConfiguration(

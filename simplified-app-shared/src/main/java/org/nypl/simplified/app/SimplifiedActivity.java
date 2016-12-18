@@ -84,7 +84,7 @@ public abstract class SimplifiedActivity extends Activity
   }
 
   private @Nullable ArrayAdapter<SimplifiedPart> adapter;
-  private @Nullable ArrayAdapter<Object>        adapter_accounts;
+  private @Nullable ArrayAdapter<Object>         adapter_accounts;
   private @Nullable FrameLayout                  content_frame;
   private @Nullable DrawerLayout                 drawer;
   private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>>
@@ -428,7 +428,7 @@ public abstract class SimplifiedActivity extends Activity
 
           if (part.equals(SimplifiedPart.PART_SWITCHER)) {
             v.setBackgroundResource(R.drawable.textview_underline);
-            final Prefs prefs = new Prefs(SimplifiedActivity.this.getApplicationContext());
+            final Prefs prefs = Simplified.getSharedPrefs();
             final Account account = new AccountsRegistry(SimplifiedActivity.this).getAccount(prefs.getInt("current_account"));
             tv.setText(account.getName());
             tv.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
@@ -724,11 +724,6 @@ public abstract class SimplifiedActivity extends Activity
         if (account.getId() != Simplified.getCurrentAccount().getId()) {
           final Prefs prefs = Simplified.getSharedPrefs();
           prefs.putInt("current_account", account.getId());
-          if (account.getId() == 0) {
-            prefs.putString("library", "");
-          } else {
-            prefs.putString("library", "_" + account.getPathComponent());
-          }
 
           dl.setAdapter(this.adapter);
 

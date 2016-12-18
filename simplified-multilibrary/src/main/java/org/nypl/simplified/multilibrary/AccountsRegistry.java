@@ -43,6 +43,7 @@ public class AccountsRegistry implements Serializable {
       current_accounts = new JSONArray(prefs.getString("current_accounts"));
     } catch (JSONException e) {
       e.printStackTrace();
+      prefs.putString("current_accounts", current_accounts.toString());
     }
     return  current_accounts;
   }

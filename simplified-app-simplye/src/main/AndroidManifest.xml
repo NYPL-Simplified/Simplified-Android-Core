@@ -89,6 +89,13 @@
       android:exported="false">
     </activity>
     <activity
+      android:name="org.nypl.simplified.app.MainSettingsAccountsActivity"
+      android:configChanges="orientation|screenSize"
+      android:label="@string/settings_accounts"
+      android:contentDescription="@string/settings_accounts"
+      android:exported="false">
+    </activity>
+    <activity
       android:name="org.nypl.simplified.app.HelpActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/help"

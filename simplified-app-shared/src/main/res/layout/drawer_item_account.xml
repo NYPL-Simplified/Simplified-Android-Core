@@ -28,7 +28,7 @@
     android:textColor="@drawable/drawer_list_text"
     android:text="Item"
     android:background="?android:attr/activatedBackgroundIndicator"
-    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    android:minHeight="?android:attr/listPreferredItemHeight"
     android:layout_weight="0.12"/>
 
   <ImageView

@@ -7,6 +7,7 @@ import java.io.Serializable;
 
 /**
  * Created by aferditamuriqi on 8/29/16.
+ *
  */
 
 public class Account implements Serializable {
@@ -175,6 +176,7 @@ public class Account implements Serializable {
       this.id = account.getInt("id");
       this.path_component = account.getString("pathComponent");
       this.name = account.getString("name");
+      this.subtitle = account.getString("subtitle");
       this.logo = account.getString("logo");
       this.catalog_url = account.getString("catalogUrl");
       this.needs_auth = account.getBoolean("needsAuth");
@@ -192,7 +194,7 @@ public class Account implements Serializable {
   }
 
   /**
-   * @return
+   * @return account as json object
    */
   public JSONObject getJsonObject()
   {
@@ -201,6 +203,7 @@ public class Account implements Serializable {
       object.put("id",this.id);
       object.put("pathComponent",this.path_component);
       object.put("name",this.name);
+      object.put("subtitle",this.subtitle);
       object.put("logo",this.logo);
       object.put("catalogUrl",this.catalog_url);
       object.put("needsAuth",this.needs_auth);
