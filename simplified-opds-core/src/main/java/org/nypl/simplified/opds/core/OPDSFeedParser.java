@@ -1,10 +1,14 @@
 package org.nypl.simplified.opds.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.json.core.JSONParseException;
+import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -431,6 +435,26 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           }
 
           continue;
+        }
+
+        // parse licensor
+        {
+          if (OPDSXML.nodeHasName(
+            (Element) child, OPDSFeedConstants.DRM_URI, "licensor")) {
+            final Element e = OPDSXML.nodeAsElement(child);
+            String  in_vendor = e.getAttribute("drm:vendor");
+            for (int i = 0; i < e.getChildNodes().getLength(); ++i)
+            {
+              final Node node = e.getChildNodes().item(i);
+              if (node.getNodeName().contains("clientToken"))
+              {
+                String  in_client_token =  node.getFirstChild().getNodeValue();
+                DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token);
+                b.setLisensor(Option.some(licensor));
+              }
+            }
+          }
+
         }
 
         /**
