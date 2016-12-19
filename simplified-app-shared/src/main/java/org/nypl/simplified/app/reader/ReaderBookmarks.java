@@ -190,4 +190,44 @@ public final class ReaderBookmarks implements ReaderBookmarksType
       }, 3000L);
 
   }
+
+  @Override
+  public void setBookmark(
+    final BookID id,
+    final ReaderBookLocation bookmark
+    ) {
+    NullCheck.notNull(id);
+    NullCheck.notNull(bookmark);
+
+    this.write_timer.cancel();
+    this.write_timer = new Timer();
+    this.write_timer.schedule(
+      new TimerTask() {
+        @Override
+        public void run() {
+          try {
+            ReaderBookmarks.LOG.debug(
+              "saving bookmark for book {}: {}", id, bookmark);
+
+            // save to server
+            if (!"null".equals(((Some<String>) bookmark.getContentCFI()).get())) {
+
+              final JSONObject o = NullCheck.notNull(bookmark.toJSON());
+              final String text = NullCheck.notNull(o.toString());
+              final String key = NullCheck.notNull(id.toString());
+              final Editor e = ReaderBookmarks.this.bookmarks.edit();
+              e.putString(key, text);
+              e.apply();
+
+            }
+          } catch (final JSONException e) {
+            ReaderBookmarks.LOG.error(
+              "unable to serialize bookmark: {}", e.getMessage(), e);
+          }
+          ReaderBookmarks.LOG.debug("CurrentPage timer run ");
+        }
+      }, 3000L);
+
+  }
+
 }

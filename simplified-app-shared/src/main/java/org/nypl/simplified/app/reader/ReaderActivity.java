@@ -294,7 +294,7 @@ public final class ReaderActivity extends Activity implements
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
-    int id = Simplified.getCurrentAccount().getId();
+    final int id = Simplified.getCurrentAccount().getId();
     if (id == 0) {
       setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
     }
@@ -504,6 +504,16 @@ public final class ReaderActivity extends Activity implements
         this.postLastRead(l);
 
       }
+    }
+    else
+    {
+      final SimplifiedReaderAppServicesType rs =
+        Simplified.getReaderAppServices();
+      final ReaderBookmarksType bm = rs.getBookmarks();
+      final BookID in_book_id = NullCheck.notNull(this.book_id);
+
+      bm.setBookmark(in_book_id, l);
+
     }
   }
 
