@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.DisplayMetrics;
+
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -367,7 +368,7 @@ public final class Simplified extends Application
       } catch (final IOException e) {
         Simplified.LOG.debug("No EULA defined: ", e);
       }
-      
+
     }
 
     return documents_builder.build();
@@ -418,10 +419,25 @@ public final class Simplified extends Application
 
     final AccountsDatabaseType accounts_database = AccountsDatabase.openDatabase(accounts_dir);
 
+    String catalog = account.getCatalogUrl();
+    String adobe = account.getCatalogUrl();
+
+    if (!account.needsAuth() && Simplified.getSharedPrefs().contains("age13"))
+    {
+      if (Simplified.getSharedPrefs().getBoolean("age13")){
+        catalog = account.getCatalogUrl13AndOver();
+        adobe = account.getCatalogUrl13AndOver();
+      }
+      else {
+        catalog = account.getCatalogUrlUnder13();
+        adobe = account.getCatalogUrlUnder13();
+      }
+    }
+
     final BooksControllerConfiguration books_config =
       new BooksControllerConfiguration(
-        URI.create(account.getCatalogUrl()),
-        URI.create(account.getCatalogUrl()));
+        URI.create(catalog),
+        URI.create(adobe));
 
     final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(context.getResources().getString(R.string.feature_catalog_loans_uri_component));
 
@@ -602,8 +618,21 @@ public final class Simplified extends Application
        * Catalog URIs.
        */
 
-      final String catalog = account.getCatalogUrl();
-      final String adobe = account.getCatalogUrl();
+      String catalog = account.getCatalogUrl();
+      String adobe = account.getCatalogUrl();
+
+      if (!account.needsAuth() && Simplified.getSharedPrefs().contains("age13"))
+      {
+        if (Simplified.getSharedPrefs().getBoolean("age13")){
+          catalog = account.getCatalogUrl13AndOver();
+          adobe = account.getCatalogUrl13AndOver();
+        }
+        else {
+          catalog = account.getCatalogUrlUnder13();
+          adobe = account.getCatalogUrlUnder13();
+        }
+      }
+
 
       CatalogAppServices.LOG_CA.debug("catalog:     {}", catalog);
       CatalogAppServices.LOG_CA.debug("this.library:     {}", account.getName());

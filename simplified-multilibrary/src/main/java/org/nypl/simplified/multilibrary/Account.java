@@ -17,10 +17,12 @@ public class Account implements Serializable {
   private String name;
   private String subtitle;
   private String logo;
-  private Boolean needs_auth;
-  private Boolean supports_reservations;
-  private Boolean supports_card_creator;
+  private boolean needs_auth;
+  private boolean supports_reservations;
+  private boolean supports_card_creator;
   private String catalog_url;
+  private String catalog_url_under_13;
+  private String catalog_url_13_and_over;
   private String main_color;
 
 
@@ -99,6 +101,12 @@ public class Account implements Serializable {
    */
   public String getCatalogUrl() {
     return this.catalog_url;
+  }
+  public String getCatalogUrlUnder13() {
+    return this.catalog_url_under_13;
+  }
+  public String getCatalogUrl13AndOver() {
+    return this.catalog_url_13_and_over;
   }
 
   /**
@@ -179,6 +187,12 @@ public class Account implements Serializable {
       this.subtitle = account.getString("subtitle");
       this.logo = account.getString("logo");
       this.catalog_url = account.getString("catalogUrl");
+      if (!account.isNull("catalogUrlUnder13")) {
+        this.catalog_url_under_13 = account.getString("catalogUrlUnder13");
+      }
+      if (!account.isNull("catalogUrl13")) {
+        this.catalog_url_13_and_over = account.getString("catalogUrl13");
+      }
       this.needs_auth = account.getBoolean("needsAuth");
       this.supports_reservations = account.getBoolean("supportsReservations");
       this.supports_card_creator = account.getBoolean("supportsCardCreator");
@@ -206,6 +220,8 @@ public class Account implements Serializable {
       object.put("subtitle",this.subtitle);
       object.put("logo",this.logo);
       object.put("catalogUrl",this.catalog_url);
+      object.put("catalogUrlUnder13",this.catalog_url_under_13);
+      object.put("catalogUrl13",this.catalog_url_13_and_over);
       object.put("needsAuth",this.needs_auth);
       object.put("supportsReservations",this.supports_reservations);
       object.put("supportsCardCreator",this.supports_card_creator);

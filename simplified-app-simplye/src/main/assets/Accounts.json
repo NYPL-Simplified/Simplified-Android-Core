@@ -32,7 +32,9 @@
  "needsAuth" : false,
  "supportsCardCreator" : false,
  "supportsReservations" : false,
-  "catalogUrl" : "http://dev-mta.nypl.org/all-books.xml",
+  "catalogUrl" : "http://dev-mta.nypl.org/index.xml",
+  "catalogUrlUnder13" : "http://dev-mta.nypl.org/childrens-books.xml",
+  "catalogUrl13" : "http://dev-mta.nypl.org/all-books.xml",
   "mainColor" : "#497049"
  }
 ]
