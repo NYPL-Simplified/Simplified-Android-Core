@@ -428,11 +428,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       NullCheck.notNull((CheckBox) this.findViewById(R.id.age13_checkbox));
 
     // check if key exists, if doesn't ask user how old they are, move this to catalog activity
-    //Simplified.getSharedPrefs().contains("age13")
 
     if (Simplified.getSharedPrefs().contains("age13")) {
       in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
-      Simplified.getCatalogAppServices().reloadCatalog();
     }
 
     in_age13_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
