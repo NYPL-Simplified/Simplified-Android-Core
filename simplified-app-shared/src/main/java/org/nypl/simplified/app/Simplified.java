@@ -758,33 +758,6 @@ public final class Simplified extends Application
           Simplified.LOG.debug("No EULA defined: ", e);
         }
 
-        try {
-          final InputStream stream = assets.open("privacy.html");
-          documents_builder.enablePrivacyPolicy(
-            new FunctionType<Unit, InputStream>()
-            {
-              @Override public InputStream call(final Unit x)
-              {
-                return stream;
-              }
-            });
-        } catch (final IOException e) {
-          Simplified.LOG.debug("No privacy policy defined: ", e);
-        }
-
-        try {
-          final InputStream stream = assets.open("about.html");
-          documents_builder.enableAbout(
-            new FunctionType<Unit, InputStream>()
-            {
-              @Override public InputStream call(final Unit x)
-              {
-                return stream;
-              }
-            });
-        } catch (final IOException e) {
-          Simplified.LOG.debug("No about defined: ", e);
-        }
 
         try {
           final InputStream stream = assets.open("software-licenses.html");
@@ -800,19 +773,6 @@ public final class Simplified extends Application
           Simplified.LOG.debug("No licenses defined: ", e);
         }
 
-        try {
-          final InputStream stream = assets.open("acknowledgements.html");
-          documents_builder.enableAcknowledgements(
-            new FunctionType<Unit, InputStream>()
-            {
-              @Override public InputStream call(final Unit x)
-              {
-                return stream;
-              }
-            });
-        } catch (final IOException e) {
-          Simplified.LOG.debug("No acknowledgements defined: ", e);
-        }
       }
 
       this.documents = documents_builder.build();
