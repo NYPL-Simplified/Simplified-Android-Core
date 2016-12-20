@@ -51,4 +51,10 @@ public interface SimplifiedCatalogAppServicesType extends
    */
 
   OptionType<HelpstackType> getHelpStack();
+
+  /**
+   * 
+   */
+  void reloadCatalog();
+
 }

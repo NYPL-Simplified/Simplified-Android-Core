@@ -142,7 +142,7 @@ public final class Simplified extends Application
   {
     final Simplified i = Simplified.checkInitialized();
 
-    return i.getActualAppServices(Simplified.getCurrentAccount().getPathComponent());
+    return i.getActualAppServices(Simplified.getCurrentAccount().getPathComponent(), false);
   }
 
   /**
@@ -475,7 +475,7 @@ public final class Simplified extends Application
   }
 
 
-  private synchronized SimplifiedCatalogAppServicesType getActualAppServices(final String in_library)
+  private synchronized SimplifiedCatalogAppServicesType getActualAppServices(final String in_library, final boolean reload)
   {
     CatalogAppServices as = this.app_services;
     if (as == null)
@@ -485,7 +485,7 @@ public final class Simplified extends Application
       this.app_services = as;
       return as;
     }
-    else if (this.app_services.library.equals(in_library)) {
+    else if (this.app_services.library.equals(in_library) && !reload) {
       return as;
     }
     else
@@ -560,7 +560,7 @@ public final class Simplified extends Application
     private final ExecutorService                    exec_catalog_feeds;
     private final ExecutorService                    exec_covers;
     private final ExecutorService                    exec_downloader;
-    private final URI                                feed_initial_uri;
+    private URI                                feed_initial_uri;
     private final FeedLoaderType                     feed_loader;
     private final HTTPType                           http;
     private final ScreenSizeControllerType           screen;
@@ -871,6 +871,12 @@ public final class Simplified extends Application
     @Override public OptionType<HelpstackType> getHelpStack()
     {
       return this.helpstack;
+    }
+
+    @Override
+    public void reloadCatalog() {
+      final Simplified i = Simplified.checkInitialized();
+      i.getActualAppServices(Simplified.getCurrentAccount().getPathComponent(), true);
     }
 
     @Override public boolean isNetworkAvailable()
