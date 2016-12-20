@@ -430,26 +430,23 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     // check if key exists, if doesn't ask user how old they are, move this to catalog activity
     //Simplified.getSharedPrefs().contains("age13")
 
-    if (Simplified.getSharedPrefs().contains("age13"))
-    {
+    if (Simplified.getSharedPrefs().contains("age13")) {
       in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
+      Simplified.getCatalogAppServices().reloadCatalog();
     }
 
     in_age13_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override
       public void onCheckedChanged(final CompoundButton button, final boolean checked) {
-
         Simplified.getSharedPrefs().putBoolean("age13", checked);
-
+        Simplified.getCatalogAppServices().reloadCatalog();
       }
     });
 
 
-    if (this.account.needsAuth())
-    {
+    if (this.account.needsAuth()) {
       in_login.setVisibility(View.VISIBLE);
       in_age13_checkbox.setVisibility(View.GONE);
-
     }
     else {
       in_login.setVisibility(View.GONE);
