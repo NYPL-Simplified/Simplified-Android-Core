@@ -8,9 +8,6 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
-import org.nypl.drm.core.AdobeDeviceID;
-import org.nypl.drm.core.AdobeUserID;
-import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -27,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 final class BooksControllerLoginTask implements Runnable,
@@ -100,14 +96,8 @@ final class BooksControllerLoginTask implements Runnable,
       }
     }
 
-    URI auth_uri = this.config.getCurrentRootFeedURI();
-    final HTTPResultType<InputStream> r;
-    if (this.adobe_drm.isSome()) {
-      auth_uri = this.config.getAdobeAuthURI().resolve("AdobeAuth/authdata");
-      r = this.http.get(Option.some(auth), auth_uri, 0);
-    } else {
-      r = this.http.head(Option.some(auth), auth_uri);
-    }
+    final URI auth_uri = this.config.getCurrentRootFeedURI();
+    final HTTPResultType<InputStream> r = this.http.head(Option.some(auth), auth_uri);
 
     BooksControllerLoginTask.LOG.debug(
       "attempting login on {}", auth_uri);
@@ -155,59 +145,10 @@ final class BooksControllerLoginTask implements Runnable,
   }
 
   private void onHTTPServerAcceptedCredentials(final InputStream data) {
-    /**
-     * If an Adobe DRM implementation is available, activate the device
-     * with the credentials. If the Adobe server rejects the credentials,
-     * then the login attempt is still considered to have failed.
-     */
-
-    if (this.adobe_drm.isSome()) {
 
 
-      final Scanner scanner = new Scanner(data).useDelimiter("\\A");
-      final String adobe_token = scanner.hasNext() ? scanner.next() : "";
-      this.credentials.setAdobeToken(Option.some(new AccountAdobeToken(adobe_token)));
+    this.onCompletedSuccessfully();
 
-      BooksControllerDeviceActivationTask activation_task =
-        new BooksControllerDeviceActivationTask(this.adobe_drm,
-          this.credentials,
-          this.accounts_database,
-          this.books_database) {
-          @Override
-          public void onActivationsCount(final int count) {
-            /**
-             * Device activation succeeded.
-             */
-          }
-
-          @Override
-          public void onActivation(final int index, final AdobeVendorID authority,
-                                   final String device_id, final String user_name,
-                                   final AdobeUserID user_id, final String expires) {
-            super.onActivation(index, authority, device_id, user_name, user_id, expires);
-
-            final AdobeDeviceID adobe_device_id = new AdobeDeviceID(device_id);
-
-            BooksControllerLoginTask.this.credentials.setAdobeDeviceID(Option.some(adobe_device_id));
-            BooksControllerLoginTask.this.credentials.setAdobeUserID(Option.some(user_id));
-            BooksControllerLoginTask.this.onCompletedSuccessfully();
-          }
-
-          @Override
-          public void onActivationError(final String message) {
-            BooksControllerLoginTask.this.listener.onAccountLoginFailureDeviceActivationError(message);
-          }
-        };
-      activation_task.run();
-
-    } else {
-
-      /**
-       * Otherwise, the login process is completed.
-       */
-
-      this.onCompletedSuccessfully();
-    }
   }
 
   private void onCompletedSuccessfully() {

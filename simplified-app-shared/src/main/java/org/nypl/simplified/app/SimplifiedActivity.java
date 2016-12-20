@@ -623,18 +623,29 @@ public abstract class SimplifiedActivity extends Activity
     SimplifiedActivity.LOG.debug(
       "activity count: {}", SimplifiedActivity.ACTIVITY_COUNT);
 
-    if (!SimplifiedActivity.DEVICE_ACTIVATED) {
-      // Don't try to activate the device unless we're connected to the Internet, since
-      // it will discard its credentials if it fails.
-      final ConnectivityManager connectivity_manager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-      final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
-      if (network_info != null && network_info.isConnected()) {
-        // This is commented out because it turns out that activating the device on startup breaks
-        // decryption until a book is fulfilled.
-        //app.getBooks().accountActivateDevice();
-        SimplifiedActivity.DEVICE_ACTIVATED = true;
-      }
-    }
+
+    UIThread.runOnUIThreadDelayed(
+      new Runnable() {
+        @Override
+        public void run() {
+
+          if (!SimplifiedActivity.DEVICE_ACTIVATED && Simplified.getCurrentAccount().needsAuth()) {
+            // Don't try to activate the device unless we're connected to the Internet, since
+            // it will discard its credentials if it fails.
+            final ConnectivityManager connectivity_manager = (ConnectivityManager) SimplifiedActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
+            if (network_info != null && network_info.isConnected()) {
+              // This is commented out because it turns out that activating the device on startup breaks
+              // decryption until a book is fulfilled.
+              SimplifiedActivity.this.app.getBooks().accountActivateDevice();
+              SimplifiedActivity.DEVICE_ACTIVATED = true;
+            }
+          }
+
+        }
+      }, 3000L);
+
+
   }
 
   @Override protected void onDestroy()
@@ -722,6 +733,13 @@ public abstract class SimplifiedActivity extends Activity
 
 
         if (account.getId() != Simplified.getCurrentAccount().getId()) {
+
+//           //deactivate current adobe account // not needed (for now) as we can have multiple activations
+//          if (! SimplifiedActivity.DEVICE_ACTIVATED && account.needsAuth()) {
+//            this.app.getBooks().accountDeActivateDevice();
+//            SimplifiedActivity.DEVICE_ACTIVATED = false;
+//          }
+
           final Prefs prefs = Simplified.getSharedPrefs();
           prefs.putInt("current_account", account.getId());
 

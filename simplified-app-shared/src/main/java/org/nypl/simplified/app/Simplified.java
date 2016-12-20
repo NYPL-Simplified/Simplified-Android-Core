@@ -244,7 +244,7 @@ public final class Simplified extends Application
   public static SimplifiedReaderAppServicesType getReaderAppServices()
   {
     final Simplified i = Simplified.checkInitialized();
-    return i.getActualReaderAppServices();
+    return i.getActualReaderAppServices(Simplified.getCurrentAccount().getPathComponent());
   }
 
   private static FeedLoaderType makeFeedLoader(
@@ -377,9 +377,10 @@ public final class Simplified extends Application
   /**
    * @param account
    * @param context
+   * @param in_adobe_drm
    * @return
    */
-  public static BooksType getBooks(final Account account, Context context) {
+  public static BooksType getBooks(final Account account, final Context context, final OptionType<AdobeAdeptExecutorType> in_adobe_drm) {
 
     final ExecutorService  exec_books = Simplified.namedThreadPool(1, "books", 19);
     final HTTPType http = HTTP.newHTTP();
@@ -442,8 +443,8 @@ public final class Simplified extends Application
     final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(context.getResources().getString(R.string.feature_catalog_loans_uri_component));
 
 
-    final OptionType<AdobeAdeptExecutorType> adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
-      context, AdobeDRMServices.getPackageOverride(context.getResources()));
+//    final OptionType<AdobeAdeptExecutorType> adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
+//      context, AdobeDRMServices.getPackageOverride(context.getResources()));
 
     return  BooksController.newBooks(
       exec_books,
@@ -452,7 +453,7 @@ public final class Simplified extends Application
       downloader,
       in_json_serializer,
       in_json_parser,
-      adobe_drm,
+      in_adobe_drm,
       Simplified.getDocumentStore(account, context.getResources()),
       books_database,
       accounts_database,
@@ -477,24 +478,43 @@ public final class Simplified extends Application
   private synchronized SimplifiedCatalogAppServicesType getActualAppServices(final String in_library)
   {
     CatalogAppServices as = this.app_services;
-    if (as != null && this.app_services.library.equals(in_library)) {
+    if (as == null)
+    {
+      as = new CatalogAppServices(
+        null, this, this, NullCheck.notNull(this.getResources()), in_library);
+      this.app_services = as;
       return as;
     }
-    as = new CatalogAppServices(
-      this, this, NullCheck.notNull(this.getResources()), in_library);
-    this.app_services = as;
-    return as;
+    else if (this.app_services.library.equals(in_library)) {
+      return as;
+    }
+    else
+    {
+      as = new CatalogAppServices(this.app_services.adobe_drm,
+        this, this, NullCheck.notNull(this.getResources()), in_library);
+      this.app_services = as;
+      return as;
+    }
   }
 
-  private SimplifiedReaderAppServicesType getActualReaderAppServices()
+  private SimplifiedReaderAppServicesType getActualReaderAppServices(final String in_library)
   {
     ReaderAppServices as = this.reader_services;
-    if (as != null) {
+    if (as == null)
+    {
+      as = new ReaderAppServices(null, this, NullCheck.notNull(this.getResources()));
+      this.reader_services = as;
       return as;
     }
-    as = new ReaderAppServices(this, NullCheck.notNull(this.getResources()));
-    this.reader_services = as;
-    return as;
+    else if (this.app_services.library.equals(in_library))
+    {
+      return as;
+    }
+    else {
+      as = new ReaderAppServices(this.reader_services.epub_exec, this, NullCheck.notNull(this.getResources()));
+      this.reader_services = as;
+      return as;
+    }
   }
 
   private void initBugsnag(final OptionType<String> api_token_opt)
@@ -546,7 +566,7 @@ public final class Simplified extends Application
     private final ScreenSizeControllerType           screen;
     private final AtomicBoolean                      synced;
     private final DownloaderType                     downloader;
-    private final OptionType<AdobeAdeptExecutorType> adobe_drm;
+    private OptionType<AdobeAdeptExecutorType> adobe_drm;
     private final DocumentStoreType                  documents;
     private final OptionType<HelpstackType>          helpstack;
     private final BookDatabaseType                   books_database;
@@ -555,6 +575,7 @@ public final class Simplified extends Application
     private final String library;
 
     private CatalogAppServices(
+      OptionType<AdobeAdeptExecutorType> in_adobe_drm,
       final Application in_app,
       final Context in_context,
       final Resources rr,
@@ -562,9 +583,8 @@ public final class Simplified extends Application
     {
       NullCheck.notNull(rr);
 
-
       this.library = in_library;
-
+      this.adobe_drm = in_adobe_drm;
       this.context = NullCheck.notNull(in_context);
       this.screen = new ScreenSizeController(rr);
       this.exec_catalog_feeds =
@@ -667,10 +687,10 @@ public final class Simplified extends Application
       /**
        * DRM.
        */
-
-      this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
-        this.context, AdobeDRMServices.getPackageOverride(rr));
-
+      if (this.adobe_drm == null) {
+        this.adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
+          this.context, AdobeDRMServices.getPackageOverride(rr));
+      }
       this.downloader = DownloaderHTTP.newDownloader(
         this.exec_books, downloads_dir, this.http);
 
@@ -1021,6 +1041,7 @@ public final class Simplified extends Application
     private final ReaderSettingsType          settings;
 
     private ReaderAppServices(
+      ExecutorService in_epub_exec,
       final Context context,
       final Resources rr)
     {
@@ -1040,8 +1061,14 @@ public final class Simplified extends Application
 
       this.httpd =
         ReaderHTTPServerAAsync.newServer(context.getAssets(), this.mime, port);
+      
+      if (in_epub_exec == null) {
+        this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
+      }
+      else {
+        this.epub_exec = in_epub_exec;
+      }
 
-      this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       this.epub_loader =
         ReaderReadiumEPUBLoader.newLoader(context, this.epub_exec);
 

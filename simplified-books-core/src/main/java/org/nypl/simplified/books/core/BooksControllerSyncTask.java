@@ -5,6 +5,9 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+
+import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -14,6 +17,7 @@ import org.nypl.simplified.http.core.HTTPResultMatcherType;
 import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
@@ -48,6 +52,7 @@ final class BooksControllerSyncTask implements Runnable
   private final BookDatabaseType                 books_database;
   private final AccountsDatabaseType             accounts_database;
   private final URI                              loans_uri;
+  private final OptionType<AdobeAdeptExecutorType> adobe_drm;
 
   BooksControllerSyncTask(
     final BooksControllerType in_books,
@@ -58,7 +63,8 @@ final class BooksControllerSyncTask implements Runnable
     final OPDSFeedParserType in_feed_parser,
     final AccountSyncListenerType in_listener,
     final AtomicBoolean in_running,
-    final URI in_loans_uri)
+    final URI in_loans_uri,
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
   {
     this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
@@ -68,6 +74,8 @@ final class BooksControllerSyncTask implements Runnable
     this.listener = NullCheck.notNull(in_listener);
     this.running = NullCheck.notNull(in_running);
     this.loans_uri = NullCheck.notNull(in_loans_uri);
+    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
+
   }
 
   @Override public void run()
@@ -169,6 +177,40 @@ final class BooksControllerSyncTask implements Runnable
 
     final OPDSAcquisitionFeed feed =
       this.feed_parser.parse(this.loans_uri, r_feed.getValue());
+
+
+    if (feed.getLicensor().isSome())
+    {
+      final DRMLicensor licensor = ((Some<DRMLicensor>) feed.getLicensor()).get();
+
+      final OptionType<AccountCredentials> credentials_opt =
+        this.accounts_database.accountGetCredentials();
+
+
+      if (credentials_opt.isSome()) {
+
+        final AccountCredentials credentials = ((Some<AccountCredentials>) credentials_opt).get();
+
+        credentials.setAdobeToken(Option.some(new AccountAdobeToken(licensor.getClientToken())));
+        credentials.setAdobeVendor(Option.some(new AdobeVendorID(licensor.getVendor())));
+
+        try {
+          this.accounts_database.accountSetCredentials(credentials);
+        } catch (final IOException e) {
+          BooksControllerSyncTask.LOG.error("could not save credentials: ", e);
+        }
+
+
+        final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
+          this.adobe_drm,
+          credentials,
+          this.accounts_database,
+          this.books_database
+        );
+        activation_task.run();
+
+      }
+    }
 
     /**
      * Obtain the set of books that are on disk already. If any

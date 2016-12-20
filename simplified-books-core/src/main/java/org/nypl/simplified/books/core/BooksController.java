@@ -237,10 +237,12 @@ public final class BooksController implements BooksType {
   @Override
   public void accountLogout(
     final AccountCredentials account,
-    final AccountLogoutListenerType listener) {
+    final AccountLogoutListenerType listener,
+    final AccountSyncListenerType sync_listener) {
     NullCheck.notNull(listener);
 
     synchronized (this) {
+      this.accountSync(sync_listener);
       this.stopAllTasks();
       this.books_status.booksStatusClearAll();
       this.submitRunnable(
@@ -269,7 +271,8 @@ public final class BooksController implements BooksType {
         this.feed_parser,
         listener,
         this.syncing,
-        this.loans_uri));
+        this.loans_uri,
+        this.adobe_drm));
   }
 
 
@@ -286,8 +289,7 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database,
-        licensor
+        this.book_database
       );
       this.submitRunnable(activation_task);
 
@@ -310,7 +312,7 @@ public final class BooksController implements BooksType {
 
 
   @Override
-  public void accountActivateDevice(final OptionType<DRMLicensor> licensor) {
+  public void accountActivateDevice() {
 
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {
@@ -319,8 +321,7 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database,
-        licensor
+        this.book_database
       );
       this.submitRunnable(activation_task);
 
@@ -352,8 +353,7 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database,
-        licensor);
+        this.book_database);
       this.submitRunnable(activation_task);
 
       //fulfill book which were already downloaded when device was active.

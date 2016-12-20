@@ -91,7 +91,7 @@ final class BooksControllerBorrowTask implements Runnable
     final OPDSAcquisitionFeedEntry in_feed_entry,
     final FeedLoaderType in_feed_loader,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    boolean in_needs_auth)
+    final boolean in_needs_auth)
   {
     this.downloader = NullCheck.notNull(in_downloader);
     this.downloads = NullCheck.notNull(in_downloads);
@@ -360,8 +360,7 @@ final class BooksControllerBorrowTask implements Runnable
                   this.adobe_drm,
                   credentials_some.get(),
                   this.accounts_database,
-                  this.books_database,
-                  this.feed_entry.getLicensor()
+                  this.books_database
                 );
                 activation_task.run();
               }

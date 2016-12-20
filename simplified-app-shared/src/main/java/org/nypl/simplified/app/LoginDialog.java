@@ -383,7 +383,7 @@ public final class LoginDialog extends DialogFragment
     if (account_id != null )
     {
       Account account = new AccountsRegistry(getActivity()).getAccount(Integer.valueOf(account_id));
-      books = Simplified.getBooks(account, getActivity());
+      books = Simplified.getBooks(account, getActivity(), Simplified.getCatalogAppServices().getAdobeDRMExecutor());
       docs = Simplified.getDocumentStore(account, getActivity().getResources());
     }
 

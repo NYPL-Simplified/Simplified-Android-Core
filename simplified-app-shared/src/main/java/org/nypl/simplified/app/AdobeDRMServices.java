@@ -33,6 +33,7 @@ import org.nypl.drm.core.DRMException;
 import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.json.core.JSONParserUtilities;
+import org.nypl.simplified.multilibrary.Account;
 import org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -143,13 +144,22 @@ public final class AdobeDRMServices
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    final File app_storage = context.getFilesDir();
-    final File xml_storage = context.getFilesDir();
+    Account account = Simplified.getCurrentAccount();
+
+    final File base_accounts_dir =
+      new File(context.getFilesDir(), account.getPathComponent());
+
+    final File base_dir = Simplified.getDiskDataDir(context);
+    final File base_library_dir = new File(base_dir, account.getPathComponent());
+
+    final File app_storage = base_accounts_dir;
+    final File xml_storage = base_accounts_dir;
 
     final File book_storage =
-      new File(Simplified.getDiskDataDir(context), "adobe-books-tmp");
+      new File(base_library_dir, "adobe-books-tmp");
     final File temp_storage =
-      new File(Simplified.getDiskDataDir(context), "adobe-tmp");
+      new File(base_library_dir, "adobe-tmp");
+
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);
@@ -232,13 +242,23 @@ public final class AdobeDRMServices
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    final File app_storage = context.getFilesDir();
-    final File xml_storage = context.getFilesDir();
+
+    Account account = Simplified.getCurrentAccount();
+
+    final File base_accounts_dir =
+      new File(context.getFilesDir(), account.getPathComponent());
+
+    final File base_dir = Simplified.getDiskDataDir(context);
+    final File base_library_dir = new File(base_dir, account.getPathComponent());
+
+
+    final File app_storage = base_accounts_dir;//context.getFilesDir();
+    final File xml_storage = base_accounts_dir;//context.getFilesDir();
 
     final File book_storage =
-      new File(Simplified.getDiskDataDir(context), "adobe-books-tmp");
+      new File(base_library_dir, "adobe-books-tmp");
     final File temp_storage =
-      new File(Simplified.getDiskDataDir(context), "adobe-tmp");
+      new File(base_library_dir, "adobe-tmp");
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);

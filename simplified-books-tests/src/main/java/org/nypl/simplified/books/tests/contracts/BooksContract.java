@@ -1061,7 +1061,7 @@ public final class BooksContract implements BooksContractType
         };
 
       System.out.println("logging out");
-      b.accountLogout(creds,logout_listener);
+      b.accountLogout(creds,logout_listener, sync_listener);
       System.out.println("awaiting logout completion");
       latch3.await(10L, TimeUnit.SECONDS);
       System.out.println("logged out");

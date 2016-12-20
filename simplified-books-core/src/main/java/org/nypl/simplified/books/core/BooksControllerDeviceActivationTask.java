@@ -14,7 +14,6 @@ import org.nypl.drm.core.AdobeAdeptProcedureType;
 import org.nypl.drm.core.AdobeDeviceID;
 import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.AdobeVendorID;
-import org.nypl.simplified.opds.core.DRMLicensor;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -29,7 +28,6 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final AccountCredentials credentials;
   private final AccountsDatabaseType accounts_database;
-  private final DRMLicensor licensor;
 
   private static final Logger LOG;
 
@@ -41,15 +39,10 @@ public class BooksControllerDeviceActivationTask implements Runnable,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AccountCredentials in_credentials,
     final AccountsDatabaseType in_accounts_database,
-    final BookDatabaseType book_database,
-    final OptionType<DRMLicensor> in_licensor) {
+    final BookDatabaseType book_database) {
     this.adobe_drm = in_adobe_drm;
     this.credentials = in_credentials;
     this.accounts_database = in_accounts_database;
-    this.licensor = ((Some<DRMLicensor>) in_licensor).get();
-
-    this.credentials.setAdobeToken(Option.some(new AccountAdobeToken(this.licensor.getClientToken())));
-    this.credentials.setAdobeVendor(Option.some(new AdobeVendorID(this.licensor.getVendor())));
 
   }
 
@@ -78,18 +71,18 @@ public class BooksControllerDeviceActivationTask implements Runnable,
               new AdobeAdeptProcedureType() {
                 @Override
                 public void executeWith(final AdobeAdeptConnectorType c) {
-                  c.discardDeviceActivations();
+//                  c.discardDeviceActivations();
 
                   final String token = ((Some<AccountAdobeToken>) adobe_token).get().toString().replace("\n", "");
 
                   final String username = token.substring(0, token.lastIndexOf("|"));
                   final String password = token.substring(token.lastIndexOf("|") + 1);
-                  //check if clever active
-                    c.activateDevice(
-                      BooksControllerDeviceActivationTask.this,
-                      s.get(),
-                      username,
-                      password);
+
+                  c.activateDevice(
+                    BooksControllerDeviceActivationTask.this,
+                    ((Some<AdobeVendorID>) vendor_opt).get(),
+                    username,
+                    password);
                 }
               });
             return Unit.unit();
@@ -141,5 +134,10 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   @Override
   public void onActivationError(final String error) {
     BooksControllerDeviceActivationTask.LOG.debug("Failed to activate device: {}", error);
+//    try {
+//      this.accounts_database.accountRemoveCredentials();
+//    } catch (IOException exception) {
+//      BooksControllerDeviceActivationTask.LOG.debug("Failed to clear account credentials");
+//    }
   }
 }

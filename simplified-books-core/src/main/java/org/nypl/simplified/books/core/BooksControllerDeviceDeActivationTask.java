@@ -55,8 +55,6 @@ public class BooksControllerDeviceDeActivationTask implements Runnable,
         (Some<AdobeAdeptExecutorType>) this.adobe_drm;
       final AdobeAdeptExecutorType adobe_exec = some.get();
 
-      final AccountBarcode user = this.credentials.getBarcode();
-      final AccountPIN pass = this.credentials.getPin();
       final OptionType<AccountAdobeToken> adobe_token = this.credentials.getAdobeToken();
       final OptionType<AdobeVendorID> vendor_opt = this.credentials.getAdobeVendor();
       final OptionType<AdobeUserID> user_id = this.credentials.getAdobeUserID();
@@ -77,10 +75,7 @@ public class BooksControllerDeviceDeActivationTask implements Runnable,
               new AdobeAdeptProcedureType() {
                 @Override
                 public void executeWith(final AdobeAdeptConnectorType c) {
-
-
-
-
+                  
                   if (BooksControllerDeviceDeActivationTask.this.credentials.getAdobeUserID().isSome()) {
 
                     final String token = ((Some<AccountAdobeToken>) adobe_token).get().toString().replace("\n", "");
@@ -89,7 +84,7 @@ public class BooksControllerDeviceDeActivationTask implements Runnable,
 
                     c.deactivateDevice(
                       BooksControllerDeviceDeActivationTask.this,
-                      s.get(),
+                      ((Some<AdobeVendorID>) vendor_opt).get(),
                       ((Some<AdobeUserID>) user_id).get(),
                       username,
                       password);

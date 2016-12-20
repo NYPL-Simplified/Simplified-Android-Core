@@ -201,7 +201,7 @@ final class BooksControllerFulFillTask implements Runnable
                 in_book_id, e_nn.getAcquisitions());
             if (a_opt.isSome()) {
               final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-              this.books_controller.bookBorrow(in_book_id, a, e_nn);
+              this.books_controller.bookBorrow(in_book_id, a, e_nn, true);
             }
 
           }

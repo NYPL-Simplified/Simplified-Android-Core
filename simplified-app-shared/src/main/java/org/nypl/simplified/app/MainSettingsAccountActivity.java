@@ -43,8 +43,10 @@ import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
 import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.AccountSyncListenerType;
 import org.nypl.simplified.books.core.AccountsDatabaseType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
+import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
@@ -59,7 +61,7 @@ import org.slf4j.Logger;
 
 public final class MainSettingsAccountActivity extends SimplifiedActivity implements
   AccountLogoutListenerType,
-  AccountGetCachedCredentialsListenerType {
+  AccountGetCachedCredentialsListenerType, AccountSyncListenerType {
   private static final Logger LOG;
 
   static {
@@ -153,7 +155,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                   new Runnable() {
                     @Override
                     public void run() {
-                      books.accountLogout(creds, MainSettingsAccountActivity.this);
+                      books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                     }
                   });
                 final FragmentManager fm =
@@ -626,7 +628,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     BooksType books = app.getBooks();
     if (this.account != null)
     {
-      books = Simplified.getBooks(this.account, this);
+      books = Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
     }
 
     final Resources rr = NullCheck.notNull(this.getResources());
@@ -681,7 +683,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                     new Runnable() {
                       @Override
                       public void run() {
-                        finalBooks.accountLogout(creds, MainSettingsAccountActivity.this);
+                        finalBooks.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                       }
                     });
                   final FragmentManager fm =
@@ -708,4 +710,28 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     return true;
   }
 
+  @Override
+  public void onAccountSyncAuthenticationFailure(String message) {
+
+  }
+
+  @Override
+  public void onAccountSyncBook(BookID book) {
+
+  }
+
+  @Override
+  public void onAccountSyncFailure(OptionType<Throwable> error, String message) {
+
+  }
+
+  @Override
+  public void onAccountSyncSuccess() {
+
+  }
+
+  @Override
+  public void onAccountSyncBookDeleted(BookID book) {
+
+  }
 }

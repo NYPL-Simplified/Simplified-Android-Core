@@ -54,7 +54,8 @@ public interface AccountsControllerType
 
   void accountLogout(
     AccountCredentials credentials,
-    AccountLogoutListenerType listener);
+    AccountLogoutListenerType listener,
+    AccountSyncListenerType sync_listener);
 
   /**
    * Sync books, delivering results to the given {@code listener}.
@@ -73,7 +74,7 @@ public interface AccountsControllerType
   /**
    * Activate the device with the currently logged in account (if you are logged in).
    */
-  void accountActivateDevice(OptionType<DRMLicensor> licensor);
+  void accountActivateDevice();
 
   /**
    *  fulfill all existing books which were download before
