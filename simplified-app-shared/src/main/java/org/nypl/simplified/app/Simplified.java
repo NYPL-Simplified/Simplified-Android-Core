@@ -173,12 +173,21 @@ public final class Simplified extends Application
   public static AccountsDatabaseType getAccountsDatabase(Account account, Context context)
   {
 
-    final File base_accounts_dir =
-      new File(context.getFilesDir(), account.getPathComponent());
+    File base_accounts_dir = context.getFilesDir();
+    if (account.getId() > 0)
+    {
+      base_accounts_dir =
+        new File(context.getFilesDir(), account.getPathComponent());
+    }
     final File accounts_dir = new File(base_accounts_dir, "accounts");
 
     final File base_dir = Simplified.getDiskDataDir(context);
-    final File base_library_dir = new File(base_dir, account.getPathComponent());
+    File base_library_dir = base_dir;
+    if (account.getId() > 0)
+    {
+      base_library_dir = new File(base_dir, account.getPathComponent());
+    }
+
     final File downloads_dir = new File(base_library_dir, "downloads");
     final File books_dir = new File(base_library_dir, "books");
 
@@ -197,6 +206,9 @@ public final class Simplified extends Application
     return AccountsDatabase.openDatabase(accounts_dir);
   }
 
+  /**
+   * @return
+   */
   public static Resources.Theme getCurrentTheme() {
     final Simplified i = Simplified.checkInitialized();
 
@@ -334,7 +346,13 @@ public final class Simplified extends Application
       };
 
     final File base_dir = Simplified.getDiskDataDir(i.getApplicationContext());
-    final File base_library_dir = new File(base_dir, account.getPathComponent());
+
+    File base_library_dir = base_dir;
+    if (account.getId() > 0)
+    {
+      base_library_dir = new File(base_dir, account.getPathComponent());
+    }
+
     final File books_dir = new File(base_library_dir, "books");
 
 
@@ -385,13 +403,23 @@ public final class Simplified extends Application
     final ExecutorService  exec_books = Simplified.namedThreadPool(1, "books", 19);
     final HTTPType http = HTTP.newHTTP();
 
-    final File base_accounts_dir =
-      new File(context.getFilesDir(), account.getPathComponent());
+    File base_accounts_dir = context.getFilesDir();
+    if (account.getId() > 0)
+    {
+      base_accounts_dir =
+        new File(context.getFilesDir(), account.getPathComponent());
+    }
+
     final File accounts_dir = new File(base_accounts_dir, "accounts");
 
 
     final File base_dir = Simplified.getDiskDataDir(context);
-    final File base_library_dir = new File(base_dir, account.getPathComponent());
+    File base_library_dir = base_dir;
+    if (account.getId() > 0)
+    {
+      base_library_dir = new File(base_dir, account.getPathComponent());
+    }
+
     final File downloads_dir = new File(base_library_dir, "downloads");
     final File books_dir = new File(base_library_dir, "books");
     final File books_database_directory = new File(books_dir, "data");
@@ -602,12 +630,23 @@ public final class Simplified extends Application
        * Application paths.
        */
 
-      final File base_accounts_dir =
-        new File(this.context.getFilesDir(), account.getPathComponent());
+      File base_accounts_dir = this.context.getFilesDir();
+      if (account.getId() > 0)
+      {
+        base_accounts_dir =
+          new File(this.context.getFilesDir(), account.getPathComponent());
+      }
+
+
       final File accounts_dir = new File(base_accounts_dir, "accounts");
 
       final File base_dir = Simplified.getDiskDataDir(in_context);
-      final File base_library_dir = new File(base_dir, account.getPathComponent());
+      File base_library_dir = base_dir;
+      if (account.getId() > 0)
+      {
+        base_library_dir = new File(base_dir, account.getPathComponent());
+      }
+
       final File downloads_dir = new File(base_library_dir, "downloads");
       final File books_dir = new File(base_library_dir, "books");
       final File books_database_directory = new File(books_dir, "data");
@@ -1027,7 +1066,7 @@ public final class Simplified extends Application
 
       this.httpd =
         ReaderHTTPServerAAsync.newServer(context.getAssets(), this.mime, port);
-      
+
       if (in_epub_exec == null) {
         this.epub_exec = Simplified.namedThreadPool(1, "epub", 19);
       }

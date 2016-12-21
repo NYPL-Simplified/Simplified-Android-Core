@@ -3,13 +3,14 @@ package org.nypl.simplified.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
 import java.util.Timer;
@@ -86,19 +87,18 @@ public class MainSplashActivity extends Activity
       final EULAType eula = some_eula.get();
       if (eula.eulaHasAgreed()) {
         MainSplashActivity.LOG.debug("EULA: agreed");
-        this.afterEULA();
+        this.openWelcome();
       } else {
         MainSplashActivity.LOG.debug("EULA: not agreed");
         if (show_eula) {
           this.openEULA();
         } else {
-//          this.finish();
-          this.afterEULA();
+          this.openWelcome();
         }
       }
     } else {
       MainSplashActivity.LOG.debug("EULA: unavailable");
-      this.afterEULA();
+      this.openWelcome();
     }
   }
 
@@ -107,6 +107,21 @@ public class MainSplashActivity extends Activity
     final Intent i = new Intent(this, MainEULAActivity.class);
     this.startActivity(i);
     this.overridePendingTransition(0, 0);
+  }
+
+  private void openWelcome()
+  {
+
+    if (Simplified.getSharedPrefs().contains("welcome")) {
+      this.openCatalog();
+    }
+    else {
+      final Intent i = new Intent(this, MainWelcomeActivity.class);
+      this.startActivity(i);
+      this.overridePendingTransition(0, 0);
+      this.finish();
+    }
+
   }
 
   private void openCatalog()
@@ -118,8 +133,4 @@ public class MainSplashActivity extends Activity
     this.finish();
   }
 
-  protected void afterEULA()
-  {
-    this.openCatalog();
-  }
 }
