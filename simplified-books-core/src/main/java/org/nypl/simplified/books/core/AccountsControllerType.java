@@ -29,10 +29,12 @@ public interface AccountsControllerType
    * Start loading books, delivering results to the given {@code listener}.
    *
    * @param listener The listener
+   * @param needs_auch
    */
 
   void accountLoadBooks(
-    AccountDataLoadListenerType listener);
+    AccountDataLoadListenerType listener,
+    boolean needs_auch);
 
   /**
    * Log in, delivering results to the given {@code listener}.

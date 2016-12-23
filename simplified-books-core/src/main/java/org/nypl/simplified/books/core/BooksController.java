@@ -392,7 +392,7 @@ public final class BooksController implements BooksType {
     final BookID id,
     final OPDSAcquisition acq,
     final OPDSAcquisitionFeedEntry eo,
-    boolean needs_auth) {
+    final boolean needs_auth) {
     NullCheck.notNull(id);
     NullCheck.notNull(acq);
     NullCheck.notNull(eo);
@@ -413,7 +413,8 @@ public final class BooksController implements BooksType {
         eo,
         this.feed_loader,
         this.adobe_drm,
-        needs_auth));
+        needs_auth
+        ));
   }
 
   @Override

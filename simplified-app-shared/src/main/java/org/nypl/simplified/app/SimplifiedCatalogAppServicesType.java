@@ -53,8 +53,9 @@ public interface SimplifiedCatalogAppServicesType extends
   OptionType<HelpstackType> getHelpStack();
 
   /**
-   * 
+   *
+   * @param delete_books
    */
-  void reloadCatalog();
+  void reloadCatalog(boolean delete_books);
 
 }

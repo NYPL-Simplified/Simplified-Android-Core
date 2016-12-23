@@ -971,7 +971,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           public void onClick(final DialogInterface dialog, final int which) {
             Simplified.getSharedPrefs().putBoolean("age13", false);
             //reload catalog
-            CatalogFeedActivity.this.reloadCatalogActivity();
+            CatalogFeedActivity.this.reloadCatalogActivity(true);
           }
         }
       );
@@ -981,7 +981,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           public void onClick(final DialogInterface dialog, final int which) {
             Simplified.getSharedPrefs().putBoolean("age13", true);
             //reload catalog
-            CatalogFeedActivity.this.reloadCatalogActivity();
+            CatalogFeedActivity.this.reloadCatalogActivity(false);
           }
         }
       );
@@ -991,9 +991,9 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     }
   }
 
-  private void reloadCatalogActivity()
+  private void reloadCatalogActivity(final boolean delete_books)
   {
-    Simplified.getCatalogAppServices().reloadCatalog();
+    Simplified.getCatalogAppServices().reloadCatalog(delete_books);
     final Intent i = new Intent(CatalogFeedActivity.this, MainCatalogActivity.class);
     i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

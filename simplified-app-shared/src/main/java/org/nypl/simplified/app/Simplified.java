@@ -913,9 +913,17 @@ public final class Simplified extends Application
     }
 
     @Override
-    public void reloadCatalog() {
+    public void reloadCatalog(final boolean delete_books) {
       final Simplified i = Simplified.checkInitialized();
       i.getActualAppServices(Simplified.getCurrentAccount().getPathComponent(), true);
+
+      if (delete_books) {
+        try {
+          this.books_database.databaseDestroy();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
     }
 
     @Override public boolean isNetworkAvailable()
@@ -1026,7 +1034,7 @@ public final class Simplified extends Application
     {
       if (this.synced.compareAndSet(false, true)) {
         CatalogAppServices.LOG_CA.debug("performing initial sync");
-        this.books.accountLoadBooks(this);
+        this.books.accountLoadBooks(this, Simplified.getCurrentAccount().needsAuth());
       } else {
         CatalogAppServices.LOG_CA.debug(
           "initial sync already attempted, not syncing again");

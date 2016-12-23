@@ -21,17 +21,20 @@ final class BooksControllerDataLoadTask implements Runnable
   private final BooksStatusCacheType         books_status;
   private final AccountDataLoadListenerType  listener;
   private final AccountsDatabaseReadableType accounts;
+  private final boolean needs_auch;
 
   BooksControllerDataLoadTask(
     final BookDatabaseType in_books_database,
     final BooksStatusCacheType in_books_status,
     final AccountsDatabaseReadableType in_accounts_database,
-    final AccountDataLoadListenerType in_listener)
+    final AccountDataLoadListenerType in_listener,
+    final boolean in_needs_auch)
   {
     this.books_database = NullCheck.notNull(in_books_database);
     this.books_status = NullCheck.notNull(in_books_status);
     this.listener = NullCheck.notNull(in_listener);
     this.accounts = NullCheck.notNull(in_accounts_database);
+    this.needs_auch = in_needs_auch;
   }
 
   @Override public void run()
@@ -39,7 +42,7 @@ final class BooksControllerDataLoadTask implements Runnable
     final OptionType<AccountCredentials> credentials_opt =
       this.accounts.accountGetCredentials();
 
-    if (credentials_opt.isSome()) {
+    if (credentials_opt.isSome() || !this.needs_auch) {
       this.books_database.databaseNotifyAllBookStatus(
         this.books_status,
         new ProcedureType<Pair<BookID, BookDatabaseEntrySnapshot>>()

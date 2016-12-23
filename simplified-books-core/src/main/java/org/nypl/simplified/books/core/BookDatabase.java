@@ -195,7 +195,7 @@ public final class BookDatabase implements BookDatabaseType
       for (final BookDatabaseEntryType e : es) {
         e.entryDestroy();
       }
-      FileUtilities.fileDelete(this.directory);
+//      FileUtilities.fileDelete(this.directory);
     }
   }
 
