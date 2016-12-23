@@ -624,25 +624,25 @@ public abstract class SimplifiedActivity extends Activity
       "activity count: {}", SimplifiedActivity.ACTIVITY_COUNT);
 
 
-    UIThread.runOnUIThreadDelayed(
-      new Runnable() {
-        @Override
-        public void run() {
-
-          if (!SimplifiedActivity.DEVICE_ACTIVATED && Simplified.getCurrentAccount().needsAuth()) {
-            // Don't try to activate the device unless we're connected to the Internet, since
-            // it will discard its credentials if it fails.
-            final ConnectivityManager connectivity_manager = (ConnectivityManager) SimplifiedActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-            final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
-            if (network_info != null && network_info.isConnected()) {
-              // This is commented out because it turns out that activating the device on startup breaks
-              // decryption until a book is fulfilled.
-              SimplifiedActivity.DEVICE_ACTIVATED = true;
-            }
-          }
-
-        }
-      }, 3000L);
+//    UIThread.runOnUIThreadDelayed(
+//      new Runnable() {
+//        @Override
+//        public void run() {
+//
+//          if (!SimplifiedActivity.DEVICE_ACTIVATED && Simplified.getCurrentAccount().needsAuth()) {
+//            // Don't try to activate the device unless we're connected to the Internet, since
+//            // it will discard its credentials if it fails.
+//            final ConnectivityManager connectivity_manager = (ConnectivityManager) SimplifiedActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+//            final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
+//            if (network_info != null && network_info.isConnected()) {
+//              // This is commented out because it turns out that activating the device on startup breaks
+//              // decryption until a book is fulfilled.
+//              SimplifiedActivity.DEVICE_ACTIVATED = true;
+//            }
+//          }
+//
+//        }
+//      }, 3000L);
 
 
   }
