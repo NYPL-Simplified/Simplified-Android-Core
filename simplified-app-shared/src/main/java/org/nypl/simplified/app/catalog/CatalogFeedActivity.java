@@ -52,6 +52,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
@@ -1092,7 +1093,17 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           Simplified.getCatalogAppServices();
         final BooksType books = app.getBooks();
 
-        books.accountSync(new SyncListener());
+        books.accountSync(new SyncListener(), new DeviceActivationListenerType() {
+          @Override
+          public void onDeviceActivationFailure(String message) {
+
+          }
+
+          @Override
+          public void onDeviceActivationSuccess() {
+
+          }
+        });
         CatalogFeedActivity.this.retryFeed();
 
       }
