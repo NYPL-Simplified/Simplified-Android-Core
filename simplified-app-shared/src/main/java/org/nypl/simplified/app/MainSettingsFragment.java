@@ -160,12 +160,13 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     {
       final Intent intent = new Intent(
         MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+      final Bundle b = new Bundle();
       WebViewActivity.setActivityArguments(
-        new Bundle(),
+        b,
         "http://www.librarysimplified.org/acknowledgments.html",
         resources.getString(R.string.settings_about),
         SimplifiedPart.PART_SETTINGS);
-      intent.putExtras(new Bundle());
+      intent.putExtras(b);
       intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
       final Preference preferences = findPreference(resources.getString(R.string.settings_about));
@@ -175,12 +176,13 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     {
       final Intent intent =
         new Intent(MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+      final Bundle b = new Bundle();
       WebViewActivity.setActivityArguments(
-        new Bundle(),
+        b,
         "http://www.librarysimplified.org/EULA.html",
         resources.getString(R.string.settings_eula),
         SimplifiedPart.PART_SETTINGS);
-      intent.putExtras(new Bundle());
+      intent.putExtras(b);
       intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
       final Preference preferences = findPreference(resources.getString(R.string.settings_eula));
@@ -195,12 +197,13 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
 
             final Intent intent = new Intent(
               MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+            final Bundle b = new Bundle();
             WebViewActivity.setActivityArguments(
-              new Bundle(),
+              b,
               licenses.documentGetReadableURL().toString(),
               resources.getString(R.string.settings_licence_software),
               SimplifiedPart.PART_SETTINGS);
-            intent.putExtras(new Bundle());
+            intent.putExtras(b);
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
             final Preference preferences = findPreference(resources.getString(R.string.settings_licence_software));
