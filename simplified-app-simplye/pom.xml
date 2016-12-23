@@ -65,6 +65,13 @@
       <build>
         <plugins>
           <!-- Android plugin configuration -->
+          <plugin>
+            <groupId>com.simpligility.maven.plugins</groupId>
+            <artifactId>android-maven-plugin</artifactId>
+            <configuration>
+              <release>true</release>
+            </configuration>
+          </plugin>
 
           <!-- Jarsigner -->
           <plugin>
