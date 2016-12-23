@@ -30,6 +30,7 @@
   <string name="catalog_detail_related">Related Books</string>
   <string name="catalog_revoke_failed">The operation could not be completed.</string>
   <string name="catalog_download_failed">The download could not be completed.</string>
+  <string name="catalog_download_failed_too_many_activations">The download could not be completed. Adobe device activations reached.</string>
   <string name="catalog_download_failed_account_not_active">This device has not been activated. Go to account settings to activate.</string>
   <string name="catalog_download_failed_loan_limit_reached">Book loan limit reached.</string>
   <string name="catalog_download_failed_unsupported_pdf">This book is an Adobe PDF, which is not supported.</string>

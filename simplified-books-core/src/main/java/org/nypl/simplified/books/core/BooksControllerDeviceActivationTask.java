@@ -28,6 +28,7 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final AccountCredentials credentials;
   private final AccountsDatabaseType accounts_database;
+  private final DeviceActivationListenerType device_activation_listener;
 
   private static final Logger LOG;
 
@@ -39,11 +40,12 @@ public class BooksControllerDeviceActivationTask implements Runnable,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AccountCredentials in_credentials,
     final AccountsDatabaseType in_accounts_database,
-    final BookDatabaseType book_database) {
+    final BookDatabaseType book_database,
+    final DeviceActivationListenerType in_device_activation_listener) {
     this.adobe_drm = in_adobe_drm;
     this.credentials = in_credentials;
     this.accounts_database = in_accounts_database;
-
+    this.device_activation_listener = in_device_activation_listener;
   }
 
   @Override
@@ -113,6 +115,8 @@ public class BooksControllerDeviceActivationTask implements Runnable,
     BooksControllerDeviceActivationTask.this.credentials.setAdobeUserID(Option.some(user_id));
     BooksControllerDeviceActivationTask.this.credentials.setAdobeDeviceID(Option.some(device_id));
 
+    this.device_activation_listener.onDeviceActivationSuccess();
+
     try {
       this.accounts_database.accountSetCredentials(this.credentials);
     } catch (final IOException e) {
@@ -134,6 +138,7 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   @Override
   public void onActivationError(final String error) {
     BooksControllerDeviceActivationTask.LOG.debug("Failed to activate device: {}", error);
+    this.device_activation_listener.onDeviceActivationFailure(error);
 //    try {
 //      this.accounts_database.accountRemoveCredentials();
 //    } catch (IOException exception) {

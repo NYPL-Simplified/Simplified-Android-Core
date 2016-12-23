@@ -360,8 +360,24 @@ final class BooksControllerBorrowTask implements Runnable
                   this.adobe_drm,
                   credentials_some.get(),
                   this.accounts_database,
-                  this.books_database
-                );
+                  this.books_database,
+                  new DeviceActivationListenerType() {
+                    @Override
+                    public void onDeviceActivationFailure(final String message) {
+                      BooksControllerBorrowTask.LOG.debug("device activation failed: {}", message);
+
+                      final OptionType<Calendar> none = Option.none();
+                      final BookStatusDownloadFailed failed =
+                        new BookStatusDownloadFailed(BooksControllerBorrowTask.this.book_id, Option.some((Throwable) new AccountTooManyActivationsException(message)), none);
+                      BooksControllerBorrowTask.this.books_status.booksStatusUpdate(failed);
+                      BooksControllerBorrowTask.this.downloadRemoveFromCurrent();
+                    }
+
+                    @Override
+                    public void onDeviceActivationSuccess() {
+                      BooksControllerBorrowTask.LOG.debug("ddevice activation succeee:");
+                    }
+                  });
                 activation_task.run();
               }
             }
@@ -932,6 +948,9 @@ final class BooksControllerBorrowTask implements Runnable
       }
       else if (message.startsWith("E_ACT_NOT_READY")) {
         error = Option.some((Throwable) new AccountNotReadyException(message));
+      }
+      else if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
+        error = Option.some((Throwable) new AccountTooManyActivationsException(message));
       }
       else {
         error = Option.some((Throwable) new BookBorrowExceptionDRMWorkflowError(message));

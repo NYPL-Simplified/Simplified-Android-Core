@@ -48,6 +48,7 @@ import org.nypl.simplified.books.core.AccountsDatabaseType;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
@@ -61,7 +62,7 @@ import org.slf4j.Logger;
 
 public final class MainSettingsAccountActivity extends SimplifiedActivity implements
   AccountLogoutListenerType,
-  AccountGetCachedCredentialsListenerType, AccountSyncListenerType {
+  AccountGetCachedCredentialsListenerType, AccountSyncListenerType, DeviceActivationListenerType {
   private static final Logger LOG;
 
   static {
@@ -155,7 +156,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                   new Runnable() {
                     @Override
                     public void run() {
-                      books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
+                      books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                     }
                   });
                 final FragmentManager fm =
@@ -678,7 +679,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                     new Runnable() {
                       @Override
                       public void run() {
-                        finalBooks.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
+                        finalBooks.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                       }
                     });
                   final FragmentManager fm =
@@ -728,5 +729,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   @Override
   public void onAccountSyncBookDeleted(BookID book) {
 
+  }
+
+  @Override
+  public void onDeviceActivationFailure(String message) {
+    // do nothing
+  }
+
+  @Override
+  public void onDeviceActivationSuccess() {
+    // do nothing
   }
 }

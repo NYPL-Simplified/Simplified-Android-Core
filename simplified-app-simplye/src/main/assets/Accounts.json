@@ -24,17 +24,17 @@
  "mainColor" : "#446ebf"
  },
  {
- "id" : 2,
- "pathComponent" : "2",
- "name" : "Instant Classics",
- "subtitle" : "Open access to the literature of our shared culture.",
- "logo" : "LibraryLogoMagic",
- "needsAuth" : false,
- "supportsCardCreator" : false,
- "supportsReservations" : false,
-  "catalogUrl" : "http://dev-mta.nypl.org/index.xml",
-  "catalogUrlUnder13" : "http://dev-mta.nypl.org/childrens-books.xml",
-  "catalogUrl13" : "http://dev-mta.nypl.org/all-books.xml",
+  "id" : 2,
+  "pathComponent" : "2",
+  "name" : "Instant Classics",
+  "subtitle" : "Open access to the literature of our shared culture.",
+  "logo" : "LibraryLogoMagic",
+  "needsAuth" : false,
+  "supportsCardCreator" : false,
+  "supportsReservations" : false,
+  "catalogUrl" : "https://instantclassics.librarysimplified.org/index.xml",
+  "catalogUrlUnder13" : "https://instantclassics.librarysimplified.org/childrens-books.xml",
+  "catalogUrl13" : "https://instantclassics.librarysimplified.org/all-books.xml",
   "mainColor" : "#497049"
  }
 ]

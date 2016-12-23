@@ -37,6 +37,7 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
@@ -51,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 public final class LoginDialog extends DialogFragment
-  implements AccountLoginListenerType
+  implements AccountLoginListenerType, DeviceActivationListenerType
 {
   private static final String BARCODE_ID;
   private static final Logger LOG;
@@ -611,4 +612,13 @@ public final class LoginDialog extends DialogFragment
   }
 
 
+  @Override
+  public void onDeviceActivationFailure(String message) {
+    // Nothing
+  }
+
+  @Override
+  public void onDeviceActivationSuccess() {
+    // Nothing
+  }
 }
