@@ -1,9 +1,15 @@
 package org.nypl.simplified.multilibrary;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.io7m.jfunctional.Option;
+import com.io7m.jfunctional.OptionType;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 
 /**
  * Created by aferditamuriqi on 8/29/16.
@@ -24,8 +30,34 @@ public class Account implements Serializable {
   private String catalog_url_under_13;
   private String catalog_url_13_and_over;
   private String main_color;
+  private String contentLicense;
+  private String eula;
+  private String privacyPolicy;
+
+  public String getPrivacyPolicy() {
+    return privacyPolicy;
+  }
+
+  public String getContentLicense() {
+    return contentLicense;
+  }
+
+  public String getEula() {
+    return eula;
+  }
 
 
+  public void setContentLicense(String in_contentLicense) {
+    this.contentLicense = in_contentLicense;
+  }
+
+  public void setEula(String in_eula) {
+    this.eula = in_eula;
+  }
+
+  public void setPrivacyPolicy(String in_privacyPolicy) {
+    this.privacyPolicy = in_privacyPolicy;
+  }
   /**
    * @return the ID
    */
@@ -201,6 +233,18 @@ public class Account implements Serializable {
         this.main_color = account.getString("mainColor");
       }
 
+
+      if (!account.isNull("eulaUrl")) {
+        this.eula = account.getString("eulaUrl");
+      }
+      if (!account.isNull("privacyUrl")) {
+        this.privacyPolicy = account.getString("privacyUrl");
+      }
+      if (!account.isNull("licenseUrl")) {
+        this.contentLicense = account.getString("licenseUrl");
+      }
+
+
     } catch (JSONException e) {
       e.printStackTrace();
     }
@@ -220,6 +264,9 @@ public class Account implements Serializable {
       object.put("subtitle",this.subtitle);
       object.put("logo",this.logo);
       object.put("catalogUrl",this.catalog_url);
+      object.put("eulaUrl",this.eula);
+      object.put("licenseUrl",this.contentLicense);
+      object.put("privacyUrl",this.privacyPolicy);
       object.put("catalogUrlUnder13",this.catalog_url_under_13);
       object.put("catalogUrl13",this.catalog_url_13_and_over);
       object.put("needsAuth",this.needs_auth);
