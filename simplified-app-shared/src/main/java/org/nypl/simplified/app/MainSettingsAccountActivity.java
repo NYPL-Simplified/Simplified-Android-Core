@@ -8,9 +8,11 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
@@ -28,7 +30,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -296,6 +300,14 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     if (item.getItemId() == R.id.show_eula) {
 
       final Intent eula_intent = new Intent(MainSettingsAccountActivity.this, MainEULAActivity.class);
+
+      if (this.account.getEula() != null) {
+        final Bundle b = new Bundle();
+        MainEULAActivity.setActivityArguments(
+          b,
+          this.account.getEula());
+        eula_intent.putExtras(b);
+      }
       eula_intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
       startActivity(eula_intent);
 
@@ -374,6 +386,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final Button in_signup =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_signup));
+
+
+    final LinearLayout in_account_links =
+      NullCheck.notNull((LinearLayout) this.findViewById(R.id.account_links));
+
+    final TableRow in_privacy =
+      (TableRow) in_account_links.findViewById(R.id.link_privacy);
+    final TableRow in_license =
+      (TableRow) in_account_links.findViewById(R.id.link_license);
 
     final TextView account_name = NullCheck.notNull(
       (TextView) this.findViewById(android.R.id.text1));
@@ -507,6 +528,63 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         }
       });
     in_signup.setText("Sign Up");
+
+    if (this.account.getPrivacyPolicy() != null) {
+      in_privacy.setVisibility(View.VISIBLE);
+    }
+    else {
+      in_privacy.setVisibility(View.GONE);
+    }
+    if (this.account.getContentLicense() != null) {
+      in_license.setVisibility(View.VISIBLE);
+    }
+    else {
+      in_license.setVisibility(View.GONE);
+    }
+
+    in_license.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+
+        final Intent intent =
+          new Intent(MainSettingsAccountActivity.this, WebViewActivity.class);
+        final Bundle b = new Bundle();
+        WebViewActivity.setActivityArguments(
+          b,
+          MainSettingsAccountActivity.this.account.getContentLicense(),
+          "Content Licenses",
+          SimplifiedPart.PART_SETTINGS);
+        intent.putExtras(b);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+
+      }
+    });
+
+    in_privacy.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(View view) {
+
+        final Intent intent =
+          new Intent(MainSettingsAccountActivity.this, WebViewActivity.class);
+        final Bundle b = new Bundle();
+        WebViewActivity.setActivityArguments(
+          b,
+          MainSettingsAccountActivity.this.account.getPrivacyPolicy(),
+          "Privacy Policy",
+          SimplifiedPart.PART_SETTINGS);
+        intent.putExtras(b);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+
+      }
+    });
+
+
 
 
     this.navigationDrawerSetActionBarTitle();

@@ -3,13 +3,21 @@
 <ScrollView
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  android:background="@color/light_background">
 
   <LinearLayout
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:background="@color/light_background">
+
+  <LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:background="@color/normal_background">
 
 
     <TableLayout
@@ -17,7 +25,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
-      android:layout_marginBottom="16dp">
+      android:layout_marginBottom="16dp"
+      android:background="@color/normal_background">
 
       <TableRow
         android:id="@+id/tableRowProvider"
@@ -79,7 +88,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
-      android:layout_marginBottom="16dp">
+      android:layout_marginBottom="16dp"
+      android:background="@color/normal_background">
 
       <TableRow
         android:id="@+id/tableRow1"
@@ -184,7 +194,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:layout_marginTop="22dp"
-      android:layout_marginBottom="16dp">
+      android:layout_marginBottom="16dp"
+      android:background="@color/normal_background">
 
       <TableRow
         android:layout_width="wrap_content"
@@ -216,9 +227,45 @@
       </TableRow>
 
     </TableLayout>
-
-
   </LinearLayout>
 
+  <LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/light_background"
+    android:paddingTop="10dp"
+    android:id="@+id/account_links">
+
+  <TableLayout
+      android:id="@+id/links"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+      <TableRow
+        android:id="@+id/link_privacy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/normal_background"
+        android:padding="015dp"
+        android:layout_marginBottom="5dp">
+        <TextView android:text="Privacy Policy"
+                  android:layout_width="match_parent"
+                  android:textAppearance="?android:attr/textAppearanceMedium"/>
+      </TableRow>
+      <TableRow
+        android:id="@+id/link_license"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/normal_background"
+        android:padding="015dp"
+        android:layout_marginBottom="5dp">
+        <TextView android:text="Content Licenses"
+                  android:layout_width="match_parent"
+                  android:textAppearance="?android:attr/textAppearanceMedium"/>
+      </TableRow>
+    </TableLayout>
+
+  </LinearLayout>
+</LinearLayout>
 </ScrollView>
 

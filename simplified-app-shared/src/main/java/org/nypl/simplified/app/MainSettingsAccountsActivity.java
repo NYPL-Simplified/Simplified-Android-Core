@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -82,13 +83,59 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
     this.setContentView(R.layout.accounts);
     final ListView dl =
       NullCheck.notNull((ListView) this.findViewById(R.id.account_list));
+    final LinearLayout current_account =
+      NullCheck.notNull((LinearLayout) this.findViewById(R.id.current_account));
+
+    {
+      final Account account = Simplified.getCurrentAccount();
+      final TextView tv =
+        NullCheck.notNull((TextView) current_account.findViewById(android.R.id.text1));
+      tv.setText(account.getName());
+      tv.setTextColor(R.color.text_black);
+      final TextView tv2 =
+        NullCheck.notNull((TextView) current_account.findViewById(android.R.id.text2));
+      tv2.setText(account.getSubtitle());
+      tv2.setTextColor(R.color.text_black);
+
+      final ImageView icon_view =
+        NullCheck.notNull((ImageView) current_account.findViewById(R.id.cellIcon));
+      if (account.getId() == 0) {
+        icon_view.setImageResource(R.drawable.account_logo_nypl);
+      } else if (account.getId() == 1) {
+        icon_view.setImageResource(R.drawable.account_logo_bpl);
+      } else if (account.getId() == 2) {
+        icon_view.setImageResource(R.drawable.account_logo_instant);
+      }
+
+      current_account.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+
+
+          final Bundle b = new Bundle();
+          b.putInt("selected_account", account.getId());
+          SimplifiedActivity.setActivityArguments(b, false);
+          final Intent intent = new Intent();
+          intent.setClass(
+            MainSettingsAccountsActivity.this, MainSettingsAccountActivity.class);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+          intent.putExtras(b);
+
+          MainSettingsAccountsActivity.this.startActivity(intent);
+
+        }
+      });
+    }
 
     final List<Account> dia = new ArrayList<Account>();
     final JSONArray registry =
       new AccountsRegistry(this, Simplified.getSharedPrefs()).getCurrentAccounts(Simplified.getSharedPrefs());
     for (int index = 0; index < registry.length(); ++index) {
       try {
-        dia.add(new Account(registry.getJSONObject(index)));
+        final Account account = new Account(registry.getJSONObject(index));
+        if (Simplified.getCurrentAccount().getId() != account.getId()) {
+          dia.add(new Account(registry.getJSONObject(index)));
+        }
       } catch (JSONException e) {
         e.printStackTrace();
       }

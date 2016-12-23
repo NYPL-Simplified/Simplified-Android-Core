@@ -4,18 +4,76 @@
   android:id="@+id/accounts_layout"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="@color/light_background"
-  android:orientation="vertical">
+  android:background="@color/button_disabled"
+  android:orientation="vertical"
+  android:backgroundTint="@color/light_background">
+
+  <LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:weightSum="1"
+    android:layout_marginTop="20dp"
+    android:id="@+id/current_account"
+    android:background="@color/normal_background">
+    <ImageView
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:id="@+id/cellIcon"
+      android:src="@drawable/simplye_logo"
+      android:paddingLeft="10dp"
+      android:layout_weight="0.88"
+      />
+
+    <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="0.12"
+      android:layout_marginTop="10dp"
+      android:layout_margin="10dp"
+
+      >
+      <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical"
+        android:paddingLeft="11dp"
+        android:paddingRight="11dp"
+        android:textColor="@drawable/drawer_list_text"
+        android:text="Item"
+        />
+      <TextView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@android:id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"
+        android:textSize="14sp"
+        android:gravity="center_vertical"
+        android:paddingLeft="11dp"
+        android:paddingRight="11dp"
+        android:textColor="@drawable/drawer_list_text"
+        android:text="Item"
+        />
+    </LinearLayout>
 
 
+  </LinearLayout>
   <ListView
     android:id="@+id/account_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="@color/normal_background"
     android:choiceMode="singleChoice"
     android:divider="@android:color/transparent"
-    android:dividerHeight="0dp" />
+    android:dividerHeight="0dp"
+    android:layout_marginTop="20dp"/>
 
 </LinearLayout>

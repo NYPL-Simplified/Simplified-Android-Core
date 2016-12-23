@@ -2,6 +2,7 @@ package org.nypl.simplified.app;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
@@ -18,6 +19,9 @@ import com.io7m.jnull.Nullable;
 public final class MainEULAActivity extends Activity
 {
 
+  public static final String URI_KEY =
+    "org.nypl.simplified.app.MainEULAActivity.uri";
+
   /**
    * Construct an activity.
    */
@@ -25,6 +29,16 @@ public final class MainEULAActivity extends Activity
   public MainEULAActivity()
   {
 
+  }
+
+  public static void setActivityArguments(
+    final Bundle b,
+    final String uri)
+  {
+    NullCheck.notNull(b);
+    NullCheck.notNull(uri);
+
+    b.putString(MainEULAActivity.URI_KEY, uri);
   }
 
   @Override protected void onCreate(final Bundle state)
@@ -55,6 +69,12 @@ public final class MainEULAActivity extends Activity
 
     this.setContentView(R.layout.eula);
 
+
+    final Intent i = NullCheck.notNull(this.getIntent());
+    final String uri =
+      i.getStringExtra(MainEULAActivity.URI_KEY);
+
+
     final WebView web_view = NullCheck.notNull((WebView) this.findViewById(R.id.eula_web_view));
 
     final WebSettings settings = web_view.getSettings();
@@ -64,8 +84,13 @@ public final class MainEULAActivity extends Activity
     settings.setAllowUniversalAccessFromFileURLs(false);
     settings.setJavaScriptEnabled(false);
 
-    web_view.loadUrl("http://www.librarysimplified.org/EULA.html");
-
+    if (uri != null)
+    {
+      web_view.loadUrl(uri);
+    }
+    else {
+      web_view.loadUrl("http://www.librarysimplified.org/EULA.html");
+    }
   }
 
   @Override
