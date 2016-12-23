@@ -429,8 +429,14 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       NullCheck.notNull((TableLayout) this.findViewById(R.id.settings_signup_table));
 
 
+    boolean locationpermission = false;
+    if ( /*Build.VERSION.SDK_INT >= 23 &&*/
+      ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED /*&&
+      ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED*/) {
+      locationpermission = true;
+    }
 
-    if (this.account.supportsCardCreator()) {
+    if (this.account.supportsCardCreator() && locationpermission) {
       in_table_signup.setVisibility(View.VISIBLE);
     }
     else {
