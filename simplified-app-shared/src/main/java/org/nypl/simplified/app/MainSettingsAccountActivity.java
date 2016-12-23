@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
@@ -437,8 +438,50 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     in_age13_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override
       public void onCheckedChanged(final CompoundButton button, final boolean checked) {
-        Simplified.getSharedPrefs().putBoolean("age13", checked);
-        Simplified.getCatalogAppServices().reloadCatalog();
+
+        if (checked)
+        {
+            Simplified.getSharedPrefs().putBoolean("age13", checked);
+            Simplified.getCatalogAppServices().reloadCatalog(false);
+        }
+        else {
+          UIThread.runOnUIThread(
+            new Runnable() {
+              @Override
+              public void run() {
+
+                final AlertDialog.Builder alert = new AlertDialog.Builder(MainSettingsAccountActivity.this);
+
+                // Setting Dialog Title
+                alert.setTitle("Age Verification");
+
+                // Setting Dialog Message
+                alert.setMessage("If you are under 13, all content downloaded to My Books will be removed. How old are you?");
+
+                // On pressing the under 13 button.
+                alert.setNeutralButton("Under 13", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int which) {
+                      Simplified.getSharedPrefs().putBoolean("age13", false);
+                      Simplified.getCatalogAppServices().reloadCatalog(true);
+                    }
+                  }
+                );
+
+                // On pressing the 13 and over button
+                alert.setPositiveButton("13 or Older", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int which) {
+                      Simplified.getSharedPrefs().putBoolean("age13", true);
+                      in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
+                    }
+                  }
+                );
+
+                // Showing Alert Message
+                alert.show();
+
+              }
+            });
+        }
       }
     });
 
