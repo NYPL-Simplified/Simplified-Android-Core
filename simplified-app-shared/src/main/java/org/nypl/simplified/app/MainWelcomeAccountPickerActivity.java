@@ -75,7 +75,7 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
       bar.setHomeButtonEnabled(false);
     }
 
-    this.setContentView(R.layout.accounts);
+    this.setContentView(R.layout.accounts_picker);
     final ListView dl =
       NullCheck.notNull((ListView) this.findViewById(R.id.account_list));
 
@@ -165,8 +165,10 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
 
     final Account account = this.adapter_accounts.getItem(position);
     final AccountsRegistry registry = new AccountsRegistry(this, Simplified.getSharedPrefs());
-    registry.addAccount(account, Simplified.getSharedPrefs());
-
+    final Account existing = registry.getExistingAccount(account.getId());
+    if (existing.getId() != account.getId()) {
+      registry.addAccount(account, Simplified.getSharedPrefs());
+    }
     Simplified.getSharedPrefs().putInt("current_account", account.getId());
     Simplified.getCatalogAppServices();
     Simplified.getSharedPrefs().putBoolean("welcome", true);
