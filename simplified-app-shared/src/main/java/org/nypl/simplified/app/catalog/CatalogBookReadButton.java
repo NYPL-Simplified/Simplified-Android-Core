@@ -1,22 +1,22 @@
 package org.nypl.simplified.app.catalog;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.os.Build;
-import android.util.TypedValue;
 import android.view.View;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 
 
@@ -73,7 +73,19 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
           public void onClick(
             final @Nullable View v) {
 
-            in_books.accountActivateDeviceAndFulFillBook(in_book_id, in_entry.getFeedEntry().getLicensor());
+
+            DeviceActivationListenerType listener = new DeviceActivationListenerType() {
+              @Override
+              public void onDeviceActivationFailure(final String message) {
+
+              }
+              @Override
+              public void onDeviceActivationSuccess() {
+
+              }
+            };
+
+            in_books.accountActivateDeviceAndFulFillBook(in_book_id, in_entry.getFeedEntry().getLicensor(),listener);
 
           }
         }
