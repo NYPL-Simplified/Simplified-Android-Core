@@ -637,7 +637,6 @@ public abstract class SimplifiedActivity extends Activity
             if (network_info != null && network_info.isConnected()) {
               // This is commented out because it turns out that activating the device on startup breaks
               // decryption until a book is fulfilled.
-              SimplifiedActivity.this.app.getBooks().accountActivateDevice();
               SimplifiedActivity.DEVICE_ACTIVATED = true;
             }
           }
@@ -733,12 +732,6 @@ public abstract class SimplifiedActivity extends Activity
 
 
         if (account.getId() != Simplified.getCurrentAccount().getId()) {
-
-//           //deactivate current adobe account // not needed (for now) as we can have multiple activations
-//          if (! SimplifiedActivity.DEVICE_ACTIVATED && account.needsAuth()) {
-//            this.app.getBooks().accountDeActivateDevice();
-//            SimplifiedActivity.DEVICE_ACTIVATED = false;
-//          }
 
           final Prefs prefs = Simplified.getSharedPrefs();
           prefs.putInt("current_account", account.getId());
