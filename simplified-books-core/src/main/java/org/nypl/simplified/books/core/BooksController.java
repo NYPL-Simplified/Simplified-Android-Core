@@ -203,14 +203,16 @@ public final class BooksController implements BooksType {
 
   @Override
   public void accountLoadBooks(
-    final AccountDataLoadListenerType listener) {
+    final AccountDataLoadListenerType listener,
+    final boolean needs_auch) {
     NullCheck.notNull(listener);
     this.submitRunnable(
       new BooksControllerDataLoadTask(
         this.book_database,
         this.books_status,
         this.accounts_database,
-        listener));
+        listener,
+        needs_auch));
   }
 
   @Override
@@ -219,6 +221,18 @@ public final class BooksController implements BooksType {
     final AccountLoginListenerType listener) {
     NullCheck.notNull(account);
     NullCheck.notNull(listener);
+
+    final DeviceActivationListenerType device_listener = new DeviceActivationListenerType() {
+      @Override
+      public void onDeviceActivationFailure(final String message) {
+        // do nothing
+      }
+
+      @Override
+      public void onDeviceActivationSuccess() {
+        // do nothing
+      }
+    };
 
     this.submitRunnable(
       new BooksControllerLoginTask(
@@ -231,18 +245,20 @@ public final class BooksController implements BooksType {
         this.feed_parser,
         account,
         listener,
-        this.syncing));
+        this.syncing,
+        device_listener));
   }
 
   @Override
   public void accountLogout(
     final AccountCredentials account,
     final AccountLogoutListenerType listener,
-    final AccountSyncListenerType sync_listener) {
+    final AccountSyncListenerType sync_listener,
+    final DeviceActivationListenerType device_listener) {
     NullCheck.notNull(listener);
 
     synchronized (this) {
-      this.accountSync(sync_listener);
+      this.accountSync(sync_listener, device_listener);
       this.stopAllTasks();
       this.books_status.booksStatusClearAll();
       this.submitRunnable(
@@ -259,7 +275,8 @@ public final class BooksController implements BooksType {
 
   @Override
   public void accountSync(
-    final AccountSyncListenerType listener) {
+    final AccountSyncListenerType listener,
+    final DeviceActivationListenerType device_listener) {
     NullCheck.notNull(listener);
     this.submitRunnable(
       new BooksControllerSyncTask(
@@ -272,15 +289,17 @@ public final class BooksController implements BooksType {
         listener,
         this.syncing,
         this.loans_uri,
-        this.adobe_drm));
+        this.adobe_drm,
+        device_listener));
   }
 
 
   /**
    * @param in_book_id book id to be fulfilled
+   * @param listener
    */
   @Override
-  public void accountActivateDeviceAndFulFillBook(final BookID in_book_id, final OptionType<DRMLicensor> licensor) {
+  public void accountActivateDeviceAndFulFillBook(final BookID in_book_id, final OptionType<DRMLicensor> licensor, DeviceActivationListenerType listener) {
 
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {
@@ -289,8 +308,8 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database
-      );
+        this.book_database,
+        listener);
       this.submitRunnable(activation_task);
 
 
@@ -312,7 +331,7 @@ public final class BooksController implements BooksType {
 
 
   @Override
-  public void accountActivateDevice() {
+  public void accountActivateDevice(final DeviceActivationListenerType device_listener) {
 
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {
@@ -321,8 +340,8 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database
-      );
+        this.book_database,
+        device_listener);
       this.submitRunnable(activation_task);
 
     }
@@ -345,7 +364,9 @@ public final class BooksController implements BooksType {
   }
 
   @Override
-  public void accountActivateDeviceAndFulfillBooks(final OptionType<DRMLicensor> licensor) {
+  public void accountActivateDeviceAndFulfillBooks(
+    final OptionType<DRMLicensor> licensor,
+    final DeviceActivationListenerType device_listener) {
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {
       final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
@@ -353,7 +374,8 @@ public final class BooksController implements BooksType {
         this.adobe_drm,
         credentials_some.get(),
         this.accounts_database,
-        this.book_database);
+        this.book_database,
+        device_listener);
       this.submitRunnable(activation_task);
 
       //fulfill book which were already downloaded when device was active.

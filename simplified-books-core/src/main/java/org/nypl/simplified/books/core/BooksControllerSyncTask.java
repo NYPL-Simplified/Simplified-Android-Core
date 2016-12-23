@@ -53,6 +53,7 @@ final class BooksControllerSyncTask implements Runnable
   private final AccountsDatabaseType             accounts_database;
   private final URI                              loans_uri;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
+  private final DeviceActivationListenerType      device_activation_listener;
 
   BooksControllerSyncTask(
     final BooksControllerType in_books,
@@ -64,7 +65,8 @@ final class BooksControllerSyncTask implements Runnable
     final AccountSyncListenerType in_listener,
     final AtomicBoolean in_running,
     final URI in_loans_uri,
-    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    final DeviceActivationListenerType in_device_activation_listener)
   {
     this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
@@ -75,6 +77,7 @@ final class BooksControllerSyncTask implements Runnable
     this.running = NullCheck.notNull(in_running);
     this.loans_uri = NullCheck.notNull(in_loans_uri);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
+    this.device_activation_listener = NullCheck.notNull(in_device_activation_listener);
 
   }
 
@@ -205,7 +208,8 @@ final class BooksControllerSyncTask implements Runnable
           this.adobe_drm,
           credentials,
           this.accounts_database,
-          this.books_database
+          this.books_database,
+          this.device_activation_listener
         );
         activation_task.run();
 

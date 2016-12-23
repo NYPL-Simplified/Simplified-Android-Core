@@ -44,6 +44,7 @@ import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.Clock;
 import org.nypl.simplified.books.core.ClockType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.DocumentStore;
 import org.nypl.simplified.books.core.DocumentStoreBuilderType;
 import org.nypl.simplified.books.core.DocumentStoreType;
@@ -572,7 +573,8 @@ public final class Simplified extends Application
   private static final class CatalogAppServices implements
     SimplifiedCatalogAppServicesType,
     AccountDataLoadListenerType,
-    AccountSyncListenerType
+    AccountSyncListenerType,
+    DeviceActivationListenerType
   {
     private static final Logger LOG_CA;
 
@@ -588,17 +590,18 @@ public final class Simplified extends Application
     private final ExecutorService                    exec_catalog_feeds;
     private final ExecutorService                    exec_covers;
     private final ExecutorService                    exec_downloader;
-    private URI                                feed_initial_uri;
+    private URI                                      feed_initial_uri;
     private final FeedLoaderType                     feed_loader;
     private final HTTPType                           http;
     private final ScreenSizeControllerType           screen;
     private final AtomicBoolean                      synced;
     private final DownloaderType                     downloader;
-    private OptionType<AdobeAdeptExecutorType> adobe_drm;
+    private OptionType<AdobeAdeptExecutorType>       adobe_drm;
     private final DocumentStoreType                  documents;
     private final OptionType<HelpstackType>          helpstack;
     private final BookDatabaseType                   books_database;
     private final AccountsDatabaseType               accounts_database;
+
 
     private final String library;
 
@@ -955,7 +958,7 @@ public final class Simplified extends Application
       CatalogAppServices.LOG_CA.debug(
         "finished loading books, syncing " + "account");
       final BooksType b = NullCheck.notNull(this.books);
-      b.accountSync(this);
+      b.accountSync(this, this);
     }
 
     @Override public void onAccountDataBookLoadSucceeded(
@@ -1039,6 +1042,18 @@ public final class Simplified extends Application
         CatalogAppServices.LOG_CA.debug(
           "initial sync already attempted, not syncing again");
       }
+    }
+
+    @Override
+    public void onDeviceActivationFailure(String message) {
+      CatalogAppServices.LOG_CA.debug(
+        "Could not activate Device");
+    }
+
+    @Override
+    public void onDeviceActivationSuccess() {
+      CatalogAppServices.LOG_CA.debug(
+        "Device activated successful");
     }
   }
 

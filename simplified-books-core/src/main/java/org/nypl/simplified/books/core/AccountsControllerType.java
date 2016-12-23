@@ -45,7 +45,8 @@ public interface AccountsControllerType
 
   void accountLogin(
     AccountCredentials credentials,
-    AccountLoginListenerType listener);
+    AccountLoginListenerType listener
+    );
 
   /**
    * Log out, delivering results to the given {@code listener}.
@@ -57,7 +58,8 @@ public interface AccountsControllerType
   void accountLogout(
     AccountCredentials credentials,
     AccountLogoutListenerType listener,
-    AccountSyncListenerType sync_listener);
+    AccountSyncListenerType sync_listener,
+    DeviceActivationListenerType device_listener);
 
   /**
    * Sync books, delivering results to the given {@code listener}.
@@ -66,17 +68,21 @@ public interface AccountsControllerType
    */
 
   void accountSync(
-    AccountSyncListenerType listener);
+    AccountSyncListenerType listener,
+    DeviceActivationListenerType device_listener);
 
   /**
    * Activate the device with the currently logged in account (if you are logged in).
    */
-  void accountActivateDeviceAndFulfillBooks(OptionType<DRMLicensor> licensor);
+  void accountActivateDeviceAndFulfillBooks(
+    OptionType<DRMLicensor> licensor,
+    DeviceActivationListenerType device_listener);
 
   /**
    * Activate the device with the currently logged in account (if you are logged in).
    */
-  void accountActivateDevice();
+  void accountActivateDevice(
+    DeviceActivationListenerType device_listener);
 
   /**
    *  fulfill all existing books which were download before
@@ -102,8 +108,9 @@ public interface AccountsControllerType
   /**
    * @param in_book_id book id to be fulfilled
    * @param licensor licensor data
+   * @param listener
    */
-  void accountActivateDeviceAndFulFillBook(BookID in_book_id, OptionType<DRMLicensor> licensor);
+  void accountActivateDeviceAndFulFillBook(BookID in_book_id, OptionType<DRMLicensor> licensor, DeviceActivationListenerType listener);
 
 
 

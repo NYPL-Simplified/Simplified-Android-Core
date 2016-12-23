@@ -454,7 +454,7 @@ public final class BooksContract implements BooksContractType
             ok.set(true);
             latch.countDown();
           }
-        });
+        },true);
 
       latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
@@ -540,7 +540,7 @@ public final class BooksContract implements BooksContractType
             ok.set(true);
             latch.countDown();
           }
-        });
+        },true);
 
       latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
@@ -1046,7 +1046,7 @@ public final class BooksContract implements BooksContractType
         };
 
       System.out.println("loading books");
-      b.accountLoadBooks(load_listener);
+      b.accountLoadBooks(load_listener,true);
       System.out.println("waiting for book load completion");
       latch2.await(10L, TimeUnit.SECONDS);
       System.out.println("book load completed");
