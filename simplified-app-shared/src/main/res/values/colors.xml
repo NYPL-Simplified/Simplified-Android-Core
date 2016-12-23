@@ -3,10 +3,12 @@
 
   <color name="divider_color">#eeeeee</color>
   
+  <color name="list_item_foreground">#ff669900</color>
   <color name="list_item_background">#ffffff</color>
   <color name="list_item_text_normal">#000000</color>
   <color name="list_item_text_selected">#ffffff</color>
 
+  <color name="button_foreground">#ff669900</color>
   <color name="button_background">#ffffff</color>
   <color name="button_disabled">#dddddd</color>
 

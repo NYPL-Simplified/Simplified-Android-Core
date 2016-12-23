@@ -2,7 +2,7 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.simplye"
-  android:versionCode="1017"
+  android:versionCode="1022"
   android:versionName="1.2.0">
 
   <uses-sdk

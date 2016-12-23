@@ -5,7 +5,9 @@
     <shape android:shape="rectangle">
       <padding
         android:left="@dimen/button_padding_left"
-        android:right="@dimen/button_padding_right"/>
+        android:top="@dimen/button_padding_top"
+        android:right="@dimen/button_padding_right"
+        android:bottom="@dimen/button_padding_bottom" />
       <corners android:radius="@dimen/button_corner_radius" />
       <solid android:color="@color/button_background" />
       <stroke
@@ -18,9 +20,11 @@
     <shape android:shape="rectangle">
       <padding
         android:left="@dimen/button_padding_left"
-        android:right="@dimen/button_padding_right"/>
+        android:top="@dimen/button_padding_top"
+        android:right="@dimen/button_padding_right"
+        android:bottom="@dimen/button_padding_bottom" />
       <corners android:radius="@dimen/button_corner_radius" />
-      <solid android:color="#86bc54" />
+      <solid android:color="?button_foreground" />
       <stroke
         android:width="@dimen/button_stroke"
         android:color="@color/button_background" />
@@ -31,12 +35,14 @@
     <shape android:shape="rectangle">
       <padding
         android:left="@dimen/button_padding_left"
-        android:right="@dimen/button_padding_right"/>
+        android:top="@dimen/button_padding_top"
+        android:right="@dimen/button_padding_right"
+        android:bottom="@dimen/button_padding_bottom" />
       <corners android:radius="@dimen/button_corner_radius" />
       <solid android:color="@color/button_background" />
       <stroke
         android:width="@dimen/button_stroke"
-        android:color="#86bc54" />
+        android:color="?button_foreground" />
     </shape>
   </item>
 
@@ -44,12 +50,14 @@
     <shape android:shape="rectangle">
       <padding
         android:left="@dimen/button_padding_left"
-        android:right="@dimen/button_padding_right"/>
+        android:top="@dimen/button_padding_top"
+        android:right="@dimen/button_padding_right"
+        android:bottom="@dimen/button_padding_bottom" />
       <corners android:radius="@dimen/button_corner_radius" />
       <solid android:color="@color/button_background" />
       <stroke
         android:width="@dimen/button_stroke"
-        android:color="#86bc54" />
+        android:color="?button_foreground" />
     </shape>
   </item>
 

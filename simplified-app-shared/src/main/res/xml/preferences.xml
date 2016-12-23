@@ -4,35 +4,41 @@
   <PreferenceCategory>
     <Preference
       android:key="@string/settings_accounts"
-      android:title="@string/settings_accounts">
+      android:title="@string/settings_accounts"
+      android:icon="@null">
     </Preference>
   </PreferenceCategory>
   <PreferenceCategory>
     <Preference
       android:key="@string/help"
-      android:title="@string/help">
+      android:title="@string/help"
+      android:icon="@null">
     </Preference>
   </PreferenceCategory>
   <PreferenceCategory>
     <Preference
       android:key="@string/settings_about"
-      android:title="@string/settings_about">
+      android:title="@string/settings_about"
+      android:icon="@null">
     </Preference>
 
     <Preference
       android:key="@string/settings_eula"
-      android:title="@string/settings_eula">
+      android:title="@string/settings_eula"
+      android:icon="@null">
     </Preference>
 
     <Preference
       android:key="@string/settings_licence_software"
-      android:title="@string/settings_licence_software">
+      android:title="@string/settings_licence_software"
+      android:icon="@null">
     </Preference>
   </PreferenceCategory>
   <PreferenceCategory>
     <Preference
       android:key="@string/settings_alt_uris"
-      android:title="@string/settings_alt_uris">
+      android:title="@string/settings_alt_uris"
+      android:icon="@null">
     </Preference>
   </PreferenceCategory>
 

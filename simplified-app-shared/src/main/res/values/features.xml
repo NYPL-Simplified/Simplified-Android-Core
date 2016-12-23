@@ -10,6 +10,9 @@
   <!-- The configurable splash screen image -->
   <drawable name="feature_app_splash">@drawable/simplified_splash</drawable>
 
+
+  <color name="app_main_color">#666766</color>
+
   <!-- The configurable main color, used for branding. -->
   <color name="feature_main_color">#497049</color>
   <color name="feature_main_color_nypl">#da2527</color>
