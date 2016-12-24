@@ -919,10 +919,26 @@ public final class Simplified extends Application
 
       if (delete_books) {
         try {
-          this.books_database.databaseDestroy();
+
+          if (account.getId() == getCurrentAccount().getId()) {
+            this.books_database.databaseDestroy();
+          }
+          else {
+            // set database to destroy the next time switched to that account.
+            getSharedPrefs().putInt("destroy_database", account.getId());
+          }
         } catch (IOException e) {
           e.printStackTrace();
         }
+      }
+    }
+
+    @Override
+    public void destroyDatabase() {
+      try {
+        this.books_database.databaseDestroy();
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
 

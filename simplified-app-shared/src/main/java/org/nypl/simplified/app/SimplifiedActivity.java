@@ -750,6 +750,13 @@ public abstract class SimplifiedActivity extends Activity
                 SimplifiedActivity.this.selected = 1;
                 SimplifiedActivity.this.startSideBarActivity();
 
+
+                if (Simplified.getSharedPrefs().contains("destroy_database") && Simplified.getSharedPrefs().getInt("destroy_database") == Simplified.getCurrentAccount().getId())
+                {
+                    SimplifiedActivity.this.app.destroyDatabase();
+                    Simplified.getSharedPrefs().remove("destroy_databse");
+                }
+
               }
             }, 30L);
         } else {
