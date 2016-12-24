@@ -233,12 +233,12 @@ public final class OPDSAcquisitionFeedEntryParser
 
               final String vendor = licensor_some.get().getAttributes().getNamedItemNS(OPDSFeedConstants.DRM_URI_TEXT, "vendor").getNodeValue();
 
-              OptionType<String> clientToken_opt =  OPDSXML.getFirstChildElementTextWithNameOptional(
+              final OptionType<String> client_token_opt =  OPDSXML.getFirstChildElementTextWithNameOptional(
                 licensor_some.get(), OPDSFeedConstants.DRM_URI, "clientToken");
 
-              final Some<String> clientToken_some = (Some<String>) clientToken_opt;
+              final Some<String> client_token_some = (Some<String>) client_token_opt;
 
-              eb.setLicensorOption(Option.some(new DRMLicensor(vendor,clientToken_some.get())));
+              eb.setLicensorOption(Option.some(new DRMLicensor(vendor, client_token_some.get())));
 
             }
 

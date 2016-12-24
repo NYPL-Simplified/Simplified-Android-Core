@@ -32,7 +32,7 @@ public interface BooksControllerType
    *  @param id       The book ID
    * @param acq      The specific acquisition relation
    * @param eo       The feed entry
-   * @param needs_auth
+   * @param needs_auth  login required
    */
 
   void bookBorrow(

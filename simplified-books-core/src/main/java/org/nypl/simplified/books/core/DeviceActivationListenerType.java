@@ -1,7 +1,5 @@
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.OptionType;
-
 /**
  * The type of listeners for account sync operations.
  *

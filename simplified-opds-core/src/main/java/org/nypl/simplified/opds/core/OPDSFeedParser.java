@@ -1,14 +1,11 @@
 package org.nypl.simplified.opds.core;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+
 import org.nypl.simplified.assertions.Assertions;
-import org.nypl.simplified.json.core.JSONParseException;
-import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -18,9 +15,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -30,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * <p> The default implementation of the {@link OPDSFeedParserType}. </p> <p>
@@ -442,14 +440,14 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           if (OPDSXML.nodeHasName(
             (Element) child, OPDSFeedConstants.DRM_URI, "licensor")) {
             final Element e = OPDSXML.nodeAsElement(child);
-            String  in_vendor = e.getAttribute("drm:vendor");
+            final String  in_vendor = e.getAttribute("drm:vendor");
             for (int i = 0; i < e.getChildNodes().getLength(); ++i)
             {
               final Node node = e.getChildNodes().item(i);
               if (node.getNodeName().contains("clientToken"))
               {
-                String  in_client_token =  node.getFirstChild().getNodeValue();
-                DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token);
+                final String  in_client_token =  node.getFirstChild().getNodeValue();
+                final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token);
                 b.setLisensor(Option.some(licensor));
               }
             }

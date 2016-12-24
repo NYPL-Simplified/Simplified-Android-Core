@@ -144,7 +144,7 @@ public final class AdobeDRMServices
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    Account account = Simplified.getCurrentAccount();
+    final Account account = Simplified.getCurrentAccount();
 
     final File base_accounts_dir =
       new File(context.getFilesDir(), account.getPathComponent());
@@ -243,7 +243,7 @@ public final class AdobeDRMServices
     log.debug("adobe device serial:          {}", device_serial);
 
 
-    Account account = Simplified.getCurrentAccount();
+    final Account account = Simplified.getCurrentAccount();
 
     final File base_accounts_dir =
       new File(context.getFilesDir(), account.getPathComponent());
@@ -252,8 +252,8 @@ public final class AdobeDRMServices
     final File base_library_dir = new File(base_dir, account.getPathComponent());
 
 
-    final File app_storage = base_accounts_dir;//context.getFilesDir();
-    final File xml_storage = base_accounts_dir;//context.getFilesDir();
+    final File app_storage = base_accounts_dir;
+    final File xml_storage = base_accounts_dir;
 
     final File book_storage =
       new File(base_library_dir, "adobe-books-tmp");

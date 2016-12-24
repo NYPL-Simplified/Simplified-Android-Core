@@ -29,7 +29,7 @@ public interface AccountsControllerType
    * Start loading books, delivering results to the given {@code listener}.
    *
    * @param listener The listener
-   * @param needs_auch
+   * @param needs_auch login required
    */
 
   void accountLoadBooks(
@@ -53,6 +53,8 @@ public interface AccountsControllerType
    *
    * @param credentials account credentials
    * @param listener The listener
+   * @param sync_listener   Account sync listener
+   * @param device_listener device activation listener
    */
 
   void accountLogout(
@@ -65,6 +67,7 @@ public interface AccountsControllerType
    * Sync books, delivering results to the given {@code listener}.
    *
    * @param listener The listener
+   * @param device_listener  device activation listener
    */
 
   void accountSync(
@@ -73,6 +76,8 @@ public interface AccountsControllerType
 
   /**
    * Activate the device with the currently logged in account (if you are logged in).
+   * @param licensor         drm licener
+   * @param device_listener device activation listener
    */
   void accountActivateDeviceAndFulfillBooks(
     OptionType<DRMLicensor> licensor,
@@ -80,6 +85,7 @@ public interface AccountsControllerType
 
   /**
    * Activate the device with the currently logged in account (if you are logged in).
+   * @param device_listener  device activation listener
    */
   void accountActivateDevice(
     DeviceActivationListenerType device_listener);
@@ -108,9 +114,12 @@ public interface AccountsControllerType
   /**
    * @param in_book_id book id to be fulfilled
    * @param licensor licensor data
-   * @param listener
+   * @param listener   account activation  listener
    */
-  void accountActivateDeviceAndFulFillBook(BookID in_book_id, OptionType<DRMLicensor> licensor, DeviceActivationListenerType listener);
+  void accountActivateDeviceAndFulFillBook(
+    BookID in_book_id,
+    OptionType<DRMLicensor> licensor,
+    DeviceActivationListenerType listener);
 
 
 

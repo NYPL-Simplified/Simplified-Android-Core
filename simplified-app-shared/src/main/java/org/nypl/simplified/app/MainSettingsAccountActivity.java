@@ -430,9 +430,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
 
     boolean locationpermission = false;
-    if ( /*Build.VERSION.SDK_INT >= 23 &&*/
-      ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED /*&&
-      ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED*/) {
+    if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
       locationpermission = true;
     }
 
@@ -468,8 +466,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
         if (checked)
         {
-            Simplified.getSharedPrefs().putBoolean("age13", checked);
-            Simplified.getCatalogAppServices().reloadCatalog(false);
+            Simplified.getSharedPrefs().putBoolean("age13", true);
+            Simplified.getCatalogAppServices().reloadCatalog(false, MainSettingsAccountActivity.this.account);
         }
         else {
           UIThread.runOnUIThread(
@@ -489,7 +487,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                 alert.setNeutralButton("Under 13", new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int which) {
                       Simplified.getSharedPrefs().putBoolean("age13", false);
-                      Simplified.getCatalogAppServices().reloadCatalog(true);
+                      Simplified.getCatalogAppServices().reloadCatalog(true, MainSettingsAccountActivity.this.account);
                     }
                   }
                 );
@@ -550,7 +548,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     in_license.setOnClickListener(new OnClickListener() {
       @Override
-      public void onClick(View view) {
+      public void onClick(final View view) {
 
         final Intent intent =
           new Intent(MainSettingsAccountActivity.this, WebViewActivity.class);
@@ -571,7 +569,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     in_privacy.setOnClickListener(new OnClickListener() {
       @Override
-      public void onClick(View view) {
+      public void onClick(final View view) {
 
         final Intent intent =
           new Intent(MainSettingsAccountActivity.this, WebViewActivity.class);
@@ -690,7 +688,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           final AccountBarcode barcode = new AccountBarcode("");
           final AccountPIN pin = new AccountPIN("");
 
-          if (Simplified.getCurrentAccount().getId() == account.getId())
+          if (Simplified.getCurrentAccount().getId() == MainSettingsAccountActivity.this.account.getId())
           {
             final LoginDialog df =
               LoginDialog.newDialog("Login required", barcode, pin);
@@ -699,7 +697,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           }
           else {
             final LoginDialog df =
-              LoginDialog.newDialog("Login required", barcode, pin, account);
+              LoginDialog.newDialog("Login required", barcode, pin, MainSettingsAccountActivity.this.account);
             df.setLoginListener(login_listener);
             df.show(fm, "login-dialog");
           }
@@ -781,7 +779,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     if (accounts_database.accountGetCredentials().isSome()) {
       final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();
 
-      final BooksType finalBooks = books;
+      final BooksType final_books = books;
       UIThread.runOnUIThread(
         new Runnable() {
           @Override
@@ -806,7 +804,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                     new Runnable() {
                       @Override
                       public void run() {
-                        finalBooks.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
+                        final_books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                       }
                     });
                   final FragmentManager fm =
@@ -834,17 +832,17 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   }
 
   @Override
-  public void onAccountSyncAuthenticationFailure(String message) {
+  public void onAccountSyncAuthenticationFailure(final String message) {
 
   }
 
   @Override
-  public void onAccountSyncBook(BookID book) {
+  public void onAccountSyncBook(final BookID book) {
 
   }
 
   @Override
-  public void onAccountSyncFailure(OptionType<Throwable> error, String message) {
+  public void onAccountSyncFailure(final OptionType<Throwable> error, final String message) {
 
   }
 
@@ -854,12 +852,12 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   }
 
   @Override
-  public void onAccountSyncBookDeleted(BookID book) {
+  public void onAccountSyncBookDeleted(final BookID book) {
 
   }
 
   @Override
-  public void onDeviceActivationFailure(String message) {
+  public void onDeviceActivationFailure(final String message) {
     // do nothing
   }
 

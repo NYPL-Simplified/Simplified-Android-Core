@@ -145,11 +145,11 @@ public final class LoginDialog extends DialogFragment
   }
 
   /**
-   * @param text
-   * @param barcode
-   * @param pin
-   * @param account
-   * @return
+   * @param text Text
+   * @param barcode Barcode
+   * @param pin Pin
+   * @param account Library Account
+   * @return Login Dialog
    */
 
   public static LoginDialog newDialog(
@@ -381,9 +381,9 @@ public final class LoginDialog extends DialogFragment
 
     BooksType books = app.getBooks();
 
-    if (account_id != null )
+    if (account_id != null)
     {
-      Account account = new AccountsRegistry(getActivity()).getAccount(Integer.valueOf(account_id));
+      final Account account = new AccountsRegistry(getActivity()).getAccount(Integer.valueOf(account_id));
       books = Simplified.getBooks(account, getActivity(), Simplified.getCatalogAppServices().getAdobeDRMExecutor());
       docs = Simplified.getDocumentStore(account, getActivity().getResources());
     }
@@ -393,7 +393,7 @@ public final class LoginDialog extends DialogFragment
     in_pin_edit.setText(initial_pin.toString());
 
     in_login_button.setEnabled(false);
-    final BooksType finalBooks = books;
+    final BooksType final_books = books;
     in_login_button.setOnClickListener(
       new OnClickListener()
       {
@@ -417,7 +417,7 @@ public final class LoginDialog extends DialogFragment
 
           final AccountCredentials creds =
             new AccountCredentials(adobe_vendor, barcode, pin,  Option.some(provider));
-          finalBooks.accountLogin(creds, LoginDialog.this);
+          final_books.accountLogin(creds, LoginDialog.this);
         }
       });
 
@@ -613,7 +613,7 @@ public final class LoginDialog extends DialogFragment
 
 
   @Override
-  public void onDeviceActivationFailure(String message) {
+  public void onDeviceActivationFailure(final String message) {
     // Nothing
   }
 

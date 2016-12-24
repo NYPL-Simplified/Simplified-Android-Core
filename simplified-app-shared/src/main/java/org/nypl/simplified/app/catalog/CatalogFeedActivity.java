@@ -1095,7 +1095,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
         books.accountSync(new SyncListener(), new DeviceActivationListenerType() {
           @Override
-          public void onDeviceActivationFailure(String message) {
+          public void onDeviceActivationFailure(final String message) {
 
           }
 

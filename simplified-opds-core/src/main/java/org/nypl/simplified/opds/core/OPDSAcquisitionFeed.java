@@ -238,7 +238,7 @@ public final class OPDSAcquisitionFeed implements Serializable
   }
 
   /**
-   * @return
+   * @return licensor information used to active adobe device
    */
   public OptionType<DRMLicensor> getLicensor()
   {

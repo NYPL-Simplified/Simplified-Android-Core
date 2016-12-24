@@ -137,7 +137,7 @@ public final class ReaderBookmarks implements ReaderBookmarksType
               body.addProperty("http://librarysimplified.org/terms/device", ((Some<AdobeDeviceID>) credentials.getAdobeDeviceID()).get().getValue());
               annotation.setBody(body);
 
-              Gson gson = new GsonBuilder()
+              final Gson gson = new GsonBuilder()
                 .disableHtmlEscaping()
                 .create();
 

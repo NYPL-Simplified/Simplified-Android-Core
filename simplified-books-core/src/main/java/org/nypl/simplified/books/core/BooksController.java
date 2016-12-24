@@ -296,10 +296,11 @@ public final class BooksController implements BooksType {
 
   /**
    * @param in_book_id book id to be fulfilled
-   * @param listener
    */
   @Override
-  public void accountActivateDeviceAndFulFillBook(final BookID in_book_id, final OptionType<DRMLicensor> licensor, DeviceActivationListenerType listener) {
+  public void accountActivateDeviceAndFulFillBook(final BookID in_book_id,
+                                                  final OptionType<DRMLicensor> licensor,
+                                                  final DeviceActivationListenerType listener) {
 
     final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
     if (credentials_opt.isSome()) {

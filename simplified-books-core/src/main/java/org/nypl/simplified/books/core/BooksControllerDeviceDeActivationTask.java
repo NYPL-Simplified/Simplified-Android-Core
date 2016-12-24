@@ -7,7 +7,6 @@ import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 
-import org.nypl.drm.core.AdobeAdeptActivationReceiverType;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptDeactivationReceiverType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;

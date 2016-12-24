@@ -19,6 +19,9 @@ import com.io7m.jnull.Nullable;
 public final class MainEULAActivity extends Activity
 {
 
+  /**
+   *
+   */
   public static final String URI_KEY =
     "org.nypl.simplified.app.MainEULAActivity.uri";
 
@@ -31,6 +34,10 @@ public final class MainEULAActivity extends Activity
 
   }
 
+  /**
+   * @param b Bundle
+   * @param uri URI
+   */
   public static void setActivityArguments(
     final Bundle b,
     final String uri)

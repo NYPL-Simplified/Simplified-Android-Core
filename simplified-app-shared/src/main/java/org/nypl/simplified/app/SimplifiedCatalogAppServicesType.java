@@ -5,6 +5,7 @@ import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedLoaderType;
+import org.nypl.simplified.multilibrary.Account;
 
 /**
  * Services provided to the main Simplified app.
@@ -54,8 +55,13 @@ public interface SimplifiedCatalogAppServicesType extends
 
   /**
    *
-   * @param delete_books
+   * @param delete_books  should book shelf be deleted
+   * @param account which accounts book shelf should be deleted
    */
-  void reloadCatalog(boolean delete_books);
+  void reloadCatalog(boolean delete_books, Account account);
 
+  /**
+   *
+   */
+  void destroyDatabase();
 }

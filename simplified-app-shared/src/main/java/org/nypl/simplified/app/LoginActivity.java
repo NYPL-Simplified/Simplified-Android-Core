@@ -41,7 +41,7 @@ public final class LoginActivity extends Activity {
 
   @Override
   protected void onCreate(final Bundle state) {
-    int id = Simplified.getCurrentAccount().getId();
+    final int id = Simplified.getCurrentAccount().getId();
     if (id == 0) {
       setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
     }

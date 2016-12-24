@@ -93,7 +93,7 @@ public final class CatalogAcquisitionButtonController
             CatalogAcquisitionButtonController.this.onLoginSuccess(creds);
           }
         });
-    } else if (!Simplified.getCurrentAccount().needsAuth()){
+    } else if (!Simplified.getCurrentAccount().needsAuth()) {
       this.getBook();
     }
     else {

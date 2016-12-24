@@ -85,7 +85,7 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
               }
             };
 
-            in_books.accountActivateDeviceAndFulFillBook(in_book_id, in_entry.getFeedEntry().getLicensor(),listener);
+            in_books.accountActivateDeviceAndFulFillBook(in_book_id, in_entry.getFeedEntry().getLicensor(), listener);
 
           }
         }

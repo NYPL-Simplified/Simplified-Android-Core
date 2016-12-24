@@ -147,16 +147,15 @@ public final class Simplified extends Application
   }
 
   /**
-   * @return
+   * @return Shared Preferences
    */
   public static Prefs getSharedPrefs() {
     final Simplified i = Simplified.checkInitialized();
-    final Prefs prefs = new Prefs(i.getApplicationContext());
-    return prefs;
+    return new Prefs(i.getApplicationContext());
   }
 
   /**
-   * @return
+   * @return Current Library Account
    */
   public static Account getCurrentAccount() {
     final Simplified i = Simplified.checkInitialized();
@@ -169,9 +168,11 @@ public final class Simplified extends Application
   }
 
   /**
-   * @return
+   * @param account  Library Account
+   * @param context Context
+   * @return Accounts Database
    */
-  public static AccountsDatabaseType getAccountsDatabase(Account account, Context context)
+  public static AccountsDatabaseType getAccountsDatabase(final Account account, final Context context)
   {
 
     File base_accounts_dir = context.getFilesDir();
@@ -208,7 +209,7 @@ public final class Simplified extends Application
   }
 
   /**
-   * @return
+   * @return Current Theme
    */
   public static Resources.Theme getCurrentTheme() {
     final Simplified i = Simplified.checkInitialized();
@@ -228,7 +229,7 @@ public final class Simplified extends Application
       Environment.getExternalStorageState())) {
 
       Simplified.LOG.debug("trying external storage");
-      if (Environment.isExternalStorageRemovable() == false) {
+      if (!Environment.isExternalStorageRemovable()) {
         final File r = context.getExternalFilesDir(null);
         Simplified.LOG.debug(
           "external storage is not removable, using it ({})", r);
@@ -302,7 +303,7 @@ public final class Simplified extends Application
           });
         t.setName(
           String.format(
-            "simplified-%s-tasks-%d", base, Integer.valueOf(this.id)));
+            "simplified-%s-tasks-%d", base, this.id));
         ++this.id;
         return t;
       }
@@ -313,9 +314,9 @@ public final class Simplified extends Application
   }
 
   /**
-   * @param account
-   * @param rr
-   * @return
+   * @param account Library Account
+   * @param rr Resources
+   * @return Document Store
    */
   public static DocumentStoreType getDocumentStore(final Account account, final Resources rr) {
 
@@ -394,10 +395,10 @@ public final class Simplified extends Application
   }
 
   /**
-   * @param account
-   * @param context
-   * @param in_adobe_drm
-   * @return
+   * @param account Library Account
+   * @param context Context
+   * @param in_adobe_drm Adobe Adept Excecutor
+   * @return Books
    */
   public static BooksType getBooks(final Account account, final Context context, final OptionType<AdobeAdeptExecutorType> in_adobe_drm) {
 
@@ -454,7 +455,7 @@ public final class Simplified extends Application
 
     if (!account.needsAuth() && Simplified.getSharedPrefs().contains("age13"))
     {
-      if (Simplified.getSharedPrefs().getBoolean("age13")){
+      if (Simplified.getSharedPrefs().getBoolean("age13")) {
         catalog = account.getCatalogUrl13AndOver();
         adobe = account.getCatalogUrl13AndOver();
       }
@@ -470,10 +471,6 @@ public final class Simplified extends Application
         URI.create(adobe));
 
     final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(context.getResources().getString(R.string.feature_catalog_loans_uri_component));
-
-
-//    final OptionType<AdobeAdeptExecutorType> adobe_drm = AdobeDRMServices.newAdobeDRMOptional(
-//      context, AdobeDRMServices.getPackageOverride(context.getResources()));
 
     return  BooksController.newBooks(
       exec_books,
@@ -561,7 +558,7 @@ public final class Simplified extends Application
   @Override public void onCreate()
   {
     Simplified.LOG.debug(
-      "starting app: pid {}", Integer.valueOf(android.os.Process.myPid()));
+      "starting app: pid {}", android.os.Process.myPid());
     Simplified.INSTANCE = this;
 
     this.initBugsnag(Bugsnag.getApiToken(this.getAssets()));
@@ -606,7 +603,7 @@ public final class Simplified extends Application
     private final String library;
 
     private CatalogAppServices(
-      OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+      final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
       final Application in_app,
       final Context in_context,
       final Resources rr,
@@ -627,7 +624,7 @@ public final class Simplified extends Application
 
       final Prefs prefs = getSharedPrefs();
 
-      Account account = new AccountsRegistry(this.context).getAccount(prefs.getInt("current_account"));
+      final Account account = new AccountsRegistry(this.context).getAccount(prefs.getInt("current_account"));
 
       /**
        * Application paths.
@@ -685,7 +682,7 @@ public final class Simplified extends Application
 
       if (!account.needsAuth() && Simplified.getSharedPrefs().contains("age13"))
       {
-        if (Simplified.getSharedPrefs().getBoolean("age13")){
+        if (Simplified.getSharedPrefs().getBoolean("age13")) {
           catalog = account.getCatalogUrl13AndOver();
           adobe = account.getCatalogUrl13AndOver();
         }
@@ -916,7 +913,7 @@ public final class Simplified extends Application
     }
 
     @Override
-    public void reloadCatalog(final boolean delete_books) {
+    public void reloadCatalog(final boolean delete_books, final Account account) {
       final Simplified i = Simplified.checkInitialized();
       i.getActualAppServices(Simplified.getCurrentAccount().getPathComponent(), true);
 
@@ -1045,7 +1042,7 @@ public final class Simplified extends Application
     }
 
     @Override
-    public void onDeviceActivationFailure(String message) {
+    public void onDeviceActivationFailure(final String message) {
       CatalogAppServices.LOG_CA.debug(
         "Could not activate Device");
     }
@@ -1069,7 +1066,7 @@ public final class Simplified extends Application
     private final ReaderSettingsType          settings;
 
     private ReaderAppServices(
-      ExecutorService in_epub_exec,
+      final ExecutorService in_epub_exec,
       final Context context,
       final Resources rr)
     {

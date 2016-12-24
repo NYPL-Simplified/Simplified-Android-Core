@@ -1,7 +1,6 @@
 package org.nypl.simplified.app;
 
 
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -18,11 +17,8 @@ import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
 import org.nypl.simplified.app.testing.OnMultipleClickListener;
-import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
-import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
-import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.SyncedDocumentType;
