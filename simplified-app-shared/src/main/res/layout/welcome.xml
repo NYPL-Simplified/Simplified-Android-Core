@@ -11,73 +11,87 @@
     android:layout_width="wrap_content"
     android:layout_height="120dp"
     android:layout_gravity="center"
-    android:src="@drawable/simplified_splash"/>
+    android:src="@drawable/simplified_splash"
+    android:layout_weight="1"/>
 
-  <ImageView
-    android:layout_width="80dp"
-    android:layout_height="80dp"
-    android:layout_gravity="center"
-    android:layout_marginTop="10dp"
-    android:src="@drawable/getting_started_icon_library"/>
-
-  <TextView
-    android:layout_width="wrap_content"
+  <LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:text="Read Books From Your Library"/>
+    android:layout_weight="1"
+    android:id="@+id/">
 
-  <TextView
-    android:layout_width="wrap_content"
+    <ImageView
+      android:layout_width="80dp"
+      android:layout_height="80dp"
+      android:layout_gravity="center"
+      android:layout_marginTop="10dp"
+      android:src="@drawable/getting_started_icon_library"/>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:text="Read Books From Your Library"/>
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:text="Check out books and sync across devices"/>
+
+    <Button
+      android:id="@+id/welcome_library"
+      android:text="Pick Your Library"
+      android:layout_gravity="center"
+      android:layout_width="wrap_content"
+      android:layout_height="30dp"
+      android:layout_marginTop="10dp"
+      android:background="@drawable/simplified_welcome_button"
+      android:textColor="@drawable/simplified_welcome_button_text"
+      />
+  </LinearLayout>
+
+  <LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:textAppearance="?android:attr/textAppearanceSmall"
-    android:text="Check out books and sync across devices"/>
+    android:layout_weight="1">
 
-  <Button
-    android:id="@+id/welcome_library"
-    android:text="Pick Your Library"
-    android:layout_gravity="center"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:minWidth="100dp"
-    android:layout_marginTop="10dp"
-    android:background="@drawable/simplified_welcome_button"
-    android:textColor="@drawable/simplified_welcome_button_text"
-    />
+    <ImageView
+      android:layout_width="80dp"
+      android:layout_height="80dp"
+      android:layout_gravity="center"
+      android:layout_marginTop="10dp"
+      android:src="@drawable/getting_started_icon_instant"/>
 
-  <ImageView
-    android:layout_width="80dp"
-    android:layout_height="80dp"
-    android:layout_gravity="center"
-    android:layout_marginTop="10dp"
-    android:src="@drawable/getting_started_icon_instant"/>
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:text="Read Books Without a Library Card"/>
 
-  <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:text="Read Books Without a Library Card"/>
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:text="Find classic books in the public domain"/>
 
-  <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    android:textAppearance="?android:attr/textAppearanceSmall"
-    android:text="Find classic books in the public domain"/>
-
-  <Button
-    android:id="@+id/welcome_instant"
-    android:text="Instant Classics"
-    android:minWidth="100dp"
-    android:layout_gravity="center"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
-    android:background="@drawable/simplified_welcome_button"
-    android:textColor="@drawable/simplified_welcome_button_text"
-    />
+    <Button
+      android:id="@+id/welcome_instant"
+      android:text="Instant Classics"
+      android:layout_gravity="center"
+      android:layout_width="wrap_content"
+      android:layout_height="30dp"
+      android:layout_marginTop="10dp"
+      android:background="@drawable/simplified_welcome_button"
+      android:textColor="@drawable/simplified_welcome_button_text"
+      />
+  </LinearLayout>
 
 
 </LinearLayout>
