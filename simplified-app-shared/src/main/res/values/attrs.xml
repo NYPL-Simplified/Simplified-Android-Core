@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <!--<attr name="feature_main_color" format="color" />-->
-  <!--<attr name="feature_secondary_color" format="color" />-->
+
   <attr name="button_foreground" format="color" />
   <attr name="list_item_foreground" format="color"/>
   <attr name="downloading_background" format="color"/>

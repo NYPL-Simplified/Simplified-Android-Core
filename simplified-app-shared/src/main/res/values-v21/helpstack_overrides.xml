@@ -2,7 +2,7 @@
 <resources>
 
   <!-- HelpStack theme values -->
-  <color name="hs_header_background_color">@color/app_main_color</color>
+  <color name="hs_header_background_color">?attr/main_color</color>
 
   <drawable name="hs_search_icon">@drawable/ic_search_black_48dp</drawable>
 
