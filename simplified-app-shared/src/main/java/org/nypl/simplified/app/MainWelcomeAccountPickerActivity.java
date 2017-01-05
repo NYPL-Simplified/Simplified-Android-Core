@@ -166,7 +166,12 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
     final Account account = this.adapter_accounts.getItem(position);
     final AccountsRegistry registry = new AccountsRegistry(this, Simplified.getSharedPrefs());
     final Account existing = registry.getExistingAccount(account.getId());
-    if (existing.getId() != account.getId()) {
+    if (existing != null) {
+      if (existing.getId() != account.getId()) {
+        registry.addAccount(account, Simplified.getSharedPrefs());
+      }
+    }
+    else {
       registry.addAccount(account, Simplified.getSharedPrefs());
     }
     Simplified.getSharedPrefs().putInt("current_account", account.getId());
