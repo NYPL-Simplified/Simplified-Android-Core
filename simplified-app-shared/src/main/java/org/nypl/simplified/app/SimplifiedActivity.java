@@ -754,7 +754,7 @@ public abstract class SimplifiedActivity extends Activity
                 if (Simplified.getSharedPrefs().contains("destroy_database") && Simplified.getSharedPrefs().getInt("destroy_database") == Simplified.getCurrentAccount().getId())
                 {
                     SimplifiedActivity.this.app.destroyDatabase();
-                    Simplified.getSharedPrefs().remove("destroy_databse");
+                    Simplified.getSharedPrefs().remove("destroy_database");
                 }
 
               }
