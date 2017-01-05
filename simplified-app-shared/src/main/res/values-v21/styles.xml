@@ -7,15 +7,15 @@
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
     <item name="android:actionBarStyle">@style/ActionBar</item>
 
-    <item name="android:colorPrimary">@color/feature_main_color</item>
-    <item name="android:colorPrimaryDark">@color/feature_secondary_color</item>
-    <item name="android:colorAccent">@color/feature_main_color</item>
+    <item name="android:colorPrimary">@color/app_main_color</item>
+    <item name="android:colorPrimaryDark">@color/app_main_color</item>
+    <item name="android:colorAccent">@color/app_main_color</item>
 
-    <item name="button_foreground">@color/feature_main_color</item>
-    <item name="list_item_foreground">@color/feature_main_color</item>
-    <item name="downloading_background">@color/feature_main_color</item>
-    <item name="notification_background">@color/feature_main_color</item>
-    <item name="main_color">@color/feature_main_color</item>
+    <item name="button_foreground">@color/app_main_color</item>
+    <item name="list_item_foreground">@color/app_main_color</item>
+    <item name="downloading_background">@color/app_main_color</item>
+    <item name="notification_background">@color/app_main_color</item>
+    <item name="main_color">@color/app_main_color</item>
 
 
   </style>
@@ -77,15 +77,15 @@
     <item name="android:windowActionBar">false</item>
     <item name="android:windowNoTitle">true</item>
 
-    <item name="android:colorPrimary">@color/feature_main_color</item>
-    <item name="android:colorPrimaryDark">@color/feature_main_color</item>
-    <item name="android:colorAccent">@color/feature_main_color</item>
+    <item name="android:colorPrimary">@color/app_main_color</item>
+    <item name="android:colorPrimaryDark">@color/app_main_color</item>
+    <item name="android:colorAccent">@color/app_main_color</item>
 
-    <item name="button_foreground">@color/feature_main_color</item>
-    <item name="list_item_foreground">@color/feature_main_color</item>
-    <item name="downloading_background">@color/feature_main_color</item>
-    <item name="notification_background">@color/feature_main_color</item>
-    <item name="main_color">@color/feature_main_color</item>
+    <item name="button_foreground">@color/app_main_color</item>
+    <item name="list_item_foreground">@color/app_main_color</item>
+    <item name="downloading_background">@color/app_main_color</item>
+    <item name="notification_background">@color/app_main_color</item>
+    <item name="main_color">@color/app_main_color</item>
 
   </style>
 
@@ -141,7 +141,7 @@
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>
-    <item name="android:textColor">@color/feature_main_color</item>
+    <item name="android:textColor">@color/app_main_color</item>
     <item name="android:textStyle">normal</item>
     <item name="android:typeface">sans</item>
   </style>
