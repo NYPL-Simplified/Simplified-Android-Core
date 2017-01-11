@@ -531,6 +531,7 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderSettingsType settings = rs.getSettings();
     settings.removeListener(this);
+//    System.exit(0);
   }
 
   @Override public void onEPUBLoadFailed(
