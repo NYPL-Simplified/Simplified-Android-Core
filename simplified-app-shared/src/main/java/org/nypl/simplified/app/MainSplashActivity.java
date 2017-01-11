@@ -92,7 +92,17 @@ public class MainSplashActivity extends Activity
 
         final AccountsRegistry registry = new AccountsRegistry(this, Simplified.getSharedPrefs());
         final Account account = registry.getAccount(0);
-        registry.addAccount(account, Simplified.getSharedPrefs());
+
+        final Account existing = registry.getExistingAccount(account.getId());
+        if (existing != null) {
+          if (existing.getId() != account.getId()) {
+            registry.addAccount(account, Simplified.getSharedPrefs());
+          }
+        }
+        else {
+          registry.addAccount(account, Simplified.getSharedPrefs());
+        }
+
 
         Simplified.getSharedPrefs().putInt("current_account", 0);
         Simplified.getCatalogAppServices();
