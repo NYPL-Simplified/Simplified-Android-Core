@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.view.View;

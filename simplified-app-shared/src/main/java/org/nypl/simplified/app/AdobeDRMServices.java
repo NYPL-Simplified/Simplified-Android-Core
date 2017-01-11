@@ -146,11 +146,20 @@ public final class AdobeDRMServices
 
     final Account account = Simplified.getCurrentAccount();
 
-    final File base_accounts_dir =
-      new File(context.getFilesDir(), account.getPathComponent());
+    File base_accounts_dir = context.getFilesDir();
+    if (account.getId() > 0)
+    {
+      base_accounts_dir =
+        new File(context.getFilesDir(), account.getPathComponent());
+    }
 
     final File base_dir = Simplified.getDiskDataDir(context);
-    final File base_library_dir = new File(base_dir, account.getPathComponent());
+
+    File base_library_dir = base_dir;
+    if (account.getId() > 0)
+    {
+      base_library_dir = new File(base_dir, account.getPathComponent());
+    }
 
     final File app_storage = base_accounts_dir;
     final File xml_storage = base_accounts_dir;
@@ -245,11 +254,20 @@ public final class AdobeDRMServices
 
     final Account account = Simplified.getCurrentAccount();
 
-    final File base_accounts_dir =
-      new File(context.getFilesDir(), account.getPathComponent());
+    File base_accounts_dir = context.getFilesDir();
+    if (account.getId() > 0)
+    {
+      base_accounts_dir =
+        new File(context.getFilesDir(), account.getPathComponent());
+    }
 
     final File base_dir = Simplified.getDiskDataDir(context);
-    final File base_library_dir = new File(base_dir, account.getPathComponent());
+
+    File base_library_dir = base_dir;
+    if (account.getId() > 0)
+    {
+      base_library_dir = new File(base_dir, account.getPathComponent());
+    }
 
 
     final File app_storage = base_accounts_dir;
