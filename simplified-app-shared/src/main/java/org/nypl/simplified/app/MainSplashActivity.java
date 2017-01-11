@@ -90,24 +90,28 @@ public class MainSplashActivity extends Activity
       if (eula.eulaHasAgreed()) {
         MainSplashActivity.LOG.debug("EULA: agreed");
 
-        final AccountsRegistry registry = new AccountsRegistry(this, Simplified.getSharedPrefs());
-        final Account account = registry.getAccount(0);
-
-        final Account existing = registry.getExistingAccount(account.getId());
-        if (existing != null) {
-          if (existing.getId() != account.getId()) {
-            registry.addAccount(account, Simplified.getSharedPrefs());
-          }
+        if (Simplified.getSharedPrefs().contains("welcome")) {
+          this.openCatalog();
         }
         else {
-          registry.addAccount(account, Simplified.getSharedPrefs());
+          final AccountsRegistry registry = new AccountsRegistry(this, Simplified.getSharedPrefs());
+          final Account account = registry.getAccount(0);
+
+          final Account existing = registry.getExistingAccount(account.getId());
+          if (existing == null) {
+            registry.addAccount(account, Simplified.getSharedPrefs());
+          }
+          else if (existing.getId() != account.getId()) {
+            registry.addAccount(account, Simplified.getSharedPrefs());
+          }
+
+
+          Simplified.getSharedPrefs().putInt("current_account", 0);
+          Simplified.getCatalogAppServices();
+          Simplified.getSharedPrefs().putBoolean("welcome", true);
+          this.openCatalog();
+
         }
-
-
-        Simplified.getSharedPrefs().putInt("current_account", 0);
-        Simplified.getCatalogAppServices();
-        Simplified.getSharedPrefs().putBoolean("welcome", true);
-        this.openCatalog();
 
       } else {
         MainSplashActivity.LOG.debug("EULA: not agreed");
