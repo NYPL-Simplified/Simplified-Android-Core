@@ -68,7 +68,7 @@
     <dependency>
       <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-circ-analytics</artifactId>
-      <version>1.2.0</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
