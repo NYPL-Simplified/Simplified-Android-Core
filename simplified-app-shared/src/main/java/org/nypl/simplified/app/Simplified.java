@@ -922,6 +922,8 @@ public final class Simplified extends Application
 
           if (account.getId() == getCurrentAccount().getId()) {
             this.books_database.databaseDestroy();
+            this.getBooks().destroyBookStatusCache();
+
           }
           else {
             // set database to destroy the next time switched to that account.
@@ -937,6 +939,7 @@ public final class Simplified extends Application
     public void destroyDatabase() {
       try {
         this.books_database.databaseDestroy();
+        this.getBooks().destroyBookStatusCache();
       } catch (IOException e) {
         e.printStackTrace();
       }

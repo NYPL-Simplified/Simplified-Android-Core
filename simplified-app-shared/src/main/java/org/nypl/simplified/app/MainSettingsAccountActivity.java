@@ -222,6 +222,12 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     MainSettingsAccountActivity.LOG.debug("onAccountLogoutSuccess");
     this.onAccountIsNotLoggedIn();
 
+    //if current account ??
+      final SimplifiedCatalogAppServicesType app =
+        Simplified.getCatalogAppServices();
+
+      app.getBooks().destroyBookStatusCache();
+
     final Resources rr = NullCheck.notNull(this.getResources());
     final Context context = MainSettingsAccountActivity.this.getApplicationContext();
     final CharSequence text =
@@ -804,6 +810,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                     new Runnable() {
                       @Override
                       public void run() {
+                        //if current account
+                        if (MainSettingsAccountActivity.this.account == Simplified.getCurrentAccount()) {
+                          final_books.destroyBookStatusCache();
+                        }
                         final_books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                       }
                     });
