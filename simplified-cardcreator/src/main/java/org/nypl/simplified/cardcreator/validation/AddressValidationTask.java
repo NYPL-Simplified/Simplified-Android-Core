@@ -78,7 +78,7 @@ public class AddressValidationTask implements Runnable {
         URI uri = null;
 
         try {
-            uri = new URI(this.card_creator.getUrl()).resolve("v1/validate/address");
+            uri = new URI(this.card_creator.getUrl()).resolve("/validate/address");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

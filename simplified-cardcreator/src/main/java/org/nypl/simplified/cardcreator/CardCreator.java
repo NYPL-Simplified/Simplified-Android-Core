@@ -26,6 +26,7 @@ public final class CardCreator {
   }
 
   private String url;
+  private String version;
   private String username;
   private String password;
   private Resources resources;
@@ -50,6 +51,7 @@ public final class CardCreator {
       p.load(s);
 
       this.url = p.getProperty("cardcreator." + in_environment + ".url");
+      this.version = p.getProperty("cardcreator." + in_environment + ".version");
       this.username = p.getProperty("cardcreator." + in_environment + ".username");
       this.password = p.getProperty("cardcreator." + in_environment + ".password");
 
@@ -85,7 +87,7 @@ public final class CardCreator {
    * @return card creator url
    */
   public String getUrl() {
-    return this.url;
+    return this.url + "/" + this.version;
   }
 
   /**

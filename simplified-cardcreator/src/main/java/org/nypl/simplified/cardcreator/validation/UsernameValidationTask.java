@@ -58,7 +58,7 @@ public class UsernameValidationTask implements Runnable {
     URI uri = null;
 
     try {
-      uri = new URI(this.card_creator.getUrl()).resolve("v1/validate/username");
+      uri = new URI(this.card_creator.getUrl()).resolve("/validate/username");
     } catch (URISyntaxException e) {
       e.printStackTrace();
     }

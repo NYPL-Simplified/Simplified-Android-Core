@@ -57,7 +57,7 @@ public class CreatePatronTask implements Runnable {
         URI uri = null;
 
         try {
-            uri = new URI(this.card_creator.getUrl()).resolve("v1/create_patron");
+            uri = new URI(this.card_creator.getUrl()).resolve("/create_patron");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
