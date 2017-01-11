@@ -272,7 +272,11 @@ final class BooksControllerBorrowTask implements Runnable
               }
             });
 
-          c.fulfillACSM(new AdobeFulfillmentListener(), acsm);
+
+          final AdobeUserID user = ((Some<AdobeUserID>) BooksControllerBorrowTask.this.getAccountCredentials().getAdobeUserID()).get();
+
+          // do something
+          c.fulfillACSM(new AdobeFulfillmentListener(), acsm, user);
         }
       });
   }
@@ -960,6 +964,9 @@ final class BooksControllerBorrowTask implements Runnable
       else if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
         error = Option.some((Throwable) new AccountTooManyActivationsException(message));
       }
+//      else if (message.startsWith("E_LIC_ALREADY_FULFILLED_BY_ANOTHER_USER")) {
+//        error = Option.some((Throwable) new LicenceAlreadyFulfilledByAnotherUserException(message));
+//      }
       else {
         error = Option.some((Throwable) new BookBorrowExceptionDRMWorkflowError(message));
       }
