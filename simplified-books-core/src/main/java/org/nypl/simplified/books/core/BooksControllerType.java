@@ -20,6 +20,13 @@ public interface BooksControllerType
 
   BooksStatusCacheType bookGetStatusCache();
 
+
+  /**
+   *
+   */
+
+  void destroyBookStatusCache();
+
   /**
    * @return A read-only reference to the current book database.
    */

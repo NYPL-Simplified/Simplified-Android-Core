@@ -337,9 +337,17 @@ final class BooksControllerBorrowTask implements Runnable
           this.runAcquisitionBorrow();
           break;
         }
+        case ACQUISITION_OPEN_ACCESS:
+        {
+          BooksControllerBorrowTask.LOG.debug(
+            "[{}]: acquisition type is {}, performing fulfillment",
+            this.short_id,
+            at);
+          this.runAcquisitionFulfill(this.feed_entry);
+          break;
+        }
         case ACQUISITION_GENERIC:
-        case ACQUISITION_OPEN_ACCESS: {
-          
+        {
           if (this.adobe_drm.isSome() && this.needs_auth) {
             final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
             if (credentials_opt.isSome()) {

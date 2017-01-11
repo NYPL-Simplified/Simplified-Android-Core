@@ -44,7 +44,7 @@ public final class BooksController implements BooksType {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
   }
 
-  private final BooksStatusCacheType books_status;
+  private BooksStatusCacheType books_status;
   private final DownloaderType downloader;
   private final ConcurrentHashMap<BookID, DownloadType> downloads;
   private final ExecutorService exec;
@@ -403,6 +403,11 @@ public final class BooksController implements BooksType {
   @Override
   public BooksStatusCacheType bookGetStatusCache() {
     return this.books_status;
+  }
+
+  @Override
+  public void destroyBookStatusCache() {
+    this.books_status = BooksStatusCache.newStatusCache();
   }
 
   @Override

@@ -116,9 +116,9 @@ public final class CatalogAcquisitionButtons
       case ACQUISITION_BORROW:
         return 6;
       case ACQUISITION_OPEN_ACCESS:
-        return 4;
-      case ACQUISITION_GENERIC:
         return 5;
+      case ACQUISITION_GENERIC:
+        return 4;
       case ACQUISITION_SAMPLE:
         return 3;
       case ACQUISITION_BUY:

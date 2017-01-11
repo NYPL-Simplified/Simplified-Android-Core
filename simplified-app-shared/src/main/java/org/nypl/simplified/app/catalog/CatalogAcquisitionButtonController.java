@@ -78,7 +78,7 @@ public final class CatalogAcquisitionButtonController
   @Override public void onClick(
     final @Nullable View v)
   {
-    if (this.books.accountIsLoggedIn() && Simplified.getCurrentAccount().needsAuth()) {
+    if (this.books.accountIsLoggedIn() && Simplified.getCurrentAccount().needsAuth() && this.acq.getType() != OPDSAcquisition.Type.ACQUISITION_OPEN_ACCESS) {
       this.books.accountGetCachedLoginDetails(
         new AccountGetCachedCredentialsListenerType()
         {
@@ -93,7 +93,7 @@ public final class CatalogAcquisitionButtonController
             CatalogAcquisitionButtonController.this.onLoginSuccess(creds);
           }
         });
-    } else if (!Simplified.getCurrentAccount().needsAuth()) {
+    } else if (!Simplified.getCurrentAccount().needsAuth() || this.acq.getType() == OPDSAcquisition.Type.ACQUISITION_OPEN_ACCESS) {
       this.getBook();
     }
     else {

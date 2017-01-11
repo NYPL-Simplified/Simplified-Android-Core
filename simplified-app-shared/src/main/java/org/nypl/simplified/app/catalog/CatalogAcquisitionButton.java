@@ -50,6 +50,13 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
 
     switch (in_acq.getType()) {
       case ACQUISITION_OPEN_ACCESS:
+        this.getTextView().setText(
+          NullCheck.notNull(
+            rr.getString(R.string.catalog_book_download)));
+        this.getTextView().setContentDescription(
+          NullCheck.notNull(
+            rr.getString(R.string.catalog_accessibility_book_download)));
+        break;
       case ACQUISITION_BORROW: {
         if (availability instanceof OPDSAvailabilityHoldable) {
           this.getTextView().setText(

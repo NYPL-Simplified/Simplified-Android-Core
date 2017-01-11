@@ -161,7 +161,7 @@ final class BooksControllerSyncTask implements Runnable
             final HTTPResultOKType<InputStream> e)
             throws Exception {
             try {
-              BooksControllerSyncTask.this.syncFeedEntries(e);
+               BooksControllerSyncTask.this.syncFeedEntries(e);
               return Unit.unit();
             } finally {
               e.close();
