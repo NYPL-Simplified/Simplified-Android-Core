@@ -11,6 +11,8 @@ import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.multilibrary.Account;
+import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
 import java.util.Timer;
@@ -87,7 +89,16 @@ public class MainSplashActivity extends Activity
       final EULAType eula = some_eula.get();
       if (eula.eulaHasAgreed()) {
         MainSplashActivity.LOG.debug("EULA: agreed");
-        this.openWelcome();
+
+        final AccountsRegistry registry = new AccountsRegistry(this, Simplified.getSharedPrefs());
+        final Account account = registry.getAccount(0);
+        registry.addAccount(account, Simplified.getSharedPrefs());
+
+        Simplified.getSharedPrefs().putInt("current_account", 0);
+        Simplified.getCatalogAppServices();
+        Simplified.getSharedPrefs().putBoolean("welcome", true);
+        this.openCatalog();
+
       } else {
         MainSplashActivity.LOG.debug("EULA: not agreed");
         if (show_eula) {
