@@ -87,6 +87,8 @@ final class BooksControllerLogoutTask implements Runnable {
      */
 
     try {
+      new DeviceManagerDeleteTask(this.credentials).run();
+
       BooksControllerLogoutTask.this.accounts_database.accountRemoveCredentials();
       BooksControllerLogoutTask.this.database.databaseDestroy();
       BooksControllerLogoutTask.this.listener.onAccountLogoutSuccess();

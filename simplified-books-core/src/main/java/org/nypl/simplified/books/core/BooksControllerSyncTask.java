@@ -194,6 +194,7 @@ final class BooksControllerSyncTask implements Runnable
 
         final AccountCredentials credentials = ((Some<AccountCredentials>) credentials_opt).get();
 
+        credentials.setDrmLicensor(feed.getLicensor());
         credentials.setAdobeToken(Option.some(new AccountAdobeToken(licensor.getClientToken())));
         credentials.setAdobeVendor(Option.some(new AdobeVendorID(licensor.getVendor())));
 

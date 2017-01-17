@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -231,14 +232,43 @@ public final class OPDSAcquisitionFeedEntryParser
             if (licensor_opt.isSome()) {
               final Some<Element> licensor_some = (Some<Element>) licensor_opt;
 
-              final String vendor = licensor_some.get().getAttributes().getNamedItemNS(OPDSFeedConstants.DRM_URI_TEXT, "vendor").getNodeValue();
+              final Element in_e = OPDSXML.nodeAsElement(licensor_some.get());
+              final String  in_vendor = in_e.getAttribute("drm:vendor");
+              String in_client_token = null;
+              OptionType<String> in_device_manager = Option.none();
+              for (int i = 0; i < in_e.getChildNodes().getLength(); ++i)
+              {
+                final Node node = in_e.getChildNodes().item(i);
 
-              final OptionType<String> client_token_opt =  OPDSXML.getFirstChildElementTextWithNameOptional(
-                licensor_some.get(), OPDSFeedConstants.DRM_URI, "clientToken");
+                if (node.getNodeName().contains("clientToken"))
+                {
+                  in_client_token =  node.getFirstChild().getNodeValue();
+                }
 
-              final Some<String> client_token_some = (Some<String>) client_token_opt;
+                if (node.getNodeName().contains("link"))
+                {
+                  final Element element = OPDSXML.nodeAsElement(node);
 
-              eb.setLicensorOption(Option.some(new DRMLicensor(vendor, client_token_some.get())));
+                  final boolean has_everything =
+                    element.hasAttribute("rel") && element.hasAttribute("href");
+
+                  if (has_everything) {
+                    final String r = NullCheck.notNull(element.getAttribute("rel"));
+                    final String h = NullCheck.notNull(element.getAttribute("href"));
+
+                    if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
+
+                      in_device_manager = Option.some(h);
+
+                    }
+                  }
+                }
+                if (in_vendor != null && in_client_token != null) {
+                  final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token, in_device_manager);
+                  eb.setLicensorOption(Option.some(licensor));
+                }
+              }
+
 
             }
 

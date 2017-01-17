@@ -85,6 +85,9 @@ public class BooksControllerDeviceActivationTask implements Runnable,
                     ((Some<AdobeVendorID>) vendor_opt).get(),
                     username,
                     password);
+
+                  new DeviceManagerPostTask(BooksControllerDeviceActivationTask.this.credentials).run();
+
                 }
               });
             return Unit.unit();

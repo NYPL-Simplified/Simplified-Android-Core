@@ -441,13 +441,37 @@ public final class OPDSFeedParser implements OPDSFeedParserType
             (Element) child, OPDSFeedConstants.DRM_URI, "licensor")) {
             final Element e = OPDSXML.nodeAsElement(child);
             final String  in_vendor = e.getAttribute("drm:vendor");
+            String in_client_token = null;
+            OptionType<String> in_device_manager = Option.none();
             for (int i = 0; i < e.getChildNodes().getLength(); ++i)
             {
               final Node node = e.getChildNodes().item(i);
+
               if (node.getNodeName().contains("clientToken"))
               {
-                final String  in_client_token =  node.getFirstChild().getNodeValue();
-                final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token);
+                in_client_token =  node.getFirstChild().getNodeValue();
+              }
+
+              if (node.getNodeName().contains("link"))
+              {
+              final Element element = OPDSXML.nodeAsElement(node);
+
+                final boolean has_everything =
+                  element.hasAttribute("rel") && element.hasAttribute("href");
+
+                if (has_everything) {
+                  final String r = NullCheck.notNull(element.getAttribute("rel"));
+                  final String h = NullCheck.notNull(element.getAttribute("href"));
+
+                  if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
+
+                    in_device_manager = Option.some(h);
+
+                  }
+                }
+              }
+              if (in_vendor != null && in_client_token != null) {
+                final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token, in_device_manager);
                 b.setLisensor(Option.some(licensor));
               }
             }

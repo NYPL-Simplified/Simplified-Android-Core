@@ -148,7 +148,10 @@ public final class OPDSJSONParser implements OPDSJSONParserType
       final ObjectNode o = JSONParserUtilities.checkObject(null, jn);
       final String in_vendor = JSONParserUtilities.getString(o, "vendor");
       final String in_client_token = JSONParserUtilities.getString(o, "clientToken");
-      return new DRMLicensor(in_vendor, in_client_token);
+      final OptionType<String> in_device_manager =
+        JSONParserUtilities.getStringOptional(o, "deviceManager");
+
+      return new DRMLicensor(in_vendor, in_client_token, in_device_manager);
     } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }

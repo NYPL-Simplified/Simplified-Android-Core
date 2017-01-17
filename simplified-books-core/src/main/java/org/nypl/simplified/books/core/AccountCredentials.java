@@ -7,6 +7,7 @@ import com.io7m.jnull.NullCheck;
 import org.nypl.drm.core.AdobeDeviceID;
 import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.AdobeVendorID;
+import org.nypl.simplified.opds.core.DRMLicensor;
 
 /**
  * The type representing account credentials.
@@ -22,6 +23,7 @@ public final class AccountCredentials {
   private OptionType<AccountAdobeToken>     adobe_token;
   private OptionType<AdobeUserID>           user_id;
   private OptionType<AdobeDeviceID>         device_id;
+  private OptionType<DRMLicensor>           licensor;
 
 
   /**
@@ -49,6 +51,7 @@ public final class AccountCredentials {
     this.auth_token = Option.none();
     this.adobe_token = Option.none();
     this.patron = Option.none();
+    this.licensor = Option.none();
 
   }
 
@@ -81,8 +84,9 @@ public final class AccountCredentials {
     this.adobe_token = in_adobe_token;
     this.provider = in_provider;
     this.patron = in_patron;
-    this.user_id = null;
-    this.device_id = null;
+    this.user_id = Option.none();
+    this.device_id = Option.none();
+    this.licensor = Option.none();
 
   }
 
@@ -98,6 +102,7 @@ public final class AccountCredentials {
     sb.append(", device_id=").append(this.device_id);
     sb.append(", provider=").append(this.provider);
     sb.append(", patron=").append(this.patron);
+    sb.append(", licensor=").append(this.licensor);
     sb.append('}');
     return sb.toString();
   }
@@ -133,6 +138,7 @@ public final class AccountCredentials {
     result = 31 * result + this.device_id.hashCode();
     result = 31 * result + this.provider.hashCode();
     result = 31 * result + this.patron.hashCode();
+    result = 31 * result + this.licensor.hashCode();
     return result;
   }
 
@@ -142,6 +148,13 @@ public final class AccountCredentials {
 
   public OptionType<AdobeVendorID> getAdobeVendor() {
     return this.adobe_vendor;
+  }
+
+  /**
+   * @return drm licensor
+   */
+  public OptionType<DRMLicensor> getDrmLicensor() {
+    return this.licensor;
   }
 
   /**
@@ -195,6 +208,13 @@ public final class AccountCredentials {
    */
   public void setAdobeVendor(final OptionType<AdobeVendorID> in_adobe_vendor) {
     this.adobe_vendor = in_adobe_vendor;
+  }
+
+  /**
+   * @param in_drm_licensor drm licensor
+   */
+  public void setDrmLicensor(final OptionType<DRMLicensor> in_drm_licensor) {
+    this.licensor = in_drm_licensor;
   }
 
   /**

@@ -238,6 +238,9 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     je.put("vendor", l.getVendor());
     je.put("clientToken", l.getClientToken());
 
+    if (l.getDeviceManager().isSome()) {
+      je.put("deviceManager", ((Some<String>) l.getDeviceManager()).get());
+    }
 
     return je;
   }
