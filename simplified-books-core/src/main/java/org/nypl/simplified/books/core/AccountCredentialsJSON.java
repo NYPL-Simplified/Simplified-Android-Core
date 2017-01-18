@@ -267,15 +267,18 @@ public final class AccountCredentialsJSON
           }
         });
 
-    final OptionType<DRMLicensor> licensor = Option.some(new DRMLicensor(
-      ((Some<AdobeVendorID>) vendor).get().toString(),
-      ((Some<AccountAdobeToken>) adobe_token).get().toString(),
-      licensor_url));
-
     final AccountCredentials creds = new AccountCredentials(vendor, user, pass, provider, auth_token, adobe_token, patron);
     creds.setAdobeUserID(adobe_user);
     creds.setAdobeDeviceID(adobe_device);
-    creds.setDrmLicensor(licensor);
+
+    if (vendor.isSome() && adobe_token.isSome()) {
+
+      final OptionType<DRMLicensor> licensor = Option.some(new DRMLicensor(
+        ((Some<AdobeVendorID>) vendor).get().toString(),
+        ((Some<AccountAdobeToken>) adobe_token).get().toString(),
+        licensor_url));
+      creds.setDrmLicensor(licensor);
+    }
 
     return creds;
   }

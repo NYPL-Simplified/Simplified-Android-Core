@@ -50,15 +50,17 @@ public class DeviceManagerDeleteTask
           final String url = ((Some<String>) licensor.getDeviceManager()).get();
 
           final String content_type = "vnd.librarysimplified/drm-device-id-list";
+          if (this.creds.getAdobeDeviceID().isSome()) {
           final String device_id = ((Some<AdobeDeviceID>) this.creds.getAdobeDeviceID()).get().getValue();
-          final URI uri = new URI(url + "/" + device_id);
-          LOG.debug("uri %s", uri);
-          final AccountBarcode barcode = this.creds.getBarcode();
-          final AccountPIN pin = this.creds.getPin();
+            final URI uri = new URI(url + "/" + device_id);
+            LOG.debug("uri %s", uri);
+            final AccountBarcode barcode = this.creds.getBarcode();
+            final AccountPIN pin = this.creds.getPin();
 
-          final OptionType<HTTPAuthType> http_auth = Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
+            final OptionType<HTTPAuthType> http_auth = Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
 
-          HTTP.newHTTP().delete(http_auth, uri, content_type);
+            HTTP.newHTTP().delete(http_auth, uri, content_type);
+          }
         }
       } catch (URISyntaxException e) {
         e.printStackTrace();

@@ -48,15 +48,17 @@ public class DeviceManagerPostTask
         if (licensor.getDeviceManager().isSome()) {
           final String url = ((Some<String>) licensor.getDeviceManager()).get();
           final String content_type = "vnd.librarysimplified/drm-device-id-list";
-          final String device_id = ((Some<AdobeDeviceID>) this.creds.getAdobeDeviceID()).get().getValue();
-          final URI uri = new URI(url);
+          if (this.creds.getAdobeDeviceID().isSome()) {
+            final String device_id = ((Some<AdobeDeviceID>) this.creds.getAdobeDeviceID()).get().getValue();
+            final URI uri = new URI(url);
 
-          final AccountBarcode barcode = this.creds.getBarcode();
-          final AccountPIN pin = this.creds.getPin();
+            final AccountBarcode barcode = this.creds.getBarcode();
+            final AccountPIN pin = this.creds.getPin();
 
-          final OptionType<HTTPAuthType> http_auth = Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
+            final OptionType<HTTPAuthType> http_auth = Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
 
-          HTTP.newHTTP().post(http_auth, uri, device_id.getBytes(), content_type);
+            HTTP.newHTTP().post(http_auth, uri, device_id.getBytes(), content_type);
+          }
         }
       } catch (URISyntaxException e) {
         e.printStackTrace();

@@ -99,7 +99,8 @@ final class BooksControllerLoginTask implements Runnable,
       }
     }
 
-    final URI auth_uri = this.config.getCurrentRootFeedURI();
+    final URI auth_uri =  this.config.getCurrentRootFeedURI().resolve("loans/");
+
     final HTTPResultType<InputStream> r = this.http.head(Option.some(auth), auth_uri);
 
     BooksControllerLoginTask.LOG.debug(
