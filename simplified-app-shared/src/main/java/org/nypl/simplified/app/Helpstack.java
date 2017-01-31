@@ -172,7 +172,9 @@ public final class Helpstack implements HelpstackType
               "helpstack.desk.staff_login_password");
     }
 
-    return new HSDeskGear(instance_url, to_help_email, staff_login_email, staff_login_password);
+    final String brand_id = p.getProperty("helpstack.desk.brand_id");
+
+    return new HSDeskGear(instance_url, to_help_email, staff_login_email, staff_login_password, brand_id);
   }
 
   @Override public void show(final Activity a)
