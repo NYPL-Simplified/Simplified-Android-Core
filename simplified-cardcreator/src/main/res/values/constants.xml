@@ -8,7 +8,9 @@
   <string name="USERNAME_DATA_KEY">username</string>
   <string name="PIN_DATA_KEY">pin</string>
 
-  <string name="NAME_DATA_KEY">name</string>
+  <string name="FIRST_NAME_DATA_KEY">firstname</string>
+  <string name="MIDDLE_NAME_DATA_KEY">middlename</string>
+  <string name="LAST_NAME_DATA_KEY">lastname</string>
   <string name="EMAIL_DATA_KEY">email</string>
 
   <string name="LIVE_IN_NY_DATA_KEY">live_in_ny</string>
@@ -36,6 +38,7 @@
   <string name="SHOW_PREV_BUTTON">prev</string>
   <string name="SHOW_NEXT_BUTTON">next</string>
   <string name="UNDER_13">under13</string>
+  <string name="EULA_ACCEPTED">eulaAccepted</string>
   <string name="EQUAL_OR_OLDER_13">equalOrOlder</string>
 
 

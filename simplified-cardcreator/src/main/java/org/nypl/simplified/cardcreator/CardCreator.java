@@ -64,6 +64,9 @@ public final class CardCreator {
       if (this.password == null) {
         throw new CardCreatorConfigurationMissingParameter("cardcreator." + in_environment + ".password");
       }
+      if (this.version == null) {
+        throw new CardCreatorConfigurationMissingParameter("cardcreator." + in_environment + ".version");
+      }
     } catch (final IOException e) {
       CardCreator.LOG.debug(
         "i/o error on attempting to open cardcreator.conf: ", e);
@@ -87,7 +90,14 @@ public final class CardCreator {
    * @return card creator url
    */
   public String getUrl() {
-    return this.url + "/" + this.version;
+    return this.url;
+  }
+
+  /**
+   * @return card creator version
+   */
+  public String getVersion() {
+    return this.version;
   }
 
   /**

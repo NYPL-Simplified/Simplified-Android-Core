@@ -104,7 +104,14 @@ public class ReviewFragment extends Fragment {
 
         this.username.setText(this.prefs.getString(getResources().getString(R.string.USERNAME_DATA_KEY)));
         this.pin.setText(this.prefs.getString(getResources().getString(R.string.PIN_DATA_KEY)));
-        this.name.setText(this.prefs.getString(getResources().getString(R.string.NAME_DATA_KEY)));
+        this.name.setText(this.prefs.getString(getResources().getString(R.string.LAST_NAME_DATA_KEY)) + ", "
+          + this.prefs.getString(getResources().getString(R.string.FIRST_NAME_DATA_KEY)));
+        if (!this.prefs.getString(getResources().getString(R.string.MIDDLE_NAME_DATA_KEY)).isEmpty())
+        {
+            this.name.setText(this.prefs.getString(getResources().getString(R.string.LAST_NAME_DATA_KEY)) + ", "
+              + this.prefs.getString(getResources().getString(R.string.FIRST_NAME_DATA_KEY)) + " "
+              + this.prefs.getString(getResources().getString(R.string.MIDDLE_NAME_DATA_KEY)));
+        }
         this.email.setText(this.prefs.getString(getResources().getString(R.string.EMAIL_DATA_KEY)));
 
         final StringBuilder home = new StringBuilder();

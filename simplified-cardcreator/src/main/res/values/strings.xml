@@ -16,8 +16,11 @@
   <string name="label_address_home">Home Address</string>
   <string name="label_address_work">Work Address</string>
   <string name="label_address_school">School Address</string>
-  <string name="label_name">Name</string>
+  <string name="label_firstname">First Name</string>
+  <string name="label_middletname">Middle</string>
+  <string name="label_lastname">Last Name</string>
   <string name="label_email">Email</string>
+  <string name="label_name">Name</string>
   <string name="label_username">Username</string>
   <string name="label_pin">PIN</string>
   <string name="label_barcode">Barcode</string>

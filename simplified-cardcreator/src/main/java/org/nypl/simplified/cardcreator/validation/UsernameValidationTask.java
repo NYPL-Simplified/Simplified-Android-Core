@@ -29,7 +29,7 @@ import java.net.URISyntaxException;
  *
  */
 
-public class UsernameValidationTask implements Runnable {
+public class UsernameValidationTask {
 
   private static final String TAG = "UsernameValidationTask";
 
@@ -51,14 +51,16 @@ public class UsernameValidationTask implements Runnable {
     this.card_creator = in_card_creator;
   }
 
-  @Override
+  /**
+   *
+   */
   public void run() {
 
     final HTTPType http = HTTP.newHTTP();
     URI uri = null;
 
     try {
-      uri = new URI(this.card_creator.getUrl()).resolve("/validate/username");
+      uri = new URI(this.card_creator.getUrl()).resolve(this.card_creator.getVersion() + "/validate/username");
     } catch (URISyntaxException e) {
       e.printStackTrace();
     }

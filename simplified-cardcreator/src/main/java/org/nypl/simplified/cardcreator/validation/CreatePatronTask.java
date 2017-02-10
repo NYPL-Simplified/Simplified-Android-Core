@@ -31,7 +31,7 @@ import java.net.URISyntaxException;
  *
  */
 
-public class CreatePatronTask implements Runnable {
+public class CreatePatronTask {
 
     private final Prefs prefs;
 
@@ -49,7 +49,9 @@ public class CreatePatronTask implements Runnable {
         this.card_creator = in_card_creator;
     }
 
-    @Override
+    /**
+     *
+     */
     public void run() {
 
 
@@ -57,7 +59,7 @@ public class CreatePatronTask implements Runnable {
         URI uri = null;
 
         try {
-            uri = new URI(this.card_creator.getUrl()).resolve("/create_patron");
+            uri = new URI(this.card_creator.getUrl()).resolve(this.card_creator.getVersion() + "/create_patron");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -66,7 +68,16 @@ public class CreatePatronTask implements Runnable {
           Option.some((HTTPAuthType) new HTTPAuthBasic(this.card_creator.getUsername(), this.card_creator.getPassword()));
 
         final ObjectNode card = JsonNodeFactory.instance.objectNode();
-        card.set("name", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.NAME_DATA_KEY))));
+        card.set("name", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.LAST_NAME_DATA_KEY)) + ", "
+          + this.prefs.getString(this.card_creator.getResources().getString(R.string.FIRST_NAME_DATA_KEY))));
+
+        if (!this.prefs.getString(this.card_creator.getResources().getString(R.string.MIDDLE_NAME_DATA_KEY)).isEmpty())
+        {
+            card.set("name", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.LAST_NAME_DATA_KEY)) + ", "
+              + this.prefs.getString(this.card_creator.getResources().getString(R.string.FIRST_NAME_DATA_KEY)) + " "
+              + this.prefs.getString(this.card_creator.getResources().getString(R.string.MIDDLE_NAME_DATA_KEY))));
+        }
+
         card.set("email", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.EMAIL_DATA_KEY))));
         card.set("pin", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.PIN_DATA_KEY))));
         card.set("username", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.USERNAME_DATA_KEY))));
@@ -100,42 +111,41 @@ public class CreatePatronTask implements Runnable {
 
             result.matchResult(
 
-                    new HTTPResultMatcherType<InputStream, Unit, Exception>() {
-                        @Override
-                        public Unit onHTTPError(final HTTPResultError<InputStream> error) throws Exception {
+              new HTTPResultMatcherType<InputStream, Unit, Exception>() {
+                  @Override
+                  public Unit onHTTPError(final HTTPResultError<InputStream> error) throws Exception {
 
-                            CreatePatronTask.this.listener.onAccountCreationError(error.getMessage());
+                      CreatePatronTask.this.listener.onAccountCreationError(error.getMessage());
 
-                            return Unit.unit();
-                        }
+                      return Unit.unit();
+                  }
 
-                        @Override
-                        public Unit onHTTPException(final HTTPResultException<InputStream> exceptin) throws Exception {
+                  @Override
+                  public Unit onHTTPException(final HTTPResultException<InputStream> exceptin) throws Exception {
 
-                            CreatePatronTask.this.listener.onAccountCreationError(exceptin.getError().getMessage());
+                      CreatePatronTask.this.listener.onAccountCreationError(exceptin.getError().getMessage());
 
-                            return Unit.unit();
-                        }
+                      return Unit.unit();
+                  }
 
-                        @Override
-                        public Unit onHTTPOK(final HTTPResultOKType<InputStream> result) throws Exception {
+                  @Override
+                  public Unit onHTTPOK(final HTTPResultOKType<InputStream> result) throws Exception {
 
-                            final NewPatronResponse name_response = new NewPatronResponse(result.getValue());
+                      final NewPatronResponse name_response = new NewPatronResponse(result.getValue());
 
-                            if (name_response.getType().equals("card-granted")) {
-                                CreatePatronTask.this.listener.onAccountCreationSucceeded(name_response);
-                            } else {
-                                CreatePatronTask.this.listener.onAccountCreationFailed(name_response);
-                            }
+                      if (name_response.getType().equals("card-granted")) {
+                          CreatePatronTask.this.listener.onAccountCreationSucceeded(name_response);
+                      } else {
+                          CreatePatronTask.this.listener.onAccountCreationFailed(name_response);
+                      }
 
-                            return Unit.unit();
-                        }
-                    }
+                      return Unit.unit();
+                  }
+              }
             );
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 }
