@@ -171,19 +171,13 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>readium-sdk-android-runtime</artifactId>
-        <version>0.22.1</version>
+        <version>0.25.0</version>
+        <type>aar</type>
       </dependency>
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>readium-shared-js</artifactId>
-        <version>0.23.0</version>
-      </dependency>
-      <dependency>
-        <groupId>org.nypl.readium</groupId>
-        <artifactId>libepub3</artifactId>
-        <version>0.22.1</version>
-        <classifier>armeabi-v7a</classifier>
-        <type>so</type>
+        <version>0.25.0</version>
       </dependency>
       <dependency>
         <groupId>com.nanohttpd</groupId>

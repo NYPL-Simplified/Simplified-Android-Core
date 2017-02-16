@@ -114,16 +114,11 @@
     <dependency>
       <groupId>org.nypl.readium</groupId>
       <artifactId>readium-sdk-android-runtime</artifactId>
+      <type>aar</type>
     </dependency>
     <dependency>
       <groupId>org.nypl.readium</groupId>
       <artifactId>readium-shared-js</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.nypl.readium</groupId>
-      <artifactId>libepub3</artifactId>
-      <classifier>armeabi-v7a</classifier>
-      <type>so</type>
     </dependency>
     <dependency>
       <groupId>com.koushikdutta.async</groupId>
