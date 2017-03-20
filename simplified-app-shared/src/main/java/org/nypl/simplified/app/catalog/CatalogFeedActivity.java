@@ -962,13 +962,14 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       final AlertDialog.Builder alert = new AlertDialog.Builder(CatalogFeedActivity.this);
 
       // Setting Dialog Title
-      alert.setTitle("Age Verification");
+      alert.setTitle(R.string.age_verification_title);
 
       // Setting Dialog Message
-      alert.setMessage("You must be 13 years of age or older to download a book from the collection.\nHow old are you?");
+      //alert.setMessage("You must be 13 years of age or older to download a book from the collection.\nHow old are you?");
+      alert.setMessage(R.string.age_verification_question);
 
       // On pressing the under 13 button.
-      alert.setNeutralButton("Under 13", new DialogInterface.OnClickListener() {
+      alert.setNeutralButton(R.string.age_verification_13_younger, new DialogInterface.OnClickListener() {
           public void onClick(final DialogInterface dialog, final int which) {
             Simplified.getSharedPrefs().putBoolean("age13", false);
             //reload catalog
@@ -978,7 +979,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       );
 
       // On pressing the 13 and over button
-      alert.setPositiveButton("13 or Older", new DialogInterface.OnClickListener() {
+      alert.setPositiveButton(R.string.age_verification_13_older, new DialogInterface.OnClickListener() {
           public void onClick(final DialogInterface dialog, final int which) {
             Simplified.getSharedPrefs().putBoolean("age13", true);
             //reload catalog
