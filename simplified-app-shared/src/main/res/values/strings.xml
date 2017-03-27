@@ -206,8 +206,13 @@
   <string name="reader_accessibility_settings_close">Close reader settings</string>
   <string name="reader_settings_close">Close</string>
 
-
-
+  <!-- Welcome Strings -->
+  <string name="welcome_library_header">Read Books From Your Library</string>
+  <string name="welcome_library_subtext">Check out books and sync across devices</string>
+  <string name="welcome_library_button">Pick Your Library</string>
+  <string name="welcome_instant_header">Read Books Without a Library Card</string>
+  <string name="welcome_instant_subtext">Find classic books in the public domain</string>
+  <string name="welcome_instant_button">Instant Classics</string>
 
 
 </resources>
