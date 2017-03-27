@@ -218,5 +218,8 @@
   <string name="welcome_instant_subtext">Find classic books in the public domain</string>
   <string name="welcome_instant_button">Instant Classics</string>
 
+  <!-- Card Signup Strings -->
+  <string name="need_card_question">Don\'t have a library card?</string>
+  <string name="need_card_button">Sign Up</string>
 
 </resources>

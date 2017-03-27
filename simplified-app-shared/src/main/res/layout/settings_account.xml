@@ -203,7 +203,7 @@
 
         <TextView
           android:labelFor="@+id/settings_barcode_edit"
-          android:text="Don't have a library card?"
+          android:text="@string/need_card_question"
           android:layout_width="wrap_content"
           android:layout_weight="1"
           android:layout_height="wrap_content"
@@ -221,7 +221,7 @@
           android:paddingRight="30dp"
           android:textColor="@drawable/simplified_button_text"
           android:textSize="12sp"
-          android:text="Sign Up"/>
+          android:text="@string/need_card_button"/>
 
 
       </TableRow>

@@ -537,7 +537,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           startActivity(cardcreator);
         }
       });
-    in_signup.setText("Sign Up");
+    in_signup.setText(R.string.need_card_button);
 
     if (this.account.getPrivacyPolicy() != null) {
       in_privacy.setVisibility(View.VISIBLE);
