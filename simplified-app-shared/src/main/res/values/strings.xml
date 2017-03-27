@@ -92,6 +92,8 @@
   <string name="catalog_book_interval_days_short">d</string>
   <string name="catalog_book_interval_hours_short">h</string>
 
+  <string name="catalog_book_summary_publisher">Book Publisher</string>
+
   <!-- Catalog book report strings -->
   <string name="catalog_book_report_wrong_genre">Wrong Genre</string>
   <string name="catalog_book_report_wrong_audience">Wrong Audience</string>
