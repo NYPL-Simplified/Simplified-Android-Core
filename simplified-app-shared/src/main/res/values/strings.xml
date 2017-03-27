@@ -4,6 +4,7 @@
   <!-- EULA strings -->
   <string name="eula_disagree">Disagree</string>
   <string name="eula_agree">Agree</string>
+  <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
 
   <!-- Age Verification strings -->
   <string name="age_verification_title">Age Verification</string>
