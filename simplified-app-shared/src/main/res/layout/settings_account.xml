@@ -248,7 +248,7 @@
         android:background="@color/normal_background"
         android:padding="015dp"
         android:layout_marginBottom="5dp">
-        <TextView android:text="Privacy Policy"
+        <TextView android:text="@string/settings_privacy"
                   android:layout_width="match_parent"
                   android:textAppearance="?android:attr/textAppearanceMedium"/>
       </TableRow>
@@ -259,7 +259,7 @@
         android:background="@color/normal_background"
         android:padding="015dp"
         android:layout_marginBottom="5dp">
-        <TextView android:text="Content Licenses"
+        <TextView android:text="@string/settings_licence_content"
                   android:layout_width="match_parent"
                   android:textAppearance="?android:attr/textAppearanceMedium"/>
       </TableRow>
