@@ -172,7 +172,7 @@ public final class ReaderSettingsDialog extends DialogFragment
         @Override public void onClick(
           final @Nullable View v)
         {
-          if (settings.getFontScale() < 200) {
+          if (settings.getFontScale() < 250) {
             settings.setFontScale(settings.getFontScale() + 25.0f);
           }
         }
