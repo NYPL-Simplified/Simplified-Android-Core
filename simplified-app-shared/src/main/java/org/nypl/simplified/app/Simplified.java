@@ -453,7 +453,7 @@ public final class Simplified extends Application
     String catalog = account.getCatalogUrl();
     String adobe = account.getCatalogUrl();
 
-    if (!account.needsAuth() && Simplified.getSharedPrefs().contains("age13"))
+    if (!account.needsAuth() && account.getId() == 2 && Simplified.getSharedPrefs().contains("age13"))
     {
       if (Simplified.getSharedPrefs().getBoolean("age13")) {
         catalog = account.getCatalogUrl13AndOver();
@@ -680,7 +680,7 @@ public final class Simplified extends Application
       String catalog = account.getCatalogUrl();
       String adobe = account.getCatalogUrl();
 
-      if (!account.needsAuth() && Simplified.getSharedPrefs().contains("age13"))
+      if (!account.needsAuth() && account.getId() == 2 && Simplified.getSharedPrefs().contains("age13"))
       {
         if (Simplified.getSharedPrefs().getBoolean("age13")) {
           catalog = account.getCatalogUrl13AndOver();
