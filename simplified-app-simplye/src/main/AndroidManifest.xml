@@ -205,6 +205,12 @@
       android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
       android:screenOrientation="portrait">
     </activity>
+    <activity
+      android:name="org.nypl.simplified.app.ReportIssueActivity"
+      android:windowSoftInputMode="adjustResize"
+      android:label="@string/hs_issuebutton_title"
+      android:contentDescription="@string/hs_issuebutton_title">
+    </activity>
 
     <receiver
       android:name="com.tenmiles.helpstack.service.AttachmentDownloadReceiver"

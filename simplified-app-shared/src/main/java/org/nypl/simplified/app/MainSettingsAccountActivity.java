@@ -418,10 +418,36 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_pin_reveal.setVisibility(View.GONE);
     }
 
-    /**
-     * Get labels from the current authentication document.
-     */
 
+    final LinearLayout in_account_emails =
+      NullCheck.notNull((LinearLayout) this.findViewById(R.id.account_emails));
+    if (this.account.getSupportEmail() == null)
+    {
+      in_account_emails.setVisibility(View.GONE);
+    }
+    else
+    {
+      in_account_emails.setVisibility(View.VISIBLE);
+    }
+
+    final TableRow in_report_issue =
+      (TableRow) in_account_emails.findViewById(R.id.report_issue);
+
+    in_report_issue.setOnClickListener(new OnClickListener() {
+      @Override
+      public void onClick(final View view) {
+
+        final Intent intent =
+          new Intent(MainSettingsAccountActivity.this, ReportIssueActivity.class);
+        final Bundle b = new Bundle();
+        b.putInt("selected_account", MainSettingsAccountActivity.this.account.getId());
+        intent.putExtras(b);
+        startActivity(intent);
+
+      }
+    });
+
+     //Get labels from the current authentication document.
     final AuthenticationDocumentType auth_doc =
       docs.getAuthenticationDocument();
     in_barcode_label.setText(auth_doc.getLabelLoginUserID());
@@ -620,6 +646,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
 
       in_eula_checkbox.setChecked(eula.eulaHasAgreed());
+      in_eula_checkbox.setEnabled(true);
 
       in_eula_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
         @Override
@@ -769,6 +796,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final TextView in_pin_text = NullCheck.notNull(this.pin_text);
     final Button in_login = NullCheck.notNull(this.login);
+    final CheckBox in_eula_checkbox =
+      NullCheck.notNull((CheckBox) this.findViewById(R.id.eula_checkbox));
 
     in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
     in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
@@ -798,6 +827,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
             in_pin_text.setText(creds.getPin().toString());
             in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+
+            in_eula_checkbox.setEnabled(false);
 
             in_login.setText(rr.getString(R.string.settings_log_out));
             in_login.setOnClickListener(
