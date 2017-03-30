@@ -33,14 +33,17 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text="Read Books From Your Library"/>
+      android:text="Read Books from your Library"
+      />
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
+      android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="Check out books and sync across devices"/>
+      android:text="Simply browse borrow and read free ebooks from you local library"
+      android:textAlignment="center"/>
 
     <Button
       android:id="@+id/welcome_library"
@@ -72,18 +75,21 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text="Read Books Without a Library Card"/>
+      android:text="SimplyRead"
+      />
 
     <TextView
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
+      android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="Find classic books in the public domain"/>
+      android:text="Download and read ebooks without a library card"
+      android:textAlignment="center"/>
 
     <Button
       android:id="@+id/welcome_instant"
-      android:text="Instant Classics"
+      android:text="Read Now"
       android:layout_gravity="center"
       android:layout_width="wrap_content"
       android:layout_height="30dp"
