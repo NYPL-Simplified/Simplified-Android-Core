@@ -236,14 +236,42 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="@color/light_background"
-      android:paddingTop="10dp"
-      android:id="@+id/account_links"
-      >
+      android:paddingTop="10dp">
 
       <TableLayout
-        android:id="@+id/links"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <TableRow
+          android:id="@+id/support_center"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:background="@color/normal_background"
+          android:padding="015dp"
+          android:layout_marginBottom="5dp"
+          android:elevation="1dp">
+
+          <TextView
+            android:text="Support Center"
+            android:layout_width="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
+
+
+        <TableRow
+          android:id="@+id/report_issue"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:background="@color/normal_background"
+          android:padding="015dp"
+          android:layout_marginBottom="5dp"
+          android:elevation="1dp">
+
+          <TextView
+            android:text="Report an Issue"
+            android:layout_width="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
 
         <TableRow
           android:id="@+id/link_privacy"
@@ -275,38 +303,6 @@
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         </TableRow>
       </TableLayout>
-    </LinearLayout>
-
-    <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:background="@color/light_background"
-      android:paddingTop="10dp"
-      android:id="@+id/account_emails">
-
-      <TableLayout
-        android:id="@+id/emails"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TableRow
-          android:id="@+id/report_issue"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:background="@color/normal_background"
-          android:padding="015dp"
-          android:layout_marginBottom="5dp"
-          android:elevation="1dp">
-
-          <TextView
-            android:text="Report an Issue"
-            android:layout_width="match_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-        </TableRow>
-
-      </TableLayout>
-
     </LinearLayout>
   </LinearLayout>
 </ScrollView>

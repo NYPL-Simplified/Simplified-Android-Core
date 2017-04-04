@@ -29,8 +29,11 @@ public class Account implements Serializable {
   private boolean supports_barcode_display;
   private boolean supports_reservations;
   private boolean supports_card_creator;
+  private boolean supports_help_center;
 
   private String support_email;
+
+  private String card_creator_url;
 
   private String catalog_url;
   private String main_color;
@@ -157,6 +160,10 @@ public class Account implements Serializable {
     return this.catalog_url_13_and_over;
   }
 
+  public String getCardCreatorUrl() {
+    return this.card_creator_url;
+  }
+
   /**
    * @param in_catalog_url The Catalog Main URL
    */
@@ -184,6 +191,9 @@ public class Account implements Serializable {
   public boolean supportsCardCreator() {
     return supports_card_creator;
   }
+  public boolean supportsHelpCenter() {
+    return supports_help_center;
+  }
 
   /**
    * @param supports_card_creator
@@ -192,6 +202,9 @@ public class Account implements Serializable {
     this.supports_card_creator = supports_card_creator;
   }
 
+  public void setSupportsHelpCenter(final boolean supports_help_center) {
+    this.supports_help_center = supports_help_center;
+  }
   /**
    * @return
    */
@@ -285,11 +298,17 @@ public class Account implements Serializable {
       if (!account.isNull("catalogUrl13")) {
         this.catalog_url_13_and_over = account.getString("catalogUrl13");
       }
+      if (!account.isNull("cardCreatorUrl")) {
+        this.card_creator_url = account.getString("cardCreatorUrl");
+      }
       this.needs_auth = account.getBoolean("needsAuth");
       this.supports_reservations = account.getBoolean("supportsReservations");
       this.supports_card_creator = account.getBoolean("supportsCardCreator");
       if (!account.isNull("supportsSimplyESync")) {
         this.supports_simplye_sync = account.getBoolean("supportsSimplyESync");
+      }
+      if (!account.isNull("supportsHelpCenter")) {
+        this.supports_help_center = account.getBoolean("supportsHelpCenter");
       }
       if (!account.isNull("supportsBarcodeScanner")) {
         this.supports_barcode_scanner = account.getBoolean("supportsBarcodeScanner");
@@ -345,6 +364,8 @@ public class Account implements Serializable {
       object.put("needsAuth", this.needs_auth);
       object.put("supportsReservations", this.supports_reservations);
       object.put("supportsCardCreator", this.supports_card_creator);
+      object.put("supportsHelpCenter", this.supports_help_center);
+      object.put("cardCreatorUrl", this.card_creator_url);
       object.put("supportsSimplyESync", this.supports_simplye_sync);
       object.put("supportsBarcodeScanner", this.supports_barcode_scanner);
       object.put("supportsBarcodeDisplay", this.supports_barcode_display);
