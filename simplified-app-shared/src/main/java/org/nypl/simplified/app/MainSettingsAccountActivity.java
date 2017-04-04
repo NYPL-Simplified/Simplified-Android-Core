@@ -489,7 +489,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       locationpermission = true;
     }
 
-    if ((this.account.supportsCardCreator() && locationpermission) || !this.account.getCardCreatorUrl().isEmpty()) {
+    if ((this.account.supportsCardCreator() && locationpermission) || this.account.getCardCreatorUrl() != null) {
       in_table_signup.setVisibility(View.VISIBLE);
     }
     else {
@@ -591,7 +591,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_signup.setText("Sign Up");
 
     }
-    else if (!this.account.getCardCreatorUrl().isEmpty())
+    else if (this.account.getCardCreatorUrl() != null)
     {
 
       in_signup.setOnClickListener(
