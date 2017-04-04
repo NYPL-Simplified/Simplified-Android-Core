@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -43,17 +44,28 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 // Added by Bluefire
+import com.sonydadc.urms.android.Urms;
 import com.sonydadc.urms.android.UrmsError;
+import com.sonydadc.urms.android.api.CreateProfileTask;
 import com.sonydadc.urms.android.task.EmptyResponse;
 import com.sonydadc.urms.android.task.IFailedCallback;
 import com.sonydadc.urms.android.task.ISucceededCallback;
 import com.sonydadc.urms.android.task.IUrmsTask;
 import com.sonydadc.urms.android.task.UrmsTaskStatus;
+import com.sonydadc.urms.android.type.UrmsConfig;
 // Added by Bluefire
 
 
-
-
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.joda.time.Instant;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,14 +96,25 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 import bclurms.UrmsCreateProfileRequest;
 import bclurms.UrmsEvaluateLicenseRequest;
 import bclurms.UrmsRegisterBookRequest;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * The main reader activity for reading an EPUB.
@@ -346,7 +369,7 @@ public final class ReaderActivity extends Activity implements
     this.entry =
             NullCheck.notNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
 
-    ReaderActivity.LOG.debug("ReaderActivity", "before reading file from Assets and writing to internal storage");
+    ReaderActivity.LOG.debug("ReaderActivity - before reading file from Assets and writing to internal storage");
 
     // Read file from Assets and write to internal storage
     File f = new File(getCacheDir() + "/iliaddrm.epub");
@@ -363,20 +386,152 @@ public final class ReaderActivity extends Activity implements
     final File in_epub_file = new File(getCacheDir(), "iliaddrm.epub");
 
 
-    ReaderActivity.LOG.debug("ReaderActivity", "before evaluateURMSLicense called");
-    String bookCCID = "NHG6M6VG63D4DQKJMC986FYFDG5MDQJE";
-    String bookUri = in_epub_file.getAbsolutePath();
-    ReaderActivity.LOG.debug("ReaderActivity - bookUri", bookUri);
+    ReaderActivity.LOG.debug("ReaderActivity before evaluateURMSLicense called");
+    final String bookCCID = "NHG6M6VG63D4DQKJMC986FYFDG5MDQJE";
+    final String bookUri = in_epub_file.getAbsolutePath();
+    ReaderActivity.LOG.debug("ReaderActivity - bookUri:  {}", bookUri);
 
 
-    ReaderActivity.LOG.debug("ReaderActivity", "Requesting authToken…");
-    try {
-      UrmsCreateProfileRequest.requestAuthToken();
-    } catch (SignatureException e) {
-      e.printStackTrace();
-    }
-    evaluateURMSLicense(bookCCID, bookUri, getApplicationContext(), a, in_epub_file);
-    ReaderActivity.LOG.debug("ReaderActivity", "after evaluateURMSLicense called");
+    ReaderActivity.LOG.debug("ReaderActivity - Requesting authToken…");
+
+
+    Thread thread = new Thread(new Runnable() {
+
+      @Override
+      public void run() {
+        try  {
+
+
+          ReaderActivity.LOG.debug("ReaderActivity - Thread running");
+
+          String userID = "google-110495186711904557779";
+          String path = "/store/v2/users/" + userID + "/authtoken/generate";
+          String sessionURL = "http://urms-967957035.eu-west-1.elb.amazonaws.com" + path;
+
+          String timestamp = Long.toString(System.currentTimeMillis());
+          String hmacMessage = path + timestamp;
+          String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
+
+          ReaderActivity.LOG.debug("ReaderActivity - hmacMessage: {} ", hmacMessage);
+
+
+          String hmac = hashMac(hmacMessage, secretKey);
+          String authHash = Base64.encodeToString(hmac.getBytes(), Base64.DEFAULT);
+
+          ReaderActivity.LOG.debug("ReaderActivity - authHash: {} ", authHash);
+
+          String storeID = "129";
+          String authString = storeID + "-" + timestamp + "-" + authHash;
+
+          ReaderActivity.LOG.debug("ReaderActivity - authString: {} ", authString);
+
+
+          // Create a new HttpClient and Post Header
+          HttpClient httpclient = new DefaultHttpClient();
+          HttpPost httppost = new HttpPost(sessionURL);
+
+
+          try {
+            // Set headers
+            httppost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            // Data to POST
+            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            nameValuePairs.add(new BasicNameValuePair("authString", authString));
+            nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
+
+            // Set content length header
+            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
+            long urlEncodedFormEntityLength = urlEncodedFormEntity.getContentLength();
+            httppost.setHeader("Content-Length", Long.toString(urlEncodedFormEntityLength));
+
+            // Set data body
+            httppost.setEntity(urlEncodedFormEntity);
+
+
+
+            // Execute HTTP Post Request
+            HttpResponse httpResponse = httpclient.execute(httppost);
+            HttpEntity responseEntity = httpResponse.getEntity();
+            String response = "";
+            if(responseEntity!=null) {
+              response = EntityUtils.toString(responseEntity);
+            }
+
+            JSONObject responseJson;
+            try {
+              responseJson = new JSONObject(response);
+              String authToken = responseJson.getString("authToken");
+              ReaderActivity.LOG.debug("ReaderActivity - authToken: {}", authToken);
+
+             String profileName = "default";
+
+              UrmsConfig config = new UrmsConfig(
+                      "https://urms-sdk.codefusion.technology/sdk/",			// cgp.api
+                      "https://urms-marlin-us.codefusion.technology/bks/",	// marlin.api
+                      "urn:marlin:organization:sne:service-provider:2",		// marlin.service_id
+                      true 													// marlin.use_ssl
+              );
+
+              CreateProfileTask createProfile = Urms.createCreateProfileTask(authToken, profileName, null, config);
+              Log.d("ReaderActivity", "!@!@! Token: " + authToken);
+
+              createProfile.setSucceededCallback(new ISucceededCallback<EmptyResponse>() {
+                @Override
+                public void onSucceeded(IUrmsTask task, EmptyResponse result) {
+                  Log.d("ReaderActivity", "Success creating profile.");
+
+                  evaluateURMSLicense(bookCCID, bookUri, getApplicationContext(), a, in_epub_file);
+                  ReaderActivity.LOG.debug("ReaderActivity - after evaluateURMSLicense called");
+                }
+              });
+
+              createProfile.setFailedCallback(new IFailedCallback() {
+                @Override
+                public void onFailed(IUrmsTask task, UrmsTaskStatus status, UrmsError error) {
+                  if (error.getErrorType() == UrmsError.RegisterUserDeviceCapacityReached) {
+                    Log.e(TAG, "RegisterUserDeviceCapacityReached");
+                  } else if (error.getErrorType() == UrmsError.NetworkError ||
+                          error.getErrorType() == UrmsError.NetworkTimeout) {
+                    Log.e(TAG, "Network error or network timeout.");
+                  } else if (error.getErrorType() == UrmsError.UrmsNotInitialized) {
+                    Log.e(TAG, "URMS not initialized.");
+                  } else if (error.getErrorType() == UrmsError.LoseTime) {
+                    Log.e(TAG, "Please ensure the time on your device is correct.");
+                  } else if (error.getErrorType() == UrmsError.OutdatedVersion) {
+                    Log.e(TAG, "Outdated version");
+                  } else if (error.getErrorCode().endsWith("04")) {
+                    Log.e(TAG, "Potential server/client configuration mismatch.");
+                  } else {
+                    Log.e(TAG, "Other error: " + error.getErrorCode());
+                    Log.e(TAG, "Error type: " + new Integer(error.getErrorType()).toString());
+                  }
+                  Log.e(TAG, "Error creating profile.");
+                }
+              });
+              Urms.executeAsync(createProfile);
+
+            } catch (JSONException e) {
+              e.printStackTrace();
+            }
+
+
+
+          } catch (ClientProtocolException e) {
+            // TODO Auto-generated catch block
+          } catch (IOException e) {
+            // TODO Auto-generated catch block
+          }
+
+
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    });
+
+    thread.start();
   }
 
   public void evaluateURMSLicense(final String bookCCID, final String bookUri, final Context mContext, final Bundle bundle, final File in_epub_file) {
@@ -678,17 +833,16 @@ public final class ReaderActivity extends Activity implements
     final View in_toc = NullCheck.notNull(this.view_toc);
 
     in_toc.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-          ReaderTOCActivity.startActivityForResult(
-            ReaderActivity.this, sent_toc);
-          ReaderActivity.this.overridePendingTransition(0, 0);
-        }
-      });
+            new OnClickListener() {
+              @Override
+              public void onClick(
+                      final @Nullable View v) {
+                final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
+                ReaderTOCActivity.startActivityForResult(
+                        ReaderActivity.this, sent_toc);
+                ReaderActivity.this.overridePendingTransition(0, 0);
+              }
+            });
 
     /**
      * Get a reference to the web server. Start it if necessary (the callbacks
@@ -736,15 +890,15 @@ public final class ReaderActivity extends Activity implements
     this.applyViewerColorScheme(cs);
 
     UIThread.runOnUIThreadDelayed(
-      new Runnable() {
-        @Override
-        public void run() {
-          final ReaderReadiumJavaScriptAPIType readium_js =
-            NullCheck.notNull(ReaderActivity.this.readium_js_api);
-          readium_js.getCurrentPage(ReaderActivity.this);
-          readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
-        }
-      }, 300L);
+            new Runnable() {
+              @Override
+              public void run() {
+                final ReaderReadiumJavaScriptAPIType readium_js =
+                        NullCheck.notNull(ReaderActivity.this.readium_js_api);
+                readium_js.getCurrentPage(ReaderActivity.this);
+                readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+              }
+            }, 300L);
   }
 
   @Override public void onReadiumFunctionDispatchError(
@@ -1201,13 +1355,12 @@ public final class ReaderActivity extends Activity implements
         }, 200L);
     } else {
       UIThread.runOnUIThread(
-        new Runnable()
-        {
-          @Override public void run()
-          {
-            simplified_js.pageHasChanged();
-          }
-        });
+              new Runnable() {
+                @Override
+                public void run() {
+                  simplified_js.pageHasChanged();
+                }
+              });
     }
   }
 
@@ -1244,17 +1397,16 @@ public final class ReaderActivity extends Activity implements
     final ImageView play = NullCheck.notNull(this.view_media_play);
 
     UIThread.runOnUIThread(
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          if (playing) {
-            play.setImageDrawable(rr.getDrawable(R.drawable.circle_pause_8x));
-          } else {
-            play.setImageDrawable(rr.getDrawable(R.drawable.circle_play_8x));
-          }
-        }
-      });
+            new Runnable() {
+              @Override
+              public void run() {
+                if (playing) {
+                  play.setImageDrawable(rr.getDrawable(R.drawable.circle_pause_8x));
+                } else {
+                  play.setImageDrawable(rr.getDrawable(R.drawable.circle_play_8x));
+                }
+              }
+            });
   }
 
   @Override public void onReadiumMediaOverlayStatusError(
@@ -1268,17 +1420,16 @@ public final class ReaderActivity extends Activity implements
     final Throwable x)
   {
     ErrorDialogUtilities.showErrorWithRunnable(
-      this,
-      ReaderActivity.LOG,
-      "Could not start http server.",
-      x,
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          ReaderActivity.this.finish();
-        }
-      });
+            this,
+            ReaderActivity.LOG,
+            "Could not start http server.",
+            x,
+            new Runnable() {
+              @Override
+              public void run() {
+                ReaderActivity.this.finish();
+              }
+            });
   }
 
   @Override public void onServerStartSucceeded(
@@ -1310,24 +1461,23 @@ public final class ReaderActivity extends Activity implements
   {
     final ViewGroup in_hud = NullCheck.notNull(this.view_hud);
     UIThread.runOnUIThread(
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          switch (in_hud.getVisibility()) {
-            case View.VISIBLE: {
-              FadeUtilities.fadeOut(
-                in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
-              break;
-            }
-            case View.INVISIBLE:
-            case View.GONE: {
-              FadeUtilities.fadeIn(in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
-              break;
-            }
-          }
-        }
-      });
+            new Runnable() {
+              @Override
+              public void run() {
+                switch (in_hud.getVisibility()) {
+                  case View.VISIBLE: {
+                    FadeUtilities.fadeOut(
+                            in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
+                    break;
+                  }
+                  case View.INVISIBLE:
+                  case View.GONE: {
+                    FadeUtilities.fadeIn(in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
+                    break;
+                  }
+                }
+              }
+            });
   }
 
   @Override public void onSimplifiedGestureCenterError(
@@ -1372,5 +1522,50 @@ public final class ReaderActivity extends Activity implements
 
     js.openContentURL(e.getContentRef(), e.getSourceHref());
   }
+
+
+// Bluefire Added
+
+  /**
+   * Encryption of a given text using the provided secretKey
+   *
+   * @param text
+   * @param secretKey
+   * @return the encoded string
+   * @throws SignatureException
+   */
+  public static String hashMac(String text, String secretKey)
+          throws SignatureException {
+
+    try {
+      Key sk = new SecretKeySpec(secretKey.getBytes(), HASH_ALGORITHM);
+      Mac mac = Mac.getInstance(sk.getAlgorithm());
+      mac.init(sk);
+      final byte[] hmac = mac.doFinal(text.getBytes());
+      return toHexString(hmac);
+    } catch (NoSuchAlgorithmException e1) {
+      // throw an exception or pick a different encryption method
+      throw new SignatureException(
+              "error building signature, no such algorithm in device "
+                      + HASH_ALGORITHM);
+    } catch (InvalidKeyException e) {
+      throw new SignatureException(
+              "error building signature, invalid key " + HASH_ALGORITHM);
+    }
+  }
+
+  private static final String HASH_ALGORITHM = "HmacSHA256";
+
+  public static String toHexString(byte[] bytes) {
+    StringBuilder sb = new StringBuilder(bytes.length * 2);
+
+    Formatter formatter = new Formatter(sb);
+    for (byte b : bytes) {
+      formatter.format("%02x", b);
+    }
+
+    return sb.toString();
+  }
+// Bluefire Added
 
 }

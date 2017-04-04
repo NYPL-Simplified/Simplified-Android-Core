@@ -49,68 +49,88 @@ public class UrmsCreateProfileRequest {
 
 
     public static void requestAuthToken() throws SignatureException {
-        String userID = "google-110495186711904557779";
-        String path = "/store/v2/users/" + userID + "/authtoken/generate";
-        String sessionURL = "http://urms-967957035.eu-west-1.elb.amazonaws.com" + path;
 
-        String timestamp = Long.toString(System.currentTimeMillis());
-        String hmacMessage = path + timestamp;
-        String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try  {
+
+                    String userID = "google-110495186711904557779";
+                    String path = "/store/v2/users/" + userID + "/authtoken/generate";
+                    String sessionURL = "http://urms-967957035.eu-west-1.elb.amazonaws.com" + path;
+
+                    String timestamp = Long.toString(System.currentTimeMillis());
+                    String hmacMessage = path + timestamp;
+                    String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
 
 
-        String hmac = hashMac(hmacMessage, secretKey);
-        String authHash = Base64.encodeToString(hmac.getBytes(), Base64.DEFAULT);
+                    String hmac = hashMac(hmacMessage, secretKey);
+                    String authHash = Base64.encodeToString(hmac.getBytes(), Base64.DEFAULT);
 
-        String storeID = "129";
-        String authString = storeID + "-" + timestamp + "-" + authHash;
+                    String storeID = "129";
+                    String authString = storeID + "-" + timestamp + "-" + authHash;
 
-        // Create a new HttpClient and Post Header
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpPost httppost = new HttpPost(sessionURL);
+                    // Create a new HttpClient and Post Header
+                    HttpClient httpclient = new DefaultHttpClient();
+                    HttpPost httppost = new HttpPost(sessionURL);
 
-        try {
-            // Set headers
-            httppost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            // Data to POST
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("authString", authString));
-            nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
+                    try {
+                        // Set headers
+                        httppost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            // Set content length header
-            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
-            long urlEncodedFormEntityLength = urlEncodedFormEntity.getContentLength();
-            httppost.setHeader("Content-Length", Long.toString(urlEncodedFormEntityLength));
+                        // Data to POST
+                        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+                        nameValuePairs.add(new BasicNameValuePair("authString", authString));
+                        nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
 
-            // Set data body
-            httppost.setEntity(urlEncodedFormEntity);
+                        // Set content length header
+                        UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
+                        long urlEncodedFormEntityLength = urlEncodedFormEntity.getContentLength();
+                        httppost.setHeader("Content-Length", Long.toString(urlEncodedFormEntityLength));
 
-            // Execute HTTP Post Request
-            HttpResponse httpResponse = httpclient.execute(httppost);
-            HttpEntity responseEntity = httpResponse.getEntity();
-            String response = "";
-            if(responseEntity!=null) {
-                response = EntityUtils.toString(responseEntity);
+                        // Set data body
+                        httppost.setEntity(urlEncodedFormEntity);
+
+
+
+                        // Execute HTTP Post Request
+                        HttpResponse httpResponse = httpclient.execute(httppost);
+                        HttpEntity responseEntity = httpResponse.getEntity();
+                        String response = "";
+                        if(responseEntity!=null) {
+                            response = EntityUtils.toString(responseEntity);
+                        }
+
+                        JSONObject responseJson;
+                        try {
+                            responseJson = new JSONObject(response);
+                            String authToken = responseJson.getString("authToken");
+
+                            initialize(authToken, "default");
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+
+
+                    } catch (ClientProtocolException e) {
+                        // TODO Auto-generated catch block
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                    }
+
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+        });
 
-            JSONObject responseJson;
-            try {
-                responseJson = new JSONObject(response);
-                String authToken = responseJson.getString("authToken");
-
-                initialize(authToken, "default");
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-
-
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-        }
+        thread.start();
 
 
     }
