@@ -18,3 +18,4 @@ target
 gen-external-apklibs
 *.iml
 build.sh
+.DS_Store

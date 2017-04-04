@@ -120,6 +120,35 @@
       <groupId>org.nypl.readium</groupId>
       <artifactId>readium-shared-js</artifactId>
     </dependency>
+
+
+
+
+
+    <!-- Added by Bluefire -->
+    <!--<dependency>-->
+      <!--<groupId>com.sonydadc</groupId>-->
+      <!--<artifactId>liburms</artifactId>-->
+      <!--<classifier>armeabi-v7a</classifier>-->
+      <!--<type>so</type>-->
+      <!--<version>1.0.1</version>-->
+    <!--</dependency>-->
+    <!--<dependency>-->
+      <!--<groupId>com.sonydadc</groupId>-->
+      <!--<artifactId>libgnustlshared</artifactId>-->
+      <!--<classifier>armeabi-v7a</classifier>-->
+      <!--<type>so</type>-->
+      <!--<version>1.0.1</version>-->
+    <!--</dependency>-->
+     <dependency>
+      <groupId>com.sonydadc</groupId>
+      <artifactId>urms-sdk-android</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+    <!-- End added by Bluefire -->
+
+
+
     <dependency>
       <groupId>com.koushikdutta.async</groupId>
       <artifactId>androidasync</artifactId>
@@ -211,12 +240,49 @@
   </profiles>
 
   <build>
+
     <plugins>
-      <!-- Check style -->
+      <!-- Added by Bluefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.sony.dadc</groupId>
+                  <artifactId>liburms</artifactId>
+                  <version>1.0.1</version>
+                  <type>so</type>
+                  <destFileName>liburms.so</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.sony.dadc</groupId>
+                  <artifactId>libgnustlshared</artifactId>
+                  <version>1.0.1</version>
+                  <type>so</type>
+                  <destFileName>libgnustl_shared.so</destFileName>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.directory}/lib/armeabi-v7a</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
+      <!-- Added by Bluefire -->
+
+      <!-- Check style -->
+      <!--<plugin>-->
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <!--<artifactId>maven-checkstyle-plugin</artifactId>-->
+      <!--</plugin>-->
 
       <!-- Android plugin configuration -->
       <plugin>
