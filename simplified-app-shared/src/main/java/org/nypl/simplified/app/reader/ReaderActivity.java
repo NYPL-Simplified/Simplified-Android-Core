@@ -98,6 +98,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -408,21 +409,19 @@ public final class ReaderActivity extends Activity implements
           String path = "/store/v2/users/" + userID + "/authtoken/generate";
           String sessionURL = "http://urms-967957035.eu-west-1.elb.amazonaws.com" + path;
 
-          String timestamp = Long.toString(System.currentTimeMillis());
+          String timestamp = Long.toString(System.currentTimeMillis() / 1000);
           String hmacMessage = path + timestamp;
           String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
-
           ReaderActivity.LOG.debug("ReaderActivity - hmacMessage: {} ", hmacMessage);
 
-
           String hmac = hashMac(hmacMessage, secretKey);
-          String authHash = Base64.encodeToString(hmac.getBytes(), Base64.DEFAULT);
+          ReaderActivity.LOG.debug("ReaderActivity - hmac: {} ", hmac);
 
+          String authHash = Base64.encodeToString(hmac.getBytes(), Base64.DEFAULT);
           ReaderActivity.LOG.debug("ReaderActivity - authHash: {} ", authHash);
 
           String storeID = "129";
           String authString = storeID + "-" + timestamp + "-" + authHash;
-
           ReaderActivity.LOG.debug("ReaderActivity - authString: {} ", authString);
 
 
@@ -442,8 +441,8 @@ public final class ReaderActivity extends Activity implements
 
             // Set content length header
             UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
-            long urlEncodedFormEntityLength = urlEncodedFormEntity.getContentLength();
-            httppost.setHeader("Content-Length", Long.toString(urlEncodedFormEntityLength));
+//            long urlEncodedFormEntityLength = urlEncodedFormEntity.getContentLength();
+//            httppost.setHeader("Content-Length", Long.toString(urlEncodedFormEntityLength));
 
             // Set data body
             httppost.setEntity(urlEncodedFormEntity);
@@ -451,12 +450,18 @@ public final class ReaderActivity extends Activity implements
 
 
             // Execute HTTP Post Request
+
+            ReaderActivity.LOG.debug("ReaderActivity - Executing HTTP POST request…");
             HttpResponse httpResponse = httpclient.execute(httppost);
+            ReaderActivity.LOG.debug("ReaderActivity - Getting response entity…");
             HttpEntity responseEntity = httpResponse.getEntity();
             String response = "";
-            if(responseEntity!=null) {
+            if(responseEntity != null) {
               response = EntityUtils.toString(responseEntity);
+              ReaderActivity.LOG.debug("ReaderActivity - Response is: {}", response);
+
             }
+
 
             JSONObject responseJson;
             try {
@@ -518,9 +523,9 @@ public final class ReaderActivity extends Activity implements
 
 
           } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
+             e.printStackTrace();
           } catch (IOException e) {
-            // TODO Auto-generated catch block
+             e.printStackTrace();
           }
 
 
@@ -1535,13 +1540,13 @@ public final class ReaderActivity extends Activity implements
    * @throws SignatureException
    */
   public static String hashMac(String text, String secretKey)
-          throws SignatureException {
+          throws SignatureException, UnsupportedEncodingException {
 
     try {
-      Key sk = new SecretKeySpec(secretKey.getBytes(), HASH_ALGORITHM);
+      Key sk = new SecretKeySpec(secretKey.getBytes("UTF-8"), HASH_ALGORITHM);
       Mac mac = Mac.getInstance(sk.getAlgorithm());
       mac.init(sk);
-      final byte[] hmac = mac.doFinal(text.getBytes());
+      final byte[] hmac = mac.doFinal(text.getBytes("UTF-8"));
       return toHexString(hmac);
     } catch (NoSuchAlgorithmException e1) {
       // throw an exception or pick a different encryption method
