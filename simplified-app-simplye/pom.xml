@@ -24,6 +24,11 @@
       <version>${project.version}</version>
       <type>aar</type>
     </dependency>
+
+
+
+
+
   </dependencies>
 
   <profiles>
@@ -145,6 +150,47 @@
           </sdk>
         </configuration>
       </plugin>
+
+
+
+
+      <!-- Added by Bluefire -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.sony.dadc</groupId>
+                  <artifactId>liburms</artifactId>
+                  <version>1.0.1</version>
+                  <type>so</type>
+                  <destFileName>liburms.so</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.sony.dadc</groupId>
+                  <artifactId>libgnustlshared</artifactId>
+                  <version>1.0.1</version>
+                  <type>so</type>
+                  <destFileName>libgnustl_shared.so</destFileName>
+                </artifactItem>
+              </artifactItems>
+              <outputDirectory>${project.build.directory}/ndk-libs/armeabi-v7a</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Added by Bluefire -->
+
+
     </plugins>
   </build>
 

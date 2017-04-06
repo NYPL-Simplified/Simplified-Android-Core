@@ -57,14 +57,19 @@ import com.sonydadc.urms.android.type.UrmsConfig;
 
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.Instant;
 import org.json.JSONException;
@@ -100,6 +105,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -107,6 +114,7 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -410,15 +418,42 @@ public final class ReaderActivity extends Activity implements
           String sessionURL = "http://urms-967957035.eu-west-1.elb.amazonaws.com" + path;
 
           String timestamp = Long.toString(System.currentTimeMillis() / 1000);
+//          String timestamp = "1491427893";
           String hmacMessage = path + timestamp;
+
           String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
           ReaderActivity.LOG.debug("ReaderActivity - hmacMessage: {} ", hmacMessage);
 
-          String hmac = hashMac(hmacMessage, secretKey);
-          ReaderActivity.LOG.debug("ReaderActivity - hmac: {} ", hmac);
 
-          String authHash = Base64.encodeToString(hmac.getBytes(), Base64.DEFAULT);
-          ReaderActivity.LOG.debug("ReaderActivity - authHash: {} ", authHash);
+
+          String base_string = hmacMessage;
+          String key = secretKey;
+          String authHash = "";
+          try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secret = new SecretKeySpec(key.getBytes("UTF-8"), mac.getAlgorithm());
+            mac.init(secret);
+            byte[] digest = mac.doFinal(base_string.getBytes());
+
+            // Base 64 Encode the results
+            authHash = Base64.encodeToString(digest, Base64.DEFAULT);
+            Log.v(TAG, "String: " + base_string);
+            Log.v(TAG, "key: " + key);
+            Log.v(TAG, "authHash: " + authHash);
+          } catch (Exception e) {
+            System.out.println(e.getMessage());
+          }
+
+          authHash = authHash.replaceAll("(\\r|\\n)", "");
+          authHash = authHash.replaceAll(Pattern.quote("+"), "-");
+//          authHash = authHash.replaceAll(Pattern.quote("/"), "_");
+
+
+//          byte[] hmac = hashMac(hmacMessage, secretKey);
+//          ReaderActivity.LOG.debug("ReaderActivity - hmac: {} ", hmac);
+
+//          String authHash = Base64.encodeToString(hmac, Base64.DEFAULT);
+//          ReaderActivity.LOG.debug("ReaderActivity - authHash: {} ", authHash);
 
           String storeID = "129";
           String authString = storeID + "-" + timestamp + "-" + authHash;
@@ -427,6 +462,13 @@ public final class ReaderActivity extends Activity implements
 
           // Create a new HttpClient and Post Header
           HttpClient httpclient = new DefaultHttpClient();
+
+//          HttpHost httpproxy = new HttpHost("192.168.1.154", 8888, "http");
+//          httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,httpproxy);
+
+
+
+
           HttpPost httppost = new HttpPost(sessionURL);
 
 
@@ -435,18 +477,34 @@ public final class ReaderActivity extends Activity implements
             httppost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
             // Data to POST
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("authString", authString));
-            nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
+//            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+//            nameValuePairs.add(new BasicNameValuePair("authString", authString));
+//            nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
 
             // Set content length header
-            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
+//            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
+
+            // Set data body
+            String dataBody = "authString=" + authString + "&timestamp=" + timestamp;
+            StringEntity stringEntity = new StringEntity(dataBody, HTTP.UTF_8);
+            stringEntity.setContentEncoding(HTTP.UTF_8);
+            httppost.setEntity(stringEntity);
+
+//            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+//            nameValuePairs.add(new BasicNameValuePair("authString", authString));
+//            nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
+//            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs, "UTF-8");
+//            urlEncodedFormEntity.setContentEncoding("UTF-8");
 //            long urlEncodedFormEntityLength = urlEncodedFormEntity.getContentLength();
 //            httppost.setHeader("Content-Length", Long.toString(urlEncodedFormEntityLength));
 
-            // Set data body
-            httppost.setEntity(urlEncodedFormEntity);
 
+//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity: {} ", urlEncodedFormEntity.toString());
+//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContent(): {} ", urlEncodedFormEntity.getContent());
+//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContentType(): {} ", urlEncodedFormEntity.getContentType());
+//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContentEncoding(): {} ", urlEncodedFormEntity.getContentEncoding());
+//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContentLength(): {} ", urlEncodedFormEntity.getContentLength());
+//            httppost.setEntity(urlEncodedFormEntity);
 
 
             // Execute HTTP Post Request
@@ -1539,15 +1597,15 @@ public final class ReaderActivity extends Activity implements
    * @return the encoded string
    * @throws SignatureException
    */
-  public static String hashMac(String text, String secretKey)
+  public static byte[] hashMac(String text, String secretKey)
           throws SignatureException, UnsupportedEncodingException {
 
     try {
       Key sk = new SecretKeySpec(secretKey.getBytes("UTF-8"), HASH_ALGORITHM);
       Mac mac = Mac.getInstance(sk.getAlgorithm());
       mac.init(sk);
-      final byte[] hmac = mac.doFinal(text.getBytes("UTF-8"));
-      return toHexString(hmac);
+      final byte[] hmac = mac.doFinal(text.getBytes());
+      return hmac;
     } catch (NoSuchAlgorithmException e1) {
       // throw an exception or pick a different encryption method
       throw new SignatureException(
