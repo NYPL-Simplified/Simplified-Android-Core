@@ -37,6 +37,11 @@ final class BooksControllerDeleteBookDataTask implements Runnable
       final BookDatabaseEntrySnapshot snap = e.entryGetSnapshot();
       final BookStatusType status = BookStatus.fromSnapshot(this.book_id, snap);
       this.books_status.booksStatusUpdate(status);
+
+      // destroy entry, this is needed after deletion has been broadcasted, so the book doesn't stay in loans,
+      // especially needed for collection without auth requirement where no syn is happening
+      e.entryDestroy();
+
     } catch (final Throwable e) {
       BooksControllerDeleteBookDataTask.LOG.error(
         "[{}]: could not destroy book data: ", this.book_id.getShortID(), e);
