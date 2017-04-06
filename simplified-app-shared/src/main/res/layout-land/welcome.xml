@@ -84,7 +84,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="SimplyRead"
+        android:text="SimplyE"
         android:layout_weight="1"/>
 
       <TextView

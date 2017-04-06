@@ -53,7 +53,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     try {
       final PackageInfo p_info = MainSettingsFragment.this.getActivity().getPackageManager().getPackageInfo(MainSettingsFragment.this.getActivity().getPackageName(), 0);
       final String version = p_info.versionName;
-      secret.setTitle("Version: " + version);
+      secret.setTitle("Version: " + version + " (" + p_info.versionCode + ")");
 
     } catch (PackageManager.NameNotFoundException e) {
       e.printStackTrace();
