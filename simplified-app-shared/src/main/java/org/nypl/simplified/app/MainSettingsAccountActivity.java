@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -30,7 +31,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -41,6 +41,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.tenmiles.helpstack.HSHelpStack;
+import com.tenmiles.helpstack.gears.HSDeskGear;
 
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -394,13 +396,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       NullCheck.notNull((Button) this.findViewById(R.id.settings_signup));
 
 
-    final LinearLayout in_account_links =
-      NullCheck.notNull((LinearLayout) this.findViewById(R.id.account_links));
-
     final TableRow in_privacy =
-      (TableRow) in_account_links.findViewById(R.id.link_privacy);
+      (TableRow) findViewById(R.id.link_privacy);
     final TableRow in_license =
-      (TableRow) in_account_links.findViewById(R.id.link_license);
+      (TableRow) findViewById(R.id.link_license);
 
     final TextView account_name = NullCheck.notNull(
       (TextView) this.findViewById(android.R.id.text1));
@@ -418,10 +417,60 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_pin_reveal.setVisibility(View.GONE);
     }
 
-    /**
-     * Get labels from the current authentication document.
-     */
+    final TableRow in_report_issue =
+      (TableRow) findViewById(R.id.report_issue);
 
+    if (this.account.getSupportEmail() == null)
+    {
+
+      in_report_issue.setVisibility(View.GONE);
+
+    }
+    else
+    {
+      in_report_issue.setVisibility(View.VISIBLE);
+      in_report_issue.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+
+          final Intent intent =
+            new Intent(MainSettingsAccountActivity.this, ReportIssueActivity.class);
+          final Bundle b = new Bundle();
+          b.putInt("selected_account", MainSettingsAccountActivity.this.account.getId());
+          intent.putExtras(b);
+          startActivity(intent);
+
+        }
+      });
+
+    }
+
+    final TableRow in_support_center =
+      (TableRow) findViewById(R.id.support_center);
+    if (this.account.supportsHelpCenter())
+    {
+      in_support_center.setVisibility(View.VISIBLE);
+      in_support_center.setOnClickListener(new OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+
+          final HSHelpStack stack = HSHelpStack.getInstance(MainSettingsAccountActivity.this);
+
+          final HSDeskGear gear =
+            new HSDeskGear(" ", " ", null);
+          stack.setGear(gear);
+
+          HSHelpStack.getInstance(getApplicationContext()).showHelp(MainSettingsAccountActivity.this);
+
+        }
+      });
+    }
+    else
+    {
+      in_support_center.setVisibility(View.GONE);
+    }
+
+     //Get labels from the current authentication document.
     final AuthenticationDocumentType auth_doc =
       docs.getAuthenticationDocument();
     in_barcode_label.setText(auth_doc.getLabelLoginUserID());
@@ -440,12 +489,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       locationpermission = true;
     }
 
-    if (this.account.supportsCardCreator() && locationpermission) {
+    if ((this.account.supportsCardCreator() && locationpermission) || this.account.getCardCreatorUrl() != null) {
       in_table_signup.setVisibility(View.VISIBLE);
     }
     else {
       in_table_signup.setVisibility(View.GONE);
     }
+
     in_login.setOnClickListener(
       new OnClickListener() {
         @Override
@@ -527,17 +577,40 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_age13_checkbox.setVisibility(View.VISIBLE);
     }
 
+    if (this.account.supportsCardCreator() && locationpermission) {
 
-    in_signup.setOnClickListener(
-      new OnClickListener() {
-        @Override
-        public void onClick(
-          final @Nullable View v) {
-          final Intent cardcreator = new Intent(MainSettingsAccountActivity.this, CardCreatorActivity.class);
-          startActivity(cardcreator);
-        }
-      });
+      in_signup.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+            final Intent cardcreator = new Intent(MainSettingsAccountActivity.this, CardCreatorActivity.class);
+            startActivity(cardcreator);
+          }
+        });
+      in_signup.setText("Sign Up");
     in_signup.setText(R.string.need_card_button);
+
+    }
+    else if (this.account.getCardCreatorUrl() != null)
+    {
+
+      in_signup.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+            final @Nullable View v) {
+
+            final Intent  e_card = new Intent(Intent.ACTION_VIEW);
+            e_card.setData(Uri.parse(MainSettingsAccountActivity.this.account.getCardCreatorUrl()));
+            startActivity(e_card);
+
+          }
+        });
+      in_signup.setText("Sign Up");
+
+
+    }
 
     if (this.account.getPrivacyPolicy() != null) {
       in_privacy.setVisibility(View.VISIBLE);
@@ -620,6 +693,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
 
       in_eula_checkbox.setChecked(eula.eulaHasAgreed());
+      in_eula_checkbox.setEnabled(true);
 
       in_eula_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
         @Override
@@ -769,6 +843,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final TextView in_pin_text = NullCheck.notNull(this.pin_text);
     final Button in_login = NullCheck.notNull(this.login);
+    final CheckBox in_eula_checkbox =
+      NullCheck.notNull((CheckBox) this.findViewById(R.id.eula_checkbox));
 
     in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
     in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
@@ -798,6 +874,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
             in_pin_text.setText(creds.getPin().toString());
             in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+
+            in_eula_checkbox.setEnabled(false);
 
             in_login.setText(rr.getString(R.string.settings_log_out));
             in_login.setOnClickListener(

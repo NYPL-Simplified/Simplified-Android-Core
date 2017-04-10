@@ -286,7 +286,7 @@ public final class ReaderActivity extends Activity implements
   @Override
   protected void onResume() {
     super.onResume();
-    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read")) {
+    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read") && Simplified.getCurrentAccount().supportsSimplyESync()) {
       this.syncLastRead();
     }
   }
@@ -495,7 +495,7 @@ public final class ReaderActivity extends Activity implements
   {
     ReaderActivity.LOG.debug("received book location: {}", l);
 
-    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read")) {
+    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read") && Simplified.getCurrentAccount().supportsSimplyESync()) {
 
       LOG.debug("CurrentPage prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
 

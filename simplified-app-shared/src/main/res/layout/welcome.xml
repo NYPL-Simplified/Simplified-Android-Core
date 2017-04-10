@@ -39,6 +39,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
+      android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
       android:text="@string/welcome_library_subtext"/>
 
@@ -78,8 +79,10 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_gravity="center"
+      android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="@string/welcome_instant_subtext"/>
+      android:text="@string/welcome_instant_subtext"
+      android:textAlignment="center"/>
 
     <Button
       android:id="@+id/welcome_instant"

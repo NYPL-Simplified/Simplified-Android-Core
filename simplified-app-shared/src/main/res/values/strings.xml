@@ -118,7 +118,7 @@
   <string name="catalog_book_report_submit">Submit</string>
 
   <!-- Help strings -->
-  <string name="help">Help</string>
+  <string name="help">Frequently Asked Questions</string>
 
   <!-- Library Signup Strings -->
   <string name="library_signup_title">Sign Up for a Library Card</string>
@@ -158,6 +158,7 @@
   <string name="settings_manage_accounts">Manage Accounts</string>
   <string name="settings_credits">Acknowledgements</string>
   <string name="settings_eula">User Agreement</string>
+  <string name="settings_report_issue">Report an Issue</string>
   <string name="settings_privacy">Privacy Policy</string>
   <string name="settings_licences">Licenses</string>
   <string name="settings_licence_software">Software License</string>
@@ -224,11 +225,11 @@
 
   <!-- Welcome Strings -->
   <string name="welcome_library_header">Read Books From Your Library</string>
-  <string name="welcome_library_subtext">Check out books and sync across devices</string>
+  <string name="welcome_library_subtext">Simply browse, borrow, and read free ebooks from your local library</string>
   <string name="welcome_library_button">Pick Your Library</string>
-  <string name="welcome_instant_header">Read Books Without a Library Card</string>
-  <string name="welcome_instant_subtext">Find classic books in the public domain</string>
-  <string name="welcome_instant_button">Instant Classics</string>
+  <string name="welcome_instant_header">SimplyRead</string>
+  <string name="welcome_instant_subtext">Download and read ebooks without a library card</string>
+  <string name="welcome_instant_button">Read Now</string>
 
   <!-- Card Signup Strings -->
   <string name="need_card_question">Don\'t have a library card?</string>

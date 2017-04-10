@@ -4,9 +4,6 @@
   <!-- The configurable application name -->
   <string name="feature_app_name">Simply\uFEFFE</string>
 
-  <!-- The configurable application icon -->
-  <drawable name="feature_app_icon">@drawable/simplified</drawable>
-
   <!-- The configurable splash screen image -->
   <drawable name="feature_app_splash">@drawable/simplified_splash</drawable>
 

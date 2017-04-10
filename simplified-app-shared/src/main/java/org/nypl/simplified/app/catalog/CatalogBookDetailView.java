@@ -957,6 +957,11 @@ public final class CatalogBookDetailView implements Observer,
 
     final Button report_button = this.book_download_report_button;
     report_button.setOnClickListener(new CatalogBookReport(this.activity, e));
+
+//    self.reportAProblemButton.hidden = book.acquisition.report == nil;
+
+//    report_button.setVisibility(View.GONE);
+
   }
 
   @Override public void update(

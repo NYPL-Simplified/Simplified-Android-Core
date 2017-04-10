@@ -9,10 +9,10 @@
 
   <ImageView
     android:layout_width="wrap_content"
-    android:layout_height="120dp"
     android:layout_gravity="center"
     android:src="@drawable/simplified_splash"
-    android:layout_weight="1"/>
+    android:layout_weight="1"
+    android:layout_height="100dp"/>
 
   <LinearLayout
     android:orientation="horizontal"
@@ -29,11 +29,11 @@
 
       <ImageView
         android:layout_width="80dp"
-        android:layout_height="80dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
         android:src="@drawable/getting_started_icon_library"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:layout_height="70dp"/>
 
       <TextView
         android:layout_width="wrap_content"
@@ -47,9 +47,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/welcome_library_subtext"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:textAlignment="center"/>
 
       <Button
         android:id="@+id/welcome_library"
@@ -71,11 +73,11 @@
 
       <ImageView
         android:layout_width="80dp"
-        android:layout_height="80dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
         android:src="@drawable/getting_started_icon_instant"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:layout_height="70dp"/>
 
       <TextView
         android:layout_width="wrap_content"
@@ -89,9 +91,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
+
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/welcome_instant_subtext"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:textAlignment="center"/>
 
       <Button
         android:id="@+id/welcome_instant"
