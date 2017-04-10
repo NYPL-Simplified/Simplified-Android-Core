@@ -2,12 +2,12 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.simplye"
-  android:versionCode="1033"
+  android:versionCode="1082"
   android:versionName="2.0.0">
 
   <uses-sdk
     android:minSdkVersion="19"
-    android:targetSdkVersion="21"/>
+    android:targetSdkVersion="25"/>
 
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-permission android:name="android.permission.INTERNET"/>
@@ -18,7 +18,7 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:icon="@drawable/feature_app_icon"
+    android:icon="@mipmap/ic_launcher"
     android:label="@string/feature_app_name"
     android:contentDescription="@string/feature_app_name"
     android:largeHeap="true"
@@ -204,6 +204,12 @@
     <activity
       android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
       android:screenOrientation="portrait">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.ReportIssueActivity"
+      android:windowSoftInputMode="adjustResize"
+      android:label="@string/hs_issuebutton_title"
+      android:contentDescription="@string/hs_issuebutton_title">
     </activity>
 
     <receiver

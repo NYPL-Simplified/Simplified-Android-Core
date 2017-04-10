@@ -9,10 +9,10 @@
 
   <ImageView
     android:layout_width="wrap_content"
-    android:layout_height="120dp"
     android:layout_gravity="center"
     android:src="@drawable/simplified_splash"
-    android:layout_weight="1"/>
+    android:layout_weight="1"
+    android:layout_height="100dp"/>
 
   <LinearLayout
     android:orientation="horizontal"
@@ -29,27 +29,29 @@
 
       <ImageView
         android:layout_width="80dp"
-        android:layout_height="80dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
         android:src="@drawable/getting_started_icon_library"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:layout_height="70dp"/>
 
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Read Books From Your Library"
+        android:text="Read Books from your Library"
         android:layout_weight="1"/>
 
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Check out books and sync across devices"
-        android:layout_weight="1"/>
+        android:text="Simply browse borrow and read free ebooks from you local library"
+        android:layout_weight="1"
+        android:textAlignment="center"/>
 
       <Button
         android:id="@+id/welcome_library"
@@ -71,31 +73,34 @@
 
       <ImageView
         android:layout_width="80dp"
-        android:layout_height="80dp"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
         android:src="@drawable/getting_started_icon_instant"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:layout_height="70dp"/>
 
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Read Books Without a Library Card"
+        android:text="SimplyRead"
         android:layout_weight="1"/>
 
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
+
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Find classic books in the public domain"
-        android:layout_weight="1"/>
+        android:text="Download and read ebooks without a library card"
+        android:layout_weight="1"
+        android:textAlignment="center"/>
 
       <Button
         android:id="@+id/welcome_instant"
-        android:text="Instant Classics"
+        android:text="Read Now"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
