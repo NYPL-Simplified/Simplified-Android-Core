@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import bclurms.UrmsInitializer;
+
 /**
  * A splash screen activity that either shows a license agreement, or simply
  * starts up another activity without displaying anything if the user has
@@ -44,6 +46,9 @@ public class MainSplashActivity extends Activity
   @Override
   protected void onCreate(final Bundle state)
   {
+    UrmsInitializer.initializeWithMarlinURL(getApplicationContext(), "https://urms-marlin-us.codefusion.technology/bks/");
+
+
     final int id = Simplified.getCurrentAccount().getId();
     if (id == 0) {
       setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);

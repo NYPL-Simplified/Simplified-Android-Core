@@ -47,10 +47,14 @@ import com.io7m.junreachable.UnreachableCodeException;
 import com.sonydadc.urms.android.Urms;
 import com.sonydadc.urms.android.UrmsError;
 import com.sonydadc.urms.android.api.CreateProfileTask;
+import com.sonydadc.urms.android.api.DeleteProfileTask;
+import com.sonydadc.urms.android.api.RegisterBookTask;
 import com.sonydadc.urms.android.task.EmptyResponse;
 import com.sonydadc.urms.android.task.IFailedCallback;
+import com.sonydadc.urms.android.task.IPostExecuteCallback;
 import com.sonydadc.urms.android.task.ISucceededCallback;
 import com.sonydadc.urms.android.task.IUrmsTask;
+import com.sonydadc.urms.android.task.TaskFailedException;
 import com.sonydadc.urms.android.task.UrmsTaskStatus;
 import com.sonydadc.urms.android.type.UrmsConfig;
 // Added by Bluefire
@@ -121,6 +125,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import bclurms.UrmsCreateProfileRequest;
 import bclurms.UrmsEvaluateLicenseRequest;
+import bclurms.UrmsInitializer;
 import bclurms.UrmsRegisterBookRequest;
 
 import static android.content.ContentValues.TAG;
@@ -381,9 +386,9 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.debug("ReaderActivity - before reading file from Assets and writing to internal storage");
 
     // Read file from Assets and write to internal storage
-    File f = new File(getCacheDir() + "/iliaddrm.epub");
+    File f = new File(getCacheDir() + "/sample.epub");
     if (!f.exists()) try {
-      InputStream is = getAssets().open("iliaddrm.epub");
+      InputStream is = getAssets().open("sample.epub");
       int size = is.available();
       byte[] buffer = new byte[size];
       is.read(buffer);
@@ -392,7 +397,7 @@ public final class ReaderActivity extends Activity implements
       fos.write(buffer);
       fos.close();
     } catch (Exception e) { throw new RuntimeException(e); }
-    final File in_epub_file = new File(getCacheDir(), "iliaddrm.epub");
+    final File in_epub_file = new File(getCacheDir(), "sample.epub");
 
 
     ReaderActivity.LOG.debug("ReaderActivity before evaluateURMSLicense called");
@@ -418,7 +423,6 @@ public final class ReaderActivity extends Activity implements
           String sessionURL = "http://urms-967957035.eu-west-1.elb.amazonaws.com" + path;
 
           String timestamp = Long.toString(System.currentTimeMillis() / 1000);
-//          String timestamp = "1491427893";
           String hmacMessage = path + timestamp;
 
           String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
@@ -445,7 +449,7 @@ public final class ReaderActivity extends Activity implements
           }
 
           authHash = authHash.replaceAll("(\\r|\\n)", "");
-          authHash = authHash.replaceAll(Pattern.quote("+"), "-");
+          authHash = authHash.replaceAll(Pattern.quote("+"), "%2B");
 //          authHash = authHash.replaceAll(Pattern.quote("/"), "_");
 
 
@@ -524,55 +528,98 @@ public final class ReaderActivity extends Activity implements
             JSONObject responseJson;
             try {
               responseJson = new JSONObject(response);
-              String authToken = responseJson.getString("authToken");
+              final String authToken = responseJson.getString("authToken");
               ReaderActivity.LOG.debug("ReaderActivity - authToken: {}", authToken);
 
-             String profileName = "default";
+             final String profileName = "default";
 
-              UrmsConfig config = new UrmsConfig(
+              final UrmsConfig config = new UrmsConfig(
                       "https://urms-sdk.codefusion.technology/sdk/",			// cgp.api
                       "https://urms-marlin-us.codefusion.technology/bks/",	// marlin.api
                       "urn:marlin:organization:sne:service-provider:2",		// marlin.service_id
                       true 													// marlin.use_ssl
               );
 
-              CreateProfileTask createProfile = Urms.createCreateProfileTask(authToken, profileName, null, config);
-              Log.d("ReaderActivity", "!@!@! Token: " + authToken);
+              runOnUiThread(new Runnable() {
+                public void run() {
 
-              createProfile.setSucceededCallback(new ISucceededCallback<EmptyResponse>() {
-                @Override
-                public void onSucceeded(IUrmsTask task, EmptyResponse result) {
-                  Log.d("ReaderActivity", "Success creating profile.");
+                  boolean deleteProfileSucceeded = Urms.createDeleteProfileTask(profileName).execute();
 
-                  evaluateURMSLicense(bookCCID, bookUri, getApplicationContext(), a, in_epub_file);
-                  ReaderActivity.LOG.debug("ReaderActivity - after evaluateURMSLicense called");
-                }
-              });
-
-              createProfile.setFailedCallback(new IFailedCallback() {
-                @Override
-                public void onFailed(IUrmsTask task, UrmsTaskStatus status, UrmsError error) {
-                  if (error.getErrorType() == UrmsError.RegisterUserDeviceCapacityReached) {
-                    Log.e(TAG, "RegisterUserDeviceCapacityReached");
-                  } else if (error.getErrorType() == UrmsError.NetworkError ||
-                          error.getErrorType() == UrmsError.NetworkTimeout) {
-                    Log.e(TAG, "Network error or network timeout.");
-                  } else if (error.getErrorType() == UrmsError.UrmsNotInitialized) {
-                    Log.e(TAG, "URMS not initialized.");
-                  } else if (error.getErrorType() == UrmsError.LoseTime) {
-                    Log.e(TAG, "Please ensure the time on your device is correct.");
-                  } else if (error.getErrorType() == UrmsError.OutdatedVersion) {
-                    Log.e(TAG, "Outdated version");
-                  } else if (error.getErrorCode().endsWith("04")) {
-                    Log.e(TAG, "Potential server/client configuration mismatch.");
+                  if (deleteProfileSucceeded) {
+                    Log.d("ReaderActivity", "Profile deleted: " + profileName);
                   } else {
-                    Log.e(TAG, "Other error: " + error.getErrorCode());
-                    Log.e(TAG, "Error type: " + new Integer(error.getErrorType()).toString());
+                    Log.d("ReaderActivity", "Error deleting profile: " + profileName);
                   }
-                  Log.e(TAG, "Error creating profile.");
+
+
+                  CreateProfileTask createProfile = Urms.createCreateProfileTask(authToken, profileName, null, config);
+                  Log.d("ReaderActivity", "!@!@! Token: " + authToken);
+
+                  createProfile.setSucceededCallback(new ISucceededCallback<EmptyResponse>() {
+                    @Override
+                    public void onSucceeded(IUrmsTask task, EmptyResponse result) {
+                      Log.d("ReaderActivity", "Success creating profile.");
+
+
+                      List<String> profiles = null;
+                      try {
+                        profiles = Urms.createGetProfilesTask().getResultWithExecute().getProfiles();
+                        if (profiles.size() > 0) {
+                          Urms.createSwitchProfileTask(profiles.get(0)).getResultWithExecute();
+                          evaluateURMSLicense(bookCCID, bookUri, getApplicationContext(), a, in_epub_file);
+                        }
+                      } catch (TaskFailedException e) {
+                        e.printStackTrace();
+                      }
+                    }
+                  });
+
+                  createProfile.setFailedCallback(new IFailedCallback() {
+                    @Override
+                    public void onFailed(IUrmsTask task, UrmsTaskStatus status, UrmsError error) {
+
+                      if (error.getErrorType() == UrmsError.RegisterUserDeviceCapacityReached) {
+                        Log.e(TAG, "RegisterUserDeviceCapacityReached");
+                      } else if (error.getErrorType() == UrmsError.NetworkError ||
+                              error.getErrorType() == UrmsError.NetworkTimeout) {
+                        Log.e(TAG, "Network error or network timeout.");
+                      } else if (error.getErrorType() == UrmsError.UrmsNotInitialized) {
+                        Log.e(TAG, "URMS not initialized.");
+                      } else if (error.getErrorType() == UrmsError.LoseTime) {
+                        Log.e(TAG, "Please ensure the time on your device is correct.");
+                      } else if (error.getErrorType() == UrmsError.OutdatedVersion) {
+                        Log.e(TAG, "Outdated version");
+                      } else if (error.getErrorCode().endsWith("04")) {
+                        Log.e(TAG, "Potential server/client configuration mismatch.");
+                      } else {
+                        Log.e(TAG, "Create Profile failed: Other error: " + error.getErrorCode());
+                        Log.e(TAG, "Create Profile Error type: " + new Integer(error.getErrorType()).toString());
+                      }
+
+                      Log.d(TAG, "Create Profile failed, getting profiles…");
+
+                      List<String> profiles = null;
+                      try {
+                        profiles = Urms.createGetProfilesTask().getResultWithExecute().getProfiles();
+                        if (profiles.size() > 0) {
+                          Log.d("ReaderActivity", "Profiles size: " + profiles.size());
+                          Log.d("ReaderActivity", "Profiles: " + profiles.toString());
+                          Urms.createSwitchProfileTask(profiles.get(0)).getResultWithExecute();
+                          Log.d(TAG, "Switched to profile: " + profiles.get(0));
+                          Log.d(TAG, "Evaluating URMS license…");
+                          evaluateURMSLicense(bookCCID, bookUri, getApplicationContext(), a, in_epub_file);
+                        }
+                      } catch (TaskFailedException e) {
+                        e.printStackTrace();
+                      }
+
+
+                    }
+                  });
+                  Urms.executeAsync(createProfile);
                 }
-              });
-              Urms.executeAsync(createProfile);
+              });// End runnable
+
 
             } catch (JSONException e) {
               e.printStackTrace();
@@ -587,7 +634,6 @@ public final class ReaderActivity extends Activity implements
           }
 
 
-
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -597,47 +643,29 @@ public final class ReaderActivity extends Activity implements
     thread.start();
   }
 
+
+
   public void evaluateURMSLicense(final String bookCCID, final String bookUri, final Context mContext, final Bundle bundle, final File in_epub_file) {
     Log.e(TAG, "[evaluateURMSLicense] bookCCID = " + bookCCID);
 
-    UrmsEvaluateLicenseRequest evaluateLicenseRequest = new UrmsEvaluateLicenseRequest();
-    UrmsError error = evaluateLicenseRequest.execute(bookCCID);
-    if (error.isError()) {
-      Log.e(TAG, "[evaluateURMSLicense] Registering book...");
 
-      UrmsRegisterBookRequest registerBookRequest = new UrmsRegisterBookRequest();
+    if(!Urms.createEvaluateLicenseTask(bookCCID).execute()) {
+      Log.e(TAG, "[evaluateURMSLicense] Evaluate URMS license failed. Registering book...");
 
-      ISucceededCallback succeededCallback = new ISucceededCallback<EmptyResponse>() {
+      RegisterBookTask rbt = Urms.createRegisterBookTask(bookCCID);
+      rbt.setPostExecuteCallback(new IPostExecuteCallback() {
         @Override
-        public void onSucceeded(IUrmsTask task, EmptyResponse result) {
-          Log.e(TAG, "Register book task succeeded.");
-          evaluateURMSLicense(bookCCID, bookUri, mContext, bundle, in_epub_file); // Call self after registerBookTask succeeds, to evaluate again
+        public void onPostExecute(IUrmsTask task) {
+
+          Log.e(TAG, "Register book task - on post execute.");
+//          evaluateURMSLicense(bookCCID, bookUri, mContext, bundle, in_epub_file); // Call self after registerBookTask succeeds, to evaluate again
+
+
         }
-      };
+      });
+      rbt.setDestination(in_epub_file);
 
-      IFailedCallback failedCallback = new IFailedCallback() {
-        @Override
-        public void onFailed(IUrmsTask task, UrmsTaskStatus status, UrmsError error) {
-          Log.e(TAG, "Register book task failed.");
-          Log.e(TAG, error.getErrorCode());
-
-          if (status != UrmsTaskStatus.Cancelled) {
-            if (error.getErrorType() == UrmsError.NetworkError || error.getErrorType() == UrmsError.NetworkTimeout) {
-              Log.e(TAG, "Network Error or Network Timeout.");
-            } else if (error.getErrorType() == UrmsError.UrmsNotInitialized) {
-              Log.e(TAG, "URMS not initialized.");
-            } else if (error.getErrorType() == UrmsError.NoBook) {
-              Log.e(TAG, "Invalid License.");
-            } else if (error.getErrorType() == UrmsError.NotAuthorized) {
-              Log.e(TAG, "Not Authorized.");
-            } else {
-              Log.e(TAG, "Other error occurred.");
-            }
-          }
-        }
-      };
-
-      registerBookRequest.execute(bookCCID, bookUri, succeededCallback, failedCallback);
+      rbt.executeAsync();
       Log.e(TAG, "Register book task executed.");
     } else {
       Log.e(TAG, "No error from evaluateURMSLicense. Opening book.");
