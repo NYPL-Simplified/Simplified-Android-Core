@@ -534,6 +534,8 @@ public class CardCreatorActivity extends FragmentActivity implements
       // Can't get location.
       // GPS or network is not enabled.
       // Ask user to enable GPS/network in settings.
+      this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), false);
+      findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
       tracker.showSettingsAlert();
     }

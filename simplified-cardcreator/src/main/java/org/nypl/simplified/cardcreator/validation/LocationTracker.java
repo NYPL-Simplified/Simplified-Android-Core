@@ -167,11 +167,17 @@ public class LocationTracker extends Service implements LocationListener {
       // Using getFromLocation() returns an array of Addresses for the area immediately
       // surrounding the given latitude and longitude. The results are a best guess and are
       // not guaranteed to be accurate.
-      addresses = geocoder.getFromLocation(
-        this.location.getLatitude(),
-        this.location.getLongitude(),
-        // In this sample, we get just a single address.
-        1);
+      if (this.location != null) {
+        addresses = geocoder.getFromLocation(
+          this.location.getLatitude(),
+          this.location.getLongitude(),
+          // In this sample, we get just a single address.
+          1);
+      }
+      else
+      {
+        this.getLocation();
+      }
     } catch (IOException ioException) {
       // Catch network or other I/O problems.
 //      errorMessage = getString(R.string.service_not_available);

@@ -233,6 +233,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
       app.getBooks().destroyBookStatusCache();
 
+    Simplified.getCatalogAppServices().reloadCatalog(true, MainSettingsAccountActivity.this.account);
     final Resources rr = NullCheck.notNull(this.getResources());
     final Context context = MainSettingsAccountActivity.this.getApplicationContext();
     final CharSequence text =
@@ -895,10 +896,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                       @Override
                       public void run() {
                         //if current account
+                        final_books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                         if (MainSettingsAccountActivity.this.account == Simplified.getCurrentAccount()) {
                           final_books.destroyBookStatusCache();
                         }
-                        final_books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
                       }
                     });
                   final FragmentManager fm =
