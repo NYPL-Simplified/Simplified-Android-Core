@@ -20,8 +20,7 @@
     android:label="@string/feature_app_name"
     android:contentDescription="@string/feature_app_name"
     android:largeHeap="true"
-    android:theme="@style/SimplifiedTheme"
-    android:debuggable="true">
+    android:theme="@style/SimplifiedTheme">
 
     <!-- Main entry point for the application. -->
     <activity
