@@ -1,5 +1,7 @@
 package org.nypl.simplified.app;
 
+import android.*;
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -13,6 +15,7 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -484,12 +487,16 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       NullCheck.notNull((TableLayout) this.findViewById(R.id.settings_signup_table));
 
 
-    boolean locationpermission = false;
-    if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-      locationpermission = true;
-    }
+//    boolean locationpermission = false;
+//    if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//      locationpermission = true;
+//    }
+//    else
+//    {
+//      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+//    }
 
-    if ((this.account.supportsCardCreator() && locationpermission) || this.account.getCardCreatorUrl() != null) {
+    if (this.account.supportsCardCreator() || this.account.getCardCreatorUrl() != null) {
       in_table_signup.setVisibility(View.VISIBLE);
     }
     else {
@@ -577,7 +584,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_age13_checkbox.setVisibility(View.VISIBLE);
     }
 
-    if (this.account.supportsCardCreator() && locationpermission) {
+    if (this.account.supportsCardCreator()) {
 
       in_signup.setOnClickListener(
         new OnClickListener() {
