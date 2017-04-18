@@ -20,6 +20,13 @@ public interface BooksControllerType
 
   BooksStatusCacheType bookGetStatusCache();
 
+
+  /**
+   *
+   */
+
+  void destroyBookStatusCache();
+
   /**
    * @return A read-only reference to the current book database.
    */
@@ -29,25 +36,27 @@ public interface BooksControllerType
   /**
    * Borrow the given book, delivering the results to the given {@code
    * listener}.
-   *
-   * @param id       The book ID
+   *  @param id       The book ID
    * @param acq      The specific acquisition relation
    * @param eo       The feed entry
+   * @param needs_auth  login required
    */
 
   void bookBorrow(
     BookID id,
     OPDSAcquisition acq,
-    OPDSAcquisitionFeedEntry eo);
+    OPDSAcquisitionFeedEntry eo,
+    boolean needs_auth);
 
   /**
    * Delete the actual book file for the given book, if any.
    *
    * @param id The book ID
+   * @param needs_auth login needed
    */
 
   void bookDeleteData(
-    BookID id);
+    BookID id, boolean needs_auth);
 
   /**
    * Cancel the download of the book with the given {@code id}.

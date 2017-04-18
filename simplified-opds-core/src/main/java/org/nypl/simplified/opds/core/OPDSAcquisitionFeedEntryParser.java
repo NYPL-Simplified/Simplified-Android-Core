@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -221,6 +222,58 @@ public final class OPDSAcquisitionFeedEntryParser
           } else {
             OPDSAcquisitionFeedEntryParser.tryAvailability(eb, e_link, revoke);
           }
+
+          {
+
+            final OptionType<Element> licensor_opt =
+              OPDSXML.getFirstChildElementWithNameOptional(
+                e_link, OPDSFeedConstants.DRM_URI, "licensor");
+
+            if (licensor_opt.isSome()) {
+              final Some<Element> licensor_some = (Some<Element>) licensor_opt;
+
+              final Element in_e = OPDSXML.nodeAsElement(licensor_some.get());
+              final String  in_vendor = in_e.getAttribute("drm:vendor");
+              String in_client_token = null;
+              OptionType<String> in_device_manager = Option.none();
+              for (int i = 0; i < in_e.getChildNodes().getLength(); ++i)
+              {
+                final Node node = in_e.getChildNodes().item(i);
+
+                if (node.getNodeName().contains("clientToken"))
+                {
+                  in_client_token =  node.getFirstChild().getNodeValue();
+                }
+
+                if (node.getNodeName().contains("link"))
+                {
+                  final Element element = OPDSXML.nodeAsElement(node);
+
+                  final boolean has_everything =
+                    element.hasAttribute("rel") && element.hasAttribute("href");
+
+                  if (has_everything) {
+                    final String r = NullCheck.notNull(element.getAttribute("rel"));
+                    final String h = NullCheck.notNull(element.getAttribute("href"));
+
+                    if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
+
+                      in_device_manager = Option.some(h);
+
+                    }
+                  }
+                }
+                if (in_vendor != null && in_client_token != null) {
+                  final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token, in_device_manager);
+                  eb.setLicensorOption(Option.some(licensor));
+                }
+              }
+
+
+            }
+
+          }
+
         }
       }
     }
@@ -259,22 +312,23 @@ public final class OPDSAcquisitionFeedEntryParser
     final List<Element> top_level_list = OPDSXML.getChildElementsWithName(
       link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
 
-    if (top_level_list.size() == 0) {
-      return true;
-    }
-
-    for (Element top_level_e : top_level_list) {
-      if ("vnd.adobe/adept+xml".equals(top_level_e.getAttribute("type"))) {
-        final List<Element> second_level_list = OPDSXML.getChildElementsWithName(
-          link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
-        for (Element second_level_e : second_level_list) {
-          if ("application/epub+zip".equals(second_level_e.getAttribute("type"))) {
-            return true;
+    if (top_level_list.size() != 0) {
+      for (Element top_level_e : top_level_list) {
+        if ("vnd.adobe/adept+xml".equals(top_level_e.getAttribute("type"))) {
+          final List<Element> second_level_list = OPDSXML.getChildElementsWithName(
+            link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
+          for (Element second_level_e : second_level_list) {
+            if ("application/epub+zip".equals(second_level_e.getAttribute("type"))) {
+              return true;
+            }
           }
+        } else if ("application/epub+zip".equals(top_level_e.getAttribute("type"))) {
+          return true;
         }
-      } else if ("application/epub+zip".equals(top_level_e.getAttribute("type"))) {
-        return true;
       }
+    }
+    else if ("application/epub+zip".equals(link.getAttribute("type"))) {
+      return true;
     }
 
     return false;

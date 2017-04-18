@@ -7,7 +7,7 @@
   android:layout_width="match_parent"
   android:layout_height="110dp"
   android:padding="8dp"
-  android:background="@color/downloading_background">
+  >
 
   <TextView
     android:id="@+id/cell_downloading_title"

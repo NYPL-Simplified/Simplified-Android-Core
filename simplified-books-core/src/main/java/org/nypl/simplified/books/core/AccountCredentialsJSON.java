@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.FunctionType;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.ProcedureType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
@@ -15,6 +17,7 @@ import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.nypl.simplified.json.core.JSONSerializerUtilities;
+import org.nypl.simplified.opds.core.DRMLicensor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -119,6 +122,20 @@ public final class AccountCredentialsJSON
         }
       });
 
+    if (credentials.getDrmLicensor().isSome()) {
+      final DRMLicensor licensor = ((Some<DRMLicensor>) credentials.getDrmLicensor()).get();
+      if (licensor.getDeviceManager().isSome()) {
+
+        licensor.getDeviceManager().map_(
+          new ProcedureType<String>() {
+            @Override
+            public void call(final String x) {
+              jo.put("licensor_url", x);
+            }
+          });
+
+      }
+    }
 
     credentials.getAdobeVendor().map_(
       new ProcedureType<AdobeVendorID>()
@@ -240,11 +257,28 @@ public final class AccountCredentialsJSON
           }
         });
 
-
+    final OptionType<String> licensor_url =
+      JSONParserUtilities.getStringOptional(obj, "licensor_url").map(
+        new FunctionType<String, String>()
+        {
+          @Override public String call(final String x)
+          {
+            return x;
+          }
+        });
 
     final AccountCredentials creds = new AccountCredentials(vendor, user, pass, provider, auth_token, adobe_token, patron);
     creds.setAdobeUserID(adobe_user);
     creds.setAdobeDeviceID(adobe_device);
+
+    if (vendor.isSome() && adobe_token.isSome()) {
+
+      final OptionType<DRMLicensor> licensor = Option.some(new DRMLicensor(
+        ((Some<AdobeVendorID>) vendor).get().toString(),
+        ((Some<AccountAdobeToken>) adobe_token).get().toString(),
+        licensor_url));
+      creds.setDrmLicensor(licensor);
+    }
 
     return creds;
   }

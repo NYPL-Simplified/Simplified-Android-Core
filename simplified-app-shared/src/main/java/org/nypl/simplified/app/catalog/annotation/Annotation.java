@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.catalog.annotation;
 
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -17,7 +18,7 @@ public class Annotation {
 
   @SerializedName("body")
   @Expose
-  private Object body;
+  private JsonElement body;
   @SerializedName("id")
   @Expose
   private String id;
@@ -128,15 +129,16 @@ public class Annotation {
   /**
    * @return The body
    */
-  public Object getBody() {
-    return this.body;
+  public JsonElement getBody() {
+      return this.body;
   }
 
   /**
    * @param in_body The body
    */
-  public void setBody(final Object in_body) {
-    this.body = in_body;
+  public void setBody(final JsonElement in_body) {
+      this.body = in_body;
+
   }
 
 

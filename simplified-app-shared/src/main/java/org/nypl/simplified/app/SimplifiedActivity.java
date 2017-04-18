@@ -6,8 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,14 +21,19 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.nypl.simplified.app.catalog.CatalogFeedActivity;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsLocalBooks;
 import org.nypl.simplified.app.catalog.CatalogFeedArgumentsRemote;
@@ -37,11 +41,15 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
-import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedFacetPseudo;
+import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.multilibrary.Account;
+import org.nypl.simplified.multilibrary.AccountsRegistry;
+import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
@@ -74,18 +82,19 @@ public abstract class SimplifiedActivity extends Activity
   }
 
   private @Nullable ArrayAdapter<SimplifiedPart> adapter;
+  private @Nullable ArrayAdapter<Object>         adapter_accounts;
   private @Nullable FrameLayout                  content_frame;
   private @Nullable DrawerLayout                 drawer;
   private @Nullable Map<SimplifiedPart, FunctionType<Bundle, Unit>>
-                                                 drawer_arg_funcs;
+    drawer_arg_funcs;
   private @Nullable Map<SimplifiedPart, Class<? extends Activity>>
-                                                 drawer_classes_by_name;
+    drawer_classes_by_name;
   private @Nullable List<SimplifiedPart>         drawer_items;
   private @Nullable ListView                     drawer_list;
   private @Nullable SharedPreferences            drawer_settings;
   private           boolean                      finishing;
   private           int                          selected;
-
+  private           SimplifiedCatalogAppServicesType app;
   /**
    * Set the arguments for the activity that will be created.
    *
@@ -169,18 +178,15 @@ public abstract class SimplifiedActivity extends Activity
         if (this.getClass() != MainCatalogActivity.class) {
           // got to main catalog activity
           //final DrawerLayout d = NullCheck.notNull(this.drawer);
-          this.selected = 0;
+          this.selected = 1;
           this.startSideBarActivity();
 
 
-        }
-        else
-        {
+        } else {
           d.openDrawer(GravityCompat.START);
           bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_hide));
         }
-      }
-      else {
+      } else {
         this.finishWithConditionalAnimationOverride();
       }
     }
@@ -189,43 +195,66 @@ public abstract class SimplifiedActivity extends Activity
   private void startSideBarActivity() {
     if (this.selected != -1) {
       final List<SimplifiedPart> di = NullCheck.notNull(this.drawer_items);
-      final Map<SimplifiedPart, Class<? extends Activity>> dc =
-              NullCheck.notNull(this.drawer_classes_by_name);
-      final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
-              NullCheck.notNull(this.drawer_arg_funcs);
 
       final SimplifiedPart name = NullCheck.notNull(di.get(this.selected));
-      final Class<? extends Activity> c = NullCheck.notNull(dc.get(name));
-      final FunctionType<Bundle, Unit> fa = NullCheck.notNull(fas.get(name));
 
-      final Bundle b = new Bundle();
-      SimplifiedActivity.setActivityArguments(b, false);
-      fa.call(b);
+      if (this.selected > 0) {
+        final Map<SimplifiedPart, Class<? extends Activity>> dc =
+          NullCheck.notNull(this.drawer_classes_by_name);
+        final Class<? extends Activity> c = NullCheck.notNull(dc.get(name));
 
-      final Intent i = new Intent();
-      i.setClass(this, c);
-      i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        final Map<SimplifiedPart, FunctionType<Bundle, Unit>> fas =
+          NullCheck.notNull(this.drawer_arg_funcs);
+        final FunctionType<Bundle, Unit> fa = NullCheck.notNull(fas.get(name));
 
-      i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-      i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final Bundle b = new Bundle();
+        SimplifiedActivity.setActivityArguments(b, false);
+        fa.call(b);
+
+        final Intent i = new Intent();
+        i.setClass(this, c);
+        i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 
-      i.putExtras(b);
-      this.startActivity(i);
+        i.putExtras(b);
+        this.startActivity(i);
 
-      this.overridePendingTransition(0, 0);
+        this.overridePendingTransition(0, 0);
+      } else {
+        // replace drawer with selection of libraries
+        final ListView dl =
+          NullCheck.notNull((ListView) this.findViewById(R.id.left_drawer));
 
+        dl.setOnItemClickListener(this);
+        dl.setAdapter(this.adapter_accounts);
+
+      }
     }
-    this.selected = -1;
 
-    final DrawerLayout d = NullCheck.notNull(this.drawer);
-    d.closeDrawer(GravityCompat.START);
+    if (this.selected > 0) {
+      this.selected = -1;
+      final DrawerLayout d = NullCheck.notNull(this.drawer);
+      d.closeDrawer(GravityCompat.START);
+    }
   }
 
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
+
+    final int id = Simplified.getCurrentAccount().getId();
+    if (id == 0) {
+      setTheme(R.style.SimplifiedTheme_NYPL);
+    } else if (id == 1) {
+      setTheme(R.style.SimplifiedTheme_BPL);
+    } else {
+      setTheme(R.style.SimplifiedTheme_Magic);
+    }
+
     super.onCreate(state);
 
     SimplifiedActivity.LOG.debug("onCreate: {}", this);
@@ -274,7 +303,7 @@ public abstract class SimplifiedActivity extends Activity
      * is simply removed from the navigation drawer.
      */
 
-    final SimplifiedCatalogAppServicesType app =
+    this.app =
       Simplified.getCatalogAppServices();
     final Resources rr = NullCheck.notNull(this.getResources());
     final boolean holds_enabled = rr.getBoolean(R.bool.feature_holds_enabled);
@@ -297,17 +326,32 @@ public abstract class SimplifiedActivity extends Activity
 
     final String app_name = NullCheck.notNull(rr.getString(R.string.feature_app_name));
     final List<SimplifiedPart> di = new ArrayList<SimplifiedPart>();
+    di.add(SimplifiedPart.PART_SWITCHER);
+
     di.add(SimplifiedPart.PART_CATALOG);
     di.add(SimplifiedPart.PART_BOOKS);
-    if (holds_enabled) {
+    if (holds_enabled && Simplified.getCurrentAccount().supportsReservations()) {
       di.add(SimplifiedPart.PART_HOLDS);
     }
     di.add(SimplifiedPart.PART_SETTINGS);
 
 
+    final List<Object> dia = new ArrayList<Object>();
+
+    final JSONArray registry = new AccountsRegistry(this).getCurrentAccounts(Simplified.getSharedPrefs());
+    for (int index = 0; index < registry.length(); ++index) {
+      try {
+        dia.add(new Account(registry.getJSONObject(index)));
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+    }
+    dia.add(SimplifiedPart.PART_MANAGE_ACCOUNTS);
+
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
-    this.adapter =
-      new ArrayAdapter<SimplifiedPart>(this, R.layout.drawer_item, di)
+
+    this.adapter_accounts =
+      new ArrayAdapter<Object>(this,  R.layout.drawer_item_account, dia)
       {
         @Override public View getView(
           final int position,
@@ -318,16 +362,110 @@ public abstract class SimplifiedActivity extends Activity
           if (reuse != null) {
             v = reuse;
           } else {
-            v = inflater.inflate(R.layout.drawer_item, parent, false);
+            v = inflater.inflate(R.layout.drawer_item_account, parent, false);
           }
 
+          final Object object = NullCheck.notNull(dia.get(position));
+
+          if (object instanceof Account) {
+
+            final Account account = (Account) object;
+            final TextView tv =
+              NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+            tv.setText(account.getName());
+
+            final ImageView icon_view =
+              NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
+            if (account.getId() == 0) {
+              icon_view.setImageResource(R.drawable.account_logo_nypl);
+            } else if (account.getId() == 1) {
+              icon_view.setImageResource(R.drawable.account_logo_bpl);
+            } else if (account.getId() == 2) {
+              icon_view.setImageResource(R.drawable.account_logo_instant);
+            }
+          } else {
+            final ImageView icon_view =
+              NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
+            icon_view.setImageResource(R.drawable.menu_icon_settings);
+            final TextView tv =
+              NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+            tv.setText("Manage Accounts");
+
+          }
+          return v;
+        }
+      };
+
+
+    this.adapter =
+      new ArrayAdapter<SimplifiedPart>(this, R.layout.drawer_item, di)
+      {
+        @Override public View getView(
+          final int position,
+          final @Nullable View reuse,
+          final @Nullable ViewGroup parent)
+        {
+          View v;
+          if (reuse != null) {
+            v = reuse;
+          } else {
+            v = inflater.inflate(R.layout.drawer_item, parent, false);
+          }
           final SimplifiedPart part = NullCheck.notNull(di.get(position));
+
+          if (part.equals(SimplifiedPart.PART_SWITCHER)) {
+            v = inflater.inflate(R.layout.drawer_item_current_account, parent, false);
+          }
+
           final TextView tv =
             NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
-          tv.setText(part.getPartName(rr));
 
-          if (dl.getCheckedItemPosition() == position) {
-            tv.setContentDescription(tv.getText() + ". selected.");
+          final ImageView icon_view =
+            NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
+
+
+          if (part.equals(SimplifiedPart.PART_SWITCHER)) {
+            v.setBackgroundResource(R.drawable.textview_underline);
+            final Prefs prefs = Simplified.getSharedPrefs();
+            final Account account = new AccountsRegistry(SimplifiedActivity.this).getAccount(prefs.getInt("current_account"));
+            tv.setText(account.getName());
+            tv.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+
+            if (account.getId() == 0) {
+              icon_view.setImageResource(R.drawable.account_logo_nypl);
+            } else if (account.getId() == 1) {
+              icon_view.setImageResource(R.drawable.account_logo_bpl);
+            } else if (account.getId() == 2) {
+              icon_view.setImageResource(R.drawable.account_logo_instant);
+            }
+          } else {
+            tv.setText(part.getPartName(rr));
+            if (dl.getCheckedItemPosition() == position) {
+              tv.setContentDescription(tv.getText() + ". selected.");
+              if (SimplifiedPart.PART_CATALOG == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_catalog_white);
+              } else if (SimplifiedPart.PART_BOOKS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_books_white);
+              } else if (SimplifiedPart.PART_HOLDS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_holds_white);
+              } else if (SimplifiedPart.PART_SETTINGS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_settings_white);
+              }
+
+            }
+            else
+            {
+              if (SimplifiedPart.PART_CATALOG == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_catalog);
+              } else if (SimplifiedPart.PART_BOOKS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_books);
+              } else if (SimplifiedPart.PART_HOLDS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_holds);
+              } else if (SimplifiedPart.PART_SETTINGS == part) {
+                icon_view.setImageResource(R.drawable.menu_icon_settings);
+              }
+
+            }
           }
 
           return v;
@@ -346,7 +484,7 @@ public abstract class SimplifiedActivity extends Activity
     classes_by_name.put(SimplifiedPart.PART_BOOKS, MainBooksActivity.class);
     classes_by_name.put(
       SimplifiedPart.PART_CATALOG, MainCatalogActivity.class);
-    if (holds_enabled) {
+    if (holds_enabled && Simplified.getCurrentAccount().supportsReservations()) {
       classes_by_name.put(SimplifiedPart.PART_HOLDS, MainHoldsActivity.class);
     }
     classes_by_name.put(
@@ -388,7 +526,7 @@ public abstract class SimplifiedActivity extends Activity
         @Override public Unit call(
           final Bundle b)
         {
-          final BooksType books = app.getBooks();
+          final BooksType books = SimplifiedActivity.this.app.getBooks();
           final BooksControllerConfigurationType config =
             books.booksGetConfiguration();
 
@@ -406,7 +544,7 @@ public abstract class SimplifiedActivity extends Activity
         }
       });
 
-    if (holds_enabled) {
+    if (holds_enabled && Simplified.getCurrentAccount().supportsReservations()) {
       da.put(
         SimplifiedPart.PART_HOLDS, new FunctionType<Bundle, Unit>()
         {
@@ -431,6 +569,16 @@ public abstract class SimplifiedActivity extends Activity
 
     da.put(
       SimplifiedPart.PART_SETTINGS, new FunctionType<Bundle, Unit>()
+      {
+        @Override public Unit call(
+          final Bundle b)
+        {
+          SimplifiedActivity.setActivityArguments(b, false);
+          return Unit.unit();
+        }
+      });
+    da.put(
+      SimplifiedPart.PART_SWITCHER, new FunctionType<Bundle, Unit>()
       {
         @Override public Unit call(
           final Bundle b)
@@ -473,18 +621,28 @@ public abstract class SimplifiedActivity extends Activity
     SimplifiedActivity.LOG.debug(
       "activity count: {}", SimplifiedActivity.ACTIVITY_COUNT);
 
-    if (!SimplifiedActivity.DEVICE_ACTIVATED) {
-      // Don't try to activate the device unless we're connected to the Internet, since
-      // it will discard its credentials if it fails.
-      final ConnectivityManager connectivity_manager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-      final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
-      if (network_info != null && network_info.isConnected()) {
-        // This is commented out because it turns out that activating the device on startup breaks
-        // decryption until a book is fulfilled.
-        //app.getBooks().accountActivateDevice();
-        SimplifiedActivity.DEVICE_ACTIVATED = true;
-      }
-    }
+
+//    UIThread.runOnUIThreadDelayed(
+//      new Runnable() {
+//        @Override
+//        public void run() {
+//
+//          if (!SimplifiedActivity.DEVICE_ACTIVATED && Simplified.getCurrentAccount().needsAuth()) {
+//            // Don't try to activate the device unless we're connected to the Internet, since
+//            // it will discard its credentials if it fails.
+//            final ConnectivityManager connectivity_manager = (ConnectivityManager) SimplifiedActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+//            final NetworkInfo network_info = connectivity_manager.getActiveNetworkInfo();
+//            if (network_info != null && network_info.isConnected()) {
+//              // This is commented out because it turns out that activating the device on startup breaks
+//              // decryption until a book is fulfilled.
+//              SimplifiedActivity.DEVICE_ACTIVATED = true;
+//            }
+//          }
+//
+//        }
+//      }, 3000L);
+
+
   }
 
   @Override protected void onDestroy()
@@ -550,14 +708,66 @@ public abstract class SimplifiedActivity extends Activity
     final int position,
     final long id)
   {
-    SimplifiedActivity.LOG.debug("onItemClick: {}", position);
-    final Resources rr = NullCheck.notNull(this.getResources());
+    final ListView dl =
+      NullCheck.notNull((ListView) this.findViewById(R.id.left_drawer));
 
-    final DrawerLayout d = NullCheck.notNull(this.drawer);
-    final ActionBar bar = this.getActionBar();
-    bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
-    this.selected = position;
-    this.startSideBarActivity();
+    if (dl.getAdapter().equals(this.adapter)) {
+
+      SimplifiedActivity.LOG.debug("onItemClick: {}", position);
+      final Resources rr = NullCheck.notNull(this.getResources());
+
+      final ActionBar bar = this.getActionBar();
+      bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
+      this.selected = position;
+      this.startSideBarActivity();
+    } else {
+      // select library
+
+      final Object object = this.adapter_accounts.getItem(position);
+
+      if (object instanceof Account) {
+        final Account account = (Account) object;
+
+
+        if (account.getId() != Simplified.getCurrentAccount().getId()) {
+
+          final Prefs prefs = Simplified.getSharedPrefs();
+          prefs.putInt("current_account", account.getId());
+
+          dl.setAdapter(this.adapter);
+
+          this.app =
+            Simplified.getCatalogAppServices();
+
+          UIThread.runOnUIThreadDelayed(
+            new Runnable() {
+              @Override
+              public void run() {
+
+                final Resources rr = NullCheck.notNull(SimplifiedActivity.this.getResources());
+                final ActionBar bar = SimplifiedActivity.this.getActionBar();
+                bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
+                SimplifiedActivity.this.selected = 1;
+                SimplifiedActivity.this.startSideBarActivity();
+
+
+                if (Simplified.getSharedPrefs().contains("destroy_database") && Simplified.getSharedPrefs().getInt("destroy_database") == Simplified.getCurrentAccount().getId())
+                {
+                    SimplifiedActivity.this.app.destroyDatabase();
+                    Simplified.getSharedPrefs().remove("destroy_database");
+                }
+
+              }
+            }, 30L);
+        } else {
+          dl.setAdapter(this.adapter);
+        }
+      } else {
+        this.selected = this.adapter.getCount() - 1;
+        this.startSideBarActivity();
+      }
+    }
+
   }
 
   @Override public boolean onOptionsItemSelected(

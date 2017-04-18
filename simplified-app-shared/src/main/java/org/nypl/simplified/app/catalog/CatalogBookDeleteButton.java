@@ -3,6 +3,7 @@ package org.nypl.simplified.app.catalog;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.view.View;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -36,8 +37,8 @@ public final class CatalogBookDeleteButton extends CatalogLeftPaddedButton
     this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_delete)));
     this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_delete)));
     this.getTextView().setTextSize(12.0f);
-    this.setBackground(rr.getDrawable(R.drawable.simplified_button));
-    this.getTextView().setTextColor(rr.getColorStateList(R.drawable.simplified_button_text));
+    this.setBackgroundResource(R.drawable.simplified_button);
+    this.getTextView().setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
 
     this.setOnClickListener(
       new OnClickListener()
@@ -54,7 +55,7 @@ public final class CatalogBookDeleteButton extends CatalogLeftPaddedButton
                 final SimplifiedCatalogAppServicesType app =
                   Simplified.getCatalogAppServices();
                 final BooksType books = app.getBooks();
-                books.bookDeleteData(in_book_id);
+                books.bookDeleteData(in_book_id, Simplified.getCurrentAccount().needsAuth());
               }
             });
           final FragmentManager fm = in_activity.getFragmentManager();

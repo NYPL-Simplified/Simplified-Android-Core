@@ -16,12 +16,17 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
 import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountAuthProvider;
@@ -32,8 +37,12 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.DocumentStoreType;
+import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.multilibrary.Account;
+import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,12 +52,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 public final class LoginDialog extends DialogFragment
-  implements AccountLoginListenerType
+  implements AccountLoginListenerType, DeviceActivationListenerType
 {
   private static final String BARCODE_ID;
   private static final Logger LOG;
   private static final String PIN_ID;
   private static final String TEXT_ID;
+  private static final String ACCOUNT_ID;
 
   static {
     LOG = LogUtilities.getLog(LoginDialog.class);
@@ -58,6 +68,7 @@ public final class LoginDialog extends DialogFragment
     BARCODE_ID = "org.nypl.simplified.app.LoginDialog.barcode";
     PIN_ID = "org.nypl.simplified.app.LoginDialog.pin";
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
+    ACCOUNT_ID = "org.nypl.simplified.app.LoginDialog.accountid";
   }
 
   private @Nullable EditText          barcode_edit;
@@ -131,6 +142,37 @@ public final class LoginDialog extends DialogFragment
     final LoginDialog d = new LoginDialog();
     d.setArguments(b);
     return d;
+  }
+
+  /**
+   * @param text Text
+   * @param barcode Barcode
+   * @param pin Pin
+   * @param account Library Account
+   * @return Login Dialog
+   */
+
+  public static LoginDialog newDialog(
+    final String text,
+    final AccountBarcode barcode,
+    final AccountPIN pin,
+    final Account account) {
+
+    NullCheck.notNull(text);
+    NullCheck.notNull(barcode);
+    NullCheck.notNull(pin);
+    NullCheck.notNull(account);
+
+    final Bundle b = new Bundle();
+    b.putSerializable(LoginDialog.TEXT_ID, text);
+    b.putSerializable(LoginDialog.PIN_ID, pin);
+    b.putSerializable(LoginDialog.BARCODE_ID, barcode);
+    b.putSerializable(LoginDialog.ACCOUNT_ID, account.getPathComponent());
+
+    final LoginDialog d = new LoginDialog();
+    d.setArguments(b);
+    return d;
+
   }
 
   private void onAccountLoginFailure(
@@ -290,6 +332,9 @@ public final class LoginDialog extends DialogFragment
     final String initial_txt =
       NullCheck.notNull(b.getString(LoginDialog.TEXT_ID));
 
+    final String account_id =
+      b.getString(LoginDialog.ACCOUNT_ID);
+
     final ViewGroup in_layout = NullCheck.notNull(
       (ViewGroup) inflater.inflate(
         R.layout.login_dialog, container, false));
@@ -312,12 +357,18 @@ public final class LoginDialog extends DialogFragment
     final Button in_login_cancel_button = NullCheck.notNull(
       (Button) in_layout.findViewById(R.id.login_dialog_cancel));
 
+    final CheckBox in_eula_checkbox =
+      NullCheck.notNull((CheckBox) in_layout.findViewById(R.id.eula_checkbox));
+
+
+
+
     final Button in_login_request_new_code = NullCheck.notNull(
       (Button) in_layout.findViewById(R.id.request_new_codes));
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
-    final DocumentStoreType docs = app.getDocumentStore();
+    DocumentStoreType docs = app.getDocumentStore();
 
     final AuthenticationDocumentType auth_doc =
       docs.getAuthenticationDocument();
@@ -328,13 +379,21 @@ public final class LoginDialog extends DialogFragment
     final OptionType<AdobeVendorID> adobe_vendor = Option.some(
       new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
 
-    final BooksType books = app.getBooks();
+    BooksType books = app.getBooks();
+
+    if (account_id != null)
+    {
+      final Account account = new AccountsRegistry(getActivity()).getAccount(Integer.valueOf(account_id));
+      books = Simplified.getBooks(account, getActivity(), Simplified.getCatalogAppServices().getAdobeDRMExecutor());
+      docs = Simplified.getDocumentStore(account, getActivity().getResources());
+    }
 
     in_text.setText(initial_txt);
     in_barcode_edit.setText(initial_bar.toString());
     in_pin_edit.setText(initial_pin.toString());
 
     in_login_button.setEnabled(false);
+    final BooksType final_books = books;
     in_login_button.setOnClickListener(
       new OnClickListener()
       {
@@ -358,7 +417,7 @@ public final class LoginDialog extends DialogFragment
 
           final AccountCredentials creds =
             new AccountCredentials(adobe_vendor, barcode, pin,  Option.some(provider));
-          books.accountLogin(creds, LoginDialog.this);
+          final_books.accountLogin(creds, LoginDialog.this);
         }
       });
 
@@ -406,6 +465,38 @@ public final class LoginDialog extends DialogFragment
     final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
     final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
 
+
+    final OptionType<EULAType> eula_opt = docs.getEULA();
+
+    if (eula_opt.isSome()) {
+      final Some<EULAType> some_eula = (Some<EULAType>) eula_opt;
+      final EULAType eula = some_eula.get();
+
+
+      in_eula_checkbox.setChecked(eula.eulaHasAgreed());
+
+      in_eula_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(final CompoundButton button, final boolean checked) {
+
+          eula.eulaSetHasAgreed(checked);
+          in_login_button.setEnabled(
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()) && in_eula_checkbox.isChecked());
+
+        }
+      });
+
+      if (eula.eulaHasAgreed()) {
+        LoginDialog.LOG.debug("EULA: agreed");
+
+      } else {
+        LoginDialog.LOG.debug("EULA: not agreed");
+
+      }
+    } else {
+      LoginDialog.LOG.debug("EULA: unavailable");
+    }
+
     in_barcode_edit.addTextChangedListener(
       new TextWatcher()
       {
@@ -432,7 +523,7 @@ public final class LoginDialog extends DialogFragment
         {
           in_barcode_empty.set(NullCheck.notNull(s).length() == 0);
           in_login_button.setEnabled(
-            (!in_barcode_empty.get()) && (!in_pin_empty.get()));
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()) && in_eula_checkbox.isChecked());
         }
       });
 
@@ -462,7 +553,7 @@ public final class LoginDialog extends DialogFragment
         {
           in_pin_empty.set(NullCheck.notNull(s).length() == 0);
           in_login_button.setEnabled(
-            (!in_barcode_empty.get()) && (!in_pin_empty.get()));
+            (!in_barcode_empty.get()) && (!in_pin_empty.get()) && in_eula_checkbox.isChecked());
         }
       });
 
@@ -517,6 +608,17 @@ public final class LoginDialog extends DialogFragment
 
   @Override public void onAccountSyncBookDeleted(final BookID book)
   {
+    // Nothing
+  }
+
+
+  @Override
+  public void onDeviceActivationFailure(final String message) {
+    // Nothing
+  }
+
+  @Override
+  public void onDeviceActivationSuccess() {
     // Nothing
   }
 }

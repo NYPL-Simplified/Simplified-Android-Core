@@ -39,4 +39,14 @@ public interface ReaderBookmarksType
     OPDSAcquisitionFeedEntry entry,
     AccountCredentials credentials,
     RequestQueue queue);
+
+
+  /**
+   * @param id       The ID of the book
+   * @param bookmark The bookmark
+   */
+  void setBookmark(
+    BookID id,
+    ReaderBookLocation bookmark);
+
 }

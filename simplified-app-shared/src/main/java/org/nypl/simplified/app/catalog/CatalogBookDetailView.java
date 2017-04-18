@@ -17,12 +17,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.app.R;
@@ -30,7 +32,6 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
-import org.nypl.simplified.books.core.AccountNotReadyException;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
@@ -539,20 +540,6 @@ public final class CatalogBookDetailView implements Observer,
     final Resources rr = NullCheck.notNull(this.activity.getResources());
 
     final FeedEntryOPDS current_entry = this.entry.get();
-
-    final OptionType<Throwable> error_opt = f.getError();
-    if (error_opt.isSome()) {
-      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
-      final Throwable error = error_some.get();
-
-      if (error instanceof AccountNotReadyException) {
-
-        this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
-
-      }
-
-    }
-
 
     final TextView failed =
       NullCheck.notNull(this.book_downloading_failed_text);

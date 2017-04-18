@@ -28,6 +28,9 @@ public class NYPLStringRequest extends StringRequest {
   AccountCredentials credentials;
   private @Nullable String username;
   private @Nullable String password;
+  private @Nullable String content_type;
+  private @Nullable String body;
+
 
   /**
    * @param method request method
@@ -43,6 +46,46 @@ public class NYPLStringRequest extends StringRequest {
                            final Response.ErrorListener error_listener) {
     super(method, url, listener, error_listener);
     this.credentials = in_credentials;
+  }
+
+  /**
+   * @param method request method
+   * @param url request url
+   * @param in_credentials account credentials
+   * @param in_content_type  header contetn type
+   * @param listener response listener
+   * @param error_listener error listener
+   */
+  public NYPLStringRequest(final int method,
+                           final String url,
+                           final AccountCredentials in_credentials,
+                           final String in_content_type,
+                           final String in_body,
+                           final Response.Listener<String> listener,
+                           final Response.ErrorListener error_listener) {
+    super(method, url, listener, error_listener);
+    this.credentials = in_credentials;
+    this.content_type = in_content_type;
+    this.body = in_body;
+  }
+
+  /**
+   * @param method request method
+   * @param url request url
+   * @param in_credentials account credentials
+   * @param in_content_type  header contetn type
+   * @param listener response listener
+   * @param error_listener error listener
+   */
+  public NYPLStringRequest(final int method,
+                           final String url,
+                           final AccountCredentials in_credentials,
+                           final String in_content_type,
+                           final Response.Listener<String> listener,
+                           final Response.ErrorListener error_listener) {
+    super(method, url, listener, error_listener);
+    this.credentials = in_credentials;
+    this.content_type = in_content_type;
   }
 
   /**
@@ -79,6 +122,10 @@ public class NYPLStringRequest extends StringRequest {
     this.password = in_password;
   }
 
+  @Override
+  public byte[] getBody() throws AuthFailureError {
+    return this.body != null ? this.body.getBytes() : null;
+  }
 
   @Override
   public Map<String, String> getHeaders() throws AuthFailureError {
@@ -112,6 +159,12 @@ public class NYPLStringRequest extends StringRequest {
       params.put("Authorization", "Basic " + encoded);
 
     }
+
+    if (this.content_type != null)
+    {
+      params.put("Content-Type",  this.content_type);
+    }
+
     return params;
   }
 

@@ -3,21 +3,20 @@
 
   <color name="divider_color">#eeeeee</color>
   
+  <color name="list_item_foreground">#ff669900</color>
   <color name="list_item_background">#ffffff</color>
-  <color name="list_item_foreground">@color/feature_main_color</color>
   <color name="list_item_text_normal">#000000</color>
   <color name="list_item_text_selected">#ffffff</color>
 
+  <color name="button_foreground">#ff669900</color>
   <color name="button_background">#ffffff</color>
-  <color name="button_foreground">@color/feature_main_color</color>
   <color name="button_disabled">#dddddd</color>
 
-  <color name="downloading_background">@color/feature_main_color</color>
   <color name="downloading_foreground">#ffffff</color>
 
-  <color name="notification_background">@color/feature_main_color</color>
   <color name="notification_foreground">#ffffff</color>
 
+  <color name="light_background">#f5f5f5</color>
   <color name="normal_background">#ffffff</color>
   <color name="normal_text_major">#000000</color>
   <color name="normal_text_minor">#a0a0a0</color>

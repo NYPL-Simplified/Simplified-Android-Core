@@ -3,6 +3,7 @@ package org.nypl.simplified.app.reader;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -104,7 +105,7 @@ import java.util.List;
   {
     UIThread.checkIsUIThread();
 
-    final int main_color = r.getColor(R.color.feature_main_color);
+    final int main_color = Color.parseColor(Simplified.getCurrentAccount().getMainColor());
     final TextView in_title = NullCheck.notNull(this.view_title);
     final ViewGroup in_root = NullCheck.notNull(this.view_root);
 

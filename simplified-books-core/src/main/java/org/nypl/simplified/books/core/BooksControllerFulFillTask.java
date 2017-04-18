@@ -201,7 +201,7 @@ final class BooksControllerFulFillTask implements Runnable
                 in_book_id, e_nn.getAcquisitions());
             if (a_opt.isSome()) {
               final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-              this.books_controller.bookBorrow(in_book_id, a, e_nn);
+              this.books_controller.bookBorrow(in_book_id, a, e_nn, true);
             }
 
           }
@@ -249,9 +249,9 @@ final class BooksControllerFulFillTask implements Runnable
       case ACQUISITION_BORROW:
         return 6;
       case ACQUISITION_OPEN_ACCESS:
-        return 4;
-      case ACQUISITION_GENERIC:
         return 5;
+      case ACQUISITION_GENERIC:
+        return 4;
       case ACQUISITION_SAMPLE:
         return 3;
       case ACQUISITION_BUY:

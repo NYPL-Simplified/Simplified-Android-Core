@@ -21,7 +21,6 @@ import java.util.Locale;
 
 /**
  * Created by aferditamuriqi on 9/15/16.
- *
  */
 
 public class LocationTracker extends Service implements LocationListener {
@@ -86,7 +85,6 @@ public class LocationTracker extends Service implements LocationListener {
             LocationManager.NETWORK_PROVIDER,
             MIN_TIME_BW_UPDATES,
             MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-//          Log.d("Network", "Network");
           if (this.location_manager != null) {
             this.location = this.location_manager
               .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -114,8 +112,7 @@ public class LocationTracker extends Service implements LocationListener {
           }
         }
       }
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
 
@@ -126,7 +123,7 @@ public class LocationTracker extends Service implements LocationListener {
   /**
    * Stop using GPS listener
    * Calling this function will stop using GPS in your app.
-   * */
+   */
   public void stopUsingGPS() {
     if (this.location_manager != null) {
       this.location_manager.removeUpdates(LocationTracker.this);
@@ -136,6 +133,7 @@ public class LocationTracker extends Service implements LocationListener {
 
   /**
    * Function to get latitude
+   *
    * @return latitude
    */
   public double getLatitude() {
@@ -169,11 +167,17 @@ public class LocationTracker extends Service implements LocationListener {
       // Using getFromLocation() returns an array of Addresses for the area immediately
       // surrounding the given latitude and longitude. The results are a best guess and are
       // not guaranteed to be accurate.
-      addresses = geocoder.getFromLocation(
-        this.location.getLatitude(),
-        this.location.getLongitude(),
-        // In this sample, we get just a single address.
-        1);
+      if (this.location != null) {
+        addresses = geocoder.getFromLocation(
+          this.location.getLatitude(),
+          this.location.getLongitude(),
+          // In this sample, we get just a single address.
+          1);
+      }
+      else
+      {
+        this.getLocation();
+      }
     } catch (IOException ioException) {
       // Catch network or other I/O problems.
 //      errorMessage = getString(R.string.service_not_available);
@@ -200,23 +204,13 @@ public class LocationTracker extends Service implements LocationListener {
       final Address address = addresses.get(0);
       final ArrayList<String> address_fragments = new ArrayList<String>();
 
-      // Fetch the address lines using {@code getAddressLine},
-      // join them, and send them to the thread. The {@link android.location.address}
-      // class provides other options for fetching address details that you may prefer
-      // to use. Here are some examples:
-      // getLocality() ("Mountain View", for example)
-      // getAdminArea() ("CA", for example)
-      // getPostalCode() ("94043", for example)
-      // getCountryCode() ("US", for example)
-      // getCountryName() ("United States", for example)
-
       address_fragments.add(address.getAdminArea());
       address_fragments.add(address.getCountryCode());
       this.address_output = address.getAdminArea() + " " + address.getCountryCode();
 
-//      if ( (address.getCountryCode().equals("US") && (address.getAdminArea().equals("New York") || address.getAdminArea().equals("NY")))) {
+      if ((address.getCountryCode().equals("US") && (address.getAdminArea().equals("New York") || address.getAdminArea().equals("NY")))) {
         this.is_new_york = true;
-//      }
+      }
 
     }
     return this.is_new_york;
@@ -227,7 +221,6 @@ public class LocationTracker extends Service implements LocationListener {
    * Function to get longitude
    *
    * @return longitude
-   *
    */
   public double getLongitude() {
     if (this.location != null) {
@@ -239,8 +232,9 @@ public class LocationTracker extends Service implements LocationListener {
 
   /**
    * Function to check GPS/Wi-Fi enabled
+   *
    * @return boolean
-   * */
+   */
   public boolean canGetLocation() {
     return this.can_get_location;
   }
@@ -249,7 +243,7 @@ public class LocationTracker extends Service implements LocationListener {
   /**
    * Function to show settings alert dialog.
    * On pressing the Settings button it will launch Settings Options.
-   * */
+   */
   public void showSettingsAlert() {
     final AlertDialog.Builder alert = new AlertDialog.Builder(this.context);
 

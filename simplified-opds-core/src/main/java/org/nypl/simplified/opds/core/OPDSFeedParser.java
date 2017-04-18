@@ -4,6 +4,7 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+
 import org.nypl.simplified.assertions.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -26,6 +24,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * <p> The default implementation of the {@link OPDSFeedParserType}. </p> <p>
@@ -431,6 +433,50 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           }
 
           continue;
+        }
+
+        // parse licensor
+        {
+          if (OPDSXML.nodeHasName(
+            (Element) child, OPDSFeedConstants.DRM_URI, "licensor")) {
+            final Element e = OPDSXML.nodeAsElement(child);
+            final String  in_vendor = e.getAttribute("drm:vendor");
+            String in_client_token = null;
+            OptionType<String> in_device_manager = Option.none();
+            for (int i = 0; i < e.getChildNodes().getLength(); ++i)
+            {
+              final Node node = e.getChildNodes().item(i);
+
+              if (node.getNodeName().contains("clientToken"))
+              {
+                in_client_token =  node.getFirstChild().getNodeValue();
+              }
+
+              if (node.getNodeName().contains("link"))
+              {
+              final Element element = OPDSXML.nodeAsElement(node);
+
+                final boolean has_everything =
+                  element.hasAttribute("rel") && element.hasAttribute("href");
+
+                if (has_everything) {
+                  final String r = NullCheck.notNull(element.getAttribute("rel"));
+                  final String h = NullCheck.notNull(element.getAttribute("href"));
+
+                  if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
+
+                    in_device_manager = Option.some(h);
+
+                  }
+                }
+              }
+              if (in_vendor != null && in_client_token != null) {
+                final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token, in_device_manager);
+                b.setLisensor(Option.some(licensor));
+              }
+            }
+          }
+
         }
 
         /**

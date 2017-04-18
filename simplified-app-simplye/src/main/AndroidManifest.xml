@@ -2,28 +2,30 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   package="org.nypl.simplified.simplye"
-  android:versionCode="1017"
-  android:versionName="1.2.0">
+  android:versionCode="1088"
+  android:versionName="2.0.0">
 
   <uses-sdk
     android:minSdkVersion="19"
-    android:targetSdkVersion="21"/>
+    android:targetSdkVersion="25"/>
 
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+
+  <uses-feature android:name="android.hardware.location.gps" />
 
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:icon="@drawable/feature_app_icon"
+    android:icon="@mipmap/ic_launcher"
     android:label="@string/feature_app_name"
     android:contentDescription="@string/feature_app_name"
     android:largeHeap="true"
-    android:theme="@style/SimplifiedTheme"
->
+    android:theme="@style/SimplifiedTheme">
 
     <!-- Main entry point for the application. -->
     <activity
@@ -89,6 +91,13 @@
       android:exported="false">
     </activity>
     <activity
+      android:name="org.nypl.simplified.app.MainSettingsAccountsActivity"
+      android:configChanges="orientation|screenSize"
+      android:label="@string/settings_accounts"
+      android:contentDescription="@string/settings_accounts"
+      android:exported="false">
+    </activity>
+    <activity
       android:name="org.nypl.simplified.app.HelpActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/help"
@@ -101,6 +110,19 @@
       android:name="org.nypl.simplified.app.WebViewActivity"
       android:configChanges="orientation|screenSize"
       android:exported="false">
+    </activity>
+
+    <!-- Welcome -->
+    <activity
+      android:name="org.nypl.simplified.app.MainWelcomeActivity"
+      android:configChanges="orientation|screenSize"
+      android:exported="true">
+    </activity>
+
+    <activity
+      android:name="org.nypl.simplified.app.MainWelcomeAccountPickerActivity"
+      android:configChanges="orientation|screenSize"
+      android:exported="true">
     </activity>
 
     <!-- EULA -->
@@ -184,6 +206,12 @@
     <activity
       android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
       android:screenOrientation="portrait">
+    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.ReportIssueActivity"
+      android:windowSoftInputMode="adjustResize"
+      android:label="@string/hs_issuebutton_title"
+      android:contentDescription="@string/hs_issuebutton_title">
     </activity>
 
     <receiver

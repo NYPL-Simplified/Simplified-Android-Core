@@ -1,7 +1,9 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -50,6 +52,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksFeedSelection;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
@@ -905,7 +908,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     final CatalogFeedArgumentsType args = this.getArguments();
     final ImmutableStack<CatalogFeedArgumentsType> new_up_stack =
-    this.newUpStack(args);
+      this.newUpStack(args);
 
     final CatalogFeedLaneListenerType in_lane_listener =
       new CatalogFeedLaneListenerType()
@@ -949,6 +952,61 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     return Unit.unit();
   }
 
+  /**
+   *
+   */
+  public void showAgeCheckAlert() {
+
+    if (!Simplified.getCurrentAccount().needsAuth() && !Simplified.getSharedPrefs().contains("age13")) {
+
+      final AlertDialog.Builder alert = new AlertDialog.Builder(CatalogFeedActivity.this);
+
+      // Setting Dialog Title
+      alert.setTitle("Age Verification");
+
+      // Setting Dialog Message
+      alert.setMessage("You must be 13 years of age or older to download some of the books from this collection.\nHow old are you?");
+
+      // On pressing the under 13 button.
+      alert.setNeutralButton("Under 13", new DialogInterface.OnClickListener() {
+          public void onClick(final DialogInterface dialog, final int which) {
+            Simplified.getSharedPrefs().putBoolean("age13", false);
+            //reload catalog
+            CatalogFeedActivity.this.reloadCatalogActivity(true);
+          }
+        }
+      );
+
+      // On pressing the 13 and over button
+      alert.setPositiveButton("13 or Older", new DialogInterface.OnClickListener() {
+          public void onClick(final DialogInterface dialog, final int which) {
+            Simplified.getSharedPrefs().putBoolean("age13", true);
+            //reload catalog
+            CatalogFeedActivity.this.reloadCatalogActivity(false);
+          }
+        }
+      );
+
+      // Showing Alert Message
+      alert.show();
+    }
+  }
+
+  private void reloadCatalogActivity(final boolean delete_books)
+  {
+    Simplified.getCatalogAppServices().reloadCatalog(delete_books, Simplified.getCurrentAccount());
+    final Intent i = new Intent(CatalogFeedActivity.this, MainCatalogActivity.class);
+    i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    final Bundle b = new Bundle();
+    SimplifiedActivity.setActivityArguments(b, false);
+    i.putExtras(b);
+    startActivity(i);
+    overridePendingTransition(0, 0);
+  }
+
   private void onFeedWithoutGroupsEmptyUI(
     final FeedWithoutGroups f)
   {
@@ -983,6 +1041,11 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     content_area.addView(layout);
     content_area.requestLayout();
+
+    if (!this.isFinishing()) {
+      this.showAgeCheckAlert();
+    }
+
   }
 
   private void onFeedWithoutGroupsNonEmptyUI(
@@ -992,7 +1055,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       "received feed without blocks (non-empty): {}", f.getFeedURI());
 
     UIThread.checkIsUIThread();
-    Assertions.checkPrecondition(f.isEmpty() == false, "Feed is non-empty");
+    Assertions.checkPrecondition(!f.isEmpty(), "Feed is non-empty");
 
     this.invalidateOptionsMenu();
 
@@ -1010,7 +1073,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     content_area.requestLayout();
 
     CatalogFeedActivity.LOG.debug(
-      "restoring scroll position: {}", Integer.valueOf(this.saved_scroll_pos));
+      "restoring scroll position: {}", this.saved_scroll_pos);
 
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
@@ -1030,7 +1093,17 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           Simplified.getCatalogAppServices();
         final BooksType books = app.getBooks();
 
-        books.accountSync(new SyncListener());
+        books.accountSync(new SyncListener(), new DeviceActivationListenerType() {
+          @Override
+          public void onDeviceActivationFailure(final String message) {
+
+          }
+
+          @Override
+          public void onDeviceActivationSuccess() {
+
+          }
+        });
         CatalogFeedActivity.this.retryFeed();
 
       }
@@ -1050,7 +1123,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     final CatalogFeedArgumentsType args = this.getArguments();
     final ImmutableStack<CatalogFeedArgumentsType> new_up_stack =
-    this.newUpStack(args);
+      this.newUpStack(args);
 
     final CatalogBookSelectionListenerType book_select_listener =
       new CatalogBookSelectionListenerType()
@@ -1305,7 +1378,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
       final ImmutableStack<CatalogFeedArgumentsType> us =
-      ImmutableStack.empty();
+        ImmutableStack.empty();
 
 
       final String title =

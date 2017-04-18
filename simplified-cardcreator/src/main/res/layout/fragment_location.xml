@@ -1,57 +1,49 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/WizardPageContainer">
+              style="@style/WizardPageContainer">
 
-    <TextView style="@style/WizardPageTitle" />
+  <TextView style="@style/WizardPageTitle"/>
 
-    <TextView style="@style/WizardPageDescription" />
+  <TextView style="@style/WizardPageDescription"/>
 
 
-    <ScrollView
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    android:scrollbarStyle="outsideOverlay">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+
+      <TextView
+        style="@style/WizardFormLabel"
+        android:text="location"/>
+
+      <EditText
+        android:id="@+id/region"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="16dp"
-        android:scrollbarStyle="outsideOverlay">
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:saveEnabled="false"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-
-            <TextView
-                style="@style/WizardFormLabel"
-                android:text="location" />
-
-            <EditText
-                android:id="@+id/region"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:enabled="false"
-                android:saveEnabled="false" />
-
-            <ProgressBar
-                android:id="@+id/progress_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_gravity="center"
-                android:visibility="gone" />
-
-            <Button
-                android:id="@+id/fetch_address_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:onClick="checkLocation"
-                android:text="Check location again" />
+      <Button
+        android:id="@+id/fetch_address_button"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="checkLocation"
+        android:text="Check location again"/>
 
 
-        </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
+  </ScrollView>
 
-    <TextView style="@style/WizardPageFooter" />
+  <TextView style="@style/WizardPageFooter"/>
 
 </LinearLayout>

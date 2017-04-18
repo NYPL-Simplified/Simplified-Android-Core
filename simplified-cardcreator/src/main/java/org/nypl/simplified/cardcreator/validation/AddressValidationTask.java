@@ -1,5 +1,7 @@
 package org.nypl.simplified.cardcreator.validation;
 
+import android.widget.ProgressBar;
+
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.Option;
@@ -29,7 +31,7 @@ import java.net.URISyntaxException;
  *
  */
 
-public class AddressValidationTask implements Runnable {
+public class AddressValidationTask {
 
     private final AddressListenerType listener;
 
@@ -72,13 +74,15 @@ public class AddressValidationTask implements Runnable {
 
     }
 
-    @Override
+    /**
+     *
+     */
     public void run() {
 
         URI uri = null;
 
         try {
-            uri = new URI(this.card_creator.getUrl()).resolve("v1/validate/address");
+            uri = new URI(this.card_creator.getUrl()).resolve(this.card_creator.getVersion() + "/validate/address");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

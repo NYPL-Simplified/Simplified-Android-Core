@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+    android:drawable="@color/list_item_background"
+    android:state_pressed="true" />
+  
+  <item android:state_activated="true">
+    <color android:color="?list_item_foreground" />
+  </item>
+  
+  <item android:drawable="@color/list_item_background" />
+</selector>

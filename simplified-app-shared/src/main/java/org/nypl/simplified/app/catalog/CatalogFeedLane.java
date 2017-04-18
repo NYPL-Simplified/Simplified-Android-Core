@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,21 +12,25 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
+
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ScreenSizeControllerType;
+import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.utilities.FadeUtilities;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.FeedGroup;
+import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
 
@@ -83,8 +88,15 @@ import java.util.concurrent.atomic.AtomicInteger;
         Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.catalog_feed_groups_lane, this, true);
 
+
+
+    final Account account =   Simplified.getCurrentAccount();
+
     this.header =
       NullCheck.notNull((RelativeLayout) this.findViewById(R.id.feed_header));
+    ((TextView) this.header.findViewById(R.id.feed_title)).setTextColor(Color.parseColor(account.getMainColor()));
+    ((TextView) this.header.findViewById(R.id.feed_more)).setTextColor(Color.parseColor(account.getMainColor()));
+
     this.title =
       NullCheck.notNull((TextView) this.findViewById(R.id.feed_title));
     this.progress =

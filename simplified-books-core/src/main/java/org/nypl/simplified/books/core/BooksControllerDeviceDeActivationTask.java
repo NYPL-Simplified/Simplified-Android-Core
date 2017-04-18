@@ -7,7 +7,6 @@ import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 
-import org.nypl.drm.core.AdobeAdeptActivationReceiverType;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptDeactivationReceiverType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
@@ -55,11 +54,9 @@ public class BooksControllerDeviceDeActivationTask implements Runnable,
         (Some<AdobeAdeptExecutorType>) this.adobe_drm;
       final AdobeAdeptExecutorType adobe_exec = some.get();
 
-      final AccountBarcode user = this.credentials.getBarcode();
-      final AccountPIN pass = this.credentials.getPin();
       final OptionType<AccountAdobeToken> adobe_token = this.credentials.getAdobeToken();
       final OptionType<AdobeVendorID> vendor_opt = this.credentials.getAdobeVendor();
-//      final OptionType<AdobeUserID> user_id = this.credentials.getAdobeUserID();
+      final OptionType<AdobeUserID> user_id = this.credentials.getAdobeUserID();
 
       vendor_opt.accept(
         new OptionVisitorType<AdobeVendorID, Unit>() {
@@ -77,69 +74,19 @@ public class BooksControllerDeviceDeActivationTask implements Runnable,
               new AdobeAdeptProcedureType() {
                 @Override
                 public void executeWith(final AdobeAdeptConnectorType c) {
-
-
-                  if (BooksControllerDeviceDeActivationTask.this.credentials.getAdobeUserID().isNone()) {
-
-                    c.getDeviceActivations(new AdobeAdeptActivationReceiverType() {
-                      @Override
-                      public void onActivationsCount(final int count) {
-                        if (count == 0) {
-                          BooksControllerDeviceDeActivationTask.this.onDeactivationError("No devices were activated.");
-                        }
-                      }
-
-                      @Override
-                      public void onActivation(final int index,
-                                               final AdobeVendorID authority,
-                                               final String device_id,
-                                               final String user_name,
-                                               final AdobeUserID in_user_id,
-                                               final String expires) {
-
-
-                        final AdobeDeviceID adobe_device_id = new AdobeDeviceID(device_id);
-
-
-                        BooksControllerDeviceDeActivationTask.this.credentials.setAdobeUserID(Option.some(in_user_id));
-                        BooksControllerDeviceDeActivationTask.this.credentials.setAdobeDeviceID(Option.some(adobe_device_id));
-
-                        try {
-
-                          BooksControllerDeviceDeActivationTask.this.accounts_database.accountSetCredentials(BooksControllerDeviceDeActivationTask.this.credentials);
-                        } catch (final IOException e) {
-                          BooksControllerDeviceDeActivationTask.LOG.error("could not save credentials: ", e);
-                        }
-
-
-                      }
-
-                      @Override
-                      public void onActivationError(final String message) {
-                        BooksControllerDeviceDeActivationTask.this.onDeactivationError("Activation error when getting existing activations. This should never happen.");
-                      }
-                    });
-
-                  }
-
-
+                  
                   if (BooksControllerDeviceDeActivationTask.this.credentials.getAdobeUserID().isSome()) {
 
-                    if (adobe_token.isNone()) {
-                      c.deactivateDevice(
-                        BooksControllerDeviceDeActivationTask.this,
-                        s.get(),
-                        ((Some<AdobeUserID>) BooksControllerDeviceDeActivationTask.this.credentials.getAdobeUserID()).get(),
-                        user.toString(),
-                        pass.toString());
-                    } else {
-                      c.deactivateDevice(
-                        BooksControllerDeviceDeActivationTask.this,
-                        s.get(),
-                        ((Some<AdobeUserID>) BooksControllerDeviceDeActivationTask.this.credentials.getAdobeUserID()).get(),
-                        ((Some<AccountAdobeToken>) adobe_token).get().toString(),
-                        "");
-                    }
+                    final String token = ((Some<AccountAdobeToken>) adobe_token).get().toString().replace("\n", "");
+                    final String username = token.substring(0, token.lastIndexOf("|"));
+                    final String password = token.substring(token.lastIndexOf("|") + 1);
+
+                    c.deactivateDevice(
+                      BooksControllerDeviceDeActivationTask.this,
+                      ((Some<AdobeVendorID>) vendor_opt).get(),
+                      ((Some<AdobeUserID>) user_id).get(),
+                      username,
+                      password);
 
                   } else {
                     BooksControllerDeviceDeActivationTask.this.onDeactivationSucceeded();

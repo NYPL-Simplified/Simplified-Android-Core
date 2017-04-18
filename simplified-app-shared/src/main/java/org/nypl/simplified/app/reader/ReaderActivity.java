@@ -3,11 +3,13 @@ package org.nypl.simplified.app.reader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -29,6 +32,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -37,6 +42,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import org.joda.time.Instant;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nypl.simplified.app.R;
@@ -58,7 +64,6 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.prefs.Prefs;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.volley.NYPLStringRequest;
 import org.readium.sdk.android.Container;
@@ -121,7 +126,6 @@ public final class ReaderActivity extends Activity implements
   private           ReaderBookLocation                current_location;
   private           ReaderBookLocation                sync_location;
   private           AccountCredentials                credentials;
-  private           Prefs                             prefs;
   /**
    * Construct an activity.
    */
@@ -169,8 +173,7 @@ public final class ReaderActivity extends Activity implements
     final ImageView in_media_next = NullCheck.notNull(this.view_media_next);
     final ImageView in_media_prev = NullCheck.notNull(this.view_media_prev);
 
-    final Resources rr = NullCheck.notNull(this.getResources());
-    final int main_color = rr.getColor(R.color.feature_main_color);
+    final int main_color = Color.parseColor(Simplified.getCurrentAccount().getMainColor());
     final ColorMatrixColorFilter filter =
       ReaderColorMatrix.getImageFilterMatrix(main_color);
 
@@ -285,12 +288,25 @@ public final class ReaderActivity extends Activity implements
   @Override
   protected void onResume() {
     super.onResume();
-    this.syncLastRead();
+    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read") && Simplified.getCurrentAccount().supportsSimplyESync()) {
+      this.syncLastRead();
+    }
   }
 
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
+    final int id = Simplified.getCurrentAccount().getId();
+    if (id == 0) {
+      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
+    }
+    else if (id == 1) {
+      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
+    }
+    else {
+      setTheme(R.style.SimplifiedThemeNoActionBar);
+    }
+
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
@@ -305,8 +321,6 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
     this.entry =
       NullCheck.notNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
-
-    this.prefs =  new Prefs(ReaderActivity.this);
 
     ReaderActivity.LOG.debug("epub file: {}", in_epub_file);
     ReaderActivity.LOG.debug("book id:   {}", this.book_id);
@@ -379,6 +393,13 @@ public final class ReaderActivity extends Activity implements
           d.show(fm, "settings-dialog");
         }
       });
+
+    // set reader brightness.
+    final int brightness = getPreferences(Context.MODE_PRIVATE).getInt("reader_brightness", 50);
+    final float back_light_value = (float) brightness / 100;
+    final WindowManager.LayoutParams layout_params = getWindow().getAttributes();
+    layout_params.screenBrightness = back_light_value;
+    getWindow().setAttributes(layout_params);
 
     this.view_loading = in_loading;
     this.view_progress_text = in_progress_text;
@@ -483,22 +504,26 @@ public final class ReaderActivity extends Activity implements
   {
     ReaderActivity.LOG.debug("received book location: {}", l);
 
-    final BookID in_book_id = NullCheck.notNull(this.book_id);
-    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read") && Simplified.getCurrentAccount().supportsSimplyESync()) {
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
+      LOG.debug("CurrentPage prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
 
-    final ReaderBookmarksType bm = rs.getBookmarks();
+      if (Simplified.getSharedPrefs().getBoolean("post_last_read")) {
 
-    LOG.debug("CurrentPage prefs {}", this.prefs.getBoolean("post_last_read"));
+        this.postLastRead(l);
 
-    final RequestQueue queue = Volley.newRequestQueue(this);
-
-    if (this.prefs.getBoolean("post_last_read")) {
-      bm.setBookmark(in_book_id, l, in_entry, this.credentials, queue);
+      }
     }
+    else
+    {
+      final SimplifiedReaderAppServicesType rs =
+        Simplified.getReaderAppServices();
+      final ReaderBookmarksType bm = rs.getBookmarks();
+      final BookID in_book_id = NullCheck.notNull(this.book_id);
 
+      bm.setBookmark(in_book_id, l);
+
+    }
   }
 
   @Override protected void onDestroy()
@@ -515,6 +540,7 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderSettingsType settings = rs.getSettings();
     settings.removeListener(this);
+//    System.exit(0);
   }
 
   @Override public void onEPUBLoadFailed(
@@ -699,10 +725,8 @@ public final class ReaderActivity extends Activity implements
             final Package p = NullCheck.notNull(c.getDefaultPackage());
 
             js.openBook(p, vs, page);
-
-            ReaderActivity.this.prefs.putBoolean("post_last_read", true);
-            LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
-
+            Simplified.getSharedPrefs().putBoolean("post_last_read", true);
+            LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
           }
         });
 
@@ -711,8 +735,8 @@ public final class ReaderActivity extends Activity implements
           @Override
           public void onClick(final DialogInterface dialog, final int which) {
             // negative button logic
-            ReaderActivity.this.prefs.putBoolean("post_last_read", true);
-            LOG.debug("CurrentPage set prefs {}", ReaderActivity.this.prefs.getBoolean("post_last_read"));
+            Simplified.getSharedPrefs().putBoolean("post_last_read", true);
+            LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
 
           }
         });
@@ -723,8 +747,8 @@ public final class ReaderActivity extends Activity implements
 
     if ((this.current_location == null && this.sync_location == null) || this.current_location != null && this.sync_location == null)
     {
-      this.prefs.putBoolean("post_last_read", true);
-      LOG.debug("CurrentPage set prefs {}", this.prefs.getBoolean("post_last_read"));
+      Simplified.getSharedPrefs().putBoolean("post_last_read", true);
+      LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
     }
     else if (this.current_location == null && this.sync_location != null)
     {
@@ -738,8 +762,8 @@ public final class ReaderActivity extends Activity implements
     }
     else
     {
-      this.prefs.putBoolean("post_last_read", true);
-      LOG.debug("CurrentPage set prefs {}", this.prefs.getBoolean("post_last_read"));
+      Simplified.getSharedPrefs().putBoolean("post_last_read", true);
+      LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
     }
 
   }
@@ -853,34 +877,18 @@ public final class ReaderActivity extends Activity implements
       });
   }
 
-  private void syncLastRead() {
+  private void postLastRead(final ReaderBookLocation l) {
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
     final ReaderBookmarksType bm = rs.getBookmarks();
     final BookID in_book_id = NullCheck.notNull(this.book_id);
     final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
-    final ReaderBookmarksType bookmarks = rs.getBookmarks();
 
-    final OptionType<ReaderBookLocation> mark =
-      bookmarks.getBookmark(in_book_id, in_entry);
-
-    final OptionType<ReaderOpenPageRequestType> page_request = mark.map(
-      new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
-        @Override
-        public ReaderOpenPageRequestType call(
-          final ReaderBookLocation l) {
-          LOG.debug("CurrentPage location {}", l);
-          ReaderActivity.this.current_location = l;
-          return ReaderOpenPageRequest.fromBookLocation(l);
-        }
-      });
-
-    // Instantiate the RequestQueue.
     if (in_entry.getAnnotations().isSome()) {
 
-      final RequestQueue queue = Volley.newRequestQueue(this);
       final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
+      final RequestQueue queue = Volley.newRequestQueue(this);
 
       // Request a string response from the provided URL.
       final NYPLStringRequest request = new NYPLStringRequest(Request.Method.GET, url, this.credentials,
@@ -891,7 +899,45 @@ public final class ReaderActivity extends Activity implements
           public void onResponse(final String response) {
 
             LOG.debug("CurrentPage onResponse {}", response);
-            ReaderActivity.this.showBookLocationDialog(response);
+
+            final AnnotationResult result = new Gson().fromJson(response, AnnotationResult.class);
+
+            if (result.getTotal() == 0)
+            {
+              bm.setBookmark(in_book_id, l, in_entry, ReaderActivity.this.credentials, queue);
+
+            }
+            else {
+
+
+              for (final Annotation annotation : result.getFirst().getItems()) {
+
+                if (annotation.getBody().isJsonObject()) {
+
+                  final JsonObject body = (JsonObject) annotation.getBody();
+
+                  final JsonPrimitive time = body.getAsJsonPrimitive("http://librarysimplified.org/terms/time");
+
+                  LOG.debug("CurrentPage time {}", time.getAsString());
+
+                  final Instant server_instant = new Instant(time.getAsString());
+                  final Instant current_local_instant = new Instant();
+
+                  final long local_new = current_local_instant.getMillis() - server_instant.getMillis();
+                  LOG.debug("CurrentPage local_new {}", local_new);
+                  final long server_new = server_instant.getMillis() - current_local_instant.getMillis();
+                  LOG.debug("CurrentPage server_new {}", server_new);
+
+                  if (local_new > 0) {
+                    bm.setBookmark(in_book_id, l, in_entry, ReaderActivity.this.credentials, queue);
+                  }
+                }
+                else
+                {
+                  bm.setBookmark(in_book_id, l, in_entry, ReaderActivity.this.credentials, queue);
+                }
+              }
+            }
 
           }
         }, new Response.ErrorListener() {
@@ -907,6 +953,44 @@ public final class ReaderActivity extends Activity implements
       // Add the request to the RequestQueue.
       queue.add(request);
     }
+  }
+
+  private void syncLastRead() {
+
+    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
+
+      if (in_entry.getAnnotations().isSome()) {
+
+        final RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
+
+        // Request a string response from the provided URL.
+        final NYPLStringRequest request = new NYPLStringRequest(Request.Method.GET, url, this.credentials,
+          new Response.Listener<String>() {
+
+
+            @Override
+            public void onResponse(final String response) {
+
+              LOG.debug("CurrentPage onResponse {}", response);
+              ReaderActivity.this.showBookLocationDialog(response);
+
+            }
+          }, new Response.ErrorListener() {
+
+          @Override
+          public void onErrorResponse(final VolleyError error) {
+
+            LOG.debug("CurrentPage onErrorResponse {}", error);
+
+          }
+        });
+
+        // Add the request to the RequestQueue.
+        queue.add(request);
+      }
+
+
   }
 
   @Override public void onReadiumFunctionInitializeError(

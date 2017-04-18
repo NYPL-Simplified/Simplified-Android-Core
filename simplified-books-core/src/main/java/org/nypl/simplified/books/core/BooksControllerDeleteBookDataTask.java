@@ -16,15 +16,18 @@ final class BooksControllerDeleteBookDataTask implements Runnable
   private final BookDatabaseType     book_database;
   private final BookID               book_id;
   private final BooksStatusCacheType books_status;
+  private final boolean              needs_auth;
 
   BooksControllerDeleteBookDataTask(
     final BooksStatusCacheType in_books_status,
     final BookDatabaseType in_book_database,
-    final BookID in_book_id)
+    final BookID in_book_id,
+    final boolean in_needs_auth)
   {
     this.books_status = NullCheck.notNull(in_books_status);
     this.book_database = NullCheck.notNull(in_book_database);
     this.book_id = NullCheck.notNull(in_book_id);
+    this.needs_auth = in_needs_auth;
   }
 
   @Override public void run()
@@ -37,6 +40,12 @@ final class BooksControllerDeleteBookDataTask implements Runnable
       final BookDatabaseEntrySnapshot snap = e.entryGetSnapshot();
       final BookStatusType status = BookStatus.fromSnapshot(this.book_id, snap);
       this.books_status.booksStatusUpdate(status);
+
+      // destroy entry, this is needed after deletion has been broadcasted, so the book doesn't stay in loans,
+      // especially needed for collection without auth requirement where no syn is happening
+      if (!this.needs_auth) {
+        e.entryDestroy();
+      }
     } catch (final Throwable e) {
       BooksControllerDeleteBookDataTask.LOG.error(
         "[{}]: could not destroy book data: ", this.book_id.getShortID(), e);

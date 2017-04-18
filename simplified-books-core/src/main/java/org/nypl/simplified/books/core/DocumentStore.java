@@ -262,7 +262,7 @@ public final class DocumentStore implements DocumentStoreType
                       this.http,
                       this.exec,
                       this.base,
-                      "licenses.html",
+                      "software-licenses.html",
                       f));
     }
     @Override

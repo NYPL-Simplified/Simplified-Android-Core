@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.nypl.simplified</groupId>
     <artifactId>simplified</artifactId>
-    <version>1.2.0</version>
+    <version>2.0.0</version>
   </parent>
   <artifactId>simplified-app-shared</artifactId>
 
@@ -51,12 +51,6 @@
 
     <dependency>
       <groupId>org.nypl.simplified</groupId>
-      <artifactId>simplified-prefs</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-volley</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -68,8 +62,13 @@
     </dependency>
     <dependency>
       <groupId>org.nypl.simplified</groupId>
+      <artifactId>simplified-multilibrary</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.nypl.simplified</groupId>
       <artifactId>simplified-circ-analytics</artifactId>
-      <version>1.2.0</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -115,16 +114,11 @@
     <dependency>
       <groupId>org.nypl.readium</groupId>
       <artifactId>readium-sdk-android-runtime</artifactId>
+      <type>aar</type>
     </dependency>
     <dependency>
       <groupId>org.nypl.readium</groupId>
       <artifactId>readium-shared-js</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.nypl.readium</groupId>
-      <artifactId>libepub3</artifactId>
-      <classifier>armeabi-v7a</classifier>
-      <type>so</type>
     </dependency>
     <dependency>
       <groupId>com.koushikdutta.async</groupId>
@@ -181,6 +175,13 @@
       <artifactId>gson</artifactId>
       <version>2.3</version>
     </dependency>
+
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.9.6</version>
+    </dependency>
+
   </dependencies>
 
   <profiles>
