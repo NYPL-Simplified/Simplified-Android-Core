@@ -34,8 +34,8 @@ class UrmsInitializeRequest {
             }
 
             UrmsError error = Urms.initialize(context, 60); // context, apiTimeout
-
             final Context ctx = context;
+
             // Set default error handler
             Urms.setTaskModifier(new IUrmsTaskModifier() {
                 @Override

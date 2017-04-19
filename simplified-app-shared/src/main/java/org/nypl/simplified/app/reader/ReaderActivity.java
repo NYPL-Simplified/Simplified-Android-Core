@@ -48,6 +48,8 @@ import com.sonydadc.urms.android.Urms;
 import com.sonydadc.urms.android.UrmsError;
 import com.sonydadc.urms.android.api.CreateProfileTask;
 import com.sonydadc.urms.android.api.DeleteProfileTask;
+import com.sonydadc.urms.android.api.GetOnlineBooksResult;
+import com.sonydadc.urms.android.api.GetOnlineBooksTask;
 import com.sonydadc.urms.android.api.RegisterBookTask;
 import com.sonydadc.urms.android.task.EmptyResponse;
 import com.sonydadc.urms.android.task.IFailedCallback;
@@ -421,11 +423,10 @@ public final class ReaderActivity extends Activity implements
           String userID = "google-110495186711904557779";
           String path = "/store/v2/users/" + userID + "/authtoken/generate";
           String sessionURL = "http://urms-967957035.eu-west-1.elb.amazonaws.com" + path;
-
           String timestamp = Long.toString(System.currentTimeMillis() / 1000);
           String hmacMessage = path + timestamp;
-
           String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
+
           ReaderActivity.LOG.debug("ReaderActivity - hmacMessage: {} ", hmacMessage);
 
 
@@ -438,9 +439,7 @@ public final class ReaderActivity extends Activity implements
             SecretKeySpec secret = new SecretKeySpec(key.getBytes("UTF-8"), mac.getAlgorithm());
             mac.init(secret);
             byte[] digest = mac.doFinal(base_string.getBytes());
-
-            // Base 64 Encode the results
-            authHash = Base64.encodeToString(digest, Base64.DEFAULT);
+            authHash = Base64.encodeToString(digest, Base64.DEFAULT); // Base 64 Encode the results
             Log.v(TAG, "String: " + base_string);
             Log.v(TAG, "key: " + key);
             Log.v(TAG, "authHash: " + authHash);
@@ -531,7 +530,9 @@ public final class ReaderActivity extends Activity implements
               final String authToken = responseJson.getString("authToken");
               ReaderActivity.LOG.debug("ReaderActivity - authToken: {}", authToken);
 
-             final String profileName = "default";
+//             final String profileName = "default";
+             final String profileName = "test_profile_april_13_2017_d";
+//             Urms.reset();
 
               final UrmsConfig config = new UrmsConfig(
                       "https://urms-sdk.codefusion.technology/sdk/",			// cgp.api
@@ -543,19 +544,17 @@ public final class ReaderActivity extends Activity implements
               runOnUiThread(new Runnable() {
                 public void run() {
 
-                  boolean deleteProfileSucceeded = Urms.createDeleteProfileTask(profileName).execute();
+//                  boolean deleteProfileSucceeded = Urms.createDeleteProfileTask(profileName).execute();
+//
+//                  if (deleteProfileSucceeded) {
+//                    Log.d("ReaderActivity", "Profile deleted: " + profileName);
+//                  } else {
+//                    Log.d("ReaderActivity", "Error deleting profile: " + profileName);
+//                  }
 
-                  if (deleteProfileSucceeded) {
-                    Log.d("ReaderActivity", "Profile deleted: " + profileName);
-                  } else {
-                    Log.d("ReaderActivity", "Error deleting profile: " + profileName);
-                  }
+                  Log.d("ReaderActivity", "Token: " + authToken);
 
-
-                  CreateProfileTask createProfile = Urms.createCreateProfileTask(authToken, profileName, null, config);
-                  Log.d("ReaderActivity", "!@!@! Token: " + authToken);
-
-                  createProfile.setSucceededCallback(new ISucceededCallback<EmptyResponse>() {
+                  Urms.createCreateProfileTask(authToken, profileName, null, config).setSucceededCallback(new ISucceededCallback<EmptyResponse>() {
                     @Override
                     public void onSucceeded(IUrmsTask task, EmptyResponse result) {
                       Log.d("ReaderActivity", "Success creating profile.");
@@ -565,18 +564,21 @@ public final class ReaderActivity extends Activity implements
                       try {
                         profiles = Urms.createGetProfilesTask().getResultWithExecute().getProfiles();
                         if (profiles.size() > 0) {
+                          Log.d("ReaderActivity", "Profiles size: " + profiles.size());
+                          Log.d("ReaderActivity", "Profiles: " + profiles.toString());
                           Urms.createSwitchProfileTask(profiles.get(0)).getResultWithExecute();
+                          Log.d(TAG, "Switched to profile: " + profiles.get(0));
+                          Log.d(TAG, "Evaluating URMS license…");
                           evaluateURMSLicense(bookCCID, bookUri, getApplicationContext(), a, in_epub_file);
                         }
                       } catch (TaskFailedException e) {
                         e.printStackTrace();
                       }
                     }
-                  });
-
-                  createProfile.setFailedCallback(new IFailedCallback() {
+                  }).setFailedCallback(new IFailedCallback() {
                     @Override
                     public void onFailed(IUrmsTask task, UrmsTaskStatus status, UrmsError error) {
+                      Log.d("ReaderActivity", "Failed creating profile.");
 
                       if (error.getErrorType() == UrmsError.RegisterUserDeviceCapacityReached) {
                         Log.e(TAG, "RegisterUserDeviceCapacityReached");
@@ -615,8 +617,7 @@ public final class ReaderActivity extends Activity implements
 
 
                     }
-                  });
-                  Urms.executeAsync(createProfile);
+                  }).executeAsync();
                 }
               });// End runnable
 
@@ -651,22 +652,36 @@ public final class ReaderActivity extends Activity implements
 
     if(!Urms.createEvaluateLicenseTask(bookCCID).execute()) {
       Log.e(TAG, "[evaluateURMSLicense] Evaluate URMS license failed. Registering book...");
+      Log.e(TAG, "[evaluateURMSLicense] First calling getOnlineBookTask…");
 
-      RegisterBookTask rbt = Urms.createRegisterBookTask(bookCCID);
-      rbt.setPostExecuteCallback(new IPostExecuteCallback() {
+      GetOnlineBooksTask gobt = Urms.createGetOnlineBooksTask();
+      gobt.setSucceededCallback(new ISucceededCallback<GetOnlineBooksResult>() {
         @Override
-        public void onPostExecute(IUrmsTask task) {
+        public void onSucceeded(IUrmsTask task, GetOnlineBooksResult result) {
+          Log.e(TAG, "[evaluateURMSLicense] getOnlineBookTask succeeded, registering book:");
 
-          Log.e(TAG, "Register book task - on post execute.");
-//          evaluateURMSLicense(bookCCID, bookUri, mContext, bundle, in_epub_file); // Call self after registerBookTask succeeds, to evaluate again
+          RegisterBookTask rbt = Urms.createRegisterBookTask(bookCCID);
+          rbt.setPostExecuteCallback(new IPostExecuteCallback() {
+            @Override
+            public void onPostExecute(IUrmsTask task) {
+
+              Log.e(TAG, "Register book task - on post execute.");
+              evaluateURMSLicense(bookCCID, bookUri, mContext, bundle, in_epub_file); // Call self after registerBookTask succeeds, to evaluate again
+
+
+            }
+          });
+          rbt.setDestination(in_epub_file);
+
+          rbt.executeAsync();
+//      Urms.executeBackground(rbt);
+          Log.e(TAG, "Register book task executed.");
 
 
         }
       });
-      rbt.setDestination(in_epub_file);
+      gobt.executeAsync();
 
-      rbt.executeAsync();
-      Log.e(TAG, "Register book task executed.");
     } else {
       Log.e(TAG, "No error from evaluateURMSLicense. Opening book.");
       // End Bluefire Added
