@@ -3,6 +3,13 @@ URMS Integration
 
 This document outlines the changes we've made to the NYPL SimplyE app to support URMS integration.
 
+_MainSplashActivity.java onCreate():_
+
+We initialize URMS here in the main splash Activity.
+
+    UrmsInitializer.initializeWithMarlinURL(getApplicationContext(), "https://urms-marlin-us.codefusion.technology/bks/");
+
+
 _ReaderActivity.java onCreate():_
 
 We first read sample.epub from the assets directory and write it to the internal storage. This happens only once, the first time the app is run. On subsequent runs, sample.epub is read from the internal storage.

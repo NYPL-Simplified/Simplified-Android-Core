@@ -111,13 +111,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -125,10 +122,6 @@ import java.util.regex.Pattern;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import bclurms.UrmsCreateProfileRequest;
-import bclurms.UrmsEvaluateLicenseRequest;
-import bclurms.UrmsInitializer;
-import bclurms.UrmsRegisterBookRequest;
 
 import static android.content.ContentValues.TAG;
 
@@ -377,8 +370,6 @@ public final class ReaderActivity extends Activity implements
     final Bundle a = NullCheck.notNull(i.getExtras());
 
 
-
-
     // Bluefire Added
     this.book_id =
             NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
@@ -401,22 +392,17 @@ public final class ReaderActivity extends Activity implements
     } catch (Exception e) { throw new RuntimeException(e); }
     final File in_epub_file = new File(getCacheDir(), "sample.epub");
 
-
     ReaderActivity.LOG.debug("ReaderActivity before evaluateURMSLicense called");
     final String bookCCID = "NHG6M6VG63D4DQKJMC986FYFDG5MDQJE";
     final String bookUri = in_epub_file.getAbsolutePath();
     ReaderActivity.LOG.debug("ReaderActivity - bookUri:  {}", bookUri);
 
-
     ReaderActivity.LOG.debug("ReaderActivity - Requesting authToken…");
-
-
     Thread thread = new Thread(new Runnable() {
 
       @Override
       public void run() {
         try  {
-
 
           ReaderActivity.LOG.debug("ReaderActivity - Thread running");
 
@@ -428,8 +414,6 @@ public final class ReaderActivity extends Activity implements
           String secretKey = "ucj0z3uthspfixtba5kmwewdgl7s1prm";
 
           ReaderActivity.LOG.debug("ReaderActivity - hmacMessage: {} ", hmacMessage);
-
-
 
           String base_string = hmacMessage;
           String key = secretKey;
@@ -449,66 +433,24 @@ public final class ReaderActivity extends Activity implements
 
           authHash = authHash.replaceAll("(\\r|\\n)", "");
           authHash = authHash.replaceAll(Pattern.quote("+"), "%2B");
-//          authHash = authHash.replaceAll(Pattern.quote("/"), "_");
-
-
-//          byte[] hmac = hashMac(hmacMessage, secretKey);
-//          ReaderActivity.LOG.debug("ReaderActivity - hmac: {} ", hmac);
-
-//          String authHash = Base64.encodeToString(hmac, Base64.DEFAULT);
-//          ReaderActivity.LOG.debug("ReaderActivity - authHash: {} ", authHash);
 
           String storeID = "129";
           String authString = storeID + "-" + timestamp + "-" + authHash;
           ReaderActivity.LOG.debug("ReaderActivity - authString: {} ", authString);
 
-
           // Create a new HttpClient and Post Header
           HttpClient httpclient = new DefaultHttpClient();
-
-//          HttpHost httpproxy = new HttpHost("192.168.1.154", 8888, "http");
-//          httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,httpproxy);
-
-
-
-
           HttpPost httppost = new HttpPost(sessionURL);
-
 
           try {
             // Set headers
             httppost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            // Data to POST
-//            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-//            nameValuePairs.add(new BasicNameValuePair("authString", authString));
-//            nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
-
-            // Set content length header
-//            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs);
 
             // Set data body
             String dataBody = "authString=" + authString + "&timestamp=" + timestamp;
             StringEntity stringEntity = new StringEntity(dataBody, HTTP.UTF_8);
             stringEntity.setContentEncoding(HTTP.UTF_8);
             httppost.setEntity(stringEntity);
-
-//            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-//            nameValuePairs.add(new BasicNameValuePair("authString", authString));
-//            nameValuePairs.add(new BasicNameValuePair("timestamp", timestamp));
-//            UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(nameValuePairs, "UTF-8");
-//            urlEncodedFormEntity.setContentEncoding("UTF-8");
-//            long urlEncodedFormEntityLength = urlEncodedFormEntity.getContentLength();
-//            httppost.setHeader("Content-Length", Long.toString(urlEncodedFormEntityLength));
-
-
-//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity: {} ", urlEncodedFormEntity.toString());
-//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContent(): {} ", urlEncodedFormEntity.getContent());
-//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContentType(): {} ", urlEncodedFormEntity.getContentType());
-//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContentEncoding(): {} ", urlEncodedFormEntity.getContentEncoding());
-//            ReaderActivity.LOG.debug("ReaderActivity - urlEncodedFormEntity.getContentLength(): {} ", urlEncodedFormEntity.getContentLength());
-//            httppost.setEntity(urlEncodedFormEntity);
-
 
             // Execute HTTP Post Request
 
@@ -523,16 +465,14 @@ public final class ReaderActivity extends Activity implements
 
             }
 
-
             JSONObject responseJson;
             try {
               responseJson = new JSONObject(response);
               final String authToken = responseJson.getString("authToken");
               ReaderActivity.LOG.debug("ReaderActivity - authToken: {}", authToken);
 
-//             final String profileName = "default";
-             final String profileName = "test_profile_april_13_2017_d";
-//             Urms.reset();
+
+             final String profileName = "default";
 
               final UrmsConfig config = new UrmsConfig(
                       "https://urms-sdk.codefusion.technology/sdk/",			// cgp.api
@@ -544,21 +484,12 @@ public final class ReaderActivity extends Activity implements
               runOnUiThread(new Runnable() {
                 public void run() {
 
-//                  boolean deleteProfileSucceeded = Urms.createDeleteProfileTask(profileName).execute();
-//
-//                  if (deleteProfileSucceeded) {
-//                    Log.d("ReaderActivity", "Profile deleted: " + profileName);
-//                  } else {
-//                    Log.d("ReaderActivity", "Error deleting profile: " + profileName);
-//                  }
-
                   Log.d("ReaderActivity", "Token: " + authToken);
 
                   Urms.createCreateProfileTask(authToken, profileName, null, config).setSucceededCallback(new ISucceededCallback<EmptyResponse>() {
                     @Override
                     public void onSucceeded(IUrmsTask task, EmptyResponse result) {
                       Log.d("ReaderActivity", "Success creating profile.");
-
 
                       List<String> profiles = null;
                       try {
@@ -615,26 +546,19 @@ public final class ReaderActivity extends Activity implements
                         e.printStackTrace();
                       }
 
-
                     }
                   }).executeAsync();
                 }
               });// End runnable
 
-
             } catch (JSONException e) {
               e.printStackTrace();
             }
-
-
-
           } catch (ClientProtocolException e) {
              e.printStackTrace();
           } catch (IOException e) {
              e.printStackTrace();
           }
-
-
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -643,8 +567,6 @@ public final class ReaderActivity extends Activity implements
 
     thread.start();
   }
-
-
 
   public void evaluateURMSLicense(final String bookCCID, final String bookUri, final Context mContext, final Bundle bundle, final File in_epub_file) {
     Log.e(TAG, "[evaluateURMSLicense] bookCCID = " + bookCCID);
@@ -668,13 +590,10 @@ public final class ReaderActivity extends Activity implements
               Log.e(TAG, "Register book task - on post execute.");
               evaluateURMSLicense(bookCCID, bookUri, mContext, bundle, in_epub_file); // Call self after registerBookTask succeeds, to evaluate again
 
-
             }
           });
           rbt.setDestination(in_epub_file);
-
           rbt.executeAsync();
-//      Urms.executeBackground(rbt);
           Log.e(TAG, "Register book task executed.");
 
 

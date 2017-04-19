@@ -46,8 +46,9 @@ public class MainSplashActivity extends Activity
   @Override
   protected void onCreate(final Bundle state)
   {
+    // Bluefire added
     UrmsInitializer.initializeWithMarlinURL(getApplicationContext(), "https://urms-marlin-us.codefusion.technology/bks/");
-
+    // Bluefire added
 
     final int id = Simplified.getCurrentAccount().getId();
     if (id == 0) {
