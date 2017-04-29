@@ -159,17 +159,11 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
               new HSDeskGear("https://nypl.desk.com/", "4GBRmMv8ZKG8fGehhA", "12060");
             stack.setGear(gear);
 
-            HSHelpStack.getInstance(getActivity().getApplicationContext()).showHelp(getActivity());
+            stack.showHelp(getActivity());
 
             return false;
           }
         });
-
-
-//        final Intent help =
-//          new Intent(this.getActivity(), HelpActivity.class);
-//        help.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//        preference.setIntent(help);
 
       }
     }

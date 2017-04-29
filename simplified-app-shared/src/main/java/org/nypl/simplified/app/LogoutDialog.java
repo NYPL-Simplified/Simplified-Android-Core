@@ -12,16 +12,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.books.core.AccountLogoutListenerType;
-import org.nypl.simplified.books.core.AuthenticationDocumentType;
 import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
@@ -75,7 +71,7 @@ import org.slf4j.Logger;
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
 
-    BooksType books = app.getBooks();
+    final BooksType books = app.getBooks();
 
     books.destroyBookStatusCache();
 
