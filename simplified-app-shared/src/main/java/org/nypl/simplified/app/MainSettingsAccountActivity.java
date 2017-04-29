@@ -1,7 +1,5 @@
 package org.nypl.simplified.app;
 
-import android.*;
-import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -10,13 +8,10 @@ import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
@@ -464,7 +459,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             new HSDeskGear(" ", " ", null);
           stack.setGear(gear);
 
-          HSHelpStack.getInstance(getApplicationContext()).showHelp(MainSettingsAccountActivity.this);
+          stack.showHelp(MainSettingsAccountActivity.this);
 
         }
       });

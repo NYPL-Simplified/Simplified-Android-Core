@@ -1,6 +1,5 @@
 package org.nypl.simplified.app;
 
-import android.*;
 import android.Manifest;
 import android.app.ActionBar;
 import android.content.Context;
@@ -15,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,7 +24,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -195,12 +192,12 @@ public class CardCreatorActivity extends FragmentActivity implements
 
 
   @Override
-  public void onRequestPermissionsResult(int requestCode,
-                                         @NonNull String[] permissions,
-                                         @NonNull int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+  public void onRequestPermissionsResult(final int request_code,
+                                         @NonNull final String[] permissions,
+                                         @NonNull final int[] grant_results) {
+    super.onRequestPermissionsResult(request_code, permissions, grant_results);
 
-    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+    if (grant_results.length > 0 && grant_results[0] == PackageManager.PERMISSION_GRANTED)
     {
       final Fragment new_fragment = new LocationFragment().newInstance(this.prefs.getString(this.getResources().getString(R.string.ADDRESS_OUTPUT)),
         this.prefs.getString(this.getResources().getString(R.string.ADDRESS_STATUS)));

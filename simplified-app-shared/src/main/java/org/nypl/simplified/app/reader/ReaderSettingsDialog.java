@@ -5,7 +5,6 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
