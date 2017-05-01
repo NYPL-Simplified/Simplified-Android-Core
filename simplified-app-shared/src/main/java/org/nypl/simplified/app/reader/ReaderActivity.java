@@ -3,6 +3,7 @@ package org.nypl.simplified.app.reader;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -391,6 +393,13 @@ public final class ReaderActivity extends Activity implements
           d.show(fm, "settings-dialog");
         }
       });
+
+    // set reader brightness.
+    final int brightness = getPreferences(Context.MODE_PRIVATE).getInt("reader_brightness", 50);
+    final float back_light_value = (float) brightness / 100;
+    final WindowManager.LayoutParams layout_params = getWindow().getAttributes();
+    layout_params.screenBrightness = back_light_value;
+    getWindow().setAttributes(layout_params);
 
     this.view_loading = in_loading;
     this.view_progress_text = in_progress_text;

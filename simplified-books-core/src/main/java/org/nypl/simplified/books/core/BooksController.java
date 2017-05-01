@@ -447,13 +447,14 @@ public final class BooksController implements BooksType {
 
   @Override
   public void bookDeleteData(
-    final BookID id) {
+    final BookID id,
+    final boolean needs_auth) {
     NullCheck.notNull(id);
 
     BooksController.LOG.debug("delete: {}", id);
     this.submitRunnable(
       new BooksControllerDeleteBookDataTask(
-        this.books_status, this.book_database, id));
+        this.books_status, this.book_database, id, needs_auth));
   }
 
   @Override

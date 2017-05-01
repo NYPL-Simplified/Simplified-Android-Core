@@ -55,7 +55,7 @@ public final class CatalogBookDeleteButton extends CatalogLeftPaddedButton
                 final SimplifiedCatalogAppServicesType app =
                   Simplified.getCatalogAppServices();
                 final BooksType books = app.getBooks();
-                books.bookDeleteData(in_book_id);
+                books.bookDeleteData(in_book_id, Simplified.getCurrentAccount().needsAuth());
               }
             });
           final FragmentManager fm = in_activity.getFragmentManager();
