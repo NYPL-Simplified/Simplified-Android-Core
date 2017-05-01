@@ -7,7 +7,7 @@ package org.nypl.simplified.books.core;
 public interface EULAType extends SyncedDocumentType
 {
   /**
-   * @return {@code true} iff the user has already agreed to the EULA.
+   * @return {@code true} if the user has already agreed to the EULA.
    */
 
   boolean eulaHasAgreed();
@@ -15,7 +15,7 @@ public interface EULAType extends SyncedDocumentType
   /**
    * Set whether or not the user has agreed to the EULA.
    *
-   * @param t {@code true} iff the user has agreed.
+   * @param t {@code true} if the user has agreed.
    */
 
   void eulaSetHasAgreed(boolean t);

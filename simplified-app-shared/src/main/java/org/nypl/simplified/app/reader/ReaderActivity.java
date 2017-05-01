@@ -71,6 +71,7 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -106,6 +107,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable BookID                            book_id;
   private @Nullable FeedEntryOPDS                     entry;
   private @Nullable Container                         epub_container;
+  private @Nullable File                              instructions_shown_file;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
   private @Nullable ViewGroup                         view_hud;
@@ -180,7 +182,8 @@ public final class ReaderActivity extends Activity implements
     UIThread.runOnUIThread(
       new Runnable()
       {
-        @Override public void run()
+        @Override
+        public void run()
         {
           in_progress_text.setTextColor(main_color);
           in_title_text.setTextColor(main_color);
@@ -224,7 +227,8 @@ public final class ReaderActivity extends Activity implements
     UIThread.runOnUIThread(
       new Runnable()
       {
-        @Override public void run()
+        @Override
+        public void run()
         {
           ReaderActivity.LOG.debug(
             "making initial reader request: {}", reader_uri);
@@ -321,6 +325,9 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull((BookID) a.getSerializable(ReaderActivity.BOOK_ID));
     this.entry =
       NullCheck.notNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
+
+    final File base_dir = Simplified.getDiskDataDir(this);
+    this.instructions_shown_file = new File(base_dir, "reader_instructions_shown.dat");
 
     ReaderActivity.LOG.debug("epub file: {}", in_epub_file);
     ReaderActivity.LOG.debug("book id:   {}", this.book_id);
@@ -549,7 +556,8 @@ public final class ReaderActivity extends Activity implements
     ErrorDialogUtilities.showErrorWithRunnable(
       this, ReaderActivity.LOG, "Could not load EPUB file", x, new Runnable()
       {
-        @Override public void run()
+        @Override
+        public void run()
         {
           ReaderActivity.this.finish();
         }
@@ -584,7 +592,8 @@ public final class ReaderActivity extends Activity implements
     in_toc.setOnClickListener(
       new OnClickListener()
       {
-        @Override public void onClick(
+        @Override
+        public void onClick(
           final @Nullable View v)
         {
           final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
@@ -601,6 +610,45 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderHTTPServerType hs = rs.getHTTPServer();
     hs.startIfNecessaryForPackage(p, this);
+
+    this.showInstructionsDialog();
+  }
+
+  private void showInstructionsDialog()
+  {
+    if (this.getInstructionsShown()) {
+      return;
+    }
+    final ReaderInstructionsDialog d = ReaderInstructionsDialog.newDialog();
+    d.setOnConfirmListener(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        ReaderActivity.this.setInstructionsShown(true);
+      }
+    });
+    final FragmentManager fm = this.getFragmentManager();
+    d.show(fm, "instructions-dialog");
+  }
+
+  private void setInstructionsShown(
+    final boolean shown)
+  {
+    if (shown) {
+      try {
+        this.instructions_shown_file.createNewFile();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else {
+      this.instructions_shown_file.delete();
+    }
+  }
+
+  private boolean getInstructionsShown()
+  {
+    return this.instructions_shown_file.exists();
   }
 
   @Override public void onMediaOverlayIsAvailable(
