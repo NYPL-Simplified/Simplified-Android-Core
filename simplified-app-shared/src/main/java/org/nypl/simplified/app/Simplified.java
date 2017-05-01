@@ -217,7 +217,13 @@ public final class Simplified extends Application
     return i.getApplicationContext().getTheme();
   }
 
-  static File getDiskDataDir(
+  /**
+   * Get the data directory where the app stores its files.
+   *
+   * @param context Context.
+   * @return The data directory.
+   */
+  public static File getDiskDataDir(
     final Context context)
   {
     /**

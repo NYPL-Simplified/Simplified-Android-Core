@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Note that due to the utter brokenness of the Android API, the width and height
+  of the layout specified here is ignored when the layout is inflated as part of a
+  dialog. The width and height specified here are used for the purposes of designing
+  the layout in the GUI editor, but the actual width and height of the dialog must
+  be set at run-time. See org.nypl.simplified.app.ReaderInstructionsDialog. -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/logout_dialog"
+    android:layout_width="@dimen/login_dialog_width"
+    android:layout_height="@dimen/login_dialog_height"
+    android:gravity="center"
+    android:background="@color/normal_background"
+    android:padding="16dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/instructions_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="18dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:text="@string/reader_instructions_title"
+        android:textColor="@color/normal_text_major"/>
+
+    <TextView
+        android:id="@+id/instructions_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:text="@string/reader_instructions_text"
+        android:textColor="@color/normal_text_major"/>
+
+    <Button
+        android:id="@+id/reader_instructions_ok"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_standard_height"
+        android:background="@drawable/simplified_button"
+        android:contentDescription="@string/settings_accessibility_log_out"
+        android:text="@string/reader_instructions_ok"
+        android:textColor="@drawable/simplified_button_text" />
+
+</LinearLayout>
