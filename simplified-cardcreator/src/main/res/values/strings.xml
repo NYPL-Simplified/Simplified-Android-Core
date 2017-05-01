@@ -40,4 +40,7 @@
   <string name="service_not_available">Sorry, the service is not available</string>
   <string name="invalid_lat_long_used">Invalid latitude or longitude used</string>
 
+  <!-- EULA strings -->
+  <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
+
 </resources>

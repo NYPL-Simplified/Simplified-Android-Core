@@ -389,7 +389,7 @@ public abstract class SimplifiedActivity extends Activity
             icon_view.setImageResource(R.drawable.menu_icon_settings);
             final TextView tv =
               NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
-            tv.setText("Manage Accounts");
+            tv.setText(R.string.settings_manage_accounts);
 
           }
           return v;
