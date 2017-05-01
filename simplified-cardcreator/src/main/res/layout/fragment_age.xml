@@ -51,7 +51,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginTop="20dp"
         android:textSize="12sp"
-        android:text="I agree to the terms of the End User License Agreement."
+        android:text="@string/eula_checkbox"
         android:id="@+id/eula_checkbox"
         android:checked="false"
         android:layout_span="2"
