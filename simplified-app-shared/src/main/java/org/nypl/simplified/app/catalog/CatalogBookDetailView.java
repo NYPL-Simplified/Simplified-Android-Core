@@ -197,8 +197,6 @@ public final class CatalogBookDetailView implements Observer,
       (ImageView) header.findViewById(R.id.book_header_cover));
     final TextView header_authors = NullCheck.notNull(
       (TextView) header.findViewById(R.id.book_header_authors));
-    final TextView header_meta =
-      NullCheck.notNull((TextView) header.findViewById(R.id.book_header_meta));
 
     final ViewGroup bdd = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_downloading));
@@ -228,8 +226,6 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download = bd;
     this.book_download_buttons = NullCheck.notNull(
       (LinearLayout) bd.findViewById(R.id.book_dialog_download_buttons));
-    this.book_download_report_button = NullCheck.notNull(
-      (Button) bd.findViewById(R.id.book_dialog_report_button));
     this.book_download_text = NullCheck.notNull(
       (TextView) bd.findViewById(R.id.book_dialog_download_text));
 
@@ -239,12 +235,14 @@ public final class CatalogBookDetailView implements Observer,
       (TextView) summary.findViewById(R.id.book_summary_publisher));
     final WebView summary_text = NullCheck.notNull(
       (WebView) summary.findViewById(R.id.book_summary_text));
+    final TextView header_meta = NullCheck.notNull(
+      (TextView) summary.findViewById(R.id.book_header_meta));
+    this.book_download_report_button = NullCheck.notNull(
+      (Button) summary.findViewById(R.id.book_dialog_report_button));
 
     final ViewGroup related_layout = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_related_layout));
 
-    final TextView book_distribution = NullCheck.notNull(
-      (TextView) layout.findViewById(R.id.book_distribution));
     /**
      * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
      * ratio and set the width of the cover layout.
@@ -274,9 +272,6 @@ public final class CatalogBookDetailView implements Observer,
 
     header_title.setText(eo.getTitle());
 
-    book_distribution.setText(String.format(
-      rr.getString(R.string.catalog_book_distribution),
-      eo.getDistribution()));
     CatalogBookDetailView.configureViewTextAuthor(eo, header_authors);
     CatalogBookDetailView.configureViewTextMeta(rr, eo, header_meta);
 
@@ -391,6 +386,7 @@ public final class CatalogBookDetailView implements Observer,
     CatalogBookDetailView.createViewTextPublicationDate(rr, e, buffer);
     CatalogBookDetailView.createViewTextPublisher(rr, e, buffer);
     CatalogBookDetailView.createViewTextCategories(rr, e, buffer);
+    CatalogBookDetailView.createViewTextDistributor(rr, e, buffer);
     meta.setText(NullCheck.notNull(buffer.toString()));
   }
 
@@ -475,6 +471,20 @@ public final class CatalogBookDetailView implements Observer,
       buffer.append(": ");
       buffer.append(some.get());
     }
+  }
+
+  private static void createViewTextDistributor(
+    final Resources rr,
+    final OPDSAcquisitionFeedEntry e,
+    final StringBuilder buffer)
+  {
+    if (buffer.length() > 0) {
+      buffer.append("\n");
+    }
+
+    buffer.append(String.format(
+            rr.getString(R.string.catalog_book_distribution),
+            e.getDistribution()));
   }
 
   /**
