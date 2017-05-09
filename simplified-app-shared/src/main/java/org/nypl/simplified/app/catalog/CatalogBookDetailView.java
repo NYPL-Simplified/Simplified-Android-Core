@@ -197,6 +197,8 @@ public final class CatalogBookDetailView implements Observer,
       (ImageView) header.findViewById(R.id.book_header_cover));
     final TextView header_authors = NullCheck.notNull(
       (TextView) header.findViewById(R.id.book_header_authors));
+    this.book_download_buttons = NullCheck.notNull(
+            (LinearLayout) header.findViewById(R.id.book_dialog_download_buttons));
 
     final ViewGroup bdd = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_downloading));
@@ -224,15 +226,14 @@ public final class CatalogBookDetailView implements Observer,
     final ViewGroup bd = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_download));
     this.book_download = bd;
-    this.book_download_buttons = NullCheck.notNull(
-      (LinearLayout) bd.findViewById(R.id.book_dialog_download_buttons));
+
     this.book_download_text = NullCheck.notNull(
       (TextView) bd.findViewById(R.id.book_dialog_download_text));
 
     final ViewGroup summary = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_summary_layout));
-    final TextView summary_publisher = NullCheck.notNull(
-      (TextView) summary.findViewById(R.id.book_summary_publisher));
+    final TextView summary_section_title = NullCheck.notNull(
+      (TextView) summary.findViewById(R.id.book_summary_section_title));
     final WebView summary_text = NullCheck.notNull(
       (WebView) summary.findViewById(R.id.book_summary_text));
     final TextView header_meta = NullCheck.notNull(
@@ -259,7 +260,7 @@ public final class CatalogBookDetailView implements Observer,
      */
 
     final OPDSAcquisitionFeedEntry eo = in_entry.getFeedEntry();
-    CatalogBookDetailView.configureSummaryPublisher(eo, summary_publisher);
+    CatalogBookDetailView.configureSummarySectionTitle(summary_section_title);
 
     final BookID book_id = in_entry.getBookID();
     final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
@@ -306,15 +307,10 @@ public final class CatalogBookDetailView implements Observer,
     }
   }
 
-  private static void configureSummaryPublisher(
-    final OPDSAcquisitionFeedEntry e,
-    final TextView summary_publisher)
+  private static void configureSummarySectionTitle(
+    final TextView summary_section_title)
   {
-    final OptionType<String> pub = e.getPublisher();
-    if (pub.isSome()) {
-      final Some<String> some = (Some<String>) pub;
-      summary_publisher.setText(some.get());
-    }
+    summary_section_title.setText("Description");
   }
 
   private static void configureSummaryWebView(
