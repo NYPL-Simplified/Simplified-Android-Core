@@ -243,6 +243,14 @@ public final class CatalogBookDetailView implements Observer,
       (TextView) summary.findViewById(R.id.book_header_meta));
     this.book_download_report_button = NullCheck.notNull(
       (Button) summary.findViewById(R.id.book_dialog_report_button));
+    final Button read_more_button = NullCheck.notNull(
+      (Button) summary.findViewById(R.id.book_summary_read_more_button));
+
+    read_more_button.setOnClickListener(new View.OnClickListener() {
+      public void onClick(View v) {
+        CatalogBookDetailView.configureSummaryWebViewHeight(summary_text);
+      }
+    });
 
     final ViewGroup related_layout = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_related_layout));
@@ -272,7 +280,6 @@ public final class CatalogBookDetailView implements Observer,
     this.onStatus(in_entry, status_opt);
 
     CatalogBookDetailView.configureSummaryWebView(eo, summary_text);
-    CatalogBookDetailView.configureSummaryWebViewHeight(summary_text);
 
     header_title.setText(eo.getTitle());
 
