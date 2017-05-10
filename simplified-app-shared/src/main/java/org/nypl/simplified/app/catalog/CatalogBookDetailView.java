@@ -342,8 +342,8 @@ public final class CatalogBookDetailView implements Observer,
     summary_text_settings.setBlockNetworkLoads(true);
     summary_text_settings.setBlockNetworkImage(true);
     summary_text_settings.setDefaultTextEncodingName("UTF-8");
-    summary_text_settings.setDefaultFixedFontSize(12);
-    summary_text_settings.setDefaultFontSize(12);
+    summary_text_settings.setDefaultFixedFontSize(14);
+    summary_text_settings.setDefaultFontSize(14);
     summary_text.loadDataWithBaseURL(
       null, text.toString(), "text/html", "UTF-8", null);
   }
@@ -527,6 +527,7 @@ public final class CatalogBookDetailView implements Observer,
       this.activity.getResources(), this.book_download_buttons);
 
     this.book_download.setVisibility(View.VISIBLE);
+    this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -545,6 +546,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("download failed");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
     this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
@@ -614,6 +616,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("download in progress");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -893,6 +896,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("requesting download");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -919,6 +923,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("requesting loan");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
@@ -945,6 +950,7 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("requesting revoke");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
     this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
