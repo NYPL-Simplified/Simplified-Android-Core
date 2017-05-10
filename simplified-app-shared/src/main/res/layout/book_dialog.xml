@@ -79,7 +79,6 @@
               android:layout_height="wrap_content"
               android:layout_alignParentBottom="true"
               android:layout_marginLeft="12dp"
-              android:layout_marginBottom="8dp"
               android:gravity="left"
               android:orientation="horizontal">
 
@@ -87,6 +86,7 @@
                 android:id="@+id/book_dialog_downloading_failed_retry"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
+                android:layout_weight="1"
                 android:background="@drawable/simplified_button"
                 android:textColor="@drawable/simplified_button_text"
                 android:layout_width="wrap_content"
@@ -98,11 +98,12 @@
                 android:id="@+id/book_dialog_downloading_failed_dismiss"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
+                android:layout_weight="1"
                 android:background="@drawable/simplified_button"
                 android:textColor="@drawable/simplified_button_text"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/button_standard_height"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="12dp"
                 android:textSize="12sp"
                 android:text="@string/catalog_book_error_dismiss" />
       </LinearLayout>
@@ -186,9 +187,20 @@
     <WebView
       android:id="@+id/book_summary_text"
       android:layout_width="match_parent"
-      android:layout_height="200dp"
+      android:layout_height="120dp"
       android:layout_marginBottom="16dp">
     </WebView>
+
+    <Button
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="match_parent"
+      android:layout_height="@dimen/button_standard_height"
+      android:gravity="right|center_vertical"
+      android:textSize="12sp"
+      android:text="More..."
+      android:background="@android:color/transparent"
+      android:paddingRight="6dp"
+      android:id="@+id/book_summary_read_more_button"/>
 
     <View
       android:layout_width="fill_parent"
