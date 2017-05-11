@@ -218,8 +218,7 @@
       android:maxLines="8"
       android:minLines="1"
       android:ellipsize="end"
-      android:text="@string/placeholder_lorem"
-      android:textColor="@color/normal_text_minor" />
+      android:text="@string/placeholder_lorem"/>
 
     <View
       android:layout_width="fill_parent"
@@ -233,7 +232,7 @@
             android:textColor="@drawable/simplified_button_text"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/button_standard_height"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:textSize="12sp"
             android:text="@string/catalog_book_report"
             android:background="@android:color/transparent"

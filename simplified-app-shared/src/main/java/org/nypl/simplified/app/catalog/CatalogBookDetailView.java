@@ -247,8 +247,9 @@ public final class CatalogBookDetailView implements Observer,
       (Button) summary.findViewById(R.id.book_summary_read_more_button));
 
     read_more_button.setOnClickListener(new View.OnClickListener() {
-      public void onClick(View v) {
+      public void onClick(final View v) {
         CatalogBookDetailView.configureSummaryWebViewHeight(summary_text);
+        read_more_button.setVisibility(View.INVISIBLE);
       }
     });
 
