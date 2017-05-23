@@ -182,7 +182,7 @@
       android:layout_width="0dp"
       android:layout_weight="1"
       android:layout_height="wrap_content"
-      android:max="255"
+      android:max="100"
       android:contentDescription="@string/reader_accessibility_settings_brightness_slider"
       />
 

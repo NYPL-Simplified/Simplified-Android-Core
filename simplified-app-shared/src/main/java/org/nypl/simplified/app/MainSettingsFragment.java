@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
+import com.tenmiles.helpstack.HSHelpStack;
+import com.tenmiles.helpstack.gears.HSDeskGear;
 
 import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
 import org.nypl.simplified.app.testing.OnMultipleClickListener;
@@ -53,7 +55,7 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     try {
       final PackageInfo p_info = MainSettingsFragment.this.getActivity().getPackageManager().getPackageInfo(MainSettingsFragment.this.getActivity().getPackageName(), 0);
       final String version = p_info.versionName;
-      secret.setTitle("Version: " + version);
+      secret.setTitle("Version: " + version + " (" + p_info.versionCode + ")");
 
     } catch (PackageManager.NameNotFoundException e) {
       e.printStackTrace();
@@ -144,11 +146,24 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
 
     {
       if (helpstack.isSome()) {
-        final Intent help =
-          new Intent(this.getActivity(), HelpActivity.class);
+
         final Preference preference = findPreference(resources.getString(R.string.help));
-        help.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        preference.setIntent(help);
+        preference.setIntent(null);
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+          @Override
+          public boolean onPreferenceClick(final Preference preference) {
+
+            final HSHelpStack stack = HSHelpStack.getInstance(getActivity());
+
+            final HSDeskGear gear =
+              new HSDeskGear("https://nypl.desk.com/", "4GBRmMv8ZKG8fGehhA", "12060");
+            stack.setGear(gear);
+
+            stack.showHelp(getActivity());
+
+            return false;
+          }
+        });
 
       }
     }

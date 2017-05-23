@@ -9,7 +9,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/cellIcon"
-    android:src="@drawable/simplye_logo"
+    android:src="@mipmap/ic_launcher"
     android:layout_weight="0.43"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:paddingLeft="10dp"

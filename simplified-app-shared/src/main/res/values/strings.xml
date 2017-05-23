@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <!-- Action/Navigation Strings -->
+  <string name="nav_confirm">Confirm</string>
+  <string name="nav_done">Done</string>
+  <string name="nav_next">Next</string>
 
   <!-- EULA strings -->
   <string name="eula_disagree">Disagree</string>
   <string name="eula_agree">Agree</string>
+  <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
+
+  <!-- Age Verification strings -->
+  <string name="age_verification_title">Age Verification</string>
+  <string name="age_verification_question">You must be 13 years of age or older to download a book from the collection.\nHow old are you?</string>
+  <string name="age_verification_changed">If you are under 13, all content downloaded to My Books will be removed.\nHow old are you?</string>
+  <string name="age_verification_13_older">13 or Older</string>
+  <string name="age_verification_13_younger">Under 13</string>
+  <string name="age_verification_13_checkbox">I am 13 years of age or older.</string>
+  <string name="age_verification_too_young">You are not old enough to sign up for a library card.r</string>
 
   <!-- Books strings -->
   <string name="books">My Books</string>
@@ -85,6 +99,8 @@
   <string name="catalog_book_interval_days_short">d</string>
   <string name="catalog_book_interval_hours_short">h</string>
 
+  <string name="catalog_book_summary_publisher">Book Publisher</string>
+
   <!-- Catalog book report strings -->
   <string name="catalog_book_report_wrong_genre">Wrong Genre</string>
   <string name="catalog_book_report_wrong_audience">Wrong Audience</string>
@@ -102,7 +118,13 @@
   <string name="catalog_book_report_submit">Submit</string>
 
   <!-- Help strings -->
-  <string name="help">Help</string>
+  <string name="help">Frequently Asked Questions</string>
+
+  <!-- Library Signup Strings -->
+  <string name="library_signup_title">Sign Up for a Library Card</string>
+
+  <!-- Location Strings -->
+  <string name="location_no_valid_address">No valid address found</string>
 
   <!-- Settings strings -->
   <string name="settings">Settings</string>
@@ -133,8 +155,10 @@
   <string name="settings_about">About SimplyE</string>
   <string name="settings_account">Account</string>
   <string name="settings_accounts">Accounts</string>
+  <string name="settings_manage_accounts">Manage Accounts</string>
   <string name="settings_credits">Acknowledgements</string>
   <string name="settings_eula">User Agreement</string>
+  <string name="settings_report_issue">Report an Issue</string>
   <string name="settings_privacy">Privacy Policy</string>
   <string name="settings_licences">Licenses</string>
   <string name="settings_licence_software">Software License</string>
@@ -199,8 +223,17 @@
   <string name="reader_accessibility_settings_close">Close reader settings</string>
   <string name="reader_settings_close">Close</string>
 
+  <!-- Welcome Strings -->
+  <string name="welcome_library_header">Read Books From Your Library</string>
+  <string name="welcome_library_subtext">Simply browse, borrow, and read free ebooks from your local library</string>
+  <string name="welcome_library_button">Pick Your Library</string>
+  <string name="welcome_instant_header">SimplyE</string>
+  <string name="welcome_instant_subtext">Download and read ebooks without a library card</string>
+  <string name="welcome_instant_button">Read Now</string>
 
-
-
+  <!-- Card Signup Strings -->
+  <string name="need_card_question">Don\'t have a library card?</string>
+  <string name="need_card_button">Sign Up</string>
+  <string name="need_card_create">Create Card</string>
 
 </resources>

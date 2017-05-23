@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -342,7 +343,7 @@ public final class ReaderActivity extends Activity implements
   @Override
   protected void onResume() {
     super.onResume();
-    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read")) {
+    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read") && Simplified.getCurrentAccount().supportsSimplyESync()) {
       this.syncLastRead();
     }
   }
@@ -464,6 +465,26 @@ public final class ReaderActivity extends Activity implements
               ReaderActivity.LOG.debug("ReaderActivity - Response is: {}", response);
 
             }
+    // set reader brightness.
+    final int brightness = getPreferences(Context.MODE_PRIVATE).getInt("reader_brightness", 50);
+    final float back_light_value = (float) brightness / 100;
+    final WindowManager.LayoutParams layout_params = getWindow().getAttributes();
+    layout_params.screenBrightness = back_light_value;
+    getWindow().setAttributes(layout_params);
+
+    this.view_loading = in_loading;
+    this.view_progress_text = in_progress_text;
+    this.view_progress_bar = in_progress_bar;
+    this.view_title_text = in_title_text;
+    this.view_web_view = in_webview;
+    this.view_hud = in_hud;
+    this.view_toc = in_toc;
+    this.view_settings = in_settings;
+    this.web_view_resized = true;
+    this.view_media = in_media_overlay;
+    this.view_media_next = in_media_next;
+    this.view_media_prev = in_media_previous;
+    this.view_media_play = in_media_play;
 
             JSONObject responseJson;
             try {
@@ -781,7 +802,7 @@ public final class ReaderActivity extends Activity implements
   {
     ReaderActivity.LOG.debug("received book location: {}", l);
 
-    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read")) {
+    if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read") && Simplified.getCurrentAccount().supportsSimplyESync()) {
 
       LOG.debug("CurrentPage prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
 

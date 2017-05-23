@@ -12,260 +12,298 @@
     android:layout_height="wrap_content"
     android:background="@color/light_background">
 
-  <LinearLayout
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:background="@color/normal_background">
-
-
-    <TableLayout
-      android:id="@+id/settings_login_table_provider"
+    <LinearLayout
+      android:orientation="vertical"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="16dp"
-      android:background="@color/normal_background">
+      android:padding="16dp"
+      android:background="@color/normal_background"
+      android:elevation="1dp">
 
-      <TableRow
-        android:id="@+id/tableRowProvider"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
 
-        <ImageView
-          android:layout_width="80dp"
-          android:layout_height="80dp"
-          android:id="@+id/account_icon"
-          android:src="@drawable/simplye_logo"
-          android:paddingLeft="10dp"
-          android:paddingRight="0dp"
-          android:layout_weight="0"
-          />
+      <TableLayout
+        android:id="@+id/settings_login_table_provider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/normal_background">
 
-        <LinearLayout
-          android:orientation="vertical"
-          android:layout_width="match_parent"
+        <TableRow
+          android:id="@+id/tableRowProvider"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content">
+
+          <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:id="@+id/account_icon"
+            android:src="@mipmap/ic_launcher"
+            android:paddingLeft="10dp"
+            android:paddingRight="0dp"
+            android:layout_weight="0"
+            />
+
+          <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+
+            >
+
+            <TextView
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@android:id/text1"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:textAppearance="?android:attr/textAppearanceListItem"
+              android:textSize="18sp"
+              android:textStyle="bold"
+              android:gravity="center_vertical"
+              android:paddingLeft="11dp"
+              android:paddingRight="11dp"
+              android:textColor="@drawable/drawer_list_text"
+              />
+
+            <TextView
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@android:id/text2"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:textAppearance="?android:attr/textAppearanceListItemSmall"
+              android:textSize="14sp"
+              android:gravity="center_vertical"
+              android:paddingLeft="11dp"
+              android:paddingRight="11dp"
+              android:textColor="@drawable/drawer_list_text"
+              />
+          </LinearLayout>
+        </TableRow>
+
+      </TableLayout>
+
+      <TableLayout
+        android:id="@+id/settings_login_table_with_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/normal_background">
+
+        <TableRow
+          android:id="@+id/tableRow1"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content">
+
+          <TextView
+            android:id="@+id/settings_barcode_label"
+            android:labelFor="@+id/settings_barcode_edit"
+            android:text="@string/settings_barcode"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"/>
+
+          <TextView
+            android:id="@+id/settings_barcode_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/textview_underline"
+            android:maxLines="1"/>
+        </TableRow>
+
+        <TableRow
+          android:id="@+id/tableRow2"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content">
+
+          <TextView
+            android:id="@+id/settings_pin_label"
+            android:labelFor="@+id/settings_pin_edit"
+            android:text="@string/settings_pin"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"/>
+
+          <TextView
+            android:id="@+id/settings_pin_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="20dp"
+            android:background="@drawable/textview_underline"
+            android:maxLines="1"/>
+
+          <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textSize="12sp"
+            android:text="@string/settings_reveal_password"
+            android:id="@+id/settings_reveal_password"
+            android:checked="false"/>
+        </TableRow>
+
+        <TableRow
+          android:id="@+id/tableRow3"
+          android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_margin="10dp"
-          android:layout_weight="1"
+          android:layout_marginTop="10dp"
+          >
 
+          <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textSize="12sp"
+            android:text="@string/eula_checkbox"
+            android:id="@+id/eula_checkbox"
+            android:checked="false"
+            android:layout_span="2"
+            android:layout_weight="1"/>
+
+        </TableRow>
+      </TableLayout>
+
+      <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center_vertical"
+        android:text="@string/age_verification_13_checkbox"
+        android:id="@+id/age13_checkbox"
+        android:checked="false"
+        android:layout_weight="1"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        />
+
+      <Button
+        android:id="@+id/settings_login"
+        android:background="@drawable/simplified_button"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/button_standard_height"
+        android:layout_marginTop="30dp"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:textColor="@drawable/simplified_button_text"
+        android:textSize="12sp"
+        android:text="@string/settings_log_in"/>
+
+      <TableLayout
+        android:id="@+id/settings_signup_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:layout_marginBottom="16dp"
+        android:background="@color/normal_background">
+
+        <TableRow
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
           >
 
           <TextView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@android:id/text1"
-            android:layout_width="match_parent"
+            android:labelFor="@+id/settings_barcode_edit"
+            android:text="@string/need_card_question"
+            android:layout_width="wrap_content"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceListItem"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center_vertical"
-            android:paddingLeft="11dp"
-            android:paddingRight="11dp"
-            android:textColor="@drawable/drawer_list_text"
+
             />
+
+
+          <Button
+            android:id="@+id/settings_signup"
+            android:background="@drawable/simplified_button"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_standard_height"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:textColor="@drawable/simplified_button_text"
+            android:textSize="12sp"
+            android:text="@string/need_card_button"/>
+
+
+        </TableRow>
+
+      </TableLayout>
+    </LinearLayout>
+
+    <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@color/light_background"
+      android:paddingTop="10dp">
+
+      <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TableRow
+          android:id="@+id/support_center"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:background="@color/normal_background"
+          android:padding="015dp"
+          android:layout_marginBottom="5dp"
+          android:elevation="1dp">
 
           <TextView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@android:id/text2"
+            android:text="Support Center"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"
-            android:textSize="14sp"
-            android:gravity="center_vertical"
-            android:paddingLeft="11dp"
-            android:paddingRight="11dp"
-            android:textColor="@drawable/drawer_list_text"
-            />
-        </LinearLayout>
-      </TableRow>
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
 
-    </TableLayout>
 
-    <TableLayout
-      android:id="@+id/settings_login_table_with_code"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="16dp"
-      android:background="@color/normal_background">
-
-      <TableRow
-        android:id="@+id/tableRow1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <TextView
-          android:id="@+id/settings_barcode_label"
-          android:labelFor="@+id/settings_barcode_edit"
-          android:text="@string/settings_barcode"
-          android:layout_width="60dp"
-          android:layout_height="wrap_content"/>
-
-        <TextView
-          android:id="@+id/settings_barcode_text"
-          android:layout_width="wrap_content"
+        <TableRow
+          android:id="@+id/report_issue"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_weight="1"
-          android:layout_marginStart="20dp"
-          android:background="@drawable/textview_underline"
-          android:maxLines="1"/>
-      </TableRow>
+          android:background="@color/normal_background"
+          android:padding="015dp"
+          android:layout_marginBottom="5dp"
+          android:elevation="1dp">
 
-      <TableRow
-        android:id="@+id/tableRow2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+          <TextView
+            android:text="@string/settings_report_issue"
+            android:layout_width="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
 
-        <TextView
-          android:id="@+id/settings_pin_label"
-          android:labelFor="@+id/settings_pin_edit"
-          android:text="@string/settings_pin"
-          android:layout_width="60dp"
-          android:layout_height="wrap_content"/>
-
-        <TextView
-          android:id="@+id/settings_pin_text"
-          android:layout_width="wrap_content"
+        <TableRow
+          android:id="@+id/link_privacy"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_weight="1"
-          android:layout_marginStart="20dp"
-          android:background="@drawable/textview_underline"
-          android:maxLines="1"/>
+          android:background="@color/normal_background"
+          android:padding="015dp"
+          android:layout_marginBottom="5dp"
+          android:elevation="1dp">
 
-        <CheckBox
-          android:layout_width="wrap_content"
+          <TextView
+            android:text="@string/settings_privacy"
+            android:layout_width="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
+
+        <TableRow
+          android:id="@+id/link_license"
+          android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_gravity="center_vertical"
-          android:textSize="12sp"
-          android:text="@string/settings_reveal_password"
-          android:id="@+id/settings_reveal_password"
-          android:checked="false"/>
-      </TableRow>
+          android:background="@color/normal_background"
+          android:padding="015dp"
+          android:layout_marginBottom="5dp"
+          android:elevation="1dp">
 
-      <TableRow
-        android:id="@+id/tableRow3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        >
-
-        <CheckBox
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center_vertical"
-          android:textSize="12sp"
-          android:text="I agree to the terms of the End User License Agreement."
-          android:id="@+id/eula_checkbox"
-          android:checked="false"
-          android:layout_span="2"
-          android:layout_weight="1"/>
-
-      </TableRow>
-    </TableLayout>
-
-    <CheckBox
-      android:layout_width="wrap_content"
-      android:layout_height="0dp"
-      android:layout_gravity="center_vertical"
-      android:text="I am 13 years of age or older."
-      android:id="@+id/age13_checkbox"
-      android:checked="false"
-      android:layout_weight="1"
-      android:textAppearance="?android:attr/textAppearanceListItem"
-      />
-
-    <Button
-      android:id="@+id/settings_login"
-      android:background="@drawable/simplified_button"
-      android:layout_gravity="center"
-      android:layout_width="match_parent"
-      android:layout_height="@dimen/button_standard_height"
-      android:layout_marginTop="30dp"
-      android:paddingLeft="30dp"
-      android:paddingRight="30dp"
-      android:textColor="@drawable/simplified_button_text"
-      android:textSize="12sp"
-      android:text="@string/settings_log_in"/>
-
-    <TableLayout
-      android:id="@+id/settings_signup_table"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="22dp"
-      android:layout_marginBottom="16dp"
-      android:background="@color/normal_background">
-
-      <TableRow
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <TextView
-          android:labelFor="@+id/settings_barcode_edit"
-          android:text="Don't have a library card?"
-          android:layout_width="wrap_content"
-          android:layout_weight="1"
-          android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceListItem"
-
-          />
-
-
-        <Button
-          android:id="@+id/settings_signup"
-          android:background="@drawable/simplified_button"
-          android:layout_width="wrap_content"
-          android:layout_height="@dimen/button_standard_height"
-          android:paddingLeft="30dp"
-          android:paddingRight="30dp"
-          android:textColor="@drawable/simplified_button_text"
-          android:textSize="12sp"
-          android:text="Sign Up"/>
-
-
-      </TableRow>
-
-    </TableLayout>
+          <TextView
+            android:text="@string/settings_licence_content"
+            android:layout_width="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
+      </TableLayout>
+    </LinearLayout>
   </LinearLayout>
-
-  <LinearLayout
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/light_background"
-    android:paddingTop="10dp"
-    android:id="@+id/account_links">
-
-  <TableLayout
-      android:id="@+id/links"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content">
-      <TableRow
-        android:id="@+id/link_privacy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/normal_background"
-        android:padding="015dp"
-        android:layout_marginBottom="5dp">
-        <TextView android:text="Privacy Policy"
-                  android:layout_width="match_parent"
-                  android:textAppearance="?android:attr/textAppearanceMedium"/>
-      </TableRow>
-      <TableRow
-        android:id="@+id/link_license"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/normal_background"
-        android:padding="015dp"
-        android:layout_marginBottom="5dp">
-        <TextView android:text="Content Licenses"
-                  android:layout_width="match_parent"
-                  android:textAppearance="?android:attr/textAppearanceMedium"/>
-      </TableRow>
-    </TableLayout>
-
-  </LinearLayout>
-</LinearLayout>
 </ScrollView>
 

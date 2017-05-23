@@ -52,10 +52,11 @@ public interface BooksControllerType
    * Delete the actual book file for the given book, if any.
    *
    * @param id The book ID
+   * @param needs_auth login needed
    */
 
   void bookDeleteData(
-    BookID id);
+    BookID id, boolean needs_auth);
 
   /**
    * Cancel the download of the book with the given {@code id}.
