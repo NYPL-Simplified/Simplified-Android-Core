@@ -58,5 +58,25 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
+  },
+  {
+    "id": 3,
+    "pathComponent" : "3",
+    "name" : "Alameda County Public Library",
+    "subtitle" : "Infinite possibilities",
+    "logo" : "LibraryLogoAlameda",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://acl.simplye-ca.org/",
+    "supportEmail" : "enkisys@gmail.com",
+    "eulaUrl": "",
+    "licenseUrl": "",
+    "privacyUrl": "",
+    "mainColor": "#58a6f5"
   }
 ]
