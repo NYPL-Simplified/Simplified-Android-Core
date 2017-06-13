@@ -74,9 +74,8 @@
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://acl.simplye-ca.org/",
     "supportEmail" : "enkisys@gmail.com",
-    "eulaUrl": "",
-    "licenseUrl": "",
-    "privacyUrl": "",
+    "licenseUrl": "http://guides.aclibrary.org/TAC",
+    "privacyUrl": "http://califa.org/privacy-policy",
     "mainColor": "#58a6f5"
   }
 ]
