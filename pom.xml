@@ -171,7 +171,7 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>readium-sdk-android-runtime</artifactId>
-        <version>0.25.0</version>
+        <version>0.26.0</version>
         <type>aar</type>
       </dependency>
       <dependency>
