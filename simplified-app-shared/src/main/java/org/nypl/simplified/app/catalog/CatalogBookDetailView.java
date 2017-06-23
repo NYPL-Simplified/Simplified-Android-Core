@@ -104,6 +104,7 @@ public final class CatalogBookDetailView implements Observer,
   private final ViewGroup                      book_download;
   private final LinearLayout                   book_download_buttons;
   private final Button                         book_download_report_button;
+  private final Button                         related_books_button;
   private final TextView                       book_download_text;
   private final ViewGroup                      book_downloading;
   private final Button                         book_downloading_cancel;
@@ -241,8 +242,7 @@ public final class CatalogBookDetailView implements Observer,
       (WebView) summary.findViewById(R.id.book_summary_text));
     final TextView header_meta = NullCheck.notNull(
       (TextView) summary.findViewById(R.id.book_header_meta));
-    this.book_download_report_button = NullCheck.notNull(
-      (Button) summary.findViewById(R.id.book_dialog_report_button));
+
     final Button read_more_button = NullCheck.notNull(
       (Button) summary.findViewById(R.id.book_summary_read_more_button));
 
@@ -255,6 +255,10 @@ public final class CatalogBookDetailView implements Observer,
 
     final ViewGroup related_layout = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_related_layout));
+    this.related_books_button = NullCheck.notNull(
+            (Button) related_layout.findViewById(R.id.related_books_button));
+    this.book_download_report_button = NullCheck.notNull(
+            (Button) related_layout.findViewById(R.id.book_dialog_report_button));
 
     /**
      * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
@@ -286,8 +290,6 @@ public final class CatalogBookDetailView implements Observer,
 
     CatalogBookDetailView.configureViewTextAuthor(eo, header_authors);
     CatalogBookDetailView.configureViewTextMeta(rr, eo, header_meta);
-
-    related_layout.setVisibility(View.GONE);
 
     cover_provider.loadCoverInto(
       in_entry, header_cover, cover_width, cover_height);
@@ -1004,8 +1006,25 @@ public final class CatalogBookDetailView implements Observer,
         });
     }
 
+    final OnClickListener listener = new OnClickListener() {
+      @Override
+      public void onClick(final View v) {
+        final Intent i = new Intent(CatalogBookDetailView.this.activity, MainCatalogActivity.class);
+        final String relatedURI = CatalogBookDetailView.this.entry.get().getFeedEntry().getRelated().toString();
+
+        //use new relatedURI string to load a new remote feed and use with a new CatalogFeedActivity
+
+//        i.putExtra("newURI",relatedURI);
+
+        CatalogBookDetailView.this.activity.startActivity(i, null);
+      }
+    };
+
     final Button report_button = this.book_download_report_button;
     report_button.setOnClickListener(new CatalogBookReport(this.activity, e));
+
+    final Button books_button = this.related_books_button;
+    books_button.setOnClickListener(listener);
   }
 
   @Override public void update(
