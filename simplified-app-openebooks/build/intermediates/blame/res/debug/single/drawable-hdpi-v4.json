@@ -1,0 +1,30 @@
+[
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_search_black_48dp.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-hdpi-v4/ic_search_black_48dp.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_arrow_exit.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/drawable-hdpi-v4/ic_arrow_exit.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_drawer.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-hdpi-v4/ic_drawer.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_menu.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-hdpi-v4/ic_menu.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-hdpi-v4/clock_icon.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-hdpi-v4/clock_icon.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_arrow_back.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-hdpi-v4/ic_arrow_back.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-hdpi-v4/drawer_shadow.9.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-hdpi-v4/drawer_shadow.9.png"
+    }
+]

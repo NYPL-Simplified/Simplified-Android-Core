@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- The cell contents shown when a book failed to download -->
+
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/cell_downloading_failed"
+  android:layout_width="match_parent"
+  android:layout_height="110dp"
+  android:padding="8dp">
+
+  <TextView
+    android:id="@+id/cell_downloading_failed_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentStart="true"
+    android:maxLines="1"
+    android:ellipsize="end"
+    android:text="@string/placeholder_long_title"
+    android:textColor="@color/normal_text_major"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/cell_downloading_failed_static_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/cell_downloading_failed_title"
+    android:text="@string/catalog_download_failed"
+    android:textColor="@color/normal_text_major" />
+
+  <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"
+    android:layout_alignParentBottom="true"
+    android:orientation="horizontal">
+
+    <Button
+      android:id="@+id/cell_downloading_failed_retry"
+      android:background="@drawable/simplified_button"
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/button_standard_height"
+      android:textSize="12sp"
+      android:text="@string/catalog_book_error_retry" />
+
+    <Button
+      android:id="@+id/cell_downloading_failed_dismiss"
+      android:background="@drawable/simplified_button"
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/button_standard_height"
+      android:layout_marginLeft="8dp"
+      android:textSize="12sp"
+      android:text="@string/catalog_book_error_dismiss" />
+  </LinearLayout>
+
+</RelativeLayout>

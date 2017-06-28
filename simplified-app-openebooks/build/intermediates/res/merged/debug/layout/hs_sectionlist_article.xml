@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    style="@style/hs_listView_childBackgroundStyle">
+    
+    <TextView
+        android:id="@+id/sectionlisttextview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/hs_listView_childTextStyle"
+        android:text="" />
+    
+
+</LinearLayout>

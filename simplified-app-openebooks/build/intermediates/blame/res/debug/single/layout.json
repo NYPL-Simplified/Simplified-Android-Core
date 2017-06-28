@@ -1,0 +1,366 @@
+[
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_loading.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_loading.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_new_issue.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_new_issue.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_cell_downloading_failed.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_cell_downloading_failed.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_age.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_age.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_article.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_article.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_delete_confirm.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_delete_confirm.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_new_issue.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_new_issue.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_credentials.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_credentials.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/drawer_item_account.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/drawer_item_account.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_confimration.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_confimration.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_parent_home_default.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_parent_home_default.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/intro_slide_1.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/src/main/res/layout/intro_slide_1.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_review.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_review.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/alternate_feed_uris.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/alternate_feed_uris.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_image_attachment_display.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_image_attachment_display.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_location.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_location.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/logout_confirm.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/logout_confirm.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_issue_detail.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_issue_detail.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_new_user.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_new_user.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_work_address_confirm.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_work_address_confirm.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_attachment_dialog.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_attachment_dialog.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_button_expiry.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_button_expiry.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_address.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_address.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_feed_nogroups_empty.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_feed_nogroups_empty.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_child_issue_detail_user_reply.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_child_issue_detail_user_reply.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/theme_zoo.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/theme_zoo.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/settings.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/settings.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/reader_settings.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/reader_settings.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_parent_issue_detail_default.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_parent_issue_detail_default.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_custom_searchview.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_custom_searchview.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/drawer_item.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/drawer_item.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/intro_slide_2.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/src/main/res/layout/intro_slide_2.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/oe_intro.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/src/main/res/layout/oe_intro.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/settings_account.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/settings_account.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_footer_powered_by_helpstack.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_footer_powered_by_helpstack.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_name.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_name.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_sectionlist_article.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_sectionlist_article.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_feed_groups_lane.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_feed_groups_lane.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/holds.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/holds.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/accounts_picker.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/accounts_picker.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/eula.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/eula.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/account_list_item.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/account_list_item.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_revoke_confirm.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_revoke_confirm.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_issue_detail.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_issue_detail.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/webview.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/webview.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_home.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_home.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/reader_toc.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/reader_toc.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/splash.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/splash.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_edit_attachment.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_edit_attachment.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/login_clever.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/login_clever.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_section.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_section.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/main.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/main.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/report_issue.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/report_issue.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/welcome.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/welcome.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/reader_toc_element.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/reader_toc_element.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_cell_data.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_cell_data.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_cell.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_cell.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_attachment.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_attachment.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/facet_dialog.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/facet_dialog.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/book_dialog_download.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/book_dialog_download.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_cell_corrupt.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_cell_corrupt.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/book_dialog.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/book_dialog.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_loading_not_connected.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_loading_not_connected.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/book_dialog_downloading_failed.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/book_dialog_downloading_failed.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/test_cover_gen.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/test_cover_gen.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/drawer_item_current_account.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/drawer_item_current_account.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_new_user.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_new_user.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_cell_downloading.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_cell_downloading.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_feed_groups_list.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_feed_groups_list.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_loading_error.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_loading_error.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/login_dialog.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/login_dialog.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_feed_nogroups_facets.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_feed_nogroups_facets.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_feed_nogroups.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_feed_nogroups.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_search.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_search.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/accounts.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/accounts.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_section.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_section.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_home_address_confirm.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_home_address_confirm.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/catalog_book_report.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/catalog_book_report.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_child_issue_detail_staff_reply.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_child_issue_detail_staff_reply.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/book_dialog_downloading.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/book_dialog_downloading.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_footer_progress_bar.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_footer_progress_bar.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_footer_report_issue.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_footer_report_issue.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_home_address.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_home_address.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/reader.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/reader.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_image_attachment_display.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_image_attachment_display.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/fragment_work_address.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/fragment_work_address.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_expandable_child_home_default.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_expandable_child_home_default.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_activity_article.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_activity_article.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/login_view.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/layout/login_view.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/hs_fragment_home.xml",
+        "source": "/Users/winnie/.android/build-cache/a31fc8cd05d1e1099edc5786f9549c241970ff88/output/res/layout/hs_fragment_home.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/layout/activity_card_creator.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/layout/activity_card_creator.xml"
+    }
+]

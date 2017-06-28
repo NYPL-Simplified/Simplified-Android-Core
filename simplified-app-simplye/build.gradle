@@ -1,0 +1,12 @@
+apply plugin: 'com.android.application'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = 'simplified-app-simplye'
+
+dependencies {
+  compile project(':simplified-app-shared')
+}

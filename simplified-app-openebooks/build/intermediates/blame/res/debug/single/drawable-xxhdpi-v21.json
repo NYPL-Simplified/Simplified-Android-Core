@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-xxhdpi-v21/ic_menu.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-xxhdpi-v21/ic_menu.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-xxhdpi-v21/ic_drawer.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-xxhdpi-v21/ic_drawer.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-xxhdpi-v21/ic_arrow_back.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-xxhdpi-v21/ic_arrow_back.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-xxhdpi-v21/ic_arrow_exit.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-cardcreator/build/intermediates/bundles/default/res/drawable-xxhdpi-v21/ic_arrow_exit.png"
+    }
+]

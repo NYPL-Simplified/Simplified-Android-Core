@@ -1,0 +1,22 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    style="@style/hs_backgroundStyle"
+    tools:context="com.tenmiles.helpstack.SectionActivity$PlaceholderFragment" >
+
+    <ListView
+        android:id="@+id/sectionlistview"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/hs_listViewStyle"
+        />
+    
+    <FrameLayout
+        android:id="@+id/search_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </FrameLayout>
+    
+</RelativeLayout>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:background="@color/normal_background"
+  android:padding="16dp"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical">
+
+  <ImageView
+    android:layout_width="wrap_content"
+    android:layout_gravity="center"
+    android:src="@drawable/simplified_splash"
+    android:layout_weight="1"
+    android:layout_height="100dp"/>
+
+  <LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="1">
+
+    <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+     >
+
+      <ImageView
+        android:layout_width="80dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/getting_started_icon_library"
+        android:layout_weight="1"
+        android:layout_height="70dp"/>
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Read Books from your Library"
+        android:layout_weight="1"/>
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Simply browse borrow and read free ebooks from you local library"
+        android:layout_weight="1"
+        android:textAlignment="center"/>
+
+      <Button
+        android:id="@+id/welcome_library"
+        android:text="Pick Your Library"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/simplified_welcome_button"
+        android:textColor="@drawable/simplified_welcome_button_text"
+        android:layout_weight="1"/>
+    </LinearLayout>
+
+    <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1">
+
+      <ImageView
+        android:layout_width="80dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/getting_started_icon_instant"
+        android:layout_weight="1"
+        android:layout_height="70dp"/>
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="SimplyE"
+        android:layout_weight="1"/>
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Download and read ebooks without a library card"
+        android:layout_weight="1"
+        android:textAlignment="center"/>
+
+      <Button
+        android:id="@+id/welcome_instant"
+        android:text="Read Now"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/simplified_welcome_button"
+        android:textColor="@drawable/simplified_welcome_button_text"
+        android:layout_weight="1"/>
+    </LinearLayout>
+  </LinearLayout>
+
+
+</LinearLayout>

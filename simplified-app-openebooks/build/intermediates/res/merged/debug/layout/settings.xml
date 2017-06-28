@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <LinearLayout
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <TextView
+      android:id="@+id/settings_account"
+      android:text="@string/settings_account"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"/>
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_login_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/settings_about"
+        android:text="@string/settings_about"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <View
+        android:background="#eee"
+        android:id="@+id/settings_about_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+      android:id="@+id/settings_credits"
+      android:text="@string/settings_credits"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"/>
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_credits_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp"/>
+
+    <TextView
+      android:id="@+id/settings_eula"
+      android:text="@string/settings_eula"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"/>
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_eula_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp"/>
+
+    <TextView
+      android:id="@+id/settings_privacy"
+      android:text="@string/settings_privacy"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"/>
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_privacy_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp"/>
+
+    <TextView
+      android:id="@+id/settings_help"
+      android:text="@string/help"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      />
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_help_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp"
+      />
+
+    <TextView
+      android:id="@+id/settings_adobe_accounts"
+      android:text="@string/settings_adobe_accounts"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"/>
+
+    <View
+      android:background="#eee"
+      android:id="@+id/settings_adobe_accounts_divider"
+      android:layout_width="match_parent"
+      android:layout_height="1dp"
+      android:layout_marginBottom="16dp"
+      android:layout_marginTop="16dp"
+      android:visibility="visible"/>
+
+    <LinearLayout
+      android:id="@+id/secret_view"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+    <TextView
+      android:id="@+id/settings_alt_uris"
+      android:text="@string/settings_alt_uris"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:visibility="visible"/>
+      </LinearLayout>
+  </LinearLayout>
+
+</ScrollView>
+

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="/Users/winnie/Documents/NYPL/Git/android/simplified-multilibrary/src/main/assets"/><source path="/Users/winnie/Documents/NYPL/Git/android/simplified-multilibrary/build/generated/assets/shaders/release"/></dataSet><dataSet config="release"><source path="/Users/winnie/Documents/NYPL/Git/android/simplified-multilibrary/src/release/assets"/></dataSet></merger>

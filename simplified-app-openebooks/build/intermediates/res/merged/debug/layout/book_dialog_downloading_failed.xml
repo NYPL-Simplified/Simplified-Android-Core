@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/book_dialog_downloading_failed"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <TextView
+    android:id="@+id/book_dialog_downloading_failed_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:textColor="@color/normal_text_major"
+    android:text="@string/catalog_download_failed"
+    android:textSize="12sp" />
+
+  <LinearLayout
+    android:id="@+id/book_dialog_downloading_failed_buttons"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="16dp"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <Button
+      android:id="@+id/book_dialog_downloading_failed_retry"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentBottom="true"
+      android:background="@drawable/simplified_button"
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/button_standard_height"
+      android:textSize="12sp"
+      android:text="@string/catalog_book_error_retry" />
+
+    <Button
+      android:id="@+id/book_dialog_downloading_failed_dismiss"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentBottom="true"
+      android:background="@drawable/simplified_button"
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/button_standard_height"
+      android:layout_marginLeft="16dp"
+      android:textSize="12sp"
+      android:text="@string/catalog_book_error_dismiss" />
+  </LinearLayout>
+
+</RelativeLayout>

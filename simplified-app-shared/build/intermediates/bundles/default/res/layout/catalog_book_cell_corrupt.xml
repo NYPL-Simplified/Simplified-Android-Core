@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- The cell contents shown when a book failed to download -->
+
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/cell_corrupt"
+  android:layout_width="match_parent"
+  android:layout_height="110dp"
+  android:layout_marginEnd="8dp"
+  android:orientation="vertical">
+
+  <TextView
+    android:id="@+id/cell_corrupt_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentStart="true"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:text="@string/catalog_meta_corrupt_title"
+    android:textColor="@color/normal_text_major"
+    android:textStyle="bold" />
+
+  <TextView
+    android:id="@+id/cell_corrupt_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/cell_corrupt_title"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:ellipsize="end"
+    android:maxLines="3"
+    android:textColor="@color/normal_text_major"
+    android:text="@string/placeholder_lorem"
+    android:textSize="10sp" />
+
+</RelativeLayout>

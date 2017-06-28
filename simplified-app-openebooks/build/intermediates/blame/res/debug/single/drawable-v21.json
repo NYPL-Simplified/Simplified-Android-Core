@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/simplified_popup.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/simplified_popup.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/ic_drawer.png",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/ic_drawer.png"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/simplified_progress_thumb.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/simplified_progress_thumb.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/simplified_progress.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/simplified_progress.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/drawer_list_selector.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/drawer_list_selector.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/simplified_button.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/simplified_button.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/textview_underline.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/textview_underline.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/simplified_button_text.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/simplified_button_text.xml"
+    },
+    {
+        "merged": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-openebooks/build/intermediates/res/merged/debug/drawable-v21/simplified_progress_inverse.xml",
+        "source": "/Users/winnie/Documents/NYPL/Git/android/simplified-app-shared/build/intermediates/bundles/default/res/drawable-v21/simplified_progress_inverse.xml"
+    }
+]

@@ -1,0 +1,796 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="theme_zoo_spinner">
+    <item>Item 0</item>
+    <item>Item 1</item>
+    <item>Item 2</item>
+    <item>Item 3</item>
+  </string-array>
+    <attr format="color" name="button_foreground"/>
+    <attr format="boolean" name="centered"/>
+    <attr format="color" name="downloading_background"/>
+    <attr format="color" name="list_item_foreground"/>
+    <attr format="color" name="main_color"/>
+    <attr format="color" name="notification_background"/>
+    <attr format="color" name="selectedColor"/>
+    <attr format="dimension" name="strokeWidth"/>
+    <attr format="color" name="unselectedColor"/>
+    <bool name="debug_adobe_drm_logging">false</bool>
+    <bool name="debug_catalog_cell_view_states">false</bool>
+    <bool name="debug_picasso_cache_indicators">false</bool>
+    <bool name="debug_picasso_logging">false</bool>
+    <bool name="default_circle_indicator_centered">true</bool>
+    <bool name="default_circle_indicator_snap">false</bool>
+    <bool name="default_line_indicator_centered">true</bool>
+    <bool name="default_title_indicator_selected_bold">true</bool>
+    <bool name="default_underline_indicator_fades">true</bool>
+    <bool name="feature_auth_provider_clever">true</bool>
+    <bool name="feature_default_auth_provider">true</bool>
+    <bool name="feature_default_auth_provider_request_new_code">true</bool>
+    <bool name="feature_holds_enabled">false</bool>
+    <color name="app_main_color">#666766</color>
+    <color name="button_background">#ffffff</color>
+    <color name="button_disabled">#dddddd</color>
+    <color name="button_foreground">#ff669900</color>
+    <color name="colorAccent">#f9c8c7</color>
+    <color name="colorPrimary">#af1a16</color>
+    <color name="colorPrimaryDark">#cc1a16</color>
+    <color name="default_circle_indicator_fill_color">#FFFFFFFF</color>
+    <color name="default_circle_indicator_page_color">#00000000</color>
+    <color name="default_circle_indicator_stroke_color">#FFDDDDDD</color>
+    <color name="default_line_indicator_selected_color">#FF33B5E5</color>
+    <color name="default_line_indicator_unselected_color">#FFBBBBBB</color>
+    <color name="default_title_indicator_footer_color">#FF33B5E5</color>
+    <color name="default_title_indicator_selected_color">#FFFFFFFF</color>
+    <color name="default_title_indicator_text_color">#BBFFFFFF</color>
+    <color name="default_underline_indicator_selected_color">#FF33B5E5</color>
+    <color name="divider_color">#eeeeee</color>
+    <color name="downloading_foreground">#ffffff</color>
+    <color name="feature_main_color">#8cc63e</color>
+    <color name="feature_main_color_bpl">#446ebf</color>
+    <color name="feature_main_color_nypl">#da2527</color>
+    <color name="feature_secondary_color">#7baf38</color>
+    <color name="feature_secondary_color_bpl">#4168a0</color>
+    <color name="feature_secondary_color_nypl">#af1a16</color>
+    <color name="hs_accent_color">#228CD1</color>
+    <color name="hs_background_color">#e1e1e1</color>
+    <color name="hs_buttonTextcolor">#DE2527</color>
+    <color name="hs_button_background_color">#FFFFFF</color>
+    <color name="hs_childView_background_color">#ffffff</color>
+    <color name="hs_darkGreycolor">#B5B5B5</color>
+    <color name="hs_darkerGreycolor">#ff555555</color>
+    <color name="hs_editTextcolor">#000000</color>
+    <color name="hs_header_background_color">@color/app_main_color</color>
+    <color name="hs_leftchat_bubblecolor">@color/hs_leftchat_bubblecolor_defaultColor</color>
+    <color name="hs_leftchat_bubblecolor_defaultColor">#FFFFFF</color>
+    <color name="hs_leftchat_messageTextcolor">#000000</color>
+    <color name="hs_lightGreycolor">#ECECEC</color>
+    <color name="hs_listView_divider_color">#e2e2e2</color>
+    <color name="hs_listView_selector_color">#d3d3d3</color>
+    <color name="hs_message_moreinfoTextColor">#000000</color>
+    <color name="hs_rightchat_bubblecolor">@color/hs_rightchat_bubblecolor_defaultColor</color>
+    <color name="hs_rightchat_bubblecolor_defaultColor">#228CD1</color>
+    <color name="hs_rightchat_messageTextcolor">#FFFFFF</color>
+    <color name="hs_transparent_color">#0000</color>
+    <color name="light_background">#f5f5f5</color>
+    <color name="list_item_background">#ffffff</color>
+    <color name="list_item_foreground">#ff669900</color>
+    <color name="list_item_text_normal">#000000</color>
+    <color name="list_item_text_selected">#ffffff</color>
+    <color name="normal_background">#ffffff</color>
+    <color name="normal_text_major">#000000</color>
+    <color name="normal_text_minor">#a0a0a0</color>
+    <color name="notification_foreground">#ffffff</color>
+    <color name="review_green">#ff669900</color>
+    <color name="step_pager_next_tab_color">#10000000</color>
+    <color name="step_pager_previous_tab_color">#f9c8c7</color>
+    <color name="step_pager_selected_last_tab_color">#ff669900</color>
+    <color name="step_pager_selected_tab_color">#cc1a16</color>
+    <color name="text_black">#000000</color>
+    <color name="text_hint">#FFCCCCCC</color>
+    <color name="text_light">#66000000</color>
+    <color name="vpi__background_holo_dark">#ff000000</color>
+    <color name="vpi__background_holo_light">#fff3f3f3</color>
+    <color name="vpi__bright_foreground_disabled_holo_dark">#ff4c4c4c</color>
+    <color name="vpi__bright_foreground_disabled_holo_light">#ffb2b2b2</color>
+    <color name="vpi__bright_foreground_holo_dark">@color/vpi__background_holo_light</color>
+    <color name="vpi__bright_foreground_holo_light">@color/vpi__background_holo_dark</color>
+    <color name="vpi__bright_foreground_inverse_holo_dark">@color/vpi__bright_foreground_holo_light</color>
+    <color name="vpi__bright_foreground_inverse_holo_light">@color/vpi__bright_foreground_holo_dark</color>
+    <declare-styleable name="CirclePageIndicator"><attr name="centered"/><attr format="color" name="fillColor"/><attr format="color" name="pageColor"/><attr name="android:orientation"/><attr format="dimension" name="radius"/><attr format="boolean" name="snap"/><attr format="color" name="strokeColor"/><attr name="strokeWidth"/><attr name="android:background"/></declare-styleable>
+    <declare-styleable name="LinePageIndicator"><attr name="centered"/><attr name="unselectedColor"/><attr name="selectedColor"/><attr format="dimension" name="lineWidth"/><attr name="strokeWidth"/><attr format="dimension" name="gapWidth"/><attr name="android:background"/></declare-styleable>
+    <declare-styleable name="TitlePageIndicator"><attr format="dimension" name="clipPadding"/><attr format="color" name="footerColor"/><attr format="dimension" name="footerLineHeight"/><attr name="footerIndicatorStyle">
+            <enum name="none" value="0"/>
+            <enum name="triangle" value="1"/>
+            <enum name="underline" value="2"/>
+        </attr><attr format="dimension" name="footerIndicatorHeight"/><attr format="dimension" name="footerIndicatorUnderlinePadding"/><attr format="dimension" name="footerPadding"/><attr name="linePosition">
+            <enum name="bottom" value="0"/>
+            <enum name="top" value="1"/>
+        </attr><attr name="selectedColor"/><attr format="boolean" name="selectedBold"/><attr name="android:textColor"/><attr name="android:textSize"/><attr format="dimension" name="titlePadding"/><attr format="dimension" name="topPadding"/><attr name="android:background"/></declare-styleable>
+    <declare-styleable name="UnderlinePageIndicator"><attr format="boolean" name="fades"/><attr format="integer" name="fadeDelay"/><attr format="integer" name="fadeLength"/><attr name="selectedColor"/><attr name="android:background"/></declare-styleable>
+    <declare-styleable name="ViewPagerIndicator"><attr format="reference" name="vpiCirclePageIndicatorStyle"/><attr format="reference" name="vpiIconPageIndicatorStyle"/><attr format="reference" name="vpiLinePageIndicatorStyle"/><attr format="reference" name="vpiTitlePageIndicatorStyle"/><attr format="reference" name="vpiTabPageIndicatorStyle"/><attr format="reference" name="vpiUnderlinePageIndicatorStyle"/></declare-styleable>
+    <dimen name="book_delete_dialog_height">150dp</dimen>
+    <dimen name="book_delete_dialog_width">280dp</dimen>
+    <dimen name="book_revoke_dialog_height">150dp</dimen>
+    <dimen name="book_revoke_dialog_width">280dp</dimen>
+    <dimen name="button_corner_radius">3dp</dimen>
+    <dimen name="button_padding_bottom">3dp</dimen>
+    <dimen name="button_padding_left">12dp</dimen>
+    <dimen name="button_padding_right">12dp</dimen>
+    <dimen name="button_padding_top">3dp</dimen>
+    <dimen name="button_standard_height">35dp</dimen>
+    <dimen name="button_stroke">1dp</dimen>
+    <dimen name="color_button_size">30dp</dimen>
+    <dimen name="default_circle_indicator_radius">3dp</dimen>
+    <dimen name="default_circle_indicator_stroke_width">1dp</dimen>
+    <dimen name="default_line_indicator_gap_width">4dp</dimen>
+    <dimen name="default_line_indicator_line_width">12dp</dimen>
+    <dimen name="default_line_indicator_stroke_width">1dp</dimen>
+    <dimen name="default_title_indicator_clip_padding">4dp</dimen>
+    <dimen name="default_title_indicator_footer_indicator_height">4dp</dimen>
+    <dimen name="default_title_indicator_footer_indicator_underline_padding">20dp</dimen>
+    <dimen name="default_title_indicator_footer_line_height">2dp</dimen>
+    <dimen name="default_title_indicator_footer_padding">7dp</dimen>
+    <dimen name="default_title_indicator_text_size">15dp</dimen>
+    <dimen name="default_title_indicator_title_padding">5dp</dimen>
+    <dimen name="default_title_indicator_top_padding">7dp</dimen>
+    <dimen name="facet_dialog_height">280dp</dimen>
+    <dimen name="facet_dialog_width">280dp</dimen>
+    <dimen name="hs_activity_horizontal_margin">16dp</dimen>
+    <dimen name="hs_activity_vertical_margin">16dp</dimen>
+    <dimen name="hs_button_marginSize">32dp</dimen>
+    <dimen name="hs_button_textSize">18sp</dimen>
+    <dimen name="hs_chatbubbleMarginWidth">4dp</dimen>
+    <dimen name="hs_default_text_size">14sp</dimen>
+    <dimen name="hs_listView_ChildView_TextSize">16sp</dimen>
+    <dimen name="hs_listView_divider_height">0.5dip</dimen>
+    <dimen name="hs_listView_header_TextSize">18sp</dimen>
+    <dimen name="hs_message_TextSize">18sp</dimen>
+    <dimen name="hs_smallTextMaxWidth">100dp</dimen>
+    <dimen name="hs_small_TextSize">13sp</dimen>
+    <dimen name="login_dialog_height">280dp</dimen>
+    <dimen name="login_dialog_width">280dp</dimen>
+    <dimen name="logout_dialog_height">280dp</dimen>
+    <dimen name="logout_dialog_width">280dp</dimen>
+    <drawable name="feature_app_icon">@drawable/oei</drawable>
+    <drawable name="feature_app_splash">@drawable/oei_splash</drawable>
+    <drawable name="hs_action_accept">@drawable/hs_accept_light</drawable>
+    <drawable name="hs_action_forward">@drawable/hs_forward_light</drawable>
+    <drawable name="hs_add_attachment">@drawable/hs_add_attachment_img</drawable>
+    <drawable name="hs_attachment_icon">@drawable/hs_attachment</drawable>
+    <drawable name="hs_disclosure_next">@drawable/hs_disclosure</drawable>
+    <drawable name="hs_search_icon">@drawable/ic_search_black_48dp</drawable>
+    <integer name="catalog_feed_nogroups_columns">1</integer>
+    <integer name="default_circle_indicator_orientation">0</integer>
+    <integer name="default_title_indicator_footer_indicator_style">2</integer>
+    <integer name="default_title_indicator_line_position">0</integer>
+    <integer name="default_underline_indicator_fade_delay">300</integer>
+    <integer name="default_underline_indicator_fade_length">400</integer>
+    <string name="ADDRESS_IN_NY">address_in_NY</string>
+    <string name="ADDRESS_OUTPUT">address_output</string>
+    <string name="ADDRESS_STATUS">address_status</string>
+    <string name="BARCODE_DATA_KEY">barcode</string>
+    <string name="CARD_TYPE_DATA_KEY">card_type_explanation</string>
+    <string name="CITY_H_DATA_KEY">city_h</string>
+    <string name="CITY_W_DATA_KEY">city_w</string>
+    <string name="EMAIL_DATA_KEY">email</string>
+    <string name="EQUAL_OR_OLDER_13">equalOrOlder</string>
+    <string name="EULA_ACCEPTED">eulaAccepted</string>
+    <string name="FIRST_NAME_DATA_KEY">firstname</string>
+    <string name="LAST_NAME_DATA_KEY">lastname</string>
+    <string name="LIVE_IN_NY_DATA_KEY">live_in_ny</string>
+    <string name="MESSAGE_DATA_KEY">message</string>
+    <string name="MIDDLE_NAME_DATA_KEY">middlename</string>
+    <string name="PIN_DATA_KEY">pin</string>
+    <string name="SCHOOL_IN_NY_DATA_KEY">school_in_ny</string>
+    <string name="SELECTED_ADDRESS">selected_address</string>
+    <string name="SELECTED_WORK_ADDRESS">selected_work_address</string>
+    <string name="SHOW_NEXT_BUTTON">next</string>
+    <string name="SHOW_PREV_BUTTON">prev</string>
+    <string name="STATE_H_DATA_KEY">state_h</string>
+    <string name="STATE_W_DATA_KEY">state_w</string>
+    <string name="STREET1_H_DATA_KEY">street1_h</string>
+    <string name="STREET1_W_DATA_KEY">street1_w</string>
+    <string name="STREET2_H_DATA_KEY">street2_h</string>
+    <string name="STREET2_W_DATA_KEY">street2_w</string>
+    <string name="UNDER_13">under13</string>
+    <string name="USERNAME_DATA_KEY">username</string>
+    <string name="WORK_IN_NY_DATA_KEY">work_in_ny</string>
+    <string name="ZIP_H_DATA_KEY">zip_h</string>
+    <string name="ZIP_W_DATA_KEY">zip_w</string>
+    <string name="access_code_needed">You need an access code and PIN to access the collection.</string>
+    <string name="address_found">Address found</string>
+    <string name="books">My Books</string>
+    <string name="books_sort_by">Sort By</string>
+    <string name="books_sort_by_author">Author</string>
+    <string name="books_sort_by_title">Title</string>
+    <string name="books_sync">Sync Account</string>
+    <string name="catalog">Catalog</string>
+    <string name="catalog_accessibility_book_borrow">Get Button</string>
+    <string name="catalog_accessibility_book_delete">Delete Button</string>
+    <string name="catalog_accessibility_book_download">Download Button</string>
+    <string name="catalog_accessibility_book_error_dismiss">Dismiss Button</string>
+    <string name="catalog_accessibility_book_error_retry">Retry Button</string>
+    <string name="catalog_accessibility_book_read">Read Button</string>
+    <string name="catalog_accessibility_book_reserve">Reserve Button</string>
+    <string name="catalog_accessibility_book_revoke_hold">Remove Button</string>
+    <string name="catalog_accessibility_book_revoke_hold_cancel">Cancel Remove</string>
+    <string name="catalog_accessibility_book_revoke_loan">Return Now Button</string>
+    <string name="catalog_accessibility_book_revoke_loan_cancel">Cancel Return Now</string>
+    <string name="catalog_accessibility_book_sync">Sync Button</string>
+    <string name="catalog_accessibility_header_show_more">show more in %1$s</string>
+    <string name="catalog_book_availability_held_indefinite">You have this book on hold.</string>
+    <string name="catalog_book_availability_held_queue">You are at position %d in the queue for this book.</string>
+    <string name="catalog_book_availability_held_timed">You will be able to borrow this book in %s.</string>
+    <string name="catalog_book_availability_holdable">All copies of this book are currently on loan.</string>
+    <string name="catalog_book_availability_loanable">This book is available for loan.</string>
+    <string name="catalog_book_availability_loaned_indefinite">You have this book on loan.</string>
+    <string name="catalog_book_availability_loaned_timed">You have this book on loan for %s.</string>
+    <string name="catalog_book_availability_open_access">This book is yours to keep.</string>
+    <string name="catalog_book_availability_reserved_indefinite">You have this book reserved.</string>
+    <string name="catalog_book_availability_reserved_timed">Your reservation expires in %s.</string>
+    <string name="catalog_book_availability_revoked">This book is waiting to be returned.</string>
+    <string name="catalog_book_borrow">Get</string>
+    <string name="catalog_book_delete">Delete</string>
+    <string name="catalog_book_delete_confirm">Are you sure you want to delete this book?</string>
+    <string name="catalog_book_detail">Details</string>
+    <string name="catalog_book_distribution">Distributed by: %s</string>
+    <string name="catalog_book_download">Download</string>
+    <string name="catalog_book_error_dismiss">Dismiss</string>
+    <string name="catalog_book_error_retry">Retry</string>
+    <string name="catalog_book_interval_days">days</string>
+    <string name="catalog_book_interval_days_short">d</string>
+    <string name="catalog_book_interval_hours">hours</string>
+    <string name="catalog_book_interval_hours_short">h</string>
+    <string name="catalog_book_interval_months_short">m</string>
+    <string name="catalog_book_interval_sub_hour">less than an hour</string>
+    <string name="catalog_book_interval_weeks_short">w</string>
+    <string name="catalog_book_interval_years_short">y</string>
+    <string name="catalog_book_read">Read</string>
+    <string name="catalog_book_report">Report Issue</string>
+    <string name="catalog_book_report_cancel">Cancel</string>
+    <string name="catalog_book_report_cant_borrow">Can\'t Borrow</string>
+    <string name="catalog_book_report_cant_download">Can\'t Download</string>
+    <string name="catalog_book_report_incorrect_contents">Book Contents Blank or Incorrect</string>
+    <string name="catalog_book_report_submit">Submit</string>
+    <string name="catalog_book_report_wrong_age_range">Wrong Age Range</string>
+    <string name="catalog_book_report_wrong_audience">Wrong Audience</string>
+    <string name="catalog_book_report_wrong_author">Wrong Author</string>
+    <string name="catalog_book_report_wrong_cover_image">Wrong/Missing Cover Image</string>
+    <string name="catalog_book_report_wrong_description">Wrong/Mismatched Description</string>
+    <string name="catalog_book_report_wrong_genre">Wrong Genre</string>
+    <string name="catalog_book_report_wrong_medium">Wrong Medium</string>
+    <string name="catalog_book_report_wrong_title">Wrong Title</string>
+    <string name="catalog_book_reserve">Reserve</string>
+    <string name="catalog_book_revoke_cancel">Cancel</string>
+    <string name="catalog_book_revoke_hold">Remove</string>
+    <string name="catalog_book_revoke_hold_confirm">Are you sure you want to remove this reservation?</string>
+    <string name="catalog_book_revoke_loan">Return Now</string>
+    <string name="catalog_book_revoke_loan_confirm">Are you sure you want to return this book?</string>
+    <string name="catalog_book_sync">Sync</string>
+    <string name="catalog_cancel_downloading">Cancel</string>
+    <string name="catalog_categories">Categories</string>
+    <string name="catalog_detail_related">Related Books</string>
+    <string name="catalog_download_failed">The download could not be completed.</string>
+    <string name="catalog_download_failed_account_not_active">This device has not been activated. Go to account settings to activate.</string>
+    <string name="catalog_download_failed_loan_limit_reached">Book loan limit reached.</string>
+    <string name="catalog_download_failed_too_many_activations">The download could not be completed. Adobe device activations reached.</string>
+    <string name="catalog_download_failed_unsupported_passhash">Passhash protected books are not supported.</string>
+    <string name="catalog_download_failed_unsupported_pdf">This book is an Adobe PDF, which is not supported.</string>
+    <string name="catalog_download_failed_unsupported_unknown">This book is of an unknown type and is not supported.</string>
+    <string name="catalog_downloading">Downloading</string>
+    <string name="catalog_empty_feed">No results found.</string>
+    <string name="catalog_empty_my_books">Visit the Catalog to\nadd books to My Books.</string>
+    <string name="catalog_load_error_text">An error occurred while loading the catalog. Please try again.</string>
+    <string name="catalog_load_error_title">Error</string>
+    <string name="catalog_load_not_connected">You are not connected to the internet. Please connect and try again.</string>
+    <string name="catalog_meta_corrupt">The metadata for this book is damaged! Please sync your account to fix it.</string>
+    <string name="catalog_meta_corrupt_title">Metadata damaged</string>
+    <string name="catalog_more_feed">More…</string>
+    <string name="catalog_publication_date">Published</string>
+    <string name="catalog_publisher">Publisher</string>
+    <string name="catalog_refresh">Refresh Feed</string>
+    <string name="catalog_requesting_loan">Requesting</string>
+    <string name="catalog_requesting_revoke">Requesting</string>
+    <string name="catalog_revoke_failed">The operation could not be completed.</string>
+    <string name="catalog_search">Search</string>
+    <string name="catalog_unknown_feed">Unknown</string>
+    <string name="discard">Discard</string>
+    <string name="drawing_saved">Drawing saved to Gallery</string>
+    <string name="eula_agree">Agree</string>
+    <string name="eula_disagree">Disagree</string>
+    <string name="feature_adobe_auth_uri">https://circulation.openebooks.us/</string>
+    <string name="feature_adobe_package_override"/>
+    <string name="feature_adobe_vendor_id">OEI</string>
+    <string name="feature_app_name">Open eBooks</string>
+    <string name="feature_auth_provider_clever_name">Clever</string>
+    <string name="feature_auth_provider_clever_uri">https://circulation.openebooks.us/oauth_authenticate?provider=Clever&amp;redirect_uri=open-ebooks-clever://oauth</string>
+    <string name="feature_catalog_loans_uri_component">loans/</string>
+    <string name="feature_catalog_start_uri">https://circulation.openebooks.us/</string>
+    <string name="feature_default_auth_provider_name">FirstBook</string>
+    <string name="feature_default_auth_provider_request_new_code_uri">http://openebooks.net/getstarted.html</string>
+    <string name="feature_default_auth_provider_uri">https://circulation.openebooks.us/</string>
+    <string name="feature_environment">qa</string>
+    <string name="fetch_address">Fetch address</string>
+    <string name="finish">Register</string>
+    <string name="help">Frequently Asked Questions</string>
+    <string name="holds">Reservations</string>
+    <string name="holds_empty">When you reserve a book from the catalog it will show up here. Look here from time to time to see if your book is available to download.</string>
+    <string name="hs_addreply_hint">Add Reply</string>
+    <string name="hs_app_name">HelpStack</string>
+    <string name="hs_article">Article</string>
+    <string name="hs_articles_title">FAQ</string>
+    <string name="hs_attach">Attach</string>
+    <string name="hs_attachment">Attachment</string>
+    <string name="hs_attachment_edit">Edit Attachment</string>
+    <string name="hs_attachments">Attachments</string>
+    <string name="hs_change">Change</string>
+    <string name="hs_clear">Clear</string>
+    <string name="hs_creating_issue">Creating issue</string>
+    <string name="hs_done">Done</string>
+    <string name="hs_download">Download</string>
+    <string name="hs_download_complete">Download complete</string>
+    <string name="hs_downloading_attachment">Downloading Attachment</string>
+    <string name="hs_email_hint">Email Address</string>
+    <string name="hs_error">Error</string>
+    <string name="hs_error_check_network_connection">Please check your network connection</string>
+    <string name="hs_error_during_download">Error during download</string>
+    <string name="hs_error_enter_all_fields_to_register">Please enter all the fields to register successfully</string>
+    <string name="hs_error_enter_valid_email">Please enter a valid email address</string>
+    <string name="hs_error_fetching_articles">Error in fetching Articles</string>
+    <string name="hs_error_fetching_articles_issues">Error in fetching Articles and Issues</string>
+    <string name="hs_error_fetching_attachment">Error in fetching Attachment</string>
+    <string name="hs_error_fetching_ticket_updates">Error in fetching ticket updates</string>
+    <string name="hs_error_invalid_email">Invalid Email</string>
+    <string name="hs_error_posting_reply">Error in posting your reply, please check your network connection</string>
+    <string name="hs_error_reporting_issue">Error in reporting issue</string>
+    <string name="hs_error_subject_message_empty">Subject and message cannot be empty</string>
+    <string name="hs_firstname_hint">First Name</string>
+    <string name="hs_help_title">Frequently Asked Questions</string>
+    <string name="hs_issue_created_raised">Your issue has been created and raised</string>
+    <string name="hs_issuebutton_title">Report An Issue</string>
+    <string name="hs_issues_title">ISSUES</string>
+    <string name="hs_lastname_hint">Last Name</string>
+    <string name="hs_loading">Loading…</string>
+    <string name="hs_me">Me</string>
+    <string name="hs_message_hint">Message</string>
+    <string name="hs_new_issue_title">Report Issue</string>
+    <string name="hs_new_user_message">Enter your contact details to reach you later</string>
+    <string name="hs_new_user_title">Register New User</string>
+    <string name="hs_next">Next</string>
+    <string name="hs_notify_download_complete">You will be notified when the download finishes</string>
+    <string name="hs_open_with">Open with</string>
+    <string name="hs_powered_by_helpstack">Powered by HelpStack</string>
+    <string name="hs_remove">Remove</string>
+    <string name="hs_search">Search</string>
+    <string name="hs_search_hint">Search Articles</string>
+    <string name="hs_select_picture">Select Picture</string>
+    <string name="hs_sendbutton_title">Send</string>
+    <string name="hs_staff">Staff</string>
+    <string name="hs_subject_hint">Subject</string>
+    <string name="image_not_saved">Image could not be saved</string>
+    <string name="intro_message">The Open eBooks app provides free books to the children who need them the most.\n\nThe collection includes thousands of popular and award-winning titles as well as hundreds of public domain works.\n\nChildren from low-income areas may qualify for access in several ways.</string>
+    <string name="invalid_lat_long_used">Invalid latitude or longitude used</string>
+    <string name="label_address_home">Home Address</string>
+    <string name="label_address_school">School Address</string>
+    <string name="label_address_work">Work Address</string>
+    <string name="label_barcode">Barcode</string>
+    <string name="label_city">City</string>
+    <string name="label_email">Email</string>
+    <string name="label_firstname">First Name</string>
+    <string name="label_lastname">Last Name</string>
+    <string name="label_middletname">Middle</string>
+    <string name="label_name">Name</string>
+    <string name="label_pin">PIN</string>
+    <string name="label_region">Region</string>
+    <string name="label_street1">Street 1</string>
+    <string name="label_street2">Street 2</string>
+    <string name="label_username">Username</string>
+    <string name="label_zip">Zip</string>
+    <string name="login_needed">You need to login to access the collection.</string>
+    <string name="login_with_barcode">Login with FirstBook</string>
+    <string name="login_with_clever">Login with Clever</string>
+    <string name="navigation_accessibility">Navigation</string>
+    <string name="navigation_accessibility_drawer_hide">Hide navigation drawer. button.</string>
+    <string name="navigation_accessibility_drawer_show">Show navigation drawer. button.</string>
+    <string name="next">Next</string>
+    <string name="no_address_found">Sorry, no address found</string>
+    <string name="no_geocoder_available">No geocoder available</string>
+    <string name="no_location_data_provided">No location data provided</string>
+    <string name="placeholder_long_author">
+    Authors Authors Authors Authors Authors Authors Authors
+    Authors Authors Authors Authors Authors Authors Authors Authors Authors
+    Authors Authors Authors Authors
+  </string>
+    <string name="placeholder_long_title">
+    Title Title Title Title Title Title Title Title Title
+    Title Title Title Title Title Title Title Title Title Title Title Title
+    Title Title Title
+  </string>
+    <string name="placeholder_lorem">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Donec a
+    diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula
+    ac quam viverra nec consectetur ante hendrerit. Donec et mollis
+    dolor. Praesent et diam eget libero egestas mattis sit amet
+    vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia
+    consectetur. Donec ut libero sed arcu vehicula ultricies a non
+    tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed,
+    adipiscing id dolor. Pellentesque auctor nisi id magna consequat
+    sagittis.  Curabitur dapibus enim sit amet elit pharetra tincidunt
+    feugiat nisl imperdiet. Ut convallis libero in urna ultrices
+    accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar
+    at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis
+    dis parturient montes, nascetur ridiculus mus. In rutrum accumsan
+    ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
+  </string>
+    <string name="placeholder_short_title">
+    Title Title Title
+  </string>
+    <string name="prev">Previous</string>
+    <string name="reader">Reader</string>
+    <string name="reader_accessibility_close">Close the book</string>
+    <string name="reader_accessibility_media_next">Go to next media item</string>
+    <string name="reader_accessibility_media_play">Play or pause current media item</string>
+    <string name="reader_accessibility_media_previous">Go to previous media item</string>
+    <string name="reader_accessibility_settings">Show reader settings</string>
+    <string name="reader_accessibility_settings_black_on_sepia_text">Black on sepia text</string>
+    <string name="reader_accessibility_settings_black_on_white_text">Black on white text</string>
+    <string name="reader_accessibility_settings_brightness_slider">Brightness slider</string>
+    <string name="reader_accessibility_settings_close">Close reader settings</string>
+    <string name="reader_accessibility_settings_decrease_font_size">Decrease font size</string>
+    <string name="reader_accessibility_settings_increase_font_size">Increase font size</string>
+    <string name="reader_accessibility_settings_open_dyslexic_font">Open dyslexic font</string>
+    <string name="reader_accessibility_settings_sans_font">Sans font</string>
+    <string name="reader_accessibility_settings_serif_font">Serif font</string>
+    <string name="reader_accessibility_settings_white_on_black_text">White on black text</string>
+    <string name="reader_accessibility_toc">Show table of contents</string>
+    <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item</string>
+    <string name="reader_settings_close">Close</string>
+    <string name="reader_toc">Table Of Contents</string>
+    <string name="request_new_codes">Request New Code</string>
+    <string name="review">Review</string>
+    <string name="service_not_available">Sorry, the service is not available</string>
+    <string name="settings">Settings</string>
+    <string name="settings_about">About SimplyE</string>
+    <string name="settings_accessibility_log_in">Log in</string>
+    <string name="settings_accessibility_log_in_cancel">Cancel login</string>
+    <string name="settings_accessibility_log_out">Log out</string>
+    <string name="settings_accessibility_log_out_cancel">Cancel logout</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_accounts">Accounts</string>
+    <string name="settings_activate_this_device">Activate this Device</string>
+    <string name="settings_adobe_accounts">Adobe Accounts</string>
+    <string name="settings_alt_uris">Alternate URIs</string>
+    <string name="settings_authentication_title">Authentication</string>
+    <string name="settings_barcode">Barcode</string>
+    <string name="settings_credits">Acknowledgements</string>
+    <string name="settings_deactivate_this_device">Deactivate this Device</string>
+    <string name="settings_device_title">Device</string>
+    <string name="settings_eula">User Agreement</string>
+    <string name="settings_feedback">Feedback</string>
+    <string name="settings_licence_content">Content License</string>
+    <string name="settings_licence_software">Software License</string>
+    <string name="settings_licences">Licenses</string>
+    <string name="settings_log_in">Log In</string>
+    <string name="settings_log_in_cancel">Cancel</string>
+    <string name="settings_log_out">Log Out</string>
+    <string name="settings_log_out_cancel">Cancel</string>
+    <string name="settings_login_failed">Login Failed</string>
+    <string name="settings_login_failed_adobe_device_bad_clock">An error occurred when activating your device. Please check that your device clock is set to the correct time.</string>
+    <string name="settings_login_failed_adobe_device_limit">Too many devices have been registered on this account. Please contact Adobe support for assistance.</string>
+    <string name="settings_login_failed_credentials">Your barcode and pin combination was not valid. Please try again.</string>
+    <string name="settings_login_failed_device">An error occurred when activating your device. Please check your connection or try again later.</string>
+    <string name="settings_login_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
+    <string name="settings_login_succeeded">Logged in successfully</string>
+    <string name="settings_login_title">Library Card</string>
+    <string name="settings_logout_confirm">If you sign out of your account, all content will be removed from this device.</string>
+    <string name="settings_logout_failed">Logout Failed</string>
+    <string name="settings_logout_failed_server">An unknown error occurred. Please check your connection or try again later.</string>
+    <string name="settings_logout_succeeded">Logged out successfully</string>
+    <string name="settings_name">Name</string>
+    <string name="settings_pin">PIN</string>
+    <string name="settings_privacy">Privacy Policy</string>
+    <string name="settings_reveal_password">Show PIN</string>
+    <string name="settings_screen_Lock_not_setup">"Secure lock screen hasn't been set up. Go to 'Settings -> Security -> Screenlock' to set up a lock screen"</string>
+    <string name="submit_confirm_button">Register</string>
+    <string name="submit_confirm_message">You will receive an email confirmation.</string>
+    <string name="use_existing_code">Use Existing Code</string>
+    <string name="welcome_message">Welcome to Open eBooks</string>
+    <style name="HSAppBaseTheme" parent="@android:style/Theme.Holo.Light">
+    </style>
+    <style name="HSAppTheme" parent="HSAppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+    <style name="SimplifiedBookDialog" parent="SimplifiedTheme">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowIsFloating">true</item>
+  </style>
+    <style name="SimplifiedLoginDialog" parent="SimplifiedTheme">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowIsFloating">true</item>
+  </style>
+    <style name="SimplifiedTheme" parent="android:Theme.Holo.Light">
+    <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
+    <item name="android:icon">@drawable/ic_menu</item>
+    <item name="button_foreground">@color/app_main_color</item>
+    <item name="list_item_foreground">@color/app_main_color</item>
+    <item name="downloading_background">@color/app_main_color</item>
+    <item name="notification_background">@color/app_main_color</item>
+    <item name="main_color">@color/app_main_color</item>
+
+  </style>
+    <style name="SimplifiedTheme.LaneTitle">
+    <item name="android:textSize">21sp</item>
+    <item name="android:textColor">@color/app_main_color</item>
+    <item name="android:textStyle">normal</item>
+    <item name="android:typeface">sans</item>
+  </style>
+    <style name="SimplifiedThemeNoActionBar" parent="android:Theme.Holo.Light.NoActionBar">
+    <item name="android:windowActionBar">false</item>
+    <item name="android:windowNoTitle">true</item>
+
+    <item name="button_foreground">@color/app_main_color</item>
+    <item name="list_item_foreground">@color/app_main_color</item>
+    <item name="downloading_background">@color/app_main_color</item>
+    <item name="notification_background">@color/app_main_color</item>
+    <item name="main_color">@color/app_main_color</item>
+
+  </style>
+    <style name="SimplifiedThemeNoActionBar_BPL" parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_bpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_bpl</item>
+    <item name="downloading_background">@color/feature_main_color_bpl</item>
+    <item name="notification_background">@color/feature_main_color_bpl</item>
+    <item name="main_color">@color/feature_main_color_bpl</item>
+
+  </style>
+    <style name="SimplifiedThemeNoActionBar_NYPL" parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_nypl</item>
+    <item name="list_item_foreground">@color/feature_main_color_nypl</item>
+    <item name="downloading_background">@color/feature_main_color_nypl</item>
+    <item name="notification_background">@color/feature_main_color_nypl</item>
+    <item name="main_color">@color/feature_main_color_nypl</item>
+
+  </style>
+    <style name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_bpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_bpl</item>
+    <item name="downloading_background">@color/feature_main_color_bpl</item>
+    <item name="notification_background">@color/feature_main_color_bpl</item>
+    <item name="main_color">@color/feature_main_color_bpl</item>
+
+  </style>
+    <style name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color</item>
+    <item name="list_item_foreground">@color/feature_main_color</item>
+    <item name="downloading_background">@color/feature_main_color</item>
+    <item name="notification_background">@color/feature_main_color</item>
+    <item name="main_color">@color/feature_main_color</item>
+
+  </style>
+    <style name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_nypl</item>
+    <item name="list_item_foreground">@color/feature_main_color_nypl</item>
+    <item name="downloading_background">@color/feature_main_color_nypl</item>
+    <item name="notification_background">@color/feature_main_color_nypl</item>
+    <item name="main_color">@color/feature_main_color_nypl</item>
+
+  </style>
+    <style name="TextAppearance.TabPageIndicator" parent="Widget">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/vpi__dark_theme</item>
+    </style>
+    <style name="TextAppearanceFinish" parent="android:TextAppearance.Holo.Medium">
+    <item name="android:textColor">#fff</item>
+  </style>
+    <style name="Theme.PageIndicatorDefaults" parent="android:Theme">
+        <item name="vpiIconPageIndicatorStyle">@style/Widget.IconPageIndicator</item>
+        <item name="vpiTabPageIndicatorStyle">@style/Widget.TabPageIndicator</item>
+    </style>
+    <style name="Widget">
+    </style>
+    <style name="Widget.IconPageIndicator" parent="Widget">
+        <item name="android:layout_marginLeft">6dp</item>
+        <item name="android:layout_marginRight">6dp</item>
+    </style>
+    <style name="Widget.TabPageIndicator" parent="Widget">
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/vpi__tab_indicator</item>
+        <item name="android:paddingLeft">22dip</item>
+        <item name="android:paddingRight">22dip</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.TabPageIndicator</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="WizardFormEditText">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:hint">Required</item>
+    <item name="android:inputType">textCapWords</item>
+    <item name="android:saveEnabled">false</item>
+    <item name="android:textColorHint">@color/text_hint</item>
+    <item name="android:fontFamily">sans-serif</item>
+  </style>
+    <style name="WizardFormLabel">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginTop">16dp</item>
+    <item name="android:textAppearance">?android:textAppearanceSmall</item>
+    <item name="android:textColor">@color/text_light</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:textAllCaps">true</item>
+  </style>
+    <style name="WizardFormTextView">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:inputType">textCapWords</item>
+    <item name="android:saveEnabled">false</item>
+    <item name="android:textColorHint">@color/text_hint</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:textAppearance">?android:textAppearanceMedium</item>
+  </style>
+    <style name="WizardPageContainer">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">match_parent</item>
+    <item name="android:orientation">vertical</item>
+  </style>
+    <style name="WizardPageDescription">
+    <item name="android:id">@android:id/text1</item>
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginBottom">8dp</item>
+    <item name="android:layout_marginLeft">8dp</item>
+    <item name="android:layout_marginRight">8dp</item>
+
+    <item name="android:textSize">16sp</item>
+    <item name="android:textColor">@color/text_light</item>
+    <item name="android:fontFamily">sans-serif</item>
+
+  </style>
+    <style name="WizardPageError">
+    <item name="android:id">@android:id/text1</item>
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginBottom">8dp</item>
+    <item name="android:layout_marginLeft">8dp</item>
+    <item name="android:layout_marginRight">8dp</item>
+    <item name="android:textSize">16sp</item>
+    <item name="android:textColor">@color/step_pager_selected_tab_color</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:gravity">center</item>
+  </style>
+    <style name="WizardPageFooter">
+    <item name="android:id">@android:id/text2</item>
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginBottom">8dp</item>
+    <item name="android:layout_marginLeft">8dp</item>
+    <item name="android:layout_marginRight">8dp</item>
+    <item name="android:textAppearance">?android:textAppearanceSmall</item>
+    <item name="android:textColor">@color/text_light</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:textAllCaps">false</item>
+  </style>
+    <style name="WizardPageSuccess">
+    <item name="android:id">@android:id/text1</item>
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginBottom">8dp</item>
+    <item name="android:layout_marginLeft">8dp</item>
+    <item name="android:layout_marginRight">8dp</item>
+    <item name="android:textSize">16sp</item>
+    <item name="android:textColor">@color/text_black</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:gravity">center</item>
+  </style>
+    <style name="WizardPageTitle">
+    <item name="android:id">@android:id/title</item>
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:layout_marginBottom">8dp</item>
+    <item name="android:layout_marginLeft">8dp</item>
+    <item name="android:layout_marginRight">8dp</item>
+    <item name="android:textSize">26sp</item>
+    <item name="android:textColor">@color/step_pager_selected_tab_color</item>
+    <item name="android:fontFamily">sans-serif-thin</item>
+    <item name="android:gravity">center</item>
+  </style>
+    <style name="hs_backgroundStyle" parent="hs_background_defaultStyle"/>
+    <style name="hs_background_defaultStyle">
+        <item name="android:background">@color/hs_background_color</item>
+    </style>
+    <style name="hs_buttonStyle" parent="@style/hs_button_defaultStyle"/>
+    <style name="hs_button_defaultStyle">
+        <item name="android:background">@color/hs_button_background_color</item>
+        <item name="android:textColor">@color/hs_buttonTextcolor</item>
+        <item name="android:layout_marginTop">@dimen/hs_button_marginSize</item>
+        <item name="android:textSize">@dimen/hs_button_textSize</item>
+    </style>
+    <style name="hs_editTextStyle" parent="@style/hs_editText_defaultStyle"/>
+    <style name="hs_editText_defaultStyle">
+        <item name="android:inputType">textCapSentences</item>
+    </style>
+    <style name="hs_leftChatBubbleStyle" parent="hs_leftChatBubble_defaultStyle"/>
+    <style name="hs_leftChatBubbleTriangleStyle" parent="hs_leftChatBubbleTriangle_defaultStyle"/>
+    <style name="hs_leftChatBubbleTriangle_defaultStyle">
+        <item name="android:background">@drawable/left_chat_bubble_triangle</item> 
+    </style>
+    <style name="hs_leftChatBubble_defaultStyle">
+        <item name="android:background">@drawable/left_chat_bubble</item> 
+    </style>
+    <style name="hs_left_messageTextStyle" parent="@style/hs_leftmessageText_defaultStyle"/>
+    <style name="hs_leftmessageText_defaultStyle" parent="@style/hs_messageText_defaultStyle">
+        <item name="android:textColor">@color/hs_leftchat_messageTextcolor</item>
+    </style>
+    <style name="hs_listViewStyle" parent="hs_listView_defaultStyle"/>
+    <style name="hs_listView_childBackgroundStyle" parent="hs_listView_childBackground_defaultStyle"/>
+    <style name="hs_listView_childBackground_defaultStyle">
+        <item name="android:background">@color/hs_childView_background_color</item>
+    </style>
+    <style name="hs_listView_childTextStyle" parent="hs_listView_childText_defaultStyle"/>
+    <style name="hs_listView_childText_defaultStyle">
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:typeface">sans</item>
+        <item name="android:textSize">@dimen/hs_listView_ChildView_TextSize</item>
+    </style>
+    <style name="hs_listView_defaultStyle">
+        <item name="android:cacheColorHint">@color/hs_transparent_color</item>
+        <item name="android:divider">@color/hs_listView_divider_color</item>
+        <item name="android:dividerHeight">@dimen/hs_listView_divider_height</item>
+        <item name="android:listSelector">@color/hs_listView_selector_color</item>
+    </style>
+    <style name="hs_listView_headerBackgroundStyle" parent="hs_listView_headerBackground_defaultStyle"/>
+    <style name="hs_listView_headerBackground_defaultStyle">
+        <item name="android:background">@color/hs_header_background_color</item>
+    </style>
+    <style name="hs_listView_headerTextStyle" parent="hs_listView_headerText_defaultStyle"/>
+    <style name="hs_listView_headerText_defaultStyle">
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textSize">@dimen/hs_listView_header_TextSize</item>
+    </style>
+    <style name="hs_messageEditTextStyle" parent="@style/hs_editText_defaultStyle"/>
+    <style name="hs_messageText_defaultStyle">
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:typeface">sans</item>
+        <item name="android:textSize">@dimen/hs_message_TextSize</item>
+        <item name="android:gravity">left</item>
+        <item name="android:linksClickable">true</item>
+        <item name="android:textColorLink">#306EFF</item>
+    </style>
+    <style name="hs_rightChatBubbleStyle" parent="hs_rightChatBubble_defaultStyle"/>
+    <style name="hs_rightChatBubbleTriangleStyle" parent="hs_rightChatBubbleTriangle_defaultStyle"/>
+    <style name="hs_rightChatBubbleTriangle_defaultStyle">
+        <item name="android:background">@drawable/right_chat_bubble_triangle</item> 
+    </style>
+    <style name="hs_rightChatBubble_defaultStyle">
+        <item name="android:background">@drawable/right_chat_bubble</item> 
+    </style>
+    <style name="hs_right_messageTextStyle" parent="@style/hs_rightmessageText_defaultStyle"/>
+    <style name="hs_rightmessageText_defaultStyle" parent="@style/hs_messageText_defaultStyle">
+        <item name="android:textColor">@color/hs_rightchat_messageTextcolor</item>
+    </style>
+    <style name="hs_smallTextStyle" parent="@style/hs_smallText_defaultStyle"/>
+    <style name="hs_smallText_defaultStyle">
+        <item name="android:textColor">@color/hs_message_moreinfoTextColor</item>
+        <item name="android:typeface">sans</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:textSize">@dimen/hs_small_TextSize</item>
+        <item name="android:maxWidth">@dimen/hs_smallTextMaxWidth</item>
+    </style>
+</resources>
