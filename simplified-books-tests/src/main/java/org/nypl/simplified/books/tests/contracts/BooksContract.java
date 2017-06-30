@@ -147,6 +147,21 @@ public final class BooksContract implements BooksContractType
           0L);
       }
 
+      @Override
+      public HTTPResultType<InputStream> delete(
+          final OptionType<HTTPAuthType> auth,
+          final URI uri,
+          final String content_type)
+      {
+        return new HTTPResultOK<InputStream>(
+            "OK",
+            200,
+            new ByteArrayInputStream("DATA".getBytes()),
+            4L,
+            empty_headers,
+            0L);
+      }
+
       private HTTPResultType<InputStream> getLoans(
         final OptionType<HTTPAuthType> auth_opt)
       {
@@ -299,6 +314,15 @@ public final class BooksContract implements BooksContractType
         final URI uri,
         final byte[] data,
         final String content_type)
+      {
+        return new HTTPResultException<InputStream>(uri, new IOException());
+      }
+
+      @Override
+      public HTTPResultType<InputStream> delete(
+          final OptionType<HTTPAuthType> auth,
+          final URI uri,
+          final String content_type)
       {
         return new HTTPResultException<InputStream>(uri, new IOException());
       }

@@ -14,14 +14,14 @@ public class OESplashActivity extends MainSplashActivity
 {
 
 
-  @Override
+  // @Override
   protected void afterEULA()
   {
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
     final AccountsControllerType accounts = app.getBooks();
     if (accounts.accountIsLoggedIn()) {
-      super.afterEULA();
+      // super.afterEULA();
     } else {
       this.openTutorial();
     }

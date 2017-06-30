@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/simplified-app-openebooks" />
+            <option value="$PROJECT_DIR$/simplified-app-shared" />
+            <option value="$PROJECT_DIR$/simplified-app-simplye" />
+            <option value="$PROJECT_DIR$/simplified-app-tests" />
+            <option value="$PROJECT_DIR$/simplified-app-vanilla" />
+            <option value="$PROJECT_DIR$/simplified-assert" />
+            <option value="$PROJECT_DIR$/simplified-books-core" />
+            <option value="$PROJECT_DIR$/simplified-books-tests" />
+            <option value="$PROJECT_DIR$/simplified-books-tests-android" />
+            <option value="$PROJECT_DIR$/simplified-books-tests-junit4" />
+            <option value="$PROJECT_DIR$/simplified-bugsnag" />
+            <option value="$PROJECT_DIR$/simplified-cardcreator" />
+            <option value="$PROJECT_DIR$/simplified-checkstyle" />
+            <option value="$PROJECT_DIR$/simplified-circ-analytics" />
+            <option value="$PROJECT_DIR$/simplified-downloader-core" />
+            <option value="$PROJECT_DIR$/simplified-files" />
+            <option value="$PROJECT_DIR$/simplified-files-tests" />
+            <option value="$PROJECT_DIR$/simplified-files-tests-android" />
+            <option value="$PROJECT_DIR$/simplified-files-tests-junit4" />
+            <option value="$PROJECT_DIR$/simplified-http-core" />
+            <option value="$PROJECT_DIR$/simplified-http-tests" />
+            <option value="$PROJECT_DIR$/simplified-http-tests-android" />
+            <option value="$PROJECT_DIR$/simplified-http-tests-junit4" />
+            <option value="$PROJECT_DIR$/simplified-json-core" />
+            <option value="$PROJECT_DIR$/simplified-json-tests" />
+            <option value="$PROJECT_DIR$/simplified-json-tests-android" />
+            <option value="$PROJECT_DIR$/simplified-json-tests-junit4" />
+            <option value="$PROJECT_DIR$/simplified-multilibrary" />
+            <option value="$PROJECT_DIR$/simplified-opds-core" />
+            <option value="$PROJECT_DIR$/simplified-opds-tests" />
+            <option value="$PROJECT_DIR$/simplified-opds-tests-android" />
+            <option value="$PROJECT_DIR$/simplified-opds-tests-junit4" />
+            <option value="$PROJECT_DIR$/simplified-prefs" />
+            <option value="$PROJECT_DIR$/simplified-rfc3339-core" />
+            <option value="$PROJECT_DIR$/simplified-rfc3339-tests" />
+            <option value="$PROJECT_DIR$/simplified-rfc3339-tests-android" />
+            <option value="$PROJECT_DIR$/simplified-rfc3339-tests-junit4" />
+            <option value="$PROJECT_DIR$/simplified-stack" />
+            <option value="$PROJECT_DIR$/simplified-tenprint" />
+            <option value="$PROJECT_DIR$/simplified-test-utilities" />
+            <option value="$PROJECT_DIR$/simplified-volley" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
