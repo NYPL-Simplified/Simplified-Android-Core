@@ -1,9 +1,21 @@
-*.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
+#
+# Android Studio 2.2.3 Defaults
+#
+
 **/build
-/captures
+*.iml
+.DS_Store
 .externalNativeBuild
+.gradle
+/.idea/libraries
+/.idea/workspace.xml
+/captures
+/local.properties
+
+#
+# Certificates and API Keys
+#
+
+ReaderClientCert.sig 
+bugsnag.conf 
+helpstack.conf 
