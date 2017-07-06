@@ -8,6 +8,4 @@ android {
 description = ''
 
 dependencies {
-  compile group: 'android.support', name: 'compatibility-v7-appcompat', version: '23.1.1'
-  compile group: 'android.support', name: 'compatibility-v13', version: '23.1.1'
 }

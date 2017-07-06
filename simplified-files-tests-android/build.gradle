@@ -11,8 +11,4 @@ dependencies {
   compile project(':simplified-files')
   compile project(':simplified-files-tests')
   compile project(':simplified-test-utilities')
-  compile group: 'com.github.tony19', name: 'logback-android-core', version: '1.1.1-3'
-  compile(group: 'com.github.tony19', name: 'logback-android-classic', version: '1.1.1-3') {
-    exclude(module: 'android')
-  }
 }
