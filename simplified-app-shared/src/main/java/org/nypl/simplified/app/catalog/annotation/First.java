@@ -3,7 +3,7 @@ package org.nypl.simplified.app.catalog.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-// import javax.annotation.Generated;
+import javax.annotation.Generated;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -11,7 +11,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  *
  */
-// @Generated("org.jsonschema2pojo")
+@Generated("org.jsonschema2pojo")
 public class First {
 
   @SerializedName("items")
