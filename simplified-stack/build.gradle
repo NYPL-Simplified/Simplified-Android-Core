@@ -10,5 +10,5 @@ description = 'simplified-stack'
 dependencies {
   compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   compile group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
-  testCompile group: 'junit', name: 'junit', version: '4.11'
+  testCompile group: 'junit', name: 'junit', version: '4.12'
 }
