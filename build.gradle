@@ -16,6 +16,7 @@ allprojects {
   apply plugin: 'maven'
 
   apply plugin: 'nebula.lint'
+  gradleLint.alwaysRun = false
   gradleLint.rules = ['all-dependency']
 }
 
