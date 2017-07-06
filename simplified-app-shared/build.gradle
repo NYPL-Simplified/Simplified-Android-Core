@@ -3,44 +3,44 @@ description = 'simplified-app-shared'
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "26.0.0"
-    useLibrary 'org.apache.http.legacy'
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-    }
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+  useLibrary 'org.apache.http.legacy'
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+  }
 }
 
 dependencies {
-    compile project(':simplified-books-core')
-    compile project(':simplified-http-core')
-    compile project(':simplified-json-core')
-    compile project(':simplified-opds-core')
-    compile project(':simplified-stack')
-    compile project(':simplified-tenprint')
-    compile project(':simplified-volley')
-    compile project(':simplified-prefs')
-    compile project(':simplified-multilibrary')
-    compile project(':simplified-circ-analytics')
-    compile project(':simplified-bugsnag')
-    compile project(':simplified-cardcreator')
-    compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
-    compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-    compile group: 'android.support', name: 'compatibility-v7-appcompat', version: '23.1.1'
-    compile group: 'android.support', name: 'compatibility-v13', version: '23.1.1'
-    compile group: 'org.nypl.readium', name: 'readium-sdk-android-runtime', version: '0.25.0'
-    compile group: 'org.nypl.readium', name: 'readium-shared-js', version: '0.25.0'
-    compile group: 'com.koushikdutta.async', name: 'androidasync', version: '2.1.6'
-    compile group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
-    compile group: 'com.nanohttpd', name: 'nanohttpd', version: '2.1.1'
-    compile group: 'com.github.tony19', name: 'logback-android-core', version: '1.1.1-3'
-    compile(group: 'com.github.tony19', name: 'logback-android-classic', version: '1.1.1-3') {
-        exclude(module: 'android')
-    }
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
-    compile group: 'org.nypl.helpstack', name: 'helpstack-android', version: '1.4.0'
-    compile group: 'com.bugsnag', name: 'bugsnag-android', version: '3.2.7'
-    compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.3'
-    compile group: 'joda-time', name: 'joda-time', version: '2.9.6'
+  compile project(':simplified-books-core')
+  compile project(':simplified-http-core')
+  compile project(':simplified-json-core')
+  compile project(':simplified-opds-core')
+  compile project(':simplified-stack')
+  compile project(':simplified-tenprint')
+  compile project(':simplified-volley')
+  compile project(':simplified-prefs')
+  compile project(':simplified-multilibrary')
+  compile project(':simplified-circ-analytics')
+  compile project(':simplified-bugsnag')
+  compile project(':simplified-cardcreator')
+  compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
+  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  compile group: 'android.support', name: 'compatibility-v7-appcompat', version: '23.1.1'
+  compile group: 'android.support', name: 'compatibility-v13', version: '23.1.1'
+  compile group: 'org.nypl.readium', name: 'readium-sdk-android-runtime', version: '0.25.0'
+  compile group: 'org.nypl.readium', name: 'readium-shared-js', version: '0.25.0'
+  compile group: 'com.koushikdutta.async', name: 'androidasync', version: '2.1.6'
+  compile group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
+  compile group: 'com.nanohttpd', name: 'nanohttpd', version: '2.1.1'
+  compile group: 'com.github.tony19', name: 'logback-android-core', version: '1.1.1-3'
+  compile(group: 'com.github.tony19', name: 'logback-android-classic', version: '1.1.1-3') {
+    exclude(module: 'android')
+  }
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
+  compile group: 'org.nypl.helpstack', name: 'helpstack-android', version: '1.4.0'
+  compile group: 'com.bugsnag', name: 'bugsnag-android', version: '3.2.7'
+  compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+  compile group: 'com.google.code.gson', name: 'gson', version: '2.3'
+  compile group: 'joda-time', name: 'joda-time', version: '2.9.6'
 }

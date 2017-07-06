@@ -1,24 +1,24 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "26.0.0"
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
 }
 
 description = 'simplified-books-core'
 
 dependencies {
-    compile project(':simplified-assert')
-    compile project(':simplified-files')
-    compile project(':simplified-http-core')
-    compile project(':simplified-downloader-core')
-    compile project(':simplified-opds-core')
-    compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
-    compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-    compile group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
-    compile group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
-    compile group: 'net.jodah', name: 'expiringmap', version: '0.4.0'
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
-    compile project(':simplified-prefs')
-    compile project(':simplified-multilibrary')
+  compile project(':simplified-assert')
+  compile project(':simplified-files')
+  compile project(':simplified-http-core')
+  compile project(':simplified-downloader-core')
+  compile project(':simplified-opds-core')
+  compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
+  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  compile group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
+  compile group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
+  compile group: 'net.jodah', name: 'expiringmap', version: '0.4.0'
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
+  compile project(':simplified-prefs')
+  compile project(':simplified-multilibrary')
 }

@@ -1,25 +1,24 @@
 buildscript {
+  repositories {
+    jcenter()
+  }
 
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-    }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:2.3.3'
+  }
 }
 
 allprojects {
-    apply plugin: 'maven'
-    group = 'org.nypl.simplified'
-    version = '2.0.0'
+  apply plugin: 'maven'
+  group = 'org.nypl.simplified'
+  version = '2.0.0'
 }
 
 subprojects {
-    repositories {
-        mavenLocal()
-        maven { url "http://nexus.librarysimplified.org:8081/nexus/content/groups/public/" }
-        maven { url "http://repo.maven.apache.org/maven2" }
-        maven { url "https://jitpack.io" }
-    }
+  repositories {
+    mavenLocal()
+    maven { url "http://nexus.librarysimplified.org:8081/nexus/content/groups/public/" }
+    maven { url "http://repo.maven.apache.org/maven2" }
+    maven { url "https://jitpack.io" }
+  }
 }

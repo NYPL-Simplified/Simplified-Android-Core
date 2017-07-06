@@ -1,19 +1,19 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "26.0.0"
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
 }
 
 description = ''
 
 dependencies {
-    compile group: 'com.mcxiaoke.volley', name: 'library', version:'1.0.19'
-    compile group: 'android.support', name: 'compatibility-v7-appcompat', version:'23.1.1'
-    compile group: 'android.support', name: 'compatibility-v13', version:'23.1.1'
+  compile group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
+  compile group: 'android.support', name: 'compatibility-v7-appcompat', version: '23.1.1'
+  compile group: 'android.support', name: 'compatibility-v13', version: '23.1.1'
   compile project(':simplified-json-core')
   compile project(':simplified-books-core')
-    compile group: 'commons-lang', name: 'commons-lang', version:'2.6'
-    compile group: 'com.google.code.gson', name: 'gson', version:'2.3'
+  compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+  compile group: 'com.google.code.gson', name: 'gson', version: '2.3'
   compile project(':simplified-volley')
 }

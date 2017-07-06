@@ -1,19 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "26.0.0"
-    packagingOptions {
-        exclude 'META-INF/LICENSE'
-    }
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+  }
 }
 
 description = 'simplified-app-openebooks'
 
 dependencies {
-    compile project(':simplified-app-shared')
-   // compile(group: 'com.viewpagerindicator', name: 'library', version: '2.4.1') {
-   //     exclude(module: 'support-v4')
-   // }
-    compile 'com.github.JakeWharton:ViewPagerIndicator:2.4.1'
+  compile project(':simplified-app-shared')
+  // compile(group: 'com.viewpagerindicator', name: 'library', version: '2.4.1') {
+  //     exclude(module: 'support-v4')
+  // }
+  compile 'com.github.JakeWharton:ViewPagerIndicator:2.4.1'
 }
