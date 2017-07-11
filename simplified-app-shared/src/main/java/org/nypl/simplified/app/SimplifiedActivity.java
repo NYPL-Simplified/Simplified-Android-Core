@@ -251,7 +251,7 @@ public abstract class SimplifiedActivity extends Activity
       setTheme(R.style.SimplifiedTheme_NYPL);
     } else if (id == 1) {
       setTheme(R.style.SimplifiedTheme_BPL);
-    } else if (id == 3) {
+    } else if (id == 7) {
       setTheme(R.style.SimplifiedTheme_ACL);
     } else {
       setTheme(R.style.SimplifiedTheme_Magic);
@@ -384,7 +384,7 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_bpl);
             } else if (account.getId() == 2) {
               icon_view.setImageResource(R.drawable.account_logo_instant);
-            } else if (account.getId() == 3) {
+            } else if (account.getId() == 7) {
               icon_view.setImageResource(R.drawable.account_logo_alameda);
             }
           } else {
@@ -441,7 +441,7 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_bpl);
             } else if (account.getId() == 2) {
               icon_view.setImageResource(R.drawable.account_logo_instant);
-            } else if (account.getId() == 3) {
+            } else if (account.getId() == 7) {
               icon_view.setImageResource(R.drawable.account_logo_alameda);
             }
           } else {
