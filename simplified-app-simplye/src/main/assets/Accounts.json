@@ -58,5 +58,23 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
+  },
+  {
+    "id": 4,
+    "pathComponent" : "4",
+    "name" : "Howard County Library System",
+    "subtitle" : "Public education for all",
+    "logo" : "LibraryLogoHoward",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://howard.simplye-md.org",
+    "licenseUrl": "http://www.librarysimplified.org/license.html",
+    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "mainColor": "#0066CC"
   }
 ]
