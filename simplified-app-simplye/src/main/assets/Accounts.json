@@ -58,5 +58,23 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
+  },
+  {
+    "id": 9,
+    "pathComponent" : "9",
+    "name" : "Montgomery County Library",
+    "subtitle" : "Where the County Reads, Meets, Learns",
+    "logo" : "LibraryLogoMontgomery",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://montgomery.simplye-md.org/",
+    "licenseUrl": "http://www.librarysimplified.org/license.html",
+    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "mainColor": "#0067B1"
   }
 ]
