@@ -58,5 +58,23 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
+  },
+  {
+  "id": 10,
+  "pathComponent" : "10",
+  "name" : "Frederick County Public Library",
+  "subtitle" : "Explore. Invent. Transform.",
+  "logo" : "LibraryLogoFrederick",
+  "needsAuth" : true,
+  "supportsSimplyESync" : false,
+  "supportsBarcodeScanner" : false,
+  "supportsBarcodeDisplay" : false,
+  "supportsCardCreator" : false,
+  "supportsReservations" : true,
+  "supportsHelpCenter" : false,
+  "catalogUrl" : "http://frederick.simplye-md.org",
+  "licenseUrl": "http://www.librarysimplified.org/license.html",
+  "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+  "mainColor": "#ef4123"
   }
 ]
