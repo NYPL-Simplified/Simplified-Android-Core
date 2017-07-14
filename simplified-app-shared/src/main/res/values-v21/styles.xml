@@ -63,6 +63,20 @@
 
   </style>
 
+  <style
+    name="SimplifiedTheme_FCPL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_fcpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_fcpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_fcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+    <item name="downloading_background">@color/feature_main_color_fcpl</item>
+    <item name="notification_background">@color/feature_main_color_fcpl</item>
+    <item name="main_color">@color/feature_main_color_fcpl</item>
+
+  </style>
+
 
   <style name="ActionBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">
     <item name="android:displayOptions">homeAsUp|showTitle</item>
@@ -138,6 +152,21 @@
 
   </style>
 
+  <style
+    name="SimplifiedThemeNoActionBar_FCPL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_main_color_fcpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_fcpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_fcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+    <item name="downloading_background">@color/feature_main_color_fcpl</item>
+    <item name="notification_background">@color/feature_main_color_fcpl</item>
+    <item name="main_color">@color/feature_main_color_fcpl</item>
+
+  </style>
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>
