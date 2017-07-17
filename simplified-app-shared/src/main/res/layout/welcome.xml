@@ -33,7 +33,7 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text="Read Books from your Library"
+      android:text="Read Books from Your Library"
       />
 
     <TextView
@@ -42,7 +42,7 @@
       android:layout_gravity="center"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="Simply browse borrow and read free ebooks from you local library"
+      android:text="Simply browse, borrow, and read free ebooks from your local library"
       android:textAlignment="center"/>
 
     <Button
