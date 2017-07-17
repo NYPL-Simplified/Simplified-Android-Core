@@ -41,7 +41,8 @@
       android:layout_gravity="center"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="@string/welcome_library_subtext"/>
+      android:text="@string/welcome_library_subtext"
+      android:textAlignment="center"/>
 
     <Button
       android:id="@+id/welcome_library"
