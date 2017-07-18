@@ -33,7 +33,7 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text="Read Books from Your Library"
+      android:text="Read E-Books from Your Library"
       />
 
     <TextView
@@ -42,12 +42,12 @@
       android:layout_gravity="center"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="Simply browse, borrow, and read free ebooks from your local library"
+      android:text="Simply browse, borrow, and read free e-books from your local library."
       android:textAlignment="center"/>
 
     <Button
       android:id="@+id/welcome_library"
-      android:text="Pick Your Library"
+      android:text="Find Your Library"
       android:layout_gravity="center"
       android:layout_width="wrap_content"
       android:layout_height="30dp"
@@ -75,7 +75,7 @@
       android:layout_height="wrap_content"
       android:layout_gravity="center"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text="SimplyE"
+      android:text="SimplyE Collection"
       />
 
     <TextView
@@ -84,7 +84,7 @@
       android:layout_gravity="center"
       android:gravity="center"
       android:textAppearance="?android:attr/textAppearanceSmall"
-      android:text="Download and read ebooks without a library card"
+      android:text="E-books free to download and read without a library card."
       android:textAlignment="center"/>
 
     <Button

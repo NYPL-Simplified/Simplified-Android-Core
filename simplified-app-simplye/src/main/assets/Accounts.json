@@ -43,7 +43,7 @@
   {
     "id": 2,
     "pathComponent" : "2",
-    "name" : "SimplyE",
+    "name" : "SimplyE Collection",
     "subtitle" : "Download and read ebooks without a library card",
     "logo" : "LibraryLogoMagic",
     "needsAuth" : false,
