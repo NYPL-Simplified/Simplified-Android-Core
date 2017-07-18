@@ -2,7 +2,7 @@
   {
     "id": 0,
     "pathComponent" : "0",
-    "name" : "New York Public Library",
+    "name" : "The New York Public Library",
     "subtitle" : "Inspiring lifelong learning, advancing knowledge, and strengthening our communities.",
     "logo" : "LibraryLogoNYPL",
     "needsAuth" : true,
@@ -43,8 +43,8 @@
   {
     "id": 2,
     "pathComponent" : "2",
-    "name" : "SimplyE",
-    "subtitle" : "Download and read ebooks without a library card",
+    "name" : "SimplyE Collection",
+    "subtitle" : "E-books free to download and read without a library card",
     "logo" : "LibraryLogoMagic",
     "needsAuth" : false,
     "supportsSimplyESync" : false,
