@@ -62,7 +62,7 @@
   {
     "id": 9,
     "pathComponent" : "9",
-    "name" : "Montgomery County Library",
+    "name" : "Montgomery County Public Libraries",
     "subtitle" : "Where the County Reads, Meets, Learns",
     "logo" : "LibraryLogoMontgomery",
     "needsAuth" : true,
