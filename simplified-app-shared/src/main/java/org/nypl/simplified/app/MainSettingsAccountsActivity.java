@@ -109,6 +109,8 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
         icon_view.setImageResource(R.drawable.account_logo_fcpl);
       } else if (account.getId() == 7) {
         icon_view.setImageResource(R.drawable.account_logo_alameda);
+      } else if (account.getId() == 8) {
+        icon_view.setImageResource(R.drawable.account_logo_hcls);
       }
 
       current_account.setOnClickListener(new View.OnClickListener() {
@@ -184,6 +186,8 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
             icon_view.setImageResource(R.drawable.account_logo_fcpl);
           } else if (account.getId() == 7) {
             icon_view.setImageResource(R.drawable.account_logo_alameda);
+          } else if (account.getId() == 8) {
+            icon_view.setImageResource(R.drawable.account_logo_hcls);
           }
 
           return v;

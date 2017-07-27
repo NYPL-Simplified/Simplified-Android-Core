@@ -81,6 +81,11 @@
     "name" : "Alameda County Library",
     "subtitle" : "Infinite possibilities",
     "logo" : "LibraryLogoAlameda",
+    "id": 8,
+    "pathComponent" : "8",
+    "name" : "Howard County Library System",
+    "subtitle" : "Public education for all",
+    "logo" : "LibraryLogoHoward",
     "needsAuth" : true,
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -93,5 +98,12 @@
     "licenseUrl": "http://guides.aclibrary.org/TAC",
     "privacyUrl": "http://califa.org/privacy-policy",
     "mainColor": "#58a6f5"
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://howard.simplye-md.org",
+    "licenseUrl": "http://www.librarysimplified.org/license.html",
+    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "mainColor": "#0066CC"
   }
 ]
