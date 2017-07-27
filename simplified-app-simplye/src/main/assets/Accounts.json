@@ -60,24 +60,6 @@
     "mainColor": "#497049"
   },
   {
-    "id": 10,
-    "pathComponent": "10",
-    "name": "Frederick County Public Library",
-    "subtitle": "Explore. Invent. Transform.",
-    "logo": "LibraryLogoFrederick",
-    "needsAuth": true,
-    "supportsSimplyESync": false,
-    "supportsBarcodeScanner": false,
-    "supportsBarcodeDisplay": false,
-    "supportsCardCreator": false,
-    "supportsReservations": true,
-    "supportsHelpCenter": false,
-    "catalogUrl": "http://frederick.simplye-md.org",
-    "licenseUrl": "http://www.librarysimplified.org/license.html",
-    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
-    "mainColor": "#ef4123"
-  },
-  {
     "id": 7,
     "pathComponent": "7",
     "name": "Alameda County Library",
@@ -101,6 +83,19 @@
     "name" : "Howard County Library System",
     "subtitle" : "Public education for all",
     "logo" : "LibraryLogoHoward",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://howard.simplye-md.org",
+    "licenseUrl": "http://www.librarysimplified.org/license.html",
+    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "mainColor": "#0066CC"
+  },
+  {
     "id": 9,
     "pathComponent" : "9",
     "name" : "Montgomery County Public Libraries",
@@ -113,13 +108,27 @@
     "supportsCardCreator" : false,
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
-    "catalogUrl" : "http://howard.simplye-md.org",
-    "licenseUrl": "http://www.librarysimplified.org/license.html",
-    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
-    "mainColor": "#0066CC"
     "catalogUrl" : "http://montgomery.simplye-md.org/",
     "licenseUrl": "http://www.librarysimplified.org/license.html",
     "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
     "mainColor": "#0067B1"
+  },
+  {
+    "id": 10,
+    "pathComponent": "10",
+    "name": "Frederick County Public Library",
+    "subtitle": "Explore. Invent. Transform.",
+    "logo": "LibraryLogoFrederick",
+    "needsAuth": true,
+    "supportsSimplyESync": false,
+    "supportsBarcodeScanner": false,
+    "supportsBarcodeDisplay": false,
+    "supportsCardCreator": false,
+    "supportsReservations": true,
+    "supportsHelpCenter": false,
+    "catalogUrl": "http://frederick.simplye-md.org",
+    "licenseUrl": "http://www.librarysimplified.org/license.html",
+    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "mainColor": "#ef4123"
   }
 ]
