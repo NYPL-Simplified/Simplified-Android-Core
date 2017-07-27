@@ -98,6 +98,16 @@
     <item name="downloading_background">@color/feature_main_color_hcls</item>
     <item name="notification_background">@color/feature_main_color_hcls</item>
     <item name="main_color">@color/feature_main_color_hcls</item>
+    name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_mcpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_mcpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_mcpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_mcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
+    <item name="downloading_background">@color/feature_main_color_mcpl</item>
+    <item name="notification_background">@color/feature_main_color_mcpl</item>
+    <item name="main_color">@color/feature_main_color_mcpl</item>
 
   </style>
 
@@ -219,6 +229,21 @@
     <item name="main_color">@color/feature_main_color_fcpl</item>
 
   </style>
+    name="SimplifiedThemeNoActionBar_MCPL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="android:colorPrimary">@color/feature_main_color_mcpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_main_color_mcpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_mcpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_mcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
+    <item name="downloading_background">@color/feature_main_color_mcpl</item>
+    <item name="notification_background">@color/feature_main_color_mcpl</item>
+    <item name="main_color">@color/feature_main_color_mcpl</item>
+
+  </style>
+
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>

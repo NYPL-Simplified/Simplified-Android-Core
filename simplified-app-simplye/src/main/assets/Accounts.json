@@ -101,6 +101,11 @@
     "name" : "Howard County Library System",
     "subtitle" : "Public education for all",
     "logo" : "LibraryLogoHoward",
+    "id": 9,
+    "pathComponent" : "9",
+    "name" : "Montgomery County Public Libraries",
+    "subtitle" : "Where the County Reads, Meets, Learns",
+    "logo" : "LibraryLogoMontgomery",
     "needsAuth" : true,
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -112,5 +117,9 @@
     "licenseUrl": "http://www.librarysimplified.org/license.html",
     "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
     "mainColor": "#0066CC"
+    "catalogUrl" : "http://montgomery.simplye-md.org/",
+    "licenseUrl": "http://www.librarysimplified.org/license.html",
+    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "mainColor": "#0067B1"
   }
 ]

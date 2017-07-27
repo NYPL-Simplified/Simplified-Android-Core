@@ -76,6 +76,15 @@
 
   </style>
 
+    name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_mcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
+    <item name="downloading_background">@color/feature_main_color_mcpl</item>
+    <item name="notification_background">@color/feature_main_color_mcpl</item>
+    <item name="main_color">@color/feature_main_color_mcpl</item>
+
+  </style>
 
   <style
     name="SimplifiedThemeNoActionBar"
@@ -145,6 +154,16 @@
 
   </style>
 
+    name="SimplifiedThemeNoActionBar_MCPL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_mcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
+    <item name="downloading_background">@color/feature_main_color_mcpl</item>
+    <item name="notification_background">@color/feature_main_color_mcpl</item>
+    <item name="main_color">@color/feature_main_color_mcpl</item>
+
+  </style>
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>
