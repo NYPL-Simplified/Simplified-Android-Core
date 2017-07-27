@@ -50,23 +50,17 @@
   </style>
 
   <style
-    name="SimplifiedTheme_FCPL" parent="SimplifiedTheme">
-
-    <item name="button_foreground">@color/feature_main_color_fcpl</item>
-    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
-    <item name="downloading_background">@color/feature_main_color_fcpl</item>
-    <item name="notification_background">@color/feature_main_color_fcpl</item>
-    <item name="main_color">@color/feature_main_color_fcpl</item>
-
-  </style>
-    name="SimplifiedTheme_ACL" parent="SimplifiedTheme">
+    name="SimplifiedTheme_ACL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_acl</item>
     <item name="list_item_foreground">@color/feature_main_color_acl</item>
     <item name="downloading_background">@color/feature_main_color_acl</item>
     <item name="notification_background">@color/feature_main_color_acl</item>
     <item name="main_color">@color/feature_main_color_acl</item>
-    name="SimplifiedTheme_HCLS" parent="SimplifiedTheme">
+  </style>
+
+  <style
+    name="SimplifiedTheme_HCLS" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_hcls</item>
     <item name="list_item_foreground">@color/feature_main_color_hcls</item>
@@ -76,7 +70,19 @@
 
   </style>
 
-    name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
+  <style
+    name="SimplifiedTheme_FCPL" parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_fcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+    <item name="downloading_background">@color/feature_main_color_fcpl</item>
+    <item name="notification_background">@color/feature_main_color_fcpl</item>
+    <item name="main_color">@color/feature_main_color_fcpl</item>
+
+  </style>
+
+  <style
+    name="SimplifiedTheme_MCPL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_mcpl</item>
     <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
@@ -125,26 +131,17 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_FCPL"
-    parent="SimplifiedThemeNoActionBar">
-
-    <item name="button_foreground">@color/feature_main_color_fcpl</item>
-    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
-    <item name="downloading_background">@color/feature_main_color_fcpl</item>
-    <item name="notification_background">@color/feature_main_color_fcpl</item>
-    <item name="main_color">@color/feature_main_color_fcpl</item>
-
-  </style>
-    name="SimplifiedThemeNoActionBar_ACL"
-    parent="SimplifiedThemeNoActionBar">
+          name="SimplifiedThemeNoActionBar_ACL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_acl</item>
     <item name="list_item_foreground">@color/feature_main_color_acl</item>
     <item name="downloading_background">@color/feature_main_color_acl</item>
     <item name="notification_background">@color/feature_main_color_acl</item>
     <item name="main_color">@color/feature_main_color_acl</item>
-    name="SimplifiedThemeNoActionBar_hcls"
-    parent="SimplifiedThemeNoActionBar">
+  </style>
+
+  <style
+          name="SimplifiedThemeNoActionBar_HCLS" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_hcls</item>
     <item name="list_item_foreground">@color/feature_main_color_hcls</item>
@@ -154,8 +151,19 @@
 
   </style>
 
-    name="SimplifiedThemeNoActionBar_MCPL"
-    parent="SimplifiedThemeNoActionBar">
+  <style
+          name="SimplifiedThemeNoActionBar_FCPL" parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_fcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+    <item name="downloading_background">@color/feature_main_color_fcpl</item>
+    <item name="notification_background">@color/feature_main_color_fcpl</item>
+    <item name="main_color">@color/feature_main_color_fcpl</item>
+
+  </style>
+
+  <style
+          name="SimplifiedThemeNoActionBar_MCPL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_mcpl</item>
     <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
