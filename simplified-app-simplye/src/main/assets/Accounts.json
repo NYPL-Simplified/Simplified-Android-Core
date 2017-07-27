@@ -76,5 +76,22 @@
   "licenseUrl": "http://www.librarysimplified.org/license.html",
   "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
   "mainColor": "#ef4123"
+    "id": 7,
+    "pathComponent" : "7",
+    "name" : "Alameda County Library",
+    "subtitle" : "Infinite possibilities",
+    "logo" : "LibraryLogoAlameda",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://acl.simplye-ca.org/",
+    "supportEmail" : "enkisys@gmail.com",
+    "licenseUrl": "http://guides.aclibrary.org/TAC",
+    "privacyUrl": "http://califa.org/privacy-policy",
+    "mainColor": "#58a6f5"
   }
 ]

@@ -127,6 +127,8 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
             icon_view.setImageResource(R.drawable.account_logo_instant);
           } else if (account.getId() == 10) {
             icon_view.setImageResource(R.drawable.account_logo_fcpl);
+          } else if (account.getId() == 7) {
+            icon_view.setImageResource(R.drawable.account_logo_alameda);
           }
 
           return v;
