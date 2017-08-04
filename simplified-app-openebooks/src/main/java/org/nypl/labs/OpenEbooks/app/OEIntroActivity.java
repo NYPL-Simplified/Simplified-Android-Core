@@ -32,8 +32,8 @@ public class OEIntroActivity extends FragmentActivity
     this.setContentView(R.layout.oe_intro);
 
     this.view_pager = (ViewPager) this.findViewById(R.id.intro_pager);
-    final PagerAdapter pager_adater = new IntroPagerAdapter(getSupportFragmentManager());
-    this.view_pager.setAdapter(pager_adater);
+    final PagerAdapter pager_adapter = new IntroPagerAdapter(getSupportFragmentManager());
+    this.view_pager.setAdapter(pager_adapter);
 
     final CirclePageIndicator indicator = (CirclePageIndicator) this.findViewById(R.id.intro_pager_indicator);
     indicator.setViewPager(this.view_pager);
