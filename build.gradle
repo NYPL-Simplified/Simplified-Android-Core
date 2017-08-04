@@ -23,7 +23,13 @@ allprojects {
 subprojects {
   repositories {
     mavenLocal()
-    maven { url "http://nexus.librarysimplified.org:8081/nexus/content/groups/public/" }
+    maven {
+      credentials {
+        username findProperty("org.librarysimplified.nexus.username")
+        password findProperty("org.librarysimplified.nexus.password")
+      }
+      url "https://nexus.librarysimplified.org:8443/nexus/content/groups/public/"
+    }
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url "https://jitpack.io" }
   }
