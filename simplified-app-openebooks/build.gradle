@@ -12,5 +12,4 @@ description = 'simplified-app-openebooks'
 
 dependencies {
   compile project(':simplified-app-shared')
-  compile 'com.github.JakeWharton:ViewPagerIndicator:2.4.1'
 }

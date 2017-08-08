@@ -10,8 +10,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 
-import com.viewpagerindicator.CirclePageIndicator;
-
 import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
@@ -34,9 +32,6 @@ public class OEIntroActivity extends FragmentActivity
     this.view_pager = (ViewPager) this.findViewById(R.id.intro_pager);
     final PagerAdapter pager_adapter = new IntroPagerAdapter(getSupportFragmentManager());
     this.view_pager.setAdapter(pager_adapter);
-
-    final CirclePageIndicator indicator = (CirclePageIndicator) this.findViewById(R.id.intro_pager_indicator);
-    indicator.setViewPager(this.view_pager);
 
     this.view_pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
