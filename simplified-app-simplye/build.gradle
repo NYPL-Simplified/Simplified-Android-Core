@@ -12,4 +12,21 @@ description = 'simplified-app-simplye'
 
 dependencies {
   compile project(':simplified-app-shared')
+  compile group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
+  compile group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
+  compile group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+}
+
+apply plugin: 'android-native-dependencies'
+
+native_dependencies {
+  artifact (group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0',
+      classifier: 'armeabi-v7a') {
+    addLibPrefixToArtifact=false
+  }
+
+  artifact (group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0',
+      classifier: 'armeabi-v7a') {
+    addLibPrefixToArtifact=false
+  }
 }
