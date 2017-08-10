@@ -12,10 +12,6 @@
 /captures
 /local.properties
 
-# Work around an issue with macOS Android Studio where languageLevel is
-# changed continuously.
-/.idea/misc.xml
-
 #
 # Certificates and API Keys
 #
