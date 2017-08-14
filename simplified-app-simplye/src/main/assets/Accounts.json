@@ -73,8 +73,8 @@
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://howard.simplye-md.org",
-    "licenseUrl": "http://www.librarysimplified.org/license.html",
-    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "licenseUrl": "http://hclibrary.org/research/simplye-content-license/",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
     "mainColor": "#0066CC"
   }
 ]
