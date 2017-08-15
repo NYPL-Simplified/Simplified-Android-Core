@@ -73,8 +73,8 @@
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://montgomery.simplye-md.org/",
-    "licenseUrl": "http://www.librarysimplified.org/license.html",
-    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "licenseUrl": "http://montgomerycountymd.gov/library/collection/contentlicenses.html",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
     "mainColor": "#0067B1"
   }
 ]
