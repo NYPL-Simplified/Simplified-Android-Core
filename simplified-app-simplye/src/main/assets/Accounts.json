@@ -72,7 +72,7 @@
     "supportsCardCreator" : false,
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
-    "catalogUrl" : "http://http://anne-arundel.simplye-md.org/",
+    "catalogUrl" : "http://anne-arundel.simplye-md.org/",
     "mainColor" : "#0b9da1",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
