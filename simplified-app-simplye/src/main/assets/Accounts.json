@@ -75,6 +75,8 @@
     "catalogUrl" : "http://anne-arundel.simplye-md.org/",
     "mainColor" : "#0b9da1",
     "authPasscodeLength" : 0,
-    "authPasscodeAllowsLetters" : true
+    "authPasscodeAllowsLetters" : true,
+    "licenseUrl": "http://www.aacpl.net/simplye-content-license",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/"
  }
 ]
