@@ -22,3 +22,4 @@
 ReaderClientCert.sig 
 bugsnag.conf 
 helpstack.conf 
+*.jks
