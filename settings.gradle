@@ -1,9 +1,10 @@
 rootProject.name = 'simplified'
-include ':simplified-app-openebooks'
+
+// FIXME: These should be re-enabled once they are working.
+// include ':simplified-app-openebooks'
+// include ':simplified-app-vanilla'
 include ':simplified-app-shared'
 include ':simplified-app-simplye'
-include ':simplified-app-tests'
-include ':simplified-app-vanilla'
 include ':simplified-assert'
 include ':simplified-books-core'
 include ':simplified-books-tests-android'
@@ -41,11 +42,11 @@ include ':simplified-volley'
 include ':simplified-circ-analytics'
 include ':simplified-multilibrary'
 
-project(':simplified-app-openebooks').projectDir = "$rootDir/simplified-app-openebooks" as File
+// FIXME: These should be re-enabled once they are working
+// project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
+// project(':simplified-app-openebooks').projectDir = "$rootDir/simplified-app-openebooks" as File
 project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" as File
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
-project(':simplified-app-tests').projectDir = "$rootDir/simplified-app-tests" as File
-project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
 project(':simplified-assert').projectDir = "$rootDir/simplified-assert" as File
 project(':simplified-books-core').projectDir = "$rootDir/simplified-books-core" as File
 project(':simplified-books-tests-android').projectDir = "$rootDir/simplified-books-tests-android" as File
