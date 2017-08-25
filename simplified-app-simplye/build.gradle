@@ -8,10 +8,10 @@ android {
   }
   signingConfigs {
     release {
-      keyAlias property("org.librarysimplified.simplye.keyAlias")
-      keyPassword property("org.librarysimplified.simplye.keyPassword")
+      keyAlias findProperty("org.librarysimplified.simplye.keyAlias")
+      keyPassword findProperty("org.librarysimplified.simplye.keyPassword")
       storeFile file("keystore.jks")
-      storePassword property("org.librarysimplified.simplye.storePassword")
+      storePassword findProperty("org.librarysimplified.simplye.storePassword")
     }
   }
   buildTypes {
