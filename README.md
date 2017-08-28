@@ -71,6 +71,8 @@ org.librarysimplified.simplye.storePassword=
 
 In addition, you will need to obtain the correct Java keystore and either place it in the project at `simplified-app-simplye/keystore.jks` or create a symbolic link at the same location appropriately. All files matching `*.jks` are set to be ignored by Git, but care should always be taken to ensure keystores and other secrets are never committed regardless.
 
+Once the above has been completed, executing `./gradlew assembleRelease` will generate the signed APK and place it at `./simplified-app-simplye/build/outputs/apk/simplified-app-simplye-release.apk`.
+
 ## Branding And Configurable Features
 
 See [simplified-app-shared/README-Branding.md](simplified-app-shared/README-Branding.md)
