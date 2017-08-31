@@ -72,7 +72,7 @@
   "supportsCardCreator" : false,
   "supportsReservations" : true,
   "supportsHelpCenter" : false,
-  "catalogUrl" : "http://frederick.simplye-md.org",
+  "catalogUrl" : "http://frederick.simplye-md.org/",
   "licenseUrl": "http://www.fcpl.org/third-party-content",
   "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
   "mainColor": "#ef4123"
