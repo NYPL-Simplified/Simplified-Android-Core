@@ -90,7 +90,7 @@
     "supportsCardCreator" : false,
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
-    "catalogUrl" : "http://howard.simplye-md.org",
+    "catalogUrl" : "http://howard.simplye-md.org/",
     "licenseUrl": "http://www.librarysimplified.org/license.html",
     "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
     "mainColor": "#0066CC"
@@ -126,7 +126,7 @@
     "supportsCardCreator": false,
     "supportsReservations": true,
     "supportsHelpCenter": false,
-    "catalogUrl": "http://frederick.simplye-md.org",
+    "catalogUrl": "http://frederick.simplye-md.org/",
     "licenseUrl": "http://www.librarysimplified.org/license.html",
     "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
     "mainColor": "#ef4123"
