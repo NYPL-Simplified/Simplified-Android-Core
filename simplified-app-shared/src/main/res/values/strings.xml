@@ -224,11 +224,11 @@
   <string name="reader_settings_close">Close</string>
 
   <!-- Welcome Strings -->
-  <string name="welcome_library_header">Read Books From Your Library</string>
-  <string name="welcome_library_subtext">Simply browse, borrow, and read free ebooks from your local library</string>
-  <string name="welcome_library_button">Pick Your Library</string>
-  <string name="welcome_instant_header">SimplyE</string>
-  <string name="welcome_instant_subtext">Download and read ebooks without a library card</string>
+  <string name="welcome_library_header">Read E-Books from Your Library</string>
+  <string name="welcome_library_subtext">Simply browse, borrow, and read free e-books from your local library.</string>
+  <string name="welcome_library_button">Find Your Library</string>
+  <string name="welcome_instant_header">SimplyE Collection</string>
+  <string name="welcome_instant_subtext">E-books free to download and read without a library card.</string>
   <string name="welcome_instant_button">Read Now</string>
 
   <!-- Card Signup Strings -->
