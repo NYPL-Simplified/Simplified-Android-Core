@@ -133,6 +133,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
   /**
    * Set the arguments of the activity to be created.
+   * Modifies Bundle based on attributes and type (from local or remote)
+   * before being given to Intent in the calling method.
    *
    * @param b       The argument bundle
    * @param in_args The feed arguments
