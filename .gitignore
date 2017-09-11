@@ -1,20 +1,25 @@
-.classpath
-.idea/libraries
-.idea/workspace.xml
-.project
-.settings
-ReaderClientCert.sig
-gen
-helpstack.conf
-bugsnag.conf
-pom.xml.versionsBackup
-simplified-*/.classpath
-simplified-*/.project
-simplified-*/.settings
-simplified-*/bin
-simplified-*/target
-target
-.idea
-gen-external-apklibs
+#
+# Android Studio 2.2.3 Defaults
+#
+
+**/build
 *.iml
-build.sh
+.DS_Store
+.externalNativeBuild
+.gradle
+/.idea/libraries
+/.idea/workspace.xml
+/captures
+/local.properties
+
+# Ignore .so files
+**/jniLibs
+
+#
+# Certificates and API Keys
+#
+
+ReaderClientCert.sig 
+bugsnag.conf 
+helpstack.conf 
+*.jks

@@ -1,0 +1,13 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = 'simplified-rfc3339-tests'
+
+dependencies {
+  compile project(':simplified-rfc3339-core')
+  compile project(':simplified-test-utilities')
+}

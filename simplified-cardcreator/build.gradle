@@ -1,0 +1,18 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = 'simplified-cardcreator'
+
+dependencies {
+  compile project(':simplified-books-core')
+  compile project(':simplified-http-core')
+  compile project(':simplified-json-core')
+  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  compile "com.android.support:support-v4:25.3.1"
+  compile project(':simplified-prefs')
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+}

@@ -1,0 +1,13 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = 'simplified-http-tests'
+
+dependencies {
+  compile project(':simplified-http-core')
+  compile project(':simplified-test-utilities')
+}

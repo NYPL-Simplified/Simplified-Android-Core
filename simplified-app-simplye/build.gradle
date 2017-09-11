@@ -1,0 +1,48 @@
+apply plugin: 'com.android.application'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+  }
+  signingConfigs {
+    release {
+      keyAlias findProperty("org.librarysimplified.simplye.keyAlias")
+      keyPassword findProperty("org.librarysimplified.simplye.keyPassword")
+      storeFile file("keystore.jks")
+      storePassword findProperty("org.librarysimplified.simplye.storePassword")
+    }
+  }
+  buildTypes {
+    release {
+      signingConfig signingConfigs.release
+    }
+  }
+  lintOptions {
+    checkReleaseBuilds false
+  }
+}
+
+description = 'simplified-app-simplye'
+
+dependencies {
+  compile project(':simplified-app-shared')
+  compile group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
+  compile group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
+  compile group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+}
+
+apply plugin: 'android-native-dependencies'
+
+native_dependencies {
+  artifact (group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0',
+      classifier: 'armeabi-v7a') {
+    addLibPrefixToArtifact=false
+  }
+
+  artifact (group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0',
+      classifier: 'armeabi-v7a') {
+    addLibPrefixToArtifact=false
+  }
+}

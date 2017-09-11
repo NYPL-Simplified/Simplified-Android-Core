@@ -3,18 +3,19 @@
                 xmlns:app="http://schemas.android.com/apk/res/org.nypl.labs.OpenEbooks.app"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
     <android.support.v4.view.ViewPager
         android:id="@+id/intro_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <com.viewpagerindicator.CirclePageIndicator
-        android:id="@+id/intro_pager_indicator"
-        android:padding="18dip"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:layout_alignParentBottom="true"
-        app:radius="6dip"
-        app:fillColor="@color/feature_main_color"
-        app:pageColor="#FF000000"
-        app:strokeColor="#00000000"/>
+        android:layout_height="match_parent">
+
+      <com.itsronald.widget.ViewPagerIndicator
+          android:id="@+id/view_pager_indicator"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="bottom|center_horizontal"
+          android:gravity="center_vertical"/>
+
+    </android.support.v4.view.ViewPager>
+
 </RelativeLayout>

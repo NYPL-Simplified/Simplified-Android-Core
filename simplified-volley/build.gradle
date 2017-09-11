@@ -1,0 +1,14 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = ''
+
+dependencies {
+  compile group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
+  compile project(':simplified-json-core')
+  compile project(':simplified-books-core')
+}

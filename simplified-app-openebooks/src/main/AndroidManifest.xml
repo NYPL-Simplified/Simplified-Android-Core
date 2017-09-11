@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.labs.OpenEbooks.app"
   android:versionCode="1017"
   android:versionName="1.2.0">
@@ -26,7 +27,7 @@
 
     <!-- Main entry point for the application. -->
     <activity
-      android:name="org.nypl.labs.OpenEbooks.app.OESplashActivity"
+      android:name="org.nypl.simplified.app.MainSplashActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/feature_app_name"
       android:contentDescription="@string/feature_app_name"
@@ -165,7 +166,8 @@
     <!-- HelpStack -->
     <activity
       android:name="com.tenmiles.helpstack.activities.HomeActivity"
-      android:label="@string/hs_help_title" android:exported="false">
+      android:label="@string/hs_help_title" android:exported="false"
+      tools:replace="android:label">
       <intent-filter>
         <action android:name="com.tenmiles.helpstack.ShowHelp"/>
         <category android:name="android.intent.category.DEFAULT"/>

@@ -157,7 +157,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:textSize="12sp"
-            android:text="I agree to the terms of the End User License Agreement."
+            android:text="@string/eula_checkbox"
             android:id="@+id/eula_checkbox"
             android:checked="false"
             android:layout_span="2"
@@ -170,7 +170,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_gravity="center_vertical"
-        android:text="I am 13 years of age or older."
+        android:text="@string/age_verification_13_checkbox"
         android:id="@+id/age13_checkbox"
         android:checked="false"
         android:layout_weight="1"
@@ -205,7 +205,7 @@
 
           <TextView
             android:labelFor="@+id/settings_barcode_edit"
-            android:text="Don't have a library card?"
+            android:text="@string/need_card_question"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -223,7 +223,7 @@
             android:paddingRight="30dp"
             android:textColor="@drawable/simplified_button_text"
             android:textSize="12sp"
-            android:text="Sign Up"/>
+            android:text="@string/need_card_button"/>
 
 
         </TableRow>
@@ -268,7 +268,7 @@
           android:elevation="1dp">
 
           <TextView
-            android:text="Report an Issue"
+            android:text="@string/settings_report_issue"
             android:layout_width="match_parent"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         </TableRow>
@@ -283,7 +283,7 @@
           android:elevation="1dp">
 
           <TextView
-            android:text="Privacy Policy"
+            android:text="@string/settings_privacy"
             android:layout_width="match_parent"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         </TableRow>
@@ -298,7 +298,7 @@
           android:elevation="1dp">
 
           <TextView
-            android:text="Content Licenses"
+            android:text="@string/settings_licence_content"
             android:layout_width="match_parent"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         </TableRow>
