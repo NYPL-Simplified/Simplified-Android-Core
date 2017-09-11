@@ -965,7 +965,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       alert.setTitle(R.string.age_verification_title);
 
       // Setting Dialog Message
-      //alert.setMessage("You must be 13 years of age or older to download a book from the collection.\nHow old are you?");
       alert.setMessage(R.string.age_verification_question);
 
       // On pressing the under 13 button.
