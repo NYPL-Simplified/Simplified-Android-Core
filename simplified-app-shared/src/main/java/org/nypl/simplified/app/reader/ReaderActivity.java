@@ -526,6 +526,17 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
+  @Override protected void onPause()
+  {
+    super.onPause();
+
+    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
+
+    if (this.book_id != null && this.current_location != null) {
+      rs.getBookmarks().setBookmark(this.book_id, this.current_location);
+    }
+  }
+
   @Override protected void onDestroy()
   {
     super.onDestroy();

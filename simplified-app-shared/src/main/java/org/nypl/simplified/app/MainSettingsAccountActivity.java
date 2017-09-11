@@ -537,13 +537,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                 final AlertDialog.Builder alert = new AlertDialog.Builder(MainSettingsAccountActivity.this);
 
                 // Setting Dialog Title
-                alert.setTitle("Age Verification");
+                alert.setTitle(R.string.age_verification_title);
 
                 // Setting Dialog Message
-                alert.setMessage("If you are under 13, all content downloaded to My Books will be removed. How old are you?");
+                alert.setMessage(R.string.age_verification_changed);
 
                 // On pressing the under 13 button.
-                alert.setNeutralButton("Under 13", new DialogInterface.OnClickListener() {
+                alert.setNeutralButton(R.string.age_verification_13_younger, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int which) {
                       Simplified.getSharedPrefs().putBoolean("age13", false);
                       Simplified.getCatalogAppServices().reloadCatalog(true, MainSettingsAccountActivity.this.account);
@@ -552,7 +552,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
                 );
 
                 // On pressing the 13 and over button
-                alert.setPositiveButton("13 or Older", new DialogInterface.OnClickListener() {
+                alert.setPositiveButton(R.string.age_verification_13_older, new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, final int which) {
                       Simplified.getSharedPrefs().putBoolean("age13", true);
                       in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
@@ -592,6 +592,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           }
         });
       in_signup.setText("Sign Up");
+    in_signup.setText(R.string.need_card_button);
 
     }
     else if (this.account.getCardCreatorUrl() != null)
