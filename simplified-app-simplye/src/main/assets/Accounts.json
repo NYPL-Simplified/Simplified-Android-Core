@@ -58,5 +58,25 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
-  }
+  },
+  {
+    "id" : 12,
+    "pathComponent" : "12",
+    "name" : "Black Gold Cooperative",
+    "subtitle" : "TBD",
+    "logo" : "LibraryLogoMagic",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://bgc.simplye-ca.org",
+    "mainColor" : "#0b9da1",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true,
+    "licenseUrl": "http://califa.org/third-party-content",
+    "privacyUrl": "http://califa.org/privacy-policy"
+ }
 ]
