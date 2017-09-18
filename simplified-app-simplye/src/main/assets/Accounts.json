@@ -58,5 +58,25 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
+  },
+  {
+    "id": 13,
+    "pathComponent" : "13",
+    "name" : "St. Mary's County Library",
+    "subtitle" : "Read, Learn, Discover",
+    "logo" : "LibraryLogoSMCL",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://smrla.simplye-md.org/MDMARY/",
+    "supportEmail" : "sstephenson@stmalib.org",
+    "eulaUrl": "http://www.librarysimplified.org/EULA.html",
+    "licenseUrl": "https://www.stmalib.org/online-services/digital-content/simplye-content-license/",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "mainColor": "#194483"
   }
 ]

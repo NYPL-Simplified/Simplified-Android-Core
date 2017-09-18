@@ -57,6 +57,9 @@ public final class MainEULAActivity extends Activity
     else if (id == 1) {
       setTheme(R.style.SimplifiedTheme_BPL);
     }
+    else if (id == 13) {
+      setTheme(R.style.SimplifiedTheme_SMCL);
+    }
     else {
       setTheme(R.style.SimplifiedTheme);
     }
