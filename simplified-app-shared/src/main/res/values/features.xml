@@ -15,12 +15,13 @@
   <color name="feature_main_color_nypl">#da2527</color>
   <color name="feature_main_color_bpl">#446ebf</color>
   <color name="feature_main_color_smcl">#194483</color>
-
+  <color name="feature_main_color_ccpl">#20428B</color>
   <!-- The configurable secondary color, used for branding. -->
   <color name="feature_secondary_color">#476648</color>
   <color name="feature_secondary_color_nypl">#af1a16</color>
   <color name="feature_secondary_color_bpl">#4168a0</color>
   <color name="feature_secondary_color_smcl">#194483</color>
+  <color name="feature_secondary_color_ccpl">#20428B</color>
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>
