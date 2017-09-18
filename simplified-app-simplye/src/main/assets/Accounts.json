@@ -80,6 +80,25 @@
     "mainColor": "#194483"
   },
   {
+  "id": 14,
+  "pathComponent" : "14",
+  "name" : "Calvert Library",
+  "subtitle" : "Inspiring Possibility",
+  "logo" : "LibraryLogoCL",
+  "needsAuth" : true,
+  "supportsSimplyESync" : false,
+  "supportsBarcodeScanner" : false,
+  "supportsBarcodeDisplay" : false,
+  "supportsReservations" : true,
+  "supportsCardCreator" : false,
+  "supportsHelpCenter" : false,
+  "catalogUrl" : "http://smrla.simplye-md.org/MDCALV/",
+  "eulaUrl": "http://www.librarysimplified.org/EULA.html",
+  "licenseUrl": "",
+  "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+  "mainColor": "#440099"
+},
+  {
     "id": 15,
     "pathComponent" : "15",
     "name" : "Charles County Public Library",
