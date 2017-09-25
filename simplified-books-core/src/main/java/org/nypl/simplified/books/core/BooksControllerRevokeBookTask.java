@@ -381,26 +381,26 @@ final class BooksControllerRevokeBookTask
         returnBookWithoutDRM(snap, revoke_uri);
       }
 
+      /**
+       * If it turns out that the loan is not actually returnable, well, there's
+       * nothing we can do about that. This is a bug in the program.
+       */
+
+      final AdobeAdeptLoan loan = ((Some<AdobeAdeptLoan>) loan_opt).get();
+      if (loan.isReturnable() == true) {
+
         /**
-         * If it turns out that the loan is not actually returnable, well, there's
-         * nothing we can do about that. This is a bug in the program.
+         * Execute a task using the Adobe DRM library, and wait for it to
+         * finish. The reason for the waiting, as opposed to calling further
+         * methods from inside the listener callbacks is to avoid any chance
+         * of the methods in question propagating an unchecked exception back
+         * to the native code. This will obviously crash the whole process,
+         * rather than just failing the revocation.
          */
 
-        final AdobeAdeptLoan loan = ((Some<AdobeAdeptLoan>) loan_opt).get();
-        if (loan.isReturnable() == true) {
-
-          /**
-           * Execute a task using the Adobe DRM library, and wait for it to
-           * finish. The reason for the waiting, as opposed to calling further
-           * methods from inside the listener callbacks is to avoid any chance
-           * of the methods in question propagating an unchecked exception back
-           * to the native code. This will obviously crash the whole process,
-           * rather than just failing the revocation.
-           */
-
-          final CountDownLatch latch = new CountDownLatch(1);
-          final AdobeLoanReturnResult listener = new AdobeLoanReturnResult(latch);
-          adobe.execute(
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AdobeLoanReturnResult listener = new AdobeLoanReturnResult(latch);
+        adobe.execute(
             new AdobeAdeptProcedureType()
             {
               @Override public void executeWith(final AdobeAdeptConnectorType c)
