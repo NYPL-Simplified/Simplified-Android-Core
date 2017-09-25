@@ -371,15 +371,15 @@ final class BooksControllerRevokeBookTask
         this.books_database.databaseOpenEntryForReading(this.book_id);
       final BookDatabaseEntrySnapshot snap = er.entryGetSnapshot();
 
-        /**
-         * If the loan information is gone, well, there's nothing we can
-         * do about that. This is a bug in the program.
-         */
+      /**
+       * If the loan information is gone, it's assumed that it is a non-drm
+       * book from a library that still needs to be "returned"
+       */
 
-        final OptionType<AdobeAdeptLoan> loan_opt = snap.getAdobeRights();
-        if (loan_opt.isNone()) {
-          throw new UnreachableCodeException();
-        }
+      final OptionType<AdobeAdeptLoan> loan_opt = snap.getAdobeRights();
+      if (loan_opt.isNone()) {
+        returnBookWithoutDRM(snap, revoke_uri);
+      }
 
         /**
          * If it turns out that the loan is not actually returnable, well, there's
@@ -465,6 +465,25 @@ final class BooksControllerRevokeBookTask
       final OptionType<Throwable> no_exception = Option.none();
       this.revokeFailed(no_exception, "DRM is not supported!");
     }
+  }
+
+  public void returnBookWithoutDRM(final BookDatabaseEntrySnapshot snapshot, final URI revoke_uri)
+    throws IOException
+  {
+    /**
+     * Save the "revoked" state of the book.
+     * Finish the revocation by telling the server about it.
+     */
+
+    final OPDSAcquisitionFeedEntryBuilderType b =
+        OPDSAcquisitionFeedEntry.newBuilderFrom(snapshot.getEntry());
+    b.setAvailability(OPDSAvailabilityRevoked.get(revoke_uri));
+    final OPDSAcquisitionFeedEntry ee = b.build();
+    final BookDatabaseEntryWritableType ew =
+        this.books_database.databaseOpenEntryForWriting(this.book_id);
+    ew.entrySetFeedData(ee);
+
+    this.revokeUsingURI(revoke_uri, RevokeType.LOAN);
   }
 
   @Override public Unit onLoanable(final OPDSAvailabilityLoanable a)
