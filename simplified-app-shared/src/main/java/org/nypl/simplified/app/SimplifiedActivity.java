@@ -392,14 +392,14 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_bpl);
             } else if (account.getId() == 2) {
               icon_view.setImageResource(R.drawable.account_logo_instant);
-            } else if (account.getId() == 10) {
-              icon_view.setImageResource(R.drawable.account_logo_fcpl);
             } else if (account.getId() == 7) {
               icon_view.setImageResource(R.drawable.account_logo_alameda);
             } else if (account.getId() == 8) {
               icon_view.setImageResource(R.drawable.account_logo_hcls);
             } else if (account.getId() == 9) {
                 icon_view.setImageResource(R.drawable.account_logo_mcpl);
+            } else if (account.getId() == 10) {
+              icon_view.setImageResource(R.drawable.account_logo_fcpl);
             } else if (account.getId() == 11) {
               icon_view.setImageResource(R.drawable.account_logo_anne_arundel);
             }

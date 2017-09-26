@@ -143,14 +143,14 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_account_icon.setImageResource(R.drawable.account_logo_bpl);
           } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
             in_account_icon.setImageResource(R.drawable.account_logo_instant);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
-            in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
           } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
             in_account_icon.setImageResource(R.drawable.account_logo_alameda);
           } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
             in_account_icon.setImageResource(R.drawable.account_logo_hcls);
           } else if (MainSettingsAccountActivity.this.account.getId() == 9) {
             in_account_icon.setImageResource(R.drawable.account_logo_mcpl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
+            in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
           } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
             in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
           }
@@ -866,14 +866,14 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.account_logo_bpl);
     } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
       in_account_icon.setImageResource(R.drawable.account_logo_instant);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
-      in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
     } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
       in_account_icon.setImageResource(R.drawable.account_logo_alameda);
     } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
       in_account_icon.setImageResource(R.drawable.account_logo_hcls);
     } else if (MainSettingsAccountActivity.this.account.getId() == 9) {
       in_account_icon.setImageResource(R.drawable.account_logo_mcpl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
+      in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
     } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
       in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
     }
