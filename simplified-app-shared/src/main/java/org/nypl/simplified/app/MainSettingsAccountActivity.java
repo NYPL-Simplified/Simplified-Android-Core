@@ -155,6 +155,12 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
           } else if (MainSettingsAccountActivity.this.account.getId() == 12) {
             in_account_icon.setImageResource(R.drawable.account_logo_bgc);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 13) {
+            in_account_icon.setImageResource(R.drawable.account_logo_smcl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 14) {
+            in_account_icon.setImageResource(R.drawable.account_logo_cl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 15) {
+            in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
           }
 
           in_barcode_text.setText(creds.getBarcode().toString());
@@ -868,7 +874,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.account_logo_bpl);
     } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
       in_account_icon.setImageResource(R.drawable.account_logo_instant);
-<<<<<<< HEAD
     } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
       in_account_icon.setImageResource(R.drawable.account_logo_alameda);
     } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
@@ -879,10 +884,14 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
     } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
       in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
-=======
     } else if (MainSettingsAccountActivity.this.account.getId() == 12) {
       in_account_icon.setImageResource(R.drawable.account_logo_bgc);
->>>>>>> dcebd05859794d5756c87998a8c956a467938d1c
+    } else if (MainSettingsAccountActivity.this.account.getId() == 13) {
+      in_account_icon.setImageResource(R.drawable.account_logo_smcl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 14) {
+      in_account_icon.setImageResource(R.drawable.account_logo_cl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 15) {
+      in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
     }
 
     final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);

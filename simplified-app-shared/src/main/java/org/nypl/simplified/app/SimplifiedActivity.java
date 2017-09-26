@@ -263,6 +263,12 @@ public abstract class SimplifiedActivity extends Activity
       setTheme(R.style.SimplifiedTheme_AACPL);
     } else if (id == 12) {
       setTheme(R.style.SimplifiedTheme_BGC);
+    } else if (id == 13) {
+      setTheme(R.style.SimplifiedTheme_SMCL);
+    } else if (id == 14) {
+      setTheme(R.style.SimplifiedTheme_CL);
+    } else if (id == 15) {
+      setTheme(R.style.SimplifiedTheme_CCPL);
     } else {
       setTheme(R.style.SimplifiedTheme_Magic);
     }
@@ -406,6 +412,12 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_anne_arundel);
             } else if (account.getId() == 12) {
               icon_view.setImageResource(R.drawable.account_logo_bgc);
+            } else if (account.getId() == 13) {
+              icon_view.setImageResource(R.drawable.account_logo_smcl);
+            } else if (account.getId() == 14) {
+              icon_view.setImageResource(R.drawable.account_logo_cl);
+            } else if (account.getId() == 15) {
+              icon_view.setImageResource(R.drawable.account_logo_ccpl);
             }
 
           } else {
@@ -467,13 +479,19 @@ public abstract class SimplifiedActivity extends Activity
             } else if (account.getId() == 8) {
               icon_view.setImageResource(R.drawable.account_logo_hcls);
             } else if (account.getId() == 9) {
-                icon_view.setImageResource(R.drawable.account_logo_mcpl);
+              icon_view.setImageResource(R.drawable.account_logo_mcpl);
             } else if (account.getId() == 10) {
               icon_view.setImageResource(R.drawable.account_logo_fcpl);
             } else if (account.getId() == 11) {
               icon_view.setImageResource(R.drawable.account_logo_anne_arundel);
             } else if (account.getId() == 12) {
               icon_view.setImageResource(R.drawable.account_logo_bgc);
+            } else if (account.getId() == 13) {
+              icon_view.setImageResource(R.drawable.account_logo_smcl);
+            } else if (account.getId() == 14) {
+              icon_view.setImageResource(R.drawable.account_logo_cl);
+            } else if (account.getId() == 15) {
+              icon_view.setImageResource(R.drawable.account_logo_ccpl);
             }
           } else {
             tv.setText(part.getPartName(rr));

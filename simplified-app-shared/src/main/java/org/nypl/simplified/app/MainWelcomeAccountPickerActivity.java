@@ -137,8 +137,13 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
             icon_view.setImageResource(R.drawable.account_logo_anne_arundel);
           } else if (account.getId() == 12) {
             icon_view.setImageResource(R.drawable.account_logo_bgc);
+          } else if (account.getId() == 13) {
+            icon_view.setImageResource(R.drawable.account_logo_smcl);
+          } else if (account.getId() == 14) {
+            icon_view.setImageResource(R.drawable.account_logo_cl);
+          } else if (account.getId() == 15) {
+            icon_view.setImageResource(R.drawable.account_logo_ccpl);
           }
-
           return v;
         }
       };
