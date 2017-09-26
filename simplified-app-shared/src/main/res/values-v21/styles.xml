@@ -2,8 +2,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
   <style
-    name="SimplifiedTheme"
-    parent="android:Theme.Material.Light.DarkActionBar">
+      name="SimplifiedTheme"
+      parent="android:Theme.Material.Light.DarkActionBar">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
     <item name="android:actionBarStyle">@style/ActionBar</item>
 
@@ -22,7 +22,7 @@
 
 
   <style
-    name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_nypl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_nypl</item>
     <item name="android:colorAccent">@color/feature_main_color_nypl</item>
@@ -36,7 +36,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_bpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_bpl</item>
     <item name="android:colorAccent">@color/feature_main_color_bpl</item>
@@ -50,7 +50,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
+      name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color</item>
     <item name="android:colorAccent">@color/feature_main_color</item>
@@ -64,7 +64,21 @@
   </style>
 
   <style
-    name="SimplifiedTheme_AACPL" parent="SimplifiedTheme">
+    name="SimplifiedTheme_CCL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_ccl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccl</item>
+    <item name="android:colorAccent">@color/feature_main_color_ccl</item>
+    <item name="button_foreground">@color/feature_main_color_ccl</item>
+
+    <item name="list_item_foreground">@color/feature_main_color_ccl</item>
+    <item name="downloading_background">@color/feature_main_color_ccl</item>
+    <item name="notification_background">@color/feature_main_color_ccl</item>
+    <item name="main_color">@color/feature_main_color_ccl</item>
+
+  </style>
+
+  <style
+      name="SimplifiedTheme_AACPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_aacpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_aacpl</item>
     <item name="android:colorAccent">@color/feature_main_color_aacpl</item>
@@ -79,7 +93,7 @@
 
 
   <style
-    name="SimplifiedTheme_ACL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_ACL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_acl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_acl</item>
     <item name="android:colorAccent">@color/feature_main_color_acl</item>
@@ -92,7 +106,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_SMCL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_SMCL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_smcl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_smcl</item>
     <item name="android:colorAccent">@color/feature_main_color_smcl</item>
@@ -106,7 +120,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_CCPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_CCPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_ccpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccpl</item>
     <item name="android:colorAccent">@color/feature_main_color_ccpl</item>
@@ -120,7 +134,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_FCPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_FCPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_fcpl</item>
     <item name="android:colorAccent">@color/feature_main_color_fcpl</item>
@@ -133,7 +147,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_CL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_CL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_cl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_cl</item>
     <item name="android:colorAccent">@color/feature_main_color_cl</item>
@@ -147,7 +161,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_HCLS" parent="SimplifiedTheme">
+      name="SimplifiedTheme_HCLS" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_hcls</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_hcls</item>
     <item name="android:colorAccent">@color/feature_main_color_hcls</item>
@@ -160,7 +174,7 @@
   </style>
 
   <style
-          name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_mcpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_mcpl</item>
     <item name="android:colorAccent">@color/feature_main_color_mcpl</item>
@@ -173,7 +187,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_BGC" parent="SimplifiedTheme">
+      name="SimplifiedTheme_BGC" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_bgc</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_bgc</item>
     <item name="android:colorAccent">@color/feature_main_color_bgc</item>
@@ -193,8 +207,8 @@
 
 
   <style
-    name="SimplifiedThemeNoActionBar"
-    parent="android:Theme.Material.Light.NoActionBar">
+      name="SimplifiedThemeNoActionBar"
+      parent="android:Theme.Material.Light.NoActionBar">
     <item name="android:windowActionBar">false</item>
     <item name="android:windowNoTitle">true</item>
 
@@ -211,8 +225,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_NYPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_NYPL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_nypl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_nypl</item>
@@ -228,8 +242,8 @@
 
 
   <style
-    name="SimplifiedThemeNoActionBar_BPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_BPL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_bpl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_bpl</item>
@@ -244,8 +258,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_Magic"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_Magic"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color</item>
@@ -260,8 +274,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_ACL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_ACL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_acl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_acl</item>
@@ -275,8 +289,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_HCLS"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_HCLS"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_hcls</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_hcls</item>
@@ -291,8 +305,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_FCPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_FCPL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_fcpl</item>
@@ -307,8 +321,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_MCPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_MCPL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_mcpl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_mcpl</item>
@@ -322,8 +336,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_AACPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_AACPL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_aacpl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_aacpl</item>
@@ -338,18 +352,18 @@
   </style>
 
   <style
-     name="SimplifiedThemeNoActionBar_SMCL"
-     parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_SMCL"
+      parent="SimplifiedThemeNoActionBar">
 
-     <item name="android:colorPrimary">@color/feature_main_color_smcl</item>
-     <item name="android:colorPrimaryDark">@color/feature_main_color_smcl</item>
-     <item name="android:colorAccent">@color/feature_main_color_smcl</item>
+    <item name="android:colorPrimary">@color/feature_main_color_smcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_main_color_smcl</item>
+    <item name="android:colorAccent">@color/feature_main_color_smcl</item>
 
-     <item name="button_foreground">@color/feature_main_color_smcl</item>
-     <item name="list_item_foreground">@color/feature_main_color_smcl</item>
-     <item name="downloading_background">@color/feature_main_color_smcl</item>
-     <item name="notification_background">@color/feature_main_color_smcl</item>
-     <item name="main_color">@color/feature_main_color_smcl</item>
+    <item name="button_foreground">@color/feature_main_color_smcl</item>
+    <item name="list_item_foreground">@color/feature_main_color_smcl</item>
+    <item name="downloading_background">@color/feature_main_color_smcl</item>
+    <item name="notification_background">@color/feature_main_color_smcl</item>
+    <item name="main_color">@color/feature_main_color_smcl</item>
 
   </style>
 
@@ -361,16 +375,16 @@
   </style>
 
   <style
-    name="SimplifiedBookDialog"
-    parent="SimplifiedTheme">
+      name="SimplifiedBookDialog"
+      parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>
   </style>
 
   <style
-    name="SimplifiedLoginDialog"
-    parent="SimplifiedTheme">
+      name="SimplifiedLoginDialog"
+      parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>

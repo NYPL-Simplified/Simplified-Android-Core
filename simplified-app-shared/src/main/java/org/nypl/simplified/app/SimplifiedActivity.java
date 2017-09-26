@@ -269,6 +269,8 @@ public abstract class SimplifiedActivity extends Activity
       setTheme(R.style.SimplifiedTheme_CL);
     } else if (id == 15) {
       setTheme(R.style.SimplifiedTheme_CCPL);
+    } else if (id == 16) {
+      setTheme(R.style.SimplifiedTheme_CCL);
     } else {
       setTheme(R.style.SimplifiedTheme_Magic);
     }
@@ -418,6 +420,8 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_cl);
             } else if (account.getId() == 15) {
               icon_view.setImageResource(R.drawable.account_logo_ccpl);
+            } else if (account.getId() == 16) {
+              icon_view.setImageResource(R.drawable.account_logo_ccl);
             }
 
           } else {
@@ -492,6 +496,8 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_cl);
             } else if (account.getId() == 15) {
               icon_view.setImageResource(R.drawable.account_logo_ccpl);
+            } else if (account.getId() == 16) {
+              icon_view.setImageResource(R.drawable.account_logo_ccl);
             }
           } else {
             tv.setText(part.getPartName(rr));
