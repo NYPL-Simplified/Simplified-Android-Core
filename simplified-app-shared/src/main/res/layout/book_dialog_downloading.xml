@@ -44,17 +44,4 @@
       android:textAlignment="gravity"
       android:textSize="10sp" />
   </LinearLayout>
-
-  <Button
-    android:id="@+id/book_dialog_downloading_cancel"
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/button_standard_height"
-    android:background="@drawable/simplified_button"
-    android:layout_centerHorizontal="true"
-    android:layout_alignParentBottom="true"
-    android:layout_marginBottom="16dp"
-    android:text="@string/catalog_cancel_downloading"
-    android:textColor="@drawable/simplified_button_text"
-    android:textSize="12sp" />
-
 </RelativeLayout>

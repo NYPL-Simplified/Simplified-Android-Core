@@ -133,6 +133,8 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
   /**
    * Set the arguments of the activity to be created.
+   * Modifies Bundle based on attributes and type (from local or remote)
+   * before being given to Intent in the calling method.
    *
    * @param b       The argument bundle
    * @param in_args The feed arguments
@@ -965,7 +967,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       alert.setTitle(R.string.age_verification_title);
 
       // Setting Dialog Message
-      //alert.setMessage("You must be 13 years of age or older to download a book from the collection.\nHow old are you?");
       alert.setMessage(R.string.age_verification_question);
 
       // On pressing the under 13 button.

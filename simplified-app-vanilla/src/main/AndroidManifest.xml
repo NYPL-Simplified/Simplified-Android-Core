@@ -16,7 +16,6 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:icon="@drawable/feature_app_icon"
     android:label="@string/feature_app_name"
     android:largeHeap="true"
     android:theme="@style/SimplifiedTheme"

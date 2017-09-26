@@ -601,8 +601,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             startActivity(cardcreator);
           }
         });
-      in_signup.setText("Sign Up");
-    in_signup.setText(R.string.need_card_button);
+      in_signup.setText(R.string.need_card_button);
 
     }
     else if (this.account.getCardCreatorUrl() != null)
@@ -620,8 +619,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
           }
         });
-      in_signup.setText("Sign Up");
-
+      in_signup.setText(R.string.need_card_button);
 
     }
 

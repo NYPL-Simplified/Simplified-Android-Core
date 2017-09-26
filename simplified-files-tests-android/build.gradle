@@ -1,0 +1,14 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = 'simplified-files-tests-android'
+
+dependencies {
+  compile project(':simplified-files')
+  compile project(':simplified-files-tests')
+  compile project(':simplified-test-utilities')
+}

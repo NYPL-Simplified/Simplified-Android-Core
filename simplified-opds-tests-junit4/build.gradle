@@ -1,0 +1,13 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = 'simplified-opds-tests-junit4'
+
+dependencies {
+  testCompile project(':simplified-opds-tests')
+  testCompile group: 'junit', name: 'junit', version: '4.12'
+}
