@@ -73,6 +73,7 @@
     "supportsCardCreator": false,
     "supportsHelpCenter": false,
     "catalogUrl": "http://acl.simplye-ca.org/CALMDA/",
+    "supportEmail" : "ask@aclibrary.libanswers.com",
     "licenseUrl": "http://guides.aclibrary.org/TAC",
     "privacyUrl": "http://califa.org/privacy-policy",
     "mainColor": "#58a6f5"
@@ -166,7 +167,7 @@
     "supportsCardCreator" : false,
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
-    "catalogUrl" : "http://bgc.simplye-ca.org/",
+    "catalogUrl" : "http://bgc.simplye-ca.org/CABGLD/",
     "mainColor" : "#d2a74a",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true,
