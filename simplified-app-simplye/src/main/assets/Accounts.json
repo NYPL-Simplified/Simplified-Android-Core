@@ -72,8 +72,8 @@
     "supportsReservations" : true,
     "supportsCardCreator" : false,
     "supportsHelpCenter" : false,
-    "catalogUrl" : "http://acl.simplye-ca.org/",
-    "supportEmail" : "enkisys@gmail.com",
+    "catalogUrl" : "http://acl.simplye-ca.org/CALMDA/",
+    "supportEmail" : "ask@aclibrary.libanswers.com",
     "licenseUrl": "http://guides.aclibrary.org/TAC",
     "privacyUrl": "http://califa.org/privacy-policy",
     "mainColor": "#58a6f5"
