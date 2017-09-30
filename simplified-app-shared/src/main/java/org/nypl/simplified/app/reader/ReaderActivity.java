@@ -64,6 +64,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.volley.NYPLStringRequest;
 import org.readium.sdk.android.Container;
@@ -466,10 +467,6 @@ public final class ReaderActivity extends Activity implements
     in_title_text.setText("");
 
     final ReaderReadiumEPUBLoaderType pl = rs.getEPUBLoader();
-    pl.loadEPUB(in_epub_file, this);
-
-    this.applyViewerColorFilters();
-
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
 
@@ -491,6 +488,25 @@ public final class ReaderActivity extends Activity implements
         }
       }
     );
+    this.applyViewerColorFilters();
+
+    if (this.credentials != null && this.credentials.getDrmLicensor().isSome()) {
+
+      final DRMLicensor licensor = ((Some<DRMLicensor>) this.credentials.getDrmLicensor()).get();
+      switch (licensor.getDrmType()) {
+        case URMS:
+        case ADOBE:
+        case LCP:
+        default:
+          pl.loadEPUB(in_epub_file, ReaderActivity.this, licensor.getDrmType());
+          break;
+      }
+
+    } else {
+      // open access , no drm, no login
+      pl.loadEPUB(in_epub_file, ReaderActivity.this, DRMLicensor.DRM.NONE);
+    }
+
   }
 
   @Override public void onCurrentPageError(

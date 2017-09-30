@@ -62,6 +62,40 @@ public final class ErrorDialogUtilities
       });
   }
 
+  public static void showAlert(
+    final Activity ctx,
+    final Logger log,
+    final String title,
+    final String message,
+    final @Nullable Throwable x)
+  {
+    log.error("{}", message, x);
+
+    UIThread.runOnUIThread(
+      new Runnable()
+      {
+        @Override public void run()
+        {
+          final StringBuilder sb = new StringBuilder();
+          sb.append(message);
+
+          if (x != null) {
+            sb.append("\n\n");
+            sb.append(x);
+          }
+
+          final AlertDialog.Builder b = new AlertDialog.Builder(ctx);
+          b.setNegativeButton("DISMISS", null);
+          b.setMessage(NullCheck.notNull(sb.toString()));
+          b.setTitle(title);
+          b.setCancelable(true);
+
+          final AlertDialog a = b.create();
+          a.show();
+        }
+      });
+  }
+
   /**
    * Show an error dialog, running the given runnable when the user dismisses
    * the message.

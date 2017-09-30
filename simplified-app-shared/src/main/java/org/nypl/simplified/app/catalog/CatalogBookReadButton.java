@@ -58,7 +58,7 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
       this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
       this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_read)));
 
-      this.setOnClickListener(new CatalogBookRead(in_activity, in_book_id, in_entry));
+      this.setOnClickListener(new CatalogBookRead(this, in_activity, in_book_id, in_entry));
     }
     else
     {
