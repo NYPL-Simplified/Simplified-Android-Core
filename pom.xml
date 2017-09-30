@@ -171,7 +171,7 @@
       <dependency>
         <groupId>org.nypl.readium</groupId>
         <artifactId>readium-sdk-android-runtime</artifactId>
-        <version>0.25.0</version>
+        <version>0.26.1</version>
         <type>aar</type>
       </dependency>
       <dependency>
@@ -243,6 +243,27 @@
         <classifier>armeabi-v7a</classifier>
         <type>so</type>
       </dependency>
+
+      <dependency>
+        <groupId>com.aferdita.urms</groupId>
+        <artifactId>dita-urms</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.sony.dadc.prod</groupId>
+        <artifactId>liburms</artifactId>
+        <classifier>armeabi-v7a</classifier>
+        <type>so</type>
+        <version>3.5</version>
+        <optional>true</optional>
+      </dependency>
+      <dependency>
+        <groupId>com.sony.dadc.prod</groupId>
+        <artifactId>urms-sdk-android</artifactId>
+        <version>3.5</version>
+        <optional>true</optional>
+      </dependency>
+
 
       <!-- OPDS dependencies -->
       <dependency>

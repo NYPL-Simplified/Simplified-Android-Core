@@ -208,6 +208,28 @@
         </dependency>
       </dependencies>
     </profile>
+
+    <!-- The optional URMS DRM profile. -->
+    <profile>
+      <id>dita-urms</id>
+      <dependencies>
+        <dependency>
+          <groupId>com.aferdita.urms</groupId>
+          <artifactId>dita-urms</artifactId>
+        </dependency>
+        <dependency>
+          <groupId>com.sony.dadc.prod</groupId>
+          <artifactId>liburms</artifactId>
+          <classifier>armeabi-v7a</classifier>
+          <type>so</type>
+        </dependency>
+        <dependency>
+          <groupId>com.sony.dadc.prod</groupId>
+          <artifactId>urms-sdk-android</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+
   </profiles>
 
   <build>
