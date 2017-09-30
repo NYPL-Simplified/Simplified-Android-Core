@@ -201,21 +201,29 @@ public final class OPDSAcquisitionFeedEntryParser
         /**
          * Acquisitions.
          */
-
+        final OptionType<OPDSIndirectAcquisition> indirect_acquisition = OPDSAcquisitionFeedEntryParser.linkIsSupported(e_link);
         if (rel_text.startsWith(
           OPDSFeedConstants.ACQUISITION_URI_PREFIX_TEXT)
-          && OPDSAcquisitionFeedEntryParser.linkIsSupported(e_link)) {
+          && indirect_acquisition.isSome()) {
 
           boolean open_access = false;
+
+          final OPDSIndirectAcquisition ind = ((Some<OPDSIndirectAcquisition>) indirect_acquisition).get();
+
           for (final Type v : OPDSAcquisition.Type.values()) {
-            final String uri_text = NullCheck.notNull(v.getURI().toString());
-            if (rel_text.equals(uri_text)) {
-              final URI href = new URI(e_link.getAttribute("href"));
-              eb.addAcquisition(new OPDSAcquisition(v, href));
-              open_access = open_access || v == Type.ACQUISITION_OPEN_ACCESS;
-              break;
+              final String uri_text = NullCheck.notNull(v.getURI().toString());
+              if (rel_text.equals(uri_text)) {
+                URI href = new URI(e_link.getAttribute("href"));
+
+                if (ind.getDownloadUrl().isSome()) {
+                  href = ((Some<URI>) ind.getDownloadUrl()).get();
+                }
+
+                eb.addAcquisition(new OPDSAcquisition(v, href));
+                open_access = open_access || v == Type.ACQUISITION_OPEN_ACCESS;
+                break;
+              }
             }
-          }
 
           if (open_access) {
             eb.setAvailability(OPDSAvailabilityOpenAccess.get(revoke));
@@ -223,55 +231,11 @@ public final class OPDSAcquisitionFeedEntryParser
             OPDSAcquisitionFeedEntryParser.tryAvailability(eb, e_link, revoke);
           }
 
-          {
-
-            final OptionType<Element> licensor_opt =
-              OPDSXML.getFirstChildElementWithNameOptional(
-                e_link, OPDSFeedConstants.DRM_URI, "licensor");
-
-            if (licensor_opt.isSome()) {
-              final Some<Element> licensor_some = (Some<Element>) licensor_opt;
-
-              final Element in_e = OPDSXML.nodeAsElement(licensor_some.get());
-              final String  in_vendor = in_e.getAttribute("drm:vendor");
-              String in_client_token = null;
-              OptionType<String> in_device_manager = Option.none();
-              for (int i = 0; i < in_e.getChildNodes().getLength(); ++i)
-              {
-                final Node node = in_e.getChildNodes().item(i);
-
-                if (node.getNodeName().contains("clientToken"))
-                {
-                  in_client_token =  node.getFirstChild().getNodeValue();
-                }
-
-                if (node.getNodeName().contains("link"))
-                {
-                  final Element element = OPDSXML.nodeAsElement(node);
-
-                  final boolean has_everything =
-                    element.hasAttribute("rel") && element.hasAttribute("href");
-
-                  if (has_everything) {
-                    final String r = NullCheck.notNull(element.getAttribute("rel"));
-                    final String h = NullCheck.notNull(element.getAttribute("href"));
-
-                    if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
-
-                      in_device_manager = Option.some(h);
-
-                    }
-                  }
-                }
-                if (in_vendor != null && in_client_token != null) {
-                  final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token, in_device_manager);
-                  eb.setLicensorOption(Option.some(licensor));
-                }
-              }
-
-
+          if (((Some<OPDSIndirectAcquisition>) indirect_acquisition).isSome()) {
+            if (((Some<OPDSIndirectAcquisition>) indirect_acquisition).get().getLicensor().isSome()) {
+              eb.setLicensorOption(((Some<OPDSIndirectAcquisition>) indirect_acquisition).get().getLicensor());
             }
-
+            eb.setIndirectAcquisitionOption(indirect_acquisition);
           }
 
         }
@@ -306,7 +270,7 @@ public final class OPDSAcquisitionFeedEntryParser
     return eb.build();
   }
 
-  private static boolean linkIsSupported(
+  private static OptionType<OPDSIndirectAcquisition> linkIsSupported(
     final Element link)
   {
     final List<Element> top_level_list = OPDSXML.getChildElementsWithName(
@@ -319,19 +283,148 @@ public final class OPDSAcquisitionFeedEntryParser
             link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
           for (Element second_level_e : second_level_list) {
             if ("application/epub+zip".equals(second_level_e.getAttribute("type"))) {
-              return true;
+              final OptionType<String> type = Option.some(second_level_e.getAttribute("type"));
+              final OptionType<DRMLicensor> licensor = Option.none();
+              final OptionType<URI> innerlink = Option.none();
+              final OptionType<String> ccid = Option.none();
+              return Option.some(new OPDSIndirectAcquisition(type, licensor, innerlink, ccid));
+            }
+          }
+        }
+        else if ("vnd.librarysimplified/obfuscated;scheme=http://librarysimplified.org/terms/drm/scheme/URMS".equals(top_level_e.getAttribute("type"))) {
+          final List<Element> second_level_list = OPDSXML.getChildElementsWithName(
+            link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
+          for (Element second_level_e : second_level_list) {
+            if ("application/epub+zip".equals(second_level_e.getAttribute("type"))) {
+              final OptionType<String> type = Option.some(second_level_e.getAttribute("type"));
+              final OptionType<DRMLicensor> licensor = Option.none();
+              final OptionType<URI> innerlink = Option.none();
+              final OptionType<String> ccid = Option.none();
+              return Option.some(new OPDSIndirectAcquisition(type, licensor, innerlink, ccid));
             }
           }
         } else if ("application/epub+zip".equals(top_level_e.getAttribute("type"))) {
-          return true;
+          try {
+            final Element parent = OPDSXML.nodeAsElement(top_level_e.getParentNode());
+            final List<Element> e_links = OPDSXML.getChildElementsWithName(
+              top_level_e, "link");
+            DRMLicensor.DRM drm_type = DRMLicensor.DRM.NONE;
+
+            if ("vnd.adobe/adept+xml".equals(parent.getAttribute("type"))) {
+              LOG.debug("ADOBE");
+              drm_type = DRMLicensor.DRM.ADOBE;
+            }
+            else if ("vnd.librarysimplified/obfuscated;scheme=http://librarysimplified.org/terms/drm/scheme/URMS".equals(parent.getAttribute("type"))) {
+              LOG.debug("URMS");
+              drm_type = DRMLicensor.DRM.URMS;
+            }
+
+            final OptionType<String> type = Option.some(top_level_e.getAttribute("type"));
+            OptionType<DRMLicensor> licensor = Option.none();
+            OptionType<URI> innerlink = Option.none();
+            OptionType<String> ccid = Option.none();
+            if (link.getAttribute("href").contains("ccid")) {
+              ccid = Option.some(link.getAttribute("href"));
+            }
+
+            for (final Element e_link : e_links) {
+              if (e_link.hasAttribute("rel")) {
+                final String rel_text = NullCheck.notNull(e_link.getAttribute("rel"));
+                if ("http://opds-spec.org/acquisition".equals(rel_text)) {
+                  if (e_link.hasAttribute("href")) {
+                    try {
+                      final URI u = new URI(e_link.getAttribute("href"));
+                      innerlink = Option.some(u);
+                    } catch (URISyntaxException e) {
+                      e.printStackTrace();
+                    }
+                    break;
+                  }
+                }
+              }
+            }
+
+            final OptionType<Element> licensor_opt =
+              OPDSXML.getFirstChildElementWithNameOptional(
+                link, OPDSFeedConstants.DRM_URI, "licensor");
+
+            if (licensor_opt.isSome()) {
+              final Some<Element> licensor_some = (Some<Element>) licensor_opt;
+
+              final Element in_e = OPDSXML.nodeAsElement(licensor_some.get());
+              String in_vendor = null;
+              String in_client_token = null;
+              String in_device_manager = null;
+              String in_client_token_url = null;
+
+              if (in_e.hasAttribute("drm:vendor")) {
+                in_vendor =  in_e.getAttribute("drm:vendor");
+              }
+
+              for (int i = 0; i < in_e.getChildNodes().getLength(); ++i)
+              {
+                final Node node = in_e.getChildNodes().item(i);
+                if (node.getNodeName().contains("clientToken"))
+                {
+                  final Element in_e_client_token = OPDSXML.nodeAsElement(node);
+                  if (node.hasChildNodes()) {
+                    in_client_token =  node.getFirstChild().getNodeValue();
+                  }
+                  if (in_e_client_token.hasAttribute("drm:href")) {
+                    in_client_token_url =  in_e_client_token.getAttribute("drm:href");
+                  }
+                }
+
+                if (node.getNodeName().contains("link"))
+                {
+                  final Element el = OPDSXML.nodeAsElement(node);
+                  final boolean has_everything =
+                    el.hasAttribute("rel") && el.hasAttribute("href");
+                  if (has_everything) {
+                    final String r = NullCheck.notNull(el.getAttribute("rel"));
+                    final String h = NullCheck.notNull(el.getAttribute("href"));
+                    if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
+                      in_device_manager = h;
+                    }
+                  }
+                }
+
+                OptionType<String>  vendor = Option.none();
+                if (in_vendor != null) {
+                  vendor = Option.some(in_vendor);
+                }
+                OptionType<String>  client_token = Option.none();
+                if (in_client_token != null) {
+                  client_token = Option.some(in_client_token);
+                }
+                OptionType<String>  client_token_url = Option.none();
+                if (in_client_token_url != null) {
+                  client_token_url = Option.some(in_client_token_url);
+                }
+                OptionType<String>  device_manager = Option.none();
+                if (in_device_manager != null) {
+                  device_manager = Option.some(in_device_manager);
+                }
+
+                licensor = Option.some(new DRMLicensor(vendor, client_token, client_token_url, device_manager, drm_type));
+              }
+          }
+            return Option.some(new OPDSIndirectAcquisition(type, licensor, innerlink, ccid));
+          } catch (OPDSParseException e) {
+            e.printStackTrace();
+          }
         }
       }
     }
     else if ("application/epub+zip".equals(link.getAttribute("type"))) {
-      return true;
+      final OptionType<String> type = Option.some(link.getAttribute("type"));
+      final OptionType<DRMLicensor> licensor = Option.none();
+      final OptionType<URI> innerlink = Option.none();
+      final OptionType<String> ccid = Option.none();
+      return Option.some(new OPDSIndirectAcquisition(type, licensor, innerlink, ccid));
     }
 
-    return false;
+    return Option.none();
   }
 
   private static void tryAvailability(

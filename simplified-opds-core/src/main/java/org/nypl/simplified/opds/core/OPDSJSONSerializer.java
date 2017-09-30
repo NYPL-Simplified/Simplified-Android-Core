@@ -235,11 +235,40 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
 
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode je = jom.createObjectNode();
-    je.put("vendor", l.getVendor());
-    je.put("clientToken", l.getClientToken());
+
+    if (l.getVendor().isSome()) {
+      je.put("vendor", ((Some<String>) l.getVendor()).get());
+    }
+
+    if (l.getClientToken().isSome()) {
+      je.put("clientToken", ((Some<String>) l.getClientToken()).get());
+    }
 
     if (l.getDeviceManager().isSome()) {
       je.put("deviceManager", ((Some<String>) l.getDeviceManager()).get());
+    }
+    if (l.getClientTokenUrl().isSome()) {
+      je.put("clientTokenUrl", ((Some<String>) l.getClientTokenUrl()).get());
+    }
+
+    je.put("drmType", l.getDrmType().ordinal());
+
+    return je;
+  }
+
+  @Override
+  public ObjectNode serializeIndirectAcquisition(final OPDSIndirectAcquisition l) {
+    NullCheck.notNull(l);
+
+    final ObjectMapper jom = new ObjectMapper();
+    final ObjectNode je = jom.createObjectNode();
+
+    if (l.getDownloadUrl().isSome()) {
+      je.put("link", ((Some<URI>) l.getDownloadUrl()).get().toString());
+    }
+
+    if (l.getCcid().isSome()) {
+      je.put("ccid", ((Some<String>) l.getCcid()).get());
     }
 
     return je;
@@ -277,6 +306,12 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
       if (e.getLicensor().isSome())
       {
         je.set("licensor", this.serializeLicensor(((Some<DRMLicensor>) e.getLicensor()).get()));
+      }
+    }
+    {
+      if (e.getIndirectAcquisition().isSome())
+      {
+        je.set("indirectAcquisition", this.serializeIndirectAcquisition(((Some<OPDSIndirectAcquisition>) e.getIndirectAcquisition()).get()));
       }
     }
 

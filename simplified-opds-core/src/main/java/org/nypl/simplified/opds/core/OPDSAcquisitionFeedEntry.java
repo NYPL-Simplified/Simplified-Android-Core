@@ -23,7 +23,7 @@ import java.util.Set;
 @SuppressWarnings("synthetic-access")
 public final class OPDSAcquisitionFeedEntry implements Serializable
 {
-  private static final long serialVersionUID = 1L;
+  private static final long            serialVersionUID = 1L;
   private final List<OPDSAcquisition>  acquisitions;
   private final List<String>           authors;
   private final OPDSAvailabilityType   availability;
@@ -45,6 +45,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   private final OptionType<URI>        analytics;
   private final OptionType<DRMLicensor> licensor;
 
+  private final OptionType<OPDSIndirectAcquisition> indirect_acquisition;
+
   private OPDSAcquisitionFeedEntry(
     final List<String> in_authors,
     final List<OPDSAcquisition> in_acquisitions,
@@ -65,7 +67,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     final List<OPDSCategory> in_categories,
     final OptionType<URI> in_alternate,
     final OptionType<URI> in_analytics,
-    final OptionType<DRMLicensor> in_licensor)
+    final OptionType<DRMLicensor> in_licensor,
+    final OptionType<OPDSIndirectAcquisition> in_indirect_acquisition)
   {
     this.authors = NullCheck.notNull(Collections.unmodifiableList(in_authors));
     this.acquisitions =
@@ -88,6 +91,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     this.alternate = NullCheck.notNull(in_alternate);
     this.analytics = NullCheck.notNull(in_analytics);
     this.licensor = NullCheck.notNull(in_licensor);
+    this.indirect_acquisition = NullCheck.notNull(in_indirect_acquisition);
+
   }
 
   /**
@@ -153,6 +158,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     b.setAlternateOption(e.getAlternate());
     b.setAnalyticsOption(e.getAnalytics());
     b.setLicensorOption(e.getLicensor());
+    b.setIndirectAcquisitionOption(e.getIndirectAcquisition());
 
     {
       final String summary = e.getSummary();
@@ -362,6 +368,13 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
   }
 
   /**
+   * @return Indirect Acquisitio
+   */
+  public OptionType<OPDSIndirectAcquisition> getIndirectAcquisition() {
+    return this.indirect_acquisition;
+  }
+
+  /**
    * @return The title
    */
 
@@ -476,6 +489,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     private       String                 summary;
     private       OptionType<URI>        thumbnail;
     private       OptionType<DRMLicensor>        licensor;
+    private       OptionType<OPDSIndirectAcquisition> indirect_acquisition;
+
 
     private Builder(
       final String in_id,
@@ -503,6 +518,7 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       this.categories = new ArrayList<OPDSCategory>(8);
       this.groups = new HashSet<Pair<String, URI>>(8);
       this.licensor = Option.none();
+      this.indirect_acquisition = Option.none();
     }
 
     @Override public void addAcquisition(
@@ -554,7 +570,8 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
         this.categories,
         this.alternate,
         this.analytics,
-        this.licensor);
+        this.licensor,
+        this.indirect_acquisition);
     }
 
     @Override public List<OPDSAcquisition> getAcquisitions()
@@ -643,6 +660,12 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
       final OptionType<DRMLicensor> lic)
     {
       this.licensor = NullCheck.notNull(lic);
+    }
+
+    @Override public void setIndirectAcquisitionOption(
+      final OptionType<OPDSIndirectAcquisition> ia)
+    {
+      this.indirect_acquisition = NullCheck.notNull(ia);
     }
   }
 }

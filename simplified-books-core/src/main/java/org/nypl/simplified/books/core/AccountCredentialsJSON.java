@@ -135,6 +135,17 @@ public final class AccountCredentialsJSON
           });
 
       }
+      if (licensor.getClientTokenUrl().isSome()) {
+
+        licensor.getClientTokenUrl().map_(
+          new ProcedureType<String>() {
+            @Override
+            public void call(final String x) {
+              jo.put("client_token_url", x);
+            }
+          });
+
+      }
     }
 
     credentials.getAdobeVendor().map_(
@@ -247,7 +258,7 @@ public final class AccountCredentialsJSON
         }
       });
 
-    final OptionType<AdobeVendorID> vendor =
+    final OptionType<AdobeVendorID> in_vendor =
       JSONParserUtilities.getStringOptional(obj, "adobe-vendor").map(
         new FunctionType<String, AdobeVendorID>()
         {
@@ -257,7 +268,17 @@ public final class AccountCredentialsJSON
           }
         });
 
-    final OptionType<String> licensor_url =
+    final OptionType<String> in_client_token_url =
+      JSONParserUtilities.getStringOptional(obj, "client_token_url").map(
+        new FunctionType<String, String>()
+        {
+          @Override public String call(final String x)
+          {
+            return x;
+          }
+        });
+
+    final OptionType<String> in_device_manager =
       JSONParserUtilities.getStringOptional(obj, "licensor_url").map(
         new FunctionType<String, String>()
         {
@@ -267,18 +288,42 @@ public final class AccountCredentialsJSON
           }
         });
 
-    final AccountCredentials creds = new AccountCredentials(vendor, user, pass, provider, auth_token, adobe_token, patron);
-    creds.setAdobeUserID(adobe_user);
-    creds.setAdobeDeviceID(adobe_device);
+    final AccountCredentials creds = new AccountCredentials(in_vendor, user, pass, provider, auth_token, adobe_token, patron);
+    if (adobe_user.isSome()) {
+      creds.setAdobeUserID(adobe_user);
+    }
+    if (adobe_device.isSome()) {
+      creds.setAdobeDeviceID(adobe_device);
+    }
+    DRMLicensor.DRM drm_type = DRMLicensor.DRM.NONE;
 
-    if (vendor.isSome() && adobe_token.isSome()) {
+      OptionType<String>  vendor = Option.none();
+      if (in_vendor.isSome()) {
+        vendor = Option.some(((Some<AdobeVendorID>) in_vendor).get().toString());
+      }
+      OptionType<String>  client_token = Option.none();
+      if (adobe_token.isSome()) {
+        client_token = Option.some(((Some<AccountAdobeToken>) adobe_token).get().toString());
+        drm_type = DRMLicensor.DRM.ADOBE;
+      }
+      OptionType<String>  client_token_url = Option.none();
+      if (in_client_token_url.isSome()) {
+        client_token_url = in_client_token_url;
+        drm_type = DRMLicensor.DRM.URMS;
+      }
+      OptionType<String>  device_manager = Option.none();
+      if (in_device_manager.isSome()) {
+        device_manager = in_device_manager;
+      }
 
       final OptionType<DRMLicensor> licensor = Option.some(new DRMLicensor(
-        ((Some<AdobeVendorID>) vendor).get().toString(),
-        ((Some<AccountAdobeToken>) adobe_token).get().toString(),
-        licensor_url));
+        vendor,
+        client_token,
+        client_token_url,
+        device_manager,
+        drm_type));
+
       creds.setDrmLicensor(licensor);
-    }
 
     return creds;
   }

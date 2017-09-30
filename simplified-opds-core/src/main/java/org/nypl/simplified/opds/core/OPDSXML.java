@@ -69,6 +69,30 @@ public final class OPDSXML
   }
 
   /**
+   * @param node      The parent node
+   * @param name      The element name
+   *
+   * @return A list of elements
+   */
+  public static List<Element> getChildElementsWithName(
+    final Element node,
+    final String name)
+  {
+    NullCheck.notNull(node);
+    NullCheck.notNull(name);
+
+    final NodeList children =
+      node.getElementsByTagName(name);
+
+    final List<Element> xs = new ArrayList<Element>(children.getLength());
+    for (int index = 0; index < children.getLength(); ++index) {
+      xs.add((Element) children.item(index));
+    }
+
+    return xs;
+  }
+
+  /**
    * Return all child elements of {@code node} that have name {@code name} in
    * namespace {@code namespace}.
    *

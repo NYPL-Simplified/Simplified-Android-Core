@@ -81,7 +81,12 @@ public interface OPDSJSONSerializerType
   ObjectNode serializeLicensor(
     DRMLicensor l);
 
-
+  /**
+   * @param l  indirect acquisition
+   * @return JSON
+   */
+  ObjectNode serializeIndirectAcquisition(
+    OPDSIndirectAcquisition l);
   /**
    * Serialize the given JSON to the given output stream.
    *

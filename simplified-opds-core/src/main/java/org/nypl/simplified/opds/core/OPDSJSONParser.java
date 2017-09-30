@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.json.core.JSONParseException;
@@ -146,17 +147,51 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     NullCheck.notNull(jn);
     try {
       final ObjectNode o = JSONParserUtilities.checkObject(null, jn);
-      final String in_vendor = JSONParserUtilities.getString(o, "vendor");
-      final String in_client_token = JSONParserUtilities.getString(o, "clientToken");
-      final OptionType<String> in_device_manager =
-        JSONParserUtilities.getStringOptional(o, "deviceManager");
+      final OptionType<String> in_vendor = JSONParserUtilities.getStringOptional(o, "vendor");
+      final OptionType<String> in_client_token = JSONParserUtilities.getStringOptional(o, "clientToken");
+      final OptionType<String> in_client_token_url =  JSONParserUtilities.getStringOptional(o, "clientTokenUrl");
+      final OptionType<String> in_device_manager = JSONParserUtilities.getStringOptional(o, "deviceManager");
+      final OptionType<Integer> in_drm_type = JSONParserUtilities.getIntegerOptional(o, "drmType");
+      DRMLicensor.DRM drm_type = DRMLicensor.DRM.NONE;
+      if (in_drm_type.isSome())
+      {
+        drm_type = DRMLicensor.DRM.values()[((Some<Integer>) in_drm_type).get()];
+      }
 
-      return new DRMLicensor(in_vendor, in_client_token, in_device_manager);
+      return new DRMLicensor(in_vendor, in_client_token, in_client_token_url, in_device_manager, drm_type);
     } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }
   }
 
+  private static OPDSIndirectAcquisition parseIndirectAcquisition(
+    final JsonNode jn)
+    throws OPDSParseException
+  {
+    NullCheck.notNull(jn);
+    try {
+
+      final ObjectNode o = JSONParserUtilities.checkObject(null, jn);
+      final OptionType<String> link = JSONParserUtilities.getStringOptional(o, "link");
+      final OptionType<String> ccid = JSONParserUtilities.getStringOptional(o, "ccid");
+
+      final OptionType<String> in_type = Option.none();
+      final OptionType<DRMLicensor> in_licensor = Option.none();
+       OptionType<URI> in_link = Option.none();
+       OptionType<String> in_ccid = Option.none();
+
+      if (link.isSome()) {
+        in_link = Option.some(URI.create(((Some<String>) link).get()));
+      }
+      if (ccid.isSome()) {
+        in_ccid = ccid;
+      }
+
+      return new OPDSIndirectAcquisition(in_type, in_licensor, in_link, in_ccid);
+    } catch (final JSONParseException e) {
+      throw new OPDSParseException(e);
+    }
+  }
 
 
   @Override public OPDSAcquisitionFeed parseAcquisitionFeed(
@@ -276,10 +311,21 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         }
       }
 
+      OptionType<DRMLicensor>  licensor = Option.none();
       {
         if (s.has("licensor")) {
           final JsonNode a = JSONParserUtilities.getNode(s, "licensor");
-          fb.setLicensorOption(Option.some(OPDSJSONParser.parseLicensor(a)));
+          licensor = Option.some(OPDSJSONParser.parseLicensor(a));
+          fb.setLicensorOption(licensor);
+        }
+      }
+
+      {
+        if (s.has("indirectAcquisition")) {
+          final JsonNode a = JSONParserUtilities.getNode(s, "indirectAcquisition");
+          final OPDSIndirectAcquisition ind = OPDSJSONParser.parseIndirectAcquisition(a);
+          ind.setLicensor(licensor);
+          fb.setIndirectAcquisitionOption(Option.some(OPDSJSONParser.parseIndirectAcquisition(a)));
         }
       }
 

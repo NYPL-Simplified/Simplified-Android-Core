@@ -168,4 +168,10 @@ public interface OPDSAcquisitionFeedEntryBuilderType
   void setLicensorOption(
     OptionType<DRMLicensor> licensor);
 
+  /**
+   * @param indirect_acquisition indirect Acquisition
+   */
+  void setIndirectAcquisitionOption(
+    OptionType<OPDSIndirectAcquisition> indirect_acquisition);
+
 }

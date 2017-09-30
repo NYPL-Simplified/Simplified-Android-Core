@@ -440,16 +440,30 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           if (OPDSXML.nodeHasName(
             (Element) child, OPDSFeedConstants.DRM_URI, "licensor")) {
             final Element e = OPDSXML.nodeAsElement(child);
-            final String  in_vendor = e.getAttribute("drm:vendor");
+            String in_vendor = null;
             String in_client_token = null;
-            OptionType<String> in_device_manager = Option.none();
+            String in_device_manager = null;
+            String in_client_token_url = null;
+            DRMLicensor.DRM drm_type = DRMLicensor.DRM.NONE;
+            if (e.hasAttribute("drm:vendor")) {
+              in_vendor =  e.getAttribute("drm:vendor");
+            }
+
             for (int i = 0; i < e.getChildNodes().getLength(); ++i)
             {
               final Node node = e.getChildNodes().item(i);
 
               if (node.getNodeName().contains("clientToken"))
               {
-                in_client_token =  node.getFirstChild().getNodeValue();
+                final Element in_e_client_token = OPDSXML.nodeAsElement(node);
+                if (node.hasChildNodes()) {
+                  in_client_token =  node.getFirstChild().getNodeValue();
+                  drm_type = DRMLicensor.DRM.ADOBE;
+                }
+                if (in_e_client_token.hasAttribute("drm:href")) {
+                  in_client_token_url =  in_e_client_token.getAttribute("drm:href");
+                  drm_type = DRMLicensor.DRM.URMS;
+                }
               }
 
               if (node.getNodeName().contains("link"))
@@ -465,15 +479,31 @@ public final class OPDSFeedParser implements OPDSFeedParserType
 
                   if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
 
-                    in_device_manager = Option.some(h);
+                    in_device_manager = h;
 
                   }
                 }
               }
-              if (in_vendor != null && in_client_token != null) {
-                final DRMLicensor licensor = new DRMLicensor(in_vendor, in_client_token, in_device_manager);
-                b.setLisensor(Option.some(licensor));
+
+              OptionType<String>  vendor = Option.none();
+              if (in_vendor != null) {
+                vendor = Option.some(in_vendor);
               }
+              OptionType<String>  client_token = Option.none();
+              if (in_client_token != null) {
+                client_token = Option.some(in_client_token);
+              }
+              OptionType<String>  client_token_url = Option.none();
+              if (in_client_token_url != null) {
+                client_token_url = Option.some(in_client_token_url);
+              }
+              OptionType<String>  device_manager = Option.none();
+              if (in_device_manager != null) {
+                device_manager = Option.some(in_device_manager);
+              }
+
+              final DRMLicensor licensor = new DRMLicensor(vendor, client_token, client_token_url, device_manager, drm_type);
+              b.setLisensor(Option.some(licensor));
             }
           }
 
@@ -487,7 +517,6 @@ public final class OPDSFeedParser implements OPDSFeedParserType
           (Element) child, OPDSFeedConstants.ATOM_URI, "entry")) {
           final Element e = OPDSXML.nodeAsElement(child);
           b.addEntry(this.entry_parser.parseEntry(e));
-//          continue;
         }
       }
     }
