@@ -134,12 +134,7 @@ public final class CatalogBookRead implements OnClickListener
           final OPDSIndirectAcquisition ind = ((Some<OPDSIndirectAcquisition>) this.entry.getFeedEntry().getIndirectAcquisition()).get();
           if (ind.getCcid().isSome()) {
             final String ccid = ((Some<String>) ind.getCcid()).get();
-            LOG.error("CCID: {}", ccid);
-            LOG.error("credentials: {}", this.credentials);
-
             if (this.credentials != null) {
-              LOG.error("credentials.getDrmLicensor: {}", this.credentials.getDrmLicensor());
-
               if (this.credentials.getDrmLicensor().isSome()) {
                 final DRMLicensor l = ((Some<DRMLicensor>) this.credentials.getDrmLicensor()).get();
                 if (l.getClientTokenUrl().isSome()) {
