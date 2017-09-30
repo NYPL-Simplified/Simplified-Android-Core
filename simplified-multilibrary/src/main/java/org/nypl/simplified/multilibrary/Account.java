@@ -21,6 +21,7 @@ public class Account implements Serializable {
   private Integer id;
   private String path_component;
   private String name;
+  private String abbreviation;
   private String subtitle;
   private String logo;
   private boolean needs_auth;
@@ -108,6 +109,13 @@ public class Account implements Serializable {
    */
   public String getName() {
     return this.name;
+  }
+  
+  /**
+   * @return Abbreviation
+   */
+  public String getAbbreviation() {
+    return this.abbreviation;
   }
 
   /**
@@ -289,6 +297,10 @@ public class Account implements Serializable {
       this.id = account.getInt("id");
       this.path_component = account.getString("pathComponent");
       this.name = account.getString("name");
+      if (!account.isNull("abbreviation")) {
+        this.abbreviation = account.getString("abbreviation");
+      }
+
       this.subtitle = account.getString("subtitle");
       this.logo = account.getString("logo");
       this.catalog_url = account.getString("catalogUrl");
@@ -352,6 +364,7 @@ public class Account implements Serializable {
       object.put("id", this.id);
       object.put("pathComponent", this.path_component);
       object.put("name", this.name);
+      object.put("abbreviation", this.abbreviation);
       object.put("subtitle", this.subtitle);
       object.put("logo", this.logo);
       object.put("catalogUrl", this.catalog_url);
