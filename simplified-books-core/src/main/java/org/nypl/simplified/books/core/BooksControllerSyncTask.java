@@ -181,22 +181,36 @@ final class BooksControllerSyncTask implements Runnable
     final OPDSAcquisitionFeed feed =
       this.feed_parser.parse(this.loans_uri, r_feed.getValue());
 
+    OptionType<DRMLicensor> licensor = Option.none();
 
     if (feed.getLicensor().isSome())
     {
-      final DRMLicensor licensor = ((Some<DRMLicensor>) feed.getLicensor()).get();
+      licensor =  feed.getLicensor();
+    }
 
-      final OptionType<AccountCredentials> credentials_opt =
-        this.accounts_database.accountGetCredentials();
+    final OptionType<AccountCredentials> credentials_opt =
+      this.accounts_database.accountGetCredentials();
 
 
-      if (credentials_opt.isSome()) {
+    if (credentials_opt.isSome()) {
 
-        final AccountCredentials credentials = ((Some<AccountCredentials>) credentials_opt).get();
+      final AccountCredentials credentials = ((Some<AccountCredentials>) credentials_opt).get();
 
+      if (licensor.isSome()) {
         credentials.setDrmLicensor(feed.getLicensor());
-        credentials.setAdobeToken(Option.some(new AccountAdobeToken(licensor.getClientToken())));
-        credentials.setAdobeVendor(Option.some(new AdobeVendorID(licensor.getVendor())));
+      } else {
+        licensor = credentials.getDrmLicensor();
+      }
+
+      if (licensor.isSome()) {
+
+        final DRMLicensor l = ((Some<DRMLicensor>) licensor).get();
+        if (l.getClientToken().isSome()) {
+          credentials.setAdobeToken(Option.some(new AccountAdobeToken(((Some<String>) l.getClientToken()).get())));
+        }
+        if (l.getVendor().isSome()) {
+          credentials.setAdobeVendor(Option.some(new AdobeVendorID(((Some<String>) l.getVendor()).get())));
+        }
 
         try {
           this.accounts_database.accountSetCredentials(credentials);
@@ -204,16 +218,16 @@ final class BooksControllerSyncTask implements Runnable
           BooksControllerSyncTask.LOG.error("could not save credentials: ", e);
         }
 
-
-        final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
-          this.adobe_drm,
-          credentials,
-          this.accounts_database,
-          this.books_database,
-          this.device_activation_listener
-        );
-        activation_task.run();
-
+        if (l.getClientToken().isSome() && l.getVendor().isSome()) {
+          final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
+            this.adobe_drm,
+            credentials,
+            this.accounts_database,
+            this.books_database,
+            this.device_activation_listener
+          );
+          activation_task.run();
+        }
       }
     }
 
@@ -257,7 +271,7 @@ final class BooksControllerSyncTask implements Runnable
     final Set<BookID> revoking = new HashSet<BookID>(existing.size());
     for (final BookID existing_id : existing) {
       try {
-        if (received.contains(existing_id) == false) {
+        if (!received.contains(existing_id)) {
           final BookDatabaseEntryType e =
             this.books_database.databaseOpenEntryForWriting(existing_id);
 

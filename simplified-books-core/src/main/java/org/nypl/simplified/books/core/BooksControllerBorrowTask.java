@@ -28,6 +28,7 @@ import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
@@ -39,6 +40,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
+import org.nypl.simplified.opds.core.OPDSIndirectAcquisition;
 import org.nypl.simplified.opds.core.OPDSParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -272,11 +274,18 @@ final class BooksControllerBorrowTask implements Runnable
               }
             });
 
+            if (BooksControllerBorrowTask.this.getAccountCredentials().getAdobeUserID().isSome()) {
+              final OptionType<AccountCredentials> credentials_opt = BooksControllerBorrowTask.this.accounts_database.accountGetCredentials();
+              if (credentials_opt.isSome()) {
+                final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+                final AdobeUserID user = ((Some<AdobeUserID>) credentials_some.get().getAdobeUserID()).get();
 
-          final AdobeUserID user = ((Some<AdobeUserID>) BooksControllerBorrowTask.this.getAccountCredentials().getAdobeUserID()).get();
+                // do something
+                c.fulfillACSM(new AdobeFulfillmentListener(), acsm, user);
+              }
+            }
+          
 
-          // do something
-          c.fulfillACSM(new AdobeFulfillmentListener(), acsm, user);
         }
       });
   }
@@ -352,50 +361,86 @@ final class BooksControllerBorrowTask implements Runnable
         }
         case ACQUISITION_GENERIC:
         {
-          if (this.adobe_drm.isSome() && this.needs_auth) {
+          if (this.needs_auth) {
             final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
             if (credentials_opt.isSome()) {
               final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+              final OptionType<DRMLicensor> licensor = credentials_some.get().getDrmLicensor();
+              if (licensor.isSome()) {
+                final DRMLicensor.DRM drm_type = ((Some<DRMLicensor>) licensor).get().getDrmType();
 
-              final OptionType<AdobeUserID> adobe_user_id = credentials_some.get().getAdobeUserID();
+                switch (drm_type) {
+                  case ADOBE:
 
-              if (adobe_user_id.isSome()) {
-                BooksControllerBorrowTask.LOG.debug(
-                  "[{}]: acquisition type is {}, performing fulfillment",
-                  this.short_id,
-                  at);
-                this.runAcquisitionFulfill(this.feed_entry);
+                    BooksControllerBorrowTask.LOG.debug("ADOBE DRM");
 
-              }
-              else {
-                final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
-                  this.adobe_drm,
-                  credentials_some.get(),
-                  this.accounts_database,
-                  this.books_database,
-                  new DeviceActivationListenerType() {
-                    @Override
-                    public void onDeviceActivationFailure(final String message) {
-                      BooksControllerBorrowTask.LOG.debug("device activation failed: {}", message);
+                    if (this.adobe_drm.isSome()) {
+                      if (credentials_opt.isSome()) {
 
-                      final OptionType<Calendar> none = Option.none();
-                      final BookStatusDownloadFailed failed =
-                        new BookStatusDownloadFailed(BooksControllerBorrowTask.this.book_id, Option.some((Throwable) new AccountTooManyActivationsException(message)), none);
-                      BooksControllerBorrowTask.this.books_status.booksStatusUpdate(failed);
-                      BooksControllerBorrowTask.this.downloadRemoveFromCurrent();
+                        final OptionType<AdobeUserID> adobe_user_id = credentials_some.get().getAdobeUserID();
+
+                        if (adobe_user_id.isSome()) {
+                          BooksControllerBorrowTask.LOG.debug(
+                            "[{}]: acquisition type is {}, performing fulfillment",
+                            this.short_id,
+                            at);
+                          this.runAcquisitionFulfill(this.feed_entry);
+
+                        } else {
+                          final BooksControllerDeviceActivationTask activation_task =
+                            new BooksControllerDeviceActivationTask(
+                            this.adobe_drm,
+                            credentials_some.get(),
+                            this.accounts_database,
+                            this.books_database,
+                            new DeviceActivationListenerType() {
+                              @Override
+                              public void onDeviceActivationFailure(final String message) {
+                                BooksControllerBorrowTask.LOG.debug("device activation failed: {}", message);
+
+                                final OptionType<Calendar> none = Option.none();
+                                final BookStatusDownloadFailed failed =
+                                  new BookStatusDownloadFailed(
+                                    BooksControllerBorrowTask.this.book_id,
+                                    Option.some((Throwable) new AccountTooManyActivationsException(message)),
+                                    none);
+                                BooksControllerBorrowTask.this.books_status.booksStatusUpdate(failed);
+                                BooksControllerBorrowTask.this.downloadRemoveFromCurrent();
+                              }
+
+                              @Override
+                              public void onDeviceActivationSuccess() {
+                                BooksControllerBorrowTask.LOG.debug("device activation succeeded:");
+                              }
+                            });
+                          activation_task.run();
+                        }
+                      }
                     }
 
-                    @Override
-                    public void onDeviceActivationSuccess() {
-                      BooksControllerBorrowTask.LOG.debug("ddevice activation succeee:");
-                    }
-                  });
-                activation_task.run();
+                    break;
+                  case URMS:
+
+                    BooksControllerBorrowTask.LOG.debug("URMS DRM");
+                    BooksControllerBorrowTask.LOG.debug(
+                      "[{}]: acquisition type is {}, performing fulfillment",
+                      this.short_id,
+                      at);
+                    this.runAcquisitionFulfill(this.feed_entry);
+
+                    break;
+                  case LCP:
+                    BooksControllerBorrowTask.LOG.debug("LCP DRM");
+                    break;
+                  case NONE:
+                  default:
+                    BooksControllerBorrowTask.LOG.debug("NO DRM");
+                    break;
+                }
               }
             }
           }
-          else if (!this.needs_auth)
-          {
+          else {
             BooksControllerBorrowTask.LOG.debug(
               "[{}]: acquisition type is {}, performing fulfillment",
               this.short_id,
@@ -799,8 +844,20 @@ final class BooksControllerBorrowTask implements Runnable
      * downloading by passing them to the Adobe DRM connector.
      */
 
+    URI uri = a.getURI();
+    if (this.feed_entry.getIndirectAcquisition().isSome())
+    {
+      final OPDSIndirectAcquisition ind =
+        ((Some<OPDSIndirectAcquisition>) this.feed_entry.getIndirectAcquisition()).get();
+
+      if (ind.getDownloadUrl().isSome())
+      {
+        uri = ((Some<URI>) ind.getDownloadUrl()).get();
+      }
+    }
+
     return this.downloader.download(
-      a.getURI(), auth, new DownloadListenerType()
+     uri, auth, new DownloadListenerType()
       {
         @Override public void onDownloadStarted(
           final DownloadType d,
