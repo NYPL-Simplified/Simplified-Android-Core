@@ -16,6 +16,7 @@ import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.files.FileUtilities;
+import org.nypl.simplified.opds.core.DRMLicensor;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.ContentFilterErrorHandler;
 import org.readium.sdk.android.EPub3;
@@ -58,17 +59,19 @@ public final class ReaderReadiumEPUBLoader
 
   private static Container loadFromFile(
     final Context ctx,
-    final File f)
-    throws FileNotFoundException, IOException
+    final File f,
+    final DRMLicensor.DRM drm_type)
+    throws IOException
   {
     /**
      * Readium will happily segfault if passed a filename that does not refer
      * to a file that exists.
      */
 
-    if (f.isFile() == false) {
+    if (!f.isFile()) {
       throw new FileNotFoundException("No such file");
     }
+
 
     /**
      * If Adobe rights exist for the given book, then those rights must
@@ -80,25 +83,126 @@ public final class ReaderReadiumEPUBLoader
      * happen in practice and likely indicates database tampering or a bug
      * in the program.
      */
+    switch (drm_type) {
+      case ADOBE:
+      {
+        final OptionType<File> adobe_rights =
+          BookDatabase.getAdobeRightsFileForEPUB(f);
 
-    final OptionType<File> adobe_rights =
-      BookDatabase.getAdobeRightsFileForEPUB(f);
+        final byte[] adobe_rights_data;
+        if (adobe_rights.isSome()) {
+          ReaderReadiumEPUBLoader.LOG.debug("Adobe rights data exists, loading it");
+          final File adobe_rights_file = ((Some<File>) adobe_rights).get();
+          adobe_rights_data = FileUtilities.fileReadBytes(adobe_rights_file);
+          ReaderReadiumEPUBLoader.LOG.debug(
+            "Loaded {} bytes of Adobe rights data", adobe_rights_data.length);
+        } else {
+          ReaderReadiumEPUBLoader.LOG.debug("No Adobe rights data exists");
+          adobe_rights_data = new byte[0];
+        }
 
-    final byte[] adobe_rights_data;
-    if (adobe_rights.isSome()) {
-      ReaderReadiumEPUBLoader.LOG.debug("Adobe rights data exists, loading it");
-      final File adobe_rights_file = ((Some<File>) adobe_rights).get();
-      adobe_rights_data = FileUtilities.fileReadBytes(adobe_rights_file);
-      ReaderReadiumEPUBLoader.LOG.debug(
-        "Loaded {} bytes of Adobe rights data", adobe_rights_data.length);
-    } else {
-      ReaderReadiumEPUBLoader.LOG.debug("No Adobe rights data exists");
-      adobe_rights_data = new byte[0];
+
+        /**
+         * The majority of logged messages will be useless noise.
+         */
+
+        final ContentFilterErrorHandler content_filter_errors = new ContentFilterErrorHandler() {
+          @Override
+          public void handleContentFilterError(
+            final @Nullable String filter_id,
+            final long error_code,
+            final @Nullable String message) {
+            ReaderReadiumEPUBLoader.LOG.error("{}:{}: {}", filter_id, error_code, message);
+            IfBugsnag.get().notify(
+              new ReaderReadiumContentFilterException(
+                String.format("%s:%d: %s", filter_id, error_code, message)),
+              Severity.ERROR);
+          }
+        };
+
+        /**
+         * The Readium SDK will call the given filter handler when the
+         * filter chain has been populated. It is at this point that it
+         * is necessary to register the Adobe content filter plugin, if
+         * one is to be used. The plugin will call the given rights client
+         * every time it needs to load rights data (which will only be once,
+         * given the way that the application creates a new instance of
+         * Readium each time a book is opened).
+         */
+
+        final AdobeAdeptContentRightsClientType rights_client =
+          new AdobeAdeptContentRightsClientType() {
+            @Override
+            public byte[] getRightsData(final String path) {
+              ReaderReadiumEPUBLoader.LOG.debug(
+                "returning {} bytes of rights data for path {}",
+                adobe_rights_data.length,
+                path);
+              return adobe_rights_data;
+            }
+          };
+
+        final Runnable filter_handler = new Runnable() {
+          @Override
+          public void run() {
+            ReaderReadiumEPUBLoader.LOG.debug("Registering content filter");
+
+            try {
+
+              final AdobeAdeptContentFilterType adobe =
+                AdobeDRMServices.newAdobeContentFilter(
+                  ctx, AdobeDRMServices.getPackageOverride(ctx.getResources()));
+              adobe.registerFilter(rights_client);
+              ReaderReadiumEPUBLoader.LOG.debug("Content filter registered");
+            } catch (final DRMUnsupportedException e) {
+              ReaderReadiumEPUBLoader.LOG.error(
+                "DRM is not supported: ", e);
+            } catch (final DRMException e) {
+              ReaderReadiumEPUBLoader.LOG.error(
+                "DRM could not be initialized: ", e);
+            }
+          }
+        };
+        EPub3.initialize();
+        ReaderReadiumEPUBLoader.LOG.debug("EPub3.initialize()");
+        ReaderReadiumEPUBLoader.LOG.debug("drm_type " + drm_type);
+
+        EPub3.setContentFilterErrorHandler(content_filter_errors);
+        EPub3.setContentFiltersRegistrationHandler(filter_handler);
     }
+        break;
+      case URMS: {
+        final ContentFilterErrorHandler content_filter_errors = new ContentFilterErrorHandler() {
+          @Override
+          public void handleContentFilterError(
+            final @Nullable String filter_id,
+            final long error_code,
+            final @Nullable String message) {
+            ReaderReadiumEPUBLoader.LOG.error("{}:{}: {}", filter_id, error_code, message);
 
-    /**
-     * The majority of logged messages will be useless noise.
-     */
+          }
+        };
+        final Runnable filter_handler = new Runnable() {
+          @Override
+          public void run() {
+            ReaderReadiumEPUBLoader.LOG.debug("Registering NO content filter");
+
+          }
+        };
+        EPub3.initialize();
+        ReaderReadiumEPUBLoader.LOG.debug("EPub3.initialize()");
+        ReaderReadiumEPUBLoader.LOG.debug("drm_type " + drm_type);
+
+        EPub3.setContentFilterErrorHandler(content_filter_errors);
+        EPub3.setContentFiltersRegistrationHandler(filter_handler);
+      }
+        break;
+      case LCP:
+      case NONE:
+      default:
+
+        break;
+    }
 
     final SdkErrorHandler errors = new SdkErrorHandler()
     {
@@ -113,72 +217,11 @@ public final class ReaderReadiumEPUBLoader
         return true;
       }
     };
-    final ContentFilterErrorHandler content_filter_errors = new ContentFilterErrorHandler()
-    {
-      @Override public void handleContentFilterError(
-        final @Nullable String filter_id,
-        final long error_code,
-        final @Nullable String message)
-      {
-        ReaderReadiumEPUBLoader.LOG.error("{}:{}: {}", filter_id, error_code, message);
-        IfBugsnag.get().notify(
-          new ReaderReadiumContentFilterException(
-            String.format("%s:%d: %s", filter_id, error_code, message)),
-          Severity.ERROR);
-      }
-    };
-
-    /**
-     * The Readium SDK will call the given filter handler when the
-     * filter chain has been populated. It is at this point that it
-     * is necessary to register the Adobe content filter plugin, if
-     * one is to be used. The plugin will call the given rights client
-     * every time it needs to load rights data (which will only be once,
-     * given the way that the application creates a new instance of
-     * Readium each time a book is opened).
-     */
-
-    final AdobeAdeptContentRightsClientType rights_client =
-      new AdobeAdeptContentRightsClientType()
-      {
-        @Override public byte[] getRightsData(final String path)
-        {
-          ReaderReadiumEPUBLoader.LOG.debug(
-            "returning {} bytes of rights data for path {}",
-            adobe_rights_data.length,
-            path);
-          return adobe_rights_data;
-        }
-      };
-
-    final Runnable filter_handler = new Runnable()
-    {
-      @Override public void run()
-      {
-        ReaderReadiumEPUBLoader.LOG.debug("Registering content filter");
-
-        try {
-
-          final AdobeAdeptContentFilterType adobe =
-            AdobeDRMServices.newAdobeContentFilter(
-              ctx, AdobeDRMServices.getPackageOverride(ctx.getResources()));
-          adobe.registerFilter(rights_client);
-          ReaderReadiumEPUBLoader.LOG.debug("Content filter registered");
-        } catch (final DRMUnsupportedException e) {
-          ReaderReadiumEPUBLoader.LOG.error(
-            "DRM is not supported: ", e);
-        } catch (final DRMException e) {
-          ReaderReadiumEPUBLoader.LOG.error(
-            "DRM could not be initialized: ", e);
-        }
-      }
-    };
 
     EPub3.setSdkErrorHandler(errors);
-    EPub3.setContentFilterErrorHandler(content_filter_errors);
-    EPub3.setContentFiltersRegistrationHandler(filter_handler);
     final Container c = EPub3.openBook(f.toString());
     EPub3.setSdkErrorHandler(null);
+
 
     /**
      * Only the default package is considered important. If the package has no
@@ -210,7 +253,8 @@ public final class ReaderReadiumEPUBLoader
 
   @Override public void loadEPUB(
     final File f,
-    final ReaderReadiumEPUBLoadListenerType l)
+    final ReaderReadiumEPUBLoadListenerType l,
+    final DRMLicensor.DRM drm_type)
   {
     NullCheck.notNull(f);
     NullCheck.notNull(l);
@@ -228,14 +272,8 @@ public final class ReaderReadiumEPUBLoader
         @Override public void run()
         {
           try {
-            final Container c;
-            if (cs.containsKey(f)) {
-              c = NullCheck.notNull(cs.get(f));
-            } else {
-              c = ReaderReadiumEPUBLoader.loadFromFile(
-                ReaderReadiumEPUBLoader.this.context, f);
-              cs.put(f, c);
-            }
+            final Container c = ReaderReadiumEPUBLoader.loadFromFile(
+              ReaderReadiumEPUBLoader.this.context, f, drm_type);
 
             l.onEPUBLoadSucceeded(c);
           } catch (final Throwable x0) {
