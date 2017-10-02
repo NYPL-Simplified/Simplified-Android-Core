@@ -58,5 +58,24 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
+  },
+  {
+    "id": 16,
+    "pathComponent" : "16",
+    "name" : "Carroll County Public Library",
+    "subtitle" : "A great place to learn",
+    "logo" : "LibraryLogoCarroll",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "supportEmail" : "ask@carr.org",
+    "catalogUrl" : "http://carroll.simplye-md.org/CARROLL/",
+    "licenseUrl": "https://library.carr.org/license.asp",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "mainColor": "#fcb033"
   }
 ]
