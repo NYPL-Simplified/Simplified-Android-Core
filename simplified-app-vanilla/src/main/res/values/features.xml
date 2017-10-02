@@ -5,10 +5,10 @@
   <string name="feature_app_name">Simplified</string>
 
   <!-- The configurable application icon -->
-  <drawable name="feature_app_icon">@drawable/simplified</drawable>
+  <!-- <drawable name="feature_app_icon">@drawable/simplified</drawable> -->
 
   <!-- The configurable splash screen image -->
-  <drawable name="feature_app_splash">@drawable/simplified</drawable>
+  <!-- <drawable name="feature_app_splash">@drawable/simplified</drawable> -->
 
   <!-- The configurable main color, used for branding. -->
   <color name="feature_main_color">#f0731f</color>

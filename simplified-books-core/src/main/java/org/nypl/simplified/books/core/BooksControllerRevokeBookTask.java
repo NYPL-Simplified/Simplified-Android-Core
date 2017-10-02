@@ -15,6 +15,7 @@ import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
+import org.nypl.drm.core.AdobeUserID;
 import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -404,7 +405,11 @@ final class BooksControllerRevokeBookTask
             {
               @Override public void executeWith(final AdobeAdeptConnectorType c)
               {
-                c.loanReturn(listener, loan.getID());
+
+                // do something
+                final AdobeUserID user = ((Some<AdobeUserID>) BooksControllerRevokeBookTask.this.getAccountCredentials().getAdobeUserID()).get();
+
+                c.loanReturn(listener, loan.getID(), user);
               }
             });
 

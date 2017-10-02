@@ -1,7 +1,6 @@
 package org.nypl.simplified.app;
 
 
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -9,26 +8,33 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
+import android.view.View;
 import android.widget.Toast;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
+import com.tenmiles.helpstack.HSHelpStack;
+import com.tenmiles.helpstack.gears.HSDeskGear;
 
-import org.nypl.simplified.app.testing.OnMultipleClickListener;
 import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
-import org.nypl.simplified.books.core.AccountBarcode;
+import org.nypl.simplified.app.testing.OnMultipleClickListener;
 import org.nypl.simplified.books.core.AccountCredentials;
-import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
-import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
-import org.nypl.simplified.books.core.EULAType;
+import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.SyncedDocumentType;
+import org.slf4j.Logger;
 
 class MainSettingsFragment extends PreferenceFragment implements LoginListenerType {
 
+
+  private static final Logger LOG;
+
+
+  static {
+    LOG = LogUtilities.getLog(MainSettingsFragment.class);
+  }
   /**
    * Construct an Fragment.
    */
@@ -43,59 +49,13 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     final SimplifiedCatalogAppServicesType app =
       Simplified.getCatalogAppServices();
 
-    final BooksType books = app.getBooks();
     final Resources resources = NullCheck.notNull(this.getResources());
-
-    final boolean clever_enabled = resources.getBoolean(R.bool.feature_auth_provider_clever);
-
-
-    if (books.accountIsLoggedIn()) {
-
-      final Intent account =
-        new Intent(this.getActivity(), MainSettingsAccountActivity.class);
-      final Preference preferences = findPreference(resources.getString(R.string.settings_account));
-      account.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-      preferences.setIntent(account);
-      preferences.setOnPreferenceClickListener(null);
-
-    } else if (clever_enabled) {
-
-      final Intent account =
-        new Intent(this.getActivity(), LoginActivity.class);
-      final Preference preferences = findPreference(resources.getString(R.string.settings_account));
-      preferences.setIntent(account);
-      preferences.setOnPreferenceClickListener(null);
-
-    } else {
-
-      final Preference preferences = findPreference(resources.getString(R.string.settings_account));
-      preferences.setIntent(null);
-      preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(final Preference preference) {
-
-          final AccountBarcode barcode = new AccountBarcode("");
-          final AccountPIN pin = new AccountPIN("");
-
-          final LoginDialog df =
-            LoginDialog.newDialog("Login required", barcode, pin);
-          df.setLoginListener(MainSettingsFragment.this);
-
-          final FragmentManager fm = MainSettingsFragment.this.getActivity().getFragmentManager();
-          df.show(fm, "login-dialog");
-
-          return false;
-        }
-      });
-
-    }
-
     final Preference secret = findPreference(resources.getString(R.string.settings_alt_uris));
 
     try {
       final PackageInfo p_info = MainSettingsFragment.this.getActivity().getPackageManager().getPackageInfo(MainSettingsFragment.this.getActivity().getPackageName(), 0);
       final String version = p_info.versionName;
-      secret.setTitle("Version: " + version);
+      secret.setTitle("Version: " + version + " (" + p_info.versionCode + ")");
 
     } catch (PackageManager.NameNotFoundException e) {
       e.printStackTrace();
@@ -145,6 +105,12 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
   }
 
   @Override
+  public void onViewCreated(final View view, final Bundle state) {
+    super.onViewCreated(view, state);
+    view.setBackgroundColor(getResources().getColor(R.color.light_background));
+  }
+
+  @Override
   public void onCreate(final Bundle saved_instance_state) {
     super.onCreate(saved_instance_state);
 
@@ -156,136 +122,106 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     final DocumentStoreType docs = app.getDocumentStore();
     final OptionType<HelpstackType> helpstack = app.getHelpStack();
 
+    {
+      final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
+      preferences.setIntent(null);
+      preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        @Override
+        public boolean onPreferenceClick(final Preference preference) {
 
-    if (helpstack.isSome()) {
-      final Intent help =
-        new Intent(this.getActivity(), HelpActivity.class);
-      final Preference preference = findPreference(resources.getString(R.string.help));
-      help.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-      preference.setIntent(help);
+          final Bundle b = new Bundle();
+          SimplifiedActivity.setActivityArguments(b, false);
+          final Intent intent = new Intent();
+          intent.setClass(
+            MainSettingsFragment.this.getActivity(), MainSettingsAccountsActivity.class);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+          intent.putExtras(b);
 
+          preferences.setIntent(intent);
+
+          return false;
+        }
+      });
     }
-    final PreferenceScreen screen = getPreferenceScreen();
-    final Preference about_preference = findPreference(resources.getString(R.string.settings_about));
-    screen.removePreference(about_preference);
 
-    docs.getAbout().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType ack) {
+    {
+      if (helpstack.isSome()) {
 
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            ack.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_about),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        final Preference preference = findPreference(resources.getString(R.string.help));
+        preference.setIntent(null);
+        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+          @Override
+          public boolean onPreferenceClick(final Preference preference) {
 
-          about_preference.setIntent(intent);
-          screen.addPreference(about_preference);
-        }
+            final HSHelpStack stack = HSHelpStack.getInstance(getActivity());
 
-      });
+            final HSDeskGear gear =
+              new HSDeskGear("https://nypl.desk.com/", "4GBRmMv8ZKG8fGehhA", "12060");
+            stack.setGear(gear);
 
+            stack.showHelp(getActivity());
 
-    docs.getEULA().map_(
-      new ProcedureType<EULAType>() {
-        @Override
-        public void call(final EULAType eula) {
+            return false;
+          }
+        });
 
-          final Intent intent =
-            new Intent(MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            eula.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_eula),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+      }
+    }
 
+    {
+      final Intent intent = new Intent(
+        MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+      final Bundle b = new Bundle();
+      WebViewActivity.setActivityArguments(
+        b,
+        "http://www.librarysimplified.org/acknowledgments.html",
+        resources.getString(R.string.settings_about),
+        SimplifiedPart.PART_SETTINGS);
+      intent.putExtras(b);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-          final Preference preferences = findPreference(resources.getString(R.string.settings_eula));
-          preferences.setIntent(intent);
+      final Preference preferences = findPreference(resources.getString(R.string.settings_about));
+      preferences.setIntent(intent);
+    }
 
-        }
-      });
+    {
+      final Intent intent =
+        new Intent(MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+      final Bundle b = new Bundle();
+      WebViewActivity.setActivityArguments(
+        b,
+        "http://www.librarysimplified.org/EULA.html",
+        resources.getString(R.string.settings_eula),
+        SimplifiedPart.PART_SETTINGS);
+      intent.putExtras(b);
+      intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-    docs.getPrivacyPolicy().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType policy) {
+      final Preference preferences = findPreference(resources.getString(R.string.settings_eula));
+      preferences.setIntent(intent);
+    }
 
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            policy.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_privacy),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    {
+      docs.getLicenses().map_(
+        new ProcedureType<SyncedDocumentType>() {
+          @Override
+          public void call(final SyncedDocumentType licenses) {
 
-          final Preference preferences = findPreference(resources.getString(R.string.settings_privacy));
-          preferences.setIntent(intent);
+            final Intent intent = new Intent(
+              MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+            final Bundle b = new Bundle();
+            WebViewActivity.setActivityArguments(
+              b,
+              licenses.documentGetReadableURL().toString(),
+              resources.getString(R.string.settings_licence_software),
+              SimplifiedPart.PART_SETTINGS);
+            intent.putExtras(b);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-        }
-      });
-
-
-    docs.getAcknowledgements().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType ack) {
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            ack.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_credits),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-
-          final Preference preferences = findPreference(resources.getString(R.string.settings_credits));
-          preferences.setIntent(intent);
-
-        }
-      });
-
-    final Preference licenses_preference = findPreference(resources.getString(R.string.settings_licences));
-    screen.removePreference(licenses_preference);
-
-    docs.getLicenses().map_(
-      new ProcedureType<SyncedDocumentType>() {
-        @Override
-        public void call(final SyncedDocumentType licenses) {
-
-          final Intent intent = new Intent(
-            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-          final Bundle b = new Bundle();
-          WebViewActivity.setActivityArguments(
-            b,
-            licenses.documentGetReadableURL().toString(),
-            resources.getString(R.string.settings_licences),
-            SimplifiedPart.PART_SETTINGS);
-          intent.putExtras(b);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-
-
-          licenses_preference.setIntent(intent);
-          screen.addPreference(licenses_preference);
-
-        }
-      });
-
-
+            final Preference preferences = findPreference(resources.getString(R.string.settings_licence_software));
+            preferences.setIntent(intent);
+          }
+        });
+    }
   }
 
   @Override

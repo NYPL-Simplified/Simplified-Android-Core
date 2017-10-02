@@ -1,0 +1,14 @@
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+}
+
+description = ''
+
+dependencies {
+  compile project(':simplified-json-core')
+  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  compile project(':simplified-prefs')
+}

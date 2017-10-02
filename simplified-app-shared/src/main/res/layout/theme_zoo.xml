@@ -7,7 +7,7 @@
 
   <RelativeLayout
     android:id="@+id/theme_zoo_downloading"
-    android:background="@color/downloading_background"
+    android:background="?downloading_background"
     android:layout_width="match_parent"
     android:layout_height="100dp">
 

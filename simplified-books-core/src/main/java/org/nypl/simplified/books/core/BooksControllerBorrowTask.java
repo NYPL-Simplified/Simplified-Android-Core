@@ -16,6 +16,7 @@ import org.nypl.drm.core.AdobeAdeptFulfillmentToken;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeAdeptNetProviderType;
 import org.nypl.drm.core.AdobeAdeptProcedureType;
+import org.nypl.drm.core.AdobeUserID;
 import org.nypl.drm.core.DRMUnsupportedException;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.downloader.core.DownloadListenerType;
@@ -75,9 +76,9 @@ final class BooksControllerBorrowTask implements Runnable
   private final OPDSAcquisitionFeedEntry           feed_entry;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final String                             short_id;
-  private final AccountsDatabaseType       accounts_database;
+  private final AccountsDatabaseType               accounts_database;
   private       long                               download_running_total;
-
+  private       boolean                            needs_auth;
   BooksControllerBorrowTask(
     final BookDatabaseType in_books_database,
     final AccountsDatabaseType in_accounts_database,
@@ -89,7 +90,8 @@ final class BooksControllerBorrowTask implements Runnable
     final OPDSAcquisition in_acq,
     final OPDSAcquisitionFeedEntry in_feed_entry,
     final FeedLoaderType in_feed_loader,
-    final OptionType<AdobeAdeptExecutorType> in_adobe_drm)
+    final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
+    final boolean in_needs_auth)
   {
     this.downloader = NullCheck.notNull(in_downloader);
     this.downloads = NullCheck.notNull(in_downloads);
@@ -103,6 +105,7 @@ final class BooksControllerBorrowTask implements Runnable
     this.feed_loader = NullCheck.notNull(in_feed_loader);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.short_id = this.book_id.getShortID();
+    this.needs_auth = in_needs_auth;
   }
 
   private void downloadFailed(
@@ -269,7 +272,11 @@ final class BooksControllerBorrowTask implements Runnable
               }
             });
 
-          c.fulfillACSM(new AdobeFulfillmentListener(), acsm);
+
+          final AdobeUserID user = ((Some<AdobeUserID>) BooksControllerBorrowTask.this.getAccountCredentials().getAdobeUserID()).get();
+
+          // do something
+          c.fulfillACSM(new AdobeFulfillmentListener(), acsm, user);
         }
       });
   }
@@ -334,13 +341,67 @@ final class BooksControllerBorrowTask implements Runnable
           this.runAcquisitionBorrow();
           break;
         }
-        case ACQUISITION_GENERIC:
-        case ACQUISITION_OPEN_ACCESS: {
+        case ACQUISITION_OPEN_ACCESS:
+        {
           BooksControllerBorrowTask.LOG.debug(
             "[{}]: acquisition type is {}, performing fulfillment",
             this.short_id,
             at);
           this.runAcquisitionFulfill(this.feed_entry);
+          break;
+        }
+        case ACQUISITION_GENERIC:
+        {
+          if (this.adobe_drm.isSome() && this.needs_auth) {
+            final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
+            if (credentials_opt.isSome()) {
+              final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
+
+              final OptionType<AdobeUserID> adobe_user_id = credentials_some.get().getAdobeUserID();
+
+              if (adobe_user_id.isSome()) {
+                BooksControllerBorrowTask.LOG.debug(
+                  "[{}]: acquisition type is {}, performing fulfillment",
+                  this.short_id,
+                  at);
+                this.runAcquisitionFulfill(this.feed_entry);
+
+              }
+              else {
+                final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
+                  this.adobe_drm,
+                  credentials_some.get(),
+                  this.accounts_database,
+                  this.books_database,
+                  new DeviceActivationListenerType() {
+                    @Override
+                    public void onDeviceActivationFailure(final String message) {
+                      BooksControllerBorrowTask.LOG.debug("device activation failed: {}", message);
+
+                      final OptionType<Calendar> none = Option.none();
+                      final BookStatusDownloadFailed failed =
+                        new BookStatusDownloadFailed(BooksControllerBorrowTask.this.book_id, Option.some((Throwable) new AccountTooManyActivationsException(message)), none);
+                      BooksControllerBorrowTask.this.books_status.booksStatusUpdate(failed);
+                      BooksControllerBorrowTask.this.downloadRemoveFromCurrent();
+                    }
+
+                    @Override
+                    public void onDeviceActivationSuccess() {
+                      BooksControllerBorrowTask.LOG.debug("ddevice activation succeee:");
+                    }
+                  });
+                activation_task.run();
+              }
+            }
+          }
+          else if (!this.needs_auth)
+          {
+            BooksControllerBorrowTask.LOG.debug(
+              "[{}]: acquisition type is {}, performing fulfillment",
+              this.short_id,
+              at);
+            this.runAcquisitionFulfill(this.feed_entry);
+          }
           break;
         }
         case ACQUISITION_BUY:
@@ -713,22 +774,21 @@ final class BooksControllerBorrowTask implements Runnable
     /**
      * Downloading requires authentication.
      */
+    OptionType<HTTPAuthType> auth = Option.none();
+    if (this.needs_auth) {
+      final AccountCredentials credentials = this.getAccountCredentials();
+      final AccountBarcode barcode = credentials.getBarcode();
+      final AccountPIN pin = credentials.getPin();
+      auth =
+        Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
 
-    final AccountCredentials credentials = this.getAccountCredentials();
-    final AccountBarcode barcode = credentials.getBarcode();
-    final AccountPIN pin = credentials.getPin();
-//    final HTTPAuthType auth =
-//      new HTTPAuthBasic(barcode.toString(), pin.toString());
-    HTTPAuthType auth =
-      new HTTPAuthBasic(barcode.toString(), pin.toString());
-
-    if (credentials.getAuthToken().isSome()) {
-      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
-      if (token != null) {
-        auth = new HTTPAuthOAuth(token.toString());
+      if (credentials.getAuthToken().isSome()) {
+        final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
+        if (token != null) {
+          auth = Option.some((HTTPAuthType) new HTTPAuthOAuth(token.toString()));
+        }
       }
     }
-
     final String sid = this.short_id;
     BooksControllerBorrowTask.LOG.debug(
       "[{}]: starting download", sid);
@@ -740,7 +800,7 @@ final class BooksControllerBorrowTask implements Runnable
      */
 
     return this.downloader.download(
-      a.getURI(), Option.some(auth), new DownloadListenerType()
+      a.getURI(), auth, new DownloadListenerType()
       {
         @Override public void onDownloadStarted(
           final DownloadType d,
@@ -784,14 +844,14 @@ final class BooksControllerBorrowTask implements Runnable
             ex = BookBorrowExceptionFetchingBookFailed.newException(exception);
           }
 
-          if (ex.getCause().getMessage().contains("401: UNAUTHORIZED"))
-          {
-            try {
-              BooksControllerBorrowTask.this.accounts_database.accountRemoveCredentials();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          }
+//          if (ex.getCause().getMessage().contains("401: UNAUTHORIZED"))
+//          {
+//            try {
+//              BooksControllerBorrowTask.this.accounts_database.accountRemoveCredentials();
+//            } catch (IOException e) {
+//              e.printStackTrace();
+//            }
+//          }
             BooksControllerBorrowTask.this.downloadFailed(Option.some(ex));
 
         }
@@ -901,6 +961,12 @@ final class BooksControllerBorrowTask implements Runnable
       else if (message.startsWith("E_ACT_NOT_READY")) {
         error = Option.some((Throwable) new AccountNotReadyException(message));
       }
+      else if (message.startsWith("E_ACT_TOO_MANY_ACTIVATIONS")) {
+        error = Option.some((Throwable) new AccountTooManyActivationsException(message));
+      }
+//      else if (message.startsWith("E_LIC_ALREADY_FULFILLED_BY_ANOTHER_USER")) {
+//        error = Option.some((Throwable) new LicenceAlreadyFulfilledByAnotherUserException(message));
+//      }
       else {
         error = Option.some((Throwable) new BookBorrowExceptionDRMWorkflowError(message));
       }

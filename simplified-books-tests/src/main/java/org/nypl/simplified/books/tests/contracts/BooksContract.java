@@ -30,6 +30,7 @@ import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.BooksStatusCacheType;
 import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.core.DeviceActivationListenerType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
 import org.nypl.simplified.books.core.FeedHTTPTransport;
@@ -144,6 +145,21 @@ public final class BooksContract implements BooksContractType
           4L,
           empty_headers,
           0L);
+      }
+
+      @Override
+      public HTTPResultType<InputStream> delete(
+          final OptionType<HTTPAuthType> auth,
+          final URI uri,
+          final String content_type)
+      {
+        return new HTTPResultOK<InputStream>(
+            "OK",
+            200,
+            new ByteArrayInputStream("DATA".getBytes()),
+            4L,
+            empty_headers,
+            0L);
       }
 
       private HTTPResultType<InputStream> getLoans(
@@ -301,6 +317,15 @@ public final class BooksContract implements BooksContractType
       {
         return new HTTPResultException<InputStream>(uri, new IOException());
       }
+
+      @Override
+      public HTTPResultType<InputStream> delete(
+          final OptionType<HTTPAuthType> auth,
+          final URI uri,
+          final String content_type)
+      {
+        return new HTTPResultException<InputStream>(uri, new IOException());
+      }
     };
   }
 
@@ -453,7 +478,7 @@ public final class BooksContract implements BooksContractType
             ok.set(true);
             latch.countDown();
           }
-        });
+        },true);
 
       latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
@@ -539,7 +564,7 @@ public final class BooksContract implements BooksContractType
             ok.set(true);
             latch.countDown();
           }
-        });
+        },true);
 
       latch.await(10L, TimeUnit.SECONDS);
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
@@ -973,8 +998,24 @@ public final class BooksContract implements BooksContractType
           }
         };
 
+      final DeviceActivationListenerType device_listener = new DeviceActivationListenerType() {
+        @Override
+        public void onDeviceActivationFailure(String message) {
+          System.out.println(
+            "failed to activate device " + message);
+
+        }
+
+        @Override
+        public void onDeviceActivationSuccess() {
+          System.out.println(
+            "device activated successful ");
+
+        }
+      };
+
       System.out.println("syncing account");
-      b.accountSync(sync_listener);
+      b.accountSync(sync_listener, device_listener);
       System.out.println("awaiting account sync");
       latch1.await(10L, TimeUnit.SECONDS);
       System.out.println("account synced");
@@ -1029,7 +1070,7 @@ public final class BooksContract implements BooksContractType
         };
 
       System.out.println("loading books");
-      b.accountLoadBooks(load_listener);
+      b.accountLoadBooks(load_listener,true);
       System.out.println("waiting for book load completion");
       latch2.await(10L, TimeUnit.SECONDS);
       System.out.println("book load completed");
@@ -1061,7 +1102,7 @@ public final class BooksContract implements BooksContractType
         };
 
       System.out.println("logging out");
-      b.accountLogout(creds,logout_listener);
+      b.accountLogout(creds,logout_listener, sync_listener, device_listener);
       System.out.println("awaiting logout completion");
       latch3.await(10L, TimeUnit.SECONDS);
       System.out.println("logged out");
@@ -1246,7 +1287,23 @@ public final class BooksContract implements BooksContractType
           }
         };
 
-      b.accountSync(sync_listener);
+      final DeviceActivationListenerType device_listener = new DeviceActivationListenerType() {
+        @Override
+        public void onDeviceActivationFailure(String message) {
+          System.out.println(
+            "failed to activate device " + message);
+
+        }
+
+        @Override
+        public void onDeviceActivationSuccess() {
+          System.out.println(
+            "device activated successful ");
+
+        }
+      };
+
+      b.accountSync(sync_listener, device_listener);
       latch1.await(10L, TimeUnit.SECONDS);
 
       TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);

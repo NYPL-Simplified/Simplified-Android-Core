@@ -2,19 +2,23 @@
 <resources>
 
   <!-- The configurable application name -->
-  <string name="feature_app_name">Simplified</string>
-
-  <!-- The configurable application icon -->
-  <drawable name="feature_app_icon">@drawable/simplified</drawable>
+  <string name="feature_app_name">Simply\uFEFFE</string>
 
   <!-- The configurable splash screen image -->
-  <drawable name="feature_app_splash">@drawable/simplified</drawable>
+  <drawable name="feature_app_splash">@drawable/simplified_splash</drawable>
+
+
+  <color name="app_main_color">#666766</color>
 
   <!-- The configurable main color, used for branding. -->
-  <color name="feature_main_color">#f0731f</color>
+  <color name="feature_main_color">#497049</color>
+  <color name="feature_main_color_nypl">#da2527</color>
+  <color name="feature_main_color_bpl">#446ebf</color>
 
   <!-- The configurable secondary color, used for branding. -->
-  <color name="feature_secondary_color">#d76e1e</color>
+  <color name="feature_secondary_color">#476648</color>
+  <color name="feature_secondary_color_nypl">#af1a16</color>
+  <color name="feature_secondary_color_bpl">#4168a0</color>
 
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
@@ -22,14 +26,13 @@
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">NYPL</string>
 
-  <!-- qa or prod  - not implemented yet -->
+  <!-- qa or prod  - currently used only in card creator -->
   <string name="feature_environment">qa</string>
 
   <!-- authentication providers -->
   <!-- default authentication provider -->
   <bool name="feature_default_auth_provider">true</bool>
   <string name="feature_default_auth_provider_name">Library</string>
-  <string name="feature_default_auth_provider_uri">http://circulation.alpha.librarysimplified.org/</string>
   <bool name="feature_default_auth_provider_request_new_code">false</bool>
   <string name="feature_default_auth_provider_request_new_code_uri"> </string>
 
@@ -40,7 +43,6 @@
 
   <!-- The initial catalog URI that will be loaded on program start -->
   <string name="feature_catalog_start_uri">http://circulation.alpha.librarysimplified.org/</string>
-  <string name="feature_adobe_auth_uri">https://circulation.librarysimplified.org/</string>
 
   <!-- The initial catalog loans URI that will be used to sync accounts -->
   <string name="feature_catalog_loans_uri_component">loans/</string>

@@ -176,7 +176,7 @@ public final class ReaderReadiumEPUBLoader
 
     EPub3.setSdkErrorHandler(errors);
     EPub3.setContentFilterErrorHandler(content_filter_errors);
-    EPub3.setPostFilterPopulationHandler(filter_handler);
+    EPub3.setContentFiltersRegistrationHandler(filter_handler);
     final Container c = EPub3.openBook(f.toString());
     EPub3.setSdkErrorHandler(null);
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <attr name="button_foreground" format="color" />
+  <attr name="list_item_foreground" format="color"/>
+  <attr name="downloading_background" format="color"/>
+  <attr name="notification_background" format="color"/>
+  <attr name="main_color" format="color"/>
+
+</resources>

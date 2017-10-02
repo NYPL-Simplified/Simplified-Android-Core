@@ -3,6 +3,7 @@ package org.nypl.simplified.app.catalog;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,12 +18,16 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.app.R;
@@ -30,7 +35,6 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
-import org.nypl.simplified.books.core.AccountNotReadyException;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
@@ -65,6 +69,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSCategory;
+import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -103,10 +108,12 @@ public final class CatalogBookDetailView implements Observer,
   private final ViewGroup                      book_download;
   private final LinearLayout                   book_download_buttons;
   private final Button                         book_download_report_button;
+  private final Button                         related_books_button;
   private final TextView                       book_download_text;
   private final ViewGroup                      book_downloading;
   private final Button                         book_downloading_cancel;
   private final ViewGroup                      book_downloading_failed;
+  private final LinearLayout                   book_downloading_failed_buttons;
   private final Button                         book_downloading_failed_dismiss;
   private final Button                         book_downloading_failed_retry;
   private final TextView                       book_downloading_percent_text;
@@ -196,8 +203,16 @@ public final class CatalogBookDetailView implements Observer,
       (ImageView) header.findViewById(R.id.book_header_cover));
     final TextView header_authors = NullCheck.notNull(
       (TextView) header.findViewById(R.id.book_header_authors));
-    final TextView header_meta =
-      NullCheck.notNull((TextView) header.findViewById(R.id.book_header_meta));
+    this.book_download_buttons = NullCheck.notNull(
+      (LinearLayout) header.findViewById(R.id.book_dialog_download_buttons));
+    this.book_downloading_cancel = NullCheck.notNull(
+      (Button) header.findViewById(R.id.book_dialog_downloading_cancel));
+    this.book_downloading_failed_buttons = NullCheck.notNull(
+      (LinearLayout) header.findViewById(R.id.book_dialog_downloading_failed_buttons));
+    this.book_downloading_failed_dismiss = NullCheck.notNull(
+      (Button) header.findViewById(R.id.book_dialog_downloading_failed_dismiss));
+    this.book_downloading_failed_retry = NullCheck.notNull(
+      (Button) header.findViewById(R.id.book_dialog_downloading_failed_retry));
 
     final ViewGroup bdd = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_downloading));
@@ -209,41 +224,46 @@ public final class CatalogBookDetailView implements Observer,
       (TextView) bdd.findViewById(R.id.book_dialog_downloading_percent_text));
     this.book_downloading_progress = NullCheck.notNull(
       (ProgressBar) bdd.findViewById(R.id.book_dialog_downloading_progress));
-    this.book_downloading_cancel = NullCheck.notNull(
-      (Button) bdd.findViewById(R.id.book_dialog_downloading_cancel));
 
     final ViewGroup bdf = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_downloading_failed));
     this.book_downloading_failed_text = NullCheck.notNull(
       (TextView) bdf.findViewById(R.id.book_dialog_downloading_failed_text));
-    this.book_downloading_failed_dismiss = NullCheck.notNull(
-      (Button) bdf.findViewById(R.id.book_dialog_downloading_failed_dismiss));
-    this.book_downloading_failed_retry = NullCheck.notNull(
-      (Button) bdf.findViewById(R.id.book_dialog_downloading_failed_retry));
     this.book_downloading_failed = bdf;
 
     final ViewGroup bd = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_dialog_download));
     this.book_download = bd;
-    this.book_download_buttons = NullCheck.notNull(
-      (LinearLayout) bd.findViewById(R.id.book_dialog_download_buttons));
-    this.book_download_report_button = NullCheck.notNull(
-      (Button) bd.findViewById(R.id.book_dialog_report_button));
+
     this.book_download_text = NullCheck.notNull(
       (TextView) bd.findViewById(R.id.book_dialog_download_text));
 
     final ViewGroup summary = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_summary_layout));
-    final TextView summary_publisher = NullCheck.notNull(
-      (TextView) summary.findViewById(R.id.book_summary_publisher));
+    final TextView summary_section_title = NullCheck.notNull(
+      (TextView) summary.findViewById(R.id.book_summary_section_title));
     final WebView summary_text = NullCheck.notNull(
       (WebView) summary.findViewById(R.id.book_summary_text));
+    final TextView header_meta = NullCheck.notNull(
+      (TextView) summary.findViewById(R.id.book_header_meta));
+
+    final Button read_more_button = NullCheck.notNull(
+      (Button) summary.findViewById(R.id.book_summary_read_more_button));
+
+    read_more_button.setOnClickListener(new View.OnClickListener() {
+      public void onClick(final View v) {
+        CatalogBookDetailView.configureSummaryWebViewHeight(summary_text);
+        read_more_button.setVisibility(View.INVISIBLE);
+      }
+    });
 
     final ViewGroup related_layout = NullCheck.notNull(
       (ViewGroup) layout.findViewById(R.id.book_related_layout));
+    this.related_books_button = NullCheck.notNull(
+            (Button) related_layout.findViewById(R.id.related_books_button));
+    this.book_download_report_button = NullCheck.notNull(
+            (Button) related_layout.findViewById(R.id.book_dialog_report_button));
 
-    final TextView book_distribution = NullCheck.notNull(
-      (TextView) layout.findViewById(R.id.book_distribution));
     /**
      * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
      * ratio and set the width of the cover layout.
@@ -260,7 +280,7 @@ public final class CatalogBookDetailView implements Observer,
      */
 
     final OPDSAcquisitionFeedEntry eo = in_entry.getFeedEntry();
-    CatalogBookDetailView.configureSummaryPublisher(eo, summary_publisher);
+    CatalogBookDetailView.configureSummarySectionTitle(summary_section_title);
 
     final BookID book_id = in_entry.getBookID();
     final BooksStatusCacheType status_cache = this.books.bookGetStatusCache();
@@ -269,17 +289,11 @@ public final class CatalogBookDetailView implements Observer,
     this.onStatus(in_entry, status_opt);
 
     CatalogBookDetailView.configureSummaryWebView(eo, summary_text);
-    CatalogBookDetailView.configureSummaryWebViewHeight(summary_text);
 
     header_title.setText(eo.getTitle());
 
-    book_distribution.setText(String.format(
-      rr.getString(R.string.catalog_book_distribution),
-      eo.getDistribution()));
     CatalogBookDetailView.configureViewTextAuthor(eo, header_authors);
     CatalogBookDetailView.configureViewTextMeta(rr, eo, header_meta);
-
-    related_layout.setVisibility(View.GONE);
 
     cover_provider.loadCoverInto(
       in_entry, header_cover, cover_width, cover_height);
@@ -310,15 +324,10 @@ public final class CatalogBookDetailView implements Observer,
     }
   }
 
-  private static void configureSummaryPublisher(
-    final OPDSAcquisitionFeedEntry e,
-    final TextView summary_publisher)
+  private static void configureSummarySectionTitle(
+    final TextView summary_section_title)
   {
-    final OptionType<String> pub = e.getPublisher();
-    if (pub.isSome()) {
-      final Some<String> some = (Some<String>) pub;
-      summary_publisher.setText(some.get());
-    }
+    summary_section_title.setText("Description");
   }
 
   private static void configureSummaryWebView(
@@ -347,8 +356,8 @@ public final class CatalogBookDetailView implements Observer,
     summary_text_settings.setBlockNetworkLoads(true);
     summary_text_settings.setBlockNetworkImage(true);
     summary_text_settings.setDefaultTextEncodingName("UTF-8");
-    summary_text_settings.setDefaultFixedFontSize(12);
-    summary_text_settings.setDefaultFontSize(12);
+    summary_text_settings.setDefaultFixedFontSize(14);
+    summary_text_settings.setDefaultFontSize(14);
     summary_text.loadDataWithBaseURL(
       null, text.toString(), "text/html", "UTF-8", null);
   }
@@ -390,6 +399,7 @@ public final class CatalogBookDetailView implements Observer,
     CatalogBookDetailView.createViewTextPublicationDate(rr, e, buffer);
     CatalogBookDetailView.createViewTextPublisher(rr, e, buffer);
     CatalogBookDetailView.createViewTextCategories(rr, e, buffer);
+    CatalogBookDetailView.createViewTextDistributor(rr, e, buffer);
     meta.setText(NullCheck.notNull(buffer.toString()));
   }
 
@@ -476,6 +486,20 @@ public final class CatalogBookDetailView implements Observer,
     }
   }
 
+  private static void createViewTextDistributor(
+    final Resources rr,
+    final OPDSAcquisitionFeedEntry e,
+    final StringBuilder buffer)
+  {
+    if (buffer.length() > 0) {
+      buffer.append("\n");
+    }
+
+    buffer.append(String.format(
+            rr.getString(R.string.catalog_book_distribution),
+            e.getDistribution()));
+  }
+
   /**
    * @return The scrolling view containing the book details
    */
@@ -517,8 +541,11 @@ public final class CatalogBookDetailView implements Observer,
       this.activity.getResources(), this.book_download_buttons);
 
     this.book_download.setVisibility(View.VISIBLE);
+    this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
     return Unit.unit();
   }
 
@@ -533,26 +560,15 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("download failed");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.VISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.VISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
 
     final FeedEntryOPDS current_entry = this.entry.get();
-
-    final OptionType<Throwable> error_opt = f.getError();
-    if (error_opt.isSome()) {
-      final Some<Throwable> error_some = (Some<Throwable>) error_opt;
-      final Throwable error = error_some.get();
-
-      if (error instanceof AccountNotReadyException) {
-
-        this.books.accountActivateDeviceAndFulFillBook(current_entry.getBookID());
-
-      }
-
-    }
-
 
     final TextView failed =
       NullCheck.notNull(this.book_downloading_failed_text);
@@ -614,8 +630,11 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("download in progress");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
+    this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     this.book_downloading_label.setText(R.string.catalog_downloading);
     CatalogDownloadProgressBar.setProgressBar(
@@ -649,7 +668,9 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
 
@@ -678,7 +699,9 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     final String text =
@@ -711,7 +734,9 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     final String text =
@@ -757,7 +782,9 @@ public final class CatalogBookDetailView implements Observer,
       this.book_debug_status.setText("revoke failed");
       this.book_download.setVisibility(View.INVISIBLE);
       this.book_downloading.setVisibility(View.INVISIBLE);
+      this.book_downloading_cancel.setVisibility(View.INVISIBLE);
       this.book_downloading_failed.setVisibility(View.VISIBLE);
+      this.book_downloading_failed_buttons.setVisibility(View.VISIBLE);
 
       final TextView failed =
         NullCheck.notNull(this.book_downloading_failed_text);
@@ -790,7 +817,9 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     final String text =
@@ -816,7 +845,9 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     final String text =
@@ -855,7 +886,9 @@ public final class CatalogBookDetailView implements Observer,
     this.book_download_buttons.setVisibility(View.VISIBLE);
     this.book_download.setVisibility(View.VISIBLE);
     this.book_downloading.setVisibility(View.INVISIBLE);
+    this.book_downloading_cancel.setVisibility(View.INVISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     final Resources rr = NullCheck.notNull(this.activity.getResources());
     final OPDSAcquisitionFeedEntry eo = e.getFeedEntry();
@@ -877,8 +910,11 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("requesting download");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
+    this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     this.book_downloading_label.setText(R.string.catalog_downloading);
 
@@ -901,8 +937,11 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("requesting loan");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
+    this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     this.book_downloading_label.setText(R.string.catalog_requesting_loan);
 
@@ -925,8 +964,11 @@ public final class CatalogBookDetailView implements Observer,
     this.book_debug_status.setText("requesting revoke");
 
     this.book_download.setVisibility(View.INVISIBLE);
+    this.book_download_buttons.setVisibility(View.INVISIBLE);
     this.book_downloading.setVisibility(View.VISIBLE);
+    this.book_downloading_cancel.setVisibility(View.VISIBLE);
     this.book_downloading_failed.setVisibility(View.INVISIBLE);
+    this.book_downloading_failed_buttons.setVisibility(View.INVISIBLE);
 
     this.book_downloading_label.setText(R.string.catalog_requesting_loan);
 
@@ -966,6 +1008,52 @@ public final class CatalogBookDetailView implements Observer,
             CatalogBookDetailView.this.onBookStatusNone(e);
           }
         });
+    }
+
+    final OptionType<URI> related_book_link = CatalogBookDetailView.this.entry.get().getFeedEntry().getRelated();
+
+    final OnClickListener related_book_listener = new OnClickListener() {
+      @Override
+      public void onClick(final View v) {
+
+        related_book_link.accept(
+          new OptionVisitorType<URI, Object>() {
+            @Override
+            public Object none(final None<URI> n) {
+              return null;
+            }
+
+            @Override
+            public Object some(final Some<URI> s) {
+
+              final ImmutableStack<CatalogFeedArgumentsType> empty =
+                      ImmutableStack.empty();
+
+              final CatalogFeedArgumentsRemote remote_args =
+                      new CatalogFeedArgumentsRemote(
+                              false,
+                              NullCheck.notNull(empty),
+                              "Related Books",
+                              s.get(),
+                              false);
+
+              final Bundle b = new Bundle();
+              CatalogFeedActivity.setActivityArguments(b, remote_args);
+              final Intent i = new Intent(CatalogBookDetailView.this.activity, MainCatalogActivity.class);
+              i.putExtras(b);
+
+              CatalogBookDetailView.this.activity.startActivity(i, null);
+
+              return null;
+            }
+          }
+        );
+      }
+    };
+
+    if (related_book_link.isSome()) {
+      final Button books_button = CatalogBookDetailView.this.related_books_button;
+      books_button.setOnClickListener(related_book_listener);
     }
 
     final Button report_button = this.book_download_report_button;

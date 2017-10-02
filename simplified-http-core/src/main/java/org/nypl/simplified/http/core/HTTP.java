@@ -104,6 +104,14 @@ public final class HTTP implements HTTPType
     return this.requestInternal("POST", auth_opt, uri, 0, Option.some(data), Option.some(content_type));
   }
 
+  @Override public HTTPResultType<InputStream> delete(
+    final OptionType<HTTPAuthType> auth_opt,
+    final URI uri,
+    final String content_type)
+  {
+    return this.requestInternal("DELETE", auth_opt, uri, 0, Option.<byte[]>none(), Option.some(content_type));
+  }
+
   private HTTPResultType<InputStream> requestInternal(
       final String method,
       final OptionType<HTTPAuthType> auth_opt,

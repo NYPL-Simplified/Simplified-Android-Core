@@ -80,6 +80,27 @@
         android:maxLines="1">
       </EditText>
     </TableRow>
+
+
+    <TableRow
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      >
+
+      <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textSize="12sp"
+        android:text="@string/eula_checkbox"
+        android:id="@+id/eula_checkbox"
+        android:checked="false"
+        android:layout_span="2"
+        android:layout_weight="1"/>
+
+    </TableRow>
+
   </TableLayout>
 
   <RelativeLayout

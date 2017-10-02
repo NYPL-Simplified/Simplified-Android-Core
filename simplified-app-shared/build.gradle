@@ -1,0 +1,47 @@
+description = 'simplified-app-shared'
+
+apply plugin: 'com.android.library'
+
+android {
+  compileSdkVersion 25
+  buildToolsVersion "26.0.0"
+  useLibrary 'org.apache.http.legacy'
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+  }
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+  }
+}
+
+dependencies {
+  compile project(':simplified-books-core')
+  compile project(':simplified-http-core')
+  compile project(':simplified-json-core')
+  compile project(':simplified-opds-core')
+  compile project(':simplified-stack')
+  compile project(':simplified-tenprint')
+  compile project(':simplified-volley')
+  compile project(':simplified-prefs')
+  compile project(':simplified-multilibrary')
+  compile project(':simplified-circ-analytics')
+  compile project(':simplified-bugsnag')
+  compile project(':simplified-cardcreator')
+  compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
+  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  compile "com.android.support:support-v4:25.3.1"
+  compile 'org.nypl.readium:readium-sdk-android-runtime:0.25.0'
+  compile 'org.nypl.readium:readium-shared-js:0.25.0'
+  compile 'com.koushikdutta.async:androidasync:2.2.1'
+  compile group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
+  compile 'com.nanohttpd:nanohttpd:2.2.0'
+  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  compile 'org.nypl.helpstack:helpstack-android:1.4.0'
+  compile 'com.bugsnag:bugsnag-android:3.9.0'
+  compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+  compile group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
+  compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
+  compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
+  compile 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
+}

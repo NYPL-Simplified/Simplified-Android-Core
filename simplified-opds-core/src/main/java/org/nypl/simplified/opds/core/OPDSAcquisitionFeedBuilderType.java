@@ -75,4 +75,9 @@ public interface OPDSAcquisitionFeedBuilderType
    */
 
   void setTermsOfServiceOption(OptionType<URI> u);
+
+  /**
+   * @param licensor drm licensor info
+   */
+  void setLisensor(OptionType<DRMLicensor> licensor);
 }

@@ -28,6 +28,7 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final AccountCredentials credentials;
   private final AccountsDatabaseType accounts_database;
+  private final DeviceActivationListenerType device_activation_listener;
 
   private static final Logger LOG;
 
@@ -39,10 +40,12 @@ public class BooksControllerDeviceActivationTask implements Runnable,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
     final AccountCredentials in_credentials,
     final AccountsDatabaseType in_accounts_database,
-    final BookDatabaseType book_database) {
+    final BookDatabaseType book_database,
+    final DeviceActivationListenerType in_device_activation_listener) {
     this.adobe_drm = in_adobe_drm;
     this.credentials = in_credentials;
     this.accounts_database = in_accounts_database;
+    this.device_activation_listener = in_device_activation_listener;
   }
 
   @Override
@@ -52,8 +55,6 @@ public class BooksControllerDeviceActivationTask implements Runnable,
         (Some<AdobeAdeptExecutorType>) this.adobe_drm;
       final AdobeAdeptExecutorType adobe_exec = some.get();
 
-      final AccountBarcode user = this.credentials.getBarcode();
-      final AccountPIN pass = this.credentials.getPin();
       final OptionType<AccountAdobeToken> adobe_token = this.credentials.getAdobeToken();
       final OptionType<AdobeVendorID> vendor_opt = this.credentials.getAdobeVendor();
 
@@ -72,22 +73,21 @@ public class BooksControllerDeviceActivationTask implements Runnable,
               new AdobeAdeptProcedureType() {
                 @Override
                 public void executeWith(final AdobeAdeptConnectorType c) {
-                  c.discardDeviceActivations();
+//                  c.discardDeviceActivations();
 
-                  //check if clever active
-                  if (adobe_token.isNone()) {
-                    c.activateDevice(
-                      BooksControllerDeviceActivationTask.this,
-                      s.get(),
-                      user.toString(),
-                      pass.toString());
-                  } else {
-                    c.activateDevice(
-                      BooksControllerDeviceActivationTask.this,
-                      s.get(),
-                      ((Some<AccountAdobeToken>) adobe_token).get().toString(),
-                      "");
-                  }
+                  final String token = ((Some<AccountAdobeToken>) adobe_token).get().toString().replace("\n", "");
+
+                  final String username = token.substring(0, token.lastIndexOf("|"));
+                  final String password = token.substring(token.lastIndexOf("|") + 1);
+
+                  c.activateDevice(
+                    BooksControllerDeviceActivationTask.this,
+                    ((Some<AdobeVendorID>) vendor_opt).get(),
+                    username,
+                    password);
+
+                  new DeviceManagerPostTask(BooksControllerDeviceActivationTask.this.credentials).run();
+
                 }
               });
             return Unit.unit();
@@ -100,7 +100,7 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   public void onActivation(
     final int index,
     final AdobeVendorID authority,
-    final String device_id,
+    final AdobeDeviceID device_id,
     final String user_name,
     final AdobeUserID user_id,
     final String expires) {
@@ -116,7 +116,9 @@ public class BooksControllerDeviceActivationTask implements Runnable,
       "Activation [{}]: expires: {}", Integer.valueOf(index), expires);
 
     BooksControllerDeviceActivationTask.this.credentials.setAdobeUserID(Option.some(user_id));
-    BooksControllerDeviceActivationTask.this.credentials.setAdobeDeviceID(Option.some(new AdobeDeviceID(device_id)));
+    BooksControllerDeviceActivationTask.this.credentials.setAdobeDeviceID(Option.some(device_id));
+
+    this.device_activation_listener.onDeviceActivationSuccess();
 
     try {
       this.accounts_database.accountSetCredentials(this.credentials);
@@ -139,10 +141,11 @@ public class BooksControllerDeviceActivationTask implements Runnable,
   @Override
   public void onActivationError(final String error) {
     BooksControllerDeviceActivationTask.LOG.debug("Failed to activate device: {}", error);
-    try {
-      this.accounts_database.accountRemoveCredentials();
-    } catch (IOException exception) {
-      BooksControllerDeviceActivationTask.LOG.debug("Failed to clear account credentials");
-    }
+    this.device_activation_listener.onDeviceActivationFailure(error);
+//    try {
+//      this.accounts_database.accountRemoveCredentials();
+//    } catch (IOException exception) {
+//      BooksControllerDeviceActivationTask.LOG.debug("Failed to clear account credentials");
+//    }
   }
 }

@@ -16,6 +16,7 @@ import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.app.LoginDialog;
 import org.nypl.simplified.app.LoginListenerType;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
@@ -77,7 +78,7 @@ public final class CatalogAcquisitionButtonController
   @Override public void onClick(
     final @Nullable View v)
   {
-    if (this.books.accountIsLoggedIn()) {
+    if (this.books.accountIsLoggedIn() && Simplified.getCurrentAccount().needsAuth() && this.acq.getType() != OPDSAcquisition.Type.ACQUISITION_OPEN_ACCESS) {
       this.books.accountGetCachedLoginDetails(
         new AccountGetCachedCredentialsListenerType()
         {
@@ -92,7 +93,10 @@ public final class CatalogAcquisitionButtonController
             CatalogAcquisitionButtonController.this.onLoginSuccess(creds);
           }
         });
-    } else {
+    } else if (!Simplified.getCurrentAccount().needsAuth() || this.acq.getType() == OPDSAcquisition.Type.ACQUISITION_OPEN_ACCESS) {
+      this.getBook();
+    }
+    else {
       this.tryLogin();
     }
   }
@@ -141,6 +145,10 @@ public final class CatalogAcquisitionButtonController
     final AccountCredentials creds)
   {
     CatalogAcquisitionButtonController.LOG.debug("login succeeded");
+    this.getBook();
+  }
+
+  private void getBook() {
     CatalogAcquisitionButtonController.LOG.debug(
       "attempting borrow of {} acquisition", this.acq.getType());
 
@@ -149,7 +157,7 @@ public final class CatalogAcquisitionButtonController
       case ACQUISITION_GENERIC:
       case ACQUISITION_OPEN_ACCESS: {
         final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
-        this.books.bookBorrow(this.id, this.acq, eo);
+        this.books.bookBorrow(this.id, this.acq, eo, Simplified.getCurrentAccount().needsAuth());
         break;
       }
       case ACQUISITION_BUY:

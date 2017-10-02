@@ -26,6 +26,7 @@ public final class CardCreator {
   }
 
   private String url;
+  private String version;
   private String username;
   private String password;
   private Resources resources;
@@ -50,6 +51,7 @@ public final class CardCreator {
       p.load(s);
 
       this.url = p.getProperty("cardcreator." + in_environment + ".url");
+      this.version = p.getProperty("cardcreator." + in_environment + ".version");
       this.username = p.getProperty("cardcreator." + in_environment + ".username");
       this.password = p.getProperty("cardcreator." + in_environment + ".password");
 
@@ -61,6 +63,9 @@ public final class CardCreator {
       }
       if (this.password == null) {
         throw new CardCreatorConfigurationMissingParameter("cardcreator." + in_environment + ".password");
+      }
+      if (this.version == null) {
+        throw new CardCreatorConfigurationMissingParameter("cardcreator." + in_environment + ".version");
       }
     } catch (final IOException e) {
       CardCreator.LOG.debug(
@@ -86,6 +91,13 @@ public final class CardCreator {
    */
   public String getUrl() {
     return this.url;
+  }
+
+  /**
+   * @return card creator version
+   */
+  public String getVersion() {
+    return this.version;
   }
 
   /**

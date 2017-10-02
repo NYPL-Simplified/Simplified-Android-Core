@@ -6,18 +6,92 @@
     parent="android:Theme.Holo.Light">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
     <item name="android:icon">@drawable/ic_menu</item>
+    <item name="button_foreground">@color/app_main_color</item>
+    <item name="list_item_foreground">@color/app_main_color</item>
+    <item name="downloading_background">@color/app_main_color</item>
+    <item name="notification_background">@color/app_main_color</item>
+    <item name="main_color">@color/app_main_color</item>
+
   </style>
+
+
+  <style
+    name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_nypl</item>
+    <item name="list_item_foreground">@color/feature_main_color_nypl</item>
+    <item name="downloading_background">@color/feature_main_color_nypl</item>
+    <item name="notification_background">@color/feature_main_color_nypl</item>
+    <item name="main_color">@color/feature_main_color_nypl</item>
+
+  </style>
+
+  <style
+    name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color</item>
+    <item name="list_item_foreground">@color/feature_main_color</item>
+    <item name="downloading_background">@color/feature_main_color</item>
+    <item name="notification_background">@color/feature_main_color</item>
+    <item name="main_color">@color/feature_main_color</item>
+
+  </style>
+
+
+  <style
+    name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_bpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_bpl</item>
+    <item name="downloading_background">@color/feature_main_color_bpl</item>
+    <item name="notification_background">@color/feature_main_color_bpl</item>
+    <item name="main_color">@color/feature_main_color_bpl</item>
+
+  </style>
+
 
   <style
     name="SimplifiedThemeNoActionBar"
     parent="android:Theme.Holo.Light.NoActionBar">
     <item name="android:windowActionBar">false</item>
     <item name="android:windowNoTitle">true</item>
+
+    <item name="button_foreground">@color/app_main_color</item>
+    <item name="list_item_foreground">@color/app_main_color</item>
+    <item name="downloading_background">@color/app_main_color</item>
+    <item name="notification_background">@color/app_main_color</item>
+    <item name="main_color">@color/app_main_color</item>
+
   </style>
+
+  <style
+    name="SimplifiedThemeNoActionBar_NYPL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_nypl</item>
+    <item name="list_item_foreground">@color/feature_main_color_nypl</item>
+    <item name="downloading_background">@color/feature_main_color_nypl</item>
+    <item name="notification_background">@color/feature_main_color_nypl</item>
+    <item name="main_color">@color/feature_main_color_nypl</item>
+
+  </style>
+
+  <style
+    name="SimplifiedThemeNoActionBar_BPL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_bpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_bpl</item>
+    <item name="downloading_background">@color/feature_main_color_bpl</item>
+    <item name="notification_background">@color/feature_main_color_bpl</item>
+    <item name="main_color">@color/feature_main_color_bpl</item>
+
+  </style>
+
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>
-    <item name="android:textColor">@color/feature_main_color</item>
+    <item name="android:textColor">@color/app_main_color</item>
     <item name="android:textStyle">normal</item>
     <item name="android:typeface">sans</item>
   </style>

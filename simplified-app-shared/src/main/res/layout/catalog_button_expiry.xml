@@ -12,7 +12,7 @@
         android:id="@+id/clock_icon"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/clock_icon"
-        android:tint="@color/button_foreground"/>
+        android:tint="?button_foreground"/>
 
     <TextView
         android:layout_width="wrap_content"

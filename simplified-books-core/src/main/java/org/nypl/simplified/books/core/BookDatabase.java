@@ -65,7 +65,7 @@ public final class BookDatabase implements BookDatabaseType
   private final File                                   directory;
   private final OPDSJSONParserType                     parser;
   private final OPDSJSONSerializerType                 serializer;
-  private final Map<BookID, BookDatabaseEntrySnapshot> snapshots;
+  private Map<BookID, BookDatabaseEntrySnapshot> snapshots;
 
   private BookDatabase(
     final OPDSJSONSerializerType in_json_serializer,

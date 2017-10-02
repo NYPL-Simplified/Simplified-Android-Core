@@ -7,7 +7,7 @@
 
   <uses-sdk
     android:minSdkVersion="19"
-    android:targetSdkVersion="21"/>
+    android:targetSdkVersion="25"/>
 
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -16,7 +16,6 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:icon="@drawable/feature_app_icon"
     android:label="@string/feature_app_name"
     android:largeHeap="true"
     android:theme="@style/SimplifiedTheme"

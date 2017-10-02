@@ -151,8 +151,6 @@ public final class WebViewActivity extends SimplifiedActivity
     settings.setSupportMultipleWindows(false);
     settings.setAllowUniversalAccessFromFileURLs(false);
     settings.setJavaScriptEnabled(false);
-    settings.setBlockNetworkImage(true);
-    settings.setBlockNetworkLoads(true);
 
     this.web_view.loadUrl(uri);
   }

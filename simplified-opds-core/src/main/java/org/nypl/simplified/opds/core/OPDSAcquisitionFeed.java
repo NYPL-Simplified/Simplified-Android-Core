@@ -38,6 +38,7 @@ public final class OPDSAcquisitionFeed implements Serializable
   private final OptionType<URI>                terms_of_service;
   private final OptionType<URI>                about;
   private final OptionType<URI>                licenses;
+  private final OptionType<DRMLicensor>        licensor;
   private final OptionType<URI>                privacy_policy;
 
   private OPDSAcquisitionFeed(
@@ -55,7 +56,8 @@ public final class OPDSAcquisitionFeed implements Serializable
     final OptionType<URI> in_terms_of_service,
     final OptionType<URI> in_about,
     final OptionType<URI> in_privacy_policy,
-    final OptionType<URI> in_licenses)
+    final OptionType<URI> in_licenses,
+    final OptionType<DRMLicensor> in_licensor)
   {
     this.uri = NullCheck.notNull(in_uri);
     this.entries = NullCheck.notNull(Collections.unmodifiableList(in_entries));
@@ -75,6 +77,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     this.about = NullCheck.notNull(in_about);
     this.privacy_policy = NullCheck.notNull(in_privacy_policy);
     this.licenses = NullCheck.notNull(in_licenses);
+    this.licensor = in_licensor;
   }
 
   /**
@@ -235,6 +238,14 @@ public final class OPDSAcquisitionFeed implements Serializable
   }
 
   /**
+   * @return licensor information used to active adobe device
+   */
+  public OptionType<DRMLicensor> getLicensor()
+  {
+    return this.licensor;
+  }
+
+  /**
    * @return The link to the terms of service, if any
    */
 
@@ -301,6 +312,7 @@ public final class OPDSAcquisitionFeed implements Serializable
     private       OptionType<URI>                             privacy_policy;
     private       OptionType<URI>                             about;
     private       OptionType<URI>                             licenses;
+    private       OptionType<DRMLicensor>                     licensor;
 
     private Builder(
       final URI in_uri,
@@ -324,6 +336,7 @@ public final class OPDSAcquisitionFeed implements Serializable
       this.privacy_policy = Option.none();
       this.about = Option.none();
       this.licenses = Option.none();
+      this.licensor = Option.none();
     }
 
     @Override public void addEntry(
@@ -382,6 +395,11 @@ public final class OPDSAcquisitionFeed implements Serializable
       this.terms_of_service = NullCheck.notNull(u);
     }
 
+    @Override
+    public void setLisensor(final OptionType<DRMLicensor> in_licensor) {
+      this.licensor = in_licensor;
+    }
+
     @Override public void setPrivacyPolicyOption(final OptionType<URI> u)
     {
       this.privacy_policy = NullCheck.notNull(u);
@@ -415,7 +433,8 @@ public final class OPDSAcquisitionFeed implements Serializable
         this.terms_of_service,
         this.about,
         this.privacy_policy,
-        this.licenses
+        this.licenses,
+        this.licensor
         );
     }
 

@@ -5,7 +5,7 @@
     android:state_pressed="true" />
   
   <item android:state_activated="true">
-    <color android:color="@color/list_item_foreground" />
+    <color android:color="@color/app_main_color" />
   </item>
   
   <item android:drawable="@color/list_item_background" />

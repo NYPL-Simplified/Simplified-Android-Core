@@ -1,22 +1,20 @@
 package org.nypl.labs.OpenEbooks.app;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-
-import com.viewpagerindicator.CirclePageIndicator;
 
 import org.nypl.simplified.app.LoginActivity;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
-public class OEIntroActivity extends Activity
+public class OEIntroActivity extends FragmentActivity
 {
   private static final Logger LOG;
   private ViewPager view_pager;
@@ -32,11 +30,8 @@ public class OEIntroActivity extends Activity
     this.setContentView(R.layout.oe_intro);
 
     this.view_pager = (ViewPager) this.findViewById(R.id.intro_pager);
-    final PagerAdapter pager_adater = new IntroPagerAdapter(getFragmentManager());
-    this.view_pager.setAdapter(pager_adater);
-
-    final CirclePageIndicator indicator = (CirclePageIndicator) this.findViewById(R.id.intro_pager_indicator);
-    indicator.setViewPager(this.view_pager);
+    final PagerAdapter pager_adapter = new IntroPagerAdapter(getSupportFragmentManager());
+    this.view_pager.setAdapter(pager_adapter);
 
     this.view_pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 

@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -67,6 +68,7 @@ public class AgeFragment extends Fragment {
     ((RadioButton) root_view.findViewById(R.id.under13)).setChecked(this.prefs.getBoolean(getResources().getString(R.string.UNDER_13)));
     ((RadioButton) root_view.findViewById(R.id.equalOrOlder)).setChecked(this.prefs.getBoolean(getResources().getString(R.string.EQUAL_OR_OLDER_13)));
 
+    ((CheckBox) root_view.findViewById(R.id.eula_checkbox)).setChecked(this.prefs.getBoolean(getResources().getString(R.string.EULA_ACCEPTED)));
 
     return root_view;
   }

@@ -14,6 +14,13 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 public enum SimplifiedPart
 {
+
+
+  /**
+   *
+   */
+  PART_SWITCHER,
+
   /**
    * The "My Books" section.
    */
@@ -38,6 +45,11 @@ public enum SimplifiedPart
 
   PART_SETTINGS,
 
+  /**
+   * The settings section.
+   */
+
+  PART_MANAGE_ACCOUNTS,
 
   /**
    * The account section.
@@ -80,6 +92,10 @@ public enum SimplifiedPart
       case PART_ACCOUNT: {
         return NullCheck.notNull(r.getString(R.string.settings_account));
       }
+      case PART_SWITCHER: {
+        return "current library";
+      }
+
     }
 
     throw new UnreachableCodeException();
