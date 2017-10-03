@@ -122,7 +122,7 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
       } else if (account.getId() == 14) {
         icon_view.setImageResource(R.drawable.account_logo_cl);
       } else if (account.getId() == 15) {
-        icon_view.setImageResource(R.drawable.account_logo_ccpl));
+        icon_view.setImageResource(R.drawable.account_logo_ccpl);
       } else if (account.getId() == 16) {
         icon_view.setImageResource(R.drawable.account_logo_ccl);
       }
