@@ -145,6 +145,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_account_icon.setImageResource(R.drawable.account_logo_instant);
           } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
             in_account_icon.setImageResource(R.drawable.account_logo_alameda);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
+            in_account_icon.setImageResource(R.drawable.account_logo_hcls);
           }
 
           in_barcode_text.setText(creds.getBarcode().toString());
@@ -860,6 +862,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.account_logo_instant);
     } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
       in_account_icon.setImageResource(R.drawable.account_logo_alameda);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
+      in_account_icon.setImageResource(R.drawable.account_logo_hcls);
     }
 
     final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
