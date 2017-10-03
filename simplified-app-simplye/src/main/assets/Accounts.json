@@ -58,5 +58,25 @@
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "#497049"
-  }
+  },
+  {
+    "id" : 11,
+    "pathComponent" : "11",
+    "name" : "Anne Arundel Co. Public Library",
+    "subtitle" : "Educate. Enrich. Inspire.",
+    "logo" : "LibraryLogoAnneArundel",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://anne-arundel.simplye-md.org/",
+    "mainColor" : "#0b9da1",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true,
+    "licenseUrl": "http://www.aacpl.net/simplye-content-license",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/"
+ }
 ]
