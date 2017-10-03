@@ -129,7 +129,7 @@
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://frederick.simplye-md.org/",
-    "licenseUrl": "http://www.fcpl.org/third-party-content",
+    "licenseUrl": "http://fcpl.org/third-party-content/",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
     "supportEmail" : "fcplweb@fcpl.org",
     "mainColor": "#ef4123"
