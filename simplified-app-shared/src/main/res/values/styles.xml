@@ -49,6 +49,17 @@
 
   </style>
 
+  <style
+    name="SimplifiedTheme_ACL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_acl</item>
+    <item name="list_item_foreground">@color/feature_main_color_acl</item>
+    <item name="downloading_background">@color/feature_main_color_acl</item>
+    <item name="notification_background">@color/feature_main_color_acl</item>
+    <item name="main_color">@color/feature_main_color_acl</item>
+
+  </style>
+
 
   <style
     name="SimplifiedThemeNoActionBar"
@@ -85,6 +96,18 @@
     <item name="downloading_background">@color/feature_main_color_bpl</item>
     <item name="notification_background">@color/feature_main_color_bpl</item>
     <item name="main_color">@color/feature_main_color_bpl</item>
+
+  </style>
+
+  <style
+    name="SimplifiedThemeNoActionBar_ACL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_acl</item>
+    <item name="list_item_foreground">@color/feature_main_color_acl</item>
+    <item name="downloading_background">@color/feature_main_color_acl</item>
+    <item name="notification_background">@color/feature_main_color_acl</item>
+    <item name="main_color">@color/feature_main_color_acl</item>
 
   </style>
 
