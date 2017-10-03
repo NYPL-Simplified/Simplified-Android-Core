@@ -129,6 +129,22 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
             icon_view.setImageResource(R.drawable.account_logo_alameda);
           } else if (account.getId() == 8) {
             icon_view.setImageResource(R.drawable.account_logo_hcls);
+          } else if (account.getId() == 9) {
+            icon_view.setImageResource(R.drawable.account_logo_mcpl);
+          } else if (account.getId() == 10) {
+            icon_view.setImageResource(R.drawable.account_logo_fcpl);
+          } else if (account.getId() == 11) {
+            icon_view.setImageResource(R.drawable.account_logo_anne_arundel);
+          } else if (account.getId() == 12) {
+            icon_view.setImageResource(R.drawable.account_logo_bgc);
+          } else if (account.getId() == 13) {
+            icon_view.setImageResource(R.drawable.account_logo_smcl);
+          } else if (account.getId() == 14) {
+            icon_view.setImageResource(R.drawable.account_logo_cl);
+          } else if (account.getId() == 15) {
+            icon_view.setImageResource(R.drawable.account_logo_ccpl);
+          } else if (account.getId() == 16) {
+            icon_view.setImageResource(R.drawable.account_logo_ccl);
           }
 
           return v;
