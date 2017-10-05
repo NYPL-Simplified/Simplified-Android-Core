@@ -76,7 +76,9 @@
     "supportEmail" : "ask@aclibrary.libanswers.com",
     "licenseUrl": "http://guides.aclibrary.org/TAC",
     "privacyUrl": "http://califa.org/privacy-policy",
-    "mainColor": "#58a6f5"
+    "mainColor": "#58a6f5",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   },
   {
     "id": 8,
@@ -95,7 +97,9 @@
     "licenseUrl": "http://hclibrary.org/research/simplye-content-license/",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
     "supportEmail" : "askhcls@hclibrary.org",
-    "mainColor": "#0066CC"
+    "mainColor": "#0066CC",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   },
   {
     "id": 9,
@@ -113,7 +117,9 @@
     "catalogUrl" : "http://montgomery.simplye-md.org/",
     "licenseUrl": "http://montgomerycountymd.gov/library/collection/contentlicenses.html",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#0067B1"
+    "mainColor": "#0067B1",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   },
   {
     "id": 10,
@@ -132,7 +138,9 @@
     "licenseUrl": "http://fcpl.org/third-party-content/",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
     "supportEmail" : "fcplweb@fcpl.org",
-    "mainColor": "#ef4123"
+    "mainColor": "#ef4123",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   },
   {
     "id" : 11,
@@ -192,7 +200,9 @@
     "eulaUrl": "http://www.librarysimplified.org/EULA.html",
     "licenseUrl": "https://www.stmalib.org/online-services/digital-content/simplye-content-license/",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#194483"
+    "mainColor": "#194483",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   },
   {
     "id": 14,
@@ -212,7 +222,9 @@
     "supportEmail" : "ill.calv@somd.lib.md.us",
     "licenseUrl": "",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#440099"
+    "mainColor": "#440099",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   },
   {
     "id": 15,
@@ -232,7 +244,9 @@
     "eulaUrl": "http://www.librarysimplified.org/EULA.html",
     "licenseUrl": "https://www.ccplonline.org/services/simplye-content-license",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#20428B"
+    "mainColor": "#20428B",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   },
   {
     "id": 16,
@@ -251,6 +265,8 @@
     "catalogUrl" : "http://carroll.simplye-md.org/CARROLL/",
     "licenseUrl": "https://library.carr.org/license.asp",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#fcb033"
+    "mainColor": "#fcb033",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
   }
 ]
