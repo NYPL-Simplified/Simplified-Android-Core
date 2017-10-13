@@ -125,6 +125,8 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
         icon_view.setImageResource(R.drawable.account_logo_ccpl);
       } else if (account.getId() == 16) {
         icon_view.setImageResource(R.drawable.account_logo_ccl);
+      } else if (account.getId() == 18) {
+        icon_view.setImageResource(R.drawable.account_logo_lapl);
       }
 
       current_account.setOnClickListener(new View.OnClickListener() {
@@ -216,6 +218,8 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
             icon_view.setImageResource(R.drawable.account_logo_ccpl);
           } else if (account.getId() == 16) {
             icon_view.setImageResource(R.drawable.account_logo_ccl);
+          } else if (account.getId() == 18) {
+            icon_view.setImageResource(R.drawable.account_logo_lapl);
           }
           return v;
         }

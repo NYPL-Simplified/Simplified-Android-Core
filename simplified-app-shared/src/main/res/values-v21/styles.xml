@@ -199,6 +199,19 @@
     <item name="main_color">@color/feature_main_color_bgc</item>
 
   </style>
+  <style
+      name="SimplifiedTheme_LAPL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_lapl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_lapl</item>
+    <item name="android:colorAccent">@color/feature_main_color_lapl</item>
+
+    <item name="button_foreground">@color/feature_main_color_lapl</item>
+    <item name="list_item_foreground">@color/feature_main_color_lapl</item>
+    <item name="downloading_background">@color/feature_main_color_lapl</item>
+    <item name="notification_background">@color/feature_main_color_lapl</item>
+    <item name="main_color">@color/feature_main_color_lapl</item>
+
+  </style>
   <style name="ActionBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">
     <item name="android:displayOptions">homeAsUp|showTitle</item>
     <item name="android:homeAsUpIndicator">@drawable/ic_menu</item>

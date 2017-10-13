@@ -268,5 +268,24 @@
     "mainColor": "#fcb033",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
-  }
-]
+  },
+  {
+    "id": 18,
+    "pathComponent": "18",
+    "name": "Los Angeles Public Library",
+    "subtitle": "Creating Opportunity, Building Community, Inspiring Innovation",
+    "logo": "LibraryLogoLosAngeles",
+    "needsAuth": true,
+    "supportsSimplyESync": false,
+    "supportsBarcodeScanner": false,
+    "supportsBarcodeDisplay": false,
+    "supportsReservations": true,
+    "supportsCardCreator": false,
+    "supportsHelpCenter": false,
+    "catalogUrl" : "http://lapl.simplye-ca.org/",
+    "licenseUrl": "http://califa.org/third-party-content",
+    "privacyUrl": "http://califa.org/privacy-policy",
+    "mainColor": "#07818d",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
+  }]
