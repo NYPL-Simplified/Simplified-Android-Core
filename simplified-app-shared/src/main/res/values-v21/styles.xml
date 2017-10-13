@@ -203,7 +203,7 @@
       name="SimplifiedTheme_LAPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_lapl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_lapl</item>
-    <item name="android:colorAccent">@color/feature_main_color_bgc</item>
+    <item name="android:colorAccent">@color/feature_main_color_lapl</item>
 
     <item name="button_foreground">@color/feature_main_color_lapl</item>
     <item name="list_item_foreground">@color/feature_main_color_lapl</item>
