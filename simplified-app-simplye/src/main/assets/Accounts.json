@@ -269,6 +269,27 @@
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
+  { 
+    "id": 17,
+    "pathComponent": "17",
+    "name": "Butte County Library",
+    "subtitle": " ",
+    "logo": "LibraryLogoButte",
+    "needsAuth": true,
+    "supportsSimplyESync": false,
+    "supportsBarcodeScanner": false,
+    "supportsBarcodeDisplay": false,
+    "supportsReservations": true,
+    "supportsCardCreator": false,
+    "supportsHelpCenter": false,
+    "supportEmail" : "ebookrequest@buttecounty.net",
+    "catalogUrl" : "http://bcl.simplye-ca.org/CABTTE/",
+    "licenseUrl": "http://califa.org/third-party-content",
+    "privacyUrl": "http://califa.org/privacy-policy",
+    "mainColor": "#1b7fa7",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
+  },
   {
     "id": 18,
     "pathComponent": "18",

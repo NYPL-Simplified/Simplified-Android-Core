@@ -78,6 +78,20 @@
   </style>
 
   <style
+    name="SimplifiedTheme_BCL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_bcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_bcl</item>
+    <item name="android:colorAccent">@color/feature_main_color_bcl</item>
+    <item name="button_foreground">@color/feature_main_color_bcl</item>
+
+    <item name="list_item_foreground">@color/feature_main_color_bcl</item>
+    <item name="downloading_background">@color/feature_main_color_bcl</item>
+    <item name="notification_background">@color/feature_main_color_bcl</item>
+    <item name="main_color">@color/feature_main_color_bcl</item>
+
+  </style>
+
+  <style
       name="SimplifiedTheme_AACPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_aacpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_aacpl</item>

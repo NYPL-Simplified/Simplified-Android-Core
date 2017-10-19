@@ -25,6 +25,7 @@
   <color name="feature_main_color_cl">#440099</color>
   <color name="feature_main_color_ccl">#fcb033</color>
   <color name="feature_main_color_lapl">#07818d</color>
+  <color name="feature_main_color_bcl">#1b7fa7</color>
 
   <!-- The configurable secondary color, used for branding. -->
   <color name="feature_secondary_color">#476648</color>
@@ -41,6 +42,7 @@
   <color name="feature_secondary_color_cl">#440099</color>
   <color name="feature_secondary_color_ccl">#fcb033</color>
   <color name="feature_secondary_color_lapl">#07818d</color>
+  <color name="feature_secondary_color_bcl">#1b7fa7</color>
 
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
