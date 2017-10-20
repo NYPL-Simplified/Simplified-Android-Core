@@ -64,4 +64,8 @@ dependencies {
 
   implementation group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
   implementation group: 'net.jodah', name: 'expiringmap', version: '0.4.3'
+
+  implementation 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
+  implementation 'com.google.zxing:core:3.2.1'
+  implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
 }
