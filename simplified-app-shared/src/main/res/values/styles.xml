@@ -49,6 +49,49 @@
 
   </style>
 
+  <style
+    name="SimplifiedTheme_ACL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_acl</item>
+    <item name="list_item_foreground">@color/feature_main_color_acl</item>
+    <item name="downloading_background">@color/feature_main_color_acl</item>
+    <item name="notification_background">@color/feature_main_color_acl</item>
+    <item name="main_color">@color/feature_main_color_acl</item>
+
+  </style>
+
+  <style
+    name="SimplifiedTheme_HCLS" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_hcls</item>
+    <item name="list_item_foreground">@color/feature_main_color_hcls</item>
+    <item name="downloading_background">@color/feature_main_color_hcls</item>
+    <item name="notification_background">@color/feature_main_color_hcls</item>
+    <item name="main_color">@color/feature_main_color_hcls</item>
+
+  </style>
+
+  <style
+    name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_mcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
+    <item name="downloading_background">@color/feature_main_color_mcpl</item>
+    <item name="notification_background">@color/feature_main_color_mcpl</item>
+    <item name="main_color">@color/feature_main_color_mcpl</item>
+
+  </style>
+
+ <style
+   name="SimplifiedTheme_FCPL" parent="SimplifiedTheme">
+
+   <item name="button_foreground">@color/feature_main_color_fcpl</item>
+   <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+   <item name="downloading_background">@color/feature_main_color_fcpl</item>
+   <item name="notification_background">@color/feature_main_color_fcpl</item>
+   <item name="main_color">@color/feature_main_color_fcpl</item>
+
+ </style>
 
   <style
     name="SimplifiedThemeNoActionBar"
@@ -88,6 +131,53 @@
 
   </style>
 
+  <style
+    name="SimplifiedThemeNoActionBar_ACL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_acl</item>
+    <item name="list_item_foreground">@color/feature_main_color_acl</item>
+    <item name="downloading_background">@color/feature_main_color_acl</item>
+    <item name="notification_background">@color/feature_main_color_acl</item>
+    <item name="main_color">@color/feature_main_color_acl</item>
+
+  </style>
+
+  <style
+    name="SimplifiedThemeNoActionBar_hcls"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_hcls</item>
+    <item name="list_item_foreground">@color/feature_main_color_hcls</item>
+    <item name="downloading_background">@color/feature_main_color_hcls</item>
+    <item name="notification_background">@color/feature_main_color_hcls</item>
+    <item name="main_color">@color/feature_main_color_hcls</item>
+
+  </style>
+
+  <style
+    name="SimplifiedThemeNoActionBar_MCPL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_mcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
+    <item name="downloading_background">@color/feature_main_color_mcpl</item>
+    <item name="notification_background">@color/feature_main_color_mcpl</item>
+    <item name="main_color">@color/feature_main_color_mcpl</item>
+
+  </style>
+
+ <style
+   name="SimplifiedThemeNoActionBar_FCPL"
+   parent="SimplifiedThemeNoActionBar">
+
+   <item name="button_foreground">@color/feature_main_color_fcpl</item>
+   <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+   <item name="downloading_background">@color/feature_main_color_fcpl</item>
+   <item name="notification_background">@color/feature_main_color_fcpl</item>
+   <item name="main_color">@color/feature_main_color_fcpl</item>
+
+ </style>
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>

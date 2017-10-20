@@ -57,6 +57,36 @@ public final class MainEULAActivity extends Activity
     else if (id == 1) {
       setTheme(R.style.SimplifiedTheme_BPL);
     }
+    else if (id == 7) {
+      setTheme(R.style.SimplifiedTheme_ACL);
+    }
+    else if (id == 8) {
+      setTheme(R.style.SimplifiedTheme_HCLS);
+    }
+    else if (id == 9) {
+      setTheme(R.style.SimplifiedTheme_MCPL);
+    }
+    else if (id == 10) {
+      setTheme(R.style.SimplifiedTheme_FCPL);
+    }
+    else if (id == 11) {
+      setTheme(R.style.SimplifiedTheme_AACPL);
+    }
+    else if (id == 12) {
+      setTheme(R.style.SimplifiedTheme_BGC);
+    }
+    else if (id == 13) {
+      setTheme(R.style.SimplifiedTheme_SMCL);
+    }
+    else if (id == 14) {
+      setTheme(R.style.SimplifiedTheme_CL);
+    }
+    else if (id == 15) {
+      setTheme(R.style.SimplifiedTheme_CCPL);
+    }
+    else if (id == 16) {
+      setTheme(R.style.SimplifiedTheme_CCL);
+    }
     else {
       setTheme(R.style.SimplifiedTheme);
     }
