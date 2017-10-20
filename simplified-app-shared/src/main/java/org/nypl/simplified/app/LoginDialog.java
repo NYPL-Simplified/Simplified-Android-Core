@@ -2,6 +2,7 @@ package org.nypl.simplified.app;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -23,7 +24,10 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -85,6 +89,8 @@ public final class LoginDialog extends DialogFragment
   private @Nullable EditText          pin_edit;
   private @Nullable TextView          text;
   private @Nullable Button            cancel;
+
+  private Fragment myFragment = this;
 
   /**
    * Construct a new dialog.
@@ -469,14 +475,21 @@ public final class LoginDialog extends DialogFragment
       });
 
     in_barcode_scan_button.setOnClickListener(
-            new OnClickListener()
-            {
-              @Override public void onClick(
-                      final @Nullable View v)
-              {
-               // TODO: implement
-              }
-            });
+        new OnClickListener() {
+          @Override
+          public void onClick(
+              final @Nullable View v) {
+
+            // IntentIntegrator exit will fire on Scan or Back and hit the onActivityResult method.
+            IntentIntegrator
+                .forFragment(myFragment)
+                .setPrompt("Scan your library barcode.")
+                .setBeepEnabled(false)
+                //.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
+                //.setOrientationLocked(false)
+                .initiateScan();
+          }
+        });
 
     final boolean request_new_code = rr.getBoolean(R.bool.feature_default_auth_provider_request_new_code);
 
@@ -615,6 +628,23 @@ public final class LoginDialog extends DialogFragment
     }
 
     return in_layout;
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+    if (result != null) {
+      if (result.getContents() == null) {
+        Toast.makeText(LoginDialog.this.getActivity(), "Cancelled", Toast.LENGTH_LONG).show();
+      } else {
+        // Toast.makeText(LoginDialog.this.getActivity(), "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+        barcode_edit.setText(result.getContents());
+        pin_edit.requestFocus();
+      }
+    } else {
+      // This is important, otherwise the result will not be passed to the fragment
+      super.onActivityResult(requestCode, resultCode, data);
+    }
   }
 
   /**
