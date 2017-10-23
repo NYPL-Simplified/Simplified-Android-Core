@@ -160,7 +160,8 @@
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true,
     "licenseUrl": "http://www.aacpl.net/simplye-content-license",
-    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/"
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "supportEmail" : "askus@aacpl.libanswers.com"
   },
   {
     "id" : 12,
