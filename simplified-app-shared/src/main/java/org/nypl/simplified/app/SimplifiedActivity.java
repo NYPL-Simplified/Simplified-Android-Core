@@ -273,8 +273,12 @@ public abstract class SimplifiedActivity extends Activity
       setTheme(R.style.SimplifiedTheme_CCL);
     } else if (id == 17) {
       setTheme(R.style.SimplifiedTheme_BCL);
-    }  else if (id == 18) {
+    } else if (id == 18) {
       setTheme(R.style.SimplifiedTheme_LAPL);
+    } else if (id == 22) {
+      setTheme(R.style.SimplifiedTheme_REL);
+    } else if (id == 23) {
+      setTheme(R.style.SimplifiedTheme_WCFL);
     } else {
       setTheme(R.style.SimplifiedTheme_Magic);
     }
@@ -430,6 +434,10 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_bcl);
             } else if (account.getId() == 18) {
               icon_view.setImageResource(R.drawable.account_logo_lapl);
+            } else if (account.getId() == 22) {
+              icon_view.setImageResource(R.drawable.account_logo_rel);
+            } else if (account.getId() == 23) {
+              icon_view.setImageResource(R.drawable.account_logo_wcfl);
             }
 
           } else {
@@ -510,6 +518,10 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_bcl);
             } else if (account.getId() == 18) {
               icon_view.setImageResource(R.drawable.account_logo_lapl);
+            } else if (account.getId() == 22) {
+              icon_view.setImageResource(R.drawable.account_logo_rel);
+            } else if (account.getId() == 23) {
+              icon_view.setImageResource(R.drawable.account_logo_wcfl);
             }
           } else {
             tv.setText(part.getPartName(rr));
