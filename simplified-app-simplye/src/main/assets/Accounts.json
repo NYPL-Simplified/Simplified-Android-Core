@@ -312,6 +312,27 @@
     "authPasscodeAllowsLetters" : true
   },
   {
+    "id": 20,
+    "pathComponent": "20",
+    "name": "Santa Clara County Library District",
+    "subtitle": " ",
+    "logo": "LibraryLogoSantaClara",
+    "needsAuth": true,
+    "supportsSimplyESync": false,
+    "supportsBarcodeScanner": false,
+    "supportsBarcodeDisplay": false,
+    "supportsReservations": true,
+    "supportsCardCreator": false,
+    "supportsHelpCenter": false,
+    "supportEmail" : "ask@sccl.org",
+    "catalogUrl" : "http://sccl.simplye-ca.org/",
+    "licenseUrl": "http://califa.org/third-party-content",
+    "privacyUrl": "http://califa.org/privacy-policy",
+    "mainColor": "#1b7fa7",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
+  },
+  {
     "id" : 22,
     "pathComponent" : "22",
     "name" : "Ruth Enlow Library of Garrett County",
