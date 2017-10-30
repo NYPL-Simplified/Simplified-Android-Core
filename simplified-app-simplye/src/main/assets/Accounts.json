@@ -270,7 +270,7 @@
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
-  { 
+  {
     "id": 17,
     "pathComponent": "17",
     "name": "Butte County Library",
@@ -310,4 +310,43 @@
     "mainColor": "#07818d",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
-  }]
+  },
+  {
+    "id" : 22,
+    "pathComponent" : "22",
+    "name" : "Ruth Enlow Library of Garrett County",
+    "subtitle" : "Community + Opportunity",
+    "logo" : "LibraryLogoRuthEnlow",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://wmrl.simplye-md.org/MDRUTH/groups/",
+    "mainColor" : "#1b7fa7",
+    "supportEmail" : "webmaster@relib.net",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
+  },
+  {
+    "id" : 23,
+    "pathComponent" : "23",
+    "name" : "Washington County Free Library",
+    "subtitle" : "Providing education for all stages of life",
+    "logo" : "LibraryLogoWashington",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://wmrl.simplye-md.org/MDWASH/groups/",
+    "mainColor" : "#1b7fa7",
+    "supportEmail" : "webmaster@washcolibrary.org",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
+  }
+]
