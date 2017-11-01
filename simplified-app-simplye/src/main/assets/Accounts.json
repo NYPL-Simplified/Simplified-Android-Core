@@ -304,6 +304,7 @@
     "supportsReservations": true,
     "supportsCardCreator": false,
     "supportsHelpCenter": false,
+    "supportEmail": "webmaster@lapl.org",
     "catalogUrl" : "http://lapl.simplye-ca.org/",
     "licenseUrl": "http://califa.org/third-party-content",
     "privacyUrl": "http://califa.org/privacy-policy",
