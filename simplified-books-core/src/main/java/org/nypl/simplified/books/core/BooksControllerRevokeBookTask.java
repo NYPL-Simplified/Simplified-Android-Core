@@ -558,6 +558,10 @@ final class BooksControllerRevokeBookTask
         if (in_error.startsWith("E_ACT_NOT_READY")) {
           this.error = Option.some((Throwable) new AccountNotReadyException(in_error));
         }
+        else if (in_error.startsWith("E_STREAM_ERROR")) {
+          BooksControllerRevokeBookTask.LOG.debug("E_STREAM_ERROR returned from DRM Workflow. Continuing by attempting to revoke book manually.");
+          this.error = Option.none();
+        }
         else {
           this.error = Option.some((Throwable) new BookRevokeExceptionDRMWorkflowError(in_error));
         }
