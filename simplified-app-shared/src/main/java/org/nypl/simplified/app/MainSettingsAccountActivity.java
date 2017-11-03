@@ -918,6 +918,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.account_logo_wcfl);
     }
 
+
     final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
     if (accounts_database.accountGetCredentials().isSome()) {
       final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();

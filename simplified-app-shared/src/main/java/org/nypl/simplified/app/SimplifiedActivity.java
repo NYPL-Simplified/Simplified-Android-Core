@@ -249,40 +249,57 @@ public abstract class SimplifiedActivity extends Activity
     final int id = Simplified.getCurrentAccount().getId();
     if (id == 0) {
       setTheme(R.style.SimplifiedTheme_NYPL);
-    } else if (id == 1) {
+    }
+    else if (id == 1) {
       setTheme(R.style.SimplifiedTheme_BPL);
-    } else if (id == 10) {
-      setTheme(R.style.SimplifiedTheme_FCPL);
-    } else if (id == 7) {
+    }
+    else if (id == 7) {
       setTheme(R.style.SimplifiedTheme_ACL);
-    } else if (id == 8) {
+    }
+    else if (id == 8) {
       setTheme(R.style.SimplifiedTheme_HCLS);
-    } else if (id == 9) {
-        setTheme(R.style.SimplifiedTheme_MCPL);
-    } else if (id == 11) {
+    }
+    else if (id == 9) {
+      setTheme(R.style.SimplifiedTheme_MCPL);
+    }
+    else if (id == 10) {
+      setTheme(R.style.SimplifiedTheme_FCPL);
+    }
+    else if (id == 11) {
       setTheme(R.style.SimplifiedTheme_AACPL);
-    } else if (id == 12) {
+    }
+    else if (id == 12) {
       setTheme(R.style.SimplifiedTheme_BGC);
-    } else if (id == 13) {
+    }
+    else if (id == 13) {
       setTheme(R.style.SimplifiedTheme_SMCL);
-    } else if (id == 14) {
+    }
+    else if (id == 14) {
       setTheme(R.style.SimplifiedTheme_CL);
-    } else if (id == 15) {
+    }
+    else if (id == 15) {
       setTheme(R.style.SimplifiedTheme_CCPL);
-    } else if (id == 16) {
+    } 
+    else if (id == 16) {
       setTheme(R.style.SimplifiedTheme_CCL);
-    } else if (id == 17) {
+    }
+    else if (id == 17) {
       setTheme(R.style.SimplifiedTheme_BCL);
-    } else if (id == 18) {
+    }
+    else if (id == 18) {
       setTheme(R.style.SimplifiedTheme_LAPL);
-    } else if (id == 20) {
+    }
+    else if (id == 20) {
       setTheme(R.style.SimplifiedTheme_SCCL);
-    } else if (id == 22) {
+    }
+    else if (id == 22) {
       setTheme(R.style.SimplifiedTheme_REL);
-    } else if (id == 23) {
+    }
+    else if (id == 23) {
       setTheme(R.style.SimplifiedTheme_WCFL);
-    } else {
-      setTheme(R.style.SimplifiedTheme_Magic);
+    }
+    else {
+      setTheme(R.style.SimplifiedTheme);
     }
 
     super.onCreate(state);
@@ -417,7 +434,7 @@ public abstract class SimplifiedActivity extends Activity
             } else if (account.getId() == 8) {
               icon_view.setImageResource(R.drawable.account_logo_hcls);
             } else if (account.getId() == 9) {
-                icon_view.setImageResource(R.drawable.account_logo_mcpl);
+              icon_view.setImageResource(R.drawable.account_logo_mcpl);
             } else if (account.getId() == 10) {
               icon_view.setImageResource(R.drawable.account_logo_fcpl);
             } else if (account.getId() == 11) {
@@ -443,7 +460,6 @@ public abstract class SimplifiedActivity extends Activity
             } else if (account.getId() == 23) {
               icon_view.setImageResource(R.drawable.account_logo_wcfl);
             }
-
           } else {
             final ImageView icon_view =
               NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
@@ -529,6 +545,7 @@ public abstract class SimplifiedActivity extends Activity
             } else if (account.getId() == 23) {
               icon_view.setImageResource(R.drawable.account_logo_wcfl);
             }
+      
           } else {
             tv.setText(part.getPartName(rr));
             if (dl.getCheckedItemPosition() == position) {

@@ -558,8 +558,9 @@ final class BooksControllerRevokeBookTask
         if (in_error.startsWith("E_ACT_NOT_READY")) {
           this.error = Option.some((Throwable) new AccountNotReadyException(in_error));
         }
+        // Known issue of 404 URL for OneClick/RBdigital books
         else if (in_error.startsWith("E_STREAM_ERROR")) {
-          BooksControllerRevokeBookTask.LOG.debug("E_STREAM_ERROR returned from DRM Workflow. Continuing by attempting to revoke book manually.");
+          BooksControllerRevokeBookTask.LOG.debug("E_STREAM_ERROR: Ignore and continue with return.");
           this.error = Option.none();
         }
         else {

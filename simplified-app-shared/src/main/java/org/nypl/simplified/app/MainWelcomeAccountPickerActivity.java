@@ -156,6 +156,7 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
           } else if (account.getId() == 23) {
             icon_view.setImageResource(R.drawable.account_logo_wcfl);
           }
+
           return v;
         }
       };

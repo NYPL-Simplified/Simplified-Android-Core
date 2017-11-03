@@ -70,7 +70,7 @@ public final class MainEULAActivity extends Activity
       setTheme(R.style.SimplifiedTheme_FCPL);
     }
     else if (id == 11) {
-    setTheme(R.style.SimplifiedTheme_AACPL);
+      setTheme(R.style.SimplifiedTheme_AACPL);
     }
     else if (id == 12) {
       setTheme(R.style.SimplifiedTheme_BGC);

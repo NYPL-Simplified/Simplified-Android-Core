@@ -64,7 +64,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_CCL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_CCL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_ccl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccl</item>
     <item name="android:colorAccent">@color/feature_main_color_ccl</item>
@@ -78,7 +78,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_BCL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_BCL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_bcl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_bcl</item>
     <item name="android:colorAccent">@color/feature_main_color_bcl</item>
