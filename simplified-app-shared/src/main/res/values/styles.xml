@@ -2,8 +2,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
   <style
-      name="SimplifiedTheme"
-      parent="android:Theme.Holo.Light">
+    name="SimplifiedTheme"
+    parent="android:Theme.Holo.Light">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
     <item name="android:icon">@drawable/ic_menu</item>
     <item name="button_foreground">@color/app_main_color</item>
@@ -16,7 +16,7 @@
 
 
   <style
-      name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
+    name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
 
     <item name="button_foreground">@color/feature_main_color_nypl</item>
     <item name="list_item_foreground">@color/feature_main_color_nypl</item>
@@ -27,7 +27,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
+    name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
 
     <item name="button_foreground">@color/feature_main_color</item>
     <item name="list_item_foreground">@color/feature_main_color</item>
@@ -39,7 +39,7 @@
 
 
   <style
-      name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
+    name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
 
     <item name="button_foreground">@color/feature_main_color_bpl</item>
     <item name="list_item_foreground">@color/feature_main_color_bpl</item>
@@ -50,7 +50,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_REL" parent="SimplifiedTheme">
+    name="SimplifiedTheme_REL" parent="SimplifiedTheme">
 
     <item name="button_foreground">@color/feature_main_color_rel</item>
     <item name="list_item_foreground">@color/feature_main_color_rel</item>
@@ -61,7 +61,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_WCFL" parent="SimplifiedTheme">
+    name="SimplifiedTheme_WCFL" parent="SimplifiedTheme">
 
     <item name="button_foreground">@color/feature_main_color_wcfl</item>
     <item name="list_item_foreground">@color/feature_main_color_wcfl</item>
@@ -72,7 +72,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_SCCL" parent="SimplifiedTheme">
+    name="SimplifiedTheme_SCCL" parent="SimplifiedTheme">
 
     <item name="button_foreground">@color/feature_main_color_sccl</item>
     <item name="list_item_foreground">@color/feature_main_color_sccl</item>
@@ -83,7 +83,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_ACL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedTheme_ACL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_acl</item>
     <item name="list_item_foreground">@color/feature_main_color_acl</item>
@@ -93,7 +93,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_HCLS" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedTheme_HCLS" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_hcls</item>
     <item name="list_item_foreground">@color/feature_main_color_hcls</item>
@@ -104,7 +104,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_FCPL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedTheme_FCPL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_fcpl</item>
     <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
@@ -115,7 +115,7 @@
   </style>
 
   <style
-      name="SimplifiedTheme_MCPL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedTheme_MCPL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_mcpl</item>
     <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
@@ -126,7 +126,7 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_SCCL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_SCCL" parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_sccl</item>
     <item name="list_item_foreground">@color/feature_main_color_sccl</item>
@@ -137,8 +137,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar"
-      parent="android:Theme.Holo.Light.NoActionBar">
+    name="SimplifiedThemeNoActionBar"
+    parent="android:Theme.Holo.Light.NoActionBar">
     <item name="android:windowActionBar">false</item>
     <item name="android:windowNoTitle">true</item>
 
@@ -151,8 +151,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_NYPL"
-      parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_NYPL"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_nypl</item>
     <item name="list_item_foreground">@color/feature_main_color_nypl</item>
@@ -163,8 +163,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_BPL"
-      parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_BPL"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_bpl</item>
     <item name="list_item_foreground">@color/feature_main_color_bpl</item>
@@ -175,7 +175,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_ACL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_ACL"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_acl</item>
     <item name="list_item_foreground">@color/feature_main_color_acl</item>
@@ -185,7 +186,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_HCLS" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_HCLS"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_hcls</item>
     <item name="list_item_foreground">@color/feature_main_color_hcls</item>
@@ -196,7 +198,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_FCPL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_FCPL"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_fcpl</item>
     <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
@@ -207,7 +210,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_MCPL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_MCPL"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_mcpl</item>
     <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
@@ -218,7 +222,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_REL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_REL"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_rel</item>
     <item name="list_item_foreground">@color/feature_main_color_rel</item>
@@ -229,7 +234,8 @@
   </style>
 
   <style
-      name="SimplifiedThemeNoActionBar_WCFL" parent="SimplifiedThemeNoActionBar">
+    name="SimplifiedThemeNoActionBar_WCFL"
+    parent="SimplifiedThemeNoActionBar">
 
     <item name="button_foreground">@color/feature_main_color_wcfl</item>
     <item name="list_item_foreground">@color/feature_main_color_wcfl</item>
@@ -247,16 +253,16 @@
   </style>
 
   <style
-      name="SimplifiedBookDialog"
-      parent="SimplifiedTheme">
+    name="SimplifiedBookDialog"
+    parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>
   </style>
 
   <style
-      name="SimplifiedLoginDialog"
-      parent="SimplifiedTheme">
+    name="SimplifiedLoginDialog"
+    parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>

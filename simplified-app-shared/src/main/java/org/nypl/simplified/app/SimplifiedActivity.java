@@ -279,7 +279,7 @@ public abstract class SimplifiedActivity extends Activity
     }
     else if (id == 15) {
       setTheme(R.style.SimplifiedTheme_CCPL);
-    } 
+    }
     else if (id == 16) {
       setTheme(R.style.SimplifiedTheme_CCL);
     }
