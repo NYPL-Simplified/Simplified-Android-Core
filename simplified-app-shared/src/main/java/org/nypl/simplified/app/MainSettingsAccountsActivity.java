@@ -125,6 +125,16 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
         icon_view.setImageResource(R.drawable.account_logo_ccpl);
       } else if (account.getId() == 16) {
         icon_view.setImageResource(R.drawable.account_logo_ccl);
+      } else if (account.getId() == 17) {
+        icon_view.setImageResource(R.drawable.account_logo_bcl);
+      } else if (account.getId() == 18) {
+        icon_view.setImageResource(R.drawable.account_logo_lapl);
+      } else if (account.getId() == 20) {
+        icon_view.setImageResource(R.drawable.account_logo_sccl);
+      } else if (account.getId() == 22) {
+        icon_view.setImageResource(R.drawable.account_logo_rel);
+      } else if (account.getId() == 23) {
+        icon_view.setImageResource(R.drawable.account_logo_wcfl);
       }
 
 
@@ -217,6 +227,16 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
             icon_view.setImageResource(R.drawable.account_logo_ccpl);
           } else if (account.getId() == 16) {
             icon_view.setImageResource(R.drawable.account_logo_ccl);
+          } else if (account.getId() == 17) {
+            icon_view.setImageResource(R.drawable.account_logo_bcl);
+          } else if (account.getId() == 18) {
+            icon_view.setImageResource(R.drawable.account_logo_lapl);
+          } else if (account.getId() == 20) {
+            icon_view.setImageResource(R.drawable.account_logo_sccl);
+          } else if (account.getId() == 22) {
+            icon_view.setImageResource(R.drawable.account_logo_rel);
+          } else if (account.getId() == 23) {
+            icon_view.setImageResource(R.drawable.account_logo_wcfl);
           }
 
           return v;
