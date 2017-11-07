@@ -8,6 +8,8 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -360,7 +362,17 @@ public final class LoginDialog extends DialogFragment
     final CheckBox in_eula_checkbox =
       NullCheck.notNull((CheckBox) in_layout.findViewById(R.id.eula_checkbox));
 
-
+    Account currAcct = Simplified.getCurrentAccount();
+    if(currAcct != null){
+      if (currAcct.getPinLength() != null && currAcct.getPinLength() != 0) {
+        InputFilter[] fArray = new InputFilter[1];
+        fArray[0] = new InputFilter.LengthFilter(currAcct.getPinLength());
+        in_pin_edit.setFilters(fArray);
+      }
+      if (!currAcct.getPinLetters()) {
+        in_pin_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+      }
+  }
 
 
     final Button in_login_request_new_code = NullCheck.notNull(

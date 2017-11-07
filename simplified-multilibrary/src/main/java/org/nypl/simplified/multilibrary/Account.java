@@ -41,6 +41,8 @@ public class Account implements Serializable {
   private String eula;
   private String content_license;
   private String privacy_policy;
+  private Integer pin_length;
+  private boolean pin_letters;
   private String catalog_url_under_13;
   private String catalog_url_13_and_over;
 
@@ -58,6 +60,9 @@ public class Account implements Serializable {
   public String getEula() {
     return eula;
   }
+
+  public Integer getPinLength() { return pin_length; }
+  public boolean getPinLetters() { return pin_letters; }
 
 
   public void setContentLicense(String in_contentLicense) {
@@ -336,6 +341,12 @@ public class Account implements Serializable {
         this.content_license = account.getString("licenseUrl");
       }
 
+      if (!account.isNull("authPasscodeLength")) {
+        this.pin_length = account.getInt("authPasscodeLength");
+      }
+      if (!account.isNull("authPasscodeAllowsLetters")) {
+        this.pin_letters = account.getBoolean("authPasscodeAllowsLetters");
+      }
 
     } catch (JSONException e) {
       e.printStackTrace();
