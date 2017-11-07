@@ -284,6 +284,7 @@
 
   </style>
 
+  <!-- Porterville City Library -->
   <style
       name="SimplifiedTheme_PCL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_pcl</item>
@@ -608,6 +609,7 @@
 
   </style>
 
+  <!-- Porterville City Library -->
   <style
       name="SimplifiedThemeNoActionBar_PCL"
       parent="SimplifiedThemeNoActionBar">
