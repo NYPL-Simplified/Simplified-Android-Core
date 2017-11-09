@@ -225,6 +225,18 @@
 
   </style>
 
+  <!-- Porterville City Library -->
+  <style
+    name="SimplifiedTheme_PCL" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_pcl</item>
+    <item name="list_item_foreground">@color/feature_main_color_pcl</item>
+    <item name="downloading_background">@color/feature_main_color_pcl</item>
+    <item name="notification_background">@color/feature_main_color_pcl</item>
+    <item name="main_color">@color/feature_main_color_pcl</item>
+
+  </style>
+
   <style
     name="SimplifiedThemeNoActionBar"
     parent="android:Theme.Holo.Light.NoActionBar">
@@ -439,6 +451,18 @@
     <item name="notification_background">@color/feature_main_color_wcfl</item>
     <item name="main_color">@color/feature_main_color_wcfl</item>
 
+  </style>
+
+  <!-- Porterville City Library -->
+  <style
+    name="SimplifiedThemeNoActionBar_PCL"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_pcl</item>
+    <item name="list_item_foreground">@color/feature_main_color_pcl</item>
+    <item name="downloading_background">@color/feature_main_color_pcl</item>
+    <item name="notification_background">@color/feature_main_color_pcl</item>
+    <item name="main_color">@color/feature_main_color_pcl</item>
   </style>
 
   <!-- Santa Clara County Library -->
