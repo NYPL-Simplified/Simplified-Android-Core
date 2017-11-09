@@ -237,6 +237,18 @@
 
   </style>
 
+  <!-- Allegany County Library System -->
+  <style
+    name="SimplifiedTheme_ACLS" parent="SimplifiedTheme">
+
+    <item name="button_foreground">@color/feature_main_color_acls</item>
+    <item name="list_item_foreground">@color/feature_main_color_acls</item>
+    <item name="downloading_background">@color/feature_main_color_acls</item>
+    <item name="notification_background">@color/feature_main_color_acls</item>
+    <item name="main_color">@color/feature_main_color_acls</item>
+
+  </style>
+
   <style
     name="SimplifiedThemeNoActionBar"
     parent="android:Theme.Holo.Light.NoActionBar">
@@ -463,6 +475,18 @@
     <item name="downloading_background">@color/feature_main_color_pcl</item>
     <item name="notification_background">@color/feature_main_color_pcl</item>
     <item name="main_color">@color/feature_main_color_pcl</item>
+  </style>
+
+  <!-- Allegany County Library System -->
+  <style
+    name="SimplifiedThemeNoActionBar_ACLS"
+    parent="SimplifiedThemeNoActionBar">
+
+    <item name="button_foreground">@color/feature_main_color_acls</item>
+    <item name="list_item_foreground">@color/feature_main_color_acls</item>
+    <item name="downloading_background">@color/feature_main_color_acls</item>
+    <item name="notification_background">@color/feature_main_color_acls</item>
+    <item name="main_color">@color/feature_main_color_acls</item>
   </style>
 
   <!-- Santa Clara County Library -->
