@@ -32,7 +32,7 @@ dependencies {
   compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   compile "com.android.support:support-v4:26.1.0"
   compile 'org.nypl.readium:readium-sdk-android-runtime:0.25.0'
-  compile 'org.nypl.readium:readium-shared-js:0.25.0'
+  compile 'org.nypl.readium:readium-shared-js:0.27.0'
   compile 'com.koushikdutta.async:androidasync:2.2.1'
   compile group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
   compile 'com.nanohttpd:nanohttpd:2.2.0'
