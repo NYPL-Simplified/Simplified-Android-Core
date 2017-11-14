@@ -84,25 +84,56 @@ public final class ReaderPaginationChangedEvent
 
   /**
    * @return The fractional progress throughout the entire book, where {@code
-   * 0.0} is the start of the book, and {@code 1.0} is the end.
+   * 0.0} is the start of the book and {@code 1.0} is the end. Since the
+   * current page is always considered unread, this value will never actually
+   * hit {@code 1.0}.
    */
 
   public double getProgressFractional()
   {
+    // This should never happen.
     if (this.open_pages.size() < 1) {
       return 0.0;
     }
 
+    // Avoid later dividing by 0.0 if we're in an unexpected state.
+    if (this.spine_item_count < 1) {
+      return 0.0;
+    }
+
     final OpenPage page = NullCheck.notNull(this.open_pages.get(0));
-    final double major_index = (double) page.spine_item_index;
-    final double major_max = (double) this.spine_item_count;
-    final double major = major_index / major_max;
 
-    final double minor_index = (double) page.spine_item_page_index;
-    final double minor_max = (double) page.spine_item_page_count;
-    final double minor = minor_index / minor_max;
+    // Avoid later dividing by 0.0 if we're in an unexpected state.
+    if (page.spine_item_page_count == 0) {
+      return 0.0;
+    }
 
-    return major + (minor * 0.1);
+    // Assumes the current spine item has never been read completely and thus
+    // never hits 1.0.
+    final double progressWithinSpine =
+        page.spine_item_index / (double) this.spine_item_count;
+
+    // Assumes the current page has not been read completely and thus never
+    // hits 1.0.
+    final double progressWithinCurrentSpineItem =
+        page.spine_item_page_index / (double) page.spine_item_page_count;
+
+    // Reading one spine item increases your progress by this much.
+    final double progressPerSpineItem = 1.0 / (double) this.spine_item_count;
+
+    // The progress within the current spine item represents approximately this
+    // much progress within the entire book.
+    final double progressWithinCurrentSpineItemRelativeToBook =
+        progressWithinCurrentSpineItem * progressPerSpineItem;
+
+    // The reader's spine item progress plus their progress within the current
+    // spine item relative to the book gives a reasonably accurate estimate of
+    // their total progress.
+    final double progress =
+      progressWithinSpine + progressWithinCurrentSpineItemRelativeToBook;
+
+    // Our value will always be safely in the range [0.0, 1.0).
+    return progress;
   }
 
   /**
