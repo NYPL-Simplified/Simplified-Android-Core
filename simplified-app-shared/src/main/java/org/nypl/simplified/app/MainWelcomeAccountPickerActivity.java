@@ -153,6 +153,8 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
             icon_view.setImageResource(R.drawable.account_logo_pcl);
           } else if (account.getId() == 20) {
             icon_view.setImageResource(R.drawable.account_logo_sccl);
+          } else if (account.getId() == 21) {
+            icon_view.setImageResource(R.drawable.account_logo_acls);
           } else if (account.getId() == 22) {
             icon_view.setImageResource(R.drawable.account_logo_rel);
           } else if (account.getId() == 23) {
