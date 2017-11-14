@@ -8,6 +8,8 @@ import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -59,6 +61,8 @@ public final class LoginDialog extends DialogFragment
   private static final String PIN_ID;
   private static final String TEXT_ID;
   private static final String ACCOUNT_ID;
+  private static final String PIN_ALLOWS_LETTERS;
+  private static final String PIN_LENGTH;
 
   static {
     LOG = LogUtilities.getLog(LoginDialog.class);
@@ -69,6 +73,8 @@ public final class LoginDialog extends DialogFragment
     PIN_ID = "org.nypl.simplified.app.LoginDialog.pin";
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
     ACCOUNT_ID = "org.nypl.simplified.app.LoginDialog.accountid";
+    PIN_ALLOWS_LETTERS = "org.nypl.simplified.app.LoginDialog.pinAllowsLetters";
+    PIN_LENGTH = "org.nypl.simplified.app.LoginDialog.pinLength";
   }
 
   private @Nullable EditText          barcode_edit;
@@ -134,10 +140,14 @@ public final class LoginDialog extends DialogFragment
     NullCheck.notNull(barcode);
     NullCheck.notNull(pin);
 
+    final Account account = Simplified.getCurrentAccount();
+
     final Bundle b = new Bundle();
     b.putSerializable(LoginDialog.TEXT_ID, text);
     b.putSerializable(LoginDialog.PIN_ID, pin);
     b.putSerializable(LoginDialog.BARCODE_ID, barcode);
+    b.putSerializable(LoginDialog.PIN_ALLOWS_LETTERS, account.pinAllowsLetters());
+    b.putSerializable(LoginDialog.PIN_LENGTH, account.getPinLength());
 
     final LoginDialog d = new LoginDialog();
     d.setArguments(b);
@@ -168,6 +178,8 @@ public final class LoginDialog extends DialogFragment
     b.putSerializable(LoginDialog.PIN_ID, pin);
     b.putSerializable(LoginDialog.BARCODE_ID, barcode);
     b.putSerializable(LoginDialog.ACCOUNT_ID, account.getPathComponent());
+    b.putSerializable(LoginDialog.PIN_ALLOWS_LETTERS, account.pinAllowsLetters());
+    b.putSerializable(LoginDialog.PIN_LENGTH, account.getPinLength());
 
     final LoginDialog d = new LoginDialog();
     d.setArguments(b);
@@ -332,8 +344,9 @@ public final class LoginDialog extends DialogFragment
     final String initial_txt =
       NullCheck.notNull(b.getString(LoginDialog.TEXT_ID));
 
-    final String account_id =
-      b.getString(LoginDialog.ACCOUNT_ID);
+    final String account_id = b.getString(LoginDialog.ACCOUNT_ID);
+    final int pin_length = b.getInt(LoginDialog.PIN_LENGTH);
+    final boolean pin_allows_letters = b.getBoolean(LoginDialog.PIN_ALLOWS_LETTERS);
 
     final ViewGroup in_layout = NullCheck.notNull(
       (ViewGroup) inflater.inflate(
@@ -349,8 +362,17 @@ public final class LoginDialog extends DialogFragment
 
     final TextView in_pin_label = NullCheck.notNull(
       (TextView) in_layout.findViewById(R.id.login_dialog_pin_text_view));
+
     final EditText in_pin_edit = NullCheck.notNull(
       (EditText) in_layout.findViewById(R.id.login_dialog_pin_text_edit));
+    if (!pin_allows_letters) {
+      in_pin_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+    }
+    if (pin_length != 0) {
+      in_pin_edit.setFilters(new InputFilter[] {
+          new InputFilter.LengthFilter(pin_length)
+      });
+    }
 
     final Button in_login_button =
       NullCheck.notNull((Button) in_layout.findViewById(R.id.login_dialog_ok));
@@ -359,9 +381,6 @@ public final class LoginDialog extends DialogFragment
 
     final CheckBox in_eula_checkbox =
       NullCheck.notNull((CheckBox) in_layout.findViewById(R.id.eula_checkbox));
-
-
-
 
     final Button in_login_request_new_code = NullCheck.notNull(
       (Button) in_layout.findViewById(R.id.request_new_codes));

@@ -11,11 +11,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 
-/**
- * Created by aferditamuriqi on 8/29/16.
- *
- */
-
 public class Account implements Serializable {
 
   private Integer id;
@@ -30,35 +25,32 @@ public class Account implements Serializable {
   private boolean supports_reservations;
   private boolean supports_card_creator;
   private boolean supports_help_center;
-
   private String support_email;
-
   private String card_creator_url;
-
   private String catalog_url;
   private String main_color;
-
   private String eula;
   private String content_license;
   private String privacy_policy;
   private String catalog_url_under_13;
   private String catalog_url_13_and_over;
+  private Integer pin_length;
+  private boolean pin_allows_letters;
 
   public String getPrivacyPolicy() {
     return privacy_policy;
   }
-
   public String getContentLicense() {
     return content_license;
   }
   public String getSupportEmail() {
     return support_email;
   }
-
   public String getEula() {
     return eula;
   }
-
+  public Integer getPinLength() { return pin_length; }
+  public boolean pinAllowsLetters() { return pin_allows_letters; }
 
   public void setContentLicense(String in_contentLicense) {
     this.content_license = in_contentLicense;
@@ -219,7 +211,6 @@ public class Account implements Serializable {
     this.supports_reservations = supports_reservations;
   }
 
-
   /**
    * @return
    */
@@ -262,7 +253,6 @@ public class Account implements Serializable {
     this.supports_simplye_sync = supports_simplye_sync;
   }
 
-
   /**
    * @return
    */
@@ -278,12 +268,10 @@ public class Account implements Serializable {
   }
 
 
-
   /**
    * @param account The Json Account
    */
   public Account(final JSONObject account) {
-
 
     try {
       this.id = account.getInt("id");
@@ -301,9 +289,15 @@ public class Account implements Serializable {
       if (!account.isNull("cardCreatorUrl")) {
         this.card_creator_url = account.getString("cardCreatorUrl");
       }
-      this.needs_auth = account.getBoolean("needsAuth");
-      this.supports_reservations = account.getBoolean("supportsReservations");
-      this.supports_card_creator = account.getBoolean("supportsCardCreator");
+      if (!account.isNull("needsAuth")) {
+        this.needs_auth = account.getBoolean("needsAuth");
+      }
+      if (!account.isNull("supportsReservations")) {
+        this.supports_reservations = account.getBoolean("supportsReservations");
+      }
+      if (!account.isNull("supportsCardCreator")) {
+        this.supports_card_creator = account.getBoolean("supportsCardCreator");
+      }
       if (!account.isNull("supportsSimplyESync")) {
         this.supports_simplye_sync = account.getBoolean("supportsSimplyESync");
       }
@@ -316,16 +310,12 @@ public class Account implements Serializable {
       if (!account.isNull("supportsBarcodeDisplay")) {
         this.supports_barcode_display = account.getBoolean("supportsBarcodeDisplay");
       }
-
       if (!account.isNull("supportEmail")) {
         this.support_email = account.getString("supportEmail");
       }
-
       if (!account.isNull("mainColor")) {
         this.main_color = account.getString("mainColor");
       }
-
-
       if (!account.isNull("eulaUrl")) {
         this.eula = account.getString("eulaUrl");
       }
@@ -335,7 +325,16 @@ public class Account implements Serializable {
       if (!account.isNull("licenseUrl")) {
         this.content_license = account.getString("licenseUrl");
       }
-
+      if (!account.isNull("authPasscodeLength")) {
+        this.pin_length = account.getInt("authPasscodeLength");
+      } else {
+        this.pin_length = 0;
+      }
+      if (!account.isNull("authPasscodeAllowsLetters")) {
+        this.pin_allows_letters = account.getBoolean("authPasscodeAllowsLetters");
+      } else {
+        this.pin_allows_letters = true;
+      }
 
     } catch (JSONException e) {
       e.printStackTrace();
@@ -369,6 +368,8 @@ public class Account implements Serializable {
       object.put("supportsSimplyESync", this.supports_simplye_sync);
       object.put("supportsBarcodeScanner", this.supports_barcode_scanner);
       object.put("supportsBarcodeDisplay", this.supports_barcode_display);
+      object.put("authPasscodeLength", this.pin_length);
+      object.put("authPasscodeAllowsLetters", this.pin_allows_letters);
       object.put("mainColor", this.main_color);
     } catch (JSONException e) {
       e.printStackTrace();
