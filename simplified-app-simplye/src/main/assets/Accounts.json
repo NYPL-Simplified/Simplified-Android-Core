@@ -72,7 +72,8 @@
     "supportsCardCreator" : false,
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
-    "catalogUrl" : "http://bgc.simplye-ca.org",
+    "catalogUrl" : "http://bgc.simplye-ca.org/",
+    "supportEmail": "blackgoldhq@blackgold.org",
     "mainColor" : "#d2a74a",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
