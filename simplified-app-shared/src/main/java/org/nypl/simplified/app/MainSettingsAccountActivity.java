@@ -163,6 +163,18 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
           } else if (MainSettingsAccountActivity.this.account.getId() == 16) {
             in_account_icon.setImageResource(R.drawable.account_logo_ccl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 17) {
+            in_account_icon.setImageResource(R.drawable.account_logo_bcl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 18) {
+            in_account_icon.setImageResource(R.drawable.account_logo_lapl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 19) {
+            in_account_icon.setImageResource(R.drawable.account_logo_pcl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
+            in_account_icon.setImageResource(R.drawable.account_logo_sccl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
+            in_account_icon.setImageResource(R.drawable.account_logo_rel);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
+            in_account_icon.setImageResource(R.drawable.account_logo_wcfl);
           }
 
           in_barcode_text.setText(creds.getBarcode().toString());
@@ -896,6 +908,18 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
     } else if (MainSettingsAccountActivity.this.account.getId() == 16) {
       in_account_icon.setImageResource(R.drawable.account_logo_ccl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 17) {
+      in_account_icon.setImageResource(R.drawable.account_logo_bcl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 18) {
+      in_account_icon.setImageResource(R.drawable.account_logo_lapl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 19) {
+      in_account_icon.setImageResource(R.drawable.account_logo_pcl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
+      in_account_icon.setImageResource(R.drawable.account_logo_sccl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
+      in_account_icon.setImageResource(R.drawable.account_logo_rel);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
+      in_account_icon.setImageResource(R.drawable.account_logo_wcfl);
     }
 
 

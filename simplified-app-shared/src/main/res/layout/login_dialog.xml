@@ -74,9 +74,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_weight="1"
-        android:inputType="textNoSuggestions"
+        android:inputType="textPassword"
         android:minWidth="160dp"
-        android:maxLength="4"
         android:maxLines="1">
       </EditText>
     </TableRow>

@@ -283,6 +283,24 @@ public abstract class SimplifiedActivity extends Activity
     else if (id == 16) {
       setTheme(R.style.SimplifiedTheme_CCL);
     }
+    else if (id == 17) {
+      setTheme(R.style.SimplifiedTheme_BCL);
+    }
+    else if (id == 18) {
+      setTheme(R.style.SimplifiedTheme_LAPL);
+    }
+    else if (id == 19) {
+      setTheme(R.style.SimplifiedTheme_PCL);
+    }
+    else if (id == 20) {
+      setTheme(R.style.SimplifiedTheme_SCCL);
+    }
+    else if (id == 22) {
+      setTheme(R.style.SimplifiedTheme_REL);
+    }
+    else if (id == 23) {
+      setTheme(R.style.SimplifiedTheme_WCFL);
+    }
     else {
       setTheme(R.style.SimplifiedTheme);
     }
@@ -434,6 +452,18 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_ccpl);
             } else if (account.getId() == 16) {
               icon_view.setImageResource(R.drawable.account_logo_ccl);
+            } else if (account.getId() == 17) {
+              icon_view.setImageResource(R.drawable.account_logo_bcl);
+            } else if (account.getId() == 18) {
+              icon_view.setImageResource(R.drawable.account_logo_lapl);
+            } else if (account.getId() == 19) {
+              icon_view.setImageResource(R.drawable.account_logo_pcl);
+            } else if (account.getId() == 20) {
+              icon_view.setImageResource(R.drawable.account_logo_sccl);
+            } else if (account.getId() == 22) {
+              icon_view.setImageResource(R.drawable.account_logo_rel);
+            } else if (account.getId() == 23) {
+              icon_view.setImageResource(R.drawable.account_logo_wcfl);
             }
           } else {
             final ImageView icon_view =
@@ -509,8 +539,20 @@ public abstract class SimplifiedActivity extends Activity
               icon_view.setImageResource(R.drawable.account_logo_ccpl);
             } else if (account.getId() == 16) {
               icon_view.setImageResource(R.drawable.account_logo_ccl);
+            } else if (account.getId() == 17) {
+              icon_view.setImageResource(R.drawable.account_logo_bcl);
+            } else if (account.getId() == 18) {
+              icon_view.setImageResource(R.drawable.account_logo_lapl);
+            } else if (account.getId() == 19) {
+              icon_view.setImageResource(R.drawable.account_logo_pcl);
+            } else if (account.getId() == 20) {
+              icon_view.setImageResource(R.drawable.account_logo_sccl);
+            } else if (account.getId() == 22) {
+              icon_view.setImageResource(R.drawable.account_logo_rel);
+            } else if (account.getId() == 23) {
+              icon_view.setImageResource(R.drawable.account_logo_wcfl);
             }
-      
+
           } else {
             tv.setText(part.getPartName(rr));
             if (dl.getCheckedItemPosition() == position) {

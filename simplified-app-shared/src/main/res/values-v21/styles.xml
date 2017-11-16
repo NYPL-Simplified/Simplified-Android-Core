@@ -2,8 +2,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
   <style
-    name="SimplifiedTheme"
-    parent="android:Theme.Material.Light.DarkActionBar">
+      name="SimplifiedTheme"
+      parent="android:Theme.Material.Light.DarkActionBar">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
     <item name="android:actionBarStyle">@style/ActionBar</item>
 
@@ -22,7 +22,7 @@
 
 
   <style
-    name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_NYPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_nypl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_nypl</item>
     <item name="android:colorAccent">@color/feature_main_color_nypl</item>
@@ -36,7 +36,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_BPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_bpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_bpl</item>
     <item name="android:colorAccent">@color/feature_main_color_bpl</item>
@@ -50,21 +50,7 @@
   </style>
 
   <style
-    name="SimplifiedTheme_ACL" parent="SimplifiedTheme">
-    <item name="android:colorPrimary">@color/feature_main_color_acl</item>
-    <item name="android:colorPrimaryDark">@color/feature_secondary_color_acl</item>
-    <item name="android:colorAccent">@color/feature_main_color_acl</item>
-
-    <item name="button_foreground">@color/feature_main_color_acl</item>
-    <item name="list_item_foreground">@color/feature_main_color_acl</item>
-    <item name="downloading_background">@color/feature_main_color_acl</item>
-    <item name="notification_background">@color/feature_main_color_acl</item>
-    <item name="main_color">@color/feature_main_color_acl</item>
-
-  </style>
-
-  <style
-    name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
+      name="SimplifiedTheme_Magic" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color</item>
     <item name="android:colorAccent">@color/feature_main_color</item>
@@ -77,8 +63,127 @@
 
   </style>
 
+  <!-- Carroll County Library -->
   <style
-    name="SimplifiedTheme_HCLS" parent="SimplifiedTheme">
+      name="SimplifiedTheme_CCL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_ccl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccl</item>
+    <item name="android:colorAccent">@color/feature_main_color_ccl</item>
+    <item name="button_foreground">@color/feature_main_color_ccl</item>
+
+    <item name="list_item_foreground">@color/feature_main_color_ccl</item>
+    <item name="downloading_background">@color/feature_main_color_ccl</item>
+    <item name="notification_background">@color/feature_main_color_ccl</item>
+    <item name="main_color">@color/feature_main_color_ccl</item>
+
+  </style>
+
+  <!-- Butte County Library -->
+  <style
+      name="SimplifiedTheme_BCL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_bcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_bcl</item>
+    <item name="android:colorAccent">@color/feature_main_color_bcl</item>
+    <item name="button_foreground">@color/feature_main_color_bcl</item>
+
+    <item name="list_item_foreground">@color/feature_main_color_bcl</item>
+    <item name="downloading_background">@color/feature_main_color_bcl</item>
+    <item name="notification_background">@color/feature_main_color_bcl</item>
+    <item name="main_color">@color/feature_main_color_bcl</item>
+
+  </style>
+
+  <!-- Anne Arundel County Public Library -->
+  <style
+      name="SimplifiedTheme_AACPL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_aacpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_aacpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_aacpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_aacpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_aacpl</item>
+    <item name="downloading_background">@color/feature_main_color_aacpl</item>
+    <item name="notification_background">@color/feature_main_color_aacpl</item>
+    <item name="main_color">@color/feature_main_color_aacpl</item>
+
+  </style>
+
+  <!-- Alameda County Library -->
+  <style
+      name="SimplifiedTheme_ACL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_acl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_acl</item>
+    <item name="android:colorAccent">@color/feature_main_color_acl</item>
+
+    <item name="button_foreground">@color/feature_main_color_acl</item>
+    <item name="list_item_foreground">@color/feature_main_color_acl</item>
+    <item name="downloading_background">@color/feature_main_color_acl</item>
+    <item name="notification_background">@color/feature_main_color_acl</item>
+    <item name="main_color">@color/feature_main_color_acl</item>
+  </style>
+
+  <!-- St. Mary's County Library -->
+  <style
+      name="SimplifiedTheme_SMCL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_smcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_smcl</item>
+    <item name="android:colorAccent">@color/feature_main_color_smcl</item>
+
+    <item name="button_foreground">@color/feature_main_color_smcl</item>
+    <item name="list_item_foreground">@color/feature_main_color_smcl</item>
+    <item name="downloading_background">@color/feature_main_color_smcl</item>
+    <item name="notification_background">@color/feature_main_color_smcl</item>
+    <item name="main_color">@color/feature_main_color_smcl</item>
+
+  </style>
+
+  <!-- Charles County Public Library -->
+  <style
+      name="SimplifiedTheme_CCPL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_ccpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_ccpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_ccpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_ccpl</item>
+    <item name="downloading_background">@color/feature_main_color_ccpl</item>
+    <item name="notification_background">@color/feature_main_color_ccpl</item>
+    <item name="main_color">@color/feature_main_color_ccpl</item>
+
+  </style>
+
+  <!-- Frederick County Public Library -->
+  <style
+      name="SimplifiedTheme_FCPL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_fcpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_fcpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_fcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+    <item name="downloading_background">@color/feature_main_color_fcpl</item>
+    <item name="notification_background">@color/feature_main_color_fcpl</item>
+    <item name="main_color">@color/feature_main_color_fcpl</item>
+  </style>
+
+  <!-- Calvert Library -->
+  <style
+      name="SimplifiedTheme_CL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_cl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_cl</item>
+    <item name="android:colorAccent">@color/feature_main_color_cl</item>
+
+    <item name="button_foreground">@color/feature_main_color_cl</item>
+    <item name="list_item_foreground">@color/feature_main_color_cl</item>
+    <item name="downloading_background">@color/feature_main_color_cl</item>
+    <item name="notification_background">@color/feature_main_color_cl</item>
+    <item name="main_color">@color/feature_main_color_cl</item>
+
+  </style>
+
+  <!-- Howard County Library System -->
+  <style
+      name="SimplifiedTheme_HCLS" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_hcls</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_hcls</item>
     <item name="android:colorAccent">@color/feature_main_color_hcls</item>
@@ -88,11 +193,11 @@
     <item name="downloading_background">@color/feature_main_color_hcls</item>
     <item name="notification_background">@color/feature_main_color_hcls</item>
     <item name="main_color">@color/feature_main_color_hcls</item>
-
   </style>
 
+  <!-- Montgomery County Public Library -->
   <style
-    name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
+      name="SimplifiedTheme_MCPL" parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_mcpl</item>
     <item name="android:colorPrimaryDark">@color/feature_secondary_color_mcpl</item>
     <item name="android:colorAccent">@color/feature_main_color_mcpl</item>
@@ -102,107 +207,97 @@
     <item name="downloading_background">@color/feature_main_color_mcpl</item>
     <item name="notification_background">@color/feature_main_color_mcpl</item>
     <item name="main_color">@color/feature_main_color_mcpl</item>
+  </style>
+
+  <!-- Black Gold Cooperative -->
+  <style
+      name="SimplifiedTheme_BGC" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_bgc</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_bgc</item>
+    <item name="android:colorAccent">@color/feature_main_color_bgc</item>
+
+    <item name="button_foreground">@color/feature_main_color_bgc</item>
+    <item name="list_item_foreground">@color/feature_main_color_bgc</item>
+    <item name="downloading_background">@color/feature_main_color_bgc</item>
+    <item name="notification_background">@color/feature_main_color_bgc</item>
+    <item name="main_color">@color/feature_main_color_bgc</item>
 
   </style>
 
- <style
-   name="SimplifiedTheme_FCPL" parent="SimplifiedTheme">
-   <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
-   <item name="android:colorPrimaryDark">@color/feature_secondary_color_fcpl</item>
-   <item name="android:colorAccent">@color/feature_main_color_fcpl</item>
-
-   <item name="button_foreground">@color/feature_main_color_fcpl</item>
-   <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
-   <item name="downloading_background">@color/feature_main_color_fcpl</item>
-   <item name="notification_background">@color/feature_main_color_fcpl</item>
-   <item name="main_color">@color/feature_main_color_fcpl</item>
-
- </style>
-
+  <!-- Los Angeles Public Library -->
   <style
-   name="SimplifiedTheme_AACPL" parent="SimplifiedTheme">
-   <item name="android:colorPrimary">@color/feature_main_color_aacpl</item>
-   <item name="android:colorPrimaryDark">@color/feature_secondary_color_aacpl</item>
-   <item name="android:colorAccent">@color/feature_main_color_aacpl</item>
+      name="SimplifiedTheme_LAPL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_lapl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_lapl</item>
+    <item name="android:colorAccent">@color/feature_main_color_lapl</item>
 
-   <item name="button_foreground">@color/feature_main_color_aacpl</item>
-   <item name="list_item_foreground">@color/feature_main_color_aacpl</item>
-   <item name="downloading_background">@color/feature_main_color_aacpl</item>
-   <item name="notification_background">@color/feature_main_color_aacpl</item>
-   <item name="main_color">@color/feature_main_color_aacpl</item>
+    <item name="button_foreground">@color/feature_main_color_lapl</item>
+    <item name="list_item_foreground">@color/feature_main_color_lapl</item>
+    <item name="downloading_background">@color/feature_main_color_lapl</item>
+    <item name="notification_background">@color/feature_main_color_lapl</item>
+    <item name="main_color">@color/feature_main_color_lapl</item>
 
- </style>
+  </style>
 
- <style
-   name="SimplifiedTheme_BGC" parent="SimplifiedTheme">
-   <item name="android:colorPrimary">@color/feature_main_color_bgc</item>
-   <item name="android:colorPrimaryDark">@color/feature_secondary_color_bgc</item>
-   <item name="android:colorAccent">@color/feature_main_color_bgc</item>
+  <!-- Ruth Enlow Library -->
+  <style
+      name="SimplifiedTheme_REL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_rel</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_rel</item>
+    <item name="android:colorAccent">@color/feature_main_color_rel</item>
 
-   <item name="button_foreground">@color/feature_main_color_bgc</item>
-   <item name="list_item_foreground">@color/feature_main_color_bgc</item>
-   <item name="downloading_background">@color/feature_main_color_bgc</item>
-   <item name="notification_background">@color/feature_main_color_bgc</item>
-   <item name="main_color">@color/feature_main_color_bgc</item>
-  
- </style>
+    <item name="button_foreground">@color/feature_main_color_rel</item>
+    <item name="list_item_foreground">@color/feature_main_color_rel</item>
+    <item name="downloading_background">@color/feature_main_color_rel</item>
+    <item name="notification_background">@color/feature_main_color_rel</item>
+    <item name="main_color">@color/feature_main_color_rel</item>
 
- <style
-   name="SimplifiedTheme_CCL" parent="SimplifiedTheme">
-   <item name="android:colorPrimary">@color/feature_main_color_ccl</item>
-   <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccl</item>
-   <item name="android:colorAccent">@color/feature_main_color_ccl</item>
-   <item name="button_foreground">@color/feature_main_color_ccl</item>
+  </style>
 
-   <item name="list_item_foreground">@color/feature_main_color_ccl</item>
-   <item name="downloading_background">@color/feature_main_color_ccl</item>
-   <item name="notification_background">@color/feature_main_color_ccl</item>
-   <item name="main_color">@color/feature_main_color_ccl</item>
+  <!-- Washington County Free Library -->
+  <style
+      name="SimplifiedTheme_WCFL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_wcfl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_wcfl</item>
+    <item name="android:colorAccent">@color/feature_main_color_wcfl</item>
 
- </style>
+    <item name="button_foreground">@color/feature_main_color_wcfl</item>
+    <item name="list_item_foreground">@color/feature_main_color_wcfl</item>
+    <item name="downloading_background">@color/feature_main_color_wcfl</item>
+    <item name="notification_background">@color/feature_main_color_wcfl</item>
+    <item name="main_color">@color/feature_main_color_wcfl</item>
 
- <style
-   name="SimplifiedTheme_SMCL" parent="SimplifiedTheme">
-   <item name="android:colorPrimary">@color/feature_main_color_smcl</item>
-   <item name="android:colorPrimaryDark">@color/feature_secondary_color_smcl</item>
-   <item name="android:colorAccent">@color/feature_main_color_smcl</item>
+  </style>
 
-   <item name="button_foreground">@color/feature_main_color_smcl</item>
-   <item name="list_item_foreground">@color/feature_main_color_smcl</item>
-   <item name="downloading_background">@color/feature_main_color_smcl</item>
-   <item name="notification_background">@color/feature_main_color_smcl</item>
-   <item name="main_color">@color/feature_main_color_smcl</item>
+  <!-- Santa Clara County Library -->
+  <style
+      name="SimplifiedTheme_SCCL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_sccl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_sccl</item>
+    <item name="android:colorAccent">@color/feature_main_color_sccl</item>
 
- </style>
+    <item name="button_foreground">@color/feature_main_color_sccl</item>
+    <item name="list_item_foreground">@color/feature_main_color_sccl</item>
+    <item name="downloading_background">@color/feature_main_color_sccl</item>
+    <item name="notification_background">@color/feature_main_color_sccl</item>
+    <item name="main_color">@color/feature_main_color_sccl</item>
 
- <style
-   name="SimplifiedTheme_CCPL" parent="SimplifiedTheme">
-   <item name="android:colorPrimary">@color/feature_main_color_ccpl</item>
-   <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccpl</item>
-   <item name="android:colorAccent">@color/feature_main_color_ccpl</item>
+  </style>
 
-   <item name="button_foreground">@color/feature_main_color_ccpl</item>
-   <item name="list_item_foreground">@color/feature_main_color_ccpl</item>
-   <item name="downloading_background">@color/feature_main_color_ccpl</item>
-   <item name="notification_background">@color/feature_main_color_ccpl</item>
-   <item name="main_color">@color/feature_main_color_ccpl</item>
+  <!-- Porterville City Library -->
+  <style
+      name="SimplifiedTheme_PCL" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_pcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_pcl</item>
+    <item name="android:colorAccent">@color/feature_main_color_pcl</item>
 
- </style>
+    <item name="button_foreground">@color/feature_main_color_pcl</item>
+    <item name="list_item_foreground">@color/feature_main_color_pcl</item>
+    <item name="downloading_background">@color/feature_main_color_pcl</item>
+    <item name="notification_background">@color/feature_main_color_pcl</item>
+    <item name="main_color">@color/feature_main_color_pcl</item>
 
- <style
-   name="SimplifiedTheme_CL" parent="SimplifiedTheme">
-   <item name="android:colorPrimary">@color/feature_main_color_cl</item>
-   <item name="android:colorPrimaryDark">@color/feature_secondary_color_cl</item>
-   <item name="android:colorAccent">@color/feature_main_color_cl</item>
-
-   <item name="button_foreground">@color/feature_main_color_cl</item>
-   <item name="list_item_foreground">@color/feature_main_color_cl</item>
-   <item name="downloading_background">@color/feature_main_color_cl</item>
-   <item name="notification_background">@color/feature_main_color_cl</item>
-   <item name="main_color">@color/feature_main_color_cl</item>
-
- </style>
-
+  </style>
 
   <style name="ActionBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">
     <item name="android:displayOptions">homeAsUp|showTitle</item>
@@ -212,8 +307,8 @@
 
 
   <style
-    name="SimplifiedThemeNoActionBar"
-    parent="android:Theme.Material.Light.NoActionBar">
+      name="SimplifiedThemeNoActionBar"
+      parent="android:Theme.Material.Light.NoActionBar">
     <item name="android:windowActionBar">false</item>
     <item name="android:windowNoTitle">true</item>
 
@@ -230,8 +325,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_NYPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_NYPL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_nypl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_nypl</item>
@@ -247,8 +342,8 @@
 
 
   <style
-    name="SimplifiedThemeNoActionBar_BPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_BPL"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color_bpl</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color_bpl</item>
@@ -263,40 +358,8 @@
   </style>
 
   <style
-    name="SimplifiedThemeNoActionBar_ACL"
-    parent="SimplifiedThemeNoActionBar">
-
-    <item name="android:colorPrimary">@color/feature_main_color_acl</item>
-    <item name="android:colorPrimaryDark">@color/feature_main_color_acl</item>
-    <item name="android:colorAccent">@color/feature_main_color_acl</item>
-
-    <item name="button_foreground">@color/feature_main_color_acl</item>
-    <item name="list_item_foreground">@color/feature_main_color_acl</item>
-    <item name="downloading_background">@color/feature_main_color_acl</item>
-    <item name="notification_background">@color/feature_main_color_acl</item>
-    <item name="main_color">@color/feature_main_color_acl</item>
-
-  </style>
-
-  <style
-    name="SimplifiedThemeNoActionBar_HCLS"
-    parent="SimplifiedThemeNoActionBar">
-
-    <item name="android:colorPrimary">@color/feature_main_color_hcls</item>
-    <item name="android:colorPrimaryDark">@color/feature_main_color_hcls</item>
-    <item name="android:colorAccent">@color/feature_main_color_hcls</item>
-
-    <item name="button_foreground">@color/feature_main_color_hcls</item>
-    <item name="list_item_foreground">@color/feature_main_color_hcls</item>
-    <item name="downloading_background">@color/feature_main_color_hcls</item>
-    <item name="notification_background">@color/feature_main_color_hcls</item>
-    <item name="main_color">@color/feature_main_color_hcls</item>
-
-  </style>
-
-  <style
-    name="SimplifiedThemeNoActionBar_Magic"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_Magic"
+      parent="SimplifiedThemeNoActionBar">
 
     <item name="android:colorPrimary">@color/feature_main_color</item>
     <item name="android:colorPrimaryDark">@color/feature_main_color</item>
@@ -310,60 +373,75 @@
 
   </style>
 
+  <!-- Carroll County Library -->
   <style
-    name="SimplifiedThemeNoActionBar_MCPL"
-    parent="SimplifiedThemeNoActionBar">
+      name="SimplifiedThemeNoActionBar_CCL"
+      parent="SimplifiedThemeNoActionBar">
+    <item name="android:colorPrimary">@color/feature_main_color_ccl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccl</item>
+    <item name="android:colorAccent">@color/feature_main_color_ccl</item>
 
-    <item name="android:colorPrimary">@color/feature_main_color_mcpl</item>
-    <item name="android:colorPrimaryDark">@color/feature_main_color_mcpl</item>
-    <item name="android:colorAccent">@color/feature_main_color_mcpl</item>
-
-    <item name="button_foreground">@color/feature_main_color_mcpl</item>
-    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
-    <item name="downloading_background">@color/feature_main_color_mcpl</item>
-    <item name="notification_background">@color/feature_main_color_mcpl</item>
-    <item name="main_color">@color/feature_main_color_mcpl</item>
+    <item name="button_foreground">@color/feature_main_color_ccl</item>
+    <item name="list_item_foreground">@color/feature_main_color_ccl</item>
+    <item name="downloading_background">@color/feature_main_color_ccl</item>
+    <item name="notification_background">@color/feature_main_color_ccl</item>
+    <item name="main_color">@color/feature_main_color_ccl</item>
 
   </style>
 
- <style
-   name="SimplifiedThemeNoActionBar_FCPL"
-   parent="SimplifiedThemeNoActionBar">
+  <!-- Butte County Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_BCL"
+      parent="SimplifiedThemeNoActionBar">
+    <item name="android:colorPrimary">@color/feature_main_color_bcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_bcl</item>
+    <item name="android:colorAccent">@color/feature_main_color_bcl</item>
 
-   <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
-   <item name="android:colorPrimaryDark">@color/feature_main_color_fcpl</item>
-   <item name="android:colorAccent">@color/feature_main_color_fcpl</item>
+    <item name="button_foreground">@color/feature_main_color_bcl</item>
+    <item name="list_item_foreground">@color/feature_main_color_bcl</item>
+    <item name="downloading_background">@color/feature_main_color_bcl</item>
+    <item name="notification_background">@color/feature_main_color_bcl</item>
+    <item name="main_color">@color/feature_main_color_bcl</item>
 
-   <item name="button_foreground">@color/feature_main_color_fcpl</item>
-   <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
-   <item name="downloading_background">@color/feature_main_color_fcpl</item>
-   <item name="notification_background">@color/feature_main_color_fcpl</item>
-   <item name="main_color">@color/feature_main_color_fcpl</item>
+  </style>
 
- </style>
+  <!-- Anne Arundel County Public Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_AACPL"
+      parent="SimplifiedThemeNoActionBar">
+    <item name="android:colorPrimary">@color/feature_main_color_aacpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_aacpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_aacpl</item>
 
- <style
-   name="SimplifiedThemeNoActionBar_AACPL"
-   parent="SimplifiedThemeNoActionBar">
+    <item name="button_foreground">@color/feature_main_color_aacpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_aacpl</item>
+    <item name="downloading_background">@color/feature_main_color_aacpl</item>
+    <item name="notification_background">@color/feature_main_color_aacpl</item>
+    <item name="main_color">@color/feature_main_color_aacpl</item>
 
-   <item name="android:colorPrimary">@color/feature_main_color_aacpl</item>
-   <item name="android:colorPrimaryDark">@color/feature_main_color_aacpl</item>
-   <item name="android:colorAccent">@color/feature_main_color_aacpl</item>
+  </style>
 
-   <item name="button_foreground">@color/feature_main_color_aacpl</item>
-   <item name="list_item_foreground">@color/feature_main_color_aacpl</item>
-   <item name="downloading_background">@color/feature_main_color_aacpl</item>
-   <item name="notification_background">@color/feature_main_color_aacpl</item>
-   <item name="main_color">@color/feature_main_color_aacpl</item>
+  <!-- Alameda County Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_ACL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_acl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_acl</item>
+    <item name="android:colorAccent">@color/feature_main_color_acl</item>
 
- </style>
+    <item name="button_foreground">@color/feature_main_color_acl</item>
+    <item name="list_item_foreground">@color/feature_main_color_acl</item>
+    <item name="downloading_background">@color/feature_main_color_acl</item>
+    <item name="notification_background">@color/feature_main_color_acl</item>
+    <item name="main_color">@color/feature_main_color_acl</item>
+  </style>
 
- <style
-    name="SimplifiedThemeNoActionBar_SMCL"
-    parent="SimplifiedThemeNoActionBar">
-
+  <!-- St. Mary's County Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_SMCL"
+      parent="SimplifiedTheme">
     <item name="android:colorPrimary">@color/feature_main_color_smcl</item>
-    <item name="android:colorPrimaryDark">@color/feature_main_color_smcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_smcl</item>
     <item name="android:colorAccent">@color/feature_main_color_smcl</item>
 
     <item name="button_foreground">@color/feature_main_color_smcl</item>
@@ -374,6 +452,179 @@
 
   </style>
 
+  <!-- Charles County Public Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_CCPL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_ccpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_ccpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_ccpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_ccpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_ccpl</item>
+    <item name="downloading_background">@color/feature_main_color_ccpl</item>
+    <item name="notification_background">@color/feature_main_color_ccpl</item>
+    <item name="main_color">@color/feature_main_color_ccpl</item>
+
+  </style>
+
+  <!-- Frederick County Public Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_FCPL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_fcpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_fcpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_fcpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_fcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_fcpl</item>
+    <item name="downloading_background">@color/feature_main_color_fcpl</item>
+    <item name="notification_background">@color/feature_main_color_fcpl</item>
+    <item name="main_color">@color/feature_main_color_fcpl</item>
+  </style>
+
+  <!-- Calvert Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_CL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_cl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_cl</item>
+    <item name="android:colorAccent">@color/feature_main_color_cl</item>
+
+    <item name="button_foreground">@color/feature_main_color_cl</item>
+    <item name="list_item_foreground">@color/feature_main_color_cl</item>
+    <item name="downloading_background">@color/feature_main_color_cl</item>
+    <item name="notification_background">@color/feature_main_color_cl</item>
+    <item name="main_color">@color/feature_main_color_cl</item>
+
+  </style>
+
+  <!-- Howard County Library System -->
+  <style
+      name="SimplifiedThemeNoActionBar_HCLS"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_hcls</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_hcls</item>
+    <item name="android:colorAccent">@color/feature_main_color_hcls</item>
+
+    <item name="button_foreground">@color/feature_main_color_hcls</item>
+    <item name="list_item_foreground">@color/feature_main_color_hcls</item>
+    <item name="downloading_background">@color/feature_main_color_hcls</item>
+    <item name="notification_background">@color/feature_main_color_hcls</item>
+    <item name="main_color">@color/feature_main_color_hcls</item>
+  </style>
+
+  <!-- Montgomery County Public Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_MCPL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_mcpl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_mcpl</item>
+    <item name="android:colorAccent">@color/feature_main_color_mcpl</item>
+
+    <item name="button_foreground">@color/feature_main_color_mcpl</item>
+    <item name="list_item_foreground">@color/feature_main_color_mcpl</item>
+    <item name="downloading_background">@color/feature_main_color_mcpl</item>
+    <item name="notification_background">@color/feature_main_color_mcpl</item>
+    <item name="main_color">@color/feature_main_color_mcpl</item>
+  </style>
+
+  <!-- Black Gold Cooperative -->
+  <style
+      name="SimplifiedThemeNoActionBar_BGC"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_bgc</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_bgc</item>
+    <item name="android:colorAccent">@color/feature_main_color_bgc</item>
+
+    <item name="button_foreground">@color/feature_main_color_bgc</item>
+    <item name="list_item_foreground">@color/feature_main_color_bgc</item>
+    <item name="downloading_background">@color/feature_main_color_bgc</item>
+    <item name="notification_background">@color/feature_main_color_bgc</item>
+    <item name="main_color">@color/feature_main_color_bgc</item>
+
+  </style>
+
+  <!-- Los Angeles Public Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_LAPL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_lapl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_lapl</item>
+    <item name="android:colorAccent">@color/feature_main_color_lapl</item>
+
+    <item name="button_foreground">@color/feature_main_color_lapl</item>
+    <item name="list_item_foreground">@color/feature_main_color_lapl</item>
+    <item name="downloading_background">@color/feature_main_color_lapl</item>
+    <item name="notification_background">@color/feature_main_color_lapl</item>
+    <item name="main_color">@color/feature_main_color_lapl</item>
+
+  </style>
+
+  <!-- Ruth Enlow Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_REL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_rel</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_rel</item>
+    <item name="android:colorAccent">@color/feature_main_color_rel</item>
+
+    <item name="button_foreground">@color/feature_main_color_rel</item>
+    <item name="list_item_foreground">@color/feature_main_color_rel</item>
+    <item name="downloading_background">@color/feature_main_color_rel</item>
+    <item name="notification_background">@color/feature_main_color_rel</item>
+    <item name="main_color">@color/feature_main_color_rel</item>
+
+  </style>
+
+  <!-- Washington County Free Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_WCFL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_wcfl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_wcfl</item>
+    <item name="android:colorAccent">@color/feature_main_color_wcfl</item>
+
+    <item name="button_foreground">@color/feature_main_color_wcfl</item>
+    <item name="list_item_foreground">@color/feature_main_color_wcfl</item>
+    <item name="downloading_background">@color/feature_main_color_wcfl</item>
+    <item name="notification_background">@color/feature_main_color_wcfl</item>
+    <item name="main_color">@color/feature_main_color_wcfl</item>
+
+  </style>
+
+  <!-- Santa Clara County Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_SCCL"
+      parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_sccl</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_sccl</item>
+    <item name="android:colorAccent">@color/feature_main_color_sccl</item>
+
+    <item name="button_foreground">@color/feature_main_color_sccl</item>
+    <item name="list_item_foreground">@color/feature_main_color_sccl</item>
+    <item name="downloading_background">@color/feature_main_color_sccl</item>
+    <item name="notification_background">@color/feature_main_color_sccl</item>
+    <item name="main_color">@color/feature_main_color_sccl</item>
+
+  </style>
+
+  <!-- Porterville City Library -->
+  <style
+      name="SimplifiedThemeNoActionBar_PCL"
+      parent="SimplifiedThemeNoActionBar">
+
+    <item name="android:colorPrimary">@color/feature_main_color_pcl</item>
+    <item name="android:colorPrimaryDark">@color/feature_main_color_pcl</item>
+    <item name="android:colorAccent">@color/feature_main_color_pcl</item>
+
+    <item name="button_foreground">@color/feature_main_color_pcl</item>
+    <item name="list_item_foreground">@color/feature_main_color_pcl</item>
+    <item name="downloading_background">@color/feature_main_color_pcl</item>
+    <item name="notification_background">@color/feature_main_color_pcl</item>
+    <item name="main_color">@color/feature_main_color_pcl</item>
+
+  </style>
 
   <style name="SimplifiedTheme.LaneTitle">
     <item name="android:textSize">21sp</item>
@@ -383,16 +634,16 @@
   </style>
 
   <style
-    name="SimplifiedBookDialog"
-    parent="SimplifiedTheme">
+      name="SimplifiedBookDialog"
+      parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>
   </style>
 
   <style
-    name="SimplifiedLoginDialog"
-    parent="SimplifiedTheme">
+      name="SimplifiedLoginDialog"
+      parent="SimplifiedTheme">
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">false</item>
     <item name="android:windowIsFloating">true</item>
