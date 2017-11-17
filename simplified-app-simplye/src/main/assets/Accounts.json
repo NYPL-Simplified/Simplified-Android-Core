@@ -8,7 +8,7 @@
     "needsAuth" : true,
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : true,
-    "supportsBarcodeDisplay" : false,
+    "supportsBarcodeDisplay" : true,
     "supportsReservations" : true,
     "supportsCardCreator" : true,
     "supportsHelpCenter" : true,
