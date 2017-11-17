@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,11 +35,16 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.tenmiles.helpstack.HSHelpStack;
 import com.tenmiles.helpstack.gears.HSDeskGear;
 
@@ -82,6 +88,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   private @Nullable TextView pin_text;
   private @Nullable TableLayout table_with_code;
   private @Nullable TableLayout table_signup;
+  private @Nullable ImageView barcode_image;
+  private @Nullable TextView barcode_image_toggle;
 
   private @Nullable Button login;
 
@@ -126,6 +134,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final TextView in_pin_text = NullCheck.notNull(this.pin_text);
+    final ImageView in_barcode_image = NullCheck.notNull(this.barcode_image);
+    final TextView in_barcode_image_toggle = NullCheck.notNull(this.barcode_image_toggle);
     final Button in_login = NullCheck.notNull(this.login);
 
     UIThread.runOnUIThread(
@@ -155,6 +165,23 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
           in_pin_text.setText(creds.getPin().toString());
           in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+
+          in_barcode_image.setImageBitmap(generateBarcodeImage(creds.getBarcode().toString()));
+
+          in_barcode_image_toggle.setOnClickListener(
+              new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                  if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
+                    in_barcode_image.setVisibility(View.VISIBLE);
+                    in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
+                  } else {
+                    in_barcode_image.setVisibility(View.GONE);
+                    in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
+                  }
+                }
+              }
+          );
 
           in_login.setText(rr.getString(R.string.settings_log_out));
           in_login.setOnClickListener(
@@ -387,6 +414,12 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final TextView in_pin_label = NullCheck.notNull(
       (TextView) this.findViewById(R.id.settings_pin_label));
+    
+    final ImageView in_barcode_image = NullCheck.notNull(
+        (ImageView) this.findViewById(R.id.settings_barcode_image));
+
+    final TextView in_barcode_image_toggle = NullCheck.notNull(
+        (TextView) this.findViewById(R.id.settings_barcode_toggle_barcode));
 
     final TextView in_pin_text =
       NullCheck.notNull((TextView) this.findViewById(R.id.settings_pin_text));
@@ -690,6 +723,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     this.account_icon = in_account_icon;
     this.barcode_text = in_barcode_text;
     this.pin_text = in_pin_text;
+    this.barcode_image_toggle = in_barcode_image_toggle;
+    this.barcode_image = in_barcode_image;
     this.login = in_login;
     this.table_with_code = in_table_with_code;
     this.table_signup = in_table_signup;
@@ -855,6 +890,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final TextView in_pin_text = NullCheck.notNull(this.pin_text);
+    final ImageView in_barcode_image = NullCheck.notNull(this.barcode_image);
+    final TextView in_barcode_image_toggle = NullCheck.notNull(this.barcode_image_toggle);
     final Button in_login = NullCheck.notNull(this.login);
     final CheckBox in_eula_checkbox =
       NullCheck.notNull((CheckBox) this.findViewById(R.id.eula_checkbox));
@@ -892,6 +929,22 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
             in_pin_text.setText(creds.getPin().toString());
             in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+            in_barcode_image.setImageBitmap(generateBarcodeImage(creds.getBarcode().toString()));
+
+            in_barcode_image_toggle.setOnClickListener(
+                new OnClickListener() {
+                  @Override
+                  public void onClick(View v) {
+                    if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
+                      in_barcode_image.setVisibility(View.VISIBLE);
+                      in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
+                    } else {
+                      in_barcode_image.setVisibility(View.GONE);
+                      in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
+                    }
+                  }
+                }
+            );
 
             in_eula_checkbox.setEnabled(false);
 
@@ -923,6 +976,22 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         });
     }
 
+  }
+
+  private Bitmap generateBarcodeImage(String labelLoginUserID) {
+
+    try {
+      MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+
+      BitMatrix bitMatrix = multiFormatWriter.encode(labelLoginUserID, BarcodeFormat.CODABAR, 2800, 500);
+      BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+      Bitmap barcodeBitmap = barcodeEncoder.createBitmap(bitMatrix);
+
+      return barcodeBitmap;
+    } catch (WriterException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
 

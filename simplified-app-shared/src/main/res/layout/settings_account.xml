@@ -93,6 +93,40 @@
         android:background="@color/normal_background">
 
         <TableRow
+            android:id="@+id/settings_barcode_image_row"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            >
+
+          <ImageView
+              android:id="@+id/settings_barcode_image"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:visibility="gone"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/settings_barcode_toggle_barcode_row"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            >
+
+          <TextView
+              android:id="@+id/settings_barcode_toggle_barcode"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:layout_weight="1"
+              android:text="@string/settings_toggle_barcode_show"
+              />
+
+        </TableRow>
+
+        <TableRow></TableRow>
+
+        <TableRow
           android:id="@+id/tableRow1"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content">
