@@ -84,6 +84,23 @@
 
       </TableLayout>
 
+      <ImageView
+          android:id="@+id/settings_barcode_image"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:visibility="gone"/>
+
+      <TextView
+          android:id="@+id/settings_barcode_toggle_barcode"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:maxLines="1"
+          android:textSize="18sp"
+          android:text="@string/settings_toggle_barcode_show"
+          android:visibility="gone"
+          />
+
       <TableLayout
         android:id="@+id/settings_login_table_with_code"
         android:layout_width="match_parent"
@@ -91,40 +108,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
         android:background="@color/normal_background">
-
-        <TableRow
-            android:id="@+id/settings_barcode_image_row"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            >
-
-          <ImageView
-              android:id="@+id/settings_barcode_image"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:visibility="gone"/>
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/settings_barcode_toggle_barcode_row"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            >
-
-          <TextView
-              android:id="@+id/settings_barcode_toggle_barcode"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:gravity="center"
-              android:layout_weight="1"
-              android:text="@string/settings_toggle_barcode_show"
-              />
-
-        </TableRow>
-
-        <TableRow></TableRow>
 
         <TableRow
           android:id="@+id/tableRow1"
