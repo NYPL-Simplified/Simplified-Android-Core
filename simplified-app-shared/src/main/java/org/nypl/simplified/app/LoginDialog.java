@@ -49,6 +49,8 @@ import org.slf4j.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD;
+
 /**
  * A reusable login dialog.
  */
@@ -366,7 +368,7 @@ public final class LoginDialog extends DialogFragment
     final EditText in_pin_edit = NullCheck.notNull(
       (EditText) in_layout.findViewById(R.id.login_dialog_pin_text_edit));
     if (!pin_allows_letters) {
-      in_pin_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+      in_pin_edit.setInputType(InputType.TYPE_CLASS_NUMBER | TYPE_NUMBER_VARIATION_PASSWORD);
     }
     if (pin_length != 0) {
       in_pin_edit.setFilters(new InputFilter[] {
