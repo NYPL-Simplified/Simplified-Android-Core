@@ -502,6 +502,8 @@ public final class ReaderActivity extends Activity implements
   @Override public void onCurrentPageReceived(
     final ReaderBookLocation l)
   {
+    this.current_location = l;
+
     ReaderActivity.LOG.debug("received book location: {}", l);
 
     if (Simplified.getSharedPrefs().getBoolean("setting_sync_last_read") && Simplified.getCurrentAccount().supportsSimplyESync()) {
