@@ -498,10 +498,8 @@ public final class LoginDialog extends DialogFragment
             // IntentIntegrator exit will fire on Scan or Back and hit the onActivityResult method.
             IntentIntegrator
                 .forFragment(myFragment)
-                .setPrompt("Scan your library barcode.")
+                .setPrompt(getString(R.string.barcode_scanner_prompt))
                 .setBeepEnabled(false)
-                //.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES)
-                //.setOrientationLocked(false)
                 .initiateScan();
           }
         });
