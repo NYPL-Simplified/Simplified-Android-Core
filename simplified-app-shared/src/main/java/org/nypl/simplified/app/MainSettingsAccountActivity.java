@@ -167,23 +167,26 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
 
           if (account.supportsBarcodeDisplay()) {
-            in_barcode_image.setImageBitmap(generateBarcodeImage(creds.getBarcode().toString()));
+            Bitmap barcodeBitmap = generateBarcodeImage(creds.getBarcode().toString());
+            if (barcodeBitmap != null) {
+              in_barcode_image.setImageBitmap(barcodeBitmap);
 
-            in_barcode_image_toggle.setVisibility(View.VISIBLE);
-            in_barcode_image_toggle.setOnClickListener(
-                new OnClickListener() {
-                  @Override
-                  public void onClick(View v) {
-                    if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
-                      in_barcode_image.setVisibility(View.VISIBLE);
-                      in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
-                    } else {
-                      in_barcode_image.setVisibility(View.GONE);
-                      in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
+              in_barcode_image_toggle.setVisibility(View.VISIBLE);
+              in_barcode_image_toggle.setOnClickListener(
+                  new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                      if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
+                        in_barcode_image.setVisibility(View.VISIBLE);
+                        in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
+                      } else {
+                        in_barcode_image.setVisibility(View.GONE);
+                        in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
+                      }
                     }
                   }
-                }
-            );
+              );
+            }
           }
 
           in_login.setText(rr.getString(R.string.settings_log_out));
@@ -934,23 +937,26 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
 
             if (account.supportsBarcodeDisplay()) {
-              in_barcode_image.setImageBitmap(generateBarcodeImage(creds.getBarcode().toString()));
+              Bitmap barcodeBitmap = generateBarcodeImage(creds.getBarcode().toString());
+              if (barcodeBitmap != null) {
+                in_barcode_image.setImageBitmap(barcodeBitmap);
 
-              in_barcode_image_toggle.setVisibility(View.VISIBLE);
-              in_barcode_image_toggle.setOnClickListener(
-                  new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                      if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
-                        in_barcode_image.setVisibility(View.VISIBLE);
-                        in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
-                      } else {
-                        in_barcode_image.setVisibility(View.GONE);
-                        in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
+                in_barcode_image_toggle.setVisibility(View.VISIBLE);
+                in_barcode_image_toggle.setOnClickListener(
+                    new OnClickListener() {
+                      @Override
+                      public void onClick(View v) {
+                        if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
+                          in_barcode_image.setVisibility(View.VISIBLE);
+                          in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
+                        } else {
+                          in_barcode_image.setVisibility(View.GONE);
+                          in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
+                        }
                       }
                     }
-                  }
-              );
+                );
+              }
             }
 
             in_eula_checkbox.setEnabled(false);
