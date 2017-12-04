@@ -171,6 +171,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
             in_account_icon.setImageResource(R.drawable.account_logo_pcl);
           } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
             in_account_icon.setImageResource(R.drawable.account_logo_sccl);
+          } else if (MainSettingsAccountActivity.this.account.getId() == 21) {
+            in_account_icon.setImageResource(R.drawable.account_logo_acls);
           } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
             in_account_icon.setImageResource(R.drawable.account_logo_rel);
           } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
@@ -916,6 +918,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.account_logo_pcl);
     } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
       in_account_icon.setImageResource(R.drawable.account_logo_sccl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 21) {
+      in_account_icon.setImageResource(R.drawable.account_logo_acls);
     } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
       in_account_icon.setImageResource(R.drawable.account_logo_rel);
     } else if (MainSettingsAccountActivity.this.account.getId() == 23) {

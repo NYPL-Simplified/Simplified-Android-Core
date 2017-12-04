@@ -299,6 +299,21 @@
 
   </style>
 
+  <!-- Allegany County Library System -->
+  <style
+      name="SimplifiedTheme_ACLS" parent="SimplifiedTheme">
+    <item name="android:colorPrimary">@color/feature_main_color_acls</item>
+    <item name="android:colorPrimaryDark">@color/feature_secondary_color_acls</item>
+    <item name="android:colorAccent">@color/feature_main_color_acls</item>
+
+    <item name="button_foreground">@color/feature_main_color_acls</item>
+    <item name="list_item_foreground">@color/feature_main_color_acls</item>
+    <item name="downloading_background">@color/feature_main_color_acls</item>
+    <item name="notification_background">@color/feature_main_color_acls</item>
+    <item name="main_color">@color/feature_main_color_acls</item>
+
+  </style>
+
   <style name="ActionBar" parent="@android:style/Widget.Material.Light.ActionBar.Solid">
     <item name="android:displayOptions">homeAsUp|showTitle</item>
     <item name="android:homeAsUpIndicator">@drawable/ic_menu</item>
@@ -623,6 +638,23 @@
     <item name="downloading_background">@color/feature_main_color_pcl</item>
     <item name="notification_background">@color/feature_main_color_pcl</item>
     <item name="main_color">@color/feature_main_color_pcl</item>
+
+  </style>
+
+  <!-- Allegany County Library System -->
+  <style
+      name="SimplifiedThemeNoActionBar_ACLS"
+      parent="SimplifiedThemeNoActionBar">
+
+    <item name="android:colorPrimary">@color/feature_main_color_acls</item>
+    <item name="android:colorPrimaryDark">@color/feature_main_color_acls</item>
+    <item name="android:colorAccent">@color/feature_main_color_acls</item>
+
+    <item name="button_foreground">@color/feature_main_color_acls</item>
+    <item name="list_item_foreground">@color/feature_main_color_acls</item>
+    <item name="downloading_background">@color/feature_main_color_acls</item>
+    <item name="notification_background">@color/feature_main_color_acls</item>
+    <item name="main_color">@color/feature_main_color_acls</item>
 
   </style>
 
