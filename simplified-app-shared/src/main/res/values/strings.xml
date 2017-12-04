@@ -238,4 +238,7 @@
   <string name="need_card_button">Sign Up</string>
   <string name="need_card_create">Create Card</string>
 
+  <!-- ZXing Scanner -->
+  <string name="barcode_scanner_prompt">Scan your library card barcode.</string>
+
 </resources>
