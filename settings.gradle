@@ -21,13 +21,7 @@ include ':simplified-http-tests-android'
 include ':simplified-http-tests-junit4'
 include ':simplified-http-tests'
 include ':simplified-json-core'
-include ':simplified-json-tests-android'
-include ':simplified-json-tests-junit4'
-include ':simplified-json-tests'
 include ':simplified-opds-core'
-include ':simplified-opds-tests-android'
-include ':simplified-opds-tests-junit4'
-include ':simplified-opds-tests'
 include ':simplified-rfc3339-core'
 include ':simplified-stack'
 include ':simplified-tenprint'
@@ -62,13 +56,7 @@ project(':simplified-http-tests-android').projectDir = "$rootDir/simplified-http
 project(':simplified-http-tests-junit4').projectDir = "$rootDir/simplified-http-tests-junit4" as File
 project(':simplified-http-tests').projectDir = "$rootDir/simplified-http-tests" as File
 project(':simplified-json-core').projectDir = "$rootDir/simplified-json-core" as File
-project(':simplified-json-tests-android').projectDir = "$rootDir/simplified-json-tests-android" as File
-project(':simplified-json-tests-junit4').projectDir = "$rootDir/simplified-json-tests-junit4" as File
-project(':simplified-json-tests').projectDir = "$rootDir/simplified-json-tests" as File
 project(':simplified-opds-core').projectDir = "$rootDir/simplified-opds-core" as File
-project(':simplified-opds-tests-android').projectDir = "$rootDir/simplified-opds-tests-android" as File
-project(':simplified-opds-tests-junit4').projectDir = "$rootDir/simplified-opds-tests-junit4" as File
-project(':simplified-opds-tests').projectDir = "$rootDir/simplified-opds-tests" as File
 project(':simplified-rfc3339-core').projectDir = "$rootDir/simplified-rfc3339-core" as File
 project(':simplified-stack').projectDir = "$rootDir/simplified-stack" as File
 project(':simplified-tenprint').projectDir = "$rootDir/simplified-tenprint" as File
