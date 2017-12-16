@@ -30,7 +30,6 @@ include ':simplified-opds-tests-junit4'
 include ':simplified-opds-tests'
 include ':simplified-rfc3339-core'
 include ':simplified-rfc3339-tests-android'
-include ':simplified-rfc3339-tests-junit4'
 include ':simplified-rfc3339-tests'
 include ':simplified-stack'
 include ':simplified-tenprint'
@@ -72,7 +71,6 @@ project(':simplified-opds-tests-junit4').projectDir = "$rootDir/simplified-opds-
 project(':simplified-opds-tests').projectDir = "$rootDir/simplified-opds-tests" as File
 project(':simplified-rfc3339-core').projectDir = "$rootDir/simplified-rfc3339-core" as File
 project(':simplified-rfc3339-tests-android').projectDir = "$rootDir/simplified-rfc3339-tests-android" as File
-project(':simplified-rfc3339-tests-junit4').projectDir = "$rootDir/simplified-rfc3339-tests-junit4" as File
 project(':simplified-rfc3339-tests').projectDir = "$rootDir/simplified-rfc3339-tests" as File
 project(':simplified-stack').projectDir = "$rootDir/simplified-stack" as File
 project(':simplified-tenprint').projectDir = "$rootDir/simplified-tenprint" as File

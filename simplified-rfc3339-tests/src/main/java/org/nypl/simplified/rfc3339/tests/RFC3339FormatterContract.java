@@ -1,17 +1,14 @@
 package org.nypl.simplified.rfc3339.tests;
 
 import com.io7m.jnull.NullCheckException;
+
+import org.junit.Assert;
+import org.junit.Test;
 import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
-import org.nypl.simplified.test.utilities.TestUtilities;
 
 import java.util.Calendar;
 
-/**
- * Default implementation of {@link RFC3339FormatterContractType}.
- */
-
-public final class RFC3339FormatterContract
-  implements RFC3339FormatterContractType
+public abstract class RFC3339FormatterContract
 {
   /**
    * Construct a contract.
@@ -36,7 +33,8 @@ public final class RFC3339FormatterContract
     System.out.println("Ms     : " + c.get(Calendar.MILLISECOND));
   }
 
-  @Override public void testDate0()
+  @Test
+  public final void testDate0()
     throws Exception
   {
     final String text = "2015-05-01T23:11:15-00:00";
@@ -44,16 +42,17 @@ public final class RFC3339FormatterContract
 
     RFC3339FormatterContract.dumpCalendar(text, c);
 
-    TestUtilities.assertEquals(c.get(Calendar.YEAR), 2015);
-    TestUtilities.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
-    TestUtilities.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
-    TestUtilities.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
-    TestUtilities.assertEquals(c.get(Calendar.MINUTE), 11);
-    TestUtilities.assertEquals(c.get(Calendar.SECOND), 15);
-    TestUtilities.assertEquals(c.get(Calendar.MILLISECOND), 0);
+    Assert.assertEquals(c.get(Calendar.YEAR), 2015);
+    Assert.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
+    Assert.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
+    Assert.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
+    Assert.assertEquals(c.get(Calendar.MINUTE), 11);
+    Assert.assertEquals(c.get(Calendar.SECOND), 15);
+    Assert.assertEquals(c.get(Calendar.MILLISECOND), 0);
   }
 
-  @Override public void testDate1()
+  @Test
+  public final void testDate1()
     throws Exception
   {
     final String text = "2015-05-01T23:11:15.237-00:00";
@@ -61,16 +60,17 @@ public final class RFC3339FormatterContract
 
     RFC3339FormatterContract.dumpCalendar(text, c);
 
-    TestUtilities.assertEquals(c.get(Calendar.YEAR), 2015);
-    TestUtilities.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
-    TestUtilities.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
-    TestUtilities.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
-    TestUtilities.assertEquals(c.get(Calendar.MINUTE), 11);
-    TestUtilities.assertEquals(c.get(Calendar.SECOND), 15);
-    TestUtilities.assertEquals(c.get(Calendar.MILLISECOND), 237);
+    Assert.assertEquals(c.get(Calendar.YEAR), 2015);
+    Assert.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
+    Assert.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
+    Assert.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
+    Assert.assertEquals(c.get(Calendar.MINUTE), 11);
+    Assert.assertEquals(c.get(Calendar.SECOND), 15);
+    Assert.assertEquals(c.get(Calendar.MILLISECOND), 237);
   }
 
-  @Override public void testDate2()
+  @Test
+  public final void testDate2()
     throws Exception
   {
     final String text = "2015-05-01T23:11:15Z";
@@ -78,16 +78,17 @@ public final class RFC3339FormatterContract
 
     RFC3339FormatterContract.dumpCalendar(text, c);
 
-    TestUtilities.assertEquals(c.get(Calendar.YEAR), 2015);
-    TestUtilities.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
-    TestUtilities.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
-    TestUtilities.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
-    TestUtilities.assertEquals(c.get(Calendar.MINUTE), 11);
-    TestUtilities.assertEquals(c.get(Calendar.SECOND), 15);
-    TestUtilities.assertEquals(c.get(Calendar.MILLISECOND), 0);
+    Assert.assertEquals(c.get(Calendar.YEAR), 2015);
+    Assert.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
+    Assert.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
+    Assert.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
+    Assert.assertEquals(c.get(Calendar.MINUTE), 11);
+    Assert.assertEquals(c.get(Calendar.SECOND), 15);
+    Assert.assertEquals(c.get(Calendar.MILLISECOND), 0);
   }
 
-  @Override public void testDate3()
+  @Test
+  public final void testDate3()
     throws Exception
   {
     final String text = "2015-05-01T23:11:15.237Z";
@@ -95,23 +96,23 @@ public final class RFC3339FormatterContract
 
     RFC3339FormatterContract.dumpCalendar(text, c);
 
-    TestUtilities.assertEquals(c.get(Calendar.YEAR), 2015);
-    TestUtilities.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
-    TestUtilities.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
-    TestUtilities.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
-    TestUtilities.assertEquals(c.get(Calendar.MINUTE), 11);
-    TestUtilities.assertEquals(c.get(Calendar.SECOND), 15);
-    TestUtilities.assertEquals(c.get(Calendar.MILLISECOND), 237);
+    Assert.assertEquals(c.get(Calendar.YEAR), 2015);
+    Assert.assertEquals(c.get(Calendar.MONTH), 4); // Starts from 0
+    Assert.assertEquals(c.get(Calendar.DAY_OF_MONTH), 1);
+    Assert.assertEquals(c.get(Calendar.HOUR_OF_DAY), 23);
+    Assert.assertEquals(c.get(Calendar.MINUTE), 11);
+    Assert.assertEquals(c.get(Calendar.SECOND), 15);
+    Assert.assertEquals(c.get(Calendar.MILLISECOND), 237);
   }
 
-  @Override public void testNull()
+  @Test
+  public final void testNull()
     throws Exception
   {
     boolean caught = false;
 
     try {
-      RFC3339Formatter.parseRFC3339Date(
-        (String) TestUtilities.unexpectedlyNull());
+      RFC3339Formatter.parseRFC3339Date(null);
     } catch (final NullCheckException e) {
       caught = true;
     }

@@ -9,5 +9,6 @@ description = 'simplified-rfc3339-tests'
 
 dependencies {
   compile project(':simplified-rfc3339-core')
-  compile project(':simplified-test-utilities')
+  compile 'junit:junit:4.12'
+  testCompile 'junit:junit:4.12'
 }
