@@ -29,10 +29,10 @@ include ':simplified-opds-tests-android'
 include ':simplified-opds-tests-junit4'
 include ':simplified-opds-tests'
 include ':simplified-rfc3339-core'
-include ':simplified-rfc3339-tests-android'
-include ':simplified-rfc3339-tests'
 include ':simplified-stack'
 include ':simplified-tenprint'
+include ':simplified-tests'
+include ':simplified-tests-android'
 include ':simplified-test-utilities'
 include ':simplified-bugsnag'
 include ':simplified-cardcreator'
@@ -70,11 +70,11 @@ project(':simplified-opds-tests-android').projectDir = "$rootDir/simplified-opds
 project(':simplified-opds-tests-junit4').projectDir = "$rootDir/simplified-opds-tests-junit4" as File
 project(':simplified-opds-tests').projectDir = "$rootDir/simplified-opds-tests" as File
 project(':simplified-rfc3339-core').projectDir = "$rootDir/simplified-rfc3339-core" as File
-project(':simplified-rfc3339-tests-android').projectDir = "$rootDir/simplified-rfc3339-tests-android" as File
-project(':simplified-rfc3339-tests').projectDir = "$rootDir/simplified-rfc3339-tests" as File
 project(':simplified-stack').projectDir = "$rootDir/simplified-stack" as File
 project(':simplified-tenprint').projectDir = "$rootDir/simplified-tenprint" as File
 project(':simplified-test-utilities').projectDir = "$rootDir/simplified-test-utilities" as File
+project(':simplified-tests').projectDir = "$rootDir/simplified-tests" as File
+project(':simplified-tests-android').projectDir = "$rootDir/simplified-tests-android" as File
 project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
 project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
 project(':simplified-prefs').projectDir = "$rootDir/simplified-prefs" as File
