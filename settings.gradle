@@ -7,30 +7,27 @@ include ':simplified-app-shared'
 include ':simplified-app-simplye'
 include ':simplified-assert'
 include ':simplified-books-core'
+include ':simplified-books-tests'
 include ':simplified-books-tests-android'
 include ':simplified-books-tests-junit4'
-include ':simplified-books-tests'
+include ':simplified-bugsnag'
+include ':simplified-cardcreator'
 include ':simplified-checkstyle'
+include ':simplified-circ-analytics'
 include ':simplified-downloader-core'
 include ':simplified-files'
 include ':simplified-http-core'
-include ':simplified-http-tests-android'
-include ':simplified-http-tests-junit4'
-include ':simplified-http-tests'
 include ':simplified-json-core'
+include ':simplified-multilibrary'
 include ':simplified-opds-core'
+include ':simplified-prefs'
 include ':simplified-rfc3339-core'
 include ':simplified-stack'
 include ':simplified-tenprint'
+include ':simplified-test-utilities'
 include ':simplified-tests'
 include ':simplified-tests-android'
-include ':simplified-test-utilities'
-include ':simplified-bugsnag'
-include ':simplified-cardcreator'
-include ':simplified-prefs'
 include ':simplified-volley'
-include ':simplified-circ-analytics'
-include ':simplified-multilibrary'
 
 // FIXME: These should be re-enabled once they are working
 // project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
@@ -39,27 +36,24 @@ project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" 
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
 project(':simplified-assert').projectDir = "$rootDir/simplified-assert" as File
 project(':simplified-books-core').projectDir = "$rootDir/simplified-books-core" as File
+project(':simplified-books-tests').projectDir = "$rootDir/simplified-books-tests" as File
 project(':simplified-books-tests-android').projectDir = "$rootDir/simplified-books-tests-android" as File
 project(':simplified-books-tests-junit4').projectDir = "$rootDir/simplified-books-tests-junit4" as File
-project(':simplified-books-tests').projectDir = "$rootDir/simplified-books-tests" as File
+project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
+project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
 project(':simplified-checkstyle').projectDir = "$rootDir/simplified-checkstyle" as File
+project(':simplified-circ-analytics').projectDir = "$rootDir/simplified-circ-analytics" as File
 project(':simplified-downloader-core').projectDir = "$rootDir/simplified-downloader-core" as File
 project(':simplified-files').projectDir = "$rootDir/simplified-files" as File
 project(':simplified-http-core').projectDir = "$rootDir/simplified-http-core" as File
-project(':simplified-http-tests-android').projectDir = "$rootDir/simplified-http-tests-android" as File
-project(':simplified-http-tests-junit4').projectDir = "$rootDir/simplified-http-tests-junit4" as File
-project(':simplified-http-tests').projectDir = "$rootDir/simplified-http-tests" as File
 project(':simplified-json-core').projectDir = "$rootDir/simplified-json-core" as File
+project(':simplified-multilibrary').projectDir = "$rootDir/simplified-multilibrary" as File
 project(':simplified-opds-core').projectDir = "$rootDir/simplified-opds-core" as File
+project(':simplified-prefs').projectDir = "$rootDir/simplified-prefs" as File
 project(':simplified-rfc3339-core').projectDir = "$rootDir/simplified-rfc3339-core" as File
 project(':simplified-stack').projectDir = "$rootDir/simplified-stack" as File
 project(':simplified-tenprint').projectDir = "$rootDir/simplified-tenprint" as File
 project(':simplified-test-utilities').projectDir = "$rootDir/simplified-test-utilities" as File
 project(':simplified-tests').projectDir = "$rootDir/simplified-tests" as File
 project(':simplified-tests-android').projectDir = "$rootDir/simplified-tests-android" as File
-project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
-project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
-project(':simplified-prefs').projectDir = "$rootDir/simplified-prefs" as File
 project(':simplified-volley').projectDir = "$rootDir/simplified-volley" as File
-project(':simplified-circ-analytics').projectDir = "$rootDir/simplified-circ-analytics" as File
-project(':simplified-multilibrary').projectDir = "$rootDir/simplified-multilibrary" as File
