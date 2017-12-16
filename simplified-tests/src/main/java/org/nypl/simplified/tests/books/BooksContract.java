@@ -1,11 +1,13 @@
-package org.nypl.simplified.books.tests.contracts;
+package org.nypl.simplified.tests.books;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
+import org.junit.Assert;
+import org.junit.Test;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.books.core.AccountAuthProvider;
@@ -61,7 +63,6 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializer;
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
-import org.nypl.simplified.test.utilities.TestUtilities;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -78,23 +79,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * The default implementation of the {@link BooksContractType}.
- */
-
-public final class BooksContract implements BooksContractType
+public abstract class BooksContract
 {
   private static final URI LOANS_URI = URI.create("http://example.com/loans");
   private static final URI ROOT_URI  = URI.create("http://example.com/");
-
-  /**
-   * Construct a contract.
-   */
-
-  public BooksContract()
-  {
-
-  }
 
   private static HTTPType makeAuthHTTP(
     final AccountBarcode barcode,
@@ -194,7 +182,7 @@ public final class BooksContract implements BooksContractType
 
                 final InputStream stream =
                   BooksContract.class.getResourceAsStream(
-                    "/org/nypl/simplified/books/tests/contracts/loans.xml");
+                      "/org/nypl/simplified/tests/books/loans.xml");
 
                 return new HTTPResultOK<InputStream>(
                   "OK", 200, stream, 1L, empty_headers, 0L);
@@ -399,7 +387,7 @@ public final class BooksContract implements BooksContractType
     };
   }
 
-  @Override public void testBooksLoadFileNotDirectory()
+  @Test public void testBooksLoadFileNotDirectory()
     throws Exception
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
@@ -481,14 +469,14 @@ public final class BooksContract implements BooksContractType
         },true);
 
       latch.await(10L, TimeUnit.SECONDS);
-      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      Assert.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
     }
   }
 
-  @Override public void testBooksLoadNotLoggedIn()
+  @Test public void testBooksLoadNotLoggedIn()
     throws Exception
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
@@ -567,14 +555,14 @@ public final class BooksContract implements BooksContractType
         },true);
 
       latch.await(10L, TimeUnit.SECONDS);
-      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      Assert.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
     }
   }
 
-  @Override public void testBooksLoginAcceptedFirst()
+  @Test public void testBooksLoginAcceptedFirst()
     throws Exception
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
@@ -688,7 +676,7 @@ public final class BooksContract implements BooksContractType
       b.accountLogin(creds, listener);
 
       latch.await(10L, TimeUnit.SECONDS);
-      TestUtilities.assertEquals(
+      Assert.assertEquals(
         Boolean.valueOf(succeeded.get()), Boolean.TRUE);
 
     } finally {
@@ -696,7 +684,7 @@ public final class BooksContract implements BooksContractType
     }
   }
 
-  @Override public void testBooksLoginFileNotDirectory()
+  @Test public void testBooksLoginFileNotDirectory()
     throws Exception
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
@@ -814,14 +802,14 @@ public final class BooksContract implements BooksContractType
       b.accountLogin(creds, login_listener);
 
       latch.await(10L, TimeUnit.SECONDS);
-      TestUtilities.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
+      Assert.assertEquals(Boolean.valueOf(failed.get()), Boolean.TRUE);
 
     } finally {
       exec.shutdown();
     }
   }
 
-  @Override public void testBooksSyncLoadLogoutOK()
+  @Test public void testBooksSyncLoadLogoutOK()
     throws Exception
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
@@ -1020,8 +1008,8 @@ public final class BooksContract implements BooksContractType
       latch1.await(10L, TimeUnit.SECONDS);
       System.out.println("account synced");
 
-      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
-      TestUtilities.assertEquals(
+      Assert.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      Assert.assertEquals(
         Integer.valueOf(count.get()), Integer.valueOf(4));
 
       ok.set(false);
@@ -1075,8 +1063,8 @@ public final class BooksContract implements BooksContractType
       latch2.await(10L, TimeUnit.SECONDS);
       System.out.println("book load completed");
 
-      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
-      TestUtilities.assertEquals(
+      Assert.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      Assert.assertEquals(
         Integer.valueOf(count.get()), Integer.valueOf(4));
 
       final CountDownLatch latch3 = new CountDownLatch(1);
@@ -1108,14 +1096,15 @@ public final class BooksContract implements BooksContractType
       System.out.println("logged out");
 
       final File data = new File(tmp, "data");
-      TestUtilities.assertTrue(data.exists() == false);
+      Assert.assertTrue(data.exists() == false);
 
     } finally {
       exec.shutdown();
     }
   }
 
-  @Override public void testBooksSyncOK()
+  @Test
+  public void testBooksSyncOK()
     throws Exception
   {
     final ExecutorService exec = Executors.newFixedThreadPool(4);
@@ -1306,8 +1295,8 @@ public final class BooksContract implements BooksContractType
       b.accountSync(sync_listener, device_listener);
       latch1.await(10L, TimeUnit.SECONDS);
 
-      TestUtilities.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
-      TestUtilities.assertEquals(
+      Assert.assertEquals(Boolean.valueOf(ok.get()), Boolean.TRUE);
+      Assert.assertEquals(
         Integer.valueOf(count.get()), Integer.valueOf(4));
 
       /**
@@ -1323,7 +1312,7 @@ public final class BooksContract implements BooksContractType
             + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
-        TestUtilities.assertEquals(o, o);
+        Assert.assertEquals(o, o);
       }
 
       {
@@ -1333,7 +1322,7 @@ public final class BooksContract implements BooksContractType
             + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
-        TestUtilities.assertEquals(o, o);
+        Assert.assertEquals(o, o);
       }
 
       {
@@ -1343,7 +1332,7 @@ public final class BooksContract implements BooksContractType
             + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
-        TestUtilities.assertEquals(o, o);
+        Assert.assertEquals(o, o);
       }
 
       {
@@ -1353,7 +1342,7 @@ public final class BooksContract implements BooksContractType
             + ""));
         final Some<BookStatusType> some = (Some<BookStatusType>) opt;
         final BookStatusLoaned o = (BookStatusLoaned) some.get();
-        TestUtilities.assertEquals(o, o);
+        Assert.assertEquals(o, o);
       }
 
     } finally {

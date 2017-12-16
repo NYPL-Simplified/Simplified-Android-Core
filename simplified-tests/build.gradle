@@ -8,6 +8,7 @@ android {
 description = 'simplified-tests'
 
 dependencies {
+  compile project(':simplified-books-core')
   compile project(':simplified-files')
   compile project(':simplified-http-core')
   compile project(':simplified-opds-core')

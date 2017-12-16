@@ -1,33 +1,23 @@
-package org.nypl.simplified.books.tests.contracts;
+package org.nypl.simplified.tests.books;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+
+import org.junit.Assert;
+import org.junit.Test;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
-import org.nypl.simplified.test.utilities.TestUtilities;
 
 import java.net.URI;
 import java.util.Calendar;
 
-/**
- * Default implementation of {@link BookIDContractType}.
- */
-
-public final class BookIDContract implements BookIDContractType
+public abstract class BookIDContract
 {
-  /**
-   * Construct a contract.
-   */
-
-  public BookIDContract()
-  {
-
-  }
-
-  @Override public void testBookIDNew()
+  @Test
+  public void testBookIDNew()
   {
     final OptionType<URI> revoke = Option.none();
     final OPDSAcquisitionFeedEntryBuilderType eb =
@@ -42,12 +32,12 @@ public final class BookIDContract implements BookIDContractType
     final OPDSAcquisitionFeedEntry e = eb.build();
     final BookID b = BookID.newIDFromEntry(e);
     System.out.println("book: " + b);
-    TestUtilities.assertEquals(
+    Assert.assertEquals(
       "7a99601f479c30f66f0949c51bbed2adac0e12eb79ad1319db638e16604400bf",
       b.toString());
   }
 
-  @Override public void testBookID_0()
+  @Test public void testBookID_0()
   {
     final BookID b = BookID.newFromText(
       "http://circulation.alpha.librarysimplified.org/loans/Gutenberg/18405");
