@@ -12,9 +12,6 @@ include ':simplified-books-tests-junit4'
 include ':simplified-books-tests'
 include ':simplified-checkstyle'
 include ':simplified-downloader-core'
-include ':simplified-files-tests-android'
-include ':simplified-files-tests-junit4'
-include ':simplified-files-tests'
 include ':simplified-files'
 include ':simplified-http-core'
 include ':simplified-http-tests-android'
@@ -47,9 +44,6 @@ project(':simplified-books-tests-junit4').projectDir = "$rootDir/simplified-book
 project(':simplified-books-tests').projectDir = "$rootDir/simplified-books-tests" as File
 project(':simplified-checkstyle').projectDir = "$rootDir/simplified-checkstyle" as File
 project(':simplified-downloader-core').projectDir = "$rootDir/simplified-downloader-core" as File
-project(':simplified-files-tests-android').projectDir = "$rootDir/simplified-files-tests-android" as File
-project(':simplified-files-tests-junit4').projectDir = "$rootDir/simplified-files-tests-junit4" as File
-project(':simplified-files-tests').projectDir = "$rootDir/simplified-files-tests" as File
 project(':simplified-files').projectDir = "$rootDir/simplified-files" as File
 project(':simplified-http-core').projectDir = "$rootDir/simplified-http-core" as File
 project(':simplified-http-tests-android').projectDir = "$rootDir/simplified-http-tests-android" as File

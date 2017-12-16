@@ -8,6 +8,7 @@ android {
 description = 'simplified-tests'
 
 dependencies {
+  compile project(':simplified-files')
   compile project(':simplified-opds-core')
   compile project(':simplified-rfc3339-core')
 
