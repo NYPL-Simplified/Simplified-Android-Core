@@ -8,8 +8,11 @@ android {
 description = 'simplified-tests'
 
 dependencies {
+  compile project(':simplified-opds-core')
   compile project(':simplified-rfc3339-core')
 
   compile 'junit:junit:4.12'
+
+  testCompile 'ch.qos.logback:logback-classic:1.2.3'
   testCompile 'junit:junit:4.12'
 }
