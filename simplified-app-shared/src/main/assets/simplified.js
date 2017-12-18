@@ -15,6 +15,11 @@ function Simplified() {
 
     startX = touch.screenX;
     startY = touch.screenY;
+
+    // We must call this or else `ontouchcancel` can fire instead of the
+    // desired `ontouchend` event on Android 4.X. See this for more info:
+    // https://developer.android.com/guide/webapps/migrating.html#TouchCancel
+    event.preventDefault();
   };
 
   var handleTouchEnd = function(event) {
