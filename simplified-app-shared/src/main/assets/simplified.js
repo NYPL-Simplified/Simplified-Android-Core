@@ -67,6 +67,10 @@ function Simplified() {
   // page can mean a change in the iframe and thus requires resetting properties.
   this.pageDidChange = function() {
     var contentDocument = window.frames["epubContentIframe"].contentDocument;
+    if(contentDocument === undefined) {
+      // Support Android 4.X.
+      contentDocument = window.frames["epubContentIframe"].document;
+    }
     // Handles gestures for the inner content.
     contentDocument.removeEventListener("touchstart", handleTouchStart);
     contentDocument.addEventListener("touchstart", handleTouchStart, false);
