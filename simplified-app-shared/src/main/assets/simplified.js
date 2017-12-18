@@ -64,24 +64,25 @@ function Simplified() {
     }
   };
 
-  // Handles gestures between inner content and edge of screen.
+  // Handle gestures between the inner content and the edge of the screen.
   document.addEventListener("touchstart", handleTouchStart, false);
   document.addEventListener("touchend", handleTouchEnd, false);
 
-  // This should be called by the host whenever the page changes. This is because a change in the
-  // page can mean a change in the iframe and thus requires resetting properties.
+  // This should be called by the host whenever the page changes. This is
+  // because a change in the page can mean a change in the iframe and thus
+  // requires resetting properties.
   this.pageDidChange = function() {
     var contentDocument = window.frames["epubContentIframe"].contentDocument;
     if(contentDocument === undefined) {
       // Support Android 4.X.
       contentDocument = window.frames["epubContentIframe"].document;
     }
-    // Handles gestures for the inner content.
+    // Handle gestures for the inner content.
     contentDocument.removeEventListener("touchstart", handleTouchStart);
     contentDocument.addEventListener("touchstart", handleTouchStart, false);
     contentDocument.removeEventListener("touchend", handleTouchEnd);
     contentDocument.addEventListener("touchend", handleTouchEnd, false);
-    // Set up page turning animation.
+    // Set up the page turning animation.
     contentDocument.documentElement.style["transition"] = "left 0.2s" ;
   };
 
