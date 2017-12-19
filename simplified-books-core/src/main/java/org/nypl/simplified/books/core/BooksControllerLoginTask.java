@@ -161,8 +161,6 @@ final class BooksControllerLoginTask implements Runnable,
     BooksControllerLoginTask.LOG.debug(
       "logged in as {} successfully", this.credentials.getBarcode());
 
-    this.books.accountSync(this.listener, this.device_listener);
-
     try {
       this.accounts_database.accountSetCredentials(this.credentials);
     } catch (final IOException e) {
@@ -172,6 +170,7 @@ final class BooksControllerLoginTask implements Runnable,
       return;
     }
 
+    this.books.accountSync(this.listener, this.device_listener);
   }
 
   @Override
