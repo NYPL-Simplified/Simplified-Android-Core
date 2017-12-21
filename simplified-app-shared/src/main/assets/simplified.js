@@ -83,7 +83,8 @@ function Simplified() {
     contentDocument.removeEventListener("touchend", handleTouchEnd);
     contentDocument.addEventListener("touchend", handleTouchEnd, false);
     // Set up the page turning animation.
-    contentDocument.documentElement.style["transition"] = "left 0.2s" ;
+    contentDocument.documentElement.style["transition"] = "left 0.2s";
+    contentDocument.documentElement.style["will-change"] = "left";
   };
 
 }
