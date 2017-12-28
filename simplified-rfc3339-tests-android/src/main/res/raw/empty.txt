@@ -1,4 +1,0 @@
-The Android Eclipse plugin gets extremely upset if the
-various Android directories disappear. This file exists
-to give git something to track so that directories are
-correctly created upon checking out the sources.
