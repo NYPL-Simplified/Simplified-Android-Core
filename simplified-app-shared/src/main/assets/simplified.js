@@ -82,8 +82,12 @@ function Simplified() {
     contentDocument.addEventListener("touchstart", handleTouchStart, false);
     contentDocument.removeEventListener("touchend", handleTouchEnd);
     contentDocument.addEventListener("touchend", handleTouchEnd, false);
-    // Set up the page turning animation.
+    // Set up the page turning animation. This works because Readium adjusts the
+    // `left` property of its iframe document to advance pages.
     contentDocument.documentElement.style["transition"] = "left 0.2s";
+    // Tell the browser to expect the `left` property to change. This allows the
+    // the browser to set things up in advance to achieve better performance
+    // whenever the property is altered.
     contentDocument.documentElement.style["will-change"] = "left";
   };
 
