@@ -40,6 +40,8 @@
       <module fileurl="file://$PROJECT_DIR$/simplified-stack/simplified-stack.iml" filepath="$PROJECT_DIR$/simplified-stack/simplified-stack.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-tenprint/simplified-tenprint.iml" filepath="$PROJECT_DIR$/simplified-tenprint/simplified-tenprint.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-test-utilities/simplified-test-utilities.iml" filepath="$PROJECT_DIR$/simplified-test-utilities/simplified-test-utilities.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-tests/simplified-tests.iml" filepath="$PROJECT_DIR$/simplified-tests/simplified-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-tests-android/simplified-tests-android.iml" filepath="$PROJECT_DIR$/simplified-tests-android/simplified-tests-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-volley/simplified-volley.iml" filepath="$PROJECT_DIR$/simplified-volley/simplified-volley.iml" />
     </modules>
   </component>
