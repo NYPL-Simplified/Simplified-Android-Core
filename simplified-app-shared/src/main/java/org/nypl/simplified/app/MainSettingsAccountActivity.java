@@ -490,7 +490,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           final HSHelpStack stack = HSHelpStack.getInstance(MainSettingsAccountActivity.this);
 
           final HSDeskGear gear =
-            new HSDeskGear(" ", " ", null);
+            new HSDeskGear("https://nypl.desk.com/", "4GBRmMv8ZKG8fGehhA", null);
           stack.setGear(gear);
 
           stack.showHelp(MainSettingsAccountActivity.this);
