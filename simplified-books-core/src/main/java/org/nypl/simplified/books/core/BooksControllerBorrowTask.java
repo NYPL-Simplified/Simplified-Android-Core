@@ -8,6 +8,9 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nypl.drm.core.AdobeAdeptACSMException;
 import org.nypl.drm.core.AdobeAdeptConnectorType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
@@ -58,6 +61,8 @@ final class BooksControllerBorrowTask implements Runnable
 {
   public static final String ACSM_CONTENT_TYPE =
     "application/vnd.adobe.adept+xml";
+  public static final String SIMPLIFIED_BEARER_TOKEN_CONTENT_TYPE =
+    "application/vnd.librarysimplified.bearer-token+json";
   private static final Logger LOG;
 
   static {
@@ -279,6 +284,42 @@ final class BooksControllerBorrowTask implements Runnable
           c.fulfillACSM(new AdobeFulfillmentListener(), acsm, user);
         }
       });
+  }
+
+  private void runFulfillSimplifiedBearerToken(
+      final File file)
+      throws IOException, BookUnsupportedTypeException
+  {
+    BooksControllerBorrowTask.LOG.debug(
+        "[{}]: fulfilling Simplified bearer token file", this.short_id);
+
+    /**
+     * The bearer token file will typically have downloaded almost instantly,
+     * leaving the download progress bar at 100%. This call effectively sets
+     * the download progress bar to 0% so that it doesn't look as if the user
+     * is waiting for no good reason.
+     */
+
+    this.downloadDataReceived(0L, 100L);
+
+    JSONObject jsonObject;
+    try {
+      jsonObject = new JSONObject(FileUtilities.fileReadUTF8(file));
+    } catch (JSONException ex) {
+      this.downloadFailed(Option.some((Throwable) ex));
+      return;
+    }
+
+    final SimplifiedBearerToken token = SimplifiedBearerToken.Factory.withJSONObject(jsonObject);
+    if (token == null) {
+      this.downloadFailed(Option.some(new Throwable("failed to parse Simplified bearer token")));
+    }
+
+    final OPDSAcquisition acquisition =
+        new OPDSAcquisition(OPDSAcquisition.Type.ACQUISITION_GENERIC, token.getLocation());
+    final HTTPAuthType auth = new HTTPAuthOAuth(token.getAccessToken());
+
+    this.runAcquisitionFulfillDoDownload(acquisition, Option.some(auth));
   }
 
   private void downloadDataReceived(
@@ -768,14 +809,15 @@ final class BooksControllerBorrowTask implements Runnable
   }
 
   private DownloadType runAcquisitionFulfillDoDownload(
-    final OPDSAcquisition a)
+    final OPDSAcquisition a,
+    final OptionType<HTTPAuthType> predeterminedAuth)
     throws IOException
   {
     /**
      * Downloading requires authentication.
      */
-    OptionType<HTTPAuthType> auth = Option.none();
-    if (this.needs_auth) {
+    OptionType<HTTPAuthType> auth = predeterminedAuth;
+    if (predeterminedAuth.isNone() && this.needs_auth) {
       final AccountCredentials credentials = this.getAccountCredentials();
       final AccountBarcode barcode = credentials.getBarcode();
       final AccountPIN pin = credentials.getPin();
@@ -794,9 +836,11 @@ final class BooksControllerBorrowTask implements Runnable
       "[{}]: starting download", sid);
 
     /**
-     * Point the downloader at the acquisition link. The result will either
-     * be an EPUB or an ACSM file. ACSM files have to be "fulfilled" after
-     * downloading by passing them to the Adobe DRM connector.
+     * Point the downloader at the acquisition link. The result will be an
+     * EPUB, ACSM file, or Simplified bearer token. ACSM files have to be
+     * "fulfilled" after downloading by passing them to the Adobe DRM
+     * connector. Bearer token documents need an additional request to
+     * actually get the book in question.
      */
 
     return this.downloader.download(
@@ -867,19 +911,15 @@ final class BooksControllerBorrowTask implements Runnable
 
             BooksControllerBorrowTask.this.downloadRemoveFromCurrent();
 
-            /**
-             * If the downloaded file is an ACSM fulfillment token, then the
-             * book must be downloaded using the Adobe DRM interface.
-             */
-
             final String content_type = d.getContentType();
             BooksControllerBorrowTask.LOG.debug(
               "[{}]: content type is {}", sid, content_type);
 
-            final String acsm_type =
-              BooksControllerBorrowTask.ACSM_CONTENT_TYPE;
-            if (acsm_type.equals(content_type)) {
+            if (BooksControllerBorrowTask.ACSM_CONTENT_TYPE.equals(content_type)) {
               BooksControllerBorrowTask.this.runFulfillACSM(file);
+            } else if (BooksControllerBorrowTask.SIMPLIFIED_BEARER_TOKEN_CONTENT_TYPE.
+                equals(content_type)) {
+              BooksControllerBorrowTask.this.runFulfillSimplifiedBearerToken(file);
             } else {
 
               /**
@@ -924,7 +964,7 @@ final class BooksControllerBorrowTask implements Runnable
       switch (ea.getType()) {
         case ACQUISITION_GENERIC:
         case ACQUISITION_OPEN_ACCESS: {
-          return this.runAcquisitionFulfillDoDownload(ea);
+          return this.runAcquisitionFulfillDoDownload(ea, Option.<HTTPAuthType>none());
         }
         case ACQUISITION_BORROW:
         case ACQUISITION_BUY:
