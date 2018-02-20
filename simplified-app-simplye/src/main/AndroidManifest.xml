@@ -4,7 +4,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.simplye"
   android:versionCode="1148"
-  android:versionName="2.1.4">
+  android:versionName="2.1.5">
 
   <uses-sdk
     android:minSdkVersion="19"
