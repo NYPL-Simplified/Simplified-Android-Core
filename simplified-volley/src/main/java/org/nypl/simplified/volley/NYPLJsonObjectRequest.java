@@ -28,6 +28,7 @@ public class NYPLJsonObjectRequest extends JsonObjectRequest {
   private @Nullable AccountCredentials credentials;
   private @Nullable String username;
   private @Nullable String password;
+  private @Nullable Map<String, String> parameters;
 
   /**
    * @param method request method
@@ -103,6 +104,29 @@ public class NYPLJsonObjectRequest extends JsonObjectRequest {
     this.password = in_password;
   }
 
+  /**
+   * @param method request method
+   * @param url request url
+   * @param in_username basic auth username
+   * @param in_password basic auth password
+   * @param body json body
+   * @param parameters any additional header parameters
+   * @param listener response listener
+   * @param error_listener error listener
+   */
+  public NYPLJsonObjectRequest(final int method,
+                               final String url,
+                               final String in_username,
+                               final String in_password,
+                               final JSONObject body,
+                               final Map<String,String> parameters,
+                               final Response.Listener<JSONObject>  listener,
+                               final Response.ErrorListener error_listener) {
+    super(method, url, body, listener, error_listener);
+    this.username = in_username;
+    this.password = in_password;
+    this.parameters = parameters;
+  }
 
   @Override
   public Map<String, String> getHeaders() throws AuthFailureError {
@@ -128,15 +152,22 @@ public class NYPLJsonObjectRequest extends JsonObjectRequest {
       }
 
     }
-    else
-    {
+    else {
       final String text = this.username + ":" + this.password;
       final String encoded =
-        Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+          Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
       params.put("Authorization", "Basic " + encoded);
 
     }
+
+    if (this.parameters != null) {
+      try {
+        params.putAll(this.parameters);
+      } catch (Exception e) {
+        //TODO log exception
+      }
+    }
+
     return params;
   }
-
 }
