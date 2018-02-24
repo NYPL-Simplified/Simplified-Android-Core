@@ -1,6 +1,7 @@
 description = 'simplified-app-shared'
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 27
@@ -44,4 +45,8 @@ dependencies {
   compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
   compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
   compile 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+}
+repositories {
+  mavenCentral()
 }
