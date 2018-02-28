@@ -314,7 +314,9 @@ public final class OPDSAcquisitionFeedEntryParser
 
     if (top_level_list.size() != 0) {
       for (Element top_level_e : top_level_list) {
-        if ("vnd.adobe/adept+xml".equals(top_level_e.getAttribute("type"))) {
+        final String topLevelType = top_level_e.getAttribute("type");
+        if ("vnd.adobe/adept+xml".equals(topLevelType)
+            || "application/vnd.librarysimplified.bearer-token+json".equals(topLevelType)) {
           final List<Element> second_level_list = OPDSXML.getChildElementsWithName(
             link, OPDSFeedConstants.OPDS_URI, "indirectAcquisition");
           for (Element second_level_e : second_level_list) {
