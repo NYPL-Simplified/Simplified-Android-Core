@@ -29,6 +29,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -83,9 +85,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   private @Nullable TableLayout table_with_code;
   private @Nullable TableLayout table_signup;
 
+  private @Nullable Switch sync_switch;
+  private @Nullable LinearLayout sync_table_row;
+
   private @Nullable Button login;
 
   private Account account;
+  private AnnotationsManager annotationsManager;
 
   /**
    * Construct an activity.
@@ -108,14 +114,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   @Override
   public void onAccountIsLoggedIn(
     final AccountCredentials creds) {
+
     MainSettingsAccountActivity.LOG.debug("account is logged in: {}", creds);
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     final Resources rr = NullCheck.notNull(this.getResources());
-
 
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
     final TableLayout in_table_signup = NullCheck.notNull(this.table_signup);
@@ -137,47 +142,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           in_table_signup.setVisibility(View.GONE);
           in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
           in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
-          if (MainSettingsAccountActivity.this.account.getId() == 0) {
-            in_account_icon.setImageResource(R.drawable.account_logo_nypl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 1) {
-            in_account_icon.setImageResource(R.drawable.account_logo_bpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
-            in_account_icon.setImageResource(R.drawable.account_logo_instant);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
-            in_account_icon.setImageResource(R.drawable.account_logo_alameda);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
-            in_account_icon.setImageResource(R.drawable.account_logo_hcls);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 9) {
-            in_account_icon.setImageResource(R.drawable.account_logo_mcpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
-            in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
-            in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 12) {
-            in_account_icon.setImageResource(R.drawable.account_logo_bgc);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 13) {
-            in_account_icon.setImageResource(R.drawable.account_logo_smcl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 14) {
-            in_account_icon.setImageResource(R.drawable.account_logo_cl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 15) {
-            in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 16) {
-            in_account_icon.setImageResource(R.drawable.account_logo_ccl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 17) {
-            in_account_icon.setImageResource(R.drawable.account_logo_bcl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 18) {
-            in_account_icon.setImageResource(R.drawable.account_logo_lapl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 19) {
-            in_account_icon.setImageResource(R.drawable.account_logo_pcl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
-            in_account_icon.setImageResource(R.drawable.account_logo_sccl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 21) {
-            in_account_icon.setImageResource(R.drawable.account_logo_acls);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
-            in_account_icon.setImageResource(R.drawable.account_logo_rel);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
-            in_account_icon.setImageResource(R.drawable.account_logo_wcfl);
-          }
+
+          inefficientlySetLibraryLogo(in_account_icon);
 
           in_barcode_text.setText(creds.getBarcode().toString());
           in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
@@ -206,6 +172,25 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
         }
       });
+  }
+
+  /**
+   * Update the switch to match the server, or what the user has chosen on another device.
+   * Disable user interaction with the Switch while network operations are taking place.
+   * @param account Library Account
+   */
+  public void checkServerSyncPermission(final BooksType account) {
+    this.sync_switch.setEnabled(false);
+    this.annotationsManager.requestServerSyncPermissionStatus(account, (enableSync) -> {
+      if (enableSync) {
+        final int accountID = this.account.getId();
+        Simplified.getSharedPrefs().putBoolean("NYPLSyncPermissionGranted", accountID, true);
+      }
+      this.sync_switch.setChecked(enableSync);
+      this.sync_switch.setEnabled(true);
+
+      return kotlin.Unit.INSTANCE;
+    });
   }
 
   @Override
@@ -384,7 +369,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       this.account = Simplified.getCurrentAccount();
     }
 
-
     final ActionBar bar = this.getActionBar();
     if (android.os.Build.VERSION.SDK_INT < 21) {
       bar.setDisplayHomeAsUpEnabled(false);
@@ -434,6 +418,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final Button in_signup =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_signup));
 
+    this.sync_switch = findViewById(R.id.sync_switch);
+    this.sync_table_row = findViewById(R.id.sync_table_row);
+    this.sync_table_row.setVisibility(View.GONE);
 
     final TableRow in_privacy =
       (TableRow) findViewById(R.id.link_privacy);
@@ -653,6 +640,33 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     }
 
+
+
+
+    final boolean permission = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.account.getId());
+    this.sync_switch.setChecked(permission);
+
+    this.sync_switch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      if (isChecked) {
+        buttonView.setEnabled(false);
+        annotationsManager.updateServerSyncPermissionStatus(true, (success) -> {
+          if (success) {
+            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", true);
+            this.sync_switch.setChecked(true);
+          } else {
+            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", false);
+            this.sync_switch.setChecked(false);
+            //TODO TOAST
+          }
+          this.sync_switch.setEnabled(true);
+          return kotlin.Unit.INSTANCE;
+        });
+      } else {
+        Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", false);
+        this.sync_switch.setChecked(false);
+      }
+    });
+
     if (this.account.getPrivacyPolicy() != null) {
       in_privacy.setVisibility(View.VISIBLE);
     }
@@ -763,6 +777,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
   }
 
+  private boolean syncButtonShouldBeVisible() {
+    return (this.account.supportsSimplyESync() && this.account.getId() == Simplified.getCurrentAccount().getId());
+  }
+
   /**
    *
    */
@@ -863,23 +881,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   protected void onResume() {
     super.onResume();
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-
-
-    BooksType books = app.getBooks();
-    if (this.account != null)
-    {
-      books = Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
-    }
-
     final Resources rr = NullCheck.notNull(this.getResources());
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
     final TableLayout in_table_signup = NullCheck.notNull(this.table_signup);
 
     final TextView in_account_name_text = NullCheck.notNull(this.account_name_text);
     final TextView in_account_subtitle_text = NullCheck.notNull(this.account_subtitle_text);
+
     final ImageView in_account_icon = NullCheck.notNull(this.account_icon);
+    inefficientlySetLibraryLogo(in_account_icon);
 
     final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
     final TextView in_pin_text = NullCheck.notNull(this.pin_text);
@@ -890,97 +900,101 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
     in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
 
-    if (MainSettingsAccountActivity.this.account.getId() == 0) {
-      in_account_icon.setImageResource(R.drawable.account_logo_nypl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 1) {
-      in_account_icon.setImageResource(R.drawable.account_logo_bpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
-      in_account_icon.setImageResource(R.drawable.account_logo_instant);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
-      in_account_icon.setImageResource(R.drawable.account_logo_alameda);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
-      in_account_icon.setImageResource(R.drawable.account_logo_hcls);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 9) {
-      in_account_icon.setImageResource(R.drawable.account_logo_mcpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
-      in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
-      in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 12) {
-      in_account_icon.setImageResource(R.drawable.account_logo_bgc);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 13) {
-      in_account_icon.setImageResource(R.drawable.account_logo_smcl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 14) {
-      in_account_icon.setImageResource(R.drawable.account_logo_cl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 15) {
-      in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 16) {
-      in_account_icon.setImageResource(R.drawable.account_logo_ccl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 17) {
-      in_account_icon.setImageResource(R.drawable.account_logo_bcl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 18) {
-      in_account_icon.setImageResource(R.drawable.account_logo_lapl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 19) {
-      in_account_icon.setImageResource(R.drawable.account_logo_pcl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
-      in_account_icon.setImageResource(R.drawable.account_logo_sccl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 21) {
-      in_account_icon.setImageResource(R.drawable.account_logo_acls);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
-      in_account_icon.setImageResource(R.drawable.account_logo_rel);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
-      in_account_icon.setImageResource(R.drawable.account_logo_wcfl);
-    }
 
+    final BooksType libraryAccount;
+    if (this.account == null) {
+      libraryAccount = Simplified.getCatalogAppServices().getBooks();
+    } else {
+      libraryAccount = Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
+    }
 
     final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
-    if (accounts_database.accountGetCredentials().isSome()) {
-      final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();
-
-      final BooksType final_books = books;
-      UIThread.runOnUIThread(
-        new Runnable() {
-          @Override
-          public void run() {
-
-            in_table_with_code.setVisibility(View.VISIBLE);
-            in_table_signup.setVisibility(View.GONE);
-
-            in_barcode_text.setText(creds.getBarcode().toString());
-            in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
-            in_pin_text.setText(creds.getPin().toString());
-            in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
-
-            in_eula_checkbox.setEnabled(false);
-
-            in_login.setText(rr.getString(R.string.settings_log_out));
-            in_login.setOnClickListener(
-              new OnClickListener() {
-                @Override
-                public void onClick(
-                  final @Nullable View v) {
-                  final LogoutDialog d = LogoutDialog.newDialog();
-                  d.setOnConfirmListener(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        //if current account
-                        final_books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
-                        if (MainSettingsAccountActivity.this.account == Simplified.getCurrentAccount()) {
-                          final_books.destroyBookStatusCache();
-                        }
-                      }
-                    });
-                  final FragmentManager fm =
-                    MainSettingsAccountActivity.this.getFragmentManager();
-                  d.show(fm, "logout-confirm");
-                }
-              });
-
-          }
-        });
+    if (!accounts_database.accountGetCredentials().isSome()) {
+      this.sync_table_row.setVisibility(View.GONE);
+      LOG.debug("No user currently signed in, bypassing UI update and Sync Status Initiation.");
+      return;
     }
 
+    final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();
+
+    if (syncButtonShouldBeVisible()) {
+      if (this.annotationsManager == null) {
+        this.annotationsManager = new AnnotationsManager(this.account, creds, this);
+      }
+      this.sync_table_row.setVisibility(View.VISIBLE);
+      checkServerSyncPermission(libraryAccount);
+    } else {
+      this.sync_table_row.setVisibility(View.GONE);
+    }
+
+    in_table_with_code.setVisibility(View.VISIBLE);
+    in_table_signup.setVisibility(View.GONE);
+
+    in_barcode_text.setText(creds.getBarcode().toString());
+    in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
+    in_pin_text.setText(creds.getPin().toString());
+    in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+
+    in_eula_checkbox.setEnabled(false);
+
+    in_login.setText(rr.getString(R.string.settings_log_out));
+    in_login.setOnClickListener( v -> {
+      final LogoutDialog dialog = LogoutDialog.newDialog();
+      dialog.setOnConfirmListener( () -> {
+        //Delete cache if logging out of current active library account
+        libraryAccount.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
+        if (MainSettingsAccountActivity.this.account == Simplified.getCurrentAccount()) {
+          libraryAccount.destroyBookStatusCache();
+        }
+      });
+      final FragmentManager fm = MainSettingsAccountActivity.this.getFragmentManager();
+      dialog.show(fm, "logout-confirm");
+    });
+  }
+
+  //FIXME For forward-looking sanity, this method should set the image resource directory dynamically from the key in Accounts.json
+  private void inefficientlySetLibraryLogo(ImageView icon) {
+    if (MainSettingsAccountActivity.this.account.getId() == 0) {
+      icon.setImageResource(R.drawable.account_logo_nypl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 1) {
+      icon.setImageResource(R.drawable.account_logo_bpl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
+      icon.setImageResource(R.drawable.account_logo_instant);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
+      icon.setImageResource(R.drawable.account_logo_alameda);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
+      icon.setImageResource(R.drawable.account_logo_hcls);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 9) {
+      icon.setImageResource(R.drawable.account_logo_mcpl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
+      icon.setImageResource(R.drawable.account_logo_fcpl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
+      icon.setImageResource(R.drawable.account_logo_anne_arundel);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 12) {
+      icon.setImageResource(R.drawable.account_logo_bgc);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 13) {
+      icon.setImageResource(R.drawable.account_logo_smcl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 14) {
+      icon.setImageResource(R.drawable.account_logo_cl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 15) {
+      icon.setImageResource(R.drawable.account_logo_ccpl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 16) {
+      icon.setImageResource(R.drawable.account_logo_ccl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 17) {
+      icon.setImageResource(R.drawable.account_logo_bcl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 18) {
+      icon.setImageResource(R.drawable.account_logo_lapl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 19) {
+      icon.setImageResource(R.drawable.account_logo_pcl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
+      icon.setImageResource(R.drawable.account_logo_sccl);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 21) {
+      icon.setImageResource(R.drawable.account_logo_acls);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
+      icon.setImageResource(R.drawable.account_logo_rel);
+    } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
+      icon.setImageResource(R.drawable.account_logo_wcfl);
+    }
   }
 
 

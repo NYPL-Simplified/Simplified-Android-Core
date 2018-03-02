@@ -13,6 +13,8 @@ import org.nypl.simplified.books.core.AccountAuthToken;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.core.LogUtilities;
+import org.slf4j.Logger;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -24,6 +26,12 @@ import java.util.Map;
  */
 
 public class NYPLJsonObjectRequest extends JsonObjectRequest {
+
+  private static final Logger LOG;
+
+  static {
+    LOG = LogUtilities.getLog(NYPLJsonObjectRequest.class);
+  }
 
   private @Nullable AccountCredentials credentials;
   private @Nullable String username;
@@ -165,6 +173,7 @@ public class NYPLJsonObjectRequest extends JsonObjectRequest {
         params.putAll(this.parameters);
       } catch (Exception e) {
         //TODO log exception
+        LOG.error("Error adding extra parameters value into Map.");
       }
     }
 

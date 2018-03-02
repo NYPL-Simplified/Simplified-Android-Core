@@ -6,7 +6,7 @@
     "subtitle" : "Inspiring lifelong learning, advancing knowledge, and strengthening our communities.",
     "logo" : "LibraryLogoNYPL",
     "needsAuth" : true,
-    "supportsSimplyESync" : false,
+    "supportsSimplyESync" : true,
     "supportsBarcodeScanner" : false,
     "supportsBarcodeDisplay" : false,
     "supportsReservations" : true,
