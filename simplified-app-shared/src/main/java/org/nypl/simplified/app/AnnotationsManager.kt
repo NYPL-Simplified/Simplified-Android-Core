@@ -152,7 +152,7 @@ class AnnotationsManager(private val libraryAccount: Account,
                                           completion: (success: Boolean) -> Unit) {
 
     val jsonBody = JSONObject(parameters)
-    val additionalHeaders = mapOf<String,String>("vnd.librarysimplified/user-profile+json" to "Content-Type")
+    val additionalHeaders = mapOf<String,String>("Content-Type" to "vnd.librarysimplified/user-profile+json")
 
     val request = NYPLJsonObjectRequest(
         Request.Method.PUT,

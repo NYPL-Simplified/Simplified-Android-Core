@@ -30,6 +30,8 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -90,9 +92,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   private @Nullable ImageView barcode_image;
   private @Nullable TextView barcode_image_toggle;
 
+  private @Nullable Switch sync_switch;
+  private @Nullable LinearLayout sync_table_row;
+
   private @Nullable Button login;
 
   private Account account;
+  private AnnotationsManager annotationsManager;
 
   /**
    * Construct an activity.
@@ -115,14 +121,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   @Override
   public void onAccountIsLoggedIn(
     final AccountCredentials creds) {
+
     MainSettingsAccountActivity.LOG.debug("account is logged in: {}", creds);
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
+    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
     final BooksType books = app.getBooks();
 
     final Resources rr = NullCheck.notNull(this.getResources());
-
 
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
     final TableLayout in_table_signup = NullCheck.notNull(this.table_signup);
@@ -210,6 +215,25 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
         }
       });
+  }
+
+  /**
+   * Update the switch to match the server, or what the user has chosen on another device.
+   * Disable user interaction with the Switch while network operations are taking place.
+   * @param account Library Account
+   */
+  public void checkServerSyncPermission(final BooksType account) {
+    this.sync_switch.setEnabled(false);
+    this.annotationsManager.requestServerSyncPermissionStatus(account, (enableSync) -> {
+      if (enableSync) {
+        final int accountID = this.account.getId();
+        Simplified.getSharedPrefs().putBoolean("NYPLSyncPermissionGranted", accountID, true);
+      }
+      this.sync_switch.setChecked(enableSync);
+      this.sync_switch.setEnabled(true);
+
+      return kotlin.Unit.INSTANCE;
+    });
   }
 
   @Override
@@ -388,7 +412,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       this.account = Simplified.getCurrentAccount();
     }
 
-
     final ActionBar bar = this.getActionBar();
     if (android.os.Build.VERSION.SDK_INT < 21) {
       bar.setDisplayHomeAsUpEnabled(false);
@@ -444,6 +467,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final Button in_signup =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_signup));
 
+    this.sync_switch = findViewById(R.id.sync_switch);
+    this.sync_table_row = findViewById(R.id.sync_table_row);
+    this.sync_table_row.setVisibility(View.GONE);
 
     final TableRow in_privacy =
       (TableRow) findViewById(R.id.link_privacy);
@@ -663,6 +689,33 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     }
 
+
+
+
+    final boolean permission = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.account.getId());
+    this.sync_switch.setChecked(permission);
+
+    this.sync_switch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      if (isChecked) {
+        buttonView.setEnabled(false);
+        annotationsManager.updateServerSyncPermissionStatus(true, (success) -> {
+          if (success) {
+            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", true);
+            this.sync_switch.setChecked(true);
+          } else {
+            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", false);
+            this.sync_switch.setChecked(false);
+            //TODO TOAST
+          }
+          this.sync_switch.setEnabled(true);
+          return kotlin.Unit.INSTANCE;
+        });
+      } else {
+        Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", false);
+        this.sync_switch.setChecked(false);
+      }
+    });
+
     if (this.account.getPrivacyPolicy() != null) {
       in_privacy.setVisibility(View.VISIBLE);
     }
@@ -775,6 +828,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
   }
 
+  private boolean syncButtonShouldBeVisible() {
+    return (this.account.supportsSimplyESync() && this.account.getId() == Simplified.getCurrentAccount().getId());
+  }
+
   /**
    *
    */
@@ -875,22 +932,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   protected void onResume() {
     super.onResume();
 
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-
-
-    BooksType books = app.getBooks();
-    if (this.account != null)
-    {
-      books = Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
-    }
-
     final Resources rr = NullCheck.notNull(this.getResources());
     final TableLayout in_table_with_code = NullCheck.notNull(this.table_with_code);
     final TableLayout in_table_signup = NullCheck.notNull(this.table_signup);
 
     final TextView in_account_name_text = NullCheck.notNull(this.account_name_text);
     final TextView in_account_subtitle_text = NullCheck.notNull(this.account_subtitle_text);
+
     final ImageView in_account_icon = NullCheck.notNull(this.account_icon);
 
     final TextView in_barcode_text = NullCheck.notNull(this.barcode_text);
@@ -917,81 +965,76 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.librarylogomagic);
     }
 
-    final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
-    if (accounts_database.accountGetCredentials().isSome()) {
-      final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();
-
-      final BooksType final_books = books;
-      UIThread.runOnUIThread(
-        new Runnable() {
-          @Override
-          public void run() {
-
-            in_table_with_code.setVisibility(View.VISIBLE);
-            in_table_signup.setVisibility(View.GONE);
-
-            in_barcode_text.setText(creds.getBarcode().toString());
-            in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
-            in_pin_text.setText(creds.getPin().toString());
-            in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
-
-            if (account.supportsBarcodeDisplay()) {
-              Bitmap barcodeBitmap = generateBarcodeImage(creds.getBarcode().toString());
-              if (barcodeBitmap != null) {
-                in_barcode_image.setImageBitmap(barcodeBitmap);
-
-                in_barcode_image_toggle.setVisibility(View.VISIBLE);
-                in_barcode_image_toggle.setOnClickListener(
-                    new OnClickListener() {
-                      @Override
-                      public void onClick(View v) {
-                        if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
-                          in_barcode_image.setVisibility(View.VISIBLE);
-                          in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
-                        } else {
-                          in_barcode_image.setVisibility(View.GONE);
-                          in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
-                        }
-                      }
-                    }
-                );
-              }
-            }
-
-            in_eula_checkbox.setEnabled(false);
-
-            in_login.setText(rr.getString(R.string.settings_log_out));
-            in_login.setOnClickListener(
-              new OnClickListener() {
-                @Override
-                public void onClick(
-                  final @Nullable View v) {
-                  final LogoutDialog d = LogoutDialog.newDialog();
-                  d.setOnConfirmListener(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        //if current account
-                        final_books.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
-                        if (MainSettingsAccountActivity.this.account == Simplified.getCurrentAccount()) {
-                          final_books.destroyBookStatusCache();
-                        }
-                      }
-                    });
-                  final FragmentManager fm =
-                    MainSettingsAccountActivity.this.getFragmentManager();
-                  d.show(fm, "logout-confirm");
-                }
-              });
-
-          }
-        });
+    final BooksType libraryAccount;
+    if (this.account == null) {
+      libraryAccount = Simplified.getCatalogAppServices().getBooks();
+    } else {
+      libraryAccount = Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
     }
 
+    final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
+    if (!accounts_database.accountGetCredentials().isSome()) {
+      this.sync_table_row.setVisibility(View.GONE);
+      LOG.debug("No user currently signed in, bypassing UI update and Sync Status Initiation.");
+      return;
+    }
+
+    final AccountCredentials creds = ((Some<AccountCredentials>) accounts_database.accountGetCredentials()).get();
+
+    if (syncButtonShouldBeVisible()) {
+      if (this.annotationsManager == null) {
+        this.annotationsManager = new AnnotationsManager(this.account, creds, this);
+      }
+      this.sync_table_row.setVisibility(View.VISIBLE);
+      checkServerSyncPermission(libraryAccount);
+    } else {
+      this.sync_table_row.setVisibility(View.GONE);
+    }
+
+    if (account.supportsBarcodeDisplay()) {
+      Bitmap barcodeBitmap = generateBarcodeImage(creds.getBarcode().toString());
+      if (barcodeBitmap != null) {
+        in_barcode_image.setImageBitmap(barcodeBitmap);
+
+        in_barcode_image_toggle.setVisibility(View.VISIBLE);
+        in_barcode_image_toggle.setOnClickListener(view -> {
+          if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
+            in_barcode_image.setVisibility(View.VISIBLE);
+            in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
+          } else {
+            in_barcode_image.setVisibility(View.GONE);
+            in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
+          }
+        });
+      }
+    }
+
+    in_table_with_code.setVisibility(View.VISIBLE);
+    in_table_signup.setVisibility(View.GONE);
+
+    in_barcode_text.setText(creds.getBarcode().toString());
+    in_barcode_text.setContentDescription(creds.getBarcode().toString().replaceAll(".(?=.)", "$0,"));
+    in_pin_text.setText(creds.getPin().toString());
+    in_pin_text.setContentDescription(creds.getPin().toString().replaceAll(".(?=.)", "$0,"));
+
+    in_eula_checkbox.setEnabled(false);
+
+    in_login.setText(rr.getString(R.string.settings_log_out));
+    in_login.setOnClickListener( v -> {
+      final LogoutDialog dialog = LogoutDialog.newDialog();
+      dialog.setOnConfirmListener( () -> {
+        //Delete cache if logging out of current active library account
+        libraryAccount.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
+        if (MainSettingsAccountActivity.this.account == Simplified.getCurrentAccount()) {
+          libraryAccount.destroyBookStatusCache();
+        }
+      });
+      final FragmentManager fm = MainSettingsAccountActivity.this.getFragmentManager();
+      dialog.show(fm, "logout-confirm");
+    });
   }
 
   private Bitmap generateBarcodeImage(String barcodeString) {
-
     try {
       MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
 
@@ -1005,7 +1048,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       return null;
     }
   }
-
 
   @Override
   public boolean onCreateOptionsMenu(
