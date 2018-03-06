@@ -1,5 +1,6 @@
 package org.nypl.simplified.app
 
+import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
 import com.android.volley.*
@@ -29,7 +30,7 @@ import java.io.IOException
 
 class AnnotationsManager(private val libraryAccount: Account,
                          private val credentials: AccountCredentials,
-                         context: Context) {
+                         private val context: Context) {
 
   private val requestQueue = Volley.newRequestQueue(context)
 
@@ -38,9 +39,9 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
   /**
-   * Polls the server, and based on a set of conditions, decides whether
-   * or not to inform the user about "Syncing" as a feature via an Alert, where
-   * the user can choose to dismiss/ignore, or turn it on.
+   * Queries the server, and based on a set of conditions, decides whether
+   * or not to inform the user about "Syncing" in an Alert Dialog, where
+   * the user can choose to dismiss/ignore, or turn it on for the first time.
    * @param account The particular library for the permission status request.
    * @param completion Asynchronous handler for the user's decision, or error.
    */
@@ -53,28 +54,28 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    //TODO update these calls after updating Prefs.java to support multiple libraries
     if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") == true &&
-        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted") == false) {
+        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryAccount.id) == false) {
       completion(false)
       return
     }
 
-    syncPermissionUriRequest { initialized, syncIsPermitted ->
+    syncPermissionStatusUriRequest { initialized, syncIsPermitted ->
       if (initialized && syncIsPermitted) {
         Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
         LOG.debug("Sync has already been enabled on the server. Enable here as well.")
         completion(true)
       } else if (!initialized && !Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage")) {
-        LOG.debug("Sync has never been initialized for the patron. Proceeding with alert.")
-        displayFirstTimeSyncMessage(completion)
+        LOG.debug("Sync has never been initialized for the patron. Proceeding with opt-in alert.")
+        presentFirstTimeSyncAlertDialog(completion)
       } else {
+        LOG.debug("Sync has been initialized and not permitted. Continuing with sync disabled.")
         completion(false)
       }
     }
   }
 
-  private fun syncPermissionUriRequest(completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit) {
+  private fun syncPermissionStatusUriRequest(completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit) {
 
     val catalogUriString = libraryAccount.catalogUrl ?: null
     val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
@@ -330,21 +331,26 @@ class AnnotationsManager(private val libraryAccount: Account,
    * @param cfi JSON string that represents the book position,
    * provided and parsed upstream by Readium.
    */
-  fun updateReadingPosition(bookID: String, uri: String?, cfi: String) {
+  fun updateReadingPosition(bookID: String, cfi: String) {
 
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
 
-    // If URI parameter is null, try and post to annotations URI provided by OPDS Main Catalog Feed.
-    val catalogUriString = libraryAccount.catalogUrl ?: null
+    val catalogUriString = libraryAccount.catalogUrl
     val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
     val mainFeedAnnotationUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "annotations/") else null
-    val requestUri = uri ?: mainFeedAnnotationUri.toString()
+    val requestUri = mainFeedAnnotationUri?.toString()
     if (requestUri == null) {
-      LOG.error("Could not create Annotations URI from main feed as a fallback for a null parameter.")
+      LOG.error("No Catalog Annotation Uri present for POST request.")
       return
+    }
+
+    val deviceIDString = if (credentials.adobeDeviceID.isSome) {
+      (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
+    } else {
+      null
     }
 
     val bodyObject = mapOf(
@@ -360,7 +366,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         ),
         "body" to mapOf(
             "http://librarysimplified.org/terms/time" to Instant().toString(),
-            "http://librarysimplified.org/terms/device" to (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
+            "http://librarysimplified.org/terms/device" to deviceIDString
         )
     )
 
@@ -386,15 +392,10 @@ class AnnotationsManager(private val libraryAccount: Account,
   private fun postAnnotation(uri: String, bodyParameters: String, timeout: Int?,
                              completion: (isSuccessful: Boolean, annotationID: String?) -> Unit) {
 
-    if (timeout != null) {
-      //TODO set custom timeout with RequestQueue
-    }
-
     try {
       val jsonObjectBody = JSONObject(bodyParameters)
-
-      NYPLJsonObjectRequest(
-          Request.Method.GET,
+      val request = NYPLJsonObjectRequest(
+          Request.Method.POST,
           uri,
           credentials.barcode.toString(),
           credentials.pin.toString(),
@@ -406,11 +407,22 @@ class AnnotationsManager(private val libraryAccount: Account,
             completion(true, serverAnnotationID)
           },
           Response.ErrorListener { error ->
-            LOG.error("GET request fail! Error: ${error.message}")
+            LOG.error("POST request fail! Network Response: ${error.networkResponse.toString()}")
             completion(false, null)
           })
+
+      if (timeout != null) {
+        request.retryPolicy = DefaultRetryPolicy(
+            timeout * 1000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+      }
+
+      requestQueue.add(request)
+
     } catch (e: java.lang.Exception) {
-      LOG.error("Error creating JSONObject from Kotlin type.")
+      LOG.error("Post Annotation: Error creating JSONObject from Kotlin Map Type.")
     }
   }
 
@@ -606,42 +618,63 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
 
-  //TODO these will need to change once we have the rest of the app's callsites in context
   /**
-   * Check if sync is supported by a particular library from the registry.
+   * Sync is possible if a user is logged in and the current active library
+   * has SimplyE sync support enabled.
    */
-  fun syncIsPossible(account: AccountsControllerType): Boolean {
-    return account.accountIsLoggedIn() && libraryAccount.supportsSimplyESync()
+  //TODO can be private?
+  fun syncIsPossible(userAccount: AccountsControllerType): Boolean {
+    return userAccount.accountIsLoggedIn() && libraryAccount.supportsSimplyESync()
   }
 
   /**
-   * Check if sync is supported by a particular library as well
-   * as explicitly allowed by the current user, ONLY based on local sharedPrefs.
-   * The decision to trust sharedPrefs or the server should be delegated elsewhere.
+   * Sync is permitted if the user has explicitly enabled the feature on this device,
+   * or inherited activation from another device.
    */
   fun syncIsPossibleAndPermitted(): Boolean {
     try {
       val app: SimplifiedCatalogAppServicesType? = Simplified.getCatalogAppServices()
       val currentAccount = app?.books as? AccountsControllerType
       val syncIsPossible = if (currentAccount != null) syncIsPossible(currentAccount) else false
-      return syncIsPossible && Simplified.getSharedPrefs().getBoolean("syncPermissionGranted")
+      val libraryID = Simplified.getCurrentAccount()
+      val syncPermissionGranted = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryID.id)
+      return syncIsPossible && syncPermissionGranted
     } catch (e: Exception) {
       LOG.error("Exception thrown accessing SimplifiedCatalogAppServicesType to obtain sync status.")
       return false
     }
   }
 
-  fun displayFirstTimeSyncMessage(completion: (enableSync: Boolean) -> Unit) {
-    //TODO This alert should not be presented from this class. Error should be returned.
-    //"not now" -> completion(false); seenFirstTimeMessage = true;
-    //"enable sync" ->
-    //updateServerSyncSetting { success -> completion(success) }
+  private fun presentFirstTimeSyncAlertDialog(completion: (enableSync: Boolean) -> Unit) {
+
+    val builder= AlertDialog.Builder(context)
+    builder.setTitle("SimplyE Sync")
+    builder.setMessage("Enable sync to save your reading position and bookmarks to your other devices." +
+        "\n\nYou can change this any time in Settings.")
+
+    builder.setNegativeButton("Not Now") { dialog, which ->
+      Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
+      completion(false)
+    }
+    builder.setPositiveButton("Enable Sync") { dialog, which ->
+      updateServerSyncPermissionStatus(true) { success ->
+        Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
+        completion(success)
+      }
+    }
+
+    builder.create()
+    builder.show()
   }
 
-  fun presentAlertForSyncSettingError() {
-    //TODO This alert should not be presented from this class. Error should be returned.
-    //"Error Changing Sync Setting"
-    //"There was a problem contacting the server.\nPlease make sure you are connected to the internet, or try again later."
-    //"OK"
+  private fun presentAlertForSyncSettingError() {
+
+    val builder= AlertDialog.Builder(context)
+    builder.setTitle("Error Changing Sync Setting")
+    builder.setMessage("There was a problem contacting the server." +
+        "\nPlease make sure you are connected to the internet, or try again later.")
+    builder.setPositiveButton("OK", null)
+    builder.create()
+    builder.show()
   }
 }

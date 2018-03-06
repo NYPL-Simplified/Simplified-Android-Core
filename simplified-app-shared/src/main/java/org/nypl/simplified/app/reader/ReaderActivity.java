@@ -81,6 +81,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import kotlin.Unit;
+
 /**
  * The main reader activity for reading an EPUB.
  */
@@ -134,12 +136,7 @@ public final class ReaderActivity extends Activity implements
   private           ReaderBookLocation                current_location;
   private           ReaderBookLocation                sync_location;
   private           AccountCredentials                credentials;
-
-  //TODO
   private @Nullable ReaderSyncManager                 syncManager;
-  //TODO maybe just merge both managers into the annotations class instead
-  //TODO at least rename annotationsManager to something else
-  private @Nullable AnnotationsManager                annotationsManager;
 
 
   /**
@@ -496,6 +493,7 @@ public final class ReaderActivity extends Activity implements
 
           ReaderActivity.this.credentials = creds;
 
+          initiateSyncManagement();
         }
       }
     );
@@ -510,23 +508,20 @@ public final class ReaderActivity extends Activity implements
   @Override public void onCurrentPageReceived(
     final ReaderBookLocation l)
   {
-    this.current_location = l;
-
     ReaderActivity.LOG.debug("received book location: {}", l);
+
+    //TODO see if I really need this.current_location as an ivar
+    this.current_location = l;
 
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
     final ReaderBookmarksType bm = rs.getBookmarks();
+    //TODO could book_id actually be null?
     final BookID in_book_id = NullCheck.notNull(this.book_id);
 
-    //TODO need to audit this class to make sure it's not double-uploading the page
-    bm.setBookmark(in_book_id, l);
+    bm.setBookmark(in_book_id, this.current_location);
 
-    //TODO the logic for whether the page SHOULD be uploaded will be moved deeper into the call stack
-    if (!"null".equals(((Some<String>) this.current_location.getContentCFI()).get())) {
-      this.postLastRead(l);
-    } else {
-      ReaderActivity.LOG.debug("Content CFI was null. Skipping attempt to upload.");
-    }
+    //TODO WIP
+    uploadPageLocation(this.current_location);
   }
 
   @Override protected void onPause()
@@ -587,43 +582,22 @@ public final class ReaderActivity extends Activity implements
       });
 
 
-    //TODO WIP
-    /**
-     * Configure Sync Manager.
-     */
 
-    final Account currentAccount = Simplified.getCurrentAccount();
-    this.syncManager = new ReaderSyncManager(
-        this.book_id.toString(),
-        p,
-        this.credentials,
-        currentAccount,
-        this);
-
-    initiateSync();
+    //TODO set package to sync mnager.. this.syncManager.package = p;
 
 
     /**
      * Configure the TOC button.
      */
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
-
+    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
     final View in_toc = NullCheck.notNull(this.view_toc);
 
-    in_toc.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-          ReaderTOCActivity.startActivityForResult(
-            ReaderActivity.this, sent_toc);
-          ReaderActivity.this.overridePendingTransition(0, 0);
-        }
-      });
+    in_toc.setOnClickListener( v -> {
+      final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
+      ReaderTOCActivity.startActivityForResult(ReaderActivity.this, sent_toc);
+      ReaderActivity.this.overridePendingTransition(0, 0);
+    });
 
     /**
      * Get a reference to the web server. Start it if necessary (the callbacks
@@ -689,118 +663,6 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.error("{}", x.getMessage(), x);
   }
 
-  //TODO alert to ask patron for decision
-  private void showBookLocationDialog(final String response) {
-
-    final AlertDialog.Builder builder = new AlertDialog.Builder(ReaderActivity.this);
-    builder.setTitle("Sync Reading Position");
-
-    if (ReaderActivity.this.epub_container != null) {
-      final Container container = NullCheck.notNull(ReaderActivity.this.epub_container);
-
-      final Package default_package = NullCheck.notNull(container.getDefaultPackage());
-      final AnnotationResult result = new Gson().fromJson(response, AnnotationResult.class);
-      OptionType<ReaderOpenPageRequestType> page_request = null;
-
-      for (final Annotation annotation : result.getFirst().getItems()) {
-        if ("http://librarysimplified.org/terms/annotation/idling".equals(annotation.getMotivation())) {
-
-          final String text = NullCheck.notNull(annotation.getTarget().getSelector().getValue());
-          LOG.debug("CurrentPage text {}", text);
-
-          final String key = NullCheck.notNull(this.book_id.toString());
-          LOG.debug("CurrentPage key {}", key);
-
-          try {
-            final JSONObject o = new JSONObject(text);
-
-            final OptionType<ReaderBookLocation> mark = Option.some(ReaderBookLocation.fromJSON(o));
-
-            page_request = mark.map(
-              new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
-                @Override
-                public ReaderOpenPageRequestType call(
-                  final ReaderBookLocation l) {
-                  LOG.debug("CurrentPage location {}", l);
-
-                  final String chapter = default_package.getSpineItem(l.getIDRef()).getTitle();
-                  builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\" " + chapter + "\"");
-
-                  //TODO not sure what this.sync_location is being used for
-                  ReaderActivity.this.sync_location = l;
-                  return ReaderOpenPageRequest.fromBookLocation(l);
-                }
-              });
-
-
-            LOG.debug("CurrentPage sync {}", text);
-
-          } catch (JSONException e) {
-            e.printStackTrace();
-          }
-
-        }
-      }
-
-      final OptionType<ReaderOpenPageRequestType> page = page_request;
-
-      builder.setPositiveButton("YES",
-        new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(final DialogInterface dialog, final int which) {
-            // positive button logic
-
-            final ReaderReadiumJavaScriptAPIType js =
-              NullCheck.notNull(ReaderActivity.this.readium_js_api);
-            final ReaderReadiumViewerSettings vs =
-              NullCheck.notNull(ReaderActivity.this.viewer_settings);
-            final Container c = NullCheck.notNull(ReaderActivity.this.epub_container);
-            final Package p = NullCheck.notNull(c.getDefaultPackage());
-
-            js.openBook(p, vs, page);
-            Simplified.getSharedPrefs().putBoolean("post_last_read", true);
-            LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
-          }
-        });
-
-      builder.setNegativeButton("NO",
-        new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(final DialogInterface dialog, final int which) {
-            // negative button logic
-            Simplified.getSharedPrefs().putBoolean("post_last_read", true);
-            LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
-
-          }
-        });
-
-      LOG.debug("CurrentPage current_location {}", this.current_location);
-      LOG.debug("CurrentPage sync_location {}", this.sync_location);
-    }
-
-    if ((this.current_location == null && this.sync_location == null) || this.current_location != null && this.sync_location == null)
-    {
-      Simplified.getSharedPrefs().putBoolean("post_last_read", true);
-      LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
-    }
-    else if (this.current_location == null && this.sync_location != null)
-    {
-      final AlertDialog dialog = builder.create();
-      dialog.show();
-    }
-    else if (!(this.current_location.getIDRef().equals(this.sync_location.getIDRef()) && this.current_location.getContentCFI().equals(this.sync_location.getContentCFI())))
-    {
-      final AlertDialog dialog = builder.create();
-      dialog.show();
-    }
-    else
-    {
-      Simplified.getSharedPrefs().putBoolean("post_last_read", true);
-      LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
-    }
-
-  }
-
   @Override public void onReadiumFunctionInitialize()
   {
     ReaderActivity.LOG.debug("readium initialize requested");
@@ -834,18 +696,13 @@ public final class ReaderActivity extends Activity implements
       bookmarks.getBookmark(in_book_id, in_entry);
 
 
-//TODO review and clean this up
-    
-    final OptionType<ReaderOpenPageRequestType> page_request = mark.map(
-      new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>()
-      {
-        @Override public ReaderOpenPageRequestType call(
-          final ReaderBookLocation l)
-        {
-          ReaderActivity.this.current_location = l;
-          return ReaderOpenPageRequest.fromBookLocation(l);
-        }
-      });
+    //TODO review and clean this up
+
+
+    final OptionType<ReaderOpenPageRequestType> page_request = mark.map( location -> {
+      ReaderActivity.this.current_location = location;
+      return ReaderOpenPageRequest.fromBookLocation(location);
+    });
     // is this correct? inject fonts before book opens or after
     js.injectFonts();
 
@@ -915,37 +772,39 @@ public final class ReaderActivity extends Activity implements
       });
   }
 
-  private void postLastRead(final ReaderBookLocation l) {
+  //TODO WIP
 
-    //TODO WIP
+  /**
+   * Reader Sync Manager
+   */
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
-    final ReaderBookmarksType bm = rs.getBookmarks();
-    final BookID in_book_id = NullCheck.notNull(this.book_id);
-    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
-
-    if (in_entry.getAnnotations().isSome()) {
-      final String url = ((Some<URI>) in_entry.getAnnotations()).get().toString();
-      syncManager.postLastReadPosition(l, url);
-    }
+  private void uploadPageLocation(final ReaderBookLocation location)
+  {
+    syncManager.updateServerReadingLocation(location);
   }
 
-  private void initiateSync() {
-
-    final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
-    if (!in_entry.getAnnotations().isSome()) {
-      LOG.error("No annotations uri exists for this book's sync attempt. Abandoning sync.");
+  private void initiateSyncManagement()
+  {
+    final AccountsControllerType accountController = Simplified.getCatalogAppServices().getBooks();
+    if (this.credentials == null || accountController == null) {
+      LOG.error("Parameter(s) were unexpectedly null before creating Sync Manager. Abandoning attempt.");
       return;
     }
 
-    final String annotationsUriString = ((Some<URI>) in_entry.getAnnotations()).get().toString();
-
-    syncManager.synchronizeLastReadPosition(
-        this.book_id.toString(),
-        this.current_location,
-        annotationsUriString,
+    this.syncManager = new ReaderSyncManager(
+        this.entry.getFeedEntry().getID(),
+        this.credentials,
+        Simplified.getCurrentAccount(),
         this);
+
+    syncManager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
+      //Successfully enabled
+      syncManager.synchronizeReadingLocation(
+          this.current_location,
+          this.entry.getFeedEntry(),
+          this);
+      return kotlin.Unit.INSTANCE;
+    });
   }
 
   @Override public void onReadiumFunctionInitializeError(

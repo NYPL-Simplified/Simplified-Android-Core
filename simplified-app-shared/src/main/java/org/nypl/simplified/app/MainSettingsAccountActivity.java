@@ -227,7 +227,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     this.annotationsManager.requestServerSyncPermissionStatus(account, (enableSync) -> {
       if (enableSync) {
         final int accountID = this.account.getId();
-        Simplified.getSharedPrefs().putBoolean("NYPLSyncPermissionGranted", accountID, true);
+        Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", accountID, true);
       }
       this.sync_switch.setChecked(enableSync);
       this.sync_switch.setEnabled(true);
@@ -361,6 +361,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     }
   }
 
+  //TODO switch WIP
   @Override
   public boolean onOptionsItemSelected(
     final @Nullable MenuItem item_mn) {
@@ -692,6 +693,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
 
 
+//TODO WIP
     final boolean permission = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.account.getId());
     this.sync_switch.setChecked(permission);
 
@@ -700,10 +702,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         buttonView.setEnabled(false);
         annotationsManager.updateServerSyncPermissionStatus(true, (success) -> {
           if (success) {
-            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", true);
+            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", this.account.getId(), true);
             this.sync_switch.setChecked(true);
           } else {
-            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", false);
+            Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", this.account.getId(), false);
             this.sync_switch.setChecked(false);
             //TODO TOAST
           }
@@ -711,7 +713,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           return kotlin.Unit.INSTANCE;
         });
       } else {
-        Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", false);
+        Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", this.account.getId(), false);
         this.sync_switch.setChecked(false);
       }
     });
@@ -828,6 +830,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
   }
 
+  //TODO WIP
   private boolean syncButtonShouldBeVisible() {
     return (this.account.supportsSimplyESync() && this.account.getId() == Simplified.getCurrentAccount().getId());
   }
@@ -928,6 +931,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       });
   }
 
+  //TODO I'm not really sure why onResume() gets called when toggling between logged in and logged out states
   @Override
   protected void onResume() {
     super.onResume();
@@ -965,11 +969,11 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       in_account_icon.setImageResource(R.drawable.librarylogomagic);
     }
 
-    final BooksType libraryAccount;
+    final BooksType userAccount;
     if (this.account == null) {
-      libraryAccount = Simplified.getCatalogAppServices().getBooks();
+      userAccount = Simplified.getCatalogAppServices().getBooks();
     } else {
-      libraryAccount = Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
+      userAccount = Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
     }
 
     final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
@@ -986,7 +990,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         this.annotationsManager = new AnnotationsManager(this.account, creds, this);
       }
       this.sync_table_row.setVisibility(View.VISIBLE);
-      checkServerSyncPermission(libraryAccount);
+      checkServerSyncPermission(userAccount);
     } else {
       this.sync_table_row.setVisibility(View.GONE);
     }
@@ -1024,9 +1028,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       final LogoutDialog dialog = LogoutDialog.newDialog();
       dialog.setOnConfirmListener( () -> {
         //Delete cache if logging out of current active library account
-        libraryAccount.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
+        userAccount.accountLogout(creds, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this, MainSettingsAccountActivity.this);
         if (MainSettingsAccountActivity.this.account == Simplified.getCurrentAccount()) {
-          libraryAccount.destroyBookStatusCache();
+          userAccount.destroyBookStatusCache();
         }
       });
       final FragmentManager fm = MainSettingsAccountActivity.this.getFragmentManager();
