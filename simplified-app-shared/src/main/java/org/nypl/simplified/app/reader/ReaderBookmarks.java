@@ -43,7 +43,7 @@ import java.util.TimerTask;
  * interface.</p>
  *
  * <p>This implementation uses the Android `SharedPreferences` class to
- * serialize bookmarks.</p>
+ * serialize bookmarksSharedPrefs.</p>
  */
 
 public final class ReaderBookmarks implements ReaderBookmarksType
@@ -55,22 +55,22 @@ public final class ReaderBookmarks implements ReaderBookmarksType
     LOG = LogUtilities.getLog(ReaderBookmarks.class);
   }
 
-  private final SharedPreferences bookmarks;
+  private final SharedPreferences bookmarksSharedPrefs;
 
   private ReaderBookmarks(
     final Context cc)
   {
     NullCheck.notNull(cc);
-    this.bookmarks =
-      NullCheck.notNull(cc.getSharedPreferences("reader-bookmarks", 0));
+    this.bookmarksSharedPrefs =
+      NullCheck.notNull(cc.getSharedPreferences("reader-bookmarksSharedPrefs", 0));
   }
 
   /**
-   * Open the bookmarks database.
+   * Open the bookmarksSharedPrefs database.
    *
    * @param cc The application context
    *
-   * @return A bookmarks database
+   * @return A bookmarksSharedPrefs database
    */
 
   public static ReaderBookmarksType openBookmarks(
@@ -88,8 +88,8 @@ public final class ReaderBookmarks implements ReaderBookmarksType
     final String key = NullCheck.notNull(id.toString());
 
     try {
-      if (this.bookmarks.contains(key)) {
-        final String text = this.bookmarks.getString(key, null);
+      if (this.bookmarksSharedPrefs.contains(key)) {
+        final String text = this.bookmarksSharedPrefs.getString(key, null);
         if (text != null) {
           final JSONObject o = new JSONObject(text);
           return Option.some(ReaderBookLocation.fromJSON(o));
@@ -103,7 +103,7 @@ public final class ReaderBookmarks implements ReaderBookmarksType
     }
   }
 
-
+//TODO get rid of this method when finished using it as reference
   @Override
   public void setBookmark(
     final BookID id,
@@ -176,7 +176,7 @@ public final class ReaderBookmarks implements ReaderBookmarksType
               final JSONObject o = NullCheck.notNull(bookmark.toJSON());
               final String text = NullCheck.notNull(o.toString());
               final String key = NullCheck.notNull(id.toString());
-              final Editor e = ReaderBookmarks.this.bookmarks.edit();
+              final Editor e = ReaderBookmarks.this.bookmarksSharedPrefs.edit();
               e.putString(key, text);
               e.apply();
 
@@ -209,13 +209,13 @@ public final class ReaderBookmarks implements ReaderBookmarksType
             ReaderBookmarks.LOG.debug(
               "saving bookmark for book {}: {}", id, bookmark);
 
-            // save to server
+            // save to bookmarksSharedPrefs database
             if (!"null".equals(((Some<String>) bookmark.getContentCFI()).get())) {
 
               final JSONObject o = NullCheck.notNull(bookmark.toJSON());
               final String text = NullCheck.notNull(o.toString());
               final String key = NullCheck.notNull(id.toString());
-              final Editor e = ReaderBookmarks.this.bookmarks.edit();
+              final Editor e = ReaderBookmarks.this.bookmarksSharedPrefs.edit();
               e.putString(key, text);
               e.apply();
 

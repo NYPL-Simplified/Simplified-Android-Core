@@ -2,14 +2,16 @@ package org.nypl.simplified.app
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.net.Uri
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.app.reader.ReaderBookLocation
+import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
+import org.nypl.simplified.books.core.AccountsControllerType
 import org.nypl.simplified.multilibrary.Account
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.Timer
 import kotlin.concurrent.schedule
 
@@ -20,41 +22,62 @@ interface ReaderSyncManagerDelegate {
   fun bookmarkSyncDidFinish(success: Boolean, bookmarks: List<NYPLBookmark>)
 }
 
-class ReaderSyncManager(private val bookID: String,
-                        private val bookPackage: Package,
-                        private val credentials: AccountCredentials,
+class ReaderSyncManager(private val entryID: String,
+                        credentials: AccountCredentials,
                         private val libraryAccount: Account,
                         private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate {
-
-  //TODO reader will allocate sync manager, and sync manager will allocate annotations manager
-  private val annotationsManager = AnnotationsManager(libraryAccount, credentials, delegate as Context)
-
-  // The purpose of this property is to delay any new read-position postings
-  // until the initial synchronize has completed and user input has been received.
-  private var shouldPostLastRead: Boolean = false
 
   private companion object {
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
+  val bookPackage: Package? = null
+  //TODO if bookPackage is null when creating alert dialog. queue the dialog's present until this property has been set
+  //TODO observe when set, then show jump to location dialog with appropriate messaging
+
+  // Delay server posts until first page sync is complete
+  private var delayPageSync: Boolean = true
+
+  private val annotationsManager = AnnotationsManager(libraryAccount, credentials, delegate as Context)
   private var queueTimer = Timer()
 
-  fun synchronizeLastReadPosition(bookID: String,
-                                  currentLocation: ReaderBookLocation,
-                                  uri: String,
-                                  context: Context) {
+  /**
+   * See if sync is enabled on the server before attempting to synchronize
+   * bookmarks or reading position. Set sharedPrefs accordingly.
+   * Execute the closure if it's already on or successfully enabled on the server.
+   */
+  fun serverSyncPermission(account: AccountsControllerType,
+                           completion: () -> Unit) {
+    annotationsManager.requestServerSyncPermissionStatus(account) { shouldEnable->
+      if (shouldEnable) {
+        setPermissionSharedPref(true)
+        completion()
+      }
+    }
+  }
+
+  fun synchronizeReadingLocation(currentLocation: ReaderBookLocation,
+                                 feedEntry: OPDSAcquisitionFeedEntry?,
+                                 context: Context) {
 
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
+      delayPageSync = false
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
+    if (feedEntry == null || !feedEntry.annotations.isSome) {
+      delayPageSync = false
+      LOG.error("No annotations uri or feed entry exists for this book. Abandoning sync attempt.")
+      return
+    }
 
-    annotationsManager.requestReadingPositionOnServer(bookID, uri, { serverLocation ->
+    val uriString = (feedEntry.annotations as Some<URI>).get().toString()
 
-      //TODO will this ever be null? Also, what would a null contentCFI look like within ReaderBookLocation?
-      //TODO update saving of last read position to match what is on iOS (check reader activity).
+    annotationsManager.requestReadingPositionOnServer(entryID, uriString, { serverLocation ->
+
+      delayPageSync = false
+
       if (serverLocation == null) {
-        //TODO Do I want code execution here, if there is no saved location on the server? What is the effect of shouldPostLastRead not being set?
         LOG.debug("No server location object returned.")
         return@requestReadingPositionOnServer
       }
@@ -68,10 +91,11 @@ class ReaderSyncManager(private val bookID: String,
       // Pass through without presenting the Alert Dialog if:
       // 1 - The server and the client have the same page marked
       // 2 - There is no recent page saved on the server
-      if (currentLocation.toString() == serverLocation.toString()) {
-        shouldPostLastRead = true
-      } else {
-        alert.show()
+      //TODO make sure this conditional is working...
+      if (currentLocation.toString() != serverLocation.toString()) {
+        UIThread.runOnUIThread {
+          alert.show()
+        }
       }
     })
   }
@@ -82,43 +106,54 @@ class ReaderSyncManager(private val bookID: String,
     val builder= AlertDialog.Builder(context)
     builder.setTitle("Sync Reading Position")
 
-    val chapterTitle = bookPackage.getSpineItem(location.idRef).title
-    builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\"${chapterTitle}\"")
+    //TODO more else cases here depending on a null content cfi
+    if (bookPackage != null) {
+      val chapterTitle = bookPackage.getSpineItem(location.idRef).title
+      builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\"${chapterTitle}\"")
+    } else {
+      builder.setMessage("Would you like to go to the latest page read?")
+    }
 
-    builder.setPositiveButton("YES", DialogInterface.OnClickListener() { dialog, which ->
+    builder.setPositiveButton("YES") { dialog, which ->
       completion(true)
-      shouldPostLastRead = true
       LOG.debug("User chose to jump to synced page: ${location.contentCFI}")
-    })
+    }
 
-    builder.setNegativeButton("NO", DialogInterface.OnClickListener() { dialog, which ->
+    builder.setNegativeButton("NO") { dialog, which ->
       completion(false)
-      shouldPostLastRead = true
       LOG.debug("User declined jump to synced page.")
-    })
+    }
 
     return builder.create()
   }
 
 
-  fun postLastReadPosition(location: ReaderBookLocation, uri: String) {
+  /**
+   * Attempt to update current page to the server.
+   * @param location The page to be sent as the current "left off" page
+   * @param uri Annotation URI for the specific entry
+   */
+  fun updateServerReadingLocation(location: ReaderBookLocation) {
 
-    if (!shouldPostLastRead) {
+    if (delayPageSync) {
+      LOG.debug("Post of last read position delayed. Initial sync still in progress.")
       return
     }
 
-    queueTimer.cancel()
-    queueTimer = Timer()
-    queueTimer.schedule(3000) {
-
-      if (location.contentCFI.isSome) {
-        val someLocation = location.contentCFI as Some<String>
-        annotationsManager.updateReadingPosition(bookID, uri, someLocation.get())
+    if (annotationsManager.syncIsPossibleAndPermitted()) {
+      queueTimer.cancel()
+      queueTimer = Timer()
+      queueTimer.schedule(3000) {
+        if (location.contentCFI.isSome) {
+          val someLocation = location.contentCFI as Some<String>
+          annotationsManager.updateReadingPosition(entryID, someLocation.get())
+        }
       }
-
     }
+  }
 
-    //TODO 2 - update THIS method to have what is currently in ReaderActivity
+  private fun setPermissionSharedPref(status: Boolean) {
+    Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", libraryAccount.id, status)
   }
 }
 

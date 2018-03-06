@@ -172,7 +172,6 @@ public class NYPLJsonObjectRequest extends JsonObjectRequest {
       try {
         params.putAll(this.parameters);
       } catch (Exception e) {
-        //TODO log exception
         LOG.error("Error adding extra parameters value into Map.");
       }
     }
