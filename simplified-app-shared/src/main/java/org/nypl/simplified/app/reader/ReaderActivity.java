@@ -1,10 +1,8 @@
 package org.nypl.simplified.app.reader;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -26,27 +24,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.Instant;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.nypl.simplified.app.AnnotationsManager;
 import org.nypl.simplified.app.NYPLBookmark;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ReaderSyncManager;
@@ -54,8 +39,6 @@ import org.nypl.simplified.app.ReaderSyncManagerDelegate;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
-import org.nypl.simplified.app.catalog.annotation.Annotation;
-import org.nypl.simplified.app.catalog.annotation.AnnotationResult;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode;
@@ -65,13 +48,12 @@ import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
+import org.nypl.simplified.books.core.AccountsControllerType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.volley.NYPLStringRequest;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -79,9 +61,6 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
-
-import kotlin.Unit;
 
 /**
  * The main reader activity for reading an EPUB.
@@ -493,6 +472,7 @@ public final class ReaderActivity extends Activity implements
 
           ReaderActivity.this.credentials = creds;
 
+          //TODO WIP - set package on this.syncManager after onEpubLoadSucceeded()
           initiateSyncManagement();
         }
       }
@@ -518,7 +498,7 @@ public final class ReaderActivity extends Activity implements
     //TODO could book_id actually be null?
     final BookID in_book_id = NullCheck.notNull(this.book_id);
 
-    bm.setBookmark(in_book_id, this.current_location);
+//    bm.setBookmark(in_book_id, this.current_location);
 
     //TODO WIP
     uploadPageLocation(this.current_location);
@@ -531,7 +511,7 @@ public final class ReaderActivity extends Activity implements
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
 
     if (this.book_id != null && this.current_location != null) {
-      rs.getBookmarks().setBookmark(this.book_id, this.current_location);
+//      rs.getBookmarks().setBookmark(this.book_id, this.current_location);
     }
   }
 
@@ -583,7 +563,7 @@ public final class ReaderActivity extends Activity implements
 
 
 
-    //TODO set package to sync mnager.. this.syncManager.package = p;
+    //TODO set package to sync manager.. this.syncManager.package = p;
 
 
     /**
@@ -797,7 +777,7 @@ public final class ReaderActivity extends Activity implements
         Simplified.getCurrentAccount(),
         this);
 
-    syncManager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
+    this.syncManager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
       //Successfully enabled
       syncManager.synchronizeReadingLocation(
           this.current_location,
