@@ -3,6 +3,7 @@ package org.nypl.simplified.app
 import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.android.volley.*
 import com.android.volley.Response.Listener
 import com.android.volley.toolbox.Volley
@@ -24,14 +25,15 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 
 /**
- * Handles any network requests relevant to OPDS Annotations
- * for user settings or specific OPDS Entries for that user.
+ * Performs work relevant to syncing OPDS Annotations.
+ * Current features for books:
+ * 1 - Current reading position
+ * 2 - Bookmarks saved by the user
  */
-
 class AnnotationsManager(private val libraryAccount: Account,
                          private val credentials: AccountCredentials,
-                         private val context: Context) {
-
+                         private val context: Context)
+{
   private val requestQueue = Volley.newRequestQueue(context)
 
   private companion object {
@@ -46,14 +48,15 @@ class AnnotationsManager(private val libraryAccount: Account,
    * @param completion Asynchronous handler for the user's decision, or error.
    */
   fun requestServerSyncPermissionStatus(account: AccountsControllerType,
-                                        completion: (enableSync: Boolean) -> Unit) {
-
+                                        completion: (enableSync: Boolean) -> Unit)
+  {
     if (!syncIsPossible(account)) {
       LOG.debug("Account does not satisfy conditions for sync setting request.")
       completion(false)
       return
     }
 
+    //TODO I think this condition is either wrong or out of date.. think about it some more during testing
     if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") == true &&
         Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryAccount.id) == false) {
       completion(false)
@@ -75,8 +78,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  private fun syncPermissionStatusUriRequest(completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit) {
-
+  private fun syncPermissionStatusUriRequest(completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit)
+  {
     val catalogUriString = libraryAccount.catalogUrl ?: null
     val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
     val permissionRequestUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "patrons/me/") else null
@@ -108,8 +111,8 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
   private fun handleSyncPermission(response: JSONObject,
-                                   completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit) {
-
+                                   completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit)
+  {
     try {
       val settings = response.getJSONObject("settings")
       val syncSettingsBool = settings.getBoolean("simplified:synchronize_annotations")
@@ -125,8 +128,8 @@ class AnnotationsManager(private val libraryAccount: Account,
    * all annotations for the current user will be deleted as part of this request.
    */
   fun updateServerSyncPermissionStatus(enabled: Boolean,
-                                       completion: (successful: Boolean) -> Unit) {
-
+                                       completion: (successful: Boolean) -> Unit)
+  {
     val catalogUriString = libraryAccount.catalogUrl ?: null
     val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
     val patronsUpdateUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "patrons/me/") else null
@@ -150,8 +153,8 @@ class AnnotationsManager(private val libraryAccount: Account,
   private fun setSyncPermissionUriRequest(uri: String,
                                           parameters: Map<String, Any>,
                                           timeout: Int?,
-                                          completion: (success: Boolean) -> Unit) {
-
+                                          completion: (success: Boolean) -> Unit)
+  {
     val jsonBody = JSONObject(parameters)
     val additionalHeaders = mapOf<String,String>("Content-Type" to "vnd.librarysimplified/user-profile+json")
 
@@ -221,9 +224,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     requestQueue.add(request)
   }
 
-  private fun bookLocationFromString(JSON: JSONObject): ReaderBookLocation? {
-
-    //TODO test this
+  private fun bookLocationFromString(JSON: JSONObject): ReaderBookLocation?
+  {
     try {
       val serializedResult = Gson().fromJson(JSON.toString(), AnnotationResult::class.java)
       for (annotation in serializedResult.first.items) {
@@ -239,100 +241,14 @@ class AnnotationsManager(private val libraryAccount: Account,
     return null
   }
 
-  private fun handleSyncReadingPosition2(bookID: String,
-                                         response: JSONObject?,
-                                         completion: (jumpToLocation: ReaderBookLocation) -> Unit) {
-    if (response == null) {
-      return
-    }
-    LOG.info("response json object: \n${response.toString()}")
-
-    try {
-      val serializedResult = Gson().fromJson(response.toString(), AnnotationResult::class.java)
-      for (annotation in serializedResult.first.items) {
-        if (annotation.motivation == "http://librarysimplified.org/terms/annotation/idling") {
-          val value = annotation.target.selector.value
-          val jsonObject = JSONObject(value)
-          val readerBookmark = ReaderBookLocation.fromJSON(jsonObject)
-        }
-      }
-    } catch (e: JsonSyntaxException) {
-      LOG.error("Json Syntax Exception. Skipping reading position sync.")
-    } catch (e: JSONException) {
-
-    }
-  }
-
-  private fun handleSyncReadingPosition(bookID: String,
-                                        response: JSONObject,
-                                        completion: (response: Map<String,String>?) -> Unit) {
-
-    try {
-
-      val first = response.getJSONObject("first")
-      val items = first?.getJSONArray("items")
-      if (items == null) {
-        LOG.debug("Missing required key from Annotations response, or no items exist.")
-        completion(null)
-        return
-      }
-
-      for (i in 0 until items.length()) {
-
-        val item = items.getJSONObject(i)
-        val target = item?.getJSONObject("target")
-        val source = target?.getString("source")
-        val motivation = item?.getString("motivation")
-
-        if (source == null || motivation == null) {
-          completion(null)
-          continue
-        }
-
-        if (source == bookID && motivation == "http://librarysimplified.org/terms/annotation/idling") {
-
-          val selector = target.getJSONObject("selector")
-          val serverCFI = selector?.getString("value")
-          if (serverCFI == null) {
-            LOG.error("No CFI saved for title on the server.")
-            completion(null)
-            return
-          }
-
-          val jsonObject = JSONObject(serverCFI)
-          val readerBookmark = ReaderBookLocation.fromJSON(jsonObject)
-
-
-          val readingPosAnnotation = mutableMapOf("serverCFI" to serverCFI)
-          val body = item.getJSONObject("body")
-          val device = body?.getString("http://librarysimplified.org/terms/device")
-          val time = body?.getString("http://librarysimplified.org/terms/time")
-          if (device != null) readingPosAnnotation["device"] = device
-          if (time != null) readingPosAnnotation["time"] = time
-
-          completion(readingPosAnnotation)
-          return
-        }
-      }
-      LOG.error("No annotation for reading position found for this book.")
-      completion(null)
-      return
-    } catch (e: java.lang.Exception) {
-      LOG.error("Exception thrown while parsing JSON with Volley")
-      completion(null)
-      return
-    }
-  }
-
   /**
    * Update the current reading position for the given book and current user.
    * @param bookID Identifier for the entry
-   * @param uri The Annotation ID/URI for the OPDS Entry.
-   * @param cfi JSON string that represents the book position,
+   * @param locationJson JSON string that represents the book position stored on annotation server,
    * provided and parsed upstream by Readium.
    */
-  fun updateReadingPosition(bookID: String, cfi: String) {
-
+  fun updateReadingPosition(bookID: String, locationJson: String)
+  {
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
       return
@@ -347,10 +263,13 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    val deviceIDString = if (credentials.adobeDeviceID.isSome) {
-      (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
+    //TODO WIP while testing platform differences...
+    val deviceIDString: String?
+    if (credentials.adobeDeviceID.isSome) {
+      deviceIDString = (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
     } else {
-      null
+      LOG.error("Adobe Device ID was null. No device set in body for annotation.")
+      deviceIDString = "null"
     }
 
     val bodyObject = mapOf(
@@ -361,7 +280,7 @@ class AnnotationsManager(private val libraryAccount: Account,
             "source" to bookID,
             "selector" to mapOf(
                 "type" to "oa:FragmentSelector",
-                "value" to cfi
+                "value" to locationJson
             )
         ),
         "body" to mapOf(
@@ -372,12 +291,12 @@ class AnnotationsManager(private val libraryAccount: Account,
 
     try {
       val mapper = ObjectMapper()
-      val jsonBodyString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(bodyObject)
+      val jsonBodyString= mapper.writer().writeValueAsString(bodyObject)
 
-      postAnnotation(requestUri, jsonBodyString, null, { isSuccessful, _ ->
+      postAnnotation(requestUri, jsonBodyString, 20, { isSuccessful, response ->
         if (isSuccessful) {
           //TODO is there any reason that we need to save and update the annotation ID created for a reading-position upload?
-          LOG.debug("Success: Marked Reading Position To Server: $cfi")
+          LOG.debug("Success: Marked Reading Position To Server. Response: $response")
         } else {
           LOG.error("Annotation not posted.")
         }
@@ -390,8 +309,8 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
   private fun postAnnotation(uri: String, bodyParameters: String, timeout: Int?,
-                             completion: (isSuccessful: Boolean, annotationID: String?) -> Unit) {
-
+                             completion: (isSuccessful: Boolean, annotationID: String?) -> Unit)
+  {
     try {
       val jsonObjectBody = JSONObject(bodyParameters)
       val request = NYPLJsonObjectRequest(
@@ -403,11 +322,12 @@ class AnnotationsManager(private val libraryAccount: Account,
           null,
           Listener<JSONObject> { response ->
             LOG.debug("Annotation POST: Success 200.")
-            val serverAnnotationID = response.getString("id") as? String
+            //TODO am I doing anything with the returned annotation yet? maybe just for bookmarks..
+            val serverAnnotationID = response.getString("id")
             completion(true, serverAnnotationID)
           },
           Response.ErrorListener { error ->
-            LOG.error("POST request fail! Network Response: ${error.networkResponse.toString()}")
+            LOG.error("POST request fail! Network Error Cause: ${error.cause ?: "error cause was null"}")
             completion(false, null)
           })
 
@@ -427,8 +347,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
 
-  //TODO Re-familiarize myself with the Class to represent Bookmarks/Page Positions on android...
-  //TODO Do I not need to parse for the bookmark type? Is that done from the caller or sync manager on iOS?
+  //TODO WIP. Converted from Swift. Not yet tested.
   /**
    * Get a list of any bookmark-type annotations created for the given book and the current user.
    * @param bookID Identifier for the entry
@@ -486,13 +405,13 @@ class AnnotationsManager(private val libraryAccount: Account,
         })
   }
 
-  //TODO this class was essentially prepping the data to send to the Bookmark class constructor..
+  //TODO STUB - WIP
   private fun createBookmark(bookID: String, annotation: JSONObject): Any? {
 
-    //TODO Cannot convert this until I see how bookmarks are represented on Android.
     return null
   }
 
+  //TODO WIP. Converted from Swift. Not yet tested.
   /**
    * Post a new bookmark to the server for the current user for a particular entry.
    * @param bookID Identifier for the entry
@@ -557,6 +476,7 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
+  //TODO WIP. Converted from Swift. Not yet tested.
   /**
    * Delete a bookmark on the server.
    */
@@ -586,8 +506,8 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   }
 
-  //TODO update type information for Bookmark when that's resolved
-  //TODO decide is this class is actually required on Android
+  //TODO WIP. Converted from Swift. Not yet tested.
+  //TODO decide if this method is actually required on Android
 //  fun deleteBookmarks(bookmarks: List<Any>) {
 //
 //    if (!syncIsPossibleAndPermitted()) {
@@ -610,7 +530,8 @@ class AnnotationsManager(private val libraryAccount: Account,
 //    }
 //  }
 
-  //TODO decide is this class is actually required
+  //TODO WIP. Converted from Swift. Not yet tested.
+  //TODO decide if this method is actually required on Android
   fun uploadLocalBookmarks(bookmarks: List<Any>, bookID: String,
                            completion: (successful: List<Any>, failed: List<Any>) -> Unit) {
 
@@ -622,14 +543,13 @@ class AnnotationsManager(private val libraryAccount: Account,
    * Sync is possible if a user is logged in and the current active library
    * has SimplyE sync support enabled.
    */
-  //TODO can be private?
-  fun syncIsPossible(userAccount: AccountsControllerType): Boolean {
+  private fun syncIsPossible(userAccount: AccountsControllerType): Boolean {
     return userAccount.accountIsLoggedIn() && libraryAccount.supportsSimplyESync()
   }
 
   /**
    * Sync is permitted if the user has explicitly enabled the feature on this device,
-   * or inherited activation from another device.
+   * or inherited the permission from a user's other device.
    */
   fun syncIsPossibleAndPermitted(): Boolean {
     try {
@@ -645,8 +565,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  private fun presentFirstTimeSyncAlertDialog(completion: (enableSync: Boolean) -> Unit) {
-
+  private fun presentFirstTimeSyncAlertDialog(completion: (enableSync: Boolean) -> Unit)
+  {
     val builder= AlertDialog.Builder(context)
     builder.setTitle("SimplyE Sync")
     builder.setMessage("Enable sync to save your reading position and bookmarks to your other devices." +
@@ -667,8 +587,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     builder.show()
   }
 
-  private fun presentAlertForSyncSettingError() {
-
+  private fun presentAlertForSyncSettingError()
+  {
     val builder= AlertDialog.Builder(context)
     builder.setTitle("Error Changing Sync Setting")
     builder.setMessage("There was a problem contacting the server." +
