@@ -36,6 +36,7 @@ public class Account implements Serializable {
   private String catalog_url_13_and_over;
   private Integer pin_length;
   private boolean pin_allows_letters;
+  private boolean pin_required;
 
   public String getPrivacyPolicy() {
     return privacy_policy;
@@ -51,6 +52,7 @@ public class Account implements Serializable {
   }
   public Integer getPinLength() { return pin_length; }
   public boolean pinAllowsLetters() { return pin_allows_letters; }
+  public boolean pinRequired() { return pin_required; }
 
   public void setContentLicense(String in_contentLicense) {
     this.content_license = in_contentLicense;
@@ -335,6 +337,11 @@ public class Account implements Serializable {
       } else {
         this.pin_allows_letters = true;
       }
+      if (!account.isNull("pinRequired")) {
+        this.pin_required = account.getBoolean("pinRequired");
+      } else {
+        this.pin_required = true;
+      }
 
     } catch (JSONException e) {
       e.printStackTrace();
@@ -371,6 +378,7 @@ public class Account implements Serializable {
       object.put("authPasscodeLength", this.pin_length);
       object.put("authPasscodeAllowsLetters", this.pin_allows_letters);
       object.put("mainColor", this.main_color);
+      object.put("pinRequired", this.pin_required);
     } catch (JSONException e) {
       e.printStackTrace();
     }

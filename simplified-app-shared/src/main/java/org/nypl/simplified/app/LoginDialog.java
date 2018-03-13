@@ -63,6 +63,7 @@ public final class LoginDialog extends DialogFragment
   private static final String ACCOUNT_ID;
   private static final String PIN_ALLOWS_LETTERS;
   private static final String PIN_LENGTH;
+  private static final String PIN_REQUIRED;
 
   static {
     LOG = LogUtilities.getLog(LoginDialog.class);
@@ -75,6 +76,7 @@ public final class LoginDialog extends DialogFragment
     ACCOUNT_ID = "org.nypl.simplified.app.LoginDialog.accountid";
     PIN_ALLOWS_LETTERS = "org.nypl.simplified.app.LoginDialog.pinAllowsLetters";
     PIN_LENGTH = "org.nypl.simplified.app.LoginDialog.pinLength";
+    PIN_REQUIRED = "org.nypl.simplified.app.LoginDialog.pinRequired";
   }
 
   private @Nullable EditText          barcode_edit;
@@ -148,6 +150,7 @@ public final class LoginDialog extends DialogFragment
     b.putSerializable(LoginDialog.BARCODE_ID, barcode);
     b.putSerializable(LoginDialog.PIN_ALLOWS_LETTERS, account.pinAllowsLetters());
     b.putSerializable(LoginDialog.PIN_LENGTH, account.getPinLength());
+    b.putSerializable(LoginDialog.PIN_REQUIRED, account.pinRequired());
 
     final LoginDialog d = new LoginDialog();
     d.setArguments(b);
@@ -180,6 +183,7 @@ public final class LoginDialog extends DialogFragment
     b.putSerializable(LoginDialog.ACCOUNT_ID, account.getPathComponent());
     b.putSerializable(LoginDialog.PIN_ALLOWS_LETTERS, account.pinAllowsLetters());
     b.putSerializable(LoginDialog.PIN_LENGTH, account.getPinLength());
+    b.putSerializable(LoginDialog.PIN_REQUIRED, account.pinRequired());
 
     final LoginDialog d = new LoginDialog();
     d.setArguments(b);
@@ -347,6 +351,7 @@ public final class LoginDialog extends DialogFragment
     final String account_id = b.getString(LoginDialog.ACCOUNT_ID);
     final int pin_length = b.getInt(LoginDialog.PIN_LENGTH);
     final boolean pin_allows_letters = b.getBoolean(LoginDialog.PIN_ALLOWS_LETTERS);
+    final boolean pin_required = b.getBoolean(LoginDialog.PIN_REQUIRED);
 
     final ViewGroup in_layout = NullCheck.notNull(
       (ViewGroup) inflater.inflate(
@@ -372,6 +377,10 @@ public final class LoginDialog extends DialogFragment
       in_pin_edit.setFilters(new InputFilter[] {
           new InputFilter.LengthFilter(pin_length)
       });
+    }
+    if (!pin_required) {
+      in_pin_label.setVisibility(View.INVISIBLE);
+      in_pin_edit.setVisibility(View.INVISIBLE);
     }
 
     final Button in_login_button =
@@ -429,8 +438,14 @@ public final class LoginDialog extends DialogFragment
 
           final AccountBarcode barcode =
             new AccountBarcode(NullCheck.notNull(barcode_edit_text.toString()));
-          final AccountPIN pin =
-            new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
+
+          final AccountPIN pin;
+          if (!pin_required) {
+            // Server requires blank string for No-PIN accounts
+            pin = new AccountPIN("");
+          } else {
+            pin = new AccountPIN(NullCheck.notNull(pin_edit_text.toString()));
+          }
           final AccountAuthProvider provider =
             new AccountAuthProvider(rr.getString(R.string.feature_default_auth_provider_name));
 
@@ -482,8 +497,7 @@ public final class LoginDialog extends DialogFragment
 
 
     final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
-    final AtomicBoolean in_pin_empty = new AtomicBoolean(true);
-
+    final AtomicBoolean in_pin_empty = new AtomicBoolean(pin_required);
 
     final OptionType<EULAType> eula_opt = docs.getEULA();
 
