@@ -422,6 +422,12 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final CheckBox in_pin_reveal = NullCheck.notNull(
       (CheckBox) this.findViewById(R.id.settings_reveal_password));
 
+    if (!this.account.pinRequired()) {
+      in_pin_label.setVisibility(View.INVISIBLE);
+      in_pin_text.setVisibility(View.INVISIBLE);
+      in_pin_reveal.setVisibility(View.INVISIBLE);
+    }
+
     final Button in_login =
       NullCheck.notNull((Button) this.findViewById(R.id.settings_login));
 
