@@ -170,7 +170,6 @@ public final class HTTPRedirectFollower
       case HttpURLConnection.HTTP_MOVED_TEMP:
       case 307:
       case 308: {
-        this.current_auth = Option.none();
 
         final Map<String, List<String>> headers =
           NullCheck.notNull(e.getResponseHeaders());
@@ -184,7 +183,22 @@ public final class HTTPRedirectFollower
 
         final String location = NullCheck.notNull(locations.get(0));
         this.cur_redirects = this.cur_redirects + 1;
-        this.current_uri = NullCheck.notNull(URI.create(location));
+
+        final URI previous_uri = this.current_uri;
+
+        // Resolve against the previous URI to handle relative redirects.
+        this.current_uri = NullCheck.notNull(previous_uri.resolve(location));
+
+        final boolean isSameHost =
+            previous_uri.getHost() == this.current_uri.getHost();
+
+        final boolean droppedHTTPS =
+            previous_uri.getHost() == "https" && this.current_uri.getScheme() != "https";
+
+        // Protect against passing authentication information in an unsafe manner.
+        if (!isSameHost || droppedHTTPS) {
+          this.current_auth = Option.none();
+        }
 
         this.logger.debug(
           "following redirect {} to {}", this.cur_redirects, this.current_uri);
