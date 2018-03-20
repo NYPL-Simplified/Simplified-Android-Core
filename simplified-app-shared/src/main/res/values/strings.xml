@@ -200,6 +200,8 @@
   <!-- Reader strings -->
   <string name="reader">Reader</string>
   <string name="reader_toc">Table Of Contents</string>
+  <string name="reader_toc_tab_contents">Contents</string>
+  <string name="reader_toc_tab_bookmarks">Bookmarks</string>
 
   <!-- Accessibility strings used for content descriptions (Reader) -->
   <string name="reader_accessibility_toc">Show table of contents</string>
@@ -235,5 +237,8 @@
   <string name="need_card_question">Don\'t have a library card?</string>
   <string name="need_card_button">Sign Up</string>
   <string name="need_card_create">Create Card</string>
+
+  <!-- TODO: Remove or change this placeholder text -->
+  <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

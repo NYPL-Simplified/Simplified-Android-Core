@@ -158,8 +158,8 @@
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
-      android:theme="@style/SimplifiedThemeNoActionBar"
       android:configChanges="orientation|screenSize"
+      android:theme="@style/Theme.AppCompat.Light"
       android:label="@string/reader_toc"
       android:contentDescription="@string/reader_toc"
       >
