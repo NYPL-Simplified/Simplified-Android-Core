@@ -3,7 +3,12 @@ package org.nypl.simplified.app.reader;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -18,7 +23,7 @@ import org.slf4j.Logger;
  * Activity for displaying the table of contents on devices with small screens.
  */
 
-public final class ReaderTOCActivity extends Activity
+public final class ReaderTOCActivity extends AppCompatActivity
   implements ReaderSettingsListenerType, ReaderTOCViewSelectionListenerType
 {
   /**
@@ -51,6 +56,7 @@ public final class ReaderTOCActivity extends Activity
   }
 
   private @Nullable ReaderTOCView view;
+  public @Nullable ReaderTOC in_toc;
 
   /**
    * Construct an activity.
@@ -94,16 +100,11 @@ public final class ReaderTOCActivity extends Activity
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
-    final int id = Simplified.getCurrentAccount().getId();
-    if (id == 0) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
-    }
-    else if (id == 1) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
-    }
-    else {
-      setTheme(R.style.SimplifiedThemeNoActionBar);
-    }
+    this.setTitle("Table of Contents");
+
+    //TODO WIP
+
+    //TODO Deleted theme setting stuff
 
     super.onCreate(state);
 
@@ -118,12 +119,25 @@ public final class ReaderTOCActivity extends Activity
     final Intent input = NullCheck.notNull(this.getIntent());
     final Bundle args = NullCheck.notNull(input.getExtras());
 
-    final ReaderTOC in_toc = NullCheck.notNull(
+    this.in_toc = NullCheck.notNull(
       (ReaderTOC) args.getSerializable(ReaderTOCActivity.TOC_ID));
 
-    final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
-    this.view = new ReaderTOCView(inflater, this, in_toc, this);
-    this.setContentView(this.view.getLayoutView());
+//    final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
+
+
+    //TODO WIP
+    this.setContentView(R.layout.reader_toc_tab_layout);
+
+    ViewPager pager = findViewById(R.id.reader_toc_view_pager);
+    final ReaderTOCFragmentPagerAdapter adapter = new ReaderTOCFragmentPagerAdapter(getSupportFragmentManager());
+    pager.setAdapter(adapter);
+
+    TabLayout tabLayout = findViewById(R.id.reader_toc_tab_layout);
+    tabLayout.setupWithViewPager(pager);
+
+//    this.view = new ReaderTOCView(inflater, this, in_toc, this);
+//
+//    this.setContentView(this.view.getLayoutView());
   }
 
   @Override protected void onDestroy()
