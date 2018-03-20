@@ -1,13 +1,19 @@
 package org.nypl.simplified.app.reader;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The current page. A specific location in an EPUB is identified by an
@@ -89,6 +95,29 @@ public final class ReaderBookLocation
   public String getIDRef()
   {
     return this.id_ref;
+  }
+
+  /**
+   * @return A JSON-formatted string (provides better char-escaping versus JSONObject)
+   */
+
+  public @Nullable String toJsonString()
+  {
+    if (!this.content_cfi.isSome()) {
+      return null;
+    }
+
+    final HashMap<String, Object> jsonMap = new HashMap<>();
+    jsonMap.put("idref", this.id_ref);
+    final Some<String> some = (Some<String>) this.content_cfi;
+    jsonMap.put("contentCFI", some.get());
+
+    final ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.writer().writeValueAsString(jsonMap);
+    } catch (JsonProcessingException e) {
+      return null;
+    }
   }
 
   @Override public JSONObject toJSON()

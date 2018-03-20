@@ -22,22 +22,26 @@ interface ReaderSyncManagerDelegate {
   fun bookmarkSyncDidFinish(success: Boolean, bookmarks: List<NYPLBookmark>)
 }
 
+/**
+ * Provide support for sync-related activities and logic.
+ * Utilize ReaderSyncManagerDelegate Interface to
+ * communicate commands to a book renderer.
+ */
 class ReaderSyncManager(private val entryID: String,
                         credentials: AccountCredentials,
                         private val libraryAccount: Account,
-                        private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate {
-
+                        private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate
+{
   private companion object {
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
-  val bookPackage: Package? = null
-  //TODO if bookPackage is null when creating alert dialog. queue the dialog's present until this property has been set
+  //TODO Work In Progress -
   //TODO observe when set, then show jump to location dialog with appropriate messaging
+  val bookPackage: Package? = null
 
   // Delay server posts until first page sync is complete
   private var delayPageSync: Boolean = true
-
   private val annotationsManager = AnnotationsManager(libraryAccount, credentials, delegate as Context)
   private var queueTimer = Timer()
 
@@ -47,7 +51,8 @@ class ReaderSyncManager(private val entryID: String,
    * Execute the closure if it's already on or successfully enabled on the server.
    */
   fun serverSyncPermission(account: AccountsControllerType,
-                           completion: () -> Unit) {
+                           completion: () -> Unit)
+  {
     annotationsManager.requestServerSyncPermissionStatus(account) { shouldEnable->
       if (shouldEnable) {
         setPermissionSharedPref(true)
@@ -58,8 +63,8 @@ class ReaderSyncManager(private val entryID: String,
 
   fun synchronizeReadingLocation(currentLocation: ReaderBookLocation,
                                  feedEntry: OPDSAcquisitionFeedEntry?,
-                                 context: Context) {
-
+                                 context: Context)
+  {
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
       delayPageSync = false
       LOG.debug("Account does not support sync or sync is disabled.")
@@ -101,12 +106,12 @@ class ReaderSyncManager(private val entryID: String,
   }
 
   private fun createAlertForSyncLocation(location: ReaderBookLocation, context: Context,
-                                       completion: (shouldMove: Boolean) -> Unit): AlertDialog {
-
+                                       completion: (shouldMove: Boolean) -> Unit): AlertDialog
+  {
     val builder= AlertDialog.Builder(context)
     builder.setTitle("Sync Reading Position")
 
-    //TODO more else cases here depending on a null content cfi
+    //TODO add cases once i figure out null content cfi equivalent from
     if (bookPackage != null) {
       val chapterTitle = bookPackage.getSpineItem(location.idRef).title
       builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\"${chapterTitle}\"")
@@ -133,7 +138,9 @@ class ReaderSyncManager(private val entryID: String,
    * @param location The page to be sent as the current "left off" page
    * @param uri Annotation URI for the specific entry
    */
-  fun updateServerReadingLocation(location: ReaderBookLocation) {
+  fun updateServerReadingLocation(location: ReaderBookLocation)
+  {
+    //TODO note to self: delayPageSync does not seem to work on second attempt.
 
     if (delayPageSync) {
       LOG.debug("Post of last read position delayed. Initial sync still in progress.")
@@ -144,20 +151,23 @@ class ReaderSyncManager(private val entryID: String,
       queueTimer.cancel()
       queueTimer = Timer()
       queueTimer.schedule(3000) {
-        if (location.contentCFI.isSome) {
-          val someLocation = location.contentCFI as Some<String>
-          annotationsManager.updateReadingPosition(entryID, someLocation.get())
+        val locString = location.toJsonString()
+        if (locString != null) {
+          annotationsManager.updateReadingPosition(entryID, locString)
+        } else {
+          LOG.error("Skipped upload of location due to unexpected null json representation")
         }
       }
     }
   }
 
-  private fun setPermissionSharedPref(status: Boolean) {
+  private fun setPermissionSharedPref(status: Boolean)
+  {
     Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", libraryAccount.id, status)
   }
 }
 
 
-// TODO TEMP UNTIL I CAN FIGURE THIS OUT
+// TODO STUB WIP
 // Would represent a bookmark element to be saved to the server and also de/serialized for TOC
 class NYPLBookmark(val whatever: Int)
