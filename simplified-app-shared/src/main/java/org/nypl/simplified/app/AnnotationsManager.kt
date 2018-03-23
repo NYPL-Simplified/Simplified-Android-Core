@@ -12,12 +12,13 @@ import com.io7m.jfunctional.Some
 import org.json.JSONObject
 import org.joda.time.Instant
 import org.nypl.drm.core.AdobeDeviceID
-import org.nypl.simplified.app.catalog.annotation.AnnotationResult
+import org.nypl.simplified.opds.core.annotation.AnnotationResult
 import org.nypl.simplified.app.reader.ReaderBookLocation
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
 import org.nypl.simplified.multilibrary.Account
+import org.nypl.simplified.opds.core.annotation.BookAnnotation
 import org.nypl.simplified.volley.NYPLJsonObjectRequest
 import org.slf4j.LoggerFactory
 import java.io.IOException

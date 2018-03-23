@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.catalog.annotation;
+package org.nypl.simplified.opds.core.annotation;
 
 import java.util.ArrayList;
 import java.util.List;

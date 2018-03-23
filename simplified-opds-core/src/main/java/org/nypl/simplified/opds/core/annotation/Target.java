@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.catalog.annotation;
+package org.nypl.simplified.opds.core.annotation;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.catalog.annotation;
+package org.nypl.simplified.opds.core.annotation;
 
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
@@ -10,7 +10,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  */
 
-public class Annotation {
+public class BookAnnotation {
 
   @SerializedName("@context")
   @Expose
@@ -36,7 +36,7 @@ public class Annotation {
   /**
    * No args constructor for use in serialization
    */
-  public Annotation() {
+  public BookAnnotation() {
   }
 
   /**
@@ -45,7 +45,7 @@ public class Annotation {
    * @param in_context    @context
    * @param in_type       type
    */
-  public Annotation(final String in_context, final String in_type, final String in_motivation, final Target in_target) {
+  public BookAnnotation(final String in_context, final String in_type, final String in_motivation, final Target in_target) {
     this.context = in_context;
     this.type = in_type;
     this.motivation = in_motivation;
