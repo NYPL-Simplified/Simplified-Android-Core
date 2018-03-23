@@ -490,15 +490,15 @@ public final class ReaderActivity extends Activity implements
   {
     ReaderActivity.LOG.debug("received book location: {}", l);
 
-    //TODO see if I really need this.current_location as an ivar
+    //TODO Audit this. Work in progress.
+
     this.current_location = l;
 
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
-    final ReaderBookmarksType bm = rs.getBookmarks();
-    //TODO could book_id actually be null?
+    final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
     final BookID in_book_id = NullCheck.notNull(this.book_id);
 
-//    bm.setBookmark(in_book_id, this.current_location);
+    bm.saveReadingPosition(in_book_id, this.current_location);
 
     //TODO WIP
     uploadPageLocation(this.current_location);
@@ -511,7 +511,7 @@ public final class ReaderActivity extends Activity implements
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
 
     if (this.book_id != null && this.current_location != null) {
-//      rs.getBookmarks().setBookmark(this.book_id, this.current_location);
+      rs.getBookmarks().saveReadingPosition(this.book_id, this.current_location);
     }
   }
 
@@ -665,24 +665,20 @@ public final class ReaderActivity extends Activity implements
      * book to that specific page. Otherwise, start at the beginning.
      */
 
-    final BookID in_book_id = NullCheck.notNull(this.book_id);
+    //TODO changes still in progress
 
+    final BookID in_book_id = NullCheck.notNull(this.book_id);
     final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
 
-    //TODO see if this can be used for newer concept of bookmarks
-    final ReaderBookmarksType bookmarks = rs.getBookmarks();
+    final ReaderBookmarksSharedPrefsType bookmarks = rs.getBookmarks();
+    final ReaderBookLocation location = bookmarks.getReadingPosition(in_book_id, in_entry);
 
-    final OptionType<ReaderBookLocation> mark =
-      bookmarks.getBookmark(in_book_id, in_entry);
-
-
-    //TODO review and clean this up
-
-
-    final OptionType<ReaderOpenPageRequestType> page_request = mark.map( location -> {
-      ReaderActivity.this.current_location = location;
-      return ReaderOpenPageRequest.fromBookLocation(location);
+    final OptionType<ReaderBookLocation> optionLocation = Option.of(location);
+    final OptionType<ReaderOpenPageRequestType> page_request = optionLocation.map( l -> {
+      ReaderActivity.this.current_location = l;
+      return ReaderOpenPageRequest.fromBookLocation(l);
     });
+
     // is this correct? inject fonts before book opens or after
     js.injectFonts();
 

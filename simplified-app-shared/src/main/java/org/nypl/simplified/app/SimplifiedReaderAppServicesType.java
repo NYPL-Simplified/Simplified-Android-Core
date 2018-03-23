@@ -1,6 +1,6 @@
 package org.nypl.simplified.app;
 
-import org.nypl.simplified.app.reader.ReaderBookmarksType;
+import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefsType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
 import org.nypl.simplified.app.reader.ReaderSettingsType;
@@ -16,7 +16,7 @@ public interface SimplifiedReaderAppServicesType
    * @return The bookmarks database
    */
 
-  ReaderBookmarksType getBookmarks();
+  ReaderBookmarksSharedPrefsType getBookmarks();
 
   /**
    * @return The EPUB loader
