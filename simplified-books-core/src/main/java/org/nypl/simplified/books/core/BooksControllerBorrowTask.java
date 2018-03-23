@@ -435,7 +435,7 @@ final class BooksControllerBorrowTask implements Runnable
               }
             }
           }
-          else if (!this.needs_auth)
+          else
           {
             BooksControllerBorrowTask.LOG.debug(
               "[{}]: acquisition type is {}, performing fulfillment",
