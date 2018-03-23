@@ -18,8 +18,8 @@ import com.io7m.jnull.Nullable;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
-import org.nypl.simplified.app.reader.ReaderBookmarks;
-import org.nypl.simplified.app.reader.ReaderBookmarksType;
+import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefs;
+import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefsType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
@@ -1076,7 +1076,7 @@ public final class Simplified extends Application
   private static final class ReaderAppServices
     implements SimplifiedReaderAppServicesType
   {
-    private final ReaderBookmarksType         bookmarks;
+    private final ReaderBookmarksSharedPrefsType bookmarks;
     private final ExecutorService             epub_exec;
     private final ReaderReadiumEPUBLoaderType epub_loader;
     private final ReaderHTTPServerType        httpd;
@@ -1117,10 +1117,10 @@ public final class Simplified extends Application
         ReaderReadiumEPUBLoader.newLoader(context, this.epub_exec);
 
       this.settings = ReaderSettings.openSettings(context);
-      this.bookmarks = ReaderBookmarks.openBookmarks(context);
+      this.bookmarks = ReaderBookmarksSharedPrefs.openBookmarksSharedPrefs(context);
     }
 
-    @Override public ReaderBookmarksType getBookmarks()
+    @Override public ReaderBookmarksSharedPrefsType getBookmarks()
     {
       return this.bookmarks;
     }
