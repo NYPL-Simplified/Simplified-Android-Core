@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.os.Process;
 import android.util.DisplayMetrics;
 
 import com.io7m.jfunctional.FunctionType;
@@ -107,15 +108,22 @@ public final class Simplified extends Application
   private @Nullable ReaderAppServices  reader_services;
   private @Nullable CardCreator cardcreator;
 
-  /**
-   * Construct the application.
-   */
 
-  public Simplified()
+  /**
+   * Protect the singleton from getting constructed by outside sources.
+   */
+  private Simplified()
   {
 
   }
 
+
+  /**
+   * Checks if Simplified singleton has been initialized already.
+   *
+   * @return the one singleton instance of Simplified
+   * @throws IllegalStateException if Simplified is not yet initialized
+   */
   private static Simplified checkInitialized()
   {
     final Simplified i = Simplified.INSTANCE;
@@ -555,10 +563,13 @@ public final class Simplified extends Application
     }
   }
 
-  @Override public void onCreate()
-  {
+
+  @Override
+  public void onCreate() {
+    super.onCreate();
+
     Simplified.LOG.debug(
-      "starting app: pid {}", android.os.Process.myPid());
+        "starting app: pid {}", Process.myPid());
     Simplified.INSTANCE = this;
 
     this.initBugsnag(Bugsnag.getApiToken(this.getAssets()));
