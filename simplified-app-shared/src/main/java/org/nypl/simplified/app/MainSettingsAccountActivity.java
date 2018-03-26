@@ -942,7 +942,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     in_eula_checkbox.setEnabled(false);
 
     in_login.setText(rr.getString(R.string.settings_log_out));
-    in_login.setOnClickListener( v -> {
+    in_login.setOnClickListener( view -> {
       final LogoutDialog dialog = LogoutDialog.newDialog();
       dialog.setOnConfirmListener( () -> {
         //Delete cache if logging out of current active library account

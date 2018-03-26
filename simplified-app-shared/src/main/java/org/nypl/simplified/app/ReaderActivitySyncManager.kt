@@ -9,6 +9,7 @@ import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.annotation.BookAnnotation
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -16,10 +17,11 @@ import java.util.Timer
 import kotlin.concurrent.schedule
 
 
+//TODO could probably get rid of this interface
 interface ReaderSyncManagerDelegate {
   fun navigateToLocation(location: ReaderBookLocation)
-  fun bookmarkUploadDidFinish(bookmark: NYPLBookmark, bookID: String)
-  fun bookmarkSyncDidFinish(success: Boolean, bookmarks: List<NYPLBookmark>)
+//  fun bookmarkUploadDidFinish(bookmark: NYPLBookmark, bookID: String)
+//  fun bookmarkSyncDidFinish(success: Boolean, bookmarks: List<NYPLBookmark>)
 }
 
 /**
@@ -30,14 +32,12 @@ interface ReaderSyncManagerDelegate {
 class ReaderSyncManager(private val entryID: String,
                         credentials: AccountCredentials,
                         private val libraryAccount: Account,
-                        private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate
-{
+                        private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate {
   private companion object {
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
-  //TODO Work In Progress -
-  //TODO observe when set, then show jump to location dialog with appropriate messaging
+  //TODO WIP - observe when set, then show jump to location dialog with appropriate messaging
   val bookPackage: Package? = null
 
   // Delay server posts until first page sync is complete
@@ -51,9 +51,8 @@ class ReaderSyncManager(private val entryID: String,
    * Execute the closure if it's already on or successfully enabled on the server.
    */
   fun serverSyncPermission(account: AccountsControllerType,
-                           completion: () -> Unit)
-  {
-    annotationsManager.requestServerSyncPermissionStatus(account) { shouldEnable->
+                           completion: () -> Unit) {
+    annotationsManager.requestServerSyncPermissionStatus(account) { shouldEnable ->
       if (shouldEnable) {
         setPermissionSharedPref(true)
         completion()
@@ -63,8 +62,7 @@ class ReaderSyncManager(private val entryID: String,
 
   fun synchronizeReadingLocation(currentLocation: ReaderBookLocation,
                                  feedEntry: OPDSAcquisitionFeedEntry?,
-                                 context: Context)
-  {
+                                 context: Context) {
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
       delayPageSync = false
       LOG.debug("Account does not support sync or sync is disabled.")
@@ -79,69 +77,71 @@ class ReaderSyncManager(private val entryID: String,
     val uriString = (feedEntry.annotations as Some<URI>).get().toString()
 
     annotationsManager.requestReadingPositionOnServer(entryID, uriString, { serverLocation ->
-
-      delayPageSync = false
-
-      if (serverLocation == null) {
-        LOG.debug("No server location object returned.")
-        return@requestReadingPositionOnServer
-      }
-
-      val alert = createAlertForSyncLocation(serverLocation, context) { shouldMove ->
-        if (shouldMove) {
-          navigateToLocation(serverLocation)
-        }
-      }
-
-      // Pass through without presenting the Alert Dialog if:
-      // 1 - The server and the client have the same page marked
-      // 2 - There is no recent page saved on the server
-      //TODO make sure this conditional is working...
-      if (currentLocation.toString() != serverLocation.toString()) {
-        UIThread.runOnUIThread {
-          alert.show()
-        }
-      }
+      interpretUXForSync(serverLocation, context, currentLocation)
     })
   }
 
-  private fun createAlertForSyncLocation(location: ReaderBookLocation, context: Context,
-                                       completion: (shouldMove: Boolean) -> Unit): AlertDialog
-  {
-    val builder= AlertDialog.Builder(context)
-    builder.setTitle("Sync Reading Position")
+  private fun interpretUXForSync(serverLocation: ReaderBookLocation?,
+                                 context: Context,
+                                 currentLocation: ReaderBookLocation) {
+    delayPageSync = false
 
-    //TODO add cases once i figure out null content cfi equivalent from
-    if (bookPackage != null) {
-      val chapterTitle = bookPackage.getSpineItem(location.idRef).title
-      builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\"${chapterTitle}\"")
-    } else {
-      builder.setMessage("Would you like to go to the latest page read?")
+    if (serverLocation == null) {
+      LOG.debug("No server location object returned.")
+      return
     }
 
-    builder.setPositiveButton("YES") { dialog, which ->
-      completion(true)
-      LOG.debug("User chose to jump to synced page: ${location.contentCFI}")
+    val alert = createAlertForSyncLocation(serverLocation, context) { shouldMove ->
+      if (shouldMove) {
+        navigateToLocation(serverLocation)
+      }
     }
 
-    builder.setNegativeButton("NO") { dialog, which ->
-      completion(false)
-      LOG.debug("User declined jump to synced page.")
+    // Pass through without presenting the Alert Dialog if:
+    // 1 - The server and the client have the same page marked
+    // 2 - There is no recent page saved on the server
+    if (currentLocation.toString() != serverLocation.toString()) {
+      UIThread.runOnUIThread {
+        alert.show()
+      }
     }
-
-    return builder.create()
   }
 
+  private fun createAlertForSyncLocation(location: ReaderBookLocation, context: Context,
+                                         completion: (shouldMove: Boolean) -> Unit): AlertDialog {
+    val builder = AlertDialog.Builder(context)
+
+    with(builder) {
+
+      setTitle(context.getString(R.string.syncManagerSyncLocationAlertTitle))
+
+      if (bookPackage != null) {
+        val chapterTitle = bookPackage.getSpineItem(location.idRef).title
+        val formatString = String.format(context.getString(R.string.syncManagerSyncLocationAlertMessage), chapterTitle)
+        setMessage(formatString)
+      } else {
+        setMessage(context.getString(R.string.syncManagerSyncLocationAlertMessageGeneral))
+      }
+
+      setPositiveButton("YES") { _, _ ->
+        completion(true)
+        LOG.debug("User chose to jump to synced page: ${location.contentCFI}")
+      }
+
+      setNegativeButton("NO") { _, _ ->
+        completion(false)
+        LOG.debug("User declined jump to synced page.")
+      }
+
+      return create()
+    }
+  }
 
   /**
    * Attempt to update current page to the server.
    * @param location The page to be sent as the current "left off" page
-   * @param uri Annotation URI for the specific entry
    */
-  fun updateServerReadingLocation(location: ReaderBookLocation)
-  {
-    //TODO note to self: delayPageSync does not seem to work on second attempt.
-
+  fun updateServerReadingLocation(location: ReaderBookLocation) {
     if (delayPageSync) {
       LOG.debug("Post of last read position delayed. Initial sync still in progress.")
       return
@@ -161,13 +161,7 @@ class ReaderSyncManager(private val entryID: String,
     }
   }
 
-  private fun setPermissionSharedPref(status: Boolean)
-  {
+  private fun setPermissionSharedPref(status: Boolean) {
     Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", libraryAccount.id, status)
   }
 }
-
-
-// TODO STUB WIP
-// Would represent a bookmark element to be saved to the server and also de/serialized for TOC
-class NYPLBookmark(val whatever: Int)
