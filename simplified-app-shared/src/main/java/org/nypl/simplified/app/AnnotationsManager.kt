@@ -3,26 +3,25 @@ package org.nypl.simplified.app
 import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import com.android.volley.*
 import com.android.volley.Response.Listener
 import com.android.volley.toolbox.Volley
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import com.io7m.jfunctional.Some
-import org.json.JSONException
 import org.json.JSONObject
 import org.joda.time.Instant
 import org.nypl.drm.core.AdobeDeviceID
 import org.nypl.simplified.app.catalog.annotation.AnnotationResult
 import org.nypl.simplified.app.reader.ReaderBookLocation
+import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.volley.NYPLJsonObjectRequest
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
  * Performs work relevant to syncing OPDS Annotations.
@@ -36,8 +35,13 @@ class AnnotationsManager(private val libraryAccount: Account,
 {
   private val requestQueue = Volley.newRequestQueue(context)
 
+  private var syncPermissionStatusRequestPending = false
+  private var syncPermissionStatusCompletions = mutableListOf<(Boolean,Boolean)->Unit>()
+
   private companion object {
     val LOG = LoggerFactory.getLogger(AnnotationsManager::class.java)!!
+    const val SyncPermissionStatusTimeout = 60L
+    const val ReadingPositionTimeout = 30L
   }
 
   /**
@@ -56,7 +60,6 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    //TODO I think this condition is either wrong or out of date.. think about it some more during testing
     if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") == true &&
         Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryAccount.id) == false) {
       completion(false)
@@ -80,12 +83,21 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   private fun syncPermissionStatusUriRequest(completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit)
   {
-    val catalogUriString = libraryAccount.catalogUrl ?: null
-    val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
-    val permissionRequestUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "patrons/me/") else null
+    syncPermissionStatusCompletions.add(completion)
 
-    if (permissionRequestUri == null) {
-      LOG.debug("Could not create Annotations URL from Main Feed URL. Abandoning attempt to retrieve sync setting.")
+    if (syncPermissionStatusRequestPending) {
+      LOG.debug("Request already waiting. Adding response to same result of pending request.")
+      return
+    }
+    syncPermissionStatusRequestPending = true
+
+    val baseCatalogUri = libraryAccount.catalogUrl?.let { Uri.parse(it) }
+    val permissionRequestUri = if (baseCatalogUri != null) {
+      Uri.withAppendedPath(baseCatalogUri, "patrons/me/")
+    } else {
+      LOG.debug("Could not create Annotations URL from Main Feed URL." +
+          "Abandoning attempt to retrieve sync setting.")
+      completion(true, false)
       return
     }
 
@@ -96,14 +108,21 @@ class AnnotationsManager(private val libraryAccount: Account,
         credentials.pin.toString(),
         null,
         Listener<JSONObject> { response ->
-          handleSyncPermission(response, completion)
+          syncPermissionStatusCompletions.forEach { queuedCompletion ->
+            handleSyncPermission(response, queuedCompletion)
+          }
+          syncPermissionStatusCompletions.clear()
+          syncPermissionStatusRequestPending = false
         },
         Response.ErrorListener { error ->
           LOG.error("GET request fail! Error: ${error.message}")
+          syncPermissionStatusCompletions.clear()
+          syncPermissionStatusRequestPending = false
+          completion(true, false)
         })
 
     request.retryPolicy = DefaultRetryPolicy(
-        60 * 1000,
+        TimeUnit.SECONDS.toMillis(SyncPermissionStatusTimeout).toInt(),
         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
 
@@ -113,6 +132,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   private fun handleSyncPermission(response: JSONObject,
                                    completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit)
   {
+    UIThread.checkIsUIThread()
     try {
       val settings = response.getJSONObject("settings")
       val syncSettingsBool = settings.getBoolean("simplified:synchronize_annotations")
@@ -152,11 +172,11 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   private fun setSyncPermissionUriRequest(uri: String,
                                           parameters: Map<String, Any>,
-                                          timeout: Int?,
+                                          timeout: Long?,
                                           completion: (success: Boolean) -> Unit)
   {
     val jsonBody = JSONObject(parameters)
-    val additionalHeaders = mapOf<String,String>("Content-Type" to "vnd.librarysimplified/user-profile+json")
+    val additionalHeaders = mapOf("Content-Type" to "vnd.librarysimplified/user-profile+json")
 
     val request = NYPLJsonObjectRequest(
         Request.Method.PUT,
@@ -174,7 +194,7 @@ class AnnotationsManager(private val libraryAccount: Account,
 
     if (timeout != null) {
       request.retryPolicy = DefaultRetryPolicy(
-          timeout * 1000,
+          TimeUnit.SECONDS.toMillis(timeout).toInt(),
           DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
           DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
     }
@@ -200,8 +220,6 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    //TODO Test to make sure passing null for body parameter works as expected
-
     val request = NYPLJsonObjectRequest(
         Request.Method.GET,
         uri,
@@ -217,7 +235,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         })
 
     request.retryPolicy = DefaultRetryPolicy(
-        30 * 1000,
+        TimeUnit.SECONDS.toMillis(ReadingPositionTimeout).toInt(),
         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
 
@@ -263,13 +281,11 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    //TODO WIP while testing platform differences...
-    val deviceIDString: String?
-    if (credentials.adobeDeviceID.isSome) {
-      deviceIDString = (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
+    val deviceIDString = if (credentials.adobeDeviceID.isSome) {
+      (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
     } else {
       LOG.error("Adobe Device ID was null. No device set in body for annotation.")
-      deviceIDString = "null"
+      "null"
     }
 
     val bodyObject = mapOf(
@@ -295,7 +311,6 @@ class AnnotationsManager(private val libraryAccount: Account,
 
       postAnnotation(requestUri, jsonBodyString, 20, { isSuccessful, response ->
         if (isSuccessful) {
-          //TODO is there any reason that we need to save and update the annotation ID created for a reading-position upload?
           LOG.debug("Success: Marked Reading Position To Server. Response: $response")
         } else {
           LOG.error("Annotation not posted.")
@@ -308,7 +323,7 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  private fun postAnnotation(uri: String, bodyParameters: String, timeout: Int?,
+  private fun postAnnotation(uri: String, bodyParameters: String, timeout: Long?,
                              completion: (isSuccessful: Boolean, annotationID: String?) -> Unit)
   {
     try {
@@ -322,7 +337,6 @@ class AnnotationsManager(private val libraryAccount: Account,
           null,
           Listener<JSONObject> { response ->
             LOG.debug("Annotation POST: Success 200.")
-            //TODO am I doing anything with the returned annotation yet? maybe just for bookmarks..
             val serverAnnotationID = response.getString("id")
             completion(true, serverAnnotationID)
           },
@@ -333,7 +347,7 @@ class AnnotationsManager(private val libraryAccount: Account,
 
       if (timeout != null) {
         request.retryPolicy = DefaultRetryPolicy(
-            timeout * 1000,
+            TimeUnit.SECONDS.toMillis(timeout).toInt(),
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
             DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
         )
@@ -345,199 +359,6 @@ class AnnotationsManager(private val libraryAccount: Account,
       LOG.error("Post Annotation: Error creating JSONObject from Kotlin Map Type.")
     }
   }
-
-
-  //TODO WIP. Converted from Swift. Not yet tested.
-  /**
-   * Get a list of any bookmark-type annotations created for the given book and the current user.
-   * @param bookID Identifier for the entry
-   * @param uri The Annotation ID/URI for the OPDS Entry
-   * @param completion Called asynchronously by the network request to return the bookmarks
-   */
-  fun requestBookmarksFromServer(bookID: String?, uri: Uri?,
-                                 completion: (bookmarks: Any?) -> Unit) {
-
-    if (!syncIsPossibleAndPermitted()) {
-      LOG.debug("Account does not support sync or sync is disabled.")
-      completion(null)
-      return
-    }
-    if (bookID == null || uri == null) {
-      LOG.error("Required parameter was unexpectedly null")
-      return
-    }
-
-    NYPLJsonObjectRequest(
-        Request.Method.GET,
-        uri.toString(),
-        credentials.barcode.toString(),
-        credentials.pin.toString(),
-        null,
-        Listener<JSONObject> { response ->
-
-          try {
-            val first = response.getJSONObject("first")
-            val items = first?.getJSONArray("items")
-            if (items == null) {
-              LOG.error("")  //TODO
-              return@Listener
-            }
-            val bookmarks = mutableListOf<Any>()
-            for (i in 0 until items.length()) {
-              val item = items.getJSONObject(i)
-              val bookmark = createBookmark(bookID, item)
-              if (bookmark != null) {
-                bookmarks.add(bookmark)
-              } else {
-                LOG.error("Could not create bookmark element from item.")
-                continue
-              }
-            }
-            completion(bookmarks)
-          } catch (e: java.lang.Exception) {
-            LOG.error("GET request fail! Error: ${e.message}")
-          }
-
-        },
-        Response.ErrorListener { error ->
-          LOG.error("GET request fail! Error: ${error.message}")
-          completion(null)
-        })
-  }
-
-  //TODO STUB - WIP
-  private fun createBookmark(bookID: String, annotation: JSONObject): Any? {
-
-    return null
-  }
-
-  //TODO WIP. Converted from Swift. Not yet tested.
-  /**
-   * Post a new bookmark to the server for the current user for a particular entry.
-   * @param bookID Identifier for the entry
-   * @param uri The Annotation ID/URI for the OPDS Entry
-   * @param completion Returns the new UUID/URI created for the annotation
-   */
-  fun postBookmarkToServer(bookID: String, uri: Uri, bookmark: Any,
-                           completion: (serverID: String?) -> Unit) {
-
-    if (!syncIsPossibleAndPermitted()) {
-      LOG.debug("Account does not support sync or sync is disabled.")
-      completion(null)
-      return
-    }
-
-    val catalogUriString = libraryAccount.catalogUrl ?: null
-    val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
-    val mainFeedAnnotationUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "annotations/") else null
-    if (mainFeedAnnotationUri == null) {
-      LOG.error("Required parameter was nil.")
-      completion(null)
-      return
-    }
-
-    //TODO fill in placeholder values
-
-    val parametersObject = mapOf(
-        "test" to "test"
-    )
-
-//    val parametersObject = mapOf(
-//        "@context" to "http://www.w3.org/ns/anno.jsonld",
-//        "type" to "Annotation",
-//        "motivation" to "http://www.w3.org/ns/oa#bookmarking",
-//        "target" to mapOf(
-//            "source" to bookID,
-//            "selector" to mapOf(
-//                "type" to "oa:FragmentSelector",
-//                "value" to bookmark.contentCfi
-//            )
-//        ),
-//        "body" to mapOf(
-//            "http://librarysimplified.org/terms/time" to bookmark.time,
-//            "http://librarysimplified.org/terms/device" to bookmark.device ?: "",
-//            "http://librarysimplified.org/terms/chapter" to bookmark.chapter ?: "",
-//            "http://librarysimplified.org/terms/progressWithinChapter" to bookmark.progressWithinChapter,
-//            "http://librarysimplified.org/terms/progressWithinBook" to bookmark.progressWithinBook
-//        )
-//    )
-
-    try {
-      val mapper = ObjectMapper()
-      val jsonBodyString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parametersObject)
-
-      postAnnotation(mainFeedAnnotationUri.toString(), jsonBodyString, null) { _, id ->
-        completion(id)
-      }
-
-    } catch (e: IOException) {
-      LOG.error("Error serializing JSON from Map Object")
-      return
-    }
-  }
-
-  //TODO WIP. Converted from Swift. Not yet tested.
-  /**
-   * Delete a bookmark on the server.
-   */
-  fun deleteBookmarkFromServer(annotationID: String,
-                               completion: (isSuccessful: Boolean) -> Unit) {
-
-    if (!syncIsPossibleAndPermitted()) {
-      LOG.debug("Account does not support sync or sync is disabled.")
-      completion(false)
-      return
-    }
-
-    //TODO set timeout of 20 sec.
-
-    NYPLJsonObjectRequest(
-        Request.Method.DELETE,
-        annotationID,
-        credentials.barcode.toString(),
-        credentials.pin.toString(),
-        null,
-        Listener<JSONObject> { response ->
-          completion(true)
-        },
-        Response.ErrorListener { error ->
-          completion(false)
-        })
-
-  }
-
-  //TODO WIP. Converted from Swift. Not yet tested.
-  //TODO decide if this method is actually required on Android
-//  fun deleteBookmarks(bookmarks: List<Any>) {
-//
-//    if (!syncIsPossibleAndPermitted()) {
-//      LOG.debug("Account does not support sync or sync is disabled.")
-//      return
-//    }
-//
-//    for (bookmark in bookmarks) {
-//
-//      if (bookmark.annotationID as? String == null) {   //TODO update for correct type
-//        return
-//      }
-//      deleteBookmark(bookmark.annotationID) { isSuccessful ->
-//        if (isSuccessful) {
-//          LOG.debug("Server bookmark deleted: ${bookmark.annotationID}")
-//        } else {
-//          LOG.error("Bookmark not deleted from server. Moving on: ${bookmark.annotationID}")
-//        }
-//      }
-//    }
-//  }
-
-  //TODO WIP. Converted from Swift. Not yet tested.
-  //TODO decide if this method is actually required on Android
-  fun uploadLocalBookmarks(bookmarks: List<Any>, bookID: String,
-                           completion: (successful: List<Any>, failed: List<Any>) -> Unit) {
-
-    //TODO STUB
-  }
-
 
   /**
    * Sync is possible if a user is logged in and the current active library
@@ -552,49 +373,50 @@ class AnnotationsManager(private val libraryAccount: Account,
    * or inherited the permission from a user's other device.
    */
   fun syncIsPossibleAndPermitted(): Boolean {
-    try {
+    return try {
       val app: SimplifiedCatalogAppServicesType? = Simplified.getCatalogAppServices()
       val currentAccount = app?.books as? AccountsControllerType
       val syncIsPossible = if (currentAccount != null) syncIsPossible(currentAccount) else false
       val libraryID = Simplified.getCurrentAccount()
       val syncPermissionGranted = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryID.id)
-      return syncIsPossible && syncPermissionGranted
+      syncIsPossible && syncPermissionGranted
     } catch (e: Exception) {
       LOG.error("Exception thrown accessing SimplifiedCatalogAppServicesType to obtain sync status.")
-      return false
+      false
     }
   }
 
   private fun presentFirstTimeSyncAlertDialog(completion: (enableSync: Boolean) -> Unit)
   {
     val builder= AlertDialog.Builder(context)
-    builder.setTitle("SimplyE Sync")
-    builder.setMessage("Enable sync to save your reading position and bookmarks to your other devices." +
-        "\n\nYou can change this any time in Settings.")
-
-    builder.setNegativeButton("Not Now") { dialog, which ->
-      Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
-      completion(false)
-    }
-    builder.setPositiveButton("Enable Sync") { dialog, which ->
-      updateServerSyncPermissionStatus(true) { success ->
+    with(builder) {
+      setTitle(context.getString(R.string.firstTimeSyncAlertTitle))
+      setMessage(context.getString(R.string.firstTimeSyncAlertMessage))
+      builder.setNegativeButton(context.getString(R.string.firstTimeSyncAlertNegButton)) { _, _ ->
         Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
-        completion(success)
+        completion(false)
       }
-    }
+      builder.setPositiveButton(context.getString(R.string.firstTimeSyncAlertPosButton)) { _, _ ->
+        updateServerSyncPermissionStatus(true) { success ->
+          Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
+          completion(success)
+        }
+      }
 
-    builder.create()
-    builder.show()
+      builder.create()
+      builder.show()
+    }
   }
 
   private fun presentAlertForSyncSettingError()
   {
     val builder= AlertDialog.Builder(context)
-    builder.setTitle("Error Changing Sync Setting")
-    builder.setMessage("There was a problem contacting the server." +
-        "\nPlease make sure you are connected to the internet, or try again later.")
-    builder.setPositiveButton("OK", null)
-    builder.create()
-    builder.show()
+    with(builder) {
+      setTitle(context.getString(R.string.syncSettingAlertTitle))
+      setMessage(R.string.syncSettingAlertMessage)
+      setPositiveButton("OK", null)
+      create()
+      show()
+    }
   }
 }

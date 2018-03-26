@@ -1167,14 +1167,14 @@ public final class ReaderActivity extends Activity implements
 //          }
 //        });
 
-
-  @Override
-  public void bookmarkUploadDidFinish(@NotNull NYPLBookmark bookmark, @NotNull String bookID) {
-
-  }
-
-  @Override
-  public void bookmarkSyncDidFinish(boolean success, @NotNull List<NYPLBookmark> bookmarks) {
-
-  }
+//
+//  @Override
+//  public void bookmarkUploadDidFinish(@NotNull NYPLBookmark bookmark, @NotNull String bookID) {
+//
+//  }
+//
+//  @Override
+//  public void bookmarkSyncDidFinish(boolean success, @NotNull List<NYPLBookmark> bookmarks) {
+//
+//  }
 }

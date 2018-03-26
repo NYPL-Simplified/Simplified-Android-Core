@@ -237,11 +237,9 @@
   <string name="need_card_question">Don\'t have a library card?</string>
   <string name="need_card_button">Sign Up</string>
   <string name="need_card_create">Create Card</string>
-
   <string name="label_simplye_logo">SimplyE logo</string>
   <string name="label_find_library_button">Click this button to find your local library and peruse its catalog.</string>
   <string name="label_instant_classics_button">Click this button to peruse the Instant Classics collection.</string>
-
   <string name="you_must_be_in_new_york">You must be in New York to sign up for a library card.  Please try to sign up again when you are in another location.</string>
   <string name="you_are_in_new_york">We have successfully determined that you are in New York!</string>
   <string name="done_get_location">Done</string>
@@ -250,5 +248,16 @@
   <!-- ZXing Scanner -->
   <string name="barcode_scanner_prompt">Scan your library card barcode.</string>
   <string name="barcode_scanning_error">Error Scanning Card</string>
+
+  <!-- Syncing Feature -->
+  <string name="syncSettingAlertTitle">Error Changing Sync Setting</string>
+  <string name="syncSettingAlertMessage">There was a problem contacting the server.\nPlease make sure you are connected to the internet, or try again later.</string>
+  <string name="firstTimeSyncAlertTitle">SimplyE Sync</string>
+  <string name="firstTimeSyncAlertMessage">Enable sync to save your reading position and bookmarks to your other devices.\n\nYou can change this any time in Settings.</string>
+  <string name="firstTimeSyncAlertNegButton">Not Now</string>
+  <string name="firstTimeSyncAlertPosButton">Enable Sync</string>
+  <string name="syncManagerSyncLocationAlertTitle">Sync Reading Position</string>
+  <string name="syncManagerSyncLocationAlertMessage">"Would you like to go to the latest page read? \n\nChapter:\n\"$s\"</string>
+  <string name="syncManagerSyncLocationAlertMessageGeneral">Would you like to go to the latest page read?</string>
 
 </resources>
