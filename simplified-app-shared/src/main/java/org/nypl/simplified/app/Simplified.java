@@ -112,7 +112,7 @@ public final class Simplified extends Application
   /**
    * Protect the singleton from getting constructed by outside sources.
    */
-  private Simplified()
+  public Simplified()
   {
 
   }
