@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.reader;
 
-import org.nypl.simplified.app.NYPLBookmark;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 
 public interface ReaderTOCBookmarksFragmentSelectionListenerType {
 
@@ -10,5 +10,5 @@ public interface ReaderTOCBookmarksFragmentSelectionListenerType {
    * @param bookmark Selected Bookmark Item in the ListView
    */
 
-  void onBookmarkSelected(NYPLBookmark bookmark);
+  void onBookmarkSelected(BookAnnotation bookmark);
 }
