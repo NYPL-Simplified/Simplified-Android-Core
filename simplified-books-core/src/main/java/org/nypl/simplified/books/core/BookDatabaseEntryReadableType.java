@@ -1,10 +1,14 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
+
+import org.jetbrains.annotations.NotNull;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * <p> The readable interface supported by book database entries. </p>
@@ -35,6 +39,15 @@ public interface BookDatabaseEntryReadableType
 
   OPDSAcquisitionFeedEntry entryGetFeedData()
     throws IOException;
+
+  /**
+   * @return The list of bookmarks associated with the user and book
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  @NotNull List<BookAnnotation> entryGetBookmarksList()
+      throws IOException;
 
   /**
    * @return The database entry directory

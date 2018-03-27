@@ -12,8 +12,11 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import org.jetbrains.annotations.NotNull;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeLoanID;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
@@ -341,6 +344,8 @@ public final class BookDatabase implements BookDatabaseType
     private final File                   file_lock;
     private final File                   file_meta;
     private final File                   file_meta_tmp;
+    private final File                   file_bookmarks;
+    private final File                   file_bookmarks_tmp;
     private final BookID                 id;
     private final OPDSJSONParserType     parser;
     private final OPDSJSONSerializerType serializer;
@@ -371,6 +376,8 @@ public final class BookDatabase implements BookDatabaseType
       this.file_adobe_meta = new File(this.directory, "meta_adobe.json");
       this.file_adobe_meta_tmp =
         new File(this.directory, "meta_adobe.json.tmp");
+      this.file_bookmarks = new File(this.directory, "bookmarks.json");
+      this.file_bookmarks_tmp = new File(this.directory, "bookmarks.json.tmp");
 
       this.log =
         NullCheck.notNull(LoggerFactory.getLogger(BookDatabaseEntry.class));
@@ -559,6 +566,75 @@ public final class BookDatabase implements BookDatabaseType
             return BookDatabaseEntry.this.updateSnapshotLocked();
           }
         });
+    }
+
+    //TODO WIP
+
+    @NotNull
+    @Override public List<BookAnnotation> entryGetBookmarksList() throws IOException {
+      return FileLocking.withFileThreadLocked(
+          this.file_lock,
+          (long) BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS,
+          new PartialFunctionType<Unit, List<BookAnnotation>, IOException>()
+          {
+            @Override public List<BookAnnotation> call(
+                final Unit x)
+                throws IOException
+            {
+              return BookDatabaseEntry.this.getBookmarksLocked();
+            }
+          });
+    }
+
+    @Override public BookDatabaseEntrySnapshot entrySetBookmarksList(
+        final @NotNull List<BookAnnotation> bookmarks)
+        throws IOException
+    {
+      return FileLocking.withFileThreadLocked(
+          this.file_lock,
+          (long) BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS,
+          new PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException>()
+          {
+            @Override public BookDatabaseEntrySnapshot call(
+                final Unit x)
+                throws IOException
+            {
+              BookDatabaseEntry.this.setBookmarksListLocked(bookmarks);
+              //TODO check if any updates are required to updateSnapshotLocked()
+              return BookDatabaseEntry.this.updateSnapshotLocked();
+            }
+          });
+    }
+
+    @NotNull private List<BookAnnotation> getBookmarksLocked()
+        throws FileNotFoundException {
+      final FileInputStream is = new FileInputStream(this.file_bookmarks);
+      //TODO Parse json stream to BookAnnotations
+//      try {
+//        return this.parser.parseAcquisitionFeedEntryFromStream(is);
+//      } finally {
+//        is.close();
+//      }
+      return new ArrayList<BookAnnotation>();
+    }
+
+    private void setBookmarksListLocked(
+        final List<BookAnnotation> bookmarks)
+        throws IOException
+    {
+      this.log.debug("updating bookmarks list {}", this.file_bookmarks);
+
+      final OutputStream stream = new FileOutputStream(this.file_bookmarks_tmp);
+
+      try {
+        //TODO change to serialize list to appropriate json stream
+//        this.serializer.serializeToStream(bookmarks, stream);
+      } finally {
+        stream.flush();
+        stream.close();
+      }
+
+      FileUtilities.fileRename(this.file_bookmarks_tmp, this.file_bookmarks);
     }
 
     @Override public BookDatabaseEntrySnapshot entryUpdateAll(
