@@ -362,6 +362,148 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
   /**
+   * Get a list of any bookmark-type annotations created for the given book and the current user.
+   * @param bookID Identifier for the entry
+   * @param uri The Annotation ID/URI for the OPDS Entry
+   * @param completion Called asynchronously by the network request to return the bookmarks
+   */
+  fun requestBookmarksFromServer(bookID: String?, uri: Uri?,
+                                 completion: (bookmarks: List<BookAnnotation>?) -> Unit) {
+
+    if (!syncIsPossibleAndPermitted()) {
+      LOG.debug("Account does not support sync or sync is disabled.")
+      completion(null)
+      return
+    }
+    if (bookID == null || uri == null) {
+      LOG.error("Required parameter was unexpectedly null")
+      return
+    }
+
+    NYPLJsonObjectRequest(
+        Request.Method.GET,
+        uri.toString(),
+        credentials.barcode.toString(),
+        credentials.pin.toString(),
+        null,
+        Listener<JSONObject> { response ->
+          try {
+            val result = Gson().fromJson(response.toString(), AnnotationResult::class.java)
+            val bookmarks = result.first.items.filter {
+              it.motivation.contains("bookmarking", true)
+            }
+            //TODO try and understand how i would catch any particular issues with
+            LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
+            completion(bookmarks)
+          } catch (e: java.lang.Exception) {
+            LOG.error("GET request or parsing fail for bookmarks. Error: ${e.message}")
+          }
+        },
+        Response.ErrorListener { error ->
+          LOG.error("GET request fail! Error: ${error.message}")
+          completion(null)
+        })
+  }
+
+  /**
+   * Post a new bookmark to the server for the current user for a particular entry.
+   * @param bookID Identifier for the entry
+   * @param uri The Annotation ID/URI for the OPDS Entry
+   * @param completion Returns the new UUID/URI created for the annotation
+   */
+  fun postBookmarkToServer(bookID: String,
+                           bookAnnotationUri: Uri,
+                           bookLocation: ReaderBookLocation,
+                           chapterName: String,
+                           chapterProgress: Float,
+                           bookProgress: Float,
+                           completion: (serverID: String?) -> Unit) {
+
+    if (!syncIsPossibleAndPermitted()) {
+      LOG.debug("Account does not support sync or sync is disabled.")
+      completion(null)
+      return
+    }
+
+    val timestamp = Instant().toString()
+    val deviceID = if (credentials.adobeDeviceID.isSome) {
+      (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
+    } else {
+      LOG.error("Adobe Device ID was null. No device set in body for annotation.")
+      "null"
+    }
+
+    //TODO test validity of this map
+    val parametersObject = mapOf(
+        "@context" to "http://www.w3.org/ns/anno.jsonld",
+        "type" to "Annotation",
+        "motivation" to "http://www.w3.org/ns/oa#bookmarking",
+        "target" to mapOf(
+            "source" to bookID,
+            "selector" to mapOf(
+                "type" to "oa:FragmentSelector",
+                "value" to bookLocation.contentCFI
+            )
+        ),
+        "body" to mapOf(
+            "http://librarysimplified.org/terms/time" to timestamp,
+            "http://librarysimplified.org/terms/device" to deviceID,
+            "http://librarysimplified.org/terms/chapter" to chapterName,
+            "http://librarysimplified.org/terms/progressWithinChapter" to chapterProgress,
+            "http://librarysimplified.org/terms/progressWithinBook" to bookProgress
+        )
+    )
+
+    try {
+      val mapper = ObjectMapper()
+      val jsonBodyString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parametersObject)
+
+      postAnnotation(bookAnnotationUri.toString(), jsonBodyString, null) { _, serverID ->
+        completion(serverID)
+      }
+
+    } catch (e: IOException) {
+      LOG.error("Error serializing JSON from Map Object")
+      return
+    }
+  }
+
+  //TODO WIP. Not yet tested.
+  /**
+   * Delete a bookmark on the server.
+   */
+  fun deleteBookmarkFromServer(annotationID: String,
+                               completion: (isSuccessful: Boolean) -> Unit) {
+
+    if (!syncIsPossibleAndPermitted()) {
+      LOG.debug("Account does not support sync or sync is disabled.")
+      completion(false)
+      return
+    }
+
+    val request = NYPLJsonObjectRequest(
+        Request.Method.DELETE,
+        annotationID,
+        credentials.barcode.toString(),
+        credentials.pin.toString(),
+        null,
+        Listener<JSONObject> { response ->
+          completion(true)
+        },
+        Response.ErrorListener { error ->
+          completion(false)
+        })
+
+    request.retryPolicy = DefaultRetryPolicy(
+        20 * 1000,
+        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+    )
+
+    requestQueue.add(request)
+  }
+
+  /**
    * Sync is possible if a user is logged in and the current active library
    * has SimplyE sync support enabled.
    */

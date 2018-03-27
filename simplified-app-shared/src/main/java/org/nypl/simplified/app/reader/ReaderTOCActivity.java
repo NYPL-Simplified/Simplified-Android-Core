@@ -18,6 +18,7 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.slf4j.Logger;
 
 /**
@@ -167,7 +168,7 @@ public final class ReaderTOCActivity extends AppCompatActivity
    */
 
   @Override
-  public void onBookmarkSelected(NYPLBookmark bookmark) {
+  public void onBookmarkSelected(BookAnnotation bookmark) {
     //TODO STUB
   }
 }

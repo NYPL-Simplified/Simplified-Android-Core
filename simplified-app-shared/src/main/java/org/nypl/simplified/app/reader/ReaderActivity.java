@@ -32,7 +32,6 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
-import org.nypl.simplified.app.NYPLBookmark;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ReaderSyncManager;
 import org.nypl.simplified.app.ReaderSyncManagerDelegate;
@@ -54,6 +53,7 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -116,6 +116,8 @@ public final class ReaderActivity extends Activity implements
   private           ReaderBookLocation                sync_location;
   private           AccountCredentials                credentials;
   private @Nullable ReaderSyncManager                 syncManager;
+  private @Nullable Integer                           currentSpineItemPageIndex;
+  private @Nullable Integer                           currentSpineItemPageCount;
 
 
   /**
@@ -844,6 +846,9 @@ public final class ReaderActivity extends Activity implements
             in_progress_text.setText("");
           } else {
             final OpenPage page = NullCheck.notNull(pages.get(0));
+            //TODO can't think of any other way to get these when trying to upload a bookmark
+            currentSpineItemPageIndex = page.getSpineItemPageIndex();
+            currentSpineItemPageCount = page.getSpineItemPageCount();
             in_progress_text.setText(
               NullCheck.notNull(
                 String.format(
@@ -1086,17 +1091,11 @@ public final class ReaderActivity extends Activity implements
 
     final OptionType<ReaderBookLocation> optLocation = Option.some(location);
 
-    page_request = optLocation.map(
-        new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
-          @Override
-          public ReaderOpenPageRequestType call(
-              final ReaderBookLocation l) {
-            LOG.debug("CurrentPage location {}", l);
-
-            ReaderActivity.this.sync_location = l;
-            return ReaderOpenPageRequest.fromBookLocation(l);
-          }
-        });
+    page_request = optLocation.map((l) -> {
+      LOG.debug("CurrentPage location {}", l);
+      ReaderActivity.this.sync_location = l;
+      return ReaderOpenPageRequest.fromBookLocation(l);
+    });
 
     final OptionType<ReaderOpenPageRequestType> page = page_request;
 
@@ -1108,62 +1107,8 @@ public final class ReaderActivity extends Activity implements
     final Package p = NullCheck.notNull(c.getDefaultPackage());
 
     js.openBook(p, vs, page);
-
   }
 
-//TODO old code for reference
-//    OptionType<ReaderOpenPageRequestType> page_request = null;
-//
-//          final OptionType<ReaderBookLocation> mark = Option.some(ReaderBookLocation.fromJSON(o));
-//
-//          page_request = mark.map(
-//              new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
-//                @Override
-//                public ReaderOpenPageRequestType call(
-//                    final ReaderBookLocation l) {
-//                  LOG.debug("CurrentPage location {}", l);
-//
-//                  final String chapter = default_package.getSpineItem(l.getIDRef()).getTitle();
-//                  builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\" " + chapter + "\"");
-//
-//                  //TODO not sure what this.sync_location is being used for
-//                  ReaderActivity.this.sync_location = l;
-//                  return ReaderOpenPageRequest.fromBookLocation(l);
-//                }
-//              });
-//
-//
-//          LOG.debug("CurrentPage sync {}", text);
-//
-//        } catch (JSONException e) {
-//          e.printStackTrace();
-//        }
-//
-//      }
-//    }
-//
-//    final OptionType<ReaderOpenPageRequestType> page = page_request;
-//
-//    builder.setPositiveButton("YES",
-//        new DialogInterface.OnClickListener() {
-//          @Override
-//          public void onClick(final DialogInterface dialog, final int which) {
-//            // positive button logic
-//
-//            final ReaderReadiumJavaScriptAPIType js =
-//                NullCheck.notNull(ReaderActivity.this.readium_js_api);
-//            final ReaderReadiumViewerSettings vs =
-//                NullCheck.notNull(ReaderActivity.this.viewer_settings);
-//            final Container c = NullCheck.notNull(ReaderActivity.this.epub_container);
-//            final Package p = NullCheck.notNull(c.getDefaultPackage());
-//
-//            js.openBook(p, vs, page);
-//            Simplified.getSharedPrefs().putBoolean("post_last_read", true);
-//            LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
-//          }
-//        });
-
-//
 //  @Override
 //  public void bookmarkUploadDidFinish(@NotNull NYPLBookmark bookmark, @NotNull String bookID) {
 //
