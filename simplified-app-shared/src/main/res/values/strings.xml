@@ -204,6 +204,7 @@
   <string name="reader_toc_tab_bookmarks">Bookmarks</string>
 
   <!-- Accessibility strings used for content descriptions (Reader) -->
+  <string name="reader_accessibility_bookmark">Add bookmark for this page</string>
   <string name="reader_accessibility_toc">Show table of contents</string>
   <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item</string>
   <string name="reader_accessibility_settings">Show reader settings</string>
