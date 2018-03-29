@@ -96,7 +96,7 @@ public final class OPDSAcquisitionFeedEntryParser
       e, OPDSFeedConstants.ATOM_URI, "link");
 
     /**
-     * First, locate a revocation link, if any. This is required to be found
+     * AnnotationFirstNode, locate a revocation link, if any. This is required to be found
      * first as it needs to be used later in availability information.
      */
 

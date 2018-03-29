@@ -8,28 +8,29 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  *
  */
-public class Target {
+public class AnnotationTargetNode {
 
   @SerializedName("source")
   @Expose
   private String source;
-  @SerializedName("selector")
+
+  @SerializedName("annotationSelectorNode")
   @Expose
-  private Selector selector;
+  private AnnotationSelectorNode annotationSelectorNode;
 
   /**
    * No args constructor for use in serialization
    */
-  public Target() {
+  public AnnotationTargetNode() {
   }
 
   /**
-   * @param in_selector The selector
+   * @param in_Annotation_selectorNode The annotationSelectorNode
    * @param in_source the sourece
    */
-  public Target(final String in_source, final Selector in_selector) {
+  public AnnotationTargetNode(final String in_source, final AnnotationSelectorNode in_Annotation_selectorNode) {
     this.source = in_source;
-    this.selector = in_selector;
+    this.annotationSelectorNode = in_Annotation_selectorNode;
   }
 
   /**
@@ -48,17 +49,17 @@ public class Target {
 
 
   /**
-   * @return The selector
+   * @return The annotationSelectorNode
    */
-  public Selector getSelector() {
-    return this.selector;
+  public AnnotationSelectorNode getAnnotationSelectorNode() {
+    return this.annotationSelectorNode;
   }
 
   /**
-   * @param in_selector The selector
+   * @param in_Annotation_selectorNode The annotationSelectorNode
    */
-  public void setSelector(final Selector in_selector) {
-    this.selector = in_selector;
+  public void setAnnotationSelectorNode(final AnnotationSelectorNode in_Annotation_selectorNode) {
+    this.annotationSelectorNode = in_Annotation_selectorNode;
   }
 
 

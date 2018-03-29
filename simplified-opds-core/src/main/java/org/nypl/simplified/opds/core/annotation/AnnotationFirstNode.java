@@ -12,7 +12,7 @@ import com.google.gson.annotations.SerializedName;
  *
  */
 @Generated("org.jsonschema2pojo")
-public class First {
+public class AnnotationFirstNode {
 
   @SerializedName("items")
   @Expose
@@ -27,7 +27,7 @@ public class First {
   /**
    * No args constructor for use in serialization
    */
-  public First() {
+  public AnnotationFirstNode() {
   }
   /**
    * @return The items
