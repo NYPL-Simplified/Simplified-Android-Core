@@ -26,9 +26,9 @@ public class AnnotationResult {
   @SerializedName("id")
   @Expose
   private String id;
-  @SerializedName("first")
+  @SerializedName("annotationFirstNode")
   @Expose
-  private First first;
+  private AnnotationFirstNode annotationFirstNode;
 
   /**
    * No args constructor for use in serialization
@@ -92,17 +92,17 @@ public class AnnotationResult {
   }
 
   /**
-   * @return The first
+   * @return The annotationFirstNode
    */
-  public First getFirst() {
-    return this.first;
+  public AnnotationFirstNode getAnnotationFirstNode() {
+    return this.annotationFirstNode;
   }
 
   /**
-   * @param in_first The first
+   * @param in_Annotation_firstNode The annotationFirstNode
    */
-  public void setFirst(final First in_first) {
-    this.first = in_first;
+  public void setAnnotationFirstNode(final AnnotationFirstNode in_Annotation_firstNode) {
+    this.annotationFirstNode = in_Annotation_firstNode;
   }
 
 }

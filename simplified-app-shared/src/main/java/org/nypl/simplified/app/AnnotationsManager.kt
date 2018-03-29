@@ -247,9 +247,9 @@ class AnnotationsManager(private val libraryAccount: Account,
   {
     try {
       val serializedResult = Gson().fromJson(JSON.toString(), AnnotationResult::class.java)
-      for (annotation in serializedResult.first.items) {
+      for (annotation in serializedResult.annotationFirstNode.items) {
         if (annotation.motivation == "http://librarysimplified.org/terms/annotation/idling") {
-          val value = annotation.target.selector.value
+          val value = annotation.target.annotationSelectorNode.value
           val jsonObject = JSONObject(value)
           return ReaderBookLocation.fromJSON(jsonObject)
         }
@@ -389,7 +389,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         Listener<JSONObject> { response ->
           try {
             val result = Gson().fromJson(response.toString(), AnnotationResult::class.java)
-            val bookmarks = result.first.items.filter {
+            val bookmarks = result.annotationFirstNode.items.filter {
               it.motivation.contains("bookmarking", true)
             }
             //TODO try and understand how i would catch any particular issues with
