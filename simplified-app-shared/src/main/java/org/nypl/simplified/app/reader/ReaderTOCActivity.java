@@ -4,15 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.nypl.simplified.app.NYPLBookmark;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
@@ -122,7 +119,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
     this.in_toc = NullCheck.notNull(
       (ReaderTOC) args.getSerializable(ReaderTOCActivity.TOC_ID));
 
-    //TODO WIP
     this.setContentView(R.layout.reader_toc_tab_layout);
 
     ViewPager pager = findViewById(R.id.reader_toc_view_pager);
@@ -148,7 +144,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
    * ReaderTOCContentsFragmentSelectionListener Methods
    */
 
-  //TODO still need this?
   @Override public void onTOCBackSelected()
   {
     this.finish();
@@ -169,6 +164,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
 
   @Override
   public void onBookmarkSelected(BookAnnotation bookmark) {
-    //TODO STUB
+    //FIXME STUB
   }
 }

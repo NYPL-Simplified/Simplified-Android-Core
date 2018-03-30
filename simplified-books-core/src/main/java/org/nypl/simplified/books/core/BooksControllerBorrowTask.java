@@ -358,7 +358,7 @@ final class BooksControllerBorrowTask implements Runnable
         "[{}]: creating feed entry", this.short_id);
 
       /**
-       * AnnotationFirstNode, create the on-disk database entry for the book. Write
+       * First, create the on-disk database entry for the book. Write
        * the feed data to it, fetch the cover image (if any).
        */
 
