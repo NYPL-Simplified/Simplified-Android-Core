@@ -415,6 +415,10 @@ public final class BooksController implements BooksType {
     return this.book_database;
   }
 
+  @Override public BookDatabaseType bookGetWritableDatabase() {
+    return this.book_database;
+  }
+
   @Override
   public void bookBorrow(
     final BookID id,
