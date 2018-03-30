@@ -506,8 +506,6 @@ public final class ReaderActivity extends Activity implements
   {
     ReaderActivity.LOG.debug("received book location: {}", l);
 
-    //TODO Audit this. Work in progress.
-
     this.current_location = l;
 
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
@@ -574,10 +572,6 @@ public final class ReaderActivity extends Activity implements
             in_title_text.setText(NullCheck.notNull(p.getTitle()));
           }
         });
-
-
-    //TODO set package to sync manager.. this.syncManager.package = p;
-
 
     /**
      * Configure the TOC button.
@@ -739,8 +733,6 @@ public final class ReaderActivity extends Activity implements
      * book to that specific page. Otherwise, start at the beginning.
      */
 
-    //TODO changes still in progress
-
     final BookID in_book_id = NullCheck.notNull(this.book_id);
     final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
 
@@ -821,8 +813,6 @@ public final class ReaderActivity extends Activity implements
         }
       });
   }
-
-  //TODO WIP
 
   /**
    * Reader Sync Manager
@@ -1156,9 +1146,6 @@ public final class ReaderActivity extends Activity implements
   }
 
   private void navigateTo(final ReaderBookLocation location) {
-
-    //TODO WIP
-    //TODO Not sure if use of Option Type's is the best. Copying what was already there.
 
     OptionType<ReaderOpenPageRequestType> page_request = null;
 

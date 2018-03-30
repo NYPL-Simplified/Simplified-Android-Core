@@ -36,18 +36,4 @@ interface ReaderBookmarksSharedPrefsType {
    * @param entry feed entry
    * @return A list bookmark annotations, if any
    */
-
-//TODO just testing saving to shared prefs
-//  fun getUserBookmarks(id: BookID,
-//                       entry: OPDSAcquisitionFeedEntry): List<NYPLAnnotation>?
-//
-//  /**
-//   * Save the list of user-created bookmarks to shared prefs.
-//   *
-//   * @param id The ID of the book
-//   * @param bookmarks The list of bookmark annotations
-//   */
-//  fun saveUserBookmarks(id: BookID,
-//                        bookmarks: List<NYPLAnnotation>)
-
 }

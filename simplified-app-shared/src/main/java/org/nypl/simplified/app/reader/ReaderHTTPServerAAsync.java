@@ -166,7 +166,7 @@ public final class ReaderHTTPServerAAsync
       final String type = this.mime.guessMimeTypeForURI(path);
 
       /**
-       * AnnotationFirstNode, try looking at the available Android assets.
+       * First, try looking at the available Android assets.
        */
 
       {

@@ -392,7 +392,6 @@ class AnnotationsManager(private val libraryAccount: Account,
             val bookmarks = result.annotationFirstNode.items.filter {
               it.motivation.contains("bookmarking", true)
             }
-            //TODO try and understand how i would catch any particular issues with
             LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
             completion(bookmarks)
           } catch (e: java.lang.Exception) {
@@ -433,7 +432,7 @@ class AnnotationsManager(private val libraryAccount: Account,
       "null"
     }
 
-    //TODO test validity of this map
+    //FIXME test the json output of this map
     val parametersObject = mapOf(
         "@context" to "http://www.w3.org/ns/anno.jsonld",
         "type" to "Annotation",
@@ -468,7 +467,7 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  //TODO WIP. Not yet tested.
+  //FIXME not yet tested
   /**
    * Delete a bookmark on the server.
    */
