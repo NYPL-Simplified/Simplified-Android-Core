@@ -3,6 +3,8 @@ package org.nypl.simplified.books.core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
@@ -40,7 +42,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -568,10 +572,16 @@ public final class BookDatabase implements BookDatabaseType
         });
     }
 
-    //TODO WIP
+    @Override public BookDatabaseEntrySnapshot entrySetBookmark(final BookAnnotation bm)
+        throws IOException {
+      final List<BookAnnotation> bookmarks = entryGetBookmarksList();
+      bookmarks.add(bm);
+      return entrySetBookmarksList(bookmarks);
+    }
 
     @NotNull
-    @Override public List<BookAnnotation> entryGetBookmarksList() throws IOException {
+    @Override public List<BookAnnotation> entryGetBookmarksList()
+        throws IOException {
       return FileLocking.withFileThreadLocked(
           this.file_lock,
           (long) BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS,
@@ -607,15 +617,29 @@ public final class BookDatabase implements BookDatabaseType
     }
 
     @NotNull private List<BookAnnotation> getBookmarksLocked()
-        throws FileNotFoundException {
+        throws IOException {
       final FileInputStream is = new FileInputStream(this.file_bookmarks);
-      //TODO Parse json stream to BookAnnotations
-//      try {
-//        return this.parser.parseAcquisitionFeedEntryFromStream(is);
-//      } finally {
-//        is.close();
-//      }
-      return new ArrayList<BookAnnotation>();
+
+      //TODO Turn input stream into List<BookAnnotation>
+
+      try {
+        //FIXME untested
+        final Gson gson = new Gson();
+        final JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
+        final List<BookAnnotation> bookmarks = new ArrayList<>();
+
+        reader.beginArray();
+        while (reader.hasNext()) {
+          BookAnnotation bookmark = gson.fromJson(reader, BookAnnotation.class);
+          bookmarks.add(bookmark);
+        }
+        reader.endArray();
+        reader.close();
+
+        return bookmarks;
+      } finally {
+        is.close();
+      }
     }
 
     private void setBookmarksListLocked(
@@ -623,17 +647,17 @@ public final class BookDatabase implements BookDatabaseType
         throws IOException
     {
       this.log.debug("updating bookmarks list {}", this.file_bookmarks);
-
       final OutputStream stream = new FileOutputStream(this.file_bookmarks_tmp);
 
       try {
-        //TODO change to serialize list to appropriate json stream
-//        this.serializer.serializeToStream(bookmarks, stream);
+        //FIXME test and consider converting to jackson libraries across the board
+        ObjectMapper mapper = new ObjectMapper();
+        final ObjectNode node = mapper.valueToTree(bookmarks);
+        this.serializer.serializeToStream(node, stream);
       } finally {
         stream.flush();
         stream.close();
       }
-
       FileUtilities.fileRename(this.file_bookmarks_tmp, this.file_bookmarks);
     }
 

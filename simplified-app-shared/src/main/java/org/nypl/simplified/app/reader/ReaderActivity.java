@@ -24,14 +24,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
+import org.joda.time.Instant;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ReaderSyncManager;
 import org.nypl.simplified.app.ReaderSyncManagerDelegate;
@@ -48,17 +49,22 @@ import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
+import org.nypl.simplified.books.core.BookDatabaseEntryWritableType;
+import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.annotation.AnnotationSelectorNode;
+import org.nypl.simplified.opds.core.annotation.AnnotationTargetNode;
 import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -97,6 +103,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable Container                         epub_container;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
+  private @Nullable ImageView                         view_bookmark;
   private @Nullable ViewGroup                         view_hud;
   private @Nullable ProgressBar                       view_loading;
   private @Nullable ViewGroup                         view_media;
@@ -118,6 +125,8 @@ public final class ReaderActivity extends Activity implements
   private @Nullable ReaderSyncManager                 syncManager;
   private @Nullable Integer                           currentSpineItemPageIndex;
   private @Nullable Integer                           currentSpineItemPageCount;
+  private @Nullable String                            currentChapterTitle;
+  private @Nullable ReaderBookLocation                currentPageBookmark;
 
 
   /**
@@ -162,6 +171,7 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull(this.view_progress_text);
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
     final ImageView in_toc = NullCheck.notNull(this.view_toc);
+    final ImageView in_bookmark = NullCheck.notNull(this.view_bookmark);
     final ImageView in_settings = NullCheck.notNull(this.view_settings);
     final ImageView in_media_play = NullCheck.notNull(this.view_media_play);
     final ImageView in_media_next = NullCheck.notNull(this.view_media_next);
@@ -179,6 +189,7 @@ public final class ReaderActivity extends Activity implements
           in_progress_text.setTextColor(main_color);
           in_title_text.setTextColor(main_color);
           in_toc.setColorFilter(filter);
+          in_bookmark.setColorFilter(filter);
           in_settings.setColorFilter(filter);
           in_media_play.setColorFilter(filter);
           in_media_next.setColorFilter(filter);
@@ -331,6 +342,8 @@ public final class ReaderActivity extends Activity implements
         R.id.reader_hud_container));
     final ImageView in_toc =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_toc));
+    final ImageView in_bookmark =
+        NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_bookmark));
     final ImageView in_settings =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_settings));
     final TextView in_title_text =
@@ -394,6 +407,7 @@ public final class ReaderActivity extends Activity implements
     this.view_web_view = in_webview;
     this.view_hud = in_hud;
     this.view_toc = in_toc;
+    this.view_bookmark = in_bookmark;
     this.view_settings = in_settings;
     this.web_view_resized = true;
     this.view_media = in_media_overlay;
@@ -548,21 +562,18 @@ public final class ReaderActivity extends Activity implements
   }
 
   @Override public void onEPUBLoadSucceeded(
-    final Container c)
-  {
+    final Container c) {
     this.epub_container = c;
     final Package p = NullCheck.notNull(c.getDefaultPackage());
 
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
     UIThread.runOnUIThread(
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          in_title_text.setText(NullCheck.notNull(p.getTitle()));
-        }
-      });
-
+        new Runnable() {
+          @Override
+          public void run() {
+            in_title_text.setText(NullCheck.notNull(p.getTitle()));
+          }
+        });
 
 
     //TODO set package to sync manager.. this.syncManager.package = p;
@@ -575,10 +586,27 @@ public final class ReaderActivity extends Activity implements
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
     final View in_toc = NullCheck.notNull(this.view_toc);
 
-    in_toc.setOnClickListener( v -> {
+    in_toc.setOnClickListener(v -> {
       final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
       ReaderTOCActivity.startActivityForResult(ReaderActivity.this, sent_toc);
       ReaderActivity.this.overridePendingTransition(0, 0);
+    });
+
+    /**
+     * Configure the Bookmark button.
+     */
+
+    final View in_bookmark = NullCheck.notNull(this.view_bookmark);
+
+    in_bookmark.setOnClickListener(view -> {
+
+      //bookmark was clicked
+      if (this.currentPageBookmark != null) {
+        deleteBookmark(this.currentPageBookmark);
+      } else {
+        addBookmark(this.current_location);
+      }
+
     });
 
     /**
@@ -588,6 +616,50 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderHTTPServerType hs = rs.getHTTPServer();
     hs.startIfNecessaryForPackage(p, this);
+  }
+
+  private void addBookmark(final @NonNull ReaderBookLocation bookmark) {
+
+    //TODO find ways that an invalid bookmark location could exist and inform user it cannot be made/saved
+
+    final String annot_context = "http://www.w3.org/ns/anno.jsonld";
+    final String type = "Annotation";
+    final String motivation = "http://www.w3.org/ns/oa#bookmarking";
+    final String bookID = this.book_id.toString();
+    final String selectorType = "oa:FragmentSelector";
+    final String value = bookmark.toJsonString();
+    final String timestamp = new Instant().toString();
+    final OptionType<String> deviceID = this.credentials.getAdobeDeviceID().map(
+        id -> id.toString()
+    );
+
+    //TODO GSON-generated classes are not aware of nullability, and are not correctly representing the "body" property
+
+    final AnnotationSelectorNode selectorNode = new AnnotationSelectorNode(selectorType,value);
+    final AnnotationTargetNode targetNode = new AnnotationTargetNode(bookID, selectorNode);
+    final BookAnnotation bookAnnotation = new BookAnnotation(annot_context,type,motivation,targetNode);
+
+    //TODO attempt to upload bookmark
+
+    //Save bookmark to database
+    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+    try {
+      entry.entrySetBookmark(bookAnnotation);
+    } catch (IOException e) {
+      LOG.error("Error writing bookmark annotation to database.");
+    }
+
+    this.view_bookmark.setImageResource(R.drawable.bookmark_on);
+  }
+
+  private void deleteBookmark(final ReaderBookLocation location) {
+
+    //TODO attempt to delete bookmark from server if ID Uri exists, when that finishes:
+
+    //Delete the bookmark from the database
+
+    this.view_bookmark.setImageResource(R.drawable.bookmark_off);
   }
 
   @Override public void onMediaOverlayIsAvailable(
@@ -849,6 +921,7 @@ public final class ReaderActivity extends Activity implements
             //TODO can't think of any other way to get these when trying to upload a bookmark
             currentSpineItemPageIndex = page.getSpineItemPageIndex();
             currentSpineItemPageCount = page.getSpineItemPageCount();
+            currentChapterTitle = default_package.getSpineItem(page.getIDRef()).getTitle();
             in_progress_text.setText(
               NullCheck.notNull(
                 String.format(
