@@ -43,6 +43,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     val LOG = LoggerFactory.getLogger(AnnotationsManager::class.java)!!
     const val SyncPermissionStatusTimeout = 60L
     const val ReadingPositionTimeout = 30L
+    const val BookmarksRequestTimeout = 30L
+    const val BookmarkDeleteTimeout = 20L
   }
 
   /**
@@ -363,11 +365,10 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   /**
    * Get a list of any bookmark-type annotations created for the given book and the current user.
-   * @param bookID Identifier for the entry
    * @param uri The Annotation ID/URI for the OPDS Entry
    * @param completion Called asynchronously by the network request to return the bookmarks
    */
-  fun requestBookmarksFromServer(bookID: String?, uri: Uri?,
+  fun requestBookmarksFromServer(uri: String,
                                  completion: (bookmarks: List<BookAnnotation>?) -> Unit) {
 
     if (!syncIsPossibleAndPermitted()) {
@@ -402,6 +403,14 @@ class AnnotationsManager(private val libraryAccount: Account,
           LOG.error("GET request fail! Error: ${error.message}")
           completion(null)
         })
+
+    request.retryPolicy = DefaultRetryPolicy(
+        TimeUnit.SECONDS.toMillis(BookmarksRequestTimeout).toInt(),
+        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+    )
+
+    requestQueue.add(request)
   }
 
   /**
@@ -494,7 +503,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         })
 
     request.retryPolicy = DefaultRetryPolicy(
-        20 * 1000,
+        TimeUnit.SECONDS.toMillis(BookmarkDeleteTimeout).toInt(),
         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
     )

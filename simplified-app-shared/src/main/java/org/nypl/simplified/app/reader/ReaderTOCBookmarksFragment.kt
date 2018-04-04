@@ -90,7 +90,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
     val layoutView = itemView.findViewById<ViewGroup>(R.id.toc_bookmark_element)
     val textView = layoutView.findViewById<TextView>(R.id.toc_bookmark_element_title)
-    val element = adapter!!.getItem(position)
+    val element = adapter?.getItem(position)
     textView.text = element?.title ?: "Bookmark"
 
     val rs = Simplified.getReaderAppServices()
