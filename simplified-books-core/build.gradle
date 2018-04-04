@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
 }
 
 description = 'simplified-books-core'
@@ -14,6 +14,9 @@ dependencies {
   compile project(':simplified-http-core')
   compile project(':simplified-downloader-core')
   compile project(':simplified-opds-core')
+
+  implementation project(':simplified-json-core')
+
   compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
   compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   compile group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
@@ -23,6 +26,9 @@ dependencies {
   compile project(':simplified-prefs')
   compile project(':simplified-multilibrary')
   compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+
+  implementation project(':simplified-rfc3339-core')
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
 }
 repositories {
   mavenCentral()

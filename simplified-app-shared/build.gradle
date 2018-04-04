@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
   useLibrary 'org.apache.http.legacy'
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -22,12 +22,13 @@ dependencies {
   compile project(':simplified-opds-core')
   compile project(':simplified-stack')
   compile project(':simplified-tenprint')
-  compile project(':simplified-volley')
+  implementation project(':simplified-volley')
   compile project(':simplified-prefs')
   compile project(':simplified-multilibrary')
   compile project(':simplified-circ-analytics')
   compile project(':simplified-bugsnag')
   compile project(':simplified-cardcreator')
+
   compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
   compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   compile "com.android.support:support-v4:27.0.2"
@@ -44,4 +45,9 @@ dependencies {
   compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
   compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
   compile 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
+
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.6.0-rc3'
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
+
+  implementation group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
 }

@@ -2,17 +2,20 @@ apply plugin: 'com.android.library'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
 }
 
 description = 'simplified-cardcreator'
 
 dependencies {
-  compile project(':simplified-books-core')
-  compile project(':simplified-http-core')
-  compile project(':simplified-json-core')
-  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  compile "com.android.support:support-v4:27.0.2"
-  compile project(':simplified-prefs')
-  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  implementation project(':simplified-books-core')
+  implementation project(':simplified-http-core')
+  implementation project(':simplified-json-core')
+  implementation project(':simplified-prefs')
+
+  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation "com.android.support:support-v4:27.0.2"
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
 }
