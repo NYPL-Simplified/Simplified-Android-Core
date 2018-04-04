@@ -29,11 +29,4 @@ interface ReaderBookmarksSharedPrefsType {
   fun saveReadingPosition(id: BookID,
                           bookmark: ReaderBookLocation)
 
-  /**
-   * Retrieve list of user-created bookmarks.
-   *
-   * @param id The ID of the book
-   * @param entry feed entry
-   * @return A list bookmark annotations, if any
-   */
 }
