@@ -24,8 +24,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.JsonObject;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -120,13 +122,12 @@ public final class ReaderActivity extends Activity implements
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
   private           ReaderBookLocation                current_location;
-  private           ReaderBookLocation                sync_location;
   private           AccountCredentials                credentials;
   private @Nullable ReaderSyncManager                 syncManager;
   private @Nullable Integer                           currentSpineItemPageIndex;
   private @Nullable Integer                           currentSpineItemPageCount;
   private @Nullable String                            currentChapterTitle;
-  private @Nullable ReaderBookLocation                currentPageBookmark;
+  private @Nullable ReaderBookLocation                currentPageUserBookmark;
 
 
   /**
@@ -612,28 +613,29 @@ public final class ReaderActivity extends Activity implements
     hs.startIfNecessaryForPackage(p, this);
   }
 
-  private void addBookmark(final @NonNull ReaderBookLocation bookmark) {
+  private void udpateBookmarkIconUIState() {
+    if (this.currentPageUserBookmark != null) {
+      this.view_bookmark.setImageResource(R.drawable.bookmark_on);
+    } else {
+      this.view_bookmark.setImageResource(R.drawable.bookmark_off);
+    }
+  }
 
-    //TODO find ways that an invalid bookmark location could exist and inform user it cannot be made/saved
+  private void addUserBookmark(final @NonNull ReaderBookLocation bookmark) {
 
-    final String annot_context = "http://www.w3.org/ns/anno.jsonld";
-    final String type = "Annotation";
-    final String motivation = "http://www.w3.org/ns/oa#bookmarking";
-    final String bookID = this.book_id.toString();
-    final String selectorType = "oa:FragmentSelector";
-    final String value = bookmark.toJsonString();
-    final String timestamp = new Instant().toString();
-    final OptionType<String> deviceID = this.credentials.getAdobeDeviceID().map(
-        id -> id.toString()
-    );
+    final BookAnnotation bookAnnotation = getBookAnnotation(bookmark);
 
-    //TODO GSON-generated classes are not aware of nullability, and are not correctly representing the "body" property
+    //Attempt to upload bookmark
+    syncManager.postBookmarkToServer(bookAnnotation, (ID) -> {
 
-    final AnnotationSelectorNode selectorNode = new AnnotationSelectorNode(selectorType,value);
-    final AnnotationTargetNode targetNode = new AnnotationTargetNode(bookID, selectorNode);
-    final BookAnnotation bookAnnotation = new BookAnnotation(annot_context,type,motivation,targetNode);
+      if (ID != null) {
+        //TODO re-save bookmark with annotation ID
+      } else {
+        LOG.error("No ID returned after attempting to upload bookmark.");
+      }
 
-    //TODO attempt to upload bookmark
+      return Unit.INSTANCE;
+    });
 
     //Save bookmark to database
     final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
@@ -643,8 +645,46 @@ public final class ReaderActivity extends Activity implements
     } catch (IOException e) {
       LOG.error("Error writing bookmark annotation to database.");
     }
+  //TODO maybe move this method to the sync manager
+  @Nullable private BookAnnotation getBookAnnotation(@NonNull ReaderBookLocation bookmark) {
 
-    this.view_bookmark.setImageResource(R.drawable.bookmark_on);
+    final String annotContext = "http://www.w3.org/ns/anno.jsonld";
+    final String type = "Annotation";
+    final String motivation = "http://www.w3.org/ns/oa#bookmarking";
+    final String bookID = this.entry.getFeedEntry().getID();
+    final String selectorType = "oa:FragmentSelector";
+    final String value = bookmark.toJsonString();
+    final String timestamp = new Instant().toString();
+    final OptionType<String> opt_deviceID = this.credentials.getAdobeDeviceID().map(
+        id -> id.toString()
+    );
+    final String deviceID;
+    if (opt_deviceID.isSome()) {
+      deviceID = ((Some<String>)opt_deviceID).get();
+    } else {
+      deviceID = "null";
+    }
+
+    float chapterProgress = 0.0f;
+    if (this.currentSpineItemPageCount > 0) {
+      chapterProgress = (float) currentSpineItemPageIndex / currentSpineItemPageCount;
+    }
+
+    final float bookProgress = (float) this.view_progress_bar.getProgress() / this.view_progress_bar.getMax();
+
+    final JsonObject body = new JsonObject();
+    body.addProperty("http://librarysimplified.org/terms/time", timestamp);
+    body.addProperty("http://librarysimplified.org/terms/device", deviceID);
+    body.addProperty("http://librarysimplified.org/terms/chapter", this.currentChapterTitle);
+    body.addProperty("http://librarysimplified.org/terms/progressWithinChapter", chapterProgress);
+    body.addProperty("http://librarysimplified.org/terms/progressWithinBook", bookProgress);
+
+    //FIXME GSON-generated classes are not aware of nullability, and are not correctly representing the "body" property
+    final AnnotationSelectorNode selectorNode = new AnnotationSelectorNode(selectorType,value);
+    final AnnotationTargetNode targetNode = new AnnotationTargetNode(bookID, selectorNode);
+    final BookAnnotation annotation = new BookAnnotation(annotContext, type, motivation, targetNode);
+    annotation.setBody(body);
+    return annotation;
   }
 
   private void deleteBookmark(final ReaderBookLocation location) {
@@ -832,18 +872,20 @@ public final class ReaderActivity extends Activity implements
     }
 
     this.syncManager = new ReaderSyncManager(
-        this.entry.getFeedEntry().getID(),
+        this.entry.getFeedEntry(),
         this.credentials,
         Simplified.getCurrentAccount(),
         this);
 
     this.syncManager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
+
       //Successfully enabled
-      syncManager.synchronizeReadingLocation(
-          this.current_location,
-          this.entry.getFeedEntry(),
-          this);
-      return kotlin.Unit.INSTANCE;
+      syncManager.synchronizeReadingLocation(this.current_location, this);
+
+      //TODO WIP
+      syncManager.syncBookmarks(null);
+
+      return Unit.INSTANCE;
     });
   }
 

@@ -12,7 +12,7 @@ import com.io7m.jfunctional.Some
 import org.json.JSONObject
 import org.joda.time.Instant
 import org.nypl.drm.core.AdobeDeviceID
-import org.nypl.simplified.opds.core.annotation.AnnotationResult
+import org.nypl.simplified.opds.core.annotation.AnnotationsServerResponse
 import org.nypl.simplified.app.reader.ReaderBookLocation
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
@@ -248,7 +248,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   private fun bookLocationFromString(JSON: JSONObject): ReaderBookLocation?
   {
     try {
-      val serializedResult = Gson().fromJson(JSON.toString(), AnnotationResult::class.java)
+      val serializedResult = Gson().fromJson(JSON.toString(), AnnotationsServerResponse::class.java)
       for (annotation in serializedResult.annotationFirstNode.items) {
         if (annotation.motivation == "http://librarysimplified.org/terms/annotation/idling") {
           val value = annotation.target.annotationSelectorNode.value
@@ -272,15 +272,6 @@ class AnnotationsManager(private val libraryAccount: Account,
   {
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
-      return
-    }
-
-    val catalogUriString = libraryAccount.catalogUrl
-    val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
-    val mainFeedAnnotationUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "annotations/") else null
-    val requestUri = mainFeedAnnotationUri?.toString()
-    if (requestUri == null) {
-      LOG.error("No Catalog Annotation Uri present for POST request.")
       return
     }
 
@@ -312,7 +303,7 @@ class AnnotationsManager(private val libraryAccount: Account,
       val mapper = ObjectMapper()
       val jsonBodyString= mapper.writer().writeValueAsString(bodyObject)
 
-      postAnnotation(requestUri, jsonBodyString, 20, { isSuccessful, response ->
+      postAnnotation(jsonBodyString, 20, { isSuccessful, response ->
         if (isSuccessful) {
           LOG.debug("Success: Marked Reading Position To Server. Response: $response")
         } else {
@@ -326,14 +317,24 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  private fun postAnnotation(uri: String, bodyParameters: String, timeout: Long?,
+  private fun postAnnotation(bodyParameters: String, timeout: Long?,
                              completion: (isSuccessful: Boolean, annotationID: String?) -> Unit)
   {
+    val catalogUriString = libraryAccount.catalogUrl
+    val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
+    val mainFeedAnnotationUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "annotations/") else null
+    val requestUri = mainFeedAnnotationUri?.toString()
+    if (requestUri == null) {
+      LOG.error("No Catalog Annotation Uri present for POST request.")
+      return
+    }
+
     try {
       val jsonObjectBody = JSONObject(bodyParameters)
+      LOG.debug(jsonObjectBody.toString())
       val request = NYPLJsonObjectRequest(
           Request.Method.POST,
-          uri,
+          requestUri,
           credentials.barcode.toString(),
           credentials.pin.toString(),
           jsonObjectBody,
@@ -376,20 +377,16 @@ class AnnotationsManager(private val libraryAccount: Account,
       completion(null)
       return
     }
-    if (bookID == null || uri == null) {
-      LOG.error("Required parameter was unexpectedly null")
-      return
-    }
 
-    NYPLJsonObjectRequest(
+    val request = NYPLJsonObjectRequest(
         Request.Method.GET,
-        uri.toString(),
+        uri,
         credentials.barcode.toString(),
         credentials.pin.toString(),
         null,
         Listener<JSONObject> { response ->
           try {
-            val result = Gson().fromJson(response.toString(), AnnotationResult::class.java)
+            val result = Gson().fromJson(response.toString(), AnnotationsServerResponse::class.java)
             val bookmarks = result.annotationFirstNode.items.filter {
               it.motivation.contains("bookmarking", true)
             }
@@ -415,16 +412,10 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   /**
    * Post a new bookmark to the server for the current user for a particular entry.
-   * @param bookID Identifier for the entry
-   * @param uri The Annotation ID/URI for the OPDS Entry
+   * @param bookmark the annotation object to post to the server
    * @param completion Returns the new UUID/URI created for the annotation
    */
-  fun postBookmarkToServer(bookID: String,
-                           bookAnnotationUri: Uri,
-                           bookLocation: ReaderBookLocation,
-                           chapterName: String,
-                           chapterProgress: Float,
-                           bookProgress: Float,
+  fun postBookmarkToServer(bookmark: BookAnnotation,
                            completion: (serverID: String?) -> Unit) {
 
     if (!syncIsPossibleAndPermitted()) {
@@ -433,55 +424,22 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    val timestamp = Instant().toString()
-    val deviceID = if (credentials.adobeDeviceID.isSome) {
-      (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
-    } else {
-      LOG.error("Adobe Device ID was null. No device set in body for annotation.")
-      "null"
-    }
-
-    //FIXME test the json output of this map
-    val parametersObject = mapOf(
-        "@context" to "http://www.w3.org/ns/anno.jsonld",
-        "type" to "Annotation",
-        "motivation" to "http://www.w3.org/ns/oa#bookmarking",
-        "target" to mapOf(
-            "source" to bookID,
-            "selector" to mapOf(
-                "type" to "oa:FragmentSelector",
-                "value" to bookLocation.contentCFI
-            )
-        ),
-        "body" to mapOf(
-            "http://librarysimplified.org/terms/time" to timestamp,
-            "http://librarysimplified.org/terms/device" to deviceID,
-            "http://librarysimplified.org/terms/chapter" to chapterName,
-            "http://librarysimplified.org/terms/progressWithinChapter" to chapterProgress,
-            "http://librarysimplified.org/terms/progressWithinBook" to bookProgress
-        )
-    )
-
     try {
-      val mapper = ObjectMapper()
-      val jsonBodyString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parametersObject)
-
-      postAnnotation(bookAnnotationUri.toString(), jsonBodyString, null) { _, serverID ->
+      val jsonBody = Gson().toJson(bookmark)
+      postAnnotation(jsonBody, 20) { _, serverID ->
         completion(serverID)
       }
-
     } catch (e: IOException) {
       LOG.error("Error serializing JSON from Map Object")
       return
     }
   }
 
-  //FIXME not yet tested
   /**
    * Delete a bookmark on the server.
    */
-  fun deleteBookmarkFromServer(annotationID: String,
-                               completion: (isSuccessful: Boolean) -> Unit) {
+  fun deleteBookmarkOnServer(annotationID: String,
+                             completion: (isSuccessful: Boolean) -> Unit) {
 
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")

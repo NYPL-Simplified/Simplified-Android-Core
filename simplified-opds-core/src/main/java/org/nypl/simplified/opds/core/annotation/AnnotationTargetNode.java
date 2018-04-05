@@ -14,7 +14,7 @@ public class AnnotationTargetNode {
   @Expose
   private String source;
 
-  @SerializedName("annotationSelectorNode")
+  @SerializedName("selector")
   @Expose
   private AnnotationSelectorNode annotationSelectorNode;
 
@@ -25,8 +25,8 @@ public class AnnotationTargetNode {
   }
 
   /**
-   * @param in_Annotation_selectorNode The annotationSelectorNode
-   * @param in_source the sourece
+   * @param in_Annotation_selectorNode The selector node
+   * @param in_source the source
    */
   public AnnotationTargetNode(final String in_source, final AnnotationSelectorNode in_Annotation_selectorNode) {
     this.source = in_source;
