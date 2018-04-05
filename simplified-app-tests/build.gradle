@@ -11,5 +11,5 @@ android {
 description = 'simplified-app-tests'
 
 dependencies {
-  compile project(':simplified-app-shared')
+  implementation project(':simplified-app-shared')
 }

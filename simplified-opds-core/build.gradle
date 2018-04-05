@@ -7,6 +7,10 @@ android {
 
 description = 'simplified-opds-core'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   implementation project(':simplified-assert')
   implementation project(':simplified-json-core')

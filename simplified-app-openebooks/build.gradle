@@ -11,5 +11,5 @@ android {
 description = 'simplified-app-openebooks'
 
 dependencies {
-  compile project(':simplified-app-shared')
+  implementation project(':simplified-app-shared')
 }

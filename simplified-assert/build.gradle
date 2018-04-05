@@ -7,7 +7,11 @@ android {
 
 description = 'simplified-assert'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
-  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 }

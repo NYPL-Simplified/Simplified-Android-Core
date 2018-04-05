@@ -7,6 +7,10 @@ android {
 
 description = 'simplified-downloader-core'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   implementation project(':simplified-assert')
   implementation project(':simplified-http-core')

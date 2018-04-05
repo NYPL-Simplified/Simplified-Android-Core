@@ -7,6 +7,10 @@ android {
 
 description = 'simplified-tests'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   implementation project(':simplified-books-core')
   implementation project(':simplified-files')

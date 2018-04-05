@@ -7,6 +7,10 @@ android {
 
 description = 'simplified-http-core'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   implementation project(':simplified-assert')
   implementation project(':simplified-json-core')
@@ -16,4 +20,5 @@ dependencies {
   implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
 
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 }

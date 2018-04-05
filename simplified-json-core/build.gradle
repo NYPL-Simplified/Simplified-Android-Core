@@ -7,6 +7,10 @@ android {
 
 description = 'simplified-json-core'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   implementation project(':simplified-rfc3339-core')
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'

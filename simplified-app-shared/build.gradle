@@ -15,6 +15,10 @@ android {
   }
 }
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   implementation project(':simplified-books-core')
   implementation project(':simplified-http-core')

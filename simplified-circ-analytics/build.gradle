@@ -7,6 +7,10 @@ android {
 
 description = ''
 
+repositories {
+  jcenter()
+}
+
 dependencies {
   implementation group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
   implementation project(':simplified-json-core')

@@ -7,5 +7,9 @@ android {
 
 description = ''
 
+repositories {
+  jcenter()
+}
+
 dependencies {
 }
