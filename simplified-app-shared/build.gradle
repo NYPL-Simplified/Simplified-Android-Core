@@ -16,38 +16,43 @@ android {
 }
 
 dependencies {
-  compile project(':simplified-books-core')
-  compile project(':simplified-http-core')
-  compile project(':simplified-json-core')
-  compile project(':simplified-opds-core')
-  compile project(':simplified-stack')
-  compile project(':simplified-tenprint')
+  implementation project(':simplified-books-core')
+  implementation project(':simplified-http-core')
+  implementation project(':simplified-json-core')
+  implementation project(':simplified-opds-core')
+  implementation project(':simplified-stack')
+  implementation project(':simplified-tenprint')
   implementation project(':simplified-volley')
-  compile project(':simplified-prefs')
-  compile project(':simplified-multilibrary')
-  compile project(':simplified-circ-analytics')
-  compile project(':simplified-bugsnag')
-  compile project(':simplified-cardcreator')
+  implementation project(':simplified-prefs')
+  implementation project(':simplified-multilibrary')
+  implementation project(':simplified-circ-analytics')
+  implementation project(':simplified-bugsnag')
+  implementation project(':simplified-cardcreator')
+  implementation project(':simplified-assert')
+  implementation project(':simplified-files')
+  implementation project(':simplified-downloader-core')
 
-  compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
-  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  compile "com.android.support:support-v4:27.0.2"
-  compile 'org.nypl.readium:readium-sdk-android-runtime:0.25.0'
-  compile 'org.nypl.readium:readium-shared-js:0.27.0'
-  compile 'com.koushikdutta.async:androidasync:2.2.1'
-  compile group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
-  compile 'com.nanohttpd:nanohttpd:2.2.0'
-  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-  compile 'org.nypl.helpstack:helpstack-android:1.4.0'
-  compile 'com.bugsnag:bugsnag-android:3.9.0'
-  compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
-  compile group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
-  compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
-  compile group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
-  compile 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
+  implementation group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
+  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation "com.android.support:support-v4:27.0.2"
+  implementation 'org.nypl.readium:readium-sdk-android-runtime:0.25.0'
+  implementation 'org.nypl.readium:readium-shared-js:0.27.0'
+  implementation 'com.koushikdutta.async:androidasync:2.2.1'
+  implementation group: 'com.squareup.picasso', name: 'picasso', version: '2.5.2'
+  implementation 'com.nanohttpd:nanohttpd:2.2.0'
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  implementation 'org.nypl.helpstack:helpstack-android:1.4.0'
+  implementation 'com.bugsnag:bugsnag-android:3.9.0'
+  implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
+  implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.1'
+  implementation group: 'joda-time', name: 'joda-time', version: '2.9.9'
+  implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.2-b01'
+  implementation 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
 
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.6.0-rc3'
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
+  implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
 
   implementation group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
+  implementation group: 'net.jodah', name: 'expiringmap', version: '0.4.3'
 }
