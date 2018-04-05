@@ -17,11 +17,9 @@ import java.util.Timer
 import kotlin.concurrent.schedule
 
 
-//TODO could probably get rid of this interface
+//TODO re-design to eliminate need for interface
 interface ReaderSyncManagerDelegate {
   fun navigateToLocation(location: ReaderBookLocation)
-//  fun bookmarkUploadDidFinish(bookmark: NYPLBookmark, bookID: String)
-//  fun bookmarkSyncDidFinish(success: Boolean, bookmarks: List<NYPLBookmark>)
 }
 
 /**
@@ -29,21 +27,24 @@ interface ReaderSyncManagerDelegate {
  * Utilize ReaderSyncManagerDelegate Interface to
  * communicate commands to a book renderer.
  */
-class ReaderSyncManager(private val entryID: String,
+class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
                         credentials: AccountCredentials,
                         private val libraryAccount: Account,
                         private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate {
+
   private companion object {
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
   //TODO WIP - observe when set, then show jump to location dialog with appropriate messaging
   val bookPackage: Package? = null
+  private val feedEntryID = feedEntry.id
 
   // Delay server posts until first page sync is complete
   private var delayPageSync: Boolean = true
   private val annotationsManager = AnnotationsManager(libraryAccount, credentials, delegate as Context)
   private var queueTimer = Timer()
+
 
   /**
    * See if sync is enabled on the server before attempting to synchronize
@@ -61,7 +62,6 @@ class ReaderSyncManager(private val entryID: String,
   }
 
   fun synchronizeReadingLocation(currentLocation: ReaderBookLocation,
-                                 feedEntry: OPDSAcquisitionFeedEntry?,
                                  context: Context) {
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
       delayPageSync = false
@@ -76,7 +76,7 @@ class ReaderSyncManager(private val entryID: String,
 
     val uriString = (feedEntry.annotations as Some<URI>).get().toString()
 
-    annotationsManager.requestReadingPositionOnServer(entryID, uriString, { serverLocation ->
+    annotationsManager.requestReadingPositionOnServer(feedEntryID, uriString, { serverLocation ->
       interpretUXForSync(serverLocation, context, currentLocation)
     })
   }
@@ -148,17 +148,53 @@ class ReaderSyncManager(private val entryID: String,
     }
 
     if (annotationsManager.syncIsPossibleAndPermitted()) {
+      //FIXME get rid of this queueTimer stuff. Match what's on iOS.
       queueTimer.cancel()
       queueTimer = Timer()
       queueTimer.schedule(3000) {
         val locString = location.toJsonString()
         if (locString != null) {
-          annotationsManager.updateReadingPosition(entryID, locString)
+          annotationsManager.updateReadingPosition(feedEntryID, locString)
         } else {
           LOG.error("Skipped upload of location due to unexpected null json representation")
         }
       }
     }
+  }
+
+  /**
+   * Download list of bookmark annotations from the server for the particular book,
+   * and synchronize that list as best as possible with the current list
+   * of bookmarks saved in the local database.
+   * @param completion returns a List of bookmarks, empty if none exist
+   */
+  fun syncBookmarks(completion: ((bookmarks: List<BookAnnotation>) -> Unit)?) {
+
+    //TODO IN PROGRESS Implementation
+
+    val uri = if (feedEntry.annotations.isSome) {
+      (feedEntry.annotations as Some<URI>).get().toString()
+    } else {
+      LOG.error("No annotations URI present in feed entry.")
+      return
+    }
+
+    annotationsManager.requestBookmarksFromServer(uri) { bookmarks ->
+
+      LOG.debug("Bookmarks: ${bookmarks}")
+
+    }
+
+  }
+
+  fun postBookmarkToServer(bookAnnotation: BookAnnotation,
+                           completion: (serverID: String?) -> Unit) {
+    annotationsManager.postBookmarkToServer(bookAnnotation, completion)
+  }
+
+  fun deleteBookmarkOnServer(annotationID: String,
+                             completion: (success: Boolean) -> Unit) {
+    annotationsManager.deleteBookmarkOnServer(annotationID, completion)
   }
 
   private fun setPermissionSharedPref(status: Boolean) {
