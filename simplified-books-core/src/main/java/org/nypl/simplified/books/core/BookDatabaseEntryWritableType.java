@@ -125,22 +125,7 @@ public interface BookDatabaseEntryWritableType
     throws IOException;
 
   /**
-   * Set the user-created bookmarks list for the book.
-   *
-   * @param bookmarks The List of bookmark annotations
-   *
-   * @return A snapshot of the new database state
-   *
-   * @throws IOException On I/O errors or lock acquisition failures
-   */
-
-  //TODO this method probably doesn't need to be in the interface (private method)
-  BookDatabaseEntrySnapshot entrySetBookmarksList(
-      @NotNull List<BookAnnotation> bookmarks)
-      throws IOException;
-
-  /**
-   * Set the user-created bookmarks list for the book.
+   * Set a user-created bookmark for the book.
    *
    * @param bookmark The bookmark annotation to be saved
    *
@@ -150,6 +135,20 @@ public interface BookDatabaseEntryWritableType
    */
 
   BookDatabaseEntrySnapshot entrySetBookmark(
+      @NotNull BookAnnotation bookmark)
+      throws IOException;
+
+  /**
+   * Delete a user-created bookmark from the database
+   *
+   * @param bookmark The bookmark annotation to be deleted
+   *
+   * @return A snapshot of the new database state
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  BookDatabaseEntrySnapshot entryDeleteBookmark(
       @NotNull BookAnnotation bookmark)
       throws IOException;
 

@@ -515,8 +515,11 @@ public final class ReaderActivity extends Activity implements
 
     bm.saveReadingPosition(in_book_id, this.current_location);
 
+    //Compare to user bookmarks to see if there's a match
+    checkForExistingBookmarkAtLocation(l);
+
     //TODO WIP
-    uploadPageLocation(this.current_location);
+//    uploadPageLocation(this.current_location);
   }
 
   @Override protected void onPause()
@@ -595,12 +598,19 @@ public final class ReaderActivity extends Activity implements
 
     in_bookmark.setOnClickListener(view -> {
 
-      //bookmark was clicked
-      if (this.currentPageBookmark != null) {
-        deleteBookmark(this.currentPageBookmark);
+      //TODO - Test UI logic of bookmark icon
+      //TODO - Test saving and deleting on the server
+      //TODO - Test reading and writing to the local database
+
+      if (this.currentPageUserBookmark != null) {
+        deleteUserBookmark(this.currentPageUserBookmark);
+        this.currentPageUserBookmark = null;
       } else {
-        addBookmark(this.current_location);
+        addUserBookmark(this.current_location);
+        this.currentPageUserBookmark = this.current_location;
       }
+
+      udpateBookmarkIconUIState();
 
     });
 
@@ -645,6 +655,32 @@ public final class ReaderActivity extends Activity implements
     } catch (IOException e) {
       LOG.error("Error writing bookmark annotation to database.");
     }
+  }
+
+  private void deleteUserBookmark(final BookAnnotation annotation) {
+    if (annotation.getId() != null) {
+      syncManager.deleteBookmarkOnServer(annotation.getId(), (Boolean success) -> {
+        if (success) {
+          LOG.debug("Bookmark successfully deleted from server.");
+        } else {
+          LOG.debug("Error deleting bookmark on server. Continuing to delete bookmark locally.");
+        }
+        return Unit.INSTANCE;
+      });
+    } else {
+      LOG.error("No annotation ID present on bookmark. Skipping network request to delete.");
+    }
+
+    //TODO Delete the bookmark from the database
+//    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+//    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+//    try {
+//      entry.entryDeleteBookData(bookAnnotation);
+//    } catch (IOException e) {
+//      LOG.error("Error writing bookmark annotation to database.");
+//    }
+  }
+
   //TODO maybe move this method to the sync manager
   @Nullable private BookAnnotation getBookAnnotation(@NonNull ReaderBookLocation bookmark) {
 
@@ -687,13 +723,23 @@ public final class ReaderActivity extends Activity implements
     return annotation;
   }
 
-  private void deleteBookmark(final ReaderBookLocation location) {
+  private void checkForExistingBookmarkAtLocation(final @NonNull ReaderBookLocation l) {
 
-    //TODO attempt to delete bookmark from server if ID Uri exists, when that finishes:
+    //TODO
+    //
+    //Grab List of local user bookmarks
 
-    //Delete the bookmark from the database
+    //iterate through list
 
-    this.view_bookmark.setImageResource(R.drawable.bookmark_off);
+    //COMPARE idref/content cfi of location to current bookmark in loop
+
+    //if they match: set this.currentUserBookmark
+    //if not, set it to null
+
+    //FIXME temp
+    this.currentPageUserBookmark = new ReaderBookLocation();
+
+
   }
 
   @Override public void onMediaOverlayIsAvailable(
@@ -922,8 +968,6 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.debug("pagination changed: {}", e);
     final WebView in_web_view = NullCheck.notNull(this.view_web_view);
 
-
-
     /**
      * Configure the progress bar and text.
      */
@@ -950,10 +994,13 @@ public final class ReaderActivity extends Activity implements
             in_progress_text.setText("");
           } else {
             final OpenPage page = NullCheck.notNull(pages.get(0));
-            //TODO can't think of any other way to get these when trying to upload a bookmark
+
+            //FIXME can't think of any other way to get these when trying to upload a bookmark
+            //FIXME can either of these be grabbed directly (or more simply) from the ReaderPaginationChangedEvent directly?
             currentSpineItemPageIndex = page.getSpineItemPageIndex();
             currentSpineItemPageCount = page.getSpineItemPageCount();
             currentChapterTitle = default_package.getSpineItem(page.getIDRef()).getTitle();
+
             in_progress_text.setText(
               NullCheck.notNull(
                 String.format(
@@ -1210,14 +1257,4 @@ public final class ReaderActivity extends Activity implements
 
     js.openBook(p, vs, page);
   }
-
-//  @Override
-//  public void bookmarkUploadDidFinish(@NotNull NYPLBookmark bookmark, @NotNull String bookID) {
-//
-//  }
-//
-//  @Override
-//  public void bookmarkSyncDidFinish(boolean success, @NotNull List<NYPLBookmark> bookmarks) {
-//
-//  }
 }

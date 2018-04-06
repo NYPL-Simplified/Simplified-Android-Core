@@ -572,10 +572,22 @@ public final class BookDatabase implements BookDatabaseType
         });
     }
 
-    @Override public BookDatabaseEntrySnapshot entrySetBookmark(final BookAnnotation bm)
+    //TODO WIP
+    //
+
+    @Override public BookDatabaseEntrySnapshot entrySetBookmark(
+        final BookAnnotation bm)
         throws IOException {
       final List<BookAnnotation> bookmarks = entryGetBookmarksList();
       bookmarks.add(bm);
+      return entrySetBookmarksList(bookmarks);
+    }
+
+    @Override public BookDatabaseEntrySnapshot entryDeleteBookmark(
+        final BookAnnotation bookmark)
+        throws IOException {
+      final List<BookAnnotation> bookmarks = entryGetBookmarksList();
+      bookmarks.remove(bookmark);
       return entrySetBookmarksList(bookmarks);
     }
 
@@ -596,7 +608,7 @@ public final class BookDatabase implements BookDatabaseType
           });
     }
 
-    @Override public BookDatabaseEntrySnapshot entrySetBookmarksList(
+    BookDatabaseEntrySnapshot entrySetBookmarksList(
         final @NotNull List<BookAnnotation> bookmarks)
         throws IOException
     {
