@@ -70,6 +70,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
+import kotlin.Unit;
+
 /**
  * The main reader activity for reading an EPUB.
  */
@@ -489,7 +491,7 @@ public final class ReaderActivity extends Activity implements
 
           ReaderActivity.this.credentials = creds;
 
-          //TODO WIP - set package on this.syncManager after onEpubLoadSucceeded()
+          //TODO Does the sync manager need a reference to the epub package? If not, audit where initiation begins..
           initiateSyncManagement();
         }
       }
@@ -514,12 +516,10 @@ public final class ReaderActivity extends Activity implements
     final BookID in_book_id = NullCheck.notNull(this.book_id);
 
     bm.saveReadingPosition(in_book_id, this.current_location);
+    uploadReadingPosition(this.current_location);
 
     //Compare to user bookmarks to see if there's a match
     checkForExistingBookmarkAtLocation(l);
-
-    //TODO WIP
-//    uploadPageLocation(this.current_location);
   }
 
   @Override protected void onPause()
@@ -599,8 +599,8 @@ public final class ReaderActivity extends Activity implements
     in_bookmark.setOnClickListener(view -> {
 
       //TODO - Test UI logic of bookmark icon
-      //TODO - Test saving and deleting on the server
-      //TODO - Test reading and writing to the local database
+      //TODO - Test saving and deleting on the server when icon is toggled
+      //TODO - Test reading and writing bookmarks to the local database
 
       if (this.currentPageUserBookmark != null) {
         deleteUserBookmark(this.currentPageUserBookmark);
@@ -639,7 +639,7 @@ public final class ReaderActivity extends Activity implements
     syncManager.postBookmarkToServer(bookAnnotation, (ID) -> {
 
       if (ID != null) {
-        //TODO re-save bookmark with annotation ID
+        //TODO replace bookmark with version containing annotation ID
       } else {
         LOG.error("No ID returned after attempting to upload bookmark.");
       }
@@ -672,13 +672,7 @@ public final class ReaderActivity extends Activity implements
     }
 
     //TODO Delete the bookmark from the database
-//    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-//    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
-//    try {
-//      entry.entryDeleteBookData(bookAnnotation);
-//    } catch (IOException e) {
-//      LOG.error("Error writing bookmark annotation to database.");
-//    }
+
   }
 
   //TODO maybe move this method to the sync manager
@@ -715,7 +709,7 @@ public final class ReaderActivity extends Activity implements
     body.addProperty("http://librarysimplified.org/terms/progressWithinChapter", chapterProgress);
     body.addProperty("http://librarysimplified.org/terms/progressWithinBook", bookProgress);
 
-    //FIXME GSON-generated classes are not aware of nullability, and are not correctly representing the "body" property
+    //FIXME Audit classes for correct nullability, and flexibility when dealing with Jackson instead of Gson
     final AnnotationSelectorNode selectorNode = new AnnotationSelectorNode(selectorType,value);
     final AnnotationTargetNode targetNode = new AnnotationTargetNode(bookID, selectorNode);
     final BookAnnotation annotation = new BookAnnotation(annotContext, type, motivation, targetNode);
@@ -737,9 +731,9 @@ public final class ReaderActivity extends Activity implements
     //if not, set it to null
 
     //FIXME temp
-    this.currentPageUserBookmark = new ReaderBookLocation();
+    this.currentPageUserBookmark = null;
 
-
+    //TODO should disallow user interaction with bookmark icon button until this has returned
   }
 
   @Override public void onMediaOverlayIsAvailable(
@@ -904,7 +898,7 @@ public final class ReaderActivity extends Activity implements
    * Reader Sync Manager
    */
 
-  private void uploadPageLocation(final ReaderBookLocation location)
+  private void uploadReadingPosition(final ReaderBookLocation location)
   {
     syncManager.updateServerReadingLocation(location);
   }
@@ -924,13 +918,9 @@ public final class ReaderActivity extends Activity implements
         this);
 
     this.syncManager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
-
       //Successfully enabled
-      syncManager.synchronizeReadingLocation(this.current_location, this);
-
-      //TODO WIP
+      syncManager.syncReadingLocation(this.current_location, this);
       syncManager.syncBookmarks(null);
-
       return Unit.INSTANCE;
     });
   }
@@ -995,8 +985,7 @@ public final class ReaderActivity extends Activity implements
           } else {
             final OpenPage page = NullCheck.notNull(pages.get(0));
 
-            //FIXME can't think of any other way to get these when trying to upload a bookmark
-            //FIXME can either of these be grabbed directly (or more simply) from the ReaderPaginationChangedEvent directly?
+            //TODO Better way to get these values?
             currentSpineItemPageIndex = page.getSpineItemPageIndex();
             currentSpineItemPageCount = page.getSpineItemPageCount();
             currentChapterTitle = default_package.getSpineItem(page.getIDRef()).getTitle();

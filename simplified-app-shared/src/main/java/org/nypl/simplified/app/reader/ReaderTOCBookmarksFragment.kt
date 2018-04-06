@@ -35,12 +35,12 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
     val activity = activity as? ReaderTOCActivity
 
-    //TODO WIP: change to bookmarks
+    //TODO TEMP: eventually change to bookmarks
     val listViewElements = activity?.in_toc?.elements as? List<ReaderTOC.TOCElement>
     adapter = ArrayAdapter(context, 0, listViewElements)
     bookmarksTOCListView?.adapter = this
 
-    //TODO ignoring color scheme listener stuff from contents fragment
+    //TODO Note: ignoring color scheme listener stuff from contents fragment
 
     return bookmarksTOCLayout
   }
@@ -79,7 +79,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     return adapter!!.getItemViewType(position)
   }
 
-  //TODO temporary until bookmarks are implemented
+  //TODO TEMP
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
 
     val itemView = if (reuse != null) {
