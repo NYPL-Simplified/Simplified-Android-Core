@@ -531,6 +531,8 @@ public final class ReaderActivity extends Activity implements
     if (this.book_id != null && this.current_location != null) {
       rs.getBookmarks().saveReadingPosition(this.book_id, this.current_location);
     }
+
+    syncManager.sendOffAnyQueuedRequest();
   }
 
   @Override protected void onDestroy()
