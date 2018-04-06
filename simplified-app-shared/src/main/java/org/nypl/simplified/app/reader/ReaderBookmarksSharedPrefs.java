@@ -123,30 +123,4 @@ public final class ReaderBookmarksSharedPrefs implements ReaderBookmarksSharedPr
           }
         }, 3000L);
   }
-
-  //TODO just testing an idea to save to shared prefs
-//
-//  @Nullable
-//  @Override
-//  public List<BookAnnotation> getUserBookmarks(
-//      @NotNull BookID id,
-//      @NotNull OPDSAcquisitionFeedEntry entry) {
-//
-//    final String key = NullCheck.notNull(id.toString().concat("_annotations"));
-//
-//    try {
-//      if (this.bookmarksSharedPrefs.contains(key)) {
-//        final String text = this.bookmarksSharedPrefs.getString(key, null);
-//        if (text != null) {
-//          final JSONObject o = new JSONObject(text);
-//          return ReaderBookLocation.fromJSON(o);
-//        }
-//      }
-//      return null;
-//    } catch (final JSONException e) {
-//      ReaderBookmarksSharedPrefs.LOG.error(
-//          "unable to deserialize bookmark: {}", e.getMessage(), e);
-//      return null;
-//    }
-//  }
 }

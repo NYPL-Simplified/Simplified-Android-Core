@@ -100,8 +100,7 @@ public final class ReaderTOCActivity extends AppCompatActivity
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
-    //TODO Localize
-    this.setTitle("Table of Contents");
+    this.setTitle(R.string.reader_toc);
 
     super.onCreate(state);
 

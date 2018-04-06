@@ -67,7 +67,6 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
   }
 
   private fun applyColorScheme(cs: ReaderColorScheme) {
-    //TODO better way to check UI Thread? what happens if not on UI thread?
     UIThread.checkIsUIThread()
     readerTOCListView?.rootView?.setBackgroundColor(cs.backgroundColor)
   }

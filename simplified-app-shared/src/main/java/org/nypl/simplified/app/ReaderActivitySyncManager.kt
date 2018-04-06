@@ -36,7 +36,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
-  //TODO WIP - observe when set, then show jump to location dialog with appropriate messaging
+  //TODO Is the book package needed?
   val bookPackage: Package? = null
   private val feedEntryID = feedEntry.id
 
@@ -61,8 +61,8 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     }
   }
 
-  fun synchronizeReadingLocation(currentLocation: ReaderBookLocation,
-                                 context: Context) {
+  fun syncReadingLocation(currentLocation: ReaderBookLocation,
+                          context: Context) {
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
       delayPageSync = false
       LOG.debug("Account does not support sync or sync is disabled.")
@@ -170,7 +170,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
    */
   fun syncBookmarks(completion: ((bookmarks: List<BookAnnotation>) -> Unit)?) {
 
-    //TODO IN PROGRESS Implementation
+    //TODO WIP
 
     val uri = if (feedEntry.annotations.isSome) {
       (feedEntry.annotations as Some<URI>).get().toString()

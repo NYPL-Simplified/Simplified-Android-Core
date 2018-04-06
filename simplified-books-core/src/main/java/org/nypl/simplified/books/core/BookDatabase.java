@@ -622,7 +622,6 @@ public final class BookDatabase implements BookDatabaseType
                 throws IOException
             {
               BookDatabaseEntry.this.setBookmarksListLocked(bookmarks);
-              //TODO check if any updates are required to updateSnapshotLocked()
               return BookDatabaseEntry.this.updateSnapshotLocked();
             }
           });
