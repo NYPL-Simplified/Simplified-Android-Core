@@ -13,9 +13,12 @@ import org.nypl.simplified.opds.core.annotation.BookAnnotation
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.Timer
+import java.util.*
 import kotlin.concurrent.schedule
 
+enum class ReadingLocationSyncStatus {
+  IDLE, BUSY
+}
 
 //TODO re-design to eliminate need for interface
 interface ReaderSyncManagerDelegate {
@@ -38,12 +41,13 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
   //TODO Is the book package needed?
   val bookPackage: Package? = null
-  private val feedEntryID = feedEntry.id
 
-  // Delay server posts until first page sync is complete
-  private var delayPageSync: Boolean = true
+  private val delayTimeInterval = 120L
+
+  private var delayReadingPositionSync = true
   private val annotationsManager = AnnotationsManager(libraryAccount, credentials, delegate as Context)
-  private var queueTimer = Timer()
+  private var status = ReadingLocationSyncStatus.IDLE
+  private var queuedReadingPosition: ReaderBookLocation? = null
 
 
   /**
@@ -64,19 +68,19 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
   fun syncReadingLocation(currentLocation: ReaderBookLocation,
                           context: Context) {
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
-      delayPageSync = false
+      delayReadingPositionSync = false
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
     if (feedEntry == null || !feedEntry.annotations.isSome) {
-      delayPageSync = false
+      delayReadingPositionSync = false
       LOG.error("No annotations uri or feed entry exists for this book. Abandoning sync attempt.")
       return
     }
 
     val uriString = (feedEntry.annotations as Some<URI>).get().toString()
 
-    annotationsManager.requestReadingPositionOnServer(feedEntryID, uriString, { serverLocation ->
+    annotationsManager.requestReadingPositionOnServer(feedEntry.id, uriString, { serverLocation ->
       interpretUXForSync(serverLocation, context, currentLocation)
     })
   }
@@ -84,7 +88,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
   private fun interpretUXForSync(serverLocation: ReaderBookLocation?,
                                  context: Context,
                                  currentLocation: ReaderBookLocation) {
-    delayPageSync = false
+    delayReadingPositionSync = false
 
     if (serverLocation == null) {
       LOG.debug("No server location object returned.")
@@ -139,25 +143,57 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
   /**
    * Attempt to update current page to the server.
+   * Prevent high-frequency requests to the server by queueing and shooting
+   * off tasks at a set time interval.
    * @param location The page to be sent as the current "left off" page
    */
   fun updateServerReadingLocation(location: ReaderBookLocation) {
-    if (delayPageSync) {
+
+    if (delayReadingPositionSync) {
       LOG.debug("Post of last read position delayed. Initial sync still in progress.")
       return
     }
 
     if (annotationsManager.syncIsPossibleAndPermitted()) {
-      //FIXME get rid of this queueTimer stuff. Match what's on iOS.
-      queueTimer.cancel()
-      queueTimer = Timer()
-      queueTimer.schedule(3000) {
-        val locString = location.toJsonString()
-        if (locString != null) {
-          annotationsManager.updateReadingPosition(feedEntryID, locString)
-        } else {
+
+      synchronized(this) {
+
+        val loc = location.toJsonString()
+        if (loc == null) {
           LOG.error("Skipped upload of location due to unexpected null json representation")
+          return
         }
+
+        when (this.status) {
+
+          ReadingLocationSyncStatus.IDLE -> {
+            this.status = ReadingLocationSyncStatus.BUSY
+            annotationsManager.updateReadingPosition(feedEntry.id, loc)
+
+            Timer("ReadingPositionTimer", false).schedule(delayTimeInterval) {
+              synchronized(this) {
+                status = ReadingLocationSyncStatus.IDLE
+                if (queuedReadingPosition != null) {
+                  annotationsManager.updateReadingPosition(feedEntry.id, loc)
+                  queuedReadingPosition = null
+                }
+              }
+            }
+          }
+
+          ReadingLocationSyncStatus.BUSY -> {
+            queuedReadingPosition = location
+          }
+        }
+      }
+    }
+  }
+
+  fun sendOffAnyQueuedRequest() {
+    synchronized(this) {
+      val pos = queuedReadingPosition?.toJsonString()
+      if (pos != null) {
+        annotationsManager.updateReadingPosition(feedEntry.id, pos)
       }
     }
   }
