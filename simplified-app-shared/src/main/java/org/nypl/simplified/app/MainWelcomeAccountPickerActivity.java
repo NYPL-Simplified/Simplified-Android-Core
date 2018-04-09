@@ -25,6 +25,8 @@ import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -82,9 +84,19 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
     final List<Account> dia = new ArrayList<Account>();
     final JSONArray registry =
       new AccountsRegistry(this, Simplified.getSharedPrefs()).getAccounts();
-    for (int index = 0; index < registry.length(); ++index) {
+    for (int index = 3; index < registry.length(); ++index) {
       try {
         dia.add(new Account(registry.getJSONObject(index)));
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+    }
+
+    Collections.sort(dia);
+
+    for (int index = 2; index >= 0; --index) {
+      try {
+        dia.add(0, new Account(registry.getJSONObject(index)));
       } catch (JSONException e) {
         e.printStackTrace();
       }
