@@ -119,46 +119,17 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
 
           final ImageView icon_view =
             NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
-          if (account.getId() == 0) {
-            icon_view.setImageResource(R.drawable.account_logo_nypl);
-          } else if (account.getId() == 1) {
-            icon_view.setImageResource(R.drawable.account_logo_bpl);
-          } else if (account.getId() == 2) {
-            icon_view.setImageResource(R.drawable.account_logo_instant);
-          } else if (account.getId() == 7) {
-            icon_view.setImageResource(R.drawable.account_logo_alameda);
-          } else if (account.getId() == 8) {
-            icon_view.setImageResource(R.drawable.account_logo_hcls);
-          } else if (account.getId() == 9) {
-            icon_view.setImageResource(R.drawable.account_logo_mcpl);
-          } else if (account.getId() == 10) {
-            icon_view.setImageResource(R.drawable.account_logo_fcpl);
-          } else if (account.getId() == 11) {
-            icon_view.setImageResource(R.drawable.account_logo_anne_arundel);
-          } else if (account.getId() == 12) {
-            icon_view.setImageResource(R.drawable.account_logo_bgc);
-          } else if (account.getId() == 13) {
-            icon_view.setImageResource(R.drawable.account_logo_smcl);
-          } else if (account.getId() == 14) {
-            icon_view.setImageResource(R.drawable.account_logo_cl);
-          } else if (account.getId() == 15) {
-            icon_view.setImageResource(R.drawable.account_logo_ccpl);
-          } else if (account.getId() == 16) {
-            icon_view.setImageResource(R.drawable.account_logo_ccl);
-          } else if (account.getId() == 17) {
-            icon_view.setImageResource(R.drawable.account_logo_bcl);
-          } else if (account.getId() == 18) {
-            icon_view.setImageResource(R.drawable.account_logo_lapl);
-          } else if (account.getId() == 19) {
-            icon_view.setImageResource(R.drawable.account_logo_pcl);
-          } else if (account.getId() == 20) {
-            icon_view.setImageResource(R.drawable.account_logo_sccl);
-          } else if (account.getId() == 21) {
-            icon_view.setImageResource(R.drawable.account_logo_acls);
-          } else if (account.getId() == 22) {
-            icon_view.setImageResource(R.drawable.account_logo_rel);
-          } else if (account.getId() == 23) {
-            icon_view.setImageResource(R.drawable.account_logo_wcfl);
+
+          final String resource_path = "drawable/" + account.getLowerCaseLogo();
+          final int resource_id = this.getContext().getResources().getIdentifier(
+              resource_path,
+              null,
+              this.getContext().getPackageName());
+
+          if (resource_id != 0) {
+            icon_view.setImageResource(resource_id);
+          } else {
+            icon_view.setImageResource(R.drawable.librarylogomagic);
           }
 
           return v;
