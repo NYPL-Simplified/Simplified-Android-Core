@@ -247,17 +247,20 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   private fun bookLocationFromString(JSON: JSONObject): ReaderBookLocation?
   {
-    try {
-      val serializedResult = Gson().fromJson(JSON.toString(), AnnotationsServerResponse::class.java)
-      for (annotation in serializedResult.annotationFirstNode.items) {
-        if (annotation.motivation == "http://librarysimplified.org/terms/annotation/idling") {
-          val value = annotation.target.annotationSelectorNode.value
-          val jsonObject = JSONObject(value)
-          return ReaderBookLocation.fromJSON(jsonObject)
-        }
+    val mapper = jacksonObjectMapper()
+    val annotationResponse: AnnotationResponse? = mapper.readValue(JSON.toString())
+
+    if (annotationResponse == null) {
+      LOG.error("Annotation response did not correctly deserialize.")
+      return null
+    }
+
+    annotationResponse.first.items.forEach {
+      if (it.motivation == "http://librarysimplified.org/terms/annotation/idling") {
+        val value = it.target.selector.value
+        val valueJson = JSONObject(value)
+        return ReaderBookLocation.fromJSON(valueJson)
       }
-    } catch (e: java.lang.Exception) {
-      LOG.error("Could not get or deserialize book location from server/JSON.")
     }
     return null
   }
@@ -365,12 +368,12 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
   /**
-   * Get a list of any bookmark-type annotations created for the given book and the current user.
+   * Get a list of any bookmark annotations created for the given book and the current user.
    * @param uri The Annotation ID/URI for the OPDS Entry
    * @param completion Called asynchronously by the network request to return the bookmarks
    */
   fun requestBookmarksFromServer(uri: String,
-                                 completion: (bookmarks: List<BookAnnotation>?) -> Unit) {
+                                 completion: (bookmarks: List<BookmarkAnnotation>?) -> Unit) {
 
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
@@ -385,16 +388,24 @@ class AnnotationsManager(private val libraryAccount: Account,
         credentials.pin.toString(),
         null,
         Listener<JSONObject> { response ->
+
+          val json = response.toString()
+
+          val mapper = jacksonObjectMapper()
+          var annotationResponse: AnnotationResponse?
           try {
-            val result = Gson().fromJson(response.toString(), AnnotationsServerResponse::class.java)
-            val bookmarks = result.annotationFirstNode.items.filter {
-              it.motivation.contains("bookmarking", true)
-            }
-            LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
-            completion(bookmarks)
-          } catch (e: java.lang.Exception) {
-            LOG.error("GET request or parsing fail for bookmarks. Error: ${e.message}")
+            annotationResponse = mapper.readValue(json)
+          } catch (e: JsonMappingException) {
+            LOG.error("Cancelling download request. JsonMappingException for annotations:\n $e")
+            completion(null)
+            return@Listener
           }
+
+          val bookmarks = annotationResponse.first.items.filter {
+            it.motivation.contains("bookmarking", true)
+          }
+          LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
+          completion(bookmarks)
         },
         Response.ErrorListener { error ->
           LOG.error("GET request fail! Error: ${error.message}")
@@ -415,7 +426,7 @@ class AnnotationsManager(private val libraryAccount: Account,
    * @param bookmark the annotation object to post to the server
    * @param completion Returns the new UUID/URI created for the annotation
    */
-  fun postBookmarkToServer(bookmark: BookAnnotation,
+  fun postBookmarkToServer(bookmark: BookmarkAnnotation,
                            completion: (serverID: String?) -> Unit) {
 
     if (!syncIsPossibleAndPermitted()) {
@@ -425,12 +436,12 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
 
     try {
-      val jsonBody = Gson().toJson(bookmark)
+      val jsonBody = bookmark.toString()
       postAnnotation(jsonBody, 20) { _, serverID ->
         completion(serverID)
       }
-    } catch (e: IOException) {
-      LOG.error("Error serializing JSON from Map Object")
+    } catch (e: Exception) {
+      LOG.error("Error serializing JSON from Kotlin object")
       return
     }
   }
