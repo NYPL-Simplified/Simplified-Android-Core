@@ -84,6 +84,23 @@
 
       </TableLayout>
 
+      <ImageView
+          android:id="@+id/settings_barcode_image"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:visibility="gone"/>
+
+      <TextView
+          android:id="@+id/settings_barcode_toggle_barcode"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center"
+          android:maxLines="1"
+          android:textSize="18sp"
+          android:text="@string/settings_toggle_barcode_show"
+          android:visibility="gone"
+          />
+
       <TableLayout
         android:id="@+id/settings_login_table_with_code"
         android:layout_width="match_parent"

@@ -38,5 +38,8 @@ subprojects {
     maven { url "https://jitpack.io" }
     // Needed for support-v4 26.0.0+
     maven { url "https://maven.google.com" }
+
+    // Needed for zxing gradle
+    jcenter()
   }
 }
