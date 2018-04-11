@@ -235,5 +235,8 @@
   <string name="need_card_question">Don\'t have a library card?</string>
   <string name="need_card_button">Sign Up</string>
   <string name="need_card_create">Create Card</string>
+  <string name="label_simplye_logo">SimplyE logo</string>
+  <string name="label_find_library_button">Click this button to find your local library and peruse its catalog.</string>
+  <string name="label_instant_classics_button">Click this button to peruse the Instant Classics collection.</string>
 
 </resources>
