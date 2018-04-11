@@ -1,17 +1,11 @@
 package org.nypl.simplified.multilibrary;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
+import java.util.Comparator;
 
-public class Account implements Serializable {
+public class Account implements Serializable, Comparable<Account> {
 
   private Integer id;
   private String path_component;
@@ -114,8 +108,8 @@ public class Account implements Serializable {
   /**
    * @return The Logo
    */
-  public String getLogo() {
-    return this.logo;
+  public String getLowerCaseLogo() {
+    return this.logo.toLowerCase();
   }
 
   /**
@@ -384,5 +378,10 @@ public class Account implements Serializable {
     }
 
     return object;
+  }
+
+  @Override
+  public int compareTo(Account o) {
+    return this.getName().compareTo(o.getName());
   }
 }

@@ -3,8 +3,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.simplye"
-  android:versionCode="1148"
-  android:versionName="2.1.5">
+  android:versionCode="1150"
+  android:versionName="2.1.6">
 
   <uses-sdk
     android:minSdkVersion="19"
