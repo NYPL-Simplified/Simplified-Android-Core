@@ -8,7 +8,7 @@
   <item
     android:state_focused="true"
     android:state_pressed="false"
-    android:color="#192b3e" />
+    android:color="@color/button_background" />
 
   <item
     android:state_focused="true"
@@ -20,6 +20,6 @@
     android:state_pressed="true"
     android:color="@color/button_background" />
 
-  <item android:color="#192b3e" />
+  <item android:color="@color/button_background" />
 
 </selector>
