@@ -137,46 +137,18 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           in_table_signup.setVisibility(View.GONE);
           in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
           in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
-          if (MainSettingsAccountActivity.this.account.getId() == 0) {
-            in_account_icon.setImageResource(R.drawable.account_logo_nypl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 1) {
-            in_account_icon.setImageResource(R.drawable.account_logo_bpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
-            in_account_icon.setImageResource(R.drawable.account_logo_instant);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
-            in_account_icon.setImageResource(R.drawable.account_logo_alameda);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
-            in_account_icon.setImageResource(R.drawable.account_logo_hcls);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 9) {
-            in_account_icon.setImageResource(R.drawable.account_logo_mcpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
-            in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
-            in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 12) {
-            in_account_icon.setImageResource(R.drawable.account_logo_bgc);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 13) {
-            in_account_icon.setImageResource(R.drawable.account_logo_smcl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 14) {
-            in_account_icon.setImageResource(R.drawable.account_logo_cl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 15) {
-            in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 16) {
-            in_account_icon.setImageResource(R.drawable.account_logo_ccl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 17) {
-            in_account_icon.setImageResource(R.drawable.account_logo_bcl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 18) {
-            in_account_icon.setImageResource(R.drawable.account_logo_lapl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 19) {
-            in_account_icon.setImageResource(R.drawable.account_logo_pcl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
-            in_account_icon.setImageResource(R.drawable.account_logo_sccl);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 21) {
-            in_account_icon.setImageResource(R.drawable.account_logo_acls);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
-            in_account_icon.setImageResource(R.drawable.account_logo_rel);
-          } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
-            in_account_icon.setImageResource(R.drawable.account_logo_wcfl);
+
+          final String resource_path = "drawable/" + MainSettingsAccountActivity.this.account.getLowerCaseLogo();
+          final Context context = MainSettingsAccountActivity.this.getApplicationContext();
+          final int resource_id = context.getResources().getIdentifier(
+              resource_path,
+              null,
+              context.getPackageName());
+
+          if (resource_id != 0) {
+            in_account_icon.setImageResource(resource_id);
+          } else {
+            in_account_icon.setImageResource(R.drawable.librarylogomagic);
           }
 
           in_barcode_text.setText(creds.getBarcode().toString());
@@ -890,48 +862,18 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
     in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
 
-    if (MainSettingsAccountActivity.this.account.getId() == 0) {
-      in_account_icon.setImageResource(R.drawable.account_logo_nypl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 1) {
-      in_account_icon.setImageResource(R.drawable.account_logo_bpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 2) {
-      in_account_icon.setImageResource(R.drawable.account_logo_instant);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 7) {
-      in_account_icon.setImageResource(R.drawable.account_logo_alameda);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 8) {
-      in_account_icon.setImageResource(R.drawable.account_logo_hcls);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 9) {
-      in_account_icon.setImageResource(R.drawable.account_logo_mcpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 10) {
-      in_account_icon.setImageResource(R.drawable.account_logo_fcpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 11) {
-      in_account_icon.setImageResource(R.drawable.account_logo_anne_arundel);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 12) {
-      in_account_icon.setImageResource(R.drawable.account_logo_bgc);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 13) {
-      in_account_icon.setImageResource(R.drawable.account_logo_smcl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 14) {
-      in_account_icon.setImageResource(R.drawable.account_logo_cl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 15) {
-      in_account_icon.setImageResource(R.drawable.account_logo_ccpl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 16) {
-      in_account_icon.setImageResource(R.drawable.account_logo_ccl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 17) {
-      in_account_icon.setImageResource(R.drawable.account_logo_bcl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 18) {
-      in_account_icon.setImageResource(R.drawable.account_logo_lapl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 19) {
-      in_account_icon.setImageResource(R.drawable.account_logo_pcl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 20) {
-      in_account_icon.setImageResource(R.drawable.account_logo_sccl);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 21) {
-      in_account_icon.setImageResource(R.drawable.account_logo_acls);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 22) {
-      in_account_icon.setImageResource(R.drawable.account_logo_rel);
-    } else if (MainSettingsAccountActivity.this.account.getId() == 23) {
-      in_account_icon.setImageResource(R.drawable.account_logo_wcfl);
-    }
+    final String resource_path = "drawable/" + account.getLowerCaseLogo();
+    final Context context = MainSettingsAccountActivity.this.getApplicationContext();
+    final int resource_id = context.getResources().getIdentifier(
+        resource_path,
+        null,
+        context.getPackageName());
 
+    if (resource_id != 0) {
+      in_account_icon.setImageResource(resource_id);
+    } else {
+      in_account_icon.setImageResource(R.drawable.librarylogomagic);
+    }
 
     final AccountsDatabaseType accounts_database  = Simplified.getAccountsDatabase(this.account, this);
     if (accounts_database.accountGetCredentials().isSome()) {

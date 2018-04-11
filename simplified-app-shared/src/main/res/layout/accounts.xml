@@ -23,7 +23,7 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:id="@+id/cellIcon"
-      android:src="@drawable/account_logo_instant"
+      android:src="@drawable/librarylogomagic"
       android:paddingLeft="10dp"
       android:layout_weight="0.88"
       />
