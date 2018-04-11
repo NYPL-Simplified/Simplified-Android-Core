@@ -23,6 +23,3 @@ ReaderClientCert.sig
 bugsnag.conf 
 helpstack.conf 
 *.jks
-build_file_checksums.ser
-codeStyleConfig.xml
-Project.xml
