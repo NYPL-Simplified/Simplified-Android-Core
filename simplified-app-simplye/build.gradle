@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
   packagingOptions {
     exclude 'META-INF/LICENSE'
   }
@@ -27,10 +27,12 @@ android {
 description = 'simplified-app-simplye'
 
 dependencies {
-  compile project(':simplified-app-shared')
-  compile group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
-  compile group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
-  compile group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+  implementation project(':simplified-app-shared')
+  implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
+  implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
+  implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+
+  implementation "com.android.support:support-v4:27.0.2"
 }
 
 apply plugin: 'android-native-dependencies'

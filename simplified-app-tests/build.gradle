@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
   packagingOptions {
     exclude 'META-INF/LICENSE'
   }
@@ -11,5 +11,5 @@ android {
 description = 'simplified-app-tests'
 
 dependencies {
-  compile project(':simplified-app-shared')
+  implementation project(':simplified-app-shared')
 }

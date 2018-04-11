@@ -2,12 +2,16 @@ apply plugin: 'com.android.library'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
 }
 
 description = 'simplified-tenprint'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
-  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  compile project(':simplified-assert')
+  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation project(':simplified-assert')
 }
