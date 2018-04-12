@@ -605,7 +605,7 @@ public final class ReaderActivity extends Activity implements
       //TODO - Test reading and writing bookmarks to the local database
 
       if (this.currentPageUserBookmark != null) {
-        deleteUserBookmark(this.currentPageUserBookmark);
+        //TODO delete user bookmark
         this.currentPageUserBookmark = null;
       } else {
         addUserBookmark(this.current_location);
@@ -1233,7 +1233,8 @@ public final class ReaderActivity extends Activity implements
 
     page_request = optLocation.map((l) -> {
       LOG.debug("CurrentPage location {}", l);
-      ReaderActivity.this.sync_location = l;
+      //TODO audit this
+      ReaderActivity.this.current_location = l;
       return ReaderOpenPageRequest.fromBookLocation(l);
     });
 
