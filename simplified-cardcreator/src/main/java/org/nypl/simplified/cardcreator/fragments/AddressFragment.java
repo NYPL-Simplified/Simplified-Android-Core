@@ -34,7 +34,7 @@ public class AddressFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment AgeFragment.
+     * @return A new instance of fragment AddressFragment.
      */
 
     public  AddressFragment newInstance() {

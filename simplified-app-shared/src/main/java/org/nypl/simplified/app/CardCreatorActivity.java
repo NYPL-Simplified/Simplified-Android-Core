@@ -509,20 +509,19 @@ public class CardCreatorActivity extends FragmentActivity implements
 
       if (tracker.isNYS(this)) {
 
-        ((Button) findViewById(R.id.next_button)).setText("Next");
+        ((Button) findViewById(R.id.next_button)).setText(R.string.next_get_location);
 
         ((EditText) findViewById(R.id.region)).setText(tracker.getAddressOutput());
         ((TextView) findViewById(android.R.id.text1)).setTextAppearance(getApplicationContext(), R.style.WizardPageSuccess);
-        ((TextView) findViewById(android.R.id.text1)).setText("We have successfully determined that you are in New York!");
+        ((TextView) findViewById(android.R.id.text1)).setText(R.string.you_are_in_new_york);
 
       } else {
 
-        ((Button) findViewById(R.id.next_button)).setText("Done");
+        ((Button) findViewById(R.id.next_button)).setText(R.string.done_get_location);
 
         ((EditText) findViewById(R.id.region)).setText(tracker.getAddressOutput());
         ((TextView) findViewById(android.R.id.text1)).setTextAppearance(getApplicationContext(), R.style.WizardPageError);
-        ((TextView) findViewById(android.R.id.text1)).setText("You must be in New York to sign up for a library card. "
-          + "Please try to sign up again when you are in another location.");
+        ((TextView) findViewById(android.R.id.text1)).setText(R.string.you_must_be_in_new_york);
       }
       this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
       findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
