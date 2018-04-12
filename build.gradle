@@ -36,7 +36,7 @@ subprojects {
     }
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url "https://jitpack.io" }
-    // Needed for support-v4 26.0.0+
+    // Needed for support-v4 libraries
     maven { url "https://maven.google.com" }
   }
 }
