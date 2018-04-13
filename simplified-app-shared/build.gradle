@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
   useLibrary 'org.apache.http.legacy'
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -42,11 +42,12 @@ dependencies {
   compile 'com.bugsnag:bugsnag-android:3.9.0'
   compile group: 'joda-time', name: 'joda-time', version: '2.9.9'
   compile 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
-  compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+  compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+  compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
   implementation 'com.android.support:design:27.1.0'
+  compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.5"
+  compile 'com.android.support:multidex:1.0.2'
 }
 repositories {
   mavenCentral()
 }
-
-apply plugin: 'kotlin-android-extensions'

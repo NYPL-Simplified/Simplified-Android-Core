@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.support.multidex.MultiDexApplication;
 import android.util.DisplayMetrics;
 
 import com.io7m.jfunctional.FunctionType;
@@ -94,7 +95,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Global application state.
  */
 
-public final class Simplified extends Application
+public final class Simplified extends MultiDexApplication
 {
   private static final              Logger     LOG;
   private static volatile @Nullable Simplified INSTANCE;
