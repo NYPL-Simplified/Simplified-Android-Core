@@ -7,9 +7,9 @@ import org.nypl.simplified.app.reader.ReaderBookLocation
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
+import org.nypl.simplified.books.core.BookmarkAnnotation
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-import org.nypl.simplified.opds.core.annotation.BookAnnotation
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -204,7 +204,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
    * of bookmarks saved in the local database.
    * @param completion returns a List of bookmarks, empty if none exist
    */
-  fun syncBookmarks(completion: ((bookmarks: List<BookAnnotation>) -> Unit)?) {
+  fun syncBookmarks(completion: ((bookmarks: List<BookmarkAnnotation>) -> Unit)?) {
 
     //TODO WIP
 
@@ -217,13 +217,14 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
     annotationsManager.requestBookmarksFromServer(uri) { bookmarks ->
 
+      //TODO process downloaded bookmarks
       LOG.debug("Bookmarks: ${bookmarks}")
 
     }
 
   }
 
-  fun postBookmarkToServer(bookAnnotation: BookAnnotation,
+  fun postBookmarkToServer(bookAnnotation: BookmarkAnnotation,
                            completion: (serverID: String?) -> Unit) {
     annotationsManager.postBookmarkToServer(bookAnnotation, completion)
   }

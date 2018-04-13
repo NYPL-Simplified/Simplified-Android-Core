@@ -24,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.gson.JsonObject;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -53,14 +52,15 @@ import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
 import org.nypl.simplified.books.core.BookDatabaseEntryWritableType;
 import org.nypl.simplified.books.core.BookDatabaseType;
+import org.nypl.simplified.books.core.BookmarkAnnotation;
+import org.nypl.simplified.books.core.SelectorNode;
+import org.nypl.simplified.books.core.TargetNode;
+import org.nypl.simplified.books.core.BodyNode;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.annotation.AnnotationSelectorNode;
-import org.nypl.simplified.opds.core.annotation.AnnotationTargetNode;
-import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -606,10 +606,11 @@ public final class ReaderActivity extends Activity implements
 
       if (this.currentPageUserBookmark != null) {
         //TODO delete user bookmark
+//        deleteUserBookmark(this.currentPageUserBookmark);
         this.currentPageUserBookmark = null;
       } else {
-        addUserBookmark(this.current_location);
-        this.currentPageUserBookmark = this.current_location;
+        addUserBookmark(this.currentPageUserBookmark);
+        this.currentPageUserBookmark = this.currentPageUserBookmark;
       }
 
       udpateBookmarkIconUIState();
@@ -635,7 +636,7 @@ public final class ReaderActivity extends Activity implements
 
   private void addUserBookmark(final @NonNull ReaderBookLocation bookmark) {
 
-    final BookAnnotation bookAnnotation = getBookAnnotation(bookmark);
+    final BookmarkAnnotation bookAnnotation = getBookmarkAnnotation(bookmark);
 
     //Attempt to upload bookmark
     syncManager.postBookmarkToServer(bookAnnotation, (ID) -> {
@@ -652,14 +653,15 @@ public final class ReaderActivity extends Activity implements
     //Save bookmark to database
     final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
     final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
-    try {
-      entry.entrySetBookmark(bookAnnotation);
-    } catch (IOException e) {
-      LOG.error("Error writing bookmark annotation to database.");
-    }
+//    try {
+      //TODO write to the database
+//      entry.entrySetBookmark(bookAnnotation);
+//    } catch (IOException e) {
+//      LOG.error("Error writing bookmark annotation to database.");
+//    }
   }
 
-  private void deleteUserBookmark(final BookAnnotation annotation) {
+  private void deleteUserBookmark(final BookmarkAnnotation annotation) {
     if (annotation.getId() != null) {
       syncManager.deleteBookmarkOnServer(annotation.getId(), (Boolean success) -> {
         if (success) {
@@ -678,7 +680,7 @@ public final class ReaderActivity extends Activity implements
   }
 
   //TODO maybe move this method to the sync manager
-  @Nullable private BookAnnotation getBookAnnotation(@NonNull ReaderBookLocation bookmark) {
+  @Nullable private BookmarkAnnotation getBookmarkAnnotation(@NonNull ReaderBookLocation bookmark) {
 
     final String annotContext = "http://www.w3.org/ns/anno.jsonld";
     final String type = "Annotation";
@@ -701,25 +703,15 @@ public final class ReaderActivity extends Activity implements
     if (this.currentSpineItemPageCount > 0) {
       chapterProgress = (float) currentSpineItemPageIndex / currentSpineItemPageCount;
     }
-
     final float bookProgress = (float) this.view_progress_bar.getProgress() / this.view_progress_bar.getMax();
 
-    final JsonObject body = new JsonObject();
-    body.addProperty("http://librarysimplified.org/terms/time", timestamp);
-    body.addProperty("http://librarysimplified.org/terms/device", deviceID);
-    body.addProperty("http://librarysimplified.org/terms/chapter", this.currentChapterTitle);
-    body.addProperty("http://librarysimplified.org/terms/progressWithinChapter", chapterProgress);
-    body.addProperty("http://librarysimplified.org/terms/progressWithinBook", bookProgress);
-
-    //FIXME Audit classes for correct nullability, and flexibility when dealing with Jackson instead of Gson
-    final AnnotationSelectorNode selectorNode = new AnnotationSelectorNode(selectorType,value);
-    final AnnotationTargetNode targetNode = new AnnotationTargetNode(bookID, selectorNode);
-    final BookAnnotation annotation = new BookAnnotation(annotContext, type, motivation, targetNode);
-    annotation.setBody(body);
-    return annotation;
+    final SelectorNode selectorNode = new SelectorNode(selectorType, value);
+    final TargetNode targetNode = new TargetNode(bookID, selectorNode);
+    final BodyNode bodyNode = new BodyNode(timestamp, deviceID, this.currentChapterTitle, chapterProgress, bookProgress);
+    return new BookmarkAnnotation(annotContext, bodyNode, null, type, motivation, targetNode);
   }
 
-  private void checkForExistingBookmarkAtLocation(final @NonNull ReaderBookLocation l) {
+  private void checkForExistingBookmarkAtLocation(final @NonNull ReaderBookLocation l) {/**/
 
     //TODO
     //
