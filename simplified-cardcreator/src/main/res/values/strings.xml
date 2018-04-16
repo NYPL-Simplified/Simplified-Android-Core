@@ -42,6 +42,6 @@
 
   <!-- EULA strings -->
   <string name="eula_checkbox">I agree to the terms of the End User License Agreement.</string>
-  <string name="age_verification_challenge">To obtain a digital library card from the New York Public Library, you must live, work, or attend school in New York State. You must also be at least 13 years of age and be physically present in New York at the time of sign-up.  \\n\\n\\nYou must be 13 years of age or older to sign up for a library card. How old are you?</string>
+  <string name="age_verification_challenge">To obtain a digital library card from the New York Public Library, you must live, work, or attend school in New York State. You must also be at least 13 years of age and be physically present in New York at the time of sign-up.  \n\nYou must be 13 years of age or older to sign up for a library card. How old are you?</string>
 
 </resources>
