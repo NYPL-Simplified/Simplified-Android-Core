@@ -6,17 +6,20 @@ import android.net.Uri
 import com.android.volley.*
 import com.android.volley.Response.Listener
 import com.android.volley.toolbox.Volley
+import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.gson.Gson
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.io7m.jfunctional.Some
 import org.json.JSONObject
 import org.joda.time.Instant
 import org.nypl.drm.core.AdobeDeviceID
-import org.nypl.simplified.app.catalog.annotation.AnnotationResult
 import org.nypl.simplified.app.reader.ReaderBookLocation
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
+import org.nypl.simplified.books.core.AnnotationResponse
+import org.nypl.simplified.books.core.BookmarkAnnotation
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.volley.NYPLJsonObjectRequest
 import org.slf4j.LoggerFactory
@@ -42,6 +45,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     val LOG = LoggerFactory.getLogger(AnnotationsManager::class.java)!!
     const val SyncPermissionStatusTimeout = 60L
     const val ReadingPositionTimeout = 30L
+    const val BookmarksRequestTimeout = 30L
+    const val BookmarkDeleteTimeout = 20L
   }
 
   /**
@@ -244,17 +249,20 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   private fun bookLocationFromString(JSON: JSONObject): ReaderBookLocation?
   {
-    try {
-      val serializedResult = Gson().fromJson(JSON.toString(), AnnotationResult::class.java)
-      for (annotation in serializedResult.first.items) {
-        if (annotation.motivation == "http://librarysimplified.org/terms/annotation/idling") {
-          val value = annotation.target.selector.value
-          val jsonObject = JSONObject(value)
-          return ReaderBookLocation.fromJSON(jsonObject)
-        }
+    val mapper = jacksonObjectMapper()
+    val annotationResponse: AnnotationResponse? = mapper.readValue(JSON.toString())
+
+    if (annotationResponse == null) {
+      LOG.error("Annotation response did not correctly deserialize.")
+      return null
+    }
+
+    annotationResponse.first.items.forEach {
+      if (it.motivation == "http://librarysimplified.org/terms/annotation/idling") {
+        val value = it.target.selector.value
+        val valueJson = JSONObject(value)
+        return ReaderBookLocation.fromJSON(valueJson)
       }
-    } catch (e: java.lang.Exception) {
-      LOG.error("Could not get or deserialize book location from server/JSON.")
     }
     return null
   }
@@ -269,15 +277,6 @@ class AnnotationsManager(private val libraryAccount: Account,
   {
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
-      return
-    }
-
-    val catalogUriString = libraryAccount.catalogUrl
-    val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
-    val mainFeedAnnotationUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "annotations/") else null
-    val requestUri = mainFeedAnnotationUri?.toString()
-    if (requestUri == null) {
-      LOG.error("No Catalog Annotation Uri present for POST request.")
       return
     }
 
@@ -309,7 +308,7 @@ class AnnotationsManager(private val libraryAccount: Account,
       val mapper = ObjectMapper()
       val jsonBodyString= mapper.writer().writeValueAsString(bodyObject)
 
-      postAnnotation(requestUri, jsonBodyString, 20, { isSuccessful, response ->
+      postAnnotation(jsonBodyString, 20, { isSuccessful, response ->
         if (isSuccessful) {
           LOG.debug("Success: Marked Reading Position To Server. Response: $response")
         } else {
@@ -323,14 +322,24 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  private fun postAnnotation(uri: String, bodyParameters: String, timeout: Long?,
+  private fun postAnnotation(bodyParameters: String, timeout: Long?,
                              completion: (isSuccessful: Boolean, annotationID: String?) -> Unit)
   {
+    val catalogUriString = libraryAccount.catalogUrl
+    val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
+    val mainFeedAnnotationUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "annotations/") else null
+    val requestUri = mainFeedAnnotationUri?.toString()
+    if (requestUri == null) {
+      LOG.error("No Catalog Annotation Uri present for POST request.")
+      return
+    }
+
     try {
       val jsonObjectBody = JSONObject(bodyParameters)
+      LOG.debug(jsonObjectBody.toString())
       val request = NYPLJsonObjectRequest(
           Request.Method.POST,
-          uri,
+          requestUri,
           credentials.barcode.toString(),
           credentials.pin.toString(),
           jsonObjectBody,
@@ -358,6 +367,119 @@ class AnnotationsManager(private val libraryAccount: Account,
     } catch (e: java.lang.Exception) {
       LOG.error("Post Annotation: Error creating JSONObject from Kotlin Map Type.")
     }
+  }
+
+  /**
+   * Get a list of any bookmark annotations created for the given book and the current user.
+   * @param uri The Annotation ID/URI for the OPDS Entry
+   * @param completion Called asynchronously by the network request to return the bookmarks
+   */
+  fun requestBookmarksFromServer(uri: String,
+                                 completion: (bookmarks: List<BookmarkAnnotation>?) -> Unit) {
+
+    if (!syncIsPossibleAndPermitted()) {
+      LOG.debug("Account does not support sync or sync is disabled.")
+      completion(null)
+      return
+    }
+
+    val request = NYPLJsonObjectRequest(
+        Request.Method.GET,
+        uri,
+        credentials.barcode.toString(),
+        credentials.pin.toString(),
+        null,
+        Listener<JSONObject> { response ->
+
+          val json = response.toString()
+
+          val mapper = jacksonObjectMapper()
+          var annotationResponse: AnnotationResponse?
+          try {
+            annotationResponse = mapper.readValue(json)
+          } catch (e: JsonMappingException) {
+            LOG.error("Cancelling download request. JsonMappingException for annotations:\n $e")
+            completion(null)
+            return@Listener
+          }
+
+          val bookmarks = annotationResponse.first.items.filter {
+            it.motivation.contains("bookmarking", true)
+          }
+          LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
+          completion(bookmarks)
+        },
+        Response.ErrorListener { error ->
+          LOG.error("GET request fail! Error: ${error.message}")
+          completion(null)
+        })
+
+    request.retryPolicy = DefaultRetryPolicy(
+        TimeUnit.SECONDS.toMillis(BookmarksRequestTimeout).toInt(),
+        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+    )
+
+    requestQueue.add(request)
+  }
+
+  /**
+   * Post a new bookmark to the server for the current user for a particular entry.
+   * @param bookmark the annotation object to post to the server
+   * @param completion Returns the new UUID/URI created for the annotation
+   */
+  fun postBookmarkToServer(bookmark: BookmarkAnnotation,
+                           completion: (serverID: String?) -> Unit) {
+
+    if (!syncIsPossibleAndPermitted()) {
+      LOG.debug("Account does not support sync or sync is disabled.")
+      completion(null)
+      return
+    }
+
+    try {
+      val jsonBody = bookmark.toString()
+      postAnnotation(jsonBody, 20) { _, serverID ->
+        completion(serverID)
+      }
+    } catch (e: Exception) {
+      LOG.error("Error serializing JSON from Kotlin object")
+      return
+    }
+  }
+
+  /**
+   * Delete a bookmark on the server.
+   */
+  fun deleteBookmarkOnServer(annotationID: String,
+                             completion: (isSuccessful: Boolean) -> Unit) {
+
+    if (!syncIsPossibleAndPermitted()) {
+      LOG.debug("Account does not support sync or sync is disabled.")
+      completion(false)
+      return
+    }
+
+    val request = NYPLJsonObjectRequest(
+        Request.Method.DELETE,
+        annotationID,
+        credentials.barcode.toString(),
+        credentials.pin.toString(),
+        null,
+        Listener<JSONObject> { response ->
+          completion(true)
+        },
+        Response.ErrorListener { error ->
+          completion(false)
+        })
+
+    request.retryPolicy = DefaultRetryPolicy(
+        TimeUnit.SECONDS.toMillis(BookmarkDeleteTimeout).toInt(),
+        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+    )
+
+    requestQueue.add(request)
   }
 
   /**

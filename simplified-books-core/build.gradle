@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
 }
 
 description = 'simplified-books-core'
@@ -14,12 +14,12 @@ dependencies {
   compile project(':simplified-http-core')
   compile project(':simplified-downloader-core')
   compile project(':simplified-opds-core')
-  compile group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
-  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  compile group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
-  compile group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
-  compile group: 'net.jodah', name: 'expiringmap', version: '0.4.3'
-  compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+  compile 'org.nypl.drm:nypl-drm-core:1.0.0'
+  compile 'com.io7m.jnull:io7m-jnull-core:[1.0.0, 2.0.0)'
+  compile 'com.io7m.junreachable:io7m-junreachable-core:[1.0.0, 2.0.0)'
+  compile 'com.io7m.jfunctional:io7m-jfunctional-core:[1.1.0, 2.0.0)'
+  compile 'net.jodah:expiringmap:0.4.3'
+  compile 'org.slf4j:slf4j-api:1.7.25'
   compile project(':simplified-prefs')
   compile project(':simplified-multilibrary')
   compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"

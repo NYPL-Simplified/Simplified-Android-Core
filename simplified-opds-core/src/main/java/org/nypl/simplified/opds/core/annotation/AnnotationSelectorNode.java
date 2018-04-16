@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.catalog.annotation;
+package org.nypl.simplified.opds.core.annotation;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -9,7 +9,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  */
 
-public class Selector {
+public class AnnotationSelectorNode {
 
   @SerializedName("type")
   @Expose
@@ -21,14 +21,14 @@ public class Selector {
   /**
    * No args constructor for use in serialization
    */
-  public Selector() {
+  public AnnotationSelectorNode() {
   }
 
   /**
    * @param in_value the value
    * @param in_type the type
    */
-  public Selector(final String in_type, final String in_value) {
+  public AnnotationSelectorNode(final String in_type, final String in_value) {
     this.type = in_type;
     this.value = in_value;
   }

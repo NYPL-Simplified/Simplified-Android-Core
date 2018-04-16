@@ -1,12 +1,16 @@
 package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
+
+import org.jetbrains.annotations.NotNull;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * <p>The writable interface supported by book database entries.</p>
@@ -119,6 +123,34 @@ public interface BookDatabaseEntryWritableType
   BookDatabaseEntrySnapshot entrySetAdobeRightsInformation(
     OptionType<AdobeAdeptLoan> loan)
     throws IOException;
+
+  /**
+   * Set a user-created bookmark for the book.
+   *
+   * @param bookmark The bookmark annotation to be saved
+   *
+   * @return A snapshot of the new database state
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  BookDatabaseEntrySnapshot entrySetBookmark(
+      @NotNull BookAnnotation bookmark)
+      throws IOException;
+
+  /**
+   * Delete a user-created bookmark from the database
+   *
+   * @param bookmark The bookmark annotation to be deleted
+   *
+   * @return A snapshot of the new database state
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  BookDatabaseEntrySnapshot entryDeleteBookmark(
+      @NotNull BookAnnotation bookmark)
+      throws IOException;
 
   /**
    * Update the book data based on {@code e}. The cover, if any, will be fetched

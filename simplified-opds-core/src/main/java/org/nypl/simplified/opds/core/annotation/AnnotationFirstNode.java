@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.catalog.annotation;
+package org.nypl.simplified.opds.core.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +12,11 @@ import com.google.gson.annotations.SerializedName;
  *
  */
 @Generated("org.jsonschema2pojo")
-public class First {
+public class AnnotationFirstNode {
 
   @SerializedName("items")
   @Expose
-  private List<Annotation> items = new ArrayList<Annotation>();
+  private List<BookAnnotation> items = new ArrayList<BookAnnotation>();
   @SerializedName("type")
   @Expose
   private String type;
@@ -27,19 +27,19 @@ public class First {
   /**
    * No args constructor for use in serialization
    */
-  public First() {
+  public AnnotationFirstNode() {
   }
   /**
    * @return The items
    */
-  public List<Annotation> getItems() {
+  public List<BookAnnotation> getItems() {
     return this.items;
   }
 
   /**
    * @param in_items The items
    */
-  public void setItems(final List<Annotation> in_items) {
+  public void setItems(final List<BookAnnotation> in_items) {
     this.items = in_items;
   }
 

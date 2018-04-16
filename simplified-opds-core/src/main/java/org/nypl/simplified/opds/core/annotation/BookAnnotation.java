@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.catalog.annotation;
+package org.nypl.simplified.opds.core.annotation;
 
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.Expose;
@@ -10,15 +10,18 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  */
 
-public class Annotation {
+public class BookAnnotation {
 
   @SerializedName("@context")
   @Expose
   private String context;
 
+  //TODO Nullable
   @SerializedName("body")
   @Expose
   private JsonElement body;
+
+  //TODO Nullable
   @SerializedName("id")
   @Expose
   private String id;
@@ -26,30 +29,32 @@ public class Annotation {
   @SerializedName("type")
   @Expose
   private String type;
+
   @SerializedName("motivation")
   @Expose
   private String motivation;
+
   @SerializedName("target")
   @Expose
-  private Target target;
+  private AnnotationTargetNode target;
 
   /**
    * No args constructor for use in serialization
    */
-  public Annotation() {
+  public BookAnnotation() {
   }
 
   /**
-   * @param in_target     target
+   * @param in_Annotation target
    * @param in_motivation motivation
    * @param in_context    @context
    * @param in_type       type
    */
-  public Annotation(final String in_context, final String in_type, final String in_motivation, final Target in_target) {
+  public BookAnnotation(final String in_context, final String in_type, final String in_motivation, final AnnotationTargetNode in_Annotation) {
     this.context = in_context;
     this.type = in_type;
     this.motivation = in_motivation;
-    this.target = in_target;
+    this.target = in_Annotation;
   }
 
   /**
@@ -100,15 +105,15 @@ public class Annotation {
   /**
    * @return The target
    */
-  public Target getTarget() {
+  public AnnotationTargetNode getTarget() {
     return this.target;
   }
 
   /**
-   * @param in_target The target
+   * @param in_Annotation_targetNode The target
    */
-  public void setTarget(final Target in_target) {
-    this.target = in_target;
+  public void setTarget(final AnnotationTargetNode in_Annotation_targetNode) {
+    this.target = in_Annotation_targetNode;
   }
 
 

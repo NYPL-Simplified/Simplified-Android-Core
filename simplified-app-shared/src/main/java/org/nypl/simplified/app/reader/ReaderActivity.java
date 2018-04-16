@@ -24,15 +24,16 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
-import org.nypl.simplified.app.NYPLBookmark;
+import org.joda.time.Instant;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ReaderSyncManager;
 import org.nypl.simplified.app.ReaderSyncManagerDelegate;
@@ -49,6 +50,12 @@ import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
+import org.nypl.simplified.books.core.BookDatabaseEntryWritableType;
+import org.nypl.simplified.books.core.BookDatabaseType;
+import org.nypl.simplified.books.core.BookmarkAnnotation;
+import org.nypl.simplified.books.core.SelectorNode;
+import org.nypl.simplified.books.core.TargetNode;
+import org.nypl.simplified.books.core.BodyNode;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
@@ -59,8 +66,11 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+
+import kotlin.Unit;
 
 /**
  * The main reader activity for reading an EPUB.
@@ -97,6 +107,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable Container                         epub_container;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
+  private @Nullable ImageView                         view_bookmark;
   private @Nullable ViewGroup                         view_hud;
   private @Nullable ProgressBar                       view_loading;
   private @Nullable ViewGroup                         view_media;
@@ -113,9 +124,12 @@ public final class ReaderActivity extends Activity implements
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
   private           ReaderBookLocation                current_location;
-  private           ReaderBookLocation                sync_location;
   private           AccountCredentials                credentials;
   private @Nullable ReaderSyncManager                 syncManager;
+  private @Nullable Integer                           currentSpineItemPageIndex;
+  private @Nullable Integer                           currentSpineItemPageCount;
+  private @Nullable String                            currentChapterTitle;
+  private @Nullable ReaderBookLocation                currentPageUserBookmark;
 
 
   /**
@@ -160,6 +174,7 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull(this.view_progress_text);
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
     final ImageView in_toc = NullCheck.notNull(this.view_toc);
+    final ImageView in_bookmark = NullCheck.notNull(this.view_bookmark);
     final ImageView in_settings = NullCheck.notNull(this.view_settings);
     final ImageView in_media_play = NullCheck.notNull(this.view_media_play);
     final ImageView in_media_next = NullCheck.notNull(this.view_media_next);
@@ -177,6 +192,7 @@ public final class ReaderActivity extends Activity implements
           in_progress_text.setTextColor(main_color);
           in_title_text.setTextColor(main_color);
           in_toc.setColorFilter(filter);
+          in_bookmark.setColorFilter(filter);
           in_settings.setColorFilter(filter);
           in_media_play.setColorFilter(filter);
           in_media_next.setColorFilter(filter);
@@ -329,6 +345,8 @@ public final class ReaderActivity extends Activity implements
         R.id.reader_hud_container));
     final ImageView in_toc =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_toc));
+    final ImageView in_bookmark =
+        NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_bookmark));
     final ImageView in_settings =
       NullCheck.notNull((ImageView) in_hud.findViewById(R.id.reader_settings));
     final TextView in_title_text =
@@ -392,6 +410,7 @@ public final class ReaderActivity extends Activity implements
     this.view_web_view = in_webview;
     this.view_hud = in_hud;
     this.view_toc = in_toc;
+    this.view_bookmark = in_bookmark;
     this.view_settings = in_settings;
     this.web_view_resized = true;
     this.view_media = in_media_overlay;
@@ -472,7 +491,7 @@ public final class ReaderActivity extends Activity implements
 
           ReaderActivity.this.credentials = creds;
 
-          //TODO WIP - set package on this.syncManager after onEpubLoadSucceeded()
+          //TODO Does the sync manager need a reference to the epub package? If not, audit where initiation begins..
           initiateSyncManagement();
         }
       }
@@ -490,18 +509,17 @@ public final class ReaderActivity extends Activity implements
   {
     ReaderActivity.LOG.debug("received book location: {}", l);
 
-    //TODO see if I really need this.current_location as an ivar
     this.current_location = l;
 
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
-    final ReaderBookmarksType bm = rs.getBookmarks();
-    //TODO could book_id actually be null?
+    final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
     final BookID in_book_id = NullCheck.notNull(this.book_id);
 
-//    bm.setBookmark(in_book_id, this.current_location);
+    bm.saveReadingPosition(in_book_id, this.current_location);
+    uploadReadingPosition(this.current_location);
 
-    //TODO WIP
-    uploadPageLocation(this.current_location);
+    //Compare to user bookmarks to see if there's a match
+    checkForExistingBookmarkAtLocation(l);
   }
 
   @Override protected void onPause()
@@ -511,8 +529,10 @@ public final class ReaderActivity extends Activity implements
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
 
     if (this.book_id != null && this.current_location != null) {
-//      rs.getBookmarks().setBookmark(this.book_id, this.current_location);
+      rs.getBookmarks().saveReadingPosition(this.book_id, this.current_location);
     }
+
+    syncManager.sendOffAnyQueuedRequest();
   }
 
   @Override protected void onDestroy()
@@ -546,25 +566,18 @@ public final class ReaderActivity extends Activity implements
   }
 
   @Override public void onEPUBLoadSucceeded(
-    final Container c)
-  {
+    final Container c) {
     this.epub_container = c;
     final Package p = NullCheck.notNull(c.getDefaultPackage());
 
     final TextView in_title_text = NullCheck.notNull(this.view_title_text);
     UIThread.runOnUIThread(
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          in_title_text.setText(NullCheck.notNull(p.getTitle()));
-        }
-      });
-
-
-
-    //TODO set package to sync manager.. this.syncManager.package = p;
-
+        new Runnable() {
+          @Override
+          public void run() {
+            in_title_text.setText(NullCheck.notNull(p.getTitle()));
+          }
+        });
 
     /**
      * Configure the TOC button.
@@ -573,10 +586,35 @@ public final class ReaderActivity extends Activity implements
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
     final View in_toc = NullCheck.notNull(this.view_toc);
 
-    in_toc.setOnClickListener( v -> {
+    in_toc.setOnClickListener(v -> {
       final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
       ReaderTOCActivity.startActivityForResult(ReaderActivity.this, sent_toc);
       ReaderActivity.this.overridePendingTransition(0, 0);
+    });
+
+    /**
+     * Configure the Bookmark button.
+     */
+
+    final View in_bookmark = NullCheck.notNull(this.view_bookmark);
+
+    in_bookmark.setOnClickListener(view -> {
+
+      //TODO - Test UI logic of bookmark icon
+      //TODO - Test saving and deleting on the server when icon is toggled
+      //TODO - Test reading and writing bookmarks to the local database
+
+      if (this.currentPageUserBookmark != null) {
+        //TODO delete user bookmark
+//        deleteUserBookmark(this.currentPageUserBookmark);
+        this.currentPageUserBookmark = null;
+      } else {
+        addUserBookmark(this.currentPageUserBookmark);
+        this.currentPageUserBookmark = this.currentPageUserBookmark;
+      }
+
+      udpateBookmarkIconUIState();
+
     });
 
     /**
@@ -586,6 +624,110 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderHTTPServerType hs = rs.getHTTPServer();
     hs.startIfNecessaryForPackage(p, this);
+  }
+
+  private void udpateBookmarkIconUIState() {
+    if (this.currentPageUserBookmark != null) {
+      this.view_bookmark.setImageResource(R.drawable.bookmark_on);
+    } else {
+      this.view_bookmark.setImageResource(R.drawable.bookmark_off);
+    }
+  }
+
+  private void addUserBookmark(final @NonNull ReaderBookLocation bookmark) {
+
+    final BookmarkAnnotation bookAnnotation = getBookmarkAnnotation(bookmark);
+
+    //Attempt to upload bookmark
+    syncManager.postBookmarkToServer(bookAnnotation, (ID) -> {
+
+      if (ID != null) {
+        //TODO replace bookmark with version containing annotation ID
+      } else {
+        LOG.error("No ID returned after attempting to upload bookmark.");
+      }
+
+      return Unit.INSTANCE;
+    });
+
+    //Save bookmark to database
+    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+//    try {
+      //TODO write to the database
+//      entry.entrySetBookmark(bookAnnotation);
+//    } catch (IOException e) {
+//      LOG.error("Error writing bookmark annotation to database.");
+//    }
+  }
+
+  private void deleteUserBookmark(final BookmarkAnnotation annotation) {
+    if (annotation.getId() != null) {
+      syncManager.deleteBookmarkOnServer(annotation.getId(), (Boolean success) -> {
+        if (success) {
+          LOG.debug("Bookmark successfully deleted from server.");
+        } else {
+          LOG.debug("Error deleting bookmark on server. Continuing to delete bookmark locally.");
+        }
+        return Unit.INSTANCE;
+      });
+    } else {
+      LOG.error("No annotation ID present on bookmark. Skipping network request to delete.");
+    }
+
+    //TODO Delete the bookmark from the database
+
+  }
+
+  //TODO maybe move this method to the sync manager
+  @Nullable private BookmarkAnnotation getBookmarkAnnotation(@NonNull ReaderBookLocation bookmark) {
+
+    final String annotContext = "http://www.w3.org/ns/anno.jsonld";
+    final String type = "Annotation";
+    final String motivation = "http://www.w3.org/ns/oa#bookmarking";
+    final String bookID = this.entry.getFeedEntry().getID();
+    final String selectorType = "oa:FragmentSelector";
+    final String value = bookmark.toJsonString();
+    final String timestamp = new Instant().toString();
+    final OptionType<String> opt_deviceID = this.credentials.getAdobeDeviceID().map(
+        id -> id.toString()
+    );
+    final String deviceID;
+    if (opt_deviceID.isSome()) {
+      deviceID = ((Some<String>)opt_deviceID).get();
+    } else {
+      deviceID = "null";
+    }
+
+    float chapterProgress = 0.0f;
+    if (this.currentSpineItemPageCount > 0) {
+      chapterProgress = (float) currentSpineItemPageIndex / currentSpineItemPageCount;
+    }
+    final float bookProgress = (float) this.view_progress_bar.getProgress() / this.view_progress_bar.getMax();
+
+    final SelectorNode selectorNode = new SelectorNode(selectorType, value);
+    final TargetNode targetNode = new TargetNode(bookID, selectorNode);
+    final BodyNode bodyNode = new BodyNode(timestamp, deviceID, this.currentChapterTitle, chapterProgress, bookProgress);
+    return new BookmarkAnnotation(annotContext, bodyNode, null, type, motivation, targetNode);
+  }
+
+  private void checkForExistingBookmarkAtLocation(final @NonNull ReaderBookLocation l) {/**/
+
+    //TODO
+    //
+    //Grab List of local user bookmarks
+
+    //iterate through list
+
+    //COMPARE idref/content cfi of location to current bookmark in loop
+
+    //if they match: set this.currentUserBookmark
+    //if not, set it to null
+
+    //FIXME temp
+    this.currentPageUserBookmark = null;
+
+    //TODO should disallow user interaction with bookmark icon button until this has returned
   }
 
   @Override public void onMediaOverlayIsAvailable(
@@ -666,23 +808,17 @@ public final class ReaderActivity extends Activity implements
      */
 
     final BookID in_book_id = NullCheck.notNull(this.book_id);
-
     final OPDSAcquisitionFeedEntry in_entry = NullCheck.notNull(this.entry.getFeedEntry());
 
-    //TODO see if this can be used for newer concept of bookmarks
-    final ReaderBookmarksType bookmarks = rs.getBookmarks();
+    final ReaderBookmarksSharedPrefsType bookmarks = rs.getBookmarks();
+    final ReaderBookLocation location = bookmarks.getReadingPosition(in_book_id, in_entry);
 
-    final OptionType<ReaderBookLocation> mark =
-      bookmarks.getBookmark(in_book_id, in_entry);
-
-
-    //TODO review and clean this up
-
-
-    final OptionType<ReaderOpenPageRequestType> page_request = mark.map( location -> {
-      ReaderActivity.this.current_location = location;
-      return ReaderOpenPageRequest.fromBookLocation(location);
+    final OptionType<ReaderBookLocation> optionLocation = Option.of(location);
+    final OptionType<ReaderOpenPageRequestType> page_request = optionLocation.map( l -> {
+      ReaderActivity.this.current_location = l;
+      return ReaderOpenPageRequest.fromBookLocation(l);
     });
+
     // is this correct? inject fonts before book opens or after
     js.injectFonts();
 
@@ -752,13 +888,11 @@ public final class ReaderActivity extends Activity implements
       });
   }
 
-  //TODO WIP
-
   /**
    * Reader Sync Manager
    */
 
-  private void uploadPageLocation(final ReaderBookLocation location)
+  private void uploadReadingPosition(final ReaderBookLocation location)
   {
     syncManager.updateServerReadingLocation(location);
   }
@@ -772,18 +906,16 @@ public final class ReaderActivity extends Activity implements
     }
 
     this.syncManager = new ReaderSyncManager(
-        this.entry.getFeedEntry().getID(),
+        this.entry.getFeedEntry(),
         this.credentials,
         Simplified.getCurrentAccount(),
         this);
 
     this.syncManager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
       //Successfully enabled
-      syncManager.synchronizeReadingLocation(
-          this.current_location,
-          this.entry.getFeedEntry(),
-          this);
-      return kotlin.Unit.INSTANCE;
+      syncManager.syncReadingLocation(this.current_location, this);
+      syncManager.syncBookmarks(null);
+      return Unit.INSTANCE;
     });
   }
 
@@ -820,8 +952,6 @@ public final class ReaderActivity extends Activity implements
     ReaderActivity.LOG.debug("pagination changed: {}", e);
     final WebView in_web_view = NullCheck.notNull(this.view_web_view);
 
-
-
     /**
      * Configure the progress bar and text.
      */
@@ -848,6 +978,12 @@ public final class ReaderActivity extends Activity implements
             in_progress_text.setText("");
           } else {
             final OpenPage page = NullCheck.notNull(pages.get(0));
+
+            //TODO Better way to get these values?
+            currentSpineItemPageIndex = page.getSpineItemPageIndex();
+            currentSpineItemPageCount = page.getSpineItemPageCount();
+            currentChapterTitle = default_package.getSpineItem(page.getIDRef()).getTitle();
+
             in_progress_text.setText(
               NullCheck.notNull(
                 String.format(
@@ -1083,24 +1219,16 @@ public final class ReaderActivity extends Activity implements
 
   private void navigateTo(final ReaderBookLocation location) {
 
-    //TODO WIP
-    //TODO Not sure if use of Option Type's is the best. Copying what was already there.
-
     OptionType<ReaderOpenPageRequestType> page_request = null;
 
     final OptionType<ReaderBookLocation> optLocation = Option.some(location);
 
-    page_request = optLocation.map(
-        new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
-          @Override
-          public ReaderOpenPageRequestType call(
-              final ReaderBookLocation l) {
-            LOG.debug("CurrentPage location {}", l);
-
-            ReaderActivity.this.sync_location = l;
-            return ReaderOpenPageRequest.fromBookLocation(l);
-          }
-        });
+    page_request = optLocation.map((l) -> {
+      LOG.debug("CurrentPage location {}", l);
+      //TODO audit this
+      ReaderActivity.this.current_location = l;
+      return ReaderOpenPageRequest.fromBookLocation(l);
+    });
 
     final OptionType<ReaderOpenPageRequestType> page = page_request;
 
@@ -1112,69 +1240,5 @@ public final class ReaderActivity extends Activity implements
     final Package p = NullCheck.notNull(c.getDefaultPackage());
 
     js.openBook(p, vs, page);
-
   }
-
-//TODO old code for reference
-//    OptionType<ReaderOpenPageRequestType> page_request = null;
-//
-//          final OptionType<ReaderBookLocation> mark = Option.some(ReaderBookLocation.fromJSON(o));
-//
-//          page_request = mark.map(
-//              new FunctionType<ReaderBookLocation, ReaderOpenPageRequestType>() {
-//                @Override
-//                public ReaderOpenPageRequestType call(
-//                    final ReaderBookLocation l) {
-//                  LOG.debug("CurrentPage location {}", l);
-//
-//                  final String chapter = default_package.getSpineItem(l.getIDRef()).getTitle();
-//                  builder.setMessage("Would you like to go to the latest page read? \n\nChapter:\n\" " + chapter + "\"");
-//
-//                  //TODO not sure what this.sync_location is being used for
-//                  ReaderActivity.this.sync_location = l;
-//                  return ReaderOpenPageRequest.fromBookLocation(l);
-//                }
-//              });
-//
-//
-//          LOG.debug("CurrentPage sync {}", text);
-//
-//        } catch (JSONException e) {
-//          e.printStackTrace();
-//        }
-//
-//      }
-//    }
-//
-//    final OptionType<ReaderOpenPageRequestType> page = page_request;
-//
-//    builder.setPositiveButton("YES",
-//        new DialogInterface.OnClickListener() {
-//          @Override
-//          public void onClick(final DialogInterface dialog, final int which) {
-//            // positive button logic
-//
-//            final ReaderReadiumJavaScriptAPIType js =
-//                NullCheck.notNull(ReaderActivity.this.readium_js_api);
-//            final ReaderReadiumViewerSettings vs =
-//                NullCheck.notNull(ReaderActivity.this.viewer_settings);
-//            final Container c = NullCheck.notNull(ReaderActivity.this.epub_container);
-//            final Package p = NullCheck.notNull(c.getDefaultPackage());
-//
-//            js.openBook(p, vs, page);
-//            Simplified.getSharedPrefs().putBoolean("post_last_read", true);
-//            LOG.debug("CurrentPage set prefs {}", Simplified.getSharedPrefs().getBoolean("post_last_read"));
-//          }
-//        });
-
-//
-//  @Override
-//  public void bookmarkUploadDidFinish(@NotNull NYPLBookmark bookmark, @NotNull String bookID) {
-//
-//  }
-//
-//  @Override
-//  public void bookmarkSyncDidFinish(boolean success, @NotNull List<NYPLBookmark> bookmarks) {
-//
-//  }
 }

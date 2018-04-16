@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.catalog.annotation;
+package org.nypl.simplified.opds.core.annotation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import com.google.gson.annotations.SerializedName;
  *
  */
 @Generated("org.jsonschema2pojo")
-public class AnnotationResult {
+public class AnnotationsServerResponse {
 
   @SerializedName("@context")
   @Expose
@@ -28,12 +28,12 @@ public class AnnotationResult {
   private String id;
   @SerializedName("first")
   @Expose
-  private First first;
+  private AnnotationFirstNode annotationFirstNode;
 
   /**
    * No args constructor for use in serialization
    */
-  public AnnotationResult() {
+  public AnnotationsServerResponse() {
   }
   /**
    * @return The context
@@ -92,17 +92,17 @@ public class AnnotationResult {
   }
 
   /**
-   * @return The first
+   * @return The annotationFirstNode
    */
-  public First getFirst() {
-    return this.first;
+  public AnnotationFirstNode getAnnotationFirstNode() {
+    return this.annotationFirstNode;
   }
 
   /**
-   * @param in_first The first
+   * @param in_Annotation_firstNode The annotationFirstNode
    */
-  public void setFirst(final First in_first) {
-    this.first = in_first;
+  public void setAnnotationFirstNode(final AnnotationFirstNode in_Annotation_firstNode) {
+    this.annotationFirstNode = in_Annotation_firstNode;
   }
 
 }

@@ -1,12 +1,12 @@
 buildscript {
-  ext.kotlin_version = '1.2.21'
+  ext.kotlin_version = '1.2.31'
   repositories {
     google()
     jcenter()
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.0.1'
+    classpath 'com.android.tools.build:gradle:3.1.1'
     classpath 'com.netflix.nebula:gradle-lint-plugin:7.4.0'
     classpath 'com.nabilhachicha:android-native-dependencies:0.1.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"

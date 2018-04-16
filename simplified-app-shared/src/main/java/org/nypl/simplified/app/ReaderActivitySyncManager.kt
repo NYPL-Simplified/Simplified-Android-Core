@@ -7,21 +7,22 @@ import org.nypl.simplified.app.reader.ReaderBookLocation
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
+import org.nypl.simplified.books.core.BookmarkAnnotation
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-import org.nypl.simplified.opds.core.annotation.BookAnnotation
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.Timer
+import java.util.*
 import kotlin.concurrent.schedule
 
+enum class ReadingLocationSyncStatus {
+  IDLE, BUSY
+}
 
-//TODO could probably get rid of this interface
+//TODO re-design to eliminate need for interface
 interface ReaderSyncManagerDelegate {
   fun navigateToLocation(location: ReaderBookLocation)
-//  fun bookmarkUploadDidFinish(bookmark: NYPLBookmark, bookID: String)
-//  fun bookmarkSyncDidFinish(success: Boolean, bookmarks: List<NYPLBookmark>)
 }
 
 /**
@@ -29,21 +30,25 @@ interface ReaderSyncManagerDelegate {
  * Utilize ReaderSyncManagerDelegate Interface to
  * communicate commands to a book renderer.
  */
-class ReaderSyncManager(private val entryID: String,
+class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
                         credentials: AccountCredentials,
                         private val libraryAccount: Account,
                         private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate {
+
   private companion object {
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
-  //TODO WIP - observe when set, then show jump to location dialog with appropriate messaging
+  //TODO Is the book package needed?
   val bookPackage: Package? = null
 
-  // Delay server posts until first page sync is complete
-  private var delayPageSync: Boolean = true
+  private val delayTimeInterval = 120L
+
+  private var delayReadingPositionSync = true
   private val annotationsManager = AnnotationsManager(libraryAccount, credentials, delegate as Context)
-  private var queueTimer = Timer()
+  private var status = ReadingLocationSyncStatus.IDLE
+  private var queuedReadingPosition: ReaderBookLocation? = null
+
 
   /**
    * See if sync is enabled on the server before attempting to synchronize
@@ -60,23 +65,22 @@ class ReaderSyncManager(private val entryID: String,
     }
   }
 
-  fun synchronizeReadingLocation(currentLocation: ReaderBookLocation,
-                                 feedEntry: OPDSAcquisitionFeedEntry?,
-                                 context: Context) {
+  fun syncReadingLocation(currentLocation: ReaderBookLocation,
+                          context: Context) {
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
-      delayPageSync = false
+      delayReadingPositionSync = false
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
     if (feedEntry == null || !feedEntry.annotations.isSome) {
-      delayPageSync = false
+      delayReadingPositionSync = false
       LOG.error("No annotations uri or feed entry exists for this book. Abandoning sync attempt.")
       return
     }
 
     val uriString = (feedEntry.annotations as Some<URI>).get().toString()
 
-    annotationsManager.requestReadingPositionOnServer(entryID, uriString, { serverLocation ->
+    annotationsManager.requestReadingPositionOnServer(feedEntry.id, uriString, { serverLocation ->
       interpretUXForSync(serverLocation, context, currentLocation)
     })
   }
@@ -84,7 +88,7 @@ class ReaderSyncManager(private val entryID: String,
   private fun interpretUXForSync(serverLocation: ReaderBookLocation?,
                                  context: Context,
                                  currentLocation: ReaderBookLocation) {
-    delayPageSync = false
+    delayReadingPositionSync = false
 
     if (serverLocation == null) {
       LOG.debug("No server location object returned.")
@@ -139,26 +143,95 @@ class ReaderSyncManager(private val entryID: String,
 
   /**
    * Attempt to update current page to the server.
+   * Prevent high-frequency requests to the server by queueing and shooting
+   * off tasks at a set time interval.
    * @param location The page to be sent as the current "left off" page
    */
   fun updateServerReadingLocation(location: ReaderBookLocation) {
-    if (delayPageSync) {
+
+    if (delayReadingPositionSync) {
       LOG.debug("Post of last read position delayed. Initial sync still in progress.")
       return
     }
 
     if (annotationsManager.syncIsPossibleAndPermitted()) {
-      queueTimer.cancel()
-      queueTimer = Timer()
-      queueTimer.schedule(3000) {
-        val locString = location.toJsonString()
-        if (locString != null) {
-          annotationsManager.updateReadingPosition(entryID, locString)
-        } else {
+
+      synchronized(this) {
+
+        val loc = location.toJsonString()
+        if (loc == null) {
           LOG.error("Skipped upload of location due to unexpected null json representation")
+          return
+        }
+
+        when (this.status) {
+
+          ReadingLocationSyncStatus.IDLE -> {
+            this.status = ReadingLocationSyncStatus.BUSY
+            annotationsManager.updateReadingPosition(feedEntry.id, loc)
+
+            Timer("ReadingPositionTimer", false).schedule(delayTimeInterval) {
+              synchronized(this) {
+                status = ReadingLocationSyncStatus.IDLE
+                if (queuedReadingPosition != null) {
+                  annotationsManager.updateReadingPosition(feedEntry.id, loc)
+                  queuedReadingPosition = null
+                }
+              }
+            }
+          }
+
+          ReadingLocationSyncStatus.BUSY -> {
+            queuedReadingPosition = location
+          }
         }
       }
     }
+  }
+
+  fun sendOffAnyQueuedRequest() {
+    synchronized(this) {
+      val pos = queuedReadingPosition?.toJsonString()
+      if (pos != null) {
+        annotationsManager.updateReadingPosition(feedEntry.id, pos)
+      }
+    }
+  }
+
+  /**
+   * Download list of bookmark annotations from the server for the particular book,
+   * and synchronize that list as best as possible with the current list
+   * of bookmarks saved in the local database.
+   * @param completion returns a List of bookmarks, empty if none exist
+   */
+  fun syncBookmarks(completion: ((bookmarks: List<BookmarkAnnotation>) -> Unit)?) {
+
+    //TODO WIP
+
+    val uri = if (feedEntry.annotations.isSome) {
+      (feedEntry.annotations as Some<URI>).get().toString()
+    } else {
+      LOG.error("No annotations URI present in feed entry.")
+      return
+    }
+
+    annotationsManager.requestBookmarksFromServer(uri) { bookmarks ->
+
+      //TODO process downloaded bookmarks
+      LOG.debug("Bookmarks: ${bookmarks}")
+
+    }
+
+  }
+
+  fun postBookmarkToServer(bookAnnotation: BookmarkAnnotation,
+                           completion: (serverID: String?) -> Unit) {
+    annotationsManager.postBookmarkToServer(bookAnnotation, completion)
+  }
+
+  fun deleteBookmarkOnServer(annotationID: String,
+                             completion: (success: Boolean) -> Unit) {
+    annotationsManager.deleteBookmarkOnServer(annotationID, completion)
   }
 
   private fun setPermissionSharedPref(status: Boolean) {

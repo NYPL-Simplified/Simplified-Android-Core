@@ -318,7 +318,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     }
   }
 
-  //TODO switch WIP
+  //TODO UISwitch logic still a WIP
   @Override
   public boolean onOptionsItemSelected(
     final @Nullable MenuItem item_mn) {
@@ -609,7 +609,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     }
 
     if (this.account.supportsCardCreator()) {
-
       in_signup.setOnClickListener(
         new OnClickListener() {
           @Override
@@ -620,11 +619,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           }
         });
       in_signup.setText(R.string.need_card_button);
-
     }
     else if (this.account.getCardCreatorUrl() != null)
     {
-
       in_signup.setOnClickListener(
         new OnClickListener() {
           @Override
@@ -638,13 +635,8 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           }
         });
       in_signup.setText(R.string.need_card_button);
-
     }
 
-
-
-
-//TODO WIP
     final boolean permission = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.account.getId());
     this.sync_switch.setChecked(permission);
 
@@ -658,7 +650,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           } else {
             Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", this.account.getId(), false);
             this.sync_switch.setChecked(false);
-            //TODO TOAST
           }
           this.sync_switch.setEnabled(true);
           return kotlin.Unit.INSTANCE;
@@ -779,7 +770,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
   }
 
-  //TODO WIP
   private boolean syncButtonShouldBeVisible() {
     return (this.account.supportsSimplyESync() && this.account.getId() == Simplified.getCurrentAccount().getId());
   }
@@ -880,7 +870,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       });
   }
 
-  //TODO I'm not really sure why onResume() gets called when toggling between logged in and logged out states
   @Override
   protected void onResume() {
     super.onResume();
@@ -956,7 +945,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     });
   }
 
-  //FIXME For forward-looking sanity, this method should set the image resource directory dynamically from the key in Accounts.json
+  //FIXME No Explanation Needed
   private void inefficientlySetLibraryLogo(ImageView icon) {
     if (MainSettingsAccountActivity.this.account.getId() == 0) {
       icon.setImageResource(R.drawable.account_logo_nypl);

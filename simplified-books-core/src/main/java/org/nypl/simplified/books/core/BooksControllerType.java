@@ -34,6 +34,12 @@ public interface BooksControllerType
   BookDatabaseReadableType bookGetDatabase();
 
   /**
+   * @return A writable reference to the current book database.
+   */
+
+  BookDatabaseType bookGetWritableDatabase();
+
+  /**
    * Borrow the given book, delivering the results to the given {@code
    * listener}.
    *  @param id       The book ID

@@ -55,12 +55,21 @@
         android:text="@string/placeholder_long_title"/>
 
       <ImageView
+          android:id="@+id/reader_bookmark"
+          android:src="@drawable/bookmark_off"
+          android:layout_width="40dp"
+          android:layout_height="26dp"
+          android:layout_alignParentRight="true"
+          android:layout_marginEnd="2dp"
+          android:layout_marginStart="2dp"
+          android:contentDescription="@string/reader_accessibility_bookmark"/>
+      <ImageView
         android:id="@+id/reader_toc"
         android:layout_width="40dp"
         android:layout_height="30dp"
         android:layout_marginStart="2dp"
         android:layout_marginEnd="2dp"
-        android:layout_alignParentRight="true"
+        android:layout_toLeftOf="@id/reader_bookmark"
         android:contentDescription="@string/reader_accessibility_toc"
         android:src="@drawable/list_8x"/>
 

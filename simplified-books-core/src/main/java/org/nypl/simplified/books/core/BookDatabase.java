@@ -3,6 +3,8 @@ package org.nypl.simplified.books.core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
@@ -12,8 +14,11 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+
+import org.jetbrains.annotations.NotNull;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeLoanID;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
@@ -37,7 +42,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -341,6 +348,8 @@ public final class BookDatabase implements BookDatabaseType
     private final File                   file_lock;
     private final File                   file_meta;
     private final File                   file_meta_tmp;
+    private final File                   file_bookmarks;
+    private final File                   file_bookmarks_tmp;
     private final BookID                 id;
     private final OPDSJSONParserType     parser;
     private final OPDSJSONSerializerType serializer;
@@ -371,6 +380,8 @@ public final class BookDatabase implements BookDatabaseType
       this.file_adobe_meta = new File(this.directory, "meta_adobe.json");
       this.file_adobe_meta_tmp =
         new File(this.directory, "meta_adobe.json.tmp");
+      this.file_bookmarks = new File(this.directory, "bookmarks.json");
+      this.file_bookmarks_tmp = new File(this.directory, "bookmarks.json.tmp");
 
       this.log =
         NullCheck.notNull(LoggerFactory.getLogger(BookDatabaseEntry.class));
@@ -559,6 +570,106 @@ public final class BookDatabase implements BookDatabaseType
             return BookDatabaseEntry.this.updateSnapshotLocked();
           }
         });
+    }
+
+    //TODO WIP
+    //
+
+    @Override public BookDatabaseEntrySnapshot entrySetBookmark(
+        final BookAnnotation bm)
+        throws IOException {
+      final List<BookAnnotation> bookmarks = entryGetBookmarksList();
+      bookmarks.add(bm);
+      return entrySetBookmarksList(bookmarks);
+    }
+
+    @Override public BookDatabaseEntrySnapshot entryDeleteBookmark(
+        final BookAnnotation bookmark)
+        throws IOException {
+      final List<BookAnnotation> bookmarks = entryGetBookmarksList();
+      bookmarks.remove(bookmark);
+      return entrySetBookmarksList(bookmarks);
+    }
+
+    @NotNull
+    @Override public List<BookAnnotation> entryGetBookmarksList()
+        throws IOException {
+      return FileLocking.withFileThreadLocked(
+          this.file_lock,
+          (long) BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS,
+          new PartialFunctionType<Unit, List<BookAnnotation>, IOException>()
+          {
+            @Override public List<BookAnnotation> call(
+                final Unit x)
+                throws IOException
+            {
+              return BookDatabaseEntry.this.getBookmarksLocked();
+            }
+          });
+    }
+
+    BookDatabaseEntrySnapshot entrySetBookmarksList(
+        final @NotNull List<BookAnnotation> bookmarks)
+        throws IOException
+    {
+      return FileLocking.withFileThreadLocked(
+          this.file_lock,
+          (long) BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS,
+          new PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException>()
+          {
+            @Override public BookDatabaseEntrySnapshot call(
+                final Unit x)
+                throws IOException
+            {
+              BookDatabaseEntry.this.setBookmarksListLocked(bookmarks);
+              return BookDatabaseEntry.this.updateSnapshotLocked();
+            }
+          });
+    }
+
+    @NotNull private List<BookAnnotation> getBookmarksLocked()
+        throws IOException {
+      final FileInputStream is = new FileInputStream(this.file_bookmarks);
+
+      //TODO Turn input stream into List<BookAnnotation>
+
+      try {
+        //FIXME untested
+        final Gson gson = new Gson();
+        final JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
+        final List<BookAnnotation> bookmarks = new ArrayList<>();
+
+        reader.beginArray();
+        while (reader.hasNext()) {
+          BookAnnotation bookmark = gson.fromJson(reader, BookAnnotation.class);
+          bookmarks.add(bookmark);
+        }
+        reader.endArray();
+        reader.close();
+
+        return bookmarks;
+      } finally {
+        is.close();
+      }
+    }
+
+    private void setBookmarksListLocked(
+        final List<BookAnnotation> bookmarks)
+        throws IOException
+    {
+      this.log.debug("updating bookmarks list {}", this.file_bookmarks);
+      final OutputStream stream = new FileOutputStream(this.file_bookmarks_tmp);
+
+      try {
+        //FIXME test and consider converting to jackson libraries across the board
+        ObjectMapper mapper = new ObjectMapper();
+        final ObjectNode node = mapper.valueToTree(bookmarks);
+        this.serializer.serializeToStream(node, stream);
+      } finally {
+        stream.flush();
+        stream.close();
+      }
+      FileUtilities.fileRename(this.file_bookmarks_tmp, this.file_bookmarks);
     }
 
     @Override public BookDatabaseEntrySnapshot entryUpdateAll(

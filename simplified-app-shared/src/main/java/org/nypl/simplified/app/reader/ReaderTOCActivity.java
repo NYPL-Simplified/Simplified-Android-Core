@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
@@ -17,14 +15,17 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.slf4j.Logger;
 
 /**
- * Activity for displaying the table of contents on devices with small screens.
+ * Activity for displaying the ViewPager which contains Fragments
+ * for the Table of Contents and User-Saved Bookmarks.
  */
 
 public final class ReaderTOCActivity extends AppCompatActivity
-  implements ReaderSettingsListenerType, ReaderTOCViewSelectionListenerType
+  implements ReaderSettingsListenerType, ReaderTOCContentsFragmentSelectionListenerType,
+    ReaderTOCBookmarksFragmentSelectionListenerType
 {
   /**
    * The name of the argument containing the TOC.
@@ -55,7 +56,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
       "org.nypl.simplified.app.reader.ReaderTOCActivity.toc_selected";
   }
 
-  private @Nullable ReaderTOCView view;
   public @Nullable ReaderTOC in_toc;
 
   /**
@@ -100,11 +100,7 @@ public final class ReaderTOCActivity extends AppCompatActivity
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
-    this.setTitle("Table of Contents");
-
-    //TODO WIP
-
-    //TODO Deleted theme setting stuff
+    this.setTitle(R.string.reader_toc);
 
     super.onCreate(state);
 
@@ -122,10 +118,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
     this.in_toc = NullCheck.notNull(
       (ReaderTOC) args.getSerializable(ReaderTOCActivity.TOC_ID));
 
-//    final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
-
-
-    //TODO WIP
     this.setContentView(R.layout.reader_toc_tab_layout);
 
     ViewPager pager = findViewById(R.id.reader_toc_view_pager);
@@ -134,25 +126,22 @@ public final class ReaderTOCActivity extends AppCompatActivity
 
     TabLayout tabLayout = findViewById(R.id.reader_toc_tab_layout);
     tabLayout.setupWithViewPager(pager);
-
-//    this.view = new ReaderTOCView(inflater, this, in_toc, this);
-//
-//    this.setContentView(this.view.getLayoutView());
-  }
-
-  @Override protected void onDestroy()
-  {
-    super.onDestroy();
-    ReaderTOCActivity.LOG.debug("onDestroy");
-
-    NullCheck.notNull(this.view).onTOCViewDestroy();
   }
 
   @Override public void onReaderSettingsChanged(
     final ReaderSettingsType s)
   {
-    NullCheck.notNull(this.view).onReaderSettingsChanged(s);
+    final ReaderTOCContentsFragment contentsFragment =
+        (ReaderTOCContentsFragment) getSupportFragmentManager().findFragmentById(R.id.reader_toc);
+
+    if (contentsFragment != null) {
+      contentsFragment.onReaderSettingsChanged(s);
+    }
   }
+
+  /**
+   * ReaderTOCContentsFragmentSelectionListener Methods
+   */
 
   @Override public void onTOCBackSelected()
   {
@@ -166,5 +155,14 @@ public final class ReaderTOCActivity extends AppCompatActivity
     intent.putExtra(ReaderTOCActivity.TOC_SELECTED_ID, e);
     this.setResult(Activity.RESULT_OK, intent);
     this.finish();
+  }
+
+  /**
+   * ReaderTOCBookmarksFragmentSelectionListener Methods
+   */
+
+  @Override
+  public void onBookmarkSelected(BookAnnotation bookmark) {
+    //FIXME STUB
   }
 }

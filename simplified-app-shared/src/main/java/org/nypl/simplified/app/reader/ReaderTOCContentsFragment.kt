@@ -24,10 +24,11 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
   private var inflater: LayoutInflater? = null
 
   private var adapter: ArrayAdapter<ReaderTOC.TOCElement>? = null
-  private var listener: ReaderTOCViewSelectionListenerType? = null
+  private var listener: ReaderTOCContentsFragmentSelectionListenerType? = null
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                             savedInstanceState: Bundle?): View? {
+
     this.inflater = inflater
     readerTOCLayout = inflater.inflate(R.layout.reader_toc, null)
     readerTOCListView = readerTOCLayout?.findViewById(R.id.reader_toc_list)
@@ -48,11 +49,11 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
-    if (context is ReaderTOCViewSelectionListenerType) {
+    if (context is ReaderTOCContentsFragmentSelectionListenerType) {
       listener = context
     } else {
       throw RuntimeException(context.toString() +
-          " must implement ReaderTOCViewSelectionListenerType")
+          " must implement ReaderTOCContentsFragmentSelectionListenerType")
     }
   }
 
@@ -67,7 +68,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
 
   private fun applyColorScheme(cs: ReaderColorScheme) {
     UIThread.checkIsUIThread()
-    if (cs != null) readerTOCListView?.rootView?.setBackgroundColor(cs.backgroundColor)
+    readerTOCListView?.rootView?.setBackgroundColor(cs.backgroundColor)
   }
 
   /**
@@ -86,7 +87,6 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
    * List View Adapter
    */
 
-  //TODO I'm not sure what the point of implementing all these overrides is...
   override fun areAllItemsEnabled(): Boolean {
     return adapter!!.areAllItemsEnabled()
   }
@@ -108,11 +108,11 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
   }
 
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
-    var item_view: ViewGroup
+    var itemView: ViewGroup
     if (reuse != null) {
-      item_view = reuse as ViewGroup
+      itemView = reuse as ViewGroup
     } else {
-      item_view = inflater?.inflate(R.layout.reader_toc_element, parent, false) as ViewGroup
+      itemView = inflater?.inflate(R.layout.reader_toc_element, parent, false) as ViewGroup
     }
 
     /**
@@ -120,9 +120,9 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
      * indentation level.
      */
 
-    val text_view = item_view.findViewById<TextView>(R.id.reader_toc_element_text)
+    val textView = itemView.findViewById<TextView>(R.id.reader_toc_element_text)
     val element = adapter?.getItem(position)
-    text_view.setText(element?.title)
+    textView.text = element?.title ?: "TOC Marker"
 
     val rs = Simplified.getReaderAppServices()
     val settings = rs.settings
@@ -134,14 +134,14 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
 
     val leftIndent = if (element != null) { rs.screenDPToPixels(element.indent * 16) } else { 0.0 }
     p.setMargins(leftIndent.toInt(), 0, 0, 0)
-    text_view.layoutParams = p
-    text_view.setTextColor(settings.colorScheme.foregroundColor)
+    textView.layoutParams = p
+    textView.setTextColor(settings.colorScheme.foregroundColor)
 
-    item_view.setOnClickListener { _ ->
+    itemView.setOnClickListener { _ ->
       this.listener?.onTOCItemSelected(element)
     }
 
-    return item_view
+    return itemView
   }
 
   override fun getViewTypeCount(): Int {
