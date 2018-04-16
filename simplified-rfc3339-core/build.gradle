@@ -2,12 +2,16 @@ apply plugin: 'com.android.library'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.2"
+  buildToolsVersion "27.0.3"
 }
 
 description = 'simplified-rfc3339-core'
 
+repositories {
+  jcenter()
+}
+
 dependencies {
-  compile group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
-  compile group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
+  implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
+  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
 }

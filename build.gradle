@@ -6,7 +6,7 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.0.1'
+    classpath 'com.android.tools.build:gradle:3.1.0'
     classpath 'com.netflix.nebula:gradle-lint-plugin:7.4.0'
     classpath 'com.nabilhachicha:android-native-dependencies:0.1.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -36,7 +36,7 @@ subprojects {
     }
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url "https://jitpack.io" }
-    // Needed for support-v4 26.0.0+
+    // Needed for support-v4 libraries
     maven { url "https://maven.google.com" }
   }
 }
