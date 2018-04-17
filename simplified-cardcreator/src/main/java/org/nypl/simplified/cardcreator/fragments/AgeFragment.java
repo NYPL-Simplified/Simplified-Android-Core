@@ -58,10 +58,7 @@ public class AgeFragment extends Fragment {
 
     final View root_view = inflater.inflate(R.layout.fragment_age, container, false);
 
-    ((TextView) root_view.findViewById(android.R.id.text1)).setText("To obtain a digital library card from the "
-      + "New York Public Library, you must live, work, or attend school in New York State. "
-      + "You must also be at least 13 years of age and be physically present in New York at the time of sign-up."
-      + "\n\n\nYou must be 13 years of age or older to sign up for a library card. How old are you?");
+    ((TextView) root_view.findViewById(android.R.id.text1)).setText(R.string.age_verification_challenge);
 
     root_view.findViewById(android.R.id.text1).setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
 

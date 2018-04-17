@@ -235,8 +235,14 @@
   <string name="need_card_question">Don\'t have a library card?</string>
   <string name="need_card_button">Sign Up</string>
   <string name="need_card_create">Create Card</string>
+
   <string name="label_simplye_logo">SimplyE logo</string>
   <string name="label_find_library_button">Click this button to find your local library and peruse its catalog.</string>
   <string name="label_instant_classics_button">Click this button to peruse the Instant Classics collection.</string>
+
+  <string name="you_must_be_in_new_york">You must be in New York to sign up for a library card.  Please try to sign up again when you are in another location.</string>
+  <string name="you_are_in_new_york">We have successfully determined that you are in New York!</string>
+  <string name="done_get_location">Done</string>
+  <string name="next_get_location">Next</string>
 
 </resources>
