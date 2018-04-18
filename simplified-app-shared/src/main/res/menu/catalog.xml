@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item
     android:id="@+id/catalog_action_search"
@@ -8,6 +7,6 @@
     android:title="@string/catalog_search"
     android:enabled="false"
     android:visible="true"
-    app:showAsAction="always"
-    app:actionViewClass="android.widget.SearchView" />
+    android:actionViewClass="android.widget.SearchView"
+    android:showAsAction="always"/>
 </menu>
