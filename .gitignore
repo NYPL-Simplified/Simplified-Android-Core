@@ -23,3 +23,9 @@ ReaderClientCert.sig
 bugsnag.conf 
 helpstack.conf 
 *.jks
+
+# backup files
+*~
+
+# all Android Studio cruft
+/.idea
