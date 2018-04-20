@@ -688,44 +688,29 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     return true;
   }
 
-  private void onCreateOptionsMenuSearchItem(
-    final Menu menu_nn)
-  {
+
+
+  /**
+   * If the feed actually has a search URI, then show the search field.
+   * Otherwise, disable and hide it.
+   */
+  private void onCreateOptionsMenuSearchItem(final Menu menu_nn) {
     final MenuItem search_item = menu_nn.findItem(R.id.catalog_action_search);
 
-    /**
-     * If the feed actually has a search URI, then show the search field.
-     * Otherwise, disable and hide it.
-     */
-
     final FeedType feed_actual = NullCheck.notNull(this.feed);
+
     final OptionType<FeedSearchType> search_opt = feed_actual.getFeedSearch();
+
+    // Set some placeholder text
+    final CatalogFeedArgumentsType args = this.getArguments();
+
     boolean search_ok = false;
     if (search_opt.isSome()) {
-      final Some<FeedSearchType> search_some =
-        (Some<FeedSearchType>) search_opt;
+      final Some<FeedSearchType> search_some = (Some<FeedSearchType>) search_opt;
 
       this.search_view = (SearchView) search_item.getActionView();
-      this.search_view.setSubmitButtonEnabled(true);
-      this.search_view.setIconifiedByDefault(false);
-      search_item.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-      search_item.expandActionView();
 
-      /**
-       * Set some placeholder text
-       */
-
-      final CatalogFeedArgumentsType args = this.getArguments();
-      this.search_view.setQueryHint("Search " + this.feed.getFeedTitle());
-      if (args.getTitle().startsWith("Search"))
-      {
-        this.search_view.setQueryHint(args.getTitle());
-      }
-
-      /**
-       * Check that the search URI is of an understood type.
-       */
-
+      // Check that the search URI is of an understood type.
       final Resources rr = NullCheck.notNull(this.getResources());
       final FeedSearchType search = search_some.get();
       search_ok = search.matchSearch(
@@ -748,13 +733,31 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
             return NullCheck.notNull(Boolean.TRUE);
           }
         });
+
+    } else {
+      CatalogFeedActivity.LOG.debug("Feed has no search opts.");
     }
 
     if (search_ok) {
+      this.search_view.setSubmitButtonEnabled(true);
+      this.search_view.setIconifiedByDefault(false);
+      search_item.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+      search_item.expandActionView();
+
+      this.search_view.setQueryHint("Search " + this.feed.getFeedTitle());
+      if (args.getTitle().startsWith("Search")) {
+        this.search_view.setQueryHint(args.getTitle());
+      }
+
       search_item.setEnabled(true);
       search_item.setVisible(true);
+    } else {
+      search_item.setEnabled(false);
+      search_item.collapseActionView();
+      search_item.setVisible(false);
     }
   }
+
 
   @Override protected void onDestroy()
   {
