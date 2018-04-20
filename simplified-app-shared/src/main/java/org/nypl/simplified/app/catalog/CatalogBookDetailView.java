@@ -25,6 +25,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+import com.io7m.jnull.NullCheckException;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
@@ -108,7 +109,8 @@ public final class CatalogBookDetailView implements Observer,
   private final ViewGroup                      book_download;
   private final LinearLayout                   book_download_buttons;
   private final Button                         book_download_report_button;
-  private final Button                         related_books_button;
+  private final ViewGroup related_layout;
+  private final Button related_books_button;
   private final TextView                       book_download_text;
   private final ViewGroup                      book_downloading;
   private final Button                         book_downloading_cancel;
@@ -257,28 +259,24 @@ public final class CatalogBookDetailView implements Observer,
       }
     });
 
-    final ViewGroup related_layout = NullCheck.notNull(
-      (ViewGroup) layout.findViewById(R.id.book_related_layout));
-    this.related_books_button = NullCheck.notNull(
-            (Button) related_layout.findViewById(R.id.related_books_button));
+
+    this.related_layout = (ViewGroup) layout.findViewById(R.id.book_related_layout);
+
+    this.related_books_button = (Button) this.related_layout.findViewById(R.id.related_books_button);
+
     this.book_download_report_button = NullCheck.notNull(
-            (Button) related_layout.findViewById(R.id.book_dialog_report_button));
+            (Button) layout.findViewById(R.id.book_dialog_report_button));
 
-    /**
-     * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
-     * ratio and set the width of the cover layout.
-     */
 
+    /* Assuming a roughly fixed height for cover images, assume a 4:3 aspect
+     * ratio and set the width of the cover layout. */
     final int cover_height = header_cover.getLayoutParams().height;
     final int cover_width = (int) (((double) cover_height / 4.0) * 3.0);
     final LinearLayout.LayoutParams cp =
       new LinearLayout.LayoutParams(cover_width, LayoutParams.WRAP_CONTENT);
     header_left.setLayoutParams(cp);
 
-    /**
-     * Configure detail texts.
-     */
-
+    /* Configure detail texts. */
     final OPDSAcquisitionFeedEntry eo = in_entry.getFeedEntry();
     CatalogBookDetailView.configureSummarySectionTitle(summary_section_title);
 
@@ -297,7 +295,8 @@ public final class CatalogBookDetailView implements Observer,
 
     cover_provider.loadCoverInto(
       in_entry, header_cover, cover_width, cover_height);
-  }
+  }//constructor
+
 
   private static void configureButtonsHeight(
     final Resources rr,
@@ -985,6 +984,7 @@ public final class CatalogBookDetailView implements Observer,
     return Unit.unit();
   }
 
+
   private void onStatus(
     final FeedEntryOPDS e,
     final OptionType<BookStatusType> status_opt)
@@ -1053,12 +1053,18 @@ public final class CatalogBookDetailView implements Observer,
 
     if (related_book_link.isSome()) {
       final Button books_button = CatalogBookDetailView.this.related_books_button;
-      books_button.setOnClickListener(related_book_listener);
+      if (books_button != null) {
+        // set the "Related Books" section visibility to display, and set the button to listen for user actions
+        CatalogBookDetailView.this.related_layout.setVisibility(View.VISIBLE);
+
+        books_button.setOnClickListener(related_book_listener);
+      }
     }
 
     final Button report_button = this.book_download_report_button;
     report_button.setOnClickListener(new CatalogBookReport(this.activity, e));
-  }
+  }//onStatus
+
 
   @Override public void update(
     final @Nullable Observable observable,

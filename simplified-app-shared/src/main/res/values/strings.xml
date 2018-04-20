@@ -239,5 +239,6 @@
   <string name="you_are_in_new_york">We have successfully determined that you are in New York!</string>
   <string name="done_get_location">Done</string>
   <string name="next_get_location">Next</string>
+  <string name="book_summary_read_more">More...</string>
 
 </resources>
