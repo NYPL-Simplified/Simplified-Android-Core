@@ -244,5 +244,6 @@
 
   <!-- ZXing Scanner -->
   <string name="barcode_scanner_prompt">Scan your library card barcode.</string>
+  <string name="barcode_scanning_error">Error Scanning Card</string>
 
 </resources>

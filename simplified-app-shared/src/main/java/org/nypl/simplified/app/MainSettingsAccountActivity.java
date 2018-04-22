@@ -1002,7 +1002,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
       return barcodeBitmap;
     } catch (WriterException e) {
-      e.printStackTrace();
+      LOG.error("Error generating barcode image: {}", e.getLocalizedMessage());
       return null;
     }
   }

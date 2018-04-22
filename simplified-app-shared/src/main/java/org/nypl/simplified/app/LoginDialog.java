@@ -644,18 +644,18 @@ public final class LoginDialog extends DialogFragment
 
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
     IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-    if (result != null) {
-      if (result.getContents() == null) {
-        Toast.makeText(LoginDialog.this.getActivity(), "Cancelled", Toast.LENGTH_LONG).show();
-      } else {
-        // Toast.makeText(LoginDialog.this.getActivity(), "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-        barcode_edit.setText(result.getContents());
-        pin_edit.requestFocus();
-      }
-    } else {
-      // This is important, otherwise the result will not be passed to the fragment
+    if (result == null) {
       super.onActivityResult(requestCode, resultCode, data);
+      return;
+    }
+
+    if (result.getContents() == null) {
+      Toast.makeText(LoginDialog.this.getActivity(), R.string.barcode_scanning_error, Toast.LENGTH_LONG).show();
+    } else {
+      barcode_edit.setText(result.getContents());
+      pin_edit.requestFocus();
     }
   }
 
