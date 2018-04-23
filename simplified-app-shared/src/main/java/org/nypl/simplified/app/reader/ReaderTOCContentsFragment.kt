@@ -33,8 +33,8 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
     readerTOCLayout = inflater.inflate(R.layout.reader_toc, null)
     readerTOCListView = readerTOCLayout?.findViewById(R.id.reader_toc_list)
 
-    val act = activity as? ReaderTOCActivity
-    val elements = act?.in_toc?.elements as? List<ReaderTOC.TOCElement>
+    val reader_activity = activity as? ReaderTOCActivity
+    val elements = reader_activity?.in_toc?.elements as? List<ReaderTOC.TOCElement>
     adapter = ArrayAdapter(context, 0, elements)
     readerTOCListView?.adapter = this
 

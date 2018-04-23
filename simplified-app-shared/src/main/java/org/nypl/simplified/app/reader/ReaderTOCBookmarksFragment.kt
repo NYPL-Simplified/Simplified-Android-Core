@@ -11,6 +11,7 @@ import android.widget.*
 
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.books.core.BookmarkAnnotation
 
 /**
  * A reusable fragment for a ListView of bookmarks
@@ -19,7 +20,7 @@ import org.nypl.simplified.app.Simplified
 class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
   private var inflater: LayoutInflater? = null
-  private var adapter: ArrayAdapter<ReaderTOC.TOCElement>? = null
+  private var adapter: ArrayAdapter<BookmarkAnnotation>? = null
   private var listener: ReaderTOCBookmarksFragmentSelectionListenerType? = null
 
   private var bookmarksTOCLayout: View? = null
@@ -35,12 +36,11 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
     val activity = activity as? ReaderTOCActivity
 
-    //TODO TEMP: eventually change to bookmarks
-    val listViewElements = activity?.in_toc?.elements as? List<ReaderTOC.TOCElement>
-    adapter = ArrayAdapter(context, 0, listViewElements)
-    bookmarksTOCListView?.adapter = this
+    //TODO WIP
+    val bookmarks = activity?.bookmarks ?: ArrayList<BookmarkAnnotation>(0)
 
-    //TODO Note: ignoring color scheme listener stuff from contents fragment
+    adapter = ArrayAdapter(context, 0, bookmarks)
+    bookmarksTOCListView?.adapter = this
 
     return bookmarksTOCLayout
   }
@@ -79,7 +79,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     return adapter!!.getItemViewType(position)
   }
 
-  //TODO TEMP
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
 
     val itemView = if (reuse != null) {
@@ -90,17 +89,29 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
     val layoutView = itemView.findViewById<ViewGroup>(R.id.toc_bookmark_element)
     val textView = layoutView.findViewById<TextView>(R.id.toc_bookmark_element_title)
-    val element = adapter?.getItem(position)
-    textView.text = element?.title ?: "Bookmark"
+    val detailTextView = layoutView.findViewById<TextView>(R.id.toc_bookmark_element_subtitle)
+    val bookmark = adapter?.getItem(position)
+
+    val shortDate = if (bookmark?.body?.timestamp != null) {
+      bookmark.body.timestamp + " - "
+    } else { "" }
+    val chapterProgress = if (bookmark?.body?.chapterProgress != null) {
+      bookmark.body.chapterProgress.toString() + " through chapter"
+    } else { "Chapter Location Marked" }
+
+    val detailText = shortDate + chapterProgress
+
+    textView.text = bookmark?.body?.chapterTitle ?: "Bookmark"
+    detailTextView.text = detailText
 
     val rs = Simplified.getReaderAppServices()
     val settings = rs.settings
 
     textView.setTextColor(settings.colorScheme.foregroundColor)
 
-//    itemView.setOnClickListener { _ ->
-//      this.listener?.onBookmarkSelected(element)
-//    }
+    itemView.setOnClickListener { _ ->
+      this.listener?.onBookmarkSelected(bookmark)
+    }
 
     return layoutView
   }

@@ -204,7 +204,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
    * of bookmarks saved in the local database.
    * @param completion returns a List of bookmarks, empty if none exist
    */
-  fun syncBookmarks(completion: ((bookmarks: List<BookmarkAnnotation>) -> Unit)?) {
+  fun syncBookmarks(completion: ((bookmarks: List<BookmarkAnnotation>?) -> Unit)?) {
 
     //TODO WIP
 
@@ -217,8 +217,8 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
     annotationsManager.requestBookmarksFromServer(uri) { bookmarks ->
 
-      //TODO process downloaded bookmarks
       LOG.debug("Bookmarks: ${bookmarks}")
+      completion?.invoke(bookmarks)
 
     }
 
