@@ -2,6 +2,7 @@ package org.nypl.simplified.app;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -21,8 +22,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -80,11 +85,14 @@ public final class LoginDialog extends DialogFragment
   }
 
   private @Nullable EditText          barcode_edit;
+  private @Nullable ImageButton       scan;
   private @Nullable LoginListenerType listener;
   private @Nullable Button            login;
   private @Nullable EditText          pin_edit;
   private @Nullable TextView          text;
   private @Nullable Button            cancel;
+
+  private Fragment myFragment = this;
 
   /**
    * Construct a new dialog.
@@ -203,6 +211,7 @@ public final class LoginDialog extends DialogFragment
 
     final TextView in_text = NullCheck.notNull(this.text);
     final EditText in_barcode_edit = NullCheck.notNull(this.barcode_edit);
+    final ImageButton in_barcode_scan_button = NullCheck.notNull(this.scan);
     final EditText in_pin_edit = NullCheck.notNull(this.pin_edit);
     final Button in_login = NullCheck.notNull(this.login);
     final Button in_cancel = NullCheck.notNull(this.cancel);
@@ -214,6 +223,7 @@ public final class LoginDialog extends DialogFragment
         {
           in_text.setText(message);
           in_barcode_edit.setEnabled(true);
+          in_barcode_scan_button.setEnabled(true);
           in_pin_edit.setEnabled(true);
           in_login.setEnabled(true);
           in_cancel.setEnabled(true);
@@ -365,6 +375,9 @@ public final class LoginDialog extends DialogFragment
     final EditText in_barcode_edit = NullCheck.notNull(
       (EditText) in_layout.findViewById(R.id.login_dialog_barcode_text_edit));
 
+    final ImageButton in_barcode_scan_button =
+            NullCheck.notNull((ImageButton) in_layout.findViewById(R.id.login_dialog_barcode_scan_button));
+
     final TextView in_pin_label = NullCheck.notNull(
       (TextView) in_layout.findViewById(R.id.login_dialog_pin_text_view));
 
@@ -414,6 +427,15 @@ public final class LoginDialog extends DialogFragment
       final Account account = new AccountsRegistry(getActivity()).getAccount(Integer.valueOf(account_id));
       books = Simplified.getBooks(account, getActivity(), Simplified.getCatalogAppServices().getAdobeDRMExecutor());
       docs = Simplified.getDocumentStore(account, getActivity().getResources());
+
+      if (account.supportsBarcodeScanner()) {
+        in_barcode_scan_button.setVisibility(View.VISIBLE);
+      }
+    }
+    else {
+      if (Simplified.getCurrentAccount().supportsBarcodeScanner()) {
+        in_barcode_scan_button.setVisibility(View.VISIBLE);
+      }
     }
 
     in_text.setText(initial_txt);
@@ -432,6 +454,7 @@ public final class LoginDialog extends DialogFragment
           in_pin_edit.setEnabled(false);
           in_login_button.setEnabled(false);
           in_login_cancel_button.setEnabled(false);
+          in_barcode_scan_button.setEnabled(false);
 
           final Editable barcode_edit_text = in_barcode_edit.getText();
           final Editable pin_edit_text = in_pin_edit.getText();
@@ -466,6 +489,21 @@ public final class LoginDialog extends DialogFragment
         }
       });
 
+    in_barcode_scan_button.setOnClickListener(
+        new OnClickListener() {
+          @Override
+          public void onClick(
+              final @Nullable View v) {
+
+            // IntentIntegrator exit will fire on Scan or Back and hit the onActivityResult method.
+            IntentIntegrator
+                .forFragment(myFragment)
+                .setPrompt(getString(R.string.barcode_scanner_prompt))
+                .setBeepEnabled(false)
+                .initiateScan();
+          }
+        });
+
     final boolean request_new_code = rr.getBoolean(R.bool.feature_default_auth_provider_request_new_code);
 
     if (request_new_code) {
@@ -494,7 +532,6 @@ public final class LoginDialog extends DialogFragment
 //      in_login_request_new_code.setText("Sign Up");
       in_login_request_new_code.setVisibility(View.GONE);
     }
-
 
     final AtomicBoolean in_barcode_empty = new AtomicBoolean(true);
     final AtomicBoolean in_pin_empty = new AtomicBoolean(pin_required);
@@ -591,6 +628,7 @@ public final class LoginDialog extends DialogFragment
       });
 
     this.barcode_edit = in_barcode_edit;
+    this.scan = in_barcode_scan_button;
     this.pin_edit = in_pin_edit;
     this.login = in_login_button;
     this.cancel = in_login_cancel_button;
@@ -602,6 +640,23 @@ public final class LoginDialog extends DialogFragment
     }
 
     return in_layout;
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+    IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+    if (result == null) {
+      super.onActivityResult(requestCode, resultCode, data);
+      return;
+    }
+
+    if (result.getContents() == null) {
+      Toast.makeText(LoginDialog.this.getActivity(), R.string.barcode_scanning_error, Toast.LENGTH_LONG).show();
+    } else {
+      barcode_edit.setText(result.getContents());
+      pin_edit.requestFocus();
+    }
   }
 
   /**
