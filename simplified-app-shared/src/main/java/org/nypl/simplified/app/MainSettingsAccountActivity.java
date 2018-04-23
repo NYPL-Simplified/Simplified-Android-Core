@@ -37,7 +37,6 @@ import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -991,17 +990,17 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
   }
 
-  private Bitmap generateBarcodeImage(String labelLoginUserID) {
+  private Bitmap generateBarcodeImage(String barcodeString) {
 
     try {
       MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
 
-      BitMatrix bitMatrix = multiFormatWriter.encode(labelLoginUserID, BarcodeFormat.CODABAR, 2800, 500);
+      BitMatrix bitMatrix = multiFormatWriter.encode(barcodeString, BarcodeFormat.CODABAR, 2800, 500);
       BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
       Bitmap barcodeBitmap = barcodeEncoder.createBitmap(bitMatrix);
 
       return barcodeBitmap;
-    } catch (WriterException e) {
+    } catch (Exception e) {
       LOG.error("Error generating barcode image: {}", e.getLocalizedMessage());
       return null;
     }
