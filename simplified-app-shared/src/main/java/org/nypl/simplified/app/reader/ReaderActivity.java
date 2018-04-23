@@ -69,6 +69,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
 import kotlin.Unit;
 
@@ -130,6 +131,8 @@ public final class ReaderActivity extends Activity implements
   private @Nullable Integer                           currentSpineItemPageCount;
   private @Nullable String                            currentChapterTitle;
   private @Nullable ReaderBookLocation                currentPageUserBookmark;
+
+  private           List<BookmarkAnnotation>          temporaryListOfBookmarks;
 
 
   /**
@@ -253,13 +256,20 @@ public final class ReaderActivity extends Activity implements
 
     if (request_code == ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE) {
       if (result_code == Activity.RESULT_OK) {
-        final Intent nnd = NullCheck.notNull(data);
-        final Bundle b = NullCheck.notNull(nnd.getExtras());
-        final TOCElement e = NullCheck.notNull(
+        final Intent nnd = Objects.requireNonNull(data);
+        final Bundle b = Objects.requireNonNull(nnd.getExtras());
+        final TOCElement e = Objects.requireNonNull(
           (TOCElement) b.getSerializable(
             ReaderTOCActivity.TOC_SELECTED_ID));
         this.onTOCSelectionReceived(e);
       }
+    } else if (request_code == ReaderTOCActivity.BOOKMARK_SELECTION_REQUEST_CODE) {
+      final Intent nnd = Objects.requireNonNull(data);
+      final Bundle b = Objects.requireNonNull(nnd.getExtras());
+      final BookmarkAnnotation bm = Objects.requireNonNull(
+        (BookmarkAnnotation) Objects.requireNonNull(b.getSerializable(
+          ReaderTOCActivity.BOOKMARK_SELECTED_ID)));
+      this.onBookmarkSelectionReceived(bm);
     }
   }
 
@@ -588,7 +598,14 @@ public final class ReaderActivity extends Activity implements
 
     in_toc.setOnClickListener(v -> {
       final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-      ReaderTOCActivity.startActivityForResult(ReaderActivity.this, sent_toc);
+
+      //TODO WIP
+
+
+      ReaderTOCActivity.startActivityForResult(
+        ReaderActivity.this,
+        sent_toc,
+        this.temporaryListOfBookmarks);
       ReaderActivity.this.overridePendingTransition(0, 0);
     });
 
@@ -912,9 +929,17 @@ public final class ReaderActivity extends Activity implements
         this);
 
     this.syncManager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
+
       //Successfully enabled
       syncManager.syncReadingLocation(this.current_location, this);
-      syncManager.syncBookmarks(null);
+      syncManager.syncBookmarks((bookmarks) -> {
+
+        //TODO TEMP save to property (to use with table of contents)
+        this.temporaryListOfBookmarks = bookmarks;
+
+        return Unit.INSTANCE;
+      });
+
       return Unit.INSTANCE;
     });
   }
@@ -1206,6 +1231,19 @@ public final class ReaderActivity extends Activity implements
       NullCheck.notNull(this.readium_js_api);
 
     js.openContentURL(e.getContentRef(), e.getSourceHref());
+  }
+
+  @Override public void onBookmarkSelectionReceived(
+    final BookmarkAnnotation bm)
+  {
+    ReaderActivity.LOG.debug("received bookmark selection: {}", bm);
+
+    final ReaderReadiumJavaScriptAPIType js =
+        NullCheck.notNull(this.readium_js_api);
+
+    //TODO convert to book location and navigate to page
+
+//    js.openContentURL(e.getContentRef(), e.getSourceHref());
   }
 
   /**
