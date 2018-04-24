@@ -131,6 +131,8 @@
   <string name="settings_login_title">Library Card</string>
   <string name="settings_barcode">Barcode</string>
   <string name="settings_pin">PIN</string>
+  <string name="settings_toggle_barcode_show">Show Barcode</string>
+  <string name="settings_toggle_barcode_hide">Hide Barcode</string>
   <string name="settings_name">Name</string>
   <string name="settings_screen_Lock_not_setup">"Secure lock screen hasn't been set up. Go to 'Settings -> Security -> Screenlock' to set up a lock screen"</string>
   <string name="settings_log_in_cancel">Cancel</string>
@@ -244,5 +246,9 @@
   <string name="you_are_in_new_york">We have successfully determined that you are in New York!</string>
   <string name="done_get_location">Done</string>
   <string name="next_get_location">Next</string>
+
+  <!-- ZXing Scanner -->
+  <string name="barcode_scanner_prompt">Scan your library card barcode.</string>
+  <string name="barcode_scanning_error">Error Scanning Card</string>
 
 </resources>
