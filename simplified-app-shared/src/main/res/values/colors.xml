@@ -8,9 +8,12 @@
   <color name="list_item_text_normal">#000000</color>
   <color name="list_item_text_selected">#ffffff</color>
 
-  <color name="button_foreground">#ff669900</color>
+  <color name="button_foreground">#003764</color>
   <color name="button_background">#ffffff</color>
-  <color name="button_disabled">#dddddd</color>
+  <color name="button_disabled">#bbbbbb</color>
+  <color name="button_focused">#002540</color>
+  <color name="button_text_normal">#ffffff</color>
+  <color name="button_stroke">#225784</color>
 
   <color name="downloading_foreground">#ffffff</color>
 
