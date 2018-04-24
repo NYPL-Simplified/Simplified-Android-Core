@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/normal_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+
+  <View
+      android:id="@+id/spacer_top"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toTopOf="@+id/simplye_splash_logo"
+      app:layout_constraintVertical_chainStyle="spread"
+      app:layout_constraintVertical_weight="1.3"
+      />
+
+  <ImageView
+      android:id="@+id/simplye_splash_logo"
+      android:layout_width="wrap_content"
+      android:layout_height="0dp"
+      android:minHeight="50dp"
+      android:maxHeight="120dp"
+      android:adjustViewBounds="true"
+      android:src="@drawable/simplified_splash"
+      android:contentDescription="@string/label_simplye_logo"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toTopOf="@+id/choose_library"
+      app:layout_constraintTop_toBottomOf="@+id/spacer_top"
+      app:layout_constraintVertical_chainStyle="spread"
+      app:layout_constraintVertical_weight="2"
+      />
+
+  <android.support.constraint.ConstraintLayout
+      android:id="@+id/choose_library"
+      android:layout_width="wrap_content"
+      android:layout_height="0dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginStart="8dp"
+      android:orientation="vertical"
+      app:layout_constraintBottom_toTopOf="@+id/choose_classics"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/simplye_splash_logo"
+      app:layout_constraintVertical_chainStyle="spread"
+      app:layout_constraintVertical_weight="3">
+
+    <TextView
+        android:id="@+id/text_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/welcome_library_header"
+        android:importantForAccessibility="auto"
+        android:gravity="center"
+        android:minHeight="16dp"
+        android:text="@string/welcome_library_header"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        app:layout_constraintBottom_toTopOf="@+id/text_2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/text_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/welcome_library_subtext"
+        android:importantForAccessibility="auto"
+        android:gravity="center"
+        android:minHeight="16dp"
+        android:text="@string/welcome_library_subtext"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        app:layout_constraintBottom_toTopOf="@+id/welcome_library"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/welcome_library"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/simplified_welcome_button"
+        android:contentDescription="@string/welcome_library_button"
+        android:minHeight="20dp"
+        android:text="@string/welcome_library_button"
+        android:textColor="@drawable/simplified_welcome_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+  </android.support.constraint.ConstraintLayout>
+
+  <android.support.constraint.ConstraintLayout
+      android:id="@+id/choose_classics"
+      android:layout_width="wrap_content"
+      android:layout_height="0dp"
+
+      android:layout_marginEnd="8dp"
+      android:layout_marginStart="8dp"
+      android:orientation="vertical"
+      app:layout_constraintBottom_toTopOf="@+id/spacer_bottom"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/choose_library"
+      app:layout_constraintVertical_chainStyle="spread"
+      app:layout_constraintVertical_weight="3">
+
+    <TextView
+        android:id="@+id/text_3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/welcome_instant_header"
+        android:importantForAccessibility="auto"
+        android:gravity="center"
+        android:minHeight="16dp"
+        android:text="@string/welcome_instant_header"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        app:layout_constraintBottom_toTopOf="@+id/text_4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/text_4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:contentDescription="@string/welcome_instant_subtext"
+        android:importantForAccessibility="auto"
+        android:gravity="center"
+        android:minHeight="16dp"
+        android:text="@string/welcome_instant_subtext"
+        android:textAlignment="center"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        app:layout_constraintBottom_toTopOf="@+id/welcome_instant"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/welcome_instant"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/simplified_welcome_button"
+        android:contentDescription="@string/welcome_instant_button"
+        android:minHeight="20dp"
+        android:text="@string/welcome_instant_button"
+        android:textColor="@drawable/simplified_welcome_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+  </android.support.constraint.ConstraintLayout>
+
+  <View
+      android:id="@+id/spacer_bottom"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/choose_classics"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintVertical_chainStyle="spread"
+      app:layout_constraintVertical_weight="1.3"
+      />
+
+</android.support.constraint.ConstraintLayout>
+

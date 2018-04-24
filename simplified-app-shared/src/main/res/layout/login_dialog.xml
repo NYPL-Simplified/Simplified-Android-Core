@@ -55,6 +55,14 @@
         android:layout_marginStart="16dp"
         android:maxLines="1">
       </EditText>
+
+      <ImageButton
+          android:id="@+id/login_dialog_barcode_scan_button"
+          style="?android:attr/buttonStyleSmall"
+          android:background="#0000"
+          android:src="@android:drawable/ic_menu_camera"
+          android:visibility="gone"
+        />
     </TableRow>
 
     <TableRow

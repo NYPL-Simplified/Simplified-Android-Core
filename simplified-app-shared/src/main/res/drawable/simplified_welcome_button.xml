@@ -7,7 +7,7 @@
         android:left="@dimen/button_padding_left"
         android:right="@dimen/button_padding_right"/>
       <corners android:radius="@dimen/button_corner_radius" />
-      <solid android:color="@color/button_background" />
+      <solid android:color="@color/button_foreground" />
       <stroke
         android:width="@dimen/button_stroke"
         android:color="@color/button_disabled" />
@@ -20,7 +20,7 @@
         android:left="@dimen/button_padding_left"
         android:right="@dimen/button_padding_right"/>
       <corners android:radius="@dimen/button_corner_radius" />
-      <solid android:color="#86bc54" />
+      <solid android:color="@color/button_stroke" />
       <stroke
         android:width="@dimen/button_stroke"
         android:color="@color/button_background" />
@@ -33,10 +33,10 @@
         android:left="@dimen/button_padding_left"
         android:right="@dimen/button_padding_right"/>
       <corners android:radius="@dimen/button_corner_radius" />
-      <solid android:color="@color/button_background" />
+      <solid android:color="@color/button_focused" />
       <stroke
         android:width="@dimen/button_stroke"
-        android:color="#86bc54" />
+        android:color="@color/button_stroke" />
     </shape>
   </item>
 
@@ -46,10 +46,10 @@
         android:left="@dimen/button_padding_left"
         android:right="@dimen/button_padding_right"/>
       <corners android:radius="@dimen/button_corner_radius" />
-      <solid android:color="@color/button_background" />
+      <solid android:color="@color/button_foreground" />
       <stroke
         android:width="@dimen/button_stroke"
-        android:color="#86bc54" />
+        android:color="@color/button_stroke" />
     </shape>
   </item>
 
