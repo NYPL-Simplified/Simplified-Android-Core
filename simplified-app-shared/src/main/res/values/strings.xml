@@ -250,5 +250,6 @@
   <string name="syncManagerSyncLocationAlertTitle">Sync Reading Position</string>
   <string name="syncManagerSyncLocationAlertMessage">"Would you like to go to the latest page read? \n\nChapter:\n\"$s\"</string>
   <string name="syncManagerSyncLocationAlertMessageGeneral">Would you like to go to the latest page read?</string>
+  <string name="new_bookmark_error">Unable to bookmark this page. Please try another page, or report the error for this book.</string>
 
 </resources>

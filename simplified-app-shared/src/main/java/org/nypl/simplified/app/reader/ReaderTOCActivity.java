@@ -62,21 +62,12 @@ public final class ReaderTOCActivity extends AppCompatActivity
 
   public static final int TOC_SELECTION_REQUEST_CODE;
 
-  /**
-   * The activity request code (for retrieving the result of executing the
-   * activity).
-   */
-
-  public static final int BOOKMARK_SELECTION_REQUEST_CODE;
-
 
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderTOCActivity.class);
     TOC_SELECTION_REQUEST_CODE = 23;
-    //TODO any rhyme or reason to this number?
-    BOOKMARK_SELECTION_REQUEST_CODE = 24;
     TOC_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.toc";
     TOC_SELECTED_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.toc_selected";
     BOOKMARKS_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.bookmarks";
@@ -111,6 +102,7 @@ public final class ReaderTOCActivity extends AppCompatActivity
   {
     Objects.requireNonNull(from);
     Objects.requireNonNull(toc);
+    Objects.requireNonNull(marks);
 
     final Intent i = new Intent(Intent.ACTION_PICK);
     i.setClass(from, ReaderTOCActivity.class);
@@ -119,8 +111,7 @@ public final class ReaderTOCActivity extends AppCompatActivity
 
     //TODO need to figure out how to handle Activity Result now that there are two possible finishes
 
-    from.startActivityForResult(
-      i, ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE);
+    from.startActivityForResult(i, ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE);
   }
 
   @Override public void finish()

@@ -17,6 +17,7 @@
       android:id="@+id/toc_bookmark_element"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:padding="16dp"
       android:orientation="vertical">
 
     <TextView
