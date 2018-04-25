@@ -2,6 +2,7 @@ package org.nypl.simplified.app.reader
 
 import android.content.Context
 import android.database.DataSetObserver
+import android.opengl.Visibility
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -108,19 +109,16 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
   }
 
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
-    var itemView: ViewGroup
-    if (reuse != null) {
-      itemView = reuse as ViewGroup
+
+    val itemView = if (reuse != null) {
+      reuse as ViewGroup
     } else {
-      itemView = inflater?.inflate(R.layout.reader_toc_element, parent, false) as ViewGroup
+      inflater?.inflate(R.layout.reader_toc_element, parent, false) as ViewGroup
     }
 
-    /**
-     * Populate the text view and set the left margin based on the desired
-     * indentation level.
-     */
-
     val textView = itemView.findViewById<TextView>(R.id.reader_toc_element_text)
+    val bookmarkLayout = itemView.findViewById<ViewGroup>(R.id.toc_bookmark_element)
+    bookmarkLayout.visibility = View.GONE
     val element = adapter?.getItem(position)
     textView.text = element?.title ?: "TOC Marker"
 
@@ -132,6 +130,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
         android.view.ViewGroup.LayoutParams.WRAP_CONTENT
     )
 
+    // Set the left margin based on the desired indentation level.
     val leftIndent = if (element != null) { rs.screenDPToPixels(element.indent * 16) } else { 0.0 }
     p.setMargins(leftIndent.toInt(), 0, 0, 0)
     textView.layoutParams = p
@@ -141,6 +140,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
       this.listener?.onTOCItemSelected(element)
     }
 
+    //TODO this is likely not the itemView anymore, but some subview of it (look at how bookmarks does it)
     return itemView
   }
 

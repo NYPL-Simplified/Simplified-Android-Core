@@ -12,6 +12,11 @@ import android.widget.*
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.books.core.BookmarkAnnotation
+import org.nypl.simplified.rfc3339.core.RFC3339Formatter
+import org.slf4j.LoggerFactory
+import java.lang.Exception
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * A reusable fragment for a ListView of bookmarks
@@ -26,6 +31,9 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
   private var bookmarksTOCLayout: View? = null
   private var bookmarksTOCListView: ListView? = null
 
+  private companion object {
+    val LOG = LoggerFactory.getLogger(ReaderTOCBookmarksFragment::class.java)!!
+  }
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                             savedInstanceState: Bundle?): View? {
@@ -35,8 +43,6 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     bookmarksTOCListView = bookmarksTOCLayout?.findViewById(R.id.bookmarks_list) as? ListView
 
     val activity = activity as? ReaderTOCActivity
-
-    //TODO WIP
     val bookmarks = activity?.bookmarks ?: ArrayList<BookmarkAnnotation>(0)
 
     adapter = ArrayAdapter(context, 0, bookmarks)
@@ -92,24 +98,15 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     val detailTextView = layoutView.findViewById<TextView>(R.id.toc_bookmark_element_subtitle)
     val bookmark = adapter?.getItem(position)
 
-    val shortDate = if (bookmark?.body?.timestamp != null) {
-      bookmark.body.timestamp + " - "
-    } else { "" }
-    val chapterProgress = if (bookmark?.body?.chapterProgress != null) {
-      bookmark.body.chapterProgress.toString() + " through chapter"
-    } else { "Chapter Location Marked" }
-
-    val detailText = shortDate + chapterProgress
-
     textView.text = bookmark?.body?.chapterTitle ?: "Bookmark"
-    detailTextView.text = detailText
+    detailTextView.text = detailTextFrom(bookmark)
 
     val rs = Simplified.getReaderAppServices()
     val settings = rs.settings
 
     textView.setTextColor(settings.colorScheme.foregroundColor)
 
-    itemView.setOnClickListener { _ ->
+    layoutView.setOnClickListener { _ ->
       this.listener?.onBookmarkSelected(bookmark)
     }
 
@@ -138,6 +135,36 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
   override fun unregisterDataSetObserver(observer: DataSetObserver?) {
     adapter!!.unregisterDataSetObserver(observer)
+  }
+
+  /**
+   * Private Instance Methods
+   */
+
+  private fun detailTextFrom(bookmark: BookmarkAnnotation?): String {
+    val shortDate = if (bookmark?.body?.timestamp != null) {
+      try {
+        val date = RFC3339Formatter.parseRFC3339Date(bookmark.body.timestamp)
+        val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.US)
+        val dateFormatString = dateFormat.format(date.time)
+        "$dateFormatString - "
+      } catch (e: Exception) {
+        LOG.error("Error parsing date/time in bookmark. Falling back to raw timestamp.")
+        bookmark.body.timestamp + " - "
+      }
+    } else {
+      ""
+    }
+
+    val chapterProgress = if (bookmark?.body?.chapterProgress != null) {
+      val progressFloat = bookmark.body.chapterProgress!!
+      val percent = (progressFloat * 100).toInt()
+      "$percent% through chapter"
+    } else {
+      "Chapter Location Marked"
+    }
+
+    return shortDate + chapterProgress
   }
 }
 

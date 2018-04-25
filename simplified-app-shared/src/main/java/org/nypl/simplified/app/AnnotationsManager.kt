@@ -350,6 +350,7 @@ class AnnotationsManager(private val libraryAccount: Account,
             completion(true, serverAnnotationID)
           },
           Response.ErrorListener { error ->
+            //TODO actually pull the server error json problem response from our circ servers
             LOG.error("POST request fail! Network Error Cause: ${error.cause ?: "error cause was null"}")
             completion(false, null)
           })
@@ -438,8 +439,10 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
 
     try {
-      val jsonBody = bookmark.toString()
-      postAnnotation(jsonBody, 20) { _, serverID ->
+//      val jsonBody = bookmark.toString()
+
+      val jsonString = ObjectMapper().writeValueAsString(bookmark)
+      postAnnotation(jsonString, 20) { _, serverID ->
         completion(serverID)
       }
     } catch (e: Exception) {
