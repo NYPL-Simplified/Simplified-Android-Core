@@ -26,7 +26,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
   private var inflater: LayoutInflater? = null
   private var adapter: ArrayAdapter<BookmarkAnnotation>? = null
-  private var listener: ReaderTOCBookmarksFragmentSelectionListenerType? = null
+  private var listener: ReaderTOCFragmentSelectionListenerType ? = null
 
   private var bookmarksTOCLayout: View? = null
   private var bookmarksTOCListView: ListView? = null
@@ -53,11 +53,11 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
-    if (context is ReaderTOCBookmarksFragmentSelectionListenerType) {
+    if (context is ReaderTOCFragmentSelectionListenerType ) {
       listener = context
     } else {
       throw RuntimeException(context.toString() +
-          " must implement ReaderTOCBookmarksFragmentSelectionListenerType")
+          " must implement ReaderTOCFragmentSelectionListenerType ")
     }
   }
 

@@ -34,6 +34,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.Instant;
+import org.json.JSONObject;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ReaderSyncManager;
 import org.nypl.simplified.app.ReaderSyncManagerDelegate;
@@ -617,12 +618,11 @@ public final class ReaderActivity extends Activity implements
 
     in_bookmark.setOnClickListener(view -> {
 
-      //TODO - Test UI logic of bookmark icon
       //TODO - Test saving and deleting on the server when icon is toggled
       //TODO - Test reading and writing bookmarks to the local database
 
       if (this.current_page_bookmark != null) {
-        deleteUserBookmark(this.current_page_bookmark);
+        delete(this.current_page_bookmark);
         this.current_page_bookmark = null;
       } else {
         final BookmarkAnnotation annotation = createAnnotation(this.current_location);
@@ -666,7 +666,7 @@ public final class ReaderActivity extends Activity implements
 
       if (ID != null) {
         LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
-        //TODO replace loc with version containing annotation ID
+        //TODO replace bookmark in db with version containing annotation ID
       } else {
         LOG.error("No ID returned after attempting to upload loc.");
       }
@@ -685,7 +685,7 @@ public final class ReaderActivity extends Activity implements
 //    }
   }
 
-  private void deleteUserBookmark(final BookmarkAnnotation annotation) {
+  private void delete(final BookmarkAnnotation annotation) {
     if (annotation.getId() != null) {
       sync_manager.deleteBookmarkOnServer(annotation.getId(), (Boolean success) -> {
         if (success) {
@@ -1249,6 +1249,17 @@ public final class ReaderActivity extends Activity implements
         NullCheck.notNull(this.readium_js_api);
 
     //TODO convert to book location and navigate to page
+
+    //TODO CURRENT WIP
+
+    final String loc_value = bm.getTarget().getSelector().getValue(); //raw content cfi
+    try {
+      final JSONObject loc_json = new JSONObject(loc_value);
+      final ReaderBookLocation book_loc = ReaderBookLocation.fromJSON(loc_json);
+      this.navigateTo(book_loc);
+    } catch (Exception e) {
+      //TODO whatever...
+    }
 
 //    js.openContentURL(e.getContentRef(), e.getSourceHref());
   }

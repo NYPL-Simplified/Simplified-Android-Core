@@ -25,7 +25,7 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
   private var inflater: LayoutInflater? = null
 
   private var adapter: ArrayAdapter<ReaderTOC.TOCElement>? = null
-  private var listener: ReaderTOCContentsFragmentSelectionListenerType? = null
+  private var listener: ReaderTOCFragmentSelectionListenerType ? = null
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                             savedInstanceState: Bundle?): View? {
@@ -50,11 +50,11 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
-    if (context is ReaderTOCContentsFragmentSelectionListenerType) {
+    if (context is ReaderTOCFragmentSelectionListenerType ) {
       listener = context
     } else {
       throw RuntimeException(context.toString() +
-          " must implement ReaderTOCContentsFragmentSelectionListenerType")
+          " must implement ReaderTOCFragmentSelectionListenerType ")
     }
   }
 
