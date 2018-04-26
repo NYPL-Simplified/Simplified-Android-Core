@@ -3,12 +3,10 @@ package org.nypl.simplified.app.reader;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
@@ -28,8 +26,7 @@ import java.util.Objects;
  */
 
 public final class ReaderTOCActivity extends AppCompatActivity
-  implements ReaderSettingsListenerType, ReaderTOCContentsFragmentSelectionListenerType,
-    ReaderTOCBookmarksFragmentSelectionListenerType
+  implements ReaderSettingsListenerType, ReaderTOCFragmentSelectionListenerType
 {
   /**
    * The name of the argument containing the TOC.
@@ -134,13 +131,13 @@ public final class ReaderTOCActivity extends AppCompatActivity
     final ReaderSettingsType settings = rs.getSettings();
     settings.addListener(this);
 
-    final Intent input = NullCheck.notNull(this.getIntent());
-    final Bundle args = NullCheck.notNull(input.getExtras());
+    final Intent input = Objects.requireNonNull(this.getIntent());
+    final Bundle args = Objects.requireNonNull(input.getExtras());
 
-    this.in_toc = NullCheck.notNull(
+    this.in_toc = Objects.requireNonNull(
       (ReaderTOC) args.getSerializable(ReaderTOCActivity.TOC_ID));
 
-    this.bookmarks = NullCheck.notNull(
+    this.bookmarks = Objects.requireNonNull(
       (List<BookmarkAnnotation>) args.getSerializable(ReaderTOCActivity.BOOKMARKS_ID));
 
     this.setContentView(R.layout.reader_toc_tab_layout);
@@ -165,29 +162,18 @@ public final class ReaderTOCActivity extends AppCompatActivity
   }
 
   /**
-   * ReaderTOCContentsFragmentSelectionListener Methods
+   * TOC Selection Methods
    */
 
-  @Override public void onTOCBackSelected()
-  {
-    this.finish();
-  }
-
-  @Override public void onTOCItemSelected(
-    final TOCElement e)
-  {
+  @Override public void onTOCItemSelected(final TOCElement e) {
     final Intent intent = new Intent();
     intent.putExtra(ReaderTOCActivity.TOC_SELECTED_ID, e);
     this.setResult(Activity.RESULT_OK, intent);
     this.finish();
   }
 
-  /**
-   * ReaderTOCBookmarksFragmentSelectionListener Methods
-   */
-
   @Override
-  public void onBookmarkSelected(BookmarkAnnotation bookmark) {
+  public void onBookmarkSelected(@android.support.annotation.Nullable BookmarkAnnotation bookmark) {
     final Intent intent = new Intent();
     intent.putExtra(ReaderTOCActivity.BOOKMARK_SELECTED_ID, bookmark);
     this.setResult(Activity.RESULT_OK, intent);
