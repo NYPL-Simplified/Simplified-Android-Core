@@ -27,5 +27,4 @@ helpstack.conf
 # backup files
 *~
 
-# all Android Studio cruft
-/.idea
+
