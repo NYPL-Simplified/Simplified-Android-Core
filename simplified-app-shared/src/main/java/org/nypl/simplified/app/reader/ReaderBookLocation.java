@@ -1,5 +1,8 @@
 package org.nypl.simplified.app.reader;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io7m.jfunctional.Option;
@@ -7,13 +10,11 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The current page. A specific location in an EPUB is identified by an
@@ -143,5 +144,13 @@ public final class ReaderBookLocation
     b.append(this.id_ref);
     b.append("]");
     return NullCheck.notNull(b.toString());
+  }
+
+  @Override public boolean equals(Object obj) {
+    if (obj instanceof ReaderBookLocation) {
+      ReaderBookLocation loc_obj = (ReaderBookLocation) obj;
+      return this.toString().equals(loc_obj.toString());
+    }
+    return false;
   }
 }

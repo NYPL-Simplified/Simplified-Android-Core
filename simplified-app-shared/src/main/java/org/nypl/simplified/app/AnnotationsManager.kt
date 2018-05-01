@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import com.android.volley.*
 import com.android.volley.Response.Listener
+import com.android.volley.Response.ErrorListener
 import com.android.volley.toolbox.Volley
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -22,6 +23,7 @@ import org.nypl.simplified.books.core.AnnotationResponse
 import org.nypl.simplified.books.core.BookmarkAnnotation
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.volley.NYPLJsonObjectRequest
+import org.nypl.simplified.volley.NYPLStringRequest
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -119,7 +121,7 @@ class AnnotationsManager(private val libraryAccount: Account,
           syncPermissionStatusCompletions.clear()
           syncPermissionStatusRequestPending = false
         },
-        Response.ErrorListener { error ->
+        ErrorListener { error ->
           LOG.error("GET request fail! Error: ${error.message}")
           syncPermissionStatusCompletions.clear()
           syncPermissionStatusRequestPending = false
@@ -193,7 +195,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         Listener<JSONObject> { _ ->
           completion(true)
         },
-        Response.ErrorListener { error ->
+        ErrorListener { error ->
           LOG.debug("PUT request fail! Error: ${error.message}")
         })
 
@@ -234,7 +236,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         Listener<JSONObject> { response ->
           completion(bookLocationFromString(response))
         },
-        Response.ErrorListener { error ->
+        ErrorListener { error ->
           LOG.debug("GET request fail! Error: ${error.message}")
           completion(null)
         })
@@ -349,7 +351,7 @@ class AnnotationsManager(private val libraryAccount: Account,
             val serverAnnotationID = response.getString("id")
             completion(true, serverAnnotationID)
           },
-          Response.ErrorListener { error ->
+          ErrorListener { error ->
             //TODO actually pull the server error json problem response from our circ servers
             LOG.error("POST request fail! Network Error Cause: ${error.cause ?: "error cause was null"}")
             completion(false, null)
@@ -410,7 +412,7 @@ class AnnotationsManager(private val libraryAccount: Account,
           LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
           completion(bookmarks)
         },
-        Response.ErrorListener { error ->
+        ErrorListener { error ->
           LOG.error("GET request fail! Error: ${error.message}")
           completion(null)
         })
@@ -463,18 +465,17 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    val request = NYPLJsonObjectRequest(
+    val request = NYPLStringRequest(
         Request.Method.DELETE,
         annotationID,
-        credentials.barcode.toString(),
-        credentials.pin.toString(),
-        null,
-        Listener<JSONObject> { response ->
+        credentials,
+        Listener { string ->
           completion(true)
         },
-        Response.ErrorListener { error ->
+        ErrorListener { error ->
           completion(false)
-        })
+        }
+    )
 
     request.retryPolicy = DefaultRetryPolicy(
         TimeUnit.SECONDS.toMillis(BookmarkDeleteTimeout).toInt(),
