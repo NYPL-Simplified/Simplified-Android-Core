@@ -86,6 +86,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 
@@ -744,8 +745,9 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       search_item.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
       search_item.expandActionView();
 
-      this.search_view.setQueryHint("Search " + this.feed.getFeedTitle());
-      if (args.getTitle().startsWith("Search")) {
+      // display either the category title or the previously searched keywords 
+      this.search_view.setQueryHint(String.format("%s %s", getString(R.string.search_hint_prefix), Objects.toString(this.feed.getFeedTitle(), "")));
+      if (args.getTitle().startsWith(getString(R.string.search_hint_prefix))) {
         this.search_view.setQueryHint(args.getTitle());
       }
 
