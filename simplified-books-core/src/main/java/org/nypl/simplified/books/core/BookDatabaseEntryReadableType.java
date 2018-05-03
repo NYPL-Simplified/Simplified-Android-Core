@@ -4,7 +4,6 @@ import com.io7m.jfunctional.OptionType;
 
 import org.jetbrains.annotations.NotNull;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +45,7 @@ public interface BookDatabaseEntryReadableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  @NotNull List<BookAnnotation> entryGetBookmarksList()
+  @NotNull List<BookmarkAnnotation> entryGetBookmarksList()
       throws IOException;
 
   /**

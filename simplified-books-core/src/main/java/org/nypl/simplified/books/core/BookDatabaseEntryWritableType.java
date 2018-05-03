@@ -6,11 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * <p>The writable interface supported by book database entries.</p>
@@ -135,7 +133,7 @@ public interface BookDatabaseEntryWritableType
    */
 
   BookDatabaseEntrySnapshot entrySetBookmark(
-      @NotNull BookAnnotation bookmark)
+      @NotNull BookmarkAnnotation bookmark)
       throws IOException;
 
   /**
@@ -149,7 +147,7 @@ public interface BookDatabaseEntryWritableType
    */
 
   BookDatabaseEntrySnapshot entryDeleteBookmark(
-      @NotNull BookAnnotation bookmark)
+      @NotNull BookmarkAnnotation bookmark)
       throws IOException;
 
   /**

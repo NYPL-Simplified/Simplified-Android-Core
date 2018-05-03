@@ -3,8 +3,6 @@ package org.nypl.simplified.books.core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Pair;
@@ -18,7 +16,6 @@ import com.io7m.jnull.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.nypl.drm.core.AdobeAdeptLoan;
 import org.nypl.drm.core.AdobeLoanID;
-import org.nypl.simplified.opds.core.annotation.BookAnnotation;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
@@ -42,9 +39,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -572,34 +567,33 @@ public final class BookDatabase implements BookDatabaseType
         });
     }
 
+
     //TODO WIP
-    //
 
     @Override public BookDatabaseEntrySnapshot entrySetBookmark(
-        final BookAnnotation bm)
+        final BookmarkAnnotation bm)
         throws IOException {
-      final List<BookAnnotation> bookmarks = entryGetBookmarksList();
+      final List<BookmarkAnnotation> bookmarks = entryGetBookmarksList();
       bookmarks.add(bm);
       return entrySetBookmarksList(bookmarks);
     }
 
     @Override public BookDatabaseEntrySnapshot entryDeleteBookmark(
-        final BookAnnotation bookmark)
+        final BookmarkAnnotation bookmark)
         throws IOException {
-      final List<BookAnnotation> bookmarks = entryGetBookmarksList();
+      final List<BookmarkAnnotation> bookmarks = entryGetBookmarksList();
       bookmarks.remove(bookmark);
       return entrySetBookmarksList(bookmarks);
     }
 
-    @NotNull
-    @Override public List<BookAnnotation> entryGetBookmarksList()
+    @NotNull @Override public List<BookmarkAnnotation> entryGetBookmarksList()
         throws IOException {
       return FileLocking.withFileThreadLocked(
           this.file_lock,
           (long) BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS,
-          new PartialFunctionType<Unit, List<BookAnnotation>, IOException>()
+          new PartialFunctionType<Unit, List<BookmarkAnnotation>, IOException>()
           {
-            @Override public List<BookAnnotation> call(
+            @Override public List<BookmarkAnnotation> call(
                 final Unit x)
                 throws IOException
             {
@@ -609,7 +603,7 @@ public final class BookDatabase implements BookDatabaseType
     }
 
     BookDatabaseEntrySnapshot entrySetBookmarksList(
-        final @NotNull List<BookAnnotation> bookmarks)
+        final @NotNull List<BookmarkAnnotation> bookmarks)
         throws IOException
     {
       return FileLocking.withFileThreadLocked(
@@ -627,8 +621,9 @@ public final class BookDatabase implements BookDatabaseType
           });
     }
 
-    @NotNull private List<BookAnnotation> getBookmarksLocked()
+    @NotNull private List<BookmarkAnnotation> getBookmarksLocked()
         throws IOException {
+
       final FileInputStream is = new FileInputStream(this.file_bookmarks);
 
       //TODO Turn input stream into List<BookAnnotation>
@@ -654,14 +649,14 @@ public final class BookDatabase implements BookDatabaseType
     }
 
     private void setBookmarksListLocked(
-        final List<BookAnnotation> bookmarks)
+        final List<BookmarkAnnotation> bookmarks)
         throws IOException
     {
       this.log.debug("updating bookmarks list {}", this.file_bookmarks);
+
       final OutputStream stream = new FileOutputStream(this.file_bookmarks_tmp);
 
       try {
-        //FIXME test and consider converting to jackson libraries across the board
         ObjectMapper mapper = new ObjectMapper();
         final ObjectNode node = mapper.valueToTree(bookmarks);
         this.serializer.serializeToStream(node, stream);
