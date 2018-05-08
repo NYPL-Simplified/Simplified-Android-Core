@@ -115,6 +115,6 @@ public final class OPDSAuthenticationDocumentSerializer
     final OutputStream os)
     throws IOException
   {
-    JSONSerializerUtilities.serialize(d, os);
+    JSONSerializerUtilities.serializeObject(d, os);
   }
 }

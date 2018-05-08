@@ -9,6 +9,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * <p>The writable interface supported by book database entries.</p>
@@ -123,6 +124,20 @@ public interface BookDatabaseEntryWritableType
     throws IOException;
 
   /**
+   * Set the list of bookmarks to be saved for the book
+   *
+   * @param bookmarks The list of bookmark annotations to be saved
+   *
+   * @return A snapshot of the new database state
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  BookDatabaseEntrySnapshot entrySetBookmarks(
+    final List<BookmarkAnnotation> bookmarks)
+    throws IOException;
+
+  /**
    * Set a user-created bookmark for the book.
    *
    * @param bookmark The bookmark annotation to be saved
@@ -133,7 +148,7 @@ public interface BookDatabaseEntryWritableType
    */
 
   BookDatabaseEntrySnapshot entrySetBookmark(
-      @NotNull BookmarkAnnotation bookmark)
+      BookmarkAnnotation bookmark)
       throws IOException;
 
   /**
@@ -147,7 +162,7 @@ public interface BookDatabaseEntryWritableType
    */
 
   BookDatabaseEntrySnapshot entryDeleteBookmark(
-      @NotNull BookmarkAnnotation bookmark)
+      BookmarkAnnotation bookmark)
       throws IOException;
 
   /**

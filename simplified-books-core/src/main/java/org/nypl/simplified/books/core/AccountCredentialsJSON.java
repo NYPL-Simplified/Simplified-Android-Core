@@ -51,7 +51,7 @@ public final class AccountCredentialsJSON
 
     final ObjectNode jo = AccountCredentialsJSON.serializeToJSON(credentials);
     final ByteArrayOutputStream bao = new ByteArrayOutputStream(1024);
-    JSONSerializerUtilities.serialize(jo, bao);
+    JSONSerializerUtilities.serializeObject(jo, bao);
     return bao.toString("UTF-8");
   }
 

@@ -31,7 +31,7 @@ public interface BooksControllerType
    * @return A read-only reference to the current book database.
    */
 
-  BookDatabaseReadableType bookGetDatabase();
+  BookDatabaseType bookGetDatabase();
 
   /**
    * @return A writable reference to the current book database.

@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
@@ -93,6 +94,20 @@ public interface OPDSJSONSerializerType
 
   void serializeToStream(
     ObjectNode d,
+    OutputStream os)
+    throws IOException;
+
+  /**
+   * Serialize the given JSON Array to the given output stream.
+   *
+   * @param d  The JSON
+   * @param os The output stream
+   *
+   * @throws IOException On I/O errors
+   */
+
+  void serializeToStream(
+    ArrayNode d,
     OutputStream os)
     throws IOException;
 }

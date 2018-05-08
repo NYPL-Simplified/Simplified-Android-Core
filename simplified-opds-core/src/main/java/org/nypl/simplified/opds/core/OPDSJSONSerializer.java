@@ -447,6 +447,14 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType
     final OutputStream os)
     throws IOException
   {
-    JSONSerializerUtilities.serialize(d, os);
+    JSONSerializerUtilities.serializeObject(d, os);
+  }
+
+  @Override public void serializeToStream(
+    final ArrayNode d,
+    final OutputStream os)
+    throws IOException
+  {
+    JSONSerializerUtilities.serializeArray(d, os);
   }
 }

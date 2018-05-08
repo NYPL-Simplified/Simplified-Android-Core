@@ -2,6 +2,7 @@ package org.nypl.simplified.json.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
@@ -29,8 +30,30 @@ public final class JSONSerializerUtilities
    * @throws IOException On I/O errors
    */
 
-  public static void serialize(
+  public static void serializeObject(
     final ObjectNode d,
+    final OutputStream os)
+    throws IOException
+  {
+    NullCheck.notNull(d);
+    NullCheck.notNull(os);
+
+    final ObjectMapper jom = new ObjectMapper();
+    final ObjectWriter jw = jom.writerWithDefaultPrettyPrinter();
+    jw.writeValue(os, d);
+  }
+
+  /**
+   * Serialize the given array node to the given stream.
+   *
+   * @param d  The array node
+   * @param os The output stream
+   *
+   * @throws IOException On I/O errors
+   */
+
+  public static void serializeArray(
+    final ArrayNode d,
     final OutputStream os)
     throws IOException
   {
