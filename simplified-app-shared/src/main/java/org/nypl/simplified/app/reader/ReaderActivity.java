@@ -50,6 +50,7 @@ import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
+import org.nypl.simplified.books.core.BookDatabaseEntryReadableType;
 import org.nypl.simplified.books.core.BookDatabaseEntryWritableType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
@@ -66,6 +67,7 @@ import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -542,8 +544,20 @@ public final class ReaderActivity extends Activity implements
       in_title_text.setText(Objects.requireNonNull(p.getTitle()));
     });
 
-    //FIXME set this.bookmarks from local database before syncing
-    this.bookmarks = new ArrayList<>();
+    /*
+      Get any bookmarks from the local database.
+     */
+
+    //FIXME TEMPORARY while testing
+    try {
+      final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
+      final BookDatabaseEntryReadableType entry = db.databaseOpenEntryForReading(this.book_id);
+      this.bookmarks = entry.entryGetBookmarks();
+      LOG.debug("Bookmarks ivar reconstituted after book launch: \n{}", this.bookmarks);
+    } catch (IOException e) {
+      LOG.error("Error getting list of bookmarks from the book entry database");
+      this.bookmarks = new ArrayList<>();
+    }
 
     /*
       Configure the TOC button.
@@ -565,9 +579,6 @@ public final class ReaderActivity extends Activity implements
     final View in_bookmark = Objects.requireNonNull(this.view_bookmark);
 
     in_bookmark.setOnClickListener(view -> {
-
-      //TODO - Test reading and writing bookmarks to the local database
-
       if (this.current_page_bookmark != null) {
         delete(this.current_page_bookmark);
         this.current_page_bookmark = null;
@@ -608,25 +619,25 @@ public final class ReaderActivity extends Activity implements
 
     //Attempt to upload location
     sync_manager.postBookmarkToServer(annotation, (ID) -> {
-
       if (ID != null) {
         LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
         //TODO replace bookmark in db with version containing annotation ID
       } else {
         LOG.error("No ID returned after attempting to upload loc.");
       }
-
       return Unit.INSTANCE;
     });
 
-    //TODO write to the database
-//    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-//    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
-//    try {
-//      entry.entrySetBookmark(bookAnnotation);
-//    } catch (IOException e) {
-//      LOG.error("Error writing loc annotation to database.");
-//    }
+    //Save bookmark to local disk
+    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+    try {
+      entry.entrySetBookmark(annotation);
+      this.bookmarks.add(annotation);
+    } catch (IOException e) {
+      LOG.error("Error writing annotation to app database: {}", annotation);
+      //TODO user facing error message
+    }
   }
 
   private void delete(final BookmarkAnnotation annotation) {
@@ -644,6 +655,17 @@ public final class ReaderActivity extends Activity implements
     }
 
     //TODO Delete the bookmark from the database
+    /*
+    Delete from the database
+     */
+
+    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+    try {
+      entry.entryDeleteBookmark(annotation);
+    } catch (IOException e) {
+      LOG.error("Error deleting annotation from the app database: {}", annotation);
+    }
   }
 
   //TODO What should nullness of this method be?
@@ -697,6 +719,8 @@ public final class ReaderActivity extends Activity implements
   }
 
   private void checkForExistingBookmarkAtLocation(final @NonNull ReaderBookLocation loc) {
+
+    Objects.requireNonNull(this.bookmarks);
 
     this.current_page_bookmark = null;
     for (int i = 0; i < this.bookmarks.size(); i++) {
@@ -868,7 +892,7 @@ public final class ReaderActivity extends Activity implements
       sync_manager.syncBookmarks((bookmarks) -> {
 
         //TODO TEMP save to property (to use with table of contents)
-        this.bookmarks = bookmarks;
+//        this.bookmarks = bookmarks;
 
         return Unit.INSTANCE;
       });
