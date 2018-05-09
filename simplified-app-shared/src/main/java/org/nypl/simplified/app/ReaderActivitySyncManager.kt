@@ -12,17 +12,13 @@ import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
+import java.io.Reader
 import java.net.URI
 import java.util.*
 import kotlin.concurrent.schedule
 
 enum class ReadingLocationSyncStatus {
   IDLE, BUSY
-}
-
-//TODO re-design to eliminate need for interface
-interface ReaderSyncManagerDelegate {
-  fun navigateToLocation(location: ReaderBookLocation)
 }
 
 /**
@@ -33,19 +29,20 @@ interface ReaderSyncManagerDelegate {
 class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
                         credentials: AccountCredentials,
                         private val libraryAccount: Account,
-                        private val delegate: ReaderSyncManagerDelegate) : ReaderSyncManagerDelegate by delegate {
+                        context: Context,
+                        private val pageNavigationListener: (ReaderBookLocation) -> Unit) {
 
   private companion object {
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
-  //TODO Is the book package needed?
+  //TODO not being set right now.. is this not available during init?
   val bookPackage: Package? = null
 
   private val delayTimeInterval = 120L
 
   private var delayReadingPositionSync = true
-  private val annotationsManager = AnnotationsManager(libraryAccount, credentials, delegate as Context)
+  private val annotationsManager = AnnotationsManager(libraryAccount, credentials, context)
   private var status = ReadingLocationSyncStatus.IDLE
   private var queuedReadingPosition: ReaderBookLocation? = null
 
@@ -72,7 +69,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
-    if (feedEntry == null || !feedEntry.annotations.isSome) {
+    if (!feedEntry.annotations.isSome) {
       delayReadingPositionSync = false
       LOG.error("No annotations uri or feed entry exists for this book. Abandoning sync attempt.")
       return
@@ -97,7 +94,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
     val alert = createAlertForSyncLocation(serverLocation, context) { shouldMove ->
       if (shouldMove) {
-        navigateToLocation(serverLocation)
+        pageNavigationListener(serverLocation)
       }
     }
 
@@ -206,8 +203,6 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
    */
   fun syncBookmarks(completion: ((bookmarks: List<BookmarkAnnotation>?) -> Unit)?) {
 
-    //TODO WIP
-
     val uri = if (feedEntry.annotations.isSome) {
       (feedEntry.annotations as Some<URI>).get().toString()
     } else {
@@ -217,7 +212,9 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
     annotationsManager.requestBookmarksFromServer(uri) { bookmarks ->
 
-      LOG.debug("Bookmarks: ${bookmarks}")
+      //TODO WIP
+
+      LOG.debug("Bookmarks: $bookmarks")
       completion?.invoke(bookmarks)
 
     }

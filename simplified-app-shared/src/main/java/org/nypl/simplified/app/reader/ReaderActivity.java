@@ -36,7 +36,6 @@ import org.json.JSONObject;
 import org.nypl.drm.core.AdobeDeviceID;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ReaderSyncManager;
-import org.nypl.simplified.app.ReaderSyncManagerDelegate;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
@@ -75,6 +74,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import kotlin.Unit;
+import kotlin.jvm.Synchronized;
 
 /**
  * The main reader activity for reading an EPUB.
@@ -88,8 +88,7 @@ public final class ReaderActivity extends Activity implements
   ReaderCurrentPageListenerType,
   ReaderTOCSelectionListenerType,
   ReaderSettingsListenerType,
-  ReaderMediaOverlayAvailabilityListenerType,
-    ReaderSyncManagerDelegate
+  ReaderMediaOverlayAvailabilityListenerType
 {
   private static final String BOOK_ID;
   private static final String FILE_ID;
@@ -127,15 +126,14 @@ public final class ReaderActivity extends Activity implements
   private @Nullable WebView                           view_web_view;
   private @Nullable ReaderReadiumViewerSettings       viewer_settings;
   private           boolean                           web_view_resized;
-  //TODO update annot's and create assertions for sync_manager and other ivar's that need to be there
-  private           ReaderBookLocation                current_location;
-  private           AccountCredentials                credentials;
-  private @Nullable  ReaderSyncManager                 sync_manager;
-  private @Nullable Integer                           current_spineItemPageIndex;
-  private @Nullable Integer                           current_spineItemPageCount;
-  private @Nullable String                            current_chapterTitle;
-  private @Nullable BookmarkAnnotation                current_page_bookmark;
-  private           List<BookmarkAnnotation>          bookmarks;
+  private @Nullable ReaderBookLocation                current_location;
+  private @Nullable BookmarkAnnotation                current_bookmark;
+  private @Nullable AccountCredentials                credentials;
+  private @Nullable ReaderSyncManager                 sync_manager;
+  private           int                               current_page_index;
+  private           int                               current_page_count;
+  private @Nullable String                            current_chapter_title;
+  private @Nullable List<BookmarkAnnotation>          bookmarks;
 
 
   /**
@@ -548,7 +546,6 @@ public final class ReaderActivity extends Activity implements
       Get any bookmarks from the local database.
      */
 
-    //FIXME TEMPORARY while testing
     try {
       final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
       final BookDatabaseEntryReadableType entry = db.databaseOpenEntryForReading(this.book_id);
@@ -577,23 +574,16 @@ public final class ReaderActivity extends Activity implements
      */
 
     final View in_bookmark = Objects.requireNonNull(this.view_bookmark);
+    final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
 
     in_bookmark.setOnClickListener(view -> {
-      if (this.current_page_bookmark != null) {
-        delete(this.current_page_bookmark);
-        this.current_page_bookmark = null;
+      if (this.current_bookmark != null) {
+        delete(this.current_bookmark);
+        this.current_bookmark = null;
       } else {
-        final BookmarkAnnotation annotation = createAnnotation(this.current_location);
-        if (annotation != null) {
-          this.current_page_bookmark = annotation;
-          saveAndUpload(annotation);
-        } else {
-          ErrorDialogUtilities.showError(
-            this,
-            ReaderActivity.LOG,
-            getString(R.string.new_bookmark_error),
-            null);
-        }
+        final BookmarkAnnotation annotation = createAnnotation(current_loc, null);
+        this.current_bookmark = annotation;
+        saveAndUpload(annotation, this.current_location);
       }
       updateBookmarkIconUI();
     });
@@ -608,35 +598,47 @@ public final class ReaderActivity extends Activity implements
   }
 
   private void updateBookmarkIconUI() {
-    if (this.current_page_bookmark != null) {
+    if (this.current_bookmark != null) {
       this.view_bookmark.setImageResource(R.drawable.bookmark_on);
     } else {
       this.view_bookmark.setImageResource(R.drawable.bookmark_off);
     }
   }
 
-  private void saveAndUpload(final @NonNull BookmarkAnnotation annotation) {
+  private void saveAndUpload(final @NonNull BookmarkAnnotation annotation,
+                             final @NonNull ReaderBookLocation location) {
 
-    //Attempt to upload location
-    sync_manager.postBookmarkToServer(annotation, (ID) -> {
+    final ReaderSyncManager mgr = Objects.requireNonNull(this.sync_manager);
+
+    //Save bookmark to local disk
+    saveToDisk(annotation);
+
+    //Save bookmark on the server
+    mgr.postBookmarkToServer(annotation, (ID) -> {
       if (ID != null) {
         LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
-        //TODO replace bookmark in db with version containing annotation ID
+        final BookmarkAnnotation annot = createAnnotation(location, ID);
+        this.saveToDisk(annot);
       } else {
         LOG.error("No ID returned after attempting to upload loc.");
       }
       return Unit.INSTANCE;
     });
+  }
 
-    //Save bookmark to local disk
+  private void saveToDisk(@NonNull BookmarkAnnotation annotation) {
+    final List<BookmarkAnnotation> bm = Objects.requireNonNull(this.bookmarks);
     final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
     final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
     try {
       entry.entrySetBookmark(annotation);
-      this.bookmarks.add(annotation);
+      bm.add(annotation);
     } catch (IOException e) {
       LOG.error("Error writing annotation to app database: {}", annotation);
-      //TODO user facing error message
+      ErrorDialogUtilities.showError(
+        this,
+        ReaderActivity.LOG,
+        getString(R.string.bookmark_save_error), null);
     }
   }
 
@@ -654,7 +656,6 @@ public final class ReaderActivity extends Activity implements
       LOG.error("No annotation ID present on bookmark. Skipping network request to delete.");
     }
 
-    //TODO Delete the bookmark from the database
     /*
     Delete from the database
      */
@@ -668,10 +669,14 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  //TODO What should nullness of this method be?
-  private BookmarkAnnotation createAnnotation(
-    @NonNull ReaderBookLocation bookmark)
+  private synchronized @NonNull BookmarkAnnotation createAnnotation(
+    @NonNull ReaderBookLocation bookmark,
+    @Nullable String id)
   {
+    Objects.requireNonNull(this.current_page_count);
+    Objects.requireNonNull(this.credentials);
+    Objects.requireNonNull(this.view_progress_bar);
+
     final String annotContext = "http://www.w3.org/ns/anno.jsonld";
     final String type = "Annotation";
     final String motivation = "http://www.w3.org/ns/oa#bookmarking";
@@ -683,21 +688,21 @@ public final class ReaderActivity extends Activity implements
       this.credentials.getAdobeDeviceID().map(AdobeDeviceID::toString);
     final String deviceID;
     if (opt_deviceID.isSome()) {
-      deviceID = ((Some<String>)opt_deviceID).get();
+      deviceID = ((Some<String>) opt_deviceID).get();
     } else {
       deviceID = "null";
     }
 
     float chapterProgress = 0.0f;
-    if (this.current_spineItemPageCount > 0) {
-      chapterProgress = (float) current_spineItemPageIndex / current_spineItemPageCount;
+    if (this.current_page_count > 0) {
+      chapterProgress = (float) current_page_index / current_page_count;
     }
     final float bookProgress = (float) this.view_progress_bar.getProgress() / this.view_progress_bar.getMax();
 
     final SelectorNode selectorNode = new SelectorNode(selectorType, value);
     final TargetNode targetNode = new TargetNode(bookID, selectorNode);
-    final BodyNode bodyNode = new BodyNode(timestamp, deviceID, this.current_chapterTitle, chapterProgress, bookProgress);
-    return new BookmarkAnnotation(annotContext, bodyNode, null, type, motivation, targetNode);
+    final BodyNode bodyNode = new BodyNode(timestamp, deviceID, this.current_chapter_title, chapterProgress, bookProgress);
+    return new BookmarkAnnotation(annotContext, bodyNode, id, type, motivation, targetNode);
   }
 
   private @Nullable ReaderBookLocation createReaderLocation(
@@ -722,11 +727,11 @@ public final class ReaderActivity extends Activity implements
 
     Objects.requireNonNull(this.bookmarks);
 
-    this.current_page_bookmark = null;
+    this.current_bookmark = null;
     for (int i = 0; i < this.bookmarks.size(); i++) {
       final ReaderBookLocation mark_loc = createReaderLocation(this.bookmarks.get(i));
       if (mark_loc.equals(loc)) {
-        this.current_page_bookmark = this.bookmarks.get(i);
+        this.current_bookmark = this.bookmarks.get(i);
         break;
       }
     }
@@ -873,6 +878,8 @@ public final class ReaderActivity extends Activity implements
 
   private void initiateSyncManagement()
   {
+    final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
+
     final AccountsControllerType accountController = Simplified.getCatalogAppServices().getBooks();
     if (this.credentials == null || accountController == null) {
       LOG.error("Parameter(s) were unexpectedly null before creating Sync Manager. Abandoning attempt.");
@@ -880,15 +887,19 @@ public final class ReaderActivity extends Activity implements
     }
 
     this.sync_manager = new ReaderSyncManager(
-        this.feed_entry,
-        this.credentials,
-        Simplified.getCurrentAccount(),
-        this);
+      this.feed_entry,
+      this.credentials,
+      Simplified.getCurrentAccount(),
+      this,
+      (location) -> {
+        navigateTo(location);
+        return Unit.INSTANCE;
+      });
 
     this.sync_manager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
 
       //Successfully enabled
-      sync_manager.syncReadingLocation(this.current_location, this);
+      sync_manager.syncReadingLocation(current_loc, this);
       sync_manager.syncBookmarks((bookmarks) -> {
 
         //TODO TEMP save to property (to use with table of contents)
@@ -951,9 +962,9 @@ public final class ReaderActivity extends Activity implements
       } else {
         final OpenPage page = Objects.requireNonNull(pages.get(0));
 
-        current_spineItemPageIndex = page.getSpineItemPageIndex();
-        current_spineItemPageCount = page.getSpineItemPageCount();
-        current_chapterTitle = default_package.getSpineItem(page.getIDRef()).getTitle();
+        current_page_index = page.getSpineItemPageIndex();
+        current_page_count = page.getSpineItemPageCount();
+        current_chapter_title = default_package.getSpineItem(page.getIDRef()).getTitle();
 
         in_progress_text.setText(
           Objects.requireNonNull(
@@ -1157,21 +1168,12 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  /**
-   * ReaderSyncManagerDelegate Methods
-   */
-
-  @Override public void navigateToLocation(@NotNull ReaderBookLocation location) {
-    this.navigateTo(location);
-  }
-
   private void navigateTo(final ReaderBookLocation location) {
     final OptionType<ReaderBookLocation> optLocation = Option.some(location);
 
     OptionType<ReaderOpenPageRequestType> page_request;
     page_request = optLocation.map((l) -> {
       LOG.debug("CurrentPage location {}", l);
-      //TODO audit this
       ReaderActivity.this.current_location = l;
       return ReaderOpenPageRequest.fromBookLocation(l);
     });

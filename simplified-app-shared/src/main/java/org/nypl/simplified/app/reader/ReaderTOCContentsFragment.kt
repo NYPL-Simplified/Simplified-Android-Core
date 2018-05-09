@@ -140,7 +140,6 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
       this.listener?.onTOCItemSelected(element)
     }
 
-    //TODO this is likely not the itemView anymore, but some subview of it (look at how bookmarks does it)
     return itemView
   }
 

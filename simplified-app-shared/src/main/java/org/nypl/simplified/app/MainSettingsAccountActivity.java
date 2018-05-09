@@ -361,7 +361,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     }
   }
 
-  //TODO switch WIP
   @Override
   public boolean onOptionsItemSelected(
     final @Nullable MenuItem item_mn) {
@@ -690,10 +689,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     }
 
-
-
-
-//TODO WIP
     final boolean permission = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.account.getId());
     this.sync_switch.setChecked(permission);
 
@@ -707,7 +702,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           } else {
             Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", this.account.getId(), false);
             this.sync_switch.setChecked(false);
-            //TODO TOAST
           }
           this.sync_switch.setEnabled(true);
           return kotlin.Unit.INSTANCE;
@@ -830,7 +824,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
   }
 
-  //TODO WIP
   private boolean syncButtonShouldBeVisible() {
     return (this.account.supportsSimplyESync() && this.account.getId() == Simplified.getCurrentAccount().getId());
   }
@@ -931,7 +924,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       });
   }
 
-  //TODO I'm not really sure why onResume() gets called when toggling between logged in and logged out states
   @Override
   protected void onResume() {
     super.onResume();

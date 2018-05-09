@@ -262,5 +262,6 @@
   <string name="syncManagerSyncLocationAlertMessageGeneral">Would you like to go to the latest page read?</string>
   <string name="new_bookmark_error">Unable to bookmark this page. Please try another page, or report the error for this book.</string>
   <string name="bookmark_navigation_error">There was an error navigating to the bookmark.</string>
+  <string name="bookmark_save_error">A bookmark could not be saved on this page.</string>
 
 </resources>
