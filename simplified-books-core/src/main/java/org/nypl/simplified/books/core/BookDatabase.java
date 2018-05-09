@@ -343,8 +343,8 @@ public final class BookDatabase implements BookDatabaseType
     private final File                   file_lock;
     private final File                   file_meta;
     private final File                   file_meta_tmp;
-    private final File                   file_bookmarks;
-    private final File                   file_bookmarks_tmp;
+    private final File                   file_annotations;
+    private final File                   file_annotations_tmp;
     private final BookID                 id;
     private final OPDSJSONParserType     parser;
     private final OPDSJSONSerializerType serializer;
@@ -375,8 +375,8 @@ public final class BookDatabase implements BookDatabaseType
       this.file_adobe_meta = new File(this.directory, "meta_adobe.json");
       this.file_adobe_meta_tmp =
         new File(this.directory, "meta_adobe.json.tmp");
-      this.file_bookmarks = new File(this.directory, "bookmarks.json");
-      this.file_bookmarks_tmp = new File(this.directory, "bookmarks.json.tmp");
+      this.file_annotations = new File(this.directory, "annotations.json");
+      this.file_annotations_tmp = new File(this.directory, "annotations.json.tmp");
 
       this.log =
         NullCheck.notNull(LoggerFactory.getLogger(BookDatabaseEntry.class));
@@ -636,7 +636,7 @@ public final class BookDatabase implements BookDatabaseType
     private List<BookmarkAnnotation> getBookmarksLocked()
         throws IOException {
       try {
-        final FileInputStream is = new FileInputStream(this.file_bookmarks);
+        final FileInputStream is = new FileInputStream(this.file_annotations);
         final List<BookmarkAnnotation> bookmarks = AnnotationsParser.Companion.parseBookmarkArray(is);
         is.close();
         this.log.debug("Bookmarks read from input stream: {}", bookmarks);
@@ -651,19 +651,21 @@ public final class BookDatabase implements BookDatabaseType
         final List<BookmarkAnnotation> bookmarks)
         throws IOException
     {
-      this.log.debug("updating bookmarks list: {}", this.file_bookmarks);
+      this.log.debug("updating bookmarks list: {}", this.file_annotations);
 
-      final OutputStream stream = new FileOutputStream(this.file_bookmarks_tmp);
+      final OutputStream stream = new FileOutputStream(this.file_annotations_tmp);
 
       try {
         ObjectMapper mapper = new ObjectMapper();
-        final ArrayNode jsonArray = mapper.valueToTree(bookmarks);
-        this.serializer.serializeToStream(jsonArray, stream);
+        final ArrayNode bookmarksArray = mapper.valueToTree(bookmarks);
+        final ObjectNode objNode = mapper.createObjectNode();
+        objNode.putArray("bookmarks").addAll(bookmarksArray);
+        this.serializer.serializeToStream(objNode, stream);
       } finally {
         stream.flush();
         stream.close();
       }
-      FileUtilities.fileRename(this.file_bookmarks_tmp, this.file_bookmarks);
+      FileUtilities.fileRename(this.file_annotations_tmp, this.file_annotations);
     }
 
     @Override public BookDatabaseEntrySnapshot entryUpdateAll(
@@ -713,7 +715,7 @@ public final class BookDatabase implements BookDatabaseType
         o.put("returnable", data.isReturnable());
 
         final ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        JSONSerializerUtilities.serializeObject(o, bao);
+        JSONSerializerUtilities.serialize(o, bao);
 
         FileUtilities.fileWriteUTF8Atomically(
           this.file_adobe_meta,

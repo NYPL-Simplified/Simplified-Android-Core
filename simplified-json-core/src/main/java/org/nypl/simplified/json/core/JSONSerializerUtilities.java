@@ -30,30 +30,8 @@ public final class JSONSerializerUtilities
    * @throws IOException On I/O errors
    */
 
-  public static void serializeObject(
+  public static void serialize(
     final ObjectNode d,
-    final OutputStream os)
-    throws IOException
-  {
-    NullCheck.notNull(d);
-    NullCheck.notNull(os);
-
-    final ObjectMapper jom = new ObjectMapper();
-    final ObjectWriter jw = jom.writerWithDefaultPrettyPrinter();
-    jw.writeValue(os, d);
-  }
-
-  /**
-   * Serialize the given array node to the given stream.
-   *
-   * @param d  The array node
-   * @param os The output stream
-   *
-   * @throws IOException On I/O errors
-   */
-
-  public static void serializeArray(
-    final ArrayNode d,
     final OutputStream os)
     throws IOException
   {

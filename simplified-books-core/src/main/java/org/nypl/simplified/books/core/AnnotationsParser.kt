@@ -13,7 +13,8 @@ class AnnotationsParser {
     fun parseBookmarkArray(stream: InputStream): List<BookmarkAnnotation> {
       return try {
         val mapper = jacksonObjectMapper()
-        mapper.readValue(stream)
+        val jsonObj: Map<String,List<BookmarkAnnotation>> = mapper.readValue(stream)
+        jsonObj["bookmarks"] ?: ArrayList()
       } catch (e: Exception) {
         LOG.error("Exception thrown while parsing bookmarks list from input stream: {}" +
             "\nReturning an empty list.", e)
