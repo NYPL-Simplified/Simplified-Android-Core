@@ -45,7 +45,7 @@ public interface BookDatabaseEntryReadableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  @NotNull List<BookmarkAnnotation> entryGetBookmarksList()
+  List<BookmarkAnnotation> entryGetBookmarks()
       throws IOException;
 
   /**

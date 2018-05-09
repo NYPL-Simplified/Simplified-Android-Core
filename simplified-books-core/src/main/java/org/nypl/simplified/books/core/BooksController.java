@@ -411,7 +411,7 @@ public final class BooksController implements BooksType {
   }
 
   @Override
-  public BookDatabaseReadableType bookGetDatabase() {
+  public BookDatabaseType bookGetDatabase() {
     return this.book_database;
   }
 

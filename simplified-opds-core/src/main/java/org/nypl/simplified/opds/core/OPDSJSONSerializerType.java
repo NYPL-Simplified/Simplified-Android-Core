@@ -1,5 +1,6 @@
 package org.nypl.simplified.opds.core;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
