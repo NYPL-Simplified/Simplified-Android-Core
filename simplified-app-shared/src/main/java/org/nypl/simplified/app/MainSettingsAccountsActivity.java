@@ -30,6 +30,7 @@ import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -221,10 +222,28 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
         }
       }
 
+      java.util.Collections.sort(all, new Comparator<Account>() {
+        @Override
+        public int compare(final Account a, final Account b) {
+          // Check if we're one of the three "special" libraries that always come first.
+          // This is a complete hack.
+          if (a.getId() <= 2 || b.getId() <= 2) {
+            // One of the libraries is special, so sort it first. Lower ids are "more
+            // special" than higher ids and thus show up earlier.
+            return a.getId() - b.getId();
+          } else {
+            // Neither library is special so we just go alphabetically.
+            return a.getName().compareToIgnoreCase(b.getName());
+          }
+        }
+      });
+
+      int index = 0;
       for (Account account : all) {
         if (registry.getExistingAccount(account.getId()) == null) {
-          menu.getMenu().add(Menu.NONE, account.getId(), account.getId(), account.getName());
+          menu.getMenu().add(Menu.NONE, account.getId(), index, account.getName());
         }
+        ++index;
       }
 
       menu.show();
