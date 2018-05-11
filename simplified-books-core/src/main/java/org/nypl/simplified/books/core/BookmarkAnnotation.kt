@@ -24,6 +24,11 @@ data class BookmarkAnnotation(@field:JsonProperty("@context") val context: Strin
                          val type: String,
                          val motivation: String,
                          val target: TargetNode) : Serializable
+{
+  override fun equals(other: Any?): Boolean {
+    return this.target.selector.value == (other as BookmarkAnnotation).target.selector.value
+  }
+}
 
 data class FirstNode(val items: List<BookmarkAnnotation>,
                      val type: String,

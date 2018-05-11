@@ -12,7 +12,6 @@ import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
-import java.io.Reader
 import java.net.URI
 import java.util.*
 import kotlin.concurrent.schedule
@@ -36,8 +35,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     val LOG = LoggerFactory.getLogger(ReaderSyncManager::class.java)!!
   }
 
-  //TODO not being set right now.. is this not available during init?
-  val bookPackage: Package? = null
+  var bookPackage: Package? = null
 
   private val delayTimeInterval = 120L
 
@@ -116,8 +114,9 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
       setTitle(context.getString(R.string.syncManagerSyncLocationAlertTitle))
 
-      if (bookPackage != null) {
-        val chapterTitle = bookPackage.getSpineItem(location.idRef).title
+      val p = bookPackage
+      if (p != null) {
+        val chapterTitle = p.getSpineItem(location.idRef).title
         val formatString = String.format(context.getString(R.string.syncManagerSyncLocationAlertMessage), chapterTitle)
         setMessage(formatString)
       } else {
@@ -196,12 +195,22 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
   }
 
   /**
+   * Try to re-upload any bookmarks that may not have been previously saved on the server.
+   */
+  //TODO is there a use for this?
+  fun retryOnDiskBookmarksUpload(marks: List<BookmarkAnnotation>) {
+    marks.filter { it.id == null }
+         .map { postBookmarkToServer(it, null) }
+  }
+
+  /**
    * Download list of bookmark annotations from the server for the particular book,
    * and synchronize that list as best as possible with the current list
    * of bookmarks saved in the local database.
    * @param completion returns a List of bookmarks, empty if none exist
    */
-  fun syncBookmarks(completion: ((bookmarks: List<BookmarkAnnotation>?) -> Unit)?) {
+  fun syncBookmarks(onDiskBookmarks: List<BookmarkAnnotation>,
+                    completion: ((syncedBookmarks: List<BookmarkAnnotation>?) -> Unit)?) {
 
     val uri = if (feedEntry.annotations.isSome) {
       (feedEntry.annotations as Some<URI>).get().toString()
@@ -210,19 +219,39 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
       return
     }
 
-    annotationsManager.requestBookmarksFromServer(uri) { bookmarks ->
+    annotationsManager.requestBookmarksFromServer(uri) { serverBookmarks ->
 
-      //TODO WIP
+      /*
+      Synchronize bookmarks between client and server
+       */
 
-      LOG.debug("Bookmarks: $bookmarks")
-      completion?.invoke(bookmarks)
+      val localBookmarksToKeep = mutableListOf<BookmarkAnnotation>()
+      val serverBookmarksToKeep = mutableListOf<BookmarkAnnotation>()
 
+      for (serverMark in serverBookmarks) {
+        val match = onDiskBookmarks.filter { it.id == serverMark.id }
+        localBookmarksToKeep.add(0,match.first())
+
+        //Skipping "serverBookmarksToDelete"
+      }
+
+      serverBookmarksToKeep.addAll(serverBookmarks.filterNot { localBookmarksToKeep.contains(it) })
+
+      //Skipping "localBookmarksToDelete"
+
+      localBookmarksToKeep.addAll(serverBookmarksToKeep)
+
+      //Squash duplicates and prioritize ones with an ID
+      val syncedMarks = localBookmarksToKeep.sortedWith(nullsLast(compareBy({ it.id })))
+                                            .distinctBy { it.target.selector.value }
+
+      LOG.debug("Newly Synced Bookmarks: $syncedMarks")
+      completion?.let { it(syncedMarks) }
     }
-
   }
 
   fun postBookmarkToServer(bookAnnotation: BookmarkAnnotation,
-                           completion: (serverID: String?) -> Unit) {
+                           completion: ((serverID: String?) -> Unit)?) {
     annotationsManager.postBookmarkToServer(bookAnnotation, completion)
   }
 

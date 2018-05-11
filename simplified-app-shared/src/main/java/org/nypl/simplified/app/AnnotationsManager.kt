@@ -67,8 +67,8 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") == true &&
-        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryAccount.id) == false) {
+    if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") &&
+        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryAccount.id).not()) {
       completion(false)
       return
     }
@@ -378,11 +378,10 @@ class AnnotationsManager(private val libraryAccount: Account,
    * @param completion Called asynchronously by the network request to return the bookmarks
    */
   fun requestBookmarksFromServer(uri: String,
-                                 completion: (bookmarks: List<BookmarkAnnotation>?) -> Unit) {
+                                 completion: ((bookmarks: List<BookmarkAnnotation>) -> Unit)?) {
 
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
-      completion(null)
       return
     }
 
@@ -397,12 +396,11 @@ class AnnotationsManager(private val libraryAccount: Account,
           val json = response.toString()
 
           val mapper = jacksonObjectMapper()
-          var annotationResponse: AnnotationResponse?
+          val annotationResponse: AnnotationResponse?
           try {
             annotationResponse = mapper.readValue(json)
           } catch (e: JsonMappingException) {
             LOG.error("Cancelling download request. JsonMappingException for annotations:\n $e")
-            completion(null)
             return@Listener
           }
 
@@ -410,11 +408,10 @@ class AnnotationsManager(private val libraryAccount: Account,
             it.motivation.contains("bookmarking", true)
           }
           LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
-          completion(bookmarks)
+          completion?.let { it(bookmarks) }
         },
         ErrorListener { error ->
           LOG.error("GET request fail! Error: ${error.message}")
-          completion(null)
         })
 
     request.retryPolicy = DefaultRetryPolicy(
@@ -432,20 +429,18 @@ class AnnotationsManager(private val libraryAccount: Account,
    * @param completion Returns the new UUID/URI created for the annotation
    */
   fun postBookmarkToServer(bookmark: BookmarkAnnotation,
-                           completion: (serverID: String?) -> Unit) {
+                           completion: ((serverID: String?) -> Unit)?) {
 
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
-      completion(null)
+      completion?.let { it(null) }
       return
     }
 
     try {
-//      val jsonBody = bookmark.toString()
-
       val jsonString = ObjectMapper().writeValueAsString(bookmark)
       postAnnotation(jsonString, 20) { _, serverID ->
-        completion(serverID)
+        completion?.let { it(serverID) }
       }
     } catch (e: Exception) {
       LOG.error("Error serializing JSON from Kotlin object")
@@ -469,10 +464,10 @@ class AnnotationsManager(private val libraryAccount: Account,
         Request.Method.DELETE,
         annotationID,
         credentials,
-        Listener { string ->
+        Listener { _ ->
           completion(true)
         },
-        ErrorListener { error ->
+        ErrorListener { _ ->
           completion(false)
         }
     )

@@ -147,7 +147,7 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entrySetBookmark(
+  BookDatabaseEntrySnapshot entryAddBookmark(
       BookmarkAnnotation bookmark)
       throws IOException;
 

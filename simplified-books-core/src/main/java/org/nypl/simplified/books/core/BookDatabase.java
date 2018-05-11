@@ -571,7 +571,7 @@ public final class BookDatabase implements BookDatabaseType
     Bookmarks - Public Methods
      */
 
-    @Override public BookDatabaseEntrySnapshot entrySetBookmark(
+    @Override public BookDatabaseEntrySnapshot entryAddBookmark(
         final BookmarkAnnotation bm)
         throws IOException {
       final List<BookmarkAnnotation> bookmarks = entryGetBookmarks();
@@ -583,6 +583,7 @@ public final class BookDatabase implements BookDatabaseType
         final BookmarkAnnotation bookmark)
         throws IOException {
       final List<BookmarkAnnotation> bookmarks = entryGetBookmarks();
+      //TODO see if this really can delete a bookmark.. since i did override equals()
       bookmarks.remove(bookmark);
       return entrySetBookmarksList(bookmarks);
     }
@@ -590,9 +591,7 @@ public final class BookDatabase implements BookDatabaseType
     @Override public BookDatabaseEntrySnapshot entrySetBookmarks(
       List<BookmarkAnnotation> bookmarks)
       throws IOException {
-      final List<BookmarkAnnotation> currentBookmarks = entryGetBookmarks();
-      currentBookmarks.addAll(bookmarks);
-      return entrySetBookmarksList(currentBookmarks);
+      return entrySetBookmarksList(bookmarks);
     }
 
     @Override public List<BookmarkAnnotation> entryGetBookmarks()
