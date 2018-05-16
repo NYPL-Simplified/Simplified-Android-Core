@@ -746,7 +746,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       search_item.expandActionView();
 
       // display either the category title or the previously searched keywords 
-      this.search_view.setQueryHint(String.format("%s %s", getString(R.string.search_hint_prefix), Objects.toString(this.feed.getFeedTitle(), "")));
+      this.search_view.setQueryHint(String.format(getString(R.string.search_hint_format), Objects.toString(this.feed.getFeedTitle(), getString(R.string.search_hint_feed_title_default))));
       if (args.getTitle().startsWith(getString(R.string.search_hint_prefix))) {
         this.search_view.setQueryHint(args.getTitle());
       }
