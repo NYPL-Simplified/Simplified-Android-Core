@@ -460,7 +460,6 @@ public final class ReaderActivity extends Activity implements
         @Override public void onAccountIsLoggedIn(
           final AccountCredentials creds) {
           ReaderActivity.this.credentials = creds;
-          initiateSyncManagement();
         }
       }
     );
@@ -479,6 +478,8 @@ public final class ReaderActivity extends Activity implements
 
     this.current_location = l;
     Objects.requireNonNull(this.current_location);
+
+    initiateSyncManagement();
 
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
     final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
@@ -543,6 +544,7 @@ public final class ReaderActivity extends Activity implements
       Get any bookmarks from the local database.
      */
 
+
     synchronized(this) {
       if (this.bookmarks == null) {
         try {
@@ -575,7 +577,6 @@ public final class ReaderActivity extends Activity implements
      */
 
     final View in_bookmark = Objects.requireNonNull(this.view_bookmark);
-    final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
     Objects.requireNonNull(this.bookmarks);
 
     in_bookmark.setOnClickListener(view -> {
@@ -584,10 +585,11 @@ public final class ReaderActivity extends Activity implements
         this.bookmarks.remove(this.current_bookmark);
         this.current_bookmark = null;
       } else {
+        final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
         final BookmarkAnnotation annotation = createAnnotation(current_loc, null);
-        saveAndUpload(annotation, this.current_location);
-        this.bookmarks.add(this.current_bookmark);
         this.current_bookmark = annotation;
+        saveAndUpload(annotation, current_loc);
+        this.bookmarks.add(Objects.requireNonNull(this.current_bookmark));
       }
       updateBookmarkIconUI();
     });
@@ -806,9 +808,6 @@ public final class ReaderActivity extends Activity implements
     final Package p = Objects.requireNonNull(c.getDefaultPackage());
     p.setRootUrls(hs.getURIBase().toString(), null);
 
-    Objects.requireNonNull(this.sync_manager);
-    this.sync_manager.setBookPackage(p);
-    
     final ReaderReadiumViewerSettings vs =
       Objects.requireNonNull(this.viewer_settings);
     final ReaderReadiumJavaScriptAPIType js =
@@ -891,6 +890,10 @@ public final class ReaderActivity extends Activity implements
 
   private void initiateSyncManagement()
   {
+    if (this.sync_manager != null) {
+      return;
+    }
+
     final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
     final List<BookmarkAnnotation> current_marks = Objects.requireNonNull(this.bookmarks);
 
@@ -909,6 +912,10 @@ public final class ReaderActivity extends Activity implements
         navigateTo(location);
         return Unit.INSTANCE;
       });
+
+    final Container c = Objects.requireNonNull(this.epub_container);
+    final Package p = c.getDefaultPackage();
+    this.sync_manager.setBookPackage(p);
 
     this.sync_manager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
       //Sync Permitted or Successfully Enabled

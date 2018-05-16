@@ -99,6 +99,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     // Pass through without presenting the Alert Dialog if:
     // 1 - The server and the client have the same page marked
     // 2 - There is no recent page saved on the server
+    //TODO add: if the same device created the server's location
     if (currentLocation.toString() != serverLocation.toString()) {
       UIThread.runOnUIThread {
         alert.show()
@@ -230,7 +231,9 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
       for (serverMark in serverBookmarks) {
         val match = onDiskBookmarks.filter { it.id == serverMark.id }
-        localBookmarksToKeep.add(0,match.first())
+        if (match.count() > 0) {
+          localBookmarksToKeep.add(0, match.first())
+        }
 
         //Skipping "serverBookmarksToDelete"
       }
