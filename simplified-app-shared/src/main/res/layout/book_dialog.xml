@@ -84,8 +84,6 @@
 
         <Button
                 android:id="@+id/book_dialog_downloading_failed_retry"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
                 android:layout_weight="1"
                 android:background="@drawable/simplified_button"
                 android:textColor="@drawable/simplified_button_text"
@@ -96,8 +94,6 @@
 
         <Button
                 android:id="@+id/book_dialog_downloading_failed_dismiss"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
                 android:layout_weight="1"
                 android:background="@drawable/simplified_button"
                 android:textColor="@drawable/simplified_button_text"
@@ -128,19 +124,17 @@
               android:layout_marginLeft="8dp"
               android:gravity="center"
               android:orientation="horizontal"
-      >
+        >
 
         <!-- This button will actually be removed at run-time, it is here -->
         <!-- for the purposes of checking the layout in the GUI editor. -->
         <Button
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:background="@drawable/simplified_button"
-                android:textColor="@drawable/simplified_button_text"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_standard_height"
-                android:textSize="12sp"
-                android:text="@string/catalog_book_borrow" />
+            android:background="@drawable/simplified_button"
+            android:textColor="@drawable/simplified_button_text"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_standard_height"
+            android:textSize="12sp"
+            android:text="@string/catalog_book_borrow" />
       </LinearLayout>
 
     </RelativeLayout>
@@ -195,11 +189,11 @@
       android:textColor="@drawable/simplified_button_text"
       android:layout_width="match_parent"
       android:layout_height="@dimen/button_standard_height"
-      android:gravity="right|center_vertical"
+      android:gravity="end|center_vertical"
       android:textSize="12sp"
-      android:text="More..."
+      android:text="@string/book_summary_read_more"
       android:background="@android:color/transparent"
-      android:paddingRight="6dp"
+      android:paddingEnd="6dp"
       android:id="@+id/book_summary_read_more_button"/>
 
     <View
@@ -233,6 +227,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
     android:layout_marginEnd="10dp"
+    android:visibility="gone"
     android:orientation="vertical">
 
     <Button
@@ -254,17 +249,19 @@
       android:layout_marginRight="6dp"
       android:background="@android:color/darker_gray" />
 
-    <Button
-            android:textColor="@drawable/simplified_button_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/catalog_book_report"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:background="@android:color/transparent"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:id="@+id/book_dialog_report_button"/>
   </LinearLayout>
+
+
+  <Button
+      android:textColor="@drawable/simplified_button_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="10dp"
+      android:text="@string/catalog_book_report"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:background="@android:color/transparent"
+      android:paddingLeft="10dp"
+      android:paddingRight="10dp"
+      android:id="@+id/book_dialog_report_button"/>
 
 </LinearLayout>
