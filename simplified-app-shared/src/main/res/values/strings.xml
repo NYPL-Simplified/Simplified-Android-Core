@@ -169,6 +169,10 @@
   <string name="settings_adobe_accounts">Adobe Accounts</string>
   <string name="settings_alt_uris">Alternate URIs</string>
   <string name="settings_reveal_password">Show PIN</string>
+  <string name="settings_advanced_menu">Advanced</string>
+  <string name="settings_bookmarks_switch">Sync Bookmarks</string>
+  <string name="advanced_sync_switch_title">Delete All Bookmarks</string>
+  <string name="advanced_sync_switch_description">Delete all the bookmarks you have saved in the cloud.</string>
 
   <string name="login_needed">You need to login to access the collection.</string>
   <string name="login_with_barcode">Login with Barcode</string>
@@ -263,5 +267,8 @@
   <string name="new_bookmark_error">Unable to bookmark this page. Please try another page, or report the error for this book.</string>
   <string name="bookmark_navigation_error">There was an error navigating to the bookmark.</string>
   <string name="bookmark_save_error">A bookmark could not be saved on this page.</string>
+  <string name="title_activity_settings_account_advanced">SettingsAccountAdvancedActivity</string>
+  <string name="advanced_sync_error_message">There was an error while contacting the server. Please try again later with a strong internet connection.</string>
+  <string name="advanced_sync_message">"Selecting \"Delete\" will remove all bookmarks from the server for this library account."</string>
 
 </resources>

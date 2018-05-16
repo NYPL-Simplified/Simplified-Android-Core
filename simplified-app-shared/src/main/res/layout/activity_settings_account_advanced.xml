@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/accounts_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_background"
+    android:orientation="vertical">
+
+    <TableRow
+        android:id="@+id/advanced_sync_switch"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/normal_background"
+        android:padding="15dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="5dp">
+
+      <TextView
+          android:text="@string/advanced_sync_switch_title"
+          android:layout_width="match_parent"
+          android:textAppearance="?android:attr/textAppearanceMedium"/>
+    </TableRow>
+
+  <TextView
+      android:text="@string/advanced_sync_switch_description"
+      android:layout_width="match_parent"
+      android:textAppearance="?android:attr/textAppearanceSmall"
+      android:paddingLeft="15dp"
+      android:paddingRight="15dp"
+      android:layout_marginBottom="5dp"/>
+
+  <ProgressBar
+      android:id="@+id/advanced_sync_progress_bar"
+      android:indeterminate="true"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:layout_gravity="center"
+      android:visibility="invisible"/>
+</TableLayout>

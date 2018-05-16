@@ -513,19 +513,19 @@ class AnnotationsManager(private val libraryAccount: Account,
     with(builder) {
       setTitle(context.getString(R.string.firstTimeSyncAlertTitle))
       setMessage(context.getString(R.string.firstTimeSyncAlertMessage))
-      builder.setNegativeButton(context.getString(R.string.firstTimeSyncAlertNegButton)) { _, _ ->
+      setNegativeButton(context.getString(R.string.firstTimeSyncAlertNegButton)) { _, _ ->
         Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
         completion(false)
       }
-      builder.setPositiveButton(context.getString(R.string.firstTimeSyncAlertPosButton)) { _, _ ->
+      setPositiveButton(context.getString(R.string.firstTimeSyncAlertPosButton)) { _, _ ->
         updateServerSyncPermissionStatus(true) { success ->
           Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
           completion(success)
         }
       }
 
-      builder.create()
-      builder.show()
+      create()
+      show()
     }
   }
 

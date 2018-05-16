@@ -3,7 +3,9 @@ package org.nypl.simplified.app;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -68,6 +70,8 @@ import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
+import kotlin.Unit;
+
 /**
  * The activity displaying the settings for the application.
  */
@@ -94,11 +98,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
   private @Nullable Switch sync_switch;
   private @Nullable LinearLayout sync_table_row;
+  private @Nullable TableRow advanced_table_row;
 
   private @Nullable Button login;
 
   private Account account;
-  private AnnotationsManager annotationsManager;
+
+  AnnotationsManager annotationsManager;
 
   /**
    * Construct an activity.
@@ -176,19 +182,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
               in_barcode_image.setImageBitmap(barcodeBitmap);
 
               in_barcode_image_toggle.setVisibility(View.VISIBLE);
-              in_barcode_image_toggle.setOnClickListener(
-                  new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                      if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
-                        in_barcode_image.setVisibility(View.VISIBLE);
-                        in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
-                      } else {
-                        in_barcode_image.setVisibility(View.GONE);
-                        in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
-                      }
-                    }
+              in_barcode_image_toggle.setOnClickListener(v -> {
+                if (in_barcode_image_toggle.getText() == getText(R.string.settings_toggle_barcode_show)) {
+                  in_barcode_image.setVisibility(View.VISIBLE);
+                  in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_hide);
+                } else {
+                  in_barcode_image.setVisibility(View.GONE);
+                  in_barcode_image_toggle.setText(R.string.settings_toggle_barcode_show);
                   }
+                }
               );
             }
           }
@@ -283,6 +285,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   public void onAccountLogoutSuccess() {
     MainSettingsAccountActivity.LOG.debug("onAccountLogoutSuccess");
     this.onAccountIsNotLoggedIn();
+
+    this.annotationsManager = null;
+
+    //TODO LEFT off thinking of a place to instantiate this.annotationsManager (in a potentially better spot than in onResume())
 
     //if current account ??
       final SimplifiedCatalogAppServicesType app =
@@ -470,6 +476,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     this.sync_switch = findViewById(R.id.sync_switch);
     this.sync_table_row = findViewById(R.id.sync_table_row);
     this.sync_table_row.setVisibility(View.GONE);
+    this.advanced_table_row = findViewById(R.id.link_advanced);
+    this.advanced_table_row.setVisibility(View.GONE);
+
+    this.advanced_table_row.setOnClickListener(view -> {
+      final FragmentManager mgr = getFragmentManager();
+      final FragmentTransaction transaction = mgr.beginTransaction();
+      final SettingsAccountAdvancedFragment fragment = new SettingsAccountAdvancedFragment();
+      transaction.add(R.id.settings_account_container, fragment).addToBackStack("advanced").commit();
+    });
 
     final TableRow in_privacy =
       (TableRow) findViewById(R.id.link_privacy);
@@ -769,7 +784,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
 
 
-
     this.navigationDrawerSetActionBarTitle();
 
     this.account_name_text = account_name;
@@ -826,6 +840,21 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
   private boolean syncButtonShouldBeVisible() {
     return (this.account.supportsSimplyESync() && this.account.getId() == Simplified.getCurrentAccount().getId());
+  }
+
+  @Override
+  public void onBackPressed() {
+
+    /*
+    Pop any stack of Fragments if they exist.
+     */
+    final FragmentManager manager = getFragmentManager();
+    if (manager.getBackStackEntryCount() > 0) {
+      manager.popBackStackImmediate();
+      return;
+    }
+
+    super.onBackPressed();
   }
 
   /**
@@ -980,11 +1009,13 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     if (syncButtonShouldBeVisible()) {
       if (this.annotationsManager == null) {
         this.annotationsManager = new AnnotationsManager(this.account, creds, this);
+        checkServerSyncPermission(userAccount);
       }
       this.sync_table_row.setVisibility(View.VISIBLE);
-      checkServerSyncPermission(userAccount);
+      this.advanced_table_row.setVisibility(View.VISIBLE);
     } else {
       this.sync_table_row.setVisibility(View.GONE);
+      this.advanced_table_row.setVisibility(View.GONE);
     }
 
     if (account.supportsBarcodeDisplay()) {

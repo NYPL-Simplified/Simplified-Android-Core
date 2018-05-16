@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<FrameLayout
+    android:id="@+id/settings_account_container"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
 <ScrollView
   xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/settings_account_scroll_view"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:background="@color/light_background">
@@ -19,7 +26,6 @@
         android:elevation="1dp"
         android:orientation="vertical"
         android:padding="16dp">
-
 
       <TableLayout
           android:id="@+id/settings_login_table_provider"
@@ -257,6 +263,7 @@
         android:elevation="1dp"
         android:orientation="vertical"
         android:padding="16dp"
+        android:layout_marginTop="10dp"
         android:visibility="visible">
 
 
@@ -266,8 +273,8 @@
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:background="@color/normal_background"
-          android:text="Sync Bookmarks"
-          android:textAppearance="?android:attr/textAppearanceMedium"/>
+          android:text="@string/settings_bookmarks_switch"
+          android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
 
     <LinearLayout
@@ -282,18 +289,18 @@
         android:layout_height="wrap_content">
 
         <TableRow
-          android:id="@+id/support_center"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:background="@color/normal_background"
-          android:padding="015dp"
-          android:layout_marginBottom="5dp"
-          android:elevation="1dp">
+            android:id="@+id/support_center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:background="@color/normal_background"
+            android:elevation="1dp"
+            android:padding="015dp">
 
           <TextView
-            android:text="Support Center"
-            android:layout_width="match_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
+              android:layout_width="match_parent"
+              android:text="Support Center"
+              android:textAppearance="?android:attr/textAppearanceMedium" />
         </TableRow>
 
 
@@ -341,8 +348,24 @@
             android:layout_width="match_parent"
             android:textAppearance="?android:attr/textAppearanceMedium"/>
         </TableRow>
+
+        <TableRow
+            android:id="@+id/link_advanced"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/normal_background"
+            android:padding="015dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:elevation="1dp">
+
+          <TextView
+              android:text="@string/settings_advanced_menu"
+              android:layout_width="match_parent"
+              android:textAppearance="?android:attr/textAppearanceMedium"/>
+        </TableRow>
       </TableLayout>
     </LinearLayout>
   </LinearLayout>
 </ScrollView>
-
+</FrameLayout>
