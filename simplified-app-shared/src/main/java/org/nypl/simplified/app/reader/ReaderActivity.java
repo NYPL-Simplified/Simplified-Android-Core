@@ -532,6 +532,8 @@ public final class ReaderActivity extends Activity implements
       ReaderActivity.this::finish);
   }
 
+
+
   @Override public void onEPUBLoadSucceeded(
     final Container c) {
     this.epub_container = c;
@@ -543,7 +545,6 @@ public final class ReaderActivity extends Activity implements
     /*
       Get any bookmarks from the local database.
      */
-
 
     synchronized(this) {
       if (this.bookmarks == null) {
@@ -629,7 +630,7 @@ public final class ReaderActivity extends Activity implements
         bm.remove(annotation);
         this.saveToDisk(newAnnotation);
       } else {
-        LOG.error("No ID returned after attempting to upload loc.");
+        LOG.error("Skipping annotation upload.");
       }
       return Unit.INSTANCE;
     });
@@ -695,14 +696,7 @@ public final class ReaderActivity extends Activity implements
     final String selectorType = "oa:FragmentSelector";
     final String value = Objects.requireNonNull(bookmark.toJsonString());
     final String timestamp = new Instant().toString();
-    final OptionType<String> opt_deviceID =
-      this.credentials.getAdobeDeviceID().map(AdobeDeviceID::toString);
-    final String deviceID;
-    if (opt_deviceID.isSome()) {
-      deviceID = ((Some<String>) opt_deviceID).get();
-    } else {
-      deviceID = "null";
-    }
+    final String deviceID = getDeviceIDString();
 
     float chapterProgress = 0.0f;
     if (this.current_page_count > 0) {
@@ -714,6 +708,18 @@ public final class ReaderActivity extends Activity implements
     final TargetNode targetNode = new TargetNode(bookID, selectorNode);
     final BodyNode bodyNode = new BodyNode(timestamp, deviceID, this.current_chapter_title, chapterProgress, bookProgress);
     return new BookmarkAnnotation(annotContext, bodyNode, id, type, motivation, targetNode);
+  }
+
+  private String getDeviceIDString() {
+    final OptionType<String> opt_deviceID =
+      this.credentials.getAdobeDeviceID().map(AdobeDeviceID::toString);
+    final String deviceID;
+    if (opt_deviceID.isSome()) {
+      deviceID = ((Some<String>) opt_deviceID).get();
+    } else {
+      deviceID = "null";
+    }
+    return deviceID;
   }
 
   private @Nullable ReaderBookLocation createReaderLocation(
@@ -919,7 +925,9 @@ public final class ReaderActivity extends Activity implements
 
     this.sync_manager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
       //Sync Permitted or Successfully Enabled
-      sync_manager.syncReadingLocation(current_loc, this);
+      sync_manager.syncReadingLocation(getDeviceIDString(), current_loc, this);
+      //TODO should we create a delay here?
+      sync_manager.retryOnDiskBookmarksUpload(current_marks);
       sync_manager.syncBookmarks(current_marks, (syncedMarks) -> {
         synchronized(this) {
           this.bookmarks = syncedMarks;

@@ -583,7 +583,6 @@ public final class BookDatabase implements BookDatabaseType
         final BookmarkAnnotation bookmark)
         throws IOException {
       final List<BookmarkAnnotation> bookmarks = entryGetBookmarks();
-      //TODO see if this really can delete a bookmark.. since i did override equals()
       bookmarks.remove(bookmark);
       return entrySetBookmarksList(bookmarks);
     }
@@ -638,7 +637,6 @@ public final class BookDatabase implements BookDatabaseType
         final FileInputStream is = new FileInputStream(this.file_annotations);
         final List<BookmarkAnnotation> bookmarks = AnnotationsParser.Companion.parseBookmarkArray(is);
         is.close();
-        this.log.debug("Bookmarks read from input stream: {}", bookmarks);
         return bookmarks;
       } catch (FileNotFoundException e) {
         this.log.debug("Bookmarks file not found. Continuing by returning an empty list.");
@@ -650,8 +648,6 @@ public final class BookDatabase implements BookDatabaseType
         final List<BookmarkAnnotation> bookmarks)
         throws IOException
     {
-      this.log.debug("updating bookmarks list: {}", this.file_annotations);
-
       final OutputStream stream = new FileOutputStream(this.file_annotations_tmp);
 
       try {

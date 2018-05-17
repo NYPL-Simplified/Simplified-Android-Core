@@ -3,6 +3,7 @@ package org.nypl.simplified.app
 import android.app.AlertDialog
 import android.content.Context
 import com.io7m.jfunctional.Some
+import org.json.JSONObject
 import org.nypl.simplified.app.reader.ReaderBookLocation
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
@@ -60,7 +61,8 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     }
   }
 
-  fun syncReadingLocation(currentLocation: ReaderBookLocation,
+  fun syncReadingLocation(device: String,
+                          currentLocation: ReaderBookLocation,
                           context: Context) {
     if (!annotationsManager.syncIsPossibleAndPermitted()) {
       delayReadingPositionSync = false
@@ -76,13 +78,14 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     val uriString = (feedEntry.annotations as Some<URI>).get().toString()
 
     annotationsManager.requestReadingPositionOnServer(feedEntry.id, uriString, { serverLocation ->
-      interpretUXForSync(serverLocation, context, currentLocation)
+      interpretUXForSync(device, serverLocation, currentLocation, context)
     })
   }
 
-  private fun interpretUXForSync(serverLocation: ReaderBookLocation?,
-                                 context: Context,
-                                 currentLocation: ReaderBookLocation) {
+  private fun interpretUXForSync(device: String,
+                                 serverLocation: BookmarkAnnotation?,
+                                 currentLocation: ReaderBookLocation,
+                                 context: Context) {
     delayReadingPositionSync = false
 
     if (serverLocation == null) {
@@ -90,17 +93,21 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
       return
     }
 
-    val alert = createAlertForSyncLocation(serverLocation, context) { shouldMove ->
+    val jsonObject = JSONObject(serverLocation.target.selector.value)
+    val serverBookLocation = ReaderBookLocation.fromJSON(jsonObject)
+
+    val alert = createAlertForSyncLocation(serverBookLocation, context) { shouldMove ->
       if (shouldMove) {
-        pageNavigationListener(serverLocation)
+        pageNavigationListener(serverBookLocation)
       }
     }
 
-    // Pass through without presenting the Alert Dialog if:
+    // Pass through without presenting the Alert Dialog for any of the following:
     // 1 - The server and the client have the same page marked
     // 2 - There is no recent page saved on the server
-    //TODO add: if the same device created the server's location
-    if (currentLocation.toString() != serverLocation.toString()) {
+    // 3 - The server mark came from the same device
+    if (currentLocation.toString() != serverBookLocation.toString() &&
+        device != serverLocation.body.device) {
       UIThread.runOnUIThread {
         alert.show()
       }
@@ -124,12 +131,12 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
         setMessage(context.getString(R.string.syncManagerSyncLocationAlertMessageGeneral))
       }
 
-      setPositiveButton("YES") { _, _ ->
+      setPositiveButton(context.getString(R.string.syncManagerSyncLocationAlertMove)) { _, _ ->
         completion(true)
         LOG.debug("User chose to jump to synced page: ${location.contentCFI}")
       }
 
-      setNegativeButton("NO") { _, _ ->
+      setNegativeButton(context.getString(R.string.syncManagerSyncLocationAlertStay)) { _, _ ->
         completion(false)
         LOG.debug("User declined jump to synced page.")
       }
@@ -197,8 +204,8 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
   /**
    * Try to re-upload any bookmarks that may not have been previously saved on the server.
+   * This is NOT a serial action on a single thread.
    */
-  //TODO is there a use for this?
   fun retryOnDiskBookmarksUpload(marks: List<BookmarkAnnotation>) {
     marks.filter { it.id == null }
          .map { postBookmarkToServer(it, null) }
@@ -223,26 +230,21 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     annotationsManager.requestBookmarksFromServer(uri) { serverBookmarks ->
 
       /*
-      Synchronize bookmarks between client and server
+      Synchronize:
+      1. Do not omit any bookmark that came from the server
+      2. Only delete an on-disk bookmark if it's missing from the server, and it has an ID.
        */
 
-      val localBookmarksToKeep = mutableListOf<BookmarkAnnotation>()
-      val serverBookmarksToKeep = mutableListOf<BookmarkAnnotation>()
+      val localBookmarksToKeep = onDiskBookmarks.toMutableList()
 
-      for (serverMark in serverBookmarks) {
-        val match = onDiskBookmarks.filter { it.id == serverMark.id }
-        if (match.count() > 0) {
-          localBookmarksToKeep.add(0, match.first())
+      for (onDiskMark in onDiskBookmarks) {
+        val match = serverBookmarks.filter { it.id == onDiskMark.id }
+        if (match.count() < 1 && onDiskMark.id != null) {
+          localBookmarksToKeep.remove(onDiskMark)
         }
-
-        //Skipping "serverBookmarksToDelete"
       }
 
-      serverBookmarksToKeep.addAll(serverBookmarks.filterNot { localBookmarksToKeep.contains(it) })
-
-      //Skipping "localBookmarksToDelete"
-
-      localBookmarksToKeep.addAll(serverBookmarksToKeep)
+      localBookmarksToKeep.addAll(0, serverBookmarks)
 
       //Squash duplicates and prioritize ones with an ID
       val syncedMarks = localBookmarksToKeep.sortedWith(nullsLast(compareBy({ it.id })))

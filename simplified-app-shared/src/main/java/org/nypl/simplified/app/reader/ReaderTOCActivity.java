@@ -106,8 +106,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
     i.putExtra(ReaderTOCActivity.TOC_ID, toc);
     i.putExtra(ReaderTOCActivity.BOOKMARKS_ID, (Serializable) marks);
 
-    //TODO need to figure out how to handle Activity Result now that there are two possible finishes
-
     from.startActivityForResult(i, ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE);
   }
 

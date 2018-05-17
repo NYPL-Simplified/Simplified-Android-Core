@@ -15,7 +15,6 @@ import com.io7m.jfunctional.Some
 import org.json.JSONObject
 import org.joda.time.Instant
 import org.nypl.drm.core.AdobeDeviceID
-import org.nypl.simplified.app.reader.ReaderBookLocation
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
@@ -216,7 +215,7 @@ class AnnotationsManager(private val libraryAccount: Account,
    * @param completion Called asynchronously by the network request to return the CFI
    */
   fun requestReadingPositionOnServer(bookID: String?, uri: String?,
-                                     completion: (location: ReaderBookLocation?) -> Unit ) {
+                                     completion: (location: BookmarkAnnotation?) -> Unit ) {
 
     if (!syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
@@ -234,10 +233,10 @@ class AnnotationsManager(private val libraryAccount: Account,
         credentials.pin.toString(),
         null,
         Listener<JSONObject> { response ->
-          completion(bookLocationFromString(response))
+          completion(bookAnnotationFromBody(response))
         },
         ErrorListener { error ->
-          LOG.debug("GET request fail! Error: ${error.message}")
+          logVolleyError(error)
           completion(null)
         })
 
@@ -249,7 +248,7 @@ class AnnotationsManager(private val libraryAccount: Account,
     requestQueue.add(request)
   }
 
-  private fun bookLocationFromString(JSON: JSONObject): ReaderBookLocation?
+  fun bookAnnotationFromBody(JSON: JSONObject): BookmarkAnnotation?
   {
     val mapper = jacksonObjectMapper()
     val annotationResponse: AnnotationResponse? = mapper.readValue(JSON.toString())
@@ -261,9 +260,10 @@ class AnnotationsManager(private val libraryAccount: Account,
 
     annotationResponse.first.items.forEach {
       if (it.motivation == "http://librarysimplified.org/terms/annotation/idling") {
-        val value = it.target.selector.value
-        val valueJson = JSONObject(value)
-        return ReaderBookLocation.fromJSON(valueJson)
+//        val value = it.target.selector.value
+//        val valueJson = JSONObject(value)
+//        return ReaderBookLocation.fromJSON(valueJson)
+        return it
       }
     }
     return null
@@ -352,11 +352,9 @@ class AnnotationsManager(private val libraryAccount: Account,
             completion(true, serverAnnotationID)
           },
           ErrorListener { error ->
-            //TODO actually pull the server error json problem response from our circ servers
-            LOG.error("POST request fail! Network Error Cause: ${error.cause ?: "error cause was null"}")
+            logVolleyError(error)
             completion(false, null)
           })
-
       if (timeout != null) {
         request.retryPolicy = DefaultRetryPolicy(
             TimeUnit.SECONDS.toMillis(timeout).toInt(),
@@ -411,7 +409,7 @@ class AnnotationsManager(private val libraryAccount: Account,
           completion?.let { it(bookmarks) }
         },
         ErrorListener { error ->
-          LOG.error("GET request fail! Error: ${error.message}")
+          logVolleyError(error)
         })
 
     request.retryPolicy = DefaultRetryPolicy(
@@ -467,7 +465,8 @@ class AnnotationsManager(private val libraryAccount: Account,
         Listener { _ ->
           completion(true)
         },
-        ErrorListener { _ ->
+        ErrorListener { error ->
+          logVolleyError(error)
           completion(false)
         }
     )
@@ -539,5 +538,20 @@ class AnnotationsManager(private val libraryAccount: Account,
       create()
       show()
     }
+  }
+
+  private fun logVolleyError(error: VolleyError) {
+    val code = error.networkResponse.statusCode
+    val errorBody = if (error.networkResponse.data != null) {
+      try {
+        error.networkResponse.data
+      } catch (e: java.lang.Exception) {
+        e.printStackTrace()
+      }
+    } else {
+      error.cause
+    }
+    LOG.error("Volley request has returned an error: " +
+        "Status: $code. ${errorBody ?: "error cause & body: null"}")
   }
 }

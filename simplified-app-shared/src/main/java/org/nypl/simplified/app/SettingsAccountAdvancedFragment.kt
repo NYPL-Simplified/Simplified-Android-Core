@@ -14,10 +14,8 @@ import java.util.*
 
 class SettingsAccountAdvancedFragment : Fragment() {
 
-  //TODO add the title bar (same from other activities)
-
-  lateinit var progressBar: ProgressBar
-  lateinit var syncSwitch: TableRow
+  private lateinit var progressBar: ProgressBar
+  private lateinit var syncSwitch: TableRow
 
   override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
     super.onCreateView(inflater, container, savedInstanceState)
@@ -70,6 +68,4 @@ class SettingsAccountAdvancedFragment : Fragment() {
     val dialog = builder.create()
     dialog.show()
   }
-
-
 }

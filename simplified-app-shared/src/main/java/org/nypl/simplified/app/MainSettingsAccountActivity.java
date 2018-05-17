@@ -288,8 +288,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     this.annotationsManager = null;
 
-    //TODO LEFT off thinking of a place to instantiate this.annotationsManager (in a potentially better spot than in onResume())
-
     //if current account ??
       final SimplifiedCatalogAppServicesType app =
         Simplified.getCatalogAppServices();
