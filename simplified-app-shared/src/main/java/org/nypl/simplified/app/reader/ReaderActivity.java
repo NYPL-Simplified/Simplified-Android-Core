@@ -711,8 +711,8 @@ public final class ReaderActivity extends Activity implements
   }
 
   private String getDeviceIDString() {
-    final OptionType<String> opt_deviceID =
-      this.credentials.getAdobeDeviceID().map(AdobeDeviceID::toString);
+    final AccountCredentials creds = Objects.requireNonNull(this.credentials);
+    OptionType<String> opt_deviceID = creds.getAdobeDeviceID().map(AdobeDeviceID::toString);
     final String deviceID;
     if (opt_deviceID.isSome()) {
       deviceID = ((Some<String>) opt_deviceID).get();
@@ -926,7 +926,6 @@ public final class ReaderActivity extends Activity implements
     this.sync_manager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
       //Sync Permitted or Successfully Enabled
       sync_manager.syncReadingLocation(getDeviceIDString(), current_loc, this);
-      //TODO should we create a delay here?
       sync_manager.retryOnDiskBookmarksUpload(current_marks);
       sync_manager.syncBookmarks(current_marks, (syncedMarks) -> {
         synchronized(this) {

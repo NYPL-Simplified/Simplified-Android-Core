@@ -248,7 +248,7 @@ class AnnotationsManager(private val libraryAccount: Account,
     requestQueue.add(request)
   }
 
-  fun bookAnnotationFromBody(JSON: JSONObject): BookmarkAnnotation?
+  private fun bookAnnotationFromBody(JSON: JSONObject): BookmarkAnnotation?
   {
     val mapper = jacksonObjectMapper()
     val annotationResponse: AnnotationResponse? = mapper.readValue(JSON.toString())
@@ -260,9 +260,6 @@ class AnnotationsManager(private val libraryAccount: Account,
 
     annotationResponse.first.items.forEach {
       if (it.motivation == "http://librarysimplified.org/terms/annotation/idling") {
-//        val value = it.target.selector.value
-//        val valueJson = JSONObject(value)
-//        return ReaderBookLocation.fromJSON(valueJson)
         return it
       }
     }

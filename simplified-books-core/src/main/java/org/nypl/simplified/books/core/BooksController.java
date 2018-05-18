@@ -410,8 +410,7 @@ public final class BooksController implements BooksType {
     this.books_status = BooksStatusCache.newStatusCache();
   }
 
-  @Override
-  public BookDatabaseType bookGetDatabase() {
+  @Override public BookDatabaseType bookGetDatabase() {
     return this.book_database;
   }
 

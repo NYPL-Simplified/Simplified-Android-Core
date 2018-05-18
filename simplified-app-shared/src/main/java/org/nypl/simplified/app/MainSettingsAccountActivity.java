@@ -3,7 +3,6 @@ package org.nypl.simplified.app;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.KeyguardManager;
@@ -70,8 +69,6 @@ import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
 
-import kotlin.Unit;
-
 /**
  * The activity displaying the settings for the application.
  */
@@ -84,6 +81,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   static {
     LOG = LogUtilities.getLog(MainSettingsActivity.class);
   }
+
+  private Account account;
+  @Nullable AnnotationsManager annotationsManager;
 
   private @Nullable TextView account_name_text;
   private @Nullable TextView account_subtitle_text;
@@ -101,10 +101,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
   private @Nullable TableRow advanced_table_row;
 
   private @Nullable Button login;
-
-  private Account account;
-
-  AnnotationsManager annotationsManager;
 
   /**
    * Construct an activity.
@@ -233,7 +229,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       }
       this.sync_switch.setChecked(enableSync);
       this.sync_switch.setEnabled(true);
-
       return kotlin.Unit.INSTANCE;
     });
   }
@@ -705,6 +700,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     final boolean permission = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.account.getId());
     this.sync_switch.setChecked(permission);
 
+    /*
+    If switching on, disable user interaction until server has responded.
+    If switching off, disable applicable network requests by updating shared prefs flags.
+     */
     this.sync_switch.setOnCheckedChangeListener((buttonView, isChecked) -> {
       if (isChecked) {
         buttonView.setEnabled(false);
@@ -842,16 +841,12 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
   @Override
   public void onBackPressed() {
-
-    /*
-    Pop any stack of Fragments if they exist.
-     */
+    //Pop any Fragments if they exist in the navigation stack.
     final FragmentManager manager = getFragmentManager();
     if (manager.getBackStackEntryCount() > 0) {
       manager.popBackStackImmediate();
       return;
     }
-
     super.onBackPressed();
   }
 
