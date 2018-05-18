@@ -262,7 +262,7 @@
   <string name="firstTimeSyncAlertNegButton">Not Now</string>
   <string name="firstTimeSyncAlertPosButton">Enable Sync</string>
   <string name="syncManagerSyncLocationAlertTitle">Sync Reading Position</string>
-  <string name="syncManagerSyncLocationAlertMessage">"Would you like to go to the latest page read? \n\nChapter:\n\"$s\"</string>
+  <string name="syncManagerSyncLocationAlertMessage">"Would you like to go to the latest page read? \n\nChapter:\n&#8220;%s&#8220;"</string>
   <string name="syncManagerSyncLocationAlertMessageGeneral">Would you like to go to the latest page read?</string>
   <string name="syncManagerSyncLocationAlertMove">Move</string>
   <string name="syncManagerSyncLocationAlertStay">Stay</string>
