@@ -582,15 +582,15 @@ public final class ReaderActivity extends Activity implements
 
     in_bookmark.setOnClickListener(view -> {
       if (this.current_bookmark != null) {
-        delete(this.current_bookmark);
+        deleteLocalAndRemote(this.current_bookmark);
         this.bookmarks.remove(this.current_bookmark);
         this.current_bookmark = null;
       } else {
         final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
-        final BookmarkAnnotation annotation = createAnnotation(current_loc, null);
-        this.current_bookmark = annotation;
-        saveAndUpload(annotation, current_loc);
-        this.bookmarks.add(Objects.requireNonNull(this.current_bookmark));
+        final BookmarkAnnotation bookmarkAnnotation = createAnnotation(current_loc, null);
+        this.current_bookmark = Objects.requireNonNull(bookmarkAnnotation);
+        this.bookmarks.add(bookmarkAnnotation);
+        saveLocalAndRemote(bookmarkAnnotation, current_loc);
       }
       updateBookmarkIconUI();
     });
@@ -612,8 +612,8 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  private void saveAndUpload(final @NonNull BookmarkAnnotation annotation,
-                             final @NonNull ReaderBookLocation location) {
+  private void saveLocalAndRemote(final @NonNull BookmarkAnnotation annotation,
+                                  final @NonNull ReaderBookLocation location) {
 
     final ReaderSyncManager mgr = Objects.requireNonNull(this.sync_manager);
     final List<BookmarkAnnotation> bm = Objects.requireNonNull(this.bookmarks);
@@ -623,16 +623,19 @@ public final class ReaderActivity extends Activity implements
 
     //Save bookmark on the server
     mgr.postBookmarkToServer(annotation, (ID) -> {
-      if (ID != null) {
-        LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
-        final BookmarkAnnotation newAnnotation = createAnnotation(location, ID);
-        this.delete(annotation);
-        bm.remove(annotation);
-        this.saveToDisk(newAnnotation);
-      } else {
-        LOG.error("Skipping annotation upload.");
+      synchronized (this) {
+        if (ID != null) {
+          LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
+          final BookmarkAnnotation newAnnotation = createAnnotation(location, ID);
+          this.deleteLocalAndRemote(annotation);
+          bm.remove(annotation);
+          bm.add(newAnnotation);
+          this.saveToDisk(newAnnotation);
+        } else {
+          LOG.error("Skipping annotation upload.");
+        }
+        return Unit.INSTANCE;
       }
-      return Unit.INSTANCE;
     });
   }
 
@@ -650,7 +653,7 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  private void delete(final BookmarkAnnotation annotation) {
+  private void deleteLocalAndRemote(final BookmarkAnnotation annotation) {
     final ReaderSyncManager mgr = Objects.requireNonNull(this.sync_manager);
 
     /*
