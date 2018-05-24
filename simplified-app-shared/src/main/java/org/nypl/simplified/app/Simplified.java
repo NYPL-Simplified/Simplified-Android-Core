@@ -10,6 +10,8 @@ import android.os.Environment;
 import android.os.Process;
 import android.util.DisplayMetrics;
 
+import com.bugsnag.android.Severity;
+
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -557,12 +559,25 @@ public final class Simplified extends Application
       final String api_token = ((Some<String>) api_token_opt).get();
       Simplified.LOG.debug("IfBugsnag: init live interface");
       IfBugsnag.init(this, api_token);
+      reportNewSession();
     } else {
       Simplified.LOG.debug("IfBugsnag: init no-op interface");
       IfBugsnag.init();
     }
   }
 
+  private void reportNewSession() {
+    final String libraryName = getCurrentAccount().getName();
+    final int libraryID = getCurrentAccount().getId();
+    Exception e = new Exception("app_launch");
+    com.bugsnag.android.Bugsnag.notify(e, report -> {
+      if (report.getError() != null) {
+        report.getError().getMetaData().addToTab("Library Info", "LibraryID", libraryID);
+        report.getError().getMetaData().addToTab("Library Info", "LibraryName", libraryName);
+        report.getError().setSeverity(Severity.INFO);
+      }
+    });
+  }
 
   @Override
   public void onCreate() {
