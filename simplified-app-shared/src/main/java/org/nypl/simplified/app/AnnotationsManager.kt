@@ -195,7 +195,7 @@ class AnnotationsManager(private val libraryAccount: Account,
           completion(true)
         },
         ErrorListener { error ->
-          LOG.debug("PUT request fail! Error: ${error.message}")
+          LOG.error("PUT request fail! Error: ${error.message}")
         })
 
     if (timeout != null) {
@@ -398,11 +398,9 @@ class AnnotationsManager(private val libraryAccount: Account,
             LOG.error("Cancelling download request. JsonMappingException for annotations:\n $e")
             return@Listener
           }
-
           val bookmarks = annotationResponse.first.items.filter {
             it.motivation.contains("bookmarking", true)
           }
-          LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
           completion?.let { it(bookmarks) }
         },
         ErrorListener { error ->
