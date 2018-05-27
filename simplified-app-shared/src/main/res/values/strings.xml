@@ -58,11 +58,18 @@
   <string name="catalog_publication_date">Published</string>
   <string name="catalog_publisher">Publisher</string>
   <string name="catalog_refresh">Refresh Feed</string>
-  <string name="catalog_search">Search</string>
   <string name="catalog_unknown_feed">Unknown</string>
   <string name="catalog_more_feed">More&#8230;</string>
   <string name="catalog_requesting_loan">Requesting</string>
   <string name="catalog_requesting_revoke">Requesting</string>
+
+
+  <!-- Catalog Search-related Strings -->
+  <string name="catalog_search">Search</string>
+  <string name="search_hint_prefix">Search</string>
+  <string name="search_hint_format">Search %s</string>
+  <string name="search_hint_feed_title_default">Feed</string>
+
 
   <!-- Catalog book detail strings -->
   <string name="catalog_book_borrow">Get</string>

@@ -23,3 +23,10 @@ ReaderClientCert.sig
 bugsnag.conf 
 helpstack.conf 
 *.jks
+
+# backup files
+*~
+
+
+
+
