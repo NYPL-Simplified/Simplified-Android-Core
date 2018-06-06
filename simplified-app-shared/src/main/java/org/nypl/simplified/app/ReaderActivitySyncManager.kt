@@ -38,7 +38,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
   var bookPackage: Package? = null
 
-  private val delayTimeInterval = 120L
+  private val delayTimeInterval = 120 * 1000L
 
   private var delayReadingPositionSync = true
   private val annotationsManager = AnnotationsManager(libraryAccount, credentials, context)
@@ -175,7 +175,7 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
             annotationsManager.updateReadingPosition(feedEntry.id, loc)
 
             Timer("ReadingPositionTimer", false).schedule(delayTimeInterval) {
-              synchronized(this) {
+              synchronized(this@ReaderSyncManager) {
                 status = ReadingLocationSyncStatus.IDLE
                 if (queuedReadingPosition != null) {
                   annotationsManager.updateReadingPosition(feedEntry.id, loc)
@@ -250,7 +250,6 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
       val syncedMarks = localBookmarksToKeep.sortedWith(nullsLast(compareBy({ it.id })))
                                             .distinctBy { it.target.selector.value }
 
-      LOG.debug("Newly Synced Bookmarks: $syncedMarks")
       completion?.let { it(syncedMarks) }
     }
   }

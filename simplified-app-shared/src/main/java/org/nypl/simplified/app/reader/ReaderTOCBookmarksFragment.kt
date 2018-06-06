@@ -45,7 +45,9 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     val activity = activity as? ReaderTOCActivity
     val bookmarks = activity?.bookmarks ?: ArrayList<BookmarkAnnotation>(0)
 
-    adapter = ArrayAdapter(context, 0, bookmarks)
+    val sortedMarks = bookmarks.sortedWith(compareBy({ it.body.bookProgress }))
+
+    adapter = ArrayAdapter(context, 0, sortedMarks)
     bookmarksTOCListView?.adapter = this
 
     return bookmarksTOCLayout

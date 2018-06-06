@@ -25,6 +25,7 @@ import org.nypl.simplified.volley.NYPLJsonObjectRequest
 import org.nypl.simplified.volley.NYPLStringRequest
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 /**
@@ -195,7 +196,7 @@ class AnnotationsManager(private val libraryAccount: Account,
           completion(true)
         },
         ErrorListener { error ->
-          LOG.debug("PUT request fail! Error: ${error.message}")
+          LOG.error("PUT request fail! Error: ${error.message}")
         })
 
     if (timeout != null) {
@@ -398,11 +399,9 @@ class AnnotationsManager(private val libraryAccount: Account,
             LOG.error("Cancelling download request. JsonMappingException for annotations:\n $e")
             return@Listener
           }
-
           val bookmarks = annotationResponse.first.items.filter {
             it.motivation.contains("bookmarking", true)
           }
-          LOG.debug("Bookmarks downloaded from server:\n$bookmarks")
           completion?.let { it(bookmarks) }
         },
         ErrorListener { error ->
@@ -537,18 +536,17 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  private fun logVolleyError(error: VolleyError) {
-    val code = error.networkResponse.statusCode
-    val errorBody = if (error.networkResponse.data != null) {
+  private fun logVolleyError(error: VolleyError?) {
+    val code = error?.networkResponse?.statusCode
+    val errorBody = error?.networkResponse?.let {
       try {
-        error.networkResponse.data
+        String(it.data, Charset.forName("UTF-8"))
       } catch (e: java.lang.Exception) {
         e.printStackTrace()
+        "null"
       }
-    } else {
-      error.cause
     }
     LOG.error("Volley request has returned an error: " +
-        "Status: $code. ${errorBody ?: "error cause & body: null"}")
+        "Status: ${code ?: "code: null"}. ${errorBody ?: "error cause & body: null"}")
   }
 }

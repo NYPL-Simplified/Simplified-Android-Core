@@ -468,7 +468,7 @@ public final class ReaderActivity extends Activity implements
   @Override public void onCurrentPageError(
     final Throwable x)
   {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+    ReaderActivity.LOG.error("onCurrentPageError: {}", x.getMessage(), x);
   }
 
   @Override public void onCurrentPageReceived(
@@ -817,10 +817,11 @@ public final class ReaderActivity extends Activity implements
     final Package p = Objects.requireNonNull(c.getDefaultPackage());
     p.setRootUrls(hs.getURIBase().toString(), null);
 
-    final ReaderReadiumViewerSettings vs =
-      Objects.requireNonNull(this.viewer_settings);
     final ReaderReadiumJavaScriptAPIType js =
       Objects.requireNonNull(this.readium_js_api);
+
+    // is this correct? inject fonts before book opens or after
+    js.injectFonts();
 
     /*
       If there's a bookmark for the current book, send a request to open the
@@ -829,21 +830,9 @@ public final class ReaderActivity extends Activity implements
 
     final BookID in_book_id = Objects.requireNonNull(this.book_id);
     final OPDSAcquisitionFeedEntry in_entry = Objects.requireNonNull(this.feed_entry);
-
     final ReaderBookmarksSharedPrefsType bookmarks = rs.getBookmarks();
-    final ReaderBookLocation location = bookmarks.getReadingPosition(in_book_id, in_entry);
-
-    final OptionType<ReaderBookLocation> optionLocation = Option.of(location);
-    final OptionType<ReaderOpenPageRequestType> page_request = optionLocation.map( l -> {
-      ReaderActivity.this.current_location = l;
-      return ReaderOpenPageRequest.fromBookLocation(l);
-    });
-
-    // is this correct? inject fonts before book opens or after
-    js.injectFonts();
-
-    // open book with page request, vs = view settings, p = package , what is package actually ? page_request = idref + contentcfi
-    js.openBook(p, vs, page_request);
+    final ReaderBookLocation readingPosition = bookmarks.getReadingPosition(in_book_id, in_entry);
+    navigateTo(readingPosition);
 
     /*
       Configure the visibility of UI elements.
@@ -1051,7 +1040,7 @@ public final class ReaderActivity extends Activity implements
   @Override public void onReadiumFunctionPaginationChangedError(
     final Throwable x)
   {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+    ReaderActivity.LOG.error("onReadiumFunctionPaginationChangedError: {}", x.getMessage(), x);
   }
 
   @Override public void onReadiumFunctionSettingsApplied()
@@ -1204,25 +1193,22 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  private void navigateTo(final ReaderBookLocation location) {
-    final OptionType<ReaderBookLocation> optLocation = Option.some(location);
-
-    OptionType<ReaderOpenPageRequestType> page_request;
-    page_request = optLocation.map((l) -> {
-      LOG.debug("CurrentPage location {}", l);
+  private void navigateTo(final ReaderBookLocation location)
+  {
+    final OptionType<ReaderBookLocation> optLocation = Option.of(location);
+    OptionType<ReaderOpenPageRequestType> page_request = optLocation.map((l) -> {
+      LOG.debug("Creating Page Req for: {}", l);
       ReaderActivity.this.current_location = l;
       return ReaderOpenPageRequest.fromBookLocation(l);
     });
 
-    final OptionType<ReaderOpenPageRequestType> page = page_request;
-
     final ReaderReadiumJavaScriptAPIType js =
-        Objects.requireNonNull(ReaderActivity.this.readium_js_api);
+      Objects.requireNonNull(this.readium_js_api);
     final ReaderReadiumViewerSettings vs =
-      Objects.requireNonNull(ReaderActivity.this.viewer_settings);
+      Objects.requireNonNull(this.viewer_settings);
     final Container c = Objects.requireNonNull(ReaderActivity.this.epub_container);
     final Package p = Objects.requireNonNull(c.getDefaultPackage());
 
-    js.openBook(p, vs, page);
+    js.openBook(p, vs, page_request);
   }
 }
