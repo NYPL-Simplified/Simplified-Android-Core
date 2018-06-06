@@ -250,7 +250,6 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
       val syncedMarks = localBookmarksToKeep.sortedWith(nullsLast(compareBy({ it.id })))
                                             .distinctBy { it.target.selector.value }
 
-      LOG.debug("Newly Synced Bookmarks: $syncedMarks")
       completion?.let { it(syncedMarks) }
     }
   }
