@@ -7,6 +7,9 @@
 .DS_Store
 .externalNativeBuild
 .gradle
+/.idea/caches
+/.idea/codeStyles
+/.idea/dictionaries
 /.idea/libraries
 /.idea/workspace.xml
 /captures
@@ -18,7 +21,6 @@
 #
 # Certificates and API Keys
 #
-
 ReaderClientCert.sig 
 bugsnag.conf 
 helpstack.conf 
@@ -26,7 +28,3 @@ helpstack.conf
 
 # backup files
 *~
-
-
-
-

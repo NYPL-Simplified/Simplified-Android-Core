@@ -176,6 +176,10 @@
   <string name="settings_adobe_accounts">Adobe Accounts</string>
   <string name="settings_alt_uris">Alternate URIs</string>
   <string name="settings_reveal_password">Show PIN</string>
+  <string name="settings_advanced_menu">Advanced</string>
+  <string name="settings_bookmarks_switch">Sync Bookmarks</string>
+  <string name="advanced_sync_switch_title">Delete All Bookmarks</string>
+  <string name="advanced_sync_switch_description">Delete all the bookmarks you have saved in the cloud.</string>
 
   <string name="login_needed">You need to login to access the collection.</string>
   <string name="login_with_barcode">Login with Barcode</string>
@@ -211,6 +215,7 @@
   <string name="reader_toc">Table Of Contents</string>
 
   <!-- Accessibility strings used for content descriptions (Reader) -->
+  <string name="reader_accessibility_bookmark">Add bookmark for this page</string>
   <string name="reader_accessibility_toc">Show table of contents</string>
   <string name="reader_accessibility_toc_back">Close the table of contents without selecting an item</string>
   <string name="reader_accessibility_settings">Show reader settings</string>
@@ -244,11 +249,9 @@
   <string name="need_card_question">Don\'t have a library card?</string>
   <string name="need_card_button">Sign Up</string>
   <string name="need_card_create">Create Card</string>
-
   <string name="label_simplye_logo">SimplyE logo</string>
   <string name="label_find_library_button">Click this button to find your local library and peruse its catalog.</string>
   <string name="label_instant_classics_button">Click this button to peruse the Instant Classics collection.</string>
-
   <string name="you_must_be_in_new_york">You must be in New York to sign up for a library card.  Please try to sign up again when you are in another location.</string>
   <string name="you_are_in_new_york">We have successfully determined that you are in New York!</string>
   <string name="done_get_location">Done</string>
@@ -258,5 +261,24 @@
   <!-- ZXing Scanner -->
   <string name="barcode_scanner_prompt">Scan your library card barcode.</string>
   <string name="barcode_scanning_error">Error Scanning Card</string>
+
+  <!-- Syncing Feature -->
+  <string name="syncSettingAlertTitle">Error Changing Sync Setting</string>
+  <string name="syncSettingAlertMessage">There was a problem contacting the server.\nPlease make sure you are connected to the internet, or try again later.</string>
+  <string name="firstTimeSyncAlertTitle">SimplyE Sync</string>
+  <string name="firstTimeSyncAlertMessage">Enable sync to save your reading position and bookmarks to your other devices.\n\nYou can change this any time in Settings.</string>
+  <string name="firstTimeSyncAlertNegButton">Not Now</string>
+  <string name="firstTimeSyncAlertPosButton">Enable Sync</string>
+  <string name="syncManagerSyncLocationAlertTitle">Sync Reading Position</string>
+  <string name="syncManagerSyncLocationAlertMessage">"Would you like to go to the latest page read? \n\nChapter:\n&#8220;%s&#8220;"</string>
+  <string name="syncManagerSyncLocationAlertMessageGeneral">Would you like to go to the latest page read?</string>
+  <string name="syncManagerSyncLocationAlertMove">Move</string>
+  <string name="syncManagerSyncLocationAlertStay">Stay</string>
+  <string name="new_bookmark_error">Unable to bookmark this page. Please try another page, or report the error for this book.</string>
+  <string name="bookmark_navigation_error">There was an error navigating to the bookmark.</string>
+  <string name="bookmark_save_error">A bookmark could not be saved on this page.</string>
+  <string name="title_activity_settings_account_advanced">SettingsAccountAdvancedActivity</string>
+  <string name="advanced_sync_error_message">There was an error while contacting the server. Please try again later with a strong internet connection.</string>
+  <string name="advanced_sync_message">"Selecting \"Delete\" will remove all bookmarks from the server for this library account."</string>
 
 </resources>

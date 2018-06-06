@@ -3,23 +3,30 @@ package org.nypl.simplified.app.reader;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
+import org.nypl.simplified.books.core.BookmarkAnnotation;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 
+import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
+
 /**
- * Activity for displaying the table of contents on devices with small screens.
+ * Activity for displaying the ViewPager which contains Fragments
+ * for the Table of Contents and User-Saved Bookmarks.
  */
 
-public final class ReaderTOCActivity extends Activity
-  implements ReaderSettingsListenerType, ReaderTOCViewSelectionListenerType
+public final class ReaderTOCActivity extends AppCompatActivity
+  implements ReaderSettingsListenerType, ReaderTOCFragmentSelectionListenerType
 {
   /**
    * The name of the argument containing the TOC.
@@ -28,10 +35,22 @@ public final class ReaderTOCActivity extends Activity
   public static final String TOC_ID;
 
   /**
+   * The name of the argument containing the user bookmarks.
+   */
+
+  public static final String BOOKMARKS_ID;
+
+  /**
    * The name of the argument containing the selected TOC item.
    */
 
   public static final String TOC_SELECTED_ID;
+
+  /**
+   * The name of the argument containing the selected TOC item.
+   */
+
+  public static final String BOOKMARK_SELECTED_ID;
 
   /**
    * The activity request code (for retrieving the result of executing the
@@ -40,17 +59,20 @@ public final class ReaderTOCActivity extends Activity
 
   public static final int TOC_SELECTION_REQUEST_CODE;
 
+
   private static final Logger LOG;
 
   static {
     LOG = LogUtilities.getLog(ReaderTOCActivity.class);
     TOC_SELECTION_REQUEST_CODE = 23;
     TOC_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.toc";
-    TOC_SELECTED_ID =
-      "org.nypl.simplified.app.reader.ReaderTOCActivity.toc_selected";
+    TOC_SELECTED_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.toc_selected";
+    BOOKMARKS_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.bookmarks";
+    BOOKMARK_SELECTED_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.bookmark_selected";
   }
 
-  private @Nullable ReaderTOCView view;
+  public @Nullable ReaderTOC in_toc;
+  public @Nullable List<BookmarkAnnotation> bookmarks;
 
   /**
    * Construct an activity.
@@ -62,9 +84,9 @@ public final class ReaderTOCActivity extends Activity
   }
 
   /**
-   * Start a TOC activity. The user will be prompted to select a TOC item, and
-   * the results of that selection will be reported using the request code
-   * {@link #TOC_SELECTION_REQUEST_CODE}.
+   * Start a TOC activity. The user will be shown a pager view.
+   * If they select a TOC or Bookmark item, the results of that selection
+   * will be reported using the request code {@link #TOC_SELECTION_REQUEST_CODE}.
    *
    * @param from The parent activity
    * @param toc  The table of contents
@@ -72,17 +94,19 @@ public final class ReaderTOCActivity extends Activity
 
   public static void startActivityForResult(
     final Activity from,
-    final ReaderTOC toc)
+    final ReaderTOC toc,
+    final List<BookmarkAnnotation> marks)
   {
-    NullCheck.notNull(from);
-    NullCheck.notNull(toc);
+    Objects.requireNonNull(from);
+    Objects.requireNonNull(toc);
+    Objects.requireNonNull(marks);
 
     final Intent i = new Intent(Intent.ACTION_PICK);
     i.setClass(from, ReaderTOCActivity.class);
     i.putExtra(ReaderTOCActivity.TOC_ID, toc);
+    i.putExtra(ReaderTOCActivity.BOOKMARKS_ID, (Serializable) marks);
 
-    from.startActivityForResult(
-      i, ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE);
+    from.startActivityForResult(i, ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE);
   }
 
   @Override public void finish()
@@ -94,20 +118,10 @@ public final class ReaderTOCActivity extends Activity
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
-    final int id = Simplified.getCurrentAccount().getId();
-    if (id == 0) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
-    }
-    else if (id == 1) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
-    }
-    else {
-      setTheme(R.style.SimplifiedThemeNoActionBar);
-    }
-
     super.onCreate(state);
-
     ReaderTOCActivity.LOG.debug("onCreate");
+
+    this.setTitle(R.string.reader_toc);
 
     final SimplifiedReaderAppServicesType rs =
       Simplified.getReaderAppServices();
@@ -115,41 +129,51 @@ public final class ReaderTOCActivity extends Activity
     final ReaderSettingsType settings = rs.getSettings();
     settings.addListener(this);
 
-    final Intent input = NullCheck.notNull(this.getIntent());
-    final Bundle args = NullCheck.notNull(input.getExtras());
+    final Intent input = Objects.requireNonNull(this.getIntent());
+    final Bundle args = Objects.requireNonNull(input.getExtras());
 
-    final ReaderTOC in_toc = NullCheck.notNull(
+    this.in_toc = Objects.requireNonNull(
       (ReaderTOC) args.getSerializable(ReaderTOCActivity.TOC_ID));
 
-    final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
-    this.view = new ReaderTOCView(inflater, this, in_toc, this);
-    this.setContentView(this.view.getLayoutView());
-  }
+    this.bookmarks = Objects.requireNonNull(
+      (List<BookmarkAnnotation>) args.getSerializable(ReaderTOCActivity.BOOKMARKS_ID));
 
-  @Override protected void onDestroy()
-  {
-    super.onDestroy();
-    ReaderTOCActivity.LOG.debug("onDestroy");
+    this.setContentView(R.layout.reader_toc_tab_layout);
 
-    NullCheck.notNull(this.view).onTOCViewDestroy();
+    ViewPager pager = findViewById(R.id.reader_toc_view_pager);
+    final ReaderTOCFragmentPagerAdapter pagerAdapter = new ReaderTOCFragmentPagerAdapter(getSupportFragmentManager());
+    pager.setAdapter(pagerAdapter);
+
+    TabLayout tabLayout = findViewById(R.id.reader_toc_tab_layout);
+    tabLayout.setupWithViewPager(pager);
   }
 
   @Override public void onReaderSettingsChanged(
     final ReaderSettingsType s)
   {
-    NullCheck.notNull(this.view).onReaderSettingsChanged(s);
+    final ReaderTOCContentsFragment contentsFragment =
+        (ReaderTOCContentsFragment) getSupportFragmentManager().findFragmentById(R.id.reader_toc);
+
+    if (contentsFragment != null) {
+      contentsFragment.onReaderSettingsChanged(s);
+    }
   }
 
-  @Override public void onTOCBackSelected()
-  {
+  /**
+   * TOC Selection Methods
+   */
+
+  @Override public void onTOCItemSelected(final TOCElement e) {
+    final Intent intent = new Intent();
+    intent.putExtra(ReaderTOCActivity.TOC_SELECTED_ID, e);
+    this.setResult(Activity.RESULT_OK, intent);
     this.finish();
   }
 
-  @Override public void onTOCItemSelected(
-    final TOCElement e)
-  {
+  @Override
+  public void onBookmarkSelected(@android.support.annotation.Nullable BookmarkAnnotation bookmark) {
     final Intent intent = new Intent();
-    intent.putExtra(ReaderTOCActivity.TOC_SELECTED_ID, e);
+    intent.putExtra(ReaderTOCActivity.BOOKMARK_SELECTED_ID, bookmark);
     this.setResult(Activity.RESULT_OK, intent);
     this.finish();
   }

@@ -62,6 +62,17 @@ public class Prefs {
 
     /**
      * @param key preference key
+     * @param libraryID int used for library-specific prefs
+     * @return boolean value
+     */
+    public boolean getBoolean(final String key, final int libraryID) {
+        final String concatString = key.concat("_") + libraryID;
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.context);
+        return prefs.getBoolean(concatString, false);
+    }
+
+    /**
+     * @param key preference key
      * @return value
      */
     public int getInt(final String key) {
@@ -90,6 +101,19 @@ public class Prefs {
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(key, value);
         editor.apply(); // important! Don't forget!
+    }
+
+    /**
+     * @param key preference key
+     * @param libraryID int used for library-specific prefs
+     * @param value preference value
+     */
+    public void putBoolean(final String key, final int libraryID, final boolean value) {
+        final String concatString = key.concat("_") + libraryID;
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this.context);
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(concatString, value);
+        editor.apply();
     }
 
     /**

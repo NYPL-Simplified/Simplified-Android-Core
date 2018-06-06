@@ -1,13 +1,20 @@
 package org.nypl.simplified.app.reader;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
  * The current page. A specific location in an EPUB is identified by an
@@ -91,6 +98,29 @@ public final class ReaderBookLocation
     return this.id_ref;
   }
 
+  /**
+   * @return A JSON-formatted string (provides better char-escaping versus JSONObject)
+   */
+
+  public @Nullable String toJsonString()
+  {
+    if (!this.content_cfi.isSome()) {
+      return null;
+    }
+
+    final HashMap<String, Object> jsonMap = new HashMap<>();
+    jsonMap.put("idref", this.id_ref);
+    final Some<String> some = (Some<String>) this.content_cfi;
+    jsonMap.put("contentCFI", some.get());
+
+    final ObjectMapper mapper = new ObjectMapper();
+    try {
+      return mapper.writer().writeValueAsString(jsonMap);
+    } catch (JsonProcessingException e) {
+      return null;
+    }
+  }
+
   @Override public JSONObject toJSON()
     throws JSONException
   {
@@ -114,5 +144,13 @@ public final class ReaderBookLocation
     b.append(this.id_ref);
     b.append("]");
     return NullCheck.notNull(b.toString());
+  }
+
+  @Override public boolean equals(Object obj) {
+    if (obj instanceof ReaderBookLocation) {
+      ReaderBookLocation loc_obj = (ReaderBookLocation) obj;
+      return this.toString().equals(loc_obj.toString());
+    }
+    return false;
   }
 }
