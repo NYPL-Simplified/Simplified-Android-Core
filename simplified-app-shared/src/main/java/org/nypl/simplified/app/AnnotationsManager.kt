@@ -25,6 +25,7 @@ import org.nypl.simplified.volley.NYPLJsonObjectRequest
 import org.nypl.simplified.volley.NYPLStringRequest
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 /**
@@ -535,16 +536,15 @@ class AnnotationsManager(private val libraryAccount: Account,
     }
   }
 
-  private fun logVolleyError(error: VolleyError) {
-    val code: Int? = error.networkResponse?.statusCode
-    val errorBody = if (error.networkResponse?.data != null) {
+  private fun logVolleyError(error: VolleyError?) {
+    val code = error?.networkResponse?.statusCode
+    val errorBody = error?.networkResponse?.let {
       try {
-        error.networkResponse.data
+        String(it.data, Charset.forName("UTF-8"))
       } catch (e: java.lang.Exception) {
         e.printStackTrace()
+        "null"
       }
-    } else {
-      error.cause
     }
     LOG.error("Volley request has returned an error: " +
         "Status: ${code ?: "code: null"}. ${errorBody ?: "error cause & body: null"}")
