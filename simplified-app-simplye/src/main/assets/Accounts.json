@@ -289,6 +289,25 @@
     "authPasscodeAllowsLetters" : true
   },
   {
+    "id" : 19,
+    "pathComponent" : "19",
+    "name" : "Porterville City Library",
+    "subtitle" : "Personal enrichment and lifelong learning, the power of information, and the joy of reading.",
+    "logo" : "LibraryLogoPorterville",
+    "needsAuth" : true,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://pcl.simplye-ca.org/",
+    "mainColor" : "#1b7fa7",
+    "supportEmail" : "library@ci.porterville.ca.us",
+    "authPasscodeLength" : 0,
+    "authPasscodeAllowsLetters" : true
+  },
+  {
     "id" : 20,
     "pathComponent" : "20",
     "name" : "Santa Clara County Library District",
