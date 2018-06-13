@@ -82,7 +82,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         LOG.debug("Sync has never been initialized for the patron. Proceeding with opt-in alert.")
         presentFirstTimeSyncAlertDialog(completion)
       } else {
-        LOG.debug("Sync has been initialized and not permitted. Continuing with sync disabled.")
+        LOG.debug("Continuing with sync disabled in Settings.")
         completion(false)
       }
     }

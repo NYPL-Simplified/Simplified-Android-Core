@@ -28,6 +28,9 @@ data class BookmarkAnnotation(@field:JsonProperty("@context") val context: Strin
   override fun equals(other: Any?): Boolean {
     return this.target.selector.value == (other as BookmarkAnnotation).target.selector.value
   }
+  override fun hashCode(): Int {
+    return this.target.selector.value.hashCode()
+  }
 }
 
 data class FirstNode(val items: List<BookmarkAnnotation>,
