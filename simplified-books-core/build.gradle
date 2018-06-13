@@ -25,13 +25,13 @@ dependencies {
   implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
   implementation project(':simplified-prefs')
   implementation project(':simplified-multilibrary')
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   implementation project(':simplified-rfc3339-core')
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
   implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+'
 
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 repositories {
