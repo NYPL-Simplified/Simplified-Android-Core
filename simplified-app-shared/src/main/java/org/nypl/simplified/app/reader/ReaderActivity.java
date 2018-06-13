@@ -501,8 +501,9 @@ public final class ReaderActivity extends Activity implements
       rs.getBookmarks().saveReadingPosition(this.book_id, this.current_location);
     }
 
-    final ReaderSyncManager mgr = Objects.requireNonNull(this.sync_manager);
-    mgr.sendOffAnyQueuedRequest();
+    if (this.sync_manager != null) {
+      this.sync_manager.sendOffAnyQueuedRequest();
+    }
   }
 
   @Override protected void onDestroy()
