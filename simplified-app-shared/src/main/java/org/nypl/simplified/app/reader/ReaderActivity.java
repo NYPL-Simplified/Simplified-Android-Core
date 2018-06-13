@@ -479,7 +479,7 @@ public final class ReaderActivity extends Activity implements
     this.current_location = l;
     Objects.requireNonNull(this.current_location);
 
-    initiateSyncManagement();
+    lazyInitSyncManagement();
 
     final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
     final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
@@ -488,7 +488,7 @@ public final class ReaderActivity extends Activity implements
     bm.saveReadingPosition(in_book_id, this.current_location);
     uploadReadingPosition(this.current_location);
 
-    checkForExistingBookmarkAtLocation(this.current_location);
+    checkExistingBookmarksAndUpdateUI(this.current_location);
   }
 
   @Override protected void onPause()
@@ -741,10 +741,10 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  private void checkForExistingBookmarkAtLocation(final @NonNull ReaderBookLocation loc) {
-
+  private void checkExistingBookmarksAndUpdateUI(
+    final @NonNull ReaderBookLocation loc)
+  {
     Objects.requireNonNull(this.bookmarks);
-
     this.current_bookmark = null;
     for (int i = 0; i < this.bookmarks.size(); i++) {
       final ReaderBookLocation mark_loc = createReaderLocation(this.bookmarks.get(i));
@@ -886,7 +886,7 @@ public final class ReaderActivity extends Activity implements
     mgr.updateServerReadingLocation(location);
   }
 
-  private void initiateSyncManagement()
+  private void lazyInitSyncManagement()
   {
     if (this.sync_manager != null) {
       return;
