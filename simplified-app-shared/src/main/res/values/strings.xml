@@ -266,7 +266,7 @@
   <string name="syncSettingAlertTitle">Error Changing Sync Setting</string>
   <string name="syncSettingAlertMessage">There was a problem contacting the server.\nPlease make sure you are connected to the internet, or try again later.</string>
   <string name="firstTimeSyncAlertTitle">SimplyE Sync</string>
-  <string name="firstTimeSyncAlertMessage">Enable sync to save your reading position and bookmarks to your other devices.\n\nYou can change this any time in Settings.</string>
+  <string name="firstTimeSyncAlertMessage">Enable sync to save your reading position and bookmarks to your other Android devices.\n\nYou can change this any time in Settings.</string>
   <string name="firstTimeSyncAlertNegButton">Not Now</string>
   <string name="firstTimeSyncAlertPosButton">Enable Sync</string>
   <string name="syncManagerSyncLocationAlertTitle">Sync Reading Position</string>
