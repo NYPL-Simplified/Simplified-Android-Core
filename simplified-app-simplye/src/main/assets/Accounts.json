@@ -401,5 +401,20 @@
     "supportEmail" : "ask.librarian@prescott-az.gov",
     "authPasscodeLength" : 4,
     "authPasscodeAllowsLetters" : true
+  },
+  {
+    "id" : 86,
+    "pathComponent" : "86",
+    "name" : "Digital Public Library of America",
+    "subtitle" : "Popular books free to download and keep, handpicked by librarians across the US.",
+    "logo" : "LibraryLogoDPLA",
+    "needsAuth" : false,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : false,
+    "catalogUrl" : "http://openbookshelf.dp.la/OB/groups/3",
+    "mainColor" : "#639bb4"
   }
 ]
