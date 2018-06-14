@@ -501,8 +501,9 @@ public final class ReaderActivity extends Activity implements
       rs.getBookmarks().saveReadingPosition(this.book_id, this.current_location);
     }
 
-    if (this.sync_manager != null) {
-      this.sync_manager.sendOffAnyQueuedRequest();
+    final ReaderSyncManager mgr = this.sync_manager;
+    if (mgr != null) {
+      mgr.sendOffAnyQueuedRequest();
     }
   }
 
@@ -616,28 +617,30 @@ public final class ReaderActivity extends Activity implements
   private void saveLocalAndRemote(final @NonNull BookmarkAnnotation annotation,
                                   final @NonNull ReaderBookLocation location) {
 
-    final ReaderSyncManager mgr = Objects.requireNonNull(this.sync_manager);
+    final ReaderSyncManager mgr = this.sync_manager;
     final List<BookmarkAnnotation> bm = Objects.requireNonNull(this.bookmarks);
 
     //Save bookmark to local disk
     saveToDisk(annotation);
 
-    //Save bookmark on the server
-    mgr.postBookmarkToServer(annotation, (ID) -> {
-      synchronized (this) {
-        if (ID != null) {
-          LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
-          final BookmarkAnnotation newAnnotation = createAnnotation(location, ID);
-          this.deleteLocalAndRemote(annotation);
-          bm.remove(annotation);
-          bm.add(newAnnotation);
-          this.saveToDisk(newAnnotation);
-        } else {
-          LOG.error("Skipping annotation upload.");
+    if (mgr != null) {
+      //Save bookmark on the server
+      mgr.postBookmarkToServer(annotation, (ID) -> {
+        synchronized (this) {
+          if (ID != null) {
+            LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
+            final BookmarkAnnotation newAnnotation = createAnnotation(location, ID);
+            this.deleteLocalAndRemote(annotation);
+            bm.remove(annotation);
+            bm.add(newAnnotation);
+            this.saveToDisk(newAnnotation);
+          } else {
+            LOG.error("Skipping annotation upload.");
+          }
+          return Unit.INSTANCE;
         }
-        return Unit.INSTANCE;
-      }
-    });
+      });
+    }
   }
 
   private void saveToDisk(@NonNull BookmarkAnnotation mark) {
@@ -655,23 +658,6 @@ public final class ReaderActivity extends Activity implements
   }
 
   private void deleteLocalAndRemote(final BookmarkAnnotation annotation) {
-    final ReaderSyncManager mgr = Objects.requireNonNull(this.sync_manager);
-
-    /*
-    Delete on the server if we have an ID/URI
-     */
-    if (annotation.getId() != null) {
-      mgr.deleteBookmarkOnServer(annotation.getId(), (Boolean success) -> {
-        if (success) {
-          LOG.debug("Bookmark successfully deleted from server.");
-        } else {
-          LOG.debug("Error deleting bookmark on server. Continuing to delete bookmark locally.");
-        }
-        return Unit.INSTANCE;
-      });
-    } else {
-      LOG.error("No annotation ID present on bookmark. Skipping network request to delete.");
-    }
 
     /*
     Delete on the disk
@@ -683,6 +669,25 @@ public final class ReaderActivity extends Activity implements
     } catch (IOException e) {
       LOG.error("Error deleting annotation from the app database: {}", annotation);
     }
+
+    /*
+    Delete on the server if we have an ID/URI
+     */
+    final ReaderSyncManager mgr = this.sync_manager;
+    if (mgr != null) {
+      if (annotation.getId() != null) {
+        mgr.deleteBookmarkOnServer(annotation.getId(), (Boolean success) -> {
+          if (success) {
+            LOG.debug("Bookmark successfully deleted from server.");
+          } else {
+            LOG.debug("Error deleting bookmark on server. Continuing to delete bookmark locally.");
+          }
+          return Unit.INSTANCE;
+        });
+      } else {
+        LOG.error("No annotation ID present on bookmark. Skipping network request to delete.");
+      }
+    }
   }
 
   private synchronized @NonNull BookmarkAnnotation createAnnotation(
@@ -690,7 +695,6 @@ public final class ReaderActivity extends Activity implements
     @Nullable String id)
   {
     Objects.requireNonNull(this.current_page_count);
-    Objects.requireNonNull(this.credentials);
     Objects.requireNonNull(this.view_progress_bar);
 
     final String annotContext = "http://www.w3.org/ns/anno.jsonld";
@@ -715,13 +719,13 @@ public final class ReaderActivity extends Activity implements
   }
 
   private String getDeviceIDString() {
-    final AccountCredentials creds = Objects.requireNonNull(this.credentials);
-    OptionType<String> opt_deviceID = creds.getAdobeDeviceID().map(AdobeDeviceID::toString);
-    final String deviceID;
-    if (opt_deviceID.isSome()) {
-      deviceID = ((Some<String>) opt_deviceID).get();
-    } else {
-      deviceID = "null";
+    final AccountCredentials creds = this.credentials;
+    String deviceID = "null";
+    if (creds != null) {
+      OptionType<String> opt_deviceID = creds.getAdobeDeviceID().map(AdobeDeviceID::toString);
+      if (opt_deviceID.isSome()) {
+        deviceID = ((Some<String>) opt_deviceID).get();
+      }
     }
     return deviceID;
   }
@@ -883,8 +887,10 @@ public final class ReaderActivity extends Activity implements
 
   private void uploadReadingPosition(final ReaderBookLocation location)
   {
-    final ReaderSyncManager mgr = Objects.requireNonNull(this.sync_manager);
-    mgr.updateServerReadingLocation(location);
+    final ReaderSyncManager mgr = this.sync_manager;
+    if (mgr != null) {
+      mgr.updateServerReadingLocation(location);
+    }
   }
 
   private void lazyInitSyncManagement()
