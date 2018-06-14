@@ -57,7 +57,7 @@
     "supportsCardCreator" : false,
     "supportsReservations" : false,
     "supportsHelpCenter" : false,
-    "catalogUrl" : "https://instantclassics.librarysimplified.org/index.xml",
+    "catalogUrl" : "https://circulation.librarysimplified.org/CLASSICS/",
     "catalogUrlUnder13": "https://instantclassics.librarysimplified.org/childrens-books.xml",
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
