@@ -43,7 +43,7 @@ public final class ReaderBookmarksSharedPrefs implements ReaderBookmarksSharedPr
   {
     NullCheck.notNull(cc);
     this.bookmarksSharedPrefs =
-      NullCheck.notNull(cc.getSharedPreferences("reader-bookmarksSharedPrefs", 0));
+      NullCheck.notNull(cc.getSharedPreferences("reader-bookmarks", 0));
   }
 
   /**
