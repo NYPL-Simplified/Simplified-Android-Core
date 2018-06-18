@@ -472,12 +472,12 @@ public final class ReaderActivity extends Activity implements
   }
 
   @Override public void onCurrentPageReceived(
-    final ReaderBookLocation l)
+    final ReaderBookLocation loc)
   {
-    ReaderActivity.LOG.debug("received book location: {}", l);
+    Objects.requireNonNull(loc);
+    ReaderActivity.LOG.debug("received book location: {}", loc);
 
-    this.current_location = l;
-    Objects.requireNonNull(this.current_location);
+    this.current_location = loc;
 
     lazyInitSyncManagement();
 
@@ -485,10 +485,9 @@ public final class ReaderActivity extends Activity implements
     final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
     final BookID in_book_id = Objects.requireNonNull(this.book_id);
 
-    bm.saveReadingPosition(in_book_id, this.current_location);
-    uploadReadingPosition(this.current_location);
-
-    checkExistingBookmarksAndUpdateUI(this.current_location);
+    bm.saveReadingPosition(in_book_id, loc);
+    uploadReadingPosition(loc);
+    checkExistingBookmarksAndUpdateUI(loc);
   }
 
   @Override protected void onPause()
