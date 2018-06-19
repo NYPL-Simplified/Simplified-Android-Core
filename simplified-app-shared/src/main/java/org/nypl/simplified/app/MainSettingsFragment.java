@@ -1,6 +1,5 @@
 package org.nypl.simplified.app;
 
-
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jnull.NullCheck;
 import com.tenmiles.helpstack.HSHelpStack;
 import com.tenmiles.helpstack.gears.HSDeskGear;
@@ -22,24 +20,11 @@ import org.nypl.simplified.app.testing.OnMultipleClickListener;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.DocumentStoreType;
-import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.books.core.SyncedDocumentType;
-import org.slf4j.Logger;
 
-class MainSettingsFragment extends PreferenceFragment implements LoginListenerType {
+public class MainSettingsFragment extends PreferenceFragment implements LoginListenerType {
 
-
-  private static final Logger LOG;
-
-
-  static {
-    LOG = LogUtilities.getLog(MainSettingsFragment.class);
-  }
-  /**
-   * Construct an Fragment.
-   */
-  MainSettingsFragment() {
-
+  public MainSettingsFragment() {
+    // Required empty public constructor
   }
 
   @Override
@@ -125,46 +110,30 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     {
       final Preference preferences = findPreference(resources.getString(R.string.settings_accounts));
       preferences.setIntent(null);
-      preferences.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-        @Override
-        public boolean onPreferenceClick(final Preference preference) {
-
-          final Bundle b = new Bundle();
-          SimplifiedActivity.setActivityArguments(b, false);
-          final Intent intent = new Intent();
-          intent.setClass(
-            MainSettingsFragment.this.getActivity(), MainSettingsAccountsActivity.class);
-          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-          intent.putExtras(b);
-
-          preferences.setIntent(intent);
-
-          return false;
-        }
+      preferences.setOnPreferenceClickListener(preference -> {
+        final Bundle b = new Bundle();
+        SimplifiedActivity.setActivityArguments(b, false);
+        final Intent intent = new Intent();
+        intent.setClass(MainSettingsFragment.this.getActivity(), MainSettingsAccountsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.putExtras(b);
+        preferences.setIntent(intent);
+        return false;
       });
     }
 
     {
       if (helpstack.isSome()) {
-
         final Preference preference = findPreference(resources.getString(R.string.help));
         preference.setIntent(null);
-        preference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-          @Override
-          public boolean onPreferenceClick(final Preference preference) {
-
-            final HSHelpStack stack = HSHelpStack.getInstance(getActivity());
-
-            final HSDeskGear gear =
-              new HSDeskGear("https://nypl.desk.com/", "4GBRmMv8ZKG8fGehhA", "12060");
-            stack.setGear(gear);
-
-            stack.showHelp(getActivity());
-
-            return false;
-          }
+        preference.setOnPreferenceClickListener(pref -> {
+          final HSHelpStack stack = HSHelpStack.getInstance(getActivity());
+          final HSDeskGear gear =
+            new HSDeskGear("https://nypl.desk.com/", "4GBRmMv8ZKG8fGehhA", "12060");
+          stack.setGear(gear);
+          stack.showHelp(getActivity());
+          return false;
         });
-
       }
     }
 
@@ -201,25 +170,20 @@ class MainSettingsFragment extends PreferenceFragment implements LoginListenerTy
     }
 
     {
-      docs.getLicenses().map_(
-        new ProcedureType<SyncedDocumentType>() {
-          @Override
-          public void call(final SyncedDocumentType licenses) {
+      docs.getLicenses().map_(licenses -> {
+          final Intent intent = new Intent(
+            MainSettingsFragment.this.getActivity(), WebViewActivity.class);
+          final Bundle b = new Bundle();
+          WebViewActivity.setActivityArguments(
+            b,
+            licenses.documentGetReadableURL().toString(),
+            resources.getString(R.string.settings_licence_software),
+            SimplifiedPart.PART_SETTINGS);
+          intent.putExtras(b);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 
-            final Intent intent = new Intent(
-              MainSettingsFragment.this.getActivity(), WebViewActivity.class);
-            final Bundle b = new Bundle();
-            WebViewActivity.setActivityArguments(
-              b,
-              licenses.documentGetReadableURL().toString(),
-              resources.getString(R.string.settings_licence_software),
-              SimplifiedPart.PART_SETTINGS);
-            intent.putExtras(b);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-
-            final Preference preferences = findPreference(resources.getString(R.string.settings_licence_software));
-            preferences.setIntent(intent);
-          }
+          final Preference preferences = findPreference(resources.getString(R.string.settings_licence_software));
+          preferences.setIntent(intent);
         });
     }
   }
