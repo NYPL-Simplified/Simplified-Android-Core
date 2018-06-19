@@ -3,6 +3,8 @@ package org.nypl.simplified.multilibrary;
 import android.content.Context;
 import android.content.res.AssetManager;
 
+import com.io7m.junreachable.UnreachableCodeException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +13,7 @@ import org.nypl.simplified.prefs.Prefs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -173,7 +176,12 @@ public class AccountsRegistry implements Serializable {
       }
 
     }
-    return null;
+
+    try {
+      return new Account(this.getAccounts().getJSONObject(0));   //Default
+    } catch (JSONException e) {
+      throw new UnreachableCodeException(e);
+    }
   }
 
   /**
