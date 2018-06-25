@@ -9,7 +9,7 @@
 
     <TextView
       android:id="@+id/feed_title"
-      android:textAppearance="@style/SimplifiedTheme.LaneTitle"
+      android:textAppearance="@style/SimplifiedTheme_ActionBar.LaneTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
@@ -19,7 +19,7 @@
 
     <TextView
         android:id="@+id/feed_more"
-        android:textAppearance="@style/SimplifiedTheme.LaneTitle"
+        android:textAppearance="@style/SimplifiedTheme_ActionBar.LaneTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

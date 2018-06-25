@@ -17,7 +17,7 @@
     "eulaUrl": "http://www.librarysimplified.org/EULA.html",
     "licenseUrl": "http://www.librarysimplified.org/license.html",
     "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
-    "mainColor": "#da2527",
+    "mainColor": "Red",
     "authPasscodeLength" : 4,
     "authPasscodeAllowsLetters" : false
   },
@@ -40,7 +40,7 @@
     "eulaUrl": "http://www.bklynlibrary.org/policy/terms-conditions",
     "licenseUrl": "http://www.librarysimplified.org/bklynlicenses.html",
     "privacyUrl": "http://www.librarysimplified.org/bklynprivacypolicy.html",
-    "mainColor": "#446ebf",
+    "mainColor": "Blue",
     "authPasscodeLength" : 4,
     "authPasscodeAllowsLetters" : false
   },
@@ -61,7 +61,7 @@
     "catalogUrlUnder13": "https://instantclassics.librarysimplified.org/childrens-books.xml",
     "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
-    "mainColor": "#497049"
+    "mainColor": "Teal"
   },
   {
     "id" : 7,
@@ -78,7 +78,7 @@
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://acl.simplye-ca.org/CALMDA/",
     "supportEmail" : "simplye@aclibrary.org",
-    "mainColor" : "#58a6f5",
+    "mainColor" : "LightBlue",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -99,7 +99,7 @@
     "licenseUrl": "http://hclibrary.org/research/simplye-content-license/",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
     "supportEmail" : "askhcls@hclibrary.org",
-    "mainColor": "#0066CC",
+    "mainColor": "Indigo",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -119,7 +119,7 @@
     "catalogUrl" : "http://montgomery.simplye-md.org/",
     "licenseUrl": "http://montgomerycountymd.gov/library/collection/contentlicenses.html",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#0067B1",
+    "mainColor": "Blue",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -140,7 +140,7 @@
     "licenseUrl": "http://fcpl.org/third-party-content/",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
     "supportEmail" : "fcplweb@fcpl.org",
-    "mainColor": "#ef4123",
+    "mainColor": "Red",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -159,7 +159,7 @@
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://anne-arundel.simplye-md.org/",
     "supportEmail" : "askus@aacpl.libanswers.com",
-    "mainColor" : "#0b9da1",
+    "mainColor" : "Teal",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -178,7 +178,7 @@
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://bgc.simplye-ca.org/",
     "supportEmail": "blackgoldhq@blackgold.org",
-    "mainColor" : "#d2a74a",
+    "mainColor" : "Amber",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -200,7 +200,7 @@
     "eulaUrl": "http://www.librarysimplified.org/EULA.html",
     "licenseUrl": "https://www.stmalib.org/online-services/digital-content/simplye-content-license/",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#194483",
+    "mainColor": "Indigo",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -222,7 +222,7 @@
     "supportEmail" : "ill.calv@somd.lib.md.us",
     "licenseUrl": "http://calvert.lib.md.us/SimplyELicense.html",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#440099",
+    "mainColor": "DeepPurple",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -244,7 +244,7 @@
     "eulaUrl": "http://www.librarysimplified.org/EULA.html",
     "licenseUrl": "https://www.ccplonline.org/services/simplye-content-license",
     "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
-    "mainColor": "#20428B",
+    "mainColor": "Indigo",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -265,7 +265,7 @@
     "catalogUrl" : "http://bcl.simplye-ca.org/CABTTE/",
     "licenseUrl": "http://califa.org/third-party-content",
     "privacyUrl": "http://califa.org/privacy-policy",
-    "mainColor": "#1b7fa7",
+    "mainColor": "Cyan",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -284,7 +284,7 @@
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://lapl.simplye-ca.org/",
     "supportEmail" : "webmaster@lapl.org",
-    "mainColor" : "#07818d",
+    "mainColor" : "Teal",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
   },
@@ -302,7 +302,7 @@
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://pcl.simplye-ca.org/",
-    "mainColor" : "#1b7fa7",
+    "mainColor" : "Cyan",
     "supportEmail" : "library@ci.porterville.ca.us",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
@@ -321,7 +321,7 @@
     "supportsReservations" : true,
     "supportsHelpCenter" : false,
     "catalogUrl" : "http://sccl.simplye-ca.org/",
-    "mainColor" : "#1b7fa7",
+    "mainColor" : "Teal",
     "supportEmail" : "ask@sccl.org",
     "authPasscodeLength" : 0,
     "authPasscodeAllowsLetters" : true
@@ -340,7 +340,7 @@
     "supportsCardCreator" : false,
     "supportsHelpCenter" : false,
     "catalogUrl" : "https://yavapai.lyrasistechnology.org/beavercreek/",
-    "mainColor" : "#446ebf",
+    "mainColor" : "Blue",
     "supportEmail" : "bonnie.best@yavapai.us",
     "authPasscodeLength" : 4,
     "authPasscodeAllowsLetters" : true
@@ -359,7 +359,7 @@
     "supportsCardCreator" : false,
     "supportsHelpCenter" : false,
     "catalogUrl" : "https://yavapai.lyrasistechnology.org/campverde/",
-    "mainColor" : "#446ebf",
+    "mainColor" : "Blue",
     "supportEmail" : "library@campverde.az.gov",
     "authPasscodeLength" : 4,
     "authPasscodeAllowsLetters" : true
@@ -378,7 +378,7 @@
     "supportsCardCreator" : false,
     "supportsHelpCenter" : false,
     "catalogUrl" : "https://yavapai.lyrasistechnology.org/embryriddle/",
-    "mainColor" : "#446ebf",
+    "mainColor" : "Blue",
     "supportEmail" : "prariel@erau.edu",
     "authPasscodeLength" : 4,
     "authPasscodeAllowsLetters" : true
@@ -397,7 +397,7 @@
     "supportsCardCreator" : false,
     "supportsHelpCenter" : false,
     "catalogUrl" : "https://yavapai.lyrasistechnology.org/prescott/",
-    "mainColor" : "#446ebf",
+    "mainColor" : "Blue",
     "supportEmail" : "ask.librarian@prescott-az.gov",
     "authPasscodeLength" : 4,
     "authPasscodeAllowsLetters" : true
@@ -415,6 +415,6 @@
     "supportsCardCreator" : false,
     "supportsReservations" : false,
     "catalogUrl" : "http://openbookshelf.dp.la/OB/groups/3",
-    "mainColor" : "#639bb4"
+    "mainColor" : "Cyan"
   }
 ]

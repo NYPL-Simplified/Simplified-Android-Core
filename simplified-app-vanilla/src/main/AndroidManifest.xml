@@ -86,13 +86,13 @@
       android:name="org.nypl.simplified.app.reader.ReaderActivity"
       android:exported="true"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
       android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
       android:exported="false"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
       android:configChanges="orientation|screenSize"
       android:process="org.nypl.simplified.app.reader.ReaderActivityProcess">
     </activity>

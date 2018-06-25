@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.reader;
 
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -38,6 +39,7 @@ import org.nypl.simplified.app.ReaderSyncManager;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
+import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode;
@@ -287,16 +289,8 @@ public final class ReaderActivity extends Activity implements
   @Override protected void onCreate(
     final @Nullable Bundle state)
   {
-    final int id = Simplified.getCurrentAccount().getId();
-    if (id == 0) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
-    }
-    else if (id == 1) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
-    }
-    else {
-      setTheme(R.style.SimplifiedThemeNoActionBar);
-    }
+    final String accountColor = Simplified.getCurrentAccount().getMainColor();
+    setTheme(ThemeMatcher.Companion.noActionBarStyle(accountColor));
 
     super.onCreate(state);
     this.setContentView(R.layout.reader);
