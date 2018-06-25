@@ -24,7 +24,7 @@
         android:right="@dimen/button_padding_right"
         android:bottom="@dimen/button_padding_bottom" />
       <corners android:radius="@dimen/button_corner_radius" />
-      <solid android:color="@color/app_main_color" />
+      <solid android:color="@color/app_primary_color" />
       <stroke
         android:width="@dimen/button_stroke"
         android:color="@color/button_background" />
@@ -42,7 +42,7 @@
       <solid android:color="@color/button_background" />
       <stroke
         android:width="@dimen/button_stroke"
-        android:color="@color/app_main_color" />
+        android:color="@color/app_primary_color" />
     </shape>
   </item>
 
@@ -57,7 +57,7 @@
       <solid android:color="@color/button_background" />
       <stroke
         android:width="@dimen/button_stroke"
-        android:color="@color/app_main_color" />
+        android:color="@color/app_primary_color" />
     </shape>
   </item>
 
