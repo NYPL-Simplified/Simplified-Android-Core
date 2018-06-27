@@ -3,13 +3,14 @@ package org.nypl.simplified.app.catalog;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.FeedFacetType;
 
@@ -57,7 +58,9 @@ public final class CatalogFacetButton extends Button
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     this.setTextSize(12.0f);
     this.setBackgroundResource(R.drawable.simplified_button);
-    this.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+    final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+    final int mainColor = ContextCompat.getColor(this.getContext(), resID);
+    this.setTextColor(mainColor);
 
     this.setText(active.facetGetTitle());
     this.setOnClickListener(

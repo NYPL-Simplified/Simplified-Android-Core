@@ -2,7 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import android.app.Activity;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.io7m.jfunctional.OptionType;
@@ -12,6 +12,7 @@ import com.io7m.jnull.Nullable;
 
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
@@ -48,7 +49,9 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
     this.getTextView().setTextSize(12.0f);
 
     this.setBackgroundResource(R.drawable.simplified_button);
-    this.getTextView().setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+    final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+    final int mainColor = ContextCompat.getColor(this.getContext(), resID);
+    this.getTextView().setTextColor(mainColor);
 
     final OptionType<BookDatabaseEntrySnapshot> snap_opt =
       in_books.bookGetDatabase().databaseGetEntrySnapshot(in_book_id);

@@ -2,7 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +23,7 @@ import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.ScreenSizeControllerType;
 import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.books.core.FeedEntryCorrupt;
 import org.nypl.simplified.books.core.FeedEntryMatcherType;
@@ -88,14 +89,13 @@ import java.util.concurrent.atomic.AtomicInteger;
         Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.catalog_feed_groups_lane, this, true);
 
-
-
     final Account account =   Simplified.getCurrentAccount();
 
-    this.header =
-      NullCheck.notNull((RelativeLayout) this.findViewById(R.id.feed_header));
-    ((TextView) this.header.findViewById(R.id.feed_title)).setTextColor(Color.parseColor(account.getMainColor()));
-    ((TextView) this.header.findViewById(R.id.feed_more)).setTextColor(Color.parseColor(account.getMainColor()));
+    this.header = NullCheck.notNull(this.findViewById(R.id.feed_header));
+    final int resID = ThemeMatcher.Companion.color(account.getMainColor());
+    final int mainColor = ContextCompat.getColor(this.getContext(), resID);
+    ((TextView) this.header.findViewById(R.id.feed_title)).setTextColor(mainColor);
+    ((TextView) this.header.findViewById(R.id.feed_more)).setTextColor(mainColor);
 
     this.title =
       NullCheck.notNull((TextView) this.findViewById(R.id.feed_title));

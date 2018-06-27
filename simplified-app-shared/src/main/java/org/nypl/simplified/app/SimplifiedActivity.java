@@ -6,8 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -426,8 +426,10 @@ public abstract class SimplifiedActivity extends Activity
             v.setBackgroundResource(R.drawable.textview_underline);
             final Prefs prefs = Simplified.getSharedPrefs();
             final Account account = new AccountsRegistry(SimplifiedActivity.this).getAccount(prefs.getInt("current_account"));
+            final int resID = ThemeMatcher.Companion.color(account.getMainColor());
+            final int mainColor = ContextCompat.getColor(this.getContext(), resID);
             tv.setText(account.getName());
-            tv.setTextColor(Color.parseColor(Simplified.getCurrentAccount().getMainColor()));
+            tv.setTextColor(mainColor);
 
             final String resource_path = "drawable/" + account.getLowerCaseLogo();
             final int resource_id = this.getContext().getResources().getIdentifier(

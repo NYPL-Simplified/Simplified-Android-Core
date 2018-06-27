@@ -9,12 +9,12 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -183,13 +183,13 @@ public final class ReaderActivity extends Activity implements
     final ImageView in_media_next = Objects.requireNonNull(this.view_media_next);
     final ImageView in_media_prev = Objects.requireNonNull(this.view_media_prev);
 
-    final int main_color = Color.parseColor(Simplified.getCurrentAccount().getMainColor());
-    final ColorMatrixColorFilter filter =
-      ReaderColorMatrix.getImageFilterMatrix(main_color);
+    final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+    final int mainColor = ContextCompat.getColor(this, resID);
+    final ColorMatrixColorFilter filter = ReaderColorMatrix.getImageFilterMatrix(mainColor);
 
     UIThread.runOnUIThread(() -> {
-      in_progress_text.setTextColor(main_color);
-      in_title_text.setTextColor(main_color);
+      in_progress_text.setTextColor(mainColor);
+      in_title_text.setTextColor(mainColor);
       in_toc.setColorFilter(filter);
       in_bookmark.setColorFilter(filter);
       in_settings.setColorFilter(filter);

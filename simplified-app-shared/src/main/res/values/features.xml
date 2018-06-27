@@ -7,7 +7,7 @@
   <!-- The configurable splash screen image -->
   <drawable name="feature_app_splash">@drawable/simplified_splash</drawable>
 
-  <color name="app_primary_color">#f44336</color>
+  <color name="app_primary_color">#000000</color>
   <color name="app_accent_color">#ffffff</color>
 
   <!-- Material Design Color Palette -->
