@@ -26,7 +26,7 @@
     android:label="@string/feature_app_name"
     android:contentDescription="@string/feature_app_name"
     android:largeHeap="true"
-    android:theme="@style/SimplifiedTheme">
+    android:theme="@style/SimplifiedTheme_ActionBar">
 
     <!-- Main entry point for the application. -->
     <activity
@@ -34,7 +34,7 @@
       android:configChanges="orientation|screenSize"
       android:label="@string/feature_app_name"
       android:contentDescription="@string/feature_app_name"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
 >
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
@@ -60,7 +60,7 @@
     <activity
       android:name="org.nypl.simplified.app.LoginActivity"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
       android:exported="false">
     </activity>
     <activity
@@ -151,7 +151,7 @@
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderActivity"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
       android:label="@string/reader"
       android:contentDescription="@string/reader"
       >

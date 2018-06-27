@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -19,6 +20,8 @@ import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+
+import java.util.Objects;
 
 /**
  *
@@ -41,16 +44,9 @@ public final class LoginActivity extends Activity {
 
   @Override
   protected void onCreate(final Bundle state) {
-    final int id = Simplified.getCurrentAccount().getId();
-    if (id == 0) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
-    }
-    else if (id == 1) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
-    }
-    else {
-      setTheme(R.style.SimplifiedThemeNoActionBar);
-    }
+
+    final String accountColor = Simplified.getCurrentAccount().getMainColor();
+    setTheme(ThemeMatcher.Companion.noActionBarStyle(accountColor));
 
     super.onCreate(state);
     this.setContentView(R.layout.login_view);

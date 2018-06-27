@@ -50,67 +50,8 @@ public final class MainEULAActivity extends Activity
 
   @Override protected void onCreate(final Bundle state)
   {
-    final int id = Simplified.getCurrentAccount().getId();
-    if (id == 0) {
-      setTheme(R.style.SimplifiedTheme_NYPL);
-    }
-    else if (id == 1) {
-      setTheme(R.style.SimplifiedTheme_BPL);
-    }
-    else if (id == 7) {
-      setTheme(R.style.SimplifiedTheme_ACL);
-    }
-    else if (id == 8) {
-      setTheme(R.style.SimplifiedTheme_HCLS);
-    }
-    else if (id == 9) {
-      setTheme(R.style.SimplifiedTheme_MCPL);
-    }
-    else if (id == 10) {
-      setTheme(R.style.SimplifiedTheme_FCPL);
-    }
-    else if (id == 11) {
-      setTheme(R.style.SimplifiedTheme_AACPL);
-    }
-    else if (id == 12) {
-      setTheme(R.style.SimplifiedTheme_BGC);
-    }
-    else if (id == 13) {
-      setTheme(R.style.SimplifiedTheme_SMCL);
-    }
-    else if (id == 14) {
-      setTheme(R.style.SimplifiedTheme_CL);
-    }
-    else if (id == 15) {
-      setTheme(R.style.SimplifiedTheme_CCPL);
-    }
-    else if (id == 16) {
-      setTheme(R.style.SimplifiedTheme_CCL);
-    }
-    else if (id == 17) {
-      setTheme(R.style.SimplifiedTheme_BCL);
-    }
-    else if (id == 18) {
-      setTheme(R.style.SimplifiedTheme_LAPL);
-    }
-    else if (id == 19) {
-      setTheme(R.style.SimplifiedTheme_PCL);
-    }
-    else if (id == 20) {
-      setTheme(R.style.SimplifiedTheme_SCCL);
-    }
-    else if (id == 21) {
-      setTheme(R.style.SimplifiedTheme_ACLS);
-    }
-    else if (id == 22) {
-      setTheme(R.style.SimplifiedTheme_REL);
-    }
-    else if (id == 23) {
-      setTheme(R.style.SimplifiedTheme_WCFL);
-    }
-    else {
-      setTheme(R.style.SimplifiedTheme);
-    }
+    final String accountColor = Simplified.getCurrentAccount().getMainColor();
+    setTheme(ThemeMatcher.Companion.actionBarStyle(accountColor));
 
     super.onCreate(state);
 

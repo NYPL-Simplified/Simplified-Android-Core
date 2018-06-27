@@ -31,7 +31,7 @@
       android:configChanges="orientation|screenSize"
       android:label="@string/feature_app_name"
       android:contentDescription="@string/feature_app_name"
-      android:theme="@style/SimplifiedThemeNoActionBar">
+      android:theme="@style/SimplifiedTheme_NoActionBar">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
@@ -61,7 +61,7 @@
     <activity
       android:name="org.nypl.simplified.app.LoginActivity"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
       >
     </activity>
     <activity
@@ -118,7 +118,7 @@
     <activity
         android:name="org.nypl.labs.OpenEbooks.app.OEIntroActivity"
         android:configChanges="orientation|screenSize"
-        android:theme="@style/SimplifiedThemeNoActionBar"
+        android:theme="@style/SimplifiedTheme_NoActionBar"
         android:exported="false">
     </activity>
 
@@ -141,7 +141,7 @@
       android:name="org.nypl.simplified.app.reader.ReaderActivity"
       android:exported="true"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
       android:label="@string/reader"
       android:contentDescription="@string/reader"
       >
@@ -149,7 +149,7 @@
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
       android:exported="false"
-      android:theme="@style/SimplifiedThemeNoActionBar"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
       android:configChanges="orientation|screenSize"
       android:label="@string/reader_toc"
       android:contentDescription="@string/reader_toc"

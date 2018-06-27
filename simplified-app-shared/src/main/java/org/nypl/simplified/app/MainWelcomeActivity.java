@@ -1,5 +1,6 @@
 package org.nypl.simplified.app;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,6 +18,8 @@ import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
+
+import java.util.Objects;
 
 
 /**
@@ -45,16 +48,9 @@ public class MainWelcomeActivity extends Activity
   @Override
   protected void onCreate(final Bundle state)
   {
-    final int id = Simplified.getCurrentAccount().getId();
-    if (id == 0) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_NYPL);
-    }
-    else if (id == 1) {
-      setTheme(R.style.SimplifiedThemeNoActionBar_BPL);
-    }
-    else {
-      setTheme(R.style.SimplifiedThemeNoActionBar);
-    }
+    final String accountColor = Simplified.getCurrentAccount().getMainColor();
+    setTheme(ThemeMatcher.Companion.noActionBarStyle(accountColor));
+
     super.onCreate(state);
     this.setContentView(R.layout.welcome);
 
