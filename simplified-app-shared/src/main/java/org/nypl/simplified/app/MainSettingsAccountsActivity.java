@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -89,14 +90,14 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
 
     {
       final Account account = Simplified.getCurrentAccount();
-      final TextView tv =
-        NullCheck.notNull((TextView) current_account.findViewById(android.R.id.text1));
+      final TextView tv = NullCheck.notNull(current_account.findViewById(android.R.id.text1));
+      final TextView tv2 = NullCheck.notNull(current_account.findViewById(android.R.id.text2));
+      final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+      final int mainColor = ContextCompat.getColor(this, resID);
       tv.setText(account.getName());
-      tv.setTextColor(R.color.text_black);
-      final TextView tv2 =
-        NullCheck.notNull((TextView) current_account.findViewById(android.R.id.text2));
+      tv.setTextColor(mainColor);
       tv2.setText(account.getSubtitle());
-      tv2.setTextColor(R.color.text_black);
+      tv2.setTextColor(mainColor);
 
       final ImageView icon_view =
         NullCheck.notNull((ImageView) current_account.findViewById(R.id.cellIcon));
@@ -164,15 +165,14 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
           }
 
           final Account account = NullCheck.notNull(dia.get(position));
-
-          final TextView tv =
-            NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+          final TextView tv = NullCheck.notNull(v.findViewById(android.R.id.text1));
+          final TextView tv2 = NullCheck.notNull(v.findViewById(android.R.id.text2));
+          final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+          final int mainColor = ContextCompat.getColor(this.getContext(), resID);
           tv.setText(account.getName());
-          tv.setTextColor(R.color.text_black);
-          final TextView tv2 =
-            NullCheck.notNull((TextView) v.findViewById(android.R.id.text2));
+          tv.setTextColor(mainColor);
           tv2.setText(account.getSubtitle());
-          tv2.setTextColor(R.color.text_black);
+          tv2.setTextColor(mainColor);
 
           final ImageView icon_view =
             NullCheck.notNull(v.findViewById(R.id.cellIcon));
