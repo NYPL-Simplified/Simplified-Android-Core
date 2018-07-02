@@ -416,5 +416,24 @@
     "supportsReservations" : false,
     "catalogUrl" : "http://openbookshelf.dp.la/OB/groups/3",
     "mainColor" : "Cyan"
+  },
+  {
+    "id": 88,
+    "pathComponent" : "88",
+    "name" : "San Jose Public Library",
+    "subtitle" : "",
+    "logo" : "LibraryLogoMagic",
+    "needsAuth" : true,
+    "supportsSimplyESync" : true,
+    "supportsBarcodeScanner" : true,
+    "supportsBarcodeDisplay" : true,
+    "supportsReservations" : true,
+    "supportsCardCreator" : true,
+    "supportsHelpCenter" : true,
+    "catalogUrl" : "http://califa102.simplye-ca.org/CASJPL/",
+    "supportEmail" : "simplyehelp@nypl.org",
+    "mainColor": "Teal",
+    "authPasscodeLength" : 4,
+    "authPasscodeAllowsLetters" : false
   }
 ]
