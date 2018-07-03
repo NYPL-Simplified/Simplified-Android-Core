@@ -3,6 +3,7 @@ package org.nypl.simplified.app;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -119,15 +120,14 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
           }
 
           final Account account = NullCheck.notNull(dia.get(position));
-
-          final TextView tv =
-            NullCheck.notNull((TextView) v.findViewById(android.R.id.text1));
+          final TextView tv = NullCheck.notNull(v.findViewById(android.R.id.text1));
+          final TextView tv2 = NullCheck.notNull(v.findViewById(android.R.id.text2));
+          final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+          final int mainColor = ContextCompat.getColor(this.getContext(), resID);
           tv.setText(account.getName());
-          tv.setTextColor(R.color.text_black);
-          final TextView tv2 =
-            NullCheck.notNull((TextView) v.findViewById(android.R.id.text2));
+          tv.setTextColor(mainColor);
           tv2.setText(account.getSubtitle());
-          tv2.setTextColor(R.color.text_black);
+          tv2.setTextColor(mainColor);
 
           final ImageView icon_view =
             NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
