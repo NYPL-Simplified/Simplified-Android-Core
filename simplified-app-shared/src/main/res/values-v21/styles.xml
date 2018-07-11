@@ -61,9 +61,9 @@
     <item name="android:colorAccent">@color/red_primary_light</item>
     <item name="main_color">@color/red_primary</item>
     <item name="button_foreground">@color/red_primary</item>
-    <item name="list_item_foreground">@color/red_primary</item>
-    <item name="downloading_background">@color/red_primary</item>
-    <item name="notification_background">@color/red_primary</item>
+    <item name="list_item_foreground">@color/red_primary_dark</item>
+    <item name="downloading_background">@color/red_primary_dark</item>
+    <item name="notification_background">@color/red_primary_dark</item>
   </style>
 
   <style
@@ -74,9 +74,9 @@
     <item name="android:colorAccent">@color/pink_primary_light</item>
     <item name="main_color">@color/pink_primary</item>
     <item name="button_foreground">@color/pink_primary</item>
-    <item name="list_item_foreground">@color/pink_primary</item>
-    <item name="downloading_background">@color/pink_primary</item>
-    <item name="notification_background">@color/pink_primary</item>
+    <item name="list_item_foreground">@color/pink_primary_dark</item>
+    <item name="downloading_background">@color/pink_primary_dark</item>
+    <item name="notification_background">@color/pink_primary_dark</item>
   </style>
 
   <style
@@ -87,9 +87,9 @@
     <item name="android:colorAccent">@color/purple_primary_light</item>
     <item name="main_color">@color/purple_primary</item>
     <item name="button_foreground">@color/purple_primary</item>
-    <item name="list_item_foreground">@color/purple_primary</item>
-    <item name="downloading_background">@color/purple_primary</item>
-    <item name="notification_background">@color/purple_primary</item>
+    <item name="list_item_foreground">@color/purple_primary_dark</item>
+    <item name="downloading_background">@color/purple_primary_dark</item>
+    <item name="notification_background">@color/purple_primary_dark</item>
   </style>
 
   <style
@@ -100,9 +100,9 @@
     <item name="android:colorAccent">@color/deep_purple_primary_light</item>
     <item name="main_color">@color/deep_purple_primary</item>
     <item name="button_foreground">@color/deep_purple_primary</item>
-    <item name="list_item_foreground">@color/deep_purple_primary</item>
-    <item name="downloading_background">@color/deep_purple_primary</item>
-    <item name="notification_background">@color/deep_purple_primary</item>
+    <item name="list_item_foreground">@color/deep_purple_primary_dark</item>
+    <item name="downloading_background">@color/deep_purple_primary_dark</item>
+    <item name="notification_background">@color/deep_purple_primary_dark</item>
   </style>
 
   <style
@@ -113,9 +113,9 @@
     <item name="android:colorAccent">@color/indigo_primary_light</item>
     <item name="main_color">@color/indigo_primary</item>
     <item name="button_foreground">@color/indigo_primary</item>
-    <item name="list_item_foreground">@color/indigo_primary</item>
-    <item name="downloading_background">@color/indigo_primary</item>
-    <item name="notification_background">@color/indigo_primary</item>
+    <item name="list_item_foreground">@color/indigo_primary_dark</item>
+    <item name="downloading_background">@color/indigo_primary_dark</item>
+    <item name="notification_background">@color/indigo_primary_dark</item>
   </style>
 
   <style
@@ -126,9 +126,9 @@
     <item name="android:colorAccent">@color/blue_primary_light</item>
     <item name="main_color">@color/blue_primary</item>
     <item name="button_foreground">@color/blue_primary</item>
-    <item name="list_item_foreground">@color/blue_primary</item>
-    <item name="downloading_background">@color/blue_primary</item>
-    <item name="notification_background">@color/blue_primary</item>
+    <item name="list_item_foreground">@color/blue_primary_dark</item>
+    <item name="downloading_background">@color/blue_primary_dark</item>
+    <item name="notification_background">@color/blue_primary_dark</item>
   </style>
 
   <style
@@ -139,9 +139,9 @@
     <item name="android:colorAccent">@color/light_blue_primary_light</item>
     <item name="main_color">@color/light_blue_primary</item>
     <item name="button_foreground">@color/light_blue_primary</item>
-    <item name="list_item_foreground">@color/light_blue_primary</item>
-    <item name="downloading_background">@color/light_blue_primary</item>
-    <item name="notification_background">@color/light_blue_primary</item>
+    <item name="list_item_foreground">@color/light_blue_primary_dark</item>
+    <item name="downloading_background">@color/light_blue_primary_dark</item>
+    <item name="notification_background">@color/light_blue_primary_dark</item>
   </style>
 
   <style
@@ -152,9 +152,9 @@
     <item name="android:colorAccent">@color/cyan_primary_light</item>
     <item name="main_color">@color/cyan_primary</item>
     <item name="button_foreground">@color/cyan_primary</item>
-    <item name="list_item_foreground">@color/cyan_primary</item>
-    <item name="downloading_background">@color/cyan_primary</item>
-    <item name="notification_background">@color/cyan_primary</item>
+    <item name="list_item_foreground">@color/cyan_primary_dark</item>
+    <item name="downloading_background">@color/cyan_primary_dark</item>
+    <item name="notification_background">@color/cyan_primary_dark</item>
   </style>
 
   <style
@@ -165,9 +165,9 @@
     <item name="android:colorAccent">@color/teal_primary_light</item>
     <item name="main_color">@color/teal_primary</item>
     <item name="button_foreground">@color/teal_primary</item>
-    <item name="list_item_foreground">@color/teal_primary</item>
-    <item name="downloading_background">@color/teal_primary</item>
-    <item name="notification_background">@color/teal_primary</item>
+    <item name="list_item_foreground">@color/teal_primary_dark</item>
+    <item name="downloading_background">@color/teal_primary_dark</item>
+    <item name="notification_background">@color/teal_primary_dark</item>
   </style>
 
   <style
@@ -178,9 +178,9 @@
     <item name="android:colorAccent">@color/amber_primary_light</item>
     <item name="main_color">@color/amber_primary</item>
     <item name="button_foreground">@color/amber_primary</item>
-    <item name="list_item_foreground">@color/amber_primary</item>
-    <item name="downloading_background">@color/amber_primary</item>
-    <item name="notification_background">@color/amber_primary</item>
+    <item name="list_item_foreground">@color/amber_primary_dark</item>
+    <item name="downloading_background">@color/amber_primary_dark</item>
+    <item name="notification_background">@color/amber_primary_dark</item>
   </style>
 
   <style
@@ -191,9 +191,9 @@
     <item name="android:colorAccent">@color/orange_primary_light</item>
     <item name="main_color">@color/orange_primary</item>
     <item name="button_foreground">@color/orange_primary</item>
-    <item name="list_item_foreground">@color/orange_primary</item>
-    <item name="downloading_background">@color/orange_primary</item>
-    <item name="notification_background">@color/orange_primary</item>
+    <item name="list_item_foreground">@color/orange_primary_dark</item>
+    <item name="downloading_background">@color/orange_primary_dark</item>
+    <item name="notification_background">@color/orange_primary_dark</item>
   </style>
 
   <style
@@ -204,9 +204,9 @@
     <item name="android:colorAccent">@color/deep_orange_primary_light</item>
     <item name="main_color">@color/deep_orange_primary</item>
     <item name="button_foreground">@color/deep_orange_primary</item>
-    <item name="list_item_foreground">@color/deep_orange_primary</item>
-    <item name="downloading_background">@color/deep_orange_primary</item>
-    <item name="notification_background">@color/deep_orange_primary</item>
+    <item name="list_item_foreground">@color/deep_orange_primary_dark</item>
+    <item name="downloading_background">@color/deep_orange_primary_dark</item>
+    <item name="notification_background">@color/deep_orange_primary_dark</item>
   </style>
 
   <style
@@ -217,9 +217,9 @@
     <item name="android:colorAccent">@color/brown_primary_light</item>
     <item name="main_color">@color/brown_primary</item>
     <item name="button_foreground">@color/brown_primary</item>
-    <item name="list_item_foreground">@color/brown_primary</item>
-    <item name="downloading_background">@color/brown_primary</item>
-    <item name="notification_background">@color/brown_primary</item>
+    <item name="list_item_foreground">@color/brown_primary_dark</item>
+    <item name="downloading_background">@color/brown_primary_dark</item>
+    <item name="notification_background">@color/brown_primary_dark</item>
   </style>
 
   <style
@@ -230,9 +230,9 @@
     <item name="android:colorAccent">@color/grey_primary_light</item>
     <item name="main_color">@color/grey_primary</item>
     <item name="button_foreground">@color/grey_primary</item>
-    <item name="list_item_foreground">@color/grey_primary</item>
-    <item name="downloading_background">@color/grey_primary</item>
-    <item name="notification_background">@color/grey_primary</item>
+    <item name="list_item_foreground">@color/grey_primary_dark</item>
+    <item name="downloading_background">@color/grey_primary_dark</item>
+    <item name="notification_background">@color/grey_primary_dark</item>
   </style>
 
   <style
@@ -243,9 +243,9 @@
     <item name="android:colorAccent">@color/blue_grey_primary_light</item>
     <item name="main_color">@color/blue_grey_primary</item>
     <item name="button_foreground">@color/blue_grey_primary</item>
-    <item name="list_item_foreground">@color/blue_grey_primary</item>
-    <item name="downloading_background">@color/blue_grey_primary</item>
-    <item name="notification_background">@color/blue_grey_primary</item>
+    <item name="list_item_foreground">@color/blue_grey_primary_dark</item>
+    <item name="downloading_background">@color/blue_grey_primary_dark</item>
+    <item name="notification_background">@color/blue_grey_primary_dark</item>
   </style>
 
   <!-- Material Design Color Palette w/ No Action Bar -->
@@ -258,9 +258,9 @@
     <item name="android:colorAccent">@color/red_primary_light</item>
     <item name="main_color">@color/red_primary</item>
     <item name="button_foreground">@color/red_primary</item>
-    <item name="list_item_foreground">@color/red_primary</item>
-    <item name="downloading_background">@color/red_primary</item>
-    <item name="notification_background">@color/red_primary</item>
+    <item name="list_item_foreground">@color/red_primary_dark</item>
+    <item name="downloading_background">@color/red_primary_dark</item>
+    <item name="notification_background">@color/red_primary_dark</item>
   </style>
 
   <style
@@ -271,9 +271,9 @@
     <item name="android:colorAccent">@color/pink_primary_light</item>
     <item name="main_color">@color/pink_primary</item>
     <item name="button_foreground">@color/pink_primary</item>
-    <item name="list_item_foreground">@color/pink_primary</item>
-    <item name="downloading_background">@color/pink_primary</item>
-    <item name="notification_background">@color/pink_primary</item>
+    <item name="list_item_foreground">@color/pink_primary_dark</item>
+    <item name="downloading_background">@color/pink_primary_dark</item>
+    <item name="notification_background">@color/pink_primary_dark</item>
   </style>
 
   <style
@@ -284,9 +284,9 @@
     <item name="android:colorAccent">@color/purple_primary_light</item>
     <item name="main_color">@color/purple_primary</item>
     <item name="button_foreground">@color/purple_primary</item>
-    <item name="list_item_foreground">@color/purple_primary</item>
-    <item name="downloading_background">@color/purple_primary</item>
-    <item name="notification_background">@color/purple_primary</item>
+    <item name="list_item_foreground">@color/purple_primary_dark</item>
+    <item name="downloading_background">@color/purple_primary_dark</item>
+    <item name="notification_background">@color/purple_primary_dark</item>
   </style>
 
   <style
@@ -297,9 +297,9 @@
     <item name="android:colorAccent">@color/deep_purple_primary_light</item>
     <item name="main_color">@color/deep_purple_primary</item>
     <item name="button_foreground">@color/deep_purple_primary</item>
-    <item name="list_item_foreground">@color/deep_purple_primary</item>
-    <item name="downloading_background">@color/deep_purple_primary</item>
-    <item name="notification_background">@color/deep_purple_primary</item>
+    <item name="list_item_foreground">@color/deep_purple_primary_dark</item>
+    <item name="downloading_background">@color/deep_purple_primary_dark</item>
+    <item name="notification_background">@color/deep_purple_primary_dark</item>
   </style>
 
   <style
@@ -310,9 +310,9 @@
     <item name="android:colorAccent">@color/indigo_primary_light</item>
     <item name="main_color">@color/indigo_primary</item>
     <item name="button_foreground">@color/indigo_primary</item>
-    <item name="list_item_foreground">@color/indigo_primary</item>
-    <item name="downloading_background">@color/indigo_primary</item>
-    <item name="notification_background">@color/indigo_primary</item>
+    <item name="list_item_foreground">@color/indigo_primary_dark</item>
+    <item name="downloading_background">@color/indigo_primary_dark</item>
+    <item name="notification_background">@color/indigo_primary_dark</item>
   </style>
 
   <style
@@ -323,9 +323,9 @@
     <item name="android:colorAccent">@color/blue_primary_light</item>
     <item name="main_color">@color/blue_primary</item>
     <item name="button_foreground">@color/blue_primary</item>
-    <item name="list_item_foreground">@color/blue_primary</item>
-    <item name="downloading_background">@color/blue_primary</item>
-    <item name="notification_background">@color/blue_primary</item>
+    <item name="list_item_foreground">@color/blue_primary_dark</item>
+    <item name="downloading_background">@color/blue_primary_dark</item>
+    <item name="notification_background">@color/blue_primary_dark</item>
   </style>
 
   <style
@@ -336,9 +336,9 @@
     <item name="android:colorAccent">@color/light_blue_primary_light</item>
     <item name="main_color">@color/light_blue_primary</item>
     <item name="button_foreground">@color/light_blue_primary</item>
-    <item name="list_item_foreground">@color/light_blue_primary</item>
-    <item name="downloading_background">@color/light_blue_primary</item>
-    <item name="notification_background">@color/light_blue_primary</item>
+    <item name="list_item_foreground">@color/light_blue_primary_dark</item>
+    <item name="downloading_background">@color/light_blue_primary_dark</item>
+    <item name="notification_background">@color/light_blue_primary_dark</item>
   </style>
 
   <style
@@ -349,9 +349,9 @@
     <item name="android:colorAccent">@color/cyan_primary_light</item>
     <item name="main_color">@color/cyan_primary</item>
     <item name="button_foreground">@color/cyan_primary</item>
-    <item name="list_item_foreground">@color/cyan_primary</item>
-    <item name="downloading_background">@color/cyan_primary</item>
-    <item name="notification_background">@color/cyan_primary</item>
+    <item name="list_item_foreground">@color/cyan_primary_dark</item>
+    <item name="downloading_background">@color/cyan_primary_dark</item>
+    <item name="notification_background">@color/cyan_primary_dark</item>
   </style>
 
   <style
@@ -362,9 +362,9 @@
     <item name="android:colorAccent">@color/teal_primary_light</item>
     <item name="main_color">@color/teal_primary</item>
     <item name="button_foreground">@color/teal_primary</item>
-    <item name="list_item_foreground">@color/teal_primary</item>
-    <item name="downloading_background">@color/teal_primary</item>
-    <item name="notification_background">@color/teal_primary</item>
+    <item name="list_item_foreground">@color/teal_primary_dark</item>
+    <item name="downloading_background">@color/teal_primary_dark</item>
+    <item name="notification_background">@color/teal_primary_dark</item>
   </style>
 
   <style
@@ -375,9 +375,9 @@
     <item name="android:colorAccent">@color/amber_primary_light</item>
     <item name="main_color">@color/amber_primary</item>
     <item name="button_foreground">@color/amber_primary</item>
-    <item name="list_item_foreground">@color/amber_primary</item>
-    <item name="downloading_background">@color/amber_primary</item>
-    <item name="notification_background">@color/amber_primary</item>
+    <item name="list_item_foreground">@color/amber_primary_dark</item>
+    <item name="downloading_background">@color/amber_primary_dark</item>
+    <item name="notification_background">@color/amber_primary_dark</item>
   </style>
 
   <style
@@ -388,9 +388,9 @@
     <item name="android:colorAccent">@color/orange_primary_light</item>
     <item name="main_color">@color/orange_primary</item>
     <item name="button_foreground">@color/orange_primary</item>
-    <item name="list_item_foreground">@color/orange_primary</item>
-    <item name="downloading_background">@color/orange_primary</item>
-    <item name="notification_background">@color/orange_primary</item>
+    <item name="list_item_foreground">@color/orange_primary_dark</item>
+    <item name="downloading_background">@color/orange_primary_dark</item>
+    <item name="notification_background">@color/orange_primary_dark</item>
   </style>
 
   <style
@@ -401,9 +401,9 @@
     <item name="android:colorAccent">@color/deep_orange_primary_light</item>
     <item name="main_color">@color/deep_orange_primary</item>
     <item name="button_foreground">@color/deep_orange_primary</item>
-    <item name="list_item_foreground">@color/deep_orange_primary</item>
-    <item name="downloading_background">@color/deep_orange_primary</item>
-    <item name="notification_background">@color/deep_orange_primary</item>
+    <item name="list_item_foreground">@color/deep_orange_primary_dark</item>
+    <item name="downloading_background">@color/deep_orange_primary_dark</item>
+    <item name="notification_background">@color/deep_orange_primary_dark</item>
   </style>
 
   <style
@@ -414,9 +414,9 @@
     <item name="android:colorAccent">@color/brown_primary_light</item>
     <item name="main_color">@color/brown_primary</item>
     <item name="button_foreground">@color/brown_primary</item>
-    <item name="list_item_foreground">@color/brown_primary</item>
-    <item name="downloading_background">@color/brown_primary</item>
-    <item name="notification_background">@color/brown_primary</item>
+    <item name="list_item_foreground">@color/brown_primary_dark</item>
+    <item name="downloading_background">@color/brown_primary_dark</item>
+    <item name="notification_background">@color/brown_primary_dark</item>
   </style>
 
   <style
@@ -427,9 +427,9 @@
     <item name="android:colorAccent">@color/grey_primary_light</item>
     <item name="main_color">@color/grey_primary</item>
     <item name="button_foreground">@color/grey_primary</item>
-    <item name="list_item_foreground">@color/grey_primary</item>
-    <item name="downloading_background">@color/grey_primary</item>
-    <item name="notification_background">@color/grey_primary</item>
+    <item name="list_item_foreground">@color/grey_primary_dark</item>
+    <item name="downloading_background">@color/grey_primary_dark</item>
+    <item name="notification_background">@color/grey_primary_dark</item>
   </style>
 
   <style
@@ -440,9 +440,9 @@
     <item name="android:colorAccent">@color/blue_grey_primary_light</item>
     <item name="main_color">@color/blue_grey_primary</item>
     <item name="button_foreground">@color/blue_grey_primary</item>
-    <item name="list_item_foreground">@color/blue_grey_primary</item>
-    <item name="downloading_background">@color/blue_grey_primary</item>
-    <item name="notification_background">@color/blue_grey_primary</item>
+    <item name="list_item_foreground">@color/blue_grey_primary_dark</item>
+    <item name="downloading_background">@color/blue_grey_primary_dark</item>
+    <item name="notification_background">@color/blue_grey_primary_dark</item>
   </style>
 
 
