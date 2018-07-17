@@ -58,8 +58,8 @@
     "supportsReservations" : false,
     "supportsHelpCenter" : false,
     "catalogUrl" : "https://circulation.librarysimplified.org/CLASSICS/",
-    "catalogUrlUnder13": "https://instantclassics.librarysimplified.org/childrens-books.xml",
-    "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
+    "catalogUrlUnder13": "http://simplye-collection-redirects.librarysimplified.org/childrens-books.xml",
+    "catalogUrl13": "http://simplye-collection-redirects.librarysimplified.org/all-books.xml",
     "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
     "mainColor": "Teal"
   },
