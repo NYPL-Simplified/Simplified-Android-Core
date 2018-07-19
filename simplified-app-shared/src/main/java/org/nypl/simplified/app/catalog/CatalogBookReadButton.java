@@ -43,57 +43,43 @@ public final class CatalogBookReadButton extends CatalogLeftPaddedButton
     final BooksType in_books)
   {
     super(in_activity);
-
+    this.getTextView().setTextSize(12.0f);
+    this.setBackgroundResource(R.drawable.simplified_button);
 
     final Resources rr = NullCheck.notNull(in_activity.getResources());
-    this.getTextView().setTextSize(12.0f);
-
-    this.setBackgroundResource(R.drawable.simplified_button);
     final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
     final int mainColor = ContextCompat.getColor(this.getContext(), resID);
     this.getTextView().setTextColor(mainColor);
 
-    final OptionType<BookDatabaseEntrySnapshot> snap_opt =
-      in_books.bookGetDatabase().databaseGetEntrySnapshot(in_book_id);
+    final OptionType<BookDatabaseEntrySnapshot> snap_opt = in_books.bookGetDatabase().databaseGetEntrySnapshot(in_book_id);
 
-    if (in_books.accountIsDeviceActive() || ((Some<BookDatabaseEntrySnapshot>) snap_opt).get().getAdobeRights().isNone()) {
-
-      this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
-      this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_read)));
-
-      this.setOnClickListener(new CatalogBookRead(in_activity, in_book_id, in_entry));
+    if (snap_opt.isSome()) {
+      if (in_books.accountIsDeviceActive() || ((Some<BookDatabaseEntrySnapshot>) snap_opt).get().getAdobeRights().isNone()) {
+        setButtonForRead(in_activity, in_book_id, in_entry, rr);
+      } else {
+        setButtonForDownload(in_book_id, in_entry, in_books, rr);
+      }
+    } else {
+      setButtonForDownload(in_book_id, in_entry, in_books, rr);
     }
-    else
-    {
-      this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_download)));
-      this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_download)));
+  }
 
-      this.setOnClickListener(
+  private void setButtonForDownload(BookID in_book_id, FeedEntryOPDS in_entry, BooksType in_books, Resources rr) {
+    this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_download)));
+    this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_download)));
 
-        new OnClickListener() {
-          @Override
-          public void onClick(
-            final @Nullable View v) {
+    this.setOnClickListener(view -> {
+      DeviceActivationListenerType listener = new DeviceActivationListenerType() {
+        @Override public void onDeviceActivationFailure(final String message) { }
+        @Override public void onDeviceActivationSuccess() { }
+      };
+      in_books.accountActivateDeviceAndFulFillBook(in_book_id, in_entry.getFeedEntry().getLicensor(), listener);
+    });
+  }
 
-
-            DeviceActivationListenerType listener = new DeviceActivationListenerType() {
-              @Override
-              public void onDeviceActivationFailure(final String message) {
-
-              }
-              @Override
-              public void onDeviceActivationSuccess() {
-
-              }
-            };
-
-            in_books.accountActivateDeviceAndFulFillBook(in_book_id, in_entry.getFeedEntry().getLicensor(), listener);
-
-          }
-        }
-      );
-    }
-
-
+  private void setButtonForRead(Activity in_activity, BookID in_book_id, FeedEntryOPDS in_entry, Resources rr) {
+    this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_read)));
+    this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_read)));
+    this.setOnClickListener(new CatalogBookRead(in_activity, in_book_id, in_entry));
   }
 }

@@ -1,7 +1,9 @@
 package org.nypl.simplified.books.core;
 
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.ProcedureType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -265,8 +267,7 @@ final class BooksControllerBorrowTask implements Runnable
           BooksControllerBorrowTask.this.downloads.put(
             BooksControllerBorrowTask.this.book_id, new DownloadType()
             {
-              @Override public void cancel()
-              {
+              @Override public void cancel() {
                 final AdobeAdeptNetProviderType net = c.getNetProvider();
                 net.cancel();
               }
@@ -277,11 +278,26 @@ final class BooksControllerBorrowTask implements Runnable
               }
             });
 
+          final OptionType<AdobeUserID> user = BooksControllerBorrowTask.this.getAccountCredentials().getAdobeUserID();
+          user.accept(new OptionVisitorType<AdobeUserID, Void>() {
+            /*
+            In rare instances, there is a bug that will put the app in a state where
+            a user is signed in, but has no valid Adobe User ID associated with DRM activation.
+            If this occurs, cancel the attempted DRM fulfillment.
+             */
+            @Override
+            public Void none(None<AdobeUserID> none) {
+              final AdobeAdeptNetProviderType net = c.getNetProvider();
+              net.cancel();
+              return null;
+            }
 
-          final AdobeUserID user = ((Some<AdobeUserID>) BooksControllerBorrowTask.this.getAccountCredentials().getAdobeUserID()).get();
-
-          // do something
-          c.fulfillACSM(new AdobeFulfillmentListener(), acsm, user);
+            @Override
+            public Void some(Some<AdobeUserID> user) {
+              c.fulfillACSM(new AdobeFulfillmentListener(), acsm, user.get());
+              return null;
+            }
+          });
         }
       });
   }

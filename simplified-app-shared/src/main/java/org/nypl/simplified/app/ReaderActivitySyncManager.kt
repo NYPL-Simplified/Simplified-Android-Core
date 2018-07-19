@@ -2,6 +2,7 @@ package org.nypl.simplified.app
 
 import android.app.AlertDialog
 import android.content.Context
+import android.support.v4.content.ContextCompat
 import com.io7m.jfunctional.Some
 import org.json.JSONObject
 import org.nypl.simplified.app.reader.ReaderBookLocation
@@ -77,9 +78,9 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
 
     val uriString = (feedEntry.annotations as Some<URI>).get().toString()
 
-    annotationsManager.requestReadingPositionOnServer(feedEntry.id, uriString, { serverLocation ->
+    annotationsManager.requestReadingPositionOnServer(feedEntry.id, uriString) { serverLocation ->
       interpretUXForSync(device, serverLocation, currentLocation, context)
-    })
+    }
   }
 
   private fun interpretUXForSync(device: String,
@@ -110,6 +111,10 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
         device != serverLocation.body.device) {
       UIThread.runOnUIThread {
         alert.show()
+        val resID = ThemeMatcher.color(Simplified.getCurrentAccount().mainColor)
+        val mainTextColor = ContextCompat.getColor(context, resID)
+        alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mainTextColor)
+        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor)
       }
     }
   }
