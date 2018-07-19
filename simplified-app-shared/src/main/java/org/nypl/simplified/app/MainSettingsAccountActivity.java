@@ -599,10 +599,10 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     if (Simplified.getSharedPrefs().contains("age13")) {
       in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
     } else {
-      showAgeChoiceDialog(in_age13_checkbox);
+      showAgeGateOptionsDialog(in_age13_checkbox);
     }
 
-    in_age13_checkbox.setOnCheckedChangeListener(this::showAgeConfirmDialog);
+    in_age13_checkbox.setOnCheckedChangeListener(this::showAgeChangeConfirmation);
 
     if (this.account.needsAuth()) {
       in_login.setVisibility(View.VISIBLE);
@@ -781,7 +781,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
   }
 
-  private void showAgeChoiceDialog(CheckBox age13_box) {
+  private void showAgeGateOptionsDialog(CheckBox age13_box) {
     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
     builder.setTitle(R.string.age_verification_title);
@@ -808,9 +808,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor);
   }
 
-  //Confirm the user wants to change their age to 'Under 13',
-  //and lose any currently downloaded books in their collection.
-  private void showAgeConfirmDialog(CompoundButton button, boolean checked) {
+  private void showAgeChangeConfirmation(CompoundButton button, boolean checked) {
     if (checked) {
       Simplified.getSharedPrefs().putBoolean("age13", true);
       setSimplyCollectionCatalog(false);
