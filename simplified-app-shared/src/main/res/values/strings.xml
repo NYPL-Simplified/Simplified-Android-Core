@@ -18,6 +18,8 @@
   <string name="age_verification_13_younger">Under 13</string>
   <string name="age_verification_13_checkbox">I am 13 years of age or older.</string>
   <string name="age_verification_too_young">You are not old enough to sign up for a library card.</string>
+  <string name="age_verification_confirm_under13_check">Changing your age to under 13 will remove all books downloaded from the SimplyE Collection.</string>
+  <string name="age_verification_confirm_title">Delete Books?</string>
 
   <!-- Books strings -->
   <string name="books">My Books</string>

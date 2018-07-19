@@ -7,13 +7,13 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
@@ -594,65 +594,15 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
         }
       });
 
-    final CheckBox in_age13_checkbox =
-      NullCheck.notNull((CheckBox) this.findViewById(R.id.age13_checkbox));
-
-    // check if key exists, if doesn't ask user how old they are, move this to catalog activity
+    final CheckBox in_age13_checkbox = NullCheck.notNull(this.findViewById(R.id.age13_checkbox));
 
     if (Simplified.getSharedPrefs().contains("age13")) {
       in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
+    } else {
+      showAgeChoiceDialog(in_age13_checkbox);
     }
 
-    in_age13_checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(final CompoundButton button, final boolean checked) {
-
-        if (checked)
-        {
-            Simplified.getSharedPrefs().putBoolean("age13", true);
-            Simplified.getCatalogAppServices().reloadCatalog(false, MainSettingsAccountActivity.this.account);
-        }
-        else {
-          UIThread.runOnUIThread(
-            new Runnable() {
-              @Override
-              public void run() {
-
-                final AlertDialog.Builder alert = new AlertDialog.Builder(MainSettingsAccountActivity.this);
-
-                // Setting Dialog Title
-                alert.setTitle(R.string.age_verification_title);
-
-                // Setting Dialog Message
-                alert.setMessage(R.string.age_verification_changed);
-
-                // On pressing the under 13 button.
-                alert.setNeutralButton(R.string.age_verification_13_younger, new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, final int which) {
-                      Simplified.getSharedPrefs().putBoolean("age13", false);
-                      Simplified.getCatalogAppServices().reloadCatalog(true, MainSettingsAccountActivity.this.account);
-                    }
-                  }
-                );
-
-                // On pressing the 13 and over button
-                alert.setPositiveButton(R.string.age_verification_13_older, new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, final int which) {
-                      Simplified.getSharedPrefs().putBoolean("age13", true);
-                      in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
-                    }
-                  }
-                );
-
-                // Showing Alert Message
-                alert.show();
-
-              }
-            });
-        }
-      }
-    });
-
+    in_age13_checkbox.setOnCheckedChangeListener(this::showAgeConfirmDialog);
 
     if (this.account.needsAuth()) {
       in_login.setVisibility(View.VISIBLE);
@@ -660,7 +610,6 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     }
     else {
       in_login.setVisibility(View.GONE);
-      // show age checkbox
       in_age13_checkbox.setVisibility(View.VISIBLE);
     }
 
@@ -828,11 +777,71 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
       MainSettingsAccountActivity.LOG.debug("EULA: unavailable");
     }
 
-
-
-
     this.getWindow().setSoftInputMode(
       WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+  }
+
+  private void showAgeChoiceDialog(CheckBox age13_box) {
+    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+    builder.setTitle(R.string.age_verification_title);
+    builder.setMessage(R.string.age_verification_changed);
+
+    // Under 13
+    builder.setNeutralButton(R.string.age_verification_13_younger, (dialog, which) -> {
+      Simplified.getSharedPrefs().putBoolean("age13", false);
+      age13_box.setChecked(false);
+      setSimplyCollectionCatalog(true);
+    });
+
+    // 13 and Over
+    builder.setPositiveButton(R.string.age_verification_13_older, (dialog, which) -> {
+      Simplified.getSharedPrefs().putBoolean("age13", true);
+      age13_box.setChecked(true);
+      setSimplyCollectionCatalog(false);
+    });
+
+    AlertDialog alert = builder.show();
+    final int resID = ThemeMatcher.Companion.color(this.account.getMainColor());
+    final int mainTextColor = ContextCompat.getColor(this, resID);
+    alert.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(mainTextColor);
+    alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor);
+  }
+
+  //Confirm the user wants to change their age to 'Under 13',
+  //and lose any currently downloaded books in their collection.
+  private void showAgeConfirmDialog(CompoundButton button, boolean checked) {
+    if (checked) {
+      Simplified.getSharedPrefs().putBoolean("age13", true);
+      setSimplyCollectionCatalog(false);
+    } else {
+      final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+      builder.setTitle(R.string.age_verification_confirm_title);
+      builder.setMessage(R.string.age_verification_confirm_under13_check);
+
+      builder.setNegativeButton(R.string.catalog_cancel_downloading, (dialog, which) -> {
+        Simplified.getSharedPrefs().putBoolean("age13", true);
+        button.setChecked(true);
+      });
+
+      //Confirm Under 13
+      builder.setPositiveButton(R.string.catalog_book_delete, (dialog, which) -> {
+        Simplified.getSharedPrefs().putBoolean("age13", false);
+        button.setChecked(false);
+        setSimplyCollectionCatalog(true);
+      });
+
+      AlertDialog alert = builder.show();
+      final int resID = ThemeMatcher.Companion.color(this.account.getMainColor());
+      final int mainTextColor = ContextCompat.getColor(this, resID);
+      alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mainTextColor);
+      alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor);
+    }
+  }
+
+  private void setSimplyCollectionCatalog(final Boolean deleteBooks) {
+    Simplified.getCatalogAppServices().reloadCatalog(deleteBooks, this.account);
+    Simplified.getBooks(this.account, this, Simplified.getCatalogAppServices().getAdobeDRMExecutor());
   }
 
   private boolean syncButtonShouldBeVisible() {
