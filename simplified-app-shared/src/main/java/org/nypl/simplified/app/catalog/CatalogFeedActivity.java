@@ -3,10 +3,10 @@ package org.nypl.simplified.app.catalog;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -39,6 +39,7 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
+import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.AccountBarcode;
@@ -250,8 +251,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         this.retryFeed();
       }
     }
-
-
   }
 
   /**
@@ -494,6 +493,44 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
   private CatalogFeedArgumentsType getArguments()
   {
+    /*
+     * FIXME: When real navigation support comes into the app to support age-gated
+     * collections, like the SimplyE Collection, remove this hack.
+     */
+    final Resources res = NullCheck.notNull(this.getResources());
+    final String lib_title =
+      NullCheck.notNull(res.getString(R.string.feature_app_name));
+    final int libraryID = Simplified.getCurrentAccount().getId();
+    if (libraryID == 2 && this.getClass() == MainCatalogActivity.class) {
+      if (Simplified.getSharedPrefs().contains("age13") == false) {
+        //Show Age Verification and load <13 to be safe
+        showAgeCheckAlert();
+      }
+      final boolean over13 = Simplified.getSharedPrefs().getBoolean("age13");
+      final URI ageURI;
+      try {
+        if (over13) {
+          ageURI = new URI(Simplified.getCurrentAccount().getCatalogUrl13AndOver());
+        } else {
+          ageURI = new URI(Simplified.getCurrentAccount().getCatalogUrlUnder13());
+        }
+        return new CatalogFeedArgumentsRemote(
+          false,
+          ImmutableStack.empty(),
+          lib_title,
+          ageURI,
+          false
+        );
+      } catch (Exception e) {
+        CatalogFeedActivity.LOG.error(
+          "error constructing SimplyE collection uri: {}", e.getMessage(), e);
+      }
+    }
+    /*
+     * End of hack..
+     */
+
+
     /**
      * Attempt to fetch arguments.
      */
@@ -959,43 +996,30 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
     return Unit.unit();
   }
 
-  /**
-   *
-   */
   public void showAgeCheckAlert() {
+    final AlertDialog.Builder builder = new AlertDialog.Builder(CatalogFeedActivity.this);
 
-    if (!Simplified.getCurrentAccount().needsAuth() && !Simplified.getSharedPrefs().contains("age13")) {
+    builder.setTitle(R.string.age_verification_title);
+    builder.setMessage(R.string.age_verification_question);
 
-      final AlertDialog.Builder alert = new AlertDialog.Builder(CatalogFeedActivity.this);
+      // Under 13
+      builder.setNeutralButton(R.string.age_verification_13_younger, (dialog, which) -> {
+        Simplified.getSharedPrefs().putBoolean("age13", false);
+        CatalogFeedActivity.this.reloadCatalogActivity(true);
+      });
 
-      // Setting Dialog Title
-      alert.setTitle(R.string.age_verification_title);
+      // 13 or Over
+      builder.setPositiveButton(R.string.age_verification_13_older, (dialog, which) -> {
+        Simplified.getSharedPrefs().putBoolean("age13", true);
+        CatalogFeedActivity.this.reloadCatalogActivity(false);
+      });
 
-      // Setting Dialog Message
-      alert.setMessage(R.string.age_verification_question);
-
-      // On pressing the under 13 button.
-      alert.setNeutralButton(R.string.age_verification_13_younger, new DialogInterface.OnClickListener() {
-          public void onClick(final DialogInterface dialog, final int which) {
-            Simplified.getSharedPrefs().putBoolean("age13", false);
-            //reload catalog
-            CatalogFeedActivity.this.reloadCatalogActivity(true);
-          }
-        }
-      );
-
-      // On pressing the 13 and over button
-      alert.setPositiveButton(R.string.age_verification_13_older, new DialogInterface.OnClickListener() {
-          public void onClick(final DialogInterface dialog, final int which) {
-            Simplified.getSharedPrefs().putBoolean("age13", true);
-            //reload catalog
-            CatalogFeedActivity.this.reloadCatalogActivity(false);
-          }
-        }
-      );
-
-      // Showing Alert Message
-      alert.show();
+    if(!this.isFinishing()) {
+      AlertDialog alert = builder.show();
+      final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+      final int mainTextColor = ContextCompat.getColor(this, resID);
+      alert.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(mainTextColor);
+      alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor);
     }
   }
 
@@ -1048,11 +1072,6 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
 
     content_area.addView(layout);
     content_area.requestLayout();
-
-    if (!this.isFinishing()) {
-      this.showAgeCheckAlert();
-    }
-
   }
 
   private void onFeedWithoutGroupsNonEmptyUI(
