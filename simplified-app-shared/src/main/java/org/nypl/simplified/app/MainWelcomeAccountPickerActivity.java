@@ -122,8 +122,7 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
           final Account account = NullCheck.notNull(dia.get(position));
           final TextView tv = NullCheck.notNull(v.findViewById(android.R.id.text1));
           final TextView tv2 = NullCheck.notNull(v.findViewById(android.R.id.text2));
-          final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
-          final int mainColor = ContextCompat.getColor(this.getContext(), resID);
+          final int mainColor = ContextCompat.getColor(this.getContext(), R.color.app_primary_color);
           tv.setText(account.getName());
           tv.setTextColor(mainColor);
           tv2.setText(account.getSubtitle());
