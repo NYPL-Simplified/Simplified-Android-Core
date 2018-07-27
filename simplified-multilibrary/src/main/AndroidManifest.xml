@@ -4,6 +4,6 @@
   package="org.nypl.simplified.multilibrary">
     <uses-sdk
       android:minSdkVersion="19"
-      android:targetSdkVersion="27"/>
+      android:targetSdkVersion="25"/>
 
 </manifest>
