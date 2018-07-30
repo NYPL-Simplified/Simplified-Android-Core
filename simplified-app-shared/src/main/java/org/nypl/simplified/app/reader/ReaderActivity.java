@@ -556,38 +556,33 @@ public final class ReaderActivity extends Activity implements
     }
 
     /*
-      Configure the TOC button.
+      Configure the TOC and Bookmark buttons.
      */
 
-    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
-    final View in_toc = Objects.requireNonNull(this.view_toc);
-
-    in_toc.setOnClickListener((View v) -> {
-      final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-      ReaderTOCActivity.startActivityForResult(ReaderActivity.this, sent_toc, this.bookmarks);
-      ReaderActivity.this.overridePendingTransition(0, 0);
-    });
-
-    /*
-      Configure the Bookmark button.
-     */
-
-    final View in_bookmark = Objects.requireNonNull(this.view_bookmark);
     Objects.requireNonNull(this.bookmarks);
+    final View in_bookmark = Objects.requireNonNull(this.view_bookmark);
+    final View in_toc = Objects.requireNonNull(this.view_toc);
+    UIThread.runOnUIThread(() -> {
+      in_toc.setOnClickListener((View v) -> {
+        final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
+        ReaderTOCActivity.startActivityForResult(ReaderActivity.this, sent_toc, this.bookmarks);
+        ReaderActivity.this.overridePendingTransition(0, 0);
+      });
 
-    in_bookmark.setOnClickListener(view -> {
-      if (this.current_bookmark != null) {
-        deleteLocalAndRemote(this.current_bookmark);
-        this.bookmarks.remove(this.current_bookmark);
-        this.current_bookmark = null;
-      } else {
-        final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
-        final BookmarkAnnotation bookmarkAnnotation = createAnnotation(current_loc, null);
-        this.current_bookmark = Objects.requireNonNull(bookmarkAnnotation);
-        this.bookmarks.add(bookmarkAnnotation);
-        saveLocalAndRemote(bookmarkAnnotation, current_loc);
-      }
-      updateBookmarkIconUI();
+      in_bookmark.setOnClickListener(view -> {
+        if (this.current_bookmark != null) {
+          deleteLocalAndRemote(this.current_bookmark);
+          this.bookmarks.remove(this.current_bookmark);
+          this.current_bookmark = null;
+        } else {
+          final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
+          final BookmarkAnnotation bookmarkAnnotation = createAnnotation(current_loc, null);
+          this.current_bookmark = Objects.requireNonNull(bookmarkAnnotation);
+          this.bookmarks.add(bookmarkAnnotation);
+          saveLocalAndRemote(bookmarkAnnotation, current_loc);
+        }
+        updateBookmarkIconUI();
+      });
     });
 
     /*
@@ -595,6 +590,7 @@ public final class ReaderActivity extends Activity implements
       will still be executed if the server is already running).
      */
 
+    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
     final ReaderHTTPServerType hs = rs.getHTTPServer();
     hs.startIfNecessaryForPackage(p, this);
   }
