@@ -498,10 +498,10 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
      * collections, like the SimplyE Collection, remove this hack.
      */
     final Resources res = NullCheck.notNull(this.getResources());
-    final String lib_title =
-      NullCheck.notNull(res.getString(R.string.feature_app_name));
+    final String lib_title = NullCheck.notNull(res.getString(R.string.feature_app_name));
     final int libraryID = Simplified.getCurrentAccount().getId();
-    if (libraryID == 2 && this.getClass() == MainCatalogActivity.class) {
+    final ImmutableStack<CatalogFeedArgumentsType> upStack = this.getUpStack();
+    if (upStack.isEmpty() && libraryID == 2 && this.getClass() == MainCatalogActivity.class) {
       if (Simplified.getSharedPrefs().contains("age13") == false) {
         //Show Age Verification and load <13 to be safe
         showAgeCheckAlert();
@@ -514,6 +514,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
         } else {
           ageURI = new URI(Simplified.getCurrentAccount().getCatalogUrlUnder13());
         }
+        CatalogFeedActivity.LOG.debug("Hardcoding SimplyE Collection URI: {}", ageURI);
         return new CatalogFeedArgumentsRemote(
           false,
           ImmutableStack.empty(),
@@ -1463,8 +1464,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
       final URI target = this.search.getQueryURIForTerms(qnn);
 
       final CatalogFeedActivity cfa = CatalogFeedActivity.this;
-      final ImmutableStack<CatalogFeedArgumentsType> us =
-        ImmutableStack.empty();
+      final ImmutableStack<CatalogFeedArgumentsType> us = cfa.newUpStack(this.args);
 
       final String title =
         this.resources.getString(R.string.catalog_search) + ": " + qnn;
