@@ -370,15 +370,9 @@ public abstract class SimplifiedActivity extends Activity
             final ImageView icon_view =
               NullCheck.notNull(v.findViewById(R.id.cellIcon));
 
-            final String resource_path = "drawable/" + account.getLowerCaseLogo();
-            final int resource_id = this.getContext().getResources().getIdentifier(
-                resource_path,
-                null,
-                this.getContext().getPackageName());
-
-            if (resource_id != 0) {
-              icon_view.setImageResource(resource_id);
-            } else {
+            try {
+              icon_view.setImageBitmap(account.getLogoBitmap());
+            } catch (IllegalArgumentException e) {
               icon_view.setImageResource(R.drawable.librarylogomagic);
             }
 
@@ -431,15 +425,9 @@ public abstract class SimplifiedActivity extends Activity
             tv.setText(account.getName());
             tv.setTextColor(mainColor);
 
-            final String resource_path = "drawable/" + account.getLowerCaseLogo();
-            final int resource_id = this.getContext().getResources().getIdentifier(
-                resource_path,
-                null,
-                this.getContext().getPackageName());
-
-            if (resource_id != 0) {
-              icon_view.setImageResource(resource_id);
-            } else {
+            try {
+              icon_view.setImageBitmap(account.getLogoBitmap());
+            } catch (IllegalArgumentException e) {
               icon_view.setImageResource(R.drawable.librarylogomagic);
             }
 

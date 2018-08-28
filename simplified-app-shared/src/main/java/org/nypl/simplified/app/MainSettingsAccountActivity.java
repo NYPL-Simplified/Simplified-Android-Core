@@ -154,16 +154,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
           in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
           in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
 
-          final String resource_path = "drawable/" + MainSettingsAccountActivity.this.account.getLowerCaseLogo();
-          final Context context = MainSettingsAccountActivity.this.getApplicationContext();
-          final int resource_id = context.getResources().getIdentifier(
-              resource_path,
-              null,
-              context.getPackageName());
-
-          if (resource_id != 0) {
-            in_account_icon.setImageResource(resource_id);
-          } else {
+          try {
+            in_account_icon.setImageBitmap(MainSettingsAccountActivity.this.account.getLogoBitmap());
+          } catch (IllegalArgumentException e) {
             in_account_icon.setImageResource(R.drawable.librarylogomagic);
           }
 
@@ -598,7 +591,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
     if (Simplified.getSharedPrefs().contains("age13")) {
       in_age13_checkbox.setChecked(Simplified.getSharedPrefs().getBoolean("age13"));
-    } else {
+    } else if (account.getId() == 2){
       showAgeGateOptionsDialog(in_age13_checkbox);
     }
 
@@ -977,16 +970,9 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
     in_account_name_text.setText(MainSettingsAccountActivity.this.account.getName());
     in_account_subtitle_text.setText(MainSettingsAccountActivity.this.account.getSubtitle());
 
-    final String resource_path = "drawable/" + account.getLowerCaseLogo();
-    final Context context = MainSettingsAccountActivity.this.getApplicationContext();
-    final int resource_id = context.getResources().getIdentifier(
-        resource_path,
-        null,
-        context.getPackageName());
-
-    if (resource_id != 0) {
-      in_account_icon.setImageResource(resource_id);
-    } else {
+    try {
+      in_account_icon.setImageBitmap(MainSettingsAccountActivity.this.account.getLogoBitmap());
+    } catch (IllegalArgumentException e) {
       in_account_icon.setImageResource(R.drawable.librarylogomagic);
     }
 

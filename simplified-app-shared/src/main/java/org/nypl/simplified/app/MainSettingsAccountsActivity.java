@@ -25,6 +25,7 @@ import com.io7m.jnull.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
@@ -101,15 +102,9 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
       final ImageView icon_view =
         NullCheck.notNull((ImageView) current_account.findViewById(R.id.cellIcon));
 
-      final String resource_path = "drawable/" + account.getLowerCaseLogo();
-      final int resource_id = this.getApplicationContext().getResources().getIdentifier(
-          resource_path,
-          null,
-          this.getApplicationContext().getPackageName());
-
-      if (resource_id != 0) {
-        icon_view.setImageResource(resource_id);
-      } else {
+      try {
+        icon_view.setImageBitmap(account.getLogoBitmap());
+      } catch (IllegalArgumentException e) {
         icon_view.setImageResource(R.drawable.librarylogomagic);
       }
 
@@ -175,15 +170,9 @@ public final class MainSettingsAccountsActivity extends SimplifiedActivity
           final ImageView icon_view =
             NullCheck.notNull(v.findViewById(R.id.cellIcon));
 
-          final String resource_path = "drawable/" + account.getLowerCaseLogo();
-          final int resource_id = this.getContext().getResources().getIdentifier(
-              resource_path,
-              null,
-              this.getContext().getPackageName());
-
-          if (resource_id != 0) {
-            icon_view.setImageResource(resource_id);
-          } else {
+          try {
+            icon_view.setImageBitmap(account.getLogoBitmap());
+          } catch (IllegalArgumentException e) {
             icon_view.setImageResource(R.drawable.librarylogomagic);
           }
 
