@@ -1,5 +1,6 @@
 package org.nypl.simplified.app
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.support.v4.content.ContextCompat
@@ -109,12 +110,14 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
     // 3 - The server mark came from the same device
     if (currentLocation.toString() != serverBookLocation.toString() &&
         device != serverLocation.body.device) {
-      UIThread.runOnUIThread {
-        alert.show()
-        val resID = ThemeMatcher.color(Simplified.getCurrentAccount().mainColor)
-        val mainTextColor = ContextCompat.getColor(context, resID)
-        alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mainTextColor)
-        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor)
+      if ((context as? Activity)?.isFinishing == false) {
+        UIThread.runOnUIThread {
+          alert.show()
+          val resID = ThemeMatcher.color(Simplified.getCurrentAccount().mainColor)
+          val mainTextColor = ContextCompat.getColor(context, resID)
+          alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mainTextColor)
+          alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor)
+        }
       }
     }
   }
