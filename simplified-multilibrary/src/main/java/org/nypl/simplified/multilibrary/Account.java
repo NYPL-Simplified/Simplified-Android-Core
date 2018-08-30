@@ -1,9 +1,12 @@
 package org.nypl.simplified.multilibrary;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+import com.io7m.junreachable.UnreachableCodeException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.Serializable;
-import java.util.Comparator;
 
 public class Account implements Serializable, Comparable<Account> {
 
@@ -106,10 +109,23 @@ public class Account implements Serializable, Comparable<Account> {
   }
 
   /**
-   * @return The Logo
+   * @return The logo image as a bitmap
    */
-  public String getLowerCaseLogo() {
-    return this.logo.toLowerCase();
+  public Bitmap getLogoBitmap()
+    throws IllegalArgumentException
+  {
+    try {
+      final String substring = this.logo.replace("data:image/png;base64,", "");
+      final byte[] byteArray = Base64.decode(substring, Base64.DEFAULT);
+      final Bitmap imageBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+      if (imageBitmap != null) {
+        return imageBitmap;
+      } else {
+        throw new IllegalArgumentException();
+      }
+    } catch (Exception e) {
+      throw new IllegalArgumentException();
+    }
   }
 
   /**
@@ -271,11 +287,15 @@ public class Account implements Serializable, Comparable<Account> {
 
     try {
       this.id = account.getInt("id");
-      this.path_component = account.getString("pathComponent");
+      this.path_component = this.id.toString();
       this.name = account.getString("name");
-      this.subtitle = account.getString("subtitle");
-      this.logo = account.getString("logo");
       this.catalog_url = account.getString("catalogUrl");
+      if (!account.isNull("subtitle")) {
+        this.subtitle = account.getString("subtitle");
+      }
+      if (!account.isNull("logo")) {
+        this.logo = account.getString("logo");
+      }
       if (!account.isNull("catalogUrlUnder13")) {
         this.catalog_url_under_13 = account.getString("catalogUrlUnder13");
       }
@@ -338,7 +358,7 @@ public class Account implements Serializable, Comparable<Account> {
       }
 
     } catch (JSONException e) {
-      e.printStackTrace();
+      throw new UnreachableCodeException(e);
     }
 
   }

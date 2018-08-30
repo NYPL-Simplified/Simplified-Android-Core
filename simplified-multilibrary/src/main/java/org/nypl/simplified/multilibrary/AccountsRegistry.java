@@ -13,9 +13,6 @@ import org.nypl.simplified.prefs.Prefs;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.file.InvalidPathException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -50,7 +47,20 @@ public class AccountsRegistry implements Serializable {
   public JSONArray getCurrentAccounts(final Prefs prefs) {
 
     try {
-      this.current_accounts = new JSONArray(prefs.getString("current_accounts"));
+      final JSONArray currentAccounts = new JSONArray(prefs.getString("current_accounts"));
+      final JSONArray convertedCurrentAccounts = new JSONArray();
+      for (int i = 0; i < currentAccounts.length(); i++) {
+        for (int j = 0; j < this.accounts.length(); j++) {
+          final JSONObject savedAcct = currentAccounts.getJSONObject(i);
+          final JSONObject jsonAcct = this.accounts.getJSONObject(j);
+          if (savedAcct.getInt("id") == jsonAcct.getInt("id")) {
+            convertedCurrentAccounts.put(jsonAcct);
+          }
+        }
+      }
+
+      this.current_accounts = convertedCurrentAccounts;
+
     } catch (JSONException e) {
       e.printStackTrace();
     }
@@ -122,14 +132,21 @@ public class AccountsRegistry implements Serializable {
 
       final InputStream stream = assets.open("Accounts.json");
 
-      this.accounts = new JSONArray(convertStreamToString(stream));
+      final JSONArray allEntries = new JSONArray(convertStreamToString(stream));
+      final JSONArray productionEntries = new JSONArray();
+      for (int i = 0; i < allEntries.length(); i++) {
+        final JSONObject entry = allEntries.getJSONObject(i);
+        if (entry.getBoolean("inProduction")) {
+          productionEntries.put(entry);
+        }
+      }
+
+      this.accounts = productionEntries;
 
       this.getCurrentAccounts(prefs);
 
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (JSONException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      throw new UnreachableCodeException(e);
     }
 
 
@@ -147,13 +164,19 @@ public class AccountsRegistry implements Serializable {
 
       final InputStream stream = assets.open("Accounts.json");
 
-      this.accounts = new JSONArray(convertStreamToString(stream));
+      final JSONArray allEntries = new JSONArray(convertStreamToString(stream));
+      final JSONArray productionEntries = new JSONArray();
+      for (int i = 0; i < allEntries.length(); i++) {
+        final JSONObject entry = allEntries.getJSONObject(i);
+        if (entry.getBoolean("inProduction")) {
+          productionEntries.put(entry);
+        }
+      }
 
+      this.accounts = productionEntries;
 
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (JSONException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      throw new UnreachableCodeException(e);
     }
   }
   /**

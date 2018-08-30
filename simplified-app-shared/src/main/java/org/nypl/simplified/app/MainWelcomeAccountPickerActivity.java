@@ -19,6 +19,7 @@ import com.io7m.jnull.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
@@ -85,7 +86,7 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
     final List<Account> dia = new ArrayList<Account>();
     final JSONArray registry =
       new AccountsRegistry(this, Simplified.getSharedPrefs()).getAccounts();
-    for (int index = 3; index < registry.length(); ++index) {
+    for (int index = 0; index < registry.length(); ++index) {
       try {
         dia.add(new Account(registry.getJSONObject(index)));
       } catch (JSONException e) {
@@ -93,15 +94,18 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
       }
     }
 
-    Collections.sort(dia);
-
-    for (int index = 2; index >= 0; --index) {
-      try {
-        dia.add(0, new Account(registry.getJSONObject(index)));
-      } catch (JSONException e) {
-        e.printStackTrace();
+    java.util.Collections.sort(dia, (a, b) -> {
+      // Check if we're one of the three "special" libraries that always come first.
+      // This is a complete hack.
+      if (a.getId() <= 2 || b.getId() <= 2) {
+        // One of the libraries is special, so sort it first. Lower ids are "more
+        // special" than higher ids and thus show up earlier.
+        return a.getId() - b.getId();
+      } else {
+        // Neither library is special so we just go alphabetically.
+        return a.getName().compareToIgnoreCase(b.getName());
       }
-    }
+    });
 
     final LayoutInflater inflater = NullCheck.notNull(this.getLayoutInflater());
 
@@ -131,15 +135,9 @@ public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
           final ImageView icon_view =
             NullCheck.notNull((ImageView) v.findViewById(R.id.cellIcon));
 
-          final String resource_path = "drawable/" + account.getLowerCaseLogo();
-          final int resource_id = this.getContext().getResources().getIdentifier(
-              resource_path,
-              null,
-              this.getContext().getPackageName());
-
-          if (resource_id != 0) {
-            icon_view.setImageResource(resource_id);
-          } else {
+          try {
+            icon_view.setImageBitmap(account.getLogoBitmap());
+          } catch (IllegalArgumentException e) {
             icon_view.setImageResource(R.drawable.librarylogomagic);
           }
 

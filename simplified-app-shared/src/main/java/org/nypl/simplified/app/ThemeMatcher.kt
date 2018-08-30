@@ -5,64 +5,67 @@ package org.nypl.simplified.app
 class ThemeMatcher {
   companion object {
     fun actionBarStyle(colorSwatch: String): Int {
-      return when(colorSwatch) {
-        "Red" -> R.style.Simplified_RedTheme
-        "Pink" -> R.style.Simplified_PinkTheme
-        "Purple" -> R.style.Simplified_PurpleTheme
-        "DeepPurple" -> R.style.Simplified_DeepPurpleTheme
-        "Indigo" -> R.style.Simplified_IndigoTheme
-        "Blue" -> R.style.Simplified_BlueTheme
-        "LightBlue" -> R.style.Simplified_LightBlueTheme
-        "Cyan" -> R.style.Simplified_LightBlueTheme
-        "Teal" -> R.style.Simplified_TealTheme
-        "Amber" -> R.style.Simplified_AmberTheme
-        "Orange" -> R.style.Simplified_OrangeTheme
-        "DeepOrange" -> R.style.Simplified_DeepOrangeTheme
-        "Brown" -> R.style.Simplified_BrownTheme
-        "Grey" -> R.style.Simplified_GreyTheme
-        "BlueGrey" -> R.style.Simplified_BlueGreyTheme
+      val lowerCaseColor = colorSwatch.toLowerCase()
+      return when(lowerCaseColor) {
+        "red" -> R.style.Simplified_RedTheme
+        "pink" -> R.style.Simplified_PinkTheme
+        "purple" -> R.style.Simplified_PurpleTheme
+        "deeppurple" -> R.style.Simplified_DeepPurpleTheme
+        "indigo" -> R.style.Simplified_IndigoTheme
+        "blue" -> R.style.Simplified_BlueTheme
+        "lightblue" -> R.style.Simplified_LightBlueTheme
+        "cyan" -> R.style.Simplified_LightBlueTheme
+        "teal" -> R.style.Simplified_TealTheme
+        "amber" -> R.style.Simplified_AmberTheme
+        "orange" -> R.style.Simplified_OrangeTheme
+        "deeporange" -> R.style.Simplified_DeepOrangeTheme
+        "brown" -> R.style.Simplified_BrownTheme
+        "grey" -> R.style.Simplified_GreyTheme
+        "bluegrey" -> R.style.Simplified_BlueGreyTheme
         else -> R.style.Simplified_RedTheme
       }
     }
 
     fun noActionBarStyle(colorSwatch: String): Int {
-      return when(colorSwatch) {
-        "Red" -> R.style.Simplified_RedTheme_NoActionBar
-        "Pink" -> R.style.Simplified_PinkTheme_NoActionBar
-        "Purple" -> R.style.Simplified_PurpleTheme_NoActionBar
-        "DeepPurple" -> R.style.Simplified_DeepPurpleTheme_NoActionBar
-        "Indigo" -> R.style.Simplified_IndigoTheme_NoActionBar
-        "Blue" -> R.style.Simplified_BlueTheme_NoActionBar
-        "LightBlue" -> R.style.Simplified_LightBlueTheme_NoActionBar
-        "Cyan" -> R.style.Simplified_LightBlueTheme_NoActionBar
-        "Teal" -> R.style.Simplified_TealTheme_NoActionBar
-        "Amber" -> R.style.Simplified_AmberTheme_NoActionBar
-        "Orange" -> R.style.Simplified_OrangeTheme_NoActionBar
-        "DeepOrange" -> R.style.Simplified_DeepOrangeTheme_NoActionBar
-        "Brown" -> R.style.Simplified_BrownTheme_NoActionBar
-        "Grey" -> R.style.Simplified_GreyTheme_NoActionBar
-        "BlueGrey" -> R.style.Simplified_BlueGreyTheme_NoActionBar
+      val lowerCaseColor = colorSwatch.toLowerCase()
+      return when(lowerCaseColor) {
+        "red" -> R.style.Simplified_RedTheme_NoActionBar
+        "pink" -> R.style.Simplified_PinkTheme_NoActionBar
+        "purple" -> R.style.Simplified_PurpleTheme_NoActionBar
+        "deeppurple" -> R.style.Simplified_DeepPurpleTheme_NoActionBar
+        "indigo" -> R.style.Simplified_IndigoTheme_NoActionBar
+        "blue" -> R.style.Simplified_BlueTheme_NoActionBar
+        "lightblue" -> R.style.Simplified_LightBlueTheme_NoActionBar
+        "cyan" -> R.style.Simplified_LightBlueTheme_NoActionBar
+        "teal" -> R.style.Simplified_TealTheme_NoActionBar
+        "amber" -> R.style.Simplified_AmberTheme_NoActionBar
+        "orange" -> R.style.Simplified_OrangeTheme_NoActionBar
+        "deeporange" -> R.style.Simplified_DeepOrangeTheme_NoActionBar
+        "brown" -> R.style.Simplified_BrownTheme_NoActionBar
+        "grey" -> R.style.Simplified_GreyTheme_NoActionBar
+        "bluegrey" -> R.style.Simplified_BlueGreyTheme_NoActionBar
         else -> R.style.Simplified_RedTheme_NoActionBar
       }
     }
 
     fun color(colorSwatch: String): Int {
-      return when(colorSwatch) {
-        "Red" -> R.color.red_primary_dark
-        "Pink" -> R.color.pink_primary_dark
-        "Purple" -> R.color.purple_primary_dark
-        "DeepPurple" ->R.color.deep_purple_primary_dark
-        "Indigo" -> R.color.indigo_primary_dark
-        "Blue" -> R.color.blue_primary_dark
-        "LightBlue" -> R.color.light_blue_primary_dark
-        "Cyan" -> R.color.cyan_primary_dark
-        "Teal" -> R.color.teal_primary_dark
-        "Amber" -> R.color.amber_primary_dark
-        "Orange" -> R.color.orange_primary_dark
-        "DeepOrange" -> R.color.deep_orange_primary_dark
-        "Brown" -> R.color.brown_primary_dark
-        "Grey" -> R.color.grey_primary_dark
-        "BlueGrey" -> R.color.blue_grey_primary_dark
+      val lowerCaseColor = colorSwatch.toLowerCase()
+      return when(lowerCaseColor) {
+        "red" -> R.color.red_primary_dark
+        "pink" -> R.color.pink_primary_dark
+        "purple" -> R.color.purple_primary_dark
+        "deeppurple" ->R.color.deep_purple_primary_dark
+        "indigo" -> R.color.indigo_primary_dark
+        "blue" -> R.color.blue_primary_dark
+        "lightblue" -> R.color.light_blue_primary_dark
+        "cyan" -> R.color.cyan_primary_dark
+        "teal" -> R.color.teal_primary_dark
+        "amber" -> R.color.amber_primary_dark
+        "orange" -> R.color.orange_primary_dark
+        "deeporange" -> R.color.deep_orange_primary_dark
+        "brown" -> R.color.brown_primary_dark
+        "grey" -> R.color.grey_primary_dark
+        "bluegrey" -> R.color.blue_grey_primary_dark
         else -> R.color.app_primary_color
       }
     }
