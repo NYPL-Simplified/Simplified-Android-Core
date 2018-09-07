@@ -72,5 +72,11 @@ dependencies {
   implementation 'com.google.zxing:core:3.2.1'
   implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
 
+  implementation 'com.github.tony19:logback-android-core:1.1.1-6'
+  implementation('com.github.tony19:logback-android-classic:1.1.1-6') {
+    // https://github.com/tony19/logback-android/issues/73
+    exclude group: 'com.google.android', module: 'android'
+  }
+
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   }
