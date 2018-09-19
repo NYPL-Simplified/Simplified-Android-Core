@@ -1,24 +1,23 @@
-package org.nypl.simplified.books.core;
+package org.nypl.simplified.books.core
 
-import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionType
+import org.nypl.drm.core.AdobeAdeptLoan
+import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 
-import org.jetbrains.annotations.NotNull;
-import org.nypl.drm.core.AdobeAdeptLoan;
-import org.nypl.simplified.http.core.HTTPType;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import java.io.File
+import java.io.IOException
 
 /**
- * <p>The writable interface supported by book database entries.</p>
  *
- * <p>These are blocking operations that imply disk I/O.</p>
+ * The writable interface supported by book database entries.
+ *
+ *
+ * These are blocking operations that imply disk I/O.
  */
 
-public interface BookDatabaseEntryWritableType
-{
+interface BookDatabaseEntryWritableType {
+
   /**
    * Copy the given file into the directory as the book data. Typically, this
    * will be an EPUB file. This function will instantly fail if `file` is not on
@@ -31,9 +30,8 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entryCopyInBookFromSameFilesystem(
-    File file)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entryCopyInBookFromSameFilesystem(file: File): BookDatabaseEntrySnapshot
 
   /**
    * Copy the given file into the directory as the book data. Typically, this
@@ -46,20 +44,19 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entryCopyInBook(
-    File file)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entryCopyInBook(file: File): BookDatabaseEntrySnapshot
 
   /**
    * Create the book directory if it does not exist.
    *
-   * @param in_entry The feed entry
+   * @param entry The feed entry
    * @return A snapshot of the new database state
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entryCreate(OPDSAcquisitionFeedEntry in_entry)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entryCreate(entry: OPDSAcquisitionFeedEntry): BookDatabaseEntrySnapshot
 
   /**
    * Destroy the book directory and all of its contents.
@@ -67,8 +64,8 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  void entryDestroy()
-    throws IOException;
+  @Throws(IOException::class)
+  fun entryDestroy()
 
   /**
    * Destroy the book data, if it exists.
@@ -78,36 +75,34 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entryDeleteBookData()
-    throws IOException;
+  @Throws(IOException::class)
+  fun entryDeleteBookData(): BookDatabaseEntrySnapshot
 
   /**
    * Set the acquisition feed entry of the book
    *
-   * @param in_entry The feed entry
+   * @param entry The feed entry
    *
    * @return A snapshot of the new database state
    *
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entrySetFeedData(
-    OPDSAcquisitionFeedEntry in_entry)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entrySetFeedData(entry: OPDSAcquisitionFeedEntry): BookDatabaseEntrySnapshot
 
   /**
    * Set the cover of the book
    *
-   * @param in_cover The cover
+   * @param cover The cover
    *
    * @return A snapshot of the new database state
    *
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entrySetCover(
-    OptionType<File> in_cover)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entrySetCover(cover: OptionType<File>): BookDatabaseEntrySnapshot
 
   /**
    * Set the Adobe rights information for the book.
@@ -119,9 +114,8 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entrySetAdobeRightsInformation(
-    OptionType<AdobeAdeptLoan> loan)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entrySetAdobeRightsInformation(loan: OptionType<AdobeAdeptLoan>): BookDatabaseEntrySnapshot
 
   /**
    * Set the list of bookmarks to be saved for the book
@@ -133,9 +127,8 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entrySetBookmarks(
-    final List<BookmarkAnnotation> bookmarks)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entrySetBookmarks(bookmarks: List<BookmarkAnnotation>): BookDatabaseEntrySnapshot
 
   /**
    * Set a user-created bookmark for the book.
@@ -147,9 +140,8 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entryAddBookmark(
-      BookmarkAnnotation bookmark)
-      throws IOException;
+  @Throws(IOException::class)
+  fun entryAddBookmark(bookmark: BookmarkAnnotation): BookDatabaseEntrySnapshot
 
   /**
    * Delete a user-created bookmark from the database
@@ -161,17 +153,16 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entryDeleteBookmark(
-      BookmarkAnnotation bookmark)
-      throws IOException;
+  @Throws(IOException::class)
+  fun entryDeleteBookmark(bookmark: BookmarkAnnotation): BookDatabaseEntrySnapshot
 
   /**
-   * Update the book data based on {@code e}. The cover, if any, will be fetched
-   * using the http interface {@code http}, and the new status will be published
-   * to {@code books_status}.
+   * Update the book data based on `entry`. The cover, if any, will be fetched
+   * using the http interface `http`, and the new status will be published
+   * to `bookStatus`.
    *
-   * @param e            The feed entry
-   * @param books_status The book status cache
+   * @param entry            The feed entry
+   * @param bookStatus The book status cache
    * @param http         The HTTP interface
    *
    * @return A snapshot of the new database state
@@ -179,9 +170,9 @@ public interface BookDatabaseEntryWritableType
    * @throws IOException On I/O errors or lock acquisition failures
    */
 
-  BookDatabaseEntrySnapshot entryUpdateAll(
-    OPDSAcquisitionFeedEntry e,
-    BooksStatusCacheType books_status,
-    HTTPType http)
-    throws IOException;
+  @Throws(IOException::class)
+  fun entryUpdateAll(
+    entry: OPDSAcquisitionFeedEntry,
+    bookStatus: BooksStatusCacheType,
+    http: HTTPType): BookDatabaseEntrySnapshot
 }

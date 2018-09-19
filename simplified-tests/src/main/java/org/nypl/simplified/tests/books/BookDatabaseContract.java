@@ -39,7 +39,7 @@ public abstract class BookDatabaseContract {
     final File in_directory = File.createTempFile("pre", "");
     in_directory.delete();
 
-    final BookDatabaseType bd = BookDatabase.newDatabase(
+    final BookDatabaseType bd = BookDatabase.Companion.newDatabase(
         in_json_serializer, in_json_parser, in_directory);
 
     bd.databaseCreate();
@@ -57,7 +57,7 @@ public abstract class BookDatabaseContract {
     final File in_directory = File.createTempFile("pre", "");
     in_directory.delete();
 
-    final BookDatabaseType bd = BookDatabase.newDatabase(
+    final BookDatabaseType bd = BookDatabase.Companion.newDatabase(
         in_json_serializer, in_json_parser, in_directory);
     bd.databaseCreate();
 
@@ -92,7 +92,7 @@ public abstract class BookDatabaseContract {
     final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
     final File in_directory = File.createTempFile("pre", "");
 
-    final BookDatabaseType bd = BookDatabase.newDatabase(
+    final BookDatabaseType bd = BookDatabase.Companion.newDatabase(
         in_json_serializer, in_json_parser, in_directory);
 
     expected.expect(IOException.class);

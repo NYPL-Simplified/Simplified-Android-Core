@@ -119,7 +119,7 @@ public abstract class BooksContract {
 
       final AccountsDatabaseType accounts =
           AccountsDatabase.openDatabase(new File(tmp, "accounts"));
-      final BookDatabaseType database = BookDatabase.newDatabase(
+      final BookDatabaseType database = BookDatabase.Companion.newDatabase(
           in_json_serializer, in_json_parser, new File(tmp, "data"));
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
@@ -205,7 +205,7 @@ public abstract class BooksContract {
 
       final AccountsDatabaseType accounts =
           AccountsDatabase.openDatabase(new File(tmp, "accounts"));
-      final BookDatabaseType database = BookDatabase.newDatabase(
+      final BookDatabaseType database = BookDatabase.Companion.newDatabase(
           in_json_serializer, in_json_parser, new File(tmp, "data"));
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
@@ -297,7 +297,7 @@ public abstract class BooksContract {
 
       final AccountsDatabaseType accounts =
           AccountsDatabase.openDatabase(new File(tmp, "accounts"));
-      final BookDatabaseType database = BookDatabase.newDatabase(
+      final BookDatabaseType database = BookDatabase.Companion.newDatabase(
           in_json_serializer, in_json_parser, new File(tmp, "data"));
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
@@ -417,7 +417,7 @@ public abstract class BooksContract {
 
       final AccountsDatabaseType accounts =
           AccountsDatabase.openDatabase(new File(tmp, "accounts"));
-      final BookDatabaseType database = BookDatabase.newDatabase(
+      final BookDatabaseType database = BookDatabase.Companion.newDatabase(
           in_json_serializer, in_json_parser, new File(tmp, "data"));
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
@@ -540,7 +540,7 @@ public abstract class BooksContract {
 
       final AccountsDatabaseType accounts =
           AccountsDatabase.openDatabase(new File(tmp, "accounts"));
-      final BookDatabaseType database = BookDatabase.newDatabase(
+      final BookDatabaseType database = BookDatabase.Companion.newDatabase(
           in_json_serializer, in_json_parser, new File(tmp, "data"));
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
@@ -683,7 +683,7 @@ public abstract class BooksContract {
 
       final AccountsDatabaseType accounts =
           AccountsDatabase.openDatabase(new File(tmp, "accounts"));
-      final BookDatabaseType database = BookDatabase.newDatabase(
+      final BookDatabaseType database = BookDatabase.Companion.newDatabase(
           in_json_serializer, in_json_parser, new File(tmp, "data"));
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
