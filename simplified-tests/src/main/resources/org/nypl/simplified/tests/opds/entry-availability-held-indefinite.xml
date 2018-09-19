@@ -12,7 +12,10 @@
   <updated>2015-08-17T20:37:53Z</updated>
   <published>2014-08-29T10:46:42Z</published>
   <link href="http://example.com/Held-Indefinite"
-        rel="http://opds-spec.org/acquisition/borrow">
+        rel="http://opds-spec.org/acquisition">
+    <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+      <opds:indirectAcquisition type="application/epub+zip"/>
+    </opds:indirectAcquisition>
     <opds:availability
       status="reserved"
       since="2000-01-01T00:00:00Z"/>

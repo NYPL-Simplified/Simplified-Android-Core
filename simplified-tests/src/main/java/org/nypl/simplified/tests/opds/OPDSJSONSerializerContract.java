@@ -1,7 +1,5 @@
 package org.nypl.simplified.tests.opds;
 
-import com.io7m.jnull.NullCheck;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;

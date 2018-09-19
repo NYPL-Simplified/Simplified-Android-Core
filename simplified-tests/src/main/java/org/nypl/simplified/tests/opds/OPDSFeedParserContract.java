@@ -63,20 +63,21 @@ public abstract class OPDSFeedParserContract {
     d.close();
 
     Assert.assertEquals(
-        "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books",
+        "https://d5v0j5lesri7q.cloudfront.net/NYBKLYN/groups/",
         f.getFeedID());
-    Assert.assertEquals("Picture Books: By author", f.getFeedTitle());
-    Assert.assertEquals(50, f.getFeedEntries().size());
+    Assert.assertEquals("All Books", f.getFeedTitle());
+    Assert.assertEquals(0, f.getFeedEntries().size());
+    Assert.assertEquals(9, f.getFeedGroups().size());
 
     final Some<OPDSSearchLink> search_opt =
         (Some<OPDSSearchLink>) f.getFeedSearchURI();
     final OPDSSearchLink search = search_opt.get();
     Assert.assertEquals(
-        URI.create(
-            "http://circulation.alpha.librarysimplified"
-                + ".org/search/Picture%20Books"), search.getURI());
+        URI.create("https://bplsimplye.bklynlibrary.org/NYBKLYN/search/"),
+        search.getURI());
     Assert.assertEquals(
-        "application/opensearchdescription+xml", search.getType());
+        "application/opensearchdescription+xml",
+        search.getType());
 
     final Calendar u = f.getFeedUpdated();
     final Set<String> ids = new HashSet<String>();

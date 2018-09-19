@@ -3,6 +3,7 @@
   <title>Active loans and holds</title>
   <updated>2015-06-26T18:48:49Z</updated>
   <link href="http://circulation.alpha.librarysimplified.org/loans/" rel="self"/>
+
   <entry schema:additionalType="http://schema.org/Book">
     <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fbev589</id>
     <title>101 Things I Learned &#174; in Culinary School</title>
@@ -29,9 +30,19 @@
     <simplified:total_licenses>4</simplified:total_licenses>
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
-    <link href="http://circulation.alpha.librarysimplified.org/works/3M/bev589/fulfill" rel="http://opds-spec.org/acquisition"/>
+    <link href="http://circulation.alpha.librarysimplified.org/works/3M/bev589/fulfill" rel="http://opds-spec.org/acquisition">
+      <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+        <opds:indirectAcquisition type="application/epub+zip"/>
+      </opds:indirectAcquisition>
+      <opds:availability
+          status="available"
+          since="2000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
     <link href="http://circulation.alpha.librarysimplified.org/loans/3M/bev589/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
   </entry>
+
   <entry schema:additionalType="http://schema.org/Book">
     <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Faght6r9</id>
     <title>The Accidental Genie</title>
@@ -57,166 +68,18 @@
     <simplified:total_licenses>0</simplified:total_licenses>
     <simplified:available_licenses>0</simplified:available_licenses>
     <simplified:active_holds>0</simplified:active_holds>
-    <link href="http://circulation.alpha.librarysimplified.org/works/3M/aght6r9/fulfill" rel="http://opds-spec.org/acquisition"/>
+    <link href="http://circulation.alpha.librarysimplified.org/works/3M/aght6r9/fulfill" rel="http://opds-spec.org/acquisition">
+      <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+        <opds:indirectAcquisition type="application/epub+zip"/>
+      </opds:indirectAcquisition>
+      <opds:availability
+          status="available"
+          since="2000-01-01T00:00:00Z"
+          until="3000-01-01T00:00:00Z"/>
+      <opds:holds total="0"/>
+      <opds:copies available="1" total="1"/>
+    </link>
     <link href="http://circulation.alpha.librarysimplified.org/loans/3M/aght6r9/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
   </entry>
-  <entry schema:additionalType="http://schema.org/Book">
-    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fetk2889</id>
-    <title>Gretel and the Dark</title>
-    <simplified:license_source>3M</simplified:license_source>
-    <author>
-      <name>Eliza Granville</name>
-    </author>
-    <summary type="html">&lt;b&gt;A captivating and atmospheric historical novel about a young girl in Nazi Germany, a psychoanalyst in fin-de-si&#232;cle Vienna, and the powerful mystery that links them together.&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;&lt;i&gt;Gretel and the Dark&lt;/i&gt; explores good and evil, hope and despair, showing how the primal thrills and horrors of the stories we learn as children can illuminate the darkest moments in history, in two rich, intertwining narratives that come together to form one exhilarating, page-turning read. In 1899 Vienna, celebrated psychoanalyst Josef Breuer is about to encounter his strangest case yet: a mysterious, beautiful woman who claims to have no name, no feelings&#8212;to be, in fact, a machine. Intrigued, he tries to fathom the roots of her disturbance.&lt;br /&gt;&lt;br /&gt;Years later, in Nazi-controlled Germany, Krysta plays alone while her papa works in the menacingly strange infirmary next door. Young, innocent, and fiercely stubborn, she retreats into a world of fairy tales, unable to see the danger closing in around her. When everything changes and the real world becomes as frightening as any of her stories, Krysta finds that her imagination holds powers beyond what she could ever have guessed.&lt;br /&gt;&lt;br /&gt;Rich, compelling, and propulsively building to a dizzying final twist, &lt;i&gt;Gretel and the Dark&lt;/i&gt; is a testament to the lifesaving power of the imagination and a mesmerizingly original story of redemption.</summary>
-    <updated>2015-06-26T18:48:49Z</updated>
-    <simplified:pwid>a5587c92-622c-beae-bf04-81d0ce3fdd22</simplified:pwid>
-    <link href="https://dlotdqc6pnwqb.cloudfront.net/3M/etk2889/cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
-    <link href="https://dlotdqc6pnwqb.cloudfront.net/scaled/300/3M/etk2889/cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
-    <category term="Adult" scheme="http://schema.org/audience"/>
-    <category term="Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Penguin Publishing Group</dcterms:publisher>
-    <published>2014-12-03T16:03:26Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-03-25T19:32:36Z</schema:startDate>
-      <schema:endDate>2015-04-15T19:32:36Z</schema:endDate>
-    </schema:Event>
-    <simplified:total_licenses>4</simplified:total_licenses>
-    <simplified:available_licenses>3</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-    <link href="http://circulation.alpha.librarysimplified.org/works/3M/etk2889/fulfill" rel="http://opds-spec.org/acquisition"/>
-    <link href="http://circulation.alpha.librarysimplified.org/loans/3M/etk2889/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
-  </entry>
-  <entry schema:additionalType="http://schema.org/Book">
-    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Feqkyrr9</id>
-    <title>Dinosaurs in the Attic</title>
-    <simplified:license_source>3M</simplified:license_source>
-    <author>
-      <name>Douglas Preston</name>
-    </author>
-    <summary type="html">&lt;i&gt;Dinosaurs in the Attic &lt;/i&gt;is a chronicle of the expeditions, discoveries, and scientists behind the greatest natural history collection ever assembled. Written by former &lt;i&gt;Natural History &lt;/i&gt;columnist Douglas Preston, who worked at the American Museum of Natural History for seven years, this is a celebration of the best-known and best-loved museum in the United States.&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;</summary>
-    <updated>2015-06-26T18:48:49Z</updated>
-    <simplified:pwid>3cf59166-d4d7-962d-7257-14f284a23d89</simplified:pwid>
-    <link href="https://dlotdqc6pnwqb.cloudfront.net/3M/eqkyrr9/cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
-    <link href="https://dlotdqc6pnwqb.cloudfront.net/scaled/300/3M/eqkyrr9/cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
-    <category term="Adult" scheme="http://schema.org/audience"/>
-    <category term="Science" scheme="http://librarysimplified.org/terms/genres/Simplified/"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>St. Martin's Press</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>hold</schema:name>
-      <schema:startDate>2015-05-22T14:17:56Z</schema:startDate>
-      <schema:position>1</schema:position>
-    </schema:Event>
-    <simplified:total_licenses>1</simplified:total_licenses>
-    <simplified:available_licenses>0</simplified:available_licenses>
-    <simplified:active_holds>3</simplified:active_holds>
-    <link href="http://circulation.alpha.librarysimplified.org/loans/3M/eqkyrr9/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
-  </entry>
-  <entry schema:additionalType="http://schema.org/Book">
-    <id>http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F37284</id>
-    <title>Dickens As an Educator</title>
-    <simplified:license_source>Gutenberg</simplified:license_source>
-    <author>
-      <name>James L. Hughes</name>
-    </author>
-    <summary type="html">The place of Dickens among educators -- Infant garden -- The overthrow of coercion -- The doctrine of child depravity -- Cramming -- Free childhood -- Individuality -- The culture of the imagination -- Sympathy with childhood -- Child study and child nature -- Bad training -- Good training -- Community -- Nutrition as a factor in education -- Minor school -- Miscellaneous educational principles -- The training of poor, neglected, and defective children.</summary>
-    <updated>2015-06-26T18:48:49Z</updated>
-    <simplified:pwid>9861b5d0-e51c-3af5-6d0b-d35cd1dcf2eb</simplified:pwid>
-    <category term="Adult" scheme="http://schema.org/audience"/>
-    <category term="Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-04-16T18:51:36.392154Z</schema:startDate>
-    </schema:Event>
-    <link href="http://s3.amazonaws.com/oabooks.nypl.org/Gutenberg%20ID/37284.epub" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
-    <link href="http://circulation.alpha.librarysimplified.org/works/Gutenberg/37284/fulfill" rel="http://opds-spec.org/acquisition"/>
-    <link href="http://circulation.alpha.librarysimplified.org/loans/Gutenberg/37284/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
-  </entry>
-  <entry schema:additionalType="http://schema.org/Book">
-    <id>http://circulation.alpha.librarysimplified.org/works/?urn=http%3A%2F%2Fwww.gutenberg.org%2Febooks%2F26787</id>
-    <title>Alf the Freebooter, Little Danneved and Swayne Trost, and Other Ballads</title>
-    <simplified:license_source>Gutenberg</simplified:license_source>
-    <author>
-      <name></name>
-    </author>
-    <updated>2015-06-26T18:48:49Z</updated>
-    <simplified:pwid>933ac1df-2376-c99d-e7fc-c34b6839e5b1</simplified:pwid>
-    <category term="Adult" scheme="http://schema.org/audience"/>
-    <category term="Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>Project Gutenberg</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-04-03T18:03:03.275883Z</schema:startDate>
-    </schema:Event>
-    <link href="http://s3.amazonaws.com/oabooks.nypl.org/Gutenberg%20ID/26787.epub" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
-    <link href="http://circulation.alpha.librarysimplified.org/works/Gutenberg/26787/fulfill" rel="http://opds-spec.org/acquisition"/>
-    <link href="http://circulation.alpha.librarysimplified.org/loans/Gutenberg/26787/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
-  </entry>
-  <entry schema:additionalType="http://schema.org/Book">
-    <id>http://circulation.alpha.librarysimplified.org/works/?urn=urn%3Alibrarysimplified.org%2Fterms%2Fid%2F3M%2520ID%2Fcgaxr9</id>
-    <title>Tiger Lily</title>
-    <simplified:license_source>3M</simplified:license_source>
-    <author>
-      <name>Jodi Lynn Anderson</name>
-    </author>
-    <summary type="html">In this stunning re-imagining of J. M. Barrie's beloved classic &lt;em&gt;Peter Pan&lt;/em&gt;, &lt;em&gt;New York Times&lt;/em&gt; bestselling author Jodi Lynn Anderson expertly weaves a gripping tale of love, loss, and adventure.Before Peter Pan belonged to Wendy, he belonged to the girl with the crow feather in her hair&#8230; Tiger Lily. When fifteen-year-old Tiger Lily meets the alluring teenage Peter Pan deep in the forbidden woods of Neverland, the two form a bond that's impossible to break, but also impossible to hold on to. As the leader of the Lost Boys, the most fearsome of Neverland's inhabitants, Peter is an unthinkable match for Tiger Lily. However, when Wendy Darling, a girl who is everything Tiger Lily is not, arrives on the island, Tiger Lily discovers how far she is willing to go to keep Peter with her, and in Neverland.Told from the perspective of tiny, fairy-sized Tinkerbell, &lt;em&gt;Tiger Lily&lt;/em&gt; is the breathtaking story of budding romance, letting go and the pains of growing up. Supports the Common Core State Standards</summary>
-    <updated>2015-06-26T18:48:49Z</updated>
-    <simplified:pwid>128d1861-d335-9dce-b896-7f8e229ac30b</simplified:pwid>
-    <link href="https://dlotdqc6pnwqb.cloudfront.net/3M/cgaxr9/cover.png" type="image/png" rel="http://opds-spec.org/image"/>
-    <link href="https://dlotdqc6pnwqb.cloudfront.net/scaled/300/3M/cgaxr9/cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
-    <category term="Adult" scheme="http://schema.org/audience"/>
-    <category term="Fiction" scheme="http://librarysimplified.org/terms/genres/Simplified/"/>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <schema:Event>
-      <schema:name>loan</schema:name>
-      <schema:startDate>2015-03-13T13:38:19Z</schema:startDate>
-      <schema:endDate>2015-04-03T13:38:19Z</schema:endDate>
-    </schema:Event>
-    <simplified:total_licenses>0</simplified:total_licenses>
-    <simplified:available_licenses>0</simplified:available_licenses>
-    <simplified:active_holds>0</simplified:active_holds>
-    <link href="http://circulation.alpha.librarysimplified.org/works/3M/cgaxr9/fulfill" rel="http://opds-spec.org/acquisition"/>
-    <link href="http://circulation.alpha.librarysimplified.org/loans/3M/cgaxr9/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
-  </entry>
-  <entry schema:additionalType="http://schema.org/Book">
-    <id>simplified:extra-0</id>
-    <title>Loanable</title>
-    <simplified:license_source>3M</simplified:license_source>
-    <author>
-      <name>Noone</name>
-    </author>
-    <summary type="html">Nothing</summary>
-    <updated>2015-06-26T18:48:49Z</updated>
-    <simplified:pwid>128d1861-d335-9dce-b896-7f8e229ac30b</simplified:pwid>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <link href="http://circulation.alpha.librarysimplified.org/loans/3M/cgaxr9/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
-  </entry>
-  <entry schema:additionalType="http://schema.org/Book">
-    <id>simplified:extra-1</id>
-    <title>Open Access</title>
-    <simplified:license_source>3M</simplified:license_source>
-    <author>
-      <name>Noone</name>
-    </author>
-    <summary type="html">Nothing</summary>
-    <updated>2015-06-26T18:48:49Z</updated>
-    <simplified:pwid>128d1861-d335-9dce-b896-7f8e229ac30b</simplified:pwid>
-    <dcterms:language>en</dcterms:language>
-    <dcterms:publisher>HarperCollins</dcterms:publisher>
-    <published>2014-04-01T00:00:00Z</published>
-    <link href="http://s3.amazonaws.com/oabooks.nypl.org/Gutenberg%20ID/26787.epub" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
-    <link href="http://circulation.alpha.librarysimplified.org/loans/3M/cgaxr9/revoke" rel="http://librarysimplified.org/terms/rel/revoke"/>
-  </entry>
+
 </feed>

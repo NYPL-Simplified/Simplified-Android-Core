@@ -2,7 +2,6 @@ package org.nypl.simplified.tests.opds;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jnull.NullCheck;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -52,7 +51,7 @@ public abstract class OPDSFeedEntryParserContract {
 
     final OPDSAvailabilityType availability = e.getAvailability();
     final OPDSAvailabilityLoanable expected = OPDSAvailabilityLoanable.get();
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -73,7 +72,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityLoaned expected = OPDSAvailabilityLoaned.get(
         expected_start_date, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -95,7 +94,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityLoaned expected = OPDSAvailabilityLoaned.get(
         expected_start_date, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -109,7 +108,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityType availability = e.getAvailability();
     final OPDSAvailabilityHoldable expected = OPDSAvailabilityHoldable.get();
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -131,7 +130,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -154,7 +153,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -176,7 +175,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -199,7 +198,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -218,7 +217,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHeldReady expected =
         OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -238,7 +237,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHeldReady expected =
         OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -256,7 +255,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityOpenAccess expected =
         OPDSAvailabilityOpenAccess.get(expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   @Test
@@ -276,7 +275,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHeldReady expected =
         OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
-    Assert.assertEquals(availability, expected);
+    Assert.assertEquals(expected, availability);
   }
 
   private OPDSAcquisitionFeedEntryParserType getParser() {
