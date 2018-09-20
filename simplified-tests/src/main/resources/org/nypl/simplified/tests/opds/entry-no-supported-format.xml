@@ -1,0 +1,101 @@
+<entry xmlns:bibframe="http://bibframe.org/vocab/" xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:schema="http://schema.org/"
+  xmlns:simplified="http://librarysimplified.org/terms/" xmlns="http://www.w3.org/2005/Atom"
+  schema:additionalType="http://schema.org/Book">
+  <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca</id>
+  <title>The Madman's Daughter</title>
+  <schema:alternativeHeadline>The Madman's Daughter Series, Book 1</schema:alternativeHeadline>
+  <author>
+    <name>Megan Shepherd</name>
+    <link
+      href="http://qa.circulation.librarysimplified.org/NYNYPL/works/contributor/Megan%20Shepherd/eng/Children%2CYoung+Adult"
+      rel="contributor" title="Megan Shepherd"
+      type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  </author>
+  <schema:Series name="The Madman's Daughter">
+    <link
+      href="http://qa.circulation.librarysimplified.org/NYNYPL/works/series/The%20Madman%27s%20Daughter/eng/Children%2CYoung+Adult"
+      rel="series" title="The Madman's Daughter"
+      type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  </schema:Series>
+  <summary type="html">&lt;p&gt;For fans of Libba Bray, this first book in a gothic suspense trilogy
+    is inspired by H. G. Wells's &lt;em&gt;The Island of Dr. Moreau&lt;/em&gt; and has been hailed
+    by &lt;em&gt;New York Times&lt;/em&gt; bestseller Carrie Ryan as having "beautiful writing,
+    breakneck pacing, a pulse-pounding mystery, and an irresistible romance."&lt;/p&gt;&lt;p&gt;Following
+    accusations that her scientist father gruesomely experimented on animals, sixteen-year-old
+    Juliet watched as her family and her genteel life in London crumbled around her--and only
+    recently has she managed to piece her world back together. But when Juliet learns her father is
+    still alive and working on a remote tropical island, she is determined to find out if the old
+    accusations are true. Accompanied by her father's handsome young assistant, Montgomery, and an
+    enigmatic castaway, Edward, Juliet travels to the island, only to discover the depths of her
+    father's insanity. Torn between horror and scientific curiosity, Juliet knows she must end her
+    father's dangerous experiments and escape her jungle prison before it's too late. Yet as the
+    island falls into chaos, she discovers the extent of her father's genius--and madness--in her
+    own blood.&lt;/p&gt;
+  </summary>
+  <updated>2017-12-01T09:06:55Z</updated>
+  <simplified:pwid>2137cef2-a3b6-5bf2-f355-3c1d1c41e607</simplified:pwid>
+  <link
+    href="https://d3pqhns20516vc.cloudfront.net/Overdrive/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/%257B455502BE-A63C-4BFD-86D4-DFACFD1A8BCA%257DImg100.jpg"
+    rel="http://opds-spec.org/image" type="image/jpeg" />
+  <link
+    href="https://d3pqhns20516vc.cloudfront.net/scaled/300/Overdrive/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/%257B455502BE-A63C-4BFD-86D4-DFACFD1A8BCA%257DImg100.png"
+    rel="http://opds-spec.org/image/thumbnail" type="image/png" />
+  <category label="Young Adult" scheme="http://schema.org/audience" term="Young Adult" />
+  <category label="14-17" scheme="http://schema.org/typicalAgeRange" term="14-17" />
+  <category label="Fiction"
+    scheme="http://librarysimplified.org/terms/fiction/" term="http://librarysimplified.org/terms/fiction/Fiction" />
+  <category label="Romance"
+    scheme="http://librarysimplified.org/terms/genres/Simplified/" term="http://librarysimplified.org/terms/genres/Simplified/Romance" />
+  <category label="Historical Fiction"
+    scheme="http://librarysimplified.org/terms/genres/Simplified/" term="http://librarysimplified.org/terms/genres/Simplified/Historical%20Fiction" />
+  <category label="Horror"
+    scheme="http://librarysimplified.org/terms/genres/Simplified/" term="http://librarysimplified.org/terms/genres/Simplified/Horror" />
+  <dcterms:language>en</dcterms:language>
+  <dcterms:publisher>HarperCollins</dcterms:publisher>
+  <published>2014-07-15T03:47:18Z</published>
+  <dcterms:created>2013-01-29</dcterms:created>
+  <bibframe:distribution bibframe:ProviderName="Overdrive" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/report"
+    rel="issues" />
+  <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca</id>
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca"
+    rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" />
+  <bibframe:distribution bibframe:ProviderName="Overdrive" />
+  <published>2014-07-15T00:00:00Z</published>
+  <link href="http://qa.circulation.librarysimplified.org/NYNYPL/groups/346" rel="collection"
+    title="Young Adult Fiction" />
+  <updated>2018-09-14T06:06:50Z</updated>
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/borrow"
+    rel="http://opds-spec.org/acquisition/borrow"
+    type="application/atom+xml;type=entry;profile=opds-catalog">
+    <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+      <opds:indirectAcquisition type="application/not-a-supported-format" />
+    </opds:indirectAcquisition>
+    <opds:indirectAcquisition type="application/atom+xml;type=entry;profile=opds-catalog">
+      <opds:indirectAcquisition
+        type="text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media" />
+    </opds:indirectAcquisition>
+    <opds:availability status="available" />
+    <opds:holds total="0" />
+    <opds:copies available="2" total="2" />
+  </link>
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/recommendations"
+    rel="recommendations" title="Recommended Works"
+    type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/related_books"
+    rel="related" title="Recommended Works"
+    type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/annotations/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/"
+    rel="http://www.w3.org/ns/oa#annotationService"
+    type="application/ld+json; profile=&quot;http://www.w3.org/ns/anno.jsonld&quot;" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/analytics/Overdrive%20ID/455502be-a63c-4bfd-86d4-dfacfd1a8bca/open_book"
+    rel="http://librarysimplified.org/terms/rel/analytics/open-book" />
+</entry>

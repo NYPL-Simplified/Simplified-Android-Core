@@ -12,15 +12,19 @@ repositories {
 }
 
 dependencies {
+  implementation project(':simplified-assert')
   implementation project(':simplified-books-core')
+  implementation project(':simplified-downloader-core')
   implementation project(':simplified-files')
   implementation project(':simplified-http-core')
+  implementation project(':simplified-json-core')
   implementation project(':simplified-opds-core')
   implementation project(':simplified-rfc3339-core')
-  implementation project(':simplified-downloader-core')
+  implementation project(':simplified-stack')
 
   implementation 'junit:junit:4.12'
 
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'

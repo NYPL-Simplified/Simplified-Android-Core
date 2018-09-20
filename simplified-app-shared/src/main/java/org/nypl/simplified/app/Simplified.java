@@ -42,6 +42,7 @@ import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookDatabaseType;
+import org.nypl.simplified.books.core.BookFormats;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
@@ -111,15 +112,14 @@ public final class Simplified extends MultiDexApplication
   private @Nullable ReaderAppServices  reader_services;
   private @Nullable CardCreator cardcreator;
 
-
   /**
    * Protect the singleton from getting constructed by outside sources.
    */
+
   public Simplified()
   {
 
   }
-
 
   /**
    * Checks if Simplified singleton has been initialized already.
@@ -450,7 +450,7 @@ public final class Simplified extends MultiDexApplication
       in_json_serializer, in_json_parser, books_database_directory);
 
     final OPDSAcquisitionFeedEntryParserType in_entry_parser =
-      OPDSAcquisitionFeedEntryParser.newParser();
+      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
     final OPDSSearchParserType s = OPDSSearchParser.newParser();
@@ -736,7 +736,7 @@ public final class Simplified extends MultiDexApplication
 
       this.http = HTTP.newHTTP();
       final OPDSAcquisitionFeedEntryParserType in_entry_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
       final OPDSJSONSerializerType in_json_serializer =
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();

@@ -399,7 +399,7 @@ class AnnotationsManager(private val libraryAccount: Account,
             LOG.error("Cancelling download request. JsonMappingException for annotations:\n $e")
             return@Listener
           }
-          val bookmarks = annotationResponse.first.items.filter {
+          val bookmarks = annotationResponse!!.first.items.filter {
             it.motivation.contains("bookmarking", true)
           }
           completion?.let { it(bookmarks) }

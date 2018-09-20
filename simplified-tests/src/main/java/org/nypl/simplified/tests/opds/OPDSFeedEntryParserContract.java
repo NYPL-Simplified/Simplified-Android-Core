@@ -5,6 +5,7 @@ import com.io7m.jfunctional.OptionType;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.nypl.simplified.books.core.BookFormats;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
@@ -16,6 +17,8 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -28,6 +31,9 @@ import java.util.Calendar;
  */
 
 public abstract class OPDSFeedEntryParserContract {
+
+  private static Logger LOG =
+    LoggerFactory.getLogger(OPDSFeedEntryParserContract.class);
 
   private static InputStream getResource(
       final String name)
@@ -52,6 +58,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityType availability = e.getAvailability();
     final OPDSAvailabilityLoanable expected = OPDSAvailabilityLoanable.get();
     Assert.assertEquals(expected, availability);
+    Assert.assertTrue("No available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -73,6 +80,7 @@ public abstract class OPDSFeedEntryParserContract {
         expected_start_date, expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -95,6 +103,7 @@ public abstract class OPDSFeedEntryParserContract {
         expected_start_date, expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -109,6 +118,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAvailabilityHoldable expected = OPDSAvailabilityHoldable.get();
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -131,6 +141,7 @@ public abstract class OPDSFeedEntryParserContract {
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -154,6 +165,7 @@ public abstract class OPDSFeedEntryParserContract {
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -176,6 +188,7 @@ public abstract class OPDSFeedEntryParserContract {
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -199,6 +212,7 @@ public abstract class OPDSFeedEntryParserContract {
         expected_start_date, queue_position, expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -218,6 +232,7 @@ public abstract class OPDSFeedEntryParserContract {
         OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -238,6 +253,7 @@ public abstract class OPDSFeedEntryParserContract {
         OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -256,6 +272,7 @@ public abstract class OPDSFeedEntryParserContract {
         OPDSAvailabilityOpenAccess.get(expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   @Test
@@ -264,7 +281,7 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
         OPDSFeedEntryParserContract.getResource(
-            "entry-availability-heldready-specific0.xml"));
+          "entry-availability-heldready-specific0.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
@@ -276,9 +293,20 @@ public abstract class OPDSFeedEntryParserContract {
         OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
     Assert.assertEquals(expected, availability);
+    Assert.assertFalse("Available acquisitions", e.getAcquisitions().isEmpty());
+  }
+
+  @Test
+  public void testEntryNoSupportedFormats()
+    throws Exception {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
+      OPDSFeedEntryParserContract.getResource("entry-no-supported-format.xml"));
+
+    Assert.assertTrue("No available acquisitions", e.getAcquisitions().isEmpty());
   }
 
   private OPDSAcquisitionFeedEntryParserType getParser() {
-    return OPDSAcquisitionFeedEntryParser.newParser();
+    return OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
   }
 }
