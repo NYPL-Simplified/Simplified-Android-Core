@@ -5,7 +5,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -169,31 +169,68 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     return entry_builder.build();
   }
 
+  private OPDSIndirectAcquisition parseIndirectAcquisition(
+    final Element acquisition) {
+    final String type = acquisition.getAttribute("type");
+    final List<OPDSIndirectAcquisition> next_acquisitions = parseIndirectAcquisitions(acquisition);
+    return new OPDSIndirectAcquisition(type, next_acquisitions);
+  }
+
+  private List<OPDSIndirectAcquisition> parseIndirectAcquisitions(
+    final Element element) {
+    final List<Element> indirect_elements =
+      OPDSXML.getChildElementsWithName(element, OPDS_URI, "indirectAcquisition");
+    final List<OPDSIndirectAcquisition> indirects =
+      new ArrayList<>(indirect_elements.size());
+
+    for (final Element indirect_element : indirect_elements) {
+      indirects.add(parseIndirectAcquisition(indirect_element));
+    }
+    return indirects;
+  }
+
   private void tryConsumeAcquisitions(
     final OPDSAcquisitionFeedEntryBuilderType entry_builder,
     final OptionType<URI> revoke,
-    final Element e_link,
+    final Element link,
     final String rel_text)
     throws URISyntaxException, OPDSParseException {
 
-    if (rel_text.startsWith(ACQUISITION_URI_PREFIX_TEXT) && linkIsSupported(e_link)) {
-      boolean open_access = false;
-      for (final Type v : Type.values()) {
-        final String uri_text = NullCheck.notNull(v.getURI().toString());
+    if (rel_text.startsWith(ACQUISITION_URI_PREFIX_TEXT)) {
+      for (final Relation v : Relation.values()) {
+        final String uri_text = v.getUri().toString();
         if (rel_text.equals(uri_text)) {
-          final URI href = new URI(e_link.getAttribute("href"));
-          entry_builder.addAcquisition(new OPDSAcquisition(v, href));
-          open_access = open_access || v == Type.ACQUISITION_OPEN_ACCESS;
-          break;
+          final URI href = new URI(link.getAttribute("href"));
+
+          final List<OPDSIndirectAcquisition> indirects = parseIndirectAcquisitions(link);
+          final OptionType<String> type = typeAttributeWithSupportedValue(link);
+
+          if (type.isSome() || hasSupportedIndirectAcquisition(indirects)) {
+            final OPDSAcquisition acquisition = new OPDSAcquisition(v, href, type, indirects);
+            entry_builder.addAcquisition(acquisition);
+
+            if (v == Relation.ACQUISITION_OPEN_ACCESS) {
+              entry_builder.setAvailability(OPDSAvailabilityOpenAccess.get(revoke));
+            } else {
+              tryAvailability(entry_builder, link, revoke);
+            }
+            break;
+          }
         }
       }
+    }
+  }
 
-      if (open_access) {
-        entry_builder.setAvailability(OPDSAvailabilityOpenAccess.get(revoke));
-      } else {
-        tryAvailability(entry_builder, e_link, revoke);
+  private boolean hasSupportedIndirectAcquisition(
+    final List<OPDSIndirectAcquisition> indirects) {
+    for (final OPDSIndirectAcquisition indirect : indirects) {
+      for (final String supported : supported_book_formats) {
+        if (indirect.findTypeOptional(supported).isSome()) {
+          return true;
+        }
       }
     }
+    return false;
   }
 
   private void parseCategories(
@@ -387,47 +424,16 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     return Option.none();
   }
 
-  private boolean linkIsSupported(final Element link) {
-
-    final List<Element> acquisitions =
-      OPDSXML.getChildElementsWithName(link, OPDS_URI, "indirectAcquisition");
-
-    if (acquisitions.isEmpty()) {
-      return acquisitionIsOfSupportedFormat(link);
-    }
-
-    for (Element acquisition : acquisitions) {
-      if (acquisitionHasTypeWith(acquisition, "application/vnd.adobe.adept+xml") ||
-        acquisitionHasTypeWith(acquisition, "application/vnd.librarysimplified.bearer-token+json")) {
-
-        final List<Element> sub_acquisitions =
-          OPDSXML.getChildElementsWithName(acquisition, OPDS_URI, "indirectAcquisition");
-
-        for (Element sub_acquisition : sub_acquisitions) {
-          if (acquisitionIsOfSupportedFormat(sub_acquisition)) {
-            return true;
-          }
-        }
-      }
-
-      if (acquisitionIsOfSupportedFormat(acquisition)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  private boolean acquisitionIsOfSupportedFormat(final Element acquisition) {
+  private OptionType<String> typeAttributeWithSupportedValue(final Element acquisition) {
     for (String format : this.supported_book_formats) {
-      if (acquisitionHasTypeWith(acquisition, format)) {
-        return true;
+      if (hasTypeAttributeWithValue(acquisition, format)) {
+        return Option.some(format);
       }
     }
-    return false;
+    return Option.none();
   }
 
-  private boolean acquisitionHasTypeWith(
+  private boolean hasTypeAttributeWithValue(
     final Element acquisition,
     final String type) {
     final String element_type = acquisition.getAttribute("type");
@@ -488,9 +494,9 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
         final OptionType<Calendar> start_date =
           OPDSXML.getAttributeRFC3339Optional(available, "since");
         final String rel = NullCheck.notNull(element.getAttribute("rel"));
-        if (Type.ACQUISITION_BORROW.getURI().toString().equals(rel)) {
+        if (Relation.ACQUISITION_BORROW.getUri().toString().equals(rel)) {
           return OPDSAvailabilityLoanable.get();
-        } else if (Type.ACQUISITION_GENERIC.getURI().toString().equals(rel)) {
+        } else if (Relation.ACQUISITION_GENERIC.getUri().toString().equals(rel)) {
           return OPDSAvailabilityLoaned.get(start_date, end_date, revoke);
         }
       }

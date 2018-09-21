@@ -78,7 +78,7 @@ public final class CatalogAcquisitionButtonController
   @Override public void onClick(
     final @Nullable View v)
   {
-    if (this.books.accountIsLoggedIn() && Simplified.getCurrentAccount().needsAuth() && this.acq.getType() != OPDSAcquisition.Type.ACQUISITION_OPEN_ACCESS) {
+    if (this.books.accountIsLoggedIn() && Simplified.getCurrentAccount().needsAuth() && this.acq.getRelation() != OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
       this.books.accountGetCachedLoginDetails(
         new AccountGetCachedCredentialsListenerType()
         {
@@ -93,7 +93,7 @@ public final class CatalogAcquisitionButtonController
             CatalogAcquisitionButtonController.this.onLoginSuccess(creds);
           }
         });
-    } else if (!Simplified.getCurrentAccount().needsAuth() || this.acq.getType() == OPDSAcquisition.Type.ACQUISITION_OPEN_ACCESS) {
+    } else if (!Simplified.getCurrentAccount().needsAuth() || this.acq.getRelation() == OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
       this.getBook();
     }
     else {
@@ -150,9 +150,9 @@ public final class CatalogAcquisitionButtonController
 
   private void getBook() {
     CatalogAcquisitionButtonController.LOG.debug(
-      "attempting borrow of {} acquisition", this.acq.getType());
+      "attempting borrow of {} acquisition", this.acq.getRelation());
 
-    switch (this.acq.getType()) {
+    switch (this.acq.getRelation()) {
       case ACQUISITION_BORROW:
       case ACQUISITION_GENERIC:
       case ACQUISITION_OPEN_ACCESS: {

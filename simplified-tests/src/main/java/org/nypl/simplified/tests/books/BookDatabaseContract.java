@@ -12,10 +12,11 @@ import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
-import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
+import org.nypl.simplified.opds.core.OPDSIndirectAcquisition;
 import org.nypl.simplified.opds.core.OPDSJSONParser;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
 import org.nypl.simplified.opds.core.OPDSJSONSerializer;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Calendar;
+import java.util.Collections;
 
 public abstract class BookDatabaseContract {
 
@@ -72,7 +74,10 @@ public abstract class BookDatabaseContract {
               OPDSAvailabilityOpenAccess.get(revoke));
       eb.addAcquisition(
           new OPDSAcquisition(
-              Type.ACQUISITION_BORROW, URI.create("http://example.com")));
+              Relation.ACQUISITION_BORROW,
+            URI.create("http://example.com"),
+            Option.some("application/epub+zip"),
+            Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
 

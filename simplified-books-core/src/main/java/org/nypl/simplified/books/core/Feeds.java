@@ -126,7 +126,7 @@ public final class Feeds
   private static int priority(
     final OPDSAcquisition a)
   {
-    switch (a.getType()) {
+    switch (a.getRelation()) {
       case ACQUISITION_BORROW:
         return 6;
       case ACQUISITION_OPEN_ACCESS:

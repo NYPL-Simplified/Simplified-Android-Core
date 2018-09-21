@@ -10,24 +10,34 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
+
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
-import org.nypl.simplified.opds.core.OPDSAcquisition.Type;
+import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The default implementation of the {@link OPDSJSONParserType} interface.
  */
 
-public final class OPDSJSONParser implements OPDSJSONParserType
-{
-  private OPDSJSONParser()
-  {
+public final class OPDSJSONParser implements OPDSJSONParserType {
+
+  /**
+   * The name of the field used for indirect acquisitions.
+   */
+
+  public static final String INDIRECT_ACQUISITIONS_FIELD = "indirect_acquisitions";
+  public static final String CONTENT_TYPE_FIELD = "content_type";
+
+  private OPDSJSONParser() {
     // Nothing
   }
 
@@ -35,29 +45,87 @@ public final class OPDSJSONParser implements OPDSJSONParserType
    * @return A new JSON parser
    */
 
-  public static OPDSJSONParserType newParser()
-  {
+  public static OPDSJSONParserType newParser() {
     return new OPDSJSONParser();
   }
 
   private static OPDSAcquisition parseAcquisition(
     final ObjectNode o)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     try {
-      final Type in_type = Type.valueOf(
-        JSONParserUtilities.getString(o, "type"));
-      final URI in_uri = JSONParserUtilities.getURI(o, "uri");
-      return new OPDSAcquisition(in_type, in_uri);
+
+      /*
+       * XXX: COMPATIBILITY: this field is called "type" when it should really be called "relation".
+       * The name is preserved in order to allow new versions of the application to open old
+       * versions of the on-disk data.
+       */
+
+      final Relation relation =
+        Relation.valueOf(JSONParserUtilities.getString(o, "type"));
+
+      final URI uri =
+        JSONParserUtilities.getURI(o, "uri");
+
+      final List<OPDSIndirectAcquisition> indirects;
+      if (o.has(INDIRECT_ACQUISITIONS_FIELD)) {
+        indirects = parseIndirectAcquisitions(
+          JSONParserUtilities.getArray(o, INDIRECT_ACQUISITIONS_FIELD));
+      } else {
+        indirects = Collections.emptyList();
+      }
+
+      /*
+       * XXX: COMPATIBILITY: The content type field will not be present for old versions of the
+       * book database. Luckily, old book databases can only contain epub files.
+       */
+
+      OptionType<String> type;
+      if (o.has(CONTENT_TYPE_FIELD)) {
+        type = Option.some(JSONParserUtilities.getString(o, CONTENT_TYPE_FIELD));
+      } else {
+        if (indirects.isEmpty()) {
+          type = Option.of("application/epub+zip");
+        } else {
+          type = Option.none();
+        }
+      }
+
+      return new OPDSAcquisition(relation, uri, type, indirects);
     } catch (final JSONParseException e) {
       throw new OPDSParseException(e);
     }
   }
 
+  private static OPDSIndirectAcquisition parseIndirectAcquisition(
+    final JsonNode jnode)
+    throws OPDSParseException {
+    NullCheck.notNull(jnode, "JSON node");
+
+    try {
+      final ObjectNode obj = JSONParserUtilities.checkObject(null, jnode);
+      final String type = JSONParserUtilities.getString(obj, "type");
+      final ArrayNode indirects = JSONParserUtilities.getArray(obj, INDIRECT_ACQUISITIONS_FIELD);
+      return new OPDSIndirectAcquisition(type, parseIndirectAcquisitions(indirects));
+    } catch (final JSONParseException e) {
+      throw new OPDSParseException(e);
+    }
+  }
+
+  private static List<OPDSIndirectAcquisition> parseIndirectAcquisitions(
+    final ArrayNode indirects)
+    throws OPDSParseException {
+    NullCheck.notNull(indirects, "Array node");
+
+    final List<OPDSIndirectAcquisition> results = new ArrayList<>(indirects.size());
+    for (int index = 0; index < indirects.size(); ++index) {
+      results.add(parseIndirectAcquisition(indirects.get(index)));
+    }
+    return results;
+  }
+
   private static OPDSAvailabilityType parseAvailability(
     final ObjectNode node)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     try {
       if (node.has("loanable")) {
         return OPDSAvailabilityLoanable.get();
@@ -74,8 +142,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType
           JSONParserUtilities.getTimestampOptional(n, "end_date");
         final OptionType<URI> in_revoke =
           JSONParserUtilities.getURIOptional(n, "revoke");
-        return OPDSAvailabilityLoaned.get(
-          in_start_date, in_end_date, in_revoke);
+        return OPDSAvailabilityLoaned.get(in_start_date, in_end_date, in_revoke);
       }
 
       if (node.has("held")) {
@@ -88,8 +155,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType
           JSONParserUtilities.getTimestampOptional(n, "end_date");
         final OptionType<URI> in_revoke =
           JSONParserUtilities.getURIOptional(n, "revoke");
-        return OPDSAvailabilityHeld.get(
-          in_start_date, in_position, in_end_date, in_revoke);
+        return OPDSAvailabilityHeld.get(in_start_date, in_position, in_end_date, in_revoke);
       }
 
       if (node.has("held_ready")) {
@@ -124,8 +190,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType
 
   private static OPDSCategory parseCategory(
     final JsonNode jn)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     NullCheck.notNull(jn);
     try {
       final ObjectNode o = JSONParserUtilities.checkObject(null, jn);
@@ -141,8 +206,7 @@ public final class OPDSJSONParser implements OPDSJSONParserType
 
   private static DRMLicensor parseLicensor(
     final JsonNode jn)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     NullCheck.notNull(jn);
     try {
       final ObjectNode o = JSONParserUtilities.checkObject(null, jn);
@@ -158,11 +222,10 @@ public final class OPDSJSONParser implements OPDSJSONParserType
   }
 
 
-
-  @Override public OPDSAcquisitionFeed parseAcquisitionFeed(
+  @Override
+  public OPDSAcquisitionFeed parseAcquisitionFeed(
     final ObjectNode s)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     NullCheck.notNull(s);
 
     try {
@@ -177,12 +240,11 @@ public final class OPDSJSONParser implements OPDSJSONParserType
 
       fb.setNextOption(
         JSONParserUtilities.getStringOptional(s, "next").mapPartial(
-          new PartialFunctionType<String, URI, URISyntaxException>()
-          {
-            @Override public URI call(
+          new PartialFunctionType<String, URI, URISyntaxException>() {
+            @Override
+            public URI call(
               final String u)
-              throws URISyntaxException
-            {
+              throws URISyntaxException {
               return new URI(u);
             }
           }));
@@ -190,12 +252,11 @@ public final class OPDSJSONParser implements OPDSJSONParserType
       fb.setSearchOption(
         JSONParserUtilities.getObjectOptional(s, "search").mapPartial(
           new PartialFunctionType<ObjectNode, OPDSSearchLink,
-            JSONParseException>()
-          {
-            @Override public OPDSSearchLink call(
+            JSONParseException>() {
+            @Override
+            public OPDSSearchLink call(
               final ObjectNode o)
-              throws JSONParseException
-            {
+              throws JSONParseException {
               final String in_search_type =
                 JSONParserUtilities.getString(o, "type");
               final URI in_search_uri = JSONParserUtilities.getURI(o, "uri");
@@ -240,10 +301,10 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     }
   }
 
-  @Override public OPDSAcquisitionFeedEntry parseAcquisitionFeedEntry(
+  @Override
+  public OPDSAcquisitionFeedEntry parseAcquisitionFeedEntry(
     final ObjectNode s)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     NullCheck.notNull(s);
 
     try {
@@ -311,12 +372,11 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         final OptionType<String> o = JSONParserUtilities.getStringOptional(
           s, "cover");
         o.mapPartial(
-          new PartialFunctionType<String, Unit, OPDSParseException>()
-          {
-            @Override public Unit call(
+          new PartialFunctionType<String, Unit, OPDSParseException>() {
+            @Override
+            public Unit call(
               final String u)
-              throws OPDSParseException
-            {
+              throws OPDSParseException {
               try {
                 fb.setCoverOption(Option.some(new URI(u)));
                 return Unit.unit();
@@ -331,12 +391,11 @@ public final class OPDSJSONParser implements OPDSJSONParserType
         final OptionType<String> o =
           JSONParserUtilities.getStringOptional(s, "thumbnail");
         o.mapPartial(
-          new PartialFunctionType<String, Unit, OPDSParseException>()
-          {
-            @Override public Unit call(
+          new PartialFunctionType<String, Unit, OPDSParseException>() {
+            @Override
+            public Unit call(
               final String u)
-              throws OPDSParseException
-            {
+              throws OPDSParseException {
               try {
                 fb.setThumbnailOption(Option.some(new URI(u)));
                 return Unit.unit();
@@ -387,8 +446,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType
             public Unit call(
               final URI u)
               throws OPDSParseException {
-                fb.setAnnotationsOption(Option.some(u));
-                return Unit.unit();
+              fb.setAnnotationsOption(Option.some(u));
+              return Unit.unit();
             }
           });
       }
@@ -407,10 +466,10 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     }
   }
 
-  @Override public OPDSAcquisitionFeedEntry parseAcquisitionFeedEntryFromStream(
+  @Override
+  public OPDSAcquisitionFeedEntry parseAcquisitionFeedEntryFromStream(
     final InputStream s)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     try {
       final ObjectMapper jom = new ObjectMapper();
       return this.parseAcquisitionFeedEntry(
@@ -423,10 +482,10 @@ public final class OPDSJSONParser implements OPDSJSONParserType
     }
   }
 
-  @Override public OPDSAcquisitionFeed parseAcquisitionFeedFromStream(
+  @Override
+  public OPDSAcquisitionFeed parseAcquisitionFeedFromStream(
     final InputStream s)
-    throws OPDSParseException
-  {
+    throws OPDSParseException {
     try {
       final ObjectMapper jom = new ObjectMapper();
       return this.parseAcquisitionFeed(

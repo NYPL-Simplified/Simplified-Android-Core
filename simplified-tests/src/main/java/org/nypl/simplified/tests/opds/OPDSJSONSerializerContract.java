@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class OPDSJSONSerializerContract
@@ -54,7 +53,6 @@ public abstract class OPDSJSONSerializerContract
 
     final ByteArrayOutputStream bao0 = new ByteArrayOutputStream();
     s.serializeToStream(s.serializeFeedEntry(e0), bao0);
-    s.serializeToStream(s.serializeFeedEntry(e0), System.out);
 
     final InputStream rs1 = new ByteArrayInputStream(bao0.toByteArray());
     final OPDSAcquisitionFeedEntry e1 =
@@ -95,7 +93,6 @@ public abstract class OPDSJSONSerializerContract
 
     final ByteArrayOutputStream bao0 = new ByteArrayOutputStream();
     s.serializeToStream(s.serializeFeed(fe0), bao0);
-    s.serializeToStream(s.serializeFeed(fe0), System.out);
 
     final InputStream rs1 = new ByteArrayInputStream(bao0.toByteArray());
     final OPDSAcquisitionFeed fe1 = jp.parseAcquisitionFeedFromStream(rs1);

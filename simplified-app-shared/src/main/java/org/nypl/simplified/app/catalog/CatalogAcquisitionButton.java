@@ -51,7 +51,7 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
     final int mainColor = ContextCompat.getColor(this.getContext(), resID);
     this.getTextView().setTextColor(mainColor);
 
-    switch (in_acq.getType()) {
+    switch (in_acq.getRelation()) {
       case ACQUISITION_OPEN_ACCESS:
         this.getTextView().setText(
           NullCheck.notNull(
