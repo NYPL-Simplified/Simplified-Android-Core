@@ -3,6 +3,7 @@ package org.nypl.simplified.tests.opds;
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
@@ -22,11 +23,10 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
-public abstract class OPDSJSONSerializerContract
-{
+public abstract class OPDSJSONSerializerContract {
   private static InputStream getResource(
-      final String name)
-      throws Exception {
+    final String name)
+    throws Exception {
 
     final String path = "/org/nypl/simplified/tests/opds/" + name;
     final URL url = OPDSFeedEntryParserContract.class.getResource(path);
@@ -38,8 +38,7 @@ public abstract class OPDSJSONSerializerContract
 
   @Test
   public void testRoundTrip0()
-    throws Exception
-  {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType p =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
 
@@ -77,9 +76,9 @@ public abstract class OPDSJSONSerializerContract
     }
   }
 
-  @Test public void testRoundTrip1()
-    throws Exception
-  {
+  @Test
+  public void testRoundTrip1()
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType ep =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
 
