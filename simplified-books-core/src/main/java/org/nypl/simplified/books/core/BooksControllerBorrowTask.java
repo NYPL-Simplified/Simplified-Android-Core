@@ -44,6 +44,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
+import org.nypl.simplified.opds.core.OPDSIndirectAcquisition;
 import org.nypl.simplified.opds.core.OPDSParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -309,7 +311,7 @@ final class BooksControllerBorrowTask implements Runnable
     BooksControllerBorrowTask.LOG.debug(
         "[{}]: fulfilling Simplified bearer token file", this.short_id);
 
-    /**
+    /*
      * The bearer token file will typically have downloaded almost instantly,
      * leaving the download progress bar at 100%. This call effectively sets
      * the download progress bar to 0% so that it doesn't look as if the user
@@ -332,7 +334,12 @@ final class BooksControllerBorrowTask implements Runnable
     }
 
     final OPDSAcquisition acquisition =
-        new OPDSAcquisition(OPDSAcquisition.Type.ACQUISITION_GENERIC, token.getLocation());
+        new OPDSAcquisition(
+          OPDSAcquisition.Relation.ACQUISITION_GENERIC,
+          token.getLocation(),
+          Option.some(BooksControllerBorrowTask.SIMPLIFIED_BEARER_TOKEN_CONTENT_TYPE),
+          Collections.<OPDSIndirectAcquisition>emptyList());
+
     final HTTPAuthType auth = new HTTPAuthOAuth(token.getAccessToken());
 
     this.runAcquisitionFulfillDoDownload(acquisition, Option.some(auth));
@@ -342,7 +349,7 @@ final class BooksControllerBorrowTask implements Runnable
     final long running_total,
     final long expected_total)
   {
-    /**
+    /*
      * Because "data received" updates happen at such a huge rate, we want
      * to ensure that updates to the book status are rate limited to avoid
      * overwhelming the UI. Book updates are only published at the start of
@@ -388,7 +395,7 @@ final class BooksControllerBorrowTask implements Runnable
        * Then, run the appropriate acquisition type for the book.
        */
 
-      final OPDSAcquisition.Type at = this.acq.getType();
+      final OPDSAcquisition.Relation at = this.acq.getRelation();
       switch (at) {
         case ACQUISITION_BORROW: {
           BooksControllerBorrowTask.LOG.debug(
@@ -506,12 +513,13 @@ final class BooksControllerBorrowTask implements Runnable
         auth = new HTTPAuthOAuth(token.toString());
       }
     }
-    /**
+
+    /*
      * Grab the feed for the borrow link.
      */
 
     BooksControllerBorrowTask.LOG.debug(
-      "[{}]: fetching item feed: {}", sid, this.acq.getURI());
+      "[{}]: fetching item feed: {}", sid, this.acq.getUri());
 
     final FeedEntryMatcherType<Unit, UnreachableCodeException>
       feed_entry_matcher =
@@ -568,7 +576,7 @@ final class BooksControllerBorrowTask implements Runnable
       };
 
     this.feed_loader.fromURIRefreshing(
-      this.acq.getURI(), Option.some(auth), "PUT", new FeedLoaderListenerType()
+      this.acq.getUri(), Option.some(auth), "PUT", new FeedLoaderListenerType()
       {
         @Override public void onFeedLoadSuccess(
           final URI u,
@@ -860,7 +868,7 @@ final class BooksControllerBorrowTask implements Runnable
      */
 
     return this.downloader.download(
-      a.getURI(), auth, new DownloadListenerType()
+      a.getUri(), auth, new DownloadListenerType()
       {
         @Override public void onDownloadStarted(
           final DownloadType d,
@@ -977,7 +985,7 @@ final class BooksControllerBorrowTask implements Runnable
       "[{}]: fulfilling book", this.short_id);
 
     for (final OPDSAcquisition ea : ee.getAcquisitions()) {
-      switch (ea.getType()) {
+      switch (ea.getRelation()) {
         case ACQUISITION_GENERIC:
         case ACQUISITION_OPEN_ACCESS: {
           return this.runAcquisitionFulfillDoDownload(ea, Option.<HTTPAuthType>none());

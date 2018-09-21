@@ -2,6 +2,8 @@ package org.nypl.simplified.tests.opds;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
@@ -21,11 +23,10 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
-public abstract class OPDSJSONSerializerContract
-{
+public abstract class OPDSJSONSerializerContract {
   private static InputStream getResource(
-      final String name)
-      throws Exception {
+    final String name)
+    throws Exception {
 
     final String path = "/org/nypl/simplified/tests/opds/" + name;
     final URL url = OPDSFeedEntryParserContract.class.getResource(path);
@@ -37,10 +38,10 @@ public abstract class OPDSJSONSerializerContract
 
   @Test
   public void testRoundTrip0()
-    throws Exception
-  {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType p =
-      OPDSAcquisitionFeedEntryParser.newParser();
+      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
+
     final OPDSJSONParserType jp = OPDSJSONParser.newParser();
 
     final OPDSJSONSerializerType s = OPDSJSONSerializer.newSerializer();
@@ -51,7 +52,6 @@ public abstract class OPDSJSONSerializerContract
 
     final ByteArrayOutputStream bao0 = new ByteArrayOutputStream();
     s.serializeToStream(s.serializeFeedEntry(e0), bao0);
-    s.serializeToStream(s.serializeFeedEntry(e0), System.out);
 
     final InputStream rs1 = new ByteArrayInputStream(bao0.toByteArray());
     final OPDSAcquisitionFeedEntry e1 =
@@ -76,11 +76,12 @@ public abstract class OPDSJSONSerializerContract
     }
   }
 
-  @Test public void testRoundTrip1()
-    throws Exception
-  {
+  @Test
+  public void testRoundTrip1()
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType ep =
-      OPDSAcquisitionFeedEntryParser.newParser();
+      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
+
     final OPDSFeedParserType p = OPDSFeedParser.newParser(ep);
     final OPDSJSONParserType jp = OPDSJSONParser.newParser();
 
@@ -91,7 +92,6 @@ public abstract class OPDSJSONSerializerContract
 
     final ByteArrayOutputStream bao0 = new ByteArrayOutputStream();
     s.serializeToStream(s.serializeFeed(fe0), bao0);
-    s.serializeToStream(s.serializeFeed(fe0), System.out);
 
     final InputStream rs1 = new ByteArrayInputStream(bao0.toByteArray());
     final OPDSAcquisitionFeed fe1 = jp.parseAcquisitionFeedFromStream(rs1);

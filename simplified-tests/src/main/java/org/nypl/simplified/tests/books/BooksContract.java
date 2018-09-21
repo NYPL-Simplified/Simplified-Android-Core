@@ -25,6 +25,7 @@ import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookDatabaseType;
+import org.nypl.simplified.books.core.BookFormats;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusLoaned;
 import org.nypl.simplified.books.core.BookStatusType;
@@ -89,7 +90,8 @@ public abstract class BooksContract {
 
   private static FeedLoaderType newParser(final BookDatabaseReadableType db) {
     final OPDSFeedParserType in_parser =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
+          BookFormats.supportedBookMimeTypes()));
     final ExecutorService in_exec = Executors.newSingleThreadExecutor();
     final HTTPType http = HTTP.newHTTP();
     final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport =

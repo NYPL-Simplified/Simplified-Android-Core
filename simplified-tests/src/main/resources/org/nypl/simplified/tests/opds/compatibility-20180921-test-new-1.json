@@ -1,0 +1,60 @@
+{
+  "authors": [
+    "Tina Fey"
+  ],
+  "acquisitions": [
+    {
+      "type": "ACQUISITION_GENERIC",
+      "uri": "https://circulation.librarysimplified.org/NYNYPL/works/141999/fulfill/2",
+      "content_type": "application/epub+zip",
+      "indirect_acquisitions": [ ]
+    }
+  ],
+  "availability": {
+    "loaned": {
+      "start_date": "2018-09-20T10:58:50Z",
+      "end_date": "2018-10-11T10:58:50Z",
+      "revoke": "https://circulation.librarysimplified.org/NYNYPL/loans/141999/revoke"
+    }
+  },
+  "categories": [
+    {
+      "scheme": "http://schema.org/audience",
+      "term": "Adult",
+      "label": "Adult"
+    },
+    {
+      "scheme": "http://librarysimplified.org/terms/fiction/",
+      "term": "http://librarysimplified.org/terms/fiction/Nonfiction",
+      "label": "Nonfiction"
+    },
+    {
+      "scheme": "http://librarysimplified.org/terms/genres/Simplified/",
+      "term": "http://librarysimplified.org/terms/genres/Simplified/Biography%20%26%20Memoir",
+      "label": "Biography & Memoir"
+    },
+    {
+      "scheme": "http://librarysimplified.org/terms/genres/Simplified/",
+      "term": "http://librarysimplified.org/terms/genres/Simplified/Humorous%20Nonfiction",
+      "label": "Humorous Nonfiction"
+    },
+    {
+      "scheme": "http://librarysimplified.org/terms/genres/Simplified/",
+      "term": "http://librarysimplified.org/terms/genres/Simplified/Entertainment",
+      "label": "Entertainment"
+    }
+  ],
+  "cover": "https://d3pqhns20516vc.cloudfront.net/3M/beunz9/cover.jpg",
+  "groups": [],
+  "id": "urn:librarysimplified.org/terms/id/Bibliotheca%20ID/beunz9",
+  "published": "2014-04-01T01:00:00Z",
+  "publisher": "Little, Brown and Company",
+  "distribution": "Bibliotheca",
+  "summary": "Before Liz Lemon, before \"Weekend Update,\" before \"Sarah Palin,\" Tina Fey was just a young girl with a dream: a recurring stress dream that she was being chased through a local airport by her middle-school gym teacher. She also had a dream that one day she would be a comedian on TV.<br /><br />She has seen both these dreams come true.<br /><br />At last, Tina Fey's story can be told. From her youthful days as a vicious nerd to her tour of duty on <em>Saturday Night Live</em>; from her passionately halfhearted pursuit of physical beauty to her life as a mother eating things off the floor; from her one-sided college romance to her nearly fatal honeymoon -- from the beginning of this paragraph to this final sentence.<br /><br />Tina Fey reveals all, and proves what we've all suspected: you're no one until someone calls you bossy.<br /><br />(<i>Includes Special, Never-Before-Solicited Opinions on Breastfeeding, Princesses, Photoshop, the Electoral Process, and Italian Rum Cake!)</i><br /><br />",
+  "title": "Bossypants",
+  "thumbnail": "https://d3pqhns20516vc.cloudfront.net/scaled/300/3M/beunz9/cover.jpg",
+  "alternate": "https://circulation.librarysimplified.org/NYNYPL/works/Bibliotheca%20ID/beunz9",
+  "analytics": "https://circulation.librarysimplified.org/NYNYPL/analytics/Bibliotheca%20ID/beunz9",
+  "annotations": "https://circulation.librarysimplified.org/NYNYPL/annotations/Bibliotheca%20ID/beunz9/",
+  "updated": "2018-09-21T03:12:32Z"
+}
