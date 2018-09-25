@@ -6,14 +6,16 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Pair
-import com.io7m.jfunctional.PartialFunctionType
 import com.io7m.jfunctional.ProcedureType
 import com.io7m.jfunctional.Some
-import com.io7m.jfunctional.Unit
+import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
+import org.nypl.simplified.books.core.BookDatabaseEntryFormat.BookDatabaseEntryFormatAudioBook
+import org.nypl.simplified.books.core.BookDatabaseEntryFormat.BookDatabaseEntryFormatEPUB
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotAudioBook
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.json.core.JSONParserUtilities
@@ -33,6 +35,10 @@ import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.HashSet
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 /**
  * A file-based book database.
@@ -44,7 +50,92 @@ class BookDatabase private constructor(
   private val jsonSerializer: OPDSJSONSerializerType) : BookDatabaseType {
 
   private val log: Logger = LoggerFactory.getLogger(BookDatabase::class.java)
+
+  private val snapshotsLock: ReentrantLock = ReentrantLock()
   private val snapshots: MutableMap<BookID, BookDatabaseEntrySnapshot> = HashMap(64)
+
+  init {
+    this.log.debug("opened database {}", this.directory)
+  }
+
+  /**
+   * An available book format.
+   */
+
+  private data class AvailableFormat(
+
+    /**
+     * The precise implementation class of the format. This is used as unique identifier for the
+     * database entry format implementation.
+     */
+
+    val classType: Class<out BookDatabaseEntryFormat>,
+
+    /**
+     * The set of content types that will trigger the creation of a format.
+     */
+
+    val supportedContentTypes: Set<String>,
+
+    /**
+     * A function to construct a format given an existing database entry.
+     */
+
+    val constructor: (BookDatabaseEntry) -> BookDatabaseEntryFormat)
+
+  private val availableFormats: List<AvailableFormat> =
+    listOf(
+      AvailableFormat(
+        classType = DBEntryFormatEPUB::class.java,
+        supportedContentTypes = BookFormats.epubMimeTypes(),
+        constructor = { entry -> DBEntryFormatEPUB(entry) }),
+      AvailableFormat(
+        classType = DBEntryFormatAudioBook::class.java,
+        supportedContentTypes = BookFormats.audioBookMimeTypes(),
+        constructor = { entry -> DBEntryFormatAudioBook(entry) }))
+
+  /**
+   * Create a format if required. This checks to see if there is a content type that is accepted
+   * by any of the available formats, and instantiates one if one doesn't already exist.
+   */
+
+  private fun createFormatIfRequired(
+    owner: BookDatabaseEntry,
+    existingFormats: MutableMap<Class<out BookDatabaseEntryFormat>, BookDatabaseEntryFormat>,
+    contentTypes: Set<String>) {
+
+    for (contentType in contentTypes) {
+      for (availableFormat in this.availableFormats) {
+        if (availableFormat.supportedContentTypes.contains(contentType)) {
+          if (!existingFormats.containsKey(availableFormat.classType)) {
+            this.log.debug(
+              "instantiating format {} for content type {}",
+              availableFormat.classType.simpleName,
+              contentType)
+            existingFormats[availableFormat.classType] = availableFormat.constructor.invoke(owner)
+            return
+          }
+        }
+      }
+    }
+  }
+
+  private fun snapshotUpdate(snapshot: BookDatabaseEntrySnapshot): BookDatabaseEntrySnapshot {
+    this.snapshotsLock.withLock {
+      val sid = snapshot.bookID.shortID
+      this.log.debug("[{}]: updating snapshot", sid)
+      this.snapshots[snapshot.bookID] = snapshot
+      return snapshot
+    }
+  }
+
+  private fun snapshotDelete(bookID: BookID) {
+    this.snapshotsLock.withLock {
+      val sid = bookID.shortID
+      this.log.debug("[{}]: deleting snapshot", sid)
+      this.snapshots.remove(bookID)
+    }
+  }
 
   @Throws(IOException::class)
   private fun bookDatabaseEntries(): List<BookDatabaseEntryType> {
@@ -55,19 +146,11 @@ class BookDatabase private constructor(
 
       for (file in bookList) {
         val bookID = BookID.exactString(file.name)
-        xs.add(BookDatabaseEntry(
-          jsonSerializer = this.jsonSerializer,
-          jsonParser = this.jsonParser,
-          parentDirectory = this.directory,
-          bookID = bookID))
+        xs.add(this.databaseOpenExistingEntry(bookID))
       }
     }
 
     return xs
-  }
-
-  init {
-    this.log.debug("opened database {}", this.directory)
   }
 
   @Throws(IOException::class)
@@ -86,26 +169,27 @@ class BookDatabase private constructor(
     }
   }
 
-  override fun databaseOpenEntryForWriting(bookID: BookID): BookDatabaseEntryType {
-    return BookDatabaseEntry(
+  @Throws(IOException::class)
+  override fun databaseCreateEntry(
+    bookID: BookID,
+    entry: OPDSAcquisitionFeedEntry): BookDatabaseEntryType {
+    return BookDatabaseEntry.create(
+      owner = this,
+      jsonSerializer = this.jsonSerializer,
+      jsonParser = this.jsonParser,
+      parentDirectory = this.directory,
+      bookID = bookID,
+      opdsEntry = entry)
+  }
+
+  @Throws(IOException::class)
+  override fun databaseOpenExistingEntry(bookID: BookID): BookDatabaseEntryType {
+    return BookDatabaseEntry.open(
+      owner = this,
       jsonSerializer = this.jsonSerializer,
       jsonParser = this.jsonParser,
       parentDirectory = this.directory,
       bookID = bookID)
-  }
-
-  @Throws(IOException::class)
-  override fun databaseOpenEntryForReading(bookID: BookID): BookDatabaseEntryReadableType {
-    val file = File(this.directory, bookID.toString())
-    if (file.isDirectory) {
-      return BookDatabaseEntry(
-        jsonSerializer = this.jsonSerializer,
-        jsonParser = this.jsonParser,
-        parentDirectory = this.directory,
-        bookID = bookID)
-    }
-
-    throw FileNotFoundException(file.toString())
   }
 
   override fun databaseNotifyAllBookStatus(
@@ -117,12 +201,7 @@ class BookDatabase private constructor(
 
       for (file in bookList) {
         val bookID = BookID.exactString(file.name)
-        val entry =
-          BookDatabaseEntry(
-            jsonSerializer = this.jsonSerializer,
-            jsonParser = this.jsonParser,
-            parentDirectory = this.directory,
-            bookID = bookID)
+        val entry = this.databaseOpenExistingEntry(bookID)
 
         try {
           val snapshot = entry.entryGetSnapshot()
@@ -140,8 +219,8 @@ class BookDatabase private constructor(
   }
 
   override fun databaseGetEntrySnapshot(book: BookID): OptionType<BookDatabaseEntrySnapshot> {
-    synchronized(this.snapshots) {
-      return if (this.snapshots.containsKey(book)) {
+    return this.snapshotsLock.withLock {
+      if (this.snapshots.containsKey(book)) {
         Option.some(this.snapshots[book])
       } else Option.none()
     }
@@ -161,56 +240,36 @@ class BookDatabase private constructor(
   }
 
   /**
-   * A single book directory.
-   *
-   * All operations on the directory are thread-safe but not necessarily
-   * process-safe.
+   * Operations on EPUB formats in database entries.
    */
 
-  private inner class BookDatabaseEntry constructor(
-    private val jsonSerializer: OPDSJSONSerializerType,
-    private val jsonParser: OPDSJSONParserType,
-    private val parentDirectory: File,
-    private val bookID: BookID) : BookDatabaseEntryType {
+  private inner class DBEntryFormatEPUB(
+    private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatEPUB() {
 
-    private val log: Logger = LoggerFactory.getLogger(BookDatabaseEntry::class.java)
+    private val fileAdobeRightsTmp: File =
+      File(this.owner.directory, "rights_adobe.xml.tmp")
+    private val fileAdobeRights: File =
+      File(this.owner.directory, "rights_adobe.xml")
+    private val fileAdobeMeta: File =
+      File(this.owner.directory, "meta_adobe.json")
+    private val fileAdobeMetaTmp: File =
+      File(this.owner.directory, "meta_adobe.json.tmp")
+    private val fileBook: File =
+      File(this.owner.directory, "book.epub")
 
-    private val directory: File =
-      File(this.parentDirectory, this.bookID.toString())
-    private val fileLock: File =
-      File(this.parentDirectory, this.bookID.toString() + ".lock")
+    @Throws(IOException::class)
+    private fun lockedCopyInBook(file: File) {
+      FileUtilities.fileCopy(file, this.fileBook)
+    }
 
-    private val fileAdobeRightsTmp: File
-    private val fileAdobeRights: File
-    private val fileAdobeMeta: File
-    private val fileAdobeMetaTmp: File
-    private val fileBook: File
-    private val fileCover: File
-    private val fileMeta: File
-    private val fileMetaTmp: File
-    private val fileAnnotations: File
-    private val fileAnnotationsTmp: File
-
-    private fun bookLocked(): OptionType<File> {
+    private fun lockedBookGet(): OptionType<File> {
       return if (this.fileBook.isFile) {
         Option.some(this.fileBook)
       } else Option.none()
     }
 
     @Throws(IOException::class)
-    private fun bookmarksLocked(): List<BookmarkAnnotation> {
-      try {
-        FileInputStream(this.fileAnnotations).use { stream ->
-          return AnnotationsParser.parseBookmarkArray(stream)
-        }
-      } catch (e: FileNotFoundException) {
-        this.log.debug("Bookmarks file not found. Continuing by returning an empty list.")
-        return ArrayList(0)
-      }
-    }
-
-    @Throws(IOException::class)
-    private fun adobeAdobeRightsInformationLocked(): OptionType<AdobeAdeptLoan> {
+    private fun lockedAdobeRightsInformationGet(): OptionType<AdobeAdeptLoan> {
       if (this.fileAdobeRights.isFile) {
         val serialized = FileUtilities.fileReadBytes(this.fileAdobeRights)
         val jom = ObjectMapper()
@@ -226,264 +285,7 @@ class BookDatabase private constructor(
     }
 
     @Throws(IOException::class)
-    private fun coverLocked(): OptionType<File> {
-      return if (this.fileCover.isFile) {
-        Option.some(this.fileCover)
-      } else Option.none()
-    }
-
-    @Throws(IOException::class)
-    private fun coverSetLocked(cover: OptionType<File>) {
-      if (cover is Some<File>) {
-        val file = cover.get()
-        FileUtilities.fileCopy(file, this.fileCover)
-        file.delete()
-      } else {
-        this.fileCover.delete()
-      }
-    }
-
-    @Throws(IOException::class)
-    private fun dataLocked(): OPDSAcquisitionFeedEntry {
-      FileInputStream(this.fileMeta).use { stream ->
-        return this.jsonParser.parseAcquisitionFeedEntryFromStream(stream)
-      }
-    }
-
-    @Throws(IOException::class)
-    private fun snapshotLocked(): BookDatabaseEntrySnapshot {
-      val entry = this.dataLocked()
-      val cover = this.coverLocked()
-      val book = this.bookLocked()
-      val rights = this.adobeAdobeRightsInformationLocked()
-      return BookDatabaseEntrySnapshot(
-        bookID = this.bookID,
-        book = book,
-        entry = entry,
-        adobeRights = rights,
-        cover = cover)
-    }
-
-    init {
-      this.fileCover = File(this.directory, "cover.jpg")
-      this.fileMeta = File(this.directory, "meta.json")
-      this.fileMetaTmp = File(this.directory, "meta.json.tmp")
-      this.fileBook = File(this.directory, "book.epub")
-      this.fileAdobeRights = File(this.directory, "rights_adobe.xml")
-      this.fileAdobeRightsTmp = File(this.directory, "rights_adobe.xml.tmp")
-      this.fileAdobeMeta = File(this.directory, "meta_adobe.json")
-      this.fileAdobeMetaTmp = File(this.directory, "meta_adobe.json.tmp")
-      this.fileAnnotations = File(this.directory, "annotations.json")
-      this.fileAnnotationsTmp = File(this.directory, "annotations.json.tmp")
-    }
-
-    @Throws(IOException::class)
-    override fun entryCopyInBookFromSameFilesystem(
-      file: File): BookDatabaseEntrySnapshot {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.copyInBookFromSameFilesystemLocked(file)
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
-    }
-
-    @Throws(IOException::class)
-    override fun entryCopyInBook(file: File): BookDatabaseEntrySnapshot {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.copyInBookLocked(file)
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
-    }
-
-    @Throws(IOException::class)
-    private fun copyInBookLocked(file: File) {
-      FileUtilities.fileCopy(file, this.fileBook)
-    }
-
-    @Throws(IOException::class)
-    private fun copyInBookFromSameFilesystemLocked(file: File) {
-      FileUtilities.fileRename(file, this.fileBook)
-    }
-
-    @Throws(IOException::class)
-    override fun entryCreate(entry: OPDSAcquisitionFeedEntry): BookDatabaseEntrySnapshot {
-      DirectoryUtilities.directoryCreate(this.directory)
-      return this.entrySetFeedData(entry)
-    }
-
-    @Throws(IOException::class)
-    override fun entryDestroy() {
-      FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, Unit, IOException> {
-          this@BookDatabaseEntry.destroyLocked()
-          this@BookDatabaseEntry.deleteSnapshot()
-          Unit.unit()
-        })
-    }
-
-    @Throws(IOException::class)
-    override fun entryDeleteBookData(): BookDatabaseEntrySnapshot {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.destroyBookDataLocked()
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
-    }
-
-    @Throws(IOException::class)
-    private fun destroyBookDataLocked() {
-      FileUtilities.fileDelete(this.fileBook)
-    }
-
-    @Throws(IOException::class)
-    private fun destroyLocked() {
-      if (this.directory.isDirectory) {
-        val files = this.directory.listFiles()
-        for (file in files) {
-          FileUtilities.fileDelete(file)
-        }
-      }
-
-      FileUtilities.fileDelete(this.directory)
-      FileUtilities.fileDelete(this.fileLock)
-    }
-
-    override fun entryExists(): Boolean {
-      return this.fileMeta.isFile
-    }
-
-    @Throws(IOException::class)
-    override fun entryGetCover(): OptionType<File> {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, OptionType<File>, IOException> {
-          this@BookDatabaseEntry.coverLocked()
-        })
-    }
-
-    @Throws(IOException::class)
-    override fun entrySetCover(cover: OptionType<File>): BookDatabaseEntrySnapshot {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.coverSetLocked(cover)
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
-    }
-
-    @Throws(IOException::class)
-    override fun entrySetAdobeRightsInformation(
-      loan: OptionType<AdobeAdeptLoan>): BookDatabaseEntrySnapshot {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.setAdobeRightsInformationLocked(loan)
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
-    }
-
-    /*
-    Bookmarks - Public Methods
-     */
-
-    @Throws(IOException::class)
-    override fun entryAddBookmark(bookmark: BookmarkAnnotation): BookDatabaseEntrySnapshot {
-      val bookmarks = this.entryGetBookmarks().toMutableList()
-      bookmarks.add(bookmark)
-      return this.entrySetBookmarksList(bookmarks)
-    }
-
-    @Throws(IOException::class)
-    override fun entryDeleteBookmark(bookmark: BookmarkAnnotation): BookDatabaseEntrySnapshot {
-      val bookmarks = this.entryGetBookmarks().toMutableList()
-      bookmarks.remove(bookmark)
-      return this.entrySetBookmarksList(bookmarks)
-    }
-
-    @Throws(IOException::class)
-    override fun entrySetBookmarks(bookmarks: List<BookmarkAnnotation>): BookDatabaseEntrySnapshot {
-      return this.entrySetBookmarksList(bookmarks)
-    }
-
-    @Throws(IOException::class)
-    override fun entryGetBookmarks(): List<BookmarkAnnotation> {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, List<BookmarkAnnotation>, IOException> {
-          this@BookDatabaseEntry.bookmarksLocked()
-        })
-    }
-
-    /*
-    Bookmarks - Private Overrides
-     */
-
-    @Throws(IOException::class)
-    internal fun entrySetBookmarksList(
-      bookmarks: List<BookmarkAnnotation>): BookDatabaseEntrySnapshot {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.setBookmarksListLocked(bookmarks)
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
-    }
-
-    @Throws(IOException::class)
-    private fun setBookmarksListLocked(bookmarks: List<BookmarkAnnotation>) {
-      val stream = FileOutputStream(this.fileAnnotationsTmp)
-
-      try {
-        val mapper = ObjectMapper()
-        val bookmarksArray = mapper.valueToTree<ArrayNode>(bookmarks)
-        val objNode = mapper.createObjectNode()
-        objNode.putArray("bookmarks").addAll(bookmarksArray)
-        this.jsonSerializer.serializeToStream(objNode, stream)
-      } finally {
-        stream.flush()
-        stream.close()
-      }
-      FileUtilities.fileRename(this.fileAnnotationsTmp, this.fileAnnotations)
-    }
-
-    @Throws(IOException::class)
-    override fun entryUpdateAll(
-      entry: OPDSAcquisitionFeedEntry,
-      bookStatus: BooksStatusCacheType,
-      http: HTTPType): BookDatabaseEntrySnapshot {
-      val sid = this.bookID.shortID
-
-      this.entryCreate(entry)
-
-      this.log.debug("[{}]: getting snapshot", sid)
-      val snap = this.entryGetSnapshot()
-      this.log.debug("[{}]: determining status", sid)
-      val status = BookStatus.fromSnapshot(this.bookID, snap)
-
-      this.log.debug("[{}]: updating status", sid)
-      bookStatus.booksStatusUpdateIfMoreImportant(status)
-
-      this.log.debug("[{}]: finished synchronizing book entry", sid)
-      return snap
-    }
-
-    @Throws(IOException::class)
-    private fun setAdobeRightsInformationLocked(
-      loan: OptionType<AdobeAdeptLoan>) {
+    private fun lockedAdobeRightsInformationSet(loan: OptionType<AdobeAdeptLoan>) {
       if (loan is Some<AdobeAdeptLoan>) {
         val data = loan.get()
 
@@ -513,57 +315,370 @@ class BookDatabase private constructor(
     }
 
     @Throws(IOException::class)
-    override fun entryGetFeedData(): OPDSAcquisitionFeedEntry {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, OPDSAcquisitionFeedEntry, IOException> {
-          this@BookDatabaseEntry.dataLocked()
-        })
+    private fun lockedDestroyBookData() {
+      FileUtilities.fileDelete(this.fileBook)
     }
 
-    @Throws(IOException::class)
-    override fun entrySetFeedData(entry: OPDSAcquisitionFeedEntry): BookDatabaseEntrySnapshot {
-      val node = this.jsonSerializer.serializeFeedEntry(entry)
-
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.setDataLocked(node)
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
+    override fun copyInBook(file: File): BookDatabaseEntrySnapshot {
+      return this.owner.entryLock.withLock {
+        this.lockedCopyInBook(file)
+        this.owner.lockedUpdateSnapshot()
+      }
     }
 
-    private fun deleteSnapshot() {
-      synchronized(this@BookDatabase.snapshots) {
-        val sid = this.bookID.shortID
-        this.log.debug("[{}]: deleting snapshot", sid)
-        this@BookDatabase.snapshots.remove(this.bookID)
+    override fun deleteBookData(): BookDatabaseEntrySnapshot {
+      return this.owner.entryLock.withLock {
+        this.lockedDestroyBookData()
+        this.owner.lockedUpdateSnapshot()
+      }
+    }
+
+    override fun setAdobeRightsInformation(
+      loan: OptionType<AdobeAdeptLoan>): BookDatabaseEntrySnapshot {
+      return this.owner.entryLock.withLock {
+        this.lockedAdobeRightsInformationSet(loan)
+        this.owner.lockedUpdateSnapshot()
+      }
+    }
+
+    override fun snapshot(): BookDatabaseEntryFormatSnapshotEPUB {
+      return this.owner.entryLock.withLock {
+        BookDatabaseEntryFormatSnapshotEPUB(
+          adobeRights = this.lockedAdobeRightsInformationGet(),
+          book = this.lockedBookGet())
+      }
+    }
+  }
+
+  /**
+   * Operations on audio book formats in database entries.
+   */
+
+  private class DBEntryFormatAudioBook(
+    private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatAudioBook() {
+
+    override fun snapshot(): BookDatabaseEntryFormatSnapshotAudioBook {
+      return BookDatabaseEntryFormatSnapshotAudioBook()
+    }
+  }
+
+  /**
+   * A single book directory.
+   *
+   * All operations on the directory are thread-safe but not necessarily
+   * process-safe.
+   */
+
+  private class BookDatabaseEntry constructor(
+    private val owner: BookDatabase,
+    private val jsonSerializer: OPDSJSONSerializerType,
+    private val jsonParser: OPDSJSONParserType,
+    private val parentDirectory: File,
+    private val bookID: BookID) : BookDatabaseEntryType {
+
+    private val log: Logger =
+      LoggerFactory.getLogger(BookDatabaseEntry::class.java)
+
+    val directory: File =
+      File(this.parentDirectory, this.bookID.toString())
+
+    val entryLock: ReentrantLock = ReentrantLock()
+
+    private val fileCover: File
+    private val fileMeta: File
+    private val fileMetaTmp: File
+    private val fileAnnotations: File
+    private val fileAnnotationsTmp: File
+
+    private lateinit var opdsEntry: OPDSAcquisitionFeedEntry
+
+    private val formats: MutableMap<Class<out BookDatabaseEntryFormat>, BookDatabaseEntryFormat> =
+      mutableMapOf()
+
+    init {
+      this.fileCover = File(this.directory, "cover.jpg")
+      this.fileMeta = File(this.directory, "meta.json")
+      this.fileMetaTmp = File(this.directory, "meta.json.tmp")
+      this.fileAnnotations = File(this.directory, "annotations.json")
+      this.fileAnnotationsTmp = File(this.directory, "annotations.json.tmp")
+
+      this.log.debug("[{}]: mkdir {}", this.bookID.shortID, this.directory)
+      DirectoryUtilities.directoryCreate(this.directory)
+    }
+
+    companion object {
+
+      internal fun create(
+        owner: BookDatabase,
+        jsonSerializer: OPDSJSONSerializerType,
+        jsonParser: OPDSJSONParserType,
+        parentDirectory: File,
+        bookID: BookID,
+        opdsEntry: OPDSAcquisitionFeedEntry): BookDatabaseEntry {
+
+        val entry =
+          BookDatabaseEntry(
+            owner = owner,
+            jsonParser = jsonParser,
+            jsonSerializer = jsonSerializer,
+            parentDirectory = parentDirectory,
+            bookID = bookID)
+
+        entry.entrySetFeedData(opdsEntry)
+        return entry
+      }
+
+      internal fun open(
+        owner: BookDatabase,
+        jsonSerializer: OPDSJSONSerializerType,
+        jsonParser: OPDSJSONParserType,
+        parentDirectory: File,
+        bookID: BookID): BookDatabaseEntry {
+
+        val file = File(parentDirectory, bookID.toString())
+        if (file.isDirectory) {
+          val entry =
+            BookDatabaseEntry(
+              owner = owner,
+              jsonParser = jsonParser,
+              jsonSerializer = jsonSerializer,
+              parentDirectory = parentDirectory,
+              bookID = bookID)
+
+          entry.loadMetadata()
+          return entry
+        }
+
+        throw FileNotFoundException(file.absolutePath)
+      }
+    }
+
+    private fun lockedConfigureForEntry(entry: OPDSAcquisitionFeedEntry) {
+      entry.acquisitions.forEach { acquisition ->
+        this.owner.createFormatIfRequired(
+          owner = this,
+          existingFormats = this.formats,
+          contentTypes = acquisition.availableFinalContentTypes())
       }
     }
 
     @Throws(IOException::class)
-    private fun updateSnapshotLocked(): BookDatabaseEntrySnapshot {
-      val snapshot = this.snapshotLocked()
-      synchronized(this@BookDatabase.snapshots) {
-        val sid = this.bookID.shortID
-        this.log.debug("[{}]: updating snapshot {}", sid, snapshot)
-        this@BookDatabase.snapshots[this.bookID] = snapshot
-        return snapshot
+    private fun lockedBookmarks(): List<BookmarkAnnotation> {
+      try {
+        FileInputStream(this.fileAnnotations).use { stream ->
+          return AnnotationsParser.parseBookmarkArray(stream)
+        }
+      } catch (e: FileNotFoundException) {
+        this.log.debug(
+          "[{}]: Bookmarks file not found. Continuing by returning an empty list.",
+          this.bookID.shortID)
+        return emptyList()
       }
     }
 
     @Throws(IOException::class)
-    private fun setDataLocked(node: ObjectNode) {
-      this.log.debug("updating data {}", this.fileMeta)
+    private fun lockedCoverGet(): OptionType<File> {
+      return if (this.fileCover.isFile) {
+        Option.some(this.fileCover)
+      } else Option.none()
+    }
 
+    @Throws(IOException::class)
+    private fun lockedCoverSet(cover: OptionType<File>) {
+      if (cover is Some<File>) {
+        val file = cover.get()
+        FileUtilities.fileCopy(file, this.fileCover)
+        file.delete()
+      } else {
+        this.fileCover.delete()
+      }
+    }
+
+    @Throws(IOException::class)
+    private fun loadMetadata(): OPDSAcquisitionFeedEntry {
+      return this.entryLock.withLock {
+        val loaded = FileInputStream(this.fileMeta).use { stream ->
+          this.jsonParser.parseAcquisitionFeedEntryFromStream(stream)
+        }
+        this.opdsEntry = loaded
+        loaded
+      }
+    }
+
+    @Throws(IOException::class)
+    private fun lockedSnapshotGet(): BookDatabaseEntrySnapshot {
+      val resultCover =
+        if (this.fileCover.isFile) {
+          Option.some(this.fileCover)
+        } else Option.none()
+
+      val resultFormatSnapshots =
+        this.formats.values.map { format -> format.snapshot() }
+
+      return BookDatabaseEntrySnapshot(
+        bookID = this.bookID,
+        cover = resultCover,
+        entry = this.opdsEntry,
+        formats = resultFormatSnapshots)
+    }
+
+    @Throws(IOException::class)
+    private fun lockedDestroy() {
+      if (this.directory.isDirectory) {
+        val files = this.directory.listFiles()
+        for (file in files) {
+          try {
+            FileUtilities.fileDelete(file)
+          } catch (e: Exception) {
+            this.log.error("[{}]: error deleting {}: ", this.bookID.shortID, file, e)
+          }
+        }
+      }
+
+      FileUtilities.fileDelete(this.directory)
+    }
+
+    @Throws(IOException::class)
+    private fun lockedMetadataSet(node: ObjectNode) {
       FileOutputStream(this.fileMetaTmp).use { stream ->
         this.jsonSerializer.serializeToStream(node, stream)
         stream.flush()
       }
 
       FileUtilities.fileRename(this.fileMetaTmp, this.fileMeta)
+    }
+
+    @Throws(IOException::class)
+    private fun lockedBookmarksListSet(bookmarks: List<BookmarkAnnotation>) {
+      FileOutputStream(this.fileAnnotationsTmp).use { stream ->
+        try {
+          val mapper = ObjectMapper()
+          val bookmarksArray = mapper.valueToTree<ArrayNode>(bookmarks)
+          val objNode = mapper.createObjectNode()
+          objNode.putArray("bookmarks").addAll(bookmarksArray)
+          this.jsonSerializer.serializeToStream(objNode, stream)
+        } finally {
+          stream.flush()
+        }
+      }
+
+      FileUtilities.fileRename(this.fileAnnotationsTmp, this.fileAnnotations)
+    }
+
+    @Throws(IOException::class)
+    internal fun lockedUpdateSnapshot(): BookDatabaseEntrySnapshot {
+      val snapshot = this.lockedSnapshotGet()
+      return this.owner.snapshotUpdate(snapshot)
+    }
+
+    @Throws(IOException::class)
+    override fun entryDestroy() {
+      this.entryLock.withLock {
+        this.lockedDestroy()
+        this.owner.snapshotDelete(this.bookID)
+      }
+    }
+
+    override fun entryFormats(): List<BookDatabaseEntryFormat> {
+      return this.entryLock.withLock {
+        this.formats.values.toList()
+      }
+    }
+
+    override fun entryExists(): Boolean {
+      return this.fileMeta.isFile
+    }
+
+    @Throws(IOException::class)
+    override fun entryGetCover(): OptionType<File> {
+      return this.entryLock.withLock {
+        this.lockedCoverGet()
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entrySetCover(cover: OptionType<File>): BookDatabaseEntrySnapshot {
+      return this.entryLock.withLock {
+        this.lockedCoverSet(cover)
+        this.lockedUpdateSnapshot()
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entryAddBookmark(bookmark: BookmarkAnnotation): BookDatabaseEntrySnapshot {
+      return this.entryLock.withLock {
+        val bookmarks = this.lockedBookmarks().toMutableList()
+        bookmarks.add(bookmark)
+
+        this.lockedBookmarksListSet(bookmarks)
+        this.lockedUpdateSnapshot()
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entryDeleteBookmark(bookmark: BookmarkAnnotation): BookDatabaseEntrySnapshot {
+      return this.entryLock.withLock {
+        val bookmarks = this.lockedBookmarks().toMutableList()
+        bookmarks.remove(bookmark)
+
+        this.lockedBookmarksListSet(bookmarks)
+        this.lockedUpdateSnapshot()
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entrySetBookmarks(bookmarks: List<BookmarkAnnotation>): BookDatabaseEntrySnapshot {
+      return this.entryLock.withLock {
+        this.lockedBookmarksListSet(bookmarks)
+        this.lockedUpdateSnapshot()
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entryGetBookmarks(): List<BookmarkAnnotation> {
+      return this.entryLock.withLock {
+        this.lockedBookmarks()
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entryUpdateAll(
+      entry: OPDSAcquisitionFeedEntry,
+      bookStatus: BooksStatusCacheType,
+      http: HTTPType): BookDatabaseEntrySnapshot {
+      val sid = this.bookID.shortID
+
+      this.entrySetFeedData(entry)
+
+      this.log.debug("[{}]: getting snapshot", sid)
+      val snap = this.entryGetSnapshot()
+      this.log.debug("[{}]: determining status", sid)
+      val status = BookStatus.fromSnapshot(this.bookID, snap)
+
+      this.log.debug("[{}]: updating status", sid)
+      bookStatus.booksStatusUpdateIfMoreImportant(status)
+
+      this.log.debug("[{}]: finished synchronizing book entry", sid)
+      return snap
+    }
+
+    @Throws(IOException::class)
+    override fun entryGetFeedData(): OPDSAcquisitionFeedEntry {
+      return this.entryLock.withLock {
+        this.opdsEntry
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entrySetFeedData(entry: OPDSAcquisitionFeedEntry): BookDatabaseEntrySnapshot {
+      val node = this.jsonSerializer.serializeFeedEntry(entry)
+
+      return this.entryLock.withLock {
+        this.opdsEntry = entry
+        this.lockedConfigureForEntry(entry)
+        this.lockedMetadataSet(node)
+        this.lockedUpdateSnapshot()
+      }
     }
 
     override fun entryGetDirectory(): File {
@@ -576,17 +691,24 @@ class BookDatabase private constructor(
 
     @Throws(IOException::class)
     override fun entryGetSnapshot(): BookDatabaseEntrySnapshot {
-      return FileLocking.withFileThreadLocked(
-        this.fileLock,
-        BookDatabase.LOCK_WAIT_MAXIMUM_MILLISECONDS.toLong(),
-        PartialFunctionType<Unit, BookDatabaseEntrySnapshot, IOException> {
-          this@BookDatabaseEntry.updateSnapshotLocked()
-        })
+      return this.entryLock.withLock {
+        this.lockedUpdateSnapshot()
+      }
+    }
+
+    override fun <T : BookDatabaseEntryFormat> entryFindFormat(clazz: Class<T>): OptionType<T> {
+      this.entryLock.withLock {
+        for (format in this.formats.keys) {
+          if (clazz.isAssignableFrom(format)) {
+            return Option.some(formats[format]!! as T)
+          }
+        }
+        return Option.none()
+      }
     }
   }
 
   companion object {
-    private const val LOCK_WAIT_MAXIMUM_MILLISECONDS: Int = 1000
 
     /**
      * Open a database at the given directory.

@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.reader;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -51,7 +50,7 @@ import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
 import org.nypl.simplified.books.core.BookDatabaseEntryReadableType;
-import org.nypl.simplified.books.core.BookDatabaseEntryWritableType;
+import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
 import org.nypl.simplified.books.core.SelectorNode;
@@ -545,7 +544,7 @@ public final class ReaderActivity extends Activity implements
       if (this.bookmarks == null) {
         try {
           final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
-          final BookDatabaseEntryReadableType entry = db.databaseOpenEntryForReading(this.book_id);
+          final BookDatabaseEntryReadableType entry = db.databaseOpenExistingEntry(this.book_id);
           this.bookmarks = entry.entryGetBookmarks();
           LOG.debug("Bookmarks ivar reconstituted after book launch: \n{}", this.bookmarks);
         } catch (IOException e) {
@@ -634,8 +633,9 @@ public final class ReaderActivity extends Activity implements
 
   private void saveToDisk(@NonNull BookmarkAnnotation mark) {
     final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+
     try {
+      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
       entry.entryAddBookmark(mark);
     } catch (IOException e) {
       LOG.error("Error writing annotation to app database: {}", mark);
@@ -652,8 +652,9 @@ public final class ReaderActivity extends Activity implements
     Delete on the disk
      */
     final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-    final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+
     try {
+      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
       entry.entryDeleteBookmark(annotation);
     } catch (IOException e) {
       LOG.error("Error deleting annotation from the app database: {}", annotation);
@@ -920,8 +921,9 @@ public final class ReaderActivity extends Activity implements
           this.bookmarks = syncedMarks;
           //Update bookmarks on disk
           final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-          final BookDatabaseEntryWritableType entry = db.databaseOpenEntryForWriting(this.book_id);
+
           try {
+            final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
             entry.entrySetBookmarks(syncedMarks);
           } catch (IOException e) {
             LOG.error("Error writing annotation to app database: {}", syncedMarks);

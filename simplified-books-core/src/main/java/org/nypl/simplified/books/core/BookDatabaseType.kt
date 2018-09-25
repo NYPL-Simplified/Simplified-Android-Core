@@ -2,6 +2,7 @@ package org.nypl.simplified.books.core
 
 import com.io7m.jfunctional.Pair
 import com.io7m.jfunctional.ProcedureType
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 
 import java.io.IOException
 
@@ -35,11 +36,14 @@ interface BookDatabaseType : BookDatabaseReadableType {
    * without creating a new one.
    *
    * @param bookID The book ID
+   * @param entry The acquisition feed entry
    *
    * @return The database entry for `bookID`
    */
 
-  fun databaseOpenEntryForWriting(bookID: BookID): BookDatabaseEntryType
+  fun databaseCreateEntry(
+    bookID: BookID,
+    entry: OPDSAcquisitionFeedEntry): BookDatabaseEntryType
 
   /**
    * Open an existing database entry for reading.
@@ -52,7 +56,7 @@ interface BookDatabaseType : BookDatabaseReadableType {
    */
 
   @Throws(IOException::class)
-  fun databaseOpenEntryForReading(bookID: BookID): BookDatabaseEntryReadableType
+  fun databaseOpenExistingEntry(bookID: BookID): BookDatabaseEntryType
 
   /**
    * Notify the given status cache of the status of all books within the

@@ -20,7 +20,9 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -50,12 +52,12 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
   private static final Logger LOG =
     LoggerFactory.getLogger(OPDSAcquisitionFeedEntryParser.class);
 
-  private final List<String> supported_book_formats;
+  private final Set<String> supported_book_formats;
 
   private OPDSAcquisitionFeedEntryParser(
-    final List<String> supported_book_formats) {
+    final Set<String> supported_book_formats) {
     this.supported_book_formats =
-      Collections.unmodifiableList(new ArrayList<>(
+      Collections.unmodifiableSet(new HashSet<>(
         NullCheck.notNull(supported_book_formats, "Supported book formats")));
   }
 
@@ -88,7 +90,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
    */
 
   public static OPDSAcquisitionFeedEntryParserType newParser(
-    final List<String> supported_book_formats) {
+    final Set<String> supported_book_formats) {
     return new OPDSAcquisitionFeedEntryParser(supported_book_formats);
   }
 

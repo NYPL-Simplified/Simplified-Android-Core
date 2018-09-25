@@ -207,8 +207,7 @@ final class BooksControllerFulFillTask implements Runnable
           }
 
         } catch (final Throwable x) {
-          BooksControllerFulFillTask.LOG.error(
-            "[{}]: unable to save entry: {}: ", in_book_id.getShortID(), x);
+          LOG.error("[{}]: unable to save entry: ", in_book_id.getShortID(), x);
         }
       }
     }

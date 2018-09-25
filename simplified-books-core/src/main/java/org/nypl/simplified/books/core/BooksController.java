@@ -283,7 +283,6 @@ public final class BooksController implements BooksType {
         this,
         this.book_database,
         this.accounts_database,
-        this.config,
         this.http,
         this.feed_parser,
         listener,
@@ -482,7 +481,7 @@ public final class BooksController implements BooksType {
             (Some<BookDatabaseEntrySnapshot>) snap_opt;
           final BookDatabaseEntrySnapshot snap = snap_some.get();
           this.books_status.booksStatusUpdate(
-            BookStatus.fromSnapshot(
+            BookStatus.Companion.fromSnapshot(
               id, snap));
         } else {
 
