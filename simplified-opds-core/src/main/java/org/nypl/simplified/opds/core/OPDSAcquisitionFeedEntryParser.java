@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
@@ -156,17 +158,61 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     parseCategories(element, entry_builder);
 
     findAcquisitionAuthors(element, entry_builder);
+    entry_builder.setPublisherOption(findPublisher(element));
+    entry_builder.setDistribution(findDistribution(element));
+    entry_builder.setPublishedOption(OPDSAtom.findPublished(element));
 
-    entry_builder.setPublisherOption(
-      findPublisher(element));
-    entry_builder.setDistribution(
-      findDistribution(element));
-    entry_builder.setPublishedOption(
-      OPDSAtom.findPublished(element));
     entry_builder.setSummaryOption(
       OPDSXML.getFirstChildElementTextWithNameOptional(element, ATOM_URI, "summary"));
 
     return entry_builder.build();
+  }
+
+  private void tryConsumeDRMLicensorInformation(
+    final OPDSAcquisitionFeedEntryBuilderType entry_builder,
+    final Element e_link)
+    throws OPDSParseException {
+
+    final OptionType<Element> licensor_opt =
+      OPDSXML.getFirstChildElementWithNameOptional(
+        e_link, OPDSFeedConstants.DRM_URI, "licensor");
+
+    if (licensor_opt.isSome()) {
+      final Some<Element> licensor_some = (Some<Element>) licensor_opt;
+
+      final Element licensor_element = OPDSXML.nodeAsElement(licensor_some.get());
+      final String vendor = licensor_element.getAttribute("drm:vendor");
+      String client_token = null;
+      OptionType<String> device_manager = Option.none();
+
+      final NodeList licensor_children = licensor_element.getChildNodes();
+      for (int i = 0; i < licensor_children.getLength(); ++i) {
+        final Node node = licensor_children.item(i);
+
+        if (node.getNodeName().contains("clientToken")) {
+          client_token = node.getFirstChild().getNodeValue();
+        }
+
+        if (node.getNodeName().contains("link")) {
+          final Element element = OPDSXML.nodeAsElement(node);
+          final boolean has_everything =
+            element.hasAttribute("rel") && element.hasAttribute("href");
+
+          if (has_everything) {
+            final String r = NullCheck.notNull(element.getAttribute("rel"));
+            final String h = NullCheck.notNull(element.getAttribute("href"));
+
+            if ("http://librarysimplified.org/terms/drm/rel/devices".equals(r)) {
+              device_manager = Option.some(h);
+            }
+          }
+        }
+        if (vendor != null && client_token != null) {
+          final DRMLicensor licensor = new DRMLicensor(vendor, client_token, device_manager);
+          entry_builder.setLicensorOption(Option.some(licensor));
+        }
+      }
+    }
   }
 
   private OPDSIndirectAcquisition parseIndirectAcquisition(
@@ -218,6 +264,8 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
           }
         }
       }
+
+      tryConsumeDRMLicensorInformation(entry_builder, link);
     }
   }
 

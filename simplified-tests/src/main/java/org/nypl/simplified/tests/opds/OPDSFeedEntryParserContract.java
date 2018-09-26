@@ -7,6 +7,7 @@ import com.io7m.jfunctional.Some;
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
@@ -507,6 +508,28 @@ public abstract class OPDSFeedEntryParserContract {
     Assert.assertTrue(
       "text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media is available",
       available_content_types.contains("text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media"));
+  }
+
+  @Test
+  public void testEntryWithDRM()
+    throws Exception {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
+      OPDSFeedEntryParserContract.getResource("entry-with-drm.xml"));
+
+    OptionType<DRMLicensor> licensor_opt = e.getLicensor();
+    Assert.assertTrue(licensor_opt.isSome());
+
+    DRMLicensor licensor = ((Some<DRMLicensor>) licensor_opt).get();
+    Assert.assertEquals(
+      "NYPL",
+      licensor.getVendor());
+    Assert.assertEquals(
+      "NYNYPL|0000000000|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      licensor.getClientToken());
+    Assert.assertEquals(
+      Option.some("http://qa.circulation.librarysimplified.org/NYNYPL/AdobeAuth/devices"),
+      licensor.getDeviceManager());
   }
 
   private OPDSAcquisitionFeedEntryParserType getParser() {
