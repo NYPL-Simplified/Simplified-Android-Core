@@ -15,7 +15,6 @@ import org.nypl.simplified.http.core.HTTPResultMatcherType;
 import org.nypl.simplified.http.core.HTTPResultOKType;
 import org.nypl.simplified.http.core.HTTPResultType;
 import org.nypl.simplified.http.core.HTTPType;
-import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -29,8 +28,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-final class BooksControllerFulFillTask implements Runnable
-{
+final class BooksControllerFulFillTask implements Runnable {
   private static final Logger LOG;
 
   static {
@@ -38,13 +36,13 @@ final class BooksControllerFulFillTask implements Runnable
       LoggerFactory.getLogger(BooksControllerFulFillTask.class));
   }
 
-  private final OPDSFeedParserType               feed_parser;
-  private final HTTPType                         http;
-  private final AtomicBoolean                    running;
-  private final BooksControllerType              books_controller;
-  private final AccountsDatabaseType             accounts_database;
-  private final URI                              loans_uri;
-  private final BookID                           book_id;
+  private final OPDSFeedParserType feed_parser;
+  private final HTTPType http;
+  private final AtomicBoolean running;
+  private final BooksControllerType books_controller;
+  private final AccountsDatabaseType accounts_database;
+  private final URI loans_uri;
+  private final BookID book_id;
 
   BooksControllerFulFillTask(
     final BooksControllerType in_books,
@@ -53,8 +51,7 @@ final class BooksControllerFulFillTask implements Runnable
     final OPDSFeedParserType in_feed_parser,
     final AtomicBoolean in_running,
     final URI in_loans_uri,
-    final BookID in_book_id)
-  {
+    final BookID in_book_id) {
     this.books_controller = NullCheck.notNull(in_books);
     this.accounts_database = NullCheck.notNull(in_accounts_database);
     this.http = NullCheck.notNull(in_http);
@@ -64,12 +61,12 @@ final class BooksControllerFulFillTask implements Runnable
     this.book_id = NullCheck.notNull(in_book_id);
   }
 
-   BooksControllerFulFillTask(final BooksControllerType in_books,
-                                     final AccountsDatabaseType in_accounts_database,
-                                     final HTTPType in_http,
-                                     final OPDSFeedParserType in_feed_parser,
-                                     final AtomicBoolean in_running,
-                                     final URI in_loans_uri) {
+  BooksControllerFulFillTask(final BooksControllerType in_books,
+                             final AccountsDatabaseType in_accounts_database,
+                             final HTTPType in_http,
+                             final OPDSFeedParserType in_feed_parser,
+                             final AtomicBoolean in_running,
+                             final URI in_loans_uri) {
     this.books_controller = NullCheck.notNull(in_books);
     this.accounts_database = NullCheck.notNull(in_accounts_database);
     this.http = NullCheck.notNull(in_http);
@@ -80,8 +77,8 @@ final class BooksControllerFulFillTask implements Runnable
 
   }
 
-  @Override public void run()
-  {
+  @Override
+  public void run() {
     if (this.running.compareAndSet(false, true)) {
       try {
         BooksControllerFulFillTask.LOG.debug("running");
@@ -100,8 +97,7 @@ final class BooksControllerFulFillTask implements Runnable
   }
 
   private void sync()
-    throws Exception
-  {
+    throws Exception {
 
 
     final OptionType<AccountCredentials> credentials_opt =
@@ -171,8 +167,7 @@ final class BooksControllerFulFillTask implements Runnable
 
   private void fulFillEntries(
     final HTTPResultOKType<InputStream> r_feed)
-    throws Exception
-  {
+    throws Exception {
     final BooksStatusCacheType books_status =
       this.books_controller.bookGetStatusCache();
 
@@ -190,20 +185,11 @@ final class BooksControllerFulFillTask implements Runnable
 
       if (this.book_id == null || this.book_id.equals(in_book_id)) {
         try {
-
-
           final OptionType<BookStatusType> stat =
             books_status.booksStatusGet(in_book_id);
 
           if (stat.isSome() && ((Some<BookStatusType>) stat).get() instanceof BookStatusDownloaded) {
-            final OptionType<OPDSAcquisition> a_opt =
-              BooksControllerFulFillTask.getPreferredAcquisition(
-                in_book_id, e_nn.getAcquisitions());
-            if (a_opt.isSome()) {
-              final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
-              this.books_controller.bookBorrow(in_book_id, a, e_nn, true);
-            }
-
+            this.books_controller.bookBorrow(in_book_id, e_nn, true);
           }
 
         } catch (final Throwable x) {
@@ -211,55 +197,6 @@ final class BooksControllerFulFillTask implements Runnable
         }
       }
     }
-
-
-  }
-
-  public static OptionType<OPDSAcquisition> getPreferredAcquisition(
-    final BookID book_id,
-    final List<OPDSAcquisition> acquisitions)
-  {
-    NullCheck.notNull(acquisitions);
-
-    if (acquisitions.isEmpty()) {
-      BooksControllerFulFillTask.LOG.debug(
-        "[{}]: no acquisitions, so no best acquisition!", book_id);
-      return Option.none();
-    }
-
-    OPDSAcquisition best = NullCheck.notNull(acquisitions.get(0));
-    for (final OPDSAcquisition current : acquisitions) {
-      final OPDSAcquisition nn_current = NullCheck.notNull(current);
-      if (BooksControllerFulFillTask.priority(nn_current)
-        > BooksControllerFulFillTask.priority(best)) {
-        best = nn_current;
-      }
-    }
-
-    BooksControllerFulFillTask.LOG.debug(
-      "[{}]: best acquisition of {} was {}", book_id, acquisitions, best);
-
-    return Option.some(best);
-  }
-  private static int priority(
-    final OPDSAcquisition a)
-  {
-    switch (a.getRelation()) {
-      case ACQUISITION_BORROW:
-        return 6;
-      case ACQUISITION_OPEN_ACCESS:
-        return 5;
-      case ACQUISITION_GENERIC:
-        return 4;
-      case ACQUISITION_SAMPLE:
-        return 3;
-      case ACQUISITION_BUY:
-        return 2;
-      case ACQUISITION_SUBSCRIBE:
-        return 1;
-    }
-
-    return 0;
   }
 
 }

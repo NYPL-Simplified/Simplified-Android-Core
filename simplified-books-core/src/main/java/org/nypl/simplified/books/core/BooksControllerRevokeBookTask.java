@@ -37,7 +37,7 @@ import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.nypl.simplified.books.core.BookDatabaseEntryFormat.*;
+import static org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.*;
 import static org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.*;
 
 final class BooksControllerRevokeBookTask
@@ -52,7 +52,7 @@ final class BooksControllerRevokeBookTask
   private final FeedLoaderType feed_loader;
   private final AccountsDatabaseReadableType accounts_database;
   private BookDatabaseEntryType database_entry;
-  private BookDatabaseEntryFormatEPUB database_epub_entry;
+  private BookDatabaseEntryFormatHandleEPUB database_epub_entry;
 
   BooksControllerRevokeBookTask(
     final BookDatabaseType in_books_database,
@@ -76,14 +76,14 @@ final class BooksControllerRevokeBookTask
 
       this.database_entry = this.books_database.databaseOpenExistingEntry(this.book_id);
 
-      OptionType<BookDatabaseEntryFormatEPUB> format_opt =
-        this.database_entry.entryFindFormat(BookDatabaseEntryFormatEPUB.class);
+      OptionType<BookDatabaseEntryFormatHandleEPUB> format_opt =
+        this.database_entry.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
 
       if (format_opt.isNone()) {
         throw new UnimplementedCodeException();
       }
 
-      this.database_epub_entry = ((Some<BookDatabaseEntryFormatEPUB>) format_opt).get();
+      this.database_epub_entry = ((Some<BookDatabaseEntryFormatHandleEPUB>) format_opt).get();
 
       final BookDatabaseEntrySnapshot snap = this.database_entry.entryGetSnapshot();
       final OPDSAvailabilityType avail = snap.getEntry().getAvailability();

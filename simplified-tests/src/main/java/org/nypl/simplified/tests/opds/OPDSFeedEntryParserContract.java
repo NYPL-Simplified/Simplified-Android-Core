@@ -533,6 +533,6 @@ public abstract class OPDSFeedEntryParserContract {
   }
 
   private OPDSAcquisitionFeedEntryParserType getParser() {
-    return OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
+    return OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
   }
 }

@@ -1,0 +1,97 @@
+<entry xmlns:bibframe="http://bibframe.org/vocab/" xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:simplified="http://librarysimplified.org/terms/" xmlns="http://www.w3.org/2005/Atom"
+  simplified:entryPoint="http://schema.org/EBook">
+  <title>The Book of Wonder</title>
+  <author>
+    <name>Lord Dunsany</name>
+    <link
+      href="https://circulation.librarysimplified.org/CLASSICS/works/contributor/Lord%20Dunsany/eng/Adult%2CAdults+Only%2CChildren%2CYoung+Adult"
+      rel="contributor" title="Lord Dunsany"
+      type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  </author>
+  <summary type="html">&lt;p&gt;&lt;i&gt;The Book of Wonder&lt;/i&gt; is one of Lord Dunsany&#8217;s
+    many collections of fantasy short stories. While many of his collections were illustrated, this
+    particular one is different&#8212;the illustrations were completed &lt;em&gt;first&lt;/em&gt;.
+    Dunsany then used the illustrations as inspirations for the stories around them.&lt;/p&gt; &lt;p&gt;This
+    collection features fourteen short stories, all of them whimsical, imaginative, and deeply
+    strange. Dunsany writes stories that don&#8217;t always have a happy ending, and these are no
+    exception&#8212;though they&#8217;re written in an almost fairytale or allegorical style, they
+    each have a melancholy, vengeful, or even mad edge to them.&lt;/p&gt;
+  </summary>
+  <simplified:pwid>891902c7-38da-f55f-88cb-f1f8dfec23ef</simplified:pwid>
+  <link
+    href="https://covers.nypl.org/Standard+Ebooks/URI/https%3A//standardebooks.org/ebooks/lord-dunsany/the-book-of-wonder/sidney-h-sime/cover.jpg"
+    rel="http://opds-spec.org/image" type="image/jpeg" />
+  <link
+    href="https://covers.nypl.org/scaled/300/Standard+Ebooks/URI/https%3A//standardebooks.org/ebooks/lord-dunsany/the-book-of-wonder/sidney-h-sime/cover.png"
+    rel="http://opds-spec.org/image/thumbnail" type="image/png" />
+  <category label="Adult" scheme="http://schema.org/audience" term="Adult" />
+  <category label="Fiction"
+    scheme="http://librarysimplified.org/terms/fiction/" term="http://librarysimplified.org/terms/fiction/Fiction" />
+  <category label="Fantasy"
+    scheme="http://librarysimplified.org/terms/genres/Simplified/" term="http://librarysimplified.org/terms/genres/Simplified/Fantasy" />
+  <category label="Short Stories"
+    scheme="http://librarysimplified.org/terms/genres/Simplified/" term="http://librarysimplified.org/terms/genres/Simplified/Short%20Stories" />
+  <dcterms:language>en</dcterms:language>
+  <dcterms:publisher>Standard Ebooks</dcterms:publisher>
+  <link
+    href="https://circulation.librarysimplified.org/CLASSICS/works/URI/https://standardebooks.org/ebooks/lord-dunsany/the-book-of-wonder/sidney-h-sime/report"
+    rel="issues" />
+  <id>https://standardebooks.org/ebooks/lord-dunsany/the-book-of-wonder/sidney-h-sime</id>
+  <link
+    href="https://circulation.librarysimplified.org/CLASSICS/works/URI/https://standardebooks.org/ebooks/lord-dunsany/the-book-of-wonder/sidney-h-sime"
+    rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" />
+  <bibframe:distribution bibframe:ProviderName="Standard Ebooks" />
+  <published>2018-04-19T00:00:00Z</published>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/groups/1798?entrypoint=Book"
+    rel="collection" title="Short Reads" />
+  <updated>2018-06-14T18:03:41Z</updated>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/1"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/unknown">
+    <opds:availability status="available" />
+  </link>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/1"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/generic-open-access">
+    <opds:availability status="available" />
+  </link>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/1"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/generic-open-access">
+    <opds:availability status="available" />
+  </link>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/1"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/generic-open-access">
+    <opds:availability status="available" />
+  </link>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/10"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/x-mobipocket-ebook"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/unknown">
+    <opds:availability status="available" />
+  </link>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/10"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/x-mobipocket-ebook"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/generic-open-access">
+    <opds:availability status="available" />
+  </link>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/10"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/x-mobi8-ebook"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/generic-open-access">
+    <opds:availability status="available" />
+  </link>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/16"
+    rel="http://opds-spec.org/acquisition/open-access" type="application/epub+zip"
+    dcterms:rights="http://librarysimplified.org/terms/rights-status/generic-open-access">
+    <opds:availability status="available" />
+  </link>
+  <link
+    href="https://circulation.librarysimplified.org/CLASSICS/works/URI/https://standardebooks.org/ebooks/lord-dunsany/the-book-of-wonder/sidney-h-sime/related_books"
+    rel="related" title="Recommended Works"
+    type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  <link
+    href="https://circulation.librarysimplified.org/CLASSICS/analytics/URI/https://standardebooks.org/ebooks/lord-dunsany/the-book-of-wonder/sidney-h-sime/open_book"
+    rel="http://librarysimplified.org/terms/rel/analytics/open-book" />
+</entry>

@@ -91,7 +91,7 @@ public abstract class BooksContract {
   private static FeedLoaderType newParser(final BookDatabaseReadableType db) {
     final OPDSFeedParserType in_parser =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
-          BookFormats.supportedBookMimeTypes()));
+          BookFormats.Companion.supportedBookMimeTypes()));
     final ExecutorService in_exec = Executors.newSingleThreadExecutor();
     final HTTPType http = HTTP.newHTTP();
     final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport =

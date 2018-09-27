@@ -38,6 +38,7 @@ import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.BookAcquisitionSelection;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookID;
@@ -578,25 +579,17 @@ public final class CatalogBookDetailView implements Observer,
       NullCheck.notNull(this.book_downloading_failed_dismiss);
     final Button retry = NullCheck.notNull(this.book_downloading_failed_retry);
 
-    dismiss.setOnClickListener(
-      new OnClickListener() {
-        @Override
-        public void onClick(
-          final @Nullable View v) {
-          CatalogBookDetailView.this.books.bookDownloadAcknowledge(f.getID());
-        }
-      });
+    dismiss.setOnClickListener(v -> this.books.bookDownloadAcknowledge(f.getID()));
 
-    /**
+    /*
      * Manually construct an acquisition controller for the retry button.
      */
 
     final OPDSAcquisitionFeedEntry eo = current_entry.getFeedEntry();
     final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(
-        f.getID(), eo.getAcquisitions());
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(eo.getAcquisitions());
 
-    /**
+    /*
      * Theoretically, if the book has ever been downloaded, then the
      * acquisition list must have contained one usable acquisition relation...
      */

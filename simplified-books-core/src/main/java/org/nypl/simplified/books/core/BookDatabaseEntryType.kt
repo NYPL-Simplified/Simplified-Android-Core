@@ -5,7 +5,6 @@ import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
 import java.io.IOException
-import kotlin.reflect.KClass
 
 /**
  * The readable/writable interface supported by book database entries.
@@ -110,18 +109,25 @@ interface BookDatabaseEntryType : BookDatabaseEntryReadableType {
     http: HTTPType): BookDatabaseEntrySnapshot
 
   /**
-   * Retrieve a list of all formats exposed by the database entry.
+   * Retrieve a list of all format handles exposed by the database entry.
    *
-   * @return A list of all formats exposed by the database entry
+   * @return A list of all format handles exposed by the database entry
    */
 
-  fun entryFormats(): List<BookDatabaseEntryFormat>
+  fun entryFormatHandles(): List<BookDatabaseEntryFormatHandle>
 
   /**
    * @param clazz The type of format
    * @return A reference to the given format, if one is supported
    */
 
-  fun <T : BookDatabaseEntryFormat> entryFindFormat(
-    clazz: Class<T>): OptionType<T>
+  fun <T : BookDatabaseEntryFormatHandle> entryFindFormatHandle(clazz: Class<T>): OptionType<T>
+
+  /**
+   * @param contentType The MIME type
+   * @return A reference to a format handle that has content of the given type, if any
+   */
+
+  fun entryFindFormatHandleForContentType(contentType: String): OptionType<BookDatabaseEntryFormatHandle>
+
 }

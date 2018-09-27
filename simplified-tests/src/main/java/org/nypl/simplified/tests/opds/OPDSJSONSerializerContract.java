@@ -40,7 +40,7 @@ public abstract class OPDSJSONSerializerContract {
   public void testRoundTrip0()
     throws Exception {
     final OPDSAcquisitionFeedEntryParserType p =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
+      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
 
     final OPDSJSONParserType jp = OPDSJSONParser.newParser();
 
@@ -80,7 +80,7 @@ public abstract class OPDSJSONSerializerContract {
   public void testRoundTrip1()
     throws Exception {
     final OPDSAcquisitionFeedEntryParserType ep =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes());
+      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(ep);
     final OPDSJSONParserType jp = OPDSJSONParser.newParser();

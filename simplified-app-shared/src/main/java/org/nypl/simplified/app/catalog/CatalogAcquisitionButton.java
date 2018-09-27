@@ -92,7 +92,6 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
       }
     }
 
-
     this.setOnClickListener(
       new CatalogAcquisitionButtonController(
         in_activity, in_books, in_book_id, in_acq, in_entry));

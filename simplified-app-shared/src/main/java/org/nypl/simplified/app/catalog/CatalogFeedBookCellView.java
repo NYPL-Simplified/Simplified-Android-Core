@@ -28,6 +28,7 @@ import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.BookAcquisitionSelection;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
 import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
@@ -362,25 +363,16 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          CatalogFeedBookCellView.this.books.bookDownloadAcknowledge(
-            f.getID());
-        }
-      });
+      v -> this.books.bookDownloadAcknowledge(f.getID()));
 
-    /**
+    /*
      * Manually construct an acquisition controller for the retry button.
      */
 
     final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(
-        f.getID(), oe.getAcquisitions());
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(oe.getAcquisitions());
 
-    /**
+    /*
      * Theoretically, if the book has ever been downloaded, then the
      * acquisition list must have contained one usable acquisition relation...
      */

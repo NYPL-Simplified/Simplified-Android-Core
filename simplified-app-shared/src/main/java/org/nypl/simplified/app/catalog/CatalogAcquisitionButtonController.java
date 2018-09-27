@@ -45,7 +45,7 @@ public final class CatalogAcquisitionButtonController
     LOG = LogUtilities.getLog(CatalogAcquisitionButtonController.class);
   }
 
-  private final OPDSAcquisition acq;
+  private final OPDSAcquisition acquisition;
   private final Activity        activity;
   private final BooksType       books;
   private final FeedEntryOPDS   entry;
@@ -69,7 +69,7 @@ public final class CatalogAcquisitionButtonController
     final FeedEntryOPDS in_entry)
   {
     this.activity = NullCheck.notNull(in_activity);
-    this.acq = NullCheck.notNull(in_acq);
+    this.acquisition = NullCheck.notNull(in_acq);
     this.id = NullCheck.notNull(in_id);
     this.books = NullCheck.notNull(in_books);
     this.entry = NullCheck.notNull(in_entry);
@@ -78,7 +78,9 @@ public final class CatalogAcquisitionButtonController
   @Override public void onClick(
     final @Nullable View v)
   {
-    if (this.books.accountIsLoggedIn() && Simplified.getCurrentAccount().needsAuth() && this.acq.getRelation() != OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
+    if (this.books.accountIsLoggedIn()
+      && Simplified.getCurrentAccount().needsAuth()
+      && this.acquisition.getRelation() != OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
       this.books.accountGetCachedLoginDetails(
         new AccountGetCachedCredentialsListenerType()
         {
@@ -93,7 +95,8 @@ public final class CatalogAcquisitionButtonController
             CatalogAcquisitionButtonController.this.onLoginSuccess(creds);
           }
         });
-    } else if (!Simplified.getCurrentAccount().needsAuth() || this.acq.getRelation() == OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
+    } else if (!Simplified.getCurrentAccount().needsAuth()
+      || this.acquisition.getRelation() == OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS) {
       this.getBook();
     }
     else {
@@ -103,27 +106,19 @@ public final class CatalogAcquisitionButtonController
 
   private void tryLogin()
   {
-
-    final boolean clever_enabled = this.activity.getResources().getBoolean(R.bool.feature_auth_provider_clever);
+    final boolean clever_enabled =
+      this.activity.getResources().getBoolean(R.bool.feature_auth_provider_clever);
 
     if (clever_enabled) {
-
-      final Intent account =
-        new Intent(this.activity, LoginActivity.class);
-
+      final Intent account = new Intent(this.activity, LoginActivity.class);
       this.activity.startActivityForResult(account, 1);
-
       this.activity.overridePendingTransition(0, 0);
-
     } else {
-
       final AccountBarcode barcode = new AccountBarcode("");
       final AccountPIN pin = new AccountPIN("");
 
-      final LoginDialog df =
-        LoginDialog.newDialog("Login required", barcode, pin);
+      final LoginDialog df = LoginDialog.newDialog("Login required", barcode, pin);
       df.setLoginListener(this);
-
       final FragmentManager fm = this.activity.getFragmentManager();
       df.show(fm, "login-dialog");
     }
@@ -144,20 +139,18 @@ public final class CatalogAcquisitionButtonController
   @Override public void onLoginSuccess(
     final AccountCredentials creds)
   {
-    CatalogAcquisitionButtonController.LOG.debug("login succeeded");
+    LOG.debug("login succeeded");
     this.getBook();
   }
 
   private void getBook() {
-    CatalogAcquisitionButtonController.LOG.debug(
-      "attempting borrow of {} acquisition", this.acq.getRelation());
+    LOG.debug("attempting borrow of {} acquisition", this.acquisition.getRelation());
 
-    switch (this.acq.getRelation()) {
+    switch (this.acquisition.getRelation()) {
       case ACQUISITION_BORROW:
       case ACQUISITION_GENERIC:
       case ACQUISITION_OPEN_ACCESS: {
-        final OPDSAcquisitionFeedEntry eo = this.entry.getFeedEntry();
-        this.books.bookBorrow(this.id, this.acq, eo, Simplified.getCurrentAccount().needsAuth());
+        this.books.bookBorrow(this.id, this.entry.getFeedEntry(), Simplified.getCurrentAccount().needsAuth());
         break;
       }
       case ACQUISITION_BUY:

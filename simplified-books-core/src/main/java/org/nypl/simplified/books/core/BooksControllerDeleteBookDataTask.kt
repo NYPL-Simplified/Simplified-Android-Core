@@ -14,11 +14,11 @@ internal class BooksControllerDeleteBookDataTask(
       val databaseEntry =
         this.bookDatabase.databaseOpenExistingEntry(this.bookID)
 
-      for (format in databaseEntry.entryFormats()) {
+      for (format in databaseEntry.entryFormatHandles()) {
         when (format) {
-          is BookDatabaseEntryFormat.BookDatabaseEntryFormatEPUB ->
+          is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB ->
             format.deleteBookData()
-          is BookDatabaseEntryFormat.BookDatabaseEntryFormatAudioBook ->
+          is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook ->
             throw UnimplementedCodeException()
         }
       }

@@ -8,13 +8,16 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Pair
 import com.io7m.jfunctional.ProcedureType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
-import org.nypl.simplified.books.core.BookDatabaseEntryFormat.BookDatabaseEntryFormatAudioBook
-import org.nypl.simplified.books.core.BookDatabaseEntryFormat.BookDatabaseEntryFormatEPUB
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.values
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.http.core.HTTPType
@@ -33,12 +36,11 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.ArrayList
+import java.util.EnumMap
 import java.util.HashMap
 import java.util.HashSet
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 /**
  * A file-based book database.
@@ -59,17 +61,17 @@ class BookDatabase private constructor(
   }
 
   /**
-   * An available book format.
+   * A format handle constructor for a particular book format.
    */
 
-  private data class AvailableFormat(
+  private data class DatabaseBookFormatHandleConstructor(
 
     /**
      * The precise implementation class of the format. This is used as unique identifier for the
      * database entry format implementation.
      */
 
-    val classType: Class<out BookDatabaseEntryFormat>,
+    val classType: Class<out BookDatabaseEntryFormatHandle>,
 
     /**
      * The set of content types that will trigger the creation of a format.
@@ -81,38 +83,57 @@ class BookDatabase private constructor(
      * A function to construct a format given an existing database entry.
      */
 
-    val constructor: (BookDatabaseEntry) -> BookDatabaseEntryFormat)
-
-  private val availableFormats: List<AvailableFormat> =
-    listOf(
-      AvailableFormat(
-        classType = DBEntryFormatEPUB::class.java,
-        supportedContentTypes = BookFormats.epubMimeTypes(),
-        constructor = { entry -> DBEntryFormatEPUB(entry) }),
-      AvailableFormat(
-        classType = DBEntryFormatAudioBook::class.java,
-        supportedContentTypes = BookFormats.audioBookMimeTypes(),
-        constructor = { entry -> DBEntryFormatAudioBook(entry) }))
+    val constructor: (BookFormatDefinition, BookDatabaseEntry) -> BookDatabaseEntryFormatHandle)
 
   /**
-   * Create a format if required. This checks to see if there is a content type that is accepted
-   * by any of the available formats, and instantiates one if one doesn't already exist.
+   * The available format handle constructors.
    */
 
-  private fun createFormatIfRequired(
+  private val formatHandleConstructors:
+    EnumMap<BookFormatDefinition, DatabaseBookFormatHandleConstructor> =
+    EnumMap(BookFormatDefinition::class.java)
+
+  init {
+    for (format in values()) {
+      this.formatHandleConstructors[format] =
+        when (format) {
+          BOOK_FORMAT_EPUB -> {
+            DatabaseBookFormatHandleConstructor(
+              classType = DBEntryFormatHandleEPUB::class.java,
+              supportedContentTypes = format.supportedContentTypes(),
+              constructor = { format, entry -> DBEntryFormatHandleEPUB(format, entry) })
+          }
+          BOOK_FORMAT_AUDIO -> {
+            DatabaseBookFormatHandleConstructor(
+              classType = DBEntryFormatHandleAudioBook::class.java,
+              supportedContentTypes = format.supportedContentTypes(),
+              constructor = { format, entry -> DBEntryFormatHandleAudioBook(format, entry) })
+          }
+        }
+    }
+  }
+
+  /**
+   * Create a format handle if required. This checks to see if there is a content type that is
+   * accepted by any of the available formats, and instantiates one if one doesn't already exist.
+   */
+
+  private fun createFormatHandleIfRequired(
     owner: BookDatabaseEntry,
-    existingFormats: MutableMap<Class<out BookDatabaseEntryFormat>, BookDatabaseEntryFormat>,
+    existingFormats: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle>,
     contentTypes: Set<String>) {
 
     for (contentType in contentTypes) {
-      for (availableFormat in this.availableFormats) {
-        if (availableFormat.supportedContentTypes.contains(contentType)) {
-          if (!existingFormats.containsKey(availableFormat.classType)) {
+      for (formatDefinition in this.formatHandleConstructors.keys) {
+        val formatConstructor = this.formatHandleConstructors[formatDefinition]!!
+        if (formatDefinition.supportedContentTypes().contains(contentType)) {
+          if (!existingFormats.containsKey(formatConstructor.classType)) {
             this.log.debug(
               "instantiating format {} for content type {}",
-              availableFormat.classType.simpleName,
+              formatConstructor.classType.simpleName,
               contentType)
-            existingFormats[availableFormat.classType] = availableFormat.constructor.invoke(owner)
+            existingFormats[formatConstructor.classType] =
+              formatConstructor.constructor.invoke(formatDefinition, owner)
             return
           }
         }
@@ -243,8 +264,9 @@ class BookDatabase private constructor(
    * Operations on EPUB formats in database entries.
    */
 
-  private inner class DBEntryFormatEPUB(
-    private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatEPUB() {
+  private inner class DBEntryFormatHandleEPUB(
+    override val formatDefinition: BookFormatDefinition,
+    private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatHandleEPUB() {
 
     private val fileAdobeRightsTmp: File =
       File(this.owner.directory, "rights_adobe.xml.tmp")
@@ -354,8 +376,9 @@ class BookDatabase private constructor(
    * Operations on audio book formats in database entries.
    */
 
-  private class DBEntryFormatAudioBook(
-    private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatAudioBook() {
+  private class DBEntryFormatHandleAudioBook(
+    override val formatDefinition: BookFormatDefinition,
+    private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatHandleAudioBook() {
 
     override fun snapshot(): BookDatabaseEntryFormatSnapshotAudioBook {
       return BookDatabaseEntryFormatSnapshotAudioBook()
@@ -392,8 +415,8 @@ class BookDatabase private constructor(
 
     private lateinit var opdsEntry: OPDSAcquisitionFeedEntry
 
-    private val formats: MutableMap<Class<out BookDatabaseEntryFormat>, BookDatabaseEntryFormat> =
-      mutableMapOf()
+    private val formatsHandles: MutableMap<
+      Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle> = mutableMapOf()
 
     init {
       this.fileCover = File(this.directory, "cover.jpg")
@@ -455,9 +478,9 @@ class BookDatabase private constructor(
 
     private fun lockedConfigureForEntry(entry: OPDSAcquisitionFeedEntry) {
       entry.acquisitions.forEach { acquisition ->
-        this.owner.createFormatIfRequired(
+        this.owner.createFormatHandleIfRequired(
           owner = this,
-          existingFormats = this.formats,
+          existingFormats = this.formatsHandles,
           contentTypes = acquisition.availableFinalContentTypes())
       }
     }
@@ -513,7 +536,7 @@ class BookDatabase private constructor(
         } else Option.none()
 
       val resultFormatSnapshots =
-        this.formats.values.map { format -> format.snapshot() }
+        this.formatsHandles.values.map { format -> format.snapshot() }
 
       return BookDatabaseEntrySnapshot(
         bookID = this.bookID,
@@ -579,9 +602,9 @@ class BookDatabase private constructor(
       }
     }
 
-    override fun entryFormats(): List<BookDatabaseEntryFormat> {
+    override fun entryFormatHandles(): List<BookDatabaseEntryFormatHandle> {
       return this.entryLock.withLock {
-        this.formats.values.toList()
+        this.formatsHandles.values.toList()
       }
     }
 
@@ -696,11 +719,24 @@ class BookDatabase private constructor(
       }
     }
 
-    override fun <T : BookDatabaseEntryFormat> entryFindFormat(clazz: Class<T>): OptionType<T> {
+    override fun <T : BookDatabaseEntryFormatHandle> entryFindFormatHandle(clazz: Class<T>): OptionType<T> {
       this.entryLock.withLock {
-        for (format in this.formats.keys) {
+        for (format in this.formatsHandles.keys) {
           if (clazz.isAssignableFrom(format)) {
-            return Option.some(formats[format]!! as T)
+            return Option.some(formatsHandles[format]!! as T)
+          }
+        }
+        return Option.none()
+      }
+    }
+
+    override fun entryFindFormatHandleForContentType(
+      contentType: String): OptionType<BookDatabaseEntryFormatHandle> {
+
+      this.entryLock.withLock {
+        for (format in this.formatsHandles.values) {
+          if (format.formatDefinition.supportedContentTypes().contains(contentType)) {
+            return Option.some(format)
           }
         }
         return Option.none()

@@ -38,11 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public final class BooksController implements BooksType {
-  private static final Logger LOG;
 
-  static {
-    LOG = NullCheck.notNull(LoggerFactory.getLogger(BooksController.class));
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(BooksController.class);
 
   private BooksStatusCacheType books_status;
   private final DownloaderType downloader;
@@ -420,12 +417,11 @@ public final class BooksController implements BooksType {
   @Override
   public void bookBorrow(
     final BookID id,
-    final OPDSAcquisition acq,
-    final OPDSAcquisitionFeedEntry eo,
+    final OPDSAcquisitionFeedEntry entry,
     final boolean needs_auth) {
+
     NullCheck.notNull(id);
-    NullCheck.notNull(acq);
-    NullCheck.notNull(eo);
+    NullCheck.notNull(entry);
 
     BooksController.LOG.debug("borrow {}", id);
 
@@ -439,12 +435,10 @@ public final class BooksController implements BooksType {
         this.http,
         this.downloads,
         id,
-        acq,
-        eo,
+        entry,
         this.feed_loader,
         this.adobe_drm,
-        needs_auth
-        ));
+        needs_auth));
   }
 
   @Override

@@ -9,8 +9,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.nypl.simplified.books.core.BookDatabase;
-import org.nypl.simplified.books.core.BookDatabaseEntryFormat;
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot;
 import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookID;
@@ -32,8 +30,8 @@ import java.net.URI;
 import java.util.Calendar;
 import java.util.Collections;
 
-import static org.nypl.simplified.books.core.BookDatabaseEntryFormat.*;
-import static org.nypl.simplified.books.core.BookDatabaseEntryFormat.BookDatabaseEntryFormatEPUB;
+import static org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.*;
+import static org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import static org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.*;
 import static org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB;
 
@@ -130,20 +128,27 @@ public abstract class BookDatabaseContract {
     final BookDatabaseEntryType databaseEntry =
       bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
 
-    final OptionType<BookDatabaseEntryFormatEPUB> formatOpt =
-      databaseEntry.entryFindFormat(BookDatabaseEntryFormatEPUB.class);
+    final OptionType<BookDatabaseEntryFormatHandleEPUB> formatOpt =
+      databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
     Assert.assertTrue("Format is present", formatOpt.isSome());
     Assert.assertTrue(
       "No audio book format",
-      databaseEntry.entryFindFormat(BookDatabaseEntryFormatAudioBook.class).isNone());
+      databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook.class).isNone());
 
-    final BookDatabaseEntryFormatEPUB format =
-      ((Some<BookDatabaseEntryFormatEPUB>) formatOpt).get();
+    final BookDatabaseEntryFormatHandleEPUB format =
+      ((Some<BookDatabaseEntryFormatHandleEPUB>) formatOpt).get();
 
     final BookDatabaseEntryFormatSnapshotEPUB snap = format.snapshot();
     Assert.assertTrue("No Adobe rights", snap.getAdobeRights().isNone());
     Assert.assertTrue("No book data", snap.getBook().isNone());
     Assert.assertFalse("Book is not downloaded", snap.isDownloaded());
+
+    Assert.assertEquals(
+      formatOpt,
+      databaseEntry.entryFindFormatHandleForContentType("application/epub+zip"));
+    Assert.assertEquals(
+      Option.none(),
+      databaseEntry.entryFindFormatHandleForContentType("application/not-a-supported-format"));
   }
 
   /**
@@ -186,18 +191,25 @@ public abstract class BookDatabaseContract {
     final BookDatabaseEntryType databaseEntry =
       bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
 
-    final OptionType<BookDatabaseEntryFormatAudioBook> formatOpt =
-      databaseEntry.entryFindFormat(BookDatabaseEntryFormatAudioBook.class);
+    final OptionType<BookDatabaseEntryFormatHandleAudioBook> formatOpt =
+      databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook.class);
     Assert.assertTrue("Format is present", formatOpt.isSome());
     Assert.assertTrue(
       "No EPUB format",
-      databaseEntry.entryFindFormat(BookDatabaseEntryFormatEPUB.class).isNone());
+      databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class).isNone());
 
-    final BookDatabaseEntryFormatAudioBook format =
-      ((Some<BookDatabaseEntryFormatAudioBook>) formatOpt).get();
+    final BookDatabaseEntryFormatHandleAudioBook format =
+      ((Some<BookDatabaseEntryFormatHandleAudioBook>) formatOpt).get();
 
     final BookDatabaseEntryFormatSnapshotAudioBook snap = format.snapshot();
     Assert.assertTrue(snap.isDownloaded());
+
+    Assert.assertEquals(
+      formatOpt,
+      databaseEntry.entryFindFormatHandleForContentType("application/audiobook+json"));
+    Assert.assertEquals(
+      Option.none(),
+      databaseEntry.entryFindFormatHandleForContentType("application/not-a-supported-format"));
   }
 
   /**
@@ -352,12 +364,12 @@ public abstract class BookDatabaseContract {
     final BookDatabaseEntryType databaseEntry =
       bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
 
-    final OptionType<BookDatabaseEntryFormatEPUB> formatOpt =
-      databaseEntry.entryFindFormat(BookDatabaseEntryFormatEPUB.class);
+    final OptionType<BookDatabaseEntryFormatHandleEPUB> formatOpt =
+      databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
     Assert.assertTrue("Format is present", formatOpt.isSome());
 
-    final BookDatabaseEntryFormatEPUB format =
-      ((Some<BookDatabaseEntryFormatEPUB>) formatOpt).get();
+    final BookDatabaseEntryFormatHandleEPUB format =
+      ((Some<BookDatabaseEntryFormatHandleEPUB>) formatOpt).get();
 
     final File epub = File.createTempFile("pre", "").getAbsoluteFile();
     format.copyInBook(epub);

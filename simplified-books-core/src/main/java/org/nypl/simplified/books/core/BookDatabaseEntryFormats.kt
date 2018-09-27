@@ -8,10 +8,16 @@ import java.io.File
 import java.io.IOException
 
 /**
- * The type of book formats in database entries.
+ * The type of book format handles in database entries.
  */
 
-sealed class BookDatabaseEntryFormat {
+sealed class BookDatabaseEntryFormatHandle {
+
+  /**
+   * @return The format definition
+   */
+
+  abstract val formatDefinition: BookFormats.BookFormatDefinition
 
   /**
    * @return A snapshot of the current format
@@ -23,7 +29,7 @@ sealed class BookDatabaseEntryFormat {
    * The interface exposed by the EPUB format in database entries.
    */
 
-  abstract class BookDatabaseEntryFormatEPUB : BookDatabaseEntryFormat() {
+  abstract class BookDatabaseEntryFormatHandleEPUB : BookDatabaseEntryFormatHandle() {
 
     /**
      * Copy the given EPUB file into the directory as the book data.
@@ -69,7 +75,7 @@ sealed class BookDatabaseEntryFormat {
    * The interface exposed by the audio book format in database entries.
    */
 
-  abstract class BookDatabaseEntryFormatAudioBook : BookDatabaseEntryFormat() {
+  abstract class BookDatabaseEntryFormatHandleAudioBook : BookDatabaseEntryFormatHandle() {
 
     abstract override fun snapshot(): BookDatabaseEntryFormatSnapshotAudioBook
 
