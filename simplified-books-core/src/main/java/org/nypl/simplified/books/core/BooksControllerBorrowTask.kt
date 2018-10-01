@@ -443,14 +443,14 @@ internal class BooksControllerBorrowTask(
         LOG.debug("[{}]: feed {} requires authentication but none can be provided", task.shortID, u)
 
         /*
-           * XXX: If the feed resulting from borrowing a book requires
-           * authentication, then the user should be notified somehow and given
-           * a chance to log in.  The app currently has the user log in prior
-           * to attempting an operation that requires credentials, but those
-           * credentials could have become stale in between "logging in" and
-           * attempting to borrow a book. We have no way to notify the user that
-           * their credentials are incorrect from here, however.
-           */
+         * XXX: If the feed resulting from borrowing a book requires
+         * authentication, then the user should be notified somehow and given
+         * a chance to log in.  The app currently has the user log in prior
+         * to attempting an operation that requires credentials, but those
+         * credentials could have become stale in between "logging in" and
+         * attempting to borrow a book. We have no way to notify the user that
+         * their credentials are incorrect from here, however.
+         */
 
         listener.onAuthenticationNotProvided()
       }
