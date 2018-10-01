@@ -1,11 +1,13 @@
 package org.nypl.simplified.books.core
 
 import com.io7m.jfunctional.OptionType
+import com.io7m.jfunctional.Some
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB
 import java.io.File
 import java.io.IOException
+import java.net.URI
 
 /**
  * The type of book format handles in database entries.
@@ -79,6 +81,16 @@ sealed class BookDatabaseEntryFormatHandle {
 
     abstract override fun snapshot(): BookDatabaseEntryFormatSnapshotAudioBook
 
+    /**
+     * Save the manifest and the URI that can be used to fetch more up-to-date copies of it
+     * later.
+     *
+     * @throws IOException On I/O errors or lock acquisition failures
+     */
+
+    @Throws(IOException::class)
+    abstract fun copyInManifestAndURI(file: File, manifestURI: URI)
+
   }
 
 }
@@ -112,18 +124,36 @@ sealed class BookDatabaseEntryFormatSnapshot {
   }
 
   /**
+   * A reference to an audio book manifest.
+   */
+
+  data class AudioBookManifestReference(
+
+    /**
+     * The URI that can be used to fetch a more recent copy of the manifest.
+     */
+
+    val manifestURI: URI,
+
+    /**
+     * The most recent copy of the audio book manifest, if any has been fetched.
+     */
+
+    val manifestFile: File)
+
+  /**
    * A snapshot of an audio book
    */
 
-  class BookDatabaseEntryFormatSnapshotAudioBook() : BookDatabaseEntryFormatSnapshot() {
+  class BookDatabaseEntryFormatSnapshotAudioBook(
+    val manifest: OptionType<AudioBookManifestReference>) : BookDatabaseEntryFormatSnapshot() {
 
     /*
-     * Audio books are always considered to be downloaded, because the actual downloading
-     * of parts generally happens inside audio engines and cannot be otherwise observed.
+     * Audio books are downloaded if there's a manifest available.
      */
 
     override val isDownloaded: Boolean
-      get() = true
+      get() = this.manifest.isSome
   }
 
   /**

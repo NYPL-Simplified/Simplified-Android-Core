@@ -34,6 +34,7 @@ class BookFormats private constructor() {
       val types = HashSet<String>(2)
       types.add("application/vnd.librarysimplified.findaway.license+json")
       types.add("application/audiobook+json")
+      types.add("audio/mpeg")
       return Collections.unmodifiableSet(types)
     }
 
@@ -42,6 +43,7 @@ class BookFormats private constructor() {
       audioBook: Set<String>): Set<String> {
       val types = HashSet<String>(epub.size)
       types.addAll(epub)
+      types.addAll(audioBook)
       return Collections.unmodifiableSet(types)
     }
 

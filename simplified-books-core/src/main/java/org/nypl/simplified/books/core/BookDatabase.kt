@@ -12,6 +12,7 @@ import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.AudioBookManifestReference
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB
 import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition
@@ -34,6 +35,7 @@ import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URI
 import java.nio.ByteBuffer
 import java.util.ArrayList
 import java.util.EnumMap
@@ -101,7 +103,7 @@ class BookDatabase private constructor(
             DatabaseBookFormatHandleConstructor(
               classType = DBEntryFormatHandleEPUB::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { format, entry -> DBEntryFormatHandleEPUB(format, entry) })
+              constructor = { format, entry -> this.DBEntryFormatHandleEPUB(format, entry) })
           }
           BOOK_FORMAT_AUDIO -> {
             DatabaseBookFormatHandleConstructor(
@@ -380,8 +382,49 @@ class BookDatabase private constructor(
     override val formatDefinition: BookFormatDefinition,
     private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatHandleAudioBook() {
 
+    private val fileManifest: File =
+      File(this.owner.directory, "audiobook-manifest.json")
+    private val fileManifestURI: File =
+      File(this.owner.directory, "audiobook-manifest-uri.txt")
+    private val fileManifestURITmp: File =
+      File(this.owner.directory, "audiobook-manifest-uri.txt.tmp")
+
+    @Throws(IOException::class)
+    private fun lockedManifestGet(): OptionType<File> {
+      return if (this.fileManifest.isFile) {
+        Option.some(this.fileManifest)
+      } else Option.none()
+    }
+
+    @Throws(IOException::class)
+    private fun lockedManifestURIGet(): OptionType<URI> {
+      return if (this.fileManifestURI.isFile) {
+        Option.some(URI.create(FileUtilities.fileReadUTF8(this.fileManifestURI)))
+      } else Option.none()
+    }
+
+    override fun copyInManifestAndURI(file: File, manifestURI: URI) {
+      this.owner.entryLock.withLock {
+        FileUtilities.fileCopy(file, this.fileManifest)
+        FileUtilities.fileWriteUTF8Atomically(
+          this.fileManifestURI, this.fileManifestURITmp, manifestURI.toString())
+      }
+    }
+
     override fun snapshot(): BookDatabaseEntryFormatSnapshotAudioBook {
-      return BookDatabaseEntryFormatSnapshotAudioBook()
+      return this.owner.entryLock.withLock {
+        val manifestFile = this.lockedManifestGet()
+        val manifestURI = this.lockedManifestURIGet()
+        if (manifestFile is Some<File> && manifestURI is Some<URI>) {
+          BookDatabaseEntryFormatSnapshotAudioBook(
+            manifest = Option.some(AudioBookManifestReference(
+              manifestFile = manifestFile.get(),
+              manifestURI = manifestURI.get())))
+        } else {
+          BookDatabaseEntryFormatSnapshotAudioBook(
+            manifest = Option.none())
+        }
+      }
     }
   }
 
@@ -723,7 +766,7 @@ class BookDatabase private constructor(
       this.entryLock.withLock {
         for (format in this.formatsHandles.keys) {
           if (clazz.isAssignableFrom(format)) {
-            return Option.some(formatsHandles[format]!! as T)
+            return Option.some(this.formatsHandles[format]!! as T)
           }
         }
         return Option.none()

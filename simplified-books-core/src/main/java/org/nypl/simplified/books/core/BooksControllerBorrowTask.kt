@@ -49,7 +49,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.lang.UnsupportedOperationException
 import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
 
@@ -72,9 +71,21 @@ internal class BooksControllerBorrowTask(
   private val needsAuthentication: Boolean) : Runnable {
 
   private val shortID: String = this.bookID.shortID
+
+  @Volatile
   private var downloadRunningTotal: Long = 0
+
+  @Volatile
+  private var adobeRights: OptionType<AdobeAdeptLoan> = Option.none()
+
+  @Volatile
   private lateinit var databaseEntry: BookDatabaseEntryType
+
+  @Volatile
   private lateinit var acquisition: OPDSAcquisition
+
+  @Volatile
+  private lateinit var fulfillURI: URI
 
   private val accountCredentials: AccountCredentials
     get() {
@@ -629,7 +640,8 @@ internal class BooksControllerBorrowTask(
     }
 
     val sid = this.shortID
-    LOG.debug("[{}]: starting download", sid)
+    this.fulfillURI = a.uri
+    LOG.debug("[{}]: starting download {}", sid, a.uri)
 
     /*
      * Point the downloader at the acquisition link. The result will be an
@@ -699,8 +711,7 @@ internal class BooksControllerBorrowTask(
           } else {
             task.saveFinalContent(
               file = file,
-              contentType = contentType,
-              adobeRights = Option.none())
+              contentType = contentType)
           }
         } catch (e: IOException) {
           LOG.error("onDownloadCompleted: i/o exception: ", e)
@@ -718,11 +729,11 @@ internal class BooksControllerBorrowTask(
 
   private fun saveFinalContent(
     file: File,
-    contentType: String,
-    adobeRights: OptionType<AdobeAdeptLoan>) {
+    contentType: String) {
 
-    LOG.debug("[{}]: saving content {} ({})", this.shortID, file, contentType)
-    LOG.debug("[{}]: saving rights {}", this.shortID, adobeRights)
+    LOG.debug("[{}]: saving content      {} ({})", this.shortID, file, contentType)
+    LOG.debug("[{}]: saving adobe rights {}", this.shortID, this.adobeRights)
+    LOG.debug("[{}]: saving fulfill URI  {}", this.shortID, this.fulfillURI)
 
     val formatHandleOpt: OptionType<BookDatabaseEntryFormatHandle> =
       this.databaseEntry.entryFindFormatHandleForContentType(contentType)
@@ -744,11 +755,12 @@ internal class BooksControllerBorrowTask(
       return when (format) {
         is BookDatabaseEntryFormatHandleEPUB -> {
           format.copyInBook(file)
-          format.setAdobeRightsInformation(adobeRights)
+          format.setAdobeRightsInformation(this.adobeRights)
           updateStatus()
         }
         is BookDatabaseEntryFormatHandleAudioBook -> {
-          throw UnimplementedCodeException()
+          format.copyInManifestAndURI(file, this.fulfillURI)
+          updateStatus()
         }
       }
     } else {
@@ -813,7 +825,8 @@ internal class BooksControllerBorrowTask(
 
     override fun onFulfillmentSuccess(file: File, loan: AdobeAdeptLoan) {
       try {
-        this.task.saveFinalContent(file, contentType, Option.some(loan))
+        this.task.adobeRights = Option.some(loan)
+        this.task.saveFinalContent(file, this.contentType)
       } catch (x: Throwable) {
         LOG.error("failure saving content/rights: ", x)
         this.task.downloadFailed(Option.some(x))
