@@ -153,8 +153,7 @@
       android:configChanges="orientation|screenSize"
       android:theme="@style/SimplifiedTheme_NoActionBar"
       android:label="@string/reader"
-      android:contentDescription="@string/reader"
-      >
+      android:contentDescription="@string/reader">
     </activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
@@ -163,6 +162,15 @@
       android:label="@string/reader_toc"
       android:contentDescription="@string/reader_toc"
       >
+    </activity>
+
+    <!-- Audio book player -->
+    <activity
+      android:name="org.nypl.simplified.app.player.AudioBookPlayerActivity"
+      android:configChanges="orientation|screenSize"
+      android:theme="@style/SimplifiedTheme_NoActionBar"
+      android:label="@string/audio_book_player"
+      android:contentDescription="@string/audio_book_player">
     </activity>
 
     <!-- Testing -->
