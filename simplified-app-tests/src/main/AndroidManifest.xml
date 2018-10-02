@@ -12,6 +12,6 @@
     android:targetPackage="org.nypl.simplified.app.tests"
     android:label="Tests."/>
   <uses-sdk
-    android:minSdkVersion="19"
+    android:minSdkVersion="21"
     android:targetSdkVersion="28"/>
 </manifest>
