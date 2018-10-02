@@ -6,10 +6,10 @@ import android.view.View.OnClickListener
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.Nullable
-import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.player.AudioBookPlayerActivity
+import org.nypl.simplified.app.player.AudioBookPlayerParameters
 import org.nypl.simplified.app.reader.ReaderActivity
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.books.core.AccountCredentials
@@ -61,7 +61,7 @@ class CatalogBookRead(
 
     if (snapshotOpt is Some<BookDatabaseEntrySnapshot>) {
       val snap = snapshotOpt.get()
-      val formatOpt : OptionType<BookDatabaseEntryFormatSnapshot> = snap.findPreferredFormat()
+      val formatOpt: OptionType<BookDatabaseEntryFormatSnapshot> = snap.findPreferredFormat()
       if (formatOpt is Some<BookDatabaseEntryFormatSnapshot>) {
         val format = formatOpt.get()
         return when (format) {
@@ -83,10 +83,11 @@ class CatalogBookRead(
             if (manifestOpt is Some<BookDatabaseEntryFormatSnapshot.AudioBookManifestReference>) {
               AudioBookPlayerActivity.startActivity(
                 from = this.activity,
-                book = this.id,
-                manifestFile = manifestOpt.get().manifestFile,
-                manifestURI = manifestOpt.get().manifestURI,
-                entry = this.entry)
+                parameters = AudioBookPlayerParameters(
+                  manifestFile = manifestOpt.get().manifestFile,
+                  manifestURI = manifestOpt.get().manifestURI,
+                  opdsEntry = this.entry.feedEntry,
+                  bookID = this.id))
             } else {
               ErrorDialogUtilities.showError(
                 this.activity,
