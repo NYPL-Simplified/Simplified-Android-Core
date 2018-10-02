@@ -152,6 +152,64 @@ public abstract class BookDatabaseContract {
   }
 
   /**
+   * Creating a book database entry for a feed that contains an EPUB acquisition results in an
+   * EPUB format.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  public void testBooksDatabaseEntryHasEPUBFormatOpenNext() throws Exception {
+
+    final OPDSJSONSerializerType jsonSerializer = OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType jsonParser = OPDSJSONParser.newParser();
+    final File directory = File.createTempFile("pre", "");
+    directory.delete();
+
+    final BookDatabaseType bookDatabase =
+      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+    bookDatabase.databaseCreate();
+
+    final OPDSAcquisitionFeedEntry ee;
+    {
+      final OptionType<URI> revoke = Option.none();
+      final OPDSAcquisitionFeedEntryBuilderType eb =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          "abcd",
+          "Title",
+          Calendar.getInstance(),
+          OPDSAvailabilityOpenAccess.get(revoke));
+      eb.addAcquisition(
+        new OPDSAcquisition(
+          Relation.ACQUISITION_BORROW,
+          URI.create("http://example.com"),
+          Option.some("application/epub+zip"),
+          Collections.<OPDSIndirectAcquisition>emptyList()));
+      ee = eb.build();
+    }
+
+    final BookDatabaseEntryType databaseEntry0 =
+      bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
+
+    final OptionType<BookDatabaseEntryFormatHandleEPUB> formatOpt0 =
+      databaseEntry0.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
+    final BookDatabaseEntryFormatHandleEPUB format0 =
+      ((Some<BookDatabaseEntryFormatHandleEPUB>) formatOpt0).get();
+    final BookDatabaseEntryFormatSnapshotEPUB snap0 = format0.snapshot();
+
+    final BookDatabaseEntryType databaseEntry1 =
+      bookDatabase.databaseOpenExistingEntry(BookID.exactString("abcd"));
+
+    final OptionType<BookDatabaseEntryFormatHandleEPUB> formatOpt1 =
+      databaseEntry1.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
+    final BookDatabaseEntryFormatHandleEPUB format1 =
+      ((Some<BookDatabaseEntryFormatHandleEPUB>) formatOpt1).get();
+    final BookDatabaseEntryFormatSnapshotEPUB snap1 = format1.snapshot();
+
+    Assert.assertEquals(snap0, snap1);
+  }
+
+  /**
    * Creating a book database entry for a feed that contains an audio book acquisition results in an
    * audio book format.
    *
@@ -201,15 +259,70 @@ public abstract class BookDatabaseContract {
     final BookDatabaseEntryFormatHandleAudioBook format =
       ((Some<BookDatabaseEntryFormatHandleAudioBook>) formatOpt).get();
 
-    final BookDatabaseEntryFormatSnapshotAudioBook snap = format.snapshot();
-    Assert.assertTrue(snap.isDownloaded());
-
     Assert.assertEquals(
       formatOpt,
       databaseEntry.entryFindFormatHandleForContentType("application/audiobook+json"));
     Assert.assertEquals(
       Option.none(),
       databaseEntry.entryFindFormatHandleForContentType("application/not-a-supported-format"));
+  }
+
+  /**
+   * Creating a book database entry for a feed that contains an audio book acquisition results in an
+   * audio book format.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  public void testBooksDatabaseEntryHasAudioBookFormatOpenNext() throws Exception {
+
+    final OPDSJSONSerializerType jsonSerializer = OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType jsonParser = OPDSJSONParser.newParser();
+    final File directory = File.createTempFile("pre", "");
+    directory.delete();
+
+    final BookDatabaseType bookDatabase =
+      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+    bookDatabase.databaseCreate();
+
+    final OPDSAcquisitionFeedEntry ee;
+    {
+      final OptionType<URI> revoke = Option.none();
+      final OPDSAcquisitionFeedEntryBuilderType eb =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          "abcd",
+          "Title",
+          Calendar.getInstance(),
+          OPDSAvailabilityOpenAccess.get(revoke));
+      eb.addAcquisition(
+        new OPDSAcquisition(
+          Relation.ACQUISITION_BORROW,
+          URI.create("http://example.com"),
+          Option.some("application/audiobook+json"),
+          Collections.<OPDSIndirectAcquisition>emptyList()));
+      ee = eb.build();
+    }
+
+    final BookDatabaseEntryType databaseEntry0 =
+      bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
+
+    final OptionType<BookDatabaseEntryFormatHandleAudioBook> formatOpt0 =
+      databaseEntry0.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook.class);
+    final BookDatabaseEntryFormatHandleAudioBook format0 =
+      ((Some<BookDatabaseEntryFormatHandleAudioBook>) formatOpt0).get();
+    final BookDatabaseEntryFormatSnapshotAudioBook snap0 = format0.snapshot();
+
+    final BookDatabaseEntryType databaseEntry1 =
+      bookDatabase.databaseOpenExistingEntry(BookID.exactString("abcd"));
+
+    final OptionType<BookDatabaseEntryFormatHandleAudioBook> formatOpt1 =
+      databaseEntry1.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook.class);
+    final BookDatabaseEntryFormatHandleAudioBook format1 =
+      ((Some<BookDatabaseEntryFormatHandleAudioBook>) formatOpt1).get();
+    final BookDatabaseEntryFormatSnapshotAudioBook snap1 = format1.snapshot();
+
+    Assert.assertEquals(snap0, snap1);
   }
 
   /**

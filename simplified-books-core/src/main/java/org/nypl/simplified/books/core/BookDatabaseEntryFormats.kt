@@ -145,7 +145,7 @@ sealed class BookDatabaseEntryFormatSnapshot {
    * A snapshot of an audio book
    */
 
-  class BookDatabaseEntryFormatSnapshotAudioBook(
+  data class BookDatabaseEntryFormatSnapshotAudioBook(
     val manifest: OptionType<AudioBookManifestReference>) : BookDatabaseEntryFormatSnapshot() {
 
     /*

@@ -567,6 +567,7 @@ class BookDatabase private constructor(
           this.jsonParser.parseAcquisitionFeedEntryFromStream(stream)
         }
         this.opdsEntry = loaded
+        this.lockedConfigureForEntry(this.opdsEntry)
         loaded
       }
     }
