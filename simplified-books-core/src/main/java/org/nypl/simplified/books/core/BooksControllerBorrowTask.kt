@@ -383,18 +383,7 @@ internal class BooksControllerBorrowTask(
      * Borrowing requires authentication.
      */
 
-    val credentials = this.accountCredentials
-    val barcode = credentials.barcode
-    val pin = credentials.pin
-    var auth: HTTPAuthType = HTTPAuthBasic(barcode.toString(), pin.toString())
-
-    val authTokenOpt = credentials.authToken
-    if (authTokenOpt is Some<AccountAuthToken>) {
-      val token = authTokenOpt.get()
-      if (token != null) {
-        auth = HTTPAuthOAuth(token.toString())
-      }
-    }
+    val auth = AccountCredentialsHTTP.toHttpAuth(accountCredentials)
 
     /*
      * Grab the feed for the borrow link.
@@ -623,20 +612,10 @@ internal class BooksControllerBorrowTask(
     /*
      * Downloading requires authentication.
      */
+
     var auth = predeterminedAuth
     if (predeterminedAuth.isNone && this.needsAuthentication) {
-      val credentials = this.accountCredentials
-      val barcode = credentials.barcode
-      val pin = credentials.pin
-      auth = Option.some(HTTPAuthBasic(barcode.toString(), pin.toString()))
-
-      val authTokenOpt = credentials.authToken
-      if (authTokenOpt is Some<AccountAuthToken>) {
-        val token = authTokenOpt.get()
-        if (token != null) {
-          auth = Option.some(HTTPAuthOAuth(token.toString()))
-        }
-      }
+      auth = Option.some(AccountCredentialsHTTP.toHttpAuth(this.accountCredentials))
     }
 
     val sid = this.shortID

@@ -97,26 +97,17 @@ final class BooksControllerSyncTask implements Runnable {
 
     final OptionType<AccountCredentials> credentials_opt =
       this.accounts_database.accountGetCredentials();
+
     if (credentials_opt.isSome()) {
 
       final AccountCredentials credentials =
         ((Some<AccountCredentials>) credentials_opt).get();
-      final AccountBarcode barcode = credentials.getBarcode();
-      final AccountPIN pin = credentials.getPin();
-      final AccountSyncListenerType in_listener = this.listener;
-      HTTPAuthType auth =
-        new HTTPAuthBasic(barcode.toString(), pin.toString());
-
-      if (credentials.getAuthToken().isSome()) {
-        final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
-        if (token != null) {
-          auth = new HTTPAuthOAuth(token.toString());
-        }
-      }
-
+      final HTTPAuthType auth =
+        AccountCredentialsHTTP.Companion.toHttpAuth(credentials);
       final HTTPResultType<InputStream> r =
         this.http.get(Option.some(auth), this.loans_uri, 0L);
 
+      final AccountSyncListenerType in_listener = this.listener;
       r.matchResult(
         new HTTPResultMatcherType<InputStream, Unit, Exception>() {
           @Override

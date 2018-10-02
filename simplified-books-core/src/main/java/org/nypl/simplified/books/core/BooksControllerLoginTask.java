@@ -81,27 +81,19 @@ final class BooksControllerLoginTask implements Runnable,
 
   @Override
   public void onAccountDataSetupSuccess() {
-    /**
+
+    /*
      * Setting up the database was successful, now try hitting the remote
      * server and seeing whether or not it rejects the given credentials.
      */
 
+    final HTTPAuthType http_auth =
+      AccountCredentialsHTTP.Companion.toHttpAuth(this.credentials);
 
-    final AccountBarcode user = this.credentials.getBarcode();
-    final AccountPIN pass = this.credentials.getPin();
-    HTTPAuthType auth =
-      new HTTPAuthBasic(user.toString(), pass.toString());
+    final URI auth_uri =
+      this.config.getCurrentRootFeedURI().resolve("loans/");
 
-    if (this.credentials.getAuthToken().isSome()) {
-      final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
-      if (token != null) {
-        auth = new HTTPAuthOAuth(token.toString());
-      }
-    }
-
-    final URI auth_uri =  this.config.getCurrentRootFeedURI().resolve("loans/");
-
-    final HTTPResultType<InputStream> r = this.http.head(Option.some(auth), auth_uri);
+    final HTTPResultType<InputStream> r = this.http.head(Option.some(http_auth), auth_uri);
 
     BooksControllerLoginTask.LOG.debug(
       "attempting login on {}", auth_uri);

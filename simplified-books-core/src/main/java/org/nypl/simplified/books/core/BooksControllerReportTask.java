@@ -55,23 +55,9 @@ public class BooksControllerReportTask
     report.set("type", JsonNodeFactory.instance.textNode(this.report_type));
     final OptionType<AccountCredentials> credentials_opt =
       this.accounts_database.accountGetCredentials();
-    OptionType<HTTPAuthType> http_auth = Option.none();
-    if (credentials_opt.isSome()) {
-      final AccountCredentials account_credentials = ((Some<AccountCredentials>) credentials_opt).get();
-      final AccountBarcode barcode = account_credentials.getBarcode();
-      final AccountPIN pin = account_credentials.getPin();
 
-      http_auth =
-        Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
-
-      if (account_credentials.getAuthToken().isSome()) {
-        final AccountAuthToken token = ((Some<AccountAuthToken>) account_credentials.getAuthToken()).get();
-        if (token != null) {
-          http_auth = Option.some((HTTPAuthType) new HTTPAuthOAuth(token.toString()));
-        }
-      }
-
-    }
+    final OptionType<HTTPAuthType> http_auth =
+      AccountCredentialsHTTP.Companion.toHttpAuthOptional(credentials_opt);
 
     try {
       final String report_string = JSONSerializerUtilities.serializeToString(report);

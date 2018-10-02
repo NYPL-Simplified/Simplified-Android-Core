@@ -461,24 +461,8 @@ public final class FeedLoader
      * Otherwise, record the provided credentials and try again.
      */
 
-    final Some<AccountCredentials> result_some =
-      (Some<AccountCredentials>) result_opt;
-    final AccountCredentials result = result_some.get();
-    final String user = result.getBarcode().toString();
-    final String pass = result.getPin().toString();
-
-    HTTPAuthType auth =
-      new HTTPAuthBasic(user, pass);
-
-
-    if (result.getAuthToken().isSome()) {
-      final AccountAuthToken token = ((Some<AccountAuthToken>) result.getAuthToken()).get();
-      if (token != null) {
-        auth = new HTTPAuthOAuth(token.toString());
-      }
-    }
-
-    return auth;
+    final Some<AccountCredentials> result_some = (Some<AccountCredentials>) result_opt;
+    return AccountCredentialsHTTP.Companion.toHttpAuth(result_some.get());
   }
 
   private static final class ProtectedListener implements FeedLoaderListenerType

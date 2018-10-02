@@ -246,21 +246,7 @@ final class BooksControllerRevokeBookTask
 
   @NonNull
   private HTTPAuthType getHTTPAuth() {
-    final AccountCredentials credentials = this.getAccountCredentials();
-    final AccountBarcode barcode = credentials.getBarcode();
-    final AccountPIN pin = credentials.getPin();
-
-    HTTPAuthType auth =
-      new HTTPAuthBasic(barcode.toString(), pin.toString());
-
-    if (credentials.getAuthToken().isSome()) {
-      final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
-      if (token != null) {
-        auth = new HTTPAuthOAuth(token.toString());
-      }
-    }
-
-    return auth;
+    return AccountCredentialsHTTP.Companion.toHttpAuth(this.getAccountCredentials());
   }
 
   private AccountCredentials getAccountCredentials() {
