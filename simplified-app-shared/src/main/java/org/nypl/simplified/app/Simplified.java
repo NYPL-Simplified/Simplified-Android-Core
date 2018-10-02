@@ -924,6 +924,11 @@ public final class Simplified extends MultiDexApplication
       return this.cover_provider;
     }
 
+    @Override
+    public HTTPType getHTTP() {
+      return this.http;
+    }
+
     @Override public FeedLoaderType getFeedLoader()
     {
       return this.feed_loader;

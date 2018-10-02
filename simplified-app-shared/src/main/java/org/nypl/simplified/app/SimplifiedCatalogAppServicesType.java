@@ -5,6 +5,7 @@ import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedLoaderType;
+import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.multilibrary.Account;
 
 /**
@@ -34,6 +35,12 @@ public interface SimplifiedCatalogAppServicesType extends
    */
 
   BookCoverProviderType getCoverProvider();
+
+  /**
+   * @return An HTTP request provider
+   */
+
+  HTTPType getHTTP();
 
   /**
    * @return An asynchronous feed loader
