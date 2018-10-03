@@ -34,7 +34,6 @@ class CatalogBookRead(
   val entry: FeedEntryOPDS) : OnClickListener {
 
   override fun onClick(@Nullable v: View) {
-
     val prefs = Simplified.getSharedPrefs()
     prefs.putBoolean("post_last_read", false)
     LOG.debug("CurrentPage prefs {}", prefs.getBoolean("post_last_read"))
@@ -48,8 +47,8 @@ class CatalogBookRead(
           throw UnreachableCodeException()
         }
 
-        override fun onAccountIsLoggedIn(creds: AccountCredentials) {
-          CirculationAnalytics.postEvent(creds,
+        override fun onAccountIsLoggedIn(credentials: AccountCredentials) {
+          CirculationAnalytics.postEvent(credentials,
             this@CatalogBookRead.activity,
             this@CatalogBookRead.entry,
             "open_book")
@@ -65,41 +64,45 @@ class CatalogBookRead(
       if (formatOpt is Some<BookDatabaseEntryFormatSnapshot>) {
         val format = formatOpt.get()
         return when (format) {
-          is BookDatabaseEntryFormatSnapshotEPUB -> {
-            val bookOpt = format.book
-            if (bookOpt is Some<File>) {
-              ReaderActivity.startActivity(this.activity, this.id, bookOpt.get(), this.entry)
-            } else {
-              ErrorDialogUtilities.showError(
-                this.activity,
-                LOG,
-                "Bug: book claimed to be downloaded but no book file exists in storage",
-                null)
-            }
-          }
-
-          is BookDatabaseEntryFormatSnapshotAudioBook -> {
-            val manifestOpt = format.manifest
-            if (manifestOpt is Some<BookDatabaseEntryFormatSnapshot.AudioBookManifestReference>) {
-              AudioBookPlayerActivity.startActivity(
-                from = this.activity,
-                parameters = AudioBookPlayerParameters(
-                  manifestFile = manifestOpt.get().manifestFile,
-                  manifestURI = manifestOpt.get().manifestURI,
-                  opdsEntry = this.entry.feedEntry,
-                  bookID = this.id))
-            } else {
-              ErrorDialogUtilities.showError(
-                this.activity,
-                LOG,
-                "Bug: book claimed to be downloaded but no book file exists in storage",
-                null)
-            }
-          }
+          is BookDatabaseEntryFormatSnapshotEPUB -> launchEPUBReader(format)
+          is BookDatabaseEntryFormatSnapshotAudioBook -> launchAudioBookPlayer(format)
         }
       }
     } else {
       ErrorDialogUtilities.showError(this.activity, LOG, "Book no longer exists!", null)
+    }
+  }
+
+  private fun launchEPUBReader(format: BookDatabaseEntryFormatSnapshotEPUB) {
+    val bookOpt = format.book
+    if (bookOpt is Some<File>) {
+      ReaderActivity.startActivity(this.activity, this.id, bookOpt.get(), this.entry)
+    } else {
+      ErrorDialogUtilities.showError(
+        this.activity,
+        LOG,
+        "Bug: book claimed to be downloaded but no book file exists in storage",
+        null)
+    }
+  }
+
+  private fun launchAudioBookPlayer(format: BookDatabaseEntryFormatSnapshotAudioBook) {
+    val manifestOpt = format.manifest
+    if (manifestOpt is Some<BookDatabaseEntryFormatSnapshot.AudioBookManifestReference>) {
+      AudioBookPlayerActivity.startActivity(
+        from = this.activity,
+        parameters = AudioBookPlayerParameters(
+          manifestFile = manifestOpt.get().manifestFile,
+          manifestURI = manifestOpt.get().manifestURI,
+          opdsEntry = this.entry.feedEntry,
+          accountColor = Simplified.getCurrentAccount().mainColor,
+          bookID = this.id))
+    } else {
+      ErrorDialogUtilities.showError(
+        this.activity,
+        LOG,
+        "Bug: book claimed to be downloaded but no book file exists in storage",
+        null)
     }
   }
 

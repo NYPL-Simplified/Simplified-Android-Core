@@ -2,7 +2,9 @@ package org.nypl.simplified.app.player
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.support.annotation.ColorInt
 import android.support.v4.app.FragmentActivity
 import android.widget.ImageView
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -28,8 +30,10 @@ import org.nypl.audiobook.android.views.PlayerTOCFragmentParameters
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType
+import org.nypl.simplified.app.ThemeMatcher
 import org.nypl.simplified.app.utilities.NamedThreadPools
 import org.nypl.simplified.app.utilities.UIThread
+import org.nypl.simplified.books.core.FeedEntryOPDS
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -87,6 +91,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private lateinit var downloaderDir: File
   private lateinit var downloader: DownloaderType
   private var download: DownloadType? = null
+  @ColorInt private var primaryTintColor: Int = 0
 
   override fun onCreate(state: Bundle?) {
     super.onCreate(state)
@@ -101,12 +106,19 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.log.debug("manifest uri:  {}", this.parameters.manifestURI)
     this.log.debug("book id:       {}", this.parameters.bookID)
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
+    this.log.debug("account color: {}", this.parameters.accountColor)
 
     this.setContentView(R.layout.audio_book_player_base)
     this.services = Simplified.getCatalogAppServices()!!
 
+    this.primaryTintColor =
+      this.resources.getColor(ThemeMatcher.color(this.parameters.accountColor))
+    this.log.debug("tint color:    0x{}", Integer.toHexString(this.primaryTintColor))
+
+    this.actionBar.setBackgroundDrawable(ColorDrawable(this.primaryTintColor))
+
     this.bookTitle = this.parameters.opdsEntry.title
-    this.bookAuthor = findBookAuthor(this.parameters.opdsEntry)
+    this.bookAuthor = this.findBookAuthor(this.parameters.opdsEntry)
 
     /*
      * Create a new downloader that is solely used to fetch audio book manifests.
@@ -134,7 +146,9 @@ class AudioBookPlayerActivity : FragmentActivity(),
      * Show a loading fragment.
      */
 
-    this.loadingFragment = AudioBookLoadingFragment.newInstance()
+    this.loadingFragment = AudioBookLoadingFragment.newInstance(
+      AudioBookLoadingFragmentParameters(this.primaryTintColor))
+
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.audio_book_player_fragment_holder, this.loadingFragment, "LOADING")
       .commit()
@@ -207,7 +221,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
     }
 
     this.book = (bookResult as PlayerResult.Success).result
-    this.player = book.createPlayer()
+    this.player = this.book.createPlayer()
     this.playerInitialized = true
 
     /*
@@ -215,7 +229,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
      */
 
     UIThread.runOnUIThread {
-      this.playerFragment = PlayerFragment.newInstance(PlayerFragmentParameters())
+      this.playerFragment = PlayerFragment.newInstance(
+        PlayerFragmentParameters(primaryColor = this.primaryTintColor))
 
       this.supportFragmentManager
         .beginTransaction()
@@ -231,7 +246,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
      */
 
     UIThread.runOnUIThread {
-      val fragment = PlayerPlaybackRateFragment.newInstance()
+      val fragment = PlayerPlaybackRateFragment.newInstance(
+        PlayerFragmentParameters(primaryColor = this.primaryTintColor))
       fragment.show(this.supportFragmentManager, "PLAYER_RATE")
     }
   }
@@ -243,7 +259,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
      */
 
     UIThread.runOnUIThread {
-      val fragment = PlayerSleepTimerFragment.newInstance()
+      val fragment = PlayerSleepTimerFragment.newInstance(
+        PlayerFragmentParameters(primaryColor = this.primaryTintColor))
       fragment.show(this.supportFragmentManager, "PLAYER_SLEEP_TIMER")
     }
   }
@@ -259,7 +276,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
       this.actionBar.setTitle(R.string.audiobook_player_toc_title)
 
       val fragment =
-        PlayerTOCFragment.newInstance(PlayerTOCFragmentParameters())
+        PlayerTOCFragment.newInstance(
+          PlayerTOCFragmentParameters(primaryColor = this.primaryTintColor))
 
       this.supportFragmentManager
         .beginTransaction()
@@ -290,6 +308,18 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
   override fun onPlayerWantsCoverImage(view: ImageView) {
 
+    /*
+     * Use the cover provider to load a cover image into the image view. The width and height
+     * are essentially hints; the target image view almost certainly won't have a usable size
+     * before this method is called, so we pass in a width/height hint that should give something
+     * reasonably close to the expected 3:4 cover image size ratio.
+     */
+
+    this.services.coverProvider.loadCoverInto(
+      FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(this.parameters.opdsEntry) as FeedEntryOPDS,
+      view,
+      this.services.screenDPToPixels(300).toInt(),
+      this.services.screenDPToPixels(400).toInt())
   }
 
   override fun onPlayerWantsPlayer(): PlayerType {

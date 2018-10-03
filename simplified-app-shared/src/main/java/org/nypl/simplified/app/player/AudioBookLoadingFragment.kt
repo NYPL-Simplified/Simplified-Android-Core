@@ -1,5 +1,6 @@
 package org.nypl.simplified.app.player
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -37,12 +38,18 @@ class AudioBookLoadingFragment : Fragment() {
 
   companion object {
 
+    const val parametersKey = "org.nypl.simplified.app.player.AudioBookLoadingFragment.parameters"
+
     /**
      * Create a new fragment.
      */
 
-    fun newInstance(): AudioBookLoadingFragment {
-      return AudioBookLoadingFragment()
+    fun newInstance(parameters: AudioBookLoadingFragmentParameters): AudioBookLoadingFragment {
+      val args = Bundle()
+      args.putSerializable(this.parametersKey, parameters)
+      val fragment = AudioBookLoadingFragment()
+      fragment.arguments = args
+      return fragment
     }
   }
 
@@ -50,7 +57,8 @@ class AudioBookLoadingFragment : Fragment() {
   private lateinit var listener: AudioBookLoadingFragmentListenerType
   private lateinit var progress: ProgressBar
   private lateinit var services: SimplifiedCatalogAppServicesType
-  private lateinit var parameters: AudioBookPlayerParameters
+  private lateinit var playerParameters: AudioBookPlayerParameters
+  private lateinit var loadingParameters: AudioBookLoadingFragmentParameters
   private var download: DownloadType? = null
 
   override fun onCreateView(
@@ -66,6 +74,20 @@ class AudioBookLoadingFragment : Fragment() {
     this.progress = view.findViewById(R.id.audio_book_loading_progress)
     this.progress.isIndeterminate = true
     this.progress.max = 100
+    this.progress.progressTintList =
+      ColorStateList.valueOf(this.loadingParameters.primaryColor)
+    this.progress.indeterminateTintList =
+      ColorStateList.valueOf(this.loadingParameters.primaryColor)
+  }
+
+  override fun onCreate(state: Bundle?) {
+    this.log.debug("onCreate")
+
+    super.onCreate(state)
+
+    this.loadingParameters =
+      this.arguments!!.getSerializable(AudioBookLoadingFragment.parametersKey)
+        as AudioBookLoadingFragmentParameters
   }
 
   override fun onActivityCreated(state: Bundle?) {
@@ -73,7 +95,7 @@ class AudioBookLoadingFragment : Fragment() {
 
     this.services = Simplified.getCatalogAppServices()!!
     this.listener = this.activity as AudioBookLoadingFragmentListenerType
-    this.parameters = this.listener.onLoadingFragmentWantsAudioBookParameters()
+    this.playerParameters = this.listener.onLoadingFragmentWantsAudioBookParameters()
 
     /*
      * If network connectivity is available, download a new version of the manifest. If it isn't
@@ -86,19 +108,19 @@ class AudioBookLoadingFragment : Fragment() {
         object : AccountGetCachedCredentialsListenerType {
           override fun onAccountIsNotLoggedIn() {
             fragment.listener.onLoadingFragmentFinishedLoading(
-              this@AudioBookLoadingFragment.parseManifest(fragment.parameters.manifestFile))
+              this@AudioBookLoadingFragment.parseManifest(fragment.playerParameters.manifestFile))
           }
 
           override fun onAccountIsLoggedIn(credentials: AccountCredentials) {
             fragment.tryFetchNewManifest(
               credentials,
-              fragment.parameters.manifestURI,
+              fragment.playerParameters.manifestURI,
               fragment.listener)
           }
         })
     } else {
       this.listener.onLoadingFragmentFinishedLoading(
-        this.parseManifest(fragment.parameters.manifestFile))
+        this.parseManifest(fragment.playerParameters.manifestFile))
     }
   }
 
@@ -163,7 +185,7 @@ class AudioBookLoadingFragment : Fragment() {
      */
 
     val entry =
-      this.services.books.bookGetDatabase().databaseOpenExistingEntry(this.parameters.bookID)
+      this.services.books.bookGetDatabase().databaseOpenExistingEntry(this.playerParameters.bookID)
 
     val handleOpt =
       entry.entryFindFormatHandle(BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook::class.java)
@@ -171,7 +193,7 @@ class AudioBookLoadingFragment : Fragment() {
     if (handleOpt is Some<BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook>) {
       val handle = handleOpt.get()
       if (handle.formatDefinition.supportedContentTypes().contains(contentType)) {
-        handle.copyInManifestAndURI(file, this.parameters.manifestURI)
+        handle.copyInManifestAndURI(file, this.playerParameters.manifestURI)
         FileUtilities.fileDelete(file)
       } else {
         throw UnimplementedCodeException()
@@ -181,7 +203,7 @@ class AudioBookLoadingFragment : Fragment() {
     }
 
     this.listener.onLoadingFragmentFinishedLoading(
-      this.parseManifest(this.parameters.manifestFile))
+      this.parseManifest(this.playerParameters.manifestFile))
   }
 
   private fun parseManifest(manifestFile: File): PlayerManifest {
@@ -209,7 +231,7 @@ class AudioBookLoadingFragment : Fragment() {
     }
 
     this.listener.onLoadingFragmentFinishedLoading(
-      this.parseManifest(this.parameters.manifestFile))
+      this.parseManifest(this.playerParameters.manifestFile))
   }
 
   private fun onManifestDownloadDataReceived(
