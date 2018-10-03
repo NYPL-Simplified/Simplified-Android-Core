@@ -362,7 +362,7 @@ internal class BooksControllerBorrowTask(
         ACQUISITION_SUBSCRIBE -> {
           LOG.debug("[{}]: acquisition type is {}, cannot continue!",
             this.shortID, this.acquisition.relation)
-          throw UnimplementedCodeException()
+          throw UnsupportedOperationException()
         }
       }
     } catch (e: Throwable) {

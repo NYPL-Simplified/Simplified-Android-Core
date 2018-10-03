@@ -156,7 +156,7 @@ public final class CatalogAcquisitionButtonController
       case ACQUISITION_BUY:
       case ACQUISITION_SAMPLE:
       case ACQUISITION_SUBSCRIBE: {
-        throw new UnimplementedCodeException();
+        throw new UnsupportedOperationException();
       }
     }
   }
