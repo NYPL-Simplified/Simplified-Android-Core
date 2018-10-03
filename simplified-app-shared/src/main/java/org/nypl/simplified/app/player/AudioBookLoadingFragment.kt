@@ -21,13 +21,15 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountCredentialsHTTP
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.files.FileUtilities
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
+import java.io.IOException
+import java.lang.IllegalStateException
 import java.net.URI
 
 /**
@@ -107,7 +109,7 @@ class AudioBookLoadingFragment : Fragment() {
       this.services.books.accountGetCachedLoginDetails(
         object : AccountGetCachedCredentialsListenerType {
           override fun onAccountIsNotLoggedIn() {
-            fragment.listener.onLoadingFragmentFinishedLoading(
+            fragment.listener.onLoadingFragmentLoadingFinished(
               this@AudioBookLoadingFragment.parseManifest(fragment.playerParameters.manifestFile))
           }
 
@@ -119,8 +121,7 @@ class AudioBookLoadingFragment : Fragment() {
           }
         })
     } else {
-      this.listener.onLoadingFragmentFinishedLoading(
-        this.parseManifest(fragment.playerParameters.manifestFile))
+      this.parseAndFinishManifest()
     }
   }
 
@@ -188,22 +189,23 @@ class AudioBookLoadingFragment : Fragment() {
       this.services.books.bookGetDatabase().databaseOpenExistingEntry(this.playerParameters.bookID)
 
     val handleOpt =
-      entry.entryFindFormatHandle(BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook::class.java)
+      entry.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
-    if (handleOpt is Some<BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook>) {
+    if (handleOpt is Some<BookDatabaseEntryFormatHandleAudioBook>) {
       val handle = handleOpt.get()
       if (handle.formatDefinition.supportedContentTypes().contains(contentType)) {
         handle.copyInManifestAndURI(file, this.playerParameters.manifestURI)
         FileUtilities.fileDelete(file)
       } else {
-        throw UnimplementedCodeException()
+        this.log.error(
+          "Server delivered an unsupported content type: {}: ", contentType, IOException())
       }
     } else {
-      throw UnimplementedCodeException()
+      this.log.error(
+        "Bug: Book database entry has no audio book format handle", IllegalStateException())
     }
 
-    this.listener.onLoadingFragmentFinishedLoading(
-      this.parseManifest(this.playerParameters.manifestFile))
+    this.parseAndFinishManifest()
   }
 
   private fun parseManifest(manifestFile: File): PlayerManifest {
@@ -214,7 +216,7 @@ class AudioBookLoadingFragment : Fragment() {
           parseResult.result
         }
         is PlayerResult.Failure -> {
-          throw UnimplementedCodeException()
+          throw parseResult.failure
         }
       }
     }
@@ -230,8 +232,16 @@ class AudioBookLoadingFragment : Fragment() {
       this.log.error("manifest download failed: status {}", status)
     }
 
-    this.listener.onLoadingFragmentFinishedLoading(
-      this.parseManifest(this.playerParameters.manifestFile))
+    this.parseAndFinishManifest()
+  }
+
+  private fun parseAndFinishManifest() {
+    try {
+      val manifest = this.parseManifest(this.playerParameters.manifestFile)
+      this.listener.onLoadingFragmentLoadingFinished(manifest)
+    } catch (ex: Exception) {
+      this.listener.onLoadingFragmentLoadingFailed(ex)
+    }
   }
 
   private fun onManifestDownloadDataReceived(

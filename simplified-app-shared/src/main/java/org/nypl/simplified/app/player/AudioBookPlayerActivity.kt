@@ -31,6 +31,7 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType
 import org.nypl.simplified.app.ThemeMatcher
+import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.NamedThreadPools
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.FeedEntryOPDS
@@ -42,6 +43,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.lang.Exception
 
 /**
  * The main activity for playing audio books.
@@ -189,7 +191,13 @@ class AudioBookPlayerActivity : FragmentActivity(),
     return this.parameters
   }
 
-  override fun onLoadingFragmentFinishedLoading(manifest: PlayerManifest) {
+  override fun onLoadingFragmentLoadingFailed(exception: Exception) {
+    ErrorDialogUtilities.showErrorWithRunnable(this, this.log, exception.message, exception, {
+      this.finish()
+    })
+  }
+
+  override fun onLoadingFragmentLoadingFinished(manifest: PlayerManifest) {
     this.log.debug("finished loading")
 
     /*
