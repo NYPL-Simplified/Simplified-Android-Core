@@ -49,7 +49,7 @@ data class BookDatabaseEntrySnapshot(
    */
 
   fun <T : BookDatabaseEntryFormatSnapshot> findFormat(clazz: Class<T>): OptionType<T> {
-    return Option.of(this.formats.find { format -> clazz.isAssignableFrom(format.javaClass) } as T)
+    return Option.of(this.formats.find { format -> clazz.isAssignableFrom(format.javaClass) } as T?)
   }
 
   /**
