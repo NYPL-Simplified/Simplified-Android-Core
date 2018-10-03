@@ -1,5 +1,7 @@
 package org.nypl.simplified.tests.books;
 
+import android.content.Context;
+
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -88,6 +90,8 @@ public abstract class BooksContract {
   private static final URI LOANS_URI = URI.create("http://example.com/loans/");
   private static final URI ROOT_URI = URI.create("http://example.com/");
 
+  protected abstract Context getContext();
+
   private static FeedLoaderType newParser(final BookDatabaseReadableType db) {
     final OPDSFeedParserType in_parser =
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
@@ -126,6 +130,7 @@ public abstract class BooksContract {
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
+          this.getContext(),
           exec,
           BooksContract.newParser(database),
           in_http,
@@ -212,6 +217,7 @@ public abstract class BooksContract {
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
+          this.getContext(),
           exec,
           BooksContract.newParser(database),
           in_http,
@@ -304,6 +310,7 @@ public abstract class BooksContract {
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
+          this.getContext(),
           exec,
           BooksContract.newParser(database),
           in_http,
@@ -424,6 +431,7 @@ public abstract class BooksContract {
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
+          this.getContext(),
           exec,
           BooksContract.newParser(database),
           in_http,
@@ -547,6 +555,7 @@ public abstract class BooksContract {
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
+          this.getContext(),
           exec,
           BooksContract.newParser(database),
           in_http,
@@ -690,6 +699,7 @@ public abstract class BooksContract {
 
       final OptionType<AdobeAdeptExecutorType> none = Option.none();
       final BooksType b = BooksController.newBooks(
+          this.getContext(),
           exec,
           BooksContract.newParser(database),
           in_http,

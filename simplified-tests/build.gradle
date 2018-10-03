@@ -23,6 +23,7 @@ dependencies {
   implementation project(':simplified-stack')
 
   implementation 'junit:junit:4.12'
+  implementation 'org.mockito:mockito-android:2.22.0'
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'

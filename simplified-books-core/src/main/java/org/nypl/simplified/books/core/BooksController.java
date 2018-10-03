@@ -1,5 +1,7 @@
 package org.nypl.simplified.books.core;
 
+import android.content.Context;
+
 import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.OptionVisitorType;
@@ -41,6 +43,7 @@ public final class BooksController implements BooksType {
 
   private static final Logger LOG = LoggerFactory.getLogger(BooksController.class);
 
+  private final Context context;
   private BooksStatusCacheType books_status;
   private final DownloaderType downloader;
   private final ConcurrentHashMap<BookID, DownloadType> downloads;
@@ -59,6 +62,7 @@ public final class BooksController implements BooksType {
   private final URI loans_uri;
 
   private BooksController(
+    final Context in_context,
     final ExecutorService in_exec,
     final FeedLoaderType in_feeds,
     final HTTPType in_http,
@@ -71,6 +75,8 @@ public final class BooksController implements BooksType {
     final AccountsDatabaseType in_accounts_database,
     final BooksControllerConfigurationType in_config,
     final URI in_loans_uri) {
+
+    this.context = NullCheck.notNull(in_context);
     this.exec = NullCheck.notNull(in_exec);
     this.feed_loader = NullCheck.notNull(in_feeds);
     this.http = NullCheck.notNull(in_http);
@@ -95,6 +101,7 @@ public final class BooksController implements BooksType {
   /**
    * Construct a new books controller.
    *
+   * @param in_context           An Android Context value (typically the application context)
    * @param in_exec              An executor
    * @param in_feeds             An asynchronous feed loader
    * @param in_http              An HTTP interface
@@ -111,6 +118,7 @@ public final class BooksController implements BooksType {
    */
 
   public static BooksType newBooks(
+    final Context in_context,
     final ExecutorService in_exec,
     final FeedLoaderType in_feeds,
     final HTTPType in_http,
@@ -124,6 +132,7 @@ public final class BooksController implements BooksType {
     final BooksControllerConfigurationType in_config,
     final URI in_loans_url) {
     return new BooksController(
+      in_context,
       in_exec,
       in_feeds,
       in_http,
@@ -176,14 +185,12 @@ public final class BooksController implements BooksType {
   @Override
   public boolean accountIsDeviceActive() {
     if (this.adobe_drm.isSome()) {
-      final OptionType<AccountCredentials> credentials_opt = this.accounts_database.accountGetCredentials();
+      final OptionType<AccountCredentials> credentials_opt =
+        this.accounts_database.accountGetCredentials();
       if (credentials_opt.isSome()) {
         final Some<AccountCredentials> credentials_some = (Some<AccountCredentials>) credentials_opt;
-
         final OptionType<AdobeUserID> adobe_user_id = credentials_some.get().getAdobeUserID();
-
         return adobe_user_id.isSome();
-
       }
     }
     return false;
@@ -450,7 +457,11 @@ public final class BooksController implements BooksType {
     BooksController.LOG.debug("delete: {}", id);
     this.submitRunnable(
       new BooksControllerDeleteBookDataTask(
-        this.books_status, this.book_database, id, needs_auth));
+        this.context,
+        this.books_status,
+        this.book_database,
+        id,
+        needs_auth));
   }
 
   @Override

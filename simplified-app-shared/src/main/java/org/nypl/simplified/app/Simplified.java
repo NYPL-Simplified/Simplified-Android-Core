@@ -484,6 +484,7 @@ public final class Simplified extends MultiDexApplication
     final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(context.getResources().getString(R.string.feature_catalog_loans_uri_component));
 
     return  BooksController.newBooks(
+      context,
       exec_books,
       feed_loader,
       http,
@@ -871,6 +872,7 @@ public final class Simplified extends MultiDexApplication
       final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(rr.getString(R.string.feature_catalog_loans_uri_component));
 
       this.books = BooksController.newBooks(
+        in_context,
         this.exec_books,
         this.feed_loader,
         this.http,
