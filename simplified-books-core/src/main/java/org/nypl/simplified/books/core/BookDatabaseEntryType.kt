@@ -1,6 +1,9 @@
 package org.nypl.simplified.books.core
 
+import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
@@ -130,4 +133,16 @@ interface BookDatabaseEntryType : BookDatabaseEntryReadableType {
 
   fun entryFindFormatHandleForContentType(contentType: String): OptionType<BookDatabaseEntryFormatHandle>
 
+  /**
+   * @return The "preferred" format for the given type, if any
+   */
+
+  fun entryFindPreferredFormatHandle(): OptionType<BookDatabaseEntryFormatHandle> {
+    val formats = mutableListOf<BookDatabaseEntryFormatHandle>()
+    val handles = this.entryFormatHandles()
+    formats.addAll(handles.filterIsInstance(BookDatabaseEntryFormatHandleEPUB::class.java))
+    formats.addAll(handles.filterIsInstance(BookDatabaseEntryFormatHandleAudioBook::class.java))
+    formats.addAll(handles)
+    return Option.of(formats.firstOrNull())
+  }
 }

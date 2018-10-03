@@ -52,7 +52,6 @@ final class BooksControllerRevokeBookTask
   private final FeedLoaderType feed_loader;
   private final AccountsDatabaseReadableType accounts_database;
   private BookDatabaseEntryType database_entry;
-  private BookDatabaseEntryFormatHandleEPUB database_epub_entry;
 
   BooksControllerRevokeBookTask(
     final BookDatabaseType in_books_database,
@@ -75,16 +74,6 @@ final class BooksControllerRevokeBookTask
       LOG.debug("[{}]: revoking", this.book_id.getShortID());
 
       this.database_entry = this.books_database.databaseOpenExistingEntry(this.book_id);
-
-      OptionType<BookDatabaseEntryFormatHandleEPUB> format_opt =
-        this.database_entry.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
-
-      if (format_opt.isNone()) {
-        throw new UnimplementedCodeException();
-      }
-
-      this.database_epub_entry = ((Some<BookDatabaseEntryFormatHandleEPUB>) format_opt).get();
-
       final BookDatabaseEntrySnapshot snap = this.database_entry.entryGetSnapshot();
       final OPDSAvailabilityType avail = snap.getEntry().getAvailability();
       LOG.debug("[{}]: availability is {}", this.book_id.getShortID(), avail);
