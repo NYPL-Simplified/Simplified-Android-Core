@@ -1048,17 +1048,16 @@ public final class CatalogBookDetailView implements Observer,
     if (related_book_link.isSome()) {
       final Button books_button = CatalogBookDetailView.this.related_books_button;
       if (books_button != null) {
-        // set the "Related Books" section visibility to display, and set the button to listen for user actions
-        CatalogBookDetailView.this.related_layout.setVisibility(View.VISIBLE);
-
-        books_button.setOnClickListener(related_book_listener);
+        UIThread.runOnUIThread(() -> {
+          this.related_layout.setVisibility(View.VISIBLE);
+          books_button.setOnClickListener(related_book_listener);
+        });
       }
     }
 
-    final Button report_button = this.book_download_report_button;
-    report_button.setOnClickListener(new CatalogBookReport(this.activity, e));
-  }//onStatus
-
+    UIThread.runOnUIThread(() ->
+      this.book_download_report_button.setOnClickListener(new CatalogBookReport(this.activity, e)));
+  }
 
   @Override public void update(
     final @Nullable Observable observable,
