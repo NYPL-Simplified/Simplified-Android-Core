@@ -5,7 +5,6 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
-import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import org.json.JSONException
 import org.json.JSONObject
@@ -23,7 +22,6 @@ import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.files.FileUtilities
-import org.nypl.simplified.http.core.HTTPAuthBasic
 import org.nypl.simplified.http.core.HTTPAuthOAuth
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPProblemReport
@@ -50,6 +48,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.net.URI
+import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -68,7 +67,7 @@ internal class BooksControllerBorrowTask(
   private val feedEntry: OPDSAcquisitionFeedEntry,
   private val feedLoader: FeedLoaderType,
   private val adobeDRM: OptionType<AdobeAdeptExecutorType>,
-  private val needsAuthentication: Boolean) : Runnable {
+  private val needsAuthentication: Boolean) : Callable<Unit> {
 
   private val shortID: String = this.bookID.shortID
 
@@ -266,7 +265,7 @@ internal class BooksControllerBorrowTask(
     }
   }
 
-  override fun run() {
+  override fun call(): Unit {
     try {
       LOG.debug("[{}]: starting borrow (full id {})", this.shortID, this.bookID)
       LOG.debug("[{}]: creating feed entry", this.shortID)
@@ -328,7 +327,6 @@ internal class BooksControllerBorrowTask(
                   this.adobeDRM,
                   adobeCredentials,
                   this.accountsDatabase,
-                  this.booksDatabase,
                   object : DeviceActivationListenerType {
                     override fun onDeviceActivationFailure(message: String) {
                       LOG.debug("device activation failed: {}", message)
@@ -347,7 +345,7 @@ internal class BooksControllerBorrowTask(
                       LOG.debug("device activation succeeded")
                     }
                   })
-                activationTask.run()
+                activationTask.call()
               }
             }
           } else {
@@ -365,9 +363,13 @@ internal class BooksControllerBorrowTask(
           throw UnsupportedOperationException()
         }
       }
+      return Unit.unit()
     } catch (e: Throwable) {
       LOG.error("[{}]: error: ", this.shortID, e)
       this.downloadFailed(Option.some(e))
+      throw e
+    } finally {
+      LOG.debug("[{}]: borrow completed", this.shortID)
     }
   }
 
@@ -425,65 +427,66 @@ internal class BooksControllerBorrowTask(
     }
 
     this.feedLoader.fromURIRefreshing(
-      this.acquisition.uri, Option.some(auth), "PUT", object : FeedLoaderListenerType {
-      override fun onFeedLoadSuccess(u: URI, f: FeedType) {
-        try {
-          LOG.debug("[{}]: loaded feed from {}", task.shortID, u)
-          f.matchFeed(feedMatcher)
-        } catch (e: Throwable) {
-          LOG.error("[{}]: failure after receiving feed: {}: ", task.shortID, u, e)
-          task.downloadFailed(Option.some(e))
-        }
-      }
-
-      override fun onFeedRequiresAuthentication(
-        u: URI,
-        attempts: Int,
-        listener: FeedLoaderAuthenticationListenerType) {
-        LOG.debug("[{}]: feed {} requires authentication but none can be provided", task.shortID, u)
-
-        /*
-         * XXX: If the feed resulting from borrowing a book requires
-         * authentication, then the user should be notified somehow and given
-         * a chance to log in.  The app currently has the user log in prior
-         * to attempting an operation that requires credentials, but those
-         * credentials could have become stale in between "logging in" and
-         * attempting to borrow a book. We have no way to notify the user that
-         * their credentials are incorrect from here, however.
-         */
-
-        listener.onAuthenticationNotProvided()
-      }
-
-      override fun onFeedLoadFailure(u: URI, x: Throwable) {
-        LOG.debug("[{}]: failed to load feed", task.shortID)
-
-        var ex: Throwable = BookBorrowExceptionFetchingBorrowFeedFailed(x)
-
-        if (x is OPDSParseException) {
-          ex = BookBorrowExceptionBadBorrowFeed(x)
-        } else if (x is FeedHTTPTransportException) {
-          val problemReportOpt = x.problemReport
-          if (problemReportOpt.isSome) {
-            val problemReport = (problemReportOpt as Some<HTTPProblemReport>).get()
-            val problemType = problemReport.problemType
-            if (problemType == HTTPProblemReport.ProblemType.LoanLimitReached) {
-              ex = BookBorrowExceptionLoanLimitReached(x)
-            }
-            if (HTTPProblemReport.ProblemStatus.Unauthorized == problemReport.problemStatus) {
-              try {
-                task.accountsDatabase.accountRemoveCredentials()
-              } catch (e: IOException) {
-                e.printStackTrace()
-              }
-
-            }
+      this.acquisition.uri, Option.some(auth), "PUT",
+      object : FeedLoaderListenerType {
+        override fun onFeedLoadSuccess(u: URI, f: FeedType) {
+          try {
+            LOG.debug("[{}]: loaded feed from {}", task.shortID, u)
+            f.matchFeed(feedMatcher)
+          } catch (e: Throwable) {
+            LOG.error("[{}]: failure after receiving feed: {}: ", task.shortID, u, e)
+            task.downloadFailed(Option.some(e))
           }
         }
 
-        task.downloadFailed(Option.some(ex))
-      }
-    })
+        override fun onFeedRequiresAuthentication(
+          u: URI,
+          attempts: Int,
+          listener: FeedLoaderAuthenticationListenerType) {
+          LOG.debug("[{}]: feed {} requires authentication but none can be provided", task.shortID, u)
+
+          /*
+           * XXX: If the feed resulting from borrowing a book requires
+           * authentication, then the user should be notified somehow and given
+           * a chance to log in.  The app currently has the user log in prior
+           * to attempting an operation that requires credentials, but those
+           * credentials could have become stale in between "logging in" and
+           * attempting to borrow a book. We have no way to notify the user that
+           * their credentials are incorrect from here, however.
+           */
+
+          listener.onAuthenticationNotProvided()
+        }
+
+        override fun onFeedLoadFailure(u: URI, x: Throwable) {
+          LOG.debug("[{}]: failed to load feed", task.shortID)
+
+          var ex: Throwable = BookBorrowExceptionFetchingBorrowFeedFailed(x)
+
+          if (x is OPDSParseException) {
+            ex = BookBorrowExceptionBadBorrowFeed(x)
+          } else if (x is FeedHTTPTransportException) {
+            val problemReportOpt = x.problemReport
+            if (problemReportOpt.isSome) {
+              val problemReport = (problemReportOpt as Some<HTTPProblemReport>).get()
+              val problemType = problemReport.problemType
+              if (problemType == HTTPProblemReport.ProblemType.LoanLimitReached) {
+                ex = BookBorrowExceptionLoanLimitReached(x)
+              }
+              if (HTTPProblemReport.ProblemStatus.Unauthorized == problemReport.problemStatus) {
+                try {
+                  task.accountsDatabase.accountRemoveCredentials()
+                } catch (e: IOException) {
+                  e.printStackTrace()
+                }
+
+              }
+            }
+          }
+
+          task.downloadFailed(Option.some(ex))
+        }
+      })
   }
 
   @Throws(IOException::class, BookBorrowExceptionNoUsableAcquisition::class)

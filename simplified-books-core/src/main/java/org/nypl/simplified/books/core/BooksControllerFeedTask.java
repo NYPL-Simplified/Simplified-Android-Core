@@ -33,8 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
-final class BooksControllerFeedTask implements Runnable
+final class BooksControllerFeedTask implements Callable<Unit>
 {
   private static final Logger LOG;
 
@@ -377,12 +378,14 @@ final class BooksControllerFeedTask implements Runnable
     return f;
   }
 
-  @Override public void run()
-  {
+  @Override
+  public Unit call() {
     try {
       this.listener.onBookFeedSuccess(this.feed());
+      return Unit.unit();
     } catch (final Throwable x) {
       this.listener.onBookFeedFailure(x);
+      throw x;
     }
   }
 

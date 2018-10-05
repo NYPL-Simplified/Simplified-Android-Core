@@ -1,6 +1,8 @@
 package org.nypl.simplified.books.core;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.opds.core.DRMLicensor;
 
@@ -32,7 +34,7 @@ public interface AccountsControllerType
    * @param needs_auch login required
    */
 
-  void accountLoadBooks(
+  FluentFuture<Unit> accountLoadBooks(
     AccountDataLoadListenerType listener,
     boolean needs_auch);
 
@@ -43,10 +45,9 @@ public interface AccountsControllerType
    * @param listener    The listener
    */
 
-  void accountLogin(
+  FluentFuture<Unit> accountLogin(
     AccountCredentials credentials,
-    AccountLoginListenerType listener
-    );
+    AccountLoginListenerType listener);
 
   /**
    * Log out, delivering results to the given {@code listener}.
@@ -57,7 +58,7 @@ public interface AccountsControllerType
    * @param device_listener device activation listener
    */
 
-  void accountLogout(
+  FluentFuture<Unit> accountLogout(
     AccountCredentials credentials,
     AccountLogoutListenerType listener,
     AccountSyncListenerType sync_listener,
@@ -68,11 +69,13 @@ public interface AccountsControllerType
    *
    * @param listener The listener
    * @param device_listener  device activation listener
+   * @param needs_authentication true if the account needs authentication
    */
 
-  void accountSync(
+  FluentFuture<Unit> accountSync(
     AccountSyncListenerType listener,
-    DeviceActivationListenerType device_listener);
+    DeviceActivationListenerType device_listener,
+    boolean needs_authentication);
 
   /**
    * Activate the device with the currently logged in account (if you are logged in).

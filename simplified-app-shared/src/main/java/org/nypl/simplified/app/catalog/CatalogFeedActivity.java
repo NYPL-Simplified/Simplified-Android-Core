@@ -1130,7 +1130,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
           public void onDeviceActivationSuccess() {
 
           }
-        });
+        }, Simplified.getCurrentAccount().needsAuth());
         CatalogFeedActivity.this.retryFeed();
 
       }

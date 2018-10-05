@@ -2,6 +2,7 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
@@ -9,13 +10,11 @@ import org.nypl.simplified.http.core.HTTPType;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
-final class BooksControllerLogoutTask implements Runnable {
-  private static final Logger LOG;
+final class BooksControllerLogoutTask implements Callable<Unit> {
 
-  static {
-    LOG = LogUtilities.getLog(BooksControllerLogoutTask.class);
-  }
+  private static final Logger LOG = LogUtilities.getLog(BooksControllerLogoutTask.class);
 
   private final AccountLogoutListenerType listener;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
@@ -32,16 +31,21 @@ final class BooksControllerLogoutTask implements Runnable {
     final BooksControllerConfigurationType in_config,
     final HTTPType in_http,
     final AccountCredentials in_credentials) {
-    this.database = NullCheck.notNull(in_book_database);
-    this.adobe_drm = NullCheck.notNull(in_adobe_drm);
-    this.accounts_database = NullCheck.notNull(in_accounts_database);
-    this.listener = new AccountLogoutListenerCatcher(
-      BooksControllerLogoutTask.LOG, NullCheck.notNull(in_listener));
-    this.credentials = NullCheck.notNull(in_credentials);
 
+    this.database =
+      NullCheck.notNull(in_book_database);
+    this.adobe_drm =
+      NullCheck.notNull(in_adobe_drm);
+    this.accounts_database =
+      NullCheck.notNull(in_accounts_database);
+    this.listener =
+      new AccountLogoutListenerCatcher(LOG, NullCheck.notNull(in_listener));
+    this.credentials =
+      NullCheck.notNull(in_credentials);
   }
 
-  private void deactivateDevice() {
+  private Unit deactivateDevice() throws Exception {
+
     /**
      * If an Adobe DRM implementation is available, activate the device
      * with the credentials. If the Adobe server rejects the credentials,
@@ -50,8 +54,9 @@ final class BooksControllerLogoutTask implements Runnable {
 
     if (this.adobe_drm.isSome() && this.credentials.getAdobeUserID().isSome()) {
 
-      BooksControllerDeviceDeActivationTask device_deactivation_task = new BooksControllerDeviceDeActivationTask(this.adobe_drm,
-        this.credentials, this.accounts_database, this.database) {
+      BooksControllerDeviceDeActivationTask device_deactivation_task =
+        new BooksControllerDeviceDeActivationTask(
+          this.adobe_drm, this.credentials, this.accounts_database) {
 
         @Override
         public void onDeactivationError(final String message) {
@@ -69,7 +74,7 @@ final class BooksControllerLogoutTask implements Runnable {
         }
 
       };
-      device_deactivation_task.run();
+      device_deactivation_task.call();
 
     } else {
 
@@ -79,30 +84,29 @@ final class BooksControllerLogoutTask implements Runnable {
 
       this.onDeactivationSucceeded();
     }
+    return Unit.unit();
   }
 
   public void onDeactivationSucceeded() {
-    /**
+
+    /*
      * Delete the books database.
      */
 
     try {
       new DeviceManagerDeleteTask(this.credentials).run();
 
-      BooksControllerLogoutTask.this.accounts_database.accountRemoveCredentials();
-      BooksControllerLogoutTask.this.database.databaseDestroy();
-      BooksControllerLogoutTask.this.listener.onAccountLogoutSuccess();
+      this.accounts_database.accountRemoveCredentials();
+      this.database.databaseDestroy();
+      this.listener.onAccountLogoutSuccess();
     } catch (IOException e) {
-      e.printStackTrace();
-      BooksControllerLogoutTask.this.listener.onAccountLogoutFailure(Option.<Throwable>some(e), e.getMessage());
+      LOG.error("deactivation failed: ", e);
+      this.listener.onAccountLogoutFailure(Option.<Throwable>some(e), e.getMessage());
     }
   }
 
-
   @Override
-  public void run() {
-
-    BooksControllerLogoutTask.this.deactivateDevice();
-
+  public Unit call() throws Exception {
+    return this.deactivateDevice();
   }
 }

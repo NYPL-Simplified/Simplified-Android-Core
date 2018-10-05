@@ -205,6 +205,10 @@ class BookDatabase private constructor(
       opdsEntry = entry)
   }
 
+  override fun databaseEntryExists(bookID: BookID): Boolean {
+    return File(directory, bookID.toString()).isDirectory
+  }
+
   @Throws(IOException::class)
   override fun databaseOpenExistingEntry(bookID: BookID): BookDatabaseEntryType {
     return BookDatabaseEntry.open(

@@ -8,8 +8,6 @@ import com.io7m.jnull.NullCheck;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeVendorID;
-import org.nypl.simplified.http.core.HTTPAuthBasic;
-import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
@@ -33,9 +31,10 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-final class BooksControllerSyncTask implements Runnable {
+final class BooksControllerSyncTask implements Callable<Unit> {
   private static final Logger LOG = LoggerFactory.getLogger(BooksControllerSyncTask.class);
 
   private final OPDSFeedParserType feed_parser;
@@ -48,6 +47,7 @@ final class BooksControllerSyncTask implements Runnable {
   private final URI loans_uri;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
   private final DeviceActivationListenerType device_activation_listener;
+  private final boolean needs_authentication;
 
   BooksControllerSyncTask(
     final BooksControllerType in_books,
@@ -59,7 +59,9 @@ final class BooksControllerSyncTask implements Runnable {
     final AtomicBoolean in_running,
     final URI in_loans_uri,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    final DeviceActivationListenerType in_device_activation_listener) {
+    final DeviceActivationListenerType in_device_activation_listener,
+    final boolean in_needs_authentication) {
+
     this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
     this.accounts_database = NullCheck.notNull(in_accounts_database);
@@ -70,24 +72,27 @@ final class BooksControllerSyncTask implements Runnable {
     this.loans_uri = NullCheck.notNull(in_loans_uri);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.device_activation_listener = NullCheck.notNull(in_device_activation_listener);
+    this.needs_authentication = in_needs_authentication;
   }
 
   @Override
-  public void run() {
+  public Unit call() throws Exception {
     if (this.running.compareAndSet(false, true)) {
       try {
         LOG.debug("running");
         this.sync();
         this.listener.onAccountSyncSuccess();
+        return Unit.unit();
       } catch (final Throwable x) {
-        this.listener.onAccountSyncFailure(
-          Option.some(x), NullCheck.notNull(x.getMessage()));
+        this.listener.onAccountSyncFailure(Option.some(x), NullCheck.notNull(x.getMessage()));
+        throw x;
       } finally {
         this.running.set(false);
         LOG.debug("completed");
       }
     } else {
       LOG.debug("sync already in progress, exiting");
+      return Unit.unit();
     }
   }
 
@@ -184,10 +189,9 @@ final class BooksControllerSyncTask implements Runnable {
             this.adobe_drm,
             credentials,
             this.accounts_database,
-            this.books_database,
             this.device_activation_listener);
 
-        activation_task.run();
+        activation_task.call();
       }
     }
 
@@ -252,7 +256,7 @@ final class BooksControllerSyncTask implements Runnable {
      */
 
     for (final BookID existing_id : revoking) {
-      this.books_controller.bookRevoke(existing_id);
+      this.books_controller.bookRevoke(existing_id, this.needs_authentication);
     }
   }
 }

@@ -1,6 +1,9 @@
 package org.nypl.simplified.books.core;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
@@ -39,7 +42,7 @@ public interface BooksControllerType {
   BookDatabaseType bookGetWritableDatabase();
 
   /**
-   * Borrow the given book, delivering the results to the given {@code listener}.
+   * Borrow the given book.
    *
    * @param id         The book ID
    * @param entry      The feed entry
@@ -59,7 +62,8 @@ public interface BooksControllerType {
    */
 
   void bookDeleteData(
-    BookID id, boolean needs_auth);
+    BookID id,
+    boolean needs_auth);
 
   /**
    * Cancel the download of the book with the given {@code id}.
@@ -111,11 +115,13 @@ public interface BooksControllerType {
   /**
    * Revoke a loan or hold for the given book.
    *
-   * @param id The book ID
+   * @param id                  The book ID
+   * @param needsAuthentication true if the account requires authentication
    */
 
-  void bookRevoke(
-    BookID id);
+  FluentFuture<Unit> bookRevoke(
+    BookID id,
+    boolean needsAuthentication);
 
   /**
    * Submit a problem report for a book

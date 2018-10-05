@@ -26,15 +26,12 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-final class BooksControllerFulFillTask implements Runnable {
-  private static final Logger LOG;
+final class BooksControllerFulFillTask implements Callable<Unit> {
 
-  static {
-    LOG = NullCheck.notNull(
-      LoggerFactory.getLogger(BooksControllerFulFillTask.class));
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(BooksControllerFulFillTask.class);
 
   private final OPDSFeedParserType feed_parser;
   private final HTTPType http;
@@ -77,28 +74,7 @@ final class BooksControllerFulFillTask implements Runnable {
 
   }
 
-  @Override
-  public void run() {
-    if (this.running.compareAndSet(false, true)) {
-      try {
-        BooksControllerFulFillTask.LOG.debug("running");
-        this.sync();
-
-      } catch (final Throwable x) {
-        BooksControllerFulFillTask.LOG.debug("failed");
-
-      } finally {
-        this.running.set(false);
-        BooksControllerFulFillTask.LOG.debug("completed");
-      }
-    } else {
-      BooksControllerFulFillTask.LOG.debug("sync already in progress, exiting");
-    }
-  }
-
-  private void sync()
-    throws Exception {
-
+  private void sync() throws Exception {
 
     final OptionType<AccountCredentials> credentials_opt =
       this.accounts_database.accountGetCredentials();
@@ -163,7 +139,7 @@ final class BooksControllerFulFillTask implements Runnable {
     final OPDSAcquisitionFeed feed =
       this.feed_parser.parse(this.loans_uri, r_feed.getValue());
 
-    /**
+    /*
      * Handle each book in the received feed.
      */
 
@@ -188,4 +164,23 @@ final class BooksControllerFulFillTask implements Runnable {
     }
   }
 
+  @Override
+  public Unit call() {
+    if (this.running.compareAndSet(false, true)) {
+      try {
+        LOG.debug("running");
+        this.sync();
+
+      } catch (final Throwable x) {
+        LOG.debug("failed");
+
+      } finally {
+        this.running.set(false);
+        LOG.debug("completed");
+      }
+    } else {
+      LOG.debug("sync already in progress, exiting");
+    }
+    return Unit.unit();
+  }
 }

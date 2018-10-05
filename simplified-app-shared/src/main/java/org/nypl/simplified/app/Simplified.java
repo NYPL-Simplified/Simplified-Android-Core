@@ -13,6 +13,8 @@ import android.util.DisplayMetrics;
 
 import com.bugsnag.android.Severity;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -273,7 +275,7 @@ public final class Simplified extends MultiDexApplication
   }
 
   private static FeedLoaderType makeFeedLoader(
-    final ExecutorService exec,
+    final ListeningExecutorService exec,
     final BookDatabaseReadableType db,
     final HTTPType http,
     final OPDSSearchParserType s,
@@ -413,7 +415,8 @@ public final class Simplified extends MultiDexApplication
    */
   public static BooksType getBooks(final Account account, final Context context, final OptionType<AdobeAdeptExecutorType> in_adobe_drm) {
 
-    final ExecutorService  exec_books = Simplified.namedThreadPool(1, "books", 19);
+    final ListeningExecutorService exec_books =
+      MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "books", 19));
     final HTTPType http = HTTP.newHTTP();
 
     File base_accounts_dir = context.getFilesDir();
@@ -440,7 +443,8 @@ public final class Simplified extends MultiDexApplication
     final DownloaderType downloader = DownloaderHTTP.newDownloader(
       exec_books, downloads_dir, http);
 
-    final ExecutorService exec_catalog_feeds = Simplified.namedThreadPool(1, "catalog-feed", 19);
+    final ListeningExecutorService exec_catalog_feeds =
+      MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "catalog-feed", 19));
 
     final OPDSJSONSerializerType in_json_serializer =
       OPDSJSONSerializer.newSerializer();
@@ -455,8 +459,8 @@ public final class Simplified extends MultiDexApplication
     final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
     final OPDSSearchParserType s = OPDSSearchParser.newParser();
 
-    final FeedLoaderType  feed_loader = Simplified.makeFeedLoader(
-      exec_catalog_feeds, books_database, http, s, p);
+    final FeedLoaderType  feed_loader =
+      Simplified.makeFeedLoader(exec_catalog_feeds, books_database, http, s, p);
 
 
     final AccountsDatabaseType accounts_database = AccountsDatabase.openDatabase(accounts_dir);
@@ -611,8 +615,8 @@ public final class Simplified extends MultiDexApplication
     private final Context                            context;
     private final CatalogBookCoverGenerator          cover_generator;
     private final BookCoverProviderType              cover_provider;
-    private final ExecutorService                    exec_books;
-    private final ExecutorService                    exec_catalog_feeds;
+    private final ListeningExecutorService           exec_books;
+    private final ListeningExecutorService           exec_catalog_feeds;
     private final ExecutorService                    exec_covers;
     private final ExecutorService                    exec_downloader;
     private URI                                      feed_initial_uri;
@@ -644,10 +648,11 @@ public final class Simplified extends MultiDexApplication
       this.context = NullCheck.notNull(in_context);
       this.screen = new ScreenSizeController(rr);
       this.exec_catalog_feeds =
-        Simplified.namedThreadPool(1, "catalog-feed", 19);
+        MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "catalog-feed", 19));
       this.exec_covers = Simplified.namedThreadPool(2, "cover", 19);
       this.exec_downloader = Simplified.namedThreadPool(4, "downloader", 19);
-      this.exec_books = Simplified.namedThreadPool(1, "books", 19);
+      this.exec_books =
+        MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "books", 19));
 
 
       final Prefs prefs = getSharedPrefs();
@@ -1008,7 +1013,7 @@ public final class Simplified extends MultiDexApplication
       CatalogAppServices.LOG_CA.debug(
         "finished loading books, syncing " + "account");
       final BooksType b = NullCheck.notNull(this.books);
-      b.accountSync(this, this);
+      b.accountSync(this, this, Simplified.getCurrentAccount().needsAuth());
     }
 
     @Override public void onAccountDataBookLoadSucceeded(

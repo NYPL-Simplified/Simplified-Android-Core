@@ -1,5 +1,9 @@
 package org.nypl.simplified.books.core;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -7,13 +11,13 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import net.jodah.expiringmap.ExpiringMap;
 import net.jodah.expiringmap.ExpiringMap.Builder;
 import net.jodah.expiringmap.ExpiringMap.ExpirationListener;
 import net.jodah.expiringmap.ExpiringMap.ExpirationPolicy;
+
 import org.nypl.drm.core.Assertions;
-import org.nypl.simplified.http.core.HTTPAuthBasic;
-import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSFeedParserType;
@@ -29,10 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -41,35 +43,33 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The default implementation of the {@link FeedLoaderType} interface.
- *
+ * <p>
  * This implementation caches feeds. A feed is ejected from the cache if it has
  * not been accessed for five minutes.
  */
 
 public final class FeedLoader
-  implements FeedLoaderType, ExpirationListener<URI, FeedType>
-{
+  implements FeedLoaderType, ExpirationListener<URI, FeedType> {
   private static final Logger LOG;
 
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(FeedLoader.class));
   }
 
-  private final ExpiringMap<URI, FeedType>                      cache;
-  private final ExecutorService                                 exec;
-  private final OPDSFeedParserType                              parser;
-  private final OPDSSearchParserType                            search_parser;
+  private final ExpiringMap<URI, FeedType> cache;
+  private final ListeningExecutorService exec;
+  private final OPDSFeedParserType parser;
+  private final OPDSSearchParserType search_parser;
   private final OPDSFeedTransportType<OptionType<HTTPAuthType>> transport;
-  private final BookDatabaseReadableType                        database;
+  private final BookDatabaseReadableType database;
 
   private FeedLoader(
-    final ExecutorService in_exec,
+    final ListeningExecutorService in_exec,
     final BookDatabaseReadableType in_database,
     final OPDSFeedParserType in_parser,
     final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport,
     final OPDSSearchParserType in_search_parser,
-    final ExpiringMap<URI, FeedType> in_m)
-  {
+    final ExpiringMap<URI, FeedType> in_m) {
     this.exec = NullCheck.notNull(in_exec);
     this.database = NullCheck.notNull(in_database);
     this.parser = NullCheck.notNull(in_parser);
@@ -87,17 +87,15 @@ public final class FeedLoader
    * @param in_parser        A feed parser
    * @param in_transport     A feed transport
    * @param in_search_parser A search document parser
-   *
    * @return A new feed loader
    */
 
   public static FeedLoaderType newFeedLoader(
-    final ExecutorService in_exec,
+    final ListeningExecutorService in_exec,
     final BookDatabaseReadableType in_database,
     final OPDSFeedParserType in_parser,
     final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport,
-    final OPDSSearchParserType in_search_parser)
-  {
+    final OPDSSearchParserType in_search_parser) {
     final Builder<Object, Object> b = ExpiringMap.builder();
     b.expirationPolicy(ExpirationPolicy.CREATED);
     b.expiration(5L, TimeUnit.MINUTES);
@@ -120,31 +118,27 @@ public final class FeedLoader
    * @param in_transport     A feed transport
    * @param in_search_parser A search document parser
    * @param m                A map
-   *
    * @return A new feed loader
    */
 
   public static FeedLoaderType newFeedLoaderFromExpiringMap(
-    final ExecutorService in_exec,
+    final ListeningExecutorService in_exec,
     final BookDatabaseReadableType in_database,
     final OPDSFeedParserType in_parser,
     final OPDSFeedTransportType<OptionType<HTTPAuthType>> in_transport,
     final OPDSSearchParserType in_search_parser,
-    final ExpiringMap<URI, FeedType> m)
-  {
+    final ExpiringMap<URI, FeedType> m) {
     return new FeedLoader(
       in_exec, in_database, in_parser, in_transport, in_search_parser, m);
   }
 
   private static void updateFeedFromDatabase(
     final BookDatabaseReadableType db,
-    final FeedType f)
-  {
+    final FeedType f) {
     f.matchFeed(
-      new FeedMatcherType<Unit, UnreachableCodeException>()
-      {
-        @Override public Unit onFeedWithGroups(final FeedWithGroups fwg)
-        {
+      new FeedMatcherType<Unit, UnreachableCodeException>() {
+        @Override
+        public Unit onFeedWithGroups(final FeedWithGroups fwg) {
           final int size = fwg.size();
           FeedLoader.LOG.debug(
             "updating {} entries (with groups) from database",
@@ -174,8 +168,8 @@ public final class FeedLoader
           return Unit.unit();
         }
 
-        @Override public Unit onFeedWithoutGroups(final FeedWithoutGroups fwg)
-        {
+        @Override
+        public Unit onFeedWithoutGroups(final FeedWithoutGroups fwg) {
           final int size = fwg.size();
           FeedLoader.LOG.debug(
             "updating {} entries (without groups) from database",
@@ -203,51 +197,96 @@ public final class FeedLoader
       });
   }
 
-  @Override public void expired(
+  @Override
+  public void expired(
     final @Nullable URI key,
-    final @Nullable FeedType value)
-  {
+    final @Nullable FeedType value) {
     FeedLoader.LOG.debug("expired: {}", key);
   }
 
-  private Future<Unit> fetch(
+  private ListenableFuture<FeedType> fetch(
     final URI uri,
     final String method,
     final OptionType<HTTPAuthType> auth,
     final FeedLoaderListenerType listener,
-    final boolean update_from_database)
-  {
-    FeedLoader.LOG.debug("not cached, fetching ({}): {} (auth {})", method, uri, auth);
+    final boolean update_from_database) {
+    LOG.debug("not cached, fetching ({}): {} (auth {})", method, uri, auth);
 
-    final Callable<Unit> c = new Callable<Unit>()
-    {
-      @Override public Unit call()
-      {
-        final ProtectedListener p_listener = new ProtectedListener(listener);
-        try {
-          final FeedType f = FeedLoader.this.loadFeed(uri, method, auth, p_listener);
-          if (update_from_database) {
-            FeedLoader.updateFeedFromDatabase(FeedLoader.this.database, f);
-          }
-          FeedLoader.this.cache.put(uri, f);
-          FeedLoader.LOG.debug("added to cache: {}", uri);
-          p_listener.onFeedLoadSuccess(uri, f);
-        } catch (final Throwable x) {
-          p_listener.onFeedLoadFailure(uri, x);
+    return this.exec.submit(() -> {
+      final ProtectedListener p_listener = new ProtectedListener(listener);
+      try {
+        final FeedType feed = this.loadFeed(uri, method, auth, p_listener);
+        if (update_from_database) {
+          FeedLoader.updateFeedFromDatabase(this.database, feed);
         }
-
-        return Unit.unit();
+        this.cache.put(uri, feed);
+        LOG.debug("added to cache: {}", uri);
+        p_listener.onFeedLoadSuccess(uri, feed);
+        return feed;
+      } catch (final Throwable x) {
+        p_listener.onFeedLoadFailure(uri, x);
+        throw x;
       }
-    };
-
-    return NullCheck.notNull(this.exec.submit(c));
+    });
   }
 
-  @Override public Future<Unit> fromURI(
+  @Override
+  public FluentFuture<FeedType> fetchURI(URI uri, OptionType<HTTPAuthType> auth) {
+    NullCheck.notNull(uri, "URI");
+    NullCheck.notNull(auth, "Authentication");
+
+    if (this.cache.containsKey(uri)) {
+      LOG.debug("retrieved from cache: {}", uri);
+      final FeedType feed = NullCheck.notNull(this.cache.get(uri));
+      return FluentFuture.from(Futures.immediateFuture(feed));
+    }
+
+    return FluentFuture.from(this.fetch(uri, "GET", auth, new FeedLoaderListenerType() {
+      @Override
+      public void onFeedLoadSuccess(URI u, FeedType f) {
+
+      }
+
+      @Override
+      public void onFeedRequiresAuthentication(URI u, int attempts, FeedLoaderAuthenticationListenerType listener) {
+        listener.onAuthenticationNotProvided();
+      }
+
+      @Override
+      public void onFeedLoadFailure(URI u, Throwable x) {
+
+      }
+    }, false));
+  }
+
+  @Override
+  public FluentFuture<FeedType> fetchURIRefreshing(
+    URI uri,
+    OptionType<HTTPAuthType> auth,
+    String method) {
+    return FluentFuture.from(this.fetch(uri, method, auth, new FeedLoaderListenerType() {
+      @Override
+      public void onFeedLoadSuccess(URI u, FeedType f) {
+
+      }
+
+      @Override
+      public void onFeedRequiresAuthentication(URI u, int attempts, FeedLoaderAuthenticationListenerType listener) {
+        listener.onAuthenticationNotProvided();
+      }
+
+      @Override
+      public void onFeedLoadFailure(URI u, Throwable x) {
+
+      }
+    }, false));
+  }
+
+  @Override
+  public Future<Unit> fromURI(
     final URI uri,
     final OptionType<HTTPAuthType> auth,
-    final FeedLoaderListenerType listener)
-  {
+    final FeedLoaderListenerType listener) {
     NullCheck.notNull(uri);
     NullCheck.notNull(auth);
     NullCheck.notNull(listener);
@@ -257,29 +296,34 @@ public final class FeedLoader
       final FeedType f = NullCheck.notNull(this.cache.get(uri));
       final ProtectedListener p_listener = new ProtectedListener(listener);
       p_listener.onFeedLoadSuccess(uri, f);
-      return new ImmediateFuture<Unit>(Unit.unit());
+      return new ImmediateFuture<>(Unit.unit());
     }
 
-    return this.fetch(uri, "GET", auth, listener, false);
+    return Futures.lazyTransform(
+      this.fetch(uri, "GET", auth, listener, false),
+      input -> Unit.unit());
   }
 
-  @Override public Future<Unit> fromURIRefreshing(
+  @Override
+  public Future<Unit> fromURIRefreshing(
     final URI uri,
     final OptionType<HTTPAuthType> auth,
     final String method,
-    final FeedLoaderListenerType listener)
-  {
+    final FeedLoaderListenerType listener) {
     NullCheck.notNull(uri);
     NullCheck.notNull(auth);
     NullCheck.notNull(listener);
-    return this.fetch(uri, method, auth, listener, false);
+
+    return Futures.lazyTransform(
+      this.fetch(uri, method, auth, listener, false),
+      input -> Unit.unit());
   }
 
-  @Override public Future<Unit> fromURIWithDatabaseEntries(
+  @Override
+  public Future<Unit> fromURIWithDatabaseEntries(
     final URI uri,
     final OptionType<HTTPAuthType> auth,
-    final FeedLoaderListenerType listener)
-  {
+    final FeedLoaderListenerType listener) {
     NullCheck.notNull(uri);
     NullCheck.notNull(auth);
     NullCheck.notNull(listener);
@@ -293,39 +337,43 @@ public final class FeedLoader
       return new ImmediateFuture<Unit>(Unit.unit());
     }
 
-    return this.fetch(uri, "GET", auth, listener, true);
+    return Futures.lazyTransform(
+      this.fetch(uri, "GET", auth, listener, true),
+      input -> Unit.unit());
   }
 
-  @Override public Future<Unit> fromURIRefreshingWithDatabaseEntries(
+  @Override
+  public Future<Unit> fromURIRefreshingWithDatabaseEntries(
     final URI uri,
     final OptionType<HTTPAuthType> auth,
-    final FeedLoaderListenerType listener)
-  {
+    final FeedLoaderListenerType listener) {
     NullCheck.notNull(uri);
     NullCheck.notNull(auth);
     NullCheck.notNull(listener);
-    return this.fetch(uri, "GET", auth, listener, true);
+
+    return Futures.lazyTransform(
+      this.fetch(uri, "GET", auth, listener, true),
+      input -> Unit.unit());
   }
 
-  @Override public OPDSFeedParserType getOPDSFeedParser()
-  {
+  @Override
+  public OPDSFeedParserType getOPDSFeedParser() {
     return this.parser;
   }
 
   @Override
-  public OPDSFeedTransportType<OptionType<HTTPAuthType>> getOPDSFeedTransport()
-  {
+  public OPDSFeedTransportType<OptionType<HTTPAuthType>> getOPDSFeedTransport() {
     return this.transport;
   }
 
-  @Override public OPDSSearchParserType getOPDSSearchParser()
-  {
+  @Override
+  public OPDSSearchParserType getOPDSSearchParser() {
     return this.search_parser;
   }
 
-  @Override public void invalidate(
-    final URI uri)
-  {
+  @Override
+  public void invalidate(
+    final URI uri) {
     NullCheck.notNull(uri);
     this.cache.remove(uri);
   }
@@ -335,8 +383,7 @@ public final class FeedLoader
     final String method,
     final OptionType<HTTPAuthType> auth,
     final FeedLoaderListenerType listener)
-    throws InterruptedException, OPDSFeedTransportException, IOException
-  {
+    throws InterruptedException, OPDSFeedTransportException, IOException {
     final AtomicReference<OptionType<HTTPAuthType>> auth_ref =
       new AtomicReference<OptionType<HTTPAuthType>>(auth);
 
@@ -390,8 +437,7 @@ public final class FeedLoader
     final String method,
     final FeedLoaderListenerType listener,
     final AtomicReference<OptionType<HTTPAuthType>> auth)
-    throws OPDSFeedTransportException, IOException, InterruptedException
-  {
+    throws OPDSFeedTransportException, IOException, InterruptedException {
     OptionType<HTTPAuthType> auth_current = NullCheck.notNull(auth.get());
     final AtomicInteger attempts = new AtomicInteger();
 
@@ -406,8 +452,7 @@ public final class FeedLoader
       } catch (final FeedHTTPTransportException e) {
         try {
           if (e.getCode() == 401) {
-            final HTTPAuthType basic =
-              this.getCredentialsAfterError(uri, listener, attempts, e);
+            final HTTPAuthType basic = this.getCredentialsAfterError(uri, listener, attempts, e);
             auth_current = Option.some((HTTPAuthType) basic);
           } else {
             throw e;
@@ -432,8 +477,7 @@ public final class FeedLoader
     final FeedLoaderListenerType listener,
     final AtomicInteger attempts,
     final FeedHTTPTransportException e)
-    throws InterruptedException, FeedHTTPTransportException
-  {
+    throws InterruptedException, FeedHTTPTransportException {
     /**
      * Call a blocking auth listener and wait for authentication data
      * to be provided.
@@ -465,19 +509,17 @@ public final class FeedLoader
     return AccountCredentialsHTTP.Companion.toHttpAuth(result_some.get());
   }
 
-  private static final class ProtectedListener implements FeedLoaderListenerType
-  {
+  private static final class ProtectedListener implements FeedLoaderListenerType {
     private final FeedLoaderListenerType delegate;
 
-    private ProtectedListener(final FeedLoaderListenerType in_delegate)
-    {
+    private ProtectedListener(final FeedLoaderListenerType in_delegate) {
       this.delegate = NullCheck.notNull(in_delegate);
     }
 
-    @Override public void onFeedLoadFailure(
+    @Override
+    public void onFeedLoadFailure(
       final URI u,
-      final Throwable x)
-    {
+      final Throwable x) {
       try {
         this.delegate.onFeedLoadFailure(u, x);
       } catch (final Throwable xe) {
@@ -485,10 +527,10 @@ public final class FeedLoader
       }
     }
 
-    @Override public void onFeedLoadSuccess(
+    @Override
+    public void onFeedLoadSuccess(
       final URI u,
-      final FeedType f)
-    {
+      final FeedType f) {
       try {
         this.delegate.onFeedLoadSuccess(u, f);
       } catch (final Throwable x) {
@@ -496,11 +538,11 @@ public final class FeedLoader
       }
     }
 
-    @Override public void onFeedRequiresAuthentication(
+    @Override
+    public void onFeedRequiresAuthentication(
       final URI u,
       final int attempts,
-      final FeedLoaderAuthenticationListenerType listener)
-    {
+      final FeedLoaderAuthenticationListenerType listener) {
       try {
         this.delegate.onFeedRequiresAuthentication(u, attempts, listener);
       } catch (final Throwable x) {
@@ -509,43 +551,41 @@ public final class FeedLoader
     }
   }
 
-  private static final class ImmediateFuture<T> implements Future<T>
-  {
+  private static final class ImmediateFuture<T> implements Future<T> {
     private final T value;
 
     private ImmediateFuture(
-      final T in_value)
-    {
+      final T in_value) {
       this.value = NullCheck.notNull(in_value);
     }
 
-    @Override public boolean cancel(
-      final boolean x)
-    {
+    @Override
+    public boolean cancel(
+      final boolean x) {
       return false;
     }
 
-    @Override public T get()
-      throws InterruptedException, ExecutionException
-    {
+    @Override
+    public T get()
+      throws InterruptedException, ExecutionException {
       return this.value;
     }
 
-    @Override public T get(
+    @Override
+    public T get(
       final long time,
       final @Nullable TimeUnit time_unit)
-      throws InterruptedException, ExecutionException, TimeoutException
-    {
+      throws InterruptedException, ExecutionException, TimeoutException {
       return this.value;
     }
 
-    @Override public boolean isCancelled()
-    {
+    @Override
+    public boolean isCancelled() {
       return false;
     }
 
-    @Override public boolean isDone()
-    {
+    @Override
+    public boolean isDone() {
       return true;
     }
   }
@@ -556,13 +596,11 @@ public final class FeedLoader
    */
 
   private static final class BlockingAuthenticationListener
-    implements FeedLoaderAuthenticationListenerType
-  {
-    private final CountDownLatch                                  latch;
+    implements FeedLoaderAuthenticationListenerType {
+    private final CountDownLatch latch;
     private final AtomicReference<OptionType<AccountCredentials>> result;
 
-    BlockingAuthenticationListener()
-    {
+    BlockingAuthenticationListener() {
       this.latch = new CountDownLatch(1);
       final OptionType<AccountCredentials> none = Option.none();
       this.result = new AtomicReference<OptionType<AccountCredentials>>(none);
@@ -572,8 +610,7 @@ public final class FeedLoader
      * @return The result, if the listener has completed
      */
 
-    public OptionType<AccountCredentials> getResult()
-    {
+    public OptionType<AccountCredentials> getResult() {
       return this.result.get();
     }
 
@@ -582,15 +619,13 @@ public final class FeedLoader
      *
      * @param unit The time unit
      * @param time The time to wait
-     *
      * @throws InterruptedException If waiting is interrupted
      */
 
     public void waitForCompletion(
       final long time,
       final TimeUnit unit)
-      throws InterruptedException
-    {
+      throws InterruptedException {
       this.latch.await(time, unit);
     }
 
@@ -599,29 +634,28 @@ public final class FeedLoader
      * will be able to retrieve results, if any were provided.
      */
 
-    public void completeNow()
-    {
+    public void completeNow() {
       Assertions.checkPrecondition(
         this.latch.getCount() == 1, "Listener has already completed");
       this.latch.countDown();
     }
 
-    @Override public void onAuthenticationProvided(
-      final AccountCredentials credentials)
-    {
+    @Override
+    public void onAuthenticationProvided(
+      final AccountCredentials credentials) {
       this.result.set(Option.some(credentials));
       this.completeNow();
     }
 
-    @Override public void onAuthenticationNotProvided()
-    {
+    @Override
+    public void onAuthenticationNotProvided() {
       this.completeNow();
     }
 
-    @Override public void onAuthenticationError(
+    @Override
+    public void onAuthenticationError(
       final OptionType<Throwable> error,
-      final String message)
-    {
+      final String message) {
       LogUtilities.errorWithOptionalException(FeedLoader.LOG, message, error);
       this.completeNow();
     }

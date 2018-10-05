@@ -59,6 +59,12 @@ interface BookDatabaseType : BookDatabaseReadableType {
   fun databaseOpenExistingEntry(bookID: BookID): BookDatabaseEntryType
 
   /**
+   * @return `true` if a database entry exists with the given book ID
+   */
+
+  fun databaseEntryExists(bookID: BookID): Boolean
+
+  /**
    * Notify the given status cache of the status of all books within the
    * database.
    *

@@ -53,7 +53,7 @@ class CatalogBookRevokeButton(
         dialog.setOnConfirmListener {
           val app = Simplified.getCatalogAppServices()
           val books = app.books
-          books.bookRevoke(this.bookID)
+          books.bookRevoke(this.bookID, Simplified.getCurrentAccount().needsAuth())
         }
         val fm = this.activity.fragmentManager
         dialog.show(fm, "revoke-confirm")

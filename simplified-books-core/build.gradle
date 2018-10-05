@@ -21,6 +21,8 @@ dependencies {
 
   implementation project(':simplified-json-core')
 
+  api "com.google.guava:guava:23.6.1-android"
+
   implementation group: 'org.nypl.drm', name: 'nypl-drm-core', version: '1.0.0'
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
