@@ -1128,7 +1128,7 @@ abstract class BooksContract {
      * impossible to convert the borrowing code into a task that can be observed synchronously.
      */
 
-    booksController.bookBorrow(bookID, makeOPDSEntryAudioBook(), true)
+    booksController.bookBorrow(bookID, makeOPDSEntryEPUB(), true)
     TimeUnit.SECONDS.sleep(2L)
 
     val downloadedStatus =
@@ -1156,7 +1156,7 @@ abstract class BooksContract {
    * Borrowing and then revoking a book (with mocked Adobe DRM) works.
    */
 
-  @Test
+  @Test(timeout = 10_000L)
   @Throws(Exception::class)
   fun testBooksBorrowRevokeEPUBMockedAdobeDRMOK() {
 
@@ -1238,7 +1238,7 @@ abstract class BooksContract {
      * impossible to convert the borrowing code into a task that can be observed synchronously.
      */
 
-    booksController.bookBorrow(bookID, makeOPDSEntryAudioBook(), true)
+    booksController.bookBorrow(bookID, makeOPDSEntryEPUB(), true)
     TimeUnit.SECONDS.sleep(2L)
 
     val downloadedStatus =
@@ -1297,7 +1297,7 @@ abstract class BooksContract {
    * the DRM fails.
    */
 
-  @Test
+  @Test(timeout = 10_000L)
   @Throws(Exception::class)
   fun testBooksBorrowRevokeEPUBMockedAdobeDRMFailedDRM() {
 
@@ -1379,7 +1379,7 @@ abstract class BooksContract {
      * impossible to convert the borrowing code into a task that can be observed synchronously.
      */
 
-    booksController.bookBorrow(bookID, makeOPDSEntryAudioBook(), true)
+    booksController.bookBorrow(bookID, makeOPDSEntryEPUB(), true)
     TimeUnit.SECONDS.sleep(2L)
 
     val downloadedStatus =
