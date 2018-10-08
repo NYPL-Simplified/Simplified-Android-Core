@@ -334,7 +334,7 @@ public abstract class CatalogFeedActivity extends CatalogActivity implements
                   false,
                   CatalogFeedActivity.this.getUpStack(),
                   f.getFeedTitle(),
-                  o.getURI(),
+                  o.getUri(),
                   false);
 
               CatalogFeedActivity.this.catalogActivityForkNewReplacing(args);

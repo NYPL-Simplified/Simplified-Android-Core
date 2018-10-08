@@ -431,7 +431,8 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
         o.put("group", k.getGroup());
         o.put("active", k.isActive());
         o.put("title", k.getTitle());
-        o.put("uri", k.getURI().toString());
+        o.put("uri", k.getUri().toString());
+        k.getGroupType().map_(type -> o.put("group_type", type));
         a.add(o);
       }
       je.set("facets", a);

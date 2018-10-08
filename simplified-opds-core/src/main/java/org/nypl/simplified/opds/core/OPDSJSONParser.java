@@ -267,20 +267,23 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
       {
         final ArrayNode fs = JSONParserUtilities.getArray(s, "facets");
         for (int index = 0; index < fs.size(); ++index) {
-          final ObjectNode o = JSONParserUtilities.checkObject(
-            null, fs.get(index));
+          final ObjectNode o = JSONParserUtilities.checkObject(null, fs.get(index));
           final boolean in_facet_active =
             JSONParserUtilities.getBoolean(o, "active");
           final URI in_facet_uri = new URI(
-            JSONParserUtilities.getString(
-              o, "uri"));
-          final String in_facet_group = JSONParserUtilities.getString(
-            o, "group");
-          final String in_facet_title = JSONParserUtilities.getString(
-            o, "title");
-          fb.addFacet(
-            new OPDSFacet(
-              in_facet_active, in_facet_uri, in_facet_group, in_facet_title));
+            JSONParserUtilities.getString(o, "uri"));
+          final String in_facet_group =
+            JSONParserUtilities.getString(o, "group");
+          final OptionType<String> in_facet_group_type =
+            JSONParserUtilities.getStringOptional(o, "group_type");
+          final String in_facet_title =
+            JSONParserUtilities.getString(o, "title");
+          fb.addFacet(new OPDSFacet(
+            in_facet_active,
+            in_facet_uri,
+            in_facet_group,
+            in_facet_title,
+            in_facet_group_type));
         }
       }
 

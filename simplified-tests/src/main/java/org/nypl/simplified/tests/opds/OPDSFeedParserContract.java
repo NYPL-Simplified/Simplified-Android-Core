@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.opds;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
@@ -328,7 +329,7 @@ public abstract class OPDSFeedParserContract {
         OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
           BookFormats.Companion.supportedBookMimeTypes()));
     final InputStream d =
-        OPDSFeedParserContract.getResource("acquisition-categories-0.xml");
+        OPDSFeedParserContract.getResource("acquisition-facets-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
@@ -350,7 +351,7 @@ public abstract class OPDSFeedParserContract {
       Assert.assertEquals(
           URI.create(
               "http://circulation.alpha.librarysimplified"
-                  + ".org/feed/Picture%20Books?order=title"), fi.getURI());
+                  + ".org/feed/Picture%20Books?order=title"), fi.getUri());
     }
 
     {
@@ -361,8 +362,55 @@ public abstract class OPDSFeedParserContract {
       Assert.assertEquals(
           URI.create(
               "http://circulation.alpha.librarysimplified"
-                  + ".org/feed/Picture%20Books?order=author"), fi.getURI());
+                  + ".org/feed/Picture%20Books?order=author"), fi.getUri());
     }
   }
 
+  @Test
+  public void testAcquisitionFeedFacets1()
+    throws Exception {
+    final URI uri = URI.create(
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+    final OPDSFeedParserType p =
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(
+        BookFormats.Companion.supportedBookMimeTypes()));
+    final InputStream d =
+      OPDSFeedParserContract.getResource("acquisition-facets-1.xml");
+    final OPDSAcquisitionFeed f = p.parse(uri, d);
+    d.close();
+
+    final Map<String, List<OPDSFacet>> fbg = f.getFeedFacetsByGroup();
+    final List<OPDSFacet> fo = f.getFeedFacetsOrder();
+
+    Assert.assertEquals(2, fo.size());
+    Assert.assertEquals(1, fbg.size());
+    Assert.assertTrue(fbg.containsKey("Sort by"));
+
+    final List<OPDSFacet> sorted = fbg.get("Sort by");
+    Assert.assertEquals(2, sorted.size());
+
+    {
+      final OPDSFacet fi = sorted.get(0);
+      Assert.assertEquals("Sort by", fi.getGroup());
+      Assert.assertEquals(Option.some("Something"), fi.getGroupType());
+      Assert.assertEquals("Title", fi.getTitle());
+      Assert.assertTrue(!fi.isActive());
+      Assert.assertEquals(
+        URI.create(
+          "http://circulation.alpha.librarysimplified"
+            + ".org/feed/Picture%20Books?order=title"), fi.getUri());
+    }
+
+    {
+      final OPDSFacet fi = sorted.get(1);
+      Assert.assertEquals("Sort by", fi.getGroup());
+      Assert.assertEquals(Option.some("Something"), fi.getGroupType());
+      Assert.assertEquals("Author", fi.getTitle());
+      Assert.assertTrue(fi.isActive());
+      Assert.assertEquals(
+        URI.create(
+          "http://circulation.alpha.librarysimplified"
+            + ".org/feed/Picture%20Books?order=author"), fi.getUri());
+    }
+  }
 }
