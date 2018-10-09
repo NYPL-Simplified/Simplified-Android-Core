@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="catalog_facet_tab_stroke">1dp</dimen>
+  <dimen name="catalog_facet_tab_corner_radius">3dp</dimen>
+  <dimen name="catalog_facet_tab_padding_left">32dp</dimen>
+  <dimen name="catalog_facet_tab_padding_right">32dp</dimen>
+  <dimen name="catalog_facet_tab_padding_top">3dp</dimen>
+  <dimen name="catalog_facet_tab_padding_bottom">3dp</dimen>
+  <dimen name="catalog_facet_tab_standard_height">36dp</dimen>
+</resources>

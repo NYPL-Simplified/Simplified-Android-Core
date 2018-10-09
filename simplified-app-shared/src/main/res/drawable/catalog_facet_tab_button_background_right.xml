@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <item android:state_checked="false">
+    <shape android:shape="rectangle">
+      <padding android:bottom="@dimen/catalog_facet_tab_padding_bottom"
+               android:left="@dimen/catalog_facet_tab_padding_left"
+               android:right="@dimen/catalog_facet_tab_padding_right"
+               android:top="@dimen/catalog_facet_tab_padding_top" />
+      <corners android:bottomLeftRadius="0dp"
+               android:bottomRightRadius="@dimen/catalog_facet_tab_corner_radius"
+               android:topLeftRadius="0dp"
+               android:topRightRadius="@dimen/catalog_facet_tab_corner_radius" />
+      <solid android:color="@color/button_background" />
+      <stroke android:width="@dimen/catalog_facet_tab_stroke" android:color="?button_foreground" />
+    </shape>
+  </item>
+
+  <item android:state_checked="true">
+    <shape android:shape="rectangle">
+      <padding android:bottom="@dimen/catalog_facet_tab_padding_bottom"
+               android:left="@dimen/catalog_facet_tab_padding_left"
+               android:right="@dimen/catalog_facet_tab_padding_right"
+               android:top="@dimen/catalog_facet_tab_padding_top" />
+      <corners android:bottomLeftRadius="0dp"
+               android:bottomRightRadius="@dimen/catalog_facet_tab_corner_radius"
+               android:topLeftRadius="0dp"
+               android:topRightRadius="@dimen/catalog_facet_tab_corner_radius" />
+      <solid android:color="?button_foreground" />
+      <stroke android:width="@dimen/catalog_facet_tab_stroke" android:color="?button_foreground" />
+    </shape>
+  </item>
+
+</selector>
