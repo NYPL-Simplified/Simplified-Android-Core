@@ -479,7 +479,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
 
     if (s.isRevocable()) {
@@ -508,7 +508,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
     return Unit.unit();
   }
@@ -585,7 +585,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
 
     return Unit.unit();
@@ -614,7 +614,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, in_entry);
   }
 

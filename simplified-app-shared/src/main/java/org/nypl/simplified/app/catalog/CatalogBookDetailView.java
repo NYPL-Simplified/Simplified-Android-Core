@@ -701,7 +701,7 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookAvailabilityStrings.getAvailabilityString(rr, s);
     this.book_download_text.setText(text);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
@@ -736,7 +736,7 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookAvailabilityStrings.getAvailabilityString(rr, s);
     this.book_download_text.setText(text);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
@@ -847,7 +847,7 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookAvailabilityStrings.getAvailabilityString(rr, o);
     this.book_download_text.setText(text);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity,
       this.book_download_buttons,
       NullCheck.notNull(this.books),
@@ -890,7 +890,7 @@ public final class CatalogBookDetailView implements Observer,
       CatalogBookAvailabilityStrings.getOPDSAvailabilityString(rr, avail);
     this.book_download_text.setText(text);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.book_download_buttons, this.books, e);
 
     CatalogBookDetailView.configureButtonsHeight(
