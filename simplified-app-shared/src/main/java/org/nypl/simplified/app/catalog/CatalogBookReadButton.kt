@@ -4,13 +4,19 @@ import android.app.Activity
 import android.content.res.Resources
 import android.support.v4.content.ContextCompat
 import com.io7m.jfunctional.Some
+import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.R.string.catalog_accessibility_book_download
+import org.nypl.simplified.app.R.string.catalog_accessibility_book_listen
 import org.nypl.simplified.app.R.string.catalog_accessibility_book_read
 import org.nypl.simplified.app.R.string.catalog_book_download
+import org.nypl.simplified.app.R.string.catalog_book_listen
 import org.nypl.simplified.app.R.string.catalog_book_read
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.ThemeMatcher
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotAudioBook
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
 import org.nypl.simplified.books.core.BookID
 import org.nypl.simplified.books.core.BooksType
@@ -35,8 +41,9 @@ class CatalogBookReadButton(
     val mainColor = ContextCompat.getColor(this.context, resID)
     this.textView.setTextColor(mainColor)
 
-    if (bookIsReadable(books, bookID)) {
-      setButtonForRead(activity, bookID, feedEntry, activity.resources)
+    val readable = bookIsReadable(books, bookID)
+    if (readable != null) {
+      setButtonForRead(activity, bookID, feedEntry, readable, activity.resources)
     } else {
       setButtonForDownload(bookID, feedEntry, books, activity.resources)
     }
@@ -44,17 +51,19 @@ class CatalogBookReadButton(
 
   private fun bookIsReadable(
     books: BooksType,
-    bookID: BookID): Boolean {
+    bookID: BookID): BookDatabaseEntrySnapshot? {
 
     val snapshotOpt =
       books.bookGetDatabase().databaseGetEntrySnapshot(bookID)
 
     if (snapshotOpt is Some<BookDatabaseEntrySnapshot>) {
       val snapshot = snapshotOpt.get()
-      return snapshot.isDownloaded
+      if (snapshot.isDownloaded) {
+        return snapshot
+      }
     }
 
-    return false
+    return null
   }
 
   private fun setButtonForDownload(
@@ -79,10 +88,25 @@ class CatalogBookReadButton(
     activity: Activity,
     bookID: BookID,
     feedEntry: FeedEntryOPDS,
+    snapshot: BookDatabaseEntrySnapshot,
     resources: Resources) {
 
     this.textView.text = resources.getString(catalog_book_read)
     this.textView.contentDescription = resources.getString(catalog_accessibility_book_read)
     this.setOnClickListener(CatalogBookRead(activity, bookID, feedEntry))
+
+    val formatOpt = snapshot.findPreferredFormat()
+    if (formatOpt is Some<BookDatabaseEntryFormatSnapshot>) {
+      val format = formatOpt.get()
+      return when (format) {
+        is BookDatabaseEntryFormatSnapshotEPUB -> Unit
+        is BookDatabaseEntryFormatSnapshotAudioBook -> {
+          this.textView.text = resources.getString(catalog_book_listen)
+          this.textView.contentDescription = resources.getString(catalog_accessibility_book_listen)
+        }
+      }
+    } else {
+      throw UnreachableCodeException()
+    }
   }
 }

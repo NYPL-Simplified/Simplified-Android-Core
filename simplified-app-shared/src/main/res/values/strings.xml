@@ -77,6 +77,7 @@
   <string name="catalog_book_borrow">Get</string>
   <string name="catalog_book_reserve">Reserve</string>
   <string name="catalog_book_read">Read</string>
+  <string name="catalog_book_listen">Listen</string>
   <string name="catalog_book_error_dismiss">Dismiss</string>
   <string name="catalog_book_error_retry">Retry</string>
   <string name="catalog_book_sync">Sync</string>
@@ -201,6 +202,7 @@
   <string name="catalog_accessibility_book_borrow">Get Button</string>
   <string name="catalog_accessibility_book_reserve">Reserve Button</string>
   <string name="catalog_accessibility_book_read">Read Button</string>
+  <string name="catalog_accessibility_book_listen">Listen Button</string>
   <string name="catalog_accessibility_book_error_dismiss">Dismiss Button</string>
   <string name="catalog_accessibility_book_error_retry">Retry Button</string>
   <string name="catalog_accessibility_book_sync">Sync Button</string>
