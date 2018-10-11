@@ -1,6 +1,9 @@
 package org.nypl.simplified.books.core
 
+import com.io7m.jfunctional.Option
+import com.io7m.jfunctional.OptionType
 import com.io7m.junreachable.UnreachableCodeException
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 
 import java.util.Collections
 import java.util.HashSet
@@ -70,6 +73,25 @@ class BookFormats private constructor() {
     fun audioBookMimeTypes(): Set<String> {
       return AUDIO_BOOK_MIME_TYPES
     }
+
+    private val formats = BookFormatDefinition.values()
+
+    /**
+     * @return The probable format of the book in the given OPDS entry
+     */
+
+    fun inferFormat(entry: OPDSAcquisitionFeedEntry): OptionType<BookFormatDefinition> {
+      for (acquisition in entry.acquisitions) {
+        for (format in this.formats) {
+          val formatContentTypes = format.supportedContentTypes()
+          val bookAvailable = acquisition.availableFinalContentTypes()
+          if (formatContentTypes.intersect(bookAvailable).isNotEmpty()) {
+            return Option.some(format)
+          }
+        }
+      }
+      return Option.none()
+    }
   }
 
   /**
@@ -104,5 +126,6 @@ class BookFormats private constructor() {
 
     abstract fun supportedContentTypes(): Set<String>
   }
+
 
 }

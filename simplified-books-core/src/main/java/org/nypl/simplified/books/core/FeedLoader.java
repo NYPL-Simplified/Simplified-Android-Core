@@ -160,7 +160,7 @@ public final class FeedLoader
                   (Some<BookDatabaseEntrySnapshot>) snap_opt;
                 final BookDatabaseEntrySnapshot snap = some_snap.get();
                 final FeedEntryType en =
-                  FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(snap.getEntry());
+                  FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(snap.getEntry());
                 entries.set(gi, en);
               }
             }
@@ -187,7 +187,7 @@ public final class FeedLoader
                 (Some<BookDatabaseEntrySnapshot>) snap_opt;
               final BookDatabaseEntrySnapshot snap = some_snap.get();
               final FeedEntryType en =
-                FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(snap.getEntry());
+                FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(snap.getEntry());
               fwg.set(index, en);
             }
           }

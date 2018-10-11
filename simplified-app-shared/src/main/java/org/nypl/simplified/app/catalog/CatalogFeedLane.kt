@@ -10,29 +10,29 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
+import android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM
+import android.widget.RelativeLayout.ALIGN_PARENT_RIGHT
 import android.widget.TextView
-
+import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnreachableCodeException
 import com.squareup.picasso.Callback
-
 import org.nypl.simplified.app.BookCoverProviderType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeControllerType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.ThemeMatcher
 import org.nypl.simplified.app.utilities.FadeUtilities
+import org.nypl.simplified.books.core.BookFormats
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.core.FeedEntryCorrupt
 import org.nypl.simplified.books.core.FeedEntryMatcherType
 import org.nypl.simplified.books.core.FeedEntryOPDS
 import org.nypl.simplified.books.core.FeedGroup
 import org.nypl.simplified.books.core.LogUtilities
-
 import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
-
-import android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM
-import android.widget.RelativeLayout.ALIGN_PARENT_RIGHT
 
 /**
  * A feed lane.
@@ -165,20 +165,7 @@ class CatalogFeedLane(
     val imageView = imageGroup.findViewById<ImageView>(R.id.book_cover_image)
     val badgeView = imageGroup.findViewById<ImageView>(R.id.book_cover_badge)
 
-    /*
-     * Manually resize and position a badge over the cover image.
-     */
-
-    val badgeLayoutParams =
-      RelativeLayout.LayoutParams(this.imageHeight / 5, this.imageHeight / 5)
-
-    badgeLayoutParams.addRule(ALIGN_PARENT_RIGHT)
-    badgeLayoutParams.addRule(ALIGN_PARENT_BOTTOM)
-    badgeLayoutParams.rightMargin = this.screen.screenDPToPixels(4).toInt()
-    badgeLayoutParams.bottomMargin = this.screen.screenDPToPixels(4).toInt()
-    badgeView.layoutParams = badgeLayoutParams
-    badgeView.isClickable = false
-    badgeView.isFocusable = false
+    configureBadgeForFormat(entry, imageGroup, badgeView)
 
     /*
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
@@ -200,6 +187,52 @@ class CatalogFeedLane(
 
     this.scrollerContents.addView(imageGroup)
     return Unit.unit()
+  }
+
+  /**
+   * Manually resize and position a badge over the cover image based on the format of the book.
+   */
+
+  private fun configureBadgeForFormat(
+    entry: FeedEntryOPDS,
+    imageGroup: ViewGroup,
+    badgeView: ImageView) {
+
+    /*
+     * If the format can't be inferred, don't show a badge. It's not clear why the book
+     * would even be in the feed in the first place...
+     */
+
+    val formatOpt = entry.probableFormat
+    return if (formatOpt is Some<BookFormats.BookFormatDefinition>) {
+      val format = formatOpt.get()
+      when (format) {
+        null,
+        BOOK_FORMAT_EPUB ->
+          imageGroup.removeView(badgeView)
+
+        /*
+         * Show badges for audio books.
+         */
+
+        BOOK_FORMAT_AUDIO -> {
+          val badgeLayoutParams =
+            RelativeLayout.LayoutParams(this.imageHeight / 5, this.imageHeight / 5)
+
+          badgeLayoutParams.addRule(ALIGN_PARENT_RIGHT)
+          badgeLayoutParams.addRule(ALIGN_PARENT_BOTTOM)
+          badgeLayoutParams.rightMargin = this.screen.screenDPToPixels(4).toInt()
+          badgeLayoutParams.bottomMargin = this.screen.screenDPToPixels(4).toInt()
+          badgeView.layoutParams = badgeLayoutParams
+          badgeView.isClickable = false
+          badgeView.isFocusable = false
+          badgeView.visibility = View.VISIBLE
+          return
+        }
+      }
+    } else {
+      imageGroup.removeView(badgeView)
+    }
   }
 
   private fun addViewForFeedEntryCorrupt(

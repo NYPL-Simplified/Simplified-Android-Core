@@ -105,7 +105,7 @@ public final class Feeds {
         }
         final OptionType<OPDSAcquisition> a_opt = Option.some(best);
         if (a_opt.isSome()) {
-          rf.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(fe));
+          rf.add(FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(fe));
         }
       }
     }

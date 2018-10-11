@@ -115,7 +115,7 @@ final class BooksControllerFeedTask implements Callable<Unit>
             BooksControllerFeedTask.matcherForSelection(selection));
 
           if (use.booleanValue()) {
-            entries.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(data));
+            entries.add(FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(data));
           }
         } catch (final Throwable x) {
           BooksControllerFeedTask.LOG.error(

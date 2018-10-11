@@ -347,7 +347,7 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
         (Some<BookDatabaseEntrySnapshot>) snap_opt;
       final BookDatabaseEntrySnapshot snap = some.get();
       final FeedEntryType re =
-        FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(snap.getEntry());
+        FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(snap.getEntry());
       this.feed.updateEntry(re);
       return true;
     }

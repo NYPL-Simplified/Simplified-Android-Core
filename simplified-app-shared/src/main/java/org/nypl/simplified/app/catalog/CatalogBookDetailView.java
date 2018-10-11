@@ -1107,7 +1107,7 @@ public final class CatalogBookDetailView implements Observer,
         (Some<BookDatabaseEntrySnapshot>) snap_opt;
       final BookDatabaseEntrySnapshot snap = some.get();
       this.entry.set(
-        (FeedEntryOPDS) FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(
+        (FeedEntryOPDS) FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(
           snap.getEntry()));
     }
   }
