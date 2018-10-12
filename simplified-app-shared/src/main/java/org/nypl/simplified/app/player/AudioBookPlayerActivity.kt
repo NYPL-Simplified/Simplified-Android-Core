@@ -96,8 +96,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
   @ColorInt private var primaryTintColor: Int = 0
 
   override fun onCreate(state: Bundle?) {
-    super.onCreate(state)
     this.log.debug("onCreate")
+    super.onCreate(null)
 
     val i = this.intent!!
     val a = i.extras
@@ -164,8 +164,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
   }
 
   override fun onDestroy() {
-    super.onDestroy()
     this.log.debug("onDestroy")
+    super.onDestroy()
 
     val down = this.download
     if (down != null) {
