@@ -19,7 +19,7 @@ ext {
    * The version of the NYPL Audiobook API used by this package.
    */
 
-  nypl_audiobook_api_version = "0.0.47"
+  nypl_audiobook_api_version = "0.0.49"
 }
 
 allprojects {

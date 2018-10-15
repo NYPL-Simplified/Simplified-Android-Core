@@ -9,11 +9,20 @@ import android.support.v4.app.FragmentActivity
 import android.widget.ImageView
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.audiobook.android.api.PlayerAudioBookType
 import org.nypl.audiobook.android.api.PlayerAudioEngineRequest
 import org.nypl.audiobook.android.api.PlayerAudioEngines
 import org.nypl.audiobook.android.api.PlayerDownloadProviderType
+import org.nypl.audiobook.android.api.PlayerEvent
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventError
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventPlaybackRateChanged
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventChapterCompleted
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventChapterWaiting
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackBuffering
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackPaused
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackProgressUpdate
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStarted
+import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStopped
 import org.nypl.audiobook.android.api.PlayerManifest
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.audiobook.android.api.PlayerSleepTimer
@@ -42,8 +51,8 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import rx.Subscription
 import java.io.File
-import java.lang.Exception
 
 /**
  * The main activity for playing audio books.
@@ -83,6 +92,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private lateinit var bookAuthor: String
   private lateinit var player: PlayerType
   private var playerInitialized: Boolean = false
+  private lateinit var playerSubscription: Subscription
   private lateinit var playerFragment: PlayerFragment
   private lateinit var parameters: AudioBookPlayerParameters
   private lateinit var services: SimplifiedCatalogAppServicesType
@@ -176,6 +186,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     if (this.playerInitialized) {
       this.player.close()
+      this.playerSubscription.unsubscribe()
     }
   }
 
@@ -211,7 +222,13 @@ class AudioBookPlayerActivity : FragmentActivity(),
         downloadProvider = DownloadProvider.create(this.downloadExecutor)))
 
     if (engine == null) {
-      throw UnimplementedCodeException()
+      ErrorDialogUtilities.showErrorWithRunnable(
+        this,
+        this.log,
+        this.resources.getString(R.string.audio_book_player_error_engine_open),
+        null,
+        { this.finish() })
+      return
     }
 
     this.log.debug(
@@ -225,11 +242,18 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     val bookResult = engine.bookProvider.create(this)
     if (bookResult is PlayerResult.Failure) {
-      throw UnimplementedCodeException()
+      ErrorDialogUtilities.showErrorWithRunnable(
+        this,
+        this.log,
+        this.resources.getString(R.string.audio_book_player_error_book_open),
+        bookResult.failure,
+        { this.finish() })
+      return
     }
 
     this.book = (bookResult as PlayerResult.Success).result
     this.player = this.book.createPlayer()
+    this.playerSubscription = this.player.events.subscribe({ event -> this.onPlayerEvent(event) })
     this.playerInitialized = true
 
     /*
@@ -244,6 +268,26 @@ class AudioBookPlayerActivity : FragmentActivity(),
         .beginTransaction()
         .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
         .commit()
+    }
+  }
+
+  private fun onPlayerEvent(event: PlayerEvent) {
+    return when (event) {
+      is PlayerEventPlaybackStarted,
+      is PlayerEventPlaybackBuffering,
+      is PlayerEventPlaybackProgressUpdate,
+      is PlayerEventChapterCompleted,
+      is PlayerEventChapterWaiting,
+      is PlayerEventPlaybackPaused,
+      is PlayerEventPlaybackStopped,
+      is PlayerEventPlaybackRateChanged -> Unit
+      is PlayerEventError -> {
+        this.log.error("player error: code {}: spine element {}: offset {}: ",
+          event.errorCode,
+          event.spineElement,
+          event.offsetMilliseconds,
+          event.exception)
+      }
     }
   }
 

@@ -682,11 +682,14 @@ abstract class BooksContract {
     MockedAudioEngineProvider.onNextRequest = { request ->
       object : PlayerAudioBookProviderType {
         override fun create(context: Context): PlayerResult<PlayerAudioBookType, Exception> {
-          return PlayerResult.Success(MockingAudioBook(
-            id = PlayerBookID.transform("x"),
-            downloadStatusExecutor = downloadExecutor,
-            downloadProvider = MockingDownloadProvider(downloadExecutor),
-            player = MockingPlayer()))
+          return PlayerResult.Success(
+            MockingAudioBook(
+              id = PlayerBookID.transform("x"),
+              downloadStatusExecutor = downloadExecutor,
+              downloadProvider = MockingDownloadProvider(
+                executorService = downloadExecutor,
+                shouldFail = { _ -> false }),
+              players = { book -> MockingPlayer(book) }))
         }
       }
     }
