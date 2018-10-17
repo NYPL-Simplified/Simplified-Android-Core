@@ -256,6 +256,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.playerSubscription = this.player.events.subscribe({ event -> this.onPlayerEvent(event) })
     this.playerInitialized = true
 
+    this.startAllPartsDownloading();
+
     /*
      * Create and load the main player fragment into the holder view declared in the activity.
      */
@@ -268,6 +270,12 @@ class AudioBookPlayerActivity : FragmentActivity(),
         .beginTransaction()
         .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
         .commit()
+    }
+  }
+
+  private fun startAllPartsDownloading() {
+    if (this.services.isNetworkAvailable) {
+      this.book.spine.forEach { element -> element.downloadTask.fetch() }
     }
   }
 
