@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.player
 
-import android.support.annotation.ColorInt
 import org.nypl.simplified.books.core.BookID
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
