@@ -26,10 +26,8 @@
     android:minHeight="160dp"
     android:orientation="horizontal">
 
-    <!-- The width of this layout is set at run-time based on the size of the book 
-      cover -->
-
-    <LinearLayout
+    <!-- The width of this layout is set at run-time based on the size of the book cover -->
+    <RelativeLayout
       android:id="@+id/book_header_left"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
@@ -41,7 +39,7 @@
         android:layout_height="200dp"
         android:scaleType="fitCenter"
         android:src="@drawable/empty" />
-    </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
       android:id="@+id/book_header_right"
