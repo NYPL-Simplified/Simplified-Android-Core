@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.io7m.jfunctional.OptionType;
@@ -25,6 +26,7 @@ import com.squareup.picasso.Callback;
 import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
@@ -90,6 +92,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   private final ViewGroup                        cell_corrupt;
   private final TextView                         cell_corrupt_text;
   private final ImageView                        cell_cover_image;
+  private final ImageView                        cell_cover_badge;
   private final ViewGroup                        cell_cover_layout;
   private final ProgressBar                      cell_cover_progress;
   private final TextView                         cell_debug;
@@ -146,8 +149,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       NullCheck.notNull(in_activity.getApplicationContext());
     final Resources rr = NullCheck.notNull(context.getResources());
 
-    final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
-      Context.LAYOUT_INFLATER_SERVICE);
+    final LayoutInflater inflater =
+      (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
     inflater.inflate(R.layout.catalog_book_cell, this, true);
 
     /**
@@ -239,9 +243,20 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       (ProgressBar) this.cell_cover_layout.findViewById(
         R.id.cell_cover_loading));
 
-    this.cell_cover_progress.getIndeterminateDrawable().setColorFilter(
-      mainColor,
-      android.graphics.PorterDuff.Mode.SRC_IN);
+    /*
+     * Due to an absurd issue with the AIDL resource compiler, the badge view is dynamically
+     * added here rather than being declared in the layout file.
+     */
+
+    SimplifiedCatalogAppServicesType services = Simplified.getCatalogAppServices();
+    this.cell_cover_badge = new ImageView(this.activity);
+    this.cell_cover_badge.setBackgroundColor(mainColor);
+    this.cell_cover_layout.addView(this.cell_cover_badge);
+    this.cell_cover_badge.bringToFront();
+
+    this.cell_cover_progress.getIndeterminateDrawable()
+      .setColorFilter(mainColor, android.graphics.PorterDuff.Mode.SRC_IN);
+
     /**
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
      * for cover images and calculate the width of the cover layout in pixels.
@@ -282,25 +297,29 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     final int in_image_height = this.cell_cover_layout.getLayoutParams().height;
 
-    final ImageView ci = this.cell_cover_image;
-    final ProgressBar cp = this.cell_cover_progress;
+    final ImageView coverImage = this.cell_cover_image;
+    final ProgressBar coverProgress = this.cell_cover_progress;
+    final ImageView coverBadge = this.cell_cover_badge;
 
-    ci.setVisibility(View.INVISIBLE);
-    cp.setVisibility(View.VISIBLE);
+    coverImage.setVisibility(View.INVISIBLE);
+    coverProgress.setVisibility(View.VISIBLE);
 
     final Callback callback = new Callback()
     {
       @Override public void onError()
       {
         CatalogFeedBookCellView.LOG.error("unable to load image");
-        ci.setVisibility(View.INVISIBLE);
-        cp.setVisibility(View.INVISIBLE);
+        coverImage.setVisibility(View.INVISIBLE);
+        coverBadge.setVisibility(View.INVISIBLE);
+        coverProgress.setVisibility(View.INVISIBLE);
       }
 
       @Override public void onSuccess()
       {
-        ci.setVisibility(View.VISIBLE);
-        cp.setVisibility(View.INVISIBLE);
+        coverImage.setVisibility(View.VISIBLE);
+        coverBadge.setVisibility(VISIBLE);
+        coverProgress.setVisibility(View.INVISIBLE);
+        CatalogCoverBadges.INSTANCE.configureBadgeForEntry(in_e, coverBadge, 24);
       }
     };
 

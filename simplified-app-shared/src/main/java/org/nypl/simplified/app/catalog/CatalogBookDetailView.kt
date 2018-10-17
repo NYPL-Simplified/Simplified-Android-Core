@@ -248,64 +248,13 @@ class CatalogBookDetailView(
       coverHeight,
       object : Callback {
         override fun onSuccess() {
-          this@CatalogBookDetailView.onCoverImageLoaded(entryNow)
+          CatalogCoverBadges.configureBadgeForEntry(entryNow, bookHeaderCoverBadge, 32)
         }
 
         override fun onError() {
 
         }
       })
-  }
-
-  private fun onCoverImageLoaded(entryNow: FeedEntryOPDS): Unit {
-
-    /*
-     * If the format can't be inferred, don't show a badge. It's not clear why the book
-     * would even be in the feed in the first place...
-     */
-
-    val formatOpt = entryNow.probableFormat
-    return if (formatOpt is Some<BookFormatDefinition>) {
-      val format = formatOpt.get()
-      when (format) {
-        null,
-        BOOK_FORMAT_EPUB -> {
-          LOG.debug("format is {}, no badge required", format)
-          this.bookHeaderCoverBadge.visibility = View.GONE
-          Unit.unit()
-        }
-
-        /*
-         * Show badges for audio books.
-         */
-
-        BOOK_FORMAT_AUDIO -> {
-          LOG.debug("format is {}, adding badge", format)
-
-          val catalogAppServices = Simplified.getCatalogAppServices()
-
-          val badgeLayoutParams =
-            RelativeLayout.LayoutParams(
-              catalogAppServices.screenDPToPixels(32).toInt(),
-              catalogAppServices.screenDPToPixels(32).toInt())
-
-          badgeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-          badgeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-          badgeLayoutParams.rightMargin = 0
-          badgeLayoutParams.bottomMargin = 0
-
-          this.bookHeaderCoverBadge.layoutParams = badgeLayoutParams
-          this.bookHeaderCoverBadge.isClickable = false
-          this.bookHeaderCoverBadge.isFocusable = false
-          this.bookHeaderCoverBadge.visibility = View.VISIBLE
-          this.bookHeaderCoverBadge.setImageResource(R.drawable.audiobook_icon)
-          return Unit.unit()
-        }
-      }
-    } else {
-      this.bookHeaderCoverBadge.visibility = View.GONE
-      Unit.unit()
-    }
   }
 
   override fun onBookStatusDownloaded(downloaded: BookStatusDownloaded): Unit {
