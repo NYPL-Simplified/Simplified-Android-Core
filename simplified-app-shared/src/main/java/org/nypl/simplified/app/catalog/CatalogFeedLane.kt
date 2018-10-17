@@ -165,7 +165,7 @@ class CatalogFeedLane(
     val imageView = imageGroup.findViewById<ImageView>(R.id.book_cover_image)
     val badgeView = imageGroup.findViewById<ImageView>(R.id.book_cover_badge)
 
-    CatalogCoverBadges.configureBadgeForEntry(entry, badgeView, 16)
+    CatalogCoverBadges.configureBadgeForEntry(entry, badgeView, 24)
 
     /*
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
