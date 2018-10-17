@@ -30,7 +30,7 @@
     <RelativeLayout
       android:id="@+id/book_header_left"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
+      android:layout_height="200dp"
       android:orientation="vertical">
 
       <ImageView
@@ -39,6 +39,16 @@
         android:layout_height="200dp"
         android:scaleType="fitCenter"
         android:src="@drawable/empty" />
+
+      <ImageView
+        android:id="@+id/book_header_cover_badge"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="16dp"
+        android:background="?button_foreground"
+        android:clickable="false"
+        android:focusable="false"
+        android:src="@drawable/audiobook_icon" />
     </RelativeLayout>
 
     <RelativeLayout

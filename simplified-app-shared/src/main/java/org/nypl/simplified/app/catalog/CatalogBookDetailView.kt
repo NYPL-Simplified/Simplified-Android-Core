@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
+import android.view.View.INVISIBLE
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -15,6 +17,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import com.io7m.jfunctional.OptionType
@@ -32,6 +35,9 @@ import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.core.BookAcquisitionSelection
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
 import org.nypl.simplified.books.core.BookDatabaseReadableType
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.core.BookID
 import org.nypl.simplified.books.core.BookStatusDownloadFailed
 import org.nypl.simplified.books.core.BookStatusDownloadInProgress
@@ -106,9 +112,16 @@ class CatalogBookDetailView(
    */
 
   val scrollView: ScrollView
+
   private val bookDownloadingLabel: TextView
   private val bookDownloadingFailedText: TextView
   private val bookDebugStatus: TextView
+  private val bookHeader: ViewGroup
+  private val bookHeaderLeft: ViewGroup
+  private val bookHeaderTitle: TextView
+  private val bookHeaderCover: ImageView
+  private val bookHeaderAuthors: TextView
+  private val bookHeaderCoverBadge: ImageView
 
   init {
     val sv = ScrollView(this.activity)
@@ -130,31 +143,33 @@ class CatalogBookDetailView(
 
     this.bookDebugStatus = layout.findViewById<View>(R.id.book_debug_status) as TextView
     if (this.activity.resources.getBoolean(R.bool.debug_catalog_cell_view_states)) {
-      bookDebugStatus.visibility = View.VISIBLE
+      this.bookDebugStatus.visibility = View.VISIBLE
     } else {
-      bookDebugStatus.visibility = View.GONE
+      this.bookDebugStatus.visibility = View.GONE
     }
 
-    val header =
+    this.bookHeader =
       layout.findViewById<View>(R.id.book_header) as ViewGroup
-    val headerLeft =
-      header.findViewById<View>(R.id.book_header_left) as ViewGroup
-    val headerTitle =
-      header.findViewById<View>(R.id.book_header_title) as TextView
-    val headerCover =
-      header.findViewById<View>(R.id.book_header_cover) as ImageView
-    val headerAuthors =
-      header.findViewById<View>(R.id.book_header_authors) as TextView
+    this.bookHeaderLeft =
+      bookHeader.findViewById<View>(R.id.book_header_left) as ViewGroup
+    this.bookHeaderTitle =
+      bookHeader.findViewById<View>(R.id.book_header_title) as TextView
+    this.bookHeaderCover =
+      bookHeader.findViewById<View>(R.id.book_header_cover) as ImageView
+    this.bookHeaderCoverBadge =
+      bookHeader.findViewById<View>(R.id.book_header_cover_badge) as ImageView
+    this.bookHeaderAuthors =
+      bookHeader.findViewById<View>(R.id.book_header_authors) as TextView
     this.bookDownloadButtons =
-      header.findViewById<View>(R.id.book_dialog_download_buttons) as LinearLayout
+      bookHeader.findViewById<View>(R.id.book_dialog_download_buttons) as LinearLayout
     this.bookDownloadingCancel =
-      header.findViewById<View>(R.id.book_dialog_downloading_cancel) as Button
+      bookHeader.findViewById<View>(R.id.book_dialog_downloading_cancel) as Button
     this.bookDownloadingFailedButtons =
-      header.findViewById<View>(R.id.book_dialog_downloading_failed_buttons) as LinearLayout
+      bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_buttons) as LinearLayout
     this.bookDownloadingFailedDismiss =
-      header.findViewById<View>(R.id.book_dialog_downloading_failed_dismiss) as Button
+      bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_dismiss) as Button
     this.bookDownloadingFailedRetry =
-      header.findViewById<View>(R.id.book_dialog_downloading_failed_retry) as Button
+      bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_retry) as Button
 
     this.bookDownloading =
       layout.findViewById<View>(R.id.book_dialog_downloading) as ViewGroup
@@ -206,34 +221,34 @@ class CatalogBookDetailView(
     /* Assuming a roughly fixed height for cover images, assume a 4:3 aspect
      * ratio and set the width of the cover layout. */
 
-    val coverHeight = headerCover.layoutParams.height
+    val coverHeight = this.bookHeaderCover.layoutParams.height
     val coverWidth = (coverHeight.toDouble() / 4.0 * 3.0).toInt()
-    headerLeft.layoutParams = LinearLayout.LayoutParams(coverWidth, LayoutParams.WRAP_CONTENT)
+    this.bookHeaderLeft.layoutParams = LinearLayout.LayoutParams(coverWidth, LayoutParams.WRAP_CONTENT)
 
     /* Configure detail texts. */
-    val opdsEntry = this.entry.get().feedEntry
+    val entryNow = this.entry.get()
+    val opdsEntry = entryNow.feedEntry
     CatalogBookDetailView.configureSummarySectionTitle(summarySectionTitle)
 
-    val bookID = this.entry.get().bookID
+    val bookID = entryNow.bookID
     val statusCache = this.books.bookGetStatusCache()
     val statusOpt = statusCache.booksStatusGet(bookID)
-    this.onStatus(this.entry.get(), statusOpt)
+    this.onStatus(entryNow, statusOpt)
 
     CatalogBookDetailView.configureSummaryWebView(opdsEntry, summaryText)
-
-    headerTitle.text = opdsEntry.title
-
-    CatalogBookDetailView.configureViewTextAuthor(opdsEntry, headerAuthors)
+    this.bookHeaderTitle.text = opdsEntry.title
+    CatalogBookDetailView.configureViewTextAuthor(opdsEntry, this.bookHeaderAuthors)
     CatalogBookDetailView.configureViewTextMeta(this.activity.resources, opdsEntry, headerMeta)
 
+    this.bookHeaderCoverBadge.visibility = GONE
     catalogServices.coverProvider.loadCoverIntoWithCallback(
-      this.entry.get(),
-      headerCover,
+      entryNow,
+      this.bookHeaderCover,
       coverWidth,
       coverHeight,
       object : Callback {
         override fun onSuccess() {
-          this@CatalogBookDetailView.onCoverImageLoaded()
+          this@CatalogBookDetailView.onCoverImageLoaded(entryNow)
         }
 
         override fun onError() {
@@ -242,8 +257,55 @@ class CatalogBookDetailView(
       })
   }
 
-  private fun onCoverImageLoaded() {
+  private fun onCoverImageLoaded(entryNow: FeedEntryOPDS): Unit {
 
+    /*
+     * If the format can't be inferred, don't show a badge. It's not clear why the book
+     * would even be in the feed in the first place...
+     */
+
+    val formatOpt = entryNow.probableFormat
+    return if (formatOpt is Some<BookFormatDefinition>) {
+      val format = formatOpt.get()
+      when (format) {
+        null,
+        BOOK_FORMAT_EPUB -> {
+          LOG.debug("format is {}, no badge required", format)
+          this.bookHeaderCoverBadge.visibility = View.GONE
+          Unit.unit()
+        }
+
+        /*
+         * Show badges for audio books.
+         */
+
+        BOOK_FORMAT_AUDIO -> {
+          LOG.debug("format is {}, adding badge", format)
+
+          val catalogAppServices = Simplified.getCatalogAppServices()
+
+          val badgeLayoutParams =
+            RelativeLayout.LayoutParams(
+              catalogAppServices.screenDPToPixels(32).toInt(),
+              catalogAppServices.screenDPToPixels(32).toInt())
+
+          badgeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+          badgeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+          badgeLayoutParams.rightMargin = 0
+          badgeLayoutParams.bottomMargin = 0
+
+          this.bookHeaderCoverBadge.layoutParams = badgeLayoutParams
+          this.bookHeaderCoverBadge.isClickable = false
+          this.bookHeaderCoverBadge.isFocusable = false
+          this.bookHeaderCoverBadge.visibility = View.VISIBLE
+          this.bookHeaderCoverBadge.setImageResource(R.drawable.audiobook_icon)
+          return Unit.unit()
+        }
+      }
+    } else {
+      this.bookHeaderCoverBadge.visibility = View.GONE
+      Unit.unit()
+    }
   }
 
   override fun onBookStatusDownloaded(downloaded: BookStatusDownloaded): Unit {
@@ -689,24 +751,24 @@ class CatalogBookDetailView(
 
     LOG.debug("update: {} {}", observable, data)
 
-    val update_id = data as BookID
-    val current_entry = this.entry.get()
-    val current_id = current_entry.bookID
+    val updateID = data as BookID
+    val currentEntry = this.entry.get()
+    val currentID = currentEntry.bookID
 
-    /**
+    /*
      * If the book for this view has been updated in some way, first check
      * the book database and replace the current feed entry with any snapshot
      * that exists. Then, check to see if a revocation feed entry has been
      * posted and use that.
      */
 
-    if (current_id == update_id) {
+    if (currentID == updateID) {
       val statusCache = this.books.bookGetStatusCache()
-      val statusOpt = statusCache.booksStatusGet(current_id)
+      val statusOpt = statusCache.booksStatusGet(currentID)
 
       LOG.debug("received status update {}", statusOpt)
-      this.updateFetchDatabaseSnapshot(current_id, this.books.bookGetDatabase())
-      this.updateCheckForRevocationEntry(current_id, statusCache)
+      this.updateFetchDatabaseSnapshot(currentID, this.books.bookGetDatabase())
+      this.updateCheckForRevocationEntry(currentID, statusCache)
       this.onStatus(this.entry.get(), statusOpt)
     }
   }
@@ -749,7 +811,7 @@ class CatalogBookDetailView(
 
   companion object {
     private val GENRES_URI: URI = URI.create("http://librarysimplified.org/terms/genres/Simplified/")
-    private val GENRES_URI_TEXT: String = GENRES_URI.toString()
+    private val GENRES_URI_TEXT: String = this.GENRES_URI.toString()
     private val LOG: Logger
 
     init {
