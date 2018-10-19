@@ -2,6 +2,7 @@ package org.nypl.simplified.books.core
 
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
+import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB
@@ -91,6 +92,32 @@ sealed class BookDatabaseEntryFormatHandle {
     @Throws(IOException::class)
     abstract fun copyInManifestAndURI(file: File, manifestURI: URI)
 
+    /**
+     * Save the given player position to the database.
+     *
+     * @throws IOException On I/O errors or lock acquisition failures
+     */
+
+    @Throws(IOException::class)
+    abstract fun savePlayerPosition(position: PlayerPosition)
+
+    /**
+     * Load the most recently saved player position from the database, if any exists.
+     *
+     * @throws IOException On I/O errors or lock acquisition failures
+     */
+
+    @Throws(IOException::class)
+    abstract fun loadPlayerPosition(): OptionType<PlayerPosition>
+
+    /**
+     * Clear the saved player position in the database.
+     *
+     * @throws IOException On I/O errors or lock acquisition failures
+     */
+
+    @Throws(IOException::class)
+    abstract fun clearPlayerPosition()
   }
 
 }
@@ -146,7 +173,8 @@ sealed class BookDatabaseEntryFormatSnapshot {
    */
 
   data class BookDatabaseEntryFormatSnapshotAudioBook(
-    val manifest: OptionType<AudioBookManifestReference>) : BookDatabaseEntryFormatSnapshot() {
+    val manifest: OptionType<AudioBookManifestReference>,
+    val position: OptionType<PlayerPosition>) : BookDatabaseEntryFormatSnapshot() {
 
     /*
      * Audio books are downloaded if there's a manifest available.

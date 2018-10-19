@@ -18,6 +18,7 @@ import org.mockito.Mockito
 import org.nypl.audiobook.android.api.PlayerAudioBookProviderType
 import org.nypl.audiobook.android.api.PlayerAudioBookType
 import org.nypl.audiobook.android.api.PlayerBookID
+import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.audiobook.android.mocking.MockingAudioBook
 import org.nypl.audiobook.android.mocking.MockingDownloadProvider
@@ -41,6 +42,7 @@ import org.nypl.simplified.books.core.AccountPIN
 import org.nypl.simplified.books.core.AccountPatron
 import org.nypl.simplified.books.core.AccountsDatabase
 import org.nypl.simplified.books.core.BookDatabase
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
 import org.nypl.simplified.books.core.BookDatabaseReadableType
@@ -1436,6 +1438,112 @@ abstract class BooksContract {
         "Database entry should not be gone",
         booksController.bookGetDatabase().databaseEntryExists(bookID))
       throw ex.cause!!
+    }
+  }
+
+  /**
+   * Saving and then restoring the player position of an audio book works.
+   */
+
+  @Test(timeout = 10_000L)
+  @Throws(Exception::class)
+  fun testBooksSaveRestorePositionAudioBookOK() {
+
+    val tmp = DirectoryUtilities.directoryCreateTemporary()
+    val booksConfig = BooksControllerConfiguration()
+
+    val barcode = AccountBarcode("barcode")
+    val pin = AccountPIN("pin")
+    val creds = AccountCredentials(Option.none(), barcode, pin, Option.some(AccountAuthProvider("Library")))
+
+    val http = MappedHTTP(LOG)
+    http.addResource("http://example.com/loans/", httpResource("loans.xml"), "text/xml")
+    http.addResource("http://example.com/borrow/0", httpResource("borrow-audiobook-0.xml"), "text/xml")
+    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/audiobook+json")
+    http.addResource("http://example.com/revoke/0", httpResource("revoke-audiobook-0.xml"), "text/xml")
+
+    val downloader =
+      DownloaderHTTP.newDownloader(this.executor, DirectoryUtilities.directoryCreateTemporary(), http)
+    val accounts =
+      AccountsDatabase.openDatabase(File(tmp, "accounts"))
+    val database =
+      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+
+    val booksController =
+      BooksController.newBooks(
+        this.context,
+        this.executor,
+        BooksContract.newParser(database, http),
+        http,
+        downloader,
+        this.jsonSerializer,
+        this.jsonParser,
+        Option.none(),
+        EmptyDocumentStore(),
+        database,
+        accounts,
+        booksConfig,
+        booksConfig.currentRootFeedURI.resolve("loans/"))
+
+    val booksStatus = booksController.bookGetStatusCache()
+
+    val loginListener = LoggingAccountLoginListener(LOG)
+    val loginFuture = booksController.accountLogin(creds, loginListener)
+    loginFuture.get()
+
+    LOG.debug("borrowing book")
+
+    val bookID =
+      BookID.exactString("2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881")
+
+    /*
+     * Borrow the book.
+     *
+     * XXX: The book borrowing code needs to be completely rewritten. It is currently essentially
+     * impossible to convert the borrowing code into a task that can be observed synchronously.
+     */
+
+    booksController.bookBorrow(bookID, makeOPDSEntryAudioBook(), true)
+    TimeUnit.SECONDS.sleep(2L)
+
+    val downloadedStatus =
+      (booksStatus.booksStatusGet(bookID) as Some<BookStatusDownloaded>).get()
+    Assert.assertEquals(bookID, downloadedStatus.id)
+
+    val entry =
+      booksController.bookGetDatabase().databaseOpenExistingEntry(bookID)
+    val formatHandleOpt =
+      entry.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
+
+    Assert.assertTrue(formatHandleOpt is Some<BookDatabaseEntryFormatHandleAudioBook>)
+
+    val formatHandle =
+      (formatHandleOpt as Some<BookDatabaseEntryFormatHandleAudioBook>).get()
+
+    val position = PlayerPosition(
+      title = "A title", part = 23, chapter = 137, offsetMilliseconds = 400000301L)
+
+    Assert.assertEquals(Option.none<PlayerPosition>(), formatHandle.loadPlayerPosition())
+
+    run {
+      val snap = formatHandle.snapshot()
+      Assert.assertEquals(Option.none<PlayerPosition>(), snap.position)
+    }
+
+    formatHandle.savePlayerPosition(position)
+    Assert.assertEquals(Option.some(position), formatHandle.loadPlayerPosition())
+
+    run {
+      val snap = formatHandle.snapshot()
+      Assert.assertEquals(Option.some(position), snap.position)
+    }
+
+    formatHandle.clearPlayerPosition()
+    Assert.assertEquals(Option.none<PlayerPosition>(), formatHandle.loadPlayerPosition())
+
+    run {
+      val snap = formatHandle.snapshot()
+      Assert.assertEquals(Option.none<PlayerPosition>(), snap.position)
     }
   }
 

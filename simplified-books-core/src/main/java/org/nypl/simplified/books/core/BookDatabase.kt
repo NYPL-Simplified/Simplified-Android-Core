@@ -8,6 +8,9 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Pair
 import com.io7m.jfunctional.ProcedureType
 import com.io7m.jfunctional.Some
+import org.nypl.audiobook.android.api.PlayerPosition
+import org.nypl.audiobook.android.api.PlayerPositions
+import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -392,6 +395,10 @@ class BookDatabase private constructor(
       File(this.owner.directory, "audiobook-manifest-uri.txt")
     private val fileManifestURITmp: File =
       File(this.owner.directory, "audiobook-manifest-uri.txt.tmp")
+    private val filePosition: File =
+      File(this.owner.directory, "audiobook-position.json")
+    private val filePositionTmp: File =
+      File(this.owner.directory, "audiobook-position.json.tmp")
 
     @Throws(IOException::class)
     private fun lockedManifestGet(): OptionType<File> {
@@ -407,6 +414,48 @@ class BookDatabase private constructor(
       } else Option.none()
     }
 
+    @Throws(IOException::class)
+    private fun lockedLoadPlayerPosition(): OptionType<PlayerPosition> {
+      return try {
+        FileInputStream(this.filePosition).use { stream ->
+          val jom = ObjectMapper()
+          val result =
+            PlayerPositions.parseFromObjectNode(
+              JSONParserUtilities.checkObject(null, jom.readTree(stream)))
+
+          when (result) {
+            is PlayerResult.Success -> Option.some(result.result)
+            is PlayerResult.Failure -> throw result.failure
+          }
+        }
+      } catch (e: FileNotFoundException) {
+        return Option.none()
+      } catch (e: Exception) {
+        throw IOException(e)
+      }
+    }
+
+    override fun savePlayerPosition(position: PlayerPosition) {
+      val text =
+        JSONSerializerUtilities.serializeToString(PlayerPositions.serializeToObjectNode(position))
+
+      this.owner.entryLock.withLock {
+        FileUtilities.fileWriteUTF8Atomically(this.filePosition, this.filePositionTmp, text)
+      }
+    }
+
+    override fun loadPlayerPosition(): OptionType<PlayerPosition> {
+      this.owner.entryLock.withLock {
+        return lockedLoadPlayerPosition()
+      }
+    }
+
+    override fun clearPlayerPosition() {
+      this.owner.entryLock.withLock {
+        FileUtilities.fileDelete(this.filePosition)
+      }
+    }
+
     override fun copyInManifestAndURI(file: File, manifestURI: URI) {
       this.owner.entryLock.withLock {
         FileUtilities.fileCopy(file, this.fileManifest)
@@ -419,14 +468,21 @@ class BookDatabase private constructor(
       return this.owner.entryLock.withLock {
         val manifestFile = this.lockedManifestGet()
         val manifestURI = this.lockedManifestURIGet()
+        val position = this.lockedLoadPlayerPosition()
+
         if (manifestFile is Some<File> && manifestURI is Some<URI>) {
-          BookDatabaseEntryFormatSnapshotAudioBook(
-            manifest = Option.some(AudioBookManifestReference(
+          val reference =
+            AudioBookManifestReference(
               manifestFile = manifestFile.get(),
-              manifestURI = manifestURI.get())))
+              manifestURI = manifestURI.get())
+
+          BookDatabaseEntryFormatSnapshotAudioBook(
+            manifest = Option.some(reference),
+            position = position)
         } else {
           BookDatabaseEntryFormatSnapshotAudioBook(
-            manifest = Option.none())
+            manifest = Option.none(),
+            position = position)
         }
       }
     }
