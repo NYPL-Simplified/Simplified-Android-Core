@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity
 import android.widget.ImageView
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
+import com.io7m.jfunctional.Some
 import org.nypl.audiobook.android.api.PlayerAudioBookType
 import org.nypl.audiobook.android.api.PlayerAudioEngineRequest
 import org.nypl.audiobook.android.api.PlayerAudioEngines
@@ -24,9 +25,14 @@ import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.Pl
 import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStarted
 import org.nypl.audiobook.android.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStopped
 import org.nypl.audiobook.android.api.PlayerManifest
+import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.audiobook.android.api.PlayerSleepTimer
 import org.nypl.audiobook.android.api.PlayerSleepTimerType
+import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadFailed
+import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloaded
+import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloading
+import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementNotDownloaded
 import org.nypl.audiobook.android.api.PlayerType
 import org.nypl.audiobook.android.downloads.DownloadProvider
 import org.nypl.audiobook.android.views.PlayerFragment
@@ -43,6 +49,7 @@ import org.nypl.simplified.app.ThemeMatcher
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.NamedThreadPools
 import org.nypl.simplified.app.utilities.UIThread
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.core.FeedEntryOPDS
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
@@ -94,6 +101,10 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private var playerInitialized: Boolean = false
   private lateinit var playerSubscription: Subscription
   private lateinit var playerFragment: PlayerFragment
+
+  @Volatile
+  private var playerLastPosition: PlayerPosition? = null
+
   private lateinit var parameters: AudioBookPlayerParameters
   private lateinit var services: SimplifiedCatalogAppServicesType
   private lateinit var loadingFragment: AudioBookLoadingFragment
@@ -102,8 +113,10 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private lateinit var downloadExecutor: ListeningExecutorService
   private lateinit var downloaderDir: File
   private lateinit var downloader: DownloaderType
+  private lateinit var formatHandle: BookDatabaseEntryFormatHandleAudioBook
   private var download: DownloadType? = null
-  @ColorInt private var primaryTintColor: Int = 0
+  @ColorInt
+  private var primaryTintColor: Int = 0
 
   override fun onCreate(state: Bundle?) {
     this.log.debug("onCreate")
@@ -131,6 +144,27 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     this.bookTitle = this.parameters.opdsEntry.title
     this.bookAuthor = this.findBookAuthor(this.parameters.opdsEntry)
+
+    /*
+     * Open the database format handle.
+     */
+
+    val formatHandleOpt =
+      this.services.books.bookGetDatabase()
+        .databaseOpenExistingEntry(this.parameters.bookID)
+        .entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
+
+    if (!(formatHandleOpt is Some<BookDatabaseEntryFormatHandleAudioBook>)) {
+      ErrorDialogUtilities.showErrorWithRunnable(
+        this,
+        this.log,
+        this.resources.getString(R.string.audio_book_player_error_book_open),
+        null,
+        { this.finish() })
+      return
+    }
+
+    this.formatHandle = formatHandleOpt.get()
 
     /*
      * Create a new downloader that is solely used to fetch audio book manifests.
@@ -177,16 +211,48 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.log.debug("onDestroy")
     super.onDestroy()
 
+    /*
+     * Cancel the manifest download if one is still happening.
+     */
+
     val down = this.download
     if (down != null) {
       down.cancel()
     }
 
-    this.downloadExecutor.shutdown()
+    /*
+     * Cancel downloads and shut down the player.
+     */
 
     if (this.playerInitialized) {
+      this.savePlayerPosition()
+      this.cancelAllDownloads()
       this.player.close()
       this.playerSubscription.unsubscribe()
+    }
+
+    this.downloadExecutor.shutdown()
+  }
+
+  private fun savePlayerPosition() {
+    val position = this.playerLastPosition
+    if (position != null) {
+      try {
+        this.formatHandle.savePlayerPosition(position)
+      } catch (e: Exception) {
+        this.log.error("could not save player position: ", e)
+      }
+    }
+  }
+
+  private fun cancelAllDownloads() {
+    this.book.spine.forEach { element ->
+      when (element.downloadStatus) {
+        is PlayerSpineElementDownloaded,
+        is PlayerSpineElementDownloadFailed,
+        is PlayerSpineElementNotDownloaded -> Unit
+        is PlayerSpineElementDownloading -> element.downloadTask.delete()
+      }
     }
   }
 
@@ -256,6 +322,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.playerSubscription = this.player.events.subscribe({ event -> this.onPlayerEvent(event) })
     this.playerInitialized = true
 
+    this.restoreSavedPlayerPosition()
     this.startAllPartsDownloading();
 
     /*
@@ -273,6 +340,28 @@ class AudioBookPlayerActivity : FragmentActivity(),
     }
   }
 
+  private fun restoreSavedPlayerPosition() {
+    var restored = false
+
+    try {
+      val position = this.formatHandle.loadPlayerPosition()
+      if (position is Some<PlayerPosition>) {
+        this.player.movePlayheadToLocation(position.get())
+        restored = true
+      }
+    } catch (e: Exception) {
+      this.log.error("unable to load saved player position: ", e)
+    }
+
+    /*
+     * Explicitly wind back to the start of the book if there isn't a suitable position saved.
+     */
+
+    if (!restored) {
+      this.player.movePlayheadToLocation(this.book.spine[0].position)
+    }
+  }
+
   private fun startAllPartsDownloading() {
     if (this.services.isNetworkAvailable) {
       this.book.spine.forEach { element -> element.downloadTask.fetch() }
@@ -281,13 +370,24 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
   private fun onPlayerEvent(event: PlayerEvent) {
     return when (event) {
-      is PlayerEventPlaybackStarted,
-      is PlayerEventPlaybackBuffering,
-      is PlayerEventPlaybackProgressUpdate,
-      is PlayerEventChapterCompleted,
-      is PlayerEventChapterWaiting,
-      is PlayerEventPlaybackPaused,
-      is PlayerEventPlaybackStopped,
+      is PlayerEventPlaybackStarted ->
+        this.playerLastPosition =
+          event.spineElement.position.copy(offsetMilliseconds = event.offsetMilliseconds)
+      is PlayerEventPlaybackBuffering ->
+        this.playerLastPosition =
+          event.spineElement.position.copy(offsetMilliseconds = event.offsetMilliseconds)
+      is PlayerEventPlaybackProgressUpdate ->
+        this.playerLastPosition =
+          event.spineElement.position.copy(offsetMilliseconds = event.offsetMilliseconds)
+      is PlayerEventPlaybackPaused ->
+        this.playerLastPosition =
+          event.spineElement.position.copy(offsetMilliseconds = event.offsetMilliseconds)
+      is PlayerEventPlaybackStopped ->
+        this.playerLastPosition =
+          event.spineElement.position.copy(offsetMilliseconds = event.offsetMilliseconds)
+
+      is PlayerEventChapterCompleted -> Unit
+      is PlayerEventChapterWaiting -> Unit
       is PlayerEventPlaybackRateChanged -> Unit
       is PlayerEventError -> {
         this.log.error("player error: code {}: spine element {}: offset {}: ",
