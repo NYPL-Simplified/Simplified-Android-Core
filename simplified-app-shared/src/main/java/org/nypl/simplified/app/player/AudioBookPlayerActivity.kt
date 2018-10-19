@@ -172,7 +172,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     this.downloadExecutor =
       MoreExecutors.listeningDecorator(
-        NamedThreadPools.namedThreadPool(4, "audiobook-player", 19))
+        NamedThreadPools.namedThreadPool(1, "audiobook-player", 19))
 
     this.downloaderDir =
       File(this.filesDir, "audiobook-player-downloads")
@@ -251,7 +251,10 @@ class AudioBookPlayerActivity : FragmentActivity(),
         is PlayerSpineElementDownloaded,
         is PlayerSpineElementDownloadFailed,
         is PlayerSpineElementNotDownloaded -> Unit
-        is PlayerSpineElementDownloading -> element.downloadTask.delete()
+        is PlayerSpineElementDownloading -> {
+          this.log.debug("cancelling download of element {}", element.index)
+          element.downloadTask.delete()
+        }
       }
     }
   }
