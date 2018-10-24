@@ -60,6 +60,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 
 /**
  * The main activity for playing audio books.
@@ -97,6 +99,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private lateinit var book: PlayerAudioBookType
   private lateinit var bookTitle: String
   private lateinit var bookAuthor: String
+  private lateinit var playerScheduledExecutor: ScheduledExecutorService
   private lateinit var player: PlayerType
   private var playerInitialized: Boolean = false
   private lateinit var playerSubscription: Subscription
@@ -135,6 +138,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     this.setContentView(R.layout.audio_book_player_base)
     this.services = Simplified.getCatalogAppServices()!!
+    this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
 
     this.primaryTintColor =
       this.resources.getColor(ThemeMatcher.color(this.parameters.accountColor))
@@ -232,6 +236,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
     }
 
     this.downloadExecutor.shutdown()
+    this.playerScheduledExecutor.shutdown()
   }
 
   private fun savePlayerPosition() {
@@ -241,20 +246,6 @@ class AudioBookPlayerActivity : FragmentActivity(),
         this.formatHandle.savePlayerPosition(position)
       } catch (e: Exception) {
         this.log.error("could not save player position: ", e)
-      }
-    }
-  }
-
-  private fun cancelAllDownloads() {
-    this.book.spine.forEach { element ->
-      when (element.downloadStatus) {
-        is PlayerSpineElementDownloaded,
-        is PlayerSpineElementDownloadFailed,
-        is PlayerSpineElementNotDownloaded -> Unit
-        is PlayerSpineElementDownloading -> {
-          this.log.debug("cancelling download of element {}", element.index)
-          element.downloadTask.delete()
-        }
       }
     }
   }
@@ -368,6 +359,20 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private fun startAllPartsDownloading() {
     if (this.services.isNetworkAvailable) {
       this.book.spine.forEach { element -> element.downloadTask.fetch() }
+    }
+  }
+
+  private fun cancelAllDownloads() {
+    this.book.spine.forEach { element ->
+      when (element.downloadStatus) {
+        is PlayerSpineElementDownloaded,
+        is PlayerSpineElementDownloadFailed,
+        is PlayerSpineElementNotDownloaded -> Unit
+        is PlayerSpineElementDownloading -> {
+          this.log.debug("cancelling download of element {}", element.index)
+          element.downloadTask.delete()
+        }
+      }
     }
   }
 
@@ -495,5 +500,9 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
   override fun onPlayerWantsTitle(): String {
     return this.parameters.opdsEntry.title
+  }
+
+  override fun onPlayerWantsScheduledExecutor(): ScheduledExecutorService {
+    return this.playerScheduledExecutor
   }
 }
