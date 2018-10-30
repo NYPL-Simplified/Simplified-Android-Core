@@ -4,17 +4,12 @@ import android.content.Context
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.io7m.jfunctional.Some
-import org.nypl.audiobook.android.api.PlayerAudioBookType
 import org.nypl.audiobook.android.api.PlayerAudioEngineRequest
 import org.nypl.audiobook.android.api.PlayerAudioEngines
 import org.nypl.audiobook.android.api.PlayerDownloadProviderType
 import org.nypl.audiobook.android.api.PlayerDownloadRequest
 import org.nypl.audiobook.android.api.PlayerManifests
 import org.nypl.audiobook.android.api.PlayerResult
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadFailed
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloaded
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloading
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementNotDownloaded
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.slf4j.LoggerFactory
@@ -108,26 +103,11 @@ internal class BooksControllerDeleteBookDataTask(
 
             val bookResult = engine.bookProvider.create(this.context)
             when (bookResult) {
-              is PlayerResult.Success -> deleteAudioBookSpineElements(bookResult.result)
+              is PlayerResult.Success -> bookResult.result.deleteLocalChapterData()
               is PlayerResult.Failure -> throw bookResult.failure
             }
           }
         }
-      }
-    }
-  }
-
-  private fun deleteAudioBookSpineElements(book: PlayerAudioBookType) {
-    for (element in book.spine) {
-      try {
-        when (element.downloadStatus) {
-          is PlayerSpineElementNotDownloaded,
-          is PlayerSpineElementDownloading,
-          is PlayerSpineElementDownloadFailed -> Unit
-          is PlayerSpineElementDownloaded -> element.downloadTask.delete()
-        }
-      } catch (e: Exception) {
-        LOG.error("[{}]: error deleting part: ", this.bookID.shortID, e)
       }
     }
   }

@@ -358,19 +358,36 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
   private fun startAllPartsDownloading() {
     if (this.services.isNetworkAvailable) {
-      this.book.spine.forEach { element -> element.downloadTask.fetch() }
+      this.book.spine.forEach { element ->
+        val status = element.downloadStatus
+        when (status) {
+          is PlayerSpineElementNotDownloaded -> {
+            this.log.debug("[spine {}]: {}: downloading", element.index, status)
+            element.downloadTask.fetch()
+          }
+
+          is PlayerSpineElementDownloading,
+          is PlayerSpineElementDownloadFailed,
+          is PlayerSpineElementDownloaded ->
+            this.log.debug("[spine {}]: {}: not downloading", element.index, status)
+        }
+      }
     }
   }
 
   private fun cancelAllDownloads() {
     this.book.spine.forEach { element ->
-      when (element.downloadStatus) {
+      val status = element.downloadStatus
+      when (status) {
+        is PlayerSpineElementDownloading -> {
+          this.log.debug("[spine {}]: {}: cancelling download", element.index, status)
+          element.downloadTask.cancel()
+        }
+
         is PlayerSpineElementDownloaded,
         is PlayerSpineElementDownloadFailed,
-        is PlayerSpineElementNotDownloaded -> Unit
-        is PlayerSpineElementDownloading -> {
-          this.log.debug("cancelling download of element {}", element.index)
-          element.downloadTask.delete()
+        is PlayerSpineElementNotDownloaded -> {
+          this.log.debug("[spine {}]: {}: download is not running, ignoring", element.index, status)
         }
       }
     }
