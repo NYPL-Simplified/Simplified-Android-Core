@@ -3,6 +3,7 @@ package org.nypl.simplified.books.core;
 import android.content.Context;
 
 import com.google.common.base.Function;
+import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.io7m.jfunctional.None;
@@ -202,7 +203,7 @@ public final class BooksController implements BooksType {
   public void accountRemoveCredentials() {
     try {
       this.accounts_database.accountRemoveCredentials();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
   }
@@ -228,6 +229,8 @@ public final class BooksController implements BooksType {
     NullCheck.notNull(account);
     NullCheck.notNull(listener);
 
+    LOG.debug("accountLogin");
+
     final DeviceActivationListenerType device_listener =
       new DeviceActivationListenerType() {
         @Override
@@ -241,16 +244,39 @@ public final class BooksController implements BooksType {
         }
       };
 
-    return this.submitTask(
-      new BooksControllerLoginTask(
-        this,
-        this.book_database,
-        this.accounts_database,
-        this.http,
-        this.config,
-        account,
-        listener,
-        device_listener));
+    final FluentFuture<Unit> login_task =
+      this.submitTask(
+        new BooksControllerLoginTask(
+          this,
+          this.book_database,
+          this.accounts_database,
+          this.http,
+          this.config,
+          account,
+          listener,
+          device_listener));
+
+    final Function<? super Unit, Unit> func0 = ignored -> {
+      try {
+        return new BooksControllerSyncTask(
+          this,
+          this.book_database,
+          this.accounts_database,
+          this.http,
+          this.feed_parser,
+          listener,
+          this.syncing,
+          this.loans_uri,
+          this.adobe_drm,
+          device_listener,
+          true)
+          .call();
+      } catch (final Exception e) {
+        throw new RuntimeException(e);
+      }
+    };
+
+    return login_task.transform(func0, this.exec);
   }
 
   @Override
@@ -259,7 +285,13 @@ public final class BooksController implements BooksType {
     final AccountLogoutListenerType listener,
     final AccountSyncListenerType sync_listener,
     final DeviceActivationListenerType device_listener) {
-    NullCheck.notNull(listener);
+
+    NullCheck.notNull(account, "account");
+    NullCheck.notNull(listener, "listener");
+    NullCheck.notNull(sync_listener, "sync_listener");
+    NullCheck.notNull(device_listener, "device_listener");
+
+    LOG.debug("accountLogout");
 
     final FluentFuture<Unit> future0 =
       this.accountSync(sync_listener, device_listener, true);
@@ -277,7 +309,7 @@ public final class BooksController implements BooksType {
           this.http,
           account)
           .call();
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException(e);
       }
     };
@@ -290,7 +322,11 @@ public final class BooksController implements BooksType {
     final AccountSyncListenerType listener,
     final DeviceActivationListenerType device_listener,
     final boolean needs_authentication) {
-    NullCheck.notNull(listener);
+
+    NullCheck.notNull(listener, "listener");
+    NullCheck.notNull(device_listener, "device_listener");
+
+    LOG.debug("accountSync");
 
     return this.submitTask(
       new BooksControllerSyncTask(
@@ -306,7 +342,6 @@ public final class BooksController implements BooksType {
         device_listener,
         needs_authentication));
   }
-
 
   /**
    * @param in_book_id book id to be fulfilled
@@ -644,4 +679,5 @@ public final class BooksController implements BooksType {
     this.tasks.put(id, future);
     return future;
   }
+
 }

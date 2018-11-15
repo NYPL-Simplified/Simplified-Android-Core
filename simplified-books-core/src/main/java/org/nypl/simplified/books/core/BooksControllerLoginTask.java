@@ -82,15 +82,6 @@ final class BooksControllerLoginTask implements Callable<Unit> {
     } catch (final IOException e) {
       LOG.error("could not save credentials: ", e);
       this.listener.onAccountLoginFailureLocalError(Option.some(e), e.getMessage());
-      return;
-    }
-
-    try {
-      this.books.accountSync(this.listener, this.device_listener, true).get();
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-    } catch (ExecutionException e) {
-      LOG.error("unable to sync: ", e.getCause());
     }
   }
 
