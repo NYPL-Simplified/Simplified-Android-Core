@@ -145,6 +145,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.log.debug("tint color:    0x{}", Integer.toHexString(this.primaryTintColor))
 
     this.actionBar.setBackgroundDrawable(ColorDrawable(this.primaryTintColor))
+    this.actionBar.setDisplayHomeAsUpEnabled(false)
 
     this.bookTitle = this.parameters.opdsEntry.title
     this.bookAuthor = this.findBookAuthor(this.parameters.opdsEntry)
