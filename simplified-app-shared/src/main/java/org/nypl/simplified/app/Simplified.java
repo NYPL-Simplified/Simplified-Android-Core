@@ -450,8 +450,8 @@ public final class Simplified extends MultiDexApplication
       OPDSJSONSerializer.newSerializer();
     final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-    final BookDatabaseType books_database = BookDatabase.Companion.newDatabase(
-      in_json_serializer, in_json_parser, books_database_directory);
+    final BookDatabaseType books_database =
+      BookDatabase.Companion.newDatabase(context, in_json_serializer, in_json_parser, books_database_directory);
 
     final OPDSAcquisitionFeedEntryParserType in_entry_parser =
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
@@ -750,7 +750,7 @@ public final class Simplified extends MultiDexApplication
       final OPDSSearchParserType s = OPDSSearchParser.newParser();
 
       this.books_database = BookDatabase.Companion.newDatabase(
-        in_json_serializer, in_json_parser, books_database_directory);
+        in_context, in_json_serializer, in_json_parser, books_database_directory);
       this.accounts_database = AccountsDatabase.openDatabase(accounts_dir);
 
       this.feed_loader = Simplified.makeFeedLoader(

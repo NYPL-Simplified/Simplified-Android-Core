@@ -153,7 +153,6 @@ internal class BooksControllerRevokeBookTask(
     this.booksStatus.booksRevocationFeedEntryUpdate(entry)
 
     BooksControllerDeleteBookDataTask(
-      this.context,
       this.booksStatus,
       this.booksDatabase,
       this.bookID,

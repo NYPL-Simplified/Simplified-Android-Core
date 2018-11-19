@@ -40,4 +40,5 @@ dependencies {
   api "org.nypl.audiobook:org.nypl.audiobook.android.api:${nypl_audiobook_api_version}"
   api "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nypl_audiobook_api_version}"
   api "org.nypl.audiobook:org.nypl.audiobook.android.mocking:${nypl_audiobook_api_version}"
+  api "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nypl_audiobook_api_version}"
 }

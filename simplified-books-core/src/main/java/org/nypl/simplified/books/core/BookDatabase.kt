@@ -1,13 +1,21 @@
 package org.nypl.simplified.books.core
 
+import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Pair
 import com.io7m.jfunctional.ProcedureType
 import com.io7m.jfunctional.Some
+import org.nypl.audiobook.android.api.PlayerAudioEngineRequest
+import org.nypl.audiobook.android.api.PlayerAudioEngines
+import org.nypl.audiobook.android.api.PlayerDownloadProviderType
+import org.nypl.audiobook.android.api.PlayerDownloadRequest
+import org.nypl.audiobook.android.api.PlayerManifests
 import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerPositions
 import org.nypl.audiobook.android.api.PlayerResult
@@ -52,6 +60,7 @@ import kotlin.concurrent.withLock
  */
 
 class BookDatabase private constructor(
+  private val context: Context,
   private val directory: File,
   private val jsonParser: OPDSJSONParserType,
   private val jsonSerializer: OPDSJSONSerializerType) : BookDatabaseType {
@@ -88,7 +97,7 @@ class BookDatabase private constructor(
      * A function to construct a format given an existing database entry.
      */
 
-    val constructor: (BookFormatDefinition, BookDatabaseEntry) -> BookDatabaseEntryFormatHandle)
+    val constructor: (BookID, BookFormatDefinition, BookDatabaseEntry) -> BookDatabaseEntryFormatHandle)
 
   /**
    * The available format handle constructors.
@@ -106,13 +115,13 @@ class BookDatabase private constructor(
             DatabaseBookFormatHandleConstructor(
               classType = DBEntryFormatHandleEPUB::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { format, entry -> this.DBEntryFormatHandleEPUB(format, entry) })
+              constructor = { bookID, format, entry -> this.DBEntryFormatHandleEPUB(bookID, format, entry) })
           }
           BOOK_FORMAT_AUDIO -> {
             DatabaseBookFormatHandleConstructor(
               classType = DBEntryFormatHandleAudioBook::class.java,
               supportedContentTypes = format.supportedContentTypes(),
-              constructor = { format, entry -> DBEntryFormatHandleAudioBook(format, entry) })
+              constructor = { bookID, format, entry -> DBEntryFormatHandleAudioBook(bookID, format, entry) })
           }
         }
     }
@@ -133,12 +142,14 @@ class BookDatabase private constructor(
         val formatConstructor = this.formatHandleConstructors[formatDefinition]!!
         if (formatDefinition.supportedContentTypes().contains(contentType)) {
           if (!existingFormats.containsKey(formatConstructor.classType)) {
+            val bookID = owner.entryGetBookID()
             this.log.debug(
-              "instantiating format {} for content type {}",
+              "[{}]: instantiating format {} for content type {}",
+              bookID.shortID,
               formatConstructor.classType.simpleName,
               contentType)
             existingFormats[formatConstructor.classType] =
-              formatConstructor.constructor.invoke(formatDefinition, owner)
+              formatConstructor.constructor.invoke(bookID, formatDefinition, owner)
             return
           }
         }
@@ -274,8 +285,12 @@ class BookDatabase private constructor(
    */
 
   private inner class DBEntryFormatHandleEPUB(
+    private val bookID: BookID,
     override val formatDefinition: BookFormatDefinition,
     private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatHandleEPUB() {
+
+    private val log: Logger =
+      LoggerFactory.getLogger(DBEntryFormatHandleEPUB::class.java)
 
     private val fileAdobeRightsTmp: File =
       File(this.owner.directory, "rights_adobe.xml.tmp")
@@ -347,6 +362,7 @@ class BookDatabase private constructor(
 
     @Throws(IOException::class)
     private fun lockedDestroyBookData() {
+      this.log.debug("[{}]: destroying book data", this.bookID.shortID)
       FileUtilities.fileDelete(this.fileBook)
     }
 
@@ -386,6 +402,7 @@ class BookDatabase private constructor(
    */
 
   private class DBEntryFormatHandleAudioBook(
+    private val bookID: BookID,
     override val formatDefinition: BookFormatDefinition,
     private val owner: BookDatabaseEntry) : BookDatabaseEntryFormatHandleAudioBook() {
 
@@ -399,6 +416,9 @@ class BookDatabase private constructor(
       File(this.owner.directory, "audiobook-position.json")
     private val filePositionTmp: File =
       File(this.owner.directory, "audiobook-position.json.tmp")
+
+    private val log: Logger =
+      LoggerFactory.getLogger(DBEntryFormatHandleAudioBook::class.java)
 
     @Throws(IOException::class)
     private fun lockedManifestGet(): OptionType<File> {
@@ -464,6 +484,69 @@ class BookDatabase private constructor(
       }
     }
 
+    override fun deleteBookData(): BookDatabaseEntrySnapshot {
+      this.owner.entryLock.withLock {
+        this.lockedDeleteBookData()
+        return this.owner.lockedUpdateSnapshot()
+      }
+    }
+
+    private fun lockedDeleteBookData() {
+      this.log.debug("[{}]: deleting audio book data", this.bookID.shortID)
+
+      /*
+       * Parse the manifest, start up an audio engine, and then tell it to delete all and any
+       * downloaded parts.
+       */
+
+      if (!this.fileManifest.isFile) {
+        this.log.debug("[{}]: no manifest available", this.bookID.shortID)
+        return
+      }
+
+      try {
+        FileInputStream(this.fileManifest).use { stream ->
+          this.log.debug("[{}]: parsing audio book manifest", this.bookID.shortID)
+
+          val manifestResult = PlayerManifests.parse(stream)
+          when (manifestResult) {
+            is PlayerResult.Failure -> throw manifestResult.failure
+            is PlayerResult.Success -> {
+              this.log.debug("[{}]: selecting audio engine", this.bookID.shortID)
+
+              val engine = PlayerAudioEngines.findBestFor(
+                PlayerAudioEngineRequest(
+                  manifest = manifestResult.result,
+                  filter = { true },
+                  downloadProvider = NullDownloadProvider()))
+
+              if (engine == null) {
+                throw UnsupportedOperationException(
+                  "No audio engine is available to process the given request")
+              }
+
+              this.log.debug(
+                "[{}]: selected audio engine: {} {}",
+                this.bookID.shortID,
+                engine.engineProvider.name(),
+                engine.engineProvider.version())
+
+              val bookResult = engine.bookProvider.create(this.owner.owner.context)
+              when (bookResult) {
+                is PlayerResult.Success -> bookResult.result.deleteLocalChapterData()
+                is PlayerResult.Failure -> throw bookResult.failure
+              }
+
+              this.log.debug("[{}]: deleted audio book data", this.bookID.shortID)
+            }
+          }
+        }
+      } catch (ex : Exception) {
+        this.log.error("[{}]: failed to delete audio book: ", this.bookID.shortID, ex)
+        throw ex
+      }
+    }
+
     override fun snapshot(): BookDatabaseEntryFormatSnapshotAudioBook {
       return this.owner.entryLock.withLock {
         val manifestFile = this.lockedManifestGet()
@@ -489,6 +572,16 @@ class BookDatabase private constructor(
   }
 
   /**
+   * A download provider that does nothing.
+   */
+
+  private class NullDownloadProvider : PlayerDownloadProviderType {
+    override fun download(request: PlayerDownloadRequest): ListenableFuture<Unit> {
+      return Futures.immediateFailedFuture(UnsupportedOperationException())
+    }
+  }
+
+  /**
    * A single book directory.
    *
    * All operations on the directory are thread-safe but not necessarily
@@ -496,7 +589,7 @@ class BookDatabase private constructor(
    */
 
   private class BookDatabaseEntry constructor(
-    private val owner: BookDatabase,
+    internal val owner: BookDatabase,
     private val jsonSerializer: OPDSJSONSerializerType,
     private val jsonParser: OPDSJSONParserType,
     private val parentDirectory: File,
@@ -650,8 +743,43 @@ class BookDatabase private constructor(
     }
 
     @Throws(IOException::class)
+    private fun lockedDeleteBookData() {
+
+      /*
+       * Delete all of the format handles individually.
+       */
+
+      val failures = mutableListOf<Exception>()
+      for (handle in this.formatsHandles.values) {
+        try {
+          handle.deleteBookData()
+        } catch (e: Exception) {
+          failures.add(e)
+        }
+      }
+
+      /*
+       * If any of the format handles failed, abort the deletion.
+       */
+
+      if (!failures.isEmpty()) {
+        val exception = IOException("Failed to delete one or more format handles")
+        for (failure in failures) {
+          exception.addSuppressed(failure)
+        }
+      }
+    }
+
+    @Throws(IOException::class)
     private fun lockedDestroy() {
       if (this.directory.isDirectory) {
+        this.lockedDeleteBookData()
+
+        /*
+         * If all the format handles deleted properly, then delete any remaining
+         * files.
+         */
+
         val files = this.directory.listFiles()
         for (file in files) {
           try {
@@ -700,6 +828,8 @@ class BookDatabase private constructor(
 
     @Throws(IOException::class)
     override fun entryDestroy() {
+      this.log.debug("[{}]: destroying database entry", this.bookID.shortID)
+
       this.entryLock.withLock {
         this.lockedDestroy()
         this.owner.snapshotDelete(this.bookID)
@@ -749,6 +879,14 @@ class BookDatabase private constructor(
         bookmarks.remove(bookmark)
 
         this.lockedBookmarksListSet(bookmarks)
+        this.lockedUpdateSnapshot()
+      }
+    }
+
+    @Throws(IOException::class)
+    override fun entryDeleteBookData(): BookDatabaseEntrySnapshot {
+      return this.entryLock.withLock {
+        this.lockedDeleteBookData()
         this.lockedUpdateSnapshot()
       }
     }
@@ -853,6 +991,7 @@ class BookDatabase private constructor(
     /**
      * Open a database at the given directory.
      *
+     * @param context        An Android context
      * @param jsonSerializer A JSON serializer
      * @param jsonParser     A JSON parser
      * @param directory      The directory
@@ -861,11 +1000,13 @@ class BookDatabase private constructor(
      */
 
     fun newDatabase(
+      context: Context,
       jsonSerializer: OPDSJSONSerializerType,
       jsonParser: OPDSJSONParserType,
       directory: File): BookDatabaseType {
 
       return BookDatabase(
+        context = context,
         directory = directory,
         jsonParser = jsonParser,
         jsonSerializer = jsonSerializer)

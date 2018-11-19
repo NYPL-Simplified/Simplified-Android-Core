@@ -29,6 +29,17 @@ sealed class BookDatabaseEntryFormatHandle {
   abstract fun snapshot(): BookDatabaseEntryFormatSnapshot
 
   /**
+   * Destroy the book data, if it exists.
+   *
+   * @return A snapshot of the new database state
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  @Throws(IOException::class)
+  abstract fun deleteBookData(): BookDatabaseEntrySnapshot
+
+  /**
    * The interface exposed by the EPUB format in database entries.
    */
 
@@ -46,17 +57,6 @@ sealed class BookDatabaseEntryFormatHandle {
 
     @Throws(IOException::class)
     abstract fun copyInBook(file: File): BookDatabaseEntrySnapshot
-
-    /**
-     * Destroy the book data, if it exists.
-     *
-     * @return A snapshot of the new database state
-     *
-     * @throws IOException On I/O errors or lock acquisition failures
-     */
-
-    @Throws(IOException::class)
-    abstract fun deleteBookData(): BookDatabaseEntrySnapshot
 
     /**
      * Set the Adobe rights information for the book.

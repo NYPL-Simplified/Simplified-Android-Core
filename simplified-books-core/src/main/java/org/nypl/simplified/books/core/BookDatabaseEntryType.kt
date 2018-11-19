@@ -27,6 +27,17 @@ interface BookDatabaseEntryType : BookDatabaseEntryReadableType {
   fun entryDestroy()
 
   /**
+   * Destroy the local book data for all formats.
+   *
+   * @return A snapshot of the new database state
+   *
+   * @throws IOException On I/O errors or lock acquisition failures
+   */
+
+  @Throws(IOException::class)
+  fun entryDeleteBookData(): BookDatabaseEntrySnapshot
+
+  /**
    * Set the acquisition feed entry of the book
    *
    * @param entry The feed entry

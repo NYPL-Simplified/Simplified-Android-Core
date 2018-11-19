@@ -105,8 +105,10 @@ abstract class BooksContract {
   fun setUp() {
     MockedAudioEngineProvider.onNextRequest = null
 
-    this.jsonSerializer = OPDSJSONSerializer.newSerializer()
-    this.jsonParser = OPDSJSONParser.newParser()
+    this.jsonSerializer =
+      OPDSJSONSerializer.newSerializer()
+    this.jsonParser =
+      OPDSJSONParser.newParser()
     this.executor =
       MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(4))
     this.downloadExecutor =
@@ -140,7 +142,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -213,7 +215,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -293,7 +295,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -336,7 +338,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -435,7 +437,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -553,7 +555,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -633,7 +635,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -739,7 +741,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -829,7 +831,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -919,7 +921,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -1009,7 +1011,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -1097,7 +1099,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(
@@ -1183,7 +1185,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     /*
      * Create a mocked Adobe connector.
@@ -1324,7 +1326,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     /*
      * Create a mocked Adobe connector.
@@ -1467,7 +1469,7 @@ abstract class BooksContract {
     val accounts =
       AccountsDatabase.openDatabase(File(tmp, "accounts"))
     val database =
-      BookDatabase.newDatabase(this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
 
     val booksController =
       BooksController.newBooks(

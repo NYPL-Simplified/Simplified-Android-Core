@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books;
 
+import android.content.Context;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -9,6 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.nypl.simplified.books.core.BookDatabase;
+import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle;
 import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookID;
@@ -22,10 +24,14 @@ import org.nypl.simplified.opds.core.OPDSJSONParser;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
 import org.nypl.simplified.opds.core.OPDSJSONSerializer;
 import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
 import java.util.Collections;
@@ -36,6 +42,10 @@ import static org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.*;
 import static org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB;
 
 public abstract class BookDatabaseContract {
+
+  private static final Logger LOG = LoggerFactory.getLogger(BookDatabaseContract.class);
+
+  protected abstract Context context();
 
   @Rule
   public ExpectedException expected = ExpectedException.none();
@@ -55,7 +65,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
 
     bookDatabase.databaseCreate();
     Assert.assertTrue(directory.isDirectory());
@@ -78,7 +88,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
 
     bookDatabase.databaseCreate();
     Assert.assertTrue(directory.isDirectory());
@@ -104,7 +114,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
     bookDatabase.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;
@@ -167,7 +177,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
     bookDatabase.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;
@@ -225,7 +235,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
     bookDatabase.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;
@@ -268,6 +278,267 @@ public abstract class BookDatabaseContract {
   }
 
   /**
+   * Creating a book database entry with an audio book format, and copying in a book and then deleting the local
+   * book data repeatedly, works.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  public void testBooksDatabaseEntryAudioBookCopyDeleteRepeatedly() throws Exception {
+
+    final OPDSJSONSerializerType jsonSerializer = OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType jsonParser = OPDSJSONParser.newParser();
+    final File directory = File.createTempFile("pre", "");
+    directory.delete();
+
+    final BookDatabaseType bookDatabase =
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
+    bookDatabase.databaseCreate();
+
+    final OPDSAcquisitionFeedEntry ee;
+    {
+      final OptionType<URI> revoke = Option.none();
+      final OPDSAcquisitionFeedEntryBuilderType eb =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          "abcd",
+          "Title",
+          Calendar.getInstance(),
+          OPDSAvailabilityOpenAccess.get(revoke));
+      eb.addAcquisition(
+        new OPDSAcquisition(
+          Relation.ACQUISITION_BORROW,
+          URI.create("http://example.com"),
+          Option.some("application/audiobook+json"),
+          Collections.<OPDSIndirectAcquisition>emptyList()));
+      ee = eb.build();
+    }
+
+    final BookDatabaseEntryType databaseEntry =
+      bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
+
+    for (int index = 0; index < 3; ++index) {
+      final OptionType<BookDatabaseEntryFormatHandleAudioBook> formatOpt =
+        databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook.class);
+      Assert.assertTrue("Format is present", formatOpt.isSome());
+
+      final BookDatabaseEntryFormatHandleAudioBook format =
+        ((Some<BookDatabaseEntryFormatHandleAudioBook>) formatOpt).get();
+
+      final File file = copyToTempFile("/org/nypl/simplified/tests/books/basic-manifest.json");
+      format.copyInManifestAndURI(file, URI.create("urn:invalid"));
+
+      databaseEntry.entryDeleteBookData();
+    }
+  }
+
+  /**
+   * Creating a book database entry with an audio book format, and copying in a book and then destroying the entry,
+   * works.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  public void testBooksDatabaseEntryAudioBookCopyDestroyEntry() throws Exception {
+
+    final OPDSJSONSerializerType jsonSerializer = OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType jsonParser = OPDSJSONParser.newParser();
+    final File directory = File.createTempFile("pre", "");
+    directory.delete();
+
+    final BookDatabaseType bookDatabase =
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
+    bookDatabase.databaseCreate();
+
+    final OPDSAcquisitionFeedEntry ee;
+    {
+      final OptionType<URI> revoke = Option.none();
+      final OPDSAcquisitionFeedEntryBuilderType eb =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          "abcd",
+          "Title",
+          Calendar.getInstance(),
+          OPDSAvailabilityOpenAccess.get(revoke));
+      eb.addAcquisition(
+        new OPDSAcquisition(
+          Relation.ACQUISITION_BORROW,
+          URI.create("http://example.com"),
+          Option.some("application/audiobook+json"),
+          Collections.<OPDSIndirectAcquisition>emptyList()));
+      ee = eb.build();
+    }
+
+    final BookDatabaseEntryType databaseEntry =
+      bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
+
+    final OptionType<BookDatabaseEntryFormatHandleAudioBook> formatOpt =
+      databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook.class);
+    Assert.assertTrue("Format is present", formatOpt.isSome());
+
+    final BookDatabaseEntryFormatHandleAudioBook format =
+      ((Some<BookDatabaseEntryFormatHandleAudioBook>) formatOpt).get();
+
+    final File file = copyToTempFile("/org/nypl/simplified/tests/books/basic-manifest.json");
+    format.copyInManifestAndURI(file, URI.create("urn:invalid"));
+
+    databaseEntry.entryDestroy();
+  }
+
+  /**
+   * Creating a book database entry with an EPUB format, and copying in a book and then deleting the local book data
+   * repeatedly, works.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  public void testBooksDatabaseEntryEPUBCopyDeleteRepeatedly() throws Exception {
+
+    final OPDSJSONSerializerType jsonSerializer = OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType jsonParser = OPDSJSONParser.newParser();
+    final File directory = File.createTempFile("pre", "");
+    directory.delete();
+
+    final BookDatabaseType bookDatabase =
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
+    bookDatabase.databaseCreate();
+
+    final OPDSAcquisitionFeedEntry ee;
+    {
+      final OptionType<URI> revoke = Option.none();
+      final OPDSAcquisitionFeedEntryBuilderType eb =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          "abcd",
+          "Title",
+          Calendar.getInstance(),
+          OPDSAvailabilityOpenAccess.get(revoke));
+      eb.addAcquisition(
+        new OPDSAcquisition(
+          Relation.ACQUISITION_BORROW,
+          URI.create("http://example.com"),
+          Option.some("application/epub+zip"),
+          Collections.<OPDSIndirectAcquisition>emptyList()));
+      ee = eb.build();
+    }
+
+    final BookDatabaseEntryType databaseEntry =
+      bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
+
+    for (int index = 0; index < 3; ++index) {
+      final OptionType<BookDatabaseEntryFormatHandleEPUB> formatOpt =
+        databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
+      Assert.assertTrue("Format is present", formatOpt.isSome());
+
+      final BookDatabaseEntryFormatHandleEPUB format =
+        ((Some<BookDatabaseEntryFormatHandleEPUB>) formatOpt).get();
+
+      {
+        final BookDatabaseEntryFormatSnapshotEPUB snap = format.snapshot();
+        Assert.assertTrue("No Adobe rights", snap.getAdobeRights().isNone());
+        Assert.assertTrue("No book data", snap.getBook().isNone());
+        Assert.assertFalse("Book is not downloaded", snap.isDownloaded());
+      }
+
+      format.copyInBook(copyToTempFile("/org/nypl/simplified/tests/books/empty.epub"));
+
+      {
+        final BookDatabaseEntryFormatSnapshotEPUB snap = format.snapshot();
+        Assert.assertTrue("No Adobe rights", snap.getAdobeRights().isNone());
+        Assert.assertTrue("Book data", snap.getBook().isSome());
+        Assert.assertTrue("Book is downloaded", snap.isDownloaded());
+      }
+
+      databaseEntry.entryDeleteBookData();
+    }
+  }
+
+  /**
+   * Creating a book database entry with an EPUB format, and copying in a book and then destroying the entry, works.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  public void testBooksDatabaseEntryEPUBCopyDestroy() throws Exception {
+
+    final OPDSJSONSerializerType jsonSerializer = OPDSJSONSerializer.newSerializer();
+    final OPDSJSONParserType jsonParser = OPDSJSONParser.newParser();
+    final File directory = File.createTempFile("pre", "");
+    directory.delete();
+
+    final BookDatabaseType bookDatabase =
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
+    bookDatabase.databaseCreate();
+
+    final OPDSAcquisitionFeedEntry ee;
+    {
+      final OptionType<URI> revoke = Option.none();
+      final OPDSAcquisitionFeedEntryBuilderType eb =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          "abcd",
+          "Title",
+          Calendar.getInstance(),
+          OPDSAvailabilityOpenAccess.get(revoke));
+      eb.addAcquisition(
+        new OPDSAcquisition(
+          Relation.ACQUISITION_BORROW,
+          URI.create("http://example.com"),
+          Option.some("application/epub+zip"),
+          Collections.<OPDSIndirectAcquisition>emptyList()));
+      ee = eb.build();
+    }
+
+    final BookDatabaseEntryType databaseEntry =
+      bookDatabase.databaseCreateEntry(BookID.exactString("abcd"), ee);
+
+    final OptionType<BookDatabaseEntryFormatHandleEPUB> formatOpt =
+      databaseEntry.entryFindFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
+    Assert.assertTrue("Format is present", formatOpt.isSome());
+
+    final BookDatabaseEntryFormatHandleEPUB format =
+      ((Some<BookDatabaseEntryFormatHandleEPUB>) formatOpt).get();
+
+    {
+      final BookDatabaseEntryFormatSnapshotEPUB snap = format.snapshot();
+      Assert.assertTrue("No Adobe rights", snap.getAdobeRights().isNone());
+      Assert.assertTrue("No book data", snap.getBook().isNone());
+      Assert.assertFalse("Book is not downloaded", snap.isDownloaded());
+    }
+
+    format.copyInBook(copyToTempFile("/org/nypl/simplified/tests/books/empty.epub"));
+
+    {
+      final BookDatabaseEntryFormatSnapshotEPUB snap = format.snapshot();
+      Assert.assertTrue("No Adobe rights", snap.getAdobeRights().isNone());
+      Assert.assertTrue("Book data", snap.getBook().isSome());
+      Assert.assertTrue("Book is downloaded", snap.isDownloaded());
+    }
+
+    databaseEntry.entryDestroy();
+  }
+
+  private static File copyToTempFile(
+    final String name)
+    throws IOException {
+    final File file = File.createTempFile("simplified-book-database-", ".bin");
+    LOG.debug("copyToTempFile: {} -> {}", name, file);
+    try (final FileOutputStream output = new FileOutputStream(file)) {
+      try (final InputStream input = BookDatabaseContract.class.getResourceAsStream(name)) {
+        final byte[] buffer = new byte[4096];
+        while (true) {
+          final int r = input.read(buffer);
+          if (r == -1) {
+            break;
+          }
+          output.write(buffer, 0, r);
+        }
+        return file;
+      }
+    }
+  }
+
+  /**
    * Creating a book database entry for a feed that contains an audio book acquisition results in an
    * audio book format.
    *
@@ -283,7 +554,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
     bookDatabase.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;
@@ -340,7 +611,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
     bookDatabase.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;
@@ -384,7 +655,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
     bookDatabase.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;
@@ -432,7 +703,7 @@ public abstract class BookDatabaseContract {
     final File directory = File.createTempFile("pre", "");
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
 
     this.expected.expect(IOException.class);
     bookDatabase.databaseCreate();
@@ -453,7 +724,7 @@ public abstract class BookDatabaseContract {
     directory.delete();
 
     final BookDatabaseType bookDatabase =
-      BookDatabase.Companion.newDatabase(jsonSerializer, jsonParser, directory);
+      BookDatabase.Companion.newDatabase(this.context(), jsonSerializer, jsonParser, directory);
     bookDatabase.databaseCreate();
 
     final OPDSAcquisitionFeedEntry ee;

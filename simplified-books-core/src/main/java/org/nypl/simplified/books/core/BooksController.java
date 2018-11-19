@@ -505,7 +505,6 @@ public final class BooksController implements BooksType {
     LOG.debug("delete: {}", id);
     this.submitTask(
       new BooksControllerDeleteBookDataTask(
-        this.context,
         this.books_status,
         this.book_database,
         id,
