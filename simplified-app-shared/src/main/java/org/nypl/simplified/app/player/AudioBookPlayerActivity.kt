@@ -60,6 +60,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
 import java.io.File
+import java.lang.StringBuilder
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 
@@ -415,14 +416,33 @@ class AudioBookPlayerActivity : FragmentActivity(),
       is PlayerEventChapterCompleted -> Unit
       is PlayerEventChapterWaiting -> Unit
       is PlayerEventPlaybackRateChanged -> Unit
-      is PlayerEventError -> {
-        this.log.error("player error: code {}: spine element {}: offset {}: ",
-          event.errorCode,
-          event.spineElement,
-          event.offsetMilliseconds,
-          event.exception)
-      }
+      is PlayerEventError ->
+        onLogPlayerError(event)
     }
+  }
+
+  private fun onLogPlayerError(event: PlayerEventError) {
+    val builder = StringBuilder(128)
+    builder.append("Playback error:")
+    builder.append('\n')
+    builder.append("  Error Code:    ")
+    builder.append(event.errorCode)
+    builder.append('\n')
+    builder.append("  Spine Element: ")
+    builder.append(event.spineElement)
+    builder.append('\n')
+    builder.append("  Offset:        ")
+    builder.append(event.offsetMilliseconds)
+    builder.append('\n')
+    builder.append("  Book Title:    ")
+    builder.append(this.parameters.opdsEntry.title)
+    builder.append('\n')
+    builder.append("  Book OPDS ID:  ")
+    builder.append(this.parameters.opdsEntry.id)
+    builder.append('\n')
+    builder.append("  Stacktrace:")
+    builder.append('\n')
+    this.log.error("{}", builder.toString(), event.exception)
   }
 
   override fun onPlayerPlaybackRateShouldOpen() {
