@@ -3,8 +3,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.simplye"
-  android:versionCode="1166"
-  android:versionName="2.2.3">
+  android:versionCode="1185"
+  android:versionName="2.2.5">
 
   <uses-sdk
     android:minSdkVersion="19"
@@ -26,7 +26,8 @@
     android:label="@string/feature_app_name"
     android:contentDescription="@string/feature_app_name"
     android:largeHeap="true"
-    android:theme="@style/SimplifiedTheme_ActionBar">
+    android:theme="@style/SimplifiedTheme_ActionBar"
+    android:usesCleartextTraffic="true">
 
     <!-- Main entry point for the application. -->
     <activity
@@ -225,6 +226,10 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>
+
+    <uses-library
+        android:name="org.apache.http.legacy"
+        android:required="false" />
   </application>
 
 </manifest>
