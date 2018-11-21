@@ -545,7 +545,7 @@ public final class ReaderActivity extends Activity implements
         try {
           final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
           final BookDatabaseEntryReadableType entry = db.databaseOpenExistingEntry(this.book_id);
-          this.bookmarks = entry.entryGetBookmarks();
+          this.bookmarks = new ArrayList<>(entry.entryGetBookmarks());
           LOG.debug("Bookmarks ivar reconstituted after book launch: \n{}", this.bookmarks);
         } catch (IOException e) {
           LOG.error("Error getting list of bookmarks from the book entry database");
@@ -918,7 +918,7 @@ public final class ReaderActivity extends Activity implements
       sync_manager.retryOnDiskBookmarksUpload(current_marks);
       sync_manager.syncBookmarks(current_marks, (syncedMarks) -> {
         synchronized(this) {
-          this.bookmarks = syncedMarks;
+          this.bookmarks = new ArrayList<>(syncedMarks);
           //Update bookmarks on disk
           final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
 

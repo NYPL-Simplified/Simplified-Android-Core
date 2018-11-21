@@ -38,7 +38,7 @@ interface BookDatabaseEntryReadableType {
   fun entryGetFeedData(): OPDSAcquisitionFeedEntry
 
   /**
-   * @return The list of bookmarks associated with the user and book
+   * @return A read-only snapshot of the list of bookmarks associated with the user and book
    *
    * @throws IOException On I/O errors or lock acquisition failures
    */
