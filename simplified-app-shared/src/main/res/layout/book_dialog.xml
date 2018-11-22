@@ -13,7 +13,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:visibility="gone"
-    android:text="STATUS" />
+    android:text="STATUS"/>
 
   <LinearLayout
     android:id="@+id/book_header"
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="200dp"
         android:scaleType="fitCenter"
-        android:src="@drawable/empty" />
+        android:src="@drawable/empty"/>
 
       <ImageView
         android:id="@+id/book_header_cover_badge"
@@ -48,7 +48,7 @@
         android:background="?button_foreground"
         android:clickable="false"
         android:focusable="false"
-        android:src="@drawable/audiobook_icon" />
+        android:src="@drawable/audiobook_icon"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -57,92 +57,103 @@
       android:layout_height="match_parent">
 
       <TextView
-              android:id="@+id/book_header_title"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginStart="12dp"
-              android:maxLines="3"
-              android:ellipsize="end"
-              android:text="@string/placeholder_long_title"
-              android:textSize="18sp"
-              android:textColor="@color/normal_text_major"
-              android:textStyle="bold"/>
+        android:id="@+id/book_header_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="@string/placeholder_long_title"
+        android:textSize="18sp"
+        android:textColor="@color/normal_text_major"
+        android:textStyle="bold"/>
+
+      <TextView
+        android:id="@+id/book_header_format"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/book_header_title"
+        android:layout_marginStart="12dp"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="FORMAT FORMAT FORMAT FORMAT"
+        android:textColor="@color/normal_text_major"/>
 
       <TextView
         android:id="@+id/book_header_authors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/book_header_title"
+        android:layout_below="@id/book_header_format"
         android:layout_marginStart="12dp"
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="2"
         android:minLines="1"
         android:ellipsize="end"
         android:text="@string/placeholder_long_author"
-        android:textColor="@color/normal_text_major" />
+        android:textColor="@color/normal_text_major"/>
 
       <LinearLayout
-              android:id="@+id/book_dialog_downloading_failed_buttons"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_alignParentBottom="true"
-              android:layout_marginLeft="12dp"
-              android:gravity="left"
-              android:orientation="horizontal">
+        android:id="@+id/book_dialog_downloading_failed_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="12dp"
+        android:gravity="left"
+        android:orientation="horizontal">
 
         <Button
-                android:id="@+id/book_dialog_downloading_failed_retry"
-                android:layout_weight="1"
-                android:background="@drawable/simplified_button"
-                android:textColor="@drawable/simplified_button_text"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_standard_height"
-                android:textSize="12sp"
-                android:text="@string/catalog_book_error_retry" />
+          android:id="@+id/book_dialog_downloading_failed_retry"
+          android:layout_weight="1"
+          android:background="@drawable/simplified_button"
+          android:textColor="@drawable/simplified_button_text"
+          android:layout_width="wrap_content"
+          android:layout_height="@dimen/button_standard_height"
+          android:textSize="12sp"
+          android:text="@string/catalog_book_error_retry"/>
 
         <Button
-                android:id="@+id/book_dialog_downloading_failed_dismiss"
-                android:layout_weight="1"
-                android:background="@drawable/simplified_button"
-                android:textColor="@drawable/simplified_button_text"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_standard_height"
-                android:layout_marginLeft="12dp"
-                android:textSize="12sp"
-                android:text="@string/catalog_book_error_dismiss" />
+          android:id="@+id/book_dialog_downloading_failed_dismiss"
+          android:layout_weight="1"
+          android:background="@drawable/simplified_button"
+          android:textColor="@drawable/simplified_button_text"
+          android:layout_width="wrap_content"
+          android:layout_height="@dimen/button_standard_height"
+          android:layout_marginLeft="12dp"
+          android:textSize="12sp"
+          android:text="@string/catalog_book_error_dismiss"/>
       </LinearLayout>
 
       <Button
-              android:id="@+id/book_dialog_downloading_cancel"
-              android:layout_width="wrap_content"
-              android:layout_height="@dimen/button_standard_height"
-              android:background="@drawable/simplified_button"
-              android:layout_alignParentBottom="true"
-              android:layout_marginLeft="12dp"
-              android:layout_marginBottom="8dp"
-              android:text="@string/catalog_cancel_downloading"
-              android:textColor="@drawable/simplified_button_text"
-              android:textSize="12sp" />
+        android:id="@+id/book_dialog_downloading_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/button_standard_height"
+        android:background="@drawable/simplified_button"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/catalog_cancel_downloading"
+        android:textColor="@drawable/simplified_button_text"
+        android:textSize="12sp"/>
 
       <LinearLayout
-              android:id="@+id/book_dialog_download_buttons"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_alignParentBottom="true"
-              android:layout_marginLeft="8dp"
-              android:gravity="center"
-              android:orientation="horizontal"
-        >
+        android:id="@+id/book_dialog_download_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="8dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+      >
 
         <!-- This button will actually be removed at run-time, it is here -->
         <!-- for the purposes of checking the layout in the GUI editor. -->
         <Button
-            android:background="@drawable/simplified_button"
-            android:textColor="@drawable/simplified_button_text"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/button_standard_height"
-            android:textSize="12sp"
-            android:text="@string/catalog_book_borrow" />
+          android:background="@drawable/simplified_button"
+          android:textColor="@drawable/simplified_button_text"
+          android:layout_width="wrap_content"
+          android:layout_height="@dimen/button_standard_height"
+          android:textSize="12sp"
+          android:text="@string/catalog_book_borrow"/>
       </LinearLayout>
 
     </RelativeLayout>
@@ -156,19 +167,19 @@
       layout="@layout/book_dialog_downloading"
       android:layout_height="match_parent"
       android:layout_width="match_parent"
-      android:visibility="visible" />
+      android:visibility="visible"/>
 
     <include
       layout="@layout/book_dialog_downloading_failed"
       android:layout_height="match_parent"
       android:layout_width="match_parent"
-      android:visibility="visible" />
+      android:visibility="visible"/>
 
     <include
       layout="@layout/book_dialog_download"
       android:layout_height="match_parent"
       android:layout_width="match_parent"
-      android:visibility="visible" />
+      android:visibility="visible"/>
   </FrameLayout>
 
   <LinearLayout
@@ -179,12 +190,12 @@
     android:orientation="vertical">
 
     <TextView
-            android:id="@+id/book_summary_section_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="@string/catalog_book_summary_publisher"
-            android:textColor="@color/normal_text_major" tools:text="Description"/>
+      android:id="@+id/book_summary_section_title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:text="@string/catalog_book_summary_publisher"
+      android:textColor="@color/normal_text_major" tools:text="Description"/>
 
     <WebView
       android:id="@+id/book_summary_text"
@@ -208,7 +219,7 @@
       android:layout_width="fill_parent"
       android:layout_height="1dp"
       android:layout_marginTop="16dp"
-      android:background="@android:color/darker_gray" />
+      android:background="@android:color/darker_gray"/>
 
     <TextView
       android:id="@+id/book_header_meta"
@@ -247,7 +258,7 @@
       android:paddingRight="10dp"
       android:text="@string/catalog_detail_related"
       android:textAppearance="?android:attr/textAppearanceMedium"
-      android:textColor="@drawable/simplified_button_text" />
+      android:textColor="@drawable/simplified_button_text"/>
 
     <View
       android:layout_width="fill_parent"
@@ -255,21 +266,21 @@
       android:layout_marginTop="10dp"
       android:layout_marginLeft="16dp"
       android:layout_marginRight="6dp"
-      android:background="@android:color/darker_gray" />
+      android:background="@android:color/darker_gray"/>
 
   </LinearLayout>
 
 
   <Button
-      android:textColor="@drawable/simplified_button_text"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
-      android:text="@string/catalog_book_report"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:background="@android:color/transparent"
-      android:paddingLeft="10dp"
-      android:paddingRight="10dp"
-      android:id="@+id/book_dialog_report_button"/>
+    android:textColor="@drawable/simplified_button_text"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:text="@string/catalog_book_report"
+    android:textAppearance="?android:attr/textAppearanceMedium"
+    android:background="@android:color/transparent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:id="@+id/book_dialog_report_button"/>
 
 </LinearLayout>

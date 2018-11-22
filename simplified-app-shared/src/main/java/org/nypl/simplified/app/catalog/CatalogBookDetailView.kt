@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
-import android.view.View.INVISIBLE
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -17,7 +16,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
-import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import com.io7m.jfunctional.OptionType
@@ -35,7 +33,7 @@ import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.core.BookAcquisitionSelection
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
 import org.nypl.simplified.books.core.BookDatabaseReadableType
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition
+import org.nypl.simplified.books.core.BookFormats
 import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.core.BookID
@@ -119,6 +117,7 @@ class CatalogBookDetailView(
   private val bookHeader: ViewGroup
   private val bookHeaderLeft: ViewGroup
   private val bookHeaderTitle: TextView
+  private val bookHeaderFormat: TextView
   private val bookHeaderCover: ImageView
   private val bookHeaderAuthors: TextView
   private val bookHeaderCoverBadge: ImageView
@@ -154,6 +153,8 @@ class CatalogBookDetailView(
       bookHeader.findViewById<View>(R.id.book_header_left) as ViewGroup
     this.bookHeaderTitle =
       bookHeader.findViewById<View>(R.id.book_header_title) as TextView
+    this.bookHeaderFormat =
+      bookHeader.findViewById<View>(R.id.book_header_format) as TextView
     this.bookHeaderCover =
       bookHeader.findViewById<View>(R.id.book_header_cover) as ImageView
     this.bookHeaderCoverBadge =
@@ -237,6 +238,7 @@ class CatalogBookDetailView(
 
     CatalogBookDetailView.configureSummaryWebView(opdsEntry, summaryText)
     this.bookHeaderTitle.text = opdsEntry.title
+    CatalogBookDetailView.configureViewTextFormat(this.activity.resources, entryInitial, this.bookHeaderFormat)
     CatalogBookDetailView.configureViewTextAuthor(opdsEntry, this.bookHeaderAuthors)
     CatalogBookDetailView.configureViewTextMeta(this.activity.resources, opdsEntry, headerMeta)
 
@@ -942,6 +944,29 @@ class CatalogBookDetailView(
       buffer.append(
         String.format(resources.getString(R.string.catalog_book_distribution),
           entry.distribution))
+    }
+
+    fun configureViewTextFormat(resources: Resources, entry: FeedEntryOPDS, bookHeaderFormat: TextView) {
+      val formatOpt = entry.probableFormat
+      if (formatOpt is Some<BookFormats.BookFormatDefinition>) {
+        val format = formatOpt.get()
+        when (format) {
+          BOOK_FORMAT_EPUB -> {
+            // Not showing the text for epub format books is deliberate!
+            bookHeaderFormat.visibility = View.INVISIBLE
+            bookHeaderFormat.text = resources.getText(R.string.book_format_epub)
+          }
+          BOOK_FORMAT_AUDIO -> {
+            bookHeaderFormat.visibility = View.VISIBLE
+            bookHeaderFormat.text = resources.getText(R.string.book_format_audiobook)
+          }
+          null -> {
+            bookHeaderFormat.visibility = View.INVISIBLE
+          }
+        }
+      } else {
+        bookHeaderFormat.visibility = View.INVISIBLE
+      }
     }
   }
 }

@@ -217,6 +217,10 @@
   <string name="catalog_accessibility_cover_epub">%1$s, ebook</string>
   <string name="catalog_accessibility_cover_audiobook">%1$s, audiobook</string>
 
+  <!-- Book format strings -->
+  <string name="book_format_audiobook">Audiobook</string>
+  <string name="book_format_epub">eBook</string>
+
   <!-- Reader strings -->
   <string name="reader">Reader</string>
   <string name="reader_toc">Table Of Contents</string>
