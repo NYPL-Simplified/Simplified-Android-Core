@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog
 
 import android.content.Context
+import android.content.res.Resources
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
@@ -10,8 +11,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
-import android.widget.RelativeLayout.ALIGN_PARENT_BOTTOM
-import android.widget.RelativeLayout.ALIGN_PARENT_RIGHT
 import android.widget.TextView
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
@@ -177,7 +176,7 @@ class CatalogFeedLane(
     layoutParams.setMargins(0, 0, this.screen.screenDPToPixels(8).toInt(), 0)
     imageGroup.layoutParams = layoutParams
 
-    imageView.contentDescription = entry.feedEntry.title
+    imageView.contentDescription = this.configureContentDescription(this.resources, entry)
     imageView.setOnClickListener { _ -> this.listener.onSelectBook(entry) }
 
     coverViewCollections.add(CoverViewCollection(
@@ -189,49 +188,19 @@ class CatalogFeedLane(
     return Unit.unit()
   }
 
-  /**
-   * Manually resize and position a badge over the cover image based on the format of the book.
-   */
-
-  private fun configureBadgeForFormat(
-    entry: FeedEntryOPDS,
-    imageGroup: ViewGroup,
-    badgeView: ImageView) {
-
-    /*
-     * If the format can't be inferred, don't show a badge. It's not clear why the book
-     * would even be in the feed in the first place...
-     */
-
+  private fun configureContentDescription(
+    resources: Resources,
+    entry: FeedEntryOPDS): String {
     val formatOpt = entry.probableFormat
     return if (formatOpt is Some<BookFormats.BookFormatDefinition>) {
       val format = formatOpt.get()
       when (format) {
         null,
-        BOOK_FORMAT_EPUB ->
-          imageGroup.removeView(badgeView)
-
-        /*
-         * Show badges for audio books.
-         */
-
-        BOOK_FORMAT_AUDIO -> {
-          val badgeLayoutParams =
-            RelativeLayout.LayoutParams(this.imageHeight / 5, this.imageHeight / 5)
-
-          badgeLayoutParams.addRule(ALIGN_PARENT_RIGHT)
-          badgeLayoutParams.addRule(ALIGN_PARENT_BOTTOM)
-          badgeLayoutParams.rightMargin = this.screen.screenDPToPixels(4).toInt()
-          badgeLayoutParams.bottomMargin = this.screen.screenDPToPixels(4).toInt()
-          badgeView.layoutParams = badgeLayoutParams
-          badgeView.isClickable = false
-          badgeView.isFocusable = false
-          badgeView.visibility = View.VISIBLE
-          return
-        }
+        BOOK_FORMAT_EPUB -> resources.getString(R.string.catalog_accessibility_cover_epub, entry.feedEntry.title)
+        BOOK_FORMAT_AUDIO -> resources.getString(R.string.catalog_accessibility_cover_audiobook, entry.feedEntry.title)
       }
     } else {
-      imageGroup.removeView(badgeView)
+      entry.feedEntry.title
     }
   }
 

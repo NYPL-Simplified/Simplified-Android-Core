@@ -214,6 +214,9 @@
   <string name="catalog_accessibility_book_revoke_hold_cancel">Cancel Remove</string>
   <string name="catalog_accessibility_header_show_more">show more in %1$s</string>
 
+  <string name="catalog_accessibility_cover_epub">%1$s, ebook</string>
+  <string name="catalog_accessibility_cover_audiobook">%1$s, audiobook</string>
+
   <!-- Reader strings -->
   <string name="reader">Reader</string>
   <string name="reader_toc">Table Of Contents</string>
