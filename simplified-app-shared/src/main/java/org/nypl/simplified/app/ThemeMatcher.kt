@@ -15,6 +15,7 @@ class ThemeMatcher {
         "blue" -> R.style.Simplified_BlueTheme
         "lightblue" -> R.style.Simplified_LightBlueTheme
         "cyan" -> R.style.Simplified_LightBlueTheme
+        "green" -> R.style.Simplified_GreenTheme
         "teal" -> R.style.Simplified_TealTheme
         "amber" -> R.style.Simplified_AmberTheme
         "orange" -> R.style.Simplified_OrangeTheme
@@ -37,6 +38,7 @@ class ThemeMatcher {
         "blue" -> R.style.Simplified_BlueTheme_NoActionBar
         "lightblue" -> R.style.Simplified_LightBlueTheme_NoActionBar
         "cyan" -> R.style.Simplified_LightBlueTheme_NoActionBar
+        "green" -> R.style.Simplified_GreenTheme_NoActionBar
         "teal" -> R.style.Simplified_TealTheme_NoActionBar
         "amber" -> R.style.Simplified_AmberTheme_NoActionBar
         "orange" -> R.style.Simplified_OrangeTheme_NoActionBar
@@ -60,6 +62,7 @@ class ThemeMatcher {
         "lightblue" -> R.color.light_blue_primary_dark
         "cyan" -> R.color.cyan_primary_dark
         "teal" -> R.color.teal_primary_dark
+        "green" -> R.color.green_primary_dark
         "amber" -> R.color.amber_primary_dark
         "orange" -> R.color.orange_primary_dark
         "deeporange" -> R.color.deep_orange_primary_dark

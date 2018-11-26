@@ -111,6 +111,19 @@
   </style>
 
   <style
+      name="Simplified_GreenTheme"
+      parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/green_primary</item>
+    <item name="android:colorPrimaryDark">@color/green_primary_dark</item>
+    <item name="android:colorAccent">@color/green_primary_light</item>
+    <item name="main_color">@color/green_primary</item>
+    <item name="button_foreground">@color/green_primary_dark</item>
+    <item name="list_item_foreground">@color/green_primary_dark</item>
+    <item name="downloading_background">@color/green_primary_dark</item>
+    <item name="notification_background">@color/green_primary_dark</item>
+  </style>
+
+  <style
       name="Simplified_TealTheme"
       parent="SimplifiedTheme_ActionBar">
     <item name="main_color">@color/teal_primary</item>
@@ -260,6 +273,19 @@
     <item name="list_item_foreground">@color/cyan_primary_dark</item>
     <item name="downloading_background">@color/cyan_primary_dark</item>
     <item name="notification_background">@color/cyan_primary_dark</item>
+  </style>
+
+  <style
+      name="Simplified_GreenTheme_NoActionBar"
+      parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/green_primary</item>
+    <item name="android:colorPrimaryDark">@color/green_primary_dark</item>
+    <item name="android:colorAccent">@color/green_primary_light</item>
+    <item name="main_color">@color/green_primary</item>
+    <item name="button_foreground">@color/green_primary_dark</item>
+    <item name="list_item_foreground">@color/green_primary_dark</item>
+    <item name="downloading_background">@color/green_primary_dark</item>
+    <item name="notification_background">@color/green_primary_dark</item>
   </style>
 
   <style
