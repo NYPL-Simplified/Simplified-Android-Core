@@ -2,6 +2,8 @@ package org.nypl.simplified.app;
 
 import com.io7m.jfunctional.OptionType;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.simplified.accessibility.Accessibility;
+import org.nypl.simplified.accessibility.AccessibilityType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedLoaderType;
@@ -17,6 +19,11 @@ public interface SimplifiedCatalogAppServicesType extends
   NetworkConnectivityType,
   SimplifiedAppInitialSyncType
 {
+  /**
+   * @return A reference to the accessibility system
+   */
+
+  AccessibilityType getAccessibility();
 
   /**
    * @return A reference to the document store.

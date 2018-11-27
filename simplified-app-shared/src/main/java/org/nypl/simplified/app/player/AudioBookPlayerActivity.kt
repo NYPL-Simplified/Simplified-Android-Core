@@ -29,12 +29,14 @@ import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.audiobook.android.api.PlayerSleepTimer
 import org.nypl.audiobook.android.api.PlayerSleepTimerType
+import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus
 import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadFailed
 import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloaded
 import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloading
 import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementNotDownloaded
 import org.nypl.audiobook.android.api.PlayerType
 import org.nypl.audiobook.android.downloads.DownloadProvider
+import org.nypl.audiobook.android.views.PlayerAccessibilityEvent
 import org.nypl.audiobook.android.views.PlayerFragment
 import org.nypl.audiobook.android.views.PlayerFragmentListenerType
 import org.nypl.audiobook.android.views.PlayerFragmentParameters
@@ -315,7 +317,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     this.book = (bookResult as PlayerResult.Success).result
     this.player = this.book.createPlayer()
-    this.playerSubscription = this.player.events.subscribe({ event -> this.onPlayerEvent(event) })
+    this.playerSubscription = this.player.events.subscribe { event -> this.onPlayerEvent(event) }
     this.playerInitialized = true
 
     this.restoreSavedPlayerPosition()
@@ -542,5 +544,9 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
   override fun onPlayerWantsScheduledExecutor(): ScheduledExecutorService {
     return this.playerScheduledExecutor
+  }
+
+  override fun onPlayerAccessibilityEvent(event: PlayerAccessibilityEvent) {
+    this.services.accessibility.announce(event.message)
   }
 }

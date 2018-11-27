@@ -3,6 +3,7 @@ rootProject.name = 'simplified'
 // FIXME: These should be re-enabled once they are working.
 // include ':simplified-app-openebooks'
 // include ':simplified-app-vanilla'
+include ':simplified-accessibility'
 include ':simplified-app-shared'
 include ':simplified-app-simplye'
 include ':simplified-assert'
@@ -28,6 +29,7 @@ include ':simplified-volley'
 // FIXME: These should be re-enabled once they are working
 // project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
 // project(':simplified-app-openebooks').projectDir = "$rootDir/simplified-app-openebooks" as File
+project(':simplified-accessibility').projectDir = "$rootDir/simplified-accessibility" as File
 project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" as File
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
 project(':simplified-assert').projectDir = "$rootDir/simplified-assert" as File

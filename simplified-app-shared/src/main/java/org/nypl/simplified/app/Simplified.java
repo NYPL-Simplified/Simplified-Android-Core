@@ -23,6 +23,8 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.simplified.accessibility.Accessibility;
+import org.nypl.simplified.accessibility.AccessibilityType;
 import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefs;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefsType;
@@ -619,6 +621,7 @@ public final class Simplified extends MultiDexApplication
     private final ListeningExecutorService           exec_catalog_feeds;
     private final ExecutorService                    exec_covers;
     private final ExecutorService                    exec_downloader;
+    private final AccessibilityType                  accessibility;
     private URI                                      feed_initial_uri;
     private final FeedLoaderType                     feed_loader;
     private final HTTPType                           http;
@@ -630,7 +633,6 @@ public final class Simplified extends MultiDexApplication
     private final OptionType<HelpstackType>          helpstack;
     private final BookDatabaseType                   books_database;
     private final AccountsDatabaseType               accounts_database;
-
 
     private final String library;
 
@@ -653,7 +655,8 @@ public final class Simplified extends MultiDexApplication
       this.exec_downloader = Simplified.namedThreadPool(4, "downloader", 19);
       this.exec_books =
         MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "books", 19));
-
+      this.accessibility =
+        Accessibility.Companion.create(in_context);
 
       final Prefs prefs = getSharedPrefs();
 
@@ -914,6 +917,11 @@ public final class Simplified extends MultiDexApplication
        */
 
       this.helpstack = Helpstack.get(in_app, in_context.getAssets());
+    }
+
+    @Override
+    public AccessibilityType getAccessibility() {
+      return this.accessibility;
     }
 
     @Override public DocumentStoreType getDocumentStore()
