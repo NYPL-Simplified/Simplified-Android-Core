@@ -96,7 +96,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   private final ViewGroup                        cell_corrupt;
   private final TextView                         cell_corrupt_text;
   private final ImageView                        cell_cover_image;
-  private final ImageView                        cell_cover_badge;
   private final ViewGroup                        cell_cover_layout;
   private final ProgressBar                      cell_cover_progress;
   private final TextView                         cell_debug;
@@ -247,21 +246,10 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       (ProgressBar) this.cell_cover_layout.findViewById(
         R.id.cell_cover_loading));
 
-    /*
-     * Due to an absurd issue with the AIDL resource compiler, the badge view is dynamically
-     * added here rather than being declared in the layout file.
-     */
-
-    SimplifiedCatalogAppServicesType services = Simplified.getCatalogAppServices();
-    this.cell_cover_badge = new ImageView(this.activity);
-    this.cell_cover_badge.setBackgroundColor(mainColor);
-    this.cell_cover_layout.addView(this.cell_cover_badge);
-    this.cell_cover_badge.bringToFront();
-
     this.cell_cover_progress.getIndeterminateDrawable()
       .setColorFilter(mainColor, android.graphics.PorterDuff.Mode.SRC_IN);
 
-    /**
+    /*
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
      * for cover images and calculate the width of the cover layout in pixels.
      */
@@ -303,7 +291,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     final ImageView coverImage = this.cell_cover_image;
     final ProgressBar coverProgress = this.cell_cover_progress;
-    final ImageView coverBadge = this.cell_cover_badge;
 
     coverImage.setVisibility(View.INVISIBLE);
     coverProgress.setVisibility(View.VISIBLE);
@@ -314,9 +301,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       public void onSuccess(kotlin.Unit result) {
         UIThread.runOnUIThread(() -> {
           coverImage.setVisibility(View.VISIBLE);
-          coverBadge.setVisibility(VISIBLE);
           coverProgress.setVisibility(View.INVISIBLE);
-          CatalogCoverBadges.INSTANCE.configureBadgeForEntry(in_e, coverBadge, 24);
         });
       }
 
@@ -325,7 +310,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
         UIThread.runOnUIThread(() -> {
           CatalogFeedBookCellView.LOG.error("unable to load image");
           coverImage.setVisibility(View.INVISIBLE);
-          coverBadge.setVisibility(View.INVISIBLE);
           coverProgress.setVisibility(View.INVISIBLE);
         });
       }

@@ -25,6 +25,7 @@ import com.io7m.jnull.Nullable;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.accessibility.Accessibility;
 import org.nypl.simplified.accessibility.AccessibilityType;
+import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefs;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefsType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
@@ -60,6 +61,7 @@ import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.covers.BookCoverBadgeLookupType;
 import org.nypl.simplified.books.covers.BookCoverGenerator;
 import org.nypl.simplified.books.covers.BookCoverGeneratorType;
 import org.nypl.simplified.books.covers.BookCoverProvider;
@@ -618,6 +620,7 @@ public final class Simplified extends MultiDexApplication
 
     private final BooksType                          books;
     private final Context                            context;
+    private final BookCoverBadgeLookupType           cover_badges;
     private final BookCoverGeneratorType             cover_generator;
     private final BookCoverProviderType              cover_provider;
     private final ListeningExecutorService           exec_books;
@@ -803,8 +806,6 @@ public final class Simplified extends MultiDexApplication
           }
         };
 
-
-
       final DocumentStoreBuilderType documents_builder =
         DocumentStore.newBuilder(
           clock,
@@ -902,14 +903,24 @@ public final class Simplified extends MultiDexApplication
        */
 
       final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
-      this.cover_generator = new BookCoverGenerator(ten_print);
-      this.cover_provider = BookCoverProvider.Companion.newCoverProvider(
-        in_context,
-        this.books.bookGetDatabase(),
-        this.cover_generator,
-        this.exec_covers,
-        false,
-        false);
+      this.cover_generator =
+        new BookCoverGenerator(ten_print);
+      final Resources resources =
+        this.context.getResources();
+      this.cover_badges =
+        CatalogCoverBadgeImages.Companion.create(
+          resources,
+          resources.getColor(ThemeMatcher.Companion.color(account.getMainColor())),
+          this);
+      this.cover_provider =
+        BookCoverProvider.Companion.newCoverProvider(
+          in_context,
+          this.books.bookGetDatabase(),
+          this.cover_generator,
+          this.cover_badges,
+          this.exec_covers,
+          false,
+          false);
 
       /**
        * Has the initial sync operation been carried out?

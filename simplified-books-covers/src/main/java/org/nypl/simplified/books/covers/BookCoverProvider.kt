@@ -26,7 +26,8 @@ import java.util.concurrent.ExecutorService
 class BookCoverProvider private constructor(
   private val books: BookDatabaseReadableType,
   private val coverGenerator: BookCoverGeneratorType,
-  private val picasso: Picasso
+  private val picasso: Picasso,
+  private val badgeLookup: BookCoverBadgeLookupType
 ) : BookCoverProviderType {
 
   private val log: Logger = LoggerFactory.getLogger(BookCoverProvider::class.java)
@@ -76,6 +77,7 @@ class BookCoverProvider private constructor(
       }
     }
 
+    val badgePainter = BookCoverBadgePainter(entry, this.badgeLookup)
     if (uriSpecified != null) {
       this.log.debug("{}: {}: loading specified uri {}", tag, entry.bookID, uriSpecified)
 
@@ -92,6 +94,7 @@ class BookCoverProvider private constructor(
           val fallbackRequest = this@BookCoverProvider.picasso.load(uriGenerated.toString())
           fallbackRequest.tag(tag)
           fallbackRequest.resize(width, height)
+          fallbackRequest.transform(badgePainter)
           fallbackRequest.into(imageView, callbackFinal)
         }
       }
@@ -99,6 +102,7 @@ class BookCoverProvider private constructor(
       val request = this.picasso.load(uriSpecified.toString())
       request.tag(tag)
       request.resize(width, height)
+      request.transform(badgePainter)
       request.into(imageView, fallbackToGeneration)
     } else {
       this.log.debug("{}: {}: loading generated uri {}", tag, entry.bookID, uriGenerated)
@@ -106,6 +110,7 @@ class BookCoverProvider private constructor(
       val request = this.picasso.load(uriGenerated.toString())
       request.tag(tag)
       request.resize(width, height)
+      request.transform(badgePainter)
       request.into(imageView, callbackFinal)
     }
 
@@ -186,9 +191,10 @@ class BookCoverProvider private constructor(
      * Create a new cover provider.
      *
      * @param context         The application context
-     * @param bookDatabase     The books database
-     * @param coverGenerator A cover generator
-     * @param executor      An executor
+     * @param badgeLookup     A function used to look up badge images
+     * @param bookDatabase    The books database
+     * @param coverGenerator  A cover generator
+     * @param executor        An executor
      *
      * @return A new cover provider
      */
@@ -197,6 +203,7 @@ class BookCoverProvider private constructor(
       context: Context,
       bookDatabase: BookDatabaseReadableType,
       coverGenerator: BookCoverGeneratorType,
+      badgeLookup: BookCoverBadgeLookupType,
       executor: ExecutorService,
       debugCacheIndicators: Boolean,
       debugLogging: Boolean): BookCoverProviderType {
@@ -209,7 +216,7 @@ class BookCoverProvider private constructor(
       picassoBuilder.executor(executor)
 
       val picasso = picassoBuilder.build()
-      return BookCoverProvider(bookDatabase, coverGenerator, picasso)
+      return BookCoverProvider(bookDatabase, coverGenerator, picasso, badgeLookup)
     }
   }
 }

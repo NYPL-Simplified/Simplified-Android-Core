@@ -104,17 +104,17 @@ class CatalogFeedLane(
     this.header.setOnClickListener { _ -> this.listener.onSelectFeed(feedGroup) }
 
     val entries = feedGroup.groupEntries
-    val coverViewCollections = ArrayList<CoverViewCollection?>(entries.size)
+    val coverViews = ArrayList<ImageView?>(entries.size)
 
     for (index in entries.indices) {
       entries[index].matchFeedEntry(
         object : FeedEntryMatcherType<Unit, UnreachableCodeException> {
           override fun onFeedEntryCorrupt(entry: FeedEntryCorrupt): Unit {
-            return this@CatalogFeedLane.addViewForFeedEntryCorrupt(coverViewCollections)
+            return this@CatalogFeedLane.addViewForFeedEntryCorrupt(coverViews)
           }
 
           override fun onFeedEntryOPDS(entry: FeedEntryOPDS): Unit {
-            return this@CatalogFeedLane.addViewForFeedEntryOPDS(entry, coverViewCollections)
+            return this@CatalogFeedLane.addViewForFeedEntryOPDS(entry, coverViews)
           }
         })
     }
@@ -123,8 +123,8 @@ class CatalogFeedLane(
     val imagesRemaining = AtomicInteger(entries.size)
 
     for (index in entries.indices) {
-      val coverViews = coverViewCollections[index]
-      if (coverViews == null) {
+      val imageView = coverViews[index]
+      if (imageView == null) {
         continue
       }
 
@@ -142,7 +142,7 @@ class CatalogFeedLane(
           LOG.debug("could not load image for {}: ", feedEntry.bookID, exception)
 
           UIThread.runOnUIThread {
-            coverViews.imageGroup.visibility = View.GONE
+            imageView.visibility = View.GONE
             if (imagesRemaining.decrementAndGet() <= 0) {
               this@CatalogFeedLane.onFinishedLoadingAllImages()
             }
@@ -153,7 +153,7 @@ class CatalogFeedLane(
       val future =
         this.covers.loadThumbnailInto(
         feedEntry as FeedEntryOPDS,
-        coverViews.imageView,
+        imageView,
         imageWidth,
         this.imageHeight)
 
@@ -161,40 +161,26 @@ class CatalogFeedLane(
     }
   }
 
-  data class CoverViewCollection(
-    val imageGroup: ViewGroup,
-    val imageView: ImageView,
-    val badgeView: ImageView)
-
   private fun addViewForFeedEntryOPDS(
     entry: FeedEntryOPDS,
-    coverViewCollections: ArrayList<CoverViewCollection?>): Unit {
-
-    val imageGroup = this.inflater.inflate(R.layout.book_cover, null) as ViewGroup
-    val imageView = imageGroup.findViewById<ImageView>(R.id.book_cover_image)
-    val badgeView = imageGroup.findViewById<ImageView>(R.id.book_cover_badge)
-
-    CatalogCoverBadges.configureBadgeForEntry(entry, badgeView, 24)
+    coverViews: ArrayList<ImageView?>): Unit {
 
     /*
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
      * for cover images and calculate the width of the cover layout in pixels.
      */
 
+    val imageView = ImageView(this.context)
     val imageWidth = (this.imageHeight.toDouble() / 4.0 * 3.0).toInt()
     val layoutParams = LinearLayout.LayoutParams(imageWidth, this.imageHeight)
     layoutParams.setMargins(0, 0, this.screen.screenDPToPixels(8).toInt(), 0)
-    imageGroup.layoutParams = layoutParams
 
+    imageView.layoutParams = layoutParams
     imageView.contentDescription = this.configureContentDescription(this.resources, entry)
-    imageView.setOnClickListener { _ -> this.listener.onSelectBook(entry) }
+    imageView.setOnClickListener { this.listener.onSelectBook(entry) }
+    coverViews.add(imageView)
 
-    coverViewCollections.add(CoverViewCollection(
-      imageGroup = imageGroup,
-      imageView = imageView,
-      badgeView = badgeView))
-
-    this.scrollerContents.addView(imageGroup)
+    this.scrollerContents.addView(imageView)
     return Unit.unit()
   }
 
@@ -215,7 +201,7 @@ class CatalogFeedLane(
   }
 
   private fun addViewForFeedEntryCorrupt(
-    coverViewCollections: ArrayList<CoverViewCollection?>): Unit {
+    coverViewCollections: ArrayList<ImageView?>): Unit {
     coverViewCollections.add(null)
     return Unit.unit()
   }

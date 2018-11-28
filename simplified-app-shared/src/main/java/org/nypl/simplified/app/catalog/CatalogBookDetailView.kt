@@ -122,7 +122,6 @@ class CatalogBookDetailView(
   private val bookHeaderFormat: TextView
   private val bookHeaderCover: ImageView
   private val bookHeaderAuthors: TextView
-  private val bookHeaderCoverBadge: ImageView
 
   init {
     val sv = ScrollView(this.activity)
@@ -159,8 +158,6 @@ class CatalogBookDetailView(
       bookHeader.findViewById<View>(R.id.book_header_format) as TextView
     this.bookHeaderCover =
       bookHeader.findViewById<View>(R.id.book_header_cover) as ImageView
-    this.bookHeaderCoverBadge =
-      bookHeader.findViewById<View>(R.id.book_header_cover_badge) as ImageView
     this.bookHeaderAuthors =
       bookHeader.findViewById<View>(R.id.book_header_authors) as TextView
     this.bookDownloadButtons =
@@ -244,8 +241,6 @@ class CatalogBookDetailView(
     CatalogBookDetailView.configureViewTextAuthor(opdsEntry, this.bookHeaderAuthors)
     CatalogBookDetailView.configureViewTextMeta(this.activity.resources, opdsEntry, headerMeta)
 
-    this.bookHeaderCoverBadge.visibility = GONE
-
     val future =
       catalogServices.coverProvider.loadCoverInto(
         entryNow,
@@ -255,9 +250,7 @@ class CatalogBookDetailView(
 
     Futures.addCallback(future, object : FutureCallback<kotlin.Unit?> {
       override fun onSuccess(result: kotlin.Unit?) {
-        UIThread.runOnUIThread {
-          CatalogCoverBadges.configureBadgeForEntry(entryNow, bookHeaderCoverBadge, 32)
-        }
+
       }
 
       override fun onFailure(exception: Throwable) {
