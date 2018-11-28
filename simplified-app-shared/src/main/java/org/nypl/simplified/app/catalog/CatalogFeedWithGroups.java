@@ -10,10 +10,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.app.BookCoverProviderType;
+
 import org.nypl.simplified.app.ScreenSizeControllerType;
 import org.nypl.simplified.books.core.FeedGroup;
 import org.nypl.simplified.books.core.FeedWithGroups;
+import org.nypl.simplified.books.covers.BookCoverProviderType;
 
 /**
  * A view that displays a catalog feed that contains groups.

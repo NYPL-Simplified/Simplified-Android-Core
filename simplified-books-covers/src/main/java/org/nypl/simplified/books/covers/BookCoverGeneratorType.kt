@@ -1,20 +1,19 @@
-package org.nypl.simplified.app.catalog;
+package org.nypl.simplified.books.covers
 
-import android.graphics.Bitmap;
-
-import java.io.IOException;
-import java.net.URI;
+import android.graphics.Bitmap
+import java.io.IOException
+import java.net.URI
 
 /**
  * The type of book cover generators.
  */
 
-public interface CatalogBookCoverGeneratorType
-{
+interface BookCoverGeneratorType {
+
   /**
    * Generate an image synchronously.
    *
-   * @param u      The image URI
+   * @param uri    The image URI
    * @param width  The image width
    * @param height The image height
    *
@@ -23,11 +22,11 @@ public interface CatalogBookCoverGeneratorType
    * @throws IOException On errors
    */
 
-  Bitmap generateImage(
-    URI u,
-    int width,
-    int height)
-    throws IOException;
+  @Throws(IOException::class)
+  fun generateImage(
+    uri: URI,
+    width: Int,
+    height: Int): Bitmap
 
   /**
    * Generate a URI from the given title and author, suitable for use in cover
@@ -39,7 +38,7 @@ public interface CatalogBookCoverGeneratorType
    * @return A URI
    */
 
-  URI generateURIForTitleAuthor(
-    String title,
-    String author);
+  fun generateURIForTitleAuthor(
+    title: String,
+    author: String): URI
 }

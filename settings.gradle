@@ -8,6 +8,7 @@ include ':simplified-app-shared'
 include ':simplified-app-simplye'
 include ':simplified-assert'
 include ':simplified-books-core'
+include ':simplified-books-covers'
 include ':simplified-bugsnag'
 include ':simplified-cardcreator'
 include ':simplified-checkstyle'
@@ -34,6 +35,7 @@ project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" 
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
 project(':simplified-assert').projectDir = "$rootDir/simplified-assert" as File
 project(':simplified-books-core').projectDir = "$rootDir/simplified-books-core" as File
+project(':simplified-books-covers').projectDir = "$rootDir/simplified-books-covers" as File
 project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
 project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
 project(':simplified-checkstyle').projectDir = "$rootDir/simplified-checkstyle" as File

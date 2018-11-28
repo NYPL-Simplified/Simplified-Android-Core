@@ -25,7 +25,6 @@ import com.io7m.jnull.Nullable;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.accessibility.Accessibility;
 import org.nypl.simplified.accessibility.AccessibilityType;
-import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefs;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefsType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
@@ -61,6 +60,10 @@ import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.covers.BookCoverGenerator;
+import org.nypl.simplified.books.covers.BookCoverGeneratorType;
+import org.nypl.simplified.books.covers.BookCoverProvider;
+import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.cardcreator.CardCreator;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
@@ -615,7 +618,7 @@ public final class Simplified extends MultiDexApplication
 
     private final BooksType                          books;
     private final Context                            context;
-    private final CatalogBookCoverGenerator          cover_generator;
+    private final BookCoverGeneratorType             cover_generator;
     private final BookCoverProviderType              cover_provider;
     private final ListeningExecutorService           exec_books;
     private final ListeningExecutorService           exec_catalog_feeds;
@@ -899,12 +902,14 @@ public final class Simplified extends MultiDexApplication
        */
 
       final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
-      this.cover_generator = new CatalogBookCoverGenerator(ten_print);
-      this.cover_provider = BookCoverProvider.newCoverProvider(
+      this.cover_generator = new BookCoverGenerator(ten_print);
+      this.cover_provider = BookCoverProvider.Companion.newCoverProvider(
         in_context,
         this.books.bookGetDatabase(),
         this.cover_generator,
-        this.exec_covers);
+        this.exec_covers,
+        false,
+        false);
 
       /**
        * Has the initial sync operation been carried out?

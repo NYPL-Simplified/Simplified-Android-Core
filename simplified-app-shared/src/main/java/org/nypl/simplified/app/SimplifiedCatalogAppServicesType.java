@@ -1,12 +1,13 @@
 package org.nypl.simplified.app;
 
 import com.io7m.jfunctional.OptionType;
+
 import org.nypl.drm.core.AdobeAdeptExecutorType;
-import org.nypl.simplified.accessibility.Accessibility;
 import org.nypl.simplified.accessibility.AccessibilityType;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.FeedLoaderType;
+import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.http.core.HTTPType;
 import org.nypl.simplified.multilibrary.Account;
 

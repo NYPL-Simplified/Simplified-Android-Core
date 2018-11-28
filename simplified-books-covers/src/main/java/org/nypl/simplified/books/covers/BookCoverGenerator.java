@@ -1,19 +1,21 @@
-package org.nypl.simplified.app.catalog;
+package org.nypl.simplified.books.covers;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+
 import com.io7m.jnull.NullCheck;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.URIQueryBuilder;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.nypl.simplified.tenprint.TenPrintInput;
 import org.nypl.simplified.tenprint.TenPrintInputBuilderType;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,21 +27,16 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * The default implementation of the {@link CatalogBookCoverGeneratorType}
+ * The default implementation of the {@link BookCoverGeneratorType}
  * interface.
  *
  * This implementation uses the provided {@link TenPrintGeneratorType} to
  * generate covers when a cover is unavailable or not specified.
  */
 
-public final class CatalogBookCoverGenerator
-  implements CatalogBookCoverGeneratorType
+public final class BookCoverGenerator implements BookCoverGeneratorType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(CatalogBookCoverGenerator.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(BookCoverGenerator.class);
 
   private final TenPrintGeneratorType generator;
 
@@ -49,7 +46,7 @@ public final class CatalogBookCoverGenerator
    * @param in_generator The cover generator
    */
 
-  public CatalogBookCoverGenerator(
+  public BookCoverGenerator(
     final TenPrintGeneratorType in_generator)
   {
     this.generator = NullCheck.notNull(in_generator);
@@ -75,17 +72,14 @@ public final class CatalogBookCoverGenerator
     throws IOException
   {
     try {
-      CatalogBookCoverGenerator.LOG.debug("generating: {}", u);
+      LOG.debug("generating: {}", u);
 
-      final Map<String, String> params =
-        CatalogBookCoverGenerator.getParameters(u);
+      final Map<String, String> params = getParameters(u);
 
       final String title_maybe = params.get("title");
-      final String title =
-        title_maybe == null ? "" : NullCheck.notNull(title_maybe);
+      final String title = title_maybe == null ? "" : NullCheck.notNull(title_maybe);
       final String author_maybe = params.get("author");
-      final String author =
-        author_maybe == null ? "" : NullCheck.notNull(author_maybe);
+      final String author = author_maybe == null ? "" : NullCheck.notNull(author_maybe);
 
       final TenPrintInputBuilderType ib = TenPrintInput.newBuilder();
       ib.setAuthor(author);
@@ -93,9 +87,7 @@ public final class CatalogBookCoverGenerator
       ib.setCoverHeight(height);
       final TenPrintInput i = ib.build();
       final Bitmap cover = this.generator.generate(i);
-
-      final Bitmap container =
-        Bitmap.createBitmap(width, height, Config.RGB_565);
+      final Bitmap container = Bitmap.createBitmap(width, height, Config.RGB_565);
       final Canvas c = new Canvas(container);
       final Paint white = new Paint();
       white.setColor(Color.WHITE);
@@ -103,8 +95,7 @@ public final class CatalogBookCoverGenerator
       c.drawBitmap(cover, (float) ((width - cover.getWidth()) / 2), 0.0F, null);
       return NullCheck.notNull(container);
     } catch (final Throwable e) {
-      CatalogBookCoverGenerator.LOG.error(
-        "error generating image for {}: ", u, e);
+      LOG.error("error generating image for {}: ", u, e);
       throw new IOException(e);
     }
   }

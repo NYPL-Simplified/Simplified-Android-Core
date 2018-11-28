@@ -12,16 +12,18 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
+import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnreachableCodeException
-import com.squareup.picasso.Callback
-import org.nypl.simplified.app.BookCoverProviderType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeControllerType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.ThemeMatcher
 import org.nypl.simplified.app.utilities.FadeUtilities
+import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.BookFormats
 import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
@@ -30,6 +32,7 @@ import org.nypl.simplified.books.core.FeedEntryMatcherType
 import org.nypl.simplified.books.core.FeedEntryOPDS
 import org.nypl.simplified.books.core.FeedGroup
 import org.nypl.simplified.books.core.LogUtilities
+import org.nypl.simplified.books.covers.BookCoverProviderType
 import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -126,28 +129,35 @@ class CatalogFeedLane(
       }
 
       val feedEntry = entries[index]
-      val coverCallback = object : Callback {
-        override fun onError() {
-          LOG.debug("could not load image for {}", feedEntry.bookID)
-          coverViews.imageGroup.visibility = View.GONE
-          if (imagesRemaining.decrementAndGet() <= 0) {
-            this@CatalogFeedLane.onFinishedLoadingAllImages()
+      val coverCallback = object : FutureCallback<kotlin.Unit> {
+        override fun onSuccess(result: kotlin.Unit?) {
+          UIThread.runOnUIThread {
+            if (imagesRemaining.decrementAndGet() <= 0) {
+              this@CatalogFeedLane.onFinishedLoadingAllImages()
+            }
           }
         }
 
-        override fun onSuccess() {
-          if (imagesRemaining.decrementAndGet() <= 0) {
-            this@CatalogFeedLane.onFinishedLoadingAllImages()
+        override fun onFailure(exception: Throwable) {
+          LOG.debug("could not load image for {}: ", feedEntry.bookID, exception)
+
+          UIThread.runOnUIThread {
+            coverViews.imageGroup.visibility = View.GONE
+            if (imagesRemaining.decrementAndGet() <= 0) {
+              this@CatalogFeedLane.onFinishedLoadingAllImages()
+            }
           }
         }
       }
 
-      this.covers.loadThumbnailIntoWithCallback(
+      val future =
+        this.covers.loadThumbnailInto(
         feedEntry as FeedEntryOPDS,
         coverViews.imageView,
         imageWidth,
-        this.imageHeight,
-        coverCallback)
+        this.imageHeight)
+
+      Futures.addCallback(future, coverCallback, directExecutor())
     }
   }
 

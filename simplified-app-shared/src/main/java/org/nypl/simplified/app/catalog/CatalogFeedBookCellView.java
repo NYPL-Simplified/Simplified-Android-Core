@@ -12,9 +12,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -23,7 +25,6 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 
-import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
@@ -58,6 +59,7 @@ import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -66,6 +68,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 /**
  * A single cell in feed (list or grid).
@@ -304,31 +308,37 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     coverImage.setVisibility(View.INVISIBLE);
     coverProgress.setVisibility(View.VISIBLE);
 
-    final Callback callback = new Callback()
+    final FutureCallback<kotlin.Unit> callback = new FutureCallback<kotlin.Unit>()
     {
-      @Override public void onError()
-      {
-        CatalogFeedBookCellView.LOG.error("unable to load image");
-        coverImage.setVisibility(View.INVISIBLE);
-        coverBadge.setVisibility(View.INVISIBLE);
-        coverProgress.setVisibility(View.INVISIBLE);
+      @Override
+      public void onSuccess(kotlin.Unit result) {
+        UIThread.runOnUIThread(() -> {
+          coverImage.setVisibility(View.VISIBLE);
+          coverBadge.setVisibility(VISIBLE);
+          coverProgress.setVisibility(View.INVISIBLE);
+          CatalogCoverBadges.INSTANCE.configureBadgeForEntry(in_e, coverBadge, 24);
+        });
       }
 
-      @Override public void onSuccess()
-      {
-        coverImage.setVisibility(View.VISIBLE);
-        coverBadge.setVisibility(VISIBLE);
-        coverProgress.setVisibility(View.INVISIBLE);
-        CatalogCoverBadges.INSTANCE.configureBadgeForEntry(in_e, coverBadge, 24);
+      @Override
+      public void onFailure(Throwable t) {
+        UIThread.runOnUIThread(() -> {
+          CatalogFeedBookCellView.LOG.error("unable to load image");
+          coverImage.setVisibility(View.INVISIBLE);
+          coverBadge.setVisibility(View.INVISIBLE);
+          coverProgress.setVisibility(View.INVISIBLE);
+        });
       }
     };
 
-    this.cover_provider.loadThumbnailIntoWithCallback(
+    FluentFuture<kotlin.Unit> future =
+      this.cover_provider.loadThumbnailInto(
       in_e,
       this.cell_cover_image,
       (int) ((double) in_image_height * 0.75),
-      in_image_height,
-      callback);
+      in_image_height);
+
+    Futures.addCallback(future, callback, directExecutor());
   }
 
   @Override public Unit onBookStatusDownloaded(

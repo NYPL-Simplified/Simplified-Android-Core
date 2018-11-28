@@ -18,12 +18,14 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import com.google.common.util.concurrent.FutureCallback
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnreachableCodeException
-import com.squareup.picasso.Callback
 import org.nypl.simplified.app.LoginActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
@@ -243,20 +245,25 @@ class CatalogBookDetailView(
     CatalogBookDetailView.configureViewTextMeta(this.activity.resources, opdsEntry, headerMeta)
 
     this.bookHeaderCoverBadge.visibility = GONE
-    catalogServices.coverProvider.loadCoverIntoWithCallback(
-      entryNow,
-      this.bookHeaderCover,
-      coverWidth,
-      coverHeight,
-      object : Callback {
-        override fun onSuccess() {
+
+    val future =
+      catalogServices.coverProvider.loadCoverInto(
+        entryNow,
+        this.bookHeaderCover,
+        coverWidth,
+        coverHeight)
+
+    Futures.addCallback(future, object : FutureCallback<kotlin.Unit?> {
+      override fun onSuccess(result: kotlin.Unit?) {
+        UIThread.runOnUIThread {
           CatalogCoverBadges.configureBadgeForEntry(entryNow, bookHeaderCoverBadge, 32)
         }
+      }
 
-        override fun onError() {
-
-        }
-      })
+      override fun onFailure(exception: Throwable) {
+        LOG.error("could not load cover: ", exception)
+      }
+    }, directExecutor())
   }
 
   override fun onBookStatusDownloaded(downloaded: BookStatusDownloaded): Unit {
