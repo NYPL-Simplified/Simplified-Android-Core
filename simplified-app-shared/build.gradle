@@ -76,6 +76,12 @@ dependencies {
   implementation 'com.google.zxing:core:3.2.1'
   implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
 
+  implementation 'com.github.tony19:logback-android-core:1.1.1-6'
+  implementation('com.github.tony19:logback-android-classic:1.1.1-6') {
+    // https://github.com/tony19/logback-android/issues/73
+    exclude group: 'com.google.android', module: 'android'
+  }
+
   implementation "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nypl_audiobook_api_version}"
   implementation "org.nypl.audiobook:org.nypl.audiobook.android.api:${nypl_audiobook_api_version}"
   implementation "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nypl_audiobook_api_version}"

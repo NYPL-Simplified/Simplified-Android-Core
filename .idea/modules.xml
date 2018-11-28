@@ -3,10 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/simplified.iml" filepath="$PROJECT_DIR$/simplified.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-accessibility/simplified-accessibility.iml" filepath="$PROJECT_DIR$/simplified-accessibility/simplified-accessibility.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app-shared/simplified-app-shared.iml" filepath="$PROJECT_DIR$/simplified-app-shared/simplified-app-shared.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-app-simplye/simplified-app-simplye.iml" filepath="$PROJECT_DIR$/simplified-app-simplye/simplified-app-simplye.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-assert/simplified-assert.iml" filepath="$PROJECT_DIR$/simplified-assert/simplified-assert.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-books-core/simplified-books-core.iml" filepath="$PROJECT_DIR$/simplified-books-core/simplified-books-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simplified-books-covers/simplified-books-covers.iml" filepath="$PROJECT_DIR$/simplified-books-covers/simplified-books-covers.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-bugsnag/simplified-bugsnag.iml" filepath="$PROJECT_DIR$/simplified-bugsnag/simplified-bugsnag.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-cardcreator/simplified-cardcreator.iml" filepath="$PROJECT_DIR$/simplified-cardcreator/simplified-cardcreator.iml" />
       <module fileurl="file://$PROJECT_DIR$/simplified-checkstyle/simplified-checkstyle.iml" filepath="$PROJECT_DIR$/simplified-checkstyle/simplified-checkstyle.iml" />

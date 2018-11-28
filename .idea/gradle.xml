@@ -8,10 +8,12 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/simplified-accessibility" />
             <option value="$PROJECT_DIR$/simplified-app-shared" />
             <option value="$PROJECT_DIR$/simplified-app-simplye" />
             <option value="$PROJECT_DIR$/simplified-assert" />
             <option value="$PROJECT_DIR$/simplified-books-core" />
+            <option value="$PROJECT_DIR$/simplified-books-covers" />
             <option value="$PROJECT_DIR$/simplified-bugsnag" />
             <option value="$PROJECT_DIR$/simplified-cardcreator" />
             <option value="$PROJECT_DIR$/simplified-checkstyle" />

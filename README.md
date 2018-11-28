@@ -2,7 +2,7 @@
 
 ## Java Prerequisites
 
-1. You should have Java SE 8u101 or [a newer version of Java SE 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html) installed. (Java SE 7u111 and newer versions of Java SE 7 may also work but have not been tested.) This is because older versions of Java do not trust [Let's Encrypt](https://letsencrypt.org/) which provides our SSL certificate.
+1. You must have Java SE 8u101 or [a newer version of Java SE 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html) installed. This is because older versions of Java do not trust [Let's Encrypt](https://letsencrypt.org/) which provides our SSL certificate.
 
 2. The `JAVA_HOME` environment variable must be set correctly. You can check what it is set to in most shells with `echo $JAVA_HOME`. If that command does not show anything, adding the following line to `~/.profile` (assuming you are on macOS) and then executing `source ~/.profile` or opening a new shell should suffice:
 
