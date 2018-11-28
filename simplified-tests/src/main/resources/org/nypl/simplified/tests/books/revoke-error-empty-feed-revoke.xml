@@ -1,0 +1,14 @@
+<feed
+  xmlns:simplified="http://librarysimplified.org/terms/"
+  xmlns:app="http://www.w3.org/2007/app"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:schema="http://schema.org/"
+  xmlns="http://www.w3.org/2005/Atom">
+
+  <id>http://circulation.alpha.librarysimplified.org/loans/</id>
+  <title>Active loans</title>
+  <updated>2015-03-24T17:23:50Z</updated>
+  <link href="http://circulation.alpha.librarysimplified.org/loans/" rel="self"/>
+
+</feed>

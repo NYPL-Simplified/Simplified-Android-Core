@@ -77,6 +77,7 @@
   <string name="catalog_book_borrow">Get</string>
   <string name="catalog_book_reserve">Reserve</string>
   <string name="catalog_book_read">Read</string>
+  <string name="catalog_book_listen">Listen</string>
   <string name="catalog_book_error_dismiss">Dismiss</string>
   <string name="catalog_book_error_retry">Retry</string>
   <string name="catalog_book_sync">Sync</string>
@@ -201,6 +202,7 @@
   <string name="catalog_accessibility_book_borrow">Get Button</string>
   <string name="catalog_accessibility_book_reserve">Reserve Button</string>
   <string name="catalog_accessibility_book_read">Read Button</string>
+  <string name="catalog_accessibility_book_listen">Listen Button</string>
   <string name="catalog_accessibility_book_error_dismiss">Dismiss Button</string>
   <string name="catalog_accessibility_book_error_retry">Retry Button</string>
   <string name="catalog_accessibility_book_sync">Sync Button</string>
@@ -211,6 +213,13 @@
   <string name="catalog_accessibility_book_revoke_loan_cancel">Cancel Return Now</string>
   <string name="catalog_accessibility_book_revoke_hold_cancel">Cancel Remove</string>
   <string name="catalog_accessibility_header_show_more">show more in %1$s</string>
+
+  <string name="catalog_accessibility_cover_epub">%1$s, ebook</string>
+  <string name="catalog_accessibility_cover_audiobook">%1$s, audiobook</string>
+
+  <!-- Book format strings -->
+  <string name="book_format_audiobook">Audiobook</string>
+  <string name="book_format_epub">eBook</string>
 
   <!-- Reader strings -->
   <string name="reader">Reader</string>
@@ -238,6 +247,11 @@
   <string name="reader_accessibility_settings_brightness_slider">Brightness slider</string>
   <string name="reader_accessibility_settings_close">Close reader settings</string>
   <string name="reader_settings_close">Close</string>
+
+  <!-- Audio book player strings -->
+  <string name="audio_book_player">Audio Book Player</string>
+  <string name="audio_book_player_error_engine_open">Unable to initialize audio engine</string>
+  <string name="audio_book_player_error_book_open">Unable to open audio book</string>
 
   <!-- Welcome Strings -->
   <string name="welcome_library_header">Read E-Books from Your Library</string>

@@ -11,15 +11,24 @@
   <summary type="html"></summary>
   <updated>2015-08-17T20:37:53Z</updated>
   <published>2014-08-29T10:46:42Z</published>
-  <link href="http://example.com/Loaned-Timed"
-        rel="http://opds-spec.org/acquisition/borrow">
+
+  <link
+      href="https://example.com/borrow"
+      rel="http://opds-spec.org/acquisition">
+    <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+      <opds:indirectAcquisition type="application/epub+zip"/>
+    </opds:indirectAcquisition>
+    <opds:indirectAcquisition type="application/atom+xml;type=entry;profile=opds-catalog">
+      <opds:indirectAcquisition type="text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media"/>
+    </opds:indirectAcquisition>
     <opds:availability
-      status="available"
-      since="2000-01-01T00:00:00Z"
-      until="2010-01-01T00:00:00Z"/>
+        status="available"
+        since="2000-01-01T00:00:00Z"
+        until="2010-01-01T00:00:00Z"/>
     <opds:holds total="0"/>
     <opds:copies available="1" total="1"/>
   </link>
+
   <link rel="http://librarysimplified.org/terms/rel/revoke"
         href="http://example.com/revoke"/>
 </entry>

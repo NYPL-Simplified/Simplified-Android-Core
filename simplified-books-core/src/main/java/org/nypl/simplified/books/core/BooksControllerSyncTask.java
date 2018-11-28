@@ -8,8 +8,6 @@ import com.io7m.jnull.NullCheck;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.drm.core.AdobeVendorID;
-import org.nypl.simplified.http.core.HTTPAuthBasic;
-import org.nypl.simplified.http.core.HTTPAuthOAuth;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
@@ -33,41 +31,37 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-final class BooksControllerSyncTask implements Runnable
-{
-  private static final Logger LOG;
+final class BooksControllerSyncTask implements Callable<Unit> {
+  private static final Logger LOG = LoggerFactory.getLogger(BooksControllerSyncTask.class);
 
-  static {
-    LOG = NullCheck.notNull(
-      LoggerFactory.getLogger(BooksControllerSyncTask.class));
-  }
-
-  private final OPDSFeedParserType               feed_parser;
-  private final HTTPType                         http;
-  private final AccountSyncListenerType          listener;
-  private final AtomicBoolean                    running;
-  private final BooksControllerType              books_controller;
-  private final BookDatabaseType                 books_database;
-  private final AccountsDatabaseType             accounts_database;
-  private final URI                              loans_uri;
+  private final OPDSFeedParserType feed_parser;
+  private final HTTPType http;
+  private final AccountSyncListenerType listener;
+  private final AtomicBoolean running;
+  private final BooksControllerType books_controller;
+  private final BookDatabaseType books_database;
+  private final AccountsDatabaseType accounts_database;
+  private final URI loans_uri;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;
-  private final DeviceActivationListenerType      device_activation_listener;
+  private final DeviceActivationListenerType device_activation_listener;
+  private final boolean needs_authentication;
 
   BooksControllerSyncTask(
     final BooksControllerType in_books,
     final BookDatabaseType in_books_database,
     final AccountsDatabaseType in_accounts_database,
-    final BooksControllerConfigurationType in_config,
     final HTTPType in_http,
     final OPDSFeedParserType in_feed_parser,
     final AccountSyncListenerType in_listener,
     final AtomicBoolean in_running,
     final URI in_loans_uri,
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,
-    final DeviceActivationListenerType in_device_activation_listener)
-  {
+    final DeviceActivationListenerType in_device_activation_listener,
+    final boolean in_needs_authentication) {
+
     this.books_controller = NullCheck.notNull(in_books);
     this.books_database = NullCheck.notNull(in_books_database);
     this.accounts_database = NullCheck.notNull(in_accounts_database);
@@ -78,55 +72,47 @@ final class BooksControllerSyncTask implements Runnable
     this.loans_uri = NullCheck.notNull(in_loans_uri);
     this.adobe_drm = NullCheck.notNull(in_adobe_drm);
     this.device_activation_listener = NullCheck.notNull(in_device_activation_listener);
-
+    this.needs_authentication = in_needs_authentication;
   }
 
-  @Override public void run()
-  {
+  @Override
+  public Unit call() throws Exception {
     if (this.running.compareAndSet(false, true)) {
       try {
-        BooksControllerSyncTask.LOG.debug("running");
+        LOG.debug("running");
         this.sync();
         this.listener.onAccountSyncSuccess();
+        return Unit.unit();
       } catch (final Throwable x) {
-        this.listener.onAccountSyncFailure(
-          Option.some(x), NullCheck.notNull(x.getMessage()));
+        this.listener.onAccountSyncFailure(Option.some(x), NullCheck.notNull(x.getMessage()));
+        throw x;
       } finally {
         this.running.set(false);
-        BooksControllerSyncTask.LOG.debug("completed");
+        LOG.debug("completed");
       }
     } else {
-      BooksControllerSyncTask.LOG.debug("sync already in progress, exiting");
+      LOG.debug("sync already in progress, exiting");
+      return Unit.unit();
     }
   }
 
   private void sync()
-    throws Exception
-  {
+    throws Exception {
 //    final URI loans_uri = this.config.getCurrentRootFeedURI().resolve("loans/");
 
     final OptionType<AccountCredentials> credentials_opt =
       this.accounts_database.accountGetCredentials();
+
     if (credentials_opt.isSome()) {
 
       final AccountCredentials credentials =
         ((Some<AccountCredentials>) credentials_opt).get();
-      final AccountBarcode barcode = credentials.getBarcode();
-      final AccountPIN pin = credentials.getPin();
-      final AccountSyncListenerType in_listener = this.listener;
-      HTTPAuthType auth =
-        new HTTPAuthBasic(barcode.toString(), pin.toString());
-
-      if (credentials.getAuthToken().isSome()) {
-        final AccountAuthToken token = ((Some<AccountAuthToken>) credentials.getAuthToken()).get();
-        if (token != null) {
-          auth = new HTTPAuthOAuth(token.toString());
-        }
-      }
-
+      final HTTPAuthType auth =
+        AccountCredentialsHTTP.Companion.toHttpAuth(credentials);
       final HTTPResultType<InputStream> r =
         this.http.get(Option.some(auth), this.loans_uri, 0L);
 
+      final AccountSyncListenerType in_listener = this.listener;
       r.matchResult(
         new HTTPResultMatcherType<InputStream, Unit, Exception>() {
           @Override
@@ -134,8 +120,7 @@ final class BooksControllerSyncTask implements Runnable
             final HTTPResultError<InputStream> e)
             throws Exception {
             final String m = NullCheck.notNull(
-              String.format(
-                "%s: %d: %s", BooksControllerSyncTask.this.loans_uri, e.getStatus(), e.getMessage()));
+              String.format("%s: %d: %s", BooksControllerSyncTask.this.loans_uri, e.getStatus(), e.getMessage()));
 
             switch (e.getStatus()) {
               case HttpURLConnection.HTTP_UNAUTHORIZED: {
@@ -161,7 +146,7 @@ final class BooksControllerSyncTask implements Runnable
             final HTTPResultOKType<InputStream> e)
             throws Exception {
             try {
-               BooksControllerSyncTask.this.syncFeedEntries(e);
+              BooksControllerSyncTask.this.syncFeedEntries(e);
               return Unit.unit();
             } finally {
               e.close();
@@ -173,25 +158,20 @@ final class BooksControllerSyncTask implements Runnable
 
   private void syncFeedEntries(
     final HTTPResultOKType<InputStream> r_feed)
-    throws Exception
-  {
+    throws Exception {
     final BooksStatusCacheType books_status =
       this.books_controller.bookGetStatusCache();
 
     final OPDSAcquisitionFeed feed =
       this.feed_parser.parse(this.loans_uri, r_feed.getValue());
 
-
-    if (feed.getLicensor().isSome())
-    {
+    if (feed.getLicensor().isSome()) {
       final DRMLicensor licensor = ((Some<DRMLicensor>) feed.getLicensor()).get();
 
       final OptionType<AccountCredentials> credentials_opt =
         this.accounts_database.accountGetCredentials();
 
-
       if (credentials_opt.isSome()) {
-
         final AccountCredentials credentials = ((Some<AccountCredentials>) credentials_opt).get();
 
         credentials.setDrmLicensor(feed.getLicensor());
@@ -201,23 +181,21 @@ final class BooksControllerSyncTask implements Runnable
         try {
           this.accounts_database.accountSetCredentials(credentials);
         } catch (final IOException e) {
-          BooksControllerSyncTask.LOG.error("could not save credentials: ", e);
+          LOG.error("could not save credentials: ", e);
         }
 
+        final BooksControllerDeviceActivationTask activation_task =
+          new BooksControllerDeviceActivationTask(
+            this.adobe_drm,
+            credentials,
+            this.accounts_database,
+            this.device_activation_listener);
 
-        final BooksControllerDeviceActivationTask activation_task = new BooksControllerDeviceActivationTask(
-          this.adobe_drm,
-          credentials,
-          this.accounts_database,
-          this.books_database,
-          this.device_activation_listener
-        );
-        activation_task.run();
-
+        activation_task.call();
       }
     }
 
-    /**
+    /*
      * Obtain the set of books that are on disk already. If any
      * of these books are not in the received feed, then they have
      * expired and should be deleted.
@@ -225,7 +203,7 @@ final class BooksControllerSyncTask implements Runnable
 
     final Set<BookID> existing = this.books_database.databaseGetBooks();
 
-    /**
+    /*
      * Handle each book in the received feed.
      */
 
@@ -237,18 +215,16 @@ final class BooksControllerSyncTask implements Runnable
 
       try {
         received.add(book_id);
-        final BookDatabaseEntryType db_e =
-          this.books_database.databaseOpenEntryForWriting(book_id);
+        final BookDatabaseEntryType db_e = this.books_database.databaseCreateEntry(book_id, e_nn);
         db_e.entryUpdateAll(e_nn, books_status, this.http);
 
         this.listener.onAccountSyncBook(book_id);
       } catch (final Throwable x) {
-        BooksControllerSyncTask.LOG.error(
-          "[{}]: unable to save entry: {}: ", book_id.getShortID(), x);
+        LOG.error("[{}]: unable to save entry: {}: ", book_id.getShortID(), x);
       }
     }
 
-    /**
+    /*
      * Now delete any book that previously existed, but is not in the
      * received set. Queue any revoked books for completion and then
      * deletion.
@@ -257,9 +233,9 @@ final class BooksControllerSyncTask implements Runnable
     final Set<BookID> revoking = new HashSet<BookID>(existing.size());
     for (final BookID existing_id : existing) {
       try {
-        if (received.contains(existing_id) == false) {
+        if (!received.contains(existing_id)) {
           final BookDatabaseEntryType e =
-            this.books_database.databaseOpenEntryForWriting(existing_id);
+            this.books_database.databaseOpenExistingEntry(existing_id);
 
           final OPDSAvailabilityType a = e.entryGetFeedData().getAvailability();
           if (a instanceof OPDSAvailabilityRevoked) {
@@ -271,17 +247,16 @@ final class BooksControllerSyncTask implements Runnable
           this.listener.onAccountSyncBookDeleted(existing_id);
         }
       } catch (final Throwable x) {
-        BooksControllerSyncTask.LOG.error(
-          "[{}]: unable to delete entry: ", existing_id.getShortID(), x);
+        LOG.error("[{}]: unable to delete entry: ", existing_id.getShortID(), x);
       }
     }
 
-    /**
+    /*
      * Try to finish the revocation of any books that require it.
      */
 
     for (final BookID existing_id : revoking) {
-      this.books_controller.bookRevoke(existing_id);
+      this.books_controller.bookRevoke(existing_id, this.needs_authentication);
     }
   }
 }

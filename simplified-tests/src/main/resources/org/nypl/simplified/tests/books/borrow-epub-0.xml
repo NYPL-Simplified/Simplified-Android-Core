@@ -1,0 +1,82 @@
+<entry xmlns:bibframe="http://bibframe.org/vocab/" xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:schema="http://schema.org/"
+  xmlns:simplified="http://librarysimplified.org/terms/" xmlns="http://www.w3.org/2005/Atom"
+  schema:additionalType="http://bib.schema.org/Audiobook">
+  <title>Most Dangerous</title>
+  <schema:alternativeHeadline>Daniel Ellsberg and the Secret History of the Vietnam War
+  </schema:alternativeHeadline>
+  <author>
+    <name>Steve Sheinkin</name>
+    <link
+      href="http://qa.circulation.librarysimplified.org/NYNYPL/works/contributor/Steve%20Sheinkin/eng/Children%2CYoung+Adult"
+      rel="contributor" title="Steve Sheinkin"
+      type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  </author>
+  <summary type="html">&lt;br /&gt;From Steve Sheinkin, the award-winning author of &lt;i&gt;The
+    Port Chicago 50&lt;/i&gt; and &lt;i&gt;Bomb &lt;/i&gt;comes a tense, exciting exploration of
+    what the Times deemed "the greatest story of the century": how Daniel Ellsberg transformed from
+    obscure government analyst into "the most dangerous man in America," and risked everything to
+    expose the government's deceit. On June 13, 1971, the front page of the New York Times announced
+    the existence of a 7,000-page collection of documents containing a secret history of the Vietnam
+    War. Known as The Pentagon Papers, these documents had been commissioned by Secretary of Defense
+    Robert McNamara. Chronicling every action the government had taken in the Vietnam War, they
+    revealed a pattern of deception spanning over twenty years and four presidencies, and forever
+    changed the relationship between American citizens and the politicians claiming to represent
+    their interests.. A provocative book that interrogates the meanings of patriotism, freedom, and
+    integrity, &lt;i&gt;Most Dangerous &lt;/i&gt;further establishes Steve Sheinkin as a leader in
+    children's nonfiction.&lt;br /&gt;
+  </summary>
+  <simplified:pwid>0c4dbdcf-0031-0c7a-72b8-523fad050d39</simplified:pwid>
+  <link href="http://book-covers.nypl.org/3M/3M%20ID/hxaee89/cover.jpg"
+    rel="http://opds-spec.org/image" type="image/jpeg" />
+  <link href="http://book-covers.nypl.org/scaled/300/3M/3M%20ID/hxaee89/cover.jpg"
+    rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" />
+  <category label="Young Adult" scheme="http://schema.org/audience" term="Young Adult" />
+  <category label="14-17" scheme="http://schema.org/typicalAgeRange" term="14-17" />
+  <category label="Nonfiction" scheme="http://librarysimplified.org/terms/fiction/"
+    term="http://librarysimplified.org/terms/fiction/Nonfiction" />
+  <category label="Biography &amp; Memoir"
+    scheme="http://librarysimplified.org/terms/genres/Simplified/"
+    term="http://librarysimplified.org/terms/genres/Simplified/Biography%20%26%20Memoir" />
+  <category label="Political Science" scheme="http://librarysimplified.org/terms/genres/Simplified/"
+    term="http://librarysimplified.org/terms/genres/Simplified/Political%20Science" />
+  <category label="History" scheme="http://librarysimplified.org/terms/genres/Simplified/"
+    term="http://librarysimplified.org/terms/genres/Simplified/History" />
+  <dcterms:language>en</dcterms:language>
+  <dcterms:publisher>Random House</dcterms:publisher>
+  <dcterms:issued>2015-09-21</dcterms:issued>
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Bibliotheca%20ID/hxaee89/report"
+    rel="issues" />
+  <id>urn:librarysimplified.org/terms/id/Bibliotheca%20ID/hxaee89</id>
+  <link href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Bibliotheca%20ID/hxaee89"
+    rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" />
+  <bibframe:distribution bibframe:ProviderName="Bibliotheca" />
+  <published>2016-03-10T00:00:00Z</published>
+  <updated>2018-10-05T05:46:42Z</updated>
+  <link href="http://example.com/fulfill/0"
+    rel="http://opds-spec.org/acquisition"
+    type="application/epub+zip">
+    <opds:availability since="2018-10-05T12:51:06Z" status="available"
+      until="2018-10-26T18:51:07Z" />
+    <opds:holds total="0" />
+    <opds:copies available="5" total="5" />
+  </link>
+  <link href="http://example.com/revoke/0"
+    rel="http://librarysimplified.org/terms/rel/revoke" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Bibliotheca%20ID/hxaee89/recommendations"
+    rel="recommendations" title="Recommended Works"
+    type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Bibliotheca%20ID/hxaee89/related_books"
+    rel="related" title="Recommended Works"
+    type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/annotations/Bibliotheca%20ID/hxaee89/"
+    rel="http://www.w3.org/ns/oa#annotationService"
+    type="application/ld+json; profile=&quot;http://www.w3.org/ns/anno.jsonld&quot;" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/analytics/Bibliotheca%20ID/hxaee89/open_book"
+    rel="http://librarysimplified.org/terms/rel/analytics/open-book" />
+</entry>

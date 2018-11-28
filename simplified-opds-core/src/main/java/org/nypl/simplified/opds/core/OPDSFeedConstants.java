@@ -28,14 +28,14 @@ final class OPDSFeedConstants
   public static final String REVOKE_URI_TEXT;
   public static final URI    ANNOTATION_URI;
   public static final String ANNOTATION_URI_TEXT;
-  private static final URI    ACQUISITION_URI_PREFIX;
-  private static final String ATOM_URI_TEXT;
-  private static final URI    FACET_URI;
-  private static final URI    IMAGE_URI;
-  private static final URI    THUMBNAIL_URI;
-  private static final String DUBLIN_CORE_TERMS_URI_TEXT;
-  private static final String SCHEMA_URI_TEXT;
-  private static final String SIMPLIFIED_URI_TEXT;
+  public static final URI    ACQUISITION_URI_PREFIX;
+  public static final String ATOM_URI_TEXT;
+  public static final URI    FACET_URI;
+  public static final URI    IMAGE_URI;
+  public static final URI    THUMBNAIL_URI;
+  public static final String DUBLIN_CORE_TERMS_URI_TEXT;
+  public static final String SCHEMA_URI_TEXT;
+  public static final String SIMPLIFIED_URI_TEXT;
 
   static {
     ATOM_URI = NullCheck.notNull(URI.create("http://www.w3.org/2005/Atom"));

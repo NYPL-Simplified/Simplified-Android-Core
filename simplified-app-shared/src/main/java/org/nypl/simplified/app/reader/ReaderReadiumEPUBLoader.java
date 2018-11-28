@@ -82,7 +82,7 @@ public final class ReaderReadiumEPUBLoader
      */
 
     final OptionType<File> adobe_rights =
-      BookDatabase.getAdobeRightsFileForEPUB(f);
+      BookDatabase.Companion.getAdobeRightsFileForEPUB(f);
 
     final byte[] adobe_rights_data;
     if (adobe_rights.isSome()) {

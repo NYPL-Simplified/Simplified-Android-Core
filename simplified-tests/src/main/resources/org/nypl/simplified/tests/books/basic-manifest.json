@@ -1,0 +1,38 @@
+{
+  "@context": [
+    "http://readium.org/webpub/default.jsonld"
+  ],
+
+  "readingOrder": [
+    {
+      "title": "Track 0",
+      "href": "http://ataxia.io7m.com/2018/08/02/00.mp3",
+      "duration": 9.0,
+      "type": "audio/mpeg"
+    },
+    {
+      "title": "Track 1",
+      "href": "http://ataxia.io7m.com/2017/11/12/01.mp3",
+      "duration": 191.0,
+      "type": "audio/mpeg"
+    },
+    {
+      "title": "Track 2",
+      "href": "http://ataxia.io7m.com/2015/02/15/02.mp3",
+      "duration": 268.0,
+      "type": "audio/mpeg"
+    },
+    {
+      "title": "Track 3",
+      "href": "http://ataxia.io7m.com/2015/02/15/03.mp3",
+      "duration": 204.0,
+      "type": "audio/mpeg"
+    }
+  ],
+
+  "metadata": {
+    "title": "title",
+    "duration": 1000.0,
+    "identifier": "urn:id"
+  }
+}

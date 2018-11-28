@@ -13,6 +13,15 @@ buildscript {
   }
 }
 
+ext {
+
+  /*
+   * The version of the NYPL Audiobook API used by this package.
+   */
+
+  nypl_audiobook_api_version = "0.0.60"
+}
+
 allprojects {
   group = 'org.nypl.simplified'
   version = '2.1.1'
@@ -40,5 +49,16 @@ subprojects {
     maven { url "https://maven.google.com" }
 
     jcenter()
+
+    if (project.hasProperty("org.nypl.simplified.with_findaway")) {
+      if (project.property("org.nypl.simplified.with_findaway") == "true") {
+        maven {
+          url "http://maven.findawayworld.com/artifactory/libs-release/"
+        }
+        maven {
+          url "http://maven.findawayworld.com/artifactory/libs-snapshot/"
+        }
+      }
+    }
   }
 }

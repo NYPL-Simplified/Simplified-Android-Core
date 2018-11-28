@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.core;
 
+import com.google.common.util.concurrent.FluentFuture;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -18,6 +19,36 @@ public interface FeedLoaderType
 {
   /**
    * Load a feed from the given URI, caching feeds that are successfully
+   * fetched.
+   *
+   * @param uri      The URI
+   * @param auth     HTTP authentication details, if any
+   *
+   * @return A future that can be used to cancel the loading feed
+   */
+
+  FluentFuture<FeedType> fetchURI(
+    URI uri,
+    OptionType<HTTPAuthType> auth);
+
+  /**
+   * Load a feed from the given URI, bypassing any cache, and caching feeds that
+   * are successfully fetched.
+   *
+   * @param uri      The URI
+   * @param auth     HTTP authentication details, if any
+   * @param method   HTTP method to use (GET/PUT)
+   *
+   * @return A future that can be used to cancel the loading feed
+   */
+
+  FluentFuture<FeedType> fetchURIRefreshing(
+    URI uri,
+    OptionType<HTTPAuthType> auth,
+    String method);
+
+  /**
+   * Load a feed from the given URI, caching feeds that are successfully
    * fetched. The feed (or errors) are delivered to the given listener.
    *
    * @param uri      The URI
@@ -25,8 +56,10 @@ public interface FeedLoaderType
    * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
+   * @deprecated Use {@link #fetchURI(URI, OptionType)}
    */
 
+  @Deprecated
   Future<Unit> fromURI(
     URI uri,
     OptionType<HTTPAuthType> auth,
@@ -43,8 +76,10 @@ public interface FeedLoaderType
    * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
+   * @deprecated Use {@link #fetchURIRefreshing(URI, OptionType, String)}
    */
 
+  @Deprecated
   Future<Unit> fromURIRefreshing(
     URI uri,
     OptionType<HTTPAuthType> auth,

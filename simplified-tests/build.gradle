@@ -1,8 +1,9 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "27.0.3"
+  buildToolsVersion "28.0.2"
 }
 
 description = 'simplified-tests'
@@ -12,15 +13,20 @@ repositories {
 }
 
 dependencies {
+  implementation project(':simplified-assert')
   implementation project(':simplified-books-core')
+  implementation project(':simplified-downloader-core')
   implementation project(':simplified-files')
   implementation project(':simplified-http-core')
+  implementation project(':simplified-json-core')
   implementation project(':simplified-opds-core')
   implementation project(':simplified-rfc3339-core')
-  implementation project(':simplified-downloader-core')
+  implementation project(':simplified-stack')
 
   implementation 'junit:junit:4.12'
+  implementation 'org.mockito:mockito-android:2.22.0'
 
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'
   implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
@@ -30,4 +36,9 @@ dependencies {
 
   testImplementation 'ch.qos.logback:logback-classic:1.2.3'
   testImplementation 'junit:junit:4.12'
+
+  api "org.nypl.audiobook:org.nypl.audiobook.android.api:${nypl_audiobook_api_version}"
+  api "org.nypl.audiobook:org.nypl.audiobook.android.manifest.nypl:${nypl_audiobook_api_version}"
+  api "org.nypl.audiobook:org.nypl.audiobook.android.mocking:${nypl_audiobook_api_version}"
+  api "org.nypl.audiobook:org.nypl.audiobook.android.open_access:${nypl_audiobook_api_version}"
 }

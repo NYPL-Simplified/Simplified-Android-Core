@@ -54,7 +54,7 @@ public final class FeedGroup
     final int max = be_list.size();
     for (int index = 0; index < max; ++index) {
       final OPDSAcquisitionFeedEntry be = NullCheck.notNull(be_list.get(index));
-      es.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(be));
+      es.add(FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(be));
     }
 
     return new FeedGroup(b.getGroupTitle(), b.getGroupURI(), es);

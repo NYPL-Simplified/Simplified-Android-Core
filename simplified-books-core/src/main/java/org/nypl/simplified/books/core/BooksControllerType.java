@@ -1,7 +1,10 @@
 package org.nypl.simplified.books.core;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
-import org.nypl.simplified.opds.core.OPDSAcquisition;
+import com.io7m.jfunctional.Unit;
+
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
 import java.net.URI;
@@ -11,15 +14,14 @@ import java.util.Calendar;
  * Interface to the book management functions.
  */
 
-public interface BooksControllerType
-{
+public interface BooksControllerType {
+
   /**
    * @return A reference to the book status cache that can be used to
    * subscribe/unsubscribe to book status updates.
    */
 
   BooksStatusCacheType bookGetStatusCache();
-
 
   /**
    *
@@ -40,29 +42,28 @@ public interface BooksControllerType
   BookDatabaseType bookGetWritableDatabase();
 
   /**
-   * Borrow the given book, delivering the results to the given {@code
-   * listener}.
-   *  @param id       The book ID
-   * @param acq      The specific acquisition relation
-   * @param eo       The feed entry
-   * @param needs_auth  login required
+   * Borrow the given book.
+   *
+   * @param id         The book ID
+   * @param entry      The feed entry
+   * @param needs_auth login required
    */
 
   void bookBorrow(
     BookID id,
-    OPDSAcquisition acq,
-    OPDSAcquisitionFeedEntry eo,
+    OPDSAcquisitionFeedEntry entry,
     boolean needs_auth);
 
   /**
    * Delete the actual book file for the given book, if any.
    *
-   * @param id The book ID
+   * @param id         The book ID
    * @param needs_auth login needed
    */
 
   void bookDeleteData(
-    BookID id, boolean needs_auth);
+    BookID id,
+    boolean needs_auth);
 
   /**
    * Cancel the download of the book with the given {@code id}.
@@ -114,11 +115,13 @@ public interface BooksControllerType
   /**
    * Revoke a loan or hold for the given book.
    *
-   * @param id The book ID
+   * @param id                  The book ID
+   * @param needsAuthentication true if the account requires authentication
    */
 
-  void bookRevoke(
-    BookID id);
+  FluentFuture<Unit> bookRevoke(
+    BookID id,
+    boolean needsAuthentication);
 
   /**
    * Submit a problem report for a book

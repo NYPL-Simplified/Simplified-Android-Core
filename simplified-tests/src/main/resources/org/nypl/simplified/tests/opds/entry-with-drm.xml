@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<entry xmlns:bibframe="http://bibframe.org/vocab/" xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:drm="http://librarysimplified.org/terms/drm" xmlns:opds="http://opds-spec.org/2010/catalog"
+  xmlns:schema="http://schema.org/" xmlns:simplified="http://librarysimplified.org/terms/"
+  xmlns="http://www.w3.org/2005/Atom" schema:additionalType="http://schema.org/Book">
+  <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/1ac5cc2a-cdc9-46e0-90a4-2de9ada35237</id>
+  <title>Hot, Sour, Salty, Sweet</title>
+  <author>
+    <name>Sherri L. Smith</name>
+    <link
+      href="http://qa.circulation.librarysimplified.org/NYNYPL/works/contributor/Sherri%20L.%20Smith/eng/Children%2CYoung+Adult"
+      rel="contributor" title="Sherri L. Smith"
+      type="application/atom+xml;profile=opds-catalog;kind=acquisition" />
+  </author>
+  <summary type="html">Ana Shen has what her social studies teacher calls a "marvelously biracial,
+    multicultural family" but what Ana simply calls a Chinese American father and an African
+    American mother. And on eighth-grade graduation day, that's a recipe for disaster. Both sets of
+    grandparents are in town to celebrate, and Ana's best friend has convinced her to invite Jamie
+    Tabata--the cutest boy in school--for a home-cooked meal. Now Ana and her family have four hours
+    to prepare their favorite dishes for dinner, and Grandma White and Nai Nai can't agree on
+    anything. Ana is tired of feeling caught between her grandparents and wishes she knew whose side
+    she was supposed to be on. But when they all sit down for their hot, sour, salty, and sweet
+    meal, Ana comes to understand how each of these different flavors, like family, fit perfectly
+    together.&lt;br&gt;&lt;br&gt;&lt;i&gt;From the Hardcover edition.&lt;/i&gt;
+  </summary>
+  <updated>2017-12-19T15:27:37Z</updated>
+  <simplified:pwid>e3d33ed8-4316-aeeb-ea36-01848e88ec16</simplified:pwid>
+  <link
+    href="https://d3pqhns20516vc.cloudfront.net/Overdrive/1ac5cc2a-cdc9-46e0-90a4-2de9ada35237/cover.jpg"
+    rel="http://opds-spec.org/image" type="image/jpeg" />
+  <link
+    href="http://images.contentreserve.com/ImageType-400/0111-1/1AC/5CC/2A/%7B1AC5CC2A-CDC9-46E0-90A4-2DE9ADA35237%7DImg400.jpg"
+    rel="http://opds-spec.org/image/thumbnail" type="image/jpeg" />
+  <category label="Young Adult" scheme="http://schema.org/audience" term="Young Adult" />
+  <category label="9-13" scheme="http://schema.org/typicalAgeRange" term="9-13" />
+  <category label="Fiction"
+    scheme="http://librarysimplified.org/terms/fiction/" term="http://librarysimplified.org/terms/fiction/Fiction" />
+  <dcterms:language>en</dcterms:language>
+  <dcterms:publisher>Random House Children's Books</dcterms:publisher>
+  <published>2015-03-02T23:53:58Z</published>
+  <dcterms:created>2008-02-12</dcterms:created>
+  <bibframe:distribution bibframe:ProviderName="Overdrive" />
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/1ac5cc2a-cdc9-46e0-90a4-2de9ada35237/report"
+    rel="issues" />
+  <id>urn:librarysimplified.org/terms/id/Overdrive%20ID/1ac5cc2a-cdc9-46e0-90a4-2de9ada35237</id>
+  <link
+    href="http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/1ac5cc2a-cdc9-46e0-90a4-2de9ada35237"
+    rel="alternate" type="application/atom+xml;relation=entry;profile=opds-catalog" />
+  <bibframe:distribution bibframe:ProviderName="Overdrive" />
+  <published>2015-03-02T00:00:00Z</published>
+  <updated>2018-09-19T21:15:16Z</updated>
+  <link href="http://qa.circulation.librarysimplified.org/NYNYPL/works/198679/fulfill/2"
+    rel="http://opds-spec.org/acquisition" type="application/vnd.adobe.adept+xml">
+    <opds:indirectAcquisition type="application/epub+zip" />
+    <opds:availability since="2018-09-20T18:47:50Z" status="available"
+      until="2018-10-04T18:47:00Z" />
+    <opds:holds total="0" />
+    <opds:copies available="1" total="1" />
+    <drm:licensor drm:vendor="NYPL">
+      <drm:clientToken>NYNYPL|0000000000|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</drm:clientToken>
+      <link href="http://qa.circulation.librarysimplified.org/NYNYPL/AdobeAuth/devices"
+        rel="http://librarysimplified.org/terms/drm/rel/devices" />
+    </drm:licensor>
+  </link>
+  <link href="http://qa.circulation.librarysimplified.org/NYNYPL/loans/198679/revoke"
+    rel="http://librarysimplified.org/terms/rel/revoke" />
+</entry>

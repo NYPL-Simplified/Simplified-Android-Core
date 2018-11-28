@@ -1,14 +1,7 @@
 package org.nypl.simplified.tests.opds;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import com.io7m.jfunctional.Some;
+import com.io7m.jnull.NullCheck;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,8 +11,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheck;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public abstract class OPDSXMLContract {
 

@@ -57,12 +57,19 @@ public final class OPDSXML
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
 
-    final NodeList children =
-      node.getElementsByTagNameNS(namespace.toString(), name);
-
+    final String namespace_text = namespace.toString();
+    final NodeList children = node.getChildNodes();
     final List<Element> xs = new ArrayList<Element>(children.getLength());
     for (int index = 0; index < children.getLength(); ++index) {
-      xs.add((Element) children.item(index));
+      final Node child = children.item(index);
+      if (child instanceof Element) {
+        final Element child_element = (Element) child;
+        final String child_namespace = child_element.getNamespaceURI();
+        final String child_name = child_element.getLocalName();
+        if (child_namespace.equals(namespace_text) && child_name.equals(name)) {
+          xs.add(child_element);
+        }
+      }
     }
 
     return xs;
@@ -91,14 +98,9 @@ public final class OPDSXML
     NullCheck.notNull(namespace);
     NullCheck.notNull(name);
 
-    final NodeList children =
-      node.getElementsByTagNameNS(namespace.toString(), name);
-    if (children.getLength() >= 1) {
-      final List<Element> xs = new ArrayList<Element>(children.getLength());
-      for (int index = 0; index < children.getLength(); ++index) {
-        xs.add((Element) children.item(index));
-      }
-      return xs;
+    final List<Element> elements = getChildElementsWithName(node, namespace, name);
+    if (!elements.isEmpty()) {
+      return elements;
     }
 
     final StringBuilder m = new StringBuilder(128);
@@ -131,8 +133,7 @@ public final class OPDSXML
     final String name)
     throws OPDSParseException
   {
-    final Element e =
-      OPDSXML.getFirstChildElementWithName(node, namespace, name);
+    final Element e = OPDSXML.getFirstChildElementWithName(node, namespace, name);
     return NullCheck.notNull(e.getTextContent().trim());
   }
 

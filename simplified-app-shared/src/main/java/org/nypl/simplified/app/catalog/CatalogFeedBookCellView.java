@@ -14,6 +14,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.common.util.concurrent.FluentFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
@@ -22,12 +25,13 @@ import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 import com.squareup.picasso.Callback;
 
-import org.nypl.simplified.app.BookCoverProviderType;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
 import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.core.BookAcquisitionSelection;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BookStatusDownloadFailed;
 import org.nypl.simplified.books.core.BookStatusDownloadInProgress;
@@ -55,6 +59,7 @@ import org.nypl.simplified.books.core.FeedEntryMatcherType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -63,6 +68,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 /**
  * A single cell in feed (list or grid).
@@ -145,8 +152,9 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       NullCheck.notNull(in_activity.getApplicationContext());
     final Resources rr = NullCheck.notNull(context.getResources());
 
-    final LayoutInflater inflater = (LayoutInflater) context.getSystemService(
-      Context.LAYOUT_INFLATER_SERVICE);
+    final LayoutInflater inflater =
+      (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
     inflater.inflate(R.layout.catalog_book_cell, this, true);
 
     /**
@@ -238,10 +246,10 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       (ProgressBar) this.cell_cover_layout.findViewById(
         R.id.cell_cover_loading));
 
-    this.cell_cover_progress.getIndeterminateDrawable().setColorFilter(
-      mainColor,
-      android.graphics.PorterDuff.Mode.SRC_IN);
-    /**
+    this.cell_cover_progress.getIndeterminateDrawable()
+      .setColorFilter(mainColor, android.graphics.PorterDuff.Mode.SRC_IN);
+
+    /*
      * The height of the row is known, so assume a roughly 4:3 aspect ratio
      * for cover images and calculate the width of the cover layout in pixels.
      */
@@ -281,34 +289,40 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     final int in_image_height = this.cell_cover_layout.getLayoutParams().height;
 
-    final ImageView ci = this.cell_cover_image;
-    final ProgressBar cp = this.cell_cover_progress;
+    final ImageView coverImage = this.cell_cover_image;
+    final ProgressBar coverProgress = this.cell_cover_progress;
 
-    ci.setVisibility(View.INVISIBLE);
-    cp.setVisibility(View.VISIBLE);
+    coverImage.setVisibility(View.INVISIBLE);
+    coverProgress.setVisibility(View.VISIBLE);
 
-    final Callback callback = new Callback()
+    final FutureCallback<kotlin.Unit> callback = new FutureCallback<kotlin.Unit>()
     {
-      @Override public void onError()
-      {
-        CatalogFeedBookCellView.LOG.error("unable to load image");
-        ci.setVisibility(View.INVISIBLE);
-        cp.setVisibility(View.INVISIBLE);
+      @Override
+      public void onSuccess(kotlin.Unit result) {
+        UIThread.runOnUIThread(() -> {
+          coverImage.setVisibility(View.VISIBLE);
+          coverProgress.setVisibility(View.INVISIBLE);
+        });
       }
 
-      @Override public void onSuccess()
-      {
-        ci.setVisibility(View.VISIBLE);
-        cp.setVisibility(View.INVISIBLE);
+      @Override
+      public void onFailure(Throwable t) {
+        UIThread.runOnUIThread(() -> {
+          CatalogFeedBookCellView.LOG.error("unable to load image");
+          coverImage.setVisibility(View.INVISIBLE);
+          coverProgress.setVisibility(View.INVISIBLE);
+        });
       }
     };
 
-    this.cover_provider.loadThumbnailIntoWithCallback(
+    FluentFuture<kotlin.Unit> future =
+      this.cover_provider.loadThumbnailInto(
       in_e,
       this.cell_cover_image,
       (int) ((double) in_image_height * 0.75),
-      in_image_height,
-      callback);
+      in_image_height);
+
+    Futures.addCallback(future, callback, directExecutor());
   }
 
   @Override public Unit onBookStatusDownloaded(
@@ -362,25 +376,16 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_downloading_failed_title.setText(oe.getTitle());
     this.cell_downloading_failed_dismiss.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          CatalogFeedBookCellView.this.books.bookDownloadAcknowledge(
-            f.getID());
-        }
-      });
+      v -> this.books.bookDownloadAcknowledge(f.getID()));
 
-    /**
+    /*
      * Manually construct an acquisition controller for the retry button.
      */
 
     final OptionType<OPDSAcquisition> a_opt =
-      CatalogAcquisitionButtons.getPreferredAcquisition(
-        f.getID(), oe.getAcquisitions());
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(oe.getAcquisitions());
 
-    /**
+    /*
      * Theoretically, if the book has ever been downloaded, then the
      * acquisition list must have contained one usable acquisition relation...
      */
@@ -487,7 +492,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
 
     if (s.isRevocable()) {
@@ -516,7 +521,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
     return Unit.unit();
   }
@@ -593,7 +598,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final FeedEntryOPDS fe = NullCheck.notNull(this.entry.get());
     this.loadImageAndSetVisibility(fe);
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, fe);
 
     return Unit.unit();
@@ -622,7 +627,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_buttons.setVisibility(View.VISIBLE);
     this.cell_buttons.removeAllViews();
 
-    CatalogAcquisitionButtons.addButtons(
+    CatalogAcquisitionButtons.Companion.addButtons(
       this.activity, this.cell_buttons, this.books, in_entry);
   }
 

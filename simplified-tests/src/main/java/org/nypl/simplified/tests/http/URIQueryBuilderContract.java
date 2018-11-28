@@ -1,12 +1,12 @@
 package org.nypl.simplified.tests.http;
 
-import java.net.URI;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.http.core.URIQueryBuilder;
+
+import java.net.URI;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public abstract class URIQueryBuilderContract {
 

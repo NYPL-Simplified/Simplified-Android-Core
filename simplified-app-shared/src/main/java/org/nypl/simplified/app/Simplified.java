@@ -13,6 +13,8 @@ import android.util.DisplayMetrics;
 
 import com.bugsnag.android.Severity;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -21,7 +23,9 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
-import org.nypl.simplified.app.catalog.CatalogBookCoverGenerator;
+import org.nypl.simplified.accessibility.Accessibility;
+import org.nypl.simplified.accessibility.AccessibilityType;
+import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefs;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefsType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
@@ -42,6 +46,7 @@ import org.nypl.simplified.books.core.BookDatabase;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
 import org.nypl.simplified.books.core.BookDatabaseReadableType;
 import org.nypl.simplified.books.core.BookDatabaseType;
+import org.nypl.simplified.books.core.BookFormats;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksController;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
@@ -56,6 +61,11 @@ import org.nypl.simplified.books.core.FeedHTTPTransport;
 import org.nypl.simplified.books.core.FeedLoader;
 import org.nypl.simplified.books.core.FeedLoaderType;
 import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.covers.BookCoverBadgeLookupType;
+import org.nypl.simplified.books.covers.BookCoverGenerator;
+import org.nypl.simplified.books.covers.BookCoverGeneratorType;
+import org.nypl.simplified.books.covers.BookCoverProvider;
+import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.cardcreator.CardCreator;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
@@ -111,15 +121,14 @@ public final class Simplified extends MultiDexApplication
   private @Nullable ReaderAppServices  reader_services;
   private @Nullable CardCreator cardcreator;
 
-
   /**
    * Protect the singleton from getting constructed by outside sources.
    */
+
   public Simplified()
   {
 
   }
-
 
   /**
    * Checks if Simplified singleton has been initialized already.
@@ -273,7 +282,7 @@ public final class Simplified extends MultiDexApplication
   }
 
   private static FeedLoaderType makeFeedLoader(
-    final ExecutorService exec,
+    final ListeningExecutorService exec,
     final BookDatabaseReadableType db,
     final HTTPType http,
     final OPDSSearchParserType s,
@@ -413,7 +422,8 @@ public final class Simplified extends MultiDexApplication
    */
   public static BooksType getBooks(final Account account, final Context context, final OptionType<AdobeAdeptExecutorType> in_adobe_drm) {
 
-    final ExecutorService  exec_books = Simplified.namedThreadPool(1, "books", 19);
+    final ListeningExecutorService exec_books =
+      MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "books", 19));
     final HTTPType http = HTTP.newHTTP();
 
     File base_accounts_dir = context.getFilesDir();
@@ -440,23 +450,24 @@ public final class Simplified extends MultiDexApplication
     final DownloaderType downloader = DownloaderHTTP.newDownloader(
       exec_books, downloads_dir, http);
 
-    final ExecutorService exec_catalog_feeds = Simplified.namedThreadPool(1, "catalog-feed", 19);
+    final ListeningExecutorService exec_catalog_feeds =
+      MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "catalog-feed", 19));
 
     final OPDSJSONSerializerType in_json_serializer =
       OPDSJSONSerializer.newSerializer();
     final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
 
-    final BookDatabaseType books_database = BookDatabase.newDatabase(
-      in_json_serializer, in_json_parser, books_database_directory);
+    final BookDatabaseType books_database =
+      BookDatabase.Companion.newDatabase(context, in_json_serializer, in_json_parser, books_database_directory);
 
     final OPDSAcquisitionFeedEntryParserType in_entry_parser =
-      OPDSAcquisitionFeedEntryParser.newParser();
+      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
     final OPDSSearchParserType s = OPDSSearchParser.newParser();
 
-    final FeedLoaderType  feed_loader = Simplified.makeFeedLoader(
-      exec_catalog_feeds, books_database, http, s, p);
+    final FeedLoaderType  feed_loader =
+      Simplified.makeFeedLoader(exec_catalog_feeds, books_database, http, s, p);
 
 
     final AccountsDatabaseType accounts_database = AccountsDatabase.openDatabase(accounts_dir);
@@ -484,6 +495,7 @@ public final class Simplified extends MultiDexApplication
     final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(context.getResources().getString(R.string.feature_catalog_loans_uri_component));
 
     return  BooksController.newBooks(
+      context,
       exec_books,
       feed_loader,
       http,
@@ -608,12 +620,14 @@ public final class Simplified extends MultiDexApplication
 
     private final BooksType                          books;
     private final Context                            context;
-    private final CatalogBookCoverGenerator          cover_generator;
+    private final BookCoverBadgeLookupType           cover_badges;
+    private final BookCoverGeneratorType             cover_generator;
     private final BookCoverProviderType              cover_provider;
-    private final ExecutorService                    exec_books;
-    private final ExecutorService                    exec_catalog_feeds;
+    private final ListeningExecutorService           exec_books;
+    private final ListeningExecutorService           exec_catalog_feeds;
     private final ExecutorService                    exec_covers;
     private final ExecutorService                    exec_downloader;
+    private final AccessibilityType                  accessibility;
     private URI                                      feed_initial_uri;
     private final FeedLoaderType                     feed_loader;
     private final HTTPType                           http;
@@ -625,7 +639,6 @@ public final class Simplified extends MultiDexApplication
     private final OptionType<HelpstackType>          helpstack;
     private final BookDatabaseType                   books_database;
     private final AccountsDatabaseType               accounts_database;
-
 
     private final String library;
 
@@ -643,11 +656,13 @@ public final class Simplified extends MultiDexApplication
       this.context = NullCheck.notNull(in_context);
       this.screen = new ScreenSizeController(rr);
       this.exec_catalog_feeds =
-        Simplified.namedThreadPool(1, "catalog-feed", 19);
+        MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "catalog-feed", 19));
       this.exec_covers = Simplified.namedThreadPool(2, "cover", 19);
       this.exec_downloader = Simplified.namedThreadPool(4, "downloader", 19);
-      this.exec_books = Simplified.namedThreadPool(1, "books", 19);
-
+      this.exec_books =
+        MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "books", 19));
+      this.accessibility =
+        Accessibility.Companion.create(in_context);
 
       final Prefs prefs = getSharedPrefs();
 
@@ -736,15 +751,15 @@ public final class Simplified extends MultiDexApplication
 
       this.http = HTTP.newHTTP();
       final OPDSAcquisitionFeedEntryParserType in_entry_parser =
-        OPDSAcquisitionFeedEntryParser.newParser();
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
       final OPDSJSONSerializerType in_json_serializer =
         OPDSJSONSerializer.newSerializer();
       final OPDSJSONParserType in_json_parser = OPDSJSONParser.newParser();
       final OPDSFeedParserType p = OPDSFeedParser.newParser(in_entry_parser);
       final OPDSSearchParserType s = OPDSSearchParser.newParser();
 
-      this.books_database = BookDatabase.newDatabase(
-        in_json_serializer, in_json_parser, books_database_directory);
+      this.books_database = BookDatabase.Companion.newDatabase(
+        in_context, in_json_serializer, in_json_parser, books_database_directory);
       this.accounts_database = AccountsDatabase.openDatabase(accounts_dir);
 
       this.feed_loader = Simplified.makeFeedLoader(
@@ -790,8 +805,6 @@ public final class Simplified extends MultiDexApplication
             return rr.getString(R.string.settings_name);
           }
         };
-
-
 
       final DocumentStoreBuilderType documents_builder =
         DocumentStore.newBuilder(
@@ -871,6 +884,7 @@ public final class Simplified extends MultiDexApplication
       final URI loans_url_component = books_config.getCurrentRootFeedURI().resolve(rr.getString(R.string.feature_catalog_loans_uri_component));
 
       this.books = BooksController.newBooks(
+        in_context,
         this.exec_books,
         this.feed_loader,
         this.http,
@@ -889,12 +903,24 @@ public final class Simplified extends MultiDexApplication
        */
 
       final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
-      this.cover_generator = new CatalogBookCoverGenerator(ten_print);
-      this.cover_provider = BookCoverProvider.newCoverProvider(
-        in_context,
-        this.books.bookGetDatabase(),
-        this.cover_generator,
-        this.exec_covers);
+      this.cover_generator =
+        new BookCoverGenerator(ten_print);
+      final Resources resources =
+        this.context.getResources();
+      this.cover_badges =
+        CatalogCoverBadgeImages.Companion.create(
+          resources,
+          resources.getColor(ThemeMatcher.Companion.color(account.getMainColor())),
+          this);
+      this.cover_provider =
+        BookCoverProvider.Companion.newCoverProvider(
+          in_context,
+          this.books.bookGetDatabase(),
+          this.cover_generator,
+          this.cover_badges,
+          this.exec_covers,
+          false,
+          false);
 
       /**
        * Has the initial sync operation been carried out?
@@ -907,6 +933,11 @@ public final class Simplified extends MultiDexApplication
        */
 
       this.helpstack = Helpstack.get(in_app, in_context.getAssets());
+    }
+
+    @Override
+    public AccessibilityType getAccessibility() {
+      return this.accessibility;
     }
 
     @Override public DocumentStoreType getDocumentStore()
@@ -922,6 +953,11 @@ public final class Simplified extends MultiDexApplication
     @Override public BookCoverProviderType getCoverProvider()
     {
       return this.cover_provider;
+    }
+
+    @Override
+    public HTTPType getHTTP() {
+      return this.http;
     }
 
     @Override public FeedLoaderType getFeedLoader()
@@ -1001,7 +1037,7 @@ public final class Simplified extends MultiDexApplication
       CatalogAppServices.LOG_CA.debug(
         "finished loading books, syncing " + "account");
       final BooksType b = NullCheck.notNull(this.books);
-      b.accountSync(this, this);
+      b.accountSync(this, this, Simplified.getCurrentAccount().needsAuth());
     }
 
     @Override public void onAccountDataBookLoadSucceeded(
