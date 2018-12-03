@@ -379,6 +379,25 @@ public final class OPDSAcquisitionFeedEntry implements Serializable
     return this.updated;
   }
 
+  /**
+   * @return The authors as a comma separated string
+   */
+
+  public String getAuthorsCommaSeparated()
+  {
+    final StringBuilder sb = new StringBuilder();
+    final List<String> author_list = this.getAuthors();
+    final int max = author_list.size();
+    for (int index = 0; index < max; ++index) {
+      final String author = NullCheck.notNull(author_list.get(index));
+      sb.append(author);
+      if ((index + 1) < max) {
+        sb.append(", ");
+      }
+    }
+    return sb.toString();
+  }
+
   @Override public int hashCode()
   {
     final int prime = 31;

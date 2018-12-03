@@ -3,7 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.simplye"
-  android:versionCode="1179"
+  android:versionCode="1180"
   android:versionName="3.0.0">
 
   <uses-sdk

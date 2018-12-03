@@ -214,8 +214,8 @@
   <string name="catalog_accessibility_book_revoke_hold_cancel">Cancel Remove</string>
   <string name="catalog_accessibility_header_show_more">show more in %1$s</string>
 
-  <string name="catalog_accessibility_cover_epub">%1$s, ebook</string>
-  <string name="catalog_accessibility_cover_audiobook">%1$s, audiobook</string>
+  <string name="catalog_accessibility_cover_epub">%1$s, ebook, by %2$s</string>
+  <string name="catalog_accessibility_cover_audiobook">%1$s, audiobook, by %2$s</string>
 
   <!-- Book format strings -->
   <string name="book_format_audiobook">Audiobook</string>

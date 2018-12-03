@@ -176,7 +176,8 @@ class CatalogFeedLane(
     layoutParams.setMargins(0, 0, this.screen.screenDPToPixels(8).toInt(), 0)
 
     imageView.layoutParams = layoutParams
-    imageView.contentDescription = this.configureContentDescription(this.resources, entry)
+    imageView.contentDescription =
+      CatalogBookFormats.contentDescriptionOfEntry(this.resources, entry)
     imageView.setOnClickListener { this.listener.onSelectBook(entry) }
     coverViews.add(imageView)
 
@@ -184,21 +185,7 @@ class CatalogFeedLane(
     return Unit.unit()
   }
 
-  private fun configureContentDescription(
-    resources: Resources,
-    entry: FeedEntryOPDS): String {
-    val formatOpt = entry.probableFormat
-    return if (formatOpt is Some<BookFormats.BookFormatDefinition>) {
-      val format = formatOpt.get()
-      when (format) {
-        null,
-        BOOK_FORMAT_EPUB -> resources.getString(R.string.catalog_accessibility_cover_epub, entry.feedEntry.title)
-        BOOK_FORMAT_AUDIO -> resources.getString(R.string.catalog_accessibility_cover_audiobook, entry.feedEntry.title)
-      }
-    } else {
-      entry.feedEntry.title
-    }
-  }
+
 
   private fun addViewForFeedEntryCorrupt(
     coverViewCollections: ArrayList<ImageView?>): Unit {
