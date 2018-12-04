@@ -1,0 +1,49 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+dependencies {
+
+}
+
+description = 'simplified-tests-sandbox'
+
+android {
+  compileSdkVersion 27
+  buildToolsVersion "28.0.2"
+
+  packagingOptions {
+
+  }
+
+  defaultConfig {
+    multiDexEnabled true
+  }
+
+  lintOptions {
+    abortOnError false
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+dependencies {
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+  implementation project(':simplified-app-shared')
+
+  implementation "com.android.support:support-v4:27.1.1"
+  implementation 'com.android.support:appcompat-v7:27.1.1'
+  implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+  implementation 'com.android.support:design:27.1.1'
+  implementation 'com.android.support:multidex:1.0.2'
+
+  implementation 'org.slf4j:slf4j-api:1.7.25'
+  implementation 'com.github.tony19:logback-android-core:1.1.1-6'
+  implementation('com.github.tony19:logback-android-classic:1.1.1-6') {
+    // https://github.com/tony19/logback-android/issues/73
+    exclude group: 'com.google.android', module: 'android'
+  }
+}
