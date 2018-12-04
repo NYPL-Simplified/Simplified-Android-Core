@@ -33,12 +33,20 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   implementation project(':simplified-app-shared')
+  implementation project(':simplified-multilibrary')
+  implementation project(':simplified-books-core')
+  implementation project(':simplified-books-covers')
+
+  implementation group: 'com.io7m.junreachable', name: 'io7m-junreachable-core', version: '[1.0.0, 2.0.0)'
+  implementation group: 'com.io7m.jfunctional', name: 'io7m-jfunctional-core', version: '[1.1.0, 2.0.0)'
 
   implementation "com.android.support:support-v4:27.1.1"
   implementation 'com.android.support:appcompat-v7:27.1.1'
   implementation 'com.android.support.constraint:constraint-layout:1.0.2'
   implementation 'com.android.support:design:27.1.1'
   implementation 'com.android.support:multidex:1.0.2'
+
+  implementation 'org.mockito:mockito-android:2.22.0'
 
   implementation 'org.slf4j:slf4j-api:1.7.25'
   implementation 'com.github.tony19:logback-android-core:1.1.1-6'
