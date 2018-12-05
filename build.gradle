@@ -19,7 +19,7 @@ ext {
    * The version of the NYPL Audiobook API used by this package.
    */
 
-  nypl_audiobook_api_version = "0.0.62"
+  nypl_audiobook_api_version = "0.0.63"
 }
 
 allprojects {
@@ -54,9 +54,6 @@ subprojects {
       if (project.property("org.nypl.simplified.with_findaway") == "true") {
         maven {
           url "http://maven.findawayworld.com/artifactory/libs-release/"
-        }
-        maven {
-          url "http://maven.findawayworld.com/artifactory/libs-snapshot/"
         }
       }
     }
