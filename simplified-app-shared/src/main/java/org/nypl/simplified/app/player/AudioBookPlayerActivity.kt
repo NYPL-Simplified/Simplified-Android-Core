@@ -206,6 +206,16 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.audio_book_player_fragment_holder, this.loadingFragment, "LOADING")
       .commit()
+
+    /*
+     * Restore the activity title when the back stack is empty.
+     */
+
+    this.supportFragmentManager.addOnBackStackChangedListener {
+      if (supportFragmentManager.backStackEntryCount == 0) {
+        this.restoreActionBarTitle()
+      }
+    }
   }
 
   private fun findBookAuthor(entry: OPDSAcquisitionFeedEntry): String {
@@ -480,6 +490,10 @@ class AudioBookPlayerActivity : FragmentActivity(),
      */
 
     this.supportFragmentManager.popBackStack()
+    this.restoreActionBarTitle()
+  }
+
+  private fun restoreActionBarTitle() {
     this.actionBar.setTitle(R.string.audio_book_player)
   }
 

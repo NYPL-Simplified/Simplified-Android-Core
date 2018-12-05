@@ -249,7 +249,7 @@
   <string name="reader_settings_close">Close</string>
 
   <!-- Audio book player strings -->
-  <string name="audio_book_player">Audio Book Player</string>
+  <string name="audio_book_player">Audiobook Player</string>
   <string name="audio_book_player_error_engine_open">Unable to initialize audio engine</string>
   <string name="audio_book_player_error_book_open">Unable to open audio book</string>
 
