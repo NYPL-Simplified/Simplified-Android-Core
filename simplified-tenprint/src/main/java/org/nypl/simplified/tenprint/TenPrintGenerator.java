@@ -211,474 +211,481 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final int x_center = x + (grid_size / 2);
     final int y_center = y + (grid_size / 2);
 
-    canvas.clipRect(
-      (float) x,
-      (float) y_max,
-      (float) x_max,
-      (float) y, Op.REPLACE);
+    canvas.save();
 
-    final int grid_size_double = grid_size * 2;
-    switch (c) {
-      case 'q':
-      case 'Q': {
-        TenPrintGenerator.renderEllipse(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-        break;
-      }
-      case 'W':
-      case 'w': {
-        TenPrintGenerator.renderEllipse(
-          canvas, x, y, grid_size, grid_size, paint_shape);
+    try {
+      canvas.clipRect(
+        (float) x,
+        (float) y_max,
+        (float) x_max,
+        (float) y,
+        Op.INTERSECT);
 
-        final int size_smaller = grid_size - thick2;
-        TenPrintGenerator.renderEllipse(
-          canvas, x + thick, y + thick, size_smaller, size_smaller, paint_base);
-        break;
-      }
-      case 'E':
-      case 'e': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y + thick, grid_size, thick, paint_shape);
-        break;
-      }
-      case 'R':
-      case 'r': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y + (grid_size - thick2), grid_size, thick, paint_shape);
-        break;
-      }
-      case 'T':
-      case 't': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x + thick, y, thick, grid_size, paint_shape);
-        break;
-      }
-      case 'Y':
-      case 'y': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x + (grid_size - thick2), y, thick, grid_size, paint_shape);
-        break;
-      }
-      case 'U':
-      case 'u': {
-        TenPrintGenerator.renderRing(
-          canvas,
-          x,
-          y,
-          grid_size_double,
-          grid_size_double,
-          thick,
-          paint_shape,
-          paint_base);
-        break;
-      }
-      case 'I':
-      case 'i': {
-        TenPrintGenerator.renderRing(
-          canvas,
-          x - grid_size,
-          y,
-          grid_size_double,
-          grid_size_double,
-          thick,
-          paint_shape,
-          paint_base);
-        break;
-      }
-      case 'O':
-      case 'o': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-        TenPrintGenerator.renderRectangle(
-          canvas, x + thick, y + thick, grid_size, grid_size, paint_base);
-        break;
-      }
-      case 'P':
-      case 'p': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-        TenPrintGenerator.renderRectangle(
-          canvas, x - thick, y + thick, grid_size, grid_size, paint_base);
-        break;
-      }
-      case 'A':
-      case 'a': {
-        final Path p = new Path();
-        p.moveTo((float) x, (float) y_max);
-        p.lineTo((float) x_center, (float) y);
-        p.lineTo((float) x_max, (float) y_max);
-        p.lineTo((float) x, (float) y_max);
-        p.close();
-        canvas.drawPath(p, paint_shape);
-        break;
-      }
-      case 'S':
-      case 's': {
-        final Path p = new Path();
-        p.moveTo((float) x, (float) y);
-        p.lineTo((float) x_center, (float) y_max);
-        p.lineTo((float) x_max, (float) y);
-        p.lineTo((float) x, (float) y);
-        p.close();
-        canvas.drawPath(p, paint_shape);
-        break;
-      }
-      case 'D':
-      case 'd': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y + thick2, grid_size, thick, paint_shape);
-        break;
-      }
-      case 'F':
-      case 'f': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y + thick3, grid_size, thick, paint_shape);
-        break;
-      }
-      case 'G':
-      case 'g': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x + thick2, y, thick, grid_size, paint_shape);
-        break;
-      }
-      case 'H':
-      case 'h': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x + (grid_size - thick3), y, thick, grid_size, paint_shape);
-        break;
-      }
-      case 'J':
-      case 'j': {
-        TenPrintGenerator.renderRing(
-          canvas,
-          x,
-          y - grid_size,
-          grid_size_double,
-          grid_size_double,
-          thick,
-          paint_shape,
-          paint_base);
-        break;
-      }
-      case 'K':
-      case 'k': {
-        TenPrintGenerator.renderRing(
-          canvas,
-          x - grid_size,
-          y - grid_size,
-          grid_size_double,
-          grid_size_double,
-          thick,
-          paint_shape,
-          paint_base);
-        break;
-      }
-      case 'L':
-      case 'l': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-        TenPrintGenerator.renderRectangle(
-          canvas, x + thick, y - thick, grid_size, grid_size, paint_base);
-        break;
-      }
-      case ':': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-        TenPrintGenerator.renderRectangle(
-          canvas, x - thick, y - thick, grid_size, grid_size, paint_base);
-        break;
-      }
+      final int grid_size_double = grid_size * 2;
+      switch (c) {
+        case 'q':
+        case 'Q': {
+          TenPrintGenerator.renderEllipse(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+          break;
+        }
+        case 'W':
+        case 'w': {
+          TenPrintGenerator.renderEllipse(
+            canvas, x, y, grid_size, grid_size, paint_shape);
 
-      case 'Z':
-      case 'z': {
-        {
+          final int size_smaller = grid_size - thick2;
+          TenPrintGenerator.renderEllipse(
+            canvas, x + thick, y + thick, size_smaller, size_smaller, paint_base);
+          break;
+        }
+        case 'E':
+        case 'e': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y + thick, grid_size, thick, paint_shape);
+          break;
+        }
+        case 'R':
+        case 'r': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y + (grid_size - thick2), grid_size, thick, paint_shape);
+          break;
+        }
+        case 'T':
+        case 't': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x + thick, y, thick, grid_size, paint_shape);
+          break;
+        }
+        case 'Y':
+        case 'y': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x + (grid_size - thick2), y, thick, grid_size, paint_shape);
+          break;
+        }
+        case 'U':
+        case 'u': {
+          TenPrintGenerator.renderRing(
+            canvas,
+            x,
+            y,
+            grid_size_double,
+            grid_size_double,
+            thick,
+            paint_shape,
+            paint_base);
+          break;
+        }
+        case 'I':
+        case 'i': {
+          TenPrintGenerator.renderRing(
+            canvas,
+            x - grid_size,
+            y,
+            grid_size_double,
+            grid_size_double,
+            thick,
+            paint_shape,
+            paint_base);
+          break;
+        }
+        case 'O':
+        case 'o': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+          TenPrintGenerator.renderRectangle(
+            canvas, x + thick, y + thick, grid_size, grid_size, paint_base);
+          break;
+        }
+        case 'P':
+        case 'p': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+          TenPrintGenerator.renderRectangle(
+            canvas, x - thick, y + thick, grid_size, grid_size, paint_base);
+          break;
+        }
+        case 'A':
+        case 'a': {
           final Path p = new Path();
-          p.moveTo((float) x, (float) y_center);
+          p.moveTo((float) x, (float) y_max);
           p.lineTo((float) x_center, (float) y);
-          p.lineTo((float) x_max, (float) y_center);
-          p.lineTo((float) x, (float) y_center);
+          p.lineTo((float) x_max, (float) y_max);
+          p.lineTo((float) x, (float) y_max);
           p.close();
           canvas.drawPath(p, paint_shape);
+          break;
         }
-
-        {
-          final Path p = new Path();
-          p.moveTo((float) x, (float) y_center);
-          p.lineTo((float) x_center, (float) y_max);
-          p.lineTo((float) x_max, (float) y_center);
-          p.lineTo((float) x, (float) y_center);
-          p.close();
-          canvas.drawPath(p, paint_shape);
-        }
-        break;
-      }
-
-      case 'X':
-      case 'x': {
-        final int gs_3 = grid_size / 3;
-        TenPrintGenerator.renderEllipseCenter(
-          canvas, x_center, y + gs_3, thick2, thick2, paint_shape);
-        TenPrintGenerator.renderEllipseCenter(
-          canvas, x + gs_3, y_max - gs_3, thick2, thick2, paint_shape);
-        TenPrintGenerator.renderEllipseCenter(
-          canvas, x_max - gs_3, y_max - gs_3, thick2, thick2, paint_shape);
-        break;
-      }
-
-      case 'C':
-      case 'c': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y + thick3, grid_size, thick, paint_shape);
-        break;
-      }
-
-      case 'V':
-      case 'v': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-
-        {
-          final Path p = new Path();
-          p.moveTo((float) x, (float) (y + thick));
-          p.lineTo((float) (x_center - thick), (float) y_center);
-          p.lineTo((float) x, (float) (y_max - thick));
-          p.lineTo((float) x, (float) (y + thick));
-          p.close();
-          canvas.drawPath(p, paint_base);
-        }
-
-        {
-          final Path p = new Path();
-          p.moveTo((float) x_max, (float) (y + thick));
-          p.lineTo((float) (x_center + thick), (float) y_center);
-          p.lineTo((float) x_max, (float) (y_max - thick));
-          p.lineTo((float) x_max, (float) (y + thick));
-          p.close();
-          canvas.drawPath(p, paint_base);
-        }
-
-        {
-          final Path p = new Path();
-          p.moveTo((float) x_max, (float) (y + thick));
-          p.lineTo((float) (x_center + thick), (float) y_center);
-          p.lineTo((float) x_max, (float) (y_max - thick));
-          p.lineTo((float) x_max, (float) (y + thick));
-          p.close();
-          canvas.drawPath(p, paint_base);
-        }
-
-        {
-          final Path p = new Path();
-          p.moveTo((float) (x + thick), (float) y_max);
-          p.lineTo((float) x_center, (float) (y_center + thick));
-          p.lineTo((float) (x_max - thick), (float) y_max);
-          p.lineTo((float) (x + thick), (float) y_max);
-          p.close();
-          canvas.drawPath(p, paint_base);
-        }
-
-        {
-          final Path p = new Path();
-          p.moveTo((float) (x + thick), (float) y);
-          p.lineTo((float) x_center, (float) (y_center - thick));
-          p.lineTo((float) (x_max - thick), (float) y);
-          p.lineTo((float) (x + thick), (float) y);
-          p.close();
-          canvas.drawPath(p, paint_base);
-        }
-
-        break;
-      }
-
-      case 'B':
-      case 'b': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x + thick3, y, thick, grid_size, paint_shape);
-        break;
-      }
-
-      case 'N':
-      case 'n': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-
-        {
+        case 'S':
+        case 's': {
           final Path p = new Path();
           p.moveTo((float) x, (float) y);
-          p.lineTo((float) (x_max - thick), (float) y);
-          p.lineTo((float) x, (float) (y_max - thick));
+          p.lineTo((float) x_center, (float) y_max);
+          p.lineTo((float) x_max, (float) y);
           p.lineTo((float) x, (float) y);
           p.close();
-          canvas.drawPath(p, paint_base);
+          canvas.drawPath(p, paint_shape);
+          break;
+        }
+        case 'D':
+        case 'd': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y + thick2, grid_size, thick, paint_shape);
+          break;
+        }
+        case 'F':
+        case 'f': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y + thick3, grid_size, thick, paint_shape);
+          break;
+        }
+        case 'G':
+        case 'g': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x + thick2, y, thick, grid_size, paint_shape);
+          break;
+        }
+        case 'H':
+        case 'h': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x + (grid_size - thick3), y, thick, grid_size, paint_shape);
+          break;
+        }
+        case 'J':
+        case 'j': {
+          TenPrintGenerator.renderRing(
+            canvas,
+            x,
+            y - grid_size,
+            grid_size_double,
+            grid_size_double,
+            thick,
+            paint_shape,
+            paint_base);
+          break;
+        }
+        case 'K':
+        case 'k': {
+          TenPrintGenerator.renderRing(
+            canvas,
+            x - grid_size,
+            y - grid_size,
+            grid_size_double,
+            grid_size_double,
+            thick,
+            paint_shape,
+            paint_base);
+          break;
+        }
+        case 'L':
+        case 'l': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+          TenPrintGenerator.renderRectangle(
+            canvas, x + thick, y - thick, grid_size, grid_size, paint_base);
+          break;
+        }
+        case ':': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+          TenPrintGenerator.renderRectangle(
+            canvas, x - thick, y - thick, grid_size, grid_size, paint_base);
+          break;
         }
 
-        {
-          final Path p = new Path();
-          p.moveTo((float) (x + thick), (float) y_max);
-          p.lineTo((float) (x_max + thick), (float) y_max);
-          p.lineTo((float) (x_max + thick), (float) y);
-          p.lineTo((float) (x + thick), (float) y_max);
-          p.close();
-          canvas.drawPath(p, paint_base);
+        case 'Z':
+        case 'z': {
+          {
+            final Path p = new Path();
+            p.moveTo((float) x, (float) y_center);
+            p.lineTo((float) x_center, (float) y);
+            p.lineTo((float) x_max, (float) y_center);
+            p.lineTo((float) x, (float) y_center);
+            p.close();
+            canvas.drawPath(p, paint_shape);
+          }
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) x, (float) y_center);
+            p.lineTo((float) x_center, (float) y_max);
+            p.lineTo((float) x_max, (float) y_center);
+            p.lineTo((float) x, (float) y_center);
+            p.close();
+            canvas.drawPath(p, paint_shape);
+          }
+          break;
         }
 
-        break;
-      }
-
-      case 'M':
-      case 'm': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, grid_size, paint_shape);
-
-        {
-          final Path p = new Path();
-          p.moveTo((float) x, (float) (y + thick));
-          p.lineTo((float) x, (float) (y_max + thick));
-          p.lineTo((float) x_max, (float) (y_max + thick));
-          p.lineTo((float) x, (float) (y + thick));
-          p.close();
-          canvas.drawPath(p, paint_base);
+        case 'X':
+        case 'x': {
+          final int gs_3 = grid_size / 3;
+          TenPrintGenerator.renderEllipseCenter(
+            canvas, x_center, y + gs_3, thick2, thick2, paint_shape);
+          TenPrintGenerator.renderEllipseCenter(
+            canvas, x + gs_3, y_max - gs_3, thick2, thick2, paint_shape);
+          TenPrintGenerator.renderEllipseCenter(
+            canvas, x_max - gs_3, y_max - gs_3, thick2, thick2, paint_shape);
+          break;
         }
 
-        {
-          final Path p = new Path();
-          p.moveTo((float) x, (float) (y - thick));
-          p.lineTo((float) x_max, (float) (y_max - thick));
-          p.lineTo((float) x_max, (float) (y - thick));
-          p.lineTo((float) x, (float) (y - thick));
-          p.close();
-          canvas.drawPath(p, paint_base);
+        case 'C':
+        case 'c': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y + thick3, grid_size, thick, paint_shape);
+          break;
         }
 
-        break;
+        case 'V':
+        case 'v': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) x, (float) (y + thick));
+            p.lineTo((float) (x_center - thick), (float) y_center);
+            p.lineTo((float) x, (float) (y_max - thick));
+            p.lineTo((float) x, (float) (y + thick));
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) x_max, (float) (y + thick));
+            p.lineTo((float) (x_center + thick), (float) y_center);
+            p.lineTo((float) x_max, (float) (y_max - thick));
+            p.lineTo((float) x_max, (float) (y + thick));
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) x_max, (float) (y + thick));
+            p.lineTo((float) (x_center + thick), (float) y_center);
+            p.lineTo((float) x_max, (float) (y_max - thick));
+            p.lineTo((float) x_max, (float) (y + thick));
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) (x + thick), (float) y_max);
+            p.lineTo((float) x_center, (float) (y_center + thick));
+            p.lineTo((float) (x_max - thick), (float) y_max);
+            p.lineTo((float) (x + thick), (float) y_max);
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) (x + thick), (float) y);
+            p.lineTo((float) x_center, (float) (y_center - thick));
+            p.lineTo((float) (x_max - thick), (float) y);
+            p.lineTo((float) (x + thick), (float) y);
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          break;
+        }
+
+        case 'B':
+        case 'b': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x + thick3, y, thick, grid_size, paint_shape);
+          break;
+        }
+
+        case 'N':
+        case 'n': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) x, (float) y);
+            p.lineTo((float) (x_max - thick), (float) y);
+            p.lineTo((float) x, (float) (y_max - thick));
+            p.lineTo((float) x, (float) y);
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) (x + thick), (float) y_max);
+            p.lineTo((float) (x_max + thick), (float) y_max);
+            p.lineTo((float) (x_max + thick), (float) y);
+            p.lineTo((float) (x + thick), (float) y_max);
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          break;
+        }
+
+        case 'M':
+        case 'm': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, grid_size, paint_shape);
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) x, (float) (y + thick));
+            p.lineTo((float) x, (float) (y_max + thick));
+            p.lineTo((float) x_max, (float) (y_max + thick));
+            p.lineTo((float) x, (float) (y + thick));
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          {
+            final Path p = new Path();
+            p.moveTo((float) x, (float) (y - thick));
+            p.lineTo((float) x_max, (float) (y_max - thick));
+            p.lineTo((float) x_max, (float) (y - thick));
+            p.lineTo((float) x, (float) (y - thick));
+            p.close();
+            canvas.drawPath(p, paint_base);
+          }
+
+          break;
+        }
+
+        case '0': {
+          TenPrintGenerator.renderRectangle(
+            canvas,
+            x_center - (thick / 2),
+            y_center - (thick / 2),
+            thick,
+            (grid_size / 2) + (thick / 2),
+            paint_shape);
+          TenPrintGenerator.renderRectangle(
+            canvas,
+            x_center - (thick / 2),
+            y_center - (thick / 2),
+            (grid_size / 2) + thick,
+            thick,
+            paint_shape);
+
+          break;
+        }
+
+        case '1': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y_center - (thick / 2), grid_size, thick, paint_shape);
+          TenPrintGenerator.renderRectangle(
+            canvas,
+            x_center - (thick / 2),
+            y,
+            thick,
+            (grid_size / 2) + (thick / 2),
+            paint_shape);
+
+          break;
+        }
+
+        case '2': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y_center - (thick / 2), grid_size, thick, paint_shape);
+
+          TenPrintGenerator.renderRectangle(
+            canvas,
+            x_center - (thick / 2),
+            y_center - (thick / 2),
+            thick,
+            (grid_size / 2) + thick,
+            paint_shape);
+
+          break;
+        }
+
+        case '3': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y_center - (thick / 2), grid_size / 2, thick, paint_shape);
+
+          TenPrintGenerator.renderRectangle(
+            canvas, x_center - (thick / 2), y, thick, grid_size, paint_shape);
+
+          break;
+        }
+
+        case '4': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, thick2, grid_size, paint_shape);
+          break;
+        }
+
+        case '5': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, thick3, grid_size, paint_shape);
+          break;
+        }
+
+        case '6': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x_max - thick3, y, thick3, grid_size, paint_shape);
+          break;
+        }
+
+        case '7': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, thick2, paint_shape);
+          break;
+        }
+
+        case '8': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, grid_size, thick3, paint_shape);
+          break;
+        }
+
+        case '9': {
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y, thick, grid_size, paint_shape);
+          TenPrintGenerator.renderRectangle(
+            canvas, x, y_max - thick3, grid_size, thick3, paint_shape);
+          break;
+        }
+
+        case '.': {
+          TenPrintGenerator.renderRectangle(
+            canvas,
+            x_center - (thick / 2),
+            y_center - (thick / 2),
+            thick,
+            (grid_size / 2) + (thick / 2),
+            paint_shape);
+
+          TenPrintGenerator.renderRectangle(
+            canvas,
+            x,
+            y_center - (thick / 2),
+            (grid_size / 2) + (thick / 2),
+            thick,
+            paint_shape);
+          break;
+        }
       }
 
-      case '0': {
-        TenPrintGenerator.renderRectangle(
-          canvas,
-          x_center - (thick / 2),
-          y_center - (thick / 2),
-          thick,
-          (grid_size / 2) + (thick / 2),
-          paint_shape);
-        TenPrintGenerator.renderRectangle(
-          canvas,
-          x_center - (thick / 2),
-          y_center - (thick / 2),
-          (grid_size / 2) + thick,
-          thick,
-          paint_shape);
+      if (i.debugArtworkEnabled()) {
+        final Paint pt = new Paint();
+        pt.setColor(Color.BLACK);
+        pt.setTextSize(16.0f);
+        canvas.drawText(Character.toString(c),
+                        (float) (x + 10),
+                        (float) (y_max - 16), pt);
 
-        break;
+        pt.setStyle(Style.STROKE);
+        canvas.drawRect((float) x, (float) y_max, (float) x_max, (float) y, pt);
       }
-
-      case '1': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y_center - (thick / 2), grid_size, thick, paint_shape);
-        TenPrintGenerator.renderRectangle(
-          canvas,
-          x_center - (thick / 2),
-          y,
-          thick,
-          (grid_size / 2) + (thick / 2),
-          paint_shape);
-
-        break;
-      }
-
-      case '2': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y_center - (thick / 2), grid_size, thick, paint_shape);
-
-        TenPrintGenerator.renderRectangle(
-          canvas,
-          x_center - (thick / 2),
-          y_center - (thick / 2),
-          thick,
-          (grid_size / 2) + thick,
-          paint_shape);
-
-        break;
-      }
-
-      case '3': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y_center - (thick / 2), grid_size / 2, thick, paint_shape);
-
-        TenPrintGenerator.renderRectangle(
-          canvas, x_center - (thick / 2), y, thick, grid_size, paint_shape);
-
-        break;
-      }
-
-      case '4': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, thick2, grid_size, paint_shape);
-        break;
-      }
-
-      case '5': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, thick3, grid_size, paint_shape);
-        break;
-      }
-
-      case '6': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x_max - thick3, y, thick3, grid_size, paint_shape);
-        break;
-      }
-
-      case '7': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, thick2, paint_shape);
-        break;
-      }
-
-      case '8': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, grid_size, thick3, paint_shape);
-        break;
-      }
-
-      case '9': {
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y, thick, grid_size, paint_shape);
-        TenPrintGenerator.renderRectangle(
-          canvas, x, y_max - thick3, grid_size, thick3, paint_shape);
-        break;
-      }
-
-      case '.': {
-        TenPrintGenerator.renderRectangle(
-          canvas,
-          x_center - (thick / 2),
-          y_center - (thick / 2),
-          thick,
-          (grid_size / 2) + (thick / 2),
-          paint_shape);
-
-        TenPrintGenerator.renderRectangle(
-          canvas,
-          x,
-          y_center - (thick / 2),
-          (grid_size / 2) + (thick / 2),
-          thick,
-          paint_shape);
-        break;
-      }
-    }
-
-    if (i.debugArtworkEnabled()) {
-      final Paint pt = new Paint();
-      pt.setColor(Color.BLACK);
-      pt.setTextSize(16.0f);
-      canvas.drawText(Character.toString(c),
-                      (float) (x + 10),
-                      (float) (y_max - 16), pt);
-
-      pt.setStyle(Style.STROKE);
-      canvas.drawRect((float) x, (float) y_max, (float) x_max, (float) y, pt);
+    } finally {
+      canvas.restore();
     }
   }
 
