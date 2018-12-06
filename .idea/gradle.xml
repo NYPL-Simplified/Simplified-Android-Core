@@ -30,6 +30,7 @@
             <option value="$PROJECT_DIR$/simplified-tenprint" />
             <option value="$PROJECT_DIR$/simplified-tests" />
             <option value="$PROJECT_DIR$/simplified-tests-android" />
+            <option value="$PROJECT_DIR$/simplified-tests-sandbox" />
             <option value="$PROJECT_DIR$/simplified-volley" />
           </set>
         </option>

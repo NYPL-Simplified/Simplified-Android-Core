@@ -206,6 +206,16 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.audio_book_player_fragment_holder, this.loadingFragment, "LOADING")
       .commit()
+
+    /*
+     * Restore the activity title when the back stack is empty.
+     */
+
+    this.supportFragmentManager.addOnBackStackChangedListener {
+      if (supportFragmentManager.backStackEntryCount == 0) {
+        this.restoreActionBarTitle()
+      }
+    }
   }
 
   private fun findBookAuthor(entry: OPDSAcquisitionFeedEntry): String {
@@ -362,39 +372,12 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
   private fun startAllPartsDownloading() {
     if (this.services.isNetworkAvailable) {
-      this.book.spine.forEach { element ->
-        val status = element.downloadStatus
-        when (status) {
-          is PlayerSpineElementNotDownloaded -> {
-            this.log.debug("[spine {}]: {}: downloading", element.index, status)
-            element.downloadTask.fetch()
-          }
-
-          is PlayerSpineElementDownloading,
-          is PlayerSpineElementDownloadFailed,
-          is PlayerSpineElementDownloaded ->
-            this.log.debug("[spine {}]: {}: not downloading", element.index, status)
-        }
-      }
+      this.book.wholeBookDownloadTask.fetch()
     }
   }
 
   private fun cancelAllDownloads() {
-    this.book.spine.forEach { element ->
-      val status = element.downloadStatus
-      when (status) {
-        is PlayerSpineElementDownloading -> {
-          this.log.debug("[spine {}]: {}: cancelling download", element.index, status)
-          element.downloadTask.cancel()
-        }
-
-        is PlayerSpineElementDownloaded,
-        is PlayerSpineElementDownloadFailed,
-        is PlayerSpineElementNotDownloaded -> {
-          this.log.debug("[spine {}]: {}: download is not running, ignoring", element.index, status)
-        }
-      }
-    }
+    this.book.wholeBookDownloadTask.cancel()
   }
 
   private fun onPlayerEvent(event: PlayerEvent) {
@@ -507,6 +490,10 @@ class AudioBookPlayerActivity : FragmentActivity(),
      */
 
     this.supportFragmentManager.popBackStack()
+    this.restoreActionBarTitle()
+  }
+
+  private fun restoreActionBarTitle() {
     this.actionBar.setTitle(R.string.audio_book_player)
   }
 

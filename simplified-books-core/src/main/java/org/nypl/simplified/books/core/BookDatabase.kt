@@ -533,7 +533,7 @@ class BookDatabase private constructor(
 
               val bookResult = engine.bookProvider.create(this.owner.owner.context)
               when (bookResult) {
-                is PlayerResult.Success -> bookResult.result.deleteLocalChapterData()
+                is PlayerResult.Success -> bookResult.result.wholeBookDownloadTask.delete()
                 is PlayerResult.Failure -> throw bookResult.failure
               }
 

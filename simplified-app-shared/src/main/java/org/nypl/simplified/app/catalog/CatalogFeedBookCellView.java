@@ -60,6 +60,7 @@ import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.books.core.FeedEntryType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
+import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.slf4j.Logger;
@@ -129,6 +130,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
   public CatalogFeedBookCellView(
     final Activity in_activity,
+    final Account in_account,
     final BookCoverProviderType in_cover_provider,
     final BooksType in_books)
   {
@@ -165,7 +167,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     status_cache.booksObservableAddObserver(this);
 
     this.cell_downloading = NullCheck.notNull(this.findViewById(R.id.cell_downloading));
-    final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
+    final int resID = ThemeMatcher.Companion.color(in_account.getMainColor());
     final int mainColor = ContextCompat.getColor(this.getContext(), resID);
     this.cell_downloading.setBackgroundColor(mainColor);
 
@@ -211,7 +213,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_downloading_failed_retry.setBackgroundResource(R.drawable.simplified_button);
     this.cell_downloading_failed_retry.setTextColor(mainColor);
-
 
     this.cell_corrupt =
       NullCheck.notNull((ViewGroup) this.findViewById(R.id.cell_corrupt));
@@ -266,22 +267,6 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     this.cell_corrupt.setVisibility(View.INVISIBLE);
     this.cell_downloading.setVisibility(View.INVISIBLE);
     this.cell_downloading_failed.setVisibility(View.INVISIBLE);
-  }
-
-  private static String makeAuthorText(
-    final OPDSAcquisitionFeedEntry in_e)
-  {
-    final StringBuilder sb = new StringBuilder();
-    final List<String> as = in_e.getAuthors();
-    final int max = as.size();
-    for (int index = 0; index < max; ++index) {
-      final String a = NullCheck.notNull(as.get(index));
-      sb.append(a);
-      if ((index + 1) < max) {
-        sb.append(", ");
-      }
-    }
-    return NullCheck.notNull(sb.toString());
   }
 
   private void loadImageAndSetVisibility(
@@ -355,11 +340,16 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     CatalogFeedBookCellView.LOG.debug("{}: download failed", f.getID());
 
+    /*
+     * Unset the content description so that the screen reader reads the error message.
+     */
+
+    this.setContentDescription(null);
+
     if (CatalogBookUnauthorized.isUnAuthorized(f))
     {
       CatalogFeedBookCellView.this.books.accountRemoveCredentials();
     }
-
 
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_corrupt.setVisibility(View.INVISIBLE);
@@ -428,8 +418,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final OPDSAcquisitionFeedEntry oe = fe.getFeedEntry();
     this.cell_downloading_label.setText(R.string.catalog_downloading);
     this.cell_downloading_title.setText(oe.getTitle());
-    this.cell_downloading_authors.setText(
-      CatalogFeedBookCellView.makeAuthorText(oe));
+    this.cell_downloading_authors.setText(oe.getAuthorsCommaSeparated());
 
     CatalogDownloadProgressBar.setProgressBar(
       d.getCurrentTotalBytes(),
@@ -538,6 +527,12 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
     final BookStatusRevokeFailed s)
   {
     CatalogFeedBookCellView.LOG.debug("{}: revoke failed", s.getID());
+
+    /*
+     * Unset the content description so that the screen reader reads the error message.
+     */
+
+    this.setContentDescription(null);
 
     this.cell_book.setVisibility(View.INVISIBLE);
     this.cell_corrupt.setVisibility(View.INVISIBLE);
@@ -667,8 +662,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_downloading_label.setText(R.string.catalog_requesting_loan);
     this.cell_downloading_title.setText(oe.getTitle());
-    this.cell_downloading_authors.setText(
-      CatalogFeedBookCellView.makeAuthorText(oe));
+    this.cell_downloading_authors.setText(oe.getAuthorsCommaSeparated());
 
     CatalogDownloadProgressBar.setProgressBar(
       0,
@@ -698,8 +692,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
 
     this.cell_downloading_label.setText(R.string.catalog_requesting_revoke);
     this.cell_downloading_title.setText(oe.getTitle());
-    this.cell_downloading_authors.setText(
-      CatalogFeedBookCellView.makeAuthorText(oe));
+    this.cell_downloading_authors.setText(oe.getAuthorsCommaSeparated());
 
     CatalogDownloadProgressBar.setProgressBar(
       0,
@@ -737,7 +730,10 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
   {
     final OPDSAcquisitionFeedEntry oe = feed_e.getFeedEntry();
     this.cell_title.setText(oe.getTitle());
-    this.cell_authors.setText(CatalogFeedBookCellView.makeAuthorText(oe));
+    this.cell_authors.setText(oe.getAuthorsCommaSeparated());
+
+    this.setContentDescription(
+      CatalogBookFormats.contentDescriptionOfEntry(this.getResources(), feed_e));
 
     final CatalogBookSelectionListenerType book_listener =
       this.book_selection_listener;

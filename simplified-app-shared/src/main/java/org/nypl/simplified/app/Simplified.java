@@ -12,7 +12,6 @@ import android.support.multidex.MultiDexApplication;
 import android.util.DisplayMetrics;
 
 import com.bugsnag.android.Severity;
-
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.FunctionType;
@@ -23,7 +22,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
-import org.nypl.simplified.accessibility.Accessibility;
+import org.nypl.simplified.accessibility.AccessibilityNoOp;
 import org.nypl.simplified.accessibility.AccessibilityType;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.reader.ReaderBookmarksSharedPrefs;
@@ -662,7 +661,7 @@ public final class Simplified extends MultiDexApplication
       this.exec_books =
         MoreExecutors.listeningDecorator(Simplified.namedThreadPool(1, "books", 19));
       this.accessibility =
-        Accessibility.Companion.create(in_context);
+        AccessibilityNoOp.Companion.create(in_context);
 
       final Prefs prefs = getSharedPrefs();
 

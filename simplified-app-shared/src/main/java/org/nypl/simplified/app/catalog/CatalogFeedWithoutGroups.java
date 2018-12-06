@@ -17,6 +17,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot;
@@ -155,7 +156,11 @@ public final class CatalogFeedWithoutGroups implements ListAdapter,
     if (reused != null) {
       cv = (CatalogFeedBookCellView) reused;
     } else {
-      cv = new CatalogFeedBookCellView(this.activity, this.book_cover_provider, this.books);
+      cv = new CatalogFeedBookCellView(
+        this.activity,
+        Simplified.getCurrentAccount(),
+        this.book_cover_provider,
+        this.books);
     }
 
     cv.viewConfigure(e, this.book_select_listener);
