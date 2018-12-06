@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/catalog_feed_facet_tabs"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_margin="8dp"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-</RadioGroup>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/catalog_feed_facet_tabs"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
+    android:gravity="center_horizontal"
+    android:orientation="horizontal"></RadioGroup>
