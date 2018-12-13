@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.core
 
+import com.google.common.base.Preconditions
 import com.io7m.jfunctional.None
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
@@ -205,7 +206,9 @@ internal class BooksControllerBorrowTask(
   }
 
   @Throws(IOException::class)
-  private fun runFulfillSimplifiedBearerToken(file: File) {
+  private fun runFulfillSimplifiedBearerToken(
+    acquisition: OPDSAcquisition,
+    file: File) {
     LOG.debug("[{}]: fulfilling Simplified bearer token file", this.shortID)
 
     /*
@@ -231,14 +234,15 @@ internal class BooksControllerBorrowTask(
       return
     }
 
-    val acquisition = OPDSAcquisition(
-      ACQUISITION_GENERIC,
-      token.location,
-      Option.some(BooksControllerBorrowTask.SIMPLIFIED_BEARER_TOKEN_CONTENT_TYPE),
-      emptyList())
+    val nextAcquisition =
+      OPDSAcquisition(
+        ACQUISITION_GENERIC,
+        token.location,
+        acquisition.type,
+        acquisition.indirectAcquisitions)
 
     val auth = HTTPAuthOAuth(token.accessToken)
-    this.runAcquisitionFulfillDoDownload(acquisition, Option.some(auth))
+    this.runAcquisitionFulfillDoDownload(nextAcquisition, Option.some(auth))
   }
 
   private fun downloadDataReceived(
@@ -609,7 +613,7 @@ internal class BooksControllerBorrowTask(
   }
 
   private fun runAcquisitionFulfillDoDownload(
-    a: OPDSAcquisition,
+    acquisition: OPDSAcquisition,
     predeterminedAuth: OptionType<HTTPAuthType>): DownloadType {
 
     /*
@@ -622,8 +626,9 @@ internal class BooksControllerBorrowTask(
     }
 
     val sid = this.shortID
-    this.fulfillURI = a.uri
-    LOG.debug("[{}]: starting download {}", sid, a.uri)
+    this.fulfillURI = acquisition.uri
+    LOG.debug("[{}]: starting download {}", sid, acquisition.uri)
+    LOG.debug("[{}]: expecting content type {}", sid, acquisition.type)
 
     /*
      * Point the downloader at the acquisition link. The result will be an
@@ -634,7 +639,7 @@ internal class BooksControllerBorrowTask(
      */
 
     val task = this
-    return this.downloader.download(a.uri, auth, object : DownloadListenerType {
+    return this.downloader.download(acquisition.uri, auth, object : DownloadListenerType {
       override fun onDownloadStarted(
         download: DownloadType,
         expectedTotal: Long) {
@@ -689,20 +694,15 @@ internal class BooksControllerBorrowTask(
           if (BooksControllerBorrowTask.ACSM_CONTENT_TYPE == contentType) {
             task.runFulfillACSM(file)
           } else if (BooksControllerBorrowTask.SIMPLIFIED_BEARER_TOKEN_CONTENT_TYPE == contentType) {
-            task.runFulfillSimplifiedBearerToken(file)
+            task.runFulfillSimplifiedBearerToken(acquisition, file)
           } else {
             task.saveFinalContent(
               file = file,
-              contentType = contentType)
+              expectedContentTypes = acquisition.availableFinalContentTypes(),
+              receivedContentType = contentType)
           }
-        } catch (e: IOException) {
-          LOG.error("onDownloadCompleted: i/o exception: ", e)
-          task.downloadFailed(Option.some(e))
-        } catch (e: BookUnsupportedTypeException) {
-          LOG.error("onDownloadCompleted: unsupported book exception: ", e)
-          task.downloadFailed(Option.some(e))
-        } catch (e: AdobeAdeptACSMException) {
-          LOG.error("onDownloadCompleted: acsm exception: ", e)
+        } catch (e: Exception) {
+          LOG.error("onDownloadCompleted: exception: ", e)
           task.downloadFailed(Option.some(e))
         }
       }
@@ -711,14 +711,23 @@ internal class BooksControllerBorrowTask(
 
   private fun saveFinalContent(
     file: File,
-    contentType: String) {
+    expectedContentTypes: Set<String>,
+    receivedContentType: String) {
 
-    LOG.debug("[{}]: saving content      {} ({})", this.shortID, file, contentType)
+    LOG.debug(
+      "[{}]: saving content      {} (expected one of {}, received {})",
+      this.shortID,
+      file,
+      expectedContentTypes,
+      receivedContentType)
+
     LOG.debug("[{}]: saving adobe rights {}", this.shortID, this.adobeRights)
     LOG.debug("[{}]: saving fulfill URI  {}", this.shortID, this.fulfillURI)
 
+    val handleContentType =
+      checkExpectedContentType(expectedContentTypes, receivedContentType)
     val formatHandleOpt: OptionType<BookDatabaseEntryFormatHandle> =
-      this.databaseEntry.entryFindFormatHandleForContentType(contentType)
+      this.databaseEntry.entryFindFormatHandleForContentType(handleContentType)
 
     fun updateStatus() {
       val downloadedSnap = this.databaseEntry.entryGetSnapshot()
@@ -747,8 +756,55 @@ internal class BooksControllerBorrowTask(
       }
     } else {
       LOG.error("[{}]: database entry does not have a format handle for {}",
-        this.shortID, contentType)
-      throw BookUnsupportedTypeException(contentType)
+        this.shortID, handleContentType)
+      throw BookUnsupportedTypeException(handleContentType)
+    }
+  }
+
+  /*
+   * If we expect a specific content type, but the server actually delivers application/octet-stream,
+   * then assume that the server delivered the expected type. Otherwise, check that the received
+   * type matches the expected type.
+   */
+
+  private fun checkExpectedContentType(
+    expectedContentTypes: Set<String>,
+    receivedContentType: String): String {
+
+    Preconditions.checkArgument(
+      !expectedContentTypes.isEmpty(),
+      "At least one expected content type")
+
+    return when (receivedContentType) {
+      "application/octet-stream" -> {
+        LOG.debug("[{}]: expected one of {} but received {} (acceptable)",
+          this.shortID,
+          expectedContentTypes,
+          receivedContentType)
+        expectedContentTypes.first()
+      }
+
+      else -> {
+        if (expectedContentTypes.contains(receivedContentType)) {
+          return receivedContentType
+        }
+
+        LOG.debug("[{}]: expected {} but received {} (unacceptable)",
+          this.shortID, expectedContentTypes, receivedContentType)
+
+        throw BookUnexpectedTypeException(
+          message =
+          StringBuilder("Unexpected content type\n")
+            .append("  Expected: One of ")
+            .append(expectedContentTypes)
+            .append('\n')
+            .append("  Received: ")
+            .append(receivedContentType)
+            .append('\n')
+            .toString(),
+          expected = expectedContentTypes,
+          received = receivedContentType)
+      }
     }
   }
 
@@ -808,7 +864,10 @@ internal class BooksControllerBorrowTask(
     override fun onFulfillmentSuccess(file: File, loan: AdobeAdeptLoan) {
       try {
         this.task.adobeRights = Option.some(loan)
-        this.task.saveFinalContent(file, this.contentType)
+        this.task.saveFinalContent(
+          file,
+          expectedContentTypes = setOf(this.contentType),
+          receivedContentType = this.contentType)
       } catch (x: Throwable) {
         LOG.error("failure saving content/rights: ", x)
         this.task.downloadFailed(Option.some(x))

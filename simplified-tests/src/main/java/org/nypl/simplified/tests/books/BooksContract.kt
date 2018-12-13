@@ -25,6 +25,7 @@ import org.nypl.audiobook.android.mocking.MockingDownloadProvider
 import org.nypl.audiobook.android.mocking.MockingPlayer
 import org.nypl.drm.core.AdobeAdeptConnectorType
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.drm.core.AdobeAdeptFulfillmentListenerType
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeAdeptLoanReturnListenerType
 import org.nypl.drm.core.AdobeLoanID
@@ -49,6 +50,7 @@ import org.nypl.simplified.books.core.BookDatabaseReadableType
 import org.nypl.simplified.books.core.BookFormats
 import org.nypl.simplified.books.core.BookID
 import org.nypl.simplified.books.core.BookRevokeExceptionDRMWorkflowError
+import org.nypl.simplified.books.core.BookStatusDownloadFailed
 import org.nypl.simplified.books.core.BookStatusDownloaded
 import org.nypl.simplified.books.core.BookStatusLoaned
 import org.nypl.simplified.books.core.BookStatusRevokeFailed
@@ -77,6 +79,7 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
 import java.nio.ByteBuffer
@@ -627,7 +630,7 @@ abstract class BooksContract {
     val http = MappedHTTP(LOG)
     http.addResource("http://example.com/loans/", httpResource("loans.xml"), "text/xml")
     http.addResource("http://example.com/borrow/0", httpResource("borrow-audiobook-0.xml"), "text/xml")
-    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/audiobook+json")
+    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/vnd.librarysimplified.findaway.license+json")
     http.addResource("http://example.com/revoke/0", httpResource("revoke-audiobook-0.xml"), "text/xml")
 
     val downloader =
@@ -734,7 +737,7 @@ abstract class BooksContract {
     val http = MappedHTTP(LOG)
     http.addResource("http://example.com/loans/", httpResource("loans.xml"), "text/xml")
     http.addResource("http://example.com/borrow/0", httpResource("borrow-audiobook-1.xml"), "text/xml")
-    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/audiobook+json")
+    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/vnd.librarysimplified.findaway.license+json")
 
     val downloader =
       DownloaderHTTP.newDownloader(this.executor, DirectoryUtilities.directoryCreateTemporary(), http)
@@ -823,7 +826,7 @@ abstract class BooksContract {
     val http = MappedHTTP(LOG)
     http.addResource("http://example.com/loans/", httpResource("loans.xml"), "text/xml")
     http.addResource("http://example.com/borrow/0", httpResource("revoke-error-bad-feed-type.xml"), "text/xml")
-    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/audiobook+json")
+    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/vnd.librarysimplified.findaway.license+json")
     http.addResource("http://example.com/revoke/fails", httpResource("groups.xml"), "text/xml")
 
     val downloader =
@@ -913,7 +916,7 @@ abstract class BooksContract {
     val http = MappedHTTP(LOG)
     http.addResource("http://example.com/loans/", httpResource("loans.xml"), "text/xml")
     http.addResource("http://example.com/borrow/0", httpResource("revoke-error-empty-feed-borrow.xml"), "text/xml")
-    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/audiobook+json")
+    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/vnd.librarysimplified.findaway.license+json")
     http.addResource("http://example.com/revoke/0", httpResource("revoke-error-empty-feed-revoke.xml"), "text/xml")
 
     val downloader =
@@ -1003,7 +1006,7 @@ abstract class BooksContract {
     val http = MappedHTTP(LOG)
     http.addResource("http://example.com/loans/", httpResource("loans.xml"), "text/xml")
     http.addResource("http://example.com/borrow/0", httpResource("borrow-audiobook-0.xml"), "text/xml")
-    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/audiobook+json")
+    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/vnd.librarysimplified.findaway.license+json")
     http.addResource("http://example.com/revoke/0", httpResource("revoke-audiobook-0.xml"), "text/xml")
 
     val downloader =
@@ -1461,7 +1464,7 @@ abstract class BooksContract {
     val http = MappedHTTP(LOG)
     http.addResource("http://example.com/loans/", httpResource("loans.xml"), "text/xml")
     http.addResource("http://example.com/borrow/0", httpResource("borrow-audiobook-0.xml"), "text/xml")
-    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/audiobook+json")
+    http.addResource("http://example.com/fulfill/0", httpResource("basic-manifest.json"), "application/vnd.librarysimplified.findaway.license+json")
     http.addResource("http://example.com/revoke/0", httpResource("revoke-audiobook-0.xml"), "text/xml")
 
     val downloader =
@@ -1550,6 +1553,285 @@ abstract class BooksContract {
   }
 
   /**
+   * Borrowing a book via an ACSM works (assuming that the Adobe Adept connector provides all
+   * the right responses).
+   */
+
+  @Test(timeout = 10_000L)
+  @Throws(Exception::class)
+  fun testBooksBorrowACSMToEPUB() {
+
+    val tmp = DirectoryUtilities.directoryCreateTemporary()
+    val booksConfig = BooksControllerConfiguration()
+
+    val barcode = AccountBarcode("barcode")
+    val pin = AccountPIN("pin")
+
+    val http = MappedHTTP(LOG)
+    http.addResource(
+      "http://example.com/loans/",
+      httpResource("loans.xml"),
+      "text/xml")
+    http.addResource(
+      "http://example.com/borrow/0",
+      httpResource("borrow-acsm-epub-0.xml"),
+      "text/xml")
+    http.addResource(
+      "http://example.com/fulfill/0",
+      httpResource("adobe-token.xml"),
+      "application/vnd.adobe.adept+xml")
+
+    val downloader =
+      DownloaderHTTP.newDownloader(this.executor, DirectoryUtilities.directoryCreateTemporary(), http)
+    val accounts =
+      AccountsDatabase.openDatabase(File(tmp, "accounts"))
+    val database =
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+
+    /*
+     * Insert some fake Adobe rights information into the databases.
+     */
+
+    val accountCredentials =
+      AccountCredentials(
+        Option.of(AdobeVendorID("FAKE")),
+        barcode,
+        pin,
+        Option.of(AccountAuthProvider("FAKE")),
+        Option.of(AccountAuthToken("FAKE")),
+        Option.of(AccountAdobeToken("FAKE")),
+        Option.of(AccountPatron("FAKE")))
+
+    accountCredentials.adobeUserID = Option.of(AdobeUserID("FAKE"))
+    accounts.accountSetCredentials(accountCredentials)
+
+    /*
+     * Create a mocked Adobe connector.
+     */
+
+    val adobeConnector =
+      Mockito.mock(AdobeAdeptConnectorType::class.java)
+
+    /*
+     * When the code calls the "fulfillACSM" method, tell the passed-in listener that the
+     * fulfillment succeeded, and create a fake epub file on disk.
+     */
+
+    Mockito.`when`(adobeConnector.fulfillACSM(Mockito.any(), Mockito.any(), Mockito.any()))
+      .thenAnswer { invocation ->
+        val listener =
+          invocation.getArgument(0) as AdobeAdeptFulfillmentListenerType
+
+        val outputFile = File(tmp, "output.epub")
+        FileOutputStream(outputFile).use { stream -> stream.write("I AM NOT AN EPUB".toByteArray()) }
+
+        listener.onFulfillmentSuccess(
+          outputFile,
+          AdobeAdeptLoan(AdobeLoanID("LOAN"), ByteBuffer.allocate(1), false))
+      }
+
+    val adobeDRM = AdobeAdeptExecutorType { procedure ->
+      LOG.debug("execute {}", procedure)
+      procedure.executeWith(adobeConnector)
+    }
+
+    val booksController =
+      BooksController.newBooks(
+        this.context,
+        this.executor,
+        BooksContract.newParser(database, http),
+        http,
+        downloader,
+        this.jsonSerializer,
+        this.jsonParser,
+        Option.some(adobeDRM),
+        EmptyDocumentStore(),
+        database,
+        accounts,
+        booksConfig,
+        booksConfig.currentRootFeedURI.resolve("loans/"))
+
+    val booksStatus = booksController.bookGetStatusCache()
+
+    LOG.debug("borrowing book")
+
+    val bookID =
+      BookID.exactString("2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881")
+
+    /*
+     * Borrow the book.
+     *
+     * XXX: The book borrowing code needs to be completely rewritten. It is currently essentially
+     * impossible to convert the borrowing code into a task that can be observed synchronously.
+     */
+
+    booksController.bookBorrow(bookID, makeOPDSEntryACSMToEPUB(), true)
+    TimeUnit.SECONDS.sleep(5L)
+
+    val downloadedStatus =
+      (booksStatus.booksStatusGet(bookID) as Some<BookStatusDownloaded>).get()
+    Assert.assertEquals(bookID, downloadedStatus.id)
+  }
+
+  /**
+   * Borrowing an open access book via a server that actually ends up delivering an
+   * application/octet-stream content type works.
+   */
+
+  @Test(timeout = 10_000L)
+  @Throws(Exception::class)
+  fun testBooksBorrowOpenAccessToEPUBWithOctetStreamContentType() {
+
+    val tmp = DirectoryUtilities.directoryCreateTemporary()
+    val booksConfig = BooksControllerConfiguration()
+
+    val barcode = AccountBarcode("barcode")
+    val pin = AccountPIN("pin")
+    val creds = AccountCredentials(Option.none(), barcode, pin, Option.some(AccountAuthProvider("Library")))
+
+    val http = MappedHTTP(LOG)
+    http.addResource(
+      "http://example.com/loans/",
+      httpResource("loans.xml"),
+      "text/xml")
+    http.addResource(
+      "http://example.com/borrow/0",
+      httpResource("borrow-epub-0.xml"),
+      "text/xml")
+    http.addResource(
+      "http://example.com/fulfill/0",
+      httpResource("empty.epub"),
+      "application/octet-stream")
+
+    val downloader =
+      DownloaderHTTP.newDownloader(this.executor, DirectoryUtilities.directoryCreateTemporary(), http)
+    val accounts =
+      AccountsDatabase.openDatabase(File(tmp, "accounts"))
+    val database =
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+
+    val booksController =
+      BooksController.newBooks(
+        this.context,
+        this.executor,
+        BooksContract.newParser(database, http),
+        http,
+        downloader,
+        this.jsonSerializer,
+        this.jsonParser,
+        Option.none(),
+        EmptyDocumentStore(),
+        database,
+        accounts,
+        booksConfig,
+        booksConfig.currentRootFeedURI.resolve("loans/"))
+
+    val loginListener = LoggingAccountLoginListener(LOG)
+    val loginFuture = booksController.accountLogin(creds, loginListener)
+    loginFuture.get()
+
+    val booksStatus = booksController.bookGetStatusCache()
+
+    LOG.debug("borrowing book")
+
+    val bookID =
+      BookID.exactString("2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881")
+
+    /*
+     * Borrow the book.
+     *
+     * XXX: The book borrowing code needs to be completely rewritten. It is currently essentially
+     * impossible to convert the borrowing code into a task that can be observed synchronously.
+     */
+
+    booksController.bookBorrow(bookID, makeOPDSEntryACSMToEPUB(), true)
+    TimeUnit.SECONDS.sleep(3L)
+
+    val downloadedStatus =
+      (booksStatus.booksStatusGet(bookID) as Some<BookStatusDownloaded>).get()
+    Assert.assertEquals(bookID, downloadedStatus.id)
+  }
+
+  /**
+   * Borrowing an open access book via a server that actually ends up delivering a different
+   * (but nontheless supported) content type is an error.
+   */
+
+  @Test(timeout = 10_000L)
+  @Throws(Exception::class)
+  fun testBooksBorrowOpenAccessToEPUBWithWrongContentType() {
+
+    val tmp = DirectoryUtilities.directoryCreateTemporary()
+    val booksConfig = BooksControllerConfiguration()
+
+    val barcode = AccountBarcode("barcode")
+    val pin = AccountPIN("pin")
+    val creds = AccountCredentials(Option.none(), barcode, pin, Option.some(AccountAuthProvider("Library")))
+
+    val http = MappedHTTP(LOG)
+    http.addResource(
+      "http://example.com/loans/",
+      httpResource("loans.xml"),
+      "text/xml")
+    http.addResource(
+      "http://example.com/borrow/0",
+      httpResource("borrow-epub-0.xml"),
+      "text/xml")
+    http.addResource(
+      "http://example.com/fulfill/0",
+      httpResource("empty.epub"),
+      BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO.supportedContentTypes().first())
+
+    val downloader =
+      DownloaderHTTP.newDownloader(this.executor, DirectoryUtilities.directoryCreateTemporary(), http)
+    val accounts =
+      AccountsDatabase.openDatabase(File(tmp, "accounts"))
+    val database =
+      BookDatabase.newDatabase(this.context, this.jsonSerializer, this.jsonParser, File(tmp, "data"))
+
+    val booksController =
+      BooksController.newBooks(
+        this.context,
+        this.executor,
+        BooksContract.newParser(database, http),
+        http,
+        downloader,
+        this.jsonSerializer,
+        this.jsonParser,
+        Option.none(),
+        EmptyDocumentStore(),
+        database,
+        accounts,
+        booksConfig,
+        booksConfig.currentRootFeedURI.resolve("loans/"))
+
+    val loginListener = LoggingAccountLoginListener(LOG)
+    val loginFuture = booksController.accountLogin(creds, loginListener)
+    loginFuture.get()
+
+    val booksStatus = booksController.bookGetStatusCache()
+
+    LOG.debug("borrowing book")
+
+    val bookID =
+      BookID.exactString("2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881")
+
+    /*
+     * Borrow the book.
+     *
+     * XXX: The book borrowing code needs to be completely rewritten. It is currently essentially
+     * impossible to convert the borrowing code into a task that can be observed synchronously.
+     */
+
+    booksController.bookBorrow(bookID, makeOPDSEntryACSMToEPUB(), true)
+    TimeUnit.SECONDS.sleep(3L)
+
+    val downloadedStatus =
+      (booksStatus.booksStatusGet(bookID) as Some<BookStatusDownloadFailed>).get()
+    Assert.assertEquals(bookID, downloadedStatus.id)
+  }
+
+  /**
    * Make an OPDS entry that allows borrowing something that looks like an audio book.
    */
 
@@ -1580,6 +1862,31 @@ abstract class BooksContract {
    */
 
   private fun makeOPDSEntryEPUB(): OPDSAcquisitionFeedEntry {
+    val opdsEntryBuilder =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "x",
+        "Book",
+        Calendar.getInstance(),
+        OPDSAvailabilityLoanable.get())
+
+    val opdsAcquisition =
+      OPDSAcquisition(OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        URI.create("http://example.com/borrow/0"),
+        Option.none(),
+        listOf(OPDSIndirectAcquisition(
+          "application/epub+zip",
+          listOf())))
+
+    opdsEntryBuilder.addAcquisition(opdsAcquisition)
+    return opdsEntryBuilder.build()
+  }
+
+  /**
+   * Make an OPDS entry that allows borrowing something that looks like an ACSM that delivers
+   * an EPUB.
+   */
+
+  private fun makeOPDSEntryACSMToEPUB(): OPDSAcquisitionFeedEntry {
     val opdsEntryBuilder =
       OPDSAcquisitionFeedEntry.newBuilder(
         "x",
