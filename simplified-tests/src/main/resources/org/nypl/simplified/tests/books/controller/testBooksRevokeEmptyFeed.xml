@@ -1,0 +1,8 @@
+<feed xmlns:schema="http://schema.org/" xmlns="http://www.w3.org/2005/Atom">
+
+  <id>urn:feed:0</id>
+  <title>Feed</title>
+  <updated>2015-03-24T17:23:50Z</updated>
+  <link href="urn:feed:0" rel="self"/>
+
+</feed>

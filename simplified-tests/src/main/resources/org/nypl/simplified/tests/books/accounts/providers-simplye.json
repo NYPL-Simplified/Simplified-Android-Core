@@ -1,0 +1,20 @@
+[
+  {
+    "id" : "https://instantclassics.librarysimplified.org",
+    "name" : "SimplyE Collection",
+    "subtitle" : "E-books free to download and read without a library card",
+    "logo" : "LibraryLogoMagic",
+    "needsAuth" : false,
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "https://instantclassics.librarysimplified.org/index.xml",
+    "catalogUrlUnder13": "https://instantclassics.librarysimplified.org/childrens-books.xml",
+    "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
+    "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
+    "mainColor": "#497049"
+  }
+]

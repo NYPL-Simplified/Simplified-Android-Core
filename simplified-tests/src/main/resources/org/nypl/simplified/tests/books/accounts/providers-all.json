@@ -1,0 +1,231 @@
+[
+  {
+    "id": "urn:provider:org.librarysimplified",
+    "name" : "The New York Public Library",
+    "subtitle" : "Inspiring lifelong learning, advancing knowledge, and strengthening our communities.",
+    "logo" : "simplified-asset:account_logo_nypl.png",
+    "authentication": {
+      "loginUrl" : "https://circulation.librarysimplified.org/loans/",
+      "passcodeLength" : 4,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : true,
+    "supportsHelpCenter" : true,
+    "catalogUrl" : "https://circulation.librarysimplified.org/",
+    "supportEmail" : "simplyehelp@nypl.org",
+    "eulaUrl": "http://www.librarysimplified.org/EULA.html",
+    "licenseUrl": "http://www.librarysimplified.org/license.html",
+    "privacyUrl": "http://www.librarysimplified.org/privacypolicy.html",
+    "mainColor": "#da2527"
+  },
+
+  {
+    "id": "urn:provider:org.bklynlibrary",
+    "name" : "Brooklyn Public Library",
+    "subtitle" : "Connecting people to resources to achieve their goals.",
+    "logo" : "simplified-asset:account_logo_bpl.png",
+    "authentication": {
+      "loginUrl" : "https://bplsimplye.bklynlibrary.org/loans/",
+      "passcodeLength" : 4,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "https://bplsimplye.bklynlibrary.org/",
+    "supportEmail" : "askus@bklynlibrary.org",
+    "cardCreatorUrl" : "https://go.bklynlibrary.org/ecard",
+    "eulaUrl": "http://www.bklynlibrary.org/policy/terms-conditions",
+    "licenseUrl": "http://www.librarysimplified.org/bklynlicenses.html",
+    "privacyUrl": "http://www.librarysimplified.org/bklynprivacypolicy.html",
+    "mainColor": "#446ebf"
+  },
+
+  {
+    "id": "urn:provider:org.librarysimplified.simplye",
+    "name" : "SimplyE Collection",
+    "subtitle" : "E-books free to download and read without a library card",
+    "logo" : "simplified-asset:account_logo_instant.png",
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "https://instantclassics.librarysimplified.org/index.xml",
+    "catalogUrlUnder13": "https://instantclassics.librarysimplified.org/childrens-books.xml",
+    "catalogUrl13": "https://instantclassics.librarysimplified.org/all-books.xml",
+    "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
+    "mainColor": "#497049"
+  },
+
+  {
+    "id": "urn:provider:org.simplye-md.howard",
+    "name" : "Howard County Library System",
+    "subtitle" : "Public education for all",
+    "logo" : "simplified-asset:account_logo_hcls.png",
+    "authentication": {
+      "loginUrl" : "http://howard.simplye-md.org/loans/",
+      "passcodeLength" : 0,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://howard.simplye-md.org/",
+    "licenseUrl": "http://hclibrary.org/research/simplye-content-license/",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "supportEmail" : "askhcls@hclibrary.org",
+    "mainColor": "#0066CC"
+  },
+
+  {
+    "id": "urn:provider:org.simplye-md.montgomery",
+    "name" : "Montgomery County Public Libraries",
+    "subtitle" : "Where the County Reads, Meets, Learns",
+    "logo" : "simplified-asset:account_logo_mcpl.png",
+    "authentication": {
+      "loginUrl" : "http://montgomery.simplye-md.org/loans/",
+      "passcodeLength" : 0,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://montgomery.simplye-md.org/",
+    "licenseUrl": "http://montgomerycountymd.gov/library/collection/contentlicenses.html",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "mainColor": "#0067B1"
+  },
+
+  {
+    "id": "urn:provider:org.simplye-md.frederick",
+    "name" : "Frederick County Public Libraries",
+    "subtitle" : "Explore. Invent. Transform.",
+    "logo" : "simplified-asset:account_logo_fcpl.png",
+    "authentication": {
+      "loginUrl" : "http://frederick.simplye-md.org/loans/",
+      "passcodeLength" : 0,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsCardCreator" : false,
+    "supportsReservations" : true,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://frederick.simplye-md.org/",
+    "licenseUrl": "http://fcpl.org/third-party-content/",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "supportEmail" : "fcplweb@fcpl.org",
+    "mainColor": "#ef4123"
+  },
+
+  {
+    "id": "urn:provider:org.simplye-md.smrla",
+    "name" : "St. Mary's County Library",
+    "subtitle" : "Read, Learn, Discover",
+    "logo" : "simplified-asset:account_logo_smcl.png",
+    "authentication": {
+      "loginUrl" : "http://smrla.simplye-md.org/MDMARY/loans/",
+      "passcodeLength" : 0,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://smrla.simplye-md.org/MDMARY/",
+    "supportEmail" : "sstephenson@stmalib.org",
+    "eulaUrl": "http://www.librarysimplified.org/EULA.html",
+    "licenseUrl": "https://www.stmalib.org/online-services/digital-content/simplye-content-license/",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "mainColor": "#194483"
+  },
+
+  {
+    "id": "urn:provider:org.simplye-md.smrla.mdcalv",
+    "name" : "Calvert Library",
+    "subtitle" : "Inspiring Possibility",
+    "logo" : "simplified-asset:account_logo_cl.png",
+    "authentication": {
+      "loginUrl" : "http://smrla.simplye-md.org/MDCALV/loans/",
+      "passcodeLength" : 0,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://smrla.simplye-md.org/MDCALV/",
+    "eulaUrl": "http://www.librarysimplified.org/EULA.html",
+    "supportEmail" : "ill.calv@somd.lib.md.us",
+    "licenseUrl": "http://calvert.lib.md.us/SimplyELicense.html",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "mainColor": "#440099"
+  },
+
+  {
+    "id": "urn:provider:org.simplye-md.smrla.mdchar",
+    "name" : "Charles County Public Library",
+    "subtitle" : "Engage, Discover and Learn",
+    "logo" : "simplified-asset:account_logo_ccpl.png",
+    "authentication": {
+      "loginUrl" : "http://smrla.simplye-md.org/MDCHAR/loans/",
+      "passcodeLength" : 0,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync" : false,
+    "supportsBarcodeScanner" : false,
+    "supportsBarcodeDisplay" : false,
+    "supportsReservations" : true,
+    "supportsCardCreator" : false,
+    "supportsHelpCenter" : false,
+    "catalogUrl" : "http://smrla.simplye-md.org/MDCHAR/",
+    "supportEmail" : "itstaff@ccplonline.org",
+    "eulaUrl": "http://www.librarysimplified.org/EULA.html",
+    "licenseUrl": "https://www.ccplonline.org/services/simplye-content-license",
+    "privacyUrl": "http://notices.sailor.lib.md.us/simplye/",
+    "mainColor": "#20428B"
+  },
+
+  {
+    "id": "urn:provider:org.simplye-ca.bcl",
+    "name": "Butte County Library",
+    "subtitle": "Email: ebookrequest@buttecounty.net for questions",
+    "logo" : "simplified-asset:account_logo_bcl.png",
+    "authentication": {
+      "loginUrl" : "http://bcl.simplye-ca.org/CABTTE/loans/",
+      "passcodeLength" : 0,
+      "passcodeAllowsLetters" : false
+    },
+    "supportsSimplyESync": false,
+    "supportsBarcodeScanner": false,
+    "supportsBarcodeDisplay": false,
+    "supportsReservations": true,
+    "supportsCardCreator": false,
+    "supportsHelpCenter": false,
+    "supportEmail" : "ebookrequest@buttecounty.net",
+    "catalogUrl" : "http://bcl.simplye-ca.org/CABTTE/",
+    "licenseUrl": "http://califa.org/third-party-content",
+    "privacyUrl": "http://califa.org/privacy-policy",
+    "mainColor": "#1b7fa7"
+  }
+]

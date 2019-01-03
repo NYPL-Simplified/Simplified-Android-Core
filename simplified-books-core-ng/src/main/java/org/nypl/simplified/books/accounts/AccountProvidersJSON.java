@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.json.core.JSONParseException;
@@ -154,8 +155,16 @@ public final class AccountProvidersJSON {
     NullCheck.notNull(text, "Text");
 
     final ObjectMapper jom = new ObjectMapper();
-    final JsonNode node = jom.readTree(text);
+    final JsonNode node = mapNullToTextNode(jom.readTree(text));
     return deserializeFromJSONArray(jom, JSONParserUtilities.checkArray(null, node));
+  }
+
+  private static JsonNode mapNullToTextNode(JsonNode jsonNode) {
+    if (jsonNode == null) {
+      return new TextNode("");
+    } else {
+      return jsonNode;
+    }
   }
 
   /**
@@ -172,7 +181,7 @@ public final class AccountProvidersJSON {
     NullCheck.notNull(stream, "Stream");
 
     final ObjectMapper jom = new ObjectMapper();
-    final JsonNode node = jom.readTree(stream);
+    final JsonNode node = mapNullToTextNode(jom.readTree(stream));
     return deserializeFromJSONArray(jom, JSONParserUtilities.checkArray(null, node));
   }
 }
