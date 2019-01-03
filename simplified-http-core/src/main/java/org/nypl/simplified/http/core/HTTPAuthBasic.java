@@ -1,7 +1,8 @@
 package org.nypl.simplified.http.core;
 
+import com.google.auto.value.AutoValue;
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+
 import net.iharder.Base64;
 
 import java.io.IOException;
@@ -12,87 +13,51 @@ import java.nio.charset.Charset;
  * HTTP Basic Auth functions.
  */
 
-public final class HTTPAuthBasic implements HTTPAuthType
-{
-  private static final long serialVersionUID = 1L;
-  private final String password;
-  private final String user;
+@AutoValue
+public abstract class HTTPAuthBasic implements HTTPAuthType {
+
+  HTTPAuthBasic() {
+
+  }
 
   /**
    * Construct a basic auth value.
    *
-   * @param in_user     The username
-   * @param in_password The password
+   * @param user     The username
+   * @param password The password
    */
 
-  public HTTPAuthBasic(
-    final String in_user,
-    final String in_password)
-  {
-    this.user = NullCheck.notNull(in_user);
-    this.password = NullCheck.notNull(in_password);
-  }
-
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (this.getClass() != obj.getClass()) {
-      return false;
-    }
-    final HTTPAuthBasic other = (HTTPAuthBasic) obj;
-    return this.password.equals(other.password) && this.user.equals(other.user);
-  }
-
-  /**
-   * @return The password
-   */
-
-  public String getPassword()
-  {
-    return this.password;
+  public static HTTPAuthBasic create(String user, String password) {
+    return new AutoValue_HTTPAuthBasic(user, password);
   }
 
   /**
    * @return The user
    */
 
-  public String getUser()
-  {
-    return this.user;
-  }
+  public abstract String user();
 
-  @Override public int hashCode()
-  {
-    final int prime = 31;
-    int result = 1;
-    result = (prime * result) + this.password.hashCode();
-    result = (prime * result) + this.user.hashCode();
-    return result;
-  }
+  /**
+   * @return The password
+   */
 
-  @Override public void setConnectionParameters(
-    final HttpURLConnection c)
-    throws IOException
-  {
+  public abstract String password();
+
+  @Override
+  public final void setConnectionParameters(
+      final HttpURLConnection c)
+      throws IOException {
     NullCheck.notNull(c);
 
-    final String text = this.user + ":" + this.password;
-    final String encoded =
-      Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
-
+    final String text = this.user() + ":" + this.password();
+    final String encoded = Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
     c.addRequestProperty("Authorization", "Basic " + encoded);
   }
 
-  @Override public <A, E extends Exception> A matchAuthType(
-    final HTTPAuthMatcherType<A, E> m)
-    throws E
-  {
+  @Override
+  public final <A, E extends Exception> A matchAuthType(
+      final HTTPAuthMatcherType<A, E> m)
+      throws E {
     return m.onAuthBasic(this);
   }
 }

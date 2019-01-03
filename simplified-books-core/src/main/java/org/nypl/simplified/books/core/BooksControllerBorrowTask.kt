@@ -25,6 +25,7 @@ import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.http.core.HTTPAuthOAuth
 import org.nypl.simplified.http.core.HTTPAuthType
+import org.nypl.simplified.http.core.HTTPOAuthToken
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPType
 import org.nypl.simplified.opds.core.OPDSAcquisition
@@ -241,7 +242,7 @@ internal class BooksControllerBorrowTask(
         acquisition.type,
         acquisition.indirectAcquisitions)
 
-    val auth = HTTPAuthOAuth(token.accessToken)
+    val auth = HTTPAuthOAuth.create(HTTPOAuthToken.create(token.accessToken))
     this.runAcquisitionFulfillDoDownload(nextAcquisition, Option.some(auth))
   }
 

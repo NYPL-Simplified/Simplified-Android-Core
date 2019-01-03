@@ -55,7 +55,8 @@ public class DeviceManagerPostTask
             final AccountBarcode barcode = this.creds.getBarcode();
             final AccountPIN pin = this.creds.getPin();
 
-            final OptionType<HTTPAuthType> http_auth = Option.some((HTTPAuthType) new HTTPAuthBasic(barcode.toString(), pin.toString()));
+            final OptionType<HTTPAuthType> http_auth = Option.some((HTTPAuthType)
+              HTTPAuthBasic.create(barcode.toString(), pin.toString()));
 
             HTTP.newHTTP().post(http_auth, uri, device_id.getBytes(), content_type);
           }

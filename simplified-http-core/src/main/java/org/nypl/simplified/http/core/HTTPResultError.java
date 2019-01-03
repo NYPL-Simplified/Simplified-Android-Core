@@ -1,6 +1,7 @@
 package org.nypl.simplified.http.core;
 
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 
 import java.io.InputStream;
@@ -13,14 +14,13 @@ import java.util.Map;
  * @param <A> The type of value
  */
 
-public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
-{
-  private final long                          last_modified;
-  private final long                          content_length;
-  private final Map<String, List<String>>     headers;
-  private final String                        message;
-  private final int                           status;
-  private final InputStream                   data;
+public final class HTTPResultError<A> implements HTTPResultConnectedType<A> {
+  private final long last_modified;
+  private final long content_length;
+  private final Map<String, List<String>> headers;
+  private final String message;
+  private final int status;
+  private final InputStream data;
   private final OptionType<HTTPProblemReport> report;
 
   /**
@@ -36,14 +36,13 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
    */
 
   public HTTPResultError(
-    final int in_status,
-    final String in_message,
-    final long in_content_length,
-    final Map<String, List<String>> in_headers,
-    final long in_last_modified,
-    final InputStream in_data,
-    final OptionType<HTTPProblemReport> in_report)
-  {
+      final int in_status,
+      final String in_message,
+      final long in_content_length,
+      final Map<String, List<String>> in_headers,
+      final long in_last_modified,
+      final InputStream in_data,
+      final OptionType<HTTPProblemReport> in_report) {
     this.status = in_status;
     this.content_length = in_content_length;
     this.message = NullCheck.notNull(in_message);
@@ -57,13 +56,12 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
    * @return The server-returned problem report, if any.
    */
 
-  public OptionType<HTTPProblemReport> getProblemReport()
-  {
+  public OptionType<HTTPProblemReport> getProblemReport() {
     return this.report;
   }
 
-  @Override public boolean equals(final Object o)
-  {
+  @Override
+  public boolean equals(final Object o) {
     if (this == o) {
       return true;
     }
@@ -90,11 +88,11 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
     return this.report.equals(that.report);
   }
 
-  @Override public int hashCode()
-  {
+  @Override
+  public int hashCode() {
     int result = (int) (this.last_modified ^ (this.last_modified >>> 32));
     result =
-      31 * result + (int) (this.content_length ^ (this.content_length >>> 32));
+        31 * result + (int) (this.content_length ^ (this.content_length >>> 32));
     result = 31 * result + this.headers.hashCode();
     result = 31 * result + this.getMessage().hashCode();
     result = 31 * result + this.getStatus();
@@ -102,44 +100,52 @@ public final class HTTPResultError<A> implements HTTPResultConnectedType<A>
     return result;
   }
 
-  @Override public long getLastModifiedTime()
-  {
+  @Override
+  public long getLastModifiedTime() {
     return this.last_modified;
   }
 
-  @Override public long getContentLength()
-  {
+  @Override
+  public long getContentLength() {
     return this.content_length;
   }
 
-  @Override public String getMessage()
-  {
+  @Override
+  public String getMessage() {
     return this.message;
   }
 
-  @Override public Map<String, List<String>> getResponseHeaders()
-  {
+  @Override
+  public Map<String, List<String>> getResponseHeaders() {
     return this.headers;
   }
 
-  @Override public int getStatus()
-  {
+  @Override
+  public int getStatus() {
     return this.status;
   }
 
-  @Override public <B, E extends Exception> B matchResult(
-    final HTTPResultMatcherType<A, B, E> m)
-    throws E
-  {
+  @Override
+  public <B, E extends Exception> B matchResult(
+      final HTTPResultMatcherType<A, B, E> m)
+      throws E {
     return m.onHTTPError(this);
+  }
+
+  @Override
+  public <B, E extends Exception> B match(
+      final PartialFunctionType<HTTPResultError<A>, B, E> on_error,
+      final PartialFunctionType<HTTPResultException<A>, B, E> on_exception,
+      final PartialFunctionType<HTTPResultOKType<A>, B, E> on_ok)
+      throws E {
+    return on_error.call(this);
   }
 
   /**
    * @return Any data returned by the server
    */
 
-  public InputStream getData()
-  {
+  public InputStream getData() {
     return this.data;
   }
 }

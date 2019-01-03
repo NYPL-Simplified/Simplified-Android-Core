@@ -21,4 +21,7 @@ dependencies {
 
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
   implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+
+  compileOnly 'com.google.auto.value:auto-value:1.5'
+  annotationProcessor 'com.google.auto.value:auto-value:1.5'
 }

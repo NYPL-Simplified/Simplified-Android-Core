@@ -65,7 +65,8 @@ public class CreatePatronTask {
         }
 
         final OptionType<HTTPAuthType> auth =
-          Option.some((HTTPAuthType) new HTTPAuthBasic(this.card_creator.getUsername(), this.card_creator.getPassword()));
+          Option.some((HTTPAuthType)
+            HTTPAuthBasic.create(this.card_creator.getUsername(), this.card_creator.getPassword()));
 
         final ObjectNode card = JsonNodeFactory.instance.objectNode();
         card.set("name", JsonNodeFactory.instance.textNode(this.prefs.getString(this.card_creator.getResources().getString(R.string.LAST_NAME_DATA_KEY)) + ", "

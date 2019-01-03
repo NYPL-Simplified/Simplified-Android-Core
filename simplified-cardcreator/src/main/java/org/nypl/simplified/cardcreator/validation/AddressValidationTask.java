@@ -103,7 +103,8 @@ public class AddressValidationTask {
         final HTTPType http = HTTP.newHTTP();
 
         final OptionType<HTTPAuthType> auth =
-          Option.some((HTTPAuthType) new HTTPAuthBasic(this.card_creator.getUsername(), this.card_creator.getPassword()));
+          Option.some((HTTPAuthType)
+            HTTPAuthBasic.create(this.card_creator.getUsername(), this.card_creator.getPassword()));
 
         final HTTPResultType<InputStream> result;
 

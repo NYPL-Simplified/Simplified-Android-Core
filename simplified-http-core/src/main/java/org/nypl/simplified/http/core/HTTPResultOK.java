@@ -1,5 +1,6 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 
 import java.io.IOException;
@@ -130,5 +131,14 @@ public final class HTTPResultOK<A> implements HTTPResultOKType<A>
     throws E
   {
     return m.onHTTPOK(this);
+  }
+
+  @Override
+  public <B, E extends Exception> B match(
+      final PartialFunctionType<HTTPResultError<A>, B, E> on_error,
+      final PartialFunctionType<HTTPResultException<A>, B, E> on_exception,
+      final PartialFunctionType<HTTPResultOKType<A>, B, E> on_ok)
+      throws E {
+    return on_ok.call(this);
   }
 }

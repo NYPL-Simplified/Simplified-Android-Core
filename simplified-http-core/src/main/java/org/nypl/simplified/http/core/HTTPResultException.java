@@ -1,5 +1,6 @@
 package org.nypl.simplified.http.core;
 
+import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
@@ -11,10 +12,9 @@ import java.net.URI;
  * @param <A> The type of result value
  */
 
-public final class HTTPResultException<A> implements HTTPResultType<A>
-{
+public final class HTTPResultException<A> implements HTTPResultType<A> {
   private final Exception error;
-  private final URI       uri;
+  private final URI uri;
 
   /**
    * Construct a result value.
@@ -24,16 +24,15 @@ public final class HTTPResultException<A> implements HTTPResultType<A>
    */
 
   public HTTPResultException(
-    final URI in_uri,
-    final Exception in_error)
-  {
+      final URI in_uri,
+      final Exception in_error) {
     this.uri = NullCheck.notNull(in_uri);
     this.error = NullCheck.notNull(in_error);
   }
 
-  @Override public boolean equals(
-    final @Nullable Object obj)
-  {
+  @Override
+  public boolean equals(
+      final @Nullable Object obj) {
     if (this == obj) {
       return true;
     }
@@ -51,8 +50,7 @@ public final class HTTPResultException<A> implements HTTPResultType<A>
    * @return The exception raised
    */
 
-  public Exception getError()
-  {
+  public Exception getError() {
     return this.error;
   }
 
@@ -60,20 +58,28 @@ public final class HTTPResultException<A> implements HTTPResultType<A>
    * @return The URI
    */
 
-  public URI getURI()
-  {
+  public URI getURI() {
     return this.uri;
   }
 
-  @Override public int hashCode()
-  {
+  @Override
+  public int hashCode() {
     return this.error.hashCode();
   }
 
-  @Override public <B, E extends Exception> B matchResult(
-    final HTTPResultMatcherType<A, B, E> e)
-    throws E
-  {
+  @Override
+  public <B, E extends Exception> B matchResult(
+      final HTTPResultMatcherType<A, B, E> e)
+      throws E {
     return e.onHTTPException(this);
+  }
+
+  @Override
+  public <B, E extends Exception> B match(
+      final PartialFunctionType<HTTPResultError<A>, B, E> on_error,
+      final PartialFunctionType<HTTPResultException<A>, B, E> on_exception,
+      final PartialFunctionType<HTTPResultOKType<A>, B, E> on_ok)
+      throws E {
+    return on_exception.call(this);
   }
 }
