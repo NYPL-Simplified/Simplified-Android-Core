@@ -25,6 +25,7 @@ repositories {
 dependencies {
   implementation project(':simplified-accessibility')
   implementation project(':simplified-books-core')
+  implementation project(':simplified-books-core-ng')
   implementation project(':simplified-books-covers')
   implementation project(':simplified-http-core')
   implementation project(':simplified-json-core')
