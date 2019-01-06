@@ -19,7 +19,7 @@ repositories {
 dependencies {
   implementation group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
   implementation project(':simplified-json-core')
-  implementation project(':simplified-books-core')
+  implementation project(':simplified-books-core-ng')
 
   implementation group: 'net.iharder', name: 'base64', version: '2.3.9'
   implementation group: 'com.io7m.jnull', name: 'io7m-jnull-core', version: '[1.0.0, 2.0.0)'

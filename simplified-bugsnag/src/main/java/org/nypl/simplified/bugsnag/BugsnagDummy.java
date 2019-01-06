@@ -14,7 +14,7 @@ public class BugsnagDummy implements BugsnagType
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(BugsnagDummy.class);
+    LOG = LoggerFactory.getLogger(BugsnagDummy.class);
   }
 
   /**

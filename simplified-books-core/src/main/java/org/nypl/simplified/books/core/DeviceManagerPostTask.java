@@ -28,7 +28,7 @@ public class DeviceManagerPostTask
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(DeviceManagerPostTask.class);
+    LOG = LoggerFactory.getLogger(DeviceManagerPostTask.class);
   }
 
   private final AccountCredentials creds;

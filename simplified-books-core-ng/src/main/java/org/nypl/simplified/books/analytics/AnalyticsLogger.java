@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AnalyticsLogger {
 
-  private static final Logger LOG = LogUtilities.getLog(AnalyticsLogger.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AnalyticsLogger.class);
 
   private final String analytics_server_uri = "http://ec2-18-217-127-216.us-east-2.compute.amazonaws.com:8080/upload.log";
   private final String log_file_name = "analytics_log.txt";

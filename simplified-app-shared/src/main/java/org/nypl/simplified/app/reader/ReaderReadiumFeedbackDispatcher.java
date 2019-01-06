@@ -4,6 +4,7 @@ import com.io7m.jnull.NullCheck;
 import org.json.JSONObject;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -16,11 +17,8 @@ import java.net.URLDecoder;
 public final class ReaderReadiumFeedbackDispatcher
   implements ReaderReadiumFeedbackDispatcherType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderReadiumFeedbackDispatcher.class);
-  }
+  private static final Logger LOG =
+    LoggerFactory.getLogger(ReaderReadiumFeedbackDispatcher.class);
 
   private ReaderReadiumFeedbackDispatcher()
   {

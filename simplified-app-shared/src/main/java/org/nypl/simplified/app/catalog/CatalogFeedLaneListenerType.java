@@ -1,14 +1,13 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.books.core.FeedEntryOPDS;
-import org.nypl.simplified.books.core.FeedGroup;
+import org.nypl.simplified.books.feeds.FeedEntryOPDS;
+import org.nypl.simplified.books.feeds.FeedGroup;
 
 /**
  * A listener that receives lane events.
  */
 
-public interface CatalogFeedLaneListenerType
-{
+public interface CatalogFeedLaneListenerType {
   /**
    * A book was selected.
    *

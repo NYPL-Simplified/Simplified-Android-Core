@@ -6,6 +6,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nypl.simplified.books.reader.ReaderBookLocation;
 
 /**
  * A request for a specific page in a book. This request is serialized to JSON
@@ -31,8 +32,7 @@ import org.json.JSONObject;
     final ReaderBookLocation location)
   {
     NullCheck.notNull(location);
-    return new FromElementCFIAndIDRef(
-      location.getIDRef(), location.getContentCFI());
+    return new FromElementCFIAndIDRef(location.idRef(), location.contentCFI());
   }
 
   /**

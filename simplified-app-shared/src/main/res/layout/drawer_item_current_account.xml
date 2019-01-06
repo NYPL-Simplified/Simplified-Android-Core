@@ -1,41 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:orientation="horizontal"
-android:weightSum="1">
-<ImageView
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:id="@+id/cellIcon"
-  android:src="@mipmap/ic_launcher"
-  android:layout_weight="0.43"
-  android:background="?android:attr/activatedBackgroundIndicator"
-  />
-
-<TextView
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@android:id/text1"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/drawer_item_current_account"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:textAppearance="?android:attr/textAppearanceListItemSmall"
-  android:gravity="center_vertical"
-  android:paddingLeft="11dp"
-  android:paddingRight="11dp"
-  android:textColor="@drawable/drawer_list_text"
-  android:text="Item"
-  android:background="?android:attr/activatedBackgroundIndicator"
-  android:minHeight="?android:attr/listPreferredItemHeightSmall"
-  android:layout_weight="0.12"/>
+  android:orientation="horizontal"
+  android:weightSum="1">
 
-<ImageView
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:id="@+id/imageView"
-  android:src="@drawable/scroll_down_arrow_grey"
-  android:layout_weight="0.45"
-  />
+  <ImageView
+    android:id="@+id/cellIcon"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="0.43"
+    android:background="?android:attr/activatedBackgroundIndicator"
+    android:src="@mipmap/ic_launcher" />
 
+  <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="0.12"
+    android:background="?android:attr/activatedBackgroundIndicator"
+    android:gravity="center_vertical"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+    android:paddingLeft="11dp"
+    android:paddingRight="11dp"
+    android:text="Item"
+    android:textAppearance="?android:attr/textAppearanceListItemSmall"
+    android:textColor="@drawable/drawer_list_text" />
+
+  <ImageView
+    android:id="@+id/imageView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="0.45"
+    android:src="@drawable/scroll_down_arrow_grey" />
 
 </LinearLayout>

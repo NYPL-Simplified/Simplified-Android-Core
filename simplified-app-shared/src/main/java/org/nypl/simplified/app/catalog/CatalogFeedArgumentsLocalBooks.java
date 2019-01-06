@@ -2,9 +2,10 @@ package org.nypl.simplified.app.catalog;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.books.core.BooksFeedSelection;
-import org.nypl.simplified.books.core.FeedFacetPseudo;
-import org.nypl.simplified.books.core.FeedFacetPseudo.FacetType;
+
+import org.nypl.simplified.books.feeds.FeedBooksSelection;
+import org.nypl.simplified.books.feeds.FeedFacetPseudo;
+import org.nypl.simplified.books.feeds.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.stack.ImmutableStack;
 
 /**
@@ -12,20 +13,14 @@ import org.nypl.simplified.stack.ImmutableStack;
  * to be displayed is the local books feed.
  */
 
-public final class CatalogFeedArgumentsLocalBooks
-  implements CatalogFeedArgumentsType
-{
-  private static final long serialVersionUID;
+public final class CatalogFeedArgumentsLocalBooks implements CatalogFeedArgumentsType {
+  private static final long serialVersionUID = 1L;
 
-  static {
-    serialVersionUID = 1L;
-  }
-
-  private final FacetType                                facet_type;
-  private final OptionType<String>                       search_terms;
-  private final String                                   title;
+  private final FacetType facet_type;
+  private final OptionType<String> search_terms;
+  private final String title;
   private final ImmutableStack<CatalogFeedArgumentsType> up_stack;
-  private final BooksFeedSelection                       selection;
+  private final FeedBooksSelection selection;
 
   /**
    * Construct feed arguments.
@@ -42,8 +37,7 @@ public final class CatalogFeedArgumentsLocalBooks
     final String in_title,
     final FeedFacetPseudo.FacetType in_facet_type,
     final OptionType<String> in_search_terms,
-    final BooksFeedSelection in_selection)
-  {
+    final FeedBooksSelection in_selection) {
     this.up_stack = NullCheck.notNull(in_up_stack);
     this.title = NullCheck.notNull(in_title);
     this.facet_type = NullCheck.notNull(in_facet_type);
@@ -55,8 +49,7 @@ public final class CatalogFeedArgumentsLocalBooks
    * @return The current facet type
    */
 
-  public FacetType getFacetType()
-  {
+  public FacetType getFacetType() {
     return this.facet_type;
   }
 
@@ -64,8 +57,7 @@ public final class CatalogFeedArgumentsLocalBooks
    * @return The type of books feed that will be generated
    */
 
-  public BooksFeedSelection getSelection()
-  {
+  public FeedBooksSelection getSelection() {
     return this.selection;
   }
 
@@ -73,42 +65,40 @@ public final class CatalogFeedArgumentsLocalBooks
    * @return The search terms, if any
    */
 
-  public OptionType<String> getSearchTerms()
-  {
+  public OptionType<String> getSearchTerms() {
     return this.search_terms;
   }
 
-  @Override public String getTitle()
-  {
+  @Override
+  public String getTitle() {
     return this.title;
   }
 
-  @Override public ImmutableStack<CatalogFeedArgumentsType> getUpStack()
-  {
+  @Override
+  public ImmutableStack<CatalogFeedArgumentsType> getUpStack() {
     return this.up_stack;
   }
 
-  @Override public <A, E extends Exception> A matchArguments(
+  @Override
+  public <A, E extends Exception> A matchArguments(
     final CatalogFeedArgumentsMatcherType<A, E> m)
-    throws E
-  {
+    throws E {
     return m.onFeedArgumentsLocalBooks(this);
   }
 
-  @Override public boolean isLocallyGenerated()
-  {
-    return true;
+  @Override
+  public boolean requiresNetworkConnectivity() {
+    return false;
   }
 
-  @Override public boolean isSearching()
-  {
+  @Override
+  public boolean isSearching() {
     return this.search_terms.isSome();
   }
 
-  @Override public String toString()
-  {
-    final StringBuilder sb =
-      new StringBuilder("CatalogFeedArgumentsLocalBooks{");
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder("CatalogFeedArgumentsLocalBooks{");
     sb.append("facet_type=").append(this.facet_type);
     sb.append(", search_terms=").append(this.search_terms);
     sb.append(", title='").append(this.title).append('\'');

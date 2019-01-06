@@ -32,7 +32,7 @@ import javax.annotation.concurrent.GuardedBy;
 
 public final class AccountsDatabase implements AccountsDatabaseType {
 
-  private static final Logger LOG = LogUtilities.getLog(AccountsDatabase.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AccountsDatabase.class);
 
   private final File directory;
   private final Object accounts_lock;

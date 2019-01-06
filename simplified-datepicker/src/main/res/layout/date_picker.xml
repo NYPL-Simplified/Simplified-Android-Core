@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+  <NumberPicker
+      android:id="@+id/date_picker_month"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginRight="4dp"/>
+
+  <NumberPicker
+      android:id="@+id/date_picker_day"
+      android:layout_toRightOf="@+id/date_picker_month"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginRight="4dp"/>
+
+  <NumberPicker
+      android:id="@+id/date_picker_year"
+      android:layout_toRightOf="@+id/date_picker_day"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+</merge>

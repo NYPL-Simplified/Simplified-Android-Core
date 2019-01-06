@@ -64,7 +64,7 @@
   <string name="catalog_more_feed">More&#8230;</string>
   <string name="catalog_requesting_loan">Requesting</string>
   <string name="catalog_requesting_revoke">Requesting</string>
-
+  <string name="catalog_added_for_later_download">Added to My Books for downloading later.</string>
 
   <!-- Catalog Search-related Strings -->
   <string name="catalog_search">Search</string>
@@ -296,5 +296,27 @@
   <string name="title_activity_settings_account_advanced">SettingsAccountAdvancedActivity</string>
   <string name="advanced_sync_error_message">There was an error while contacting the server. Please try again later with a strong internet connection.</string>
   <string name="advanced_sync_message">"Selecting \"Delete\" will remove all bookmarks from the server for this library account."</string>
+
+  <!-- Profiles Strings -->
+  <string name="profiles_title">Profiles</string>
+  <string name="profiles_select">Please select an existing profile or create a new one.</string>
+  <string name="profiles_create">Create</string>
+  <string name="profiles_please_enter">Please enter your name, gender, and date of birth.</string>
+  <string name="profiles_name_field">Name</string>
+  <string name="profiles_gender_male">Male</string>
+  <string name="profiles_gender_female">Female</string>
+  <string name="profiles_gender_non_binary">Non-binary</string>
+  <string name="profiles_selection_error_general">An error occurred whilst trying to select your profile.</string>
+  <string name="profiles_creation_error_name_already_used">That name has already been used. Please pick another.</string>
+  <string name="profiles_creation_error_general">An error occurred whilst trying to create your profile.</string>
+  <string name="profiles_account_selection_error_general">An error occurred whilst trying to select an account.</string>
+  <string name="profiles_account_creation_error_general">An error occurred whilst trying to create the account.</string>
+  <string name="profiles_account_deletion_error_general">An error occurred whilst trying to delete the account.</string>
+  <string name="profiles_switch">Switch Profile</string>
+  <string name="profiles_switch_confirm">Are you sure you want to switch profiles?</string>
+  <string name="profiles_time_out_soon">The current profile will soon be logged out due to inactivity. Please touch the screen if you want to stay logged in.</string>
+  <string name="profiles_time_out_soon_title">Profile Inactivity</string>
+  <string name="versions_revision">Build</string>
+  <string name="versions_version">Version</string>
 
 </resources>

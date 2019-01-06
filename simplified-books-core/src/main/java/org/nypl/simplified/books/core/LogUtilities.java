@@ -2,13 +2,12 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Utilities to obtain log handles, and format log messages.
+ * Utilities to format log messages.
  */
 
 public final class LogUtilities
@@ -37,17 +36,5 @@ public final class LogUtilities
     } else {
       log.error("{}", message);
     }
-  }
-
-  /**
-   * @param c A class
-   *
-   * @return A logger for the given class
-   */
-
-  public static Logger getLog(
-    final Class<?> c)
-  {
-    return NullCheck.notNull(LoggerFactory.getLogger(c));
   }
 }

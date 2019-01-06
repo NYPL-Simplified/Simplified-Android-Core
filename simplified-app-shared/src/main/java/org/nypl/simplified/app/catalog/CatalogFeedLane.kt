@@ -1,8 +1,6 @@
 package org.nypl.simplified.app.catalog
 
 import android.content.Context
-import android.content.res.Resources
-import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,24 +13,19 @@ import android.widget.TextView
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnreachableCodeException
+import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.R
-import org.nypl.simplified.app.ScreenSizeControllerType
-import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.ThemeMatcher
+import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.FadeUtilities
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.core.BookFormats
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.core.FeedEntryCorrupt
-import org.nypl.simplified.books.core.FeedEntryMatcherType
-import org.nypl.simplified.books.core.FeedEntryOPDS
-import org.nypl.simplified.books.core.FeedGroup
-import org.nypl.simplified.books.core.LogUtilities
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.books.feeds.FeedEntryCorrupt
+import org.nypl.simplified.books.feeds.FeedEntryMatcherType
+import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedGroup
+import org.slf4j.LoggerFactory
 import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -43,8 +36,9 @@ import java.util.concurrent.atomic.AtomicInteger
 class CatalogFeedLane(
   context: Context,
   private val covers: BookCoverProviderType,
-  private val screen: ScreenSizeControllerType,
-  private val listener: CatalogFeedLaneListenerType) : LinearLayout(context) {
+  private val screen: ScreenSizeInformationType,
+  private val listener: CatalogFeedLaneListenerType,
+  private val colorScheme: ApplicationColorScheme) : LinearLayout(context) {
 
   private val imageHeight: Int
   private val progress: ProgressBar
@@ -60,14 +54,12 @@ class CatalogFeedLane(
     this.inflater = this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     this.inflater.inflate(R.layout.catalog_feed_groups_lane, this, true)
 
-    val account = Simplified.getCurrentAccount()
-
     this.header = this.findViewById(R.id.feed_header)
-    val resID = ThemeMatcher.color(account.mainColor)
-    val mainColor = ContextCompat.getColor(this.context, resID)
 
-    (this.header.findViewById<View>(R.id.feed_title) as TextView).setTextColor(mainColor)
-    (this.header.findViewById<View>(R.id.feed_more) as TextView).setTextColor(mainColor)
+    (this.header.findViewById<View>(R.id.feed_title) as TextView)
+      .setTextColor(this.colorScheme.colorRGBA)
+    (this.header.findViewById<View>(R.id.feed_more) as TextView)
+      .setTextColor(this.colorScheme.colorRGBA)
 
     this.title = this.findViewById(R.id.feed_title)
     this.progress = this.findViewById(R.id.feed_progress)
@@ -176,7 +168,7 @@ class CatalogFeedLane(
     layoutParams.setMargins(0, 0, this.screen.screenDPToPixels(8).toInt(), 0)
 
     imageView.layoutParams = layoutParams
-    imageView.contentDescription =
+    imageView.contentDescription = 
       CatalogBookFormats.contentDescriptionOfEntry(this.resources, entry)
     imageView.setOnClickListener { this.listener.onSelectBook(entry) }
     coverViews.add(imageView)
@@ -184,9 +176,7 @@ class CatalogFeedLane(
     this.scrollerContents.addView(imageView)
     return Unit.unit()
   }
-
-
-
+  
   private fun addViewForFeedEntryCorrupt(
     coverViewCollections: ArrayList<ImageView?>): Unit {
     coverViewCollections.add(null)
@@ -202,6 +192,6 @@ class CatalogFeedLane(
   }
 
   companion object {
-    private val LOG = LogUtilities.getLog(CatalogFeedLane::class.java)
+    private val LOG = LoggerFactory.getLogger(CatalogFeedLane::class.java)
   }
 }

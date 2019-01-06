@@ -34,7 +34,7 @@ import java.util.TreeMap;
 
 public abstract class AccountsDatabaseContract {
 
-  private static final Logger LOG = LogUtilities.getLog(AccountsDatabaseContract.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AccountsDatabaseContract.class);
 
   @Rule public ExpectedException expected = ExpectedException.none();
 

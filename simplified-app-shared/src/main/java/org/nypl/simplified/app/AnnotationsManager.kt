@@ -38,7 +38,7 @@ class AnnotationsManager(private val libraryAccount: Account,
                          private val credentials: AccountCredentials,
                          private val context: Context)
 {
-  private val requestQueue = Volley.newRequestQueue(context)
+  private val requestQueue = Volley.newRequestQueue(this.context)
 
   private var syncPermissionStatusRequestPending = false
   private var syncPermissionStatusCompletions = mutableListOf<(Boolean,Boolean)->Unit>()
@@ -61,26 +61,26 @@ class AnnotationsManager(private val libraryAccount: Account,
   fun requestServerSyncPermissionStatus(account: AccountsControllerType,
                                         completion: (enableSync: Boolean) -> Unit)
   {
-    if (!syncIsPossible(account)) {
+    if (!this.syncIsPossible(account)) {
       LOG.debug("Account does not satisfy conditions for sync setting request.")
       completion(false)
       return
     }
 
     if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") &&
-        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryAccount.id).not()) {
+        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.libraryAccount.id).not()) {
       completion(false)
       return
     }
 
-    syncPermissionStatusUriRequest { initialized, syncIsPermitted ->
+    this.syncPermissionStatusUriRequest { initialized, syncIsPermitted ->
       if (initialized && syncIsPermitted) {
         Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
         LOG.debug("Sync has already been enabled on the server. Enable here as well.")
         completion(true)
       } else if (!initialized && !Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage")) {
         LOG.debug("Sync has never been initialized for the patron. Proceeding with opt-in alert.")
-        presentFirstTimeSyncAlertDialog(completion)
+        this.presentFirstTimeSyncAlertDialog(completion)
       } else {
         LOG.debug("Continuing with sync disabled in Settings.")
         completion(false)
@@ -90,15 +90,15 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   private fun syncPermissionStatusUriRequest(completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit)
   {
-    syncPermissionStatusCompletions.add(completion)
+    this.syncPermissionStatusCompletions.add(completion)
 
-    if (syncPermissionStatusRequestPending) {
+    if (this.syncPermissionStatusRequestPending) {
       LOG.debug("Request already waiting. Adding response to same result of pending request.")
       return
     }
-    syncPermissionStatusRequestPending = true
+    this.syncPermissionStatusRequestPending = true
 
-    val baseCatalogUri = libraryAccount.catalogUrl?.let { Uri.parse(it) }
+    val baseCatalogUri = this.libraryAccount.catalogUrl?.let { Uri.parse(it) }
     val permissionRequestUri = if (baseCatalogUri != null) {
       Uri.withAppendedPath(baseCatalogUri, "patrons/me/")
     } else {
@@ -111,29 +111,29 @@ class AnnotationsManager(private val libraryAccount: Account,
     val request = NYPLJsonObjectRequest(
         Request.Method.GET,
         permissionRequestUri.toString(),
-        credentials.barcode.toString(),
-        credentials.pin.toString(),
+        this.credentials.barcode.toString(),
+        this.credentials.pin.toString(),
         null,
         Listener<JSONObject> { response ->
-          syncPermissionStatusCompletions.forEach { queuedCompletion ->
-            handleSyncPermission(response, queuedCompletion)
+          this.syncPermissionStatusCompletions.forEach { queuedCompletion ->
+            this.handleSyncPermission(response, queuedCompletion)
           }
-          syncPermissionStatusCompletions.clear()
-          syncPermissionStatusRequestPending = false
+          this.syncPermissionStatusCompletions.clear()
+          this.syncPermissionStatusRequestPending = false
         },
         ErrorListener { error ->
           LOG.error("GET request fail! Error: ${error.message}")
-          syncPermissionStatusCompletions.clear()
-          syncPermissionStatusRequestPending = false
+          this.syncPermissionStatusCompletions.clear()
+          this.syncPermissionStatusRequestPending = false
           completion(true, false)
         })
 
     request.retryPolicy = DefaultRetryPolicy(
-        TimeUnit.SECONDS.toMillis(SyncPermissionStatusTimeout).toInt(),
+        TimeUnit.SECONDS.toMillis(org.nypl.simplified.app.AnnotationsManager.Companion.SyncPermissionStatusTimeout).toInt(),
         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
 
-    requestQueue.add(request)
+    this.requestQueue.add(request)
   }
 
   private fun handleSyncPermission(response: JSONObject,
@@ -157,7 +157,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   fun updateServerSyncPermissionStatus(enabled: Boolean,
                                        completion: (successful: Boolean) -> Unit)
   {
-    val catalogUriString = libraryAccount.catalogUrl ?: null
+    val catalogUriString = this.libraryAccount.catalogUrl ?: null
     val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
     val patronsUpdateUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "patrons/me/") else null
 
@@ -169,9 +169,9 @@ class AnnotationsManager(private val libraryAccount: Account,
 
     val parameters = mapOf<String,Any>("settings" to mapOf("simplified:synchronize_annotations" to enabled))
 
-    setSyncPermissionUriRequest(patronsUpdateUri.toString(), parameters, 20) { isSuccessful ->
+    this.setSyncPermissionUriRequest(patronsUpdateUri.toString(), parameters, 20) { isSuccessful ->
       if (!isSuccessful) {
-        presentAlertForSyncSettingError()
+        this.presentAlertForSyncSettingError()
       }
       completion(isSuccessful)
     }
@@ -188,8 +188,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     val request = NYPLJsonObjectRequest(
         Request.Method.PUT,
         uri,
-        credentials.barcode.toString(),
-        credentials.pin.toString(),
+        this.credentials.barcode.toString(),
+        this.credentials.pin.toString(),
         jsonBody,
         additionalHeaders,
         Listener<JSONObject> { _ ->
@@ -206,7 +206,7 @@ class AnnotationsManager(private val libraryAccount: Account,
           DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
     }
 
-    requestQueue.add(request)
+    this.requestQueue.add(request)
   }
 
   /**
@@ -218,7 +218,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   fun requestReadingPositionOnServer(bookID: String?, uri: String?,
                                      completion: (location: BookmarkAnnotation?) -> Unit ) {
 
-    if (!syncIsPossibleAndPermitted()) {
+    if (!this.syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
@@ -230,23 +230,23 @@ class AnnotationsManager(private val libraryAccount: Account,
     val request = NYPLJsonObjectRequest(
         Request.Method.GET,
         uri,
-        credentials.barcode.toString(),
-        credentials.pin.toString(),
+        this.credentials.barcode.toString(),
+        this.credentials.pin.toString(),
         null,
         Listener<JSONObject> { response ->
-          completion(bookAnnotationFromBody(response))
+          completion(this.bookAnnotationFromBody(response))
         },
         ErrorListener { error ->
-          logVolleyError(error)
+          this.logVolleyError(error)
           completion(null)
         })
 
     request.retryPolicy = DefaultRetryPolicy(
-        TimeUnit.SECONDS.toMillis(ReadingPositionTimeout).toInt(),
+        TimeUnit.SECONDS.toMillis(org.nypl.simplified.app.AnnotationsManager.Companion.ReadingPositionTimeout).toInt(),
         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
 
-    requestQueue.add(request)
+    this.requestQueue.add(request)
   }
 
   private fun bookAnnotationFromBody(JSON: JSONObject): BookmarkAnnotation?
@@ -275,13 +275,13 @@ class AnnotationsManager(private val libraryAccount: Account,
    */
   fun updateReadingPosition(bookID: String, locationJson: String)
   {
-    if (!syncIsPossibleAndPermitted()) {
+    if (!this.syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
 
-    val deviceIDString = if (credentials.adobeDeviceID.isSome) {
-      (credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
+    val deviceIDString = if (this.credentials.adobeDeviceID.isSome) {
+      (this.credentials.adobeDeviceID as Some<AdobeDeviceID>).get().value
     } else {
       LOG.error("Adobe Device ID was null. No device set in body for annotation.")
       "null"
@@ -308,7 +308,7 @@ class AnnotationsManager(private val libraryAccount: Account,
       val mapper = ObjectMapper()
       val jsonBodyString= mapper.writer().writeValueAsString(bodyObject)
 
-      postAnnotation(jsonBodyString, 20, { isSuccessful, response ->
+      this.postAnnotation(jsonBodyString, 20, { isSuccessful, response ->
         if (isSuccessful) {
           LOG.debug("Success: Marked Reading Position To Server. Response: $response")
         } else {
@@ -325,7 +325,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   private fun postAnnotation(bodyParameters: String, timeout: Long?,
                              completion: (isSuccessful: Boolean, annotationID: String?) -> Unit)
   {
-    val catalogUriString = libraryAccount.catalogUrl
+    val catalogUriString = this.libraryAccount.catalogUrl
     val baseUri = if (catalogUriString != null) Uri.parse(catalogUriString) else null
     val mainFeedAnnotationUri = if (baseUri != null) Uri.withAppendedPath(baseUri, "annotations/") else null
     val requestUri = mainFeedAnnotationUri?.toString()
@@ -340,8 +340,8 @@ class AnnotationsManager(private val libraryAccount: Account,
       val request = NYPLJsonObjectRequest(
           Request.Method.POST,
           requestUri,
-          credentials.barcode.toString(),
-          credentials.pin.toString(),
+          this.credentials.barcode.toString(),
+          this.credentials.pin.toString(),
           jsonObjectBody,
           null,
           Listener<JSONObject> { response ->
@@ -350,7 +350,7 @@ class AnnotationsManager(private val libraryAccount: Account,
             completion(true, serverAnnotationID)
           },
           ErrorListener { error ->
-            logVolleyError(error)
+            this.logVolleyError(error)
             completion(false, null)
           })
       if (timeout != null) {
@@ -361,7 +361,7 @@ class AnnotationsManager(private val libraryAccount: Account,
         )
       }
 
-      requestQueue.add(request)
+      this.requestQueue.add(request)
 
     } catch (e: java.lang.Exception) {
       LOG.error("Post Annotation: Error creating JSONObject from Kotlin Map Type.")
@@ -376,7 +376,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   fun requestBookmarksFromServer(uri: String,
                                  completion: ((bookmarks: List<BookmarkAnnotation>) -> Unit)?) {
 
-    if (!syncIsPossibleAndPermitted()) {
+    if (!this.syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
       return
     }
@@ -384,8 +384,8 @@ class AnnotationsManager(private val libraryAccount: Account,
     val request = NYPLJsonObjectRequest(
         Request.Method.GET,
         uri,
-        credentials.barcode.toString(),
-        credentials.pin.toString(),
+        this.credentials.barcode.toString(),
+        this.credentials.pin.toString(),
         null,
         Listener<JSONObject> { response ->
 
@@ -405,16 +405,16 @@ class AnnotationsManager(private val libraryAccount: Account,
           completion?.let { it(bookmarks) }
         },
         ErrorListener { error ->
-          logVolleyError(error)
+          this.logVolleyError(error)
         })
 
     request.retryPolicy = DefaultRetryPolicy(
-        TimeUnit.SECONDS.toMillis(BookmarksRequestTimeout).toInt(),
+        TimeUnit.SECONDS.toMillis(org.nypl.simplified.app.AnnotationsManager.Companion.BookmarksRequestTimeout).toInt(),
         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
     )
 
-    requestQueue.add(request)
+    this.requestQueue.add(request)
   }
 
   /**
@@ -425,7 +425,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   fun postBookmarkToServer(bookmark: BookmarkAnnotation,
                            completion: ((serverID: String?) -> Unit)?) {
 
-    if (!syncIsPossibleAndPermitted()) {
+    if (!this.syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
       completion?.let { it(null) }
       return
@@ -433,7 +433,7 @@ class AnnotationsManager(private val libraryAccount: Account,
 
     try {
       val jsonString = ObjectMapper().writeValueAsString(bookmark)
-      postAnnotation(jsonString, 20) { _, serverID ->
+      this.postAnnotation(jsonString, 20) { _, serverID ->
         completion?.let { it(serverID) }
       }
     } catch (e: Exception) {
@@ -448,7 +448,7 @@ class AnnotationsManager(private val libraryAccount: Account,
   fun deleteBookmarkOnServer(annotationID: String,
                              completion: (isSuccessful: Boolean) -> Unit) {
 
-    if (!syncIsPossibleAndPermitted()) {
+    if (!this.syncIsPossibleAndPermitted()) {
       LOG.debug("Account does not support sync or sync is disabled.")
       completion(false)
       return
@@ -457,23 +457,23 @@ class AnnotationsManager(private val libraryAccount: Account,
     val request = NYPLStringRequest(
         Request.Method.DELETE,
         annotationID,
-        credentials,
+      this.credentials,
         Listener { _ ->
           completion(true)
         },
         ErrorListener { error ->
-          logVolleyError(error)
+          this.logVolleyError(error)
           completion(false)
         }
     )
 
     request.retryPolicy = DefaultRetryPolicy(
-        TimeUnit.SECONDS.toMillis(BookmarkDeleteTimeout).toInt(),
+        TimeUnit.SECONDS.toMillis(org.nypl.simplified.app.AnnotationsManager.Companion.BookmarkDeleteTimeout).toInt(),
         DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
     )
 
-    requestQueue.add(request)
+    this.requestQueue.add(request)
   }
 
   /**
@@ -481,7 +481,7 @@ class AnnotationsManager(private val libraryAccount: Account,
    * has SimplyE sync support enabled.
    */
   private fun syncIsPossible(userAccount: AccountsControllerType): Boolean {
-    return userAccount.accountIsLoggedIn() && libraryAccount.supportsSimplyESync()
+    return userAccount.accountIsLoggedIn() && this.libraryAccount.supportsSimplyESync()
   }
 
   /**
@@ -492,7 +492,7 @@ class AnnotationsManager(private val libraryAccount: Account,
     return try {
       val app: SimplifiedCatalogAppServicesType? = Simplified.getCatalogAppServices()
       val currentAccount = app?.books as? AccountsControllerType
-      val syncIsPossible = if (currentAccount != null) syncIsPossible(currentAccount) else false
+      val syncIsPossible = if (currentAccount != null) this.syncIsPossible(currentAccount) else false
       val libraryID = Simplified.getCurrentAccount()
       val syncPermissionGranted = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryID.id)
       syncIsPossible && syncPermissionGranted
@@ -504,35 +504,35 @@ class AnnotationsManager(private val libraryAccount: Account,
 
   private fun presentFirstTimeSyncAlertDialog(completion: (enableSync: Boolean) -> Unit)
   {
-    val builder= AlertDialog.Builder(context)
+    val builder= AlertDialog.Builder(this.context)
     with(builder) {
-      setTitle(context.getString(R.string.firstTimeSyncAlertTitle))
-      setMessage(context.getString(R.string.firstTimeSyncAlertMessage))
-      setNegativeButton(context.getString(R.string.firstTimeSyncAlertNegButton)) { _, _ ->
+      this.setTitle(this.context.getString(R.string.firstTimeSyncAlertTitle))
+      this.setMessage(this.context.getString(R.string.firstTimeSyncAlertMessage))
+      this.setNegativeButton(this.context.getString(R.string.firstTimeSyncAlertNegButton)) { _, _ ->
         Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
         completion(false)
       }
-      setPositiveButton(context.getString(R.string.firstTimeSyncAlertPosButton)) { _, _ ->
-        updateServerSyncPermissionStatus(true) { success ->
+      this.setPositiveButton(this.context.getString(R.string.firstTimeSyncAlertPosButton)) { _, _ ->
+        this@AnnotationsManager.updateServerSyncPermissionStatus(true) { success ->
           Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
           completion(success)
         }
       }
 
-      create()
-      show()
+      this.create()
+      this.show()
     }
   }
 
   private fun presentAlertForSyncSettingError()
   {
-    val builder= AlertDialog.Builder(context)
+    val builder= AlertDialog.Builder(this.context)
     with(builder) {
-      setTitle(context.getString(R.string.syncSettingAlertTitle))
-      setMessage(R.string.syncSettingAlertMessage)
-      setPositiveButton("OK", null)
-      create()
-      show()
+      this.setTitle(this.context.getString(R.string.syncSettingAlertTitle))
+      this.setMessage(R.string.syncSettingAlertMessage)
+      this.setPositiveButton("OK", null)
+      this.create()
+      this.show()
     }
   }
 

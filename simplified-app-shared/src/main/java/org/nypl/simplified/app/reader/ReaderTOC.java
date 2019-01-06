@@ -6,6 +6,7 @@ import org.readium.sdk.android.components.navigation.NavigationElement;
 import org.readium.sdk.android.components.navigation.NavigationPoint;
 import org.readium.sdk.android.components.navigation.NavigationTable;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,12 +18,8 @@ import java.util.List;
 
 public final class ReaderTOC implements Serializable
 {
-  private static final Logger LOG;
+  private static final Logger LOG = LoggerFactory.getLogger(ReaderTOC.class);
   private static final long serialVersionUID = 1L;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderTOC.class);
-  }
 
   private final List<TOCElement> elements;
 

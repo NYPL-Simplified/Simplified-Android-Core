@@ -6,6 +6,7 @@ import com.io7m.jnull.Nullable;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.books.core.BookID;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -15,11 +16,7 @@ import java.io.File;
 
 public final class ReaderTestActivity extends Activity
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderTestActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(ReaderTestActivity.class);
 
   /**
    * Construct an activity.

@@ -2,6 +2,7 @@ package org.nypl.simplified.app;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.webkit.WebSettings;
@@ -10,13 +11,14 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A mindlessly simple activity that displays a given URI in a full-screen web
  * view.
  */
 
-public final class WebViewActivity extends SimplifiedActivity
+public final class WebViewActivity extends NavigationDrawerActivity
 {
   /**
    * The name used to pass URIs to the activity.
@@ -42,11 +44,12 @@ public final class WebViewActivity extends SimplifiedActivity
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(WebViewActivity.class);
+    LOG = LoggerFactory.getLogger(WebViewActivity.class);
   }
 
   private WebView        web_view;
   private SimplifiedPart part;
+  private String title;
 
   /**
    * Construct an activity.
@@ -100,14 +103,14 @@ public final class WebViewActivity extends SimplifiedActivity
     }
   }
 
-  @Override protected SimplifiedPart navigationDrawerGetPart()
-  {
-    return this.part;
+  @Override
+  protected boolean navigationDrawerShouldShowIndicator() {
+    return false;
   }
 
-  @Override protected boolean navigationDrawerShouldShowIndicator()
-  {
-    return false;
+  @Override
+  protected String navigationDrawerGetActivityTitle(final Resources resources) {
+    return this.title;
   }
 
   @Override protected void onCreate(final Bundle state)
@@ -119,7 +122,7 @@ public final class WebViewActivity extends SimplifiedActivity
     final Intent i = NullCheck.notNull(this.getIntent());
     final String uri =
       NullCheck.notNull(i.getStringExtra(WebViewActivity.URI_KEY));
-    final String title =
+    this.title =
       NullCheck.notNull(i.getStringExtra(WebViewActivity.TITLE_KEY));
 
     setTitle(title);

@@ -1,18 +1,15 @@
 package org.nypl.simplified.app.catalog;
 
-import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.res.Resources;
-import android.support.v4.content.ContextCompat;
-import android.view.View;
-import android.widget.Button;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
+
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.app.ThemeMatcher;
 import org.nypl.simplified.assertions.Assertions;
-import org.nypl.simplified.books.core.FeedFacetType;
+import org.nypl.simplified.books.feeds.FeedFacetType;
 
 import java.util.ArrayList;
 
@@ -20,8 +17,7 @@ import java.util.ArrayList;
  * A  button that shows a list of facets.
  */
 
-public final class CatalogFacetButton extends Button
-{
+public final class CatalogFacetButton extends AppCompatButton {
   /**
    * Construct a new button.
    *
@@ -32,11 +28,10 @@ public final class CatalogFacetButton extends Button
    */
 
   public CatalogFacetButton(
-    final Activity in_activity,
+    final AppCompatActivity in_activity,
     final String in_group_name,
     final ArrayList<FeedFacetType> in_group,
-    final CatalogFacetSelectionListenerType in_listener)
-  {
+    final CatalogFacetSelectionListenerType in_listener) {
     super(in_activity);
 
     NullCheck.notNull(in_group);
@@ -58,32 +53,16 @@ public final class CatalogFacetButton extends Button
     final Resources rr = NullCheck.notNull(in_activity.getResources());
     this.setTextSize(12.0f);
     this.setBackgroundResource(R.drawable.simplified_button);
-    final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
-    final int mainColor = ContextCompat.getColor(this.getContext(), resID);
-    this.setTextColor(mainColor);
 
     this.setText(active.facetGetTitle());
-    this.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          final FragmentManager fm = in_activity.getFragmentManager();
-          final CatalogFacetDialog d =
-            CatalogFacetDialog.newDialog(in_group_name, in_group);
-          d.setFacetSelectionListener(
-            new CatalogFacetSelectionListenerType()
-            {
-              @Override public void onFacetSelected(
-                final FeedFacetType f)
-              {
-                d.dismiss();
-                in_listener.onFacetSelected(f);
-              }
-            });
-          d.show(fm, "facet-dialog");
-        }
+    this.setOnClickListener(view -> {
+      final FragmentManager fm = in_activity.getFragmentManager();
+      final CatalogFacetDialog d = CatalogFacetDialog.newDialog(in_group_name, in_group);
+      d.setFacetSelectionListener(facet -> {
+        d.dismiss();
+        in_listener.onFacetSelected(facet);
       });
+      d.show(fm, "facet-dialog");
+    });
   }
 }

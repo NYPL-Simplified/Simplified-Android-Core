@@ -39,7 +39,7 @@ import java.util.TreeMap;
 
 public abstract class ProfilesDatabaseContract {
 
-  private static final Logger LOG = LogUtilities.getLog(ProfilesDatabaseContract.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ProfilesDatabaseContract.class);
 
   @Rule
   public ExpectedException expected = ExpectedException.none();

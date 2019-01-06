@@ -383,6 +383,12 @@
     <item name="android:windowIsFloating">true</item>
   </style>
 
+  <style name="SimplifiedProfileDialog" parent="SimplifiedTheme_ActionBar">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowIsFloating">true</item>
+  </style>
+
   <style name="TextAppearanceFinish" parent="android:TextAppearance.Holo.Medium">
     <item name="android:textColor">#fff</item>
   </style>

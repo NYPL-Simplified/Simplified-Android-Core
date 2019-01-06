@@ -29,7 +29,7 @@ public class BooksControllerDeviceDeActivationTask implements Callable<Unit>,
   private final AccountsDatabaseType accounts_database;
 
   private static final Logger LOG =
-    LogUtilities.getLog(BooksControllerDeviceDeActivationTask.class);
+    LoggerFactory.getLogger(BooksControllerDeviceDeActivationTask.class);
 
   BooksControllerDeviceDeActivationTask(
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,

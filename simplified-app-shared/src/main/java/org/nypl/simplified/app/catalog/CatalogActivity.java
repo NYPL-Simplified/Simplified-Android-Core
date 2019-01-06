@@ -5,28 +5,26 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.widget.FrameLayout;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import org.nypl.simplified.app.NavigationDrawerActivity;
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract activity providing <i>up</i> navigation using the home button.
  */
 
-public abstract class CatalogActivity extends SimplifiedActivity
+public abstract class CatalogActivity extends NavigationDrawerActivity
 {
   private static final String CATALOG_UP_STACK_ID;
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(CatalogActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(CatalogActivity.class);
 
   static {
     CATALOG_UP_STACK_ID = "org.nypl.simplified.app.CatalogActivity.up_stack";

@@ -35,6 +35,7 @@ import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,11 +50,7 @@ import java.security.NoSuchAlgorithmException;
 
 public final class AdobeDRMServices
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(AdobeDRMServices.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(AdobeDRMServices.class);
 
   private AdobeDRMServices()
   {

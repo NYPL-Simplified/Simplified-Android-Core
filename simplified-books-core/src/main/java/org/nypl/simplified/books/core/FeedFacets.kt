@@ -3,8 +3,9 @@ package org.nypl.simplified.books.core
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.junreachable.UnreachableCodeException
-
 import org.nypl.simplified.books.core.FeedFacetOPDS.ENTRYPOINT_FACET_GROUP_TYPE
+
+import org.nypl.simplified.books.feeds.FeedFacetOPDS.ENTRYPOINT_FACET_GROUP_TYPE
 
 /**
  * Functions to process facets.

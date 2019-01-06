@@ -37,7 +37,7 @@ import javax.annotation.concurrent.GuardedBy;
 
 public final class BookDatabase implements BookDatabaseType {
 
-  private static final Logger LOG = LogUtilities.getLog(BookDatabase.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BookDatabase.class);
 
   private final AccountID owner;
   private final File directory;

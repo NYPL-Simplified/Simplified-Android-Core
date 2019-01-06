@@ -30,6 +30,7 @@ import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,11 +43,7 @@ import java.util.List;
 public final class MainSettingsAccountsActivity extends SimplifiedActivity
   implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(MainSettingsAccountsActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(MainSettingsAccountsActivity.class);
 
   private @Nullable ArrayAdapter<Account> adapter_accounts;
 

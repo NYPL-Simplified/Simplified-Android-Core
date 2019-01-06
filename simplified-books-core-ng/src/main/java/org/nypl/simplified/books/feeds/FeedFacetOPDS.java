@@ -9,6 +9,9 @@ import org.nypl.simplified.opds.core.OPDSFacet;
 
 public final class FeedFacetOPDS implements FeedFacetType
 {
+  public static final String ENTRYPOINT_FACET_GROUP_TYPE =
+    "http://librarysimplified.org/terms/rel/entrypoint";
+
   private static final long serialVersionUID = 1L;
   private final OPDSFacet facet;
 

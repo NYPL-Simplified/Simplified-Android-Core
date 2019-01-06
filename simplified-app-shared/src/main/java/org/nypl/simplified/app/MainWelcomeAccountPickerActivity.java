@@ -25,6 +25,7 @@ import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,11 +39,7 @@ import java.util.List;
 public final class MainWelcomeAccountPickerActivity extends SimplifiedActivity
   implements AdapterView.OnItemClickListener {
 
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(MainWelcomeAccountPickerActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(MainWelcomeAccountPickerActivity.class);
 
   private @Nullable ArrayAdapter<Account> adapter_accounts;
 

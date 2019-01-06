@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/profileCreationEditName"
+        android:text="@string/profiles_please_enter"/>
+
+    <EditText
+        android:id="@+id/profileCreationEditName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@id/profileGenderLayout"
+        android:ems="10"
+        android:inputType="textPersonName|textCapWords"
+        android:hint="@string/profiles_name_field"
+        android:imeOptions="actionDone"
+        android:text=""/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/profileCreationDateSelection"
+        android:layout_centerInParent="true"
+        android:id="@+id/profileGenderLayout"
+        android:gravity="center_vertical"
+        android:layout_margin="8dp">
+
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/profileGenderRadioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/profileGenderFemaleRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/profiles_gender_female"/>
+            <RadioButton android:id="@+id/profileGenderMaleRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/profiles_gender_male"/>
+            <RadioButton android:id="@+id/profileGenderNonBinaryRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/profileGenderNonBinaryEditText"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:hint=""
+            android:maxLength="32"
+            android:inputType="textPersonName|textCapWords"
+            android:layout_marginBottom="2dp"
+            android:imeOptions="actionDone"/>
+
+    </LinearLayout>
+
+    <org.nypl.simplified.datepicker.DatePicker
+        android:id="@+id/profileCreationDateSelection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
+    <Button
+        android:id="@+id/profileCreationCreate"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_below="@+id/profileCreationDateSelection"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="16dp"
+        android:background="@drawable/simplified_welcome_button"
+        android:textColor="@drawable/simplified_welcome_button_text"
+        android:text="@string/profiles_create"/>
+
+</RelativeLayout>

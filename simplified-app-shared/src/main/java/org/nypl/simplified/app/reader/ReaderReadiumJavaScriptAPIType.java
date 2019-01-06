@@ -2,6 +2,8 @@ package org.nypl.simplified.app.reader;
 
 import com.io7m.jfunctional.OptionType;
 
+import org.nypl.simplified.books.reader.ReaderPreferences;
+
 /**
  * The type of the JavaScript API exposed by Readium.
  */
@@ -81,13 +83,13 @@ public interface ReaderReadiumJavaScriptAPIType
   void pagePrevious();
 
   /**
-   * Configure the page style based on the given settings.
+   * Configure the page style based on the given preferences.
    *
-   * @param r The settings
+   * @param r The preferences
    */
 
   void setPageStyleSettings(
-    ReaderSettingsType r);
+    ReaderPreferences r);
 
   /**
    * Inject any configurable fonts into the web view. This should be called

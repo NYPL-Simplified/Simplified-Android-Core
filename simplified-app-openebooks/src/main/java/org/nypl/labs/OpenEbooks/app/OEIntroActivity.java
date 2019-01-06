@@ -20,7 +20,7 @@ public class OEIntroActivity extends FragmentActivity
   private ViewPager view_pager;
 
   static {
-    LOG = LogUtilities.getLog(OEIntroActivity.class);
+    LOG = LoggerFactory.getLogger(OEIntroActivity.class);
   }
 
   @Override

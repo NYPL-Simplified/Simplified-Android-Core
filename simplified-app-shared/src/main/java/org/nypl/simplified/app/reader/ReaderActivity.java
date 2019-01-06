@@ -13,7 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -25,45 +24,45 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
-import com.io7m.junreachable.UnreachableCodeException;
 
 import org.joda.time.Instant;
-import org.json.JSONObject;
 import org.nypl.drm.core.AdobeDeviceID;
+import org.nypl.simplified.app.ApplicationColorScheme;
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.ReaderSyncManager;
 import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
-import org.nypl.simplified.app.ThemeMatcher;
+import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
-import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
-import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
-import org.nypl.simplified.app.utilities.FadeUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.core.AccountCredentials;
-import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
 import org.nypl.simplified.books.core.AccountsControllerType;
+import org.nypl.simplified.books.core.BodyNode;
 import org.nypl.simplified.books.core.BookDatabaseEntryReadableType;
 import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
+import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.core.SelectorNode;
 import org.nypl.simplified.books.core.TargetNode;
-import org.nypl.simplified.books.core.BodyNode;
-import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BooksType;
-import org.nypl.simplified.books.core.FeedEntryOPDS;
-import org.nypl.simplified.books.core.LogUtilities;
+import org.nypl.simplified.books.profiles.ProfileEvent;
+import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
+import org.nypl.simplified.books.profiles.ProfilePreferencesChanged;
+import org.nypl.simplified.books.reader.ReaderBookLocation;
+import org.nypl.simplified.books.reader.ReaderBookLocationJSON;
+import org.nypl.simplified.books.reader.ReaderColorScheme;
+import org.nypl.simplified.books.reader.ReaderPreferences;
+import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,27 +74,31 @@ import java.util.Objects;
 
 import kotlin.Unit;
 
+import static org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode.AUTO;
+import static org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE;
+import static org.nypl.simplified.app.utilities.FadeUtilities.DEFAULT_FADE_DURATION;
+import static org.nypl.simplified.app.utilities.FadeUtilities.fadeIn;
+import static org.nypl.simplified.app.utilities.FadeUtilities.fadeOut;
+
 /**
  * The main reader activity for reading an EPUB.
  */
 
-public final class ReaderActivity extends Activity implements
+public final class ReaderActivity extends ProfileTimeOutActivity implements
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,
   ReaderReadiumFeedbackListenerType,
   ReaderReadiumEPUBLoadListenerType,
   ReaderCurrentPageListenerType,
   ReaderTOCSelectionListenerType,
-  ReaderSettingsListenerType,
-  ReaderMediaOverlayAvailabilityListenerType
-{
+  ReaderMediaOverlayAvailabilityListenerType {
   private static final String BOOK_ID;
   private static final String FILE_ID;
   private static final String ENTRY;
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(ReaderActivity.class);
+    LOG = LoggerFactory.getLogger(ReaderActivity.class);
   }
 
   static {
@@ -104,52 +107,52 @@ public final class ReaderActivity extends Activity implements
     ENTRY = "org.nypl.simplified.app.ReaderActivity.entry";
   }
 
-  private @Nullable BookID                            book_id;
-  private           OPDSAcquisitionFeedEntry          feed_entry;
-  private @Nullable Container                         epub_container;
-  private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
-  private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
-  private           ImageView                         view_bookmark;
-  private @Nullable ViewGroup                         view_hud;
-  private @Nullable ProgressBar                       view_loading;
-  private @Nullable ViewGroup                         view_media;
-  private @Nullable ImageView                         view_media_next;
-  private @Nullable ImageView                         view_media_play;
-  private @Nullable ImageView                         view_media_prev;
-  private @Nullable ProgressBar                       view_progress_bar;
-  private @Nullable TextView                          view_progress_text;
-  private @Nullable View                              view_root;
-  private @Nullable ImageView                         view_settings;
-  private @Nullable TextView                          view_title_text;
-  private @Nullable ImageView                         view_toc;
-  private @Nullable WebView                           view_web_view;
-  private @Nullable ReaderReadiumViewerSettings       viewer_settings;
-  private           boolean                           web_view_resized;
-  private @Nullable ReaderBookLocation                current_location;
-  private @Nullable BookmarkAnnotation                current_bookmark;
-  private @Nullable AccountCredentials                credentials;
-  private @Nullable ReaderSyncManager                 sync_manager;
-  private           int                               current_page_index;
-  private           int                               current_page_count;
-  private @Nullable String                            current_chapter_title;
-  private @Nullable List<BookmarkAnnotation>          bookmarks;
-
+  private BookID book_id;
+  private OPDSAcquisitionFeedEntry feed_entry;
+  private Container epub_container;
+  private ReaderReadiumJavaScriptAPIType readium_js_api;
+  private ReaderSimplifiedJavaScriptAPIType simplified_js_api;
+  private ImageView view_bookmark;
+  private ViewGroup view_hud;
+  private ProgressBar view_loading;
+  private ViewGroup view_media;
+  private ImageView view_media_next;
+  private ImageView view_media_play;
+  private ImageView view_media_prev;
+  private ProgressBar view_progress_bar;
+  private TextView view_progress_text;
+  private View view_root;
+  private ImageView view_settings;
+  private TextView view_title_text;
+  private ImageView view_toc;
+  private WebView view_web_view;
+  private ReaderReadiumViewerSettings viewer_settings;
+  private boolean web_view_resized;
+  private ReaderBookLocation current_location;
+  private BookmarkAnnotation current_bookmark;
+  private AccountCredentials credentials;
+  private ReaderSyncManager sync_manager;
+  private int current_page_index;
+  private int current_page_count;
+  private String current_chapter_title;
+  private List<BookmarkAnnotation> bookmarks;
+  private ObservableSubscriptionType<ProfileEvent> profile_subscription;
+  private ObjectMapper json_mapper = new ObjectMapper();
 
   /**
    * Construct an activity.
    */
 
-  public ReaderActivity()
-  {
+  public ReaderActivity() {
 
   }
 
   /**
    * Start a new reader for the given book.
    *
-   * @param from The parent activity
-   * @param book The unique ID of the book
-   * @param file The actual EPUB file
+   * @param from  The parent activity
+   * @param book  The unique ID of the book
+   * @param file  The actual EPUB file
    * @param entry The OPD feed entry
    */
 
@@ -157,8 +160,7 @@ public final class ReaderActivity extends Activity implements
     final Activity from,
     final BookID book,
     final File file,
-    final FeedEntryOPDS entry)
-  {
+    final FeedEntryOPDS entry) {
     Objects.requireNonNull(file);
     final Bundle b = new Bundle();
     b.putSerializable(ReaderActivity.BOOK_ID, book);
@@ -169,9 +171,8 @@ public final class ReaderActivity extends Activity implements
     from.startActivity(i);
   }
 
-  private void applyViewerColorFilters()
-  {
-    ReaderActivity.LOG.debug("applying color filters");
+  private void applyViewerColorFilters() {
+    LOG.debug("applying color filters");
 
     final TextView in_progress_text = Objects.requireNonNull(this.view_progress_text);
     final TextView in_title_text = Objects.requireNonNull(this.view_title_text);
@@ -182,8 +183,8 @@ public final class ReaderActivity extends Activity implements
     final ImageView in_media_next = Objects.requireNonNull(this.view_media_next);
     final ImageView in_media_prev = Objects.requireNonNull(this.view_media_prev);
 
-    final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
-    final int mainColor = ContextCompat.getColor(this, resID);
+    final ApplicationColorScheme scheme = Simplified.getMainColorScheme();
+    final int mainColor = scheme.getColorRGBA();
     final ColorMatrixColorFilter filter = ReaderColorMatrix.getImageFilterMatrix(mainColor);
 
     UIThread.runOnUIThread(() -> {
@@ -205,37 +206,34 @@ public final class ReaderActivity extends Activity implements
    */
 
   private void applyViewerColorScheme(
-    final ReaderColorScheme cs)
-  {
-    ReaderActivity.LOG.debug("applying color scheme");
+    final ReaderColorScheme cs) {
+    LOG.debug("applying color scheme");
 
     final View in_root = Objects.requireNonNull(this.view_root);
     UIThread.runOnUIThread(() -> {
-      in_root.setBackgroundColor(cs.getBackgroundColor());
-      ReaderActivity.this.applyViewerColorFilters();
+      in_root.setBackgroundColor(ReaderColorSchemes.background(cs));
+      this.applyViewerColorFilters();
     });
   }
 
   private void makeInitialReadiumRequest(
-    final ReaderHTTPServerType hs)
-  {
+    final ReaderHTTPServerType hs) {
     final URI reader_uri = URI.create(hs.getURIBase() + "reader.html");
     final WebView wv = Objects.requireNonNull(this.view_web_view);
     UIThread.runOnUIThread(() -> {
-      ReaderActivity.LOG.debug("making initial reader request: {}", reader_uri);
+      LOG.debug("making initial reader request: {}", reader_uri);
       wv.loadUrl(reader_uri.toString());
     });
   }
 
-  @Override protected void onActivityResult(
+  @Override
+  protected void onActivityResult(
     final int request_code,
     final int result_code,
-    final @Nullable Intent data)
-  {
+    final @Nullable Intent data) {
     super.onActivityResult(request_code, result_code, data);
 
-    ReaderActivity.LOG.debug(
-      "onActivityResult: {} {} {}", request_code, result_code, data);
+    LOG.debug("onActivityResult: {} {} {}", request_code, result_code, data);
 
     if (request_code == ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE) {
       if (result_code == Activity.RESULT_OK) {
@@ -258,12 +256,12 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  @Override public void onConfigurationChanged(
-    final @Nullable Configuration c)
-  {
+  @Override
+  public void onConfigurationChanged(
+    final @Nullable Configuration c) {
     super.onConfigurationChanged(c);
 
-    ReaderActivity.LOG.debug("configuration changed");
+    LOG.debug("configuration changed");
 
     final WebView in_web_view = Objects.requireNonNull(this.view_web_view);
     final TextView in_progress_text =
@@ -278,23 +276,21 @@ public final class ReaderActivity extends Activity implements
     this.web_view_resized = true;
     UIThread.runOnUIThreadDelayed(() -> {
       final ReaderReadiumJavaScriptAPIType readium_js =
-        Objects.requireNonNull(ReaderActivity.this.readium_js_api);
-      readium_js.getCurrentPage(ReaderActivity.this);
-      readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+        Objects.requireNonNull(this.readium_js_api);
+      readium_js.getCurrentPage(this);
+      readium_js.mediaOverlayIsAvailable(this);
     }, 300L);
   }
 
   @SuppressLint("SetJavaScriptEnabled")
-  @Override protected void onCreate(
-    final @Nullable Bundle state)
-  {
-    final String accountColor = Simplified.getCurrentAccount().getMainColor();
-    setTheme(ThemeMatcher.Companion.noActionBarStyle(accountColor));
+  @Override
+  protected void onCreate(final @Nullable Bundle state) {
+    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithoutActionBar());
 
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
-    ReaderActivity.LOG.debug("starting");
+    LOG.debug("starting");
 
     final Intent i = Objects.requireNonNull(this.getIntent());
     final Bundle a = Objects.requireNonNull(i.getExtras());
@@ -307,52 +303,64 @@ public final class ReaderActivity extends Activity implements
       Objects.requireNonNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
     this.feed_entry = entry.getFeedEntry();
 
-    ReaderActivity.LOG.debug("epub file:  {}", in_epub_file);
-    ReaderActivity.LOG.debug("book id:    {}", this.book_id);
-    ReaderActivity.LOG.debug("entry id:   {}", entry.getFeedEntry().getID());
+    LOG.debug("epub file:  {}", in_epub_file);
+    LOG.debug("book id:    {}", this.book_id);
+    LOG.debug("entry id:   {}", entry.getFeedEntry().getID());
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
+    this.profile_subscription =
+      Simplified.getProfilesController()
+        .profileEvents()
+        .subscribe(this::onProfileEvent);
 
-    final ReaderSettingsType settings = rs.getSettings();
-    settings.addListener(this);
+    final ReaderPreferences readerPreferences;
 
-    this.viewer_settings = new ReaderReadiumViewerSettings(
-      SyntheticSpreadMode.SINGLE, ScrollMode.AUTO, (int) settings.getFontScale(), 20);
+    try {
+      readerPreferences =
+        Simplified.getProfilesController()
+          .profileCurrent()
+          .preferences()
+          .readerPreferences();
+    } catch (final ProfileNoneCurrentException e) {
+      throw new IllegalStateException(e);
+    }
+
+    this.viewer_settings =
+      new ReaderReadiumViewerSettings(
+        SINGLE, AUTO, (int) readerPreferences.fontScale(), 20);
 
     final ReaderReadiumFeedbackDispatcherType rd =
       ReaderReadiumFeedbackDispatcher.newDispatcher();
     final ReaderSimplifiedFeedbackDispatcherType sd =
       ReaderSimplifiedFeedbackDispatcher.newDispatcher();
 
-    final ViewGroup in_hud = Objects.requireNonNull(
-      this.findViewById(R.id.reader_hud_container));
-    final ImageView in_toc = Objects.requireNonNull(
-      in_hud.findViewById(R.id.reader_toc));
-    final ImageView in_bookmark = Objects.requireNonNull(
-      in_hud.findViewById(R.id.reader_bookmark));
-    final ImageView in_settings = Objects.requireNonNull(
-      in_hud.findViewById(R.id.reader_settings));
-    final TextView in_title_text = Objects.requireNonNull(
-      in_hud.findViewById(R.id.reader_title_text));
-    final TextView in_progress_text = Objects.requireNonNull(
-      in_hud.findViewById(R.id.reader_position_text));
-    final ProgressBar in_progress_bar = Objects.requireNonNull(
-      in_hud.findViewById(R.id.reader_position_progress));
+    final ViewGroup in_hud =
+      Objects.requireNonNull(this.findViewById(R.id.reader_hud_container));
+    final ImageView in_toc =
+      Objects.requireNonNull(in_hud.findViewById(R.id.reader_toc));
+    final ImageView in_bookmark =
+      Objects.requireNonNull(in_hud.findViewById(R.id.reader_bookmark));
+    final ImageView in_settings =
+      Objects.requireNonNull(in_hud.findViewById(R.id.reader_settings));
+    final TextView in_title_text =
+      Objects.requireNonNull(in_hud.findViewById(R.id.reader_title_text));
+    final TextView in_progress_text =
+      Objects.requireNonNull(in_hud.findViewById(R.id.reader_position_text));
+    final ProgressBar in_progress_bar =
+      Objects.requireNonNull(in_hud.findViewById(R.id.reader_position_progress));
 
-    final ViewGroup in_media_overlay = Objects.requireNonNull(
-      this.findViewById(R.id.reader_hud_media));
-    final ImageView in_media_previous = Objects.requireNonNull(
-      this.findViewById(R.id.reader_hud_media_previous));
-    final ImageView in_media_next = Objects.requireNonNull(
-      this.findViewById(R.id.reader_hud_media_next));
-    final ImageView in_media_play = Objects.requireNonNull(
-      this.findViewById(R.id.reader_hud_media_play));
+    final ViewGroup in_media_overlay =
+      Objects.requireNonNull(this.findViewById(R.id.reader_hud_media));
+    final ImageView in_media_previous =
+      Objects.requireNonNull(this.findViewById(R.id.reader_hud_media_previous));
+    final ImageView in_media_next =
+      Objects.requireNonNull(this.findViewById(R.id.reader_hud_media_next));
+    final ImageView in_media_play =
+      Objects.requireNonNull(this.findViewById(R.id.reader_hud_media_play));
 
-    final ProgressBar in_loading = Objects.requireNonNull(
-      this.findViewById(R.id.reader_loading));
-    final WebView in_webview = Objects.requireNonNull(
-      this.findViewById(R.id.reader_webview));
+    final ProgressBar in_loading =
+      Objects.requireNonNull(this.findViewById(R.id.reader_loading));
+    final WebView in_webview =
+      Objects.requireNonNull(this.findViewById(R.id.reader_webview));
 
     this.view_root = Objects.requireNonNull(in_hud.getRootView());
 
@@ -364,7 +372,7 @@ public final class ReaderActivity extends Activity implements
     in_media_overlay.setVisibility(View.INVISIBLE);
 
     in_settings.setOnClickListener(view -> {
-      final FragmentManager fm = ReaderActivity.this.getFragmentManager();
+      final FragmentManager fm = this.getFragmentManager();
       final ReaderSettingsDialog d = new ReaderSettingsDialog();
       d.show(fm, "settings-dialog");
     });
@@ -391,14 +399,13 @@ public final class ReaderActivity extends Activity implements
     this.view_media_prev = in_media_previous;
     this.view_media_play = in_media_play;
 
-    final WebChromeClient wc_client = new WebChromeClient()
-    {
-      @Override public void onShowCustomView(
+    final WebChromeClient wc_client = new WebChromeClient() {
+      @Override
+      public void onShowCustomView(
         final @Nullable View view,
-        final @Nullable CustomViewCallback callback)
-      {
+        final @Nullable CustomViewCallback callback) {
         super.onShowCustomView(view, callback);
-        ReaderActivity.LOG.debug("web-chrome: {}", view);
+        LOG.debug("web-chrome: {}", view);
       }
     };
 
@@ -408,7 +415,7 @@ public final class ReaderActivity extends Activity implements
     in_webview.setWebChromeClient(wc_client);
     in_webview.setWebViewClient(wv_client);
     in_webview.setOnLongClickListener(view -> {
-      ReaderActivity.LOG.debug("ignoring long click on web view");
+      LOG.debug("ignoring long click on web view");
       return true;
     });
 
@@ -435,40 +442,70 @@ public final class ReaderActivity extends Activity implements
 
     in_title_text.setText("");
 
-    final ReaderReadiumEPUBLoaderType pl = rs.getEPUBLoader();
-    pl.loadEPUB(in_epub_file, this);
+    final ReaderReadiumEPUBLoaderType loader = Simplified.getReadiumEPUBLoader();
+    final ReaderReadiumEPUBLoadRequest request =
+      ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
+        .setAdobeRightsFile(db_entry.book().adobeRightsFile())
+        .build();
+
+    loader.loadEPUB(request, this);
 
     this.applyViewerColorFilters();
+  }
 
-    final SimplifiedCatalogAppServicesType app = Simplified.getCatalogAppServices();
-
-    final BooksType books = app.getBooks();
-    books.accountGetCachedLoginDetails(
-      new AccountGetCachedCredentialsListenerType()
-      {
-        @Override public void onAccountIsNotLoggedIn() {
-          throw new UnreachableCodeException();
-        }
-
-        @Override public void onAccountIsLoggedIn(
-          final AccountCredentials creds) {
-          ReaderActivity.this.credentials = creds;
-        }
+  private void onProfileEvent(
+    final ProfileEvent event) {
+    if (event instanceof ProfilePreferencesChanged) {
+      try {
+        onProfileEventPreferencesChanged((ProfilePreferencesChanged) event);
+      } catch (ProfileNoneCurrentException e) {
+        throw new IllegalStateException(e);
       }
-    );
+    }
   }
 
-  @Override public void onCurrentPageError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("onCurrentPageError: {}", x.getMessage(), x);
+  private void onProfileEventPreferencesChanged(
+    final ProfilePreferencesChanged event)
+    throws ProfileNoneCurrentException {
+    if (event.changedReaderPreferences()) {
+      LOG.debug("reader settings changed");
+
+      final ReaderPreferences preferences =
+        Simplified.getProfilesController()
+          .profileCurrent()
+          .preferences()
+          .readerPreferences();
+
+      applyReaderPreferences(preferences);
+    }
   }
 
-  @Override public void onCurrentPageReceived(
-    final ReaderBookLocation loc)
-  {
+  private void applyReaderPreferences(ReaderPreferences preferences) {
+    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
+    js.setPageStyleSettings(preferences);
+
+    final ReaderColorScheme cs = preferences.colorScheme();
+    this.applyViewerColorScheme(cs);
+
+    UIThread.runOnUIThreadDelayed(() -> {
+      final ReaderReadiumJavaScriptAPIType readium_js =
+        Objects.requireNonNull(this.readium_js_api);
+      readium_js.getCurrentPage(this);
+      readium_js.mediaOverlayIsAvailable(this);
+    }, 300L);
+  }
+
+  @Override
+  public void onCurrentPageError(
+    final Throwable x) {
+    LOG.error("onCurrentPageError: {}", x.getMessage(), x);
+  }
+
+  @Override
+  public void onCurrentPageReceived(
+    final ReaderBookLocation loc) {
     Objects.requireNonNull(loc);
-    ReaderActivity.LOG.debug("received book location: {}", loc);
+    LOG.debug("received book location: {}", loc);
 
     this.current_location = loc;
 
@@ -483,14 +520,17 @@ public final class ReaderActivity extends Activity implements
     checkExistingBookmarksAndUpdateUI(loc);
   }
 
-  @Override protected void onPause()
-  {
+  @Override
+  protected void onPause() {
     super.onPause();
 
-    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
-
     if (this.book_id != null && this.current_location != null) {
-      rs.getBookmarks().saveReadingPosition(this.book_id, this.current_location);
+      try {
+        Simplified.getProfilesController()
+          .profileBookmarkSet(this.book_id, this.current_location);
+      } catch (final ProfileNoneCurrentException e) {
+        throw new IllegalStateException(e);
+      }
     }
 
     final ReaderSyncManager mgr = this.sync_manager;
@@ -499,36 +539,33 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  @Override protected void onDestroy()
-  {
+  @Override
+  protected void onDestroy() {
     super.onDestroy();
 
-    final ReaderReadiumJavaScriptAPIType readium_js =
-      Objects.requireNonNull(ReaderActivity.this.readium_js_api);
-    readium_js.getCurrentPage(ReaderActivity.this);
-    readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+    final ReaderReadiumJavaScriptAPIType readium_js = Objects.requireNonNull(this.readium_js_api);
+    readium_js.getCurrentPage(this);
+    readium_js.mediaOverlayIsAvailable(this);
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
-
-    final ReaderSettingsType settings = rs.getSettings();
-    settings.removeListener(this);
-//    System.exit(0);
+    final ObservableSubscriptionType<ProfileEvent> sub = this.profile_subscription;
+    if (sub != null) {
+      sub.unsubscribe();
+    }
+    this.profile_subscription = null;
   }
 
-  @Override public void onEPUBLoadFailed(
-    final Throwable x)
-  {
+  @Override
+  public void onEPUBLoadFailed(
+    final Throwable x) {
     ErrorDialogUtilities.showErrorWithRunnable(
-      this, ReaderActivity.LOG,
+      this, LOG,
       "Could not load EPUB file",
       x,
-      ReaderActivity.this::finish);
+      this::finish);
   }
 
-
-
-  @Override public void onEPUBLoadSucceeded(
+  @Override
+  public void onEPUBLoadSucceeded(
     final Container c) {
     this.epub_container = c;
     final Package p = Objects.requireNonNull(c.getDefaultPackage());
@@ -537,10 +574,10 @@ public final class ReaderActivity extends Activity implements
     UIThread.runOnUIThread(() -> in_title_text.setText(Objects.requireNonNull(p.getTitle())));
 
     /*
-      Get any bookmarks from the local database.
+     * Get any bookmarks from the local database.
      */
 
-    synchronized(this) {
+    synchronized (this) {
       if (this.bookmarks == null) {
         try {
           final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
@@ -555,7 +592,7 @@ public final class ReaderActivity extends Activity implements
     }
 
     /*
-      Configure the TOC and Bookmark buttons.
+     * Configure the TOC and Bookmark buttons.
      */
 
     Objects.requireNonNull(this.bookmarks);
@@ -564,8 +601,8 @@ public final class ReaderActivity extends Activity implements
     UIThread.runOnUIThread(() -> {
       in_toc.setOnClickListener((View v) -> {
         final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-        ReaderTOCActivity.startActivityForResult(ReaderActivity.this, sent_toc, this.bookmarks);
-        ReaderActivity.this.overridePendingTransition(0, 0);
+        ReaderTOCActivity.startActivityForResult(this, sent_toc, this.bookmarks);
+        this.overridePendingTransition(0, 0);
       });
 
       in_bookmark.setOnClickListener(view -> {
@@ -585,13 +622,12 @@ public final class ReaderActivity extends Activity implements
     });
 
     /*
-      Get a reference to the web server. Start it if necessary (the callbacks
-      will still be executed if the server is already running).
+     * Get a reference to the web server. Start it if necessary (the callbacks
+     * will still be executed if the server is already running).
      */
 
-    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
-    final ReaderHTTPServerType hs = rs.getHTTPServer();
-    hs.startIfNecessaryForPackage(p, this);
+    final ReaderHTTPServerType server = Simplified.getReaderHTTPServer();
+    server.startIfNecessaryForPackage(p, this);
   }
 
   private void updateBookmarkIconUI() {
@@ -641,7 +677,7 @@ public final class ReaderActivity extends Activity implements
       LOG.error("Error writing annotation to app database: {}", mark);
       ErrorDialogUtilities.showError(
         this,
-        ReaderActivity.LOG,
+        LOG,
         getString(R.string.bookmark_save_error), null);
     }
   }
@@ -680,10 +716,10 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  private synchronized @NonNull BookmarkAnnotation createAnnotation(
+  private synchronized @NonNull
+  BookmarkAnnotation createAnnotation(
     @NonNull ReaderBookLocation bookmark,
-    @Nullable String id)
-  {
+    @Nullable String id) {
     Objects.requireNonNull(this.current_page_count);
     Objects.requireNonNull(this.view_progress_bar);
 
@@ -720,13 +756,12 @@ public final class ReaderActivity extends Activity implements
     return deviceID;
   }
 
-  private @Nullable ReaderBookLocation createReaderLocation(
-    final BookmarkAnnotation bm)
-  {
+  private @Nullable
+  ReaderBookLocation createReaderLocation(
+    final BookmarkAnnotation bm) {
     final String loc_value = bm.getTarget().getSelector().getValue(); //raw content cfi
     try {
-      final JSONObject loc_json = new JSONObject(loc_value);
-      return ReaderBookLocation.fromJSON(loc_json);
+      return ReaderBookLocationJSON.deserializeFromString(this.json_mapper, loc_value);
     } catch (Exception e) {
       ErrorDialogUtilities.showError(
         this,
@@ -737,8 +772,7 @@ public final class ReaderActivity extends Activity implements
   }
 
   private void checkExistingBookmarksAndUpdateUI(
-    final @NonNull ReaderBookLocation loc)
-  {
+    final @NonNull ReaderBookLocation loc) {
     Objects.requireNonNull(this.bookmarks);
     this.current_bookmark = null;
     for (int i = 0; i < this.bookmarks.size(); i++) {
@@ -754,10 +788,10 @@ public final class ReaderActivity extends Activity implements
     this.updateBookmarkIconUI();
   }
 
-  @Override public void onMediaOverlayIsAvailable(
-    final boolean available)
-  {
-    ReaderActivity.LOG.debug(
+  @Override
+  public void onMediaOverlayIsAvailable(
+    final boolean available) {
+    LOG.debug(
       "media overlay status changed: available: {}", available);
 
     final ViewGroup in_media_hud = Objects.requireNonNull(this.view_media);
@@ -768,48 +802,29 @@ public final class ReaderActivity extends Activity implements
     });
   }
 
-  @Override public void onMediaOverlayIsAvailableError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  @Override
+  public void onMediaOverlayIsAvailableError(
+    final Throwable x) {
+    LOG.error("{}", x.getMessage(), x);
   }
 
-  @Override public void onReaderSettingsChanged(
-    final ReaderSettingsType s)
-  {
-    ReaderActivity.LOG.debug("reader settings changed");
-
-    final ReaderReadiumJavaScriptAPIType js =
-      Objects.requireNonNull(this.readium_js_api);
-    js.setPageStyleSettings(s);
-
-    final ReaderColorScheme cs = s.getColorScheme();
-    this.applyViewerColorScheme(cs);
-
-    UIThread.runOnUIThreadDelayed(() -> {
-      final ReaderReadiumJavaScriptAPIType readium_js =
-        Objects.requireNonNull(ReaderActivity.this.readium_js_api);
-      readium_js.getCurrentPage(ReaderActivity.this);
-      readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
-    }, 300L);
+  @Override
+  public void onReadiumFunctionDispatchError(
+    final Throwable x) {
+    LOG.error("{}", x.getMessage(), x);
   }
 
-  @Override public void onReadiumFunctionDispatchError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
-  }
+  @Override
+  public void onReadiumFunctionInitialize() {
+    LOG.debug("readium initialize requested");
 
-  @Override public void onReadiumFunctionInitialize()
-  {
-    ReaderActivity.LOG.debug("readium initialize requested");
+    final ReaderHTTPServerType hs =
+      Simplified.getReaderHTTPServer();
+    final Container c =
+      Objects.requireNonNull(this.epub_container);
+    final Package p =
+      Objects.requireNonNull(c.getDefaultPackage());
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
-
-    final ReaderHTTPServerType hs = rs.getHTTPServer();
-    final Container c = Objects.requireNonNull(this.epub_container);
-    final Package p = Objects.requireNonNull(c.getDefaultPackage());
     p.setRootUrls(hs.getURIBase().toString(), null);
 
     final ReaderReadiumJavaScriptAPIType js =
@@ -819,8 +834,8 @@ public final class ReaderActivity extends Activity implements
     js.injectFonts();
 
     /*
-      If there's a bookmark for the current book, send a request to open the
-      book to that specific page. Otherwise, start at the beginning.
+     * If there's a bookmark for the current book, send a request to open the
+     * book to that specific page. Otherwise, start at the beginning.
      */
 
     final BookID in_book_id = Objects.requireNonNull(this.book_id);
@@ -830,42 +845,54 @@ public final class ReaderActivity extends Activity implements
     navigateTo(readingPosition);
 
     /*
-      Configure the visibility of UI elements.
+     * Configure the visibility of UI elements.
      */
 
-    final WebView in_web_view = Objects.requireNonNull(this.view_web_view);
-    final ProgressBar in_loading = Objects.requireNonNull(this.view_loading);
+    final WebView in_web_view =
+      Objects.requireNonNull(this.view_web_view);
+    final ProgressBar in_loading =
+      Objects.requireNonNull(this.view_loading);
     final ProgressBar in_progress_bar =
       Objects.requireNonNull(this.view_progress_bar);
     final TextView in_progress_text =
       Objects.requireNonNull(this.view_progress_text);
-    final ImageView in_media_play = Objects.requireNonNull(this.view_media_play);
-    final ImageView in_media_next = Objects.requireNonNull(this.view_media_next);
-    final ImageView in_media_prev = Objects.requireNonNull(this.view_media_prev);
+    final ImageView in_media_play =
+      Objects.requireNonNull(this.view_media_play);
+    final ImageView in_media_next =
+      Objects.requireNonNull(this.view_media_next);
+    final ImageView in_media_prev =
+      Objects.requireNonNull(this.view_media_prev);
 
     in_loading.setVisibility(View.GONE);
     in_web_view.setVisibility(View.VISIBLE);
     in_progress_bar.setVisibility(View.VISIBLE);
     in_progress_text.setVisibility(View.INVISIBLE);
 
-    final ReaderSettingsType settings = rs.getSettings();
-    this.onReaderSettingsChanged(settings);
+    try {
+      this.applyReaderPreferences(
+        Simplified.getProfilesController()
+          .profileCurrent()
+          .preferences()
+          .readerPreferences());
+    } catch (final ProfileNoneCurrentException e) {
+      throw new IllegalStateException(e);
+    }
 
     UIThread.runOnUIThread(() -> {
       in_media_play.setOnClickListener(view -> {
-        ReaderActivity.LOG.debug("toggling media overlay");
+        LOG.debug("toggling media overlay");
         js.mediaOverlayToggle();
       });
 
       in_media_next.setOnClickListener(
         view -> {
-          ReaderActivity.LOG.debug("next media overlay");
+          LOG.debug("next media overlay");
           js.mediaOverlayNext();
         });
 
       in_media_prev.setOnClickListener(
         view -> {
-          ReaderActivity.LOG.debug("previous media overlay");
+          LOG.debug("previous media overlay");
           js.mediaOverlayPrevious();
         });
     });
@@ -875,16 +902,14 @@ public final class ReaderActivity extends Activity implements
     Reader Sync Manager
    */
 
-  private void uploadReadingPosition(final ReaderBookLocation location)
-  {
+  private void uploadReadingPosition(final ReaderBookLocation location) {
     final ReaderSyncManager mgr = this.sync_manager;
     if (mgr != null) {
       mgr.updateServerReadingLocation(location);
     }
   }
 
-  private void lazyInitSyncManagement()
-  {
+  private void lazyInitSyncManagement() {
     if (this.sync_manager != null) {
       return;
     }
@@ -898,15 +923,16 @@ public final class ReaderActivity extends Activity implements
       return;
     }
 
-    this.sync_manager = new ReaderSyncManager(
-      this.feed_entry,
-      this.credentials,
-      Simplified.getCurrentAccount(),
-      this,
-      (location) -> {
-        navigateTo(location);
-        return Unit.INSTANCE;
-      });
+    this.sync_manager =
+      new ReaderSyncManager(
+        this.feed_entry,
+        this.credentials,
+        Simplified.getCurrentAccount(),
+        this,
+        (location) -> {
+          navigateTo(location);
+          return Unit.INSTANCE;
+        });
 
     final Container c = Objects.requireNonNull(this.epub_container);
     final Package p = c.getDefaultPackage();
@@ -917,7 +943,7 @@ public final class ReaderActivity extends Activity implements
       sync_manager.syncReadingLocation(getDeviceIDString(), current_loc, this);
       sync_manager.retryOnDiskBookmarksUpload(current_marks);
       sync_manager.syncBookmarks(current_marks, (syncedMarks) -> {
-        synchronized(this) {
+        synchronized (this) {
           this.bookmarks = new ArrayList<>(syncedMarks);
           //Update bookmarks on disk
           final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
@@ -935,20 +961,20 @@ public final class ReaderActivity extends Activity implements
     });
   }
 
-  @Override public void onReadiumFunctionInitializeError(
-    final Throwable e)
-  {
+  @Override
+  public void onReadiumFunctionInitializeError(
+    final Throwable e) {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
-      ReaderActivity.LOG,
+      LOG,
       "Unable to initialize Readium",
       e,
-      ReaderActivity.this::finish);
+      this::finish);
   }
 
   /**
    * {@inheritDoc}
-   *
+   * <p>
    * When the device orientation changes, the configuration change handler
    * {@link #onConfigurationChanged(Configuration)} makes the web view invisible
    * so that the user does not see the now incorrectly-paginated content. When
@@ -956,10 +982,10 @@ public final class ReaderActivity extends Activity implements
    * web view visible again.
    */
 
-  @Override public void onReadiumFunctionPaginationChanged(
-    final ReaderPaginationChangedEvent e)
-  {
-    ReaderActivity.LOG.debug("pagination changed: {}", e);
+  @Override
+  public void onReadiumFunctionPaginationChanged(
+    final ReaderPaginationChangedEvent e) {
+    LOG.debug("pagination changed: {}", e);
     final WebView in_web_view = Objects.requireNonNull(this.view_web_view);
 
     /*
@@ -1006,9 +1032,9 @@ public final class ReaderActivity extends Activity implements
        */
       UIThread.runOnUIThreadDelayed(() -> {
         final ReaderReadiumJavaScriptAPIType readium_js =
-          Objects.requireNonNull(ReaderActivity.this.readium_js_api);
-        readium_js.getCurrentPage(ReaderActivity.this);
-        readium_js.mediaOverlayIsAvailable(ReaderActivity.this);
+          Objects.requireNonNull(this.readium_js_api);
+        readium_js.getCurrentPage(this);
+        readium_js.mediaOverlayIsAvailable(this);
       }, 300L);
     });
 
@@ -1035,33 +1061,33 @@ public final class ReaderActivity extends Activity implements
     }
   }
 
-  @Override public void onReadiumFunctionPaginationChangedError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("onReadiumFunctionPaginationChangedError: {}", x.getMessage(), x);
+  @Override
+  public void onReadiumFunctionPaginationChangedError(
+    final Throwable x) {
+    LOG.error("onReadiumFunctionPaginationChangedError: {}", x.getMessage(), x);
   }
 
-  @Override public void onReadiumFunctionSettingsApplied()
-  {
-    ReaderActivity.LOG.debug("received settings applied");
+  @Override
+  public void onReadiumFunctionSettingsApplied() {
+    LOG.debug("received settings applied");
   }
 
-  @Override public void onReadiumFunctionSettingsAppliedError(
-    final Throwable e)
-  {
-    ReaderActivity.LOG.error("{}", e.getMessage(), e);
+  @Override
+  public void onReadiumFunctionSettingsAppliedError(
+    final Throwable e) {
+    LOG.error("{}", e.getMessage(), e);
   }
 
-  @Override public void onReadiumFunctionUnknown(
-    final String text)
-  {
-    ReaderActivity.LOG.error("unknown readium function: {}", text);
+  @Override
+  public void onReadiumFunctionUnknown(
+    final String text) {
+    LOG.error("unknown readium function: {}", text);
   }
 
-  @Override public void onReadiumMediaOverlayStatusChangedIsPlaying(
-    final boolean playing)
-  {
-    ReaderActivity.LOG.debug(
+  @Override
+  public void onReadiumMediaOverlayStatusChangedIsPlaying(
+    final boolean playing) {
+    LOG.debug(
       "media overlay status changed: playing: {}", playing);
 
     final Resources rr = Objects.requireNonNull(this.getResources());
@@ -1076,127 +1102,121 @@ public final class ReaderActivity extends Activity implements
     });
   }
 
-  @Override public void onReadiumMediaOverlayStatusError(
-    final Throwable e)
-  {
-    ReaderActivity.LOG.error("{}", e.getMessage(), e);
+  @Override
+  public void onReadiumMediaOverlayStatusError(
+    final Throwable e) {
+    LOG.error("{}", e.getMessage(), e);
   }
 
-  @Override public void onServerStartFailed(
+  @Override
+  public void onServerStartFailed(
     final ReaderHTTPServerType hs,
-    final Throwable x)
-  {
+    final Throwable x) {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
-      ReaderActivity.LOG,
+      LOG,
       "Could not start http server.",
       x,
-      ReaderActivity.this::finish);
+      this::finish);
   }
 
-  @Override public void onServerStartSucceeded(
+  @Override
+  public void onServerStartSucceeded(
     final ReaderHTTPServerType hs,
-    final boolean first)
-  {
+    final boolean first) {
     if (first) {
-      ReaderActivity.LOG.debug("http server started");
+      LOG.debug("http server started");
     } else {
-      ReaderActivity.LOG.debug("http server already running");
+      LOG.debug("http server already running");
     }
 
     this.makeInitialReadiumRequest(hs);
   }
 
-  @Override public void onSimplifiedFunctionDispatchError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  @Override
+  public void onSimplifiedFunctionDispatchError(
+    final Throwable x) {
+    LOG.error("{}", x.getMessage(), x);
   }
 
-  @Override public void onSimplifiedFunctionUnknown(
-    final String text)
-  {
-    ReaderActivity.LOG.error("unknown function: {}", text);
+  @Override
+  public void onSimplifiedFunctionUnknown(
+    final String text) {
+    LOG.error("unknown function: {}", text);
   }
 
-  @Override public void onSimplifiedGestureCenter()
-  {
+  @Override
+  public void onSimplifiedGestureCenter() {
     final ViewGroup in_hud = Objects.requireNonNull(this.view_hud);
     UIThread.runOnUIThread(() -> {
       switch (in_hud.getVisibility()) {
         case View.VISIBLE: {
-          FadeUtilities.fadeOut(
-            in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
+          fadeOut(in_hud, DEFAULT_FADE_DURATION);
           break;
         }
         case View.INVISIBLE:
         case View.GONE: {
-          FadeUtilities.fadeIn(in_hud, FadeUtilities.DEFAULT_FADE_DURATION);
+          fadeIn(in_hud, DEFAULT_FADE_DURATION);
           break;
         }
       }
     });
   }
 
-  @Override public void onSimplifiedGestureCenterError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  @Override
+  public void onSimplifiedGestureCenterError(
+    final Throwable x) {
+    LOG.error("{}", x.getMessage(), x);
   }
 
-  @Override public void onSimplifiedGestureLeft()
-  {
-    final ReaderReadiumJavaScriptAPIType js =
-      Objects.requireNonNull(this.readium_js_api);
+  @Override
+  public void onSimplifiedGestureLeft() {
+    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
     js.pagePrevious();
   }
 
-  @Override public void onSimplifiedGestureLeftError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  @Override
+  public void onSimplifiedGestureLeftError(
+    final Throwable x) {
+    LOG.error("{}", x.getMessage(), x);
   }
 
-  @Override public void onSimplifiedGestureRight()
-  {
-    final ReaderReadiumJavaScriptAPIType js =
-      Objects.requireNonNull(this.readium_js_api);
+  @Override
+  public void onSimplifiedGestureRight() {
+    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
     js.pageNext();
   }
 
-  @Override public void onSimplifiedGestureRightError(
-    final Throwable x)
-  {
-    ReaderActivity.LOG.error("{}", x.getMessage(), x);
+  @Override
+  public void onSimplifiedGestureRightError(
+    final Throwable x) {
+    LOG.error("{}", x.getMessage(), x);
   }
 
-  @Override public void onTOCSelectionReceived(
-    final TOCElement e)
-  {
-    ReaderActivity.LOG.debug("received TOC selection: {}", e);
+  @Override
+  public void onTOCSelectionReceived(
+    final TOCElement e) {
+    LOG.debug("received TOC selection: {}", e);
 
-    final ReaderReadiumJavaScriptAPIType js =
-      Objects.requireNonNull(this.readium_js_api);
-
+    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
     js.openContentURL(e.getContentRef(), e.getSourceHref());
   }
 
-  @Override public void onBookmarkSelectionReceived(
-    final BookmarkAnnotation bm)
-  {
-    ReaderActivity.LOG.debug("received bookmark selection: {}", bm);
+  @Override
+  public void onBookmarkSelectionReceived(
+    final BookmarkAnnotation bm) {
+    LOG.debug("received bookmark selection: {}", bm);
     final ReaderBookLocation loc = createReaderLocation(bm);
     if (loc != null) {
       this.navigateTo(loc);
     }
   }
 
-  private void navigateTo(final ReaderBookLocation location)
-  {
+  private void navigateTo(final ReaderBookLocation location) {
     final OptionType<ReaderBookLocation> optLocation = Option.of(location);
     OptionType<ReaderOpenPageRequestType> page_request = optLocation.map((l) -> {
       LOG.debug("Creating Page Req for: {}", l);
-      ReaderActivity.this.current_location = l;
+      this.current_location = l;
       return ReaderOpenPageRequest.fromBookLocation(l);
     });
 
@@ -1204,8 +1224,10 @@ public final class ReaderActivity extends Activity implements
       Objects.requireNonNull(this.readium_js_api);
     final ReaderReadiumViewerSettings vs =
       Objects.requireNonNull(this.viewer_settings);
-    final Container c = Objects.requireNonNull(ReaderActivity.this.epub_container);
-    final Package p = Objects.requireNonNull(c.getDefaultPackage());
+    final Container c =
+      Objects.requireNonNull(this.epub_container);
+    final Package p =
+      Objects.requireNonNull(c.getDefaultPackage());
 
     js.openBook(p, vs, page_request);
   }

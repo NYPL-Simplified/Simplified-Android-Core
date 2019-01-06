@@ -20,7 +20,6 @@ import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke;
 import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed;
 import org.nypl.simplified.books.book_registry.BookStatusRevoked;
 import org.nypl.simplified.books.book_registry.BookWithStatus;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.feeds.FeedFacetPseudo;
 import org.nypl.simplified.books.feeds.FeedFacetType;
 import org.nypl.simplified.books.feeds.FeedSearchLocal;

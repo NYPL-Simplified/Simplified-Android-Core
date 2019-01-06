@@ -9,9 +9,9 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
-import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
-import org.nypl.simplified.books.core.BookDatabaseReadableType
-import org.nypl.simplified.books.core.FeedEntryOPDS
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.book_registry.BookWithStatus
+import org.nypl.simplified.books.feeds.FeedEntryOPDS
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService
  */
 
 class BookCoverProvider private constructor(
-  private val books: BookDatabaseReadableType,
+  private val bookRegistry: BookRegistryReadableType,
   private val coverGenerator: BookCoverGeneratorType,
   private val picasso: Picasso,
   private val badgeLookup: BookCoverBadgeLookupType
@@ -118,22 +118,24 @@ class BookCoverProvider private constructor(
   }
 
   private fun coverURIOf(entry: FeedEntryOPDS): URI? {
-    val snapOption = this.books.databaseGetEntrySnapshot(entry.bookID)
-    if (snapOption is Some<BookDatabaseEntrySnapshot>) {
-      val (_, coverOption) = snapOption.get()
-      if (coverOption is Some<File>) {
-        return coverOption.get().toURI()
+    val bookOpt = this.bookRegistry.book(entry.actualBookID)
+    if (bookOpt is Some<BookWithStatus>) {
+      val book = bookOpt.get()
+      val coverOpt = book.book().cover()
+      if (coverOpt is Some<File>) {
+        return coverOpt.get().toURI()
       }
     }
     return mapOptionToNull(entry.feedEntry.cover)
   }
 
   private fun thumbnailURIOf(entry: FeedEntryOPDS): URI? {
-    val snapOption = this.books.databaseGetEntrySnapshot(entry.bookID)
-    if (snapOption is Some<BookDatabaseEntrySnapshot>) {
-      val (_, coverOption) = snapOption.get()
-      if (coverOption is Some<File>) {
-        return coverOption.get().toURI()
+    val bookOpt = this.bookRegistry.book(entry.actualBookID)
+    if (bookOpt is Some<BookWithStatus>) {
+      val book = bookOpt.get()
+      val coverOpt = book.book().cover()
+      if (coverOpt is Some<File>) {
+        return coverOpt.get().toURI()
       }
     }
     return mapOptionToNull(entry.feedEntry.thumbnail)
@@ -192,7 +194,7 @@ class BookCoverProvider private constructor(
      *
      * @param context         The application context
      * @param badgeLookup     A function used to look up badge images
-     * @param bookDatabase    The books database
+     * @param bookRegistry    The book registry
      * @param coverGenerator  A cover generator
      * @param executor        An executor
      *
@@ -201,7 +203,7 @@ class BookCoverProvider private constructor(
 
     fun newCoverProvider(
       context: Context,
-      bookDatabase: BookDatabaseReadableType,
+      bookRegistry: BookRegistryReadableType,
       coverGenerator: BookCoverGeneratorType,
       badgeLookup: BookCoverBadgeLookupType,
       executor: ExecutorService,
@@ -216,7 +218,7 @@ class BookCoverProvider private constructor(
       picassoBuilder.executor(executor)
 
       val picasso = picassoBuilder.build()
-      return BookCoverProvider(bookDatabase, coverGenerator, picasso, badgeLookup)
+      return BookCoverProvider(bookRegistry, coverGenerator, picasso, badgeLookup)
     }
   }
 }

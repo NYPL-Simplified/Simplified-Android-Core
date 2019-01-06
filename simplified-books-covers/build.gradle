@@ -17,6 +17,7 @@ description = 'simplified-books-covers'
 
 dependencies {
   api project(':simplified-books-core')
+  api project(':simplified-books-core-ng')
   api project(':simplified-http-core')
   api project(':simplified-opds-core')
   api project(':simplified-tenprint')

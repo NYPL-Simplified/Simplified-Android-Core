@@ -10,13 +10,11 @@ import android.widget.ProgressBar
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.audiobook.android.api.PlayerManifest
 import org.nypl.audiobook.android.api.PlayerManifests
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.SimplifiedCatalogAppServicesType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountCredentialsHTTP

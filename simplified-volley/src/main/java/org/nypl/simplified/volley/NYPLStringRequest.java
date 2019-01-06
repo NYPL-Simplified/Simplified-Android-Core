@@ -8,9 +8,9 @@ import com.io7m.jnull.Nullable;
 
 import net.iharder.Base64;
 
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.core.AccountAuthToken;
 import org.nypl.simplified.books.core.AccountBarcode;
-import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountPIN;
 
 import java.nio.charset.Charset;
@@ -24,8 +24,7 @@ import java.util.Map;
 
 public class NYPLStringRequest extends StringRequest {
 
-  private @Nullable
-  AccountCredentials credentials;
+  private @Nullable AccountAuthenticationCredentials credentials;
   private @Nullable String username;
   private @Nullable String password;
   private @Nullable String content_type;
@@ -41,7 +40,7 @@ public class NYPLStringRequest extends StringRequest {
    */
   public NYPLStringRequest(final int method,
                            final String url,
-                           final AccountCredentials in_credentials,
+                           final AccountAuthenticationCredentials in_credentials,
                            final Response.Listener<String> listener,
                            final Response.ErrorListener error_listener) {
     super(method, url, listener, error_listener);
@@ -58,7 +57,7 @@ public class NYPLStringRequest extends StringRequest {
    */
   public NYPLStringRequest(final int method,
                            final String url,
-                           final AccountCredentials in_credentials,
+                           final AccountAuthenticationCredentials in_credentials,
                            final String in_content_type,
                            final String in_body,
                            final Response.Listener<String> listener,
@@ -79,7 +78,7 @@ public class NYPLStringRequest extends StringRequest {
    */
   public NYPLStringRequest(final int method,
                            final String url,
-                           final AccountCredentials in_credentials,
+                           final AccountAuthenticationCredentials in_credentials,
                            final String in_content_type,
                            final Response.Listener<String> listener,
                            final Response.ErrorListener error_listener) {
@@ -95,7 +94,7 @@ public class NYPLStringRequest extends StringRequest {
    * @param error_listener error listener
    */
   public NYPLStringRequest(final String url,
-                           final AccountCredentials in_credentials,
+                           final AccountAuthenticationCredentials in_credentials,
                            final Response.Listener<String> listener,
                            final Response.ErrorListener error_listener) {
     super(url, listener, error_listener);

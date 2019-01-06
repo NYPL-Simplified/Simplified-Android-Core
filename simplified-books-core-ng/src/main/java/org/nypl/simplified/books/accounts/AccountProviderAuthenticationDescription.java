@@ -28,6 +28,12 @@ public abstract class AccountProviderAuthenticationDescription {
   public abstract boolean passCodeMayContainLetters();
 
   /**
+   * @return {@code true} iff a PIN is required for authentication
+   */
+
+  public abstract boolean requiresPin();
+
+  /**
    * @return The login URI
    */
 
@@ -45,9 +51,9 @@ public abstract class AccountProviderAuthenticationDescription {
     }
 
     /**
-     * @see #loginURI()
      * @param uri The default login URI
      * @return The current builder
+     * @see #loginURI()
      */
 
     public abstract Builder setLoginURI(URI uri);
@@ -67,6 +73,14 @@ public abstract class AccountProviderAuthenticationDescription {
      */
 
     public abstract Builder setPassCodeMayContainLetters(boolean letters);
+
+    /**
+     * @param required {@code  true} iff a PIN is required
+     * @return The current builder
+     * @see #requiresPin()
+     */
+
+    public abstract Builder setRequiresPin(boolean required);
 
     /**
      * @return The constructed account provider

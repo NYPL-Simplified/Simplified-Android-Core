@@ -59,7 +59,7 @@
     </activity>
 
     <activity
-      android:name="org.nypl.simplified.app.LoginActivity"
+      android:name="org.nypl.simplified.app.login.LoginActivity"
       android:configChanges="orientation|screenSize"
       android:theme="@style/SimplifiedTheme_NoActionBar"
       android:exported="false">

@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 
 final class BooksControllerLogoutTask implements Callable<Unit> {
 
-  private static final Logger LOG = LogUtilities.getLog(BooksControllerLogoutTask.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BooksControllerLogoutTask.class);
 
   private final AccountLogoutListenerType listener;
   private final OptionType<AdobeAdeptExecutorType> adobe_drm;

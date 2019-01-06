@@ -1,69 +1,46 @@
 package org.nypl.simplified.app.catalog;
 
-import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.res.Resources;
-import android.support.v4.content.ContextCompat;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
+
 import com.io7m.jnull.NullCheck;
-import com.io7m.jnull.Nullable;
+
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.app.SimplifiedCatalogAppServicesType;
-import org.nypl.simplified.app.ThemeMatcher;
-import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BooksType;
+import org.nypl.simplified.books.accounts.AccountType;
+import org.nypl.simplified.books.book_database.BookID;
+import org.nypl.simplified.books.controller.BooksControllerType;
 
 /**
  * A button for deleting books.
  */
 
-public final class CatalogBookDeleteButton extends CatalogLeftPaddedButton
-  implements CatalogBookButtonType
-{
+public final class CatalogBookDeleteButton
+  extends AppCompatButton implements CatalogBookButtonType {
+
   /**
    * Construct a button.
-   *
-   * @param in_activity The host activity
-   * @param in_book_id  The book ID
    */
 
   public CatalogBookDeleteButton(
-    final Activity in_activity,
-    final BookID in_book_id)
-  {
-    super(in_activity);
+    final AppCompatActivity activity,
+    final BooksControllerType booksController,
+    final AccountType account,
+    final BookID bookID) {
 
-    final Resources rr = NullCheck.notNull(in_activity.getResources());
-    this.getTextView().setText(NullCheck.notNull(rr.getString(R.string.catalog_book_delete)));
-    this.getTextView().setContentDescription(NullCheck.notNull(rr.getString(R.string.catalog_accessibility_book_delete)));
-    this.getTextView().setTextSize(12.0f);
-    this.setBackgroundResource(R.drawable.simplified_button);
-    final int resID = ThemeMatcher.Companion.color(Simplified.getCurrentAccount().getMainColor());
-    final int mainColor = ContextCompat.getColor(this.getContext(), resID);
-    this.getTextView().setTextColor(mainColor);
+    super(activity);
 
-    this.setOnClickListener(
-      new OnClickListener()
-      {
-        @Override public void onClick(
-          final @Nullable View v)
-        {
-          final CatalogBookDeleteDialog d = CatalogBookDeleteDialog.newDialog();
-          d.setOnConfirmListener(
-            new Runnable()
-            {
-              @Override public void run()
-              {
-                final SimplifiedCatalogAppServicesType app =
-                  Simplified.getCatalogAppServices();
-                final BooksType books = app.getBooks();
-                books.bookDeleteData(in_book_id, Simplified.getCurrentAccount().needsAuth());
-              }
-            });
-          final FragmentManager fm = in_activity.getFragmentManager();
-          d.show(fm, "delete-confirm");
-        }
-      });
+    final Resources resources = NullCheck.notNull(activity.getResources());
+
+    this.setText(NullCheck.notNull(resources.getString(R.string.catalog_book_delete)));
+    this.setContentDescription(NullCheck.notNull(resources.getString(R.string.catalog_accessibility_book_delete)));
+    this.setTextSize(12.0f);
+
+    this.setOnClickListener(view -> {
+      final CatalogBookDeleteDialog d = CatalogBookDeleteDialog.newDialog();
+      d.setOnConfirmListener(() -> booksController.bookDelete(account, bookID));
+      final android.support.v4.app.FragmentManager fm = activity.getSupportFragmentManager();
+      d.show(fm, "delete-confirm");
+    });
   }
 }

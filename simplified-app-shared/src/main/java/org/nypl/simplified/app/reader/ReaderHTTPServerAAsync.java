@@ -20,6 +20,7 @@ import org.nypl.simplified.http.core.HTTPRanges;
 import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -35,11 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class ReaderHTTPServerAAsync
   implements ReaderHTTPServerType, HttpServerRequestCallback
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderHTTPServerAAsync.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(ReaderHTTPServerAAsync.class);
 
   private final     URI                   base;
   private final     ReaderHTTPMimeMapType mime;

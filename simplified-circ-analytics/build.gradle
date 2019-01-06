@@ -20,6 +20,7 @@ dependencies {
   implementation group: 'com.mcxiaoke.volley', name: 'library', version: '1.0.19'
   implementation project(':simplified-json-core')
   implementation project(':simplified-books-core')
+  implementation project(':simplified-books-core-ng')
   implementation project(':simplified-volley')
   implementation project(':simplified-opds-core')
 

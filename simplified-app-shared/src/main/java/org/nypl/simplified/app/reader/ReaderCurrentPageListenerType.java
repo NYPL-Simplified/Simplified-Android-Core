@@ -1,5 +1,7 @@
 package org.nypl.simplified.app.reader;
 
+import org.nypl.simplified.books.reader.ReaderBookLocation;
+
 /**
  * A listener for receiving the current book location.
  */

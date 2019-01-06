@@ -8,40 +8,35 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
+import com.io7m.junreachable.UnimplementedCodeException;
 
-import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.multilibrary.Account;
-import org.nypl.simplified.multilibrary.AccountsRegistry;
+import org.nypl.simplified.books.accounts.AccountID;
+import org.nypl.simplified.books.accounts.AccountType;
+import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
+import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
+import org.nypl.simplified.books.profiles.ProfileReadableType;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Created by aferditamuriqi on 3/30/17.
- */
+public class ReportIssueActivity extends AppCompatActivity {
 
-public class ReportIssueActivity extends Activity {
-
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReportIssueActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(ReportIssueActivity.class);
 
   private EditText subject_field;
   private EditText message_field;
-
-  private Account account;
   private boolean mail_client_opened;
+  private AccountType account;
 
-  /**
-   *
-   */
   public ReportIssueActivity() {
 
   }
@@ -49,35 +44,46 @@ public class ReportIssueActivity extends Activity {
   @Override
   protected void onCreate(final Bundle state) {
     super.onCreate(state);
-    setContentView(R.layout.report_issue);
+    this.setContentView(R.layout.report_issue);
 
+    try {
+      final ProfileReadableType profile =
+        Simplified.getProfilesController()
+          .profileCurrent();
 
-    final Bundle extras = getIntent().getExtras();
-    if (extras != null) {
-      this.account = new AccountsRegistry(this).getAccount(extras.getInt("selected_account"));
-    } else {
-      this.account = Simplified.getCurrentAccount();
+      final Bundle extras = getIntent().getExtras();
+      final AccountID accountId;
+      if (extras != null) {
+        accountId = AccountID.create(extras.getInt("selectedAccount"));
+      } else {
+        accountId = profile.accountCurrent().id();
+      }
+
+      this.account =
+        profile.account(accountId);
+      this.subject_field =
+        NullCheck.notNull(this.findViewById(R.id.subject_field));
+      this.message_field =
+        NullCheck.notNull(this.findViewById(R.id.message_field));
+
+      this.mail_client_opened = false;
+
+      final ActionBar bar = this.getActionBar();
+      if (android.os.Build.VERSION.SDK_INT < 21) {
+        bar.setDisplayHomeAsUpEnabled(false);
+        bar.setHomeButtonEnabled(true);
+        bar.setIcon(R.drawable.ic_arrow_back);
+      } else {
+        bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+        bar.setDisplayHomeAsUpEnabled(true);
+        bar.setHomeButtonEnabled(false);
+      }
+
+    } catch (final ProfileNoneCurrentException e) {
+      throw new IllegalStateException(e);
+    } catch (AccountsDatabaseNonexistentException e) {
+      throw new IllegalStateException(e);
     }
-
-    this.subject_field = NullCheck.notNull(
-      (EditText) this.findViewById(R.id.subject_field));
-
-    this.message_field = NullCheck.notNull(
-      (EditText) this.findViewById(R.id.message_field));
-
-    this.mail_client_opened = false;
-
-    final ActionBar bar = this.getActionBar();
-    if (android.os.Build.VERSION.SDK_INT < 21) {
-      bar.setDisplayHomeAsUpEnabled(false);
-      bar.setHomeButtonEnabled(true);
-      bar.setIcon(R.drawable.ic_arrow_back);
-    } else {
-      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back);
-      bar.setDisplayHomeAsUpEnabled(true);
-      bar.setHomeButtonEnabled(false);
-    }
-
   }
 
   @Override
@@ -126,10 +132,16 @@ public class ReportIssueActivity extends Activity {
         b.setCancelable(true);
         b.create().show();
       } else {
-        this.launchEmailAppWithEmailAddress(this,
-          this.account.getSupportEmail(),
-          this.subject_field.getText().toString(),
-          this.message_field.getText().toString());
+        final OptionType<String> emailOpt = this.account.provider().supportEmail();
+        if (emailOpt.isSome()) {
+          final String email = ((Some<String>) emailOpt).get();
+          this.launchEmailAppWithEmailAddress(this,
+            email,
+            this.subject_field.getText().toString(),
+            this.message_field.getText().toString());
+        } else {
+          throw new UnimplementedCodeException();
+        }
       }
       return true;
     }
@@ -154,7 +166,12 @@ public class ReportIssueActivity extends Activity {
    * @param subject  subject
    * @param message  message
    */
-  private void launchEmailAppWithEmailAddress(final Activity activity, final String email, final String subject, final String message) {
+  private void launchEmailAppWithEmailAddress(
+    final Activity activity,
+    final String email,
+    final String subject,
+    final String message) {
+
     final Intent email_intent = new Intent(android.content.Intent.ACTION_SEND);
     email_intent.setType("plain/text");
     email_intent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{email});

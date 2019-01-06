@@ -9,12 +9,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.app.SimplifiedReaderAppServicesType;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,7 +24,7 @@ import java.util.Objects;
  */
 
 public final class ReaderTOCActivity extends AppCompatActivity
-  implements ReaderSettingsListenerType, ReaderTOCFragmentSelectionListenerType
+  implements ReaderTOCFragmentSelectionListenerType
 {
   /**
    * The name of the argument containing the TOC.
@@ -63,7 +61,7 @@ public final class ReaderTOCActivity extends AppCompatActivity
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(ReaderTOCActivity.class);
+    LOG = LoggerFactory.getLogger(ReaderTOCActivity.class);
     TOC_SELECTION_REQUEST_CODE = 23;
     TOC_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.toc";
     TOC_SELECTED_ID = "org.nypl.simplified.app.reader.ReaderTOCActivity.toc_selected";
@@ -123,12 +121,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
 
     this.setTitle(R.string.reader_toc);
 
-    final SimplifiedReaderAppServicesType rs =
-      Simplified.getReaderAppServices();
-
-    final ReaderSettingsType settings = rs.getSettings();
-    settings.addListener(this);
-
     final Intent input = Objects.requireNonNull(this.getIntent());
     final Bundle args = Objects.requireNonNull(input.getExtras());
 
@@ -146,17 +138,6 @@ public final class ReaderTOCActivity extends AppCompatActivity
 
     TabLayout tabLayout = findViewById(R.id.reader_toc_tab_layout);
     tabLayout.setupWithViewPager(pager);
-  }
-
-  @Override public void onReaderSettingsChanged(
-    final ReaderSettingsType s)
-  {
-    final ReaderTOCContentsFragment contentsFragment =
-        (ReaderTOCContentsFragment) getSupportFragmentManager().findFragmentById(R.id.reader_toc);
-
-    if (contentsFragment != null) {
-      contentsFragment.onReaderSettingsChanged(s);
-    }
   }
 
   /**

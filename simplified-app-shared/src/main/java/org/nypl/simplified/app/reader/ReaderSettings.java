@@ -7,6 +7,7 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,11 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ReaderSettings implements ReaderSettingsType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderSettings.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(ReaderSettings.class);
 
   private final Map<ReaderSettingsListenerType, Unit> listeners;
   private final SharedPreferences                     settings;

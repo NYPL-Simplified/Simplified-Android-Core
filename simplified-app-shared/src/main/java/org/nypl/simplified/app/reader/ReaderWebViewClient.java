@@ -8,6 +8,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -19,11 +20,7 @@ import java.net.URI;
 
 final class ReaderWebViewClient extends WebViewClient
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(ReaderActivity.class);
 
   private final ReaderSimplifiedFeedbackDispatcherType simplified_dispatcher;
   private final ReaderReadiumFeedbackDispatcherType    readium_dispatcher;

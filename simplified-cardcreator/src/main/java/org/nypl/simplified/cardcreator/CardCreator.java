@@ -22,7 +22,7 @@ public final class CardCreator {
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(CardCreator.class);
+    LOG = LoggerFactory.getLogger(CardCreator.class);
   }
 
   private String url;

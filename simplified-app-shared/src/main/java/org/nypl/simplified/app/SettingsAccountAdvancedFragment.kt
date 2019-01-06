@@ -1,15 +1,15 @@
 package org.nypl.simplified.app
 
 import android.app.AlertDialog
-import android.app.Fragment
 import android.content.Context
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TableRow
-import java.util.*
+import java.util.Objects
 
 
 class SettingsAccountAdvancedFragment : Fragment() {
@@ -39,7 +39,7 @@ class SettingsAccountAdvancedFragment : Fragment() {
         syncSwitch.isEnabled = false
         act.annotationsManager.updateServerSyncPermissionStatus(false) { success ->
           if (success) {
-            val transaction = act.fragmentManager.beginTransaction()
+            val transaction = act.supportFragmentManager.beginTransaction()
             transaction.remove(this@SettingsAccountAdvancedFragment)
             transaction.commit()
           } else {

@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.books.core.FeedFacetType;
+import org.nypl.simplified.books.feeds.FeedFacetType;
 
 /**
  * The type of facet selection listeners.

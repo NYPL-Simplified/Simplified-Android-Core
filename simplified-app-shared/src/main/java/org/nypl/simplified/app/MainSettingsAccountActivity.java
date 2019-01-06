@@ -47,7 +47,10 @@ import com.io7m.jnull.Nullable;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.tenmiles.helpstack.HSHelpStack;
 import com.tenmiles.helpstack.gears.HSDeskGear;
+
+import org.nypl.simplified.app.login.LoginDialog;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType;
@@ -65,6 +68,7 @@ import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The activity displaying the settings for the application.
@@ -73,11 +77,8 @@ import org.slf4j.Logger;
 public final class MainSettingsAccountActivity extends SimplifiedActivity implements
   AccountLogoutListenerType,
   AccountGetCachedCredentialsListenerType, AccountSyncListenerType, DeviceActivationListenerType {
-  private static final Logger LOG;
 
-  static {
-    LOG = LogUtilities.getLog(MainSettingsActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(MainSettingsActivity.class);
 
   private Account account;
   @Nullable
@@ -749,7 +750,7 @@ public final class MainSettingsAccountActivity extends SimplifiedActivity implem
 
       @Override
       public void onLoginSuccess(
-        final AccountCredentials creds) {
+        final AccountAuthenticationCredentials creds) {
         LOG.trace("feed auth: login supplied new credentials");
 //        LoginActivity.this.openCatalog();
 

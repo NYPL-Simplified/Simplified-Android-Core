@@ -1,7 +1,6 @@
 package org.nypl.simplified.books.core;
 
 import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 

@@ -7,16 +7,18 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
+import android.widget.ListView
+import android.widget.TextView
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.books.core.BookmarkAnnotation
 import org.nypl.simplified.rfc3339.core.RFC3339Formatter
 import org.slf4j.LoggerFactory
-import java.lang.Exception
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.ArrayList
+import java.util.Locale
 
 /**
  * A reusable fragment for a ListView of bookmarks
@@ -26,7 +28,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
   private var inflater: LayoutInflater? = null
   private var adapter: ArrayAdapter<BookmarkAnnotation>? = null
-  private var listener: ReaderTOCFragmentSelectionListenerType ? = null
+  private var listener: ReaderTOCFragmentSelectionListenerType? = null
 
   private var bookmarksTOCLayout: View? = null
   private var bookmarksTOCListView: ListView? = null
@@ -35,8 +37,10 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     val LOG = LoggerFactory.getLogger(ReaderTOCBookmarksFragment::class.java)!!
   }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                            savedInstanceState: Bundle?): View? {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?): View? {
 
     this.inflater = inflater
     bookmarksTOCLayout = inflater.inflate(R.layout.reader_toc_bookmarks, null)
@@ -49,17 +53,16 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
     adapter = ArrayAdapter(context, 0, sortedMarks)
     bookmarksTOCListView?.adapter = this
-
     return bookmarksTOCLayout
   }
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
-    if (context is ReaderTOCFragmentSelectionListenerType ) {
+    if (context is ReaderTOCFragmentSelectionListenerType) {
       listener = context
     } else {
       throw RuntimeException(context.toString() +
-          " must implement ReaderTOCFragmentSelectionListenerType ")
+        " must implement ReaderTOCFragmentSelectionListenerType ")
     }
   }
 
@@ -103,15 +106,14 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     textView.text = bookmark?.body?.chapterTitle ?: "Bookmark"
     detailTextView.text = detailTextFrom(bookmark)
 
-    val rs = Simplified.getReaderAppServices()
-    val settings = rs.settings
+    textView.setTextColor(
+      ReaderColorSchemes.foreground(Simplified.getProfilesController()
+        .profileCurrent()
+        .preferences()
+        .readerPreferences()
+        .colorScheme()))
 
-    textView.setTextColor(settings.colorScheme.foregroundColor)
-
-    layoutView.setOnClickListener { _ ->
-      this.listener?.onBookmarkSelected(bookmark)
-    }
-
+    layoutView.setOnClickListener { this.listener?.onBookmarkSelected(bookmark) }
     return layoutView
   }
 

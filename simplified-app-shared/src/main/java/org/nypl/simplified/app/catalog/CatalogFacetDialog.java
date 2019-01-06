@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.core.FeedFacetType;
+import org.nypl.simplified.books.feeds.FeedFacetType;
 
 import java.util.ArrayList;
 

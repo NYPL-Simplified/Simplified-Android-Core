@@ -14,6 +14,8 @@ include ':simplified-bugsnag'
 include ':simplified-cardcreator'
 include ':simplified-checkstyle'
 include ':simplified-circ-analytics'
+include ':simplified-datepicker'
+include ':simplified-datepicker-demo'
 include ':simplified-downloader-core'
 include ':simplified-files'
 include ':simplified-http-core'
@@ -44,6 +46,8 @@ project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as Fil
 project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
 project(':simplified-checkstyle').projectDir = "$rootDir/simplified-checkstyle" as File
 project(':simplified-circ-analytics').projectDir = "$rootDir/simplified-circ-analytics" as File
+project(':simplified-datepicker').projectDir = "$rootDir/simplified-datepicker" as File
+project(':simplified-datepicker-demo').projectDir = "$rootDir/simplified-datepicker-demo" as File
 project(':simplified-downloader-core').projectDir = "$rootDir/simplified-downloader-core" as File
 project(':simplified-files').projectDir = "$rootDir/simplified-files" as File
 project(':simplified-http-core').projectDir = "$rootDir/simplified-http-core" as File

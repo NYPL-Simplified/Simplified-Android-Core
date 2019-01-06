@@ -4,8 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.support.annotation.ColorInt
-import android.support.v4.app.FragmentActivity
+import android.support.v7.app.AppCompatActivity
 import android.widget.ImageView
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
@@ -29,11 +28,6 @@ import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.audiobook.android.api.PlayerSleepTimer
 import org.nypl.audiobook.android.api.PlayerSleepTimerType
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadFailed
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloaded
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloading
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementNotDownloaded
 import org.nypl.audiobook.android.api.PlayerType
 import org.nypl.audiobook.android.downloads.DownloadProvider
 import org.nypl.audiobook.android.views.PlayerAccessibilityEvent
@@ -44,15 +38,14 @@ import org.nypl.audiobook.android.views.PlayerPlaybackRateFragment
 import org.nypl.audiobook.android.views.PlayerSleepTimerFragment
 import org.nypl.audiobook.android.views.PlayerTOCFragment
 import org.nypl.audiobook.android.views.PlayerTOCFragmentParameters
+import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.SimplifiedCatalogAppServicesType
-import org.nypl.simplified.app.ThemeMatcher
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.NamedThreadPools
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
-import org.nypl.simplified.books.core.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntryOPDS
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -62,7 +55,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
 import java.io.File
-import java.lang.StringBuilder
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 
@@ -70,7 +62,7 @@ import java.util.concurrent.ScheduledExecutorService
  * The main activity for playing audio books.
  */
 
-class AudioBookPlayerActivity : FragmentActivity(),
+class AudioBookPlayerActivity : AppCompatActivity(),
   AudioBookLoadingFragmentListenerType, PlayerFragmentListenerType {
 
   private val log: Logger = LoggerFactory.getLogger(AudioBookPlayerActivity::class.java)
@@ -120,9 +112,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private lateinit var downloaderDir: File
   private lateinit var downloader: DownloaderType
   private lateinit var formatHandle: BookDatabaseEntryFormatHandleAudioBook
+  private lateinit var colorScheme: ApplicationColorScheme
   private var download: DownloadType? = null
-  @ColorInt
-  private var primaryTintColor: Int = 0
 
   override fun onCreate(state: Bundle?) {
     this.log.debug("onCreate")
@@ -137,17 +128,15 @@ class AudioBookPlayerActivity : FragmentActivity(),
     this.log.debug("manifest uri:  {}", this.parameters.manifestURI)
     this.log.debug("book id:       {}", this.parameters.bookID)
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
-    this.log.debug("account color: {}", this.parameters.accountColor)
+    this.log.debug("account color: {}", this.parameters.applicationColorScheme.colorRGBA)
 
+    this.colorScheme = this.parameters.applicationColorScheme
+    this.setTheme(this.parameters.applicationColorScheme.activityThemeResourceWithActionBar)
     this.setContentView(R.layout.audio_book_player_base)
     this.services = Simplified.getCatalogAppServices()!!
     this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
 
-    this.primaryTintColor =
-      this.resources.getColor(ThemeMatcher.color(this.parameters.accountColor))
-    this.log.debug("tint color:    0x{}", Integer.toHexString(this.primaryTintColor))
-
-    this.actionBar.setBackgroundDrawable(ColorDrawable(this.primaryTintColor))
+    this.actionBar.setBackgroundDrawable(ColorDrawable(this.colorScheme.colorRGBA))
     this.actionBar.setDisplayHomeAsUpEnabled(false)
 
     this.bookTitle = this.parameters.opdsEntry.title
@@ -201,7 +190,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
      */
 
     this.loadingFragment = AudioBookLoadingFragment.newInstance(
-      AudioBookLoadingFragmentParameters(this.primaryTintColor))
+      AudioBookLoadingFragmentParameters(this.colorScheme.colorRGBA))
 
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.audio_book_player_fragment_holder, this.loadingFragment, "LOADING")
@@ -339,7 +328,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     UIThread.runOnUIThread {
       this.playerFragment = PlayerFragment.newInstance(
-        PlayerFragmentParameters(primaryColor = this.primaryTintColor))
+        PlayerFragmentParameters(primaryColor = this.colorScheme.colorRGBA))
 
       this.supportFragmentManager
         .beginTransaction()
@@ -438,7 +427,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     UIThread.runOnUIThread {
       val fragment = PlayerPlaybackRateFragment.newInstance(
-        PlayerFragmentParameters(primaryColor = this.primaryTintColor))
+        PlayerFragmentParameters(primaryColor = this.colorScheme.colorRGBA))
       fragment.show(this.supportFragmentManager, "PLAYER_RATE")
     }
   }
@@ -451,7 +440,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
     UIThread.runOnUIThread {
       val fragment = PlayerSleepTimerFragment.newInstance(
-        PlayerFragmentParameters(primaryColor = this.primaryTintColor))
+        PlayerFragmentParameters(primaryColor = this.colorScheme.colorRGBA))
       fragment.show(this.supportFragmentManager, "PLAYER_SLEEP_TIMER")
     }
   }
@@ -468,7 +457,7 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
       val fragment =
         PlayerTOCFragment.newInstance(
-          PlayerTOCFragmentParameters(primaryColor = this.primaryTintColor))
+          PlayerTOCFragmentParameters(primaryColor = this.colorScheme.colorRGBA))
 
       this.supportFragmentManager
         .beginTransaction()

@@ -28,7 +28,7 @@ public class DeviceManagerDeleteTask
   private static final Logger LOG;
 
   static {
-    LOG = LogUtilities.getLog(DeviceManagerDeleteTask.class);
+    LOG = LoggerFactory.getLogger(DeviceManagerDeleteTask.class);
   }
 
   private final AccountCredentials creds;

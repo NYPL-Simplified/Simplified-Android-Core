@@ -39,11 +39,10 @@ public interface CatalogFeedArgumentsType extends Serializable
     throws E;
 
   /**
-   * @return {@code true} If the feed is locally generated as opposed to being
-   * fetched from a remote server
+   * @return {@code true} If the feed requires network connectivity to read
    */
 
-  boolean isLocallyGenerated();
+  boolean requiresNetworkConnectivity();
 
   /**
    * @return {@code true} If the feed is the result of a search query.

@@ -5,11 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.io7m.jfunctional.Some
 import org.nypl.simplified.app.R
-import org.nypl.simplified.app.ScreenSizeControllerType
-import org.nypl.simplified.books.core.BookFormats
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.core.FeedEntryOPDS
+import org.nypl.simplified.app.ScreenSizeInformationType
+import org.nypl.simplified.books.book_database.BookFormats
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.feeds.FeedEntryOPDS
 import org.nypl.simplified.books.covers.BookCoverBadge
 import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
 
@@ -18,7 +18,7 @@ import org.nypl.simplified.books.covers.BookCoverBadgeLookupType
  */
 
 class CatalogCoverBadgeImages private constructor(
-  private val screenSize: ScreenSizeControllerType,
+  private val screenSize: ScreenSizeInformationType,
   private val backgroundColorRGBA: Int?,
   private val audioBookIcon: Bitmap) : BookCoverBadgeLookupType {
 
@@ -50,7 +50,7 @@ class CatalogCoverBadgeImages private constructor(
     fun create(
       resources: Resources,
       backgroundColorRGBA: Int?,
-      screenSize: ScreenSizeControllerType): BookCoverBadgeLookupType {
+      screenSize: ScreenSizeInformationType): BookCoverBadgeLookupType {
       val audioBookIcon = BitmapFactory.decodeResource(resources, R.drawable.audiobook_icon)
       return CatalogCoverBadgeImages(
         audioBookIcon = audioBookIcon,

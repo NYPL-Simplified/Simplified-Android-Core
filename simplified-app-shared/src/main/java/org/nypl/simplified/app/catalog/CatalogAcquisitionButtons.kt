@@ -1,14 +1,16 @@
 package org.nypl.simplified.app.catalog
 
-import android.app.Activity
+import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
-
+import org.nypl.simplified.books.accounts.AccountType
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.controller.BooksControllerType
+import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.core.BookAcquisitionSelection
-import org.nypl.simplified.books.core.BooksType
-import org.nypl.simplified.books.core.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.slf4j.LoggerFactory
 
@@ -37,9 +39,12 @@ class CatalogAcquisitionButtons private constructor() {
      */
 
     fun addButtons(
-      activity: Activity,
+      activity: AppCompatActivity,
+      account: AccountType,
       viewGroup: ViewGroup,
-      books: BooksType,
+      books: BooksControllerType,
+      profiles: ProfilesControllerType,
+      bookRegistry: BookRegistryReadableType,
       entry: FeedEntryOPDS) {
 
       viewGroup.visibility = View.VISIBLE
@@ -51,10 +56,10 @@ class CatalogAcquisitionButtons private constructor() {
       val acquisitionOpt = BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitions)
       if (acquisitionOpt is Some<OPDSAcquisition>) {
         val acquisition = acquisitionOpt.get()
-        viewGroup.addView(CatalogAcquisitionButton(activity, books, bookID, acquisition, entry))
+        viewGroup.addView(
+          CatalogAcquisitionButton(activity, books, profiles, bookRegistry, bookID, acquisition, entry))
       } else {
-        this.log.error("[{}]: no available acquisition for book ({})",
-          bookID.shortID, opdsEntry.title)
+        this.log.error("[{}]: no available acquisition for book ({})", bookID.brief(), opdsEntry.title)
       }
     }
   }

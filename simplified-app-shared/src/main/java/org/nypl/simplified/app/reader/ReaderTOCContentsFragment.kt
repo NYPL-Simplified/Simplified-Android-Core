@@ -2,22 +2,28 @@ package org.nypl.simplified.app.reader
 
 import android.content.Context
 import android.database.DataSetObserver
-import android.opengl.Visibility
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
+import android.widget.ListView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.UIThread
+import org.nypl.simplified.books.profiles.ProfileEvent
+import org.nypl.simplified.books.profiles.ProfilePreferencesChanged
+import org.nypl.simplified.books.reader.ReaderColorScheme
+import org.nypl.simplified.observable.ObservableSubscriptionType
 
 /**
  * A reusable fragment for a table of contents view
  */
-class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListenerType {
+class ReaderTOCContentsFragment : Fragment(), ListAdapter {
 
   private var readerTOCLayout: View? = null
   private var readerTOCListView: ListView? = null
@@ -25,63 +31,74 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
   private var inflater: LayoutInflater? = null
 
   private var adapter: ArrayAdapter<ReaderTOC.TOCElement>? = null
-  private var listener: ReaderTOCFragmentSelectionListenerType ? = null
+  private var listener: ReaderTOCFragmentSelectionListenerType? = null
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                            savedInstanceState: Bundle?): View? {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?): View? {
 
     this.inflater = inflater
-    readerTOCLayout = inflater.inflate(R.layout.reader_toc, null)
-    readerTOCListView = readerTOCLayout?.findViewById(R.id.reader_toc_list)
+    this.readerTOCLayout = inflater.inflate(R.layout.reader_toc, null)
+    this.readerTOCListView = this.readerTOCLayout?.findViewById(R.id.reader_toc_list)
 
-    val reader_activity = activity as? ReaderTOCActivity
+    val reader_activity = this.activity as? ReaderTOCActivity
     val elements = reader_activity?.in_toc?.elements as? List<ReaderTOC.TOCElement>
-    adapter = ArrayAdapter(context, 0, elements)
-    readerTOCListView?.adapter = this
+    this.adapter = ArrayAdapter(this.context, 0, elements)
+    this.readerTOCListView?.adapter = this
 
-    val rs = Simplified.getReaderAppServices()
-    val settings = rs.settings
-    settings.addListener(this)
+    this.applyColorScheme(
+      Simplified.getProfilesController()
+        .profileCurrent()
+        .preferences()
+        .readerPreferences()
+        .colorScheme())
 
-    applyColorScheme(settings.colorScheme)
-
-    return readerTOCLayout
+    return this.readerTOCLayout
   }
 
   override fun onAttach(context: Context) {
     super.onAttach(context)
-    if (context is ReaderTOCFragmentSelectionListenerType ) {
-      listener = context
+    if (context is ReaderTOCFragmentSelectionListenerType) {
+      this.listener = context
+
+      this.profileSubscription =
+        Simplified.getProfilesController()
+          .profileEvents()
+          .subscribe { event -> this.onProfileEvent(event) }
     } else {
       throw RuntimeException(context.toString() +
-          " must implement ReaderTOCFragmentSelectionListenerType ")
+        " must implement ReaderTOCFragmentSelectionListenerType ")
     }
   }
 
+  private var profileSubscription: ObservableSubscriptionType<ProfileEvent>? = null
+
   override fun onDetach() {
     super.onDetach()
-    listener = null
+    this.listener = null
 
-    val rs = Simplified.getReaderAppServices()
-    val settings = rs.settings
-    settings?.removeListener(this)
+    this.profileSubscription?.unsubscribe()
+    this.profileSubscription = null
+  }
+
+  private fun onProfileEvent(event: ProfileEvent) {
+    if (event is ProfilePreferencesChanged) {
+      if (event.changedReaderPreferences()) {
+        val colorScheme =
+          Simplified.getProfilesController()
+            .profileCurrent()
+            .preferences()
+            .readerPreferences()
+            .colorScheme()
+        UIThread.runOnUIThread { this.applyColorScheme(colorScheme) }
+      }
+    }
   }
 
   private fun applyColorScheme(cs: ReaderColorScheme) {
     UIThread.checkIsUIThread()
-    readerTOCListView?.rootView?.setBackgroundColor(cs.backgroundColor)
-  }
-
-  /**
-   * ReaderSettingsListenerType
-   */
-
-  override fun onReaderSettingsChanged(s: ReaderSettingsType?) {
-    UIThread.runOnUIThread {
-      if (s != null) {
-        applyColorScheme(s.colorScheme)
-      }
-    }
+    this.readerTOCListView?.rootView?.setBackgroundColor(ReaderColorSchemes.background(cs))
   }
 
   /**
@@ -89,23 +106,23 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
    */
 
   override fun areAllItemsEnabled(): Boolean {
-    return adapter!!.areAllItemsEnabled()
+    return this.adapter!!.areAllItemsEnabled()
   }
 
   override fun getCount(): Int {
-    return adapter!!.count
+    return this.adapter!!.count
   }
 
   override fun getItem(position: Int): Any {
-    return adapter!!.getItem(position)
+    return this.adapter!!.getItem(position)
   }
 
   override fun getItemId(position: Int): Long {
-    return adapter!!.getItemId(position)
+    return this.adapter!!.getItemId(position)
   }
 
   override fun getItemViewType(position: Int): Int {
-    return adapter!!.getItemViewType(position)
+    return this.adapter!!.getItemViewType(position)
   }
 
   override fun getView(position: Int, reuse: View?, parent: ViewGroup?): View {
@@ -113,57 +130,61 @@ class ReaderTOCContentsFragment : Fragment(), ListAdapter, ReaderSettingsListene
     val itemView = if (reuse != null) {
       reuse as ViewGroup
     } else {
-      inflater?.inflate(R.layout.reader_toc_element, parent, false) as ViewGroup
+      this.inflater?.inflate(R.layout.reader_toc_element, parent, false) as ViewGroup
     }
 
     val textView = itemView.findViewById<TextView>(R.id.reader_toc_element_text)
     val bookmarkLayout = itemView.findViewById<ViewGroup>(R.id.toc_bookmark_element)
     bookmarkLayout.visibility = View.GONE
-    val element = adapter?.getItem(position)
+    val element = this.adapter?.getItem(position)
     textView.text = element?.title ?: "TOC Marker"
 
-    val rs = Simplified.getReaderAppServices()
-    val settings = rs.settings
-
     val p = RelativeLayout.LayoutParams(
-        android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
-        android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+      android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+      android.view.ViewGroup.LayoutParams.WRAP_CONTENT
     )
 
     // Set the left margin based on the desired indentation level.
-    val leftIndent = if (element != null) { rs.screenDPToPixels(element.indent * 16) } else { 0.0 }
-    p.setMargins(leftIndent.toInt(), 0, 0, 0)
-    textView.layoutParams = p
-    textView.setTextColor(settings.colorScheme.foregroundColor)
-
-    itemView.setOnClickListener { _ ->
-      this.listener?.onTOCItemSelected(element)
+    val leftIndent = if (element != null) {
+      Simplified.getScreenSizeInformation().screenDPToPixels(element.indent * 16)
+    } else {
+      0.0
     }
 
+    p.setMargins(leftIndent.toInt(), 0, 0, 0)
+    textView.layoutParams = p
+    textView.setTextColor(
+      ReaderColorSchemes.foreground(Simplified.getProfilesController()
+        .profileCurrent()
+        .preferences()
+        .readerPreferences()
+        .colorScheme()))
+
+    itemView.setOnClickListener { this.listener?.onTOCItemSelected(element) }
     return itemView
   }
 
   override fun getViewTypeCount(): Int {
-    return adapter!!.viewTypeCount
+    return this.adapter!!.viewTypeCount
   }
 
   override fun hasStableIds(): Boolean {
-    return adapter!!.hasStableIds()
+    return this.adapter!!.hasStableIds()
   }
 
   override fun isEmpty(): Boolean {
-    return adapter!!.isEmpty
+    return this.adapter!!.isEmpty
   }
 
   override fun isEnabled(position: Int): Boolean {
-    return adapter!!.isEnabled(position)
+    return this.adapter!!.isEnabled(position)
   }
 
   override fun registerDataSetObserver(observer: DataSetObserver?) {
-    adapter!!.registerDataSetObserver(observer)
+    this.adapter!!.registerDataSetObserver(observer)
   }
 
   override fun unregisterDataSetObserver(observer: DataSetObserver?) {
-    adapter!!.unregisterDataSetObserver(observer)
+    this.adapter!!.unregisterDataSetObserver(observer)
   }
 }

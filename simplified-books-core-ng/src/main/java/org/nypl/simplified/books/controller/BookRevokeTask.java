@@ -23,7 +23,6 @@ import org.nypl.simplified.books.exceptions.BookRevokeExceptionNoCredentials;
 import org.nypl.simplified.books.exceptions.BookRevokeExceptionNoURI;
 import org.nypl.simplified.books.feeds.FeedEntryCorrupt;
 import org.nypl.simplified.books.feeds.FeedEntryMatcherType;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.feeds.FeedEntryType;
 import org.nypl.simplified.books.feeds.FeedLoaderAuthenticationListenerType;
 import org.nypl.simplified.books.feeds.FeedLoaderListenerType;

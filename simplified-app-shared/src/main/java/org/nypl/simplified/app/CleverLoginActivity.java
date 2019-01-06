@@ -37,6 +37,7 @@ import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -44,17 +45,12 @@ import java.net.URLDecoder;
 import java.util.StringTokenizer;
 
 /**
- * A mindlessly simple activity that displays a given URI in a full-screen web
- * view.
+ * The login activity for Clever.
  */
 
-public final class CleverLoginActivity extends SimplifiedActivity implements AccountLoginListenerType {
+public final class CleverLoginActivity extends NavigationDrawerActivity implements AccountLoginListenerType {
 
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(CleverLoginActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(CleverLoginActivity.class);
 
   private WebView web_view;
 
@@ -88,15 +84,14 @@ public final class CleverLoginActivity extends SimplifiedActivity implements Acc
     }
   }
 
-
-  @Override protected SimplifiedPart navigationDrawerGetPart()
-  {
-    return SimplifiedPart.PART_ACCOUNT;
-  }
-
   @Override protected boolean navigationDrawerShouldShowIndicator()
   {
     return false;
+  }
+
+  @Override
+  protected String navigationDrawerGetActivityTitle(Resources resources) {
+    return resources.getString(R.string.settings_log_in);
   }
 
   @SuppressLint("JavascriptInterface")

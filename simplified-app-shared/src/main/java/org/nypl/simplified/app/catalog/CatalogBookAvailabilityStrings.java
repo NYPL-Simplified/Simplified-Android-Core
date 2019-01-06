@@ -1,22 +1,24 @@
 package org.nypl.simplified.app.catalog;
 
 import android.content.res.Resources;
+
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.core.BookStatusHeld;
-import org.nypl.simplified.books.core.BookStatusHeldReady;
-import org.nypl.simplified.books.core.BookStatusHoldable;
-import org.nypl.simplified.books.core.BookStatusLoanable;
-import org.nypl.simplified.books.core.BookStatusLoanedType;
-import org.nypl.simplified.books.core.BookStatusMatcherType;
-import org.nypl.simplified.books.core.BookStatusRequestingLoan;
-import org.nypl.simplified.books.core.BookStatusRequestingRevoke;
-import org.nypl.simplified.books.core.BookStatusRevokeFailed;
-import org.nypl.simplified.books.core.BookStatusRevoked;
-import org.nypl.simplified.books.core.BookStatusType;
+import org.nypl.simplified.books.book_registry.BookStatusHeld;
+import org.nypl.simplified.books.book_registry.BookStatusHeldReady;
+import org.nypl.simplified.books.book_registry.BookStatusHoldable;
+import org.nypl.simplified.books.book_registry.BookStatusLoanable;
+import org.nypl.simplified.books.book_registry.BookStatusLoanedType;
+import org.nypl.simplified.books.book_registry.BookStatusMatcherType;
+import org.nypl.simplified.books.book_registry.BookStatusRequestingLoan;
+import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke;
+import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed;
+import org.nypl.simplified.books.book_registry.BookStatusRevoked;
+import org.nypl.simplified.books.book_registry.BookStatusType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;

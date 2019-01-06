@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -70,14 +71,13 @@ import java.util.List;
 /**
  *
  */
-public class CardCreatorActivity extends FragmentActivity implements
+public class CardCreatorActivity extends AppCompatActivity implements
   InputListenerType,
   AddressListenerType,
   UsernameListenerType,
   AccountListenerType,
   AccountLoginListenerType,
   LocationListenerType {
-
 
   protected static final String TAG = "CardCreatorActivity";
   private Prefs prefs = Simplified.getSharedPrefs();
@@ -767,8 +767,7 @@ public class CardCreatorActivity extends FragmentActivity implements
 
 
     final Resources rr = NullCheck.notNull(CardCreatorActivity.this.getResources());
-    final OptionType<AdobeVendorID> adobe_vendor = Option.some(
-      new AdobeVendorID(rr.getString(org.nypl.simplified.app.R.string.feature_adobe_vendor_id)));
+    final OptionType<AdobeVendorID> adobe_vendor = Option.some(new AdobeVendorID(rr.getString(org.nypl.simplified.app.R.string.feature_adobe_vendor_id)));
     final BooksType books = app.getBooks();
 
     final AccountBarcode barcode = new AccountBarcode(this.prefs.getString(this.getResources().getString(R.string.USERNAME_DATA_KEY)));
@@ -780,7 +779,6 @@ public class CardCreatorActivity extends FragmentActivity implements
     books.accountLogin(creds, CardCreatorActivity.this);
 
     this.showProgress(false);
-
   }
 
   @Override

@@ -6,7 +6,7 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.books.core.BookFormats
 import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.core.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntryOPDS
 
 /**
  * Functions over book formats.

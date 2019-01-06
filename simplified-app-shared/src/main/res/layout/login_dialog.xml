@@ -4,7 +4,7 @@
   of the layout specified here is ignored when the layout is inflated as part of a 
   dialog. The width and height specified here are used for the purposes of designing 
   the layout in the GUI editor, but the actual width and height of the dialog must 
-  be set at run-time. See org.nypl.simplified.app.LoginDialog. -->
+  be set at run-time. See org.nypl.simplified.app.login.LoginDialog. -->
 
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"

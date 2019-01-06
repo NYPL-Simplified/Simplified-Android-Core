@@ -5,6 +5,7 @@ import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.book_database.BookID;
+import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
@@ -50,6 +51,17 @@ public interface BooksControllerType {
   void bookDownloadCancel(
       AccountType account,
       BookID id);
+
+  /**
+   * Submit a problem report for a book
+   *
+   * @param feed_entry  Feed entry, used to get the URI to submit to
+   * @param report_type Type of report to submit
+   */
+
+  ListenableFuture<Unit> bookReport(
+    final FeedEntryOPDS feed_entry,
+    final String report_type);
 
   /**
    * Sync all books for the given account.

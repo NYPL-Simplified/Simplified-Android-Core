@@ -1,13 +1,12 @@
 package org.nypl.simplified.app.catalog
 
-import android.app.Activity
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
+import android.support.annotation.ColorInt
+import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -21,60 +20,59 @@ import android.widget.TextView
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
+import com.io7m.jfunctional.None
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
-import com.io7m.jnull.Nullable
+import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.app.LoginActivity
+import org.nypl.simplified.app.ApplicationColorScheme
+import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
-import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.ThemeMatcher
+import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.assertions.Assertions
+import org.nypl.simplified.books.accounts.AccountType
+import org.nypl.simplified.books.book_database.BookFormats
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
+import org.nypl.simplified.books.book_registry.BookStatusDownloadInProgress
+import org.nypl.simplified.books.book_registry.BookStatusDownloaded
+import org.nypl.simplified.books.book_registry.BookStatusDownloadingMatcherType
+import org.nypl.simplified.books.book_registry.BookStatusDownloadingType
+import org.nypl.simplified.books.book_registry.BookStatusEvent
+import org.nypl.simplified.books.book_registry.BookStatusEvent.Type.BOOK_CHANGED
+import org.nypl.simplified.books.book_registry.BookStatusEvent.Type.BOOK_REMOVED
+import org.nypl.simplified.books.book_registry.BookStatusHeld
+import org.nypl.simplified.books.book_registry.BookStatusHeldReady
+import org.nypl.simplified.books.book_registry.BookStatusHoldable
+import org.nypl.simplified.books.book_registry.BookStatusLoanable
+import org.nypl.simplified.books.book_registry.BookStatusLoaned
+import org.nypl.simplified.books.book_registry.BookStatusLoanedMatcherType
+import org.nypl.simplified.books.book_registry.BookStatusLoanedType
+import org.nypl.simplified.books.book_registry.BookStatusMatcherType
+import org.nypl.simplified.books.book_registry.BookStatusRequestingDownload
+import org.nypl.simplified.books.book_registry.BookStatusRequestingLoan
+import org.nypl.simplified.books.book_registry.BookStatusRequestingRevoke
+import org.nypl.simplified.books.book_registry.BookStatusRevokeFailed
+import org.nypl.simplified.books.book_registry.BookStatusRevoked
+import org.nypl.simplified.books.book_registry.BookStatusType
+import org.nypl.simplified.books.controller.BooksControllerType
+import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.core.BookAcquisitionSelection
-import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
-import org.nypl.simplified.books.core.BookDatabaseReadableType
-import org.nypl.simplified.books.core.BookFormats
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.core.BookID
-import org.nypl.simplified.books.core.BookStatusDownloadFailed
-import org.nypl.simplified.books.core.BookStatusDownloadInProgress
-import org.nypl.simplified.books.core.BookStatusDownloaded
-import org.nypl.simplified.books.core.BookStatusDownloadingMatcherType
-import org.nypl.simplified.books.core.BookStatusDownloadingType
-import org.nypl.simplified.books.core.BookStatusHeld
-import org.nypl.simplified.books.core.BookStatusHeldReady
-import org.nypl.simplified.books.core.BookStatusHoldable
-import org.nypl.simplified.books.core.BookStatusLoanable
-import org.nypl.simplified.books.core.BookStatusLoaned
-import org.nypl.simplified.books.core.BookStatusLoanedMatcherType
-import org.nypl.simplified.books.core.BookStatusLoanedType
-import org.nypl.simplified.books.core.BookStatusMatcherType
-import org.nypl.simplified.books.core.BookStatusRequestingDownload
-import org.nypl.simplified.books.core.BookStatusRequestingLoan
-import org.nypl.simplified.books.core.BookStatusRequestingRevoke
-import org.nypl.simplified.books.core.BookStatusRevokeFailed
-import org.nypl.simplified.books.core.BookStatusRevoked
-import org.nypl.simplified.books.core.BookStatusType
-import org.nypl.simplified.books.core.BooksStatusCacheType
-import org.nypl.simplified.books.core.BooksType
-import org.nypl.simplified.books.core.FeedEntryCorrupt
-import org.nypl.simplified.books.core.FeedEntryMatcherType
-import org.nypl.simplified.books.core.FeedEntryOPDS
-import org.nypl.simplified.books.core.FeedEntryType
-import org.nypl.simplified.books.core.LogUtilities
+import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.books.feeds.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.stack.ImmutableStack
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Observable
-import java.util.Observer
 import java.util.concurrent.atomic.AtomicReference
 
 /**
@@ -82,11 +80,18 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class CatalogBookDetailView(
-  private val activity: Activity,
+  private val activity: AppCompatActivity,
   private val inflater: LayoutInflater,
+  private val account: AccountType,
+  private val coverProvider: BookCoverProviderType,
+  private val booksRegistry: BookRegistryReadableType,
+  private val profilesController: ProfilesControllerType,
+  private val booksController: BooksControllerType,
+  private val screenSizeInformation: ScreenSizeInformationType,
+  private val networkConnectivity: NetworkConnectivityType,
+  private val applicationColorScheme: ApplicationColorScheme,
   entryInitial: FeedEntryOPDS)
-  : Observer,
-  BookStatusMatcherType<Unit, UnreachableCodeException>,
+  : BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
   BookStatusDownloadingMatcherType<Unit, UnreachableCodeException> {
 
@@ -104,7 +109,6 @@ class CatalogBookDetailView(
   private val bookDownloadingFailedRetry: Button
   private val bookDownloadingPercentText: TextView
   private val bookDownloadingProgress: ProgressBar
-  private val books: BooksType
   private val entry: AtomicReference<FeedEntryOPDS> = AtomicReference(entryInitial)
 
   /**
@@ -134,9 +138,6 @@ class CatalogBookDetailView(
     val layout = this.inflater.inflate(R.layout.book_dialog, sv, false)
     sv.addView(layout)
 
-    val catalogServices = Simplified.getCatalogAppServices()
-    this.books = catalogServices.books
-
     /*
      * Show the book status if status debugging is enabled.
      */
@@ -151,25 +152,25 @@ class CatalogBookDetailView(
     this.bookHeader =
       layout.findViewById<View>(R.id.book_header) as ViewGroup
     this.bookHeaderLeft =
-      bookHeader.findViewById<View>(R.id.book_header_left) as ViewGroup
+      this.bookHeader.findViewById<View>(R.id.book_header_left) as ViewGroup
     this.bookHeaderTitle =
-      bookHeader.findViewById<View>(R.id.book_header_title) as TextView
+      this.bookHeader.findViewById<View>(R.id.book_header_title) as TextView
     this.bookHeaderFormat =
-      bookHeader.findViewById<View>(R.id.book_header_format) as TextView
+      this.bookHeader.findViewById<View>(R.id.book_header_format) as TextView
     this.bookHeaderCover =
-      bookHeader.findViewById<View>(R.id.book_header_cover) as ImageView
+      this.bookHeader.findViewById<View>(R.id.book_header_cover) as ImageView
     this.bookHeaderAuthors =
-      bookHeader.findViewById<View>(R.id.book_header_authors) as TextView
+      this.bookHeader.findViewById<View>(R.id.book_header_authors) as TextView
     this.bookDownloadButtons =
-      bookHeader.findViewById<View>(R.id.book_dialog_download_buttons) as LinearLayout
+      this.bookHeader.findViewById<View>(R.id.book_dialog_download_buttons) as LinearLayout
     this.bookDownloadingCancel =
-      bookHeader.findViewById<View>(R.id.book_dialog_downloading_cancel) as Button
+      this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_cancel) as Button
     this.bookDownloadingFailedButtons =
-      bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_buttons) as LinearLayout
+      this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_buttons) as LinearLayout
     this.bookDownloadingFailedDismiss =
-      bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_dismiss) as Button
+      this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_dismiss) as Button
     this.bookDownloadingFailedRetry =
-      bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_retry) as Button
+      this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_retry) as Button
 
     this.bookDownloading =
       layout.findViewById<View>(R.id.book_dialog_downloading) as ViewGroup
@@ -199,13 +200,8 @@ class CatalogBookDetailView(
     val headerMeta =
       summary.findViewById<View>(R.id.book_header_meta) as TextView
 
-    val resID =
-      ThemeMatcher.color(Simplified.getCurrentAccount().mainColor)
-    val mainTextColor =
-      ContextCompat.getColor(this.activity.baseContext, resID)
-
     val readMoreButton = summary.findViewById<Button>(R.id.book_summary_read_more_button)
-    readMoreButton.setTextColor(mainTextColor)
+    readMoreButton.setTextColor(this.applicationColorScheme.colorRGBA)
 
     readMoreButton.setOnClickListener { view ->
       CatalogBookDetailView.configureSummaryWebViewHeight(summaryText)
@@ -214,12 +210,14 @@ class CatalogBookDetailView(
 
     this.relatedLayout = layout.findViewById(R.id.book_related_layout)
     this.relatedBooksButton = this.relatedLayout.findViewById(R.id.related_books_button)
-    this.relatedBooksButton.setTextColor(mainTextColor)
+    this.relatedBooksButton.setTextColor(this.applicationColorScheme.colorRGBA)
     this.bookDownloadReportButton = layout.findViewById(R.id.book_dialog_report_button)
-    this.bookDownloadReportButton.setTextColor(mainTextColor)
+    this.bookDownloadReportButton.setTextColor(this.applicationColorScheme.colorRGBA)
 
-    /* Assuming a roughly fixed height for cover images, assume a 4:3 aspect
-     * ratio and set the width of the cover layout. */
+    /*
+     * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
+     * ratio and set the width of the cover layout.
+     */
 
     val coverHeight = this.bookHeaderCover.layoutParams.height
     val coverWidth = (coverHeight.toDouble() / 4.0 * 3.0).toInt()
@@ -231,9 +229,7 @@ class CatalogBookDetailView(
     CatalogBookDetailView.configureSummarySectionTitle(summarySectionTitle)
 
     val bookID = entryNow.bookID
-    val statusCache = this.books.bookGetStatusCache()
-    val statusOpt = statusCache.booksStatusGet(bookID)
-    this.onStatus(entryNow, statusOpt)
+    this.onStatus(entryInitial, this.booksRegistry.bookStatus(bookID))
 
     CatalogBookDetailView.configureSummaryWebView(opdsEntry, summaryText)
     this.bookHeaderTitle.text = opdsEntry.title
@@ -242,7 +238,7 @@ class CatalogBookDetailView(
     CatalogBookDetailView.configureViewTextMeta(this.activity.resources, opdsEntry, headerMeta)
 
     val future =
-      catalogServices.coverProvider.loadCoverInto(
+      this.coverProvider.loadCoverInto(
         entryNow,
         this.bookHeaderCover,
         coverWidth,
@@ -254,12 +250,14 @@ class CatalogBookDetailView(
       }
 
       override fun onFailure(exception: Throwable) {
-        LOG.error("could not load cover: ", exception)
+        org.nypl.simplified.app.catalog.CatalogBookDetailView.Companion.LOG.error("could not load cover: ", exception)
       }
     }, directExecutor())
   }
 
   override fun onBookStatusDownloaded(downloaded: BookStatusDownloaded): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "downloaded"
     this.bookDownloadButtons.removeAllViews()
 
@@ -268,20 +266,34 @@ class CatalogBookDetailView(
 
     this.bookDownloadText.text = text
     this.bookDownloadButtons.addView(
-      CatalogBookReadButton(this.activity, downloaded.id, this.entry.get(), this.books), 0)
+      CatalogBookReadButton(
+        this.activity,
+        this.account,
+        downloaded.id,
+        this.entry.get(),
+        this.applicationColorScheme),
+      0)
 
     if (downloaded.isReturnable) {
-      val revoke = CatalogBookRevokeButton(
-        this.activity, downloaded.id, CatalogBookRevokeType.REVOKE_LOAN, this.books)
+      val revoke =
+        CatalogBookRevokeButton(
+          this.activity,
+          this.booksController,
+          this.account,
+          downloaded.id,
+          CatalogBookRevokeType.REVOKE_LOAN)
+
       this.bookDownloadButtons.addView(revoke, 1)
     } else if (this.entry.get().feedEntry.availability is OPDSAvailabilityOpenAccess) {
-      this.bookDownloadButtons.addView(
-        CatalogBookDeleteButton(
-          this.activity, downloaded.id), 1)
+      this.bookDownloadButtons.addView(CatalogBookDeleteButton(
+        this.activity, this.booksController, this.account, downloaded.id), 1)
     }
 
     this.bookDownloadButtons.visibility = View.VISIBLE
-    CatalogBookDetailView.configureButtonsHeight(this.activity.resources, this.bookDownloadButtons)
+    CatalogBookDetailView.configureButtonsHeight(
+      this.screenSizeInformation,
+      this.activity.resources,
+      this.bookDownloadButtons)
 
     this.bookDownload.visibility = View.VISIBLE
     this.bookDownloadButtons.visibility = View.VISIBLE
@@ -293,11 +305,18 @@ class CatalogBookDetailView(
   }
 
   override fun onBookStatusDownloadFailed(status: BookStatusDownloadFailed): Unit {
-    if (CatalogBookUnauthorized.isUnAuthorized(status)) {
-      this.books.accountRemoveCredentials()
-    }
+    UIThread.checkIsUIThread()
 
     this.bookDebugStatus.text = "download failed"
+
+    /*
+     * If the download failed because there was no network, act as if the book was loaned.
+     */
+
+    if (!this.networkConnectivity.isWifiAvailable()) {
+      this.onBookStatusLoaned(BookStatusLoaned(status.getID(), None.none(), false))
+      return Unit.unit()
+    }
 
     this.bookDownload.visibility = View.INVISIBLE
     this.bookDownloadButtons.visibility = View.INVISIBLE
@@ -314,7 +333,9 @@ class CatalogBookDetailView(
     val dismiss = this.bookDownloadingFailedDismiss
     val retry = this.bookDownloadingFailedRetry
 
-    dismiss.setOnClickListener { v -> this.books.bookDownloadAcknowledge(status.id) }
+    dismiss.setOnClickListener {
+      this.booksController.bookBorrowFailedDismiss(this.account, status.id)
+    }
 
     /*
      * Manually construct an acquisition controller for the retry button.
@@ -335,8 +356,16 @@ class CatalogBookDetailView(
     }
 
     val acquisition = acquisitionOpt.get()
-    val acquisitionController = CatalogAcquisitionButtonController(
-      this.activity, this.books, currentEntry.bookID, acquisition, currentEntry)
+    val acquisitionController =
+      CatalogAcquisitionButtonController(
+        this.activity,
+        this.profilesController,
+        this.booksController,
+        this.booksRegistry,
+        this.networkConnectivity,
+        currentEntry.bookID,
+        acquisition,
+        currentEntry)
 
     retry.isEnabled = true
     retry.visibility = View.VISIBLE
@@ -349,8 +378,9 @@ class CatalogBookDetailView(
   }
 
   override fun onBookStatusDownloadInProgress(status: BookStatusDownloadInProgress): Unit {
-    this.bookDebugStatus.text = "download in progress"
+    UIThread.checkIsUIThread()
 
+    this.bookDebugStatus.text = "download in progress"
     this.bookDownload.visibility = View.INVISIBLE
     this.bookDownloadButtons.visibility = View.INVISIBLE
     this.bookDownloading.visibility = View.VISIBLE
@@ -368,11 +398,13 @@ class CatalogBookDetailView(
     val dc = this.bookDownloadingCancel
     dc.visibility = View.VISIBLE
     dc.isEnabled = true
-    dc.setOnClickListener { this.books.bookDownloadCancel(status.id) }
+    dc.setOnClickListener { this.booksController.bookDownloadCancel(this.account, status.id) }
     return Unit.unit()
   }
 
   override fun onBookStatusHeld(status: BookStatusHeld): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "held"
 
     this.bookDownloadButtons.removeAllViews()
@@ -384,12 +416,18 @@ class CatalogBookDetailView(
     this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
 
     if (status.isRevocable) {
-      val revoke = CatalogBookRevokeButton(
-        this.activity, status.id, CatalogBookRevokeType.REVOKE_HOLD, this.books)
+      val revoke =
+        CatalogBookRevokeButton(
+          this.activity,
+          this.booksController,
+          this.account,
+          status.id,
+          CatalogBookRevokeType.REVOKE_HOLD)
       this.bookDownloadButtons.addView(revoke, 0)
     }
 
     CatalogBookDetailView.configureButtonsHeight(
+      this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
 
@@ -401,6 +439,8 @@ class CatalogBookDetailView(
   }
 
   override fun onBookStatusHeldReady(status: BookStatusHeldReady): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "held-ready"
 
     this.bookDownloadButtons.removeAllViews()
@@ -417,22 +457,34 @@ class CatalogBookDetailView(
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
+      this.account,
       this.bookDownloadButtons,
-      this.books,
+      this.booksController,
+      this.profilesController,
+      this.booksRegistry,
       this.entry.get())
 
     if (status.isRevocable) {
-      val revoke = CatalogBookRevokeButton(
-        this.activity, status.id, CatalogBookRevokeType.REVOKE_HOLD, this.books)
+      val revoke =
+        CatalogBookRevokeButton(
+          this.activity,
+          this.booksController,
+          this.account,
+          status.id,
+          CatalogBookRevokeType.REVOKE_HOLD)
       this.bookDownloadButtons.addView(revoke, 0)
     }
 
     CatalogBookDetailView.configureButtonsHeight(
-      this.activity.resources, this.bookDownloadButtons)
+      this.screenSizeInformation,
+      this.activity.resources,
+      this.bookDownloadButtons)
     return Unit.unit()
   }
 
   override fun onBookStatusHoldable(status: BookStatusHoldable): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "holdable"
 
     this.bookDownloadButtons.removeAllViews()
@@ -449,51 +501,56 @@ class CatalogBookDetailView(
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
+      this.account,
       this.bookDownloadButtons,
-      this.books,
+      this.booksController,
+      this.profilesController,
+      this.booksRegistry,
       this.entry.get())
 
-    CatalogBookDetailView.configureButtonsHeight(this.activity.resources, this.bookDownloadButtons)
+    CatalogBookDetailView.configureButtonsHeight(
+      this.screenSizeInformation,
+      this.activity.resources,
+      this.bookDownloadButtons)
     return Unit.unit()
   }
 
   override fun onBookStatusLoanable(status: BookStatusLoanable): Unit {
+    UIThread.checkIsUIThread()
+
     this.onBookStatusNone(this.entry.get())
     this.bookDebugStatus.text = "loanable"
     return Unit.unit()
   }
 
   override fun onBookStatusRevokeFailed(status: BookStatusRevokeFailed): Unit {
-    if (CatalogBookUnauthorized.isUnAuthorized(status)) {
-      this.books.accountRemoveCredentials()
-      UIThread.runOnUIThread {
-        val i = Intent(this.activity, LoginActivity::class.java)
-        this.activity.startActivity(i)
-        this.activity.overridePendingTransition(0, 0)
-        this.activity.finish()
-      }
-    } else {
-      this.bookDebugStatus.text = "revoke failed"
-      this.bookDownload.visibility = View.INVISIBLE
-      this.bookDownloading.visibility = View.INVISIBLE
-      this.bookDownloadingCancel.visibility = View.INVISIBLE
-      this.bookDownloadingFailed.visibility = View.VISIBLE
-      this.bookDownloadingFailedButtons.visibility = View.VISIBLE
+    UIThread.checkIsUIThread()
 
-      val failed = this.bookDownloadingFailedText
-      failed.setText(R.string.catalog_revoke_failed)
+    this.bookDebugStatus.text = "revoke failed"
+    this.bookDownload.visibility = View.INVISIBLE
+    this.bookDownloading.visibility = View.INVISIBLE
+    this.bookDownloadingCancel.visibility = View.INVISIBLE
+    this.bookDownloadingFailed.visibility = View.VISIBLE
+    this.bookDownloadingFailedButtons.visibility = View.VISIBLE
 
-      val dismiss = this.bookDownloadingFailedDismiss
-      val retry = this.bookDownloadingFailedRetry
+    val failed = this.bookDownloadingFailedText
+    failed.setText(R.string.catalog_revoke_failed)
 
-      dismiss.setOnClickListener { this.books.bookGetLatestStatusFromDisk(status.id) }
-      retry.isEnabled = false
-      retry.visibility = View.GONE
+    val dismiss = this.bookDownloadingFailedDismiss
+    val retry = this.bookDownloadingFailedRetry
+
+    dismiss.setOnClickListener {
+      this.booksController.bookBorrowFailedDismiss(this.account, status.id)
     }
+
+    retry.isEnabled = false
+    retry.visibility = View.GONE
     return Unit.unit()
   }
 
   override fun onBookStatusRevoked(status: BookStatusRevoked): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "revoked"
 
     this.bookDownloadButtons.removeAllViews()
@@ -504,19 +561,30 @@ class CatalogBookDetailView(
     this.bookDownloadingFailed.visibility = View.INVISIBLE
     this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
 
-    val text =
-      CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
+    val text = CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
     this.bookDownloadText.text = text
 
-    val revoke = CatalogBookRevokeButton(
-      this.activity, status.id, CatalogBookRevokeType.REVOKE_LOAN, this.books)
+    val revoke =
+      CatalogBookRevokeButton(
+        this.activity,
+        this.booksController,
+        this.account,
+        status.id,
+        CatalogBookRevokeType.REVOKE_LOAN)
+
     this.bookDownloadButtons.addView(revoke, 0)
 
-    CatalogBookDetailView.configureButtonsHeight(this.activity.resources, this.bookDownloadButtons)
+    CatalogBookDetailView.configureButtonsHeight(
+      this.screenSizeInformation,
+      this.activity.resources,
+      this.bookDownloadButtons)
+
     return Unit.unit()
   }
 
   override fun onBookStatusLoaned(status: BookStatusLoaned): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "loaned"
 
     this.bookDownloadButtons.removeAllViews()
@@ -533,17 +601,29 @@ class CatalogBookDetailView(
 
     CatalogAcquisitionButtons.addButtons(
       this.activity,
+      this.account,
       this.bookDownloadButtons,
-      this.books,
+      this.booksController,
+      this.profilesController,
+      this.booksRegistry,
       this.entry.get())
 
     if (status.isReturnable) {
-      val revoke = CatalogBookRevokeButton(
-        this.activity, status.id, CatalogBookRevokeType.REVOKE_LOAN, this.books)
+      val revoke =
+        CatalogBookRevokeButton(
+          this.activity,
+          this.booksController,
+          this.account,
+          status.id,
+          CatalogBookRevokeType.REVOKE_LOAN)
       this.bookDownloadButtons.addView(revoke, 1)
     }
 
-    CatalogBookDetailView.configureButtonsHeight(this.activity.resources, this.bookDownloadButtons)
+    CatalogBookDetailView.configureButtonsHeight(
+      this.screenSizeInformation,
+      this.activity.resources,
+      this.bookDownloadButtons)
+
     return Unit.unit()
   }
 
@@ -552,6 +632,8 @@ class CatalogBookDetailView(
   }
 
   private fun onBookStatusNone(entry: FeedEntryOPDS) {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "none"
 
     this.bookDownloadButtons.removeAllViews()
@@ -571,12 +653,23 @@ class CatalogBookDetailView(
     this.bookDownloadText.text = text
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity, this.bookDownloadButtons, this.books, entry)
+      this.activity,
+      this.account,
+      this.bookDownloadButtons,
+      this.booksController,
+      this.profilesController,
+      this.booksRegistry,
+      this.entry.get())
+
     CatalogBookDetailView.configureButtonsHeight(
-      this.activity.resources, this.bookDownloadButtons)
+      this.screenSizeInformation,
+      this.activity.resources,
+      this.bookDownloadButtons)
   }
 
   override fun onBookStatusRequestingDownload(status: BookStatusRequestingDownload): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "requesting download"
 
     this.bookDownload.visibility = View.INVISIBLE
@@ -602,6 +695,8 @@ class CatalogBookDetailView(
   }
 
   override fun onBookStatusRequestingLoan(status: BookStatusRequestingLoan): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "requesting loan"
 
     this.bookDownload.visibility = View.INVISIBLE
@@ -627,6 +722,8 @@ class CatalogBookDetailView(
   }
 
   override fun onBookStatusRequestingRevoke(status: BookStatusRequestingRevoke): Unit {
+    UIThread.checkIsUIThread()
+
     this.bookDebugStatus.text = "requesting revoke"
 
     this.bookDownload.visibility = View.INVISIBLE
@@ -696,86 +793,49 @@ class CatalogBookDetailView(
     }
   }
 
-  override fun update(
-    observable: Observable,
-    @Nullable data: Any) {
+  fun onBookEvent(event: BookStatusEvent) {
+    NullCheck.notNull(event, "Event")
 
-    LOG.debug("update: {} {}", observable, data)
-
-    val updateID = data as BookID
+    val updateID = event.book()
     val currentEntry = this.entry.get()
     val currentID = currentEntry.bookID
 
-    /*
-     * If the book for this view has been updated in some way, first check
-     * the book database and replace the current feed entry with any snapshot
-     * that exists. Then, check to see if a revocation feed entry has been
-     * posted and use that.
-     */
-
     if (currentID == updateID) {
-      val statusCache = this.books.bookGetStatusCache()
-      val statusOpt = statusCache.booksStatusGet(currentID)
-
-      LOG.debug("received status update {}", statusOpt)
-      this.updateFetchDatabaseSnapshot(currentID, this.books.bookGetDatabase())
-      this.updateCheckForRevocationEntry(currentID, statusCache)
-      this.onStatus(this.entry.get(), statusOpt)
-    }
-  }
-
-  private fun updateFetchDatabaseSnapshot(
-    currentID: BookID,
-    database: BookDatabaseReadableType) {
-    val snapOpt = database.databaseGetEntrySnapshot(currentID)
-
-    LOG.debug("database snapshot is {}", snapOpt)
-
-    if (snapOpt is Some<BookDatabaseEntrySnapshot>) {
-      val (_, _, entry1) = snapOpt.get()
-      this.entry.set(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(entry1) as FeedEntryOPDS)
-    }
-  }
-
-  private fun updateCheckForRevocationEntry(
-    currentID: BookID,
-    statusCache: BooksStatusCacheType) {
-    val revokeOpt = statusCache.booksRevocationFeedEntryGet(currentID)
-
-    LOG.debug("revocation entry update is {}", revokeOpt)
-
-    if (revokeOpt is Some<FeedEntryType>) {
-      revokeOpt.get().matchFeedEntry(
-        object : FeedEntryMatcherType<Unit, UnreachableCodeException> {
-          override fun onFeedEntryOPDS(e: FeedEntryOPDS): Unit {
-            this@CatalogBookDetailView.entry.set(e)
-            return Unit.unit()
+      when (event.type()) {
+        BOOK_CHANGED -> {
+          val bookWithStatus = this.booksRegistry.books().get(updateID)
+          if (bookWithStatus != null) {
+            this.entry.set(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(bookWithStatus.book().entry()))
+            UIThread.runOnUIThread { bookWithStatus.status().matchBookStatus(this) }
+            return
           }
 
-          override fun onFeedEntryCorrupt(e: FeedEntryCorrupt): Unit {
-            LOG.debug("cannot render an entry of type {}", e)
-            return Unit.unit()
-          }
-        })
+          UIThread.runOnUIThread { this.onBookStatusNone(currentEntry) }
+        }
+
+        BOOK_REMOVED -> {
+          UIThread.runOnUIThread { this.onBookStatusNone(currentEntry) }
+        }
+      }
     }
   }
 
   companion object {
-    private val GENRES_URI: URI = URI.create("http://librarysimplified.org/terms/genres/Simplified/")
-    private val GENRES_URI_TEXT: String = this.GENRES_URI.toString()
-    private val LOG: Logger
 
-    init {
-      this.LOG = LogUtilities.getLog(CatalogBookDetailView::class.java)
-    }
+    private val GENRES_URI: URI =
+      URI.create("http://librarysimplified.org/terms/genres/Simplified/")
+    private val GENRES_URI_TEXT: String =
+      this.GENRES_URI.toString()
+    private val LOG: Logger =
+      LoggerFactory.getLogger(CatalogBookDetailView::class.java)
 
     private fun configureButtonsHeight(
+      screen: ScreenSizeInformationType,
       resources: Resources,
       layout: LinearLayout) {
 
-      val app = Simplified.getCatalogAppServices()
       val dp35 = resources.getDimension(R.dimen.button_standard_height).toInt()
-      val dp8 = app.screenDPToPixels(8).toInt()
+      val dp8 = screen.screenDPToPixels(8).toInt()
       val buttonCount = layout.childCount
 
       for (index in 0 until buttonCount) {
@@ -813,17 +873,22 @@ class CatalogBookDetailView(
       text.append("</body>")
       text.append("</html>")
 
-      val summary_text_settings = summaryText.settings
-      summary_text_settings.allowContentAccess = false
-      summary_text_settings.allowFileAccess = false
-      summary_text_settings.allowFileAccessFromFileURLs = false
-      summary_text_settings.allowUniversalAccessFromFileURLs = false
-      summary_text_settings.blockNetworkLoads = true
-      summary_text_settings.blockNetworkImage = true
-      summary_text_settings.defaultTextEncodingName = "UTF-8"
-      summary_text_settings.defaultFixedFontSize = 14
-      summary_text_settings.defaultFontSize = 14
-      summaryText.loadDataWithBaseURL(null, text.toString(), "text/html", "UTF-8", null)
+      val summaryTextSettings = summaryText.settings
+      summaryTextSettings.allowContentAccess = false
+      summaryTextSettings.allowFileAccess = false
+      summaryTextSettings.allowFileAccessFromFileURLs = false
+      summaryTextSettings.allowUniversalAccessFromFileURLs = false
+      summaryTextSettings.blockNetworkLoads = true
+      summaryTextSettings.blockNetworkImage = true
+      summaryTextSettings.defaultTextEncodingName = "UTF-8"
+      summaryTextSettings.defaultFixedFontSize = 14
+      summaryTextSettings.defaultFontSize = 14
+      summaryText.loadDataWithBaseURL(
+        null,
+        text.toString(),
+        "text/html",
+        "UTF-8",
+        null)
     }
 
     /**
@@ -946,7 +1011,10 @@ class CatalogBookDetailView(
           entry.distribution))
     }
 
-    fun configureViewTextFormat(resources: Resources, entry: FeedEntryOPDS, bookHeaderFormat: TextView) {
+    fun configureViewTextFormat(
+      resources: Resources,
+      entry: FeedEntryOPDS,
+      bookHeaderFormat: TextView) {
       val formatOpt = entry.probableFormat
       if (formatOpt is Some<BookFormats.BookFormatDefinition>) {
         val format = formatOpt.get()

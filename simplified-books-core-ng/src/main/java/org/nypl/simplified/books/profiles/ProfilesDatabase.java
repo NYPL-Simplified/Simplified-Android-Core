@@ -17,10 +17,10 @@ import org.nypl.simplified.books.accounts.AccountsDatabaseException;
 import org.nypl.simplified.books.accounts.AccountsDatabaseFactoryType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.accounts.AccountsDatabaseType;
-import org.nypl.simplified.books.logging.LogUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +42,7 @@ import static org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousP
 
 public final class ProfilesDatabase implements ProfilesDatabaseType {
 
-  private static final Logger LOG = LogUtilities.getLog(ProfilesDatabase.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ProfilesDatabase.class);
 
   private static final ProfileID ANONYMOUS_PROFILE_ID = ProfileID.create(0);
 

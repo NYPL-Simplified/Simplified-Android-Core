@@ -29,7 +29,7 @@ public class BooksControllerDeviceActivationTask
   private final DeviceActivationListenerType device_activation_listener;
 
   private static final Logger LOG =
-    LogUtilities.getLog(BooksControllerDeviceActivationTask.class);
+    LoggerFactory.getLogger(BooksControllerDeviceActivationTask.class);
 
   BooksControllerDeviceActivationTask(
     final OptionType<AdobeAdeptExecutorType> in_adobe_drm,

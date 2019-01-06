@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 final class BooksControllerLoginTask implements Callable<Unit> {
 
-  private static final Logger LOG = LogUtilities.getLog(BooksControllerLoginTask.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BooksControllerLoginTask.class);
 
   private final BooksController books;
   private final BookDatabaseType books_database;

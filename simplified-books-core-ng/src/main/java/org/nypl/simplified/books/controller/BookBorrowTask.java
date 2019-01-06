@@ -38,7 +38,6 @@ import org.nypl.simplified.books.book_registry.BookStatusRequestingLoan;
 import org.nypl.simplified.books.logging.LogUtilities;
 import org.nypl.simplified.books.feeds.FeedEntryCorrupt;
 import org.nypl.simplified.books.feeds.FeedEntryMatcherType;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.feeds.FeedEntryType;
 import org.nypl.simplified.books.feeds.FeedGroup;
 import org.nypl.simplified.books.feeds.FeedHTTPTransportException;

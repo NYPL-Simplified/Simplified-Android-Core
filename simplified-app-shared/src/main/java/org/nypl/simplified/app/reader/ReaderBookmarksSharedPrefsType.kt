@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.reader
 
 import org.nypl.simplified.books.core.BookID
+import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 
 /**

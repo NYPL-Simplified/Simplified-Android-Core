@@ -5,6 +5,7 @@ import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The default implementation of the {@link ReaderSimplifiedJavaScriptAPIType}
@@ -14,11 +15,8 @@ import org.slf4j.Logger;
 public final class ReaderSimplifiedJavaScriptAPI
   implements ReaderSimplifiedJavaScriptAPIType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderSimplifiedJavaScriptAPI.class);
-  }
+  private static final Logger LOG =
+    LoggerFactory.getLogger(ReaderSimplifiedJavaScriptAPI.class);
 
   private final WebView web_view;
 

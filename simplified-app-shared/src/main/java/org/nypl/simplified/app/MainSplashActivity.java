@@ -1,9 +1,9 @@
 package org.nypl.simplified.app;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -11,12 +11,11 @@ import com.io7m.jfunctional.Some;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.books.core.DocumentStoreType;
 import org.nypl.simplified.books.core.EULAType;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.multilibrary.AccountsRegistry;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -26,13 +25,9 @@ import java.util.TimerTask;
  * already agreed to the license.
  */
 
-public class MainSplashActivity extends Activity
+public class MainSplashActivity extends AppCompatActivity
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(MainSplashActivity.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(MainSplashActivity.class);
 
   /**
    * Construct an activity.
@@ -46,8 +41,7 @@ public class MainSplashActivity extends Activity
   @Override
   protected void onCreate(final Bundle state)
   {
-    final String accountColor = Simplified.getCurrentAccount().getMainColor();
-    setTheme(ThemeMatcher.Companion.noActionBarStyle(accountColor));
+    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithoutActionBar());
 
     super.onCreate(state);
     this.setContentView(R.layout.splash);
@@ -131,11 +125,9 @@ public class MainSplashActivity extends Activity
 
   private void openWelcome()
   {
-
     if (Simplified.getSharedPrefs().contains("welcome")) {
       this.openCatalog();
-    }
-    else {
+    } else {
       final Intent i = new Intent(this, MainWelcomeActivity.class);
       this.startActivity(i);
       this.overridePendingTransition(0, 0);

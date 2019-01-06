@@ -13,9 +13,6 @@ import org.nypl.simplified.json.core.JSONSerializerUtilities;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.nypl.simplified.books.reader.ReaderColorScheme.SCHEME_BLACK_ON_WHITE;
-import static org.nypl.simplified.books.reader.ReaderFontSelection.READER_FONT_SANS_SERIF;
-
 /**
  * Functions to serialize and reader book locations to/from JSON.
  */
@@ -36,19 +33,19 @@ public final class ReaderBookLocationJSON {
    */
 
   public static ReaderBookLocation deserializeFromJSON(
-      final ObjectMapper jom,
-      final JsonNode node)
-      throws JSONParseException {
+    final ObjectMapper jom,
+    final JsonNode node)
+    throws JSONParseException {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(node, "JSON");
 
     final ObjectNode obj =
-        JSONParserUtilities.checkObject(null, node);
+      JSONParserUtilities.checkObject(null, node);
 
     return ReaderBookLocation.create(
-        JSONParserUtilities.getStringOptional(obj, "contentCFI"),
-        JSONParserUtilities.getString(obj, "idref"));
+      JSONParserUtilities.getStringOptional(obj, "contentCFI"),
+      JSONParserUtilities.getString(obj, "idref"));
   }
 
   /**
@@ -59,8 +56,8 @@ public final class ReaderBookLocationJSON {
    */
 
   public static ObjectNode serializeToJSON(
-      final ObjectMapper jom,
-      final ReaderBookLocation description) {
+    final ObjectMapper jom,
+    final ReaderBookLocation description) {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(description, "Description");
@@ -80,9 +77,9 @@ public final class ReaderBookLocationJSON {
    */
 
   public static String serializeToString(
-      final ObjectMapper jom,
-      final ReaderBookLocation description)
-      throws IOException {
+    final ObjectMapper jom,
+    final ReaderBookLocation description)
+    throws IOException {
 
     final ObjectNode jo = serializeToJSON(jom, description);
     final ByteArrayOutputStream bao = new ByteArrayOutputStream(1024);
@@ -99,8 +96,8 @@ public final class ReaderBookLocationJSON {
    */
 
   public static ReaderBookLocation deserializeFromString(
-      final ObjectMapper jom,
-      final String text) throws IOException {
+    final ObjectMapper jom,
+    final String text) throws IOException {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(text, "Text");

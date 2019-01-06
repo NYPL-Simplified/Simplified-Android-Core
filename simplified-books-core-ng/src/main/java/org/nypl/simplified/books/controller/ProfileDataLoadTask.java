@@ -22,7 +22,7 @@ import java.util.SortedMap;
 
 final class ProfileDataLoadTask implements Runnable {
 
-  private static final Logger LOG = LogUtilities.getLog(ProfileDataLoadTask.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ProfileDataLoadTask.class);
 
   private final ProfileType profile;
   private final BookRegistryType book_registry;

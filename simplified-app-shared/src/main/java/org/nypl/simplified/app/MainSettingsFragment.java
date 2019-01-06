@@ -6,7 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.Preference;
-import android.preference.PreferenceFragment;
+import android.support.v7.preference.PreferenceFragmentCompat;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,12 +16,11 @@ import com.tenmiles.helpstack.HSHelpStack;
 import com.tenmiles.helpstack.gears.HSDeskGear;
 
 import org.nypl.simplified.app.testing.AlternateFeedURIsActivity;
-import org.nypl.simplified.app.testing.OnMultipleClickListener;
-import org.nypl.simplified.books.core.AccountCredentials;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.core.BooksControllerConfigurationType;
 import org.nypl.simplified.books.core.DocumentStoreType;
 
-public class MainSettingsFragment extends PreferenceFragment implements LoginListenerType {
+public class MainSettingsFragment extends PreferenceFragmentCompat implements LoginListenerType {
 
   public MainSettingsFragment() {
     // Required empty public constructor
@@ -199,7 +198,7 @@ public class MainSettingsFragment extends PreferenceFragment implements LoginLis
   }
 
   @Override
-  public void onLoginSuccess(final AccountCredentials creds) {
+  public void onLoginSuccess(final AccountAuthenticationCredentials creds) {
     final Intent account =
       new Intent(this.getActivity(), MainSettingsAccountActivity.class);
     MainSettingsFragment.this.startActivity(account);

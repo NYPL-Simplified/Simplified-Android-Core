@@ -31,7 +31,7 @@ import java.net.URI;
 public abstract class AccountAuthenticationCredentialsJSONContract {
 
   private static final Logger LOG =
-      LogUtilities.getLog(AccountAuthenticationCredentialsJSONContract.class);
+    LoggerFactory.getLogger(AccountAuthenticationCredentialsJSONContract.class);
 
   @Rule
   public ExpectedException expected = ExpectedException.none();

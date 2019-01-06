@@ -6,12 +6,12 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.core.AccountNotReadyException;
-import org.nypl.simplified.books.core.AccountTooManyActivationsException;
-import org.nypl.simplified.books.core.BookStatusDownloadFailed;
-import org.nypl.simplified.books.core.BookUnsupportedPasshashException;
-import org.nypl.simplified.books.core.BookUnsupportedTypeException;
-import org.nypl.simplified.books.core.FeedHTTPTransportException;
+import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed;
+import org.nypl.simplified.books.exceptions.AccountNotReadyException;
+import org.nypl.simplified.books.exceptions.AccountTooManyActivationsException;
+import org.nypl.simplified.books.exceptions.BookUnsupportedPasshashException;
+import org.nypl.simplified.books.exceptions.BookUnsupportedTypeException;
+import org.nypl.simplified.books.feeds.FeedHTTPTransportException;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 
 final class CatalogBookErrorStrings

@@ -1,8 +1,11 @@
 package org.nypl.simplified.app.catalog;
 
+import android.content.res.Resources;
+
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.app.SimplifiedPart;
 import org.nypl.simplified.books.core.BooksFeedSelection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An activity that displays the holds for the current user.
@@ -10,6 +13,13 @@ import org.nypl.simplified.books.core.BooksFeedSelection;
 
 public final class MainHoldsActivity extends MainLocalFeedActivity
 {
+  private static final Logger LOG = LoggerFactory.getLogger(MainHoldsActivity.class);
+
+  @Override
+  protected Logger log() {
+    return LOG;
+  }
+
   /**
    * Construct a new activity.
    */
@@ -24,9 +34,9 @@ public final class MainHoldsActivity extends MainLocalFeedActivity
     return BooksFeedSelection.BOOKS_FEED_HOLDS;
   }
 
-  @Override protected SimplifiedPart navigationDrawerGetPart()
-  {
-    return SimplifiedPart.PART_HOLDS;
+  @Override
+  protected String navigationDrawerGetActivityTitle(final Resources resources) {
+    return resources.getString(R.string.holds);
   }
 
   @Override protected boolean navigationDrawerShouldShowIndicator()

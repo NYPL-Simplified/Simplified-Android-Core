@@ -21,7 +21,7 @@ import static org.nypl.simplified.books.book_registry.BookStatusEvent.Type.BOOK_
 
 public final class BookRegistry implements BookRegistryType {
 
-  private static final Logger LOG = LogUtilities.getLog(BookRegistry.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BookRegistry.class);
 
   private final SortedMap<BookID, BookWithStatus> books_read_only;
   private final ConcurrentSkipListMap<BookID, BookWithStatus> books;

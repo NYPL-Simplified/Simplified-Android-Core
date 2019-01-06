@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.player
 
-import org.nypl.simplified.books.core.BookID
+import org.nypl.simplified.app.ApplicationColorScheme
+import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
 import java.io.Serializable
@@ -41,4 +42,4 @@ data class AudioBookPlayerParameters(
    * action bar.
    */
 
-  val accountColor: String) : Serializable
+  val applicationColorScheme: ApplicationColorScheme) : Serializable

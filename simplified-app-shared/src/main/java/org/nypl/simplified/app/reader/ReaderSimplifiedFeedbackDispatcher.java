@@ -3,6 +3,7 @@ package org.nypl.simplified.app.reader;
 import com.io7m.jnull.NullCheck;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -15,11 +16,8 @@ import java.net.URI;
 public final class ReaderSimplifiedFeedbackDispatcher
   implements ReaderSimplifiedFeedbackDispatcherType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(ReaderSimplifiedFeedbackDispatcher.class);
-  }
+  private static final Logger LOG =
+    LoggerFactory.getLogger(ReaderSimplifiedFeedbackDispatcher.class);
 
   private ReaderSimplifiedFeedbackDispatcher()
   {

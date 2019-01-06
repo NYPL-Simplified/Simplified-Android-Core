@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.controller;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.io7m.jfunctional.OptionType;
@@ -79,7 +80,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a status value
    */
 
-  ListenableFuture<ProfileCreationEvent> profileCreate(
+  FluentFuture<ProfileCreationEvent> profileCreate(
       AccountProvider account_provider,
       String display_name,
       String gender,
@@ -93,7 +94,7 @@ public interface ProfilesControllerType {
    * @return A future that returns unit
    */
 
-  ListenableFuture<Unit> profileSelect(
+  FluentFuture<Unit> profileSelect(
       ProfileID id);
 
   /**
@@ -114,7 +115,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  ListenableFuture<AccountEventLogin> profileAccountCurrentLogin(
+  FluentFuture<AccountEventLogin> profileAccountCurrentLogin(
       AccountAuthenticationCredentials credentials);
 
   /**
@@ -126,7 +127,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  ListenableFuture<AccountEventLogin> profileAccountLogin(
+  FluentFuture<AccountEventLogin> profileAccountLogin(
       AccountID account,
       AccountAuthenticationCredentials credentials);
 
@@ -138,7 +139,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  ListenableFuture<AccountEventCreation> profileAccountCreate(
+  FluentFuture<AccountEventCreation> profileAccountCreate(
       URI provider);
 
   /**
@@ -150,7 +151,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  ListenableFuture<AccountEventDeletion> profileAccountDeleteByProvider(
+  FluentFuture<AccountEventDeletion> profileAccountDeleteByProvider(
       URI provider);
 
   /**
@@ -159,7 +160,7 @@ public interface ProfilesControllerType {
    * @param provider The account provider ID
    */
 
-  ListenableFuture<ProfileAccountSelectEvent> profileAccountSelectByProvider(
+  FluentFuture<ProfileAccountSelectEvent> profileAccountSelectByProvider(
       URI provider);
 
   /**
@@ -199,7 +200,15 @@ public interface ProfilesControllerType {
    * @return A future that returns a logout event
    */
 
-  ListenableFuture<AccountEventLogout> profileAccountLogout();
+  FluentFuture<AccountEventLogout> profileAccountCurrentLogout();
+
+  /**
+   * Attempt to log out of the given account of the current profile.
+   *
+   * @return A future that returns a logout event
+   */
+
+  FluentFuture<AccountEventLogout> profileAccountLogout(AccountID account);
 
   /**
    * Determine the root URI of the catalog based on the current account of the current profile,
@@ -224,7 +233,7 @@ public interface ProfilesControllerType {
    * @see #profileAnonymousEnabled()
    */
 
-  ListenableFuture<Unit> profileBookmarkSet(
+  FluentFuture<Unit> profileBookmarkSet(
       BookID book_id,
       ReaderBookLocation new_location)
       throws ProfileNoneCurrentException;
@@ -251,7 +260,7 @@ public interface ProfilesControllerType {
    * @see #profileAnonymousEnabled()
    */
 
-  ListenableFuture<Unit> profilePreferencesUpdate(
+  FluentFuture<Unit> profilePreferencesUpdate(
       ProfilePreferences preferences)
       throws ProfileNoneCurrentException;
 
@@ -264,7 +273,7 @@ public interface ProfilesControllerType {
    * @param request The feed request
    */
 
-  ListenableFuture<FeedWithoutGroups> profileFeed(
+  FluentFuture<FeedWithoutGroups> profileFeed(
       ProfileFeedRequest request)
       throws ProfileNoneCurrentException;
 

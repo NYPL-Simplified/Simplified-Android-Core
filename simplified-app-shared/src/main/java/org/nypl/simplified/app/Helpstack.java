@@ -12,6 +12,7 @@ import com.tenmiles.helpstack.gears.HSZendeskGear;
 import com.tenmiles.helpstack.logic.HSGear;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,11 +24,7 @@ import java.util.Properties;
 
 public final class Helpstack implements HelpstackType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LogUtilities.getLog(Helpstack.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(Helpstack.class);
 
   private final HSHelpStack helpstack;
 
