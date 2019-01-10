@@ -6,7 +6,7 @@ import com.io7m.jfunctional.Some;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.books.book_database.BookFormats;
 import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -464,20 +464,37 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
       OPDSFeedEntryParserContract.getResource("entry-with-formats-0.xml"));
 
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assert.assertEquals(2, e.getAcquisitions().size());
 
-    final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      OPDSIndirectAcquisition.Companion.findTypeInOptional(
-        "application/epub+zip",
-        acquisition.getIndirectAcquisitions()).isSome());
+    {
+      final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
+      Assert.assertTrue(
+        "application/epub+zip is available",
+        OPDSIndirectAcquisition.Companion.findTypeInOptional(
+          "application/epub+zip",
+          acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
-    Assert.assertEquals(1, available_content_types.size());
-    Assert.assertTrue(
-      "application/epub+zip is available",
-      available_content_types.contains("application/epub+zip"));
+      final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+      Assert.assertEquals(1, available_content_types.size());
+      Assert.assertTrue(
+        "application/epub+zip is available",
+        available_content_types.contains("application/epub+zip"));
+    }
+
+    {
+      final OPDSAcquisition acquisition = e.getAcquisitions().get(1);
+      Assert.assertTrue(
+        "application/pdf is available",
+        OPDSIndirectAcquisition.Companion.findTypeInOptional(
+          "application/pdf",
+          acquisition.getIndirectAcquisitions()).isSome());
+
+      final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+      Assert.assertEquals(1, available_content_types.size());
+      Assert.assertTrue(
+        "application/pdf is available",
+        available_content_types.contains("application/pdf"));
+    }
   }
 
   @Test

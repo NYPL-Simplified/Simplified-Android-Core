@@ -19,10 +19,11 @@ import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
 import org.nypl.simplified.books.book_registry.BookStatusEvent;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.stack.ImmutableStack;
+
+import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 
 /**
  * An activity showing a full-screen book detail page.
@@ -91,7 +92,8 @@ public final class CatalogBookDetailActivity extends CatalogActivity {
   private FeedEntryOPDS getFeedEntry() {
     final Intent i = NullCheck.notNull(this.getIntent());
     final Bundle a = NullCheck.notNull(i.getExtras());
-    return NullCheck.notNull((FeedEntryOPDS) a.getSerializable(CATALOG_BOOK_DETAIL_FEED_ENTRY_ID));
+    return NullCheck.notNull(
+      (FeedEntryOPDS) a.getSerializable(CATALOG_BOOK_DETAIL_FEED_ENTRY_ID));
   }
 
   @Override

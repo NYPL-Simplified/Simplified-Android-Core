@@ -1,11 +1,14 @@
 package org.nypl.simplified.tests.books.controller;
 
+import android.content.Context;
+
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.joda.time.LocalDate;
 import org.junit.After;
 import org.junit.Assert;
@@ -25,6 +28,7 @@ import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescripti
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
 import org.nypl.simplified.books.accounts.AccountsDatabases;
 import org.nypl.simplified.books.analytics.AnalyticsLogger;
+import org.nypl.simplified.books.book_database.BookFormats;
 import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.book_registry.BookRegistry;
 import org.nypl.simplified.books.book_registry.BookRegistryType;
@@ -32,11 +36,10 @@ import org.nypl.simplified.books.bundled_content.BundledContentResolverType;
 import org.nypl.simplified.books.controller.Controller;
 import org.nypl.simplified.books.controller.ProfileFeedRequest;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
-import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.books.feeds.Feed;
 import org.nypl.simplified.books.feeds.FeedHTTPTransport;
 import org.nypl.simplified.books.feeds.FeedLoader;
 import org.nypl.simplified.books.feeds.FeedLoaderType;
-import org.nypl.simplified.books.feeds.FeedWithoutGroups;
 import org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationFailed;
 import org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationSucceeded;
 import org.nypl.simplified.books.profiles.ProfileDatabaseException;
@@ -69,8 +72,6 @@ import org.nypl.simplified.tests.http.MockingHTTP;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,8 +86,12 @@ import static org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCre
 
 public abstract class ProfilesControllerContract {
 
-  @Rule public ExpectedException expected = ExpectedException.none();
+  protected abstract Context context();
 
+  @Rule
+  public ExpectedException expected = ExpectedException.none();
+
+  private ListeningExecutorService executor_feeds;
   private ExecutorService executor_downloads;
   private ExecutorService executor_books;
   private ExecutorService executor_timer;
@@ -100,61 +105,69 @@ public abstract class ProfilesControllerContract {
 
   private static AccountProvider fakeProvider(final String provider_id) {
     return AccountProvider.builder()
-        .setId(URI.create(provider_id))
-        .setDisplayName("Fake Library")
-        .setSubtitle("Imaginary books")
-        .setLogo(URI.create("http://example.com/logo.png"))
-        .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
-        .setSupportEmail("postmaster@example.com")
-        .build();
+      .setId(URI.create(provider_id))
+      .setDisplayName("Fake Library")
+      .setSubtitle("Imaginary books")
+      .setLogo(URI.create("http://example.com/logo.png"))
+      .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
+      .setSupportEmail("postmaster@example.com")
+      .build();
   }
 
   private ProfilesControllerType controller(
-      final ExecutorService task_exec,
-      final HTTPType http,
-      final BookRegistryType books,
-      final ProfilesDatabaseType profiles,
-      final DownloaderType downloader,
-      final FunctionType<Unit, AccountProviderCollection> account_providers,
-      final ExecutorService timer_exec) {
+    final ExecutorService task_exec,
+    final ListeningExecutorService feeds_exec,
+    final HTTPType http,
+    final BookRegistryType books,
+    final ProfilesDatabaseType profiles,
+    final DownloaderType downloader,
+    final FunctionType<Unit, AccountProviderCollection> account_providers,
+    final ExecutorService timer_exec) {
 
     final OPDSFeedParserType parser =
-        OPDSFeedParser.newParser(
-          OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes()));
+      OPDSFeedParser.newParser(
+        OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes()));
     final OPDSFeedTransportType<OptionType<HTTPAuthType>> transport =
-        FeedHTTPTransport.newTransport(http);
+      FeedHTTPTransport.newTransport(http);
     final BundledContentResolverType bundled_content = uri -> {
       throw new FileNotFoundException(uri.toString());
     };
 
     final FeedLoaderType feed_loader =
-        FeedLoader.newFeedLoader(
-            task_exec, books, bundled_content, parser, transport, OPDSSearchParser.newParser());
+      FeedLoader.Companion.create(
+        feeds_exec,
+        parser,
+        OPDSSearchParser.newParser(),
+        transport,
+        books,
+        bundled_content);
 
     final File analytics_directory =
-        new File("/tmp/simplified-android-tests");
+      new File("/tmp/simplified-android-tests");
 
     final AnalyticsLogger analytics_logger =
-        AnalyticsLogger.create(analytics_directory);
+      AnalyticsLogger.create(analytics_directory);
 
-    return Controller.create(
-        task_exec,
-        http,
-        parser,
-        feed_loader,
-        downloader,
-        profiles,
-        analytics_logger,
-        books,
-        bundled_content,
-        account_providers,
-        timer_exec);
+    return Controller.Companion.create(
+      task_exec,
+      http,
+      parser,
+      feed_loader,
+      downloader,
+      profiles,
+      analytics_logger,
+      books,
+      bundled_content,
+      account_providers,
+      timer_exec,
+      null);
   }
 
   @Before
   public void setUp() throws Exception {
     this.http = new MockingHTTP();
     this.executor_downloads = Executors.newCachedThreadPool();
+    this.executor_feeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
     this.executor_books = Executors.newCachedThreadPool();
     this.executor_timer = Executors.newCachedThreadPool();
     this.directory_downloads = DirectoryUtilities.directoryCreateTemporary();
@@ -168,6 +181,7 @@ public abstract class ProfilesControllerContract {
   @After
   public void tearDown() throws Exception {
     this.executor_books.shutdown();
+    this.executor_feeds.shutdown();
     this.executor_downloads.shutdown();
     this.executor_timer.shutdown();
   }
@@ -182,11 +196,11 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesCurrentNoneCurrent() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final DownloaderType downloader =
-        DownloaderHTTP.newDownloader(this.executor_downloads, this.directory_downloads, http);
+      DownloaderHTTP.newDownloader(this.executor_downloads, this.directory_downloads, http);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     this.expected.expect(ProfileNoneCurrentException.class);
     controller.profileCurrent();
@@ -202,11 +216,19 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesCurrentSelectCurrent() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final DownloaderType downloader =
-        DownloaderHTTP.newDownloader(this.executor_downloads, this.directory_downloads, http);
+      DownloaderHTTP.newDownloader(this.executor_downloads, this.directory_downloads, http);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(
+        this.executor_books,
+        this.executor_feeds,
+        http,
+        this.book_registry,
+        profiles,
+        downloader,
+        ProfilesControllerContract::accountProviders,
+        this.executor_timer);
 
     final AccountProvider account_provider = accountProviders().providerDefault();
     controller.profileCreate(account_provider, "Kermit", "Female", LocalDate.now()).get();
@@ -226,9 +248,9 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesCreateDuplicate() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     controller.profileEvents().subscribe(this.profile_events::add);
 
@@ -253,9 +275,9 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesAccountLoginFailed() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     controller.profileEvents().subscribe(this.profile_events::add);
     controller.accountEvents().subscribe(this.account_events::add);
@@ -266,23 +288,23 @@ public abstract class ProfilesControllerContract {
     controller.profileAccountCreate(provider.id()).get();
 
     this.http.addResponse(
-        "urn:fake-auth:0",
-        new HTTPResultError<>(
-            401,
-            "UNAUTHORIZED",
-            0L,
-            new HashMap<>(),
-            0L,
-            new ByteArrayInputStream(new byte[0]),
-            Option.none()));
+      "urn:fake-auth:0",
+      new HTTPResultError<>(
+        401,
+        "UNAUTHORIZED",
+        0L,
+        new HashMap<>(),
+        0L,
+        new ByteArrayInputStream(new byte[0]),
+        Option.none()));
 
     final AccountAuthenticationCredentials credentials =
-        AccountAuthenticationCredentials.builder(
-            AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-            .build();
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .build();
 
     controller.profileAccountLogin(
-        profiles.currentProfileUnsafe().accounts().firstKey(), credentials).get();
+      profiles.currentProfileUnsafe().accounts().firstKey(), credentials).get();
 
     EventAssertions.isType(ProfileCreationSucceeded.class, this.profile_events, 0);
     EventAssertions.isType(ProfileSelected.class, this.profile_events, 1);
@@ -291,8 +313,8 @@ public abstract class ProfilesControllerContract {
     EventAssertions.isType(AccountLoginFailed.class, this.account_events, 1);
 
     Assert.assertTrue(
-        "Credentials must not be saved",
-        controller.profileAccountCurrent().credentials().isNone());
+      "Credentials must not be saved",
+      controller.profileAccountCurrent().credentials().isNone());
   }
 
   /**
@@ -305,9 +327,9 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesAccountLoginSucceeded() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     controller.profileEvents().subscribe(this.profile_events::add);
     controller.accountEvents().subscribe(this.account_events::add);
@@ -318,22 +340,22 @@ public abstract class ProfilesControllerContract {
     controller.profileAccountCreate(provider.id()).get();
 
     this.http.addResponse(
-        "urn:fake-auth:0",
-        new HTTPResultOK<>(
-            "OK",
-            200,
-            new ByteArrayInputStream(new byte[0]),
-            0L,
-            new HashMap<>(),
-            0L));
+      "urn:fake-auth:0",
+      new HTTPResultOK<>(
+        "OK",
+        200,
+        new ByteArrayInputStream(new byte[0]),
+        0L,
+        new HashMap<>(),
+        0L));
 
     final AccountAuthenticationCredentials credentials =
-        AccountAuthenticationCredentials.builder(
-            AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-            .build();
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .build();
 
     controller.profileAccountLogin(
-        profiles.currentProfileUnsafe().accounts().firstKey(), credentials).get();
+      profiles.currentProfileUnsafe().accounts().firstKey(), credentials).get();
 
     EventAssertions.isType(ProfileCreationSucceeded.class, this.profile_events, 0);
     EventAssertions.isType(ProfileSelected.class, this.profile_events, 1);
@@ -342,9 +364,9 @@ public abstract class ProfilesControllerContract {
     EventAssertions.isType(AccountLoginSucceeded.class, this.account_events, 1);
 
     Assert.assertEquals(
-        "Credentials must be saved",
-        Option.some(credentials),
-        controller.profileAccountCurrent().credentials());
+      "Credentials must be saved",
+      Option.some(credentials),
+      controller.profileAccountCurrent().credentials());
   }
 
   /**
@@ -357,9 +379,9 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesAccountCurrentLoginFailed() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     controller.profileEvents().subscribe(this.profile_events::add);
     controller.accountEvents().subscribe(this.account_events::add);
@@ -370,20 +392,20 @@ public abstract class ProfilesControllerContract {
     controller.profileAccountCreate(provider.id()).get();
 
     this.http.addResponse(
-        "urn:fake-auth:0",
-        new HTTPResultError<>(
-            401,
-            "UNAUTHORIZED",
-            0L,
-            new HashMap<>(),
-            0L,
-            new ByteArrayInputStream(new byte[0]),
-            Option.none()));
+      "urn:fake-auth:0",
+      new HTTPResultError<>(
+        401,
+        "UNAUTHORIZED",
+        0L,
+        new HashMap<>(),
+        0L,
+        new ByteArrayInputStream(new byte[0]),
+        Option.none()));
 
     final AccountAuthenticationCredentials credentials =
-        AccountAuthenticationCredentials.builder(
-            AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-            .build();
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .build();
 
     controller.profileAccountCurrentLogin(credentials).get();
 
@@ -394,8 +416,8 @@ public abstract class ProfilesControllerContract {
     EventAssertions.isType(AccountLoginFailed.class, this.account_events, 1);
 
     Assert.assertTrue(
-        "Credentials must not be saved",
-        controller.profileAccountCurrent().credentials().isNone());
+      "Credentials must not be saved",
+      controller.profileAccountCurrent().credentials().isNone());
   }
 
   /**
@@ -408,9 +430,9 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesAccountCurrentLoginSucceeded() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     controller.profileEvents().subscribe(this.profile_events::add);
     controller.accountEvents().subscribe(this.account_events::add);
@@ -421,19 +443,19 @@ public abstract class ProfilesControllerContract {
     controller.profileAccountCreate(provider.id()).get();
 
     this.http.addResponse(
-        "urn:fake-auth:0",
-        new HTTPResultOK<>(
-            "OK",
-            200,
-            new ByteArrayInputStream(new byte[0]),
-            0L,
-            new HashMap<>(),
-            0L));
+      "urn:fake-auth:0",
+      new HTTPResultOK<>(
+        "OK",
+        200,
+        new ByteArrayInputStream(new byte[0]),
+        0L,
+        new HashMap<>(),
+        0L));
 
     final AccountAuthenticationCredentials credentials =
-        AccountAuthenticationCredentials.builder(
-            AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-            .build();
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .build();
 
     controller.profileAccountCurrentLogin(credentials).get();
 
@@ -444,9 +466,9 @@ public abstract class ProfilesControllerContract {
     EventAssertions.isType(AccountLoginSucceeded.class, this.account_events, 1);
 
     Assert.assertEquals(
-        "Credentials must be saved",
-        Option.some(credentials),
-        controller.profileAccountCurrent().credentials());
+      "Credentials must be saved",
+      Option.some(credentials),
+      controller.profileAccountCurrent().credentials());
   }
 
   /**
@@ -459,9 +481,9 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesAccountCurrentLoginNoAuthSucceeded() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, this.book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     controller.profileEvents().subscribe(this.profile_events::add);
     controller.accountEvents().subscribe(this.account_events::add);
@@ -472,9 +494,9 @@ public abstract class ProfilesControllerContract {
     controller.profileAccountCreate(provider.id()).get();
 
     final AccountAuthenticationCredentials credentials =
-        AccountAuthenticationCredentials.builder(
-            AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-            .build();
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .build();
 
     controller.profileAccountCurrentLogin(credentials).get();
 
@@ -485,8 +507,8 @@ public abstract class ProfilesControllerContract {
     EventAssertions.isType(AccountLoginSucceeded.class, this.account_events, 1);
 
     Assert.assertTrue(
-        "Credentials must not be saved",
-        controller.profileAccountCurrent().credentials().isNone());
+      "Credentials must not be saved",
+      controller.profileAccountCurrent().credentials().isNone());
   }
 
   /**
@@ -499,9 +521,17 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesBookmarks() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(
+        this.executor_books,
+        this.executor_feeds,
+        http,
+        book_registry,
+        profiles,
+        downloader,
+        ProfilesControllerContract::accountProviders,
+        this.executor_timer);
 
     final AccountProvider provider = fakeProvider("urn:fake:0");
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get();
@@ -510,22 +540,22 @@ public abstract class ProfilesControllerContract {
     controller.profileEvents().subscribe(this.profile_events::add);
 
     controller.profileBookmarkSet(
-        BookID.create("aaaa"),
-        ReaderBookLocation.create(Option.none(), "1")).get();
+      BookID.create("aaaa"),
+      ReaderBookLocation.create(Option.none(), "1")).get();
 
     Assert.assertEquals(
-        "Bookmark must have been saved",
-        Option.some(ReaderBookLocation.create(Option.none(), "1")),
-        controller.profileBookmarkGet(BookID.create("aaaa")));
+      "Bookmark must have been saved",
+      Option.some(ReaderBookLocation.create(Option.none(), "1")),
+      controller.profileBookmarkGet(BookID.create("aaaa")));
 
     controller.profileBookmarkSet(
-        BookID.create("aaaa"),
-        ReaderBookLocation.create(Option.none(), "2")).get();
+      BookID.create("aaaa"),
+      ReaderBookLocation.create(Option.none(), "2")).get();
 
     Assert.assertEquals(
-        "Bookmark must have been saved",
-        Option.some(ReaderBookLocation.create(Option.none(), "2")),
-        controller.profileBookmarkGet(BookID.create("aaaa")));
+      "Bookmark must have been saved",
+      Option.some(ReaderBookLocation.create(Option.none(), "2")),
+      controller.profileBookmarkGet(BookID.create("aaaa")));
 
     EventAssertions.isTypeAndMatches(ProfilePreferencesChanged.class, this.profile_events, 0, e -> {
       Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences());
@@ -548,9 +578,16 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesPreferences() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(
+        this.executor_books,
+        this.executor_feeds,
+        http,
+        book_registry,
+        profiles,
+        downloader,
+        ProfilesControllerContract::accountProviders, this.executor_timer);
 
     final AccountProvider provider = fakeProvider("urn:fake:0");
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get();
@@ -567,18 +604,18 @@ public abstract class ProfilesControllerContract {
 
     this.profile_events.clear();
     controller.profilePreferencesUpdate(
-        profiles.currentProfileUnsafe()
-            .preferences()
-            .toBuilder()
-            .setReaderPreferences(
-                ReaderPreferences.builder()
-                    .setBrightness(0.2)
-                    .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
-                    .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
-                    .setFontScale(2.0)
-                    .build())
+      profiles.currentProfileUnsafe()
+        .preferences()
+        .toBuilder()
+        .setReaderPreferences(
+          ReaderPreferences.builder()
+            .setBrightness(0.2)
+            .setColorScheme(ReaderColorScheme.SCHEME_WHITE_ON_BLACK)
+            .setFontFamily(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC)
+            .setFontScale(2.0)
             .build())
-        .get();
+        .build())
+      .get();
 
     EventAssertions.isTypeAndMatches(ProfilePreferencesChanged.class, this.profile_events, 0, e -> {
       Assert.assertTrue("Preferences must have changed", e.changedReaderPreferences());
@@ -596,9 +633,9 @@ public abstract class ProfilesControllerContract {
   public final void testProfilesFeed() throws Exception {
 
     final ProfilesDatabaseType profiles =
-        profilesDatabaseWithoutAnonymous(this.directory_profiles);
+      profilesDatabaseWithoutAnonymous(this.directory_profiles);
     final ProfilesControllerType controller =
-        controller(this.executor_books, http, book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
+      controller(this.executor_books, this.executor_feeds, http, book_registry, profiles, downloader, ProfilesControllerContract::accountProviders, this.executor_timer);
 
     final AccountProvider provider = fakeProvider("urn:fake:0");
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get();
@@ -606,22 +643,23 @@ public abstract class ProfilesControllerContract {
     controller.profileAccountCreate(provider.id()).get();
     controller.profileEvents().subscribe(this.profile_events::add);
 
-    final FeedWithoutGroups feed =
-        controller.profileFeed(
-            ProfileFeedRequest.builder(
-                URI.create("Books"), "Books", "Sort by", t -> "Sort by title")
-                .build())
-            .get();
+    final Feed.FeedWithoutGroups feed =
+      controller.profileFeed(
+        ProfileFeedRequest.builder(
+          URI.create("Books"), "Books", "Sort by", t -> "Sort by title")
+          .build())
+        .get();
 
-    Assert.assertEquals(0L, feed.size());
+    Assert.assertEquals(0L, feed.getSize());
   }
 
   private ProfilesDatabaseType profilesDatabaseWithoutAnonymous(final File dir_profiles)
-      throws ProfileDatabaseException {
+    throws ProfileDatabaseException {
     return ProfilesDatabase.openWithAnonymousAccountDisabled(
-        accountProviders(Unit.unit()),
-        AccountsDatabases.get(),
-        dir_profiles);
+      context(),
+      accountProviders(Unit.unit()),
+      AccountsDatabases.INSTANCE,
+      dir_profiles);
   }
 
   private static AccountProviderCollection accountProviders(final Unit unit) {
@@ -644,12 +682,13 @@ public abstract class ProfilesControllerContract {
 
   private static AccountProvider fakeAuthProvider(final String uri) {
     return fakeProvider(uri)
-        .toBuilder()
-        .setAuthentication(Option.some(AccountProviderAuthenticationDescription.builder()
-            .setLoginURI(URI.create(uri))
-            .setPassCodeLength(4)
-            .setPassCodeMayContainLetters(true)
-            .build()))
-        .build();
+      .toBuilder()
+      .setAuthentication(Option.some(AccountProviderAuthenticationDescription.builder()
+        .setLoginURI(URI.create(uri))
+        .setPassCodeLength(4)
+        .setPassCodeMayContainLetters(true)
+        .setRequiresPin(true)
+        .build()))
+      .build();
   }
 }

@@ -21,6 +21,7 @@ import org.nypl.simplified.books.accounts.AccountPatron;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.HTTPOAuthToken;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 

@@ -3,7 +3,6 @@ package org.nypl.simplified.app.catalog
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.support.annotation.ColorInt
 import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
@@ -33,9 +32,9 @@ import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.accounts.AccountType
-import org.nypl.simplified.books.book_database.BookFormats
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookStatusDownloadInProgress
@@ -63,7 +62,7 @@ import org.nypl.simplified.books.controller.BooksControllerType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.core.BookAcquisitionSelection
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
@@ -805,7 +804,7 @@ class CatalogBookDetailView(
         BOOK_CHANGED -> {
           val bookWithStatus = this.booksRegistry.books().get(updateID)
           if (bookWithStatus != null) {
-            this.entry.set(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(bookWithStatus.book().entry()))
+            this.entry.set(FeedEntryOPDS(bookWithStatus.book().entry))
             UIThread.runOnUIThread { bookWithStatus.status().matchBookStatus(this) }
             return
           }
@@ -1015,25 +1014,22 @@ class CatalogBookDetailView(
       resources: Resources,
       entry: FeedEntryOPDS,
       bookHeaderFormat: TextView) {
-      val formatOpt = entry.probableFormat
-      if (formatOpt is Some<BookFormats.BookFormatDefinition>) {
-        val format = formatOpt.get()
-        when (format) {
-          BOOK_FORMAT_EPUB -> {
-            // Not showing the text for epub format books is deliberate!
-            bookHeaderFormat.visibility = View.INVISIBLE
-            bookHeaderFormat.text = resources.getText(R.string.book_format_epub)
-          }
-          BOOK_FORMAT_AUDIO -> {
-            bookHeaderFormat.visibility = View.VISIBLE
-            bookHeaderFormat.text = resources.getText(R.string.book_format_audiobook)
-          }
-          null -> {
-            bookHeaderFormat.visibility = View.INVISIBLE
-          }
+      when (entry.probableFormat) {
+        BOOK_FORMAT_EPUB -> {
+          // Not showing the text for epub format books is deliberate!
+          bookHeaderFormat.visibility = View.INVISIBLE
+          bookHeaderFormat.text = resources.getText(R.string.book_format_epub)
         }
-      } else {
-        bookHeaderFormat.visibility = View.INVISIBLE
+        BOOK_FORMAT_AUDIO -> {
+          bookHeaderFormat.visibility = View.VISIBLE
+          bookHeaderFormat.text = resources.getText(R.string.book_format_audiobook)
+        }
+        BOOK_FORMAT_PDF -> {
+          bookHeaderFormat.visibility = View.INVISIBLE
+        }
+        null -> {
+          bookHeaderFormat.visibility = View.INVISIBLE
+        }
       }
     }
   }

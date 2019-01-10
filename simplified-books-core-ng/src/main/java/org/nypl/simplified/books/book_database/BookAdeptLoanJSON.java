@@ -20,9 +20,7 @@ import java.nio.ByteBuffer;
 
 public final class BookAdeptLoanJSON {
 
-  public static ObjectNode serializeToNode(
-      final AdobeAdeptLoan loan) {
-
+  public static ObjectNode serializeToNode(final AdobeAdeptLoan loan) {
     NullCheck.notNull(loan, "Loan");
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode o = jom.createObjectNode();
@@ -31,9 +29,7 @@ public final class BookAdeptLoanJSON {
     return o;
   }
 
-  public static String serializeToString(
-      final AdobeAdeptLoan loan) throws IOException {
-
+  public static String serializeToString(final AdobeAdeptLoan loan) throws IOException {
     NullCheck.notNull(loan, "Loan");
     final ByteArrayOutputStream bao = new ByteArrayOutputStream();
     JSONSerializerUtilities.serialize(serializeToNode(loan), bao);
@@ -41,15 +37,15 @@ public final class BookAdeptLoanJSON {
   }
 
   public static AdobeAdeptLoan deserializeFromNode(
-      final ObjectNode node,
-      final byte[] rights)
-      throws JSONParseException {
+    final ObjectNode node,
+    final byte[] rights)
+    throws JSONParseException {
 
     NullCheck.notNull(node, "Node");
     NullCheck.notNull(rights, "Rights");
     return new AdobeAdeptLoan(
-        new AdobeLoanID(JSONParserUtilities.getString(node, "loan-id")),
-        ByteBuffer.wrap(rights),
-        JSONParserUtilities.getBoolean(node, "returnable"));
+      new AdobeLoanID(JSONParserUtilities.getString(node, "loan-id")),
+      ByteBuffer.wrap(rights),
+      JSONParserUtilities.getBoolean(node, "returnable"));
   }
 }

@@ -1,5 +1,7 @@
 package org.nypl.simplified.tests.books.accounts;
 
+import android.content.Context;
+
 import com.io7m.jfunctional.Option;
 
 import org.hamcrest.BaseMatcher;
@@ -18,13 +20,11 @@ import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabase;
 import org.nypl.simplified.books.accounts.AccountsDatabaseException;
 import org.nypl.simplified.books.accounts.AccountsDatabaseType;
-import org.nypl.simplified.books.book_database.BookDatabaseFactoryType;
 import org.nypl.simplified.books.book_database.BookDatabases;
-import org.nypl.simplified.books.core.LogUtilities;
-import org.nypl.simplified.books.profiles.ProfileID;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +36,10 @@ public abstract class AccountsDatabaseContract {
 
   private static final Logger LOG = LoggerFactory.getLogger(AccountsDatabaseContract.class);
 
-  @Rule public ExpectedException expected = ExpectedException.none();
+  protected abstract Context context();
+
+  @Rule
+  public ExpectedException expected = ExpectedException.none();
 
   /**
    * An exception matcher that checks to see if the given accounts database exception has
@@ -46,13 +49,13 @@ public abstract class AccountsDatabaseContract {
    */
 
   private static final class CausesContains<T extends Exception>
-      extends BaseMatcher<AccountsDatabaseException> {
+    extends BaseMatcher<AccountsDatabaseException> {
     private final Class<T> exception_type;
     private final String message;
 
     CausesContains(
-        final Class<T> exception_type,
-        final String message) {
+      final Class<T> exception_type,
+      final String message) {
       this.exception_type = exception_type;
       this.message = message;
     }
@@ -81,7 +84,7 @@ public abstract class AccountsDatabaseContract {
 
   @Test
   public final void testOpenExistingNotDirectory()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -94,16 +97,16 @@ public abstract class AccountsDatabaseContract {
 
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(IOException.class, "Not a directory"));
-    AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
   }
 
   private BookDatabases bookDatabases() {
-    return BookDatabases.get();
+    return BookDatabases.INSTANCE;
   }
 
   @Test
   public final void testOpenExistingBadSubdirectory()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -117,13 +120,13 @@ public abstract class AccountsDatabaseContract {
 
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(
-        IOException.class, "Could not parse directory name as an account ID"));
-    AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+      IOException.class, "Could not parse directory name as an account ID"));
+    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
   }
 
   @Test
   public final void testOpenExistingJSONMissing()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -137,12 +140,12 @@ public abstract class AccountsDatabaseContract {
 
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(IOException.class, "Could not parse account: "));
-    AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
   }
 
   @Test
   public final void testOpenExistingJSONUnparseable()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -159,12 +162,12 @@ public abstract class AccountsDatabaseContract {
 
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(IOException.class, "Could not parse account: "));
-    AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
   }
 
   @Test
   public final void testOpenExistingEmpty()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -173,15 +176,15 @@ public abstract class AccountsDatabaseContract {
     f_p.mkdirs();
     final File f_acc = new File(f_p, "accounts");
 
-    final AccountsDatabaseType db = 
-        AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+    final AccountsDatabaseType db =
+      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
     Assert.assertEquals(0, db.accounts().size());
     Assert.assertEquals(f_acc, db.directory());
   }
 
   @Test
   public final void testCreateAccount()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -191,14 +194,14 @@ public abstract class AccountsDatabaseContract {
     final File f_acc = new File(f_p, "accounts");
 
     final AccountProviderCollectionType account_providers =
-        accountProviders();
+      accountProviders();
     final AccountsDatabaseType db =
-        AccountsDatabase.open(bookDatabases(), account_providers, f_acc);
+      AccountsDatabase.open(context(), bookDatabases(), account_providers, f_acc);
 
     final AccountProvider provider0 =
-        fakeProvider("http://www.example.com/accounts0/");
+      fakeProvider("http://www.example.com/accounts0/");
     final AccountProvider provider1 =
-        fakeProvider("http://www.example.com/accounts1/");
+      fakeProvider("http://www.example.com/accounts1/");
 
     final AccountType acc0 = db.createAccount(provider0);
     final AccountType acc1 = db.createAccount(provider1);
@@ -207,18 +210,18 @@ public abstract class AccountsDatabaseContract {
     Assert.assertTrue("Account 1 directory exists", acc1.directory().isDirectory());
 
     Assert.assertTrue(
-        "Account 0 file exists",
-        new File(acc0.directory(), "account.json").isFile());
+      "Account 0 file exists",
+      new File(acc0.directory(), "account.json").isFile());
     Assert.assertTrue(
-        "Account 1 file exists",
-        new File(acc1.directory(), "account.json").isFile());
+      "Account 1 file exists",
+      new File(acc1.directory(), "account.json").isFile());
 
     Assert.assertEquals(
-        account_providers.provider(URI.create("http://www.example.com/accounts0/")),
-        acc0.provider());
+      account_providers.provider(URI.create("http://www.example.com/accounts0/")),
+      acc0.provider());
     Assert.assertEquals(
-        account_providers.provider(URI.create("http://www.example.com/accounts1/")),
-        acc1.provider());
+      account_providers.provider(URI.create("http://www.example.com/accounts1/")),
+      acc1.provider());
 
     Assert.assertNotEquals(acc0.id(), acc1.id());
     Assert.assertNotEquals(acc0.directory(), acc1.directory());
@@ -229,7 +232,7 @@ public abstract class AccountsDatabaseContract {
 
   @Test
   public final void testCreateReopen()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -238,19 +241,19 @@ public abstract class AccountsDatabaseContract {
     f_p.mkdirs();
     final File f_acc = new File(f_p, "accounts");
 
-    final AccountsDatabaseType db0 = 
-        AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+    final AccountsDatabaseType db0 =
+      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
 
     final AccountProvider provider0 =
-        fakeProvider("http://www.example.com/accounts0/");
+      fakeProvider("http://www.example.com/accounts0/");
     final AccountProvider provider1 =
-        fakeProvider("http://www.example.com/accounts1/");
+      fakeProvider("http://www.example.com/accounts1/");
 
     final AccountType acc0 = db0.createAccount(provider0);
     final AccountType acc1 = db0.createAccount(provider1);
 
-    final AccountsDatabaseType db1 = 
-        AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+    final AccountsDatabaseType db1 =
+      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
 
     final AccountType acr0 = db1.accounts().get(acc0.id());
     final AccountType acr1 = db1.accounts().get(acc1.id());
@@ -265,7 +268,7 @@ public abstract class AccountsDatabaseContract {
 
   @Test
   public final void testSetCredentials()
-      throws Exception {
+    throws Exception {
 
     final File f_tmp = DirectoryUtilities.directoryCreateTemporary();
     final File f_pro = new File(f_tmp, "profiles");
@@ -274,15 +277,16 @@ public abstract class AccountsDatabaseContract {
     f_p.mkdirs();
     final File f_acc = new File(f_p, "accounts");
 
-    final AccountsDatabaseType db0 = AccountsDatabase.open(bookDatabases(), accountProviders(), f_acc);
+    final AccountsDatabaseType db0 =
+      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
     final AccountProvider provider0 = fakeProvider("http://www.example.com/accounts0/");
     final AccountType acc0 = db0.createAccount(provider0);
 
     final AccountAuthenticationCredentials creds =
-        AccountAuthenticationCredentials.builder(
-            AccountPIN.create("1234"),
-            AccountBarcode.create("1234"))
-            .build();
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("1234"),
+        AccountBarcode.create("1234"))
+        .build();
 
     acc0.setCredentials(Option.some(creds));
     Assert.assertEquals(Option.some(creds), acc0.credentials());
@@ -299,12 +303,12 @@ public abstract class AccountsDatabaseContract {
 
   private static AccountProvider fakeProvider(final String provider_id) {
     return AccountProvider.builder()
-        .setId(URI.create(provider_id))
-        .setDisplayName("Fake Library")
-        .setSubtitle("Imaginary books")
-        .setLogo(URI.create("http://example.com/logo.png"))
-        .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
-        .setSupportEmail("postmaster@example.com")
-        .build();
+      .setId(URI.create(provider_id))
+      .setDisplayName("Fake Library")
+      .setSubtitle("Imaginary books")
+      .setLogo(URI.create("http://example.com/logo.png"))
+      .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
+      .setSupportEmail("postmaster@example.com")
+      .build();
   }
 }

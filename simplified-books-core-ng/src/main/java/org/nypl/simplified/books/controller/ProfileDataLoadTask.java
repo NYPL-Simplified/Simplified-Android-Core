@@ -13,9 +13,9 @@ import org.nypl.simplified.books.book_registry.BookRegistryType;
 import org.nypl.simplified.books.book_registry.BookStatus;
 import org.nypl.simplified.books.book_registry.BookStatusType;
 import org.nypl.simplified.books.book_registry.BookWithStatus;
-import org.nypl.simplified.books.logging.LogUtilities;
 import org.nypl.simplified.books.profiles.ProfileType;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.SortedMap;
@@ -50,7 +50,7 @@ final class ProfileDataLoadTask implements Runnable {
       for (final BookID book_id : book_ids) {
         try {
           final BookDatabaseEntryType entry = books.entry(book_id);
-          final Book book = entry.book();
+          final Book book = entry.getBook();
           final BookStatusType status = BookStatus.fromBook(book);
           this.book_registry.update(BookWithStatus.create(book, status));
         } catch (BookDatabaseException e) {

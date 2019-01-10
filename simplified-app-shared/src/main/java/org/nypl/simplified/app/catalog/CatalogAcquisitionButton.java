@@ -14,6 +14,8 @@ import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
+import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
+
 /**
  * An acquisition button.
  */

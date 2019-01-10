@@ -2,8 +2,6 @@ package org.nypl.simplified.books.controller;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.FluentFuture;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 
@@ -19,7 +17,7 @@ import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.book_database.BookID;
-import org.nypl.simplified.books.feeds.FeedWithoutGroups;
+import org.nypl.simplified.books.feeds.Feed;
 import org.nypl.simplified.books.idle_timer.ProfileIdleTimerType;
 import org.nypl.simplified.books.profiles.ProfileAccountSelectEvent;
 import org.nypl.simplified.books.profiles.ProfileCreationEvent;
@@ -62,7 +60,7 @@ public interface ProfilesControllerType {
    */
 
   ProfileReadableType profileCurrent()
-      throws ProfileNoneCurrentException;
+    throws ProfileNoneCurrentException;
 
   /**
    * @return An observable that publishes profile events
@@ -81,10 +79,10 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<ProfileCreationEvent> profileCreate(
-      AccountProvider account_provider,
-      String display_name,
-      String gender,
-      LocalDate date);
+    AccountProvider account_provider,
+    String display_name,
+    String gender,
+    LocalDate date);
 
   /**
    * Set the given profile as the current profile. The operation always succeeds if a profile
@@ -95,7 +93,7 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<Unit> profileSelect(
-      ProfileID id);
+    ProfileID id);
 
   /**
    * @return The current account in most recently selected profile, or the anonymous profile if it is enabled
@@ -105,7 +103,7 @@ public interface ProfilesControllerType {
    */
 
   AccountType profileAccountCurrent()
-      throws ProfileNoneCurrentException;
+    throws ProfileNoneCurrentException;
 
   /**
    * Attempt to login using the current account of the current profile. The login is attempted
@@ -116,7 +114,7 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<AccountEventLogin> profileAccountCurrentLogin(
-      AccountAuthenticationCredentials credentials);
+    AccountAuthenticationCredentials credentials);
 
   /**
    * Attempt to login using the given account of the current profile. The login is attempted
@@ -128,8 +126,8 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<AccountEventLogin> profileAccountLogin(
-      AccountID account,
-      AccountAuthenticationCredentials credentials);
+    AccountID account,
+    AccountAuthenticationCredentials credentials);
 
   /**
    * Create an account using the given account provider. The operation will fail if
@@ -140,7 +138,7 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<AccountEventCreation> profileAccountCreate(
-      URI provider);
+    URI provider);
 
   /**
    * Create an account using the given account provider. The operation will fail if
@@ -152,7 +150,7 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<AccountEventDeletion> profileAccountDeleteByProvider(
-      URI provider);
+    URI provider);
 
   /**
    * Switch the current account of the current profile to the one created by the given provider.
@@ -161,7 +159,7 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<ProfileAccountSelectEvent> profileAccountSelectByProvider(
-      URI provider);
+    URI provider);
 
   /**
    * Find an account int the current profile using the given provider.
@@ -174,8 +172,8 @@ public interface ProfilesControllerType {
    */
 
   AccountType profileAccountFindByProvider(
-      URI provider)
-      throws ProfileNoneCurrentException, AccountsDatabaseNonexistentException;
+    URI provider)
+    throws ProfileNoneCurrentException, AccountsDatabaseNonexistentException;
 
   /**
    * @return An observable that publishes account events
@@ -192,7 +190,7 @@ public interface ProfilesControllerType {
    */
 
   ImmutableList<AccountProvider> profileCurrentlyUsedAccountProviders()
-      throws ProfileNoneCurrentException, ProfileNonexistentAccountProviderException;
+    throws ProfileNoneCurrentException, ProfileNonexistentAccountProviderException;
 
   /**
    * Attempt to log out using the current account of the current profile.
@@ -231,12 +229,14 @@ public interface ProfilesControllerType {
    * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @see #profileSelect(ProfileID)
    * @see #profileAnonymousEnabled()
+   * @deprecated Use the book database to store bookmarks
    */
 
+  @Deprecated
   FluentFuture<Unit> profileBookmarkSet(
-      BookID book_id,
-      ReaderBookLocation new_location)
-      throws ProfileNoneCurrentException;
+    BookID book_id,
+    ReaderBookLocation new_location)
+    throws ProfileNoneCurrentException;
 
   /**
    * Retrieve the last bookmark for a given book.
@@ -245,11 +245,13 @@ public interface ProfilesControllerType {
    * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @see #profileSelect(ProfileID)
    * @see #profileAnonymousEnabled()
+   * @deprecated Use the book database to store bookmarks
    */
 
+  @Deprecated
   OptionType<ReaderBookLocation> profileBookmarkGet(
-      BookID book_id)
-      throws ProfileNoneCurrentException;
+    BookID book_id)
+    throws ProfileNoneCurrentException;
 
   /**
    * Update preferences for the current profile.
@@ -261,25 +263,26 @@ public interface ProfilesControllerType {
    */
 
   FluentFuture<Unit> profilePreferencesUpdate(
-      ProfilePreferences preferences)
-      throws ProfileNoneCurrentException;
+    ProfilePreferences preferences)
+    throws ProfileNoneCurrentException;
 
   /**
    * Produce a feed of all the books in the current profile.
    *
+   * @param request The feed request
    * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @see #profileSelect(ProfileID)
    * @see #profileAnonymousEnabled()
-   * @param request The feed request
    */
 
-  FluentFuture<FeedWithoutGroups> profileFeed(
-      ProfileFeedRequest request)
-      throws ProfileNoneCurrentException;
+  FluentFuture<Feed.FeedWithoutGroups> profileFeed(
+    ProfileFeedRequest request)
+    throws ProfileNoneCurrentException;
 
   /**
    * Return the account that owns the given book ID in the current profile, or assume that the
    * current account owns the book.
+   *
    * @param id The book ID
    * @throws ProfileNoneCurrentException If the anonymous profile is disabled and no profile has been selected
    * @see #profileSelect(ProfileID)
@@ -287,7 +290,7 @@ public interface ProfilesControllerType {
    */
 
   AccountType profileAccountForBook(BookID id)
-      throws ProfileNoneCurrentException, AccountsDatabaseNonexistentException;
+    throws ProfileNoneCurrentException, AccountsDatabaseNonexistentException;
 
   /**
    * @return The global profile idle timer

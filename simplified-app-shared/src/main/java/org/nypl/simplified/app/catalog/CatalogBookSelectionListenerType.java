@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
+import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 
 /**
  * The type of book selection listeners.

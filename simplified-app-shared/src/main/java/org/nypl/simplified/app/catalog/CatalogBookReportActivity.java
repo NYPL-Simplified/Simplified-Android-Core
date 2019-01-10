@@ -21,7 +21,8 @@ import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.NavigationDrawerActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
+
+import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 
 /**
  * An activity showing options for reporting

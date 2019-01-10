@@ -1,7 +1,8 @@
 package org.nypl.simplified.app.catalog;
 
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.feeds.FeedGroup;
+
+import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 
 /**
  * A listener that receives lane events.

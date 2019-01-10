@@ -26,7 +26,7 @@ import org.nypl.simplified.books.book_registry.BookWithStatus;
 import org.nypl.simplified.books.controller.BooksControllerType;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
 import org.nypl.simplified.books.document_store.DocumentStoreType;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
+import org.nypl.simplified.books.feeds.FeedEntry;
 import org.nypl.simplified.books.logging.LogUtilities;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfileReadableType;
@@ -49,7 +49,7 @@ public final class CatalogAcquisitionButtonController implements OnClickListener
   private final OPDSAcquisition acquisition;
   private final AppCompatActivity activity;
   private final BooksControllerType books;
-  private final FeedEntryOPDS entry;
+  private final FeedEntry.FeedEntryOPDS entry;
   private final BookID id;
   private final ProfilesControllerType profiles;
   private final BookRegistryReadableType book_registry;
@@ -77,7 +77,7 @@ public final class CatalogAcquisitionButtonController implements OnClickListener
     final NetworkConnectivityType in_network_connectivity,
     final BookID in_id,
     final OPDSAcquisition in_acq,
-    final FeedEntryOPDS in_entry) {
+    final FeedEntry.FeedEntryOPDS in_entry) {
 
     this.activity =
       NullCheck.notNull(in_activity, "Activity");
@@ -186,7 +186,7 @@ public final class CatalogAcquisitionButtonController implements OnClickListener
         public AccountType some(final Some<BookWithStatus> some) {
           try {
             final ProfileReadableType profile = profiles.profileCurrent();
-            final AccountID account_id = some.get().book().account();
+            final AccountID account_id = some.get().book().getAccount();
             return profile.account(account_id);
           } catch (ProfileNoneCurrentException | AccountsDatabaseNonexistentException e) {
             throw new IllegalStateException(e);

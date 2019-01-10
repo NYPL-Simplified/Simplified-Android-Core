@@ -132,7 +132,6 @@ public class NYPLStringRequest extends StringRequest {
     final Map<String, String> params = new HashMap<String, String>();
 
     if (this.credentials != null) {
-
       if (this.credentials.getAuthToken().isSome()) {
 
         final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();

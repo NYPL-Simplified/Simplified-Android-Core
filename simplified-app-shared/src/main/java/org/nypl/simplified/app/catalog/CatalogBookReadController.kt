@@ -13,14 +13,14 @@ import org.nypl.simplified.app.reader.ReaderActivity
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountType
+import org.nypl.simplified.books.book_database.Book
+import org.nypl.simplified.books.book_database.BookFormat.BookFormatAudioBook
+import org.nypl.simplified.books.book_database.BookFormat.BookFormatEPUB
+import org.nypl.simplified.books.book_database.BookFormat.BookFormatPDF
 import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotAudioBook
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatSnapshot.BookDatabaseEntryFormatSnapshotEPUB
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.circanalytics.CirculationAnalytics
 import org.slf4j.LoggerFactory
-import java.io.File
 
 /**
  * A controller that opens a given book for reading.
@@ -46,13 +46,33 @@ class CatalogBookReadController(
 
     val database = this.account.bookDatabase()
     val entry = database.entry(this.id)
-    throw UnimplementedCodeException()
+    val format = entry.book.findPreferredFormat()
+
+    if (format == null) {
+      throw UnimplementedCodeException()
+    }
+
+    return when (format) {
+      is BookFormatEPUB ->
+        launchEPUBReader(entry.book, format)
+      is BookFormatAudioBook ->
+        launchAudioBookPlayer(entry.book, format)
+      is BookFormatPDF ->
+        launchPDFReader(entry.book, format)
+    }
   }
 
-  private fun launchEPUBReader(format: BookDatabaseEntryFormatSnapshotEPUB) {
-    val bookOpt = format.book
-    if (bookOpt is Some<File>) {
-      ReaderActivity.startActivity(this.activity, this.id, bookOpt.get(), this.entry)
+  private fun launchPDFReader(book: Book, format: BookFormatPDF) {
+    ErrorDialogUtilities.showError(
+      this.activity,
+      LOG,
+      "PDF support is not yet implemented",
+      null)
+  }
+
+  private fun launchEPUBReader(book: Book, format: BookFormatEPUB) {
+    if (format.isDownloaded) {
+      ReaderActivity.startActivity(this.activity, this.id, book, format)
     } else {
       ErrorDialogUtilities.showError(
         this.activity,
@@ -62,14 +82,14 @@ class CatalogBookReadController(
     }
   }
 
-  private fun launchAudioBookPlayer(format: BookDatabaseEntryFormatSnapshotAudioBook) {
-    val manifestOpt = format.manifest
-    if (manifestOpt is Some<BookDatabaseEntryFormatSnapshot.AudioBookManifestReference>) {
+  private fun launchAudioBookPlayer(book: Book, format: BookFormatAudioBook) {
+    val manifest = format.manifest
+    if (manifest != null) {
       AudioBookPlayerActivity.startActivity(
         from = this.activity,
         parameters = AudioBookPlayerParameters(
-          manifestFile = manifestOpt.get().manifestFile,
-          manifestURI = manifestOpt.get().manifestURI,
+          manifestFile = manifest.manifestFile,
+          manifestURI = manifest.manifestURI,
           opdsEntry = this.entry.feedEntry,
           applicationColorScheme = this.colorScheme,
           bookID = this.id))

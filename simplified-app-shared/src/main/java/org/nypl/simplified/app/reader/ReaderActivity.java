@@ -47,6 +47,8 @@ import org.nypl.simplified.books.core.BookDatabaseEntryReadableType;
 import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
+import org.nypl.simplified.books.feeds.FeedEntry;
+import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.core.SelectorNode;
 import org.nypl.simplified.books.core.TargetNode;

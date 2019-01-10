@@ -5,17 +5,14 @@ import com.bugsnag.android.Severity;
 
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bugsnag no-op interface
  */
 public class BugsnagDummy implements BugsnagType
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LoggerFactory.getLogger(BugsnagDummy.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(BugsnagDummy.class);
 
   /**
    *

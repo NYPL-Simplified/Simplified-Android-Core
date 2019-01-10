@@ -6,9 +6,10 @@ import android.view.View;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 
 /**
  * A controller that opens a report activity for a given book.

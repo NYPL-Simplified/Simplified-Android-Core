@@ -55,10 +55,8 @@ import org.nypl.simplified.books.controller.ProfilesControllerType;
 import org.nypl.simplified.books.core.BookAcquisitionSelection;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.books.document_store.DocumentStoreType;
-import org.nypl.simplified.books.feeds.FeedEntryCorrupt;
-import org.nypl.simplified.books.feeds.FeedEntryMatcherType;
+import org.nypl.simplified.books.feeds.FeedEntry;
 import org.nypl.simplified.books.feeds.FeedEntryOPDS;
-import org.nypl.simplified.books.feeds.FeedEntryType;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -790,7 +788,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
    */
 
   public void viewConfigure(
-    final FeedEntryType in_e,
+    final FeedEntry in_e,
     final CatalogBookSelectionListenerType in_listener) {
     NullCheck.notNull(in_e);
     NullCheck.notNull(in_listener);

@@ -46,8 +46,10 @@ public abstract class ProfilePreferences {
 
   /**
    * @return The reader bookmarks
+   * @deprecated Use the book database epub format handle to store these
    */
 
+  @Deprecated
   public abstract ReaderBookmarks readerBookmarks();
 
   /**
@@ -79,7 +81,7 @@ public abstract class ProfilePreferences {
      */
 
     public abstract Builder setReaderBookmarks(
-        ReaderBookmarks bookmarks);
+      ReaderBookmarks bookmarks);
 
     /**
      * @param prefs The reader preferences
@@ -88,7 +90,7 @@ public abstract class ProfilePreferences {
      */
 
     public abstract Builder setReaderPreferences(
-        ReaderPreferences prefs);
+      ReaderPreferences prefs);
 
     /**
      * @param gender The gender
@@ -97,7 +99,7 @@ public abstract class ProfilePreferences {
      */
 
     public abstract Builder setGender(
-        OptionType<String> gender);
+      OptionType<String> gender);
 
     /**
      * @param gender The gender
@@ -116,7 +118,7 @@ public abstract class ProfilePreferences {
      */
 
     public abstract Builder setDateOfBirth(
-        OptionType<LocalDate> date);
+      OptionType<LocalDate> date);
 
     /**
      * @param date The date
@@ -141,11 +143,11 @@ public abstract class ProfilePreferences {
 
   public static ProfilePreferences.Builder builder() {
     return new AutoValue_ProfilePreferences.Builder()
-        .setReaderPreferences(
-            ReaderPreferences.builder()
-                .build())
-        .setReaderBookmarks(ReaderBookmarks.create(ImmutableMap.of()))
-        .setGender(Option.none())
-        .setDateOfBirth(Option.none());
+      .setReaderPreferences(
+        ReaderPreferences.builder()
+          .build())
+      .setReaderBookmarks(ReaderBookmarks.create(ImmutableMap.of()))
+      .setGender(Option.none())
+      .setDateOfBirth(Option.none());
   }
 }

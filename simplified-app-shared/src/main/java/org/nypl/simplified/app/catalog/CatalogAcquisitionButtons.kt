@@ -10,7 +10,7 @@ import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.controller.BooksControllerType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.core.BookAcquisitionSelection
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.slf4j.LoggerFactory
 
@@ -45,7 +45,7 @@ class CatalogAcquisitionButtons private constructor() {
       books: BooksControllerType,
       profiles: ProfilesControllerType,
       bookRegistry: BookRegistryReadableType,
-      entry: FeedEntryOPDS) {
+      entry: FeedEntry.FeedEntryOPDS) {
 
       viewGroup.visibility = View.VISIBLE
       viewGroup.removeAllViews()

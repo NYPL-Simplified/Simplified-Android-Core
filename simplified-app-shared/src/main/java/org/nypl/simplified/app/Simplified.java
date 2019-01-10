@@ -420,14 +420,14 @@ public final class Simplified extends MultiDexApplication {
       LOG.debug("opening profile database with anonymous profile");
       return ProfilesDatabase.openWithAnonymousAccountEnabled(
         account_providers,
-        AccountsDatabases.get(),
+        AccountsDatabases.Companion.get(),
         account_providers.providerDefault(),
         directory);
     }
 
     LOG.debug("opening profile database without anonymous profile");
     return ProfilesDatabase.openWithAnonymousAccountDisabled(
-      account_providers, AccountsDatabases.get(), directory);
+      account_providers, AccountsDatabases.Companion.get(), directory);
   }
 
   @NonNull
@@ -675,7 +675,7 @@ public final class Simplified extends MultiDexApplication {
     this.feed_parser = createFeedParser();
     this.feed_search_parser = OPDSSearchParser.newParser();
     this.feed_transport = FeedHTTPTransport.newTransport(this.http);
-    this.feed_loader = FeedLoader.newFeedLoader(
+    this.feed_loader = FeedLoader.Companion.newFeedLoader(
       this.exec_catalog_feeds,
       this.book_registry,
       this.bundled_content_resolver,
@@ -684,7 +684,7 @@ public final class Simplified extends MultiDexApplication {
       this.feed_search_parser);
 
     LOG.debug("initializing book controller");
-    this.book_controller = Controller.create(
+    this.book_controller = Controller.Companion.create(
       this.exec_books,
       this.http,
       this.feed_parser,
@@ -695,7 +695,7 @@ public final class Simplified extends MultiDexApplication {
       this.book_registry,
       this.bundled_content_resolver,
       ignored -> this.account_providers,
-      this.exec_profile_timer);
+      this.exec_profile_timer, );
 
     /*
      * Log out the current profile after ten minutes, warning one minute before this happens.

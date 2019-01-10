@@ -136,7 +136,7 @@ public abstract class CatalogActivity extends NavigationDrawerActivity
     NullCheck.notNull(args);
 
     final Bundle b = new Bundle();
-    CatalogFeedActivity.setActivityArguments(b, args);
+    CatalogFeedActivity.Companion.setActivityArguments(b, args);
     final Intent i = new Intent(this, this.getFeedClassForArguments(args));
     i.putExtras(b);
     i.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);

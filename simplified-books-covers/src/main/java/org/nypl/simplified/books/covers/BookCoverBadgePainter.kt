@@ -5,14 +5,14 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import com.squareup.picasso.Transformation
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry
 
 /**
  * An image transformer that optionally adds a badge image to the loaded book cover.
  */
 
 class BookCoverBadgePainter(
-  val entry: FeedEntryOPDS,
+  val entry: FeedEntry.FeedEntryOPDS,
   val badges: BookCoverBadgeLookupType) : Transformation {
 
   override fun key(): String {

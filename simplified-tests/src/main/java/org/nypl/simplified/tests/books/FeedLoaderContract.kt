@@ -7,8 +7,8 @@ import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.nypl.simplified.books.core.FeedLoaderType
-import org.nypl.simplified.books.core.FeedWithoutGroups
+import org.nypl.simplified.books.feeds.FeedLoaderResult
+import org.nypl.simplified.books.feeds.FeedLoaderType
 import java.net.URI
 import java.util.concurrent.Executors
 
@@ -46,8 +46,8 @@ abstract class FeedLoaderContract {
     val result =
       future.get()
 
-    Assert.assertTrue(result is FeedWithoutGroups)
-    val feed = result as FeedWithoutGroups
+    Assert.assertTrue(result is FeedLoaderResult.FeedLoaderSuccess)
+    val feed = (result as FeedLoaderResult.FeedLoaderSuccess).feed
     Assert.assertEquals(0, feed.size)
   }
 }

@@ -3,9 +3,11 @@ package org.nypl.simplified.app.catalog;
 import android.content.res.Resources;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.core.BooksFeedSelection;
+import org.nypl.simplified.books.feeds.FeedBooksSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.nypl.simplified.books.feeds.FeedBooksSelection.BOOKS_FEED_LOANED;
 
 /**
  * The activity that displays the currently loaned and/or downloaded books.
@@ -34,9 +36,9 @@ public final class MainBooksActivity extends MainLocalFeedActivity
     return resources.getString(R.string.books);
   }
 
-  @Override protected BooksFeedSelection getLocalFeedTypeSelection()
+  @Override protected FeedBooksSelection localFeedTypeSelection()
   {
-    return BooksFeedSelection.BOOKS_FEED_LOANED;
+    return BOOKS_FEED_LOANED;
   }
 
   @Override protected boolean navigationDrawerShouldShowIndicator()

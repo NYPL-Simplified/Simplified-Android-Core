@@ -5,7 +5,7 @@ import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.R
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_database.BookID
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
 
 /**
  * A button that opens a given book for reading.

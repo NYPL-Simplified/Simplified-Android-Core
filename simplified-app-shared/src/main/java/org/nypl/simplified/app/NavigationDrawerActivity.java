@@ -634,7 +634,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
                 SORT_BY_TITLE,
                 no_search,
                 BOOKS_FEED_LOANED);
-        CatalogFeedActivity.setActivityArguments(bundle, local);
+        CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
         startActivityWithoutHistory(this.activity, bundle, MainBooksActivity.class);
       }, 500L);
     }
@@ -685,7 +685,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
                 SORT_BY_TITLE,
                 no_search,
                 BOOKS_FEED_HOLDS);
-        CatalogFeedActivity.setActivityArguments(bundle, local);
+        CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
         startActivityWithoutHistory(this.activity, bundle, MainHoldsActivity.class);
       }, 500L);
     }
@@ -749,7 +749,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
                   NullCheck.notNull(this.activity.getResources().getString(R.string.feature_app_name)),
                   profiles.profileAccountCurrentCatalogRootURI(),
                   false);
-          CatalogFeedActivity.setActivityArguments(bundle, remote);
+          CatalogFeedActivity.Companion.setActivityArguments(bundle, remote);
           startActivityWithoutHistory(this.activity, bundle, MainCatalogActivity.class);
         } catch (final ProfileNoneCurrentException e) {
           throw new IllegalStateException(e);

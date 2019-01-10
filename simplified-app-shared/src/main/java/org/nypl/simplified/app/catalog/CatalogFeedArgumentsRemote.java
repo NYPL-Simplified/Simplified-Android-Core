@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import com.io7m.jnull.NullCheck;
+
 import org.nypl.simplified.stack.ImmutableStack;
 
 import java.net.URI;
@@ -9,20 +10,18 @@ import java.net.URI;
  * Feed arguments indicating that the displayed feed is a remote feed.
  */
 
-public final class CatalogFeedArgumentsRemote
-  implements CatalogFeedArgumentsType
-{
+public final class CatalogFeedArgumentsRemote implements CatalogFeedArgumentsType {
   private static final long serialVersionUID;
 
   static {
     serialVersionUID = 1L;
   }
 
-  private final boolean                                  drawer_open;
-  private final String                                   title;
+  private final boolean drawer_open;
+  private final String title;
   private final ImmutableStack<CatalogFeedArgumentsType> up_stack;
-  private final URI                                      uri;
-  private final boolean                                  searching;
+  private final URI uri;
+  private final boolean searching;
 
   /**
    * Construct feed arguments.
@@ -39,8 +38,7 @@ public final class CatalogFeedArgumentsRemote
     final ImmutableStack<CatalogFeedArgumentsType> in_up_stack,
     final String in_title,
     final URI in_uri,
-    final boolean in_searching)
-  {
+    final boolean in_searching) {
     this.drawer_open = in_drawer_open;
     this.up_stack = NullCheck.notNull(in_up_stack);
     this.title = NullCheck.notNull(in_title);
@@ -48,13 +46,13 @@ public final class CatalogFeedArgumentsRemote
     this.searching = in_searching;
   }
 
-  @Override public String getTitle()
-  {
+  @Override
+  public String getTitle() {
     return this.title;
   }
 
-  @Override public ImmutableStack<CatalogFeedArgumentsType> getUpStack()
-  {
+  @Override
+  public ImmutableStack<CatalogFeedArgumentsType> getUpStack() {
     return this.up_stack;
   }
 
@@ -62,8 +60,7 @@ public final class CatalogFeedArgumentsRemote
    * @return The feed URI
    */
 
-  public URI getURI()
-  {
+  public URI getURI() {
     return this.uri;
   }
 
@@ -71,30 +68,29 @@ public final class CatalogFeedArgumentsRemote
    * @return {@code true} if the navigation drawer should be open
    */
 
-  public boolean isDrawerOpen()
-  {
+  public boolean isDrawerOpen() {
     return this.drawer_open;
   }
 
-  @Override public <A, E extends Exception> A matchArguments(
+  @Override
+  public <A, E extends Exception> A matchArguments(
     final CatalogFeedArgumentsMatcherType<A, E> m)
-    throws E
-  {
+    throws E {
     return m.onFeedArgumentsRemote(this);
   }
 
-  @Override public boolean isLocallyGenerated()
-  {
-    return false;
+  @Override
+  public boolean requiresNetworkConnectivity() {
+    return true;
   }
 
-  @Override public boolean isSearching()
-  {
+  @Override
+  public boolean isSearching() {
     return this.searching;
   }
 
-  @Override public String toString()
-  {
+  @Override
+  public String toString() {
     final StringBuilder b = new StringBuilder();
     b.append("[CatalogFeedArgumentsRemote drawer_open=");
     b.append(this.drawer_open);

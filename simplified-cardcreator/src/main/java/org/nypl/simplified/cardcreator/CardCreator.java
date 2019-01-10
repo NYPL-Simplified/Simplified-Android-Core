@@ -7,6 +7,7 @@ import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,11 +20,7 @@ import java.util.Properties;
 
 public final class CardCreator {
 
-  private static final Logger LOG;
-
-  static {
-    LOG = LoggerFactory.getLogger(CardCreator.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(CardCreator.class);
 
   private String url;
   private String version;

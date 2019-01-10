@@ -1,12 +1,11 @@
 package org.nypl.simplified.app.catalog
 
 import android.content.res.Resources
-import com.io7m.jfunctional.Some
 import org.nypl.simplified.app.R
-import org.nypl.simplified.books.core.BookFormats
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.core.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
+import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
+import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
 
 /**
  * Functions over book formats.
@@ -22,25 +21,25 @@ object CatalogBookFormats {
   fun contentDescriptionOfEntry(
     resources: Resources,
     entry: FeedEntryOPDS): String {
-    val formatOpt = entry.probableFormat
-    return if (formatOpt is Some<BookFormats.BookFormatDefinition>) {
-      val format = formatOpt.get()
-      when (format) {
-        null,
-        BOOK_FORMAT_EPUB ->
-          resources.getString(
-            R.string.catalog_accessibility_cover_epub,
-            entry.feedEntry.title,
-            entry.feedEntry.authors,
-            entry.feedEntry.authorsCommaSeparated)
-        BOOK_FORMAT_AUDIO ->
-          resources.getString(
-            R.string.catalog_accessibility_cover_audiobook,
-            entry.feedEntry.title,
-            entry.feedEntry.authorsCommaSeparated)
+    return when (entry.probableFormat) {
+      BOOK_FORMAT_EPUB -> {
+        resources.getString(
+          R.string.catalog_accessibility_cover_epub,
+          entry.feedEntry.title,
+          entry.feedEntry.authorsCommaSeparated)
       }
-    } else {
-      entry.feedEntry.title
+      BOOK_FORMAT_AUDIO -> {
+        resources.getString(
+          R.string.catalog_accessibility_cover_audiobook,
+          entry.feedEntry.title,
+          entry.feedEntry.authorsCommaSeparated)
+      }
+      BOOK_FORMAT_PDF -> {
+        entry.feedEntry.title
+      }
+      null -> {
+        entry.feedEntry.title
+      }
     }
   }
 }

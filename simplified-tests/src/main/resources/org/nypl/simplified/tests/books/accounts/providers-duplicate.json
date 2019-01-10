@@ -7,7 +7,8 @@
     "authentication" : {
       "loginUrl" : "https://circulation.librarysimplified.org/loans/",
       "passcodeLength" : 4,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -31,7 +32,8 @@
     "authentication" : {
       "loginUrl" : "https://circulation.librarysimplified.org/loans/",
       "passcodeLength" : 4,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,

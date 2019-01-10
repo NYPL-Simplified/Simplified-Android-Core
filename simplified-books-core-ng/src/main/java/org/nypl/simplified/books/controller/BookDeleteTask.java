@@ -10,8 +10,6 @@ import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookDatabaseType;
 import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.book_registry.BookRegistryType;
-import org.nypl.simplified.books.book_registry.BookWithStatus;
-import org.nypl.simplified.books.book_registry.BookStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +48,7 @@ final class BookDeleteTask implements Callable<Unit> {
     final BookDatabaseType book_database = this.account.bookDatabase();
     final BookDatabaseEntryType entry = book_database.entry(this.book_id);
     entry.delete();
-    final Book book = entry.book();
+    final Book book = entry.getBook();
     this.book_registry.clearFor(book_id);
   }
 }

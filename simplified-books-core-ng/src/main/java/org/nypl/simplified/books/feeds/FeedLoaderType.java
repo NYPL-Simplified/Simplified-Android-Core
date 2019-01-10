@@ -1,6 +1,6 @@
 package org.nypl.simplified.books.feeds;
 
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.FluentFuture;
 import com.io7m.jfunctional.OptionType;
 
 import org.nypl.simplified.http.core.HTTPAuthType;
@@ -15,57 +15,49 @@ public interface FeedLoaderType
 {
   /**
    * Load a feed from the given URI, caching feeds that are successfully
-   * fetched. The feed (or errors) are delivered to the given listener.
+   * fetched.
    *
    * @param uri      The URI
    * @param auth     HTTP authentication details, if any
-   * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
    */
 
-  ListenableFuture<FeedType> fromURI(
+  FluentFuture<FeedLoaderResult> fetchURI(
     URI uri,
-    OptionType<HTTPAuthType> auth,
-    FeedLoaderListenerType listener);
+    OptionType<HTTPAuthType> auth);
 
   /**
    * Load a feed from the given URI, bypassing any cache, and caching feeds that
-   * are successfully fetched. The feed (or errors) are delivered to the given
-   * listener.
+   * are successfully fetched.
    *
    * @param uri      The URI
    * @param auth     HTTP authentication details, if any
    * @param method   HTTP method to use (GET/PUT)
-   * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
    */
 
-  ListenableFuture<FeedType> fromURIRefreshing(
+  FluentFuture<FeedLoaderResult> fetchURIRefreshing(
     URI uri,
     OptionType<HTTPAuthType> auth,
-    String method,
-    FeedLoaderListenerType listener);
+    String method);
 
   /**
    * Load a feed from the given URI, caching feeds that are successfully
-   * fetched. The feed (or errors) are delivered to the given listener. For each
-   * returned entry in the feed, the local book database is examined and any
-   * matching entries are replaced with the data most recently written into the
+   * fetched. For each returned entry in the feed, the local book database is examined
+   * and any matching entries are replaced with the data most recently written into the
    * database.
    *
    * @param uri      The URI
    * @param auth     HTTP authentication details, if any
-   * @param listener The listener
    *
    * @return A future that can be used to cancel the loading feed
    */
 
-  ListenableFuture<FeedType> fromURIWithBookRegistryEntries(
+  FluentFuture<FeedLoaderResult> fetchURIWithBookRegistryEntries(
     URI uri,
-    OptionType<HTTPAuthType> auth,
-    FeedLoaderListenerType listener);
+    OptionType<HTTPAuthType> auth);
 
   /**
    * Invalidate the cached feed for URI {@code uri}, if any.

@@ -10,6 +10,7 @@ import org.nypl.simplified.observable.Observable;
 import org.nypl.simplified.observable.ObservableReadableType;
 import org.nypl.simplified.observable.ObservableType;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -64,8 +65,8 @@ public final class BookRegistry implements BookRegistryType {
       final BookWithStatus update) {
 
     NullCheck.notNull(update, "Update");
-    this.books.put(update.book().id(), update);
-    this.observable.send(BookStatusEvent.create(update.book().id(), BOOK_CHANGED));
+    this.books.put(update.book().getId(), update);
+    this.observable.send(BookStatusEvent.create(update.book().getId(), BOOK_CHANGED));
   }
 
   @Override
@@ -74,7 +75,7 @@ public final class BookRegistry implements BookRegistryType {
 
     NullCheck.notNull(update, "Update");
 
-    final BookWithStatus current = this.books.get(update.book().id());
+    final BookWithStatus current = this.books.get(update.book().getId());
     if (current != null) {
       final BookStatusPriorityOrdering current_p = current.status().getPriority();
       final BookStatusPriorityOrdering update_p = update.status().getPriority();

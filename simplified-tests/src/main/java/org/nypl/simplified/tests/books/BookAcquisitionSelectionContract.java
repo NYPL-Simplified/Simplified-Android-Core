@@ -6,7 +6,7 @@ import com.io7m.jfunctional.Some;
 import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.books.core.BookAcquisitionSelection;
-import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.books.book_database.BookFormats;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;

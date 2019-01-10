@@ -1,10 +1,7 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.res.Resources;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import com.io7m.jfunctional.OptionType;
@@ -33,7 +30,7 @@ import org.nypl.simplified.books.book_registry.BookStatusRevoked;
 import org.nypl.simplified.books.book_registry.BookStatusType;
 import org.nypl.simplified.books.book_registry.BookWithStatus;
 import org.nypl.simplified.books.core.BookAcquisitionSelection;
-import org.nypl.simplified.books.core.BooksFeedSelection;
+import org.nypl.simplified.books.feeds.FeedBooksSelection;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -70,7 +67,7 @@ public final class MainCatalogActivity extends CatalogFeedActivity
     return resources.getString(R.string.catalog);
   }
 
-  @Override protected BooksFeedSelection getLocalFeedTypeSelection()
+  @Override protected FeedBooksSelection localFeedTypeSelection()
   {
     /*
      * This activity does not display local feeds. To ask it to do so is an
@@ -186,14 +183,14 @@ public final class MainCatalogActivity extends CatalogFeedActivity
           final SortedMap<BookID, BookWithStatus> books = Simplified.getBooksRegistry().books();
           for (BookWithStatus bookWithStatus : books.values()) {
             if (this.bookStatusIsAwatingDownload(bookWithStatus.status())) {
-              final OPDSAcquisitionFeedEntry entry = bookWithStatus.book().entry();
+              final OPDSAcquisitionFeedEntry entry = bookWithStatus.book().getEntry();
 
               final OptionType<OPDSAcquisition> acquisition =
                 BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
 
               acquisition.map_((someAcquisition) -> {
                 Simplified.getBooksController()
-                  .bookBorrow(account, bookWithStatus.book().id(), someAcquisition, entry);
+                  .bookBorrow(account, bookWithStatus.book().getId(), someAcquisition, entry);
               });
             }
           }

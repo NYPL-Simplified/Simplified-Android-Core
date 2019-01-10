@@ -92,6 +92,7 @@ public abstract class AccountProvidersJSONContract {
         .setLoginURI(URI.create("https://circulation.librarysimplified.org/loans/"))
         .setPassCodeMayContainLetters(false)
         .setPassCodeLength(4)
+        .setRequiresPin(true)
         .build();
 
     final AccountProvider p = c.providerDefault();

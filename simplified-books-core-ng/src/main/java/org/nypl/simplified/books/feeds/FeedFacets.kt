@@ -19,17 +19,13 @@ object FeedFacets {
    */
 
   @JvmStatic
-  fun findEntryPointFacetGroupForFeed(feed: FeedType): OptionType<List<FeedFacetType>> {
-    return feed.matchFeed(
-      object : FeedMatcherType<OptionType<List<FeedFacetType>>, UnreachableCodeException> {
-        override fun onFeedWithGroups(feed: FeedWithGroups): OptionType<List<FeedFacetType>> {
-          return findEntryPointFacetGroup(feed.feedFacetsByGroup)
-        }
-
-        override fun onFeedWithoutGroups(feed: FeedWithoutGroups): OptionType<List<FeedFacetType>> {
-          return findEntryPointFacetGroup(feed.feedFacetsByGroup)
-        }
-      })
+  fun findEntryPointFacetGroupForFeed(feed: Feed): OptionType<List<FeedFacetType>> {
+    return when (feed) {
+      is Feed.FeedWithoutGroups ->
+        findEntryPointFacetGroup(feed.facetsByGroup)
+      is Feed.FeedWithGroups ->
+        findEntryPointFacetGroup(feed.facetsByGroup)
+    }
   }
 
   /**

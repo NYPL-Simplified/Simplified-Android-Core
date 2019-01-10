@@ -2,7 +2,7 @@ package org.nypl.simplified.books.covers
 
 import android.widget.ImageView
 import com.google.common.util.concurrent.FluentFuture
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry
 
 /**
  * The type of cover providers.
@@ -37,7 +37,7 @@ interface BookCoverProviderType {
    */
 
   fun loadThumbnailInto(
-    entry: FeedEntryOPDS,
+    entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
     height: Int): FluentFuture<Unit>
@@ -56,7 +56,7 @@ interface BookCoverProviderType {
    */
 
   fun loadCoverInto(
-    entry: FeedEntryOPDS,
+    entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
     height: Int): FluentFuture<Unit>

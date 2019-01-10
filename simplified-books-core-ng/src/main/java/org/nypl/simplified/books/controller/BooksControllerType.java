@@ -5,7 +5,7 @@ import com.io7m.jfunctional.Unit;
 
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.book_database.BookID;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
+import org.nypl.simplified.books.feeds.FeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 
@@ -25,10 +25,10 @@ public interface BooksControllerType {
    */
 
   void bookBorrow(
-      AccountType account,
-      BookID id,
-      OPDSAcquisition acquisition,
-      OPDSAcquisitionFeedEntry entry);
+    AccountType account,
+    BookID id,
+    OPDSAcquisition acquisition,
+    OPDSAcquisitionFeedEntry entry);
 
   /**
    * Dismiss a failed book borrowing.
@@ -38,8 +38,8 @@ public interface BooksControllerType {
    */
 
   void bookBorrowFailedDismiss(
-      AccountType account,
-      BookID id);
+    AccountType account,
+    BookID id);
 
   /**
    * Cancel a book download.
@@ -49,8 +49,8 @@ public interface BooksControllerType {
    */
 
   void bookDownloadCancel(
-      AccountType account,
-      BookID id);
+    AccountType account,
+    BookID id);
 
   /**
    * Submit a problem report for a book
@@ -60,7 +60,7 @@ public interface BooksControllerType {
    */
 
   ListenableFuture<Unit> bookReport(
-    final FeedEntryOPDS feed_entry,
+    final FeedEntry.FeedEntryOPDS feed_entry,
     final String report_type);
 
   /**
@@ -70,7 +70,7 @@ public interface BooksControllerType {
    */
 
   ListenableFuture<Unit> booksSync(
-      AccountType account);
+    AccountType account);
 
   /**
    * Revoke the given book.
@@ -80,8 +80,8 @@ public interface BooksControllerType {
    */
 
   ListenableFuture<Unit> bookRevoke(
-      AccountType account,
-      BookID book_id);
+    AccountType account,
+    BookID book_id);
 
   /**
    * Delete the given book.
@@ -91,8 +91,8 @@ public interface BooksControllerType {
    */
 
   ListenableFuture<Unit> bookDelete(
-      AccountType account,
-      BookID book_id);
+    AccountType account,
+    BookID book_id);
 
   /**
    * Dismiss a failed book revocation.
@@ -102,6 +102,6 @@ public interface BooksControllerType {
    */
 
   ListenableFuture<Unit> bookRevokeFailedDismiss(
-      AccountType account,
-      BookID id);
+    AccountType account,
+    BookID id);
 }

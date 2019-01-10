@@ -7,7 +7,8 @@
     "authentication": {
       "loginUrl" : "https://circulation.librarysimplified.org/loans/",
       "passcodeLength" : 4,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -31,7 +32,8 @@
     "authentication": {
       "loginUrl" : "https://bplsimplye.bklynlibrary.org/loans/",
       "passcodeLength" : 4,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -74,7 +76,8 @@
     "authentication": {
       "loginUrl" : "http://howard.simplye-md.org/loans/",
       "passcodeLength" : 0,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -97,7 +100,8 @@
     "authentication": {
       "loginUrl" : "http://montgomery.simplye-md.org/loans/",
       "passcodeLength" : 0,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -119,7 +123,8 @@
     "authentication": {
       "loginUrl" : "http://frederick.simplye-md.org/loans/",
       "passcodeLength" : 0,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -142,7 +147,8 @@
     "authentication": {
       "loginUrl" : "http://smrla.simplye-md.org/MDMARY/loans/",
       "passcodeLength" : 0,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -166,7 +172,8 @@
     "authentication": {
       "loginUrl" : "http://smrla.simplye-md.org/MDCALV/loans/",
       "passcodeLength" : 0,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -190,7 +197,8 @@
     "authentication": {
       "loginUrl" : "http://smrla.simplye-md.org/MDCHAR/loans/",
       "passcodeLength" : 0,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,
@@ -214,7 +222,8 @@
     "authentication": {
       "loginUrl" : "http://bcl.simplye-ca.org/CABTTE/loans/",
       "passcodeLength" : 0,
-      "passcodeAllowsLetters" : false
+      "passcodeAllowsLetters" : false,
+      "requiresPin": true
     },
     "supportsSimplyESync": false,
     "supportsBarcodeScanner": false,

@@ -16,8 +16,10 @@ import org.nypl.simplified.app.ApplicationColorScheme;
 import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
+import org.nypl.simplified.books.feeds.Feed;
 import org.nypl.simplified.books.feeds.FeedGroup;
-import org.nypl.simplified.books.feeds.FeedWithGroups;
+
+import static org.nypl.simplified.books.feeds.Feed.*;
 
 /**
  * A view that displays a catalog feed that contains groups.
@@ -54,7 +56,7 @@ public final class CatalogFeedWithGroups implements ListAdapter, OnScrollListene
     this.feed = NullCheck.notNull(in_feed);
     this.screen = NullCheck.notNull(in_screen);
     this.colorScheme = NullCheck.notNull(colorScheme);
-    this.adapter = new ArrayAdapter<>(this.activity, 0, this.feed);
+    this.adapter = new ArrayAdapter<>(this.activity, 0, this.feed.getFeedGroupsInOrder());
   }
 
   @Override
@@ -89,7 +91,7 @@ public final class CatalogFeedWithGroups implements ListAdapter, OnScrollListene
     final int position,
     final @Nullable View reused,
     final @Nullable ViewGroup parent) {
-    final FeedGroup group = this.feed.get(position);
+    final FeedGroup group = this.feed.getFeedGroupsInOrder().get(position);
 
     final CatalogFeedLane view;
     if (reused != null) {

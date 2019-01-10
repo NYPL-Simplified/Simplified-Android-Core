@@ -11,10 +11,9 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.util.concurrent.ExecutorService
@@ -34,7 +33,7 @@ class BookCoverProvider private constructor(
   private val coverTag: String = "cover"
   private val thumbnailTag: String = "thumbnail"
 
-  private fun generateCoverURI(entry: FeedEntryOPDS): URI {
+  private fun generateCoverURI(entry: FeedEntry.FeedEntryOPDS): URI {
     val feedEntry = entry.feedEntry
     val title = feedEntry.title
     val author: String
@@ -48,7 +47,7 @@ class BookCoverProvider private constructor(
   }
 
   private fun doLoad(
-    entry: FeedEntryOPDS,
+    entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
     height: Int,
@@ -117,32 +116,26 @@ class BookCoverProvider private constructor(
     return future
   }
 
-  private fun coverURIOf(entry: FeedEntryOPDS): URI? {
-    val bookOpt = this.bookRegistry.book(entry.actualBookID)
+  private fun coverURIOf(entry: FeedEntry.FeedEntryOPDS): URI? {
+    val bookOpt = this.bookRegistry.book(entry.bookID)
     if (bookOpt is Some<BookWithStatus>) {
       val book = bookOpt.get()
-      val coverOpt = book.book().cover()
-      if (coverOpt is Some<File>) {
-        return coverOpt.get().toURI()
-      }
+      return book.book().cover?.toURI()
     }
     return mapOptionToNull(entry.feedEntry.cover)
   }
 
-  private fun thumbnailURIOf(entry: FeedEntryOPDS): URI? {
-    val bookOpt = this.bookRegistry.book(entry.actualBookID)
+  private fun thumbnailURIOf(entry: FeedEntry.FeedEntryOPDS): URI? {
+    val bookOpt = this.bookRegistry.book(entry.bookID)
     if (bookOpt is Some<BookWithStatus>) {
       val book = bookOpt.get()
-      val coverOpt = book.book().cover()
-      if (coverOpt is Some<File>) {
-        return coverOpt.get().toURI()
-      }
+      return book.book().cover?.toURI()
     }
     return mapOptionToNull(entry.feedEntry.thumbnail)
   }
 
   override fun loadThumbnailInto(
-    entry: FeedEntryOPDS,
+    entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
     height: Int): FluentFuture<Unit> {
@@ -157,7 +150,7 @@ class BookCoverProvider private constructor(
   }
 
   override fun loadCoverInto(
-    entry: FeedEntryOPDS,
+    entry: FeedEntry.FeedEntryOPDS,
     imageView: ImageView,
     width: Int,
     height: Int): FluentFuture<Unit> {

@@ -3,7 +3,7 @@ package org.nypl.simplified.app.catalog;
 import android.content.res.Resources;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.books.core.BooksFeedSelection;
+import org.nypl.simplified.books.feeds.FeedBooksSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +29,9 @@ public final class MainHoldsActivity extends MainLocalFeedActivity
 
   }
 
-  @Override protected BooksFeedSelection getLocalFeedTypeSelection()
+  @Override protected FeedBooksSelection localFeedTypeSelection()
   {
-    return BooksFeedSelection.BOOKS_FEED_HOLDS;
+    return FeedBooksSelection.BOOKS_FEED_HOLDS;
   }
 
   @Override

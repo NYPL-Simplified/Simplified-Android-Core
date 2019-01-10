@@ -3,10 +3,10 @@ package org.nypl.simplified.books.accounts;
 import com.io7m.jfunctional.OptionType;
 
 import java.io.File;
-import java.net.URI;
 
 /**
  * <p>The read-only interface exposed by accounts.</p>
+ *
  * <p>An account aggregates a set of credentials and a book database.
  * Account are assigned monotonically increasing identifiers by the
  * application, but the identifiers themselves carry no meaning. It is
@@ -39,4 +39,12 @@ public interface AccountReadableType {
    */
 
   OptionType<AccountAuthenticationCredentials> credentials();
+
+  /**
+   * @return {@code true} if the account requires credentials to perform operations
+   */
+
+  default boolean requiresCredentials() {
+    return this.provider().authentication().isSome();
+  }
 }

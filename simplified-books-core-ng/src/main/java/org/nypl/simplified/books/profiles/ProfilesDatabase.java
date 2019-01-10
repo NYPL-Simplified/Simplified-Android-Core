@@ -1,5 +1,7 @@
 package org.nypl.simplified.books.profiles;
 
+import android.content.Context;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -28,6 +30,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -46,6 +49,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   private static final ProfileID ANONYMOUS_PROFILE_ID = ProfileID.create(0);
 
+  private final Context context;
   private final File directory;
   private final ConcurrentSkipListMap<ProfileID, Profile> profiles;
   private final SortedMap<ProfileID, ProfileType> profiles_read;
@@ -53,25 +57,29 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
   private final AccountsDatabaseFactoryType accounts_databases;
   private final Object profile_current_lock;
   private final AccountProviderCollectionType account_providers;
-  private @GuardedBy("profile_current_lock") ProfileID profile_current;
+  private @GuardedBy("profile_current_lock")
+  ProfileID profile_current;
 
   private ProfilesDatabase(
-      final AccountProviderCollectionType account_providers,
-      final AccountsDatabaseFactoryType accounts_databases,
-      final File directory,
-      final ConcurrentSkipListMap<ProfileID, Profile> profiles,
-      final AnonymousProfileEnabled anonymous_enabled) {
+    final Context context,
+    final AccountProviderCollectionType account_providers,
+    final AccountsDatabaseFactoryType accounts_databases,
+    final File directory,
+    final ConcurrentSkipListMap<ProfileID, Profile> profiles,
+    final AnonymousProfileEnabled anonymous_enabled) {
 
+    this.context =
+      Objects.requireNonNull(context, "context");
     this.account_providers =
-        NullCheck.notNull(account_providers, "Account providers");
+      NullCheck.notNull(account_providers, "Account providers");
     this.accounts_databases =
-        NullCheck.notNull(accounts_databases, "Accounts databases");
+      NullCheck.notNull(accounts_databases, "Accounts databases");
     this.directory =
-        NullCheck.notNull(directory, "directory");
+      NullCheck.notNull(directory, "directory");
     this.profiles =
-        NullCheck.notNull(profiles, "profiles");
+      NullCheck.notNull(profiles, "profiles");
     this.profile_anon_enabled =
-        NullCheck.notNull(anonymous_enabled, "Anonymous enabled");
+      NullCheck.notNull(anonymous_enabled, "Anonymous enabled");
 
     this.profiles_read = castMap(Collections.unmodifiableSortedMap(this.profiles));
     this.profile_current_lock = new Object();
@@ -97,6 +105,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
    * exist. The anonymous account will not be enabled, and will be ignored even if one is present
    * in the on-disk database.
    *
+   * @param context           The Android context
    * @param account_providers The available account providers
    * @param directory         The directory
    * @return A profile database
@@ -104,11 +113,13 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
    */
 
   public static ProfilesDatabaseType openWithAnonymousAccountDisabled(
-      final AccountProviderCollectionType account_providers,
-      final AccountsDatabaseFactoryType accounts_databases,
-      final File directory)
-      throws ProfileDatabaseException {
+    final Context context,
+    final AccountProviderCollectionType account_providers,
+    final AccountsDatabaseFactoryType accounts_databases,
+    final File directory)
+    throws ProfileDatabaseException {
 
+    Objects.requireNonNull(context, "Context");
     NullCheck.notNull(account_providers, "Account providers");
     NullCheck.notNull(accounts_databases, "Accounts databases");
     NullCheck.notNull(directory, "Directory");
@@ -119,7 +130,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final ObjectMapper jom = new ObjectMapper();
 
     final List<Exception> errors = new ArrayList<>();
-    openAllProfiles(account_providers, accounts_databases, directory, profiles, jom, errors);
+    openAllProfiles(context, account_providers, accounts_databases, directory, profiles, jom, errors);
     profiles.remove(ANONYMOUS_PROFILE_ID);
 
     if (!errors.isEmpty()) {
@@ -128,21 +139,27 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       }
 
       throw new ProfileDatabaseOpenException(
-          "One or more errors occurred whilst trying to open the profile database.",
-          errors);
+        "One or more errors occurred whilst trying to open the profile database.",
+        errors);
     }
 
     return new ProfilesDatabase(
-        account_providers, accounts_databases, directory, profiles, ANONYMOUS_PROFILE_DISABLED);
+      context,
+      account_providers,
+      accounts_databases,
+      directory,
+      profiles,
+      ANONYMOUS_PROFILE_DISABLED);
   }
 
   private static void openAllProfiles(
-      final AccountProviderCollectionType account_providers,
-      final AccountsDatabaseFactoryType accounts_databases,
-      final File directory,
-      final SortedMap<ProfileID, Profile> profiles,
-      final ObjectMapper jom,
-      final List<Exception> errors) {
+    final Context context,
+    final AccountProviderCollectionType account_providers,
+    final AccountsDatabaseFactoryType accounts_databases,
+    final File directory,
+    final SortedMap<ProfileID, Profile> profiles,
+    final ObjectMapper jom,
+    final List<Exception> errors) {
 
     if (!directory.exists()) {
       directory.mkdirs();
@@ -157,8 +174,15 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       for (final String profile_id_name : profile_dirs) {
         LOG.debug("opening profile: {}/{}", directory, profile_id_name);
         final Profile profile =
-            openOneProfile(
-                account_providers, accounts_databases, jom, directory, errors, profile_id_name);
+          openOneProfile(
+            context,
+            account_providers,
+            accounts_databases,
+            jom,
+            directory,
+            errors,
+            profile_id_name);
+
         if (profile == null) {
           continue;
         }
@@ -180,12 +204,14 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
    */
 
   public static ProfilesDatabaseType openWithAnonymousAccountEnabled(
-      final AccountProviderCollectionType account_providers,
-      final AccountsDatabaseFactoryType accounts_databases,
-      final AccountProvider account_provider,
-      final File directory)
-      throws ProfileDatabaseException {
+    final Context context,
+    final AccountProviderCollectionType account_providers,
+    final AccountsDatabaseFactoryType accounts_databases,
+    final AccountProvider account_provider,
+    final File directory)
+    throws ProfileDatabaseException {
 
+    Objects.requireNonNull(context, "Context");
     NullCheck.notNull(account_providers, "Account providers");
     NullCheck.notNull(accounts_databases, "Accounts databases");
     NullCheck.notNull(account_provider, "Account provider");
@@ -197,26 +223,26 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final ObjectMapper jom = new ObjectMapper();
 
     final List<Exception> errors = new ArrayList<>();
-    openAllProfiles(account_providers, accounts_databases, directory, profiles, jom, errors);
+    openAllProfiles(context, account_providers, accounts_databases, directory, profiles, jom, errors);
 
     if (!profiles.containsKey(ANONYMOUS_PROFILE_ID)) {
       final Profile anon = createProfileActual(
-          account_providers, accounts_databases, account_provider, directory, "", ANONYMOUS_PROFILE_ID);
+        context, account_providers, accounts_databases, account_provider, directory, "", ANONYMOUS_PROFILE_ID);
       profiles.put(ANONYMOUS_PROFILE_ID, anon);
     }
 
     if (!errors.isEmpty()) {
       throw new ProfileDatabaseOpenException(
-          "One or more errors occurred whilst trying to open the profile database.", errors);
+        "One or more errors occurred whilst trying to open the profile database.", errors);
     }
 
     final ProfilesDatabase database =
-        new ProfilesDatabase(
-            account_providers,
-            accounts_databases,
-            directory,
-            profiles,
-            ANONYMOUS_PROFILE_ENABLED);
+      new ProfilesDatabase(
+        context, account_providers,
+        accounts_databases,
+        directory,
+        profiles,
+        ANONYMOUS_PROFILE_ENABLED);
 
     database.setCurrentProfile(ANONYMOUS_PROFILE_ID);
     return database;
@@ -224,12 +250,13 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   private static @Nullable
   Profile openOneProfile(
-      final AccountProviderCollectionType account_providers,
-      final AccountsDatabaseFactoryType accounts_databases,
-      final ObjectMapper jom,
-      final File directory,
-      final List<Exception> errors,
-      final String profile_id_name) {
+    final Context context,
+    final AccountProviderCollectionType account_providers,
+    final AccountsDatabaseFactoryType accounts_databases,
+    final ObjectMapper jom,
+    final File directory,
+    final List<Exception> errors,
+    final String profile_id_name) {
 
     final int id;
     try {
@@ -255,9 +282,9 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     try {
       final AccountsDatabaseType accounts =
-          accounts_databases.openDatabase(account_providers, profile_accounts_dir);
+        accounts_databases.openDatabase(context, account_providers, profile_accounts_dir);
       final AccountType account =
-          accounts.accounts().get(accounts.accounts().firstKey());
+        accounts.accounts().get(accounts.accounts().firstKey());
 
       return new Profile(null, profile_id, profile_dir, desc, accounts, account);
     } catch (final AccountsDatabaseException e) {
@@ -294,9 +321,9 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   @Override
   public ProfileType createProfile(
-      final AccountProvider account_provider,
-      final String display_name)
-      throws ProfileDatabaseException {
+    final AccountProvider account_provider,
+    final String display_name)
+    throws ProfileDatabaseException {
 
     NullCheck.notNull(account_provider, "Provider");
     NullCheck.notNull(display_name, "Display name");
@@ -318,16 +345,17 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     }
 
     Assertions.checkInvariant(
-        !this.profiles.containsKey(next),
-        "Profile ID %s cannot have been used", next);
+      !this.profiles.containsKey(next),
+      "Profile ID %s cannot have been used", next);
 
     final Profile profile = createProfileActual(
-        this.account_providers,
-        this.accounts_databases,
-        account_provider,
-        this.directory,
-        display_name,
-        next);
+      context,
+      this.account_providers,
+      this.accounts_databases,
+      account_provider,
+      this.directory,
+      display_name,
+      next);
 
     this.profiles.put(profile.id(), profile);
     profile.setOwner(this);
@@ -337,6 +365,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
   /**
    * Do the actual work of creating the account.
    *
+   * @param context            The Android context
    * @param account_providers  The available account providers
    * @param accounts_databases A factory for account databases
    * @param account_provider   The account provider that will be used for the default account
@@ -346,36 +375,37 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
    */
 
   private static Profile createProfileActual(
-      final AccountProviderCollectionType account_providers,
-      final AccountsDatabaseFactoryType accounts_databases,
-      final AccountProvider account_provider,
-      final File directory,
-      final String display_name,
-      final ProfileID id)
-      throws ProfileDatabaseException {
+    final Context context,
+    final AccountProviderCollectionType account_providers,
+    final AccountsDatabaseFactoryType accounts_databases,
+    final AccountProvider account_provider,
+    final File directory,
+    final String display_name,
+    final ProfileID id)
+    throws ProfileDatabaseException {
 
     try {
       final File profile_dir =
-          new File(directory, Integer.toString(id.id()));
+        new File(directory, Integer.toString(id.id()));
       final File profile_accounts_dir =
-          new File(profile_dir, "accounts");
+        new File(profile_dir, "accounts");
 
       final ProfilePreferences prefs =
-          ProfilePreferences.builder()
-              .build();
+        ProfilePreferences.builder()
+          .build();
 
       final ProfileDescription desc =
-          ProfileDescription.builder(display_name, prefs)
-              .build();
+        ProfileDescription.builder(display_name, prefs)
+          .build();
 
       try {
         final AccountsDatabaseType accounts =
-            accounts_databases.openDatabase(account_providers, profile_accounts_dir);
+          accounts_databases.openDatabase(context, account_providers, profile_accounts_dir);
         final AccountType account =
-            accounts.createAccount(account_provider);
+          accounts.createAccount(account_provider);
 
         final Profile profile =
-            new Profile(null, id, profile_dir, desc, accounts, account);
+          new Profile(null, id, profile_dir, desc, accounts, account);
 
         writeDescription(profile_dir, desc);
         return profile;
@@ -389,7 +419,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   @Override
   public OptionType<ProfileType> findProfileWithDisplayName(
-      final String display_name) {
+    final String display_name) {
 
     NullCheck.notNull(display_name, "Display name");
 
@@ -403,15 +433,15 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   @Override
   public void setProfileCurrent(
-      final ProfileID profile)
-      throws ProfileNonexistentException, ProfileAnonymousEnabledException {
+    final ProfileID profile)
+    throws ProfileNonexistentException, ProfileAnonymousEnabledException {
 
     NullCheck.notNull(profile, "Profile");
 
     switch (this.profile_anon_enabled) {
       case ANONYMOUS_PROFILE_ENABLED: {
         throw new ProfileAnonymousEnabledException(
-            "The anonymous profile is enabled; cannot set the current profile");
+          "The anonymous profile is enabled; cannot set the current profile");
       }
       case ANONYMOUS_PROFILE_DISABLED: {
         if (!profiles.containsKey(profile)) {
@@ -469,10 +499,12 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
   private static final class Profile implements ProfileType {
 
     private final Object description_lock;
-    private @GuardedBy("description_lock") ProfileDescription description;
+    private @GuardedBy("description_lock")
+    ProfileDescription description;
 
     private final Object account_current_lock;
-    private @GuardedBy("account_current_lock") AccountType account_current;
+    private @GuardedBy("account_current_lock")
+    AccountType account_current;
 
     private ProfilesDatabase owner;
     private final AccountsDatabaseType accounts;
@@ -480,23 +512,23 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     private final File directory;
 
     private Profile(
-        final @Nullable ProfilesDatabase in_owner,
-        final ProfileID in_id,
-        final File in_directory,
-        final ProfileDescription in_description,
-        final AccountsDatabaseType in_accounts,
-        final AccountType in_account_current) {
+      final @Nullable ProfilesDatabase in_owner,
+      final ProfileID in_id,
+      final File in_directory,
+      final ProfileDescription in_description,
+      final AccountsDatabaseType in_accounts,
+      final AccountType in_account_current) {
 
       this.id =
-          NullCheck.notNull(in_id, "id");
+        NullCheck.notNull(in_id, "id");
       this.directory =
-          NullCheck.notNull(in_directory, "directory");
+        NullCheck.notNull(in_directory, "directory");
       this.description =
-          NullCheck.notNull(in_description, "description");
+        NullCheck.notNull(in_description, "description");
       this.accounts =
-          NullCheck.notNull(in_accounts, "accounts");
+        NullCheck.notNull(in_accounts, "accounts");
       this.account_current =
-          NullCheck.notNull(in_account_current, "account_current");
+        NullCheck.notNull(in_account_current, "account_current");
 
       this.account_current_lock = new Object();
       this.description_lock = new Object();
@@ -562,10 +594,10 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     @Override
     public AccountType account(final AccountID account_id)
-        throws AccountsDatabaseNonexistentException {
+      throws AccountsDatabaseNonexistentException {
 
       final AccountType account =
-          this.accounts().get(NullCheck.notNull(account_id, "Account ID"));
+        this.accounts().get(NullCheck.notNull(account_id, "Account ID"));
 
       if (account == null) {
         throw new AccountsDatabaseNonexistentException("Nonexistent account: " + account_id.id());
@@ -581,16 +613,16 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     @Override
     public void preferencesUpdate(final ProfilePreferences preferences)
-        throws IOException {
+      throws IOException {
 
       NullCheck.notNull(preferences, "Preferences");
 
       final ProfileDescription new_desc;
       synchronized (this.description_lock) {
         new_desc =
-            this.description.toBuilder()
-                .setPreferences(preferences)
-                .build();
+          this.description.toBuilder()
+            .setPreferences(preferences)
+            .build();
 
         writeDescription(this.directory, new_desc);
         this.description = new_desc;
@@ -599,7 +631,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     @Override
     public AccountType createAccount(final AccountProvider account_provider)
-        throws AccountsDatabaseException {
+      throws AccountsDatabaseException {
 
       NullCheck.notNull(account_provider, "Account provider");
       return this.accounts.createAccount(account_provider);
@@ -607,7 +639,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     @Override
     public AccountID deleteAccountByProvider(final AccountProvider account_provider)
-        throws AccountsDatabaseException {
+      throws AccountsDatabaseException {
 
       NullCheck.notNull(account_provider, "Account provider");
       final AccountID deleted = this.accounts.deleteAccountByProvider(account_provider);
@@ -622,7 +654,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     @Override
     public AccountType selectAccount(final AccountProvider account_provider)
-        throws AccountsDatabaseNonexistentException {
+      throws AccountsDatabaseNonexistentException {
 
       NullCheck.notNull(account_provider, "Account provider");
       final AccountType account = this.accounts.accountsByProvider().get(account_provider.id());
@@ -632,7 +664,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       }
 
       throw new AccountsDatabaseNonexistentException(
-          "No account with provider: " + account_provider.id());
+        "No account with provider: " + account_provider.id());
     }
 
     @Override
@@ -641,7 +673,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     }
 
     void setAccountCurrent(final AccountID id)
-        throws AccountsDatabaseNonexistentException {
+      throws AccountsDatabaseNonexistentException {
 
       NullCheck.notNull(id, "ID");
       synchronized (this.account_current_lock) {
@@ -656,34 +688,34 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
   }
 
   private static void writeDescription(
-      final File directory,
-      final ProfileDescription new_desc)
-      throws IOException {
+    final File directory,
+    final ProfileDescription new_desc)
+    throws IOException {
 
     final File profile_lock =
-        new File(directory, "lock");
+      new File(directory, "lock");
     final File profile_file =
-        new File(directory, "profile.json");
+      new File(directory, "profile.json");
     final File profile_file_tmp =
-        new File(directory, "profile.json.tmp");
+      new File(directory, "profile.json.tmp");
 
     FileLocking.withFileThreadLocked(
-        profile_lock,
-        1000L,
-        ignored -> {
+      profile_lock,
+      1000L,
+      ignored -> {
 
-          /*
-           * Ignore the return value here; the write call will immediately fail if this
-           * call fails anyway.
-           */
+        /*
+         * Ignore the return value here; the write call will immediately fail if this
+         * call fails anyway.
+         */
 
-          directory.mkdirs();
+        directory.mkdirs();
 
-          FileUtilities.fileWriteUTF8Atomically(
-              profile_file,
-              profile_file_tmp,
-              ProfileDescriptionJSON.serializeToString(new ObjectMapper(), new_desc));
-          return Unit.unit();
-        });
+        FileUtilities.fileWriteUTF8Atomically(
+          profile_file,
+          profile_file_tmp,
+          ProfileDescriptionJSON.serializeToString(new ObjectMapper(), new_desc));
+        return Unit.unit();
+      });
   }
 }

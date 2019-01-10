@@ -171,7 +171,7 @@ final class BookSyncTask implements Callable<Unit> {
       try {
         final BookDatabaseEntryType database_entry =
             book_database.createOrUpdate(book_id, opds_entry);
-        final Book book = database_entry.book();
+        final Book book = database_entry.getBook();
         this.book_registry.update(BookWithStatus.create(book, BookStatus.fromBook(book)));
       } catch (final BookDatabaseException e) {
         LOG.error("[{}] unable to update database entry: ", book_id.brief(), e);
@@ -191,7 +191,7 @@ final class BookSyncTask implements Callable<Unit> {
 
         if (!received.contains(existing_id)) {
           final BookDatabaseEntryType db_entry = book_database.entry(existing_id);
-          final OPDSAvailabilityType a = db_entry.book().entry().getAvailability();
+          final OPDSAvailabilityType a = db_entry.getBook().getEntry().getAvailability();
           if (a instanceof OPDSAvailabilityRevoked) {
             revoking.add(existing_id);
           }

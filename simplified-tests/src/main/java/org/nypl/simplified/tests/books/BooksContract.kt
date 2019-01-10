@@ -47,7 +47,7 @@ import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabase
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
 import org.nypl.simplified.books.core.BookDatabaseReadableType
-import org.nypl.simplified.books.core.BookFormats
+import org.nypl.simplified.books.book_database.BookFormats
 import org.nypl.simplified.books.core.BookID
 import org.nypl.simplified.books.core.BookRevokeExceptionDRMWorkflowError
 import org.nypl.simplified.books.core.BookStatusDownloadFailed

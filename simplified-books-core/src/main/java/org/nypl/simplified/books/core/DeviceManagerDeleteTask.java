@@ -12,6 +12,7 @@ import org.nypl.simplified.http.core.HTTPAuthBasic;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.opds.core.DRMLicensor;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,11 +26,7 @@ import java.net.URISyntaxException;
 public class DeviceManagerDeleteTask
   implements Runnable
 {
-  private static final Logger LOG;
-
-  static {
-    LOG = LoggerFactory.getLogger(DeviceManagerDeleteTask.class);
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(DeviceManagerDeleteTask.class);
 
   private final AccountCredentials creds;
 

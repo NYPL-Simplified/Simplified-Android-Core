@@ -2,26 +2,14 @@ package org.nypl.simplified.tests.opds;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.nypl.simplified.books.core.BookFormats;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
-import org.nypl.simplified.opds.core.OPDSFeedParser;
-import org.nypl.simplified.opds.core.OPDSFeedParserType;
 import org.nypl.simplified.opds.core.OPDSJSONParser;
 import org.nypl.simplified.opds.core.OPDSJSONParserType;
-import org.nypl.simplified.opds.core.OPDSJSONSerializer;
-import org.nypl.simplified.opds.core.OPDSJSONSerializerType;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.util.List;
 
 public abstract class OPDSJSONParserContract {
 

@@ -31,9 +31,9 @@ public final class AccountProvidersJSON {
    */
 
   public static AccountProvider deserializeFromJSON(
-      final ObjectMapper jom,
-      final JsonNode node)
-      throws JSONParseException {
+    final ObjectMapper jom,
+    final JsonNode node)
+    throws JSONParseException {
 
     NullCheck.notNull(jom, "Object mapper");
     NullCheck.notNull(node, "JSON");
@@ -42,53 +42,54 @@ public final class AccountProvidersJSON {
     final AccountProvider.Builder b = AccountProvider.builder();
 
     b.setId(
-        JSONParserUtilities.getURI(obj, "id"));
+      JSONParserUtilities.getURI(obj, "id"));
     b.setCatalogURI(
-        JSONParserUtilities.getURI(obj, "catalogUrl"));
+      JSONParserUtilities.getURI(obj, "catalogUrl"));
     b.setCatalogURIForUnder13s(
-        JSONParserUtilities.getURIOptional(obj, "catalogUrlUnder13"));
+      JSONParserUtilities.getURIOptional(obj, "catalogUrlUnder13"));
     b.setCatalogURIForOver13s(
-        JSONParserUtilities.getURIOptional(obj, "catalogUrl13"));
+      JSONParserUtilities.getURIOptional(obj, "catalogUrl13"));
     b.setDisplayName(
-        JSONParserUtilities.getString(obj, "name"));
+      JSONParserUtilities.getString(obj, "name"));
     b.setSubtitle(
-        JSONParserUtilities.getString(obj, "subtitle"));
+      JSONParserUtilities.getString(obj, "subtitle"));
     b.setLogo(
-        JSONParserUtilities.getURI(obj, "logo"));
+      JSONParserUtilities.getURI(obj, "logo"));
 
     b.setAuthentication(JSONParserUtilities.getObjectOptional(obj, "authentication")
-        .mapPartial(sub ->
-            AccountProviderAuthenticationDescription.builder()
-                .setLoginURI(JSONParserUtilities.getURI(sub, "loginUrl"))
-                .setPassCodeLength(JSONParserUtilities.getInteger(sub, "passcodeLength"))
-                .setPassCodeMayContainLetters(JSONParserUtilities.getBoolean(sub, "passcodeAllowsLetters"))
-                .build()));
+      .mapPartial(sub ->
+        AccountProviderAuthenticationDescription.builder()
+          .setLoginURI(JSONParserUtilities.getURI(sub, "loginUrl"))
+          .setPassCodeLength(JSONParserUtilities.getInteger(sub, "passcodeLength"))
+          .setPassCodeMayContainLetters(JSONParserUtilities.getBoolean(sub, "passcodeAllowsLetters"))
+          .setRequiresPin(JSONParserUtilities.getBoolean(sub, "requiresPin"))
+          .build()));
 
     b.setSupportsSimplyESynchronization(
-        JSONParserUtilities.getBooleanDefault(obj, "supportsSimplyESync", false));
+      JSONParserUtilities.getBooleanDefault(obj, "supportsSimplyESync", false));
     b.setSupportsBarcodeScanner(
-        JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeScanner", false));
+      JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeScanner", false));
     b.setSupportsBarcodeDisplay(
-        JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeDisplay", false));
+      JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeDisplay", false));
     b.setSupportsReservations(
-        JSONParserUtilities.getBooleanDefault(obj, "supportsReservations", false));
+      JSONParserUtilities.getBooleanDefault(obj, "supportsReservations", false));
     b.setSupportsCardCreator(
-        JSONParserUtilities.getBooleanDefault(obj, "supportsCardCreator", false));
+      JSONParserUtilities.getBooleanDefault(obj, "supportsCardCreator", false));
     b.setSupportsHelpCenter(
-        JSONParserUtilities.getBooleanDefault(obj, "supportsHelpCenter", false));
+      JSONParserUtilities.getBooleanDefault(obj, "supportsHelpCenter", false));
 
     b.setSupportEmail(
-        JSONParserUtilities.getStringOptional(obj, "supportEmail"));
+      JSONParserUtilities.getStringOptional(obj, "supportEmail"));
     b.setEula(
-        JSONParserUtilities.getURIOptional(obj, "eulaUrl"));
+      JSONParserUtilities.getURIOptional(obj, "eulaUrl"));
     b.setLicense(
-        JSONParserUtilities.getURIOptional(obj, "licenseUrl"));
+      JSONParserUtilities.getURIOptional(obj, "licenseUrl"));
     b.setPrivacyPolicy(
-        JSONParserUtilities.getURIOptional(obj, "privacyUrl"));
+      JSONParserUtilities.getURIOptional(obj, "privacyUrl"));
     b.setMainColor(
-        JSONParserUtilities.getString(obj, "mainColor"));
+      JSONParserUtilities.getString(obj, "mainColor"));
     b.setStyleNameOverride(
-        JSONParserUtilities.getStringOptional(obj, "styleNameOverride"));
+      JSONParserUtilities.getStringOptional(obj, "styleNameOverride"));
 
     return b.build();
   }
@@ -103,9 +104,9 @@ public final class AccountProvidersJSON {
    */
 
   public static AccountProviderCollection deserializeFromJSONArray(
-      final ObjectMapper jom,
-      final ArrayNode node)
-      throws JSONParseException {
+    final ObjectMapper jom,
+    final ArrayNode node)
+    throws JSONParseException {
 
     final TreeMap<URI, AccountProvider> providers = new TreeMap<>();
     AccountProvider default_provider = null;
@@ -150,8 +151,8 @@ public final class AccountProvidersJSON {
    */
 
   public static AccountProviderCollection deserializeFromString(
-      final String text)
-      throws IOException {
+    final String text)
+    throws IOException {
     NullCheck.notNull(text, "Text");
 
     final ObjectMapper jom = new ObjectMapper();
@@ -176,8 +177,8 @@ public final class AccountProvidersJSON {
    */
 
   public static AccountProviderCollection deserializeFromStream(
-      final InputStream stream)
-      throws IOException {
+    final InputStream stream)
+    throws IOException {
     NullCheck.notNull(stream, "Stream");
 
     final ObjectMapper jom = new ObjectMapper();

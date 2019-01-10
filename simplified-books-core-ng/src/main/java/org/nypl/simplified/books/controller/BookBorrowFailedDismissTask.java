@@ -3,15 +3,16 @@ package org.nypl.simplified.books.controller;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
+import org.nypl.simplified.books.book_database.Book;
 import org.nypl.simplified.books.book_database.BookDatabaseEntryType;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookDatabaseType;
 import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.book_registry.BookRegistryType;
-import org.nypl.simplified.books.book_registry.BookWithStatus;
 import org.nypl.simplified.books.book_registry.BookStatus;
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed;
 import org.nypl.simplified.books.book_registry.BookStatusType;
+import org.nypl.simplified.books.book_registry.BookWithStatus;
 import org.nypl.simplified.downloader.core.DownloadType;
 import org.nypl.simplified.downloader.core.DownloaderType;
 import org.slf4j.Logger;
@@ -34,22 +35,22 @@ final class BookBorrowFailedDismissTask implements Runnable {
   private final BookDatabaseType book_database;
 
   BookBorrowFailedDismissTask(
-      final DownloaderType downloader,
-      final ConcurrentHashMap<BookID, DownloadType> downloads,
-      final BookDatabaseType book_database,
-      final BookRegistryType book_registry,
-      final BookID id) {
+    final DownloaderType downloader,
+    final ConcurrentHashMap<BookID, DownloadType> downloads,
+    final BookDatabaseType book_database,
+    final BookRegistryType book_registry,
+    final BookID id) {
 
     this.downloader =
-        NullCheck.notNull(downloader, "Downloader");
+      NullCheck.notNull(downloader, "Downloader");
     this.downloads =
-        NullCheck.notNull(downloads, "Downloads");
+      NullCheck.notNull(downloads, "Downloads");
     this.book_database =
-        NullCheck.notNull(book_database, "Book database");
+      NullCheck.notNull(book_database, "Book database");
     this.book_registry =
-        NullCheck.notNull(book_registry, "Book registry");
+      NullCheck.notNull(book_registry, "Book registry");
     this.id =
-        NullCheck.notNull(id, "ID");
+      NullCheck.notNull(id, "ID");
   }
 
   @Override
@@ -58,7 +59,7 @@ final class BookBorrowFailedDismissTask implements Runnable {
     LOG.debug("acknowledging download of book {}", this.id);
 
     final OptionType<BookStatusType> status_opt =
-        this.book_registry.bookStatus(this.id);
+      this.book_registry.bookStatus(this.id);
 
     try {
       status_opt.mapPartial_(status -> {
@@ -66,8 +67,8 @@ final class BookBorrowFailedDismissTask implements Runnable {
 
         if (status instanceof BookStatusDownloadFailed) {
           final BookDatabaseEntryType entry = this.book_database.entry(this.id);
-          this.book_registry.update(
-              BookWithStatus.create(entry.book(), BookStatus.fromBook(entry.book())));
+          final Book book = entry.getBook();
+          this.book_registry.update(BookWithStatus.create(book, BookStatus.fromBook(book)));
         }
       });
     } catch (final BookDatabaseException e) {

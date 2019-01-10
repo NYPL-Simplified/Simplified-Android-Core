@@ -16,7 +16,7 @@ import java.util.Map;
 
 public final class FeedGroup
 {
-  private final List<FeedEntryType> entries;
+  private final List<FeedEntry> entries;
   private final String              title;
   private final URI                 uri;
 
@@ -31,7 +31,7 @@ public final class FeedGroup
   public FeedGroup(
     final String in_title,
     final URI in_uri,
-    final List<FeedEntryType> in_entries)
+    final List<FeedEntry> in_entries)
   {
     this.title = NullCheck.notNull(in_title);
     this.uri = NullCheck.notNull(in_uri);
@@ -49,12 +49,12 @@ public final class FeedGroup
   {
     NullCheck.notNull(b);
 
-    final List<FeedEntryType> es = new ArrayList<FeedEntryType>(32);
+    final List<FeedEntry> es = new ArrayList<FeedEntry>(32);
     final List<OPDSAcquisitionFeedEntry> be_list = b.getGroupEntries();
     final int max = be_list.size();
     for (int index = 0; index < max; ++index) {
       final OPDSAcquisitionFeedEntry be = NullCheck.notNull(be_list.get(index));
-      es.add(FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(be));
+      es.add(new FeedEntry.FeedEntryOPDS(be));
     }
 
     return new FeedGroup(b.getGroupTitle(), b.getGroupURI(), es);
@@ -84,7 +84,7 @@ public final class FeedGroup
    * @return The list of entries in the group
    */
 
-  public List<FeedEntryType> getGroupEntries()
+  public List<FeedEntry> getGroupEntries()
   {
     return this.entries;
   }

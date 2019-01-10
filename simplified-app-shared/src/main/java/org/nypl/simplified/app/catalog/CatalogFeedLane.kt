@@ -14,16 +14,13 @@ import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.io7m.jfunctional.Unit
-import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.FadeUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.feeds.FeedEntryCorrupt
-import org.nypl.simplified.books.feeds.FeedEntryMatcherType
-import org.nypl.simplified.books.feeds.FeedEntryOPDS
+import org.nypl.simplified.books.feeds.FeedEntry
 import org.nypl.simplified.books.feeds.FeedGroup
 import org.slf4j.LoggerFactory
 import java.util.ArrayList
@@ -99,16 +96,13 @@ class CatalogFeedLane(
     val coverViews = ArrayList<ImageView?>(entries.size)
 
     for (index in entries.indices) {
-      entries[index].matchFeedEntry(
-        object : FeedEntryMatcherType<Unit, UnreachableCodeException> {
-          override fun onFeedEntryCorrupt(entry: FeedEntryCorrupt): Unit {
-            return this@CatalogFeedLane.addViewForFeedEntryCorrupt(coverViews)
-          }
-
-          override fun onFeedEntryOPDS(entry: FeedEntryOPDS): Unit {
-            return this@CatalogFeedLane.addViewForFeedEntryOPDS(entry, coverViews)
-          }
-        })
+      val entry = entries[index]
+      when (entry) {
+        is FeedEntry.FeedEntryCorrupt ->
+          this.addViewForFeedEntryCorrupt(coverViews)
+        is FeedEntry.FeedEntryOPDS ->
+          this.addViewForFeedEntryOPDS(entry, coverViews)
+      }
     }
 
     val imageWidth = (this@CatalogFeedLane.imageHeight.toDouble() * 0.75).toInt()
@@ -144,7 +138,7 @@ class CatalogFeedLane(
 
       val future =
         this.covers.loadThumbnailInto(
-        feedEntry as FeedEntryOPDS,
+        feedEntry as FeedEntry.FeedEntryOPDS,
         imageView,
         imageWidth,
         this.imageHeight)
@@ -154,7 +148,7 @@ class CatalogFeedLane(
   }
 
   private fun addViewForFeedEntryOPDS(
-    entry: FeedEntryOPDS,
+    entry: FeedEntry.FeedEntryOPDS,
     coverViews: ArrayList<ImageView?>): Unit {
 
     /*
