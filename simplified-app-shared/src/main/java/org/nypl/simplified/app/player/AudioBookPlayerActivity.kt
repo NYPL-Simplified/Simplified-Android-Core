@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.player
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -29,11 +30,6 @@ import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.audiobook.android.api.PlayerSleepTimer
 import org.nypl.audiobook.android.api.PlayerSleepTimerType
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadFailed
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloaded
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloading
-import org.nypl.audiobook.android.api.PlayerSpineElementDownloadStatus.PlayerSpineElementNotDownloaded
 import org.nypl.audiobook.android.api.PlayerType
 import org.nypl.audiobook.android.downloads.DownloadProvider
 import org.nypl.audiobook.android.views.PlayerAccessibilityEvent
@@ -62,9 +58,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
 import java.io.File
-import java.lang.StringBuilder
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 /**
  * The main activity for playing audio books.
@@ -123,6 +119,9 @@ class AudioBookPlayerActivity : FragmentActivity(),
   private var download: DownloadType? = null
   @ColorInt
   private var primaryTintColor: Int = 0
+
+  @Volatile
+  private var destroying: Boolean = false
 
   override fun onCreate(state: Bundle?) {
     this.log.debug("onCreate")
@@ -228,6 +227,14 @@ class AudioBookPlayerActivity : FragmentActivity(),
   override fun onDestroy() {
     this.log.debug("onDestroy")
     super.onDestroy()
+
+    /*
+     * We set a flag to indicate that the activity is currently being destroyed because
+     * there may be scheduled tasks that try to execute afte the activity has stopped. This
+     * flag allows them to gracefully avoid running.
+     */
+
+    this.destroying = true
 
     /*
      * Cancel the manifest download if one is still happening.
@@ -398,12 +405,60 @@ class AudioBookPlayerActivity : FragmentActivity(),
         this.playerLastPosition =
           event.spineElement.position.copy(offsetMilliseconds = event.offsetMilliseconds)
 
-      is PlayerEventChapterCompleted -> Unit
+      is PlayerEventChapterCompleted ->
+        this.onPlayerChapterCompleted(event)
+
       is PlayerEventChapterWaiting -> Unit
       is PlayerEventPlaybackRateChanged -> Unit
       is PlayerEventError ->
         onLogPlayerError(event)
     }
+  }
+
+  private fun onPlayerChapterCompleted(event: PlayerEventChapterCompleted) {
+    if (event.spineElement.next == null) {
+      this.log.debug("book has finished")
+
+      /*
+       * Wait a few seconds and then tell the engine to switch back to the first chapter. The
+       * delay is necessary because some underlying audio engines will misbehave somewhat when
+       * sent player commands inside event callbacks.
+       */
+
+      this.playerScheduledExecutor.schedule({
+        if (!this.destroying) {
+          this.log.debug("rewinding book")
+          this.player.movePlayheadToBookStart()
+          UIThread.runOnUIThread { this.loanReturnShowDialog() }
+        }
+      }, 5L, TimeUnit.SECONDS)
+    }
+  }
+
+  private fun loanReturnShowDialog() {
+    val alert = AlertDialog.Builder(this)
+    alert.setTitle(R.string.audio_book_player_return)
+    alert.setNegativeButton(R.string.audio_book_player_do_keep) { dialog, _ ->
+      dialog.dismiss()
+    }
+    alert.setPositiveButton(R.string.audio_book_player_do_return) { _, _ ->
+      this.loanReturnPerform()
+      this.finish()
+    }
+    alert.show()
+  }
+
+  private fun loanReturnPerform() {
+    this.log.debug("returning loan")
+
+    /*
+     * We don't care if the return fails. The user can retry when they get back to their
+     * book list, if necessary.
+     */
+
+    Simplified.getCatalogAppServices().books.bookRevoke(
+      this.parameters.bookID,
+      Simplified.getCurrentAccount().needsAuth())
   }
 
   private fun onLogPlayerError(event: PlayerEventError) {
