@@ -437,7 +437,8 @@ class AudioBookPlayerActivity : FragmentActivity(),
 
   private fun loanReturnShowDialog() {
     val alert = AlertDialog.Builder(this)
-    alert.setTitle(R.string.audio_book_player_return)
+    alert.setTitle(R.string.audio_book_player_return_title)
+    alert.setMessage(R.string.audio_book_player_return_question)
     alert.setNegativeButton(R.string.audio_book_player_do_keep) { dialog, _ ->
       dialog.dismiss()
     }
