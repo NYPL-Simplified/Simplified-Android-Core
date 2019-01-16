@@ -2435,7 +2435,7 @@
     },
     {
         "authPasscodeAllowsLetters": false,
-        "catalogUrl": "https://circulation.librarysimplified.org/CLASSICS/groups/1832",
+        "catalogUrl": "https://circulation.librarysimplified.org/CLASSICS/",
         "catalogUrl13": "http://simplye-collection-redirects.librarysimplified.org/all-books.xml",
         "catalogUrlUnder13": "http://simplye-collection-redirects.librarysimplified.org/childrens-books.xml",
         "id_numeric": 2,
