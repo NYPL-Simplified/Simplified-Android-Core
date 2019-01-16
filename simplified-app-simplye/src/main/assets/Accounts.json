@@ -1298,7 +1298,7 @@
     },
     {
         "authPasscodeAllowsLetters": true,
-        "catalogUrl": "http://howard.simplye-md.org/MDHOWRDCTLIB/",
+        "catalogUrl": "https://howard.simplye-md.org/MDHOWRDCTLIB/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
         "id_numeric": 8,
         "id_uuid": "urn:uuid:f60ee2fd-0734-4112-92e1-06063358a7d9",
