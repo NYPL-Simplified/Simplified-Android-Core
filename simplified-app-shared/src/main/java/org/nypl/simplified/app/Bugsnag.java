@@ -6,7 +6,6 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.books.core.LogUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

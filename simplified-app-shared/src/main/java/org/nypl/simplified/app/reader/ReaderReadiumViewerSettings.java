@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.reader;
 
 import com.io7m.jnull.NullCheck;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

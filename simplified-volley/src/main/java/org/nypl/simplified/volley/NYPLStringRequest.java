@@ -3,15 +3,13 @@ package org.nypl.simplified.volley;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
-import com.io7m.jfunctional.Some;
 import com.io7m.jnull.Nullable;
 
 import net.iharder.Base64;
 
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
-import org.nypl.simplified.books.core.AccountAuthToken;
-import org.nypl.simplified.books.core.AccountBarcode;
-import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.accounts.AccountBarcode;
+import org.nypl.simplified.books.accounts.AccountPIN;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -19,23 +17,27 @@ import java.util.Map;
 
 /**
  * Created by aferditamuriqi on 10/13/16.
- *
  */
 
 public class NYPLStringRequest extends StringRequest {
 
-  private @Nullable AccountAuthenticationCredentials credentials;
-  private @Nullable String username;
-  private @Nullable String password;
-  private @Nullable String content_type;
-  private @Nullable String body;
+  private @Nullable
+  AccountAuthenticationCredentials credentials;
+  private @Nullable
+  String username;
+  private @Nullable
+  String password;
+  private @Nullable
+  String content_type;
+  private @Nullable
+  String body;
 
 
   /**
-   * @param method request method
-   * @param url request url
+   * @param method         request method
+   * @param url            request url
    * @param in_credentials account credentials
-   * @param listener response listener
+   * @param listener       response listener
    * @param error_listener error listener
    */
   public NYPLStringRequest(final int method,
@@ -48,12 +50,12 @@ public class NYPLStringRequest extends StringRequest {
   }
 
   /**
-   * @param method request method
-   * @param url request url
-   * @param in_credentials account credentials
-   * @param in_content_type  header contetn type
-   * @param listener response listener
-   * @param error_listener error listener
+   * @param method          request method
+   * @param url             request url
+   * @param in_credentials  account credentials
+   * @param in_content_type header contetn type
+   * @param listener        response listener
+   * @param error_listener  error listener
    */
   public NYPLStringRequest(final int method,
                            final String url,
@@ -69,12 +71,12 @@ public class NYPLStringRequest extends StringRequest {
   }
 
   /**
-   * @param method request method
-   * @param url request url
-   * @param in_credentials account credentials
-   * @param in_content_type  header contetn type
-   * @param listener response listener
-   * @param error_listener error listener
+   * @param method          request method
+   * @param url             request url
+   * @param in_credentials  account credentials
+   * @param in_content_type header contetn type
+   * @param listener        response listener
+   * @param error_listener  error listener
    */
   public NYPLStringRequest(final int method,
                            final String url,
@@ -88,9 +90,9 @@ public class NYPLStringRequest extends StringRequest {
   }
 
   /**
-   * @param url request url
+   * @param url            request url
    * @param in_credentials account credentials
-   * @param listener response listener
+   * @param listener       response listener
    * @param error_listener error listener
    */
   public NYPLStringRequest(final String url,
@@ -103,11 +105,11 @@ public class NYPLStringRequest extends StringRequest {
   }
 
   /**
-   * @param method request method
-   * @param url request url
-   * @param in_username basic auth username
-   * @param in_password basic auth password
-   * @param listener response listener
+   * @param method         request method
+   * @param url            request url
+   * @param in_username    basic auth username
+   * @param in_password    basic auth password
+   * @param listener       response listener
    * @param error_listener error listener
    */
   public NYPLStringRequest(final int method,
@@ -132,35 +134,27 @@ public class NYPLStringRequest extends StringRequest {
     final Map<String, String> params = new HashMap<String, String>();
 
     if (this.credentials != null) {
-      if (this.credentials.getAuthToken().isSome()) {
 
-        final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
-        params.put("Authorization", "Bearer " + token);
+//      if (this.credentials.getAuthToken().isSome()) {
+//        final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
+//        params.put("Authorization", "Bearer " + token);
+//        throw new UnimplementedCodeException();
+//      }
 
-      } else {
+      final AccountBarcode barcode = this.credentials.barcode();
+      final AccountPIN pin = this.credentials.pin();
 
-        final AccountBarcode barcode = this.credentials.getBarcode();
-        final AccountPIN pin = this.credentials.getPin();
-
-        final String text = barcode.toString() + ":" + pin.toString();
-        final String encoded =
-          Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
-
-        params.put("Authorization", "Basic " + encoded);
-      }
-    }
-    else
-    {
-      final String text = this.username + ":" + this.password;
-      final String encoded =
-        Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+      final String text = barcode.toString() + ":" + pin.toString();
+      final String encoded = Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
       params.put("Authorization", "Basic " + encoded);
-
+    } else {
+      final String text = this.username + ":" + this.password;
+      final String encoded = Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+      params.put("Authorization", "Basic " + encoded);
     }
 
-    if (this.content_type != null)
-    {
-      params.put("Content-Type",  this.content_type);
+    if (this.content_type != null) {
+      params.put("Content-Type", this.content_type);
     }
 
     return params;

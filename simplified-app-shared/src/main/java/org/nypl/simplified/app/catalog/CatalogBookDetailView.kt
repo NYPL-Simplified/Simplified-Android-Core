@@ -18,6 +18,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.io7m.jfunctional.None
 import com.io7m.jfunctional.OptionType
@@ -62,6 +63,7 @@ import org.nypl.simplified.books.controller.BooksControllerType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.core.BookAcquisitionSelection
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.books.document_store.DocumentStoreType
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -89,6 +91,8 @@ class CatalogBookDetailView(
   private val screenSizeInformation: ScreenSizeInformationType,
   private val networkConnectivity: NetworkConnectivityType,
   private val applicationColorScheme: ApplicationColorScheme,
+  private val backgroundExecutor: ListeningExecutorService,
+  private val documentStore: DocumentStoreType,
   entryInitial: FeedEntryOPDS)
   : BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -357,14 +361,16 @@ class CatalogBookDetailView(
     val acquisition = acquisitionOpt.get()
     val acquisitionController =
       CatalogAcquisitionButtonController(
-        this.activity,
-        this.profilesController,
-        this.booksController,
-        this.booksRegistry,
-        this.networkConnectivity,
-        currentEntry.bookID,
-        acquisition,
-        currentEntry)
+        acquisition = acquisition,
+        activity = this.activity,
+        books = this.booksController,
+        entry = currentEntry,
+        id = currentEntry.bookID,
+        profiles = this.profilesController,
+        bookRegistry = this.booksRegistry,
+        networkConnectivity = this.networkConnectivity,
+        backgroundExecutor = this.backgroundExecutor,
+        documents = this.documentStore)
 
     retry.isEnabled = true
     retry.visibility = View.VISIBLE
@@ -455,13 +461,15 @@ class CatalogBookDetailView(
     this.bookDownloadText.text = text
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity,
-      this.account,
-      this.bookDownloadButtons,
-      this.booksController,
-      this.profilesController,
-      this.booksRegistry,
-      this.entry.get())
+      activity = this.activity,
+      viewGroup = this.bookDownloadButtons,
+      bookRegistry = this.booksRegistry,
+      books = this.booksController,
+      profiles = this.profilesController,
+      entry = this.entry.get(),
+      networkConnectivity = this.networkConnectivity,
+      backgroundExecutor = this.backgroundExecutor,
+      documents = this.documentStore)
 
     if (status.isRevocable) {
       val revoke =
@@ -499,13 +507,15 @@ class CatalogBookDetailView(
     this.bookDownloadText.text = text
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity,
-      this.account,
-      this.bookDownloadButtons,
-      this.booksController,
-      this.profilesController,
-      this.booksRegistry,
-      this.entry.get())
+      activity = this.activity,
+      viewGroup = this.bookDownloadButtons,
+      bookRegistry = this.booksRegistry,
+      books = this.booksController,
+      profiles = this.profilesController,
+      entry = this.entry.get(),
+      networkConnectivity = this.networkConnectivity,
+      backgroundExecutor = this.backgroundExecutor,
+      documents = this.documentStore)
 
     CatalogBookDetailView.configureButtonsHeight(
       this.screenSizeInformation,
@@ -599,13 +609,15 @@ class CatalogBookDetailView(
     this.bookDownloadText.text = text
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity,
-      this.account,
-      this.bookDownloadButtons,
-      this.booksController,
-      this.profilesController,
-      this.booksRegistry,
-      this.entry.get())
+      activity = this.activity,
+      viewGroup = this.bookDownloadButtons,
+      bookRegistry = this.booksRegistry,
+      books = this.booksController,
+      profiles = this.profilesController,
+      entry = this.entry.get(),
+      networkConnectivity = this.networkConnectivity,
+      backgroundExecutor = this.backgroundExecutor,
+      documents = this.documentStore)
 
     if (status.isReturnable) {
       val revoke =
@@ -652,13 +664,15 @@ class CatalogBookDetailView(
     this.bookDownloadText.text = text
 
     CatalogAcquisitionButtons.addButtons(
-      this.activity,
-      this.account,
-      this.bookDownloadButtons,
-      this.booksController,
-      this.profilesController,
-      this.booksRegistry,
-      this.entry.get())
+      activity = this.activity,
+      viewGroup = this.bookDownloadButtons,
+      bookRegistry = this.booksRegistry,
+      books = this.booksController,
+      profiles = this.profilesController,
+      entry = this.entry.get(),
+      networkConnectivity = this.networkConnectivity,
+      backgroundExecutor = this.backgroundExecutor,
+      documents = this.documentStore)
 
     CatalogBookDetailView.configureButtonsHeight(
       this.screenSizeInformation,

@@ -1,8 +1,8 @@
 package org.nypl.simplified.app.reader
 
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.app.FragmentManager
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
+import android.support.v4.app.FragmentPagerAdapter
 
 class ReaderTOCFragmentPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 

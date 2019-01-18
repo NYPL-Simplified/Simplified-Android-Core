@@ -4,6 +4,7 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nypl.simplified.books.reader.ReaderBookLocation;

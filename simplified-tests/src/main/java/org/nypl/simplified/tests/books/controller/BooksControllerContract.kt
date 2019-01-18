@@ -103,8 +103,8 @@ abstract class BooksControllerContract {
     return AccountProvider.builder()
       .setId(URI.create(providerId))
       .setDisplayName("Fake Library")
-      .setSubtitle("Imaginary books")
-      .setLogo(URI.create("http://example.com/logo.png"))
+      .setSubtitle(Option.some("Imaginary books"))
+      .setLogo(Option.some(URI.create("http://example.com/logo.png")))
       .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
       .setSupportEmail("postmaster@example.com")
       .build()
@@ -190,8 +190,6 @@ abstract class BooksControllerContract {
       timerExec,
       null)
   }
-
-
 
   @Before
   @Throws(Exception::class)

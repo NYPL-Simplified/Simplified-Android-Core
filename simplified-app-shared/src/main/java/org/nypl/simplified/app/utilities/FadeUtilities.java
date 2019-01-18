@@ -2,6 +2,7 @@ package org.nypl.simplified.app.utilities;
 
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+
 import com.io7m.junreachable.UnreachableCodeException;
 
 /**

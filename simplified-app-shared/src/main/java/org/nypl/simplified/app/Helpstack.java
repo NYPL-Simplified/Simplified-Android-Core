@@ -3,6 +3,7 @@ package org.nypl.simplified.app;
 import android.app.Activity;
 import android.app.Application;
 import android.content.res.AssetManager;
+
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
@@ -10,7 +11,7 @@ import com.tenmiles.helpstack.HSHelpStack;
 import com.tenmiles.helpstack.gears.HSDeskGear;
 import com.tenmiles.helpstack.gears.HSZendeskGear;
 import com.tenmiles.helpstack.logic.HSGear;
-import org.nypl.simplified.books.core.LogUtilities;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

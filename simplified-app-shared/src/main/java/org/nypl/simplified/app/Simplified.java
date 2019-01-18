@@ -12,7 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDexApplication;
 import android.util.DisplayMetrics;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
@@ -101,11 +101,13 @@ public final class Simplified extends MultiDexApplication {
   private static volatile Simplified INSTANCE;
 
   private CardCreator cardcreator;
-  private ExecutorService exec_catalog_feeds;
-  private ExecutorService exec_covers;
-  private ExecutorService exec_downloader;
-  private ExecutorService exec_books;
-  private ExecutorService exec_epub;
+  private ListeningScheduledExecutorService exec_catalog_feeds;
+  private ListeningScheduledExecutorService exec_covers;
+  private ListeningScheduledExecutorService exec_downloader;
+  private ListeningScheduledExecutorService exec_books;
+  private ListeningScheduledExecutorService exec_epub;
+  private ListeningScheduledExecutorService exec_background;
+  private ListeningScheduledExecutorService exec_profile_timer;
   private ScreenSizeInformation screen;
   private File directory_base;
   private File directory_documents;
@@ -133,8 +135,6 @@ public final class Simplified extends MultiDexApplication {
   private NetworkConnectivity network_connectivity;
   private BookRegistryType book_registry;
   private Controller book_controller;
-  private ListeningExecutorService exec_background;
-  private ExecutorService exec_profile_timer;
   private BundledContentResolverType bundled_content_resolver;
   private ApplicationColorScheme color_scheme_fallback;
   private BookCoverBadgeLookupType cover_badges;
@@ -172,6 +172,15 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("Application is not yet initialized");
     }
     return i;
+  }
+
+  /**
+   * @return The HTTP interface
+   */
+
+  public static HTTPType getHTTP() {
+    final Simplified i = Simplified.checkInitialized();
+    return i.http;
   }
 
   /**
@@ -259,7 +268,7 @@ public final class Simplified extends MultiDexApplication {
    * @return A general executor service for background tasks
    */
 
-  public static ListeningExecutorService getBackgroundTaskExecutor() {
+  public static ListeningScheduledExecutorService getBackgroundTaskExecutor() {
     final Simplified i = Simplified.checkInitialized();
     return i.exec_background;
   }
@@ -340,7 +349,7 @@ public final class Simplified extends MultiDexApplication {
     return NullCheck.notNull(r);
   }
 
-  private static ExecutorService createNamedThreadPool(
+  private static ListeningScheduledExecutorService createNamedThreadPool(
     final int count,
     final String base,
     final int priority) {
@@ -372,7 +381,7 @@ public final class Simplified extends MultiDexApplication {
       }
     };
 
-    return NullCheck.notNull(Executors.newFixedThreadPool(count, named));
+    return MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(count, named));
   }
 
   public static DocumentStoreType getDocumentStore() {
@@ -399,12 +408,13 @@ public final class Simplified extends MultiDexApplication {
     final AssetManager asset_manager)
     throws IOException {
 
-    try (InputStream stream = asset_manager.open("account_providers.json")) {
+    try (InputStream stream = asset_manager.open("Accounts.json")) {
       return AccountProvidersJSON.deserializeFromStream(stream);
     }
   }
 
   private static ProfilesDatabaseType createProfileDatabase(
+    final Context context,
     final Resources resources,
     final AccountProviderCollection account_providers,
     final File directory)
@@ -419,15 +429,19 @@ public final class Simplified extends MultiDexApplication {
     if (anonymous) {
       LOG.debug("opening profile database with anonymous profile");
       return ProfilesDatabase.openWithAnonymousAccountEnabled(
+        context,
         account_providers,
-        AccountsDatabases.Companion.get(),
+        AccountsDatabases.INSTANCE,
         account_providers.providerDefault(),
         directory);
     }
 
     LOG.debug("opening profile database without anonymous profile");
     return ProfilesDatabase.openWithAnonymousAccountDisabled(
-      account_providers, AccountsDatabases.Companion.get(), directory);
+      context,
+      account_providers,
+      AccountsDatabases.INSTANCE,
+      directory);
   }
 
   @NonNull
@@ -646,7 +660,7 @@ public final class Simplified extends MultiDexApplication {
     try {
       LOG.debug("initializing profiles and accounts");
       this.profiles = createProfileDatabase(
-        resources, this.account_providers, this.directory_profiles);
+        this.getApplicationContext(), resources, this.account_providers, this.directory_profiles);
     } catch (final ProfileDatabaseException e) {
       throw new IllegalStateException("Could not initialize profile database", e);
     }
@@ -675,27 +689,30 @@ public final class Simplified extends MultiDexApplication {
     this.feed_parser = createFeedParser();
     this.feed_search_parser = OPDSSearchParser.newParser();
     this.feed_transport = FeedHTTPTransport.newTransport(this.http);
-    this.feed_loader = FeedLoader.Companion.newFeedLoader(
-      this.exec_catalog_feeds,
-      this.book_registry,
-      this.bundled_content_resolver,
-      this.feed_parser,
-      this.feed_transport,
-      this.feed_search_parser);
+    this.feed_loader =
+      FeedLoader.Companion.create(
+        this.exec_catalog_feeds,
+        this.feed_parser,
+        this.feed_search_parser,
+        this.feed_transport,
+        this.book_registry,
+        this.bundled_content_resolver);
 
     LOG.debug("initializing book controller");
-    this.book_controller = Controller.Companion.create(
-      this.exec_books,
-      this.http,
-      this.feed_parser,
-      this.feed_loader,
-      this.downloader,
-      this.profiles,
-      this.analytics_logger,
-      this.book_registry,
-      this.bundled_content_resolver,
-      ignored -> this.account_providers,
-      this.exec_profile_timer, );
+    this.book_controller =
+      Controller.Companion.create(
+        this.exec_books,
+        this.http,
+        this.feed_parser,
+        this.feed_loader,
+        this.downloader,
+        this.profiles,
+        this.analytics_logger,
+        this.book_registry,
+        this.bundled_content_resolver,
+        ignored -> this.account_providers,
+        this.exec_profile_timer,
+        null);
 
     /*
      * Log out the current profile after ten minutes, warning one minute before this happens.

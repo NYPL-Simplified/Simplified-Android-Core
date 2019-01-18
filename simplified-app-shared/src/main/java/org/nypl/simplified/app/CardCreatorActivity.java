@@ -5,13 +5,11 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -26,20 +24,14 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
-import org.nypl.simplified.books.core.AccountAuthProvider;
-import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
-import org.nypl.simplified.books.core.AccountPIN;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.cardcreator.fragments.AddressFragment;
 import org.nypl.simplified.cardcreator.fragments.AgeFragment;
 import org.nypl.simplified.cardcreator.fragments.ConfirmationFragment;
@@ -80,7 +72,7 @@ public class CardCreatorActivity extends AppCompatActivity implements
   LocationListenerType {
 
   protected static final String TAG = "CardCreatorActivity";
-  private Prefs prefs = Simplified.getSharedPrefs();
+  private Prefs prefs;
 
   /**
    *
@@ -761,22 +753,17 @@ public class CardCreatorActivity extends AppCompatActivity implements
     this.prefs.putBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON), true);
     findViewById(R.id.next_button).setEnabled(this.prefs.getBoolean(this.getResources().getString(R.string.SHOW_NEXT_BUTTON)));
 
-
-    final SimplifiedCatalogAppServicesType app =
-      Simplified.getCatalogAppServices();
-
-
-    final Resources rr = NullCheck.notNull(CardCreatorActivity.this.getResources());
-    final OptionType<AdobeVendorID> adobe_vendor = Option.some(new AdobeVendorID(rr.getString(org.nypl.simplified.app.R.string.feature_adobe_vendor_id)));
-    final BooksType books = app.getBooks();
-
-    final AccountBarcode barcode = new AccountBarcode(this.prefs.getString(this.getResources().getString(R.string.USERNAME_DATA_KEY)));
-    final AccountPIN pin = new AccountPIN(this.prefs.getString(this.getResources().getString(R.string.PIN_DATA_KEY)));
-    final AccountAuthProvider auth_provider = new AccountAuthProvider(rr.getString(org.nypl.simplified.app.R.string.feature_default_auth_provider_name));
-
-    final AccountCredentials creds =
-      new AccountCredentials(adobe_vendor, barcode, pin, Option.some(auth_provider));
-    books.accountLogin(creds, CardCreatorActivity.this);
+//    final Resources rr = NullCheck.notNull(CardCreatorActivity.this.getResources());
+//    final OptionType<AdobeVendorID> adobe_vendor = Option.some(new AdobeVendorID(rr.getString(org.nypl.simplified.app.R.string.feature_adobe_vendor_id)));
+//    final BooksType books = app.getBooks();
+//
+//    final AccountBarcode barcode = new AccountBarcode(this.prefs.getString(this.getResources().getString(R.string.USERNAME_DATA_KEY)));
+//    final AccountPIN pin = new AccountPIN(this.prefs.getString(this.getResources().getString(R.string.PIN_DATA_KEY)));
+//    final AccountAuthProvider auth_provider = new AccountAuthProvider(rr.getString(org.nypl.simplified.app.R.string.feature_default_auth_provider_name));
+//
+//    final AccountCredentials creds =
+//      new AccountCredentials(adobe_vendor, barcode, pin, Option.some(auth_provider));
+//    books.accountLogin(creds, CardCreatorActivity.this);
 
     this.showProgress(false);
   }

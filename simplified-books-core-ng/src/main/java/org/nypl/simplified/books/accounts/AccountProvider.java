@@ -50,13 +50,13 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
    * @return The subtitle
    */
 
-  public abstract String subtitle();
+  public abstract OptionType<String> subtitle();
 
   /**
-   * @return The logo URI
+   * @return The logo image
    */
 
-  public abstract URI logo();
+  public abstract OptionType<URI> logo();
 
   /**
    * @return An authentication description if authentication is required, or nothing if it isn't
@@ -90,6 +90,7 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
 
   /**
    * XXX: There is an associated Card Creator URL; this should be an OptionType[URI]
+   *
    * @return {@code true} iff the card creator is supported
    */
 
@@ -159,13 +160,13 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
 
   /**
    * Determine the correct catalog URI to use for readers of a given age.
+   *
    * @param age The age of the reader
    * @return The correct catalog URI for the given age
    */
 
   public final URI catalogURIForAge(
-      final int age)
-  {
+    final int age) {
     if (age >= 13) {
       return this.catalogURIForOver13s().accept(new OptionVisitorType<URI, URI>() {
         @Override
@@ -205,183 +206,182 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
     }
 
     /**
-     * @see #id()
      * @param id The provider ID
      * @return The current builder
+     * @see #id()
      */
 
     public abstract Builder setId(URI id);
 
     /**
-     * @see #displayName()
      * @param name The display name
      * @return The current builder
+     * @see #displayName()
      */
 
     public abstract Builder setDisplayName(String name);
 
     /**
-     * @see #subtitle()
      * @param subtitle The subtitle
      * @return The current builder
+     * @see #subtitle()
      */
 
-    public abstract Builder setSubtitle(String subtitle);
+    public abstract Builder setSubtitle(OptionType<String> subtitle);
 
     /**
-     * @see #logo()
-     * @param logo The logo URI
+     * @param logo The logo data
      * @return The current builder
+     * @see #logo()
      */
 
-    public abstract Builder setLogo(URI logo);
+    public abstract Builder setLogo(OptionType<URI> logo);
 
     /**
-     * @see #authentication()
      * @param description The required authentication, if any
      * @return The current builder
+     * @see #authentication()
      */
 
     public abstract Builder setAuthentication(
-        OptionType<AccountProviderAuthenticationDescription> description);
+      OptionType<AccountProviderAuthenticationDescription> description);
 
     /**
-     * @see #supportsSimplyESynchronization()
      * @param supports {@code true} iff support is present
      * @return The current builder
+     * @see #supportsSimplyESynchronization()
      */
 
     public abstract Builder setSupportsSimplyESynchronization(boolean supports);
 
     /**
-     * @see #supportsBarcodeScanner()
      * @param supports {@code true} iff support is present
      * @return The current builder
+     * @see #supportsBarcodeScanner()
      */
 
     public abstract Builder setSupportsBarcodeScanner(boolean supports);
 
     /**
-     * @see #supportsBarcodeDisplay()
      * @param supports {@code true} iff support is present
      * @return The current builder
+     * @see #supportsBarcodeDisplay()
      */
 
     public abstract Builder setSupportsBarcodeDisplay(boolean supports);
 
     /**
-     * @see #supportsReservations()
      * @param supports {@code true} iff support is present
      * @return The current builder
+     * @see #supportsReservations()
      */
 
     public abstract Builder setSupportsReservations(boolean supports);
 
     /**
-     * @see #supportsCardCreator()
      * @param supports {@code true} iff support is present
      * @return The current builder
+     * @see #supportsCardCreator()
      */
 
     public abstract Builder setSupportsCardCreator(boolean supports);
 
     /**
-     * @see #supportsHelpCenter()
      * @param supports {@code true} iff support is present
      * @return The current builder
+     * @see #supportsHelpCenter()
      */
 
     public abstract Builder setSupportsHelpCenter(boolean supports);
 
     /**
-     * @see #catalogURI()
      * @param uri The default catalog URI
      * @return The current builder
+     * @see #catalogURI()
      */
 
     public abstract Builder setCatalogURI(URI uri);
 
     /**
-     * @see #catalogURIForOver13s()
      * @param uri The catalog URI for over 13s
      * @return The current builder
+     * @see #catalogURIForOver13s()
      */
 
     public abstract Builder setCatalogURIForOver13s(
-        OptionType<URI> uri);
+      OptionType<URI> uri);
 
     /**
-     * @see #catalogURIForUnder13s()
      * @param uri The catalog URI for over 13s
      * @return The current builder
+     * @see #catalogURIForUnder13s()
      */
 
     public abstract Builder setCatalogURIForUnder13s(
-        OptionType<URI> uri);
+      OptionType<URI> uri);
 
     /**
-     * @see #supportEmail()
      * @param email The support email
      * @return The current builder
+     * @see #supportEmail()
      */
 
-    public Builder setSupportEmail(String email)
-    {
+    public Builder setSupportEmail(String email) {
       return setSupportEmail(Option.some(email));
     }
 
     /**
-     * @see #supportEmail()
      * @param email The support email
      * @return The current builder
+     * @see #supportEmail()
      */
 
     public abstract Builder setSupportEmail(OptionType<String> email);
 
     /**
-     * @see #eula()
      * @param uri The URI
      * @return The current builder
+     * @see #eula()
      */
 
     public abstract Builder setEula(
-        OptionType<URI> uri);
+      OptionType<URI> uri);
 
     /**
-     * @see #license()
      * @param uri The URI
      * @return The current builder
+     * @see #license()
      */
 
     public abstract Builder setLicense(
-        OptionType<URI> uri);
+      OptionType<URI> uri);
 
     /**
-     * @see #privacyPolicy()
      * @param uri The URI
      * @return The current builder
+     * @see #privacyPolicy()
      */
 
     public abstract Builder setPrivacyPolicy(
-        OptionType<URI> uri);
+      OptionType<URI> uri);
 
     /**
-     * @see #mainColor()
      * @param color The color
      * @return The current builder
+     * @see #mainColor()
      */
 
     public abstract Builder setMainColor(
-        String color);
+      String color);
 
     /**
-     * @see #styleNameOverride()
      * @param style The style name override
      * @return The current builder
+     * @see #styleNameOverride()
      */
 
     public abstract Builder setStyleNameOverride(
-        OptionType<String> style);
+      OptionType<String> style);
 
     /**
      * @return The constructed account provider

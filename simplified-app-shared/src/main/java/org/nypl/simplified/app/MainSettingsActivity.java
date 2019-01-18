@@ -35,9 +35,5 @@ public final class MainSettingsActivity extends NavigationDrawerActivity {
   @Override
   public void onCreate(final Bundle saved_instance_state) {
     super.onCreate(saved_instance_state);
-
-    getSupportFragmentManager().beginTransaction()
-      .replace(R.id.content_frame, new MainSettingsFragment()).commit();
-
   }
 }

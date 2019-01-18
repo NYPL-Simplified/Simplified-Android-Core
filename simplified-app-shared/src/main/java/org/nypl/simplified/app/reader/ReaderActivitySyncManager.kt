@@ -3,15 +3,12 @@ package org.nypl.simplified.app.reader
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
-import android.support.v4.content.ContextCompat
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.io7m.jfunctional.Some
-import org.json.JSONObject
+import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.simplified.app.AnnotationsManager
 import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.R
-import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.ThemeMatcher
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
 import org.nypl.simplified.books.core.AccountsControllerType
@@ -23,7 +20,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.readium.sdk.android.Package
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.*
+import java.util.Timer
 import kotlin.concurrent.schedule
 
 enum class ReadingLocationSyncStatus {
@@ -283,6 +280,6 @@ class ReaderSyncManager(private val feedEntry: OPDSAcquisitionFeedEntry,
   }
 
   private fun setPermissionSharedPref(status: Boolean) {
-    Simplified.getSharedPrefs().putBoolean("syncPermissionGranted", this.libraryAccount.id, status)
+    throw UnimplementedCodeException()
   }
 }

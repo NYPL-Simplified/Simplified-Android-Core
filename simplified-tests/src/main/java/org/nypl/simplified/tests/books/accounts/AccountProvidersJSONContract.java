@@ -101,7 +101,7 @@ public abstract class AccountProvidersJSONContract {
     Assert.assertEquals(Option.some(auth), p.authentication());
     Assert.assertEquals("http://www.librarysimplified.org", p.id().toString());
     Assert.assertEquals("The New York Public Library", p.displayName());
-    Assert.assertEquals("Inspiring lifelong learning, advancing knowledge, and strengthening our communities.", p.subtitle());
+    Assert.assertEquals(Option.some("Inspiring lifelong learning, advancing knowledge, and strengthening our communities."), p.subtitle());
     Assert.assertEquals(false, p.supportsSimplyESynchronization());
     Assert.assertEquals(false, p.supportsBarcodeDisplay());
     Assert.assertEquals(false, p.supportsBarcodeScanner());
@@ -114,7 +114,7 @@ public abstract class AccountProvidersJSONContract {
     Assert.assertEquals(Option.some(URI.create("http://www.librarysimplified.org/license.html")), p.license());
     Assert.assertEquals(Option.some(URI.create("http://www.librarysimplified.org/privacypolicy.html")), p.privacyPolicy());
     Assert.assertEquals("#da2527", p.mainColor());
-    Assert.assertEquals(URI.create("LibraryLogoNYPL"), p.logo());
+    Assert.assertEquals(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")), p.logo());
     Assert.assertEquals(Option.some("SimplifiedThemeNoActionBar_NYPL"), p.styleNameOverride());
   }
 
@@ -132,7 +132,7 @@ public abstract class AccountProvidersJSONContract {
     Assert.assertTrue(c.providers().containsValue(p));
     Assert.assertEquals("https://instantclassics.librarysimplified.org", p.id().toString());
     Assert.assertEquals("SimplyE Collection", p.displayName());
-    Assert.assertEquals("E-books free to download and read without a library card", p.subtitle());
+    Assert.assertEquals(Option.some("E-books free to download and read without a library card"), p.subtitle());
     Assert.assertEquals(false, p.supportsSimplyESynchronization());
     Assert.assertEquals(false, p.supportsBarcodeDisplay());
     Assert.assertEquals(false, p.supportsBarcodeScanner());
@@ -147,7 +147,7 @@ public abstract class AccountProvidersJSONContract {
     Assert.assertEquals(Option.some(URI.create("http://www.librarysimplified.org/iclicenses.html")), p.license());
     Assert.assertEquals(Option.none(), p.privacyPolicy());
     Assert.assertEquals("#497049", p.mainColor());
-    Assert.assertEquals(URI.create("LibraryLogoMagic"), p.logo());
+    Assert.assertEquals(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")), p.logo());
   }
 
   @Test
@@ -157,7 +157,7 @@ public abstract class AccountProvidersJSONContract {
         AccountProvidersJSON.deserializeFromString(
             readAllFromResource("providers-all.json"));
 
-    Assert.assertEquals(10L, c.providers().size());
+    Assert.assertEquals(159L, c.providers().size());
     final AccountProvider p = c.providerDefault();
     Assert.assertTrue(c.providers().containsKey(p.id()));
     Assert.assertTrue(c.providers().containsValue(p));

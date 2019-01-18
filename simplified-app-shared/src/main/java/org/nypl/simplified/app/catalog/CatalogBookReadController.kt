@@ -72,7 +72,7 @@ class CatalogBookReadController(
 
   private fun launchEPUBReader(book: Book, format: BookFormatEPUB) {
     if (format.isDownloaded) {
-      ReaderActivity.startActivity(this.activity, this.id, book, format)
+      ReaderActivity.startActivity(this.activity, this.id, format.file, FeedEntryOPDS(book.entry))
     } else {
       ErrorDialogUtilities.showError(
         this.activity,

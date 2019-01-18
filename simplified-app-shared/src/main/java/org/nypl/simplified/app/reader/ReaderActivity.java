@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
+import com.io7m.junreachable.UnreachableCodeException;
 
 import org.joda.time.Instant;
 import org.nypl.drm.core.AdobeDeviceID;
@@ -39,19 +40,15 @@ import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
+import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.core.AccountCredentials;
-import org.nypl.simplified.books.core.AccountsControllerType;
 import org.nypl.simplified.books.core.BodyNode;
-import org.nypl.simplified.books.core.BookDatabaseEntryReadableType;
-import org.nypl.simplified.books.core.BookDatabaseEntryType;
-import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
-import org.nypl.simplified.books.feeds.FeedEntry;
-import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
-import org.nypl.simplified.books.feeds.FeedEntryOPDS;
 import org.nypl.simplified.books.core.SelectorNode;
 import org.nypl.simplified.books.core.TargetNode;
+import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfilePreferencesChanged;
@@ -69,7 +66,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -444,10 +440,21 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     in_title_text.setText("");
 
+    BookDatabaseEntryFormatHandleEPUB formatHandle;
+    try {
+      formatHandle = Simplified.getProfilesController()
+        .profileAccountCurrent()
+        .bookDatabase()
+        .entry(this.book_id)
+        .findFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
+    } catch (BookDatabaseException | ProfileNoneCurrentException e) {
+      throw new IllegalStateException(e);
+    }
+
     final ReaderReadiumEPUBLoaderType loader = Simplified.getReadiumEPUBLoader();
     final ReaderReadiumEPUBLoadRequest request =
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
-        .setAdobeRightsFile(db_entry.book().adobeRightsFile())
+        .setAdobeRightsFile(Option.of(formatHandle.getFormat().getAdobeRightsFile()))
         .build();
 
     loader.loadEPUB(request, this);
@@ -511,15 +518,15 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     this.current_location = loc;
 
-    lazyInitSyncManagement();
-
-    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
-    final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
-    final BookID in_book_id = Objects.requireNonNull(this.book_id);
-
-    bm.saveReadingPosition(in_book_id, loc);
-    uploadReadingPosition(loc);
-    checkExistingBookmarksAndUpdateUI(loc);
+//    lazyInitSyncManagement();
+//
+//    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
+//    final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
+//    final BookID in_book_id = Objects.requireNonNull(this.book_id);
+//
+//    bm.saveReadingPosition(in_book_id, loc);
+//    uploadReadingPosition(loc);
+//    checkExistingBookmarksAndUpdateUI(loc);
   }
 
   @Override
@@ -580,17 +587,17 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
      */
 
     synchronized (this) {
-      if (this.bookmarks == null) {
-        try {
-          final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
-          final BookDatabaseEntryReadableType entry = db.databaseOpenExistingEntry(this.book_id);
-          this.bookmarks = new ArrayList<>(entry.entryGetBookmarks());
-          LOG.debug("Bookmarks ivar reconstituted after book launch: \n{}", this.bookmarks);
-        } catch (IOException e) {
-          LOG.error("Error getting list of bookmarks from the book entry database");
-          this.bookmarks = new ArrayList<>();
-        }
-      }
+//      if (this.bookmarks == null) {
+//        try {
+//          final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
+//          final BookDatabaseEntryReadableType entry = db.databaseOpenExistingEntry(this.book_id);
+//          this.bookmarks = new ArrayList<>(entry.entryGetBookmarks());
+//          LOG.debug("Bookmarks ivar reconstituted after book launch: \n{}", this.bookmarks);
+//        } catch (IOException e) {
+//          LOG.error("Error getting list of bookmarks from the book entry database");
+//          this.bookmarks = new ArrayList<>();
+//        }
+//      }
     }
 
     /*
@@ -670,18 +677,18 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   private void saveToDisk(@NonNull BookmarkAnnotation mark) {
-    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-
-    try {
-      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
-      entry.entryAddBookmark(mark);
-    } catch (IOException e) {
-      LOG.error("Error writing annotation to app database: {}", mark);
-      ErrorDialogUtilities.showError(
-        this,
-        LOG,
-        getString(R.string.bookmark_save_error), null);
-    }
+//    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+//
+//    try {
+//      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
+//      entry.entryAddBookmark(mark);
+//    } catch (IOException e) {
+//      LOG.error("Error writing annotation to app database: {}", mark);
+//      ErrorDialogUtilities.showError(
+//        this,
+//        LOG,
+//        getString(R.string.bookmark_save_error), null);
+//    }
   }
 
   private void deleteLocalAndRemote(final BookmarkAnnotation annotation) {
@@ -689,14 +696,14 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     /*
     Delete on the disk
      */
-    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-
-    try {
-      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
-      entry.entryDeleteBookmark(annotation);
-    } catch (IOException e) {
-      LOG.error("Error deleting annotation from the app database: {}", annotation);
-    }
+//    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+//
+//    try {
+//      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
+//      entry.entryDeleteBookmark(annotation);
+//    } catch (IOException e) {
+//      LOG.error("Error deleting annotation from the app database: {}", annotation);
+//    }
 
     /*
     Delete on the server if we have an ID/URI
@@ -730,7 +737,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final String motivation = "http://www.w3.org/ns/oa#bookmarking";
     final String bookID = this.feed_entry.getID();
     final String selectorType = "oa:FragmentSelector";
-    final String value = Objects.requireNonNull(bookmark.toJsonString());
+    final String value;
+    try {
+      value = ReaderBookLocationJSON.serializeToString(new ObjectMapper(), bookmark);
+    } catch (final IOException e) {
+      throw new UnreachableCodeException(e);
+    }
     final String timestamp = new Instant().toString();
     final String deviceID = getDeviceIDString();
 
@@ -840,11 +852,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
      * book to that specific page. Otherwise, start at the beginning.
      */
 
-    final BookID in_book_id = Objects.requireNonNull(this.book_id);
-    final OPDSAcquisitionFeedEntry in_entry = Objects.requireNonNull(this.feed_entry);
-    final ReaderBookmarksSharedPrefsType bookmarks = rs.getBookmarks();
-    final ReaderBookLocation readingPosition = bookmarks.getReadingPosition(in_book_id, in_entry);
-    navigateTo(readingPosition);
+//    final BookID in_book_id = Objects.requireNonNull(this.book_id);
+//    final OPDSAcquisitionFeedEntry in_entry = Objects.requireNonNull(this.feed_entry);
+//    final ReaderBookmarksSharedPrefsType bookmarks = rs.getBookmarks();
+//    final ReaderBookLocation readingPosition = bookmarks.getReadingPosition(in_book_id, in_entry);
+//    navigateTo(readingPosition);
 
     /*
      * Configure the visibility of UI elements.
@@ -916,51 +928,51 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       return;
     }
 
-    final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
-    final List<BookmarkAnnotation> current_marks = Objects.requireNonNull(this.bookmarks);
-
-    final AccountsControllerType accountController = Simplified.getCatalogAppServices().getBooks();
-    if (this.credentials == null || accountController == null) {
-      LOG.error("Parameter(s) were unexpectedly null before creating Sync Manager. Abandoning attempt.");
-      return;
-    }
-
-    this.sync_manager =
-      new ReaderSyncManager(
-        this.feed_entry,
-        this.credentials,
-        Simplified.getCurrentAccount(),
-        this,
-        (location) -> {
-          navigateTo(location);
-          return Unit.INSTANCE;
-        });
-
-    final Container c = Objects.requireNonNull(this.epub_container);
-    final Package p = c.getDefaultPackage();
-    this.sync_manager.setBookPackage(p);
-
-    this.sync_manager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
-      //Sync Permitted or Successfully Enabled
-      sync_manager.syncReadingLocation(getDeviceIDString(), current_loc, this);
-      sync_manager.retryOnDiskBookmarksUpload(current_marks);
-      sync_manager.syncBookmarks(current_marks, (syncedMarks) -> {
-        synchronized (this) {
-          this.bookmarks = new ArrayList<>(syncedMarks);
-          //Update bookmarks on disk
-          final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-
-          try {
-            final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
-            entry.entrySetBookmarks(syncedMarks);
-          } catch (IOException e) {
-            LOG.error("Error writing annotation to app database: {}", syncedMarks);
-          }
-          return Unit.INSTANCE;
-        }
-      });
-      return Unit.INSTANCE;
-    });
+//    final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
+//    final List<BookmarkAnnotation> current_marks = Objects.requireNonNull(this.bookmarks);
+//
+//    final AccountsControllerType accountController = Simplified.getCatalogAppServices().getBooks();
+//    if (this.credentials == null || accountController == null) {
+//      LOG.error("Parameter(s) were unexpectedly null before creating Sync Manager. Abandoning attempt.");
+//      return;
+//    }
+//
+//    this.sync_manager =
+//      new ReaderSyncManager(
+//        this.feed_entry,
+//        this.credentials,
+//        Simplified.getCurrentAccount(),
+//        this,
+//        (location) -> {
+//          navigateTo(location);
+//          return Unit.INSTANCE;
+//        });
+//
+//    final Container c = Objects.requireNonNull(this.epub_container);
+//    final Package p = c.getDefaultPackage();
+//    this.sync_manager.setBookPackage(p);
+//
+//    this.sync_manager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
+//      //Sync Permitted or Successfully Enabled
+//      sync_manager.syncReadingLocation(getDeviceIDString(), current_loc, this);
+//      sync_manager.retryOnDiskBookmarksUpload(current_marks);
+//      sync_manager.syncBookmarks(current_marks, (syncedMarks) -> {
+//        synchronized (this) {
+//          this.bookmarks = new ArrayList<>(syncedMarks);
+//          //Update bookmarks on disk
+//          final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
+//
+//          try {
+//            final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
+//            entry.entrySetBookmarks(syncedMarks);
+//          } catch (IOException e) {
+//            LOG.error("Error writing annotation to app database: {}", syncedMarks);
+//          }
+//          return Unit.INSTANCE;
+//        }
+//      });
+//      return Unit.INSTANCE;
+//    });
   }
 
   @Override

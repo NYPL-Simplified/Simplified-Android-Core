@@ -5,7 +5,7 @@
 
   <style
       name="SimplifiedTheme_NoActionBar"
-      parent="android:Theme.Holo.Light.NoActionBar">
+      parent="Theme.AppCompat.Light.NoActionBar">
     <item name="android:windowActionBar">false</item>
     <item name="android:windowNoTitle">true</item>
 
@@ -18,7 +18,7 @@
 
   <style
     name="SimplifiedTheme_ActionBar"
-    parent="android:Theme.Holo.Light">
+    parent="Theme.AppCompat.Light">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
     <item name="android:icon">@drawable/ic_menu</item>
     <item name="button_foreground">@color/app_primary_color</item>

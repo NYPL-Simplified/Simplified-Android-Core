@@ -1,6 +1,5 @@
 package org.nypl.simplified.app;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.support.v7.app.ActionBar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -28,6 +28,7 @@ import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -54,6 +55,7 @@ import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -172,7 +174,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
    */
 
   private void setActionBarTitle() {
-    final ActionBar bar = NullCheck.notNull(this.getActionBar());
+    final ActionBar bar = NullCheck.notNull(this.getSupportActionBar());
     final String title = this.navigationDrawerGetActivityTitle(this.getResources());
     bar.setTitle(title);
     this.setTitle(title);
@@ -182,7 +184,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   public void onBackPressed() {
     LOG.debug("onBackPressed: {}", this);
 
-    final ActionBar bar = this.getActionBar();
+    final ActionBar bar = this.getSupportActionBar();
     final Resources resources = this.getResources();
     if (this.drawer.isDrawerOpen(GravityCompat.START)) {
       LOG.debug("drawer is open: closing drawer and finishing activity");
@@ -278,7 +280,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
      * Show or hide the three dashes next to the home button.
      */
 
-    final ActionBar bar = NullCheck.notNull(this.getActionBar(), "Action bar");
+    final ActionBar bar = NullCheck.notNull(this.getSupportActionBar(), "Action bar");
     if (this.navigationDrawerShouldShowIndicator()) {
       LOG.debug("setting navigation drawer indicator");
       if (android.os.Build.VERSION.SDK_INT < 21) {
@@ -403,7 +405,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     switch (item.getItemId()) {
       case android.R.id.home: {
         final DrawerLayout d = NullCheck.notNull(this.drawer);
-        final ActionBar bar = this.getActionBar();
+        final ActionBar bar = this.getSupportActionBar();
         if (d.isDrawerOpen(GravityCompat.START)) {
           d.closeDrawer(GravityCompat.START);
           bar.setHomeActionContentDescription(rr.getString(R.string.navigation_accessibility_drawer_show));
@@ -521,8 +523,15 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
                 .provider();
 
         text_view.setText(account.displayName());
-        SimplifiedIconViews.configureIconViewFromURI(
-            this.activity.getAssets(), icon_view, account.logo());
+
+        if (account.logo().isSome()) {
+          URI logoURI = ((Some<URI>) account.logo()).get();
+          icon_view.setVisibility(View.VISIBLE);
+          SimplifiedIconViews.configureIconViewFromURI(
+            this.activity.getAssets(), icon_view, logoURI);
+        } else {
+          icon_view.setVisibility(View.INVISIBLE);
+        }
 
       } catch (final ProfileNoneCurrentException e) {
         throw new IllegalStateException(e);
@@ -586,7 +595,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       drawer.closeDrawer(GravityCompat.START);
 
       UIThread.runOnUIThreadDelayed(() -> {
-        startActivityWithoutHistory(this.activity, new Bundle(), MainSettingsAccountsActivity.class);
+        startActivityWithoutHistory(this.activity, new Bundle(), MainSettingsActivity.class);
       }, 500L);
     }
   }
@@ -861,8 +870,14 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         final boolean checked) {
 
       text_view.setText(this.account.displayName());
-      SimplifiedIconViews.configureIconViewFromURI(
-          this.activity.getAssets(), icon_view, this.account.logo());
+
+      if (this.account.logo().isSome()) {
+        URI logoURI = ((Some<URI>) this.account.logo()).get();
+        SimplifiedIconViews.configureIconViewFromURI(this.activity.getAssets(), icon_view, logoURI);
+        icon_view.setVisibility(View.VISIBLE);
+      } else {
+        icon_view.setVisibility(View.INVISIBLE);
+      }
     }
 
     @Override

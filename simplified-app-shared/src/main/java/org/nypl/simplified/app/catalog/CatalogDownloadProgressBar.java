@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 

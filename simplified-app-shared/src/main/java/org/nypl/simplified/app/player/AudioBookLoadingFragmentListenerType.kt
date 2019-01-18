@@ -2,7 +2,6 @@ package org.nypl.simplified.app.player
 
 import org.nypl.audiobook.android.api.PlayerManifest
 import org.nypl.simplified.downloader.core.DownloaderType
-import java.lang.Exception
 
 /**
  * The interface that must be implemented by activities hosting a {@link AudioBookLoadingFragment}.

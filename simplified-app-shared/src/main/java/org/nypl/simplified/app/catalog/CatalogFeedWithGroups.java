@@ -16,10 +16,9 @@ import org.nypl.simplified.app.ApplicationColorScheme;
 import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.covers.BookCoverProviderType;
-import org.nypl.simplified.books.feeds.Feed;
 import org.nypl.simplified.books.feeds.FeedGroup;
 
-import static org.nypl.simplified.books.feeds.Feed.*;
+import static org.nypl.simplified.books.feeds.Feed.FeedWithGroups;
 
 /**
  * A view that displays a catalog feed that contains groups.

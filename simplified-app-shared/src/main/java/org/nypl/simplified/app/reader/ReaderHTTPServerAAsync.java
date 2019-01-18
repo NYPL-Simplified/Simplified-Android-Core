@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.reader;
 
 import android.content.res.AssetManager;
+
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
@@ -14,7 +15,7 @@ import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
-import org.nypl.simplified.books.core.LogUtilities;
+
 import org.nypl.simplified.http.core.HTTPRangeType;
 import org.nypl.simplified.http.core.HTTPRanges;
 import org.readium.sdk.android.Package;

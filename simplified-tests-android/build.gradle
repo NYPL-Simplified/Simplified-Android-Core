@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 27
@@ -16,6 +17,7 @@ android {
 
   testOptions {
     execution 'ANDROID_TEST_ORCHESTRATOR'
+    animationsDisabled = true
   }
 }
 
@@ -27,7 +29,9 @@ repositories {
 
 dependencies {
   implementation project(':simplified-tests')
+  implementation project(':simplified-splash')
 
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
   implementation 'org.slf4j:slf4j-api:1.7.25'
   implementation 'com.github.tony19:logback-android-core:1.1.1-6'
   implementation('com.github.tony19:logback-android-classic:1.1.1-6') {
@@ -35,8 +39,18 @@ dependencies {
     exclude group: 'com.google.android', module: 'android'
   }
 
-  implementation 'com.android.support.test:runner:1.0.1'
+  implementation "com.android.support:appcompat-v7:27.1.1"
+  implementation "com.android.support:support-v4:27.1.1"
+  implementation "com.android.support.test:rules:1.0.2"
+  implementation "com.android.support.test:runner:1.0.2"
+  implementation "com.android.support.test.espresso:espresso-core:3.0.2"
+  implementation "org.mockito:mockito-android:2.22.0"
 
-  androidTestImplementation 'com.android.support.test:runner:1.0.1'
-  androidTestUtil 'com.android.support.test:orchestrator:1.0.1'
+  androidTestImplementation "org.mockito:mockito-android:2.22.0"
+  androidTestImplementation "com.android.support:appcompat-v7:27.1.1"
+  androidTestImplementation "com.android.support:support-v4:27.1.1"
+  androidTestImplementation "com.android.support.test:rules:1.0.2"
+  androidTestImplementation "com.android.support.test:runner:1.0.2"
+  androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
+  androidTestUtil "com.android.support.test:orchestrator:1.0.2"
 }

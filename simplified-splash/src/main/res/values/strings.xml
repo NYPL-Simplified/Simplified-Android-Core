@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- EULA strings -->
+  <string name="eula_disagree">Disagree</string>
+  <string name="eula_agree">Agree</string>
+</resources>

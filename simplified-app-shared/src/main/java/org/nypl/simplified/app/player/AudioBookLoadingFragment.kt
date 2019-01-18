@@ -16,10 +16,9 @@ import org.nypl.audiobook.android.api.PlayerResult
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.core.AccountCredentials
-import org.nypl.simplified.books.core.AccountCredentialsHTTP
-import org.nypl.simplified.books.core.AccountGetCachedCredentialsListenerType
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.accounts.AccountAuthenticatedHTTP
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
+import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.files.FileUtilities
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.lang.IllegalStateException
 import java.net.URI
 
 /**
@@ -56,7 +54,6 @@ class AudioBookLoadingFragment : Fragment() {
   private val log = LoggerFactory.getLogger(AudioBookLoadingFragment::class.java)
   private lateinit var listener: AudioBookLoadingFragmentListenerType
   private lateinit var progress: ProgressBar
-  private lateinit var services: SimplifiedCatalogAppServicesType
   private lateinit var playerParameters: AudioBookPlayerParameters
   private lateinit var loadingParameters: AudioBookLoadingFragmentParameters
   private var download: DownloadType? = null
@@ -93,7 +90,6 @@ class AudioBookLoadingFragment : Fragment() {
   override fun onActivityCreated(state: Bundle?) {
     super.onActivityCreated(state)
 
-    this.services = Simplified.getCatalogAppServices()!!
     this.listener = this.activity as AudioBookLoadingFragmentListenerType
     this.playerParameters = this.listener.onLoadingFragmentWantsAudioBookParameters()
 
@@ -104,27 +100,28 @@ class AudioBookLoadingFragment : Fragment() {
 
     val fragment = this
     if (this.listener.onLoadingFragmentIsNetworkConnectivityAvailable()) {
-      this.services.books.accountGetCachedLoginDetails(
-        object : AccountGetCachedCredentialsListenerType {
-          override fun onAccountIsNotLoggedIn() {
-            fragment.listener.onLoadingFragmentLoadingFinished(
-              this@AudioBookLoadingFragment.parseManifest(fragment.playerParameters.manifestFile))
-          }
+      val credentialsOpt =
+        Simplified.getProfilesController()
+          .profileAccountCurrent()
+          .credentials()
 
-          override fun onAccountIsLoggedIn(credentials: AccountCredentials) {
-            fragment.tryFetchNewManifest(
-              credentials,
-              fragment.playerParameters.manifestURI,
-              fragment.listener)
-          }
-        })
+      if (credentialsOpt is Some<AccountAuthenticationCredentials>) {
+        val credentials = credentialsOpt.get()
+        fragment.tryFetchNewManifest(
+          credentials,
+          fragment.playerParameters.manifestURI,
+          fragment.listener)
+      } else {
+        fragment.listener.onLoadingFragmentLoadingFinished(
+          this@AudioBookLoadingFragment.parseManifest(fragment.playerParameters.manifestFile))
+      }
     } else {
       this.parseAndFinishManifest()
     }
   }
 
   private fun tryFetchNewManifest(
-    credentials: AccountCredentials,
+    credentials: AccountAuthenticationCredentials,
     manifestURI: URI,
     listener: AudioBookLoadingFragmentListenerType) {
 
@@ -134,7 +131,7 @@ class AudioBookLoadingFragment : Fragment() {
     this.download =
       downloader.download(
         manifestURI,
-        Option.some(AccountCredentialsHTTP.toHttpAuth(credentials)),
+        Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)),
         object : DownloadListenerType {
           override fun onDownloadStarted(
             download: DownloadType,
@@ -183,14 +180,14 @@ class AudioBookLoadingFragment : Fragment() {
      * Update the manifest in the book database.
      */
 
-    val entry =
-      this.services.books.bookGetDatabase().databaseOpenExistingEntry(this.playerParameters.bookID)
+    val handle =
+      Simplified.getProfilesController()
+        .profileAccountCurrent()
+        .bookDatabase()
+        .entry(this.playerParameters.bookID)
+        .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
-    val handleOpt =
-      entry.entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
-
-    if (handleOpt is Some<BookDatabaseEntryFormatHandleAudioBook>) {
-      val handle = handleOpt.get()
+    if (handle != null) {
       if (handle.formatDefinition.supportedContentTypes().contains(contentType)) {
         handle.copyInManifestAndURI(file, this.playerParameters.manifestURI)
         FileUtilities.fileDelete(file)

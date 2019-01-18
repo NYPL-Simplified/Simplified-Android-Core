@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.reader;
 
 import android.support.annotation.Nullable;
+
 import org.nypl.simplified.books.core.BookmarkAnnotation;
 
 public interface ReaderTOCFragmentSelectionListenerType {

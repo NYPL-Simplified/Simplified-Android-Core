@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.nypl.simplified.app.Simplified.WantActionBar.WANT_NO_ACTION_BAR;
-
 /**
  * An activity that allows users to pick from a list of profiles, or to create a new profile.
  */

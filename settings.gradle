@@ -26,6 +26,7 @@ include ':simplified-opds-core'
 include ':simplified-prefs'
 include ':simplified-rfc3339-core'
 include ':simplified-stack'
+include ':simplified-splash'
 include ':simplified-tenprint'
 include ':simplified-tests'
 include ':simplified-tests-android'
@@ -58,6 +59,7 @@ project(':simplified-opds-core').projectDir = "$rootDir/simplified-opds-core" as
 project(':simplified-prefs').projectDir = "$rootDir/simplified-prefs" as File
 project(':simplified-rfc3339-core').projectDir = "$rootDir/simplified-rfc3339-core" as File
 project(':simplified-stack').projectDir = "$rootDir/simplified-stack" as File
+project(':simplified-splash').projectDir = "$rootDir/simplified-splash" as File
 project(':simplified-tenprint').projectDir = "$rootDir/simplified-tenprint" as File
 project(':simplified-tests').projectDir = "$rootDir/simplified-tests" as File
 project(':simplified-tests-android').projectDir = "$rootDir/simplified-tests-android" as File

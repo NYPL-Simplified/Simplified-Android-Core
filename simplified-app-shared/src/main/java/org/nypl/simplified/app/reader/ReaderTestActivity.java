@@ -2,8 +2,9 @@ package org.nypl.simplified.app.reader;
 
 import android.app.Activity;
 import android.os.Bundle;
+
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.books.core.LogUtilities;
+
 import org.nypl.simplified.books.core.BookID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

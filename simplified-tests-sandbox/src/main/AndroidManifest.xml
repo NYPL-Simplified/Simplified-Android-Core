@@ -14,7 +14,8 @@
     android:icon="@drawable/sandbox">
 
     <activity
-      android:name="org.nypl.simplified.tests.sandbox.BookCellViewsActivity"
+      android:name="org.nypl.simplified.tests.sandbox.TestSplashActivity"
+      android:theme="@style/Theme.AppCompat.Light"
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>

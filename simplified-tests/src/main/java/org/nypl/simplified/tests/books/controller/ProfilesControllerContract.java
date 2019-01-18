@@ -107,8 +107,8 @@ public abstract class ProfilesControllerContract {
     return AccountProvider.builder()
       .setId(URI.create(provider_id))
       .setDisplayName("Fake Library")
-      .setSubtitle("Imaginary books")
-      .setLogo(URI.create("http://example.com/logo.png"))
+      .setSubtitle(Option.some("Imaginary books"))
+      .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
       .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
       .setSupportEmail("postmaster@example.com")
       .build();

@@ -3,15 +3,13 @@ package org.nypl.simplified.volley;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.io7m.jfunctional.Some;
 
 import net.iharder.Base64;
 
 import org.json.JSONObject;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
-import org.nypl.simplified.books.core.AccountAuthToken;
-import org.nypl.simplified.books.core.AccountBarcode;
-import org.nypl.simplified.books.core.AccountPIN;
+import org.nypl.simplified.books.accounts.AccountBarcode;
+import org.nypl.simplified.books.accounts.AccountPIN;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,28 +139,22 @@ public class NYPLJsonObjectRequest extends JsonObjectRequest {
 
     if (this.credentials != null) {
 
-      if (this.credentials.getAuthToken().isSome()) {
+//      if (this.credentials.getAuthToken().isSome()) {
+//        final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
+//        params.put("Authorization", "Bearer " + token);
+//        throw new UnimplementedCodeException();
+//      }
 
-        final AccountAuthToken token = ((Some<AccountAuthToken>) this.credentials.getAuthToken()).get();
-        params.put("Authorization", "Bearer " + token);
+      final AccountBarcode barcode = this.credentials.barcode();
+      final AccountPIN pin = this.credentials.pin();
 
-      } else {
-
-        final AccountBarcode barcode = this.credentials.getBarcode();
-        final AccountPIN pin = this.credentials.getPin();
-
-        final String text = barcode.toString() + ":" + pin.toString();
-        final String encoded =
-          Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
-        params.put("Authorization", "Basic " + encoded);
-      }
-
+      final String text = barcode.toString() + ":" + pin.toString();
+      final String encoded = Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+      params.put("Authorization", "Basic " + encoded);
     } else {
       final String text = this.username + ":" + this.password;
-      final String encoded =
-        Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
+      final String encoded = Base64.encodeBytes(text.getBytes(Charset.forName("US-ASCII")));
       params.put("Authorization", "Basic " + encoded);
-
     }
 
     if (this.parameters != null) {

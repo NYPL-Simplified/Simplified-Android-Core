@@ -7,7 +7,6 @@ import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.OptionVisitorType;
-import com.io7m.jfunctional.PartialFunctionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -20,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Objects;
 
 /**
  * <p>Utility functions for deserializing elements from JSON.</p>
@@ -43,9 +43,9 @@ public final class JSONParserUtilities {
    */
 
   public static ObjectNode checkObject(
-      final @Nullable String key,
-      final JsonNode n)
-      throws JSONParseException {
+    final @Nullable String key,
+    final JsonNode n)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
 
@@ -94,9 +94,9 @@ public final class JSONParserUtilities {
    */
 
   public static ArrayNode checkArray(
-      final @Nullable String key,
-      final JsonNode n)
-      throws JSONParseException {
+    final @Nullable String key,
+    final JsonNode n)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
 
@@ -143,9 +143,9 @@ public final class JSONParserUtilities {
    */
 
   public static ArrayNode getArray(
-      final ObjectNode s,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(s);
     NullCheck.notNull(key);
@@ -186,9 +186,9 @@ public final class JSONParserUtilities {
    */
 
   public static boolean getBoolean(
-      final ObjectNode o,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode o,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(o);
     NullCheck.notNull(key);
@@ -229,9 +229,9 @@ public final class JSONParserUtilities {
    */
 
   public static int getInteger(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -272,9 +272,9 @@ public final class JSONParserUtilities {
    */
 
   public static double getDouble(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -315,9 +315,9 @@ public final class JSONParserUtilities {
    */
 
   public static JsonNode getNode(
-      final ObjectNode s,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(s);
     NullCheck.notNull(key);
@@ -343,9 +343,9 @@ public final class JSONParserUtilities {
    */
 
   public static ObjectNode getObject(
-      final ObjectNode s,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(s);
     NullCheck.notNull(key);
@@ -362,9 +362,9 @@ public final class JSONParserUtilities {
    */
 
   public static OptionType<ObjectNode> getObjectOptional(
-      final ObjectNode s,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(s);
     NullCheck.notNull(key);
@@ -383,9 +383,9 @@ public final class JSONParserUtilities {
    */
 
   public static String getString(
-      final ObjectNode s,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(s);
     NullCheck.notNull(key);
@@ -426,9 +426,9 @@ public final class JSONParserUtilities {
    */
 
   public static OptionType<Integer> getIntegerOptional(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -442,14 +442,44 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param n   A node
+   * @return A string value from key {@code key}, if the key exists, or {@code default_value} otherwise.
+   * @throws JSONParseException On type errors
+   */
+
+  public static int getIntegerDefault(
+    final ObjectNode n,
+    final String key,
+    final int default_value)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+
+    return getIntegerOptional(n, key).accept(
+      new OptionVisitorType<Integer, Integer>() {
+        @Override
+        public Integer none(final None<Integer> none) {
+          return default_value;
+        }
+
+        @Override
+        public Integer some(final Some<Integer> some) {
+          return some.get();
+        }
+      }).intValue();
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
    * @return An double value from key {@code key}, if the key exists
    * @throws JSONParseException On type errors
    */
 
   public static OptionType<Double> getDoubleOptional(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -468,26 +498,26 @@ public final class JSONParserUtilities {
    */
 
   public static double getDoubleDefault(
-      final ObjectNode n,
-      final String key,
-      final double default_value)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key,
+    final double default_value)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
 
     return getDoubleOptional(n, key).accept(
-        new OptionVisitorType<Double, Double>() {
-          @Override
-          public Double none(final None<Double> none) {
-            return default_value;
-          }
+      new OptionVisitorType<Double, Double>() {
+        @Override
+        public Double none(final None<Double> none) {
+          return default_value;
+        }
 
-          @Override
-          public Double some(final Some<Double> some) {
-            return some.get();
-          }
-        });
+        @Override
+        public Double some(final Some<Double> some) {
+          return some.get();
+        }
+      });
   }
 
   /**
@@ -498,14 +528,17 @@ public final class JSONParserUtilities {
    */
 
   public static OptionType<String> getStringOptional(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
 
     if (n.has(key)) {
+      if (n.get(key).isNull()) {
+        return Option.none();
+      }
       return Option.some(JSONParserUtilities.getString(n, key));
     }
     return Option.none();
@@ -519,26 +552,26 @@ public final class JSONParserUtilities {
    */
 
   public static String getStringDefault(
-      final ObjectNode n,
-      final String key,
-      final String default_value)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key,
+    final String default_value)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
 
     return getStringOptional(n, key).accept(
-        new OptionVisitorType<String, String>() {
-          @Override
-          public String none(final None<String> none) {
-            return default_value;
-          }
+      new OptionVisitorType<String, String>() {
+        @Override
+        public String none(final None<String> none) {
+          return default_value;
+        }
 
-          @Override
-          public String some(final Some<String> some) {
-            return some.get();
-          }
-        });
+        @Override
+        public String some(final Some<String> some) {
+          return some.get();
+        }
+      });
   }
 
   /**
@@ -549,19 +582,19 @@ public final class JSONParserUtilities {
    */
 
   public static Calendar getTimestamp(
-      final ObjectNode s,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode s,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(s);
     NullCheck.notNull(key);
 
     try {
       return RFC3339Formatter.parseRFC3339Date(
-          JSONParserUtilities.getString(s, key));
+        JSONParserUtilities.getString(s, key));
     } catch (final ParseException e) {
       final String m = NullCheck.notNull(
-          String.format("Could not parse RFC3999 date for key '%s'", key));
+        String.format("Could not parse RFC3999 date for key '%s'", key));
       throw new JSONParseException(m, e);
     }
   }
@@ -574,9 +607,9 @@ public final class JSONParserUtilities {
    */
 
   public static OptionType<Calendar> getTimestampOptional(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -595,25 +628,21 @@ public final class JSONParserUtilities {
    */
 
   public static OptionType<URI> getURIOptional(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
 
     return JSONParserUtilities.getStringOptional(n, key).mapPartial(
-        new PartialFunctionType<String, URI, JSONParseException>() {
-          @Override
-          public URI call(final String x)
-              throws JSONParseException {
-            try {
-              return new URI(x);
-            } catch (final URISyntaxException e) {
-              throw new JSONParseException(e);
-            }
-          }
-        });
+      x -> {
+        try {
+          return new URI(x);
+        } catch (final URISyntaxException e) {
+          throw new JSONParseException(e);
+        }
+      });
   }
 
   /**
@@ -624,9 +653,9 @@ public final class JSONParserUtilities {
    */
 
   public static URI getURI(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -641,6 +670,36 @@ public final class JSONParserUtilities {
   /**
    * @param key A key assumed to be holding a value
    * @param n   A node
+   * @return A URI value from key {@code key}
+   * @throws JSONParseException On type errors
+   */
+
+  public static URI getURIDefault(
+    final ObjectNode n,
+    final String key,
+    final URI default_value)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+    NullCheck.notNull(key);
+    Objects.requireNonNull(default_value, "Default");
+
+    return getURIOptional(n, key).accept(new OptionVisitorType<URI, URI>() {
+      @Override
+      public URI none(None<URI> n) {
+        return default_value;
+      }
+
+      @Override
+      public URI some(Some<URI> s) {
+        return s.get();
+      }
+    });
+  }
+
+  /**
+   * @param key A key assumed to be holding a value
+   * @param n   A node
    * @param v   A default value
    * @return A boolean from key {@code key}, or {@code v} if the key does not
    * exist
@@ -648,10 +707,10 @@ public final class JSONParserUtilities {
    */
 
   public static boolean getBooleanDefault(
-      final ObjectNode n,
-      final String key,
-      final boolean v)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key,
+    final boolean v)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -670,9 +729,9 @@ public final class JSONParserUtilities {
    */
 
   public static OptionType<BigInteger> getBigIntegerOptional(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);
@@ -691,9 +750,9 @@ public final class JSONParserUtilities {
    */
 
   public static BigInteger getBigInteger(
-      final ObjectNode n,
-      final String key)
-      throws JSONParseException {
+    final ObjectNode n,
+    final String key)
+    throws JSONParseException {
 
     NullCheck.notNull(n);
     NullCheck.notNull(key);

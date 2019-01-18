@@ -1,9 +1,9 @@
 [
   {
-    "id" : "https://instantclassics.librarysimplified.org",
+    "id_uuid" : "https://instantclassics.librarysimplified.org",
     "name" : "SimplyE Collection",
     "subtitle" : "E-books free to download and read without a library card",
-    "logo" : "LibraryLogoMagic",
+    "logo" : "data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=",
     "needsAuth" : false,
     "supportsSimplyESync" : false,
     "supportsBarcodeScanner" : false,

@@ -4,8 +4,11 @@
   <!-- The configurable application name -->
   <string name="feature_app_name">Simply\uFEFFE</string>
 
-  <!-- The configurable splash screen image -->
+  <!-- The configurable splash_image screen image -->
   <drawable name="feature_app_splash">@drawable/simplified_splash</drawable>
+
+  <!-- If true, the application presents selectable profiles. -->
+  <bool name="feature_profiles_enabled">false</bool>
 
   <color name="app_primary_color">#000000</color>
 
@@ -62,14 +65,12 @@
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>
+
   <!-- The default Adobe vendor ID -->
   <string name="feature_adobe_vendor_id">NYPL</string>
 
   <!-- qa or prod  - currently used only in card creator -->
   <string name="feature_environment">qa</string>
-
-  <!-- If true, the application presents selectable profiles. -->
-  <bool name="feature_profiles_enabled">false</bool>
 
   <!-- authentication providers -->
   <!-- default authentication provider -->

@@ -20,20 +20,10 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
-import org.nypl.drm.core.AdobeDeviceID;
-import org.nypl.drm.core.AdobeUserID;
-import org.nypl.drm.core.AdobeVendorID;
 import org.nypl.simplified.app.utilities.UIThread;
-import org.nypl.simplified.books.core.AccountAdobeToken;
-import org.nypl.simplified.books.core.AccountAuthProvider;
-import org.nypl.simplified.books.core.AccountAuthToken;
-import org.nypl.simplified.books.core.AccountBarcode;
 import org.nypl.simplified.books.core.AccountCredentials;
 import org.nypl.simplified.books.core.AccountLoginListenerType;
-import org.nypl.simplified.books.core.AccountPIN;
-import org.nypl.simplified.books.core.AccountPatron;
 import org.nypl.simplified.books.core.BookID;
-import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.http.core.HTTPProblemReport;
 import org.slf4j.Logger;
@@ -53,10 +43,6 @@ public final class CleverLoginActivity extends NavigationDrawerActivity implemen
   private static final Logger LOG = LoggerFactory.getLogger(CleverLoginActivity.class);
 
   private WebView web_view;
-
-  private
-  @Nullable
-  LoginListenerType listener;
 
   /**
    * Construct an activity.
@@ -216,28 +202,28 @@ public final class CleverLoginActivity extends NavigationDrawerActivity implemen
           }
 
           if (error == null) {
-            final SimplifiedCatalogAppServicesType app =
-              Simplified.getCatalogAppServices();
-
-
-            final Resources rr = NullCheck.notNull(CleverLoginActivity.this.getResources());
-            final OptionType<AdobeVendorID> adobe_vendor = Option.some(
-              new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
-
-            final BooksType books = app.getBooks();
-
-            final AccountBarcode barcode = new AccountBarcode("");
-            final AccountPIN pin = new AccountPIN("");
-            final AccountAuthToken auth_token = new AccountAuthToken(NullCheck.notNull(access_token));
-            final AccountPatron patron = new AccountPatron(patron_info);
-            final AccountAdobeToken adobe_token = new AccountAdobeToken("");
-            final AccountAuthProvider auth_provider = new AccountAuthProvider("Clever");
-
-            final AccountCredentials creds =
-              new AccountCredentials(adobe_vendor, barcode, pin,  Option.some(auth_provider), Option.some(auth_token), Option.some(adobe_token), Option.some(patron));
-            creds.setAdobeDeviceID(Option.<AdobeDeviceID>none());
-            creds.setAdobeUserID(Option.<AdobeUserID>none());
-            books.accountLogin(creds, CleverLoginActivity.this);
+//            final SimplifiedCatalogAppServicesType app =
+//              Simplified.getCatalogAppServices();
+//
+//
+//            final Resources rr = NullCheck.notNull(CleverLoginActivity.this.getResources());
+//            final OptionType<AdobeVendorID> adobe_vendor = Option.some(
+//              new AdobeVendorID(rr.getString(R.string.feature_adobe_vendor_id)));
+//
+//            final BooksType books = app.getBooks();
+//
+//            final AccountBarcode barcode = new AccountBarcode("");
+//            final AccountPIN pin = new AccountPIN("");
+//            final AccountAuthToken auth_token = new AccountAuthToken(NullCheck.notNull(access_token));
+//            final AccountPatron patron = new AccountPatron(patron_info);
+//            final AccountAdobeToken adobe_token = new AccountAdobeToken("");
+//            final AccountAuthProvider auth_provider = new AccountAuthProvider("Clever");
+//
+//            final AccountCredentials creds =
+//              new AccountCredentials(adobe_vendor, barcode, pin,  Option.some(auth_provider), Option.some(auth_token), Option.some(adobe_token), Option.some(patron));
+//            creds.setAdobeDeviceID(Option.<AdobeDeviceID>none());
+//            creds.setAdobeUserID(Option.<AdobeUserID>none());
+//            books.accountLogin(creds, CleverLoginActivity.this);
 
 
           } else {
@@ -285,14 +271,12 @@ public final class CleverLoginActivity extends NavigationDrawerActivity implemen
   /**
    * Set the listener that will be used to receive the results of the login
    * attempt.
-   *
-   * @param in_listener The listener
    */
 
-  public void setLoginListener(
-    final LoginListenerType in_listener) {
-    this.listener = NullCheck.notNull(in_listener);
-  }
+//  public void setLoginListener(
+//    final LoginListenerType in_listener) {
+//    this.listener = NullCheck.notNull(in_listener);
+//  }
 
   @Override
   public void onAccountSyncAuthenticationFailure(final String message) {
@@ -395,15 +379,14 @@ public final class CleverLoginActivity extends NavigationDrawerActivity implemen
 
     LogUtilities.errorWithOptionalException(CleverLoginActivity.LOG, s, error);
 
-
-    final LoginListenerType ls = this.listener;
-    if (ls != null) {
-      try {
-        ls.onLoginFailure(error, message);
-      } catch (final Throwable e) {
-        CleverLoginActivity.LOG.debug("{}", e.getMessage(), e);
-      }
-    }
+//    final LoginListenerType ls = this.listener;
+//    if (ls != null) {
+//      try {
+//        ls.onLoginFailure(error, message);
+//      } catch (final Throwable e) {
+//        CleverLoginActivity.LOG.debug("{}", e.getMessage(), e);
+//      }
+//    }
   }
 
   /**

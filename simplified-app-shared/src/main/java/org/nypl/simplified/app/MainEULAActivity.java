@@ -47,8 +47,7 @@ public final class MainEULAActivity extends Activity
 
   @Override protected void onCreate(final Bundle state)
   {
-    final String colorName = Simplified.getMainColorName();
-    setTheme(ThemeMatcher.Companion.actionBarStyle(colorName));
+    setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithActionBar());
 
     super.onCreate(state);
 

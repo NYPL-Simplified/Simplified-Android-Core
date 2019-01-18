@@ -6,6 +6,7 @@ import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 
 import java.util.List;
+import java.util.UUID;
 
 public final class EventAssertions {
 

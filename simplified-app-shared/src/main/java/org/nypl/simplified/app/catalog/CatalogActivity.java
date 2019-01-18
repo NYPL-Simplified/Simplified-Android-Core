@@ -12,7 +12,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.nypl.simplified.app.NavigationDrawerActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.utilities.FadeUtilities;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

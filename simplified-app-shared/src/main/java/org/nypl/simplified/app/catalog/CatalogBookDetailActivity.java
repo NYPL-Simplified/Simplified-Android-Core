@@ -138,6 +138,8 @@ public final class CatalogBookDetailActivity extends CatalogActivity {
         Simplified.getScreenSizeInformation(),
         Simplified.getNetworkConnectivity(),
         Simplified.getMainColorScheme(),
+        Simplified.getBackgroundTaskExecutor(),
+        Simplified.getDocumentStore(),
         entry);
 
     this.view = detailView;

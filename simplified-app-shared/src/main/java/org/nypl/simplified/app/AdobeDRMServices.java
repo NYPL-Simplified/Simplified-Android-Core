@@ -7,6 +7,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Build;
 import android.provider.Settings;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.nypl.drm.core.AdobeAdeptConnectorFactory;
 import org.nypl.drm.core.AdobeAdeptConnectorFactoryType;
 import org.nypl.drm.core.AdobeAdeptConnectorParameters;
@@ -31,9 +33,7 @@ import org.nypl.drm.core.AdobeAdeptResourceProvider;
 import org.nypl.drm.core.AdobeAdeptResourceProviderType;
 import org.nypl.drm.core.DRMException;
 import org.nypl.drm.core.DRMUnsupportedException;
-import org.nypl.simplified.books.core.LogUtilities;
 import org.nypl.simplified.json.core.JSONParserUtilities;
-import org.nypl.simplified.multilibrary.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,37 +135,24 @@ public final class AdobeDRMServices
 
     final Logger log = AdobeDRMServices.LOG;
 
-    final String device_name =
-      String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
+    final String device_name = String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
     final String device_serial = AdobeDRMServices.getDeviceSerial();
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-    final Account account = Simplified.getCurrentAccount();
-
-    File base_accounts_dir = context.getFilesDir();
-    if (account.getId() > 0)
-    {
-      base_accounts_dir =
-        new File(context.getFilesDir(), account.getPathComponent());
+    // XXX: Reimplement using new account/profile system!
+    if (Math.random() > 0.0) {
+      throw new DRMUnsupportedException("Not available!", new UnimplementedCodeException());
     }
 
-    final File base_dir = Simplified.getDiskDataDir(context);
-
-    File base_library_dir = base_dir;
-    if (account.getId() > 0)
-    {
-      base_library_dir = new File(base_dir, account.getPathComponent());
-    }
-
-    final File app_storage = base_accounts_dir;
-    final File xml_storage = base_accounts_dir;
-
+    final File app_storage =
+      new File("NOT VALID");
+    final File xml_storage =
+      new File("NOT VALID");
     final File book_storage =
-      new File(base_library_dir, "adobe-books-tmp");
+      new File(new File("NOT VALID"), "adobe-books-tmp");
     final File temp_storage =
-      new File(base_library_dir, "adobe-tmp");
-
+      new File(new File("NOT VALID"), "adobe-tmp");
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);
@@ -242,38 +229,24 @@ public final class AdobeDRMServices
 
     final Logger log = AdobeDRMServices.LOG;
 
-    final String device_name =
-      String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
+    final String device_name = String.format("%s/%s", Build.MANUFACTURER, Build.MODEL);
     final String device_serial = AdobeDRMServices.getDeviceSerial();
     log.debug("adobe device name:            {}", device_name);
     log.debug("adobe device serial:          {}", device_serial);
 
-
-    final Account account = Simplified.getCurrentAccount();
-
-    File base_accounts_dir = context.getFilesDir();
-    if (account.getId() > 0)
-    {
-      base_accounts_dir =
-        new File(context.getFilesDir(), account.getPathComponent());
+    // XXX: Reimplement using new account/profile system!
+    if (Math.random() > 0.0) {
+      throw new DRMUnsupportedException("Not available!", new UnimplementedCodeException());
     }
 
-    final File base_dir = Simplified.getDiskDataDir(context);
-
-    File base_library_dir = base_dir;
-    if (account.getId() > 0)
-    {
-      base_library_dir = new File(base_dir, account.getPathComponent());
-    }
-
-
-    final File app_storage = base_accounts_dir;
-    final File xml_storage = base_accounts_dir;
-
+    final File app_storage =
+      new File("NOT VALID");
+    final File xml_storage =
+      new File("NOT VALID");
     final File book_storage =
-      new File(base_library_dir, "adobe-books-tmp");
+      new File(new File("NOT VALID"), "adobe-books-tmp");
     final File temp_storage =
-      new File(base_library_dir, "adobe-tmp");
+      new File(new File("NOT VALID"), "adobe-tmp");
 
     log.debug("adobe app storage:            {}", app_storage);
     log.debug("adobe xml storage:            {}", xml_storage);

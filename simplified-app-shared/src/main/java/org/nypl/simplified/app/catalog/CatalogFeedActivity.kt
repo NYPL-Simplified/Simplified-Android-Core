@@ -1,11 +1,9 @@
 package org.nypl.simplified.app.catalog
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.Gravity
 import android.view.Menu
@@ -38,8 +36,6 @@ import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.SimplifiedActivity
-import org.nypl.simplified.app.ThemeMatcher
 import org.nypl.simplified.app.login.LoginActivity
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.assertions.Assertions
@@ -353,36 +349,36 @@ abstract class CatalogFeedActivity : CatalogActivity() {
    */
 
   private fun retrieveArguments(): CatalogFeedArgumentsType {
-    val libTitle = this.resources.getString(R.string.feature_app_name)
-    val libraryID = Simplified.getCurrentAccount().getId()
-    val upStack = this.upStack
-    if (upStack.isEmpty && libraryID == 2 && this.javaClass == MainCatalogActivity::class.java) {
-      if (Simplified.getSharedPrefs().contains("age13") === false) {
-        //Show Age Verification and load <13 to be safe
-        this.showAgeCheckAlert()
-      }
-      val over13 = Simplified.getSharedPrefs().getBoolean("age13")
-      val ageURI: URI
-      try {
-        if (over13) {
-          ageURI = URI(Simplified.getCurrentAccount().getCatalogUrl13AndOver())
-        } else {
-          ageURI = URI(Simplified.getCurrentAccount().getCatalogUrlUnder13())
-        }
-        LOG.debug("Hardcoding SimplyE Collection URI: {}", ageURI)
-        return CatalogFeedArgumentsRemote(
-          false,
-          ImmutableStack.empty(),
-          libTitle,
-          ageURI,
-          false
-        )
-      } catch (e: Exception) {
-        LOG.error(
-          "error constructing SimplyE collection uri: {}", e.message, e)
-      }
-
-    }
+//    val libTitle = this.resources.getString(R.string.feature_app_name)
+//    val libraryID = Simplified.getCurrentAccount().getId()
+//    val upStack = this.upStack
+//
+//    if (upStack.isEmpty && libraryID == 2 && this.javaClass == MainCatalogActivity::class.java) {
+//      if (Simplified.getSharedPrefs().contains("age13") === false) {
+//        //Show Age Verification and load <13 to be safe
+//        this.showAgeCheckAlert()
+//      }
+//      val over13 = Simplified.getSharedPrefs().getBoolean("age13")
+//      val ageURI: URI
+//      try {
+//        if (over13) {
+//          ageURI = URI(Simplified.getCurrentAccount().getCatalogUrl13AndOver())
+//        } else {
+//          ageURI = URI(Simplified.getCurrentAccount().getCatalogUrlUnder13())
+//        }
+//        LOG.debug("Hardcoding SimplyE Collection URI: {}", ageURI)
+//        return CatalogFeedArgumentsRemote(
+//          false,
+//          ImmutableStack.empty(),
+//          libTitle,
+//          ageURI,
+//          false
+//        )
+//      } catch (e: Exception) {
+//        LOG.error(
+//          "error constructing SimplyE collection uri: {}", e.message, e)
+//      }
+//    }
 
     /*
      * Attempt to fetch arguments.
@@ -402,15 +398,12 @@ abstract class CatalogFeedActivity : CatalogActivity() {
      * initial one started for the app), synthesize some.
      */
 
-    val app = Simplified.getCatalogAppServices()
-    val books = app.getBooks()
-    val booksConfig = books.booksGetConfiguration()
-
     val inDrawerOpen = true
     val empty = ImmutableStack.empty<CatalogFeedArgumentsType>()
     val inTitle = this.resources.getString(R.string.feature_app_name)
-    val inUri = booksConfig.getCurrentRootFeedURI()
 
+    /// XXX: Replace with accounts/profiles
+    val inUri = URI.create("localhost")
     return CatalogFeedArgumentsRemote(inDrawerOpen, empty, inTitle, inUri, false)
   }
 
@@ -901,44 +894,44 @@ abstract class CatalogFeedActivity : CatalogActivity() {
   }
 
   fun showAgeCheckAlert() {
-    val builder = AlertDialog.Builder(this@CatalogFeedActivity)
-
-    builder.setTitle(R.string.age_verification_title)
-    builder.setMessage(R.string.age_verification_question)
-
-    // Under 13
-    builder.setNeutralButton(R.string.age_verification_13_younger) { dialog, which ->
-      Simplified.getSharedPrefs().putBoolean("age13", false)
-      this@CatalogFeedActivity.reloadCatalogActivity(true)
-    }
-
-    // 13 or Over
-    builder.setPositiveButton(R.string.age_verification_13_older) { dialog, which ->
-      Simplified.getSharedPrefs().putBoolean("age13", true)
-      this@CatalogFeedActivity.reloadCatalogActivity(false)
-    }
-
-    if (!this.isFinishing) {
-      val alert = builder.show()
-      val resID = ThemeMatcher.color(Simplified.getCurrentAccount().getMainColor())
-      val mainTextColor = ContextCompat.getColor(this, resID)
-      alert.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(mainTextColor)
-      alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor)
-    }
+//    val builder = AlertDialog.Builder(this@CatalogFeedActivity)
+//
+//    builder.setTitle(R.string.age_verification_title)
+//    builder.setMessage(R.string.age_verification_question)
+//
+//    // Under 13
+//    builder.setNeutralButton(R.string.age_verification_13_younger) { dialog, which ->
+//      Simplified.getSharedPrefs().putBoolean("age13", false)
+//      this@CatalogFeedActivity.reloadCatalogActivity(true)
+//    }
+//
+//    // 13 or Over
+//    builder.setPositiveButton(R.string.age_verification_13_older) { dialog, which ->
+//      Simplified.getSharedPrefs().putBoolean("age13", true)
+//      this@CatalogFeedActivity.reloadCatalogActivity(false)
+//    }
+//
+//    if (!this.isFinishing) {
+//      val alert = builder.show()
+//      val resID = ThemeMatcher.color(Simplified.getCurrentAccount().getMainColor())
+//      val mainTextColor = ContextCompat.getColor(this, resID)
+//      alert.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(mainTextColor)
+//      alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mainTextColor)
+//    }
   }
 
   private fun reloadCatalogActivity(deleteBooks: Boolean) {
-    Simplified.getCatalogAppServices().reloadCatalog(deleteBooks, Simplified.getCurrentAccount())
-    val i = Intent(this@CatalogFeedActivity, MainCatalogActivity::class.java)
-    i.flags = Intent.FLAG_ACTIVITY_NO_ANIMATION
-    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    val b = Bundle()
-    SimplifiedActivity.setActivityArguments(b, false)
-    i.putExtras(b)
-    this.startActivity(i)
-    this.overridePendingTransition(0, 0)
+//    Simplified.getCatalogAppServices().reloadCatalog(deleteBooks, Simplified.getCurrentAccount())
+//    val i = Intent(this@CatalogFeedActivity, MainCatalogActivity::class.java)
+//    i.flags = Intent.FLAG_ACTIVITY_NO_ANIMATION
+//    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+//    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//    val b = Bundle()
+//    SimplifiedActivity.setActivityArguments(b, false)
+//    i.putExtras(b)
+//    this.startActivity(i)
+//    this.overridePendingTransition(0, 0)
   }
 
   /**

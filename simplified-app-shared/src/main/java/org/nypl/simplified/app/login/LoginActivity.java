@@ -15,8 +15,6 @@ import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 
-import static org.nypl.simplified.app.Simplified.WantActionBar.WANT_NO_ACTION_BAR;
-
 /**
  *
  */

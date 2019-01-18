@@ -12,7 +12,9 @@ import com.google.common.base.Function
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.Option
+import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Pair
+import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.jnull.Nullable
@@ -21,6 +23,7 @@ import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountAuthenticatedHTTP
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -63,14 +66,22 @@ class CatalogFeedWithoutGroups(
   private val executor: ListeningExecutorService,
   private val colorScheme: ApplicationColorScheme) : ListAdapter, OnScrollListener {
 
-  private val adapter: ArrayAdapter<FeedEntry>
-  private val loading: AtomicReference<Pair<ListenableFuture<Unit>, URI>>
-  private val uriNext: AtomicReference<URI>
+  private val adapter: ArrayAdapter<FeedEntry> =
+    ArrayAdapter(this.activity, 0, this.feed.entriesInOrder)
+  private val loading: AtomicReference<Pair<ListenableFuture<Unit>, URI>> =
+    AtomicReference()
+  private val uriNext: AtomicReference<URI> =
+    AtomicReference<URI>(feed.feedNext)
+  private val httpAuth: OptionType<HTTPAuthType> =
+    createHttpAuth(this.account.credentials())
 
-  init {
-    this.uriNext = AtomicReference<URI>(feed.feedNext)
-    this.adapter = ArrayAdapter(this.activity, 0, this.feed.entriesInOrder)
-    this.loading = AtomicReference()
+  private fun createHttpAuth(
+    credentials: OptionType<AccountAuthenticationCredentials>?): OptionType<HTTPAuthType> {
+    return if (credentials is Some<AccountAuthenticationCredentials>) {
+      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials.get()))
+    } else {
+      Option.none<HTTPAuthType>()
+    }
   }
 
   /**
@@ -117,15 +128,16 @@ class CatalogFeedWithoutGroups(
       cv = reused as CatalogFeedBookCellView
     } else {
       cv = CatalogFeedBookCellView(
-        this.activity,
-        this.bookCoverProvider,
-        this.bookController,
-        this.documents,
-        this.profilesController,
-        this.bookRegistry,
-        this.networkConnectivity,
-        this.executor,
-        this.colorScheme)
+        activity = this.activity,
+        coverProvider = this.bookCoverProvider,
+        booksController = this.bookController,
+        documents = this.documents,
+        profilesController = this.profilesController,
+        booksRegistry = this.bookRegistry,
+        networkConnectivity = this.networkConnectivity,
+        backgroundExecutor = this.executor,
+        colorScheme = this.colorScheme,
+        documentStore = this.documents)
     }
 
     cv.viewConfigure(e, this.bookSelectionListener)
@@ -178,17 +190,11 @@ class CatalogFeedWithoutGroups(
     return null
   }
 
-  private fun loadNextActual(next: URI): ListenableFuture<Unit> {
+  internal fun loadNextActual(next: URI): ListenableFuture<Unit> {
     LOG.debug("loading: {}", next)
-    val none = Option.none<HTTPAuthType>()
-
-    val auth =
-      this.account.credentials().map { credentials ->
-        AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
-      }
 
     val future =
-      this.feedLoader.fetchURIWithBookRegistryEntries(next, auth)
+      this.feedLoader.fetchURIWithBookRegistryEntries(next, this.httpAuth)
         .catching(
           Exception::class.java,
           Function<Exception, FeedLoaderResult> { ex -> FeedLoaderFailedGeneral(ex!!) },

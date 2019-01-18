@@ -1,7 +1,7 @@
 package org.nypl.simplified.app.reader;
 
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.books.core.LogUtilities;
+
 import org.readium.sdk.android.components.navigation.NavigationElement;
 import org.readium.sdk.android.components.navigation.NavigationPoint;
 import org.readium.sdk.android.components.navigation.NavigationTable;

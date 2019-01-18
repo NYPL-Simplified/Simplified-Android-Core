@@ -10,8 +10,6 @@ import com.io7m.jnull.NullCheck;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.reader.ReaderBookLocation;
 import org.nypl.simplified.books.reader.ReaderBookLocationJSON;

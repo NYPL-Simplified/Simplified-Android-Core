@@ -524,8 +524,8 @@ public abstract class ProfilesDatabaseContract {
       .setSupportEmail("postmaster@example.com")
       .setId(URI.create("urn:com.example"))
       .setMainColor("#eeeeee")
-      .setLogo(URI.create("http://www.example.com/logo.png"))
-      .setSubtitle("Example Subtitle")
+      .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
+      .setSubtitle(Option.some("Example Subtitle"))
       .setDisplayName("Example Provider")
       .build();
   }
@@ -558,8 +558,8 @@ public abstract class ProfilesDatabaseContract {
     return AccountProvider.builder()
       .setId(URI.create(provider_id))
       .setDisplayName("Fake Library")
-      .setSubtitle("Imaginary books")
-      .setLogo(URI.create("http://www.example.com/logo.png"))
+      .setSubtitle(Option.some("Imaginary books"))
+      .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
       .setCatalogURI(URI.create("http://www.example.com/accounts0/feed.xml"))
       .setSupportEmail("postmaster@example.com")
       .build();

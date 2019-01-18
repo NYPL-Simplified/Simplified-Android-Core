@@ -2,6 +2,7 @@ package org.nypl.simplified.app.catalog;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.squareup.picasso.Picasso.LoadedFrom;

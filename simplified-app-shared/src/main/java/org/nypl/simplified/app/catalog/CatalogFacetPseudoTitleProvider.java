@@ -1,8 +1,10 @@
 package org.nypl.simplified.app.catalog;
 
 import android.content.res.Resources;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
+
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.books.feeds.FeedFacetPseudo.FacetType;
 import org.nypl.simplified.books.feeds.FeedFacetPseudoTitleProviderType;

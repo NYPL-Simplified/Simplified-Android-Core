@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.io7m.jfunctional.Option;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.json.core.JSONParseException;
@@ -41,57 +42,77 @@ public final class AccountProvidersJSON {
     final ObjectNode obj = JSONParserUtilities.checkObject(null, node);
     final AccountProvider.Builder b = AccountProvider.builder();
 
-    b.setId(
-      JSONParserUtilities.getURI(obj, "id"));
-    b.setCatalogURI(
-      JSONParserUtilities.getURI(obj, "catalogUrl"));
-    b.setCatalogURIForUnder13s(
-      JSONParserUtilities.getURIOptional(obj, "catalogUrlUnder13"));
-    b.setCatalogURIForOver13s(
-      JSONParserUtilities.getURIOptional(obj, "catalogUrl13"));
-    b.setDisplayName(
-      JSONParserUtilities.getString(obj, "name"));
-    b.setSubtitle(
-      JSONParserUtilities.getString(obj, "subtitle"));
-    b.setLogo(
-      JSONParserUtilities.getURI(obj, "logo"));
+    final URI id_uuid = JSONParserUtilities.getURI(obj, "id_uuid");
 
-    b.setAuthentication(JSONParserUtilities.getObjectOptional(obj, "authentication")
-      .mapPartial(sub ->
-        AccountProviderAuthenticationDescription.builder()
-          .setLoginURI(JSONParserUtilities.getURI(sub, "loginUrl"))
-          .setPassCodeLength(JSONParserUtilities.getInteger(sub, "passcodeLength"))
-          .setPassCodeMayContainLetters(JSONParserUtilities.getBoolean(sub, "passcodeAllowsLetters"))
-          .setRequiresPin(JSONParserUtilities.getBoolean(sub, "requiresPin"))
-          .build()));
+    try {
+      b.setId(id_uuid);
 
-    b.setSupportsSimplyESynchronization(
-      JSONParserUtilities.getBooleanDefault(obj, "supportsSimplyESync", false));
-    b.setSupportsBarcodeScanner(
-      JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeScanner", false));
-    b.setSupportsBarcodeDisplay(
-      JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeDisplay", false));
-    b.setSupportsReservations(
-      JSONParserUtilities.getBooleanDefault(obj, "supportsReservations", false));
-    b.setSupportsCardCreator(
-      JSONParserUtilities.getBooleanDefault(obj, "supportsCardCreator", false));
-    b.setSupportsHelpCenter(
-      JSONParserUtilities.getBooleanDefault(obj, "supportsHelpCenter", false));
+      final URI catalogUrl = JSONParserUtilities.getURI(obj, "catalogUrl");
+      b.setCatalogURI(catalogUrl);
 
-    b.setSupportEmail(
-      JSONParserUtilities.getStringOptional(obj, "supportEmail"));
-    b.setEula(
-      JSONParserUtilities.getURIOptional(obj, "eulaUrl"));
-    b.setLicense(
-      JSONParserUtilities.getURIOptional(obj, "licenseUrl"));
-    b.setPrivacyPolicy(
-      JSONParserUtilities.getURIOptional(obj, "privacyUrl"));
-    b.setMainColor(
-      JSONParserUtilities.getString(obj, "mainColor"));
-    b.setStyleNameOverride(
-      JSONParserUtilities.getStringOptional(obj, "styleNameOverride"));
+      b.setCatalogURIForUnder13s(
+        JSONParserUtilities.getURIOptional(obj, "catalogUrlUnder13"));
+      b.setCatalogURIForOver13s(
+        JSONParserUtilities.getURIOptional(obj, "catalogUrl13"));
+      b.setDisplayName(
+        JSONParserUtilities.getString(obj, "name"));
+      b.setSubtitle(
+        JSONParserUtilities.getStringOptional(obj, "subtitle"));
+      b.setLogo(
+        JSONParserUtilities.getURIOptional(obj, "logo"));
 
-    return b.build();
+      if (JSONParserUtilities.getBooleanDefault(obj, "needsAuth", false)) {
+        final AccountProviderAuthenticationDescription.Builder authentication_builder =
+          AccountProviderAuthenticationDescription.builder();
+
+        authentication_builder.setRequiresPin(
+          JSONParserUtilities.getBooleanDefault(obj, "pinRequired", true));
+        authentication_builder.setPassCodeLength(
+          JSONParserUtilities.getIntegerDefault(obj, "authPasscodeLength", 0));
+        authentication_builder.setPassCodeMayContainLetters(
+          JSONParserUtilities.getBooleanDefault(obj, "authPasscodeAllowsLetters", true));
+        authentication_builder.setLoginURI(
+          JSONParserUtilities.getURIDefault(obj, "loginUrl", applyLoansHack(catalogUrl)));
+
+        b.setAuthentication(Option.some(authentication_builder.build()));
+      } else {
+        b.setAuthentication(Option.none());
+      }
+
+      b.setSupportsSimplyESynchronization(
+        JSONParserUtilities.getBooleanDefault(obj, "supportsSimplyESync", false));
+      b.setSupportsBarcodeScanner(
+        JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeScanner", false));
+      b.setSupportsBarcodeDisplay(
+        JSONParserUtilities.getBooleanDefault(obj, "supportsBarcodeDisplay", false));
+      b.setSupportsReservations(
+        JSONParserUtilities.getBooleanDefault(obj, "supportsReservations", false));
+      b.setSupportsCardCreator(
+        JSONParserUtilities.getBooleanDefault(obj, "supportsCardCreator", false));
+      b.setSupportsHelpCenter(
+        JSONParserUtilities.getBooleanDefault(obj, "supportsHelpCenter", false));
+
+      b.setSupportEmail(
+        JSONParserUtilities.getStringOptional(obj, "supportEmail"));
+      b.setEula(
+        JSONParserUtilities.getURIOptional(obj, "eulaUrl"));
+      b.setLicense(
+        JSONParserUtilities.getURIOptional(obj, "licenseUrl"));
+      b.setPrivacyPolicy(
+        JSONParserUtilities.getURIOptional(obj, "privacyUrl"));
+      b.setMainColor(
+        JSONParserUtilities.getString(obj, "mainColor"));
+      b.setStyleNameOverride(
+        JSONParserUtilities.getStringOptional(obj, "styleNameOverride"));
+
+      return b.build();
+    } catch (JSONParseException e) {
+      throw new JSONParseException("Unable to parse provider " + id_uuid, e);
+    }
+  }
+
+  private static URI applyLoansHack(URI catalogUrl) {
+    return URI.create(catalogUrl.toString() + "/loans");
   }
 
   /**

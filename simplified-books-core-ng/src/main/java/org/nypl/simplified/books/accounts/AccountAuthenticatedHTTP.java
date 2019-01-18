@@ -28,8 +28,7 @@ public final class AccountAuthenticatedHTTP {
    * @return An HTTP instance
    */
 
-  public static HTTPAuthType createAuthenticatedHTTP(
-      final AccountAuthenticationCredentials creds) {
+  public static HTTPAuthType createAuthenticatedHTTP(final AccountAuthenticationCredentials creds) {
     NullCheck.notNull(creds, "Credentials");
 
     return creds.oAuthToken().accept(new OptionVisitorType<HTTPOAuthToken, HTTPAuthType>() {

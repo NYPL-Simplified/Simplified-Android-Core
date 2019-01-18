@@ -3,17 +3,20 @@ package org.nypl.simplified.app
 import android.app.AlertDialog
 import android.content.Context
 import android.net.Uri
-import com.android.volley.*
-import com.android.volley.Response.Listener
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.Request
 import com.android.volley.Response.ErrorListener
+import com.android.volley.Response.Listener
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.Volley
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.io7m.jfunctional.Some
-import org.json.JSONObject
+import com.io7m.junreachable.UnimplementedCodeException
 import org.joda.time.Instant
+import org.json.JSONObject
 import org.nypl.drm.core.AdobeDeviceID
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.core.AccountCredentials
@@ -22,7 +25,6 @@ import org.nypl.simplified.books.core.AnnotationResponse
 import org.nypl.simplified.books.core.BookmarkAnnotation
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.volley.NYPLJsonObjectRequest
-import org.nypl.simplified.volley.NYPLStringRequest
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.nio.charset.Charset
@@ -67,25 +69,27 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") &&
-        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.libraryAccount.id).not()) {
-      completion(false)
-      return
-    }
+//    if (Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage") &&
+//        Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", this.libraryAccount.id).not()) {
+//      completion(false)
+//      return
+//    }
 
-    this.syncPermissionStatusUriRequest { initialized, syncIsPermitted ->
-      if (initialized && syncIsPermitted) {
-        Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
-        LOG.debug("Sync has already been enabled on the server. Enable here as well.")
-        completion(true)
-      } else if (!initialized && !Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage")) {
-        LOG.debug("Sync has never been initialized for the patron. Proceeding with opt-in alert.")
-        this.presentFirstTimeSyncAlertDialog(completion)
-      } else {
-        LOG.debug("Continuing with sync disabled in Settings.")
-        completion(false)
-      }
-    }
+//    this.syncPermissionStatusUriRequest { initialized, syncIsPermitted ->
+//      if (initialized && syncIsPermitted) {
+//        // Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
+//        LOG.debug("Sync has already been enabled on the server. Enable here as well.")
+//        completion(true)
+//      } else if (!initialized && !Simplified.getSharedPrefs().getBoolean("userHasSeenFirstTimeSyncMessage")) {
+//        LOG.debug("Sync has never been initialized for the patron. Proceeding with opt-in alert.")
+//        this.presentFirstTimeSyncAlertDialog(completion)
+//      } else {
+//        LOG.debug("Continuing with sync disabled in Settings.")
+//        completion(false)
+//      }
+//    }
+
+    throw UnimplementedCodeException()
   }
 
   private fun syncPermissionStatusUriRequest(completion: (initialized: Boolean, syncIsPermitted: Boolean) -> Unit)
@@ -454,26 +458,27 @@ class AnnotationsManager(private val libraryAccount: Account,
       return
     }
 
-    val request = NYPLStringRequest(
-        Request.Method.DELETE,
-        annotationID,
-      this.credentials,
-        Listener { _ ->
-          completion(true)
-        },
-        ErrorListener { error ->
-          this.logVolleyError(error)
-          completion(false)
-        }
-    )
+//    val request = NYPLStringRequest(
+//        Request.Method.DELETE,
+//        annotationID,
+//      this.credentials,
+//        Listener { _ ->
+//          completion(true)
+//        },
+//        ErrorListener { error ->
+//          this.logVolleyError(error)
+//          completion(false)
+//        }
+//    )
+//    request.retryPolicy = DefaultRetryPolicy(
+//        TimeUnit.SECONDS.toMillis(org.nypl.simplified.app.AnnotationsManager.Companion.BookmarkDeleteTimeout).toInt(),
+//        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+//        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+//    )
+//
+//    this.requestQueue.add(request)
 
-    request.retryPolicy = DefaultRetryPolicy(
-        TimeUnit.SECONDS.toMillis(org.nypl.simplified.app.AnnotationsManager.Companion.BookmarkDeleteTimeout).toInt(),
-        DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-    )
-
-    this.requestQueue.add(request)
+    throw UnimplementedCodeException()
   }
 
   /**
@@ -490,12 +495,13 @@ class AnnotationsManager(private val libraryAccount: Account,
    */
   fun syncIsPossibleAndPermitted(): Boolean {
     return try {
-      val app: SimplifiedCatalogAppServicesType? = Simplified.getCatalogAppServices()
-      val currentAccount = app?.books as? AccountsControllerType
-      val syncIsPossible = if (currentAccount != null) this.syncIsPossible(currentAccount) else false
-      val libraryID = Simplified.getCurrentAccount()
-      val syncPermissionGranted = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryID.id)
-      syncIsPossible && syncPermissionGranted
+//      val app: SimplifiedCatalogAppServicesType? = Simplified.getCatalogAppServices()
+//      val currentAccount = app?.books as? AccountsControllerType
+//      val syncIsPossible = if (currentAccount != null) this.syncIsPossible(currentAccount) else false
+//      val libraryID = Simplified.getCurrentAccount()
+//      val syncPermissionGranted = Simplified.getSharedPrefs().getBoolean("syncPermissionGranted", libraryID.id)
+//      syncIsPossible && syncPermissionGranted
+      throw UnimplementedCodeException()
     } catch (e: Exception) {
       LOG.error("Exception thrown accessing SimplifiedCatalogAppServicesType to obtain sync status.")
       false
@@ -509,13 +515,15 @@ class AnnotationsManager(private val libraryAccount: Account,
       this.setTitle(this.context.getString(R.string.firstTimeSyncAlertTitle))
       this.setMessage(this.context.getString(R.string.firstTimeSyncAlertMessage))
       this.setNegativeButton(this.context.getString(R.string.firstTimeSyncAlertNegButton)) { _, _ ->
-        Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
+        // Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
         completion(false)
+        throw UnimplementedCodeException()
       }
       this.setPositiveButton(this.context.getString(R.string.firstTimeSyncAlertPosButton)) { _, _ ->
         this@AnnotationsManager.updateServerSyncPermissionStatus(true) { success ->
-          Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
+          // Simplified.getSharedPrefs().putBoolean("userHasSeenFirstTimeSyncMessage", true)
           completion(success)
+          throw UnimplementedCodeException()
         }
       }
 

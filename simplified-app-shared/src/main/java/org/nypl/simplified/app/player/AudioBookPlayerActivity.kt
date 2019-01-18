@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.ImageView
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.io7m.jfunctional.Some
 import org.nypl.audiobook.android.api.PlayerAudioBookType
 import org.nypl.audiobook.android.api.PlayerAudioEngineRequest
 import org.nypl.audiobook.android.api.PlayerAudioEngines
@@ -44,7 +43,8 @@ import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.NamedThreadPools
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.feeds.FeedEntry
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
@@ -103,7 +103,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   private var playerLastPosition: PlayerPosition? = null
 
   private lateinit var parameters: AudioBookPlayerParameters
-  private lateinit var services: SimplifiedCatalogAppServicesType
   private lateinit var loadingFragment: AudioBookLoadingFragment
   private lateinit var sleepTimer: PlayerSleepTimerType
   private lateinit var downloadProvider: PlayerDownloadProviderType
@@ -132,7 +131,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     this.colorScheme = this.parameters.applicationColorScheme
     this.setTheme(this.parameters.applicationColorScheme.activityThemeResourceWithActionBar)
     this.setContentView(R.layout.audio_book_player_base)
-    this.services = Simplified.getCatalogAppServices()!!
     this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
 
     this.actionBar.setBackgroundDrawable(ColorDrawable(this.colorScheme.colorRGBA))
@@ -146,11 +144,13 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      */
 
     val formatHandleOpt =
-      this.services.books.bookGetDatabase()
-        .databaseOpenExistingEntry(this.parameters.bookID)
-        .entryFindFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
+      Simplified.getProfilesController()
+        .profileAccountCurrent()
+        .bookDatabase()
+        .entry(this.parameters.bookID)
+        .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
-    if (!(formatHandleOpt is Some<BookDatabaseEntryFormatHandleAudioBook>)) {
+    if (formatHandleOpt == null) {
       ErrorDialogUtilities.showErrorWithRunnable(
         this,
         this.log,
@@ -160,7 +160,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       return
     }
 
-    this.formatHandle = formatHandleOpt.get()
+    this.formatHandle = formatHandleOpt
 
     /*
      * Create a new downloader that is solely used to fetch audio book manifests.
@@ -174,7 +174,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
       File(this.filesDir, "audiobook-player-downloads")
     DirectoryUtilities.directoryCreate(this.downloaderDir)
     this.downloader =
-      DownloaderHTTP.newDownloader(this.downloadExecutor, this.downloaderDir, this.services.http)
+      DownloaderHTTP.newDownloader(this.downloadExecutor, this.downloaderDir, Simplified.getHTTP())
     this.downloadProvider =
       DownloadProvider.create(this.downloadExecutor)
 
@@ -257,7 +257,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onLoadingFragmentIsNetworkConnectivityAvailable(): Boolean {
-    return this.services.isNetworkAvailable
+    return Simplified.getNetworkConnectivity().isNetworkAvailable
   }
 
   override fun onLoadingFragmentWantsAudioBookParameters(): AudioBookPlayerParameters {
@@ -340,9 +340,9 @@ class AudioBookPlayerActivity : AppCompatActivity(),
     var restored = false
 
     try {
-      val position = this.formatHandle.loadPlayerPosition()
-      if (position is Some<PlayerPosition>) {
-        this.player.movePlayheadToLocation(position.get())
+      val position = this.formatHandle.format.position
+      if (position != null) {
+        this.player.movePlayheadToLocation(position)
         restored = true
       }
     } catch (e: Exception) {
@@ -359,7 +359,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   private fun startAllPartsDownloading() {
-    if (this.services.isNetworkAvailable) {
+    if (Simplified.getNetworkConnectivity().isNetworkAvailable) {
       this.book.wholeBookDownloadTask.fetch()
     }
   }
@@ -498,11 +498,12 @@ class AudioBookPlayerActivity : AppCompatActivity(),
      * reasonably close to the expected 3:4 cover image size ratio.
      */
 
-    this.services.coverProvider.loadCoverInto(
-      FeedEntryOPDS.fromOPDSAcquisitionFeedEntry(this.parameters.opdsEntry) as FeedEntryOPDS,
+    val screen = Simplified.getScreenSizeInformation()
+    Simplified.getCoverProvider().loadCoverInto(
+      FeedEntry.FeedEntryOPDS(this.parameters.opdsEntry),
       view,
-      this.services.screenDPToPixels(300).toInt(),
-      this.services.screenDPToPixels(400).toInt())
+      screen.screenDPToPixels(300).toInt(),
+      screen.screenDPToPixels(400).toInt())
   }
 
   override fun onPlayerWantsPlayer(): PlayerType {
@@ -522,6 +523,6 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   }
 
   override fun onPlayerAccessibilityEvent(event: PlayerAccessibilityEvent) {
-    this.services.accessibility.announce(event.message)
+
   }
 }

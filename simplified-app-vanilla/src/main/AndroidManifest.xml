@@ -23,7 +23,7 @@
 
     <!-- Main entry point for the application. -->
     <activity
-      android:name="org.nypl.simplified.app.MainSplashActivity"
+      android:name="org.nypl.simplified.app.splash.MainSplashActivity"
       android:configChanges="orientation|screenSize"
       android:label="@string/feature_app_name">
       <intent-filter>

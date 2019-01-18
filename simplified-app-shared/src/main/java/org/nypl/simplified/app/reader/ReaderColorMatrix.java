@@ -3,6 +3,7 @@ package org.nypl.simplified.app.reader;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+
 import org.nypl.simplified.assertions.Assertions;
 
 /**

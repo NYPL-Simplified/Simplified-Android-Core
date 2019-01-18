@@ -36,7 +36,6 @@ import org.nypl.simplified.datepicker.DatePicker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.nypl.simplified.app.Simplified.WantActionBar.WANT_NO_ACTION_BAR;
 import static org.nypl.simplified.books.profiles.ProfileCreationEvent.ProfileCreationFailed.ErrorCode.ERROR_GENERAL;
 
 /**

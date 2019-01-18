@@ -2,6 +2,7 @@ package org.nypl.simplified.app.utilities;
 
 import android.os.Handler;
 import android.os.Looper;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 

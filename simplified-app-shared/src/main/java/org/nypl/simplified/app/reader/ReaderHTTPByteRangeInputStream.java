@@ -33,6 +33,7 @@ package org.nypl.simplified.app.reader;
 
 import com.io7m.jnull.NonNull;
 import com.io7m.jnull.NullCheck;
+
 import org.readium.sdk.android.util.ResourceInputStream;
 
 import java.io.IOException;

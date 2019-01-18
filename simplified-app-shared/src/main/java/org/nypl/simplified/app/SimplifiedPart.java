@@ -1,6 +1,7 @@
 package org.nypl.simplified.app;
 
 import android.content.res.Resources;
+
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 

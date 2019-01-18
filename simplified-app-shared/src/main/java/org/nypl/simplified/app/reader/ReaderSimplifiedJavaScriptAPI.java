@@ -1,8 +1,9 @@
 package org.nypl.simplified.app.reader;
 
 import android.webkit.WebView;
+
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.books.core.LogUtilities;
+
 import org.nypl.simplified.app.utilities.UIThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
