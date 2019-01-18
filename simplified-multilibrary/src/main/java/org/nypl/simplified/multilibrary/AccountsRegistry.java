@@ -53,7 +53,7 @@ public class AccountsRegistry implements Serializable {
         for (int j = 0; j < this.accounts.length(); j++) {
           final JSONObject savedAcct = currentAccounts.getJSONObject(i);
           final JSONObject jsonAcct = this.accounts.getJSONObject(j);
-          if (savedAcct.getInt("id") == jsonAcct.getInt("id")) {
+          if (savedAcct.getInt("id_numeric") == jsonAcct.getInt("id_numeric")) {
             convertedCurrentAccounts.put(jsonAcct);
           }
         }
