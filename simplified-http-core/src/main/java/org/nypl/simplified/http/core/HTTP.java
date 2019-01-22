@@ -54,8 +54,9 @@ public final class HTTP implements HTTPType
     final URI uri)
   {
     NullCheck.notNull(uri);
-    final String scheme = NullCheck.notNull(uri.getScheme());
-    final boolean ok = "http".equals(scheme) || "https".endsWith(scheme);
+
+    final String scheme = uri.getScheme();
+    final boolean ok = scheme != null && scheme.startsWith("http");
     if (!ok) {
       final StringBuilder m = new StringBuilder(64);
       m.append("Unsupported URI scheme.\n");
