@@ -1,48 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
+  <!-- Custom Styles -->
+
+  <style name="SimplifiedTheme_ActionBar.LaneTitle">
+    <item name="android:textSize">21sp</item>
+    <item name="android:textColor">@color/app_primary_color</item>
+    <item name="android:textStyle">normal</item>
+    <item name="android:typeface">sans</item>
+  </style>
+
+  <style
+      name="SimplifiedBookDialog"
+      parent="SimplifiedTheme_ActionBar">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowIsFloating">true</item>
+  </style>
+
+  <style
+      name="SimplifiedLoginDialog"
+      parent="SimplifiedTheme_ActionBar">
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowFullscreen">false</item>
+    <item name="android:windowIsFloating">true</item>
+  </style>
+
+  <style name="ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid">
+    <item name="android:displayOptions">homeAsUp|showTitle</item>
+    <item name="android:homeAsUpIndicator">@drawable/ic_menu</item>
+  </style>
+
   <!-- Material Design Themes -->
 
   <style
       name="SimplifiedTheme_NoActionBar"
       parent="Theme.AppCompat.Light.NoActionBar">
-    <item name="android:windowActionBar">false</item>
-    <item name="android:windowNoTitle">true</item>
-
-    <item name="button_foreground">@color/app_primary_color</item>
-    <item name="list_item_foreground">@color/app_primary_color</item>
-    <item name="downloading_background">@color/app_primary_color</item>
-    <item name="notification_background">@color/app_primary_color</item>
-    <item name="main_color">@color/app_primary_color</item>
+    <item name="windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:colorPrimary">@color/app_primary_color</item>
+    <item name="android:colorPrimaryDark">@color/app_primary_color</item>
   </style>
 
   <style
-    name="SimplifiedTheme_ActionBar"
-    parent="Theme.AppCompat.Light">
+      name="SimplifiedTheme_ActionBar"
+      parent="Theme.AppCompat.Light.DarkActionBar">
     <item name="android:activatedBackgroundIndicator">@drawable/drawer_list_selector</item>
-    <item name="android:icon">@drawable/ic_menu</item>
-    <item name="button_foreground">@color/app_primary_color</item>
-    <item name="list_item_foreground">@color/app_primary_color</item>
-    <item name="downloading_background">@color/app_primary_color</item>
-    <item name="notification_background">@color/app_primary_color</item>
-    <item name="main_color">@color/app_primary_color</item>
+    <item name="android:actionBarStyle">@style/ActionBar</item>
+    <item name="android:colorPrimary">@color/app_primary_color</item>
+    <item name="android:colorPrimaryDark">@color/app_primary_color</item>
   </style>
 
-  <!-- Material Design Color Palette w/ No Action Bar -->
+  <!-- Material Design Color Palette w/ Action Bar -->
 
   <style
       name="Simplified_RedTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/red_primary</item>
+    <item name="android:colorPrimaryDark">@color/red_primary_dark</item>
+    <item name="android:colorAccent">@color/red_primary_light</item>
     <item name="main_color">@color/red_primary</item>
     <item name="button_foreground">@color/red_primary</item>
-    <item name="list_item_foreground">@color/red_primary</item>
+    <item name="list_item_foreground">@color/red_primary_dark</item>
     <item name="downloading_background">@color/red_primary_dark</item>
-    <item name="notification_background">@color/red_primary</item>
+    <item name="notification_background">@color/red_primary_dark</item>
   </style>
 
   <style
       name="Simplified_PinkTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/pink_primary</item>
+    <item name="android:colorPrimaryDark">@color/pink_primary_dark</item>
+    <item name="android:colorAccent">@color/pink_primary_light</item>
     <item name="main_color">@color/pink_primary</item>
     <item name="button_foreground">@color/pink_primary</item>
     <item name="list_item_foreground">@color/pink_primary_dark</item>
@@ -53,6 +82,9 @@
   <style
       name="Simplified_PurpleTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/purple_primary</item>
+    <item name="android:colorPrimaryDark">@color/purple_primary_dark</item>
+    <item name="android:colorAccent">@color/purple_primary_light</item>
     <item name="main_color">@color/purple_primary</item>
     <item name="button_foreground">@color/purple_primary</item>
     <item name="list_item_foreground">@color/purple_primary_dark</item>
@@ -63,6 +95,9 @@
   <style
       name="Simplified_DeepPurpleTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/deep_purple_primary</item>
+    <item name="android:colorPrimaryDark">@color/deep_purple_primary_dark</item>
+    <item name="android:colorAccent">@color/deep_purple_primary_light</item>
     <item name="main_color">@color/deep_purple_primary</item>
     <item name="button_foreground">@color/deep_purple_primary</item>
     <item name="list_item_foreground">@color/deep_purple_primary_dark</item>
@@ -73,6 +108,9 @@
   <style
       name="Simplified_IndigoTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/indigo_primary</item>
+    <item name="android:colorPrimaryDark">@color/indigo_primary_dark</item>
+    <item name="android:colorAccent">@color/indigo_primary_light</item>
     <item name="main_color">@color/indigo_primary</item>
     <item name="button_foreground">@color/indigo_primary</item>
     <item name="list_item_foreground">@color/indigo_primary_dark</item>
@@ -83,6 +121,9 @@
   <style
       name="Simplified_BlueTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/blue_primary</item>
+    <item name="android:colorPrimaryDark">@color/blue_primary_dark</item>
+    <item name="android:colorAccent">@color/blue_primary_light</item>
     <item name="main_color">@color/blue_primary</item>
     <item name="button_foreground">@color/blue_primary</item>
     <item name="list_item_foreground">@color/blue_primary_dark</item>
@@ -93,6 +134,9 @@
   <style
       name="Simplified_LightBlueTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/light_blue_primary</item>
+    <item name="android:colorPrimaryDark">@color/light_blue_primary_dark</item>
+    <item name="android:colorAccent">@color/light_blue_primary_light</item>
     <item name="main_color">@color/light_blue_primary</item>
     <item name="button_foreground">@color/light_blue_primary</item>
     <item name="list_item_foreground">@color/light_blue_primary_dark</item>
@@ -103,11 +147,27 @@
   <style
       name="Simplified_CyanTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/cyan_primary</item>
+    <item name="android:colorPrimaryDark">@color/cyan_primary_dark</item>
+    <item name="android:colorAccent">@color/cyan_primary_light</item>
     <item name="main_color">@color/cyan_primary</item>
     <item name="button_foreground">@color/cyan_primary</item>
     <item name="list_item_foreground">@color/cyan_primary_dark</item>
     <item name="downloading_background">@color/cyan_primary_dark</item>
     <item name="notification_background">@color/cyan_primary_dark</item>
+  </style>
+
+  <style
+      name="Simplified_TealTheme"
+      parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/teal_primary</item>
+    <item name="android:colorPrimaryDark">@color/teal_primary_dark</item>
+    <item name="android:colorAccent">@color/teal_primary_light</item>
+    <item name="main_color">@color/teal_primary</item>
+    <item name="button_foreground">@color/teal_primary</item>
+    <item name="list_item_foreground">@color/teal_primary_dark</item>
+    <item name="downloading_background">@color/teal_primary_dark</item>
+    <item name="notification_background">@color/teal_primary_dark</item>
   </style>
 
   <style
@@ -124,18 +184,11 @@
   </style>
 
   <style
-      name="Simplified_TealTheme"
-      parent="SimplifiedTheme_ActionBar">
-    <item name="main_color">@color/teal_primary</item>
-    <item name="button_foreground">@color/teal_primary</item>
-    <item name="list_item_foreground">@color/teal_primary_dark</item>
-    <item name="downloading_background">@color/teal_primary_dark</item>
-    <item name="notification_background">@color/teal_primary_dark</item>
-  </style>
-
-  <style
       name="Simplified_AmberTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/amber_primary</item>
+    <item name="android:colorPrimaryDark">@color/amber_primary_dark</item>
+    <item name="android:colorAccent">@color/amber_primary_light</item>
     <item name="main_color">@color/amber_primary</item>
     <item name="button_foreground">@color/amber_primary</item>
     <item name="list_item_foreground">@color/amber_primary_dark</item>
@@ -146,6 +199,9 @@
   <style
       name="Simplified_OrangeTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/orange_primary</item>
+    <item name="android:colorPrimaryDark">@color/orange_primary_dark</item>
+    <item name="android:colorAccent">@color/orange_primary_light</item>
     <item name="main_color">@color/orange_primary</item>
     <item name="button_foreground">@color/orange_primary</item>
     <item name="list_item_foreground">@color/orange_primary_dark</item>
@@ -156,6 +212,9 @@
   <style
       name="Simplified_DeepOrangeTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/deep_orange_primary</item>
+    <item name="android:colorPrimaryDark">@color/deep_orange_primary_dark</item>
+    <item name="android:colorAccent">@color/deep_orange_primary_light</item>
     <item name="main_color">@color/deep_orange_primary</item>
     <item name="button_foreground">@color/deep_orange_primary</item>
     <item name="list_item_foreground">@color/deep_orange_primary_dark</item>
@@ -166,6 +225,9 @@
   <style
       name="Simplified_BrownTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/brown_primary</item>
+    <item name="android:colorPrimaryDark">@color/brown_primary_dark</item>
+    <item name="android:colorAccent">@color/brown_primary_light</item>
     <item name="main_color">@color/brown_primary</item>
     <item name="button_foreground">@color/brown_primary</item>
     <item name="list_item_foreground">@color/brown_primary_dark</item>
@@ -176,6 +238,9 @@
   <style
       name="Simplified_GreyTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/grey_primary</item>
+    <item name="android:colorPrimaryDark">@color/grey_primary_dark</item>
+    <item name="android:colorAccent">@color/grey_primary_light</item>
     <item name="main_color">@color/grey_primary</item>
     <item name="button_foreground">@color/grey_primary</item>
     <item name="list_item_foreground">@color/grey_primary_dark</item>
@@ -186,6 +251,9 @@
   <style
       name="Simplified_BlueGreyTheme"
       parent="SimplifiedTheme_ActionBar">
+    <item name="android:colorPrimary">@color/blue_grey_primary</item>
+    <item name="android:colorPrimaryDark">@color/blue_grey_primary_dark</item>
+    <item name="android:colorAccent">@color/blue_grey_primary_light</item>
     <item name="main_color">@color/blue_grey_primary</item>
     <item name="button_foreground">@color/blue_grey_primary</item>
     <item name="list_item_foreground">@color/blue_grey_primary_dark</item>
@@ -198,6 +266,9 @@
   <style
       name="Simplified_RedTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/red_primary</item>
+    <item name="android:colorPrimaryDark">@color/red_primary_dark</item>
+    <item name="android:colorAccent">@color/red_primary_light</item>
     <item name="main_color">@color/red_primary</item>
     <item name="button_foreground">@color/red_primary</item>
     <item name="list_item_foreground">@color/red_primary_dark</item>
@@ -208,6 +279,9 @@
   <style
       name="Simplified_PinkTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/pink_primary</item>
+    <item name="android:colorPrimaryDark">@color/pink_primary_dark</item>
+    <item name="android:colorAccent">@color/pink_primary_light</item>
     <item name="main_color">@color/pink_primary</item>
     <item name="button_foreground">@color/pink_primary</item>
     <item name="list_item_foreground">@color/pink_primary_dark</item>
@@ -218,6 +292,9 @@
   <style
       name="Simplified_PurpleTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/purple_primary</item>
+    <item name="android:colorPrimaryDark">@color/purple_primary_dark</item>
+    <item name="android:colorAccent">@color/purple_primary_light</item>
     <item name="main_color">@color/purple_primary</item>
     <item name="button_foreground">@color/purple_primary</item>
     <item name="list_item_foreground">@color/purple_primary_dark</item>
@@ -228,6 +305,9 @@
   <style
       name="Simplified_DeepPurpleTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/deep_purple_primary</item>
+    <item name="android:colorPrimaryDark">@color/deep_purple_primary_dark</item>
+    <item name="android:colorAccent">@color/deep_purple_primary_light</item>
     <item name="main_color">@color/deep_purple_primary</item>
     <item name="button_foreground">@color/deep_purple_primary</item>
     <item name="list_item_foreground">@color/deep_purple_primary_dark</item>
@@ -238,6 +318,9 @@
   <style
       name="Simplified_IndigoTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/indigo_primary</item>
+    <item name="android:colorPrimaryDark">@color/indigo_primary_dark</item>
+    <item name="android:colorAccent">@color/indigo_primary_light</item>
     <item name="main_color">@color/indigo_primary</item>
     <item name="button_foreground">@color/indigo_primary</item>
     <item name="list_item_foreground">@color/indigo_primary_dark</item>
@@ -248,6 +331,9 @@
   <style
       name="Simplified_BlueTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/blue_primary</item>
+    <item name="android:colorPrimaryDark">@color/blue_primary_dark</item>
+    <item name="android:colorAccent">@color/blue_primary_light</item>
     <item name="main_color">@color/blue_primary</item>
     <item name="button_foreground">@color/blue_primary</item>
     <item name="list_item_foreground">@color/blue_primary_dark</item>
@@ -258,6 +344,9 @@
   <style
       name="Simplified_LightBlueTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/light_blue_primary</item>
+    <item name="android:colorPrimaryDark">@color/light_blue_primary_dark</item>
+    <item name="android:colorAccent">@color/light_blue_primary_light</item>
     <item name="main_color">@color/light_blue_primary</item>
     <item name="button_foreground">@color/light_blue_primary</item>
     <item name="list_item_foreground">@color/light_blue_primary_dark</item>
@@ -268,6 +357,9 @@
   <style
       name="Simplified_CyanTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/cyan_primary</item>
+    <item name="android:colorPrimaryDark">@color/cyan_primary_dark</item>
+    <item name="android:colorAccent">@color/cyan_primary_light</item>
     <item name="main_color">@color/cyan_primary</item>
     <item name="button_foreground">@color/cyan_primary</item>
     <item name="list_item_foreground">@color/cyan_primary_dark</item>
@@ -291,6 +383,9 @@
   <style
       name="Simplified_TealTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/teal_primary</item>
+    <item name="android:colorPrimaryDark">@color/teal_primary_dark</item>
+    <item name="android:colorAccent">@color/teal_primary_light</item>
     <item name="main_color">@color/teal_primary</item>
     <item name="button_foreground">@color/teal_primary</item>
     <item name="list_item_foreground">@color/teal_primary_dark</item>
@@ -301,6 +396,9 @@
   <style
       name="Simplified_AmberTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/amber_primary</item>
+    <item name="android:colorPrimaryDark">@color/amber_primary_dark</item>
+    <item name="android:colorAccent">@color/amber_primary_light</item>
     <item name="main_color">@color/amber_primary</item>
     <item name="button_foreground">@color/amber_primary</item>
     <item name="list_item_foreground">@color/amber_primary_dark</item>
@@ -311,6 +409,9 @@
   <style
       name="Simplified_OrangeTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/orange_primary</item>
+    <item name="android:colorPrimaryDark">@color/orange_primary_dark</item>
+    <item name="android:colorAccent">@color/orange_primary_light</item>
     <item name="main_color">@color/orange_primary</item>
     <item name="button_foreground">@color/orange_primary</item>
     <item name="list_item_foreground">@color/orange_primary_dark</item>
@@ -321,6 +422,9 @@
   <style
       name="Simplified_DeepOrangeTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/deep_orange_primary</item>
+    <item name="android:colorPrimaryDark">@color/deep_orange_primary_dark</item>
+    <item name="android:colorAccent">@color/deep_orange_primary_light</item>
     <item name="main_color">@color/deep_orange_primary</item>
     <item name="button_foreground">@color/deep_orange_primary</item>
     <item name="list_item_foreground">@color/deep_orange_primary_dark</item>
@@ -331,6 +435,9 @@
   <style
       name="Simplified_BrownTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/brown_primary</item>
+    <item name="android:colorPrimaryDark">@color/brown_primary_dark</item>
+    <item name="android:colorAccent">@color/brown_primary_light</item>
     <item name="main_color">@color/brown_primary</item>
     <item name="button_foreground">@color/brown_primary</item>
     <item name="list_item_foreground">@color/brown_primary_dark</item>
@@ -341,6 +448,9 @@
   <style
       name="Simplified_GreyTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/grey_primary</item>
+    <item name="android:colorPrimaryDark">@color/grey_primary_dark</item>
+    <item name="android:colorAccent">@color/grey_primary_light</item>
     <item name="main_color">@color/grey_primary</item>
     <item name="button_foreground">@color/grey_primary</item>
     <item name="list_item_foreground">@color/grey_primary_dark</item>
@@ -351,122 +461,14 @@
   <style
       name="Simplified_BlueGreyTheme_NoActionBar"
       parent="SimplifiedTheme_NoActionBar">
+    <item name="android:colorPrimary">@color/blue_grey_primary</item>
+    <item name="android:colorPrimaryDark">@color/blue_grey_primary_dark</item>
+    <item name="android:colorAccent">@color/blue_grey_primary_light</item>
     <item name="main_color">@color/blue_grey_primary</item>
     <item name="button_foreground">@color/blue_grey_primary</item>
     <item name="list_item_foreground">@color/blue_grey_primary_dark</item>
     <item name="downloading_background">@color/blue_grey_primary_dark</item>
     <item name="notification_background">@color/blue_grey_primary_dark</item>
-  </style>
-
-  <!-- Custom Styles -->
-
-  <style name="SimplifiedTheme_ActionBar.LaneTitle">
-    <item name="android:textSize">21sp</item>
-    <item name="android:textColor">@color/app_primary_color</item>
-    <item name="android:textStyle">normal</item>
-    <item name="android:typeface">sans</item>
-  </style>
-
-  <style
-    name="SimplifiedBookDialog"
-    parent="SimplifiedTheme_ActionBar">
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">false</item>
-    <item name="android:windowIsFloating">true</item>
-  </style>
-
-  <style
-    name="SimplifiedLoginDialog"
-    parent="SimplifiedTheme_ActionBar">
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">false</item>
-    <item name="android:windowIsFloating">true</item>
-  </style>
-
-  <style name="SimplifiedProfileDialog" parent="SimplifiedTheme_ActionBar">
-    <item name="android:windowNoTitle">true</item>
-    <item name="android:windowFullscreen">false</item>
-    <item name="android:windowIsFloating">true</item>
-  </style>
-
-  <style name="TextAppearanceFinish" parent="android:TextAppearance.Holo.Medium">
-    <item name="android:textColor">#fff</item>
-  </style>
-
-  <style name="WizardPageContainer">
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">match_parent</item>
-    <item name="android:orientation">vertical</item>
-  </style>
-
-  <style name="WizardPageTitle">
-    <item name="android:id">@android:id/title</item>
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">wrap_content</item>
-    <item name="android:layout_marginBottom">8dp</item>
-    <item name="android:layout_marginLeft">8dp</item>
-    <item name="android:layout_marginRight">8dp</item>
-    <item name="android:textSize">26sp</item>
-    <item name="android:textColor">@color/step_pager_selected_tab_color</item>
-    <item name="android:fontFamily">sans-serif-thin</item>
-    <item name="android:gravity">center</item>
-  </style>
-
-  <style name="WizardPageDescription">
-    <item name="android:id">@android:id/text1</item>
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">wrap_content</item>
-    <item name="android:layout_marginBottom">8dp</item>
-    <item name="android:layout_marginLeft">8dp</item>
-    <item name="android:layout_marginRight">8dp</item>
-
-    <item name="android:textSize">16sp</item>
-    <item name="android:textColor">@color/text_light</item>
-    <item name="android:fontFamily">sans-serif</item>
-
-  </style>
-
-  <style name="WizardPageFooter">
-    <item name="android:id">@android:id/text2</item>
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">wrap_content</item>
-    <item name="android:layout_marginBottom">8dp</item>
-    <item name="android:layout_marginLeft">8dp</item>
-    <item name="android:layout_marginRight">8dp</item>
-    <item name="android:textAppearance">?android:textAppearanceSmall</item>
-    <item name="android:textColor">@color/text_light</item>
-    <item name="android:fontFamily">sans-serif</item>
-    <item name="android:textAllCaps">false</item>
-  </style>
-
-  <style name="WizardFormLabel">
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">wrap_content</item>
-    <item name="android:layout_marginTop">16dp</item>
-    <item name="android:textAppearance">?android:textAppearanceSmall</item>
-    <item name="android:textColor">@color/text_light</item>
-    <item name="android:fontFamily">sans-serif</item>
-    <item name="android:textAllCaps">true</item>
-  </style>
-
-  <style name="WizardFormEditText">
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">wrap_content</item>
-    <item name="android:hint">Required</item>
-    <item name="android:inputType">textCapWords</item>
-    <item name="android:saveEnabled">false</item>
-    <item name="android:textColorHint">@color/text_hint</item>
-    <item name="android:fontFamily">sans-serif</item>
-  </style>
-
-  <style name="WizardFormTextView">
-    <item name="android:layout_width">match_parent</item>
-    <item name="android:layout_height">wrap_content</item>
-    <item name="android:inputType">textCapWords</item>
-    <item name="android:saveEnabled">false</item>
-    <item name="android:textColorHint">@color/text_hint</item>
-    <item name="android:fontFamily">sans-serif</item>
-    <item name="android:textAppearance">?android:textAppearanceMedium</item>
   </style>
 
 

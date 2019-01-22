@@ -44,13 +44,6 @@ public final class ProfileSwitchDialog extends DialogFragment {
   }
 
   @Override
-  public void onCreate(
-      final @Nullable Bundle state) {
-    super.onCreate(state);
-    this.setStyle(DialogFragment.STYLE_NORMAL, R.style.SimplifiedProfileDialog);
-  }
-
-  @Override
   public View onCreateView(
       final @Nullable LayoutInflater inflater_mn,
       final @Nullable ViewGroup container,

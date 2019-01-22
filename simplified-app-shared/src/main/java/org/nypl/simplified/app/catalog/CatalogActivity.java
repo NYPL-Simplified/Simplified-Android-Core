@@ -1,9 +1,9 @@
 package org.nypl.simplified.app.catalog;
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.widget.FrameLayout;
 
 import com.io7m.jnull.NullCheck;
@@ -50,7 +50,7 @@ public abstract class CatalogActivity extends NavigationDrawerActivity
   {
     CatalogActivity.LOG.debug("up stack: {}", up_stack);
 
-    final ActionBar bar = this.getActionBar();
+    final ActionBar bar = this.getSupportActionBar();
     if (android.os.Build.VERSION.SDK_INT < 21) {
       if (up_stack.isEmpty() == false) {
         bar.setDisplayHomeAsUpEnabled(false);

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.simplye"
   android:versionCode="1190"
@@ -8,38 +7,35 @@
 
   <uses-sdk
     android:minSdkVersion="21"
-    android:targetSdkVersion="28"/>
+    android:targetSdkVersion="28" />
 
-  <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
   <uses-feature android:name="android.hardware.location.gps" />
 
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
+    android:contentDescription="@string/feature_app_name"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/feature_app_name"
-    android:contentDescription="@string/feature_app_name"
     android:largeHeap="true"
-    android:theme="@style/SimplifiedTheme_ActionBar"
     android:usesCleartextTraffic="true">
 
     <!-- Main entry point for the application. -->
     <activity
       android:name="org.nypl.simplified.app.splash.SplashActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/feature_app_name"
       android:contentDescription="@string/feature_app_name"
-      android:theme="@style/SimplifiedTheme_NoActionBar"
->
+      android:label="@string/feature_app_name">
       <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
 
@@ -47,182 +43,145 @@
     <activity
       android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/catalog"
       android:contentDescription="@string/catalog"
-      >
-    </activity>
+      android:label="@string/catalog"></activity>
 
-    <activity android:name="org.nypl.simplified.app.CardCreatorActivity"
-          android:configChanges="orientation|screenSize"
-          android:label="Card Creator"
-          android:contentDescription="Card Creator">
-    </activity>
+    <activity
+      android:name="org.nypl.simplified.app.CardCreatorActivity"
+      android:configChanges="orientation|screenSize"
+      android:contentDescription="Card Creator"
+      android:label="Card Creator"></activity>
 
     <activity
       android:name="org.nypl.simplified.app.login.LoginActivity"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedTheme_NoActionBar"
-      android:exported="false">
-    </activity>
+      android:exported="false"></activity>
+
     <activity
       android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/catalog"
       android:contentDescription="@string/catalog"
-      android:exported="false">
-    </activity>
+      android:exported="false"
+      android:label="@string/catalog"></activity>
+
     <activity
       android:name="org.nypl.simplified.app.catalog.MainHoldsActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/holds"
       android:contentDescription="@string/holds"
-      android:exported="false">
-    </activity>
+      android:exported="false"
+      android:label="@string/holds"></activity>
+
     <activity
       android:name="org.nypl.simplified.app.MainSettingsActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/settings"
       android:contentDescription="@string/settings"
-      android:exported="false">
-    </activity>
+      android:exported="false"
+      android:label="@string/settings"></activity>
+
     <activity
       android:name="org.nypl.simplified.app.MainSettingsAccountActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/settings_account"
       android:contentDescription="@string/settings_account"
-      android:exported="false">
-    </activity>
+      android:exported="false"
+      android:label="@string/settings_account"></activity>
+
     <activity
       android:name="org.nypl.simplified.app.MainSettingsAccountsActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/settings_accounts"
       android:contentDescription="@string/settings_accounts"
-      android:exported="false">
-    </activity>
+      android:exported="false"
+      android:label="@string/settings_accounts"></activity>
+
     <activity
       android:name="org.nypl.simplified.app.HelpActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/help"
       android:contentDescription="@string/help"
-      android:exported="false">
-    </activity>
+      android:exported="false"
+      android:label="@string/help"></activity>
 
     <!-- General components -->
     <activity
       android:name="org.nypl.simplified.app.WebViewActivity"
       android:configChanges="orientation|screenSize"
-      android:exported="false">
-    </activity>
-
-    <!-- Welcome -->
-    <activity
-      android:name="org.nypl.simplified.app.MainWelcomeActivity"
-      android:configChanges="orientation|screenSize"
-      android:exported="true">
-    </activity>
-
-    <activity
-      android:name="org.nypl.simplified.app.MainWelcomeAccountPickerActivity"
-      android:configChanges="orientation|screenSize"
-      android:exported="true">
-    </activity>
+      android:exported="false"></activity>
 
     <!-- EULA -->
     <activity
       android:name="org.nypl.simplified.app.MainEULAActivity"
       android:configChanges="orientation|screenSize"
-      android:exported="true">
-    </activity>
+      android:exported="true"></activity>
 
     <!-- Catalog -->
     <activity
       android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
-      android:label="@string/catalog_book_detail"
       android:contentDescription="@string/catalog_book_detail"
-      android:exported="false">
-    </activity>
+      android:exported="false"
+      android:label="@string/catalog_book_detail"></activity>
     <activity
-        android:name="org.nypl.simplified.app.catalog.CatalogBookReportActivity"
-        android:label="@string/catalog_book_report"
-        android:contentDescription="@string/catalog_book_report"
-        android:exported="false">
-    </activity>
+      android:name="org.nypl.simplified.app.catalog.CatalogBookReportActivity"
+      android:contentDescription="@string/catalog_book_report"
+      android:exported="false"
+      android:label="@string/catalog_book_report"></activity>
 
     <!-- Reader -->
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderActivity"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedTheme_NoActionBar"
+      android:contentDescription="@string/reader"
       android:label="@string/reader"
-      android:contentDescription="@string/reader">
-    </activity>
+      android:theme="@style/SimplifiedTheme_NoActionBar"></activity>
     <activity
       android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
       android:configChanges="orientation|screenSize"
-      android:theme="@style/Theme.AppCompat.Light"
-      android:label="@string/reader_toc"
       android:contentDescription="@string/reader_toc"
-      >
-    </activity>
+      android:label="@string/reader_toc"></activity>
 
     <!-- Audio book player -->
     <activity
       android:name="org.nypl.simplified.app.player.AudioBookPlayerActivity"
       android:configChanges="orientation|screenSize"
-      android:label="@string/audio_book_player"
-      android:contentDescription="@string/audio_book_player">
-    </activity>
+      android:contentDescription="@string/audio_book_player"
+      android:label="@string/audio_book_player"></activity>
 
     <!-- Testing -->
     <activity
       android:name="org.nypl.simplified.app.testing.AlternateFeedURIsActivity"
       android:configChanges="orientation|screenSize"
-      android:exported="true">
-    </activity>
+      android:exported="true"></activity>
 
     <!-- HelpStack -->
     <activity
       android:name="com.tenmiles.helpstack.activities.HomeActivity"
-      android:label="@string/hs_help_title" android:exported="false"
+      android:exported="false"
+      android:label="@string/hs_help_title"
       tools:replace="android:label">
       <intent-filter>
-        <action android:name="com.tenmiles.helpstack.ShowHelp"/>
-        <category android:name="android.intent.category.DEFAULT"/>
+        <action android:name="com.tenmiles.helpstack.ShowHelp" />
+        <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>
     <activity
       android:name="com.tenmiles.helpstack.activities.NewIssueActivity"
-      android:windowSoftInputMode="adjustResize"
+      android:contentDescription="@string/hs_issuebutton_title"
       android:label="@string/hs_issuebutton_title"
-      android:contentDescription="@string/hs_issuebutton_title">
-    </activity>
+      android:windowSoftInputMode="adjustResize"></activity>
     <activity
       android:name="com.tenmiles.helpstack.activities.NewUserActivity"
-      android:windowSoftInputMode="adjustResize">
-    </activity>
+      android:windowSoftInputMode="adjustResize"></activity>
     <activity
       android:name="com.tenmiles.helpstack.activities.IssueDetailActivity"
-      android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
-    </activity>
-    <activity
-      android:name="com.tenmiles.helpstack.activities.ArticleActivity">
-    </activity>
-    <activity
-      android:name="com.tenmiles.helpstack.activities.SectionActivity">
-    </activity>
-    <activity
-      android:name="com.tenmiles.helpstack.activities.ImageAttachmentDisplayActivity">
-    </activity>
+      android:windowSoftInputMode="stateAlwaysHidden|adjustResize"></activity>
+    <activity android:name="com.tenmiles.helpstack.activities.ArticleActivity"></activity>
+    <activity android:name="com.tenmiles.helpstack.activities.SectionActivity"></activity>
+    <activity android:name="com.tenmiles.helpstack.activities.ImageAttachmentDisplayActivity"></activity>
     <activity
       android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
-      android:screenOrientation="portrait">
-    </activity>
+      android:screenOrientation="portrait"></activity>
     <activity
       android:name="org.nypl.simplified.app.ReportIssueActivity"
-      android:windowSoftInputMode="adjustResize"
+      android:contentDescription="@string/hs_issuebutton_title"
       android:label="@string/hs_issuebutton_title"
-      android:contentDescription="@string/hs_issuebutton_title">
-    </activity>
+      android:windowSoftInputMode="adjustResize"></activity>
 
     <receiver
       android:name="com.tenmiles.helpstack.service.AttachmentDownloadReceiver"
@@ -235,8 +194,8 @@
     </receiver>
 
     <uses-library
-        android:name="org.apache.http.legacy"
-        android:required="false" />
+      android:name="org.apache.http.legacy"
+      android:required="false" />
   </application>
 
 </manifest>

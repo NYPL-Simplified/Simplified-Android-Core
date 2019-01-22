@@ -400,11 +400,9 @@ abstract class CatalogFeedActivity : CatalogActivity() {
 
     val inDrawerOpen = true
     val empty = ImmutableStack.empty<CatalogFeedArgumentsType>()
-    val inTitle = this.resources.getString(R.string.feature_app_name)
-
-    /// XXX: Replace with accounts/profiles
-    val inUri = URI.create("localhost")
-    return CatalogFeedArgumentsRemote(inDrawerOpen, empty, inTitle, inUri, false)
+    val feedTitle = this.resources.getString(R.string.feature_app_name)
+    val feedURI = Simplified.getProfilesController().profileAccountCurrentCatalogRootURI()
+    return CatalogFeedArgumentsRemote(inDrawerOpen, empty, feedTitle, feedURI, false)
   }
 
   private fun loadFeed(
@@ -829,7 +827,9 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     val search = feedActual.feedSearch
     val args = this.retrieveArguments()
     var searchOk = false
-    if (search != null) {
+
+    // XXX: Update to support library search item
+    if (search != null && false) {
       this.searchView = searchItem.actionView as SearchView
 
       // Check that the search URI is of an understood type.

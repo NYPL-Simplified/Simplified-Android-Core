@@ -43,13 +43,6 @@ public final class ProfileTimeOutDialog extends DialogFragment {
   }
 
   @Override
-  public void onCreate(
-      final @Nullable Bundle state) {
-    super.onCreate(state);
-    this.setStyle(DialogFragment.STYLE_NORMAL, R.style.SimplifiedProfileDialog);
-  }
-
-  @Override
   public void onCancel(final DialogInterface dialog) {
     super.onCancel(dialog);
     this.on_dismiss.onDismiss(dialog);
