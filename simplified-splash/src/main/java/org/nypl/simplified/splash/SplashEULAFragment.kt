@@ -6,7 +6,10 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Button
 import org.nypl.simplified.books.eula.EULAType
 import org.nypl.simplified.splash.SplashEvent.SplashEULAEvent.*
@@ -71,11 +74,32 @@ class SplashEULAFragment : Fragment() {
     this.logger.debug("eula:     {}", this.eula)
     this.logger.debug("eula URL: {}", url)
 
+    this.webView.settings.allowFileAccessFromFileURLs = true
     this.webView.settings.allowFileAccess = true
     this.webView.settings.allowContentAccess = true
     this.webView.settings.setSupportMultipleWindows(false)
     this.webView.settings.allowUniversalAccessFromFileURLs = false
     this.webView.settings.javaScriptEnabled = false
+
+    this.webView.webViewClient = object:WebViewClient() {
+      override fun onReceivedError(
+        view: WebView?,
+        errorCode: Int,
+        description: String?,
+        failingUrl: String?) {
+        super.onReceivedError(view, errorCode, description, failingUrl)
+        logger.error("onReceivedError: {} {} {}", errorCode, description, failingUrl)
+      }
+
+      override fun onReceivedError(
+        view: WebView?,
+        request: WebResourceRequest?,
+        error: WebResourceError?) {
+        super.onReceivedError(view, request, error)
+        logger.error("onReceivedError: {}", error)
+      }
+    }
+
     this.webView.loadUrl(url.toString())
     return view
   }

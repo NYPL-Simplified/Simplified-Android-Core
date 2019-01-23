@@ -88,9 +88,14 @@ public final class SyncedDocument extends SyncedDocumentAbstract
     final File meta = new File(directory, name + ".meta");
     final File meta_tmp = new File(directory, name + ".meta.tmp");
 
-    if (current.isFile() == false) {
-      FileUtilities.fileWriteStreamAtomically(
-        current, current_tmp, initial.call(Unit.unit()));
+    LOG.debug("synced document [{}]: current:     {}", name, current);
+    LOG.debug("synced document [{}]: current_tmp: {}", name, current_tmp);
+    LOG.debug("synced document [{}]: meta:        {}", name, meta);
+    LOG.debug("synced document [{}]: meta_tmp:    {}", name, meta_tmp);
+
+    if (!current.isFile() || current.length() == 0L) {
+      LOG.debug("synced document [{}]: initializing file", name);
+      FileUtilities.fileWriteStreamAtomically(current, current_tmp, initial.call(Unit.unit()));
     }
 
     long fetched_last = 0;
