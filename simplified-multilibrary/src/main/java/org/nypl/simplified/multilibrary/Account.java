@@ -286,7 +286,7 @@ public class Account implements Serializable, Comparable<Account> {
   public Account(final JSONObject account) {
 
     try {
-      this.id = account.getInt("id");
+      this.id = account.getInt("id_numeric");
       this.path_component = this.id.toString();
       this.name = account.getString("name");
       this.catalog_url = account.getString("catalogUrl");
@@ -369,7 +369,7 @@ public class Account implements Serializable, Comparable<Account> {
   public JSONObject getJsonObject() {
     final JSONObject object = new JSONObject();
     try {
-      object.put("id", this.id);
+      object.put("id_numeric", this.id);
       object.put("pathComponent", this.path_component);
       object.put("name", this.name);
       object.put("subtitle", this.subtitle);
