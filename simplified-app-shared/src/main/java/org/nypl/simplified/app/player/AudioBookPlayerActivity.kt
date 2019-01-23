@@ -420,15 +420,12 @@ class AudioBookPlayerActivity : FragmentActivity(),
       this.log.debug("book has finished")
 
       /*
-       * Wait a few seconds and then tell the engine to switch back to the first chapter. The
-       * delay is necessary because some underlying audio engines will misbehave somewhat when
-       * sent player commands inside event callbacks.
+       * Wait a few seconds before displaying the dialog asking if the user wants
+       * to return the book.
        */
 
       this.playerScheduledExecutor.schedule({
         if (!this.destroying) {
-          this.log.debug("rewinding book")
-          this.player.movePlayheadToBookStart()
           UIThread.runOnUIThread { this.loanReturnShowDialog() }
         }
       }, 5L, TimeUnit.SECONDS)
