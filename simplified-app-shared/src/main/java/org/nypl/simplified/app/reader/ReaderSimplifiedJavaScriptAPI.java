@@ -61,4 +61,14 @@ public final class ReaderSimplifiedJavaScriptAPI
   {
     this.evaluate("simplified.pageDidChange();");
   }
+
+  @Override public void getReadiumCFI()
+  {
+    this.evaluate("simplified.getReadiumCFI();");
+  }
+
+  @Override public void setReadiumCFI()
+  {
+    this.evaluate("simplified.setReadiumCFI();");
+  }
 }

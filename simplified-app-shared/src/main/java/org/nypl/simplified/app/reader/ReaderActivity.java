@@ -496,17 +496,22 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   private void applyReaderPreferences(ReaderPreferences preferences) {
-    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
-    js.setPageStyleSettings(preferences);
+    // Get the CFI from the ReadiumSDK before applying the new
+    // page style settings.
+    this.simplified_js_api.getReadiumCFI();
+
+    this.readium_js_api.setPageStyleSettings(preferences);
+
+    // Once they are applied, go to the CFI that is stored in the
+    // JS ReadiumSDK instance.
+    this.simplified_js_api.setReadiumCFI();
 
     final ReaderColorScheme cs = preferences.colorScheme();
     this.applyViewerColorScheme(cs);
 
     UIThread.runOnUIThreadDelayed(() -> {
-      final ReaderReadiumJavaScriptAPIType readium_js =
-        Objects.requireNonNull(this.readium_js_api);
-      readium_js.getCurrentPage(this);
-      readium_js.mediaOverlayIsAvailable(this);
+      this.readium_js_api.getCurrentPage(this);
+      this.readium_js_api.mediaOverlayIsAvailable(this);
     }, 300L);
   }
 
