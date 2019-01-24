@@ -2,7 +2,10 @@ package org.nypl.simplified.books.core;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
+
 import org.nypl.simplified.http.core.HTTPAuthType;
+import org.nypl.simplified.http.core.HTTPProblemReport;
+import org.nypl.simplified.http.core.HTTPProblemReportLogging;
 import org.nypl.simplified.http.core.HTTPRedirectFollower;
 import org.nypl.simplified.http.core.HTTPResultError;
 import org.nypl.simplified.http.core.HTTPResultException;
@@ -26,71 +29,60 @@ import java.net.URI;
  * authentication.
  */
 
-public final class FeedHTTPTransport
-  implements OPDSFeedTransportType<OptionType<HTTPAuthType>>
-{
-  private static final Logger LOG;
-
-  static {
-    LOG = NullCheck.notNull(LoggerFactory.getLogger(FeedHTTPTransport.class));
-  }
+public final class FeedHTTPTransport implements OPDSFeedTransportType<OptionType<HTTPAuthType>> {
+  private static final Logger LOG = LoggerFactory.getLogger(FeedHTTPTransport.class);
 
   private final HTTPType http;
 
-  private FeedHTTPTransport(final HTTPType in_http)
-  {
+  private FeedHTTPTransport(final HTTPType in_http) {
     this.http = NullCheck.notNull(in_http);
   }
 
   /**
    * @param http An HTTP interface
-   *
    * @return A new transport
    */
 
   public static OPDSFeedTransportType<OptionType<HTTPAuthType>> newTransport(
-    final HTTPType http)
-  {
+    final HTTPType http) {
     return new FeedHTTPTransport(http);
   }
 
-  @Override public InputStream getStream(
+  @Override
+  public InputStream getStream(
     final OptionType<HTTPAuthType> auth,
     final URI uri,
     final String method)
-    throws OPDSFeedTransportException
-  {
-    FeedHTTPTransport.LOG.debug("get stream: {} {}", uri, auth);
+    throws OPDSFeedTransportException {
+    LOG.debug("get stream: {} {}", uri, auth);
 
-    final HTTPRedirectFollower rf = new HTTPRedirectFollower(
-      FeedHTTPTransport.LOG, this.http, method, auth, 5, uri, 0L);
+    final HTTPRedirectFollower rf =
+      new HTTPRedirectFollower(LOG, this.http, method, auth, 5, uri, 0L);
 
     final HTTPResultType<InputStream> r = rf.run();
     return r.matchResult(
-      new HTTPResultMatcherType<InputStream, InputStream,
-        OPDSFeedTransportException>()
-      {
+      new HTTPResultMatcherType<InputStream, InputStream, OPDSFeedTransportException>() {
         @Override
         public InputStream onHTTPError(final HTTPResultError<InputStream> e)
-          throws OPDSFeedTransportException
-        {
-          throw FeedHTTPTransportException.newException(
-            e.getMessage(), e.getStatus(), e.getProblemReport());
+          throws OPDSFeedTransportException {
+          final String message = e.getMessage();
+          final int status = e.getStatus();
+          final OptionType<HTTPProblemReport> problemReport = e.getProblemReport();
+          HTTPProblemReportLogging.INSTANCE.logError(LOG, uri, message, status, problemReport);
+          throw FeedHTTPTransportException.newException(message, status, problemReport);
         }
 
-        @Override public InputStream onHTTPException(
+        @Override
+        public InputStream onHTTPException(
           final HTTPResultException<InputStream> e)
-          throws OPDSFeedTransportException
-        {
+          throws OPDSFeedTransportException {
           final Exception er = e.getError();
           final IOException ex = new IOException(er);
           throw new OPDSFeedTransportIOException(er.getMessage(), ex);
         }
 
         @Override
-        public InputStream onHTTPOK(final HTTPResultOKType<InputStream> e)
-          throws OPDSFeedTransportException
-        {
+        public InputStream onHTTPOK(final HTTPResultOKType<InputStream> e) {
           return e.getValue();
         }
       });
