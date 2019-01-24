@@ -4,7 +4,7 @@
         "authPasscodeLength": 4,
         "catalogUrl": "https://circulation.librarysimplified.org/NYNYPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
-        "id_numeric": 1065,
+        "id_numeric": 0,
         "id_uuid": "urn:uuid:065c0c11-0d0f-42a3-82e4-277b18786949",
         "inProduction": true,
         "licenseUrl": "http://www.librarysimplified.org/license.html",
