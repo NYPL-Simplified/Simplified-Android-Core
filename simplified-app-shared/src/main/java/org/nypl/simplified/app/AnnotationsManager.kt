@@ -537,16 +537,16 @@ class AnnotationsManager(private val libraryAccount: Account,
   }
 
   private fun logVolleyError(error: VolleyError?) {
-    val code = error?.networkResponse?.statusCode
-    val errorBody = error?.networkResponse?.let {
+    val statusCode = error?.networkResponse?.statusCode
+    val errorBody = error?.networkResponse?.apply {
       try {
-        String(it.data, Charset.forName("UTF-8"))
+        String(this.data, Charset.forName("UTF-8"))
       } catch (e: java.lang.Exception) {
         e.printStackTrace()
-        "null"
       }
     }
-    LOG.error("Volley request has returned an error: " +
-        "Status: ${code ?: "code: null"}. ${errorBody ?: "error cause & body: null"}")
+    val errorString = "Volley request has returned an error: " +
+        "Status Code: ${statusCode ?: "null"}. Network Response: \n${errorBody ?: "null"}"
+    LOG.error(errorString, error)
   }
 }
