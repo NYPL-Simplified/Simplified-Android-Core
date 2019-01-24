@@ -109,6 +109,7 @@ public final class ReaderActivity extends Activity implements
   private @Nullable Container                         epub_container;
   private @Nullable ReaderReadiumJavaScriptAPIType    readium_js_api;
   private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js_api;
+  private @Nullable ReaderSimplifiedJavaScriptAPIType simplified_js;
   private           ImageView                         view_bookmark;
   private @Nullable ViewGroup                         view_hud;
   private @Nullable ProgressBar                       view_loading;
@@ -432,6 +433,10 @@ public final class ReaderActivity extends Activity implements
 
     this.readium_js_api = ReaderReadiumJavaScriptAPI.newAPI(in_webview);
     this.simplified_js_api = ReaderSimplifiedJavaScriptAPI.newAPI(in_webview);
+
+    final ReaderSimplifiedJavaScriptAPIType simplified_js =
+      Objects.requireNonNull(this.simplified_js_api);
+    this.simplified_js = simplified_js;
 
     in_title_text.setText("");
 
@@ -781,7 +786,16 @@ public final class ReaderActivity extends Activity implements
 
     final ReaderReadiumJavaScriptAPIType js =
       Objects.requireNonNull(this.readium_js_api);
+
+    // Get the CFI from the ReadiumSDK before applying the new
+    // page style settings.
+    this.simplified_js.getReadiumCFI();
+
     js.setPageStyleSettings(s);
+
+    // Once they are applied, go to the CFI that is stored in the
+    // JS ReadiumSDK instance.
+    this.simplified_js.setReadiumCFI();
 
     final ReaderColorScheme cs = s.getColorScheme();
     this.applyViewerColorScheme(cs);
@@ -1012,9 +1026,6 @@ public final class ReaderActivity extends Activity implements
       }, 300L);
     });
 
-    final ReaderSimplifiedJavaScriptAPIType simplified_js =
-      Objects.requireNonNull(this.simplified_js_api);
-
     /*
       Make the web view visible with a slight delay (as sometimes a
       pagination-change event will be sent even though the content has not
@@ -1028,10 +1039,10 @@ public final class ReaderActivity extends Activity implements
         in_web_view.setVisibility(View.VISIBLE);
         in_progress_bar.setVisibility(View.VISIBLE);
         in_progress_text.setVisibility(View.VISIBLE);
-        simplified_js.pageHasChanged();
+        this.simplified_js.pageHasChanged();
       }, 200L);
     } else {
-      UIThread.runOnUIThread(simplified_js::pageHasChanged);
+      UIThread.runOnUIThread(this.simplified_js::pageHasChanged);
     }
   }
 
