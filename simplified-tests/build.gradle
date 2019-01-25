@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
   implementation project(':simplified-assert')
+  implementation project(':simplified-books-annotations')
   implementation project(':simplified-books-core')
   implementation project(':simplified-books-core-ng')
   implementation project(':simplified-downloader-core')
