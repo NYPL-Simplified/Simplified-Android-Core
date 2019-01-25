@@ -136,6 +136,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   private List<BookmarkAnnotation> bookmarks;
   private ObservableSubscriptionType<ProfileEvent> profile_subscription;
   private ObjectMapper json_mapper = new ObjectMapper();
+  private BookDatabaseEntryFormatHandleEPUB formatHandle;
 
   /**
    * Construct an activity.
@@ -440,25 +441,26 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     in_title_text.setText("");
 
-    BookDatabaseEntryFormatHandleEPUB formatHandle;
     try {
-      formatHandle = Simplified.getProfilesController()
-        .profileAccountCurrent()
-        .bookDatabase()
-        .entry(this.book_id)
-        .findFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
+      this.formatHandle =
+        Simplified.getProfilesController()
+          .profileAccountCurrent()
+          .bookDatabase()
+          .entry(this.book_id)
+          .findFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
     } catch (BookDatabaseException | ProfileNoneCurrentException e) {
       throw new IllegalStateException(e);
     }
 
+    Objects.requireNonNull(this.formatHandle, "formatHandle");
+
     final ReaderReadiumEPUBLoaderType loader = Simplified.getReadiumEPUBLoader();
     final ReaderReadiumEPUBLoadRequest request =
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
-        .setAdobeRightsFile(Option.of(formatHandle.getFormat().getAdobeRightsFile()))
+        .setAdobeRightsFile(Option.of(this.formatHandle.getFormat().getAdobeRightsFile()))
         .build();
 
     loader.loadEPUB(request, this);
-
     this.applyViewerColorFilters();
   }
 
@@ -518,6 +520,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     this.current_location = loc;
 
+    try {
+      this.formatHandle.setLastReadLocation(loc);
+    } catch (final IOException e) {
+      LOG.error("could not save last read location: ", e);
+    }
+
 //    lazyInitSyncManagement();
 //
 //    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
@@ -533,12 +541,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   protected void onPause() {
     super.onPause();
 
-    if (this.book_id != null && this.current_location != null) {
+    if (this.current_location != null) {
       try {
-        Simplified.getProfilesController()
-          .profileBookmarkSet(this.book_id, this.current_location);
-      } catch (final ProfileNoneCurrentException e) {
-        throw new IllegalStateException(e);
+        this.formatHandle.setLastReadLocation(this.current_location);
+      } catch (final IOException e) {
+        LOG.error("could not save last read location: ", e);
       }
     }
 
@@ -852,11 +859,10 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
      * book to that specific page. Otherwise, start at the beginning.
      */
 
-//    final BookID in_book_id = Objects.requireNonNull(this.book_id);
-//    final OPDSAcquisitionFeedEntry in_entry = Objects.requireNonNull(this.feed_entry);
-//    final ReaderBookmarksSharedPrefsType bookmarks = rs.getBookmarks();
-//    final ReaderBookLocation readingPosition = bookmarks.getReadingPosition(in_book_id, in_entry);
-//    navigateTo(readingPosition);
+    final ReaderBookLocation location = this.formatHandle.getFormat().getLastReadLocation();
+    if (location != null) {
+      navigateTo(location);
+    }
 
     /*
      * Configure the visibility of UI elements.
