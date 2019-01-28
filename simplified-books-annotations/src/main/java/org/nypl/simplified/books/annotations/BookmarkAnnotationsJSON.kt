@@ -33,7 +33,7 @@ object BookmarkAnnotationsJSON {
 
     val node = mapper.createObjectNode()
     node.put("source", target.source)
-    node.put("selector", serializeSelectorNodeToJSON(mapper, target.selector))
+    node.set("selector", serializeSelectorNodeToJSON(mapper, target.selector))
     return node
   }
 
@@ -101,8 +101,8 @@ object BookmarkAnnotationsJSON {
     annotation.id.let { v -> node.put("id", v) }
     node.put("motivation", annotation.motivation)
     node.put("type", annotation.type)
-    node.put("target", serializeTargetNodeToJSON(mapper, annotation.target))
-    node.put("body", serializeBodyNodeToJSON(mapper, annotation.body))
+    node.set("target", serializeTargetNodeToJSON(mapper, annotation.target))
+    node.set("body", serializeBodyNodeToJSON(mapper, annotation.body))
     return node
   }
 
@@ -133,7 +133,7 @@ object BookmarkAnnotationsJSON {
     val node = mapper.createObjectNode()
     node.put("id", annotation.id)
     node.put("type", annotation.type)
-    node.put("items", nodes)
+    node.set("items", nodes)
     return node
   }
 
@@ -142,8 +142,8 @@ object BookmarkAnnotationsJSON {
     return BookmarkAnnotationFirstNode(
       type = JSONParserUtilities.getString(node, "type"),
       id = JSONParserUtilities.getString(node, "id"),
-      items = JSONParserUtilities.getArray(node, "items").map { node ->
-        deserializeBookmarkAnnotationFromJSON(JSONParserUtilities.checkObject(null, node))
+      items = JSONParserUtilities.getArray(node, "items").map { items ->
+        deserializeBookmarkAnnotationFromJSON(JSONParserUtilities.checkObject(null, items))
       })
   }
 
@@ -154,9 +154,9 @@ object BookmarkAnnotationsJSON {
     val node = mapper.createObjectNode()
     node.put("total", annotation.total)
     node.put("id", annotation.id)
-    node.put("@context", serializeStringArray(mapper, annotation.context))
-    node.put("type", serializeStringArray(mapper, annotation.type))
-    node.put("first", serializeBookmarkAnnotationFirstNodeToJSON(mapper, annotation.first))
+    node.set("@context", serializeStringArray(mapper, annotation.context))
+    node.set("type", serializeStringArray(mapper, annotation.type))
+    node.set("first", serializeBookmarkAnnotationFirstNodeToJSON(mapper, annotation.first))
     return node
   }
 
