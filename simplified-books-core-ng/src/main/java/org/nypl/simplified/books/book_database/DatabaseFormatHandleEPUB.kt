@@ -5,8 +5,8 @@ import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.reader.ReaderBookLocation
-import org.nypl.simplified.books.reader.ReaderBookLocationJSON
+import org.nypl.simplified.books.reader.ReaderBookmark
+import org.nypl.simplified.books.reader.ReaderBookmarkJSON
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -48,6 +48,7 @@ internal class DatabaseFormatHandleEPUB internal constructor(
       loadInitial(
         fileAdobeRights = this.fileAdobeRights,
         fileAdobeMeta = this.fileAdobeMeta,
+        fileBookmarks = this.fileBookmarks,
         fileBook = this.fileBook,
         fileLastRead = this.fileLastRead)
     }
@@ -124,13 +125,31 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     this.parameters.onUpdated.invoke(newFormat)
   }
 
-  override fun setLastReadLocation(location: ReaderBookLocation) {
+  override fun setLastReadLocation(bookmark: ReaderBookmark?) {
+    val newFormat = synchronized(this.formatLock) {
+      if (bookmark != null) {
+        FileUtilities.fileWriteUTF8Atomically(
+          this.fileLastRead,
+          this.fileLastReadTmp,
+          ReaderBookmarkJSON.serializeToString(objectMapper, bookmark))
+      } else {
+        FileUtilities.fileDelete(this.fileLastRead)
+      }
+
+      this.formatRef = this.formatRef.copy(lastReadLocation = bookmark)
+      this.formatRef
+    }
+
+    this.parameters.onUpdated.invoke(newFormat)
+  }
+
+  override fun setBookmarks(bookmarks: List<ReaderBookmark>) {
     val newFormat = synchronized(this.formatLock) {
       FileUtilities.fileWriteUTF8Atomically(
-        this.fileLastRead,
-        this.fileLastReadTmp,
-        ReaderBookLocationJSON.serializeToString(objectMapper, location))
-      this.formatRef = this.formatRef.copy(lastReadLocation = location)
+        this.fileBookmarks,
+        this.fileBookmarksTmp,
+        ReaderBookmarkJSON.serializeToString(objectMapper, bookmarks))
+      this.formatRef = this.formatRef.copy(bookmarks = bookmarks)
       this.formatRef
     }
 
@@ -146,17 +165,34 @@ internal class DatabaseFormatHandleEPUB internal constructor(
       fileAdobeRights: File,
       fileAdobeMeta: File,
       fileBook: File,
+      fileBookmarks: File,
       fileLastRead: File): BookFormat.BookFormatEPUB {
       return BookFormat.BookFormatEPUB(
         adobeRightsFile = fileAdobeRights,
         adobeRights = this.loadAdobeRightsInformationIfPresent(fileAdobeRights, fileAdobeMeta),
+        bookmarks = this.loadBookmarksIfPresent(fileBookmarks),
         file = if (fileBook.isFile) fileBook else null,
         lastReadLocation = this.loadLastReadLocationIfPresent(fileLastRead))
     }
 
     @Throws(IOException::class)
+    private fun loadBookmarksIfPresent(fileBookmarks: File): List<ReaderBookmark> {
+      return if (fileBookmarks.isFile) {
+        this.loadBookmarks(fileBookmarks)
+      } else {
+        listOf()
+      }
+    }
+
+    private fun loadBookmarks(fileBookmarks: File): List<ReaderBookmark> {
+      val tree = this.objectMapper.readTree(fileBookmarks)
+      val array = JSONParserUtilities.checkArray(null, tree)
+      return array.map { node -> ReaderBookmarkJSON.deserializeFromJSON(this.objectMapper, node) }
+    }
+
+    @Throws(IOException::class)
     private fun loadLastReadLocationIfPresent(
-      fileLastRead: File): ReaderBookLocation? {
+      fileLastRead: File): ReaderBookmark? {
       return if (fileLastRead.isFile) {
         this.loadLastReadLocation(fileLastRead)
       } else {
@@ -165,9 +201,9 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     }
 
     @Throws(IOException::class)
-    private fun loadLastReadLocation(fileLastRead: File): ReaderBookLocation {
+    private fun loadLastReadLocation(fileLastRead: File): ReaderBookmark {
       val serialized = FileUtilities.fileReadUTF8(fileLastRead)
-      return ReaderBookLocationJSON.deserializeFromString(this.objectMapper, serialized)
+      return ReaderBookmarkJSON.deserializeFromString(this.objectMapper, serialized)
     }
 
     @Throws(IOException::class)

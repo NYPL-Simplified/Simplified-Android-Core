@@ -44,6 +44,7 @@ import org.nypl.simplified.books.bundled_content.BundledContentResolverType;
 import org.nypl.simplified.books.clock.Clock;
 import org.nypl.simplified.books.clock.ClockType;
 import org.nypl.simplified.books.controller.AnalyticsControllerType;
+import org.nypl.simplified.books.controller.BookmarksControllerType;
 import org.nypl.simplified.books.controller.BooksControllerType;
 import org.nypl.simplified.books.controller.Controller;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
@@ -260,6 +261,15 @@ public final class Simplified extends MultiDexApplication {
    */
 
   public static BooksControllerType getBooksController() {
+    final Simplified i = Simplified.checkInitialized();
+    return i.book_controller;
+  }
+
+  /**
+   * @return The books controller
+   */
+
+  public static BookmarksControllerType getBookmarksController() {
     final Simplified i = Simplified.checkInitialized();
     return i.book_controller;
   }

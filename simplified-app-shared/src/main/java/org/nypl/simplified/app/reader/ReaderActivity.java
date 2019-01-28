@@ -11,7 +11,6 @@ import android.content.res.Resources;
 import android.graphics.ColorMatrixColorFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,13 +24,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.util.concurrent.FluentFuture;
+import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
+import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
-import com.io7m.junreachable.UnreachableCodeException;
 
-import org.joda.time.Instant;
-import org.nypl.drm.core.AdobeDeviceID;
+import org.joda.time.LocalDateTime;
 import org.nypl.simplified.app.ApplicationColorScheme;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
@@ -40,20 +40,21 @@ import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
 import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
+import org.nypl.simplified.books.accounts.AccountAuthenticationAdobePostActivationCredentials;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
+import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookID;
-import org.nypl.simplified.books.core.AccountCredentials;
-import org.nypl.simplified.books.core.BodyNode;
+import org.nypl.simplified.books.controller.BookmarksControllerType;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
-import org.nypl.simplified.books.core.SelectorNode;
-import org.nypl.simplified.books.core.TargetNode;
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfilePreferencesChanged;
 import org.nypl.simplified.books.reader.ReaderBookLocation;
 import org.nypl.simplified.books.reader.ReaderBookLocationJSON;
+import org.nypl.simplified.books.reader.ReaderBookmark;
 import org.nypl.simplified.books.reader.ReaderColorScheme;
 import org.nypl.simplified.books.reader.ReaderPreferences;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
@@ -64,13 +65,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import kotlin.Unit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode.AUTO;
 import static org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.SyntheticSpreadMode.SINGLE;
@@ -126,14 +127,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   private WebView view_web_view;
   private ReaderReadiumViewerSettings viewer_settings;
   private boolean web_view_resized;
-  private ReaderBookLocation current_location;
-  private BookmarkAnnotation current_bookmark;
-  private AccountCredentials credentials;
-  private ReaderSyncManager sync_manager;
-  private int current_page_index;
-  private int current_page_count;
-  private String current_chapter_title;
-  private List<BookmarkAnnotation> bookmarks;
+  private ReaderBookmark current_location;
+  private AccountType current_account;
+  private int current_page_index = 0;
+  private int current_page_count = 1;
+  private String current_chapter_title = "Unknown";
   private ObservableSubscriptionType<ProfileEvent> profile_subscription;
   private ObjectMapper json_mapper = new ObjectMapper();
   private BookDatabaseEntryFormatHandleEPUB formatHandle;
@@ -204,8 +202,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
    * values to all of the views in the hierarchy.
    */
 
-  private void applyViewerColorScheme(
-    final ReaderColorScheme cs) {
+  private void applyViewerColorScheme(final ReaderColorScheme cs) {
     LOG.debug("applying color scheme");
 
     final View in_root = Objects.requireNonNull(this.view_root);
@@ -215,8 +212,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     });
   }
 
-  private void makeInitialReadiumRequest(
-    final ReaderHTTPServerType hs) {
+  private void makeInitialReadiumRequest(final ReaderHTTPServerType hs) {
     final URI reader_uri = URI.create(hs.getURIBase() + "reader.html");
     final WebView wv = Objects.requireNonNull(this.view_web_view);
     UIThread.runOnUIThread(() -> {
@@ -256,8 +252,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onConfigurationChanged(
-    final @Nullable Configuration c) {
+  public void onConfigurationChanged(final @Nullable Configuration c) {
     super.onConfigurationChanged(c);
 
     LOG.debug("configuration changed");
@@ -305,6 +300,14 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     LOG.debug("epub file:  {}", in_epub_file);
     LOG.debug("book id:    {}", this.book_id);
     LOG.debug("entry id:   {}", entry.getFeedEntry().getID());
+
+    try {
+      this.current_account =
+        Simplified.getProfilesController()
+          .profileAccountCurrent();
+    } catch (ProfileNoneCurrentException e) {
+      throw new IllegalStateException(e);
+    }
 
     this.profile_subscription =
       Simplified.getProfilesController()
@@ -464,8 +467,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     this.applyViewerColorFilters();
   }
 
-  private void onProfileEvent(
-    final ProfileEvent event) {
+  private void onProfileEvent(final ProfileEvent event) {
     if (event instanceof ProfilePreferencesChanged) {
       try {
         onProfileEventPreferencesChanged((ProfilePreferencesChanged) event);
@@ -507,52 +509,48 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onCurrentPageError(
-    final Throwable x) {
+  public void onCurrentPageError(final Throwable x) {
     LOG.error("onCurrentPageError: {}", x.getMessage(), x);
   }
 
   @Override
-  public void onCurrentPageReceived(
-    final ReaderBookLocation loc) {
-    Objects.requireNonNull(loc);
-    LOG.debug("received book location: {}", loc);
+  public void onCurrentPageReceived(final ReaderBookLocation location) {
+    Objects.requireNonNull(location);
+    LOG.debug("received book location: {}", location);
 
-    this.current_location = loc;
+    final ReaderBookmark bookmark =
+      new ReaderBookmark(
+        this.book_id,
+        location,
+        LocalDateTime.now(),
+        this.current_chapter_title,
+        currentChapterProgress(),
+        currentBookProgress(),
+        getDeviceIDString());
 
-    try {
-      this.formatHandle.setLastReadLocation(loc);
-    } catch (final IOException e) {
-      LOG.error("could not save last read location: ", e);
-    }
+    this.current_location = bookmark;
 
-//    lazyInitSyncManagement();
-//
-//    final SimplifiedReaderAppServicesType rs = Simplified.getReaderAppServices();
-//    final ReaderBookmarksSharedPrefsType bm = rs.getBookmarks();
-//    final BookID in_book_id = Objects.requireNonNull(this.book_id);
-//
-//    bm.saveReadingPosition(in_book_id, loc);
-//    uploadReadingPosition(loc);
-//    checkExistingBookmarksAndUpdateUI(loc);
+    final FluentFuture<BookmarksControllerType.Bookmarks> future =
+      Simplified.getBookmarksController()
+        .bookmarksUpdate(
+          this.current_account,
+          this.book_id,
+          bookmarks -> new BookmarksControllerType.Bookmarks(bookmark, bookmarks.getBookmarks()));
   }
 
   @Override
   protected void onPause() {
     super.onPause();
 
-    if (this.current_location != null) {
-      try {
-        this.formatHandle.setLastReadLocation(this.current_location);
-      } catch (final IOException e) {
-        LOG.error("could not save last read location: ", e);
-      }
-    }
-
-    final ReaderSyncManager mgr = this.sync_manager;
-    if (mgr != null) {
-      mgr.sendOffAnyQueuedRequest();
-    }
+    Simplified.getBookmarksController()
+      .bookmarksUpdate(this.current_account, this.book_id, bookmarks -> {
+        ReaderBookmark current = this.current_location;
+        if (current != null) {
+          return new BookmarksControllerType.Bookmarks(current, bookmarks.getBookmarks());
+        } else {
+          return bookmarks;
+        }
+      });
   }
 
   @Override
@@ -581,61 +579,25 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onEPUBLoadSucceeded(
-    final Container c) {
+  public void onEPUBLoadSucceeded(final Container c) {
     this.epub_container = c;
     final Package p = Objects.requireNonNull(c.getDefaultPackage());
 
     final TextView in_title_text = Objects.requireNonNull(this.view_title_text);
     UIThread.runOnUIThread(() -> in_title_text.setText(Objects.requireNonNull(p.getTitle())));
 
-    /*
-     * Get any bookmarks from the local database.
-     */
-
-    synchronized (this) {
-//      if (this.bookmarks == null) {
-//        try {
-//          final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetDatabase();
-//          final BookDatabaseEntryReadableType entry = db.databaseOpenExistingEntry(this.book_id);
-//          this.bookmarks = new ArrayList<>(entry.entryGetBookmarks());
-//          LOG.debug("Bookmarks ivar reconstituted after book launch: \n{}", this.bookmarks);
-//        } catch (IOException e) {
-//          LOG.error("Error getting list of bookmarks from the book entry database");
-//          this.bookmarks = new ArrayList<>();
-//        }
-//      }
+    try {
+      final BookmarksControllerType.Bookmarks bookmarks =
+        Simplified.getBookmarksController()
+          .bookmarksLoad(this.current_account, this.book_id)
+          .get(10L, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      LOG.error("could not load bookmarks: ", e);
+    } catch (ExecutionException e) {
+      LOG.error("could not load bookmarks: ", e);
+    } catch (TimeoutException e) {
+      LOG.error("could not load bookmarks: ", e);
     }
-
-    /*
-     * Configure the TOC and Bookmark buttons.
-     */
-
-    Objects.requireNonNull(this.bookmarks);
-    final View in_bookmark = Objects.requireNonNull(this.view_bookmark);
-    final View in_toc = Objects.requireNonNull(this.view_toc);
-    UIThread.runOnUIThread(() -> {
-      in_toc.setOnClickListener((View v) -> {
-        final ReaderTOC sent_toc = ReaderTOC.fromPackage(p);
-        ReaderTOCActivity.startActivityForResult(this, sent_toc, this.bookmarks);
-        this.overridePendingTransition(0, 0);
-      });
-
-      in_bookmark.setOnClickListener(view -> {
-        if (this.current_bookmark != null) {
-          deleteLocalAndRemote(this.current_bookmark);
-          this.bookmarks.remove(this.current_bookmark);
-          this.current_bookmark = null;
-        } else {
-          final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
-          final BookmarkAnnotation bookmarkAnnotation = createAnnotation(current_loc, null);
-          this.current_bookmark = Objects.requireNonNull(bookmarkAnnotation);
-          this.bookmarks.add(bookmarkAnnotation);
-          saveLocalAndRemote(bookmarkAnnotation, current_loc);
-        }
-        updateBookmarkIconUI();
-      });
-    });
 
     /*
      * Get a reference to the web server. Start it if necessary (the callbacks
@@ -646,140 +608,46 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     server.startIfNecessaryForPackage(p, this);
   }
 
-  private void updateBookmarkIconUI() {
-    if (this.current_bookmark != null) {
-      this.view_bookmark.setImageResource(R.drawable.bookmark_on);
-    } else {
-      this.view_bookmark.setImageResource(R.drawable.bookmark_off);
-    }
+  private double currentBookProgress() {
+    return (double) this.view_progress_bar.getProgress() / (double) this.view_progress_bar.getMax();
   }
 
-  private void saveLocalAndRemote(final @NonNull BookmarkAnnotation annotation,
-                                  final @NonNull ReaderBookLocation location) {
-
-    final ReaderSyncManager mgr = this.sync_manager;
-    final List<BookmarkAnnotation> bm = Objects.requireNonNull(this.bookmarks);
-
-    //Save bookmark to local disk
-    saveToDisk(annotation);
-
-    if (mgr != null) {
-      //Save bookmark on the server
-      mgr.postBookmarkToServer(annotation, (ID) -> {
-        synchronized (this) {
-          if (ID != null) {
-            LOG.debug("Bookmark successfully uploaded. ID: {}", ID);
-            final BookmarkAnnotation newAnnotation = createAnnotation(location, ID);
-            this.deleteLocalAndRemote(annotation);
-            bm.remove(annotation);
-            bm.add(newAnnotation);
-            this.saveToDisk(newAnnotation);
-          } else {
-            LOG.error("Skipping annotation upload.");
-          }
-          return Unit.INSTANCE;
-        }
-      });
-    }
-  }
-
-  private void saveToDisk(@NonNull BookmarkAnnotation mark) {
-//    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-//
-//    try {
-//      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
-//      entry.entryAddBookmark(mark);
-//    } catch (IOException e) {
-//      LOG.error("Error writing annotation to app database: {}", mark);
-//      ErrorDialogUtilities.showError(
-//        this,
-//        LOG,
-//        getString(R.string.bookmark_save_error), null);
-//    }
-  }
-
-  private void deleteLocalAndRemote(final BookmarkAnnotation annotation) {
-
-    /*
-    Delete on the disk
-     */
-//    final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-//
-//    try {
-//      final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
-//      entry.entryDeleteBookmark(annotation);
-//    } catch (IOException e) {
-//      LOG.error("Error deleting annotation from the app database: {}", annotation);
-//    }
-
-    /*
-    Delete on the server if we have an ID/URI
-     */
-    final ReaderSyncManager mgr = this.sync_manager;
-    if (mgr != null) {
-      if (annotation.getId() != null) {
-        mgr.deleteBookmarkOnServer(annotation.getId(), (Boolean success) -> {
-          if (success) {
-            LOG.debug("Bookmark successfully deleted from server.");
-          } else {
-            LOG.debug("Error deleting bookmark on server. Continuing to delete bookmark locally.");
-          }
-          return Unit.INSTANCE;
-        });
-      } else {
-        LOG.error("No annotation ID present on bookmark. Skipping network request to delete.");
-      }
-    }
-  }
-
-  private synchronized @NonNull
-  BookmarkAnnotation createAnnotation(
-    @NonNull ReaderBookLocation bookmark,
-    @Nullable String id) {
-    Objects.requireNonNull(this.current_page_count);
-    Objects.requireNonNull(this.view_progress_bar);
-
-    final String annotContext = "http://www.w3.org/ns/anno.jsonld";
-    final String type = "Annotation";
-    final String motivation = "http://www.w3.org/ns/oa#bookmarking";
-    final String bookID = this.feed_entry.getID();
-    final String selectorType = "oa:FragmentSelector";
-    final String value;
-    try {
-      value = ReaderBookLocationJSON.serializeToString(new ObjectMapper(), bookmark);
-    } catch (final IOException e) {
-      throw new UnreachableCodeException(e);
-    }
-    final String timestamp = new Instant().toString();
-    final String deviceID = getDeviceIDString();
-
-    float chapterProgress = 0.0f;
+  private double currentChapterProgress() {
     if (this.current_page_count > 0) {
-      chapterProgress = (float) current_page_index / current_page_count;
+      return (float) current_page_index / current_page_count;
+    } else {
+      return 0.0;
     }
-    final float bookProgress = (float) this.view_progress_bar.getProgress() / this.view_progress_bar.getMax();
-
-    final SelectorNode selectorNode = new SelectorNode(selectorType, value);
-    final TargetNode targetNode = new TargetNode(bookID, selectorNode);
-    final BodyNode bodyNode = new BodyNode(timestamp, deviceID, this.current_chapter_title, chapterProgress, bookProgress);
-    return new BookmarkAnnotation(annotContext, bodyNode, id, type, motivation, targetNode);
   }
 
   private String getDeviceIDString() {
-    final AccountCredentials creds = this.credentials;
-    String deviceID = "null";
-    if (creds != null) {
-      OptionType<String> opt_deviceID = creds.getAdobeDeviceID().map(AdobeDeviceID::toString);
-      if (opt_deviceID.isSome()) {
-        deviceID = ((Some<String>) opt_deviceID).get();
-      }
-    }
-    return deviceID;
+    return this.current_account.credentials().accept(
+      new OptionVisitorType<AccountAuthenticationCredentials, String>() {
+        @Override
+        public String none(final None<AccountAuthenticationCredentials> n) {
+          return "null";
+        }
+
+        @Override
+        public String some(final Some<AccountAuthenticationCredentials> someCredentials) {
+          return someCredentials.get().adobePostActivationCredentials().accept(
+            new OptionVisitorType<AccountAuthenticationAdobePostActivationCredentials, String>() {
+              @Override
+              public String none(final None<AccountAuthenticationAdobePostActivationCredentials> none) {
+                return "null";
+              }
+
+              @Override
+              public String some(final Some<AccountAuthenticationAdobePostActivationCredentials> someCredentials) {
+                return someCredentials.get().deviceID().getValue();
+              }
+            });
+        }
+      });
   }
 
   private @Nullable
-  ReaderBookLocation createReaderLocation(
-    final BookmarkAnnotation bm) {
+  ReaderBookLocation createReaderLocation(final BookmarkAnnotation bm) {
     final String loc_value = bm.getTarget().getSelector().getValue(); //raw content cfi
     try {
       return ReaderBookLocationJSON.deserializeFromString(this.json_mapper, loc_value);
@@ -792,28 +660,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     }
   }
 
-  private void checkExistingBookmarksAndUpdateUI(
-    final @NonNull ReaderBookLocation loc) {
-    Objects.requireNonNull(this.bookmarks);
-    this.current_bookmark = null;
-    for (int i = 0; i < this.bookmarks.size(); i++) {
-      final ReaderBookLocation mark_loc = createReaderLocation(this.bookmarks.get(i));
-      if (mark_loc == null) {
-        continue;
-      }
-      if (mark_loc.equals(loc)) {
-        this.current_bookmark = this.bookmarks.get(i);
-        break;
-      }
-    }
-    this.updateBookmarkIconUI();
-  }
-
   @Override
-  public void onMediaOverlayIsAvailable(
-    final boolean available) {
-    LOG.debug(
-      "media overlay status changed: available: {}", available);
+  public void onMediaOverlayIsAvailable(final boolean available) {
+    LOG.debug("media overlay status changed: available: {}", available);
 
     final ViewGroup in_media_hud = Objects.requireNonNull(this.view_media);
     final TextView in_title = Objects.requireNonNull(this.view_title_text);
@@ -824,14 +673,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onMediaOverlayIsAvailableError(
-    final Throwable x) {
+  public void onMediaOverlayIsAvailableError(final Throwable x) {
     LOG.error("{}", x.getMessage(), x);
   }
 
   @Override
-  public void onReadiumFunctionDispatchError(
-    final Throwable x) {
+  public void onReadiumFunctionDispatchError(final Throwable x) {
     LOG.error("{}", x.getMessage(), x);
   }
 
@@ -859,7 +706,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
      * book to that specific page. Otherwise, start at the beginning.
      */
 
-    final ReaderBookLocation location = this.formatHandle.getFormat().getLastReadLocation();
+    final ReaderBookmark location = this.formatHandle.getFormat().getLastReadLocation();
     if (location != null) {
       navigateTo(location);
     }
@@ -918,72 +765,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     });
   }
 
-  /*
-    Reader Sync Manager
-   */
-
-  private void uploadReadingPosition(final ReaderBookLocation location) {
-    final ReaderSyncManager mgr = this.sync_manager;
-    if (mgr != null) {
-      mgr.updateServerReadingLocation(location);
-    }
-  }
-
-  private void lazyInitSyncManagement() {
-    if (this.sync_manager != null) {
-      return;
-    }
-
-//    final ReaderBookLocation current_loc = Objects.requireNonNull(this.current_location);
-//    final List<BookmarkAnnotation> current_marks = Objects.requireNonNull(this.bookmarks);
-//
-//    final AccountsControllerType accountController = Simplified.getCatalogAppServices().getBooks();
-//    if (this.credentials == null || accountController == null) {
-//      LOG.error("Parameter(s) were unexpectedly null before creating Sync Manager. Abandoning attempt.");
-//      return;
-//    }
-//
-//    this.sync_manager =
-//      new ReaderSyncManager(
-//        this.feed_entry,
-//        this.credentials,
-//        Simplified.getCurrentAccount(),
-//        this,
-//        (location) -> {
-//          navigateTo(location);
-//          return Unit.INSTANCE;
-//        });
-//
-//    final Container c = Objects.requireNonNull(this.epub_container);
-//    final Package p = c.getDefaultPackage();
-//    this.sync_manager.setBookPackage(p);
-//
-//    this.sync_manager.serverSyncPermission(Simplified.getCatalogAppServices().getBooks(), () -> {
-//      //Sync Permitted or Successfully Enabled
-//      sync_manager.syncReadingLocation(getDeviceIDString(), current_loc, this);
-//      sync_manager.retryOnDiskBookmarksUpload(current_marks);
-//      sync_manager.syncBookmarks(current_marks, (syncedMarks) -> {
-//        synchronized (this) {
-//          this.bookmarks = new ArrayList<>(syncedMarks);
-//          //Update bookmarks on disk
-//          final BookDatabaseType db = Simplified.getCatalogAppServices().getBooks().bookGetWritableDatabase();
-//
-//          try {
-//            final BookDatabaseEntryType entry = db.databaseOpenExistingEntry(this.book_id);
-//            entry.entrySetBookmarks(syncedMarks);
-//          } catch (IOException e) {
-//            LOG.error("Error writing annotation to app database: {}", syncedMarks);
-//          }
-//          return Unit.INSTANCE;
-//        }
-//      });
-//      return Unit.INSTANCE;
-//    });
-  }
-
   @Override
-  public void onReadiumFunctionInitializeError(
-    final Throwable e) {
+  public void onReadiumFunctionInitializeError(final Throwable e) {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       LOG,
@@ -1003,8 +786,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
    */
 
   @Override
-  public void onReadiumFunctionPaginationChanged(
-    final ReaderPaginationChangedEvent e) {
+  public void onReadiumFunctionPaginationChanged(final ReaderPaginationChangedEvent e) {
     LOG.debug("pagination changed: {}", e);
     final WebView in_web_view = Objects.requireNonNull(this.view_web_view);
 
@@ -1031,9 +813,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       } else {
         final OpenPage page = Objects.requireNonNull(pages.get(0));
 
-        current_page_index = page.getSpineItemPageIndex();
-        current_page_count = page.getSpineItemPageCount();
-        current_chapter_title = default_package.getSpineItem(page.getIDRef()).getTitle();
+        this.current_page_index = page.getSpineItemPageIndex();
+        this.current_page_count = page.getSpineItemPageCount();
+        this.current_chapter_title = default_package.getSpineItem(page.getIDRef()).getTitle();
 
         in_progress_text.setText(
           Objects.requireNonNull(
@@ -1082,8 +864,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onReadiumFunctionPaginationChangedError(
-    final Throwable x) {
+  public void onReadiumFunctionPaginationChangedError(final Throwable x) {
     LOG.error("onReadiumFunctionPaginationChangedError: {}", x.getMessage(), x);
   }
 
@@ -1093,22 +874,18 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onReadiumFunctionSettingsAppliedError(
-    final Throwable e) {
+  public void onReadiumFunctionSettingsAppliedError(final Throwable e) {
     LOG.error("{}", e.getMessage(), e);
   }
 
   @Override
-  public void onReadiumFunctionUnknown(
-    final String text) {
+  public void onReadiumFunctionUnknown(final String text) {
     LOG.error("unknown readium function: {}", text);
   }
 
   @Override
-  public void onReadiumMediaOverlayStatusChangedIsPlaying(
-    final boolean playing) {
-    LOG.debug(
-      "media overlay status changed: playing: {}", playing);
+  public void onReadiumMediaOverlayStatusChangedIsPlaying(final boolean playing) {
+    LOG.debug("media overlay status changed: playing: {}", playing);
 
     final Resources rr = Objects.requireNonNull(this.getResources());
     final ImageView play = Objects.requireNonNull(this.view_media_play);
@@ -1184,8 +961,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onSimplifiedGestureCenterError(
-    final Throwable x) {
+  public void onSimplifiedGestureCenterError(final Throwable x) {
     LOG.error("{}", x.getMessage(), x);
   }
 
@@ -1196,8 +972,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onSimplifiedGestureLeftError(
-    final Throwable x) {
+  public void onSimplifiedGestureLeftError(final Throwable x) {
     LOG.error("{}", x.getMessage(), x);
   }
 
@@ -1208,14 +983,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onSimplifiedGestureRightError(
-    final Throwable x) {
+  public void onSimplifiedGestureRightError(final Throwable x) {
     LOG.error("{}", x.getMessage(), x);
   }
 
   @Override
-  public void onTOCSelectionReceived(
-    final TOCElement e) {
+  public void onTOCSelectionReceived(final TOCElement e) {
     LOG.debug("received TOC selection: {}", e);
 
     final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
@@ -1223,21 +996,29 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onBookmarkSelectionReceived(
-    final BookmarkAnnotation bm) {
+  public void onBookmarkSelectionReceived(final BookmarkAnnotation bm) {
     LOG.debug("received bookmark selection: {}", bm);
-    final ReaderBookLocation loc = createReaderLocation(bm);
-    if (loc != null) {
-      this.navigateTo(loc);
+    final ReaderBookLocation location = createReaderLocation(bm);
+    if (location != null) {
+      final ReaderBookmark bookmark =
+        new ReaderBookmark(
+          this.book_id,
+          location,
+          LocalDateTime.now(),
+          this.current_chapter_title,
+          currentChapterProgress(),
+          currentBookProgress(),
+          getDeviceIDString());
+      this.navigateTo(bookmark);
     }
   }
 
-  private void navigateTo(final ReaderBookLocation location) {
-    final OptionType<ReaderBookLocation> optLocation = Option.of(location);
+  private void navigateTo(final ReaderBookmark location) {
+    final OptionType<ReaderBookmark> optLocation = Option.of(location);
     OptionType<ReaderOpenPageRequestType> page_request = optLocation.map((l) -> {
       LOG.debug("Creating Page Req for: {}", l);
       this.current_location = l;
-      return ReaderOpenPageRequest.fromBookLocation(l);
+      return ReaderOpenPageRequest.fromBookLocation(l.getLocation());
     });
 
     final ReaderReadiumJavaScriptAPIType js =

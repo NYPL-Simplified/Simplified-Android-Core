@@ -128,7 +128,7 @@ public final class ProfilePreferencesJSON {
 
     final ReaderBookmarks reader_bookmarks =
         JSONParserUtilities.getObjectOptional(obj, "reader-bookmarks")
-            .mapPartial(marks_node -> ReaderBookmarksJSON.deserializeFromJSON(jom, marks_node))
+            .mapPartial(marks_node -> ReaderBookmarksJSON.Companion.deserializeFromJSON(jom, marks_node))
             .accept(new OptionVisitorType<ReaderBookmarks, ReaderBookmarks>() {
               @Override
               public ReaderBookmarks none(final None<ReaderBookmarks> none) {
@@ -183,7 +183,7 @@ public final class ProfilePreferencesJSON {
         date -> jo.put("date-of-birth", date_formatter.print(date)));
 
     jo.set("reader-preferences", ReaderPreferencesJSON.serializeToJSON(jom, description.readerPreferences()));
-    jo.set("reader-bookmarks", ReaderBookmarksJSON.serializeToJSON(jom, description.readerBookmarks()));
+    jo.set("reader-bookmarks", ReaderBookmarksJSON.Companion.serializeToJSON(jom, description.readerBookmarks()));
     return jo;
   }
 

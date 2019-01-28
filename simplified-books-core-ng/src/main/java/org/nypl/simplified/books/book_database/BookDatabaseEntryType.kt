@@ -5,6 +5,7 @@ import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.reader.ReaderBookLocation
+import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
 import java.io.IOException
@@ -163,13 +164,24 @@ sealed class BookDatabaseEntryFormatHandle {
     /**
      * Set the last read location for the book.
      *
-     * @param location The location
+     * @param bookmark The location
      *
      * @throws IOException On I/O errors
      */
 
     @Throws(IOException::class)
-    abstract fun setLastReadLocation(location: ReaderBookLocation)
+    abstract fun setLastReadLocation(bookmark: ReaderBookmark?)
+
+    /**
+     * Set the bookmarks for the book.
+     *
+     * @param bookmarks The list of bookmarks
+     *
+     * @throws IOException On I/O errors
+     */
+
+    @Throws(IOException::class)
+    abstract fun setBookmarks(bookmarks: List<ReaderBookmark>)
   }
 
   /**
