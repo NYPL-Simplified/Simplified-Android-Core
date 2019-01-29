@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -84,12 +85,11 @@ public final class HTTPRedirectFollower
     try {
       final HTTPResultType<InputStream> r = this.processURI();
       return r.matchResult(
-        new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>()
+        new DownloadErrorFlattener<InputStream, HTTPResultOKType<InputStream>>(
+          this.logger, this.current_uri)
         {
           @Override public HTTPResultOKType<InputStream> onHTTPOK(
-            final HTTPResultOKType<InputStream> e)
-            throws Exception
-          {
+            final HTTPResultOKType<InputStream> e) {
             return e;
           }
         });
@@ -125,6 +125,9 @@ public final class HTTPRedirectFollower
     final int code = e.getStatus();
     this.logger.debug("received {} for {}", code, this.current_uri);
 
+    HTTPProblemReportLogging.INSTANCE.logError(
+      this.logger, this.current_uri, e.getMessage(), e.getStatus(), e.getProblemReport());
+
     switch (code) {
       case HttpURLConnection.HTTP_UNAUTHORIZED: {
         if (this.tried_auth.contains(this.current_uri)) {
@@ -143,8 +146,7 @@ public final class HTTPRedirectFollower
       }
     }
 
-    final String m = String.format("%d: %s", code, e.getMessage());
-    throw new IOException(NullCheck.notNull(m));
+    throw new IOException(String.format("%d: %s", code, e.getMessage()));
   }
 
   @Override public HTTPResultType<InputStream> onHTTPException(
@@ -233,17 +235,25 @@ public final class HTTPRedirectFollower
   private abstract static class DownloadErrorFlattener<A, B>
     implements HTTPResultMatcherType<A, B, Exception>
   {
-    private DownloadErrorFlattener()
-    {
+    private final Logger logger;
+    private final URI uri;
 
+    private DownloadErrorFlattener(
+      final Logger in_logger,
+      final URI current_uri)
+    {
+      this.logger = Objects.requireNonNull(in_logger, "Logger");
+      this.uri = Objects.requireNonNull(current_uri, "current_uri");
     }
 
     @Override public final B onHTTPError(
       final HTTPResultError<A> e)
       throws Exception
     {
-      final String m = String.format("%d: %s", e.getStatus(), e.getMessage());
-      throw new IOException(NullCheck.notNull(m));
+      HTTPProblemReportLogging.INSTANCE.logError(
+        this.logger, this.uri, e.getMessage(), e.getStatus(), e.getProblemReport());
+
+      throw new IOException(String.format("%d: %s", e.getStatus(), e.getMessage()));
     }
 
     @Override public final B onHTTPException(
