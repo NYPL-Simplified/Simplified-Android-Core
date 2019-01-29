@@ -337,7 +337,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
   private fun configureUpButton(
     upStack: ImmutableStack<CatalogFeedArgumentsType>,
     title: String) {
-    val bar = this.actionBar
+    val bar = this.supportActionBar
     if (!upStack.isEmpty) {
       bar!!.title = title
     }
