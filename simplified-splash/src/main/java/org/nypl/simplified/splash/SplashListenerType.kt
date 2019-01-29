@@ -26,4 +26,6 @@ interface SplashListenerType {
 
   fun onSplashOpenCatalog(account: AccountType)
 
+  fun onSplashOpenProfileAnonymous()
+
 }
