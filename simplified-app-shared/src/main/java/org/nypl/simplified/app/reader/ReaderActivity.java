@@ -215,10 +215,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   private void makeInitialReadiumRequest(final ReaderHTTPServerType hs) {
     final URI reader_uri = URI.create(hs.getURIBase() + "reader.html");
-    final WebView wv = Objects.requireNonNull(this.view_web_view);
     UIThread.runOnUIThread(() -> {
-      LOG.debug("making initial reader request: {}", reader_uri);
-      wv.loadUrl(reader_uri.toString());
+      LOG.debug("makeInitialReadiumRequest: {}", reader_uri);
+      this.view_web_view.loadUrl(reader_uri.toString());
     });
   }
 
@@ -270,10 +269,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     this.web_view_resized = true;
     UIThread.runOnUIThreadDelayed(() -> {
-      final ReaderReadiumJavaScriptAPIType readium_js =
-        Objects.requireNonNull(this.readium_js_api);
-      readium_js.getCurrentPage(this);
-      readium_js.mediaOverlayIsAvailable(this);
+      this.readium_js_api.getCurrentPage(this);
+      this.readium_js_api.mediaOverlayIsAvailable(this);
     }, 300L);
   }
 
@@ -483,7 +480,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final ProfilePreferencesChanged event)
     throws ProfileNoneCurrentException {
     if (event.changedReaderPreferences()) {
-      LOG.debug("reader settings changed");
+      LOG.debug("onProfileEventPreferencesChanged: reader settings changed");
 
       final ReaderPreferences preferences =
         Simplified.getProfilesController()
@@ -523,7 +520,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   @Override
   public void onCurrentPageReceived(final ReaderBookLocation location) {
     Objects.requireNonNull(location);
-    LOG.debug("received book location: {}", location);
+    LOG.debug("onCurrentPageReceived: {}", location);
 
     final ReaderBookmark bookmark =
       new ReaderBookmark(
@@ -564,9 +561,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   protected void onDestroy() {
     super.onDestroy();
 
-    final ReaderReadiumJavaScriptAPIType readium_js = Objects.requireNonNull(this.readium_js_api);
-    readium_js.getCurrentPage(this);
-    readium_js.mediaOverlayIsAvailable(this);
+    this.readium_js_api.getCurrentPage(this);
+    this.readium_js_api.mediaOverlayIsAvailable(this);
 
     final ObservableSubscriptionType<ProfileEvent> sub = this.profile_subscription;
     if (sub != null) {
@@ -576,8 +572,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onEPUBLoadFailed(
-    final Throwable x) {
+  public void onEPUBLoadFailed(final Throwable x) {
     ErrorDialogUtilities.showErrorWithRunnable(
       this, LOG,
       "Could not load EPUB file",
@@ -587,6 +582,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onEPUBLoadSucceeded(final Container c) {
+    LOG.debug("onEPUBLoadSucceeded: {}", c.getName());
+
     this.epub_container = c;
     final Package p = Objects.requireNonNull(c.getDefaultPackage());
 
@@ -669,7 +666,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onMediaOverlayIsAvailable(final boolean available) {
-    LOG.debug("media overlay status changed: available: {}", available);
+    LOG.debug("onMediaOverlayIsAvailable: available: {}", available);
 
     final ViewGroup in_media_hud = Objects.requireNonNull(this.view_media);
     final TextView in_title = Objects.requireNonNull(this.view_title_text);
@@ -691,7 +688,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onReadiumFunctionInitialize() {
-    LOG.debug("readium initialize requested");
+    LOG.debug("onReadiumFunctionInitialize: readium initialize requested");
 
     final ReaderHTTPServerType hs =
       Simplified.getReaderHTTPServer();
@@ -702,11 +699,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     p.setRootUrls(hs.getURIBase().toString(), null);
 
-    final ReaderReadiumJavaScriptAPIType js =
-      Objects.requireNonNull(this.readium_js_api);
-
     // is this correct? inject fonts before book opens or after
-    js.injectFonts();
+    this.readium_js_api.injectFonts();
 
     /*
      * If there's a bookmark for the current book, send a request to open the
@@ -755,19 +749,19 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     UIThread.runOnUIThread(() -> {
       in_media_play.setOnClickListener(view -> {
         LOG.debug("toggling media overlay");
-        js.mediaOverlayToggle();
+        this.readium_js_api.mediaOverlayToggle();
       });
 
       in_media_next.setOnClickListener(
         view -> {
           LOG.debug("next media overlay");
-          js.mediaOverlayNext();
+          this.readium_js_api.mediaOverlayNext();
         });
 
       in_media_prev.setOnClickListener(
         view -> {
           LOG.debug("previous media overlay");
-          js.mediaOverlayPrevious();
+          this.readium_js_api.mediaOverlayPrevious();
         });
     });
   }
@@ -794,11 +788,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onReadiumFunctionPaginationChanged(final ReaderPaginationChangedEvent e) {
-    LOG.debug("pagination changed: {}", e);
+    LOG.debug("onReadiumFunctionPaginationChanged: {}", e);
     final WebView in_web_view = Objects.requireNonNull(this.view_web_view);
 
     /*
-      Configure the progress bar and text.
+     * Configure the progress bar and text.
      */
 
     final TextView in_progress_text =
@@ -835,26 +829,22 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       }
 
       /*
-        Ask for Readium to deliver the unique identifier of the current page,
-        and tell Simplified that the page has changed and so any Javascript
-        state should be reconfigured.
+       * Ask for Readium to deliver the unique identifier of the current page,
+       * and tell Simplified that the page has changed and so any Javascript
+       * state should be reconfigured.
        */
+
       UIThread.runOnUIThreadDelayed(() -> {
-        final ReaderReadiumJavaScriptAPIType readium_js =
-          Objects.requireNonNull(this.readium_js_api);
-        readium_js.getCurrentPage(this);
-        readium_js.mediaOverlayIsAvailable(this);
+        this.readium_js_api.getCurrentPage(this);
+        this.readium_js_api.mediaOverlayIsAvailable(this);
       }, 300L);
     });
 
-    final ReaderSimplifiedJavaScriptAPIType simplified_js =
-      Objects.requireNonNull(this.simplified_js_api);
-
     /*
-      Make the web view visible with a slight delay (as sometimes a
-      pagination-change event will be sent even though the content has not
-      yet been laid out in the web view). Only do this if the screen
-      orientation has just changed.
+     * Make the web view visible with a slight delay (as sometimes a
+     * pagination-change event will be sent even though the content has not
+     * yet been laid out in the web view). Only do this if the screen
+     * orientation has just changed.
      */
 
     if (this.web_view_resized) {
@@ -863,10 +853,10 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
         in_web_view.setVisibility(View.VISIBLE);
         in_progress_bar.setVisibility(View.VISIBLE);
         in_progress_text.setVisibility(View.VISIBLE);
-        simplified_js.pageHasChanged();
+        this.simplified_js_api.pageHasChanged();
       }, 200L);
     } else {
-      UIThread.runOnUIThread(simplified_js::pageHasChanged);
+      UIThread.runOnUIThread(this.simplified_js_api::pageHasChanged);
     }
   }
 
@@ -887,12 +877,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onReadiumFunctionUnknown(final String text) {
-    LOG.error("unknown readium function: {}", text);
+    LOG.error("onReadiumFunctionUnknown: unknown readium function: {}", text);
   }
 
   @Override
   public void onReadiumMediaOverlayStatusChangedIsPlaying(final boolean playing) {
-    LOG.debug("media overlay status changed: playing: {}", playing);
+    LOG.debug("onReadiumMediaOverlayStatusChangedIsPlaying: playing: {}", playing);
 
     final Resources rr = Objects.requireNonNull(this.getResources());
     final ImageView play = Objects.requireNonNull(this.view_media_play);
@@ -907,9 +897,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public void onReadiumMediaOverlayStatusError(
-    final Throwable e) {
-    LOG.error("{}", e.getMessage(), e);
+  public void onReadiumMediaOverlayStatusError(final Throwable e) {
+    LOG.error("onReadiumMediaOverlayStatusError: {}", e.getMessage(), e);
   }
 
   @Override
@@ -929,24 +918,22 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final ReaderHTTPServerType hs,
     final boolean first) {
     if (first) {
-      LOG.debug("http server started");
+      LOG.debug("onServerStartSucceeded: http server started");
     } else {
-      LOG.debug("http server already running");
+      LOG.debug("onServerStartSucceeded: http server already running");
     }
 
     this.makeInitialReadiumRequest(hs);
   }
 
   @Override
-  public void onSimplifiedFunctionDispatchError(
-    final Throwable x) {
-    LOG.error("{}", x.getMessage(), x);
+  public void onSimplifiedFunctionDispatchError(final Throwable x) {
+    LOG.error("onSimplifiedFunctionDispatchError: {}", x.getMessage(), x);
   }
 
   @Override
-  public void onSimplifiedFunctionUnknown(
-    final String text) {
-    LOG.error("unknown function: {}", text);
+  public void onSimplifiedFunctionUnknown(final String text) {
+    LOG.error("onSimplifiedFunctionUnknown: unknown function: {}", text);
   }
 
   @Override
@@ -969,7 +956,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onSimplifiedGestureCenterError(final Throwable x) {
-    LOG.error("{}", x.getMessage(), x);
+    LOG.error("onSimplifiedGestureCenterError: {}", x.getMessage(), x);
   }
 
   @Override
@@ -980,7 +967,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onSimplifiedGestureLeftError(final Throwable x) {
-    LOG.error("{}", x.getMessage(), x);
+    LOG.error("onSimplifiedGestureLeftError: {}", x.getMessage(), x);
   }
 
   @Override
@@ -991,12 +978,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onSimplifiedGestureRightError(final Throwable x) {
-    LOG.error("{}", x.getMessage(), x);
+    LOG.error("onSimplifiedGestureRightError: {}", x.getMessage(), x);
   }
 
   @Override
   public void onTOCSelectionReceived(final TOCElement e) {
-    LOG.debug("received TOC selection: {}", e);
+    LOG.debug("onTOCSelectionReceived: received TOC selection: {}", e);
 
     final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
     js.openContentURL(e.getContentRef(), e.getSourceHref());
@@ -1004,7 +991,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onBookmarkSelectionReceived(final BookmarkAnnotation bm) {
-    LOG.debug("received bookmark selection: {}", bm);
+    LOG.debug("onBookmarkSelectionReceived: received bookmark selection: {}", bm);
     final ReaderBookLocation location = createReaderLocation(bm);
     if (location != null) {
       final ReaderBookmark bookmark =
@@ -1021,6 +1008,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   private void navigateTo(final ReaderBookmark location) {
+    LOG.debug("navigateTo: {}", location);
+
     final OptionType<ReaderBookmark> optLocation = Option.of(location);
     OptionType<ReaderOpenPageRequestType> page_request = optLocation.map((l) -> {
       LOG.debug("Creating Page Req for: {}", l);
