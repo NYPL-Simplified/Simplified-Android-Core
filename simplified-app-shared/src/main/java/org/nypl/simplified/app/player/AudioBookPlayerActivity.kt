@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.player
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -56,6 +57,7 @@ import rx.Subscription
 import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 /**
  * The main activity for playing audio books.
@@ -112,6 +114,9 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   private lateinit var formatHandle: BookDatabaseEntryFormatHandleAudioBook
   private lateinit var colorScheme: ApplicationColorScheme
   private var download: DownloadType? = null
+
+  @Volatile
+  private var destroying: Boolean = false
 
   override fun onCreate(state: Bundle?) {
     this.log.debug("onCreate")
@@ -216,6 +221,14 @@ class AudioBookPlayerActivity : AppCompatActivity(),
   override fun onDestroy() {
     this.log.debug("onDestroy")
     super.onDestroy()
+
+    /*
+     * We set a flag to indicate that the activity is currently being destroyed because
+     * there may be scheduled tasks that try to execute afte the activity has stopped. This
+     * flag allows them to gracefully avoid running.
+     */
+
+    this.destroying = true
 
     /*
      * Cancel the manifest download if one is still happening.
@@ -386,12 +399,59 @@ class AudioBookPlayerActivity : AppCompatActivity(),
         this.playerLastPosition =
           event.spineElement.position.copy(offsetMilliseconds = event.offsetMilliseconds)
 
-      is PlayerEventChapterCompleted -> Unit
+      is PlayerEventChapterCompleted ->
+        this.onPlayerChapterCompleted(event)
+
       is PlayerEventChapterWaiting -> Unit
       is PlayerEventPlaybackRateChanged -> Unit
       is PlayerEventError ->
         onLogPlayerError(event)
     }
+  }
+
+  private fun onPlayerChapterCompleted(event: PlayerEventChapterCompleted) {
+    if (event.spineElement.next == null) {
+      this.log.debug("book has finished")
+
+      /*
+       * Wait a few seconds before displaying the dialog asking if the user wants
+       * to return the book.
+       */
+
+      this.playerScheduledExecutor.schedule({
+        if (!this.destroying) {
+          UIThread.runOnUIThread { this.loanReturnShowDialog() }
+        }
+      }, 5L, TimeUnit.SECONDS)
+    }
+  }
+
+  private fun loanReturnShowDialog() {
+    val alert = AlertDialog.Builder(this)
+    alert.setTitle(R.string.audio_book_player_return_title)
+    alert.setMessage(R.string.audio_book_player_return_question)
+    alert.setNegativeButton(R.string.audio_book_player_do_keep) { dialog, _ ->
+      dialog.dismiss()
+    }
+    alert.setPositiveButton(R.string.audio_book_player_do_return) { _, _ ->
+      this.loanReturnPerform()
+      this.finish()
+    }
+    alert.show()
+  }
+
+  private fun loanReturnPerform() {
+    this.log.debug("returning loan")
+
+    /*
+     * We don't care if the return fails. The user can retry when they get back to their
+     * book list, if necessary.
+     */
+
+    Simplified.getBooksController()
+      .bookRevoke(
+        Simplified.getProfilesController().profileAccountCurrent(),
+        this.parameters.bookID)
   }
 
   private fun onLogPlayerError(event: PlayerEventError) {
