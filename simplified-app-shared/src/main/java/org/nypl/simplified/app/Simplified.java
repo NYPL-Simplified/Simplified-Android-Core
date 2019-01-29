@@ -610,8 +610,8 @@ public final class Simplified extends MultiDexApplication {
 
     LOG.debug("initializing downloader");
     this.http = HTTP.newHTTP();
-    this.downloader = DownloaderHTTP.newDownloader(
-      this.exec_books, this.directory_downloads, this.http);
+    this.downloader =
+      DownloaderHTTP.newDownloader(this.exec_downloader, this.directory_downloads, this.http);
 
     LOG.debug("initializing book registry");
     this.book_registry = BookRegistry.create();
