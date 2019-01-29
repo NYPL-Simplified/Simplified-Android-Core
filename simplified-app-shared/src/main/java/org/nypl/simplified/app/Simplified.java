@@ -671,7 +671,7 @@ public final class Simplified extends MultiDexApplication {
         this.cover_badges,
         this.exec_covers,
         true,
-        true);
+        false);
 
     LOG.debug("initializing EPUB loader and HTTP server");
     this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
