@@ -158,6 +158,7 @@ class BookDatabase private constructor(
       this.openAllBooks(context, parser, serializer, owner, directory, maps, errors)
 
       if (!errors.isEmpty()) {
+        errors.forEach { exception -> LOG.error("error opening book database: ", exception) }
         throw BookDatabaseException(
           "One or more errors occurred whilst trying to open a book database.", errors)
       }
