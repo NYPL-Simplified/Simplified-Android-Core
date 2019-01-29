@@ -168,7 +168,7 @@ internal class DatabaseFormatHandleEPUB internal constructor(
       fileBookmarks: File,
       fileLastRead: File): BookFormat.BookFormatEPUB {
       return BookFormat.BookFormatEPUB(
-        adobeRightsFile = fileAdobeRights,
+        adobeRightsFile = if (fileAdobeRights.isFile) fileAdobeRights else null,
         adobeRights = this.loadAdobeRightsInformationIfPresent(fileAdobeRights, fileAdobeMeta),
         bookmarks = this.loadBookmarksIfPresent(fileBookmarks),
         file = if (fileBook.isFile) fileBook else null,

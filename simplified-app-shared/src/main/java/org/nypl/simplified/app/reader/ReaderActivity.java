@@ -45,6 +45,7 @@ import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
+import org.nypl.simplified.books.book_database.BookFormat;
 import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.controller.BookmarksControllerType;
 import org.nypl.simplified.books.core.BookmarkAnnotation;
@@ -457,10 +458,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     Objects.requireNonNull(this.formatHandle, "formatHandle");
 
+    final BookFormat.BookFormatEPUB format = this.formatHandle.getFormat();
     final ReaderReadiumEPUBLoaderType loader = Simplified.getReadiumEPUBLoader();
     final ReaderReadiumEPUBLoadRequest request =
       ReaderReadiumEPUBLoadRequest.builder(in_epub_file)
-        .setAdobeRightsFile(Option.of(this.formatHandle.getFormat().getAdobeRightsFile()))
+        .setAdobeRightsFile(Option.of(format.getAdobeRightsFile()))
         .build();
 
     loader.loadEPUB(request, this);
