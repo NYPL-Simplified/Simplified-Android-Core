@@ -30,6 +30,7 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
 import org.nypl.simplified.books.accounts.AccountProvidersJSON;
 import org.nypl.simplified.books.accounts.AccountType;
@@ -88,6 +89,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.SortedMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -415,11 +418,39 @@ public final class Simplified extends MultiDexApplication {
   }
 
   private static AccountProviderCollection createAccountProviders(
+    final Resources resources,
     final AssetManager asset_manager)
     throws IOException {
 
     try (InputStream stream = asset_manager.open("Accounts.json")) {
-      return AccountProvidersJSON.deserializeFromStream(stream);
+      final AccountProviderCollection providers =
+        AccountProvidersJSON.deserializeFromStream(stream);
+
+      /*
+       * If a default provider is specified, use that as the default.
+       */
+
+      final String default_uri_text = resources.getString(R.string.feature_default_provider_uri);
+      if (!default_uri_text.isEmpty()) {
+        try {
+          final URI default_uri = new URI(default_uri_text);
+          final SortedMap<URI, AccountProvider> available = providers.providers();
+          if (available.containsKey(default_uri)) {
+            LOG.debug("using default provider {}", default_uri);
+            return AccountProviderCollection.create(available.get(default_uri), available);
+          } else {
+            LOG.error(
+              "specified feature_default_provider_uri {} but that provider does not exist",
+              default_uri_text);
+          }
+        } catch (URISyntaxException e) {
+          LOG.error("could not parse feature_default_provider_uri: ", e);
+        }
+      } else {
+        LOG.debug("no default provider is specified");
+      }
+
+      return providers;
     }
   }
 
@@ -659,7 +690,7 @@ public final class Simplified extends MultiDexApplication {
 
     try {
       LOG.debug("initializing account providers");
-      this.account_providers = createAccountProviders(asset_manager);
+      this.account_providers = createAccountProviders(resources, asset_manager);
       for (final URI id : this.account_providers.providers().keySet()) {
         LOG.debug("loaded account provider: {}", id);
       }
