@@ -64,13 +64,14 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
   }
 
   @Override
-  public void getCurrentPage(
-    final ReaderCurrentPageListenerType listener) {
+  public void getCurrentPage(final ReaderCurrentPageListenerType listener) {
     NullCheck.notNull(listener);
 
     this.evaluateWithResult(
       "ReadiumSDK.reader.bookmarkCurrentPage()", value -> {
         try {
+          LOG.debug("getCurrentPage: {}", value);
+
           final ReaderBookLocation location =
             ReaderBookLocationJSON.deserializeFromString(this.json_objects, value);
           listener.onCurrentPageReceived(location);
