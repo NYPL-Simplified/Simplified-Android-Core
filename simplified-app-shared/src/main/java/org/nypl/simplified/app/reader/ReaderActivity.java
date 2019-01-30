@@ -204,7 +204,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
    */
 
   private void applyViewerColorScheme(final ReaderColorScheme cs) {
-    LOG.debug("applying color scheme");
+    LOG.debug("applyViewerColorScheme: {}", cs);
 
     final View in_root = Objects.requireNonNull(this.view_root);
     UIThread.runOnUIThread(() -> {
@@ -215,10 +215,10 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   private void makeInitialReadiumRequest(final ReaderHTTPServerType hs) {
     final URI reader_uri = URI.create(hs.getURIBase() + "reader.html");
-    UIThread.runOnUIThread(() -> {
+    UIThread.runOnUIThreadDelayed(() -> {
       LOG.debug("makeInitialReadiumRequest: {}", reader_uri);
       this.view_web_view.loadUrl(reader_uri.toString());
-    });
+    }, 300L);
   }
 
   @Override
@@ -282,7 +282,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     super.onCreate(state);
     this.setContentView(R.layout.reader);
 
-    LOG.debug("starting");
+    LOG.debug("onCreate: starting");
 
     final Intent i = Objects.requireNonNull(this.getIntent());
     final Bundle a = Objects.requireNonNull(i.getExtras());
@@ -295,9 +295,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       Objects.requireNonNull((FeedEntryOPDS) a.getSerializable(ReaderActivity.ENTRY));
     this.feed_entry = entry.getFeedEntry();
 
-    LOG.debug("epub file:  {}", in_epub_file);
-    LOG.debug("book id:    {}", this.book_id);
-    LOG.debug("entry id:   {}", entry.getFeedEntry().getID());
+    LOG.debug("onCreate: epub file:  {}", in_epub_file);
+    LOG.debug("onCreate: book id:    {}", this.book_id);
+    LOG.debug("onCreate: entry id:   {}", entry.getFeedEntry().getID());
 
     try {
       this.current_account =
@@ -462,7 +462,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
         .setAdobeRightsFile(Option.of(format.getAdobeRightsFile()))
         .build();
 
+    LOG.debug("onCreate: loading EPUB");
     loader.loadEPUB(request, this);
+    LOG.debug("onCreate: applying viewer color filters");
     this.applyViewerColorFilters();
   }
 
@@ -492,23 +494,26 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     }
   }
 
-  private void applyReaderPreferences(ReaderPreferences preferences) {
-    // Get the CFI from the ReadiumSDK before applying the new
-    // page style settings.
-    this.simplified_js_api.getReadiumCFI();
-
-    this.readium_js_api.setPageStyleSettings(preferences);
-
-    // Once they are applied, go to the CFI that is stored in the
-    // JS ReadiumSDK instance.
-    this.simplified_js_api.setReadiumCFI();
-
-    final ReaderColorScheme cs = preferences.colorScheme();
-    this.applyViewerColorScheme(cs);
+  private void applyReaderPreferences(final ReaderPreferences preferences) {
+    LOG.debug("applyReaderPreferences: scheduling task to run later");
 
     UIThread.runOnUIThreadDelayed(() -> {
-      this.readium_js_api.getCurrentPage(this);
-      this.readium_js_api.mediaOverlayIsAvailable(this);
+      LOG.debug("applyReaderPreferences: executing now");
+
+      // Get the CFI from the ReadiumSDK before applying the new
+      // page style settings.
+      this.simplified_js_api.getReadiumCFI();
+
+      this.readium_js_api.setPageStyleSettings(preferences);
+
+      // Once they are applied, go to the CFI that is stored in the
+      // JS ReadiumSDK instance.
+      this.simplified_js_api.setReadiumCFI();
+
+      this.applyViewerColorScheme(preferences.colorScheme());
+
+      //this.readium_js_api.getCurrentPage(this);
+      //this.readium_js_api.mediaOverlayIsAvailable(this);
     }, 300L);
   }
 
@@ -699,18 +704,19 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     p.setRootUrls(hs.getURIBase().toString(), null);
 
+    LOG.debug("onReadiumFunctionInitialize: scheduling font injection");
     // is this correct? inject fonts before book opens or after
-    this.readium_js_api.injectFonts();
+    UIThread.runOnUIThreadDelayed(() -> {
+      LOG.debug("onReadiumFunctionInitialize: injecting fonts now");
+      this.readium_js_api.injectFonts();
+    }, 300L);
 
     /*
      * If there's a bookmark for the current book, send a request to open the
      * book to that specific page. Otherwise, start at the beginning.
      */
 
-    final ReaderBookmark location = this.formatHandle.getFormat().getLastReadLocation();
-    if (location != null) {
-      navigateTo(location);
-    }
+    navigateTo(Option.of(this.formatHandle.getFormat().getLastReadLocation()));
 
     /*
      * Configure the visibility of UI elements.
@@ -854,7 +860,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
         in_progress_bar.setVisibility(View.VISIBLE);
         in_progress_text.setVisibility(View.VISIBLE);
         this.simplified_js_api.pageHasChanged();
-      }, 200L);
+      }, 300L);
     } else {
       UIThread.runOnUIThread(this.simplified_js_api::pageHasChanged);
     }
@@ -867,12 +873,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onReadiumFunctionSettingsApplied() {
-    LOG.debug("received settings applied");
+    LOG.debug("onReadiumFunctionSettingsApplied");
   }
 
   @Override
   public void onReadiumFunctionSettingsAppliedError(final Throwable e) {
-    LOG.error("{}", e.getMessage(), e);
+    LOG.error("onReadiumFunctionSettingsAppliedError: {}", e.getMessage(), e);
   }
 
   @Override
@@ -961,8 +967,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onSimplifiedGestureLeft() {
-    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
-    js.pagePrevious();
+    this.readium_js_api.pagePrevious();
   }
 
   @Override
@@ -972,8 +977,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
   @Override
   public void onSimplifiedGestureRight() {
-    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
-    js.pageNext();
+    this.readium_js_api.pageNext();
   }
 
   @Override
@@ -984,9 +988,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   @Override
   public void onTOCSelectionReceived(final TOCElement e) {
     LOG.debug("onTOCSelectionReceived: received TOC selection: {}", e);
-
-    final ReaderReadiumJavaScriptAPIType js = Objects.requireNonNull(this.readium_js_api);
-    js.openContentURL(e.getContentRef(), e.getSourceHref());
+    this.readium_js_api.openContentURL(e.getContentRef(), e.getSourceHref());
   }
 
   @Override
@@ -1003,29 +1005,22 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
           currentChapterProgress(),
           currentBookProgress(),
           getDeviceIDString());
-      this.navigateTo(bookmark);
+      this.navigateTo(Option.some(bookmark));
     }
   }
 
-  private void navigateTo(final ReaderBookmark location) {
+  private void navigateTo(final OptionType<ReaderBookmark> location) {
     LOG.debug("navigateTo: {}", location);
 
-    final OptionType<ReaderBookmark> optLocation = Option.of(location);
-    OptionType<ReaderOpenPageRequestType> page_request = optLocation.map((l) -> {
-      LOG.debug("Creating Page Req for: {}", l);
-      this.current_location = l;
-      return ReaderOpenPageRequest.fromBookLocation(l.getLocation());
+    OptionType<ReaderOpenPageRequestType> page_request = location.map((actual) -> {
+      LOG.debug("navigateTo: Creating Page Req for: {}", actual);
+      this.current_location = actual;
+      return ReaderOpenPageRequest.fromBookLocation(actual.getLocation());
     });
 
-    final ReaderReadiumJavaScriptAPIType js =
-      Objects.requireNonNull(this.readium_js_api);
-    final ReaderReadiumViewerSettings vs =
-      Objects.requireNonNull(this.viewer_settings);
-    final Container c =
-      Objects.requireNonNull(this.epub_container);
-    final Package p =
-      Objects.requireNonNull(c.getDefaultPackage());
-
-    js.openBook(p, vs, page_request);
+    this.readium_js_api.openBook(
+      this.epub_container.getDefaultPackage(),
+      this.viewer_settings,
+      page_request);
   }
 }
