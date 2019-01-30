@@ -85,6 +85,7 @@ class SplashMainFragment : Fragment() {
     return when (anonymous) {
       ANONYMOUS_PROFILE_ENABLED -> {
         this.log.debug("anonymous profiles enabled, opening the catalog")
+        this.listener.onSplashOpenProfileAnonymous()
         this.listener.onSplashOpenCatalog(this.listener.profileController.profileAccountCurrent())
       }
       ANONYMOUS_PROFILE_DISABLED -> {

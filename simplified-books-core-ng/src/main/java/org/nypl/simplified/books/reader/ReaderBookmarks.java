@@ -10,8 +10,11 @@ import java.util.HashMap;
 
 /**
  * The reader bookmarks.
+ *
+ * @deprecated Use the book format handle to save/load bookmarks
  */
 
+@Deprecated
 @AutoValue
 public abstract class ReaderBookmarks {
 

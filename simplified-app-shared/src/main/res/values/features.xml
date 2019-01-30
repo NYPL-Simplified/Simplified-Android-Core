@@ -95,4 +95,7 @@
         implementation to use the package name defined in the Android manifest. -->
   <string name="feature_adobe_package_override">org.nypl.simplified.app</string>
 
+  <!-- The account provider that will be considered the default provider. -->
+  <string name="feature_default_provider_uri">urn:uuid:56906f26-2c9a-4ae9-bd02-552557720b99</string>
+
 </resources>

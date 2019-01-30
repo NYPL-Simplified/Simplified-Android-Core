@@ -1,13 +1,11 @@
 package org.nypl.simplified.books.book_database
 
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
 import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.book_database.BookFormat.BookFormatAudioBook
 import org.nypl.simplified.books.book_database.BookFormat.BookFormatEPUB
-import org.nypl.simplified.books.reader.ReaderBookLocation
+import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
 import java.net.URI
@@ -54,8 +52,7 @@ data class Book(
    * The available formats.
    */
 
-  val formats: List<BookFormat>)
-{
+  val formats: List<BookFormat>) {
   /**
    * If any format is downloaded, then the book as a whole is currently considered to be downloaded
    */
@@ -127,8 +124,13 @@ sealed class BookFormat {
      * The last read location of the book, if any.
      */
 
-    val lastReadLocation: ReaderBookLocation?)
-    : BookFormat() {
+    val lastReadLocation: ReaderBookmark?,
+
+    /**
+     * The list of bookmarks.
+     */
+
+    val bookmarks: List<ReaderBookmark>) : BookFormat() {
 
     override val isDownloaded: Boolean
       get() = this.file != null

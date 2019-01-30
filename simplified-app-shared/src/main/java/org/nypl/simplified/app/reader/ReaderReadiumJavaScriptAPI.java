@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nypl.simplified.app.reader.ReaderReadiumViewerSettings.ScrollMode;
+import org.nypl.simplified.app.utilities.TextUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.reader.ReaderBookLocation;
 import org.nypl.simplified.books.reader.ReaderBookLocationJSON;
@@ -64,15 +65,23 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
   }
 
   @Override
-  public void getCurrentPage(
-    final ReaderCurrentPageListenerType listener) {
+  public void getCurrentPage(final ReaderCurrentPageListenerType listener) {
     NullCheck.notNull(listener);
 
     this.evaluateWithResult(
       "ReadiumSDK.reader.bookmarkCurrentPage()", value -> {
         try {
+          LOG.debug("getCurrentPage: {}", value);
+
+          /*
+           * The JSON received from Readium is quoted, so must be unquoted before it can be
+           * parsed.
+           */
+
           final ReaderBookLocation location =
-            ReaderBookLocationJSON.deserializeFromString(this.json_objects, value);
+            ReaderBookLocationJSON.deserializeFromString(
+              this.json_objects, TextUtilities.unquote(value));
+
           listener.onCurrentPageReceived(location);
         } catch (final Throwable x) {
           try {

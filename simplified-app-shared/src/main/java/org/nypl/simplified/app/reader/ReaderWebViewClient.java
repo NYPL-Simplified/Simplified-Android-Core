@@ -21,7 +21,7 @@ import java.net.URI;
 
 final class ReaderWebViewClient extends WebViewClient
 {
-  private static final Logger LOG = LoggerFactory.getLogger(ReaderActivity.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ReaderWebViewClient.class);
 
   private final ReaderSimplifiedFeedbackDispatcherType simplified_dispatcher;
   private final ReaderReadiumFeedbackDispatcherType    readium_dispatcher;

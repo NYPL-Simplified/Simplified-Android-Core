@@ -86,7 +86,10 @@ class Controller private constructor(
   private val downloader: DownloaderType,
   private val timerExecutor: ExecutorService,
   private val adobeDrm: AdobeAdeptExecutorType?) 
-  : BooksControllerType, ProfilesControllerType, AnalyticsControllerType {
+  : BooksControllerType,
+  BookmarksControllerType,
+  ProfilesControllerType,
+  AnalyticsControllerType {
 
   private val profileEventSubscription: ObservableSubscriptionType<ProfileEvent>
   private val profileEvents: ObservableType<ProfileEvent>
@@ -132,7 +135,7 @@ class Controller private constructor(
   }
 
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
-    return org.nypl.simplified.books.controller.Controller.Companion.castMap(this.profiles.profiles())
+    return castMap(this.profiles.profiles())
   }
 
   override fun profileAnonymousEnabled(): AnonymousProfileEnabled {
@@ -387,6 +390,19 @@ class Controller private constructor(
       d.cancel()
       this.downloads.remove(id)
     }
+  }
+
+  override fun bookmarksUpdate(
+    account: AccountType,
+    id: BookID,
+    bookmarks: (BookmarksControllerType.Bookmarks) -> BookmarksControllerType.Bookmarks): FluentFuture<BookmarksControllerType.Bookmarks> {
+    return FluentFuture.from(this.taskExecutor.submit(BookmarksUpdateTask(account, id, bookmarks)))
+  }
+
+  override fun bookmarksLoad(
+    account: AccountType,
+    id: BookID): FluentFuture<BookmarksControllerType.Bookmarks> {
+    return FluentFuture.from(this.taskExecutor.submit(BookmarksLoadTask(account, id)))
   }
 
   override fun bookReport(

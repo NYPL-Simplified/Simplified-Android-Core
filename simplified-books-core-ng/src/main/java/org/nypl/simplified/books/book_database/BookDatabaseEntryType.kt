@@ -1,11 +1,12 @@
 package org.nypl.simplified.books.book_database
 
-import com.io7m.jfunctional.OptionType
 import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
-import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.*
+import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.books.reader.ReaderBookLocation
+import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-
 import java.io.File
 import java.io.IOException
 import java.net.URI
@@ -159,6 +160,28 @@ sealed class BookDatabaseEntryFormatHandle {
 
     @Throws(IOException::class)
     abstract fun setAdobeRightsInformation(loan: AdobeAdeptLoan?)
+
+    /**
+     * Set the last read location for the book.
+     *
+     * @param bookmark The location
+     *
+     * @throws IOException On I/O errors
+     */
+
+    @Throws(IOException::class)
+    abstract fun setLastReadLocation(bookmark: ReaderBookmark?)
+
+    /**
+     * Set the bookmarks for the book.
+     *
+     * @param bookmarks The list of bookmarks
+     *
+     * @throws IOException On I/O errors
+     */
+
+    @Throws(IOException::class)
+    abstract fun setBookmarks(bookmarks: List<ReaderBookmark>)
   }
 
   /**

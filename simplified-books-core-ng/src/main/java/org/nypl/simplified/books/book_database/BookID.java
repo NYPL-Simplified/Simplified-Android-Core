@@ -4,6 +4,7 @@ import com.google.auto.value.AutoValue;
 import com.io7m.jnull.NullCheck;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 /**
  * The unique identifier for a given book. This is typically a SHA256 hash of the original book
@@ -12,6 +13,12 @@ import java.io.Serializable;
 
 @AutoValue
 public abstract class BookID implements Comparable<BookID>, Serializable {
+
+  /**
+   * The regular expression that defines a valid book ID.
+   */
+
+  public static Pattern VALID_BOOK_ID = Pattern.compile("[a-z0-9]+");
 
   BookID() {
 
@@ -25,6 +32,11 @@ public abstract class BookID implements Comparable<BookID>, Serializable {
 
   public static BookID create(final String in_value)
   {
+    if (!VALID_BOOK_ID.matcher(in_value).matches()) {
+      throw new IllegalArgumentException(
+        "Book IDs must be non-empty, alphanumeric lowercase (" + VALID_BOOK_ID.pattern() + ")");
+    }
+
     return new AutoValue_BookID(in_value);
   }
 

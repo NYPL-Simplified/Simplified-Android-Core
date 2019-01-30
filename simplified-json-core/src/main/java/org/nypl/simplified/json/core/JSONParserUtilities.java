@@ -136,6 +136,44 @@ public final class JSONParserUtilities {
   }
 
   /**
+   * Check that {@code n} is a string.
+   *
+   * @param n A node
+   * @return {@code n} as a String
+   * @throws JSONParseException On type errors
+   */
+
+  public static String checkString(
+    final JsonNode n)
+    throws JSONParseException {
+
+    NullCheck.notNull(n);
+
+    switch (n.getNodeType()) {
+      case STRING: {
+        return n.asText();
+      }
+      case ARRAY:
+      case BINARY:
+      case BOOLEAN:
+      case MISSING:
+      case NULL:
+      case NUMBER:
+      case POJO:
+      case OBJECT: {
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append("Expected: A value of type String\n");
+        sb.append("Got: A value of type ");
+        sb.append(n.getNodeType());
+        sb.append("\n");
+        throw new JSONParseException(NullCheck.notNull(sb.toString()));
+      }
+    }
+
+    throw new UnreachableCodeException();
+  }
+
+  /**
    * @param key A key assumed to be holding a value
    * @param s   A node
    * @return An array from key {@code key}

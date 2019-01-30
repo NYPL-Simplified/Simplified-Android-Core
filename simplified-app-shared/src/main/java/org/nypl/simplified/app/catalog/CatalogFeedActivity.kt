@@ -337,7 +337,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
   private fun configureUpButton(
     upStack: ImmutableStack<CatalogFeedArgumentsType>,
     title: String) {
-    val bar = this.actionBar
+    val bar = this.supportActionBar
     if (!upStack.isEmpty) {
       bar!!.title = title
     }
@@ -401,7 +401,11 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     val inDrawerOpen = true
     val empty = ImmutableStack.empty<CatalogFeedArgumentsType>()
     val feedTitle = this.resources.getString(R.string.feature_app_name)
-    val feedURI = Simplified.getProfilesController().profileAccountCurrentCatalogRootURI()
+    val account =
+      Simplified.getProfilesController()
+        .profileAccountCurrent()
+
+    val feedURI = account.provider().catalogURIForAge(100)
     return CatalogFeedArgumentsRemote(inDrawerOpen, empty, feedTitle, feedURI, false)
   }
 

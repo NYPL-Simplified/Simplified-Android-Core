@@ -36,8 +36,8 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   implementation project(':simplified-rfc3339-core')
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.6.0-rc3'
-  implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+'
+  implementation "com.fasterxml.jackson.core:jackson-databind:2.6.0-rc3"
+  implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8"
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

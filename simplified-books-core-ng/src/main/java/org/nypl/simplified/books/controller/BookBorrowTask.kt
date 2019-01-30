@@ -456,9 +456,11 @@ class BookBorrowTask(
     this.downloads[this.bookId] = download
 
     val file = try {
-      downloadFuture.get(1L, TimeUnit.MINUTES)
+      downloadFuture.get(3L, TimeUnit.MINUTES)
     } catch (ex: TimeoutException) {
-      throw UnimplementedCodeException()
+      download.cancel()
+      downloadFuture.cancel(true)
+      throw IOException("Timed out", ex)
     } finally {
       this.downloads.remove(this.bookId)
     }
@@ -500,6 +502,8 @@ class BookBorrowTask(
       this.databaseEntry.findFormatHandleForContentType(handleContentType)
 
     fun updateStatus(): Unit {
+      val book = this.databaseEntry.book
+      this.bookRegistry.update(BookWithStatus.create(book, BookStatus.fromBook(book)))
       return Unit.unit()
     }
 

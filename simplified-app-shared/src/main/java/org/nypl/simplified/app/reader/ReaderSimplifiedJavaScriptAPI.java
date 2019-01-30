@@ -16,8 +16,7 @@ import org.slf4j.LoggerFactory;
 public final class ReaderSimplifiedJavaScriptAPI
   implements ReaderSimplifiedJavaScriptAPIType
 {
-  private static final Logger LOG =
-    LoggerFactory.getLogger(ReaderSimplifiedJavaScriptAPI.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ReaderSimplifiedJavaScriptAPI.class);
 
   private final WebView web_view;
 
@@ -44,21 +43,22 @@ public final class ReaderSimplifiedJavaScriptAPI
   private void evaluate(
     final String script)
   {
-    ReaderSimplifiedJavaScriptAPI.LOG.debug("sending javascript: {}", script);
-
-    final WebView wv = this.web_view;
-    UIThread.runOnUIThread(
-      new Runnable()
-      {
-        @Override public void run()
-        {
-          wv.evaluateJavascript(script, null);
-        }
-      });
+    LOG.debug("sending javascript: {}", script);
+    UIThread.runOnUIThread(() -> this.web_view.evaluateJavascript(script, null));
   }
 
   @Override public void pageHasChanged()
   {
     this.evaluate("simplified.pageDidChange();");
+  }
+
+  @Override public void getReadiumCFI()
+  {
+    this.evaluate("simplified.getReadiumCFI();");
+  }
+
+  @Override public void setReadiumCFI()
+  {
+    this.evaluate("simplified.setReadiumCFI();");
   }
 }

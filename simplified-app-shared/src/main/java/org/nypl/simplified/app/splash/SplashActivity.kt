@@ -43,6 +43,10 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
     this.finish()
   }
 
+  override fun onSplashOpenProfileAnonymous() {
+    this.profileController.profileSelect(this.profileController.profileCurrent().id())
+  }
+
   override fun onSplashOpenCatalog(account: AccountType) {
     val intent = Intent()
     intent.setClass(this, MainCatalogActivity::class.java)

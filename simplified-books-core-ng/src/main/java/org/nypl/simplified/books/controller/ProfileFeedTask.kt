@@ -55,12 +55,18 @@ internal class ProfileFeedTask(
         feedTitle = this.request.title())
 
     try {
+      LOG.debug("book registry contains {} books", this.bookRegistry.books().size)
       val books = collectAllBooks(this.bookRegistry)
+      LOG.debug("collected {} candidate books", books.size)
+
       val filter = selectFeedFilter(this.request)
 
       filterBooks(filter, books)
+      LOG.debug("after filtering, {} candidate books remain", books.size)
       searchBooks(this.request.search(), books)
+      LOG.debug("after searching, {} candidate books remain", books.size)
       sortBooks(this.request.facetActive(), books)
+      LOG.debug("after sorting, {} candidate books remain", books.size)
 
       for (book in books) {
         feed.entriesInOrder.add(FeedEntry.FeedEntryOPDS(book.book().entry))

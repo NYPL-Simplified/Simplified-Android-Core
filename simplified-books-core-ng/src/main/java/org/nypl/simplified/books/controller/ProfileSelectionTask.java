@@ -13,6 +13,8 @@ import org.nypl.simplified.observable.ObservableType;
 
 import java.util.concurrent.Callable;
 
+import static org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED;
+
 final class ProfileSelectionTask implements Callable<Unit> {
 
   private final ProfilesDatabaseType profiles;
@@ -34,6 +36,11 @@ final class ProfileSelectionTask implements Callable<Unit> {
 
   @Override
   public Unit call() throws ProfileNonexistentException, ProfileAnonymousEnabledException {
+    if (this.profiles.anonymousProfileEnabled() == ANONYMOUS_PROFILE_ENABLED) {
+      this.profile_events.send(ProfileSelected.of());
+      return Unit.unit();
+    }
+
     this.profiles.setProfileCurrent(this.profile_id);
     this.profile_events.send(ProfileSelected.of());
     return Unit.unit();
