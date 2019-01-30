@@ -1,0 +1,6 @@
+{
+  "token_type": "Bearer",
+  "expires_in": 500,
+  "access_token": "c28dce68-3164-4f94-9be1-a045c3cd8e61",
+  "location": "http://www.example.com/1.epub"
+}

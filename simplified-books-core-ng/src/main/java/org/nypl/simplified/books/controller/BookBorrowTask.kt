@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.SettableFuture
 import com.io7m.jfunctional.None
@@ -9,6 +10,7 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.LocalDateTime
 import org.nypl.drm.core.AdobeAdeptACSMException
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptFulfillmentToken
@@ -53,7 +55,9 @@ import org.nypl.simplified.downloader.core.DownloadListenerType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.files.FileUtilities
+import org.nypl.simplified.http.core.HTTPAuthOAuth
 import org.nypl.simplified.http.core.HTTPAuthType
+import org.nypl.simplified.http.core.HTTPOAuthToken
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
@@ -391,7 +395,7 @@ class BookBorrowTask(
       when (ea.relation) {
         ACQUISITION_GENERIC,
         ACQUISITION_OPEN_ACCESS ->
-          return this.runAcquisitionFulfillDoDownload(ea)
+          return this.runAcquisitionFulfillDoDownload(ea, createHttpAuthIfRequired())
         ACQUISITION_BORROW,
         ACQUISITION_BUY,
         ACQUISITION_SAMPLE,
@@ -404,8 +408,9 @@ class BookBorrowTask(
     throw BookBorrowExceptionNoUsableAcquisition()
   }
 
-  private fun runAcquisitionFulfillDoDownload(acquisition: OPDSAcquisition): Unit {
-    val httpAuth = createHttpAuthIfRequired()
+  private fun runAcquisitionFulfillDoDownload(
+    acquisition: OPDSAcquisition,
+    httpAuth: OptionType<HTTPAuthType>): Unit {
 
     this.fulfillURI = acquisition.uri
 
@@ -626,7 +631,32 @@ class BookBorrowTask(
     file: File): Unit {
     LOG.debug("[{}]: fulfilling Simplified bearer token file", this.bookId.brief())
 
-    throw UnimplementedCodeException()
+    /*
+     * The bearer token file will typically have downloaded almost instantly, leaving
+     * the download progress bar at 100%. This call effectively sets the download progress bar
+     * to 0% so that it doesn't look as if the user is waiting for no good reason.
+     */
+
+    this.downloadDataReceived(0L, 100L)
+
+    return try {
+      val token =
+        SimplifiedBearerTokenJSON.deserializeFromFile(ObjectMapper(), LocalDateTime.now(), file)
+
+      val nextAcquisition =
+        OPDSAcquisition(
+          ACQUISITION_GENERIC,
+          token.location,
+          acquisition.type,
+          acquisition.indirectAcquisitions)
+
+      val auth = HTTPAuthOAuth.create(HTTPOAuthToken.create(token.accessToken))
+      this.runAcquisitionFulfillDoDownload(nextAcquisition, Option.some(auth))
+    } catch (ex: Exception) {
+      LOG.error("[{}]: failed to parse bearer token: {}: ",
+        this.bookId.brief(), acquisition.uri, ex)
+      this.downloadFailed(Option.of(ex))
+    }
   }
 
   private fun captureDownloadException(
