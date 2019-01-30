@@ -157,7 +157,7 @@ public abstract class AccountProvidersJSONContract {
         AccountProvidersJSON.deserializeFromString(
             readAllFromResource("providers-all.json"));
 
-    Assert.assertEquals(159L, c.providers().size());
+    Assert.assertEquals(165L, c.providers().size());
     final AccountProvider p = c.providerDefault();
     Assert.assertTrue(c.providers().containsKey(p.id()));
     Assert.assertTrue(c.providers().containsValue(p));
