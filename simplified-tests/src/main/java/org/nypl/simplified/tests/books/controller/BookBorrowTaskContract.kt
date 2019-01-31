@@ -1376,6 +1376,212 @@ open class BookBorrowTaskContract {
         as BookBorrowExceptionBadBorrowFeed
   }
 
+  /**
+   * Borrowing a book with a bearer token works.
+   */
+
+  @Test(timeout = 5_000L)
+  fun testBorrowBearerToken() {
+
+    val feedLoader =
+      Mockito.mock(FeedLoaderType::class.java)
+    val account =
+      Mockito.mock(AccountType::class.java)
+    val bookDatabase =
+      Mockito.mock(BookDatabaseType::class.java)
+    val bookDatabaseEntry =
+      Mockito.mock(BookDatabaseEntryType::class.java)
+    val formatHandle =
+      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+
+    val headers = HashMap<String, MutableList<String>>()
+    headers.put("Content-Type", mutableListOf("application/vnd.librarysimplified.bearer-token+json"))
+    this.http.addResponse(
+      "http://www.example.com/0.epub",
+      HTTPResultOK(
+        "OK",
+        200,
+        resource("/org/nypl/simplified/tests/books/bearer-token-0.json"),
+        resourceSize("/org/nypl/simplified/tests/books/bearer-token-0.json"),
+        headers,
+        0L))
+
+    this.http.addResponse(
+      "http://www.example.com/1.epub",
+      HTTPResultOK(
+        "OK",
+        200,
+        resource("/org/nypl/simplified/tests/books/empty.epub"),
+        resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
+        HashMap(),
+        0L))
+
+    val acquisition =
+      OPDSAcquisition(
+        ACQUISITION_OPEN_ACCESS,
+        URI.create("http://www.example.com/0.epub"),
+        Option.some("application/epub+zip"),
+        listOf())
+
+    val opdsEntryBuilder =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "a",
+        "Title",
+        Calendar.getInstance(),
+        OPDSAvailabilityOpenAccess.get(Option.none()))
+    opdsEntryBuilder.addAcquisition(acquisition)
+
+    val opdsEntry =
+      opdsEntryBuilder.build()
+
+    val bookId =
+      BookID.create("a")
+
+    val book =
+      Book(
+        id = bookId,
+        account = AccountID.create(1),
+        cover = null,
+        thumbnail = null,
+        entry = opdsEntry,
+        formats = listOf())
+
+    Mockito.`when`(account.bookDatabase())
+      .thenReturn(bookDatabase)
+    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
+      .thenReturn(bookDatabaseEntry)
+    Mockito.`when`(bookDatabaseEntry.book)
+      .thenReturn(book)
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+      .thenReturn(formatHandle)
+
+    val task =
+      BookBorrowTask(
+        adobeDRM = null,
+        downloader = this.downloader,
+        downloads = ConcurrentHashMap(),
+        feedLoader = feedLoader,
+        bundledContent = this.bundledContent,
+        bookRegistry = this.bookRegistry,
+        bookId = bookId,
+        account = account,
+        acquisition = acquisition,
+        entry = opdsEntry)
+
+    task.call()
+
+    /*
+     * Check that the book was saved to the database.
+     */
+
+    Mockito.verify(formatHandle, Mockito.times(1))
+      .setAdobeRightsInformation(null)
+    Mockito.verify(formatHandle, Mockito.times(1))
+      .copyInBook(File(this.directoryDownloads, "0000000000000002.data"))
+  }
+
+  /**
+   * Borrowing a book with an unparseable bearer token fails.
+   */
+
+  @Test(timeout = 5_000L)
+  fun testBorrowBearerTokenUnparseable() {
+
+    val feedLoader =
+      Mockito.mock(FeedLoaderType::class.java)
+    val account =
+      Mockito.mock(AccountType::class.java)
+    val bookDatabase =
+      Mockito.mock(BookDatabaseType::class.java)
+    val bookDatabaseEntry =
+      Mockito.mock(BookDatabaseEntryType::class.java)
+    val formatHandle =
+      Mockito.mock(BookDatabaseEntryFormatHandleEPUB::class.java)
+
+    val headers = HashMap<String, MutableList<String>>()
+    headers.put("Content-Type", mutableListOf("application/vnd.librarysimplified.bearer-token+json"))
+    this.http.addResponse(
+      "http://www.example.com/0.epub",
+      HTTPResultOK(
+        "OK",
+        200,
+        resource("/org/nypl/simplified/tests/books/bearer-token-bad.json"),
+        resourceSize("/org/nypl/simplified/tests/books/bearer-token-bad.json"),
+        headers,
+        0L))
+
+    this.http.addResponse(
+      "http://www.example.com/1.epub",
+      HTTPResultOK(
+        "OK",
+        200,
+        resource("/org/nypl/simplified/tests/books/empty.epub"),
+        resourceSize("/org/nypl/simplified/tests/books/empty.epub"),
+        HashMap(),
+        0L))
+
+    val acquisition =
+      OPDSAcquisition(
+        ACQUISITION_OPEN_ACCESS,
+        URI.create("http://www.example.com/0.epub"),
+        Option.some("application/epub+zip"),
+        listOf())
+
+    val opdsEntryBuilder =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "a",
+        "Title",
+        Calendar.getInstance(),
+        OPDSAvailabilityOpenAccess.get(Option.none()))
+    opdsEntryBuilder.addAcquisition(acquisition)
+
+    val opdsEntry =
+      opdsEntryBuilder.build()
+
+    val bookId =
+      BookID.create("a")
+
+    val book =
+      Book(
+        id = bookId,
+        account = AccountID.create(1),
+        cover = null,
+        thumbnail = null,
+        entry = opdsEntry,
+        formats = listOf())
+
+    Mockito.`when`(account.bookDatabase())
+      .thenReturn(bookDatabase)
+    Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
+      .thenReturn(bookDatabaseEntry)
+    Mockito.`when`(bookDatabaseEntry.book)
+      .thenReturn(book)
+    Mockito.`when`(bookDatabaseEntry.findFormatHandleForContentType("application/epub+zip"))
+      .thenReturn(formatHandle)
+
+    val task =
+      BookBorrowTask(
+        adobeDRM = null,
+        downloader = this.downloader,
+        downloads = ConcurrentHashMap(),
+        feedLoader = feedLoader,
+        bundledContent = this.bundledContent,
+        bookRegistry = this.bookRegistry,
+        bookId = bookId,
+        account = account,
+        acquisition = acquisition,
+        entry = opdsEntry)
+
+    task.call()
+
+    /*
+     * Check that the download failed.
+     */
+
+    val bookWithStatus = (this.bookRegistry.book(bookId) as Some<BookWithStatus>).get()
+    Assert.assertEquals(BookStatusDownloadFailed::class.java, bookWithStatus.status().javaClass)
+  }
+
   private fun <T> optionUnsafe( opt: OptionType<T>): T {
     return if (opt is Some<T>) {
       opt.get()
