@@ -131,7 +131,7 @@
       android:label="@string/reader"
       android:theme="@style/SimplifiedTheme_NoActionBar"></activity>
     <activity
-      android:name="org.nypl.simplified.app.reader.ReaderTOCActivity"
+      android:name="org.nypl.simplified.app.reader.toc.ReaderTOCActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/reader_toc"
       android:label="@string/reader_toc"></activity>

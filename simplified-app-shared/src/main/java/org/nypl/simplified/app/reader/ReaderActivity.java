@@ -23,21 +23,28 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.FluentFuture;
 import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
+import com.io7m.junreachable.UnimplementedCodeException;
+import com.io7m.junreachable.UnreachableCodeException;
 
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.nypl.simplified.app.ApplicationColorScheme;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
-import org.nypl.simplified.app.reader.ReaderTOC.TOCElement;
+import org.nypl.simplified.app.reader.toc.ReaderTOC;
+import org.nypl.simplified.app.reader.toc.ReaderTOCActivity;
+import org.nypl.simplified.app.reader.toc.ReaderTOCElement;
+import org.nypl.simplified.app.reader.toc.ReaderTOCParameters;
+import org.nypl.simplified.app.reader.toc.ReaderTOCSelection;
+import org.nypl.simplified.app.reader.toc.ReaderTOCSelectionListenerType;
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.accounts.AccountAuthenticationAdobePostActivationCredentials;
@@ -48,13 +55,11 @@ import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookFormat;
 import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.controller.BookmarksControllerType;
-import org.nypl.simplified.books.core.BookmarkAnnotation;
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfilePreferencesChanged;
 import org.nypl.simplified.books.reader.ReaderBookLocation;
-import org.nypl.simplified.books.reader.ReaderBookLocationJSON;
 import org.nypl.simplified.books.reader.ReaderBookmark;
 import org.nypl.simplified.books.reader.ReaderColorScheme;
 import org.nypl.simplified.books.reader.ReaderPreferences;
@@ -67,6 +72,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -134,7 +140,6 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   private int current_page_count = 1;
   private String current_chapter_title = "Unknown";
   private ObservableSubscriptionType<ProfileEvent> profile_subscription;
-  private ObjectMapper json_mapper = new ObjectMapper();
   private BookDatabaseEntryFormatHandleEPUB formatHandle;
 
   /**
@@ -233,18 +238,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     if (request_code == ReaderTOCActivity.TOC_SELECTION_REQUEST_CODE) {
       if (result_code == Activity.RESULT_OK) {
         final Intent nnd = Objects.requireNonNull(data);
-        final Bundle b = Objects.requireNonNull(nnd.getExtras());
-        final TOCElement element = (TOCElement) b.getSerializable(
-          ReaderTOCActivity.TOC_SELECTED_ID);
-        final BookmarkAnnotation annotation = (BookmarkAnnotation) b.getSerializable(
-          ReaderTOCActivity.BOOKMARK_SELECTED_ID);
-        if (element != null) {
-          this.onTOCSelectionReceived(element);
-        } else if (annotation != null) {
-          this.onBookmarkSelectionReceived(annotation);
-        } else {
-          LOG.error("There was an error receiving input from user via TOC Selection");
-        }
+        final Bundle b =
+          Objects.requireNonNull(nnd.getExtras());
+        final ReaderTOCSelection selection =
+          (ReaderTOCSelection) b.getSerializable(ReaderTOCActivity.TOC_SELECTED_ID);
+        this.onTOCItemSelected(selection);
       } else {
         LOG.error("Error from TOC Activity Result");
       }
@@ -512,8 +510,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
       this.applyViewerColorScheme(preferences.colorScheme());
 
-      //this.readium_js_api.getCurrentPage(this);
-      //this.readium_js_api.mediaOverlayIsAvailable(this);
+      this.readium_js_api.getCurrentPage(this);
+      this.readium_js_api.mediaOverlayIsAvailable(this);
     }, 300L);
   }
 
@@ -595,18 +593,28 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final TextView in_title_text = Objects.requireNonNull(this.view_title_text);
     UIThread.runOnUIThread(() -> in_title_text.setText(Objects.requireNonNull(p.getTitle())));
 
-    try {
-      final BookmarksControllerType.Bookmarks bookmarks =
-        Simplified.getBookmarksController()
-          .bookmarksLoad(this.current_account, this.book_id)
-          .get(10L, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      LOG.error("could not load bookmarks: ", e);
-    } catch (ExecutionException e) {
-      LOG.error("could not load bookmarks: ", e);
-    } catch (TimeoutException e) {
-      LOG.error("could not load bookmarks: ", e);
-    }
+    final List<ReaderBookmark> bookmarks = loadBookmarks();
+
+    /*
+     * Configure the TOC and Bookmark buttons.
+     */
+
+    UIThread.runOnUIThread(() -> {
+      this.view_toc.setOnClickListener(v -> {
+        final ReaderTOC toc =
+          ReaderTOC.Companion.fromPackage(p);
+        final ReaderTOCParameters parameters =
+          new ReaderTOCParameters(bookmarks, toc.getElements());
+
+        ReaderTOCActivity.Companion.startActivityForResult(ReaderActivity.this, parameters);
+        this.overridePendingTransition(0, 0);
+      });
+
+      this.view_bookmark.setOnClickListener(v -> {
+        // XXX!
+        throw new UnimplementedCodeException();
+      });
+    });
 
     /*
      * Get a reference to the web server. Start it if necessary (the callbacks
@@ -615,6 +623,25 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     final ReaderHTTPServerType server = Simplified.getReaderHTTPServer();
     server.startIfNecessaryForPackage(p, this);
+  }
+
+  private List<ReaderBookmark> loadBookmarks() {
+    try {
+      final BookmarksControllerType.Bookmarks bookmarks =
+        Simplified.getBookmarksController()
+          .bookmarksLoad(this.current_account, this.book_id)
+          .get(10L, TimeUnit.SECONDS);
+      return bookmarks.getBookmarks();
+    } catch (InterruptedException e) {
+      LOG.error("could not load bookmarks: ", e);
+      return Collections.emptyList();
+    } catch (ExecutionException e) {
+      LOG.error("could not load bookmarks: ", e);
+      return Collections.emptyList();
+    } catch (TimeoutException e) {
+      LOG.error("could not load bookmarks: ", e);
+      return Collections.emptyList();
+    }
   }
 
   private double currentBookProgress() {
@@ -653,20 +680,6 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
             });
         }
       });
-  }
-
-  private @Nullable
-  ReaderBookLocation createReaderLocation(final BookmarkAnnotation bm) {
-    final String loc_value = bm.getTarget().getSelector().getValue(); //raw content cfi
-    try {
-      return ReaderBookLocationJSON.deserializeFromString(this.json_mapper, loc_value);
-    } catch (Exception e) {
-      ErrorDialogUtilities.showError(
-        this,
-        LOG,
-        getString(R.string.bookmark_navigation_error), null);
-      return null;
-    }
   }
 
   @Override
@@ -985,28 +998,14 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     LOG.error("onSimplifiedGestureRightError: {}", x.getMessage(), x);
   }
 
-  @Override
-  public void onTOCSelectionReceived(final TOCElement e) {
+  private void onTOCSelectionReceived(final ReaderTOCElement e) {
     LOG.debug("onTOCSelectionReceived: received TOC selection: {}", e);
     this.readium_js_api.openContentURL(e.getContentRef(), e.getSourceHref());
   }
 
-  @Override
-  public void onBookmarkSelectionReceived(final BookmarkAnnotation bm) {
-    LOG.debug("onBookmarkSelectionReceived: received bookmark selection: {}", bm);
-    final ReaderBookLocation location = createReaderLocation(bm);
-    if (location != null) {
-      final ReaderBookmark bookmark =
-        new ReaderBookmark(
-          this.book_id,
-          location,
-          LocalDateTime.now(),
-          this.current_chapter_title,
-          currentChapterProgress(),
-          currentBookProgress(),
-          getDeviceIDString());
-      this.navigateTo(Option.some(bookmark));
-    }
+  private void onBookmarkSelectionReceived(final ReaderBookmark bookmark) {
+    LOG.debug("onTOCBookmarkSelectionReceived: received bookmark selection: {}", bookmark);
+    this.navigateTo(Option.some(bookmark));
   }
 
   private void navigateTo(final OptionType<ReaderBookmark> location) {
@@ -1022,5 +1021,20 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       this.epub_container.getDefaultPackage(),
       this.viewer_settings,
       page_request);
+  }
+
+  @Override
+  public void onTOCItemSelected(final @NotNull ReaderTOCSelection selection) {
+    if (selection instanceof ReaderTOCSelection.ReaderSelectedBookmark) {
+      final ReaderTOCSelection.ReaderSelectedBookmark bookmark =
+        (ReaderTOCSelection.ReaderSelectedBookmark) selection;
+      this.onBookmarkSelectionReceived(bookmark.getReaderBookmark());
+    } else if (selection instanceof ReaderTOCSelection.ReaderSelectedTOCElement) {
+      final ReaderTOCSelection.ReaderSelectedTOCElement element =
+        (ReaderTOCSelection.ReaderSelectedTOCElement) selection;
+      this.onTOCSelectionReceived(element.component1());
+    } else {
+      throw new UnreachableCodeException();
+    }
   }
 }

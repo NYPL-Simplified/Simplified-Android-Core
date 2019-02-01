@@ -3,14 +3,20 @@ package org.nypl.simplified.books.reader;
 import com.google.auto.value.AutoValue;
 import com.io7m.jfunctional.OptionType;
 
+import java.io.Serializable;
+
 /**
  * The current page. A specific location in an EPUB is identified by an
  * <i>idref</i> and a <i>content CFI</i>. In some cases, the <i>content CFI</i>
  * may not be present.
+ *
+ * <p>Note: The type is {@link Serializable} purely because the Android API requires this
+ * in order pass values of this type between activities. We make absolutely no guarantees
+ * that serialized values of this class will be compatible with future releases.</p>
  */
 
 @AutoValue
-public abstract class ReaderBookLocation {
+public abstract class ReaderBookLocation implements Serializable {
 
   /**
    * @return The content CFI, if any

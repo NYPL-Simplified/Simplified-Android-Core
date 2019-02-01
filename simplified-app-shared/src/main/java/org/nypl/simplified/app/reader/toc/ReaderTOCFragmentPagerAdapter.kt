@@ -1,10 +1,12 @@
-package org.nypl.simplified.app.reader
+package org.nypl.simplified.app.reader.toc
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
 
-class ReaderTOCFragmentPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+class ReaderTOCFragmentPagerAdapter(
+  fragmentManager: FragmentManager,
+  val tocParameters: ReaderTOCParameters) : FragmentPagerAdapter(fragmentManager) {
 
   override fun getCount(): Int {
     return 2
@@ -20,9 +22,9 @@ class ReaderTOCFragmentPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(
 
   override fun getItem(position: Int): Fragment {
     return if (position > 0) {
-      ReaderTOCBookmarksFragment()
+      ReaderTOCBookmarksFragment.newInstance(this.tocParameters)
     } else {
-      ReaderTOCContentsFragment()
+      ReaderTOCContentsFragment.newInstance(this.tocParameters)
     }
   }
 }
