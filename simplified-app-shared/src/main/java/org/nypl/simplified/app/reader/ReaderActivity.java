@@ -29,7 +29,6 @@ import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.OptionVisitorType;
 import com.io7m.jfunctional.Some;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
@@ -61,6 +60,7 @@ import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfilePreferencesChanged;
 import org.nypl.simplified.books.reader.ReaderBookLocation;
 import org.nypl.simplified.books.reader.ReaderBookmark;
+import org.nypl.simplified.books.reader.ReaderBookmarks;
 import org.nypl.simplified.books.reader.ReaderColorScheme;
 import org.nypl.simplified.books.reader.ReaderPreferences;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
@@ -72,6 +72,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -593,14 +594,14 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final TextView in_title_text = Objects.requireNonNull(this.view_title_text);
     UIThread.runOnUIThread(() -> in_title_text.setText(Objects.requireNonNull(p.getTitle())));
 
-    final List<ReaderBookmark> bookmarks = loadBookmarks();
-
     /*
      * Configure the TOC and Bookmark buttons.
      */
 
     UIThread.runOnUIThread(() -> {
       this.view_toc.setOnClickListener(v -> {
+        final List<ReaderBookmark> bookmarks = loadBookmarks();
+
         final ReaderTOC toc =
           ReaderTOC.Companion.fromPackage(p);
         final ReaderTOCParameters parameters =
@@ -611,8 +612,16 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       });
 
       this.view_bookmark.setOnClickListener(v -> {
-        // XXX!
-        throw new UnimplementedCodeException();
+        Simplified.getBookmarksController()
+          .bookmarksUpdate(
+            this.current_account,
+            this.book_id,
+            currentBookmarks -> {
+              final ArrayList<ReaderBookmark> newBookmarks =
+                new ArrayList<>(currentBookmarks.getBookmarks());
+              newBookmarks.add(this.current_location);
+              return currentBookmarks.copy(this.current_location, newBookmarks);
+            });
       });
     });
 

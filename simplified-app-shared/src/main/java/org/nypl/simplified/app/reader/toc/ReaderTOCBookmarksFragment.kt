@@ -70,7 +70,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
       ArrayAdapter(
         this.context,
         0,
-        this.parameters.bookmarks.sortedBy { bookmark -> bookmark.bookProgress })
+        this.parameters.bookmarks.sortedBy { bookmark -> bookmark.bookProgress }.reversed())
 
     this.bookmarksTOCListView.adapter = this
     return this.bookmarksTOCLayout
@@ -177,7 +177,7 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
 
     val chapterProgressText =
       run {
-        val percent = (bookmark.bookProgress * 100).toInt()
+        val percent = (bookmark.chapterProgress * 100).toInt()
         "$percent% through chapter"
       }
 
