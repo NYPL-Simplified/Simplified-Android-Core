@@ -88,6 +88,8 @@ function Simplified() {
     var bookMark = currentView.bookmarkCurrentPage();
 
     this.currentViewCFI = bookMark;
+
+
   };
 
   /**
@@ -126,7 +128,77 @@ function Simplified() {
     // the browser to set things up in advance to achieve better performance
     // whenever the property is altered.
     contentDocument.documentElement.style["will-change"] = "left";
+
+    // Load the font family if it's not already there when the new
+    // page gets rendered.
+    this.linkOpenDyslexicFonts(contentDocument);
   };
+
+  /**
+   * TODO:
+   * Even though the OpenDyslexic3 font is now added to the renderer,
+   * there are still underlying issues with rendering this font. Specifically,
+   * pages at the end of chapters get lost when using this
+   * (and only this) font.
+   */
+
+  /**
+   * linkOpenDyslexicFonts
+   * If the current Open Dyslexic font is loaded on the page, do not
+   * load it again. If there's a currently selected font by the user,
+   * update the style to reflect it. This is needed when going from
+   * chapter to chapter.
+   */
+  this.linkOpenDyslexicFonts = function(innerDocument) {
+    var id = 'simplified-opendyslexic';
+    if (innerDocument.getElementById(id)) {
+      return;
+    }
+    var styleElement = document.createElement('style');
+    styleElement.id = id;
+    styleElement.textContent =
+      "@font-face { \
+        font-family: 'OpenDyslexic3'; \
+        src: url('OpenDyslexic3-Regular.ttf'); \
+        font-weight: normal; \
+      }";
+    innerDocument.head.appendChild(styleElement);
+
+    // If there's a user selected font, update the style.
+    if (this.currentFont) {
+      this.updateFontFamily({ "font-family": this.currentFont });
+    }
+  }
+
+  /**
+   * updateFontFamily
+   * If there is an existing style element in the iframe for the webreader,
+   * remove it and add an updated style element with the newly selected
+   * font family. Updating the current font selection in the object's
+   * instance as well to update the font when moving from chapter to chapter.
+   */
+  this.updateFontFamily = function(obj) {
+    var id = 'simplified-bookStyles';
+    var innerDocument = window.frames["epubContentIframe"].contentDocument;
+    if(!innerDocument) {
+      innerDocument = window.frames["epubContentIframe"].document;
+    }
+
+    var style = innerDocument.getElementById(id);
+    if (style) {
+     innerDocument.head.removeChild(style);
+    }
+    this.currentFont = obj["font-family"];
+
+    var styleElement = document.createElement('style');
+    styleElement.id = id;
+    styleElement.textContent =
+      "body { \
+        font-family: " + obj["font-family"] + "; \
+      }";
+
+    innerDocument.head.appendChild(styleElement);
+  }
 
 }
 

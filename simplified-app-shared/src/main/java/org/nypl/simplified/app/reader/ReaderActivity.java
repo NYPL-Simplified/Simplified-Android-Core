@@ -824,9 +824,6 @@ public final class ReaderActivity extends Activity implements
     final ReaderReadiumJavaScriptAPIType js =
       Objects.requireNonNull(this.readium_js_api);
 
-    // is this correct? inject fonts before book opens or after
-    js.injectFonts();
-
     /*
       If there's a bookmark for the current book, send a request to open the
       book to that specific page. Otherwise, start at the beginning.
