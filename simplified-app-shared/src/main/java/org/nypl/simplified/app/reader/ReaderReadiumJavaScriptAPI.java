@@ -238,7 +238,7 @@ public final class ReaderReadiumJavaScriptAPI
       // Update the selected user font through the custom Simplified JS script.
       this.evaluate(
         NullCheck.notNull(
-          String.format("simplified.updateFontFamily({ 'font-family': '%s'});", fontSelected)));
+          String.format("simplified.updateBookStyles({ 'font-family': '%1s', color: '%2s'});", fontSelected, color)));
     } catch (final JSONException e) {
       ReaderReadiumJavaScriptAPI.LOG.error(
         "error constructing json: {}", e.getMessage(), e);
