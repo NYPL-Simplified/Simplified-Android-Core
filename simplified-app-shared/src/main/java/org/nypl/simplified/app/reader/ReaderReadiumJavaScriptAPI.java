@@ -180,22 +180,50 @@ public final class ReaderReadiumJavaScriptAPI
     final ReaderSettingsType r)
   {
     try {
+      final ReaderColorScheme cs = r.getColorScheme();
+      final String color = NullCheck.notNull(
+          String.format("#%06x", cs.getForegroundColor() & 0xffffff));
+      final String background = NullCheck.notNull(
+          String.format("#%06x", cs.getBackgroundColor() & 0xffffff));
+
+      final JSONObject decls = new JSONObject();
+      decls.put("color", color);
+      decls.put("backgroundColor", background);
       String fontSelected = "";
 
       switch (r.getFontFamily()) {
         case READER_FONT_SANS_SERIF: {
+          decls.put("font-family", "sans-serif");
           fontSelected = "sans-serif";
           break;
         }
         case READER_FONT_OPEN_DYSLEXIC: {
+          decls.put("font-family", "OpenDyslexic3");
           fontSelected = "OpenDyslexic3";
+
           break;
         }
         case READER_FONT_SERIF: {
+          decls.put("font-family", "serif");
           fontSelected = "serif";
           break;
         }
       }
+      final JSONObject o = new JSONObject();
+      o.put("selector", "*");
+      o.put("declarations", decls);
+
+      final JSONArray styles = new JSONArray();
+      styles.put(o);
+
+      final StringBuilder script = new StringBuilder(256);
+      script.append("ReadiumSDK.reader.setBookStyles(");
+      script.append(styles);
+      script.append("); ");
+      script.append("document.body.style.backgroundColor = \"");
+      script.append(background);
+      script.append("\";");
+      this.evaluate(script.toString());
 
       final ReaderReadiumViewerSettings vs = new ReaderReadiumViewerSettings(
         SyntheticSpreadMode.SINGLE,
