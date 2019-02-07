@@ -722,7 +722,7 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
         (float) margin_half,
         (float) margin_half,
         (float) (cw - margin_half),
-        (float) start_y, Op.REPLACE);
+        (float) start_y, Op.INTERSECT);
       canvas.drawRect(0.0F, 0.0F, (float) cw, (float) ch, paint_label);
     }
 
