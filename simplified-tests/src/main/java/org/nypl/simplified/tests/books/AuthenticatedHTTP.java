@@ -82,6 +82,23 @@ public class AuthenticatedHTTP implements HTTPType {
   }
 
   @Override
+  public HTTPResultType<InputStream> put(
+    OptionType<HTTPAuthType> auth,
+    URI uri,
+    byte[] data,
+    String content_type) {
+    this.logger.debug("put: {} {} {} {}", auth, uri, data, content_type);
+    this.logger.debug("serving garbage bytes");
+    return new HTTPResultOK<InputStream>(
+      "OK",
+      200,
+      new ByteArrayInputStream("DATA".getBytes()),
+      4L,
+      empty_headers,
+      0L);
+  }
+
+  @Override
   public HTTPResultType<InputStream> post(
     final OptionType<HTTPAuthType> auth,
     final URI uri,

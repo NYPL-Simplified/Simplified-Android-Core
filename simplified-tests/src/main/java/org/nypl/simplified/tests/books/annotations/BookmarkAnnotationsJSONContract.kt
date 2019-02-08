@@ -3,13 +3,13 @@ package org.nypl.simplified.tests.books.annotations
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.Assert
 import org.junit.Test
-import org.nypl.simplified.books.annotations.BookmarkAnnotation
-import org.nypl.simplified.books.annotations.BookmarkAnnotationBodyNode
-import org.nypl.simplified.books.annotations.BookmarkAnnotationFirstNode
-import org.nypl.simplified.books.annotations.BookmarkAnnotationResponse
-import org.nypl.simplified.books.annotations.BookmarkAnnotationSelectorNode
-import org.nypl.simplified.books.annotations.BookmarkAnnotationTargetNode
-import org.nypl.simplified.books.annotations.BookmarkAnnotationsJSON
+import org.nypl.simplified.books.reader.bookmarks.BookmarkAnnotation
+import org.nypl.simplified.books.reader.bookmarks.BookmarkAnnotationBodyNode
+import org.nypl.simplified.books.reader.bookmarks.BookmarkAnnotationFirstNode
+import org.nypl.simplified.books.reader.bookmarks.BookmarkAnnotationResponse
+import org.nypl.simplified.books.reader.bookmarks.BookmarkAnnotationSelectorNode
+import org.nypl.simplified.books.reader.bookmarks.BookmarkAnnotationTargetNode
+import org.nypl.simplified.books.reader.bookmarks.BookmarkAnnotationsJSON
 
 abstract class BookmarkAnnotationsJSONContract {
 

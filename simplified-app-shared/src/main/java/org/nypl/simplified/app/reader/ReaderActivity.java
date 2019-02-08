@@ -23,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.common.util.concurrent.FluentFuture;
 import com.io7m.jfunctional.None;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
@@ -60,7 +59,6 @@ import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfilePreferencesChanged;
 import org.nypl.simplified.books.reader.ReaderBookLocation;
 import org.nypl.simplified.books.reader.ReaderBookmark;
-import org.nypl.simplified.books.reader.ReaderBookmarks;
 import org.nypl.simplified.books.reader.ReaderColorScheme;
 import org.nypl.simplified.books.reader.ReaderPreferences;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
@@ -538,12 +536,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     this.current_location = bookmark;
 
-    final FluentFuture<BookmarksControllerType.Bookmarks> future =
-      Simplified.getBookmarksController()
-        .bookmarksUpdate(
-          this.current_account,
-          this.book_id,
-          bookmarks -> new BookmarksControllerType.Bookmarks(bookmark, bookmarks.getBookmarks()));
+    Simplified.getBookmarksController()
+      .bookmarksUpdate(
+        this.current_account,
+        this.book_id,
+        bookmarks -> new BookmarksControllerType.Bookmarks(bookmark, bookmarks.getBookmarks()));
   }
 
   @Override

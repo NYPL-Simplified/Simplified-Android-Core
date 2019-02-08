@@ -17,6 +17,14 @@ import java.net.URI
 
 open class CrashingHTTP : HTTPType {
 
+  override fun put(
+    auth: OptionType<HTTPAuthType>,
+    uri: URI,
+    data: ByteArray,
+    content_type: String): HTTPResultType<InputStream> {
+    return HTTPResultException(uri, IOException())
+  }
+
   override fun get(
     auth: OptionType<HTTPAuthType>,
     uri: URI,

@@ -1,4 +1,4 @@
-package org.nypl.simplified.books.annotations
+package org.nypl.simplified.books.reader.bookmarks
 
 data class BookmarkAnnotationSelectorNode(
   val type: String,

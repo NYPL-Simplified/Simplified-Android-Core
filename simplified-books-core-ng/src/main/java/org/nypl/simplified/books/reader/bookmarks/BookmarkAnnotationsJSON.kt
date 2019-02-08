@@ -1,5 +1,6 @@
-package org.nypl.simplified.books.annotations
+package org.nypl.simplified.books.reader.bookmarks
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -97,13 +98,19 @@ object BookmarkAnnotationsJSON {
     annotation: BookmarkAnnotation): ObjectNode {
 
     val node = mapper.createObjectNode()
-    annotation.context.let { v -> node.put("@context", v) }
-    annotation.id.let { v -> node.put("id", v) }
+    if (annotation.context != null) { node.put("@context", annotation.context) }
+    if (annotation.id != null) { node.put("id", annotation.id) }
     node.put("motivation", annotation.motivation)
     node.put("type", annotation.type)
     node.set("target", serializeTargetNodeToJSON(mapper, annotation.target))
     node.set("body", serializeBodyNodeToJSON(mapper, annotation.body))
     return node
+  }
+
+  fun serializeBookmarkAnnotationToBytes(
+    mapper: ObjectMapper,
+    annotation: BookmarkAnnotation): ByteArray {
+    return mapper.writeValueAsBytes(serializeBookmarkAnnotationToJSON(mapper, annotation))
   }
 
   @Throws(JSONParseException::class)
@@ -183,5 +190,11 @@ object BookmarkAnnotationsJSON {
       JSONParserUtilities.getString(node, "id"),
       first =
       deserializeBookmarkAnnotationFirstNodeFromJSON(JSONParserUtilities.getObject(node, "first")))
+  }
+
+  @Throws(JSONParseException::class)
+  fun deserializeBookmarkAnnotationResponseFromJSON(node: JsonNode): BookmarkAnnotationResponse {
+    return deserializeBookmarkAnnotationResponseFromJSON(
+      JSONParserUtilities.checkObject(null, node))
   }
 }

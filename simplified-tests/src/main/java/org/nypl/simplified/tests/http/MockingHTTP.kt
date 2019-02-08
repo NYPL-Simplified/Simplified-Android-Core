@@ -21,6 +21,7 @@ import java.util.HashSet
  */
 
 class MockingHTTP : HTTPType {
+
   private val responses: HashMap<URI, MutableList<HTTPResultType<InputStream>>>
 
   init {
@@ -87,6 +88,15 @@ class MockingHTTP : HTTPType {
     uri: URI): HTTPResultType<InputStream> {
 
     LOG.debug("put: {} {}", auth, uri)
+    return response(uri)
+  }
+
+  override fun put(
+    auth: OptionType<HTTPAuthType>,
+    uri: URI,
+    data: ByteArray,
+    content_type: String): HTTPResultType<InputStream> {
+    LOG.debug("put: {} {} {} {}", auth, uri, data, content_type)
     return response(uri)
   }
 

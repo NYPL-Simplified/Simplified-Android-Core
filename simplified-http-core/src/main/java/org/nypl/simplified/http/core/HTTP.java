@@ -96,6 +96,15 @@ public final class HTTP implements HTTPType
     return this.requestInternal("PUT", auth_opt, uri, 0, data, content_type);
   }
 
+  @Override
+  public HTTPResultType<InputStream> put(
+    final OptionType<HTTPAuthType> auth_opt,
+    final URI uri,
+    final byte[] data,
+    final String content_type) {
+    return this.requestInternal("PUT", auth_opt, uri, 0, Option.some(data), Option.some(content_type));
+  }
+
   @Override public HTTPResultType<InputStream> post(
     final OptionType<HTTPAuthType> auth_opt,
     final URI uri,

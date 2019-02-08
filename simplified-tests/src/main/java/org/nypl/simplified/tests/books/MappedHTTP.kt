@@ -47,6 +47,15 @@ class MappedHTTP(
       Option.none())
   }
 
+  override fun put(
+    auth: OptionType<HTTPAuthType>,
+    uri: URI,
+    data: ByteArray,
+    content_type: String): HTTPResultType<InputStream> {
+    this.logger.debug("put: {} {} {} {}", auth, uri, data, content_type)
+    return this.content[uri.toASCIIString()] ?: this.notFound(uri)
+  }
+
   override fun put(auth: OptionType<HTTPAuthType>, uri: URI): HTTPResultType<InputStream> {
     this.logger.debug("put: {} {}", auth, uri)
     return this.content[uri.toASCIIString()] ?: this.notFound(uri)
