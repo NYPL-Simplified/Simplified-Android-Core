@@ -7,11 +7,7 @@
 .DS_Store
 .externalNativeBuild
 .gradle
-/.idea/caches
-/.idea/codeStyles
-/.idea/dictionaries
-/.idea/libraries
-/.idea/workspace.xml
+.idea
 /captures
 /local.properties
 
