@@ -189,28 +189,26 @@ public final class ReaderReadiumJavaScriptAPI
       final JSONObject decls = new JSONObject();
       decls.put("color", color);
       decls.put("backgroundColor", background);
+      String fontSelected = "";
 
       switch (r.getFontFamily()) {
         case READER_FONT_SANS_SERIF: {
           decls.put("font-family", "sans-serif");
+          fontSelected = "sans-serif";
           break;
         }
         case READER_FONT_OPEN_DYSLEXIC: {
-          /**
-           * This is defined as a custom CSS font family inside
-           * OpenDyslexic.css, which is referenced from the initially
-           * loaded reader.html file.
-           */
-
           decls.put("font-family", "OpenDyslexic3");
+          fontSelected = "OpenDyslexic3";
+
           break;
         }
         case READER_FONT_SERIF: {
           decls.put("font-family", "serif");
+          fontSelected = "serif";
           break;
         }
       }
-
       final JSONObject o = new JSONObject();
       o.put("selector", "*");
       o.put("declarations", decls);
@@ -237,30 +235,10 @@ public final class ReaderReadiumJavaScriptAPI
         NullCheck.notNull(
           String.format("ReadiumSDK.reader.updateSettings(%s);", vs.toJSON())));
 
-    } catch (final JSONException e) {
-      ReaderReadiumJavaScriptAPI.LOG.error(
-        "error constructing json: {}", e.getMessage(), e);
-    }
-  }
-
-  @Override public void injectFonts()
-  {
-    try {
-      final JSONObject s = new JSONObject();
-      s.put("truetype", "OpenDyslexic3-Regular.ttf");
-
-      final JSONObject o = new JSONObject();
-      o.put("fontFamily", "OpenDyslexic3");
-      o.put("fontWeight", "normal");
-      o.put("fontStyle", "normal");
-      o.put("sources", s);
-
-      final StringBuilder script = new StringBuilder(256);
-      script.append("ReadiumSDK.reader.plugins.injectFonts.registerFontFace(");
-      script.append(o);
-      script.append(");");
-
-      this.evaluate(script.toString());
+      // Update the selected user font through the custom Simplified JS script.
+      this.evaluate(
+        NullCheck.notNull(
+          String.format("simplified.updateBookStyles({ 'font-family': '%1s', color: '%2s'});", fontSelected, color)));
     } catch (final JSONException e) {
       ReaderReadiumJavaScriptAPI.LOG.error(
         "error constructing json: {}", e.getMessage(), e);
