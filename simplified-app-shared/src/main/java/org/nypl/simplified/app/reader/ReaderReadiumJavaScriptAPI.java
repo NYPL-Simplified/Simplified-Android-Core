@@ -182,9 +182,9 @@ public final class ReaderReadiumJavaScriptAPI
     try {
       final ReaderColorScheme cs = r.getColorScheme();
       final String color = NullCheck.notNull(
-          String.format("#%06x", cs.getForegroundColor() & 0xffffff));
+        String.format("#%06x", cs.getForegroundColor() & 0xffffff));
       final String background = NullCheck.notNull(
-          String.format("#%06x", cs.getBackgroundColor() & 0xffffff));
+        String.format("#%06x", cs.getBackgroundColor() & 0xffffff));
 
       final JSONObject decls = new JSONObject();
       decls.put("color", color);

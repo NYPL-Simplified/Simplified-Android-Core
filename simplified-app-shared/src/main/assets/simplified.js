@@ -88,8 +88,6 @@ function Simplified() {
     var bookMark = currentView.bookmarkCurrentPage();
 
     this.currentViewCFI = bookMark;
-
-
   };
 
   /**
