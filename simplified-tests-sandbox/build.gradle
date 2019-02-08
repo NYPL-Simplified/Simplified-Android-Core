@@ -9,7 +9,6 @@ description = 'simplified-tests-sandbox'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "28.0.2"
 
   packagingOptions {
 
@@ -17,6 +16,8 @@ android {
 
   defaultConfig {
     multiDexEnabled true
+    minSdkVersion 21
+    targetSdkVersion 27
   }
 
   lintOptions {
