@@ -5,7 +5,6 @@ apply plugin: 'kotlin-android'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "28.0.2"
   useLibrary 'org.apache.http.legacy'
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -13,6 +12,10 @@ android {
   }
   packagingOptions {
     exclude 'META-INF/LICENSE'
+  }
+  defaultConfig {
+    minSdkVersion 21
+    targetSdkVersion 28
   }
 }
 

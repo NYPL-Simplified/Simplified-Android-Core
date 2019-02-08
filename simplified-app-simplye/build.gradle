@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
   compileSdkVersion 27
-  buildToolsVersion "28.0.2"
   packagingOptions {
     exclude 'META-INF/LICENSE'
   }
@@ -21,6 +20,8 @@ android {
   }
   defaultConfig {
     multiDexEnabled true
+    minSdkVersion 21
+    targetSdkVersion 28
   }
   lintOptions {
     checkReleaseBuilds false
