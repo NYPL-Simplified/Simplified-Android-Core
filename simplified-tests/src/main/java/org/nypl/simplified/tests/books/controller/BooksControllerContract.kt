@@ -51,6 +51,8 @@ import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.observable.Observable
+import org.nypl.simplified.observable.ObservableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSParseException
@@ -89,8 +91,10 @@ abstract class BooksControllerContract {
   private lateinit var directoryDownloads: File
   private lateinit var directoryProfiles: File
   private lateinit var http: MockingHTTP
-  private lateinit var profileEvents: MutableList<ProfileEvent>
-  private lateinit var accountEvents: MutableList<AccountEvent>
+  private lateinit var profileEvents: ObservableType<ProfileEvent>
+  private lateinit var accountEvents: ObservableType<AccountEvent>
+  private lateinit var profileEventsReceived: MutableList<ProfileEvent>
+  private lateinit var accountEventsReceived: MutableList<AccountEvent>
   private lateinit var downloader: DownloaderType
   private lateinit var bookRegistry: BookRegistryType
   private lateinit var profiles: ProfilesDatabaseType
@@ -107,6 +111,8 @@ abstract class BooksControllerContract {
       .setLogo(Option.some(URI.create("http://example.com/logo.png")))
       .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
       .setSupportEmail("postmaster@example.com")
+      .setAnnotationsURI(Option.some(URI.create("http://example.com/accounts0/annotations")))
+      .setPatronSettingsURI(Option.some(URI.create("http://example.com/accounts0/patrons/me")))
       .build()
   }
 
@@ -150,6 +156,8 @@ abstract class BooksControllerContract {
   private fun createController(
     exec: ExecutorService,
     feedExecutor: ListeningExecutorService,
+    accountEvents: ObservableType<AccountEvent>,
+    profileEvents: ObservableType<ProfileEvent>,
     http: HTTPType,
     books: BookRegistryType,
     profiles: ProfilesDatabaseType,
@@ -159,7 +167,9 @@ abstract class BooksControllerContract {
 
     val parser = OPDSFeedParser.newParser(
       OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()))
-    val transport = FeedHTTPTransport.newTransport(http)
+    val transport =
+      FeedHTTPTransport.newTransport(http)
+
     val bundledContent =
       BundledContentResolverType { uri -> throw FileNotFoundException(uri.toString()) }
 
@@ -172,23 +182,26 @@ abstract class BooksControllerContract {
         bookRegistry = books,
         bundledContent = bundledContent)
 
-    val analyticsDirectory = File("/tmp/simplye-android-tests")
-
-    val analyticsLogger = AnalyticsLogger.create(analyticsDirectory)
+    val analyticsDirectory =
+      File("/tmp/simplye-android-tests")
+    val analyticsLogger =
+      AnalyticsLogger.create(analyticsDirectory)
 
     return Controller.create(
-      exec,
-      http,
-      parser,
-      feedLoader,
-      downloader,
-      profiles,
-      analyticsLogger,
-      books,
-      bundledContent,
-      accountProviders,
-      timerExec,
-      null)
+      exec = exec,
+      accountEvents = accountEvents,
+      profileEvents = profileEvents,
+      http = http,
+      feedParser = parser,
+      feedLoader = feedLoader,
+      downloader = downloader,
+      profiles = profiles,
+      analyticsLogger = analyticsLogger,
+      bookRegistry = books,
+      bundledContent = bundledContent,
+      accountProviders = accountProviders,
+      timerExecutor = timerExec,
+      adobeDrm = null)
   }
 
   @Before
@@ -201,9 +214,11 @@ abstract class BooksControllerContract {
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.directoryDownloads = DirectoryUtilities.directoryCreateTemporary()
     this.directoryProfiles = DirectoryUtilities.directoryCreateTemporary()
-    this.profileEvents = Collections.synchronizedList(ArrayList())
-    this.profiles = profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    this.accountEvents = Collections.synchronizedList(ArrayList())
+    this.profileEvents = Observable.create<ProfileEvent>()
+    this.profileEventsReceived = Collections.synchronizedList(ArrayList())
+    this.accountEvents = Observable.create<AccountEvent>()
+    this.accountEventsReceived = Collections.synchronizedList(ArrayList())
+    this.profiles = profilesDatabaseWithoutAnonymous(this.accountEvents, this.directoryProfiles)
     this.bookEvents = Collections.synchronizedList(ArrayList())
     this.bookRegistry = BookRegistry.create()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
@@ -228,16 +243,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksSyncRemoteNon401() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -271,16 +288,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksSyncRemote401() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -316,16 +335,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksSyncWithoutAuthSupport() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeProvider("urn:fake:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -348,16 +369,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksSyncMissingCredentials() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -379,16 +402,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksSyncBadFeed() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -421,15 +446,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksSyncNewEntries() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer)
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -487,15 +515,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksSyncRemoveEntries() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer)
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -588,15 +619,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksRevokeCorrectURI() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer)
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -653,15 +687,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksRevokeWithoutCredentials() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer)
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -716,16 +753,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksRevokeWithoutURI() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -769,16 +808,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksRevokeEmptyFeed() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -832,16 +873,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksRevokeGarbage() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -895,16 +938,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksDelete() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -974,16 +1019,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksRevokeDismissOK() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -1043,16 +1090,18 @@ abstract class BooksControllerContract {
   @Throws(Exception::class)
   fun testBooksRevokeDismissHasNotFailed() {
 
-    val controller = createController(
-      this.executorBooks,
-      this.executorFeeds,
-      http,
-      this.bookRegistry,
-      this.profiles,
-      this.downloader,
-      FunctionType { accountProviders(it) },
-      this.executorTimer
-    )
+    val controller =
+      createController(
+        exec = this.executorBooks,
+        feedExecutor = this.executorFeeds,
+        http = http,
+        books = this.bookRegistry,
+        profiles = this.profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { accountProviders(it) },
+        timerExec = this.executorTimer,
+        accountEvents = this.accountEvents,
+        profileEvents = this.profileEvents)
 
     val provider = fakeAuthProvider("urn:fake-auth:0")
     val profile = this.profiles.createProfile(provider, "Kermit")
@@ -1104,9 +1153,12 @@ abstract class BooksControllerContract {
   }
 
   @Throws(ProfileDatabaseException::class)
-  private fun profilesDatabaseWithoutAnonymous(dirProfiles: File?): ProfilesDatabaseType {
+  private fun profilesDatabaseWithoutAnonymous(
+    accountEvents: ObservableType<AccountEvent>,
+    dirProfiles: File?): ProfilesDatabaseType {
     return ProfilesDatabase.openWithAnonymousAccountDisabled(
       context(),
+      accountEvents,
       accountProviders(Unit.unit()),
       AccountsDatabases,
       dirProfiles)

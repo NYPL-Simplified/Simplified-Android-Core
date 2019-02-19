@@ -3,9 +3,9 @@ package org.nypl.simplified.books.accounts;
 import android.content.Context;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
-import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
@@ -14,6 +14,8 @@ import org.nypl.simplified.books.book_database.BookDatabaseType;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
+import org.nypl.simplified.observable.Observable;
+import org.nypl.simplified.observable.ObservableType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
   private final Context context;
   private final File directory;
   private final Object accounts_lock;
+  private final ObservableType<AccountEvent> account_events;
   private final @GuardedBy("accounts_lock")
   SortedMap<AccountID, Account> accounts;
   private final @GuardedBy("accounts_lock")
@@ -51,7 +54,9 @@ public final class AccountsDatabase implements AccountsDatabaseType {
   private final BookDatabaseFactoryType book_databases;
 
   private AccountsDatabase(
-    final Context context, final File directory,
+    final Context context,
+    final File directory,
+    final ObservableType<AccountEvent> account_events,
     final SortedMap<AccountID, Account> accounts,
     final SortedMap<URI, Account> accounts_by_provider,
     final BookDatabaseFactoryType book_databases) {
@@ -59,13 +64,15 @@ public final class AccountsDatabase implements AccountsDatabaseType {
     this.context =
       Objects.requireNonNull(context, "context");
     this.directory =
-      NullCheck.notNull(directory, "directory");
+      Objects.requireNonNull(directory, "directory");
+    this.account_events =
+      Objects.requireNonNull(account_events, "account_events");
     this.accounts =
-      NullCheck.notNull(accounts, "accounts");
+      Objects.requireNonNull(accounts, "accounts");
     this.accounts_by_provider =
-      NullCheck.notNull(accounts_by_provider, "accounts_by_provider");
+      Objects.requireNonNull(accounts_by_provider, "accounts_by_provider");
     this.book_databases =
-      NullCheck.notNull(book_databases, "book databases");
+      Objects.requireNonNull(book_databases, "book databases");
     this.accounts_read =
       castMap(Collections.unmodifiableSortedMap(accounts));
     this.accounts_by_provider_read =
@@ -84,15 +91,17 @@ public final class AccountsDatabase implements AccountsDatabaseType {
 
   public static AccountsDatabaseType open(
     final Context context,
+    final ObservableType<AccountEvent> account_events,
     final BookDatabaseFactoryType book_databases,
     final AccountProviderCollectionType account_providers,
     final File directory)
     throws AccountsDatabaseException {
 
     Objects.requireNonNull(context, "Context");
-    NullCheck.notNull(book_databases, "Book databases");
-    NullCheck.notNull(directory, "Directory");
-    NullCheck.notNull(account_providers, "Account providers");
+    Objects.requireNonNull(account_events, "Account events");
+    Objects.requireNonNull(book_databases, "Book databases");
+    Objects.requireNonNull(directory, "Directory");
+    Objects.requireNonNull(account_providers, "Account providers");
 
     LOG.debug("opening account database: {}", directory);
 
@@ -111,6 +120,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
 
     openAllAccounts(
       context,
+      account_events,
       book_databases,
       account_providers,
       directory,
@@ -128,11 +138,18 @@ public final class AccountsDatabase implements AccountsDatabaseType {
         "One or more errors occurred whilst trying to open the account database.", errors);
     }
 
-    return new AccountsDatabase(context, directory, accounts, accounts_by_provider, book_databases);
+    return new AccountsDatabase(
+      context,
+      directory,
+      account_events,
+      accounts,
+      accounts_by_provider,
+      book_databases);
   }
 
   private static void openAllAccounts(
     final Context context,
+    final ObservableType<AccountEvent> account_events,
     final BookDatabaseFactoryType book_databases,
     final AccountProviderCollectionType account_providers,
     final File directory,
@@ -143,13 +160,19 @@ public final class AccountsDatabase implements AccountsDatabaseType {
 
     final String[] account_dirs = directory.list();
     if (account_dirs != null) {
-      for (int index = 0; index < account_dirs.length; ++index) {
-        final String account_id_name = account_dirs[index];
+      for (final String account_id_name : account_dirs) {
         LOG.debug("opening account: {}/{}", directory, account_id_name);
 
         final Account account =
           openOneAccount(
-            context, book_databases, account_providers, directory, jom, errors, account_id_name);
+            context,
+            account_events,
+            book_databases,
+            account_providers,
+            directory,
+            jom,
+            errors,
+            account_id_name);
 
         if (account != null) {
           if (accounts_by_provider.containsKey(account.provider().id())) {
@@ -166,6 +189,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
 
   private static Account openOneAccount(
     final Context context,
+    final ObservableType<AccountEvent> account_events,
     final BookDatabaseFactoryType book_databases,
     final AccountProviderCollectionType account_providers,
     final File directory,
@@ -193,7 +217,12 @@ public final class AccountsDatabase implements AccountsDatabaseType {
         AccountDescriptionJSON.deserializeFromFile(jom, account_file);
 
       return new Account(
-        account_id, account_dir, desc, account_providers.provider(desc.provider()), book_database);
+        account_id,
+        account_dir,
+        account_events,
+        desc,
+        account_providers.provider(desc.provider()),
+        book_database);
     } catch (final IOException e) {
       errors.add(new IOException("Could not parse account: " + account_file, e));
       return null;
@@ -236,7 +265,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
   public AccountType createAccount(final AccountProvider account_provider)
     throws AccountsDatabaseException {
 
-    NullCheck.notNull(account_provider, "Account provider");
+    Objects.requireNonNull(account_provider, "Account provider");
 
     final AccountID next;
     synchronized (this.accounts_lock) {
@@ -270,14 +299,18 @@ public final class AccountsDatabase implements AccountsDatabaseType {
       final BookDatabaseType book_database =
         this.book_databases.openDatabase(this.context, next, books_dir);
 
+      final AccountPreferences preferences =
+        new AccountPreferences(false);
+
       final AccountDescription desc =
-        AccountDescription.builder(account_provider.id())
+        AccountDescription.builder(account_provider.id(), preferences)
           .build();
 
       writeDescription(account_lock, account_file, account_file_tmp, desc);
 
       synchronized (this.accounts_lock) {
-        final Account account = new Account(next, account_dir, desc, account_provider, book_database);
+        final Account account =
+          new Account(next, account_dir, account_events, desc, account_provider, book_database);
         this.accounts.put(next, account);
         this.accounts_by_provider.put(account_provider.id(), account);
         return account;
@@ -293,7 +326,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
   public AccountID deleteAccountByProvider(final AccountProvider account_provider)
     throws AccountsDatabaseException {
 
-    NullCheck.notNull(account_provider, "Account provider");
+    Objects.requireNonNull(account_provider, "Account provider");
 
     LOG.debug("delete account by provider: {}", account_provider.id());
 
@@ -341,6 +374,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
 
     private final AccountID id;
     private final File directory;
+    private final ObservableType<AccountEvent> account_events;
     private final Object description_lock;
     private @GuardedBy("description_lock")
     AccountDescription description;
@@ -350,20 +384,23 @@ public final class AccountsDatabase implements AccountsDatabaseType {
     Account(
       final AccountID id,
       final File directory,
+      final ObservableType<AccountEvent> account_events,
       final AccountDescription description,
       final AccountProvider provider,
       final BookDatabaseType book_database) {
 
       this.id =
-        NullCheck.notNull(id, "id");
+        Objects.requireNonNull(id, "id");
       this.directory =
-        NullCheck.notNull(directory, "directory");
+        Objects.requireNonNull(directory, "directory");
+      this.account_events =
+        Objects.requireNonNull(account_events, "account_events");
       this.description =
-        NullCheck.notNull(description, "description");
+        Objects.requireNonNull(description, "description");
       this.book_database =
-        NullCheck.notNull(book_database, "book database");
+        Objects.requireNonNull(book_database, "book database");
       this.provider =
-        NullCheck.notNull(provider, "provider");
+        Objects.requireNonNull(provider, "provider");
 
       this.description_lock = new Object();
     }
@@ -393,6 +430,13 @@ public final class AccountsDatabase implements AccountsDatabaseType {
     }
 
     @Override
+    public AccountPreferences preferences() {
+      synchronized (this.description_lock) {
+        return this.description.preferences();
+      }
+    }
+
+    @Override
     public BookDatabaseType bookDatabase() {
       return this.book_database;
     }
@@ -401,14 +445,29 @@ public final class AccountsDatabase implements AccountsDatabaseType {
     public void setCredentials(
       final OptionType<AccountAuthenticationCredentials> credentials)
       throws AccountsDatabaseException {
+      Objects.requireNonNull(credentials, "credentials");
 
+      this.setDescription(
+        description -> description.toBuilder().setCredentials(credentials).build());
+    }
+
+    @Override
+    public void setPreferences(
+      final AccountPreferences preferences)
+      throws AccountsDatabaseException {
+      Objects.requireNonNull(preferences, "preferences");
+
+      this.setDescription(
+        description -> description.toBuilder().setPreferences(preferences).build());
+    }
+
+    private void setDescription(
+      final FunctionType<AccountDescription, AccountDescription> mutator)
+      throws AccountsDatabaseIOException {
       try {
         final AccountDescription new_description;
         synchronized (this.description_lock) {
-          new_description =
-            this.description.toBuilder()
-              .setCredentials(credentials)
-              .build();
+          new_description = mutator.call(this.description);
 
           final File account_lock =
             new File(this.directory, "lock");
@@ -420,6 +479,8 @@ public final class AccountsDatabase implements AccountsDatabaseType {
           writeDescription(account_lock, account_file, account_file_tmp, new_description);
           this.description = new_description;
         }
+
+        this.account_events.send(new AccountEventUpdated(this.id));
       } catch (final IOException e) {
         throw new AccountsDatabaseIOException("Could not write account data", e);
       }

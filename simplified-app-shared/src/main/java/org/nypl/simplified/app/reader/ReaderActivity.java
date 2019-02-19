@@ -61,6 +61,7 @@ import org.nypl.simplified.books.reader.ReaderBookLocation;
 import org.nypl.simplified.books.reader.ReaderBookmark;
 import org.nypl.simplified.books.reader.ReaderColorScheme;
 import org.nypl.simplified.books.reader.ReaderPreferences;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.readium.sdk.android.Container;
@@ -526,13 +527,15 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     final ReaderBookmark bookmark =
       new ReaderBookmark(
-        this.book_id,
+        this.feed_entry.getID(),
         location,
+        ReaderBookmarkKind.ReaderBookmarkLastReadLocation.INSTANCE,
         LocalDateTime.now(),
         this.current_chapter_title,
         currentChapterProgress(),
         currentBookProgress(),
-        getDeviceIDString());
+        getDeviceIDString(),
+        null);
 
     this.current_location = bookmark;
 

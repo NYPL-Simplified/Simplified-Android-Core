@@ -7,11 +7,13 @@ import com.io7m.jfunctional.Option;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.accounts.AccountBarcode;
+import org.nypl.simplified.books.accounts.AccountEvent;
 import org.nypl.simplified.books.accounts.AccountPIN;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
@@ -21,8 +23,11 @@ import org.nypl.simplified.books.accounts.AccountsDatabase;
 import org.nypl.simplified.books.accounts.AccountsDatabaseException;
 import org.nypl.simplified.books.accounts.AccountsDatabaseType;
 import org.nypl.simplified.books.book_database.BookDatabases;
+import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileUtilities;
+import org.nypl.simplified.observable.Observable;
+import org.nypl.simplified.observable.ObservableType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +41,20 @@ public abstract class AccountsDatabaseContract {
 
   private static final Logger LOG = LoggerFactory.getLogger(AccountsDatabaseContract.class);
 
+  private ObservableType<AccountEvent> accountEvents;
+  private ObservableType<ProfileEvent> profileEvents;
+
   protected abstract Context context();
 
   @Rule
   public ExpectedException expected = ExpectedException.none();
+
+  @Before
+  public void setup()
+  {
+    this.accountEvents = Observable.create();
+    this.profileEvents = Observable.create();
+  }
 
   /**
    * An exception matcher that checks to see if the given accounts database exception has
@@ -97,7 +112,12 @@ public abstract class AccountsDatabaseContract {
 
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(IOException.class, "Not a directory"));
-    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+    AccountsDatabase.open(
+      context(),
+      this.accountEvents,
+      bookDatabases(),
+      accountProviders(),
+      f_acc);
   }
 
   private BookDatabases bookDatabases() {
@@ -121,7 +141,12 @@ public abstract class AccountsDatabaseContract {
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(
       IOException.class, "Could not parse directory name as an account ID"));
-    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+    AccountsDatabase.open(
+      context(),
+      this.accountEvents,
+      bookDatabases(),
+      accountProviders(),
+      f_acc);
   }
 
   @Test
@@ -140,7 +165,12 @@ public abstract class AccountsDatabaseContract {
 
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(IOException.class, "Could not parse account: "));
-    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+    AccountsDatabase.open(
+      context(),
+      this.accountEvents,
+      bookDatabases(),
+      accountProviders(),
+      f_acc);
   }
 
   @Test
@@ -162,7 +192,12 @@ public abstract class AccountsDatabaseContract {
 
     expected.expect(AccountsDatabaseException.class);
     expected.expect(new CausesContains<>(IOException.class, "Could not parse account: "));
-    AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+    AccountsDatabase.open(
+      context(),
+      this.accountEvents,
+      bookDatabases(),
+      accountProviders(),
+      f_acc);
   }
 
   @Test
@@ -177,7 +212,13 @@ public abstract class AccountsDatabaseContract {
     final File f_acc = new File(f_p, "accounts");
 
     final AccountsDatabaseType db =
-      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+      AccountsDatabase.open(
+        context(),
+        this.accountEvents,
+        bookDatabases(),
+        accountProviders(),
+        f_acc);
+
     Assert.assertEquals(0, db.accounts().size());
     Assert.assertEquals(f_acc, db.directory());
   }
@@ -196,7 +237,12 @@ public abstract class AccountsDatabaseContract {
     final AccountProviderCollectionType account_providers =
       accountProviders();
     final AccountsDatabaseType db =
-      AccountsDatabase.open(context(), bookDatabases(), account_providers, f_acc);
+      AccountsDatabase.open(
+        context(),
+        this.accountEvents,
+        bookDatabases(),
+        account_providers,
+        f_acc);
 
     final AccountProvider provider0 =
       fakeProvider("http://www.example.com/accounts0/");
@@ -242,7 +288,12 @@ public abstract class AccountsDatabaseContract {
     final File f_acc = new File(f_p, "accounts");
 
     final AccountsDatabaseType db0 =
-      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+      AccountsDatabase.open(
+        context(),
+        this.accountEvents,
+        bookDatabases(),
+        accountProviders(),
+        f_acc);
 
     final AccountProvider provider0 =
       fakeProvider("http://www.example.com/accounts0/");
@@ -253,7 +304,12 @@ public abstract class AccountsDatabaseContract {
     final AccountType acc1 = db0.createAccount(provider1);
 
     final AccountsDatabaseType db1 =
-      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+      AccountsDatabase.open(
+        context(),
+        this.accountEvents,
+        bookDatabases(),
+        accountProviders(),
+        f_acc);
 
     final AccountType acr0 = db1.accounts().get(acc0.id());
     final AccountType acr1 = db1.accounts().get(acc1.id());
@@ -278,7 +334,13 @@ public abstract class AccountsDatabaseContract {
     final File f_acc = new File(f_p, "accounts");
 
     final AccountsDatabaseType db0 =
-      AccountsDatabase.open(context(), bookDatabases(), accountProviders(), f_acc);
+      AccountsDatabase.open(
+        context(),
+        this.accountEvents,
+        bookDatabases(),
+        accountProviders(),
+        f_acc);
+
     final AccountProvider provider0 = fakeProvider("http://www.example.com/accounts0/");
     final AccountType acc0 = db0.createAccount(provider0);
 
@@ -309,6 +371,8 @@ public abstract class AccountsDatabaseContract {
       .setLogo(Option.some(URI.create("data:text/plain;base64,U3RvcCBsb29raW5nIGF0IG1lIQo=")))
       .setCatalogURI(URI.create("http://example.com/accounts0/feed.xml"))
       .setSupportEmail("postmaster@example.com")
+      .setAnnotationsURI(Option.some(URI.create("http://example.com/accounts0/annotations")))
+      .setPatronSettingsURI(Option.some(URI.create("http://example.com/accounts0/patrons/me")))
       .build();
   }
 }

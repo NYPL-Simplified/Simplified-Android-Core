@@ -9,8 +9,11 @@ import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.books.book_database.BookIDs
 import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.books.reader.ReaderBookmark
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.*
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -43,7 +46,7 @@ abstract class BookDatabaseEPUBContract {
       BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = BookID.create("abcd")
+    val bookID = BookIDs.newFromText("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     this.run {
@@ -58,12 +61,14 @@ abstract class BookDatabaseEPUBContract {
 
       val bookmark =
         ReaderBookmark(
-          book = bookID,
+          opdsId = "abcd",
           location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
           time = LocalDateTime.now(),
           chapterTitle = "A title",
+          kind = ReaderBookmarkExplicit,
           chapterProgress = 0.5,
           bookProgress = 0.25,
+          uri = null,
           deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
       formatHandle.setLastReadLocation(bookmark)
@@ -89,37 +94,43 @@ abstract class BookDatabaseEPUBContract {
       BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = BookID.create("abcd")
+    val bookID = BookIDs.newFromText("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val bookmark0 =
       ReaderBookmark(
-        book = bookID,
+        opdsId = "abcd",
         location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
+        kind = ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.5,
         bookProgress = 0.25,
+        uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmark1 =
       ReaderBookmark(
-        book = bookID,
+        opdsId = "abcd",
         location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
+        kind = ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.6,
         bookProgress = 0.25,
+        uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmark2 =
       ReaderBookmark(
-        book = bookID,
+        opdsId = "abcd",
         location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
+        kind = ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.7,
         bookProgress = 0.25,
+        uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmarks0 = listOf(bookmark0)

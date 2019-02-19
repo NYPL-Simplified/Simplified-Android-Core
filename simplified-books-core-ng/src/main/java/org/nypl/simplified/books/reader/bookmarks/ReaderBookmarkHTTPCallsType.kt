@@ -12,7 +12,7 @@ interface ReaderBookmarkHTTPCallsType {
 
   @Throws(IOException::class)
   fun syncingIsEnabled(
-    uri: URI,
+    settingsURI: URI,
     credentials: AccountAuthenticationCredentials): Boolean
 
   /**
@@ -21,7 +21,7 @@ interface ReaderBookmarkHTTPCallsType {
 
   @Throws(IOException::class)
   fun syncingEnable(
-    uri: URI,
+    settingsURI: URI,
     credentials: AccountAuthenticationCredentials,
     enabled: Boolean)
 
@@ -35,7 +35,7 @@ interface ReaderBookmarkHTTPCallsType {
 
   @Throws(IOException::class)
   fun bookmarksGet(
-    uri: URI,
+    annotationsURI: URI,
     credentials: AccountAuthenticationCredentials): List<BookmarkAnnotation>
 
   /**
@@ -48,7 +48,20 @@ interface ReaderBookmarkHTTPCallsType {
 
   @Throws(IOException::class)
   fun bookmarkAdd(
-    uri: URI,
+    annotationsURI: URI,
     credentials: AccountAuthenticationCredentials,
     bookmark: BookmarkAnnotation)
+
+  /**
+   * Delete a bookmark for the given account. This call will fail with an exception if
+   * syncing is not enabled.
+   *
+   * @see #syncingIsEnabled
+   * @see #syncingEnable
+   */
+
+  @Throws(IOException::class)
+  fun bookmarkDelete(
+    bookmarkURI: URI,
+    credentials: AccountAuthenticationCredentials)
 }

@@ -9,7 +9,8 @@ import java.util.concurrent.Callable
 class BookmarksUpdateTask(
   val account: AccountType,
   val bookID: BookID,
-  val bookmarks: (BookmarksControllerType.Bookmarks) -> BookmarksControllerType.Bookmarks) : Callable<BookmarksControllerType.Bookmarks> {
+  val bookmarks: (BookmarksControllerType.Bookmarks) -> BookmarksControllerType.Bookmarks)
+  : Callable<BookmarksControllerType.Bookmarks> {
 
   private val logger = LoggerFactory.getLogger(BookmarksUpdateTask::class.java)
 

@@ -2,8 +2,12 @@ package org.nypl.simplified.books.reader
 
 import com.io7m.jfunctional.Some
 import org.joda.time.LocalDateTime
+import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.books.book_database.BookIDs
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
 import java.io.Serializable
+import java.net.URI
 import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -19,16 +23,22 @@ import java.security.NoSuchAlgorithmException
 data class ReaderBookmark(
 
   /**
-   * The ID of the book to which the bookmark belongs.
+   * The identifier of the book taken from the OPDS entry that provided it.
    */
 
-  val book: BookID,
+  val opdsId: String,
 
   /**
    * The location of the bookmark.
    */
 
   val location: ReaderBookLocation,
+
+  /**
+   * The kind of bookmark.
+   */
+
+  val kind: ReaderBookmarkKind,
 
   /**
    * The time the bookmark was created.
@@ -58,7 +68,19 @@ data class ReaderBookmark(
    * The identifier of the device that created the bookmark, if one is available.
    */
 
-  val deviceID: String?): Serializable {
+  val deviceID: String?,
+
+  /**
+   * The URI of this bookmark, if the bookmark exists on a remote server.
+   */
+
+  val uri: URI?): Serializable {
+
+  /**
+   * The ID of the book to which the bookmark belongs.
+   */
+
+  val book: BookID = BookIDs.newFromText(this.opdsId)
 
   /**
    * The unique ID of the bookmark.
@@ -69,10 +91,12 @@ data class ReaderBookmark(
   companion object {
 
     /**
-     * Create a bookmark ID from the given book ID and location.
+     * Create a bookmark ID from the given account ID, book ID, and location.
      */
 
-    fun createBookmarkID(book: BookID, location: ReaderBookLocation): ReaderBookmarkID {
+    fun createBookmarkID(
+      book: BookID,
+      location: ReaderBookLocation): ReaderBookmarkID {
       try {
         val messageDigest = MessageDigest.getInstance("SHA-256")
         val utf8 = Charset.forName("UTF-8")

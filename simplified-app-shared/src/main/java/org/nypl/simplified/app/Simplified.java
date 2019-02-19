@@ -30,6 +30,7 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
 import org.nypl.simplified.assertions.Assertions;
+import org.nypl.simplified.books.accounts.AccountEvent;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
 import org.nypl.simplified.books.accounts.AccountProvidersJSON;
@@ -60,6 +61,7 @@ import org.nypl.simplified.books.feeds.FeedHTTPTransport;
 import org.nypl.simplified.books.feeds.FeedLoader;
 import org.nypl.simplified.books.feeds.FeedLoaderType;
 import org.nypl.simplified.books.profiles.ProfileDatabaseException;
+import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileType;
 import org.nypl.simplified.books.profiles.ProfilesDatabase;
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType;
@@ -71,6 +73,8 @@ import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.http.core.HTTP;
 import org.nypl.simplified.http.core.HTTPAuthType;
 import org.nypl.simplified.http.core.HTTPType;
+import org.nypl.simplified.observable.Observable;
+import org.nypl.simplified.observable.ObservableType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParser;
 import org.nypl.simplified.opds.core.OPDSAuthenticationDocumentParserType;
@@ -457,6 +461,8 @@ public final class Simplified extends MultiDexApplication {
   private static ProfilesDatabaseType createProfileDatabase(
     final Context context,
     final Resources resources,
+    final ObservableType<AccountEvent> account_events,
+    final ObservableType<ProfileEvent> profile_events,
     final AccountProviderCollection account_providers,
     final File directory)
     throws ProfileDatabaseException {
@@ -471,6 +477,7 @@ public final class Simplified extends MultiDexApplication {
       LOG.debug("opening profile database with anonymous profile");
       return ProfilesDatabase.openWithAnonymousAccountEnabled(
         context,
+        account_events,
         account_providers,
         AccountsDatabases.INSTANCE,
         account_providers.providerDefault(),
@@ -480,6 +487,7 @@ public final class Simplified extends MultiDexApplication {
     LOG.debug("opening profile database without anonymous profile");
     return ProfilesDatabase.openWithAnonymousAccountDisabled(
       context,
+      account_events,
       account_providers,
       AccountsDatabases.INSTANCE,
       directory);
@@ -698,10 +706,19 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("Could not initialize account providers", e);
     }
 
+    final ObservableType<AccountEvent> account_events = Observable.create();
+    final ObservableType<ProfileEvent> profile_events = Observable.create();
+
     try {
       LOG.debug("initializing profiles and accounts");
-      this.profiles = createProfileDatabase(
-        this.getApplicationContext(), resources, this.account_providers, this.directory_profiles);
+      this.profiles =
+        createProfileDatabase(
+          this.getApplicationContext(),
+          resources,
+          account_events,
+          profile_events,
+          this.account_providers,
+          this.directory_profiles);
     } catch (final ProfileDatabaseException e) {
       throw new IllegalStateException("Could not initialize profile database", e);
     }
@@ -743,6 +760,8 @@ public final class Simplified extends MultiDexApplication {
     this.book_controller =
       Controller.Companion.create(
         this.exec_books,
+        account_events,
+        profile_events,
         this.http,
         this.feed_parser,
         this.feed_loader,

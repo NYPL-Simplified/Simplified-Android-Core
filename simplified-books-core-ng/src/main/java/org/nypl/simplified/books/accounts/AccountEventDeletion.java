@@ -23,10 +23,9 @@ public abstract class AccountEventDeletion extends AccountEvent {
    */
 
   public abstract <A, E extends Exception> A matchDeletion(
-      PartialFunctionType<AccountDeletionSucceeded, A, E> on_success,
-      PartialFunctionType<AccountDeletionFailed, A, E> on_failure)
-      throws E;
-
+    PartialFunctionType<AccountDeletionSucceeded, A, E> on_success,
+    PartialFunctionType<AccountDeletionFailed, A, E> on_failure)
+    throws E;
 
   /**
    * Creating an account succeeded.
@@ -36,11 +35,19 @@ public abstract class AccountEventDeletion extends AccountEvent {
   public abstract static class AccountDeletionSucceeded extends AccountEventDeletion {
 
     /**
+     * @return The ID of the account
+     */
+
+    public abstract AccountID id();
+
+    /**
      * @return An event
      */
 
-    public static AccountDeletionSucceeded of(final AccountProvider provider) {
-      return new AutoValue_AccountEventDeletion_AccountDeletionSucceeded(provider);
+    public static AccountDeletionSucceeded of(
+      final AccountID id,
+      final AccountProvider provider) {
+      return new AutoValue_AccountEventDeletion_AccountDeletionSucceeded(id, provider);
     }
 
     /**
@@ -51,9 +58,9 @@ public abstract class AccountEventDeletion extends AccountEvent {
 
     @Override
     public final <A, E extends Exception> A matchDeletion(
-        final PartialFunctionType<AccountDeletionSucceeded, A, E> on_success,
-        final PartialFunctionType<AccountDeletionFailed, A, E> on_failure)
-        throws E {
+      final PartialFunctionType<AccountDeletionSucceeded, A, E> on_success,
+      final PartialFunctionType<AccountDeletionFailed, A, E> on_failure)
+      throws E {
       return on_success.call(this);
     }
   }
@@ -72,8 +79,8 @@ public abstract class AccountEventDeletion extends AccountEvent {
      */
 
     public static AccountDeletionFailed of(
-        final AccountDeletionFailed.ErrorCode code,
-        final OptionType<Exception> exception) {
+      final AccountDeletionFailed.ErrorCode code,
+      final OptionType<Exception> exception) {
       return new AutoValue_AccountEventDeletion_AccountDeletionFailed(code, exception);
     }
 
@@ -82,10 +89,10 @@ public abstract class AccountEventDeletion extends AccountEvent {
      * @return An event
      */
 
-    public static AccountEventDeletion ofException(final Exception exception) {
+    public static AccountEventDeletion ofException(
+      final Exception exception) {
       return new AutoValue_AccountEventDeletion_AccountDeletionFailed(
-          ErrorCode.ERROR_GENERAL, Option.some(exception));
-
+        ErrorCode.ERROR_GENERAL, Option.some(exception));
     }
 
     /**
@@ -102,9 +109,9 @@ public abstract class AccountEventDeletion extends AccountEvent {
 
     @Override
     public final <A, E extends Exception> A matchDeletion(
-        final PartialFunctionType<AccountDeletionSucceeded, A, E> on_success,
-        final PartialFunctionType<AccountDeletionFailed, A, E> on_failure)
-        throws E {
+      final PartialFunctionType<AccountDeletionSucceeded, A, E> on_success,
+      final PartialFunctionType<AccountDeletionFailed, A, E> on_failure)
+      throws E {
       return on_failure.call(this);
     }
 

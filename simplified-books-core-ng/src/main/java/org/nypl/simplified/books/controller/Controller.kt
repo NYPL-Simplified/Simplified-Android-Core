@@ -74,6 +74,8 @@ import java.util.concurrent.ExecutorService
  */
 
 class Controller private constructor(
+  private val profileEvents: ObservableType<ProfileEvent>,
+  private val accountEvents: ObservableType<AccountEvent>,
   private val taskExecutor: ListeningExecutorService,
   private val profiles: ProfilesDatabaseType,
   private val analyticsLogger: AnalyticsLogger?,
@@ -92,15 +94,11 @@ class Controller private constructor(
   AnalyticsControllerType {
 
   private val profileEventSubscription: ObservableSubscriptionType<ProfileEvent>
-  private val profileEvents: ObservableType<ProfileEvent>
-  private val accountEvents: ObservableType<AccountEvent>
   private val timer: ProfileIdleTimerType
   private val downloads: ConcurrentHashMap<BookID, DownloadType>
 
   init {
     this.downloads = ConcurrentHashMap(32)
-    this.profileEvents = Observable.create()
-    this.accountEvents = Observable.create()
     this.timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
     this.profileEventSubscription = this.profileEvents.subscribe { this.onProfileEvent(it) }
   }
@@ -455,6 +453,8 @@ class Controller private constructor(
 
     fun create(
       exec: ExecutorService,
+      accountEvents: ObservableType<AccountEvent>,
+      profileEvents: ObservableType<ProfileEvent>,
       http: HTTPType,
       feedParser: OPDSFeedParserType,
       feedLoader: FeedLoaderType,
@@ -469,6 +469,8 @@ class Controller private constructor(
 
       return Controller(
         taskExecutor = MoreExecutors.listeningDecorator(exec),
+        accountEvents = accountEvents,
+        profileEvents = profileEvents,
         profiles = profiles,
         analyticsLogger = analyticsLogger,
         bookRegistry = bookRegistry,

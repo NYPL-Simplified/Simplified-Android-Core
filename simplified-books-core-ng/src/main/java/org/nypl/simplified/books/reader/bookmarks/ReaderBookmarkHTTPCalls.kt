@@ -26,22 +26,37 @@ class ReaderBookmarkHTTPCalls(
   private val logger = LoggerFactory.getLogger(ReaderBookmarkHTTPCalls::class.java)
 
   override fun bookmarksGet(
-    uri: URI,
+    annotationsURI: URI,
     credentials: AccountAuthenticationCredentials): List<BookmarkAnnotation> {
 
     val auth =
       AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
     val result =
-      this.http.get(Option.some(auth), uri, 0L)
+      this.http.get(Option.some(auth), annotationsURI, 0L)
 
     return result.match<List<BookmarkAnnotation>, IOException>(
-      { error -> logAndFail(uri, error) },
+      { error -> logAndFail(annotationsURI, error) },
+      { exception -> throw exception.error },
+      { success -> deserializeBookmarksFromStream(success.value) })
+  }
+
+  override fun bookmarkDelete(
+    bookmarkURI: URI,
+    credentials: AccountAuthenticationCredentials) {
+
+    val auth =
+      AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
+    val result =
+      this.http.delete(Option.some(auth), bookmarkURI, "application/octet-stream")
+
+    return result.match<Unit, IOException>(
+      { error -> logAndFail(bookmarkURI, error) },
       { exception -> throw exception.error },
       { success -> deserializeBookmarksFromStream(success.value) })
   }
 
   override fun bookmarkAdd(
-    uri: URI,
+    annotationsURI: URI,
     credentials: AccountAuthenticationCredentials,
     bookmark: BookmarkAnnotation) {
 
@@ -50,16 +65,16 @@ class ReaderBookmarkHTTPCalls(
     val auth =
       AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
     val result =
-      this.http.post(Option.some(auth), uri, data, "application/ld+json")
+      this.http.post(Option.some(auth), annotationsURI, data, "application/ld+json")
 
     return result.match<Unit, IOException>(
-      { error -> logAndFail(uri, error) },
+      { error -> logAndFail(annotationsURI, error) },
       { exception -> throw exception.error },
       { })
   }
 
   override fun syncingEnable(
-    uri: URI,
+    settingsURI: URI,
     credentials: AccountAuthenticationCredentials,
     enabled: Boolean) {
 
@@ -68,25 +83,25 @@ class ReaderBookmarkHTTPCalls(
     val auth =
       AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
     val result =
-      this.http.put(Option.some(auth), uri, data, "vnd.librarysimplified/user-profile+json")
+      this.http.put(Option.some(auth), settingsURI, data, "vnd.librarysimplified/user-profile+json")
 
     return result.match<Unit, IOException>(
-      { error -> logAndFail(uri, error) },
+      { error -> logAndFail(settingsURI, error) },
       { exception -> throw exception.error },
       { })
   }
 
   override fun syncingIsEnabled(
-    uri: URI,
+    settingsURI: URI,
     credentials: AccountAuthenticationCredentials): Boolean {
 
     val auth =
       AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials)
     val result =
-      this.http.get(Option.some(auth), uri, 0L)
+      this.http.get(Option.some(auth), settingsURI, 0L)
 
     return result.match<Boolean, IOException>(
-      { error -> logAndFail(uri, error) },
+      { error -> logAndFail(settingsURI, error) },
       { exception -> throw exception.error },
       { success -> deserializeSyncingEnabledFromStream(success.value) })
   }

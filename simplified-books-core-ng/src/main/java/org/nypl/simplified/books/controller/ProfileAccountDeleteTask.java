@@ -35,22 +35,22 @@ final class ProfileAccountDeleteTask implements Callable<AccountEventDeletion> {
   private final ObservableType<AccountEvent> account_events;
 
   ProfileAccountDeleteTask(
-      final ProfilesDatabaseType profiles,
-      final ObservableType<AccountEvent> account_events,
-      final ObservableType<ProfileEvent> profile_events,
-      final FunctionType<Unit, AccountProviderCollection> account_providers,
-      final URI provider) {
+    final ProfilesDatabaseType profiles,
+    final ObservableType<AccountEvent> account_events,
+    final ObservableType<ProfileEvent> profile_events,
+    final FunctionType<Unit, AccountProviderCollection> account_providers,
+    final URI provider) {
 
     this.profiles =
-        NullCheck.notNull(profiles, "Profiles");
+      NullCheck.notNull(profiles, "Profiles");
     this.account_events =
-        NullCheck.notNull(account_events, "Account events");
+      NullCheck.notNull(account_events, "Account events");
     this.profile_events =
-        NullCheck.notNull(profile_events, "Profile events");
+      NullCheck.notNull(profile_events, "Profile events");
     this.account_providers =
-        NullCheck.notNull(account_providers, "Account providers");
+      NullCheck.notNull(account_providers, "Account providers");
     this.provider_id =
-        NullCheck.notNull(provider, "Provider");
+      NullCheck.notNull(provider, "Provider");
   }
 
   protected AccountEventDeletion execute() {
@@ -65,9 +65,10 @@ final class ProfileAccountDeleteTask implements Callable<AccountEventDeletion> {
         profile.deleteAccountByProvider(provider);
         final AccountType account_now = profile.accountCurrent();
         if (!account_now.id().equals(account_then.id())) {
-          this.profile_events.send(ProfileAccountSelectSucceeded.of(account_then.id(), account_now.id()));
+          this.profile_events.send(
+            ProfileAccountSelectSucceeded.of(account_then.id(), account_now.id()));
         }
-        return AccountDeletionSucceeded.of(provider);
+        return AccountDeletionSucceeded.of(account_now.id(), provider);
       }
 
       throw new ProfileNonexistentAccountProviderException("Unrecognized provider: " + this.provider_id);

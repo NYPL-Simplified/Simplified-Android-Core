@@ -23,9 +23,9 @@ public abstract class AccountEventLogout extends AccountEvent {
    */
 
   public abstract <A, E extends Exception> A matchLogout(
-      PartialFunctionType<AccountLogoutSucceeded, A, E> on_success,
-      PartialFunctionType<AccountLogoutFailed, A, E> on_failure)
-      throws E;
+    PartialFunctionType<AccountLogoutSucceeded, A, E> on_success,
+    PartialFunctionType<AccountLogoutFailed, A, E> on_failure)
+    throws E;
 
   /**
    * Logging in succeeded.
@@ -34,11 +34,17 @@ public abstract class AccountEventLogout extends AccountEvent {
   @AutoValue
   public abstract static class AccountLogoutSucceeded extends AccountEventLogout {
 
+    /**
+     * @return The ID of the account
+     */
+
+    public abstract AccountID id();
+
     @Override
     public final <A, E extends Exception> A matchLogout(
-        final PartialFunctionType<AccountLogoutSucceeded, A, E> on_success,
-        final PartialFunctionType<AccountLogoutFailed, A, E> on_failure)
-        throws E {
+      final PartialFunctionType<AccountLogoutSucceeded, A, E> on_success,
+      final PartialFunctionType<AccountLogoutFailed, A, E> on_failure)
+      throws E {
       return on_success.call(this);
     }
 
@@ -46,8 +52,8 @@ public abstract class AccountEventLogout extends AccountEvent {
      * @return An event
      */
 
-    public static AccountLogoutSucceeded of() {
-      return new AutoValue_AccountEventLogout_AccountLogoutSucceeded();
+    public static AccountLogoutSucceeded of(AccountID id) {
+      return new AutoValue_AccountEventLogout_AccountLogoutSucceeded(id);
     }
   }
 
@@ -71,7 +77,9 @@ public abstract class AccountEventLogout extends AccountEvent {
 
       ERROR_PROFILE_CONFIGURATION,
 
-      ERROR_ACCOUNTS_DATABASE, /**
+      ERROR_ACCOUNTS_DATABASE,
+
+      /**
        * A general error code that is not specifically actionable (such as an I/O error
        * or a programming mistake).
        */
@@ -93,9 +101,9 @@ public abstract class AccountEventLogout extends AccountEvent {
 
     @Override
     public final <A, E extends Exception> A matchLogout(
-        final PartialFunctionType<AccountLogoutSucceeded, A, E> on_success,
-        final PartialFunctionType<AccountLogoutFailed, A, E> on_failure)
-        throws E {
+      final PartialFunctionType<AccountLogoutSucceeded, A, E> on_success,
+      final PartialFunctionType<AccountLogoutFailed, A, E> on_failure)
+      throws E {
       return on_failure.call(this);
     }
 
@@ -106,8 +114,8 @@ public abstract class AccountEventLogout extends AccountEvent {
      */
 
     public static AccountLogoutFailed of(
-        final AccountLogoutFailed.ErrorCode code,
-        final OptionType<Exception> exception) {
+      final AccountLogoutFailed.ErrorCode code,
+      final OptionType<Exception> exception) {
       return new AutoValue_AccountEventLogout_AccountLogoutFailed(code, exception);
     }
 
@@ -117,9 +125,9 @@ public abstract class AccountEventLogout extends AccountEvent {
      */
 
     public static AccountLogoutFailed ofException(
-        final Exception exception) {
+      final Exception exception) {
       return new AutoValue_AccountEventLogout_AccountLogoutFailed(
-          ErrorCode.ERROR_GENERAL, Option.some(exception));
+        ErrorCode.ERROR_GENERAL, Option.some(exception));
     }
   }
 }

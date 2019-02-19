@@ -4,11 +4,9 @@ import com.io7m.jfunctional.OptionType;
 
 import org.nypl.simplified.books.book_database.BookDatabaseType;
 
-import java.io.File;
-import java.net.URI;
-
 /**
  * <p>The interface exposed by accounts.</p>
+ *
  * <p>An account aggregates a set of credentials and a book database.
  * Account are assigned monotonically increasing identifiers by the
  * application, but the identifiers themselves carry no meaning. It is
@@ -32,5 +30,15 @@ public interface AccountType extends AccountReadableType {
    */
 
   void setCredentials(OptionType<AccountAuthenticationCredentials> credentials)
-      throws AccountsDatabaseException;
+    throws AccountsDatabaseException;
+
+  /**
+   * Update the account preferences.
+   *
+   * @param preferences The new preferences
+   * @throws AccountsDatabaseException On database errors
+   */
+
+  void setPreferences(AccountPreferences preferences)
+    throws AccountsDatabaseException;
 }

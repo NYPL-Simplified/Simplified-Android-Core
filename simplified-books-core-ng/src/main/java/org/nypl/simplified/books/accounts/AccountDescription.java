@@ -20,14 +20,18 @@ public abstract class AccountDescription {
   /**
    * Create an account description.
    *
-   * @param provider The account provider ID
+   * @param provider    The account provider ID
+   * @param preferences The account preferences
    * @return An account description
    */
 
-  public static Builder builder(final URI provider) {
+  public static Builder builder(
+    final URI provider,
+    final AccountPreferences preferences) {
     return new AutoValue_AccountDescription.Builder()
-        .setCredentials(Option.none())
-        .setProvider(provider);
+      .setCredentials(Option.none())
+      .setPreferences(preferences)
+      .setProvider(provider);
   }
 
   /**
@@ -41,6 +45,12 @@ public abstract class AccountDescription {
    */
 
   public abstract OptionType<AccountAuthenticationCredentials> credentials();
+
+  /**
+   * @return The account preferences
+   */
+
+  public abstract AccountPreferences preferences();
 
   /**
    * @return The current value as a mutable builder
@@ -64,7 +74,7 @@ public abstract class AccountDescription {
      */
 
     public abstract Builder setProvider(
-        URI provider);
+      URI provider);
 
     /**
      * Set the credentials.
@@ -75,7 +85,18 @@ public abstract class AccountDescription {
      */
 
     public abstract Builder setCredentials(
-        OptionType<AccountAuthenticationCredentials> credentials);
+      OptionType<AccountAuthenticationCredentials> credentials);
+
+    /**
+     * Set the preferences.
+     *
+     * @param preferences The preferences
+     * @return The current builder
+     * @see #preferences()
+     */
+
+    public abstract Builder setPreferences(
+      AccountPreferences preferences);
 
     /**
      * Set the credentials.
@@ -86,8 +107,7 @@ public abstract class AccountDescription {
      */
 
     public final Builder setCredentials(
-        final AccountAuthenticationCredentials credentials)
-    {
+      final AccountAuthenticationCredentials credentials) {
       return setCredentials(Option.some(credentials));
     }
 

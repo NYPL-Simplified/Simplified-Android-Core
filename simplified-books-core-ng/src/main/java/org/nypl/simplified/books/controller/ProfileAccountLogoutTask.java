@@ -96,7 +96,7 @@ final class ProfileAccountLogoutTask implements Callable<AccountEventLogout> {
     }
 
     LOG.debug("logged out successfully");
-    return AccountLogoutSucceeded.of();
+    return AccountLogoutSucceeded.of(account.id());
   }
 
 }

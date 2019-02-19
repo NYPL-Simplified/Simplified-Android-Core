@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import com.io7m.jfunctional.OptionType
+import com.io7m.jfunctional.Some
 import org.joda.time.LocalDateTime
-import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.books.accounts.AccountID
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -22,6 +25,7 @@ object ReaderBookmarkJSON {
    * Deserialize bookmarks from the given JSON node.
    *
    * @param objectMapper  A JSON object mapper
+   * @param kind The kind of bookmark
    * @param node A JSON node
    * @return A parsed description
    * @throws JSONParseException On parse errors
@@ -31,14 +35,19 @@ object ReaderBookmarkJSON {
   @Throws(JSONParseException::class)
   fun deserializeFromJSON(
     objectMapper: ObjectMapper,
+    kind: ReaderBookmarkKind,
     node: JsonNode): ReaderBookmark {
-    return deserializeFromJSON(objectMapper, JSONParserUtilities.checkObject(null, node))
+    return deserializeFromJSON(
+      objectMapper = objectMapper,
+      kind = kind,
+      node = JSONParserUtilities.checkObject(null, node))
   }
 
   /**
    * Deserialize bookmarks from the given JSON node.
    *
    * @param objectMapper  A JSON object mapper
+   * @param kind The kind of bookmark
    * @param node A JSON node
    * @return A parsed description
    * @throws JSONParseException On parse errors
@@ -48,16 +57,27 @@ object ReaderBookmarkJSON {
   @Throws(JSONParseException::class)
   fun deserializeFromJSON(
     objectMapper: ObjectMapper,
+    kind: ReaderBookmarkKind,
     node: ObjectNode): ReaderBookmark {
 
     return ReaderBookmark(
-      book = BookID.create(JSONParserUtilities.getString(node, "bookID")),
+      opdsId = JSONParserUtilities.getString(node, "opdsId"),
+      kind = kind,
       location = ReaderBookLocationJSON.deserializeFromJSON(objectMapper, JSONParserUtilities.getObject(node, "location")),
       time = LocalDateTime.parse(JSONParserUtilities.getString(node, "time")),
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       chapterProgress = JSONParserUtilities.getDouble(node, "chapterProgress"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
+      uri = toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
       deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null))
+  }
+
+  private fun <T> toNullable(option: OptionType<T>): T? {
+    return if (option is Some<T>) {
+      option.get()
+    } else {
+      null
+    }
   }
 
   /**
@@ -73,7 +93,7 @@ object ReaderBookmarkJSON {
     description: ReaderBookmark): ObjectNode {
 
     val node = objectMapper.createObjectNode()
-    node.put("bookID", description.book.value())
+    node.put("opdsId", description.opdsId)
     node.set("location", ReaderBookLocationJSON.serializeToJSON(objectMapper, description.location))
     node.put("time", description.time.toString())
     node.put("chapterTitle", description.chapterTitle)
@@ -145,6 +165,7 @@ object ReaderBookmarkJSON {
    * Deserialize a bookmark from the given string.
    *
    * @param objectMapper A JSON object mapper
+   * @param kind The kind of bookmark
    * @param serialized A serialized JSON string
    * @return A parsed location
    * @throws IOException On I/O or parser errors
@@ -154,7 +175,12 @@ object ReaderBookmarkJSON {
   @Throws(IOException::class)
   fun deserializeFromString(
     objectMapper: ObjectMapper,
+    kind: ReaderBookmarkKind,
     serialized: String): ReaderBookmark {
-    return deserializeFromJSON(objectMapper, objectMapper.readTree(serialized))
+    return deserializeFromJSON(
+      objectMapper = objectMapper,
+      kind = kind,
+      node = objectMapper.readTree(serialized)
+    )
   }
 }

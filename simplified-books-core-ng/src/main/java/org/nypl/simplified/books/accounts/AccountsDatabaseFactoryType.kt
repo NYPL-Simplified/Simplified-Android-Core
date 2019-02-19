@@ -2,7 +2,7 @@ package org.nypl.simplified.books.accounts
 
 import android.content.Context
 import org.nypl.simplified.books.book_database.BookDatabaseFactoryType
-
+import org.nypl.simplified.observable.ObservableType
 import java.io.File
 
 interface AccountsDatabaseFactoryType {
@@ -10,6 +10,7 @@ interface AccountsDatabaseFactoryType {
   /**
    * Open an accounts database from the given directory, creating a new database if one does not exist.
    *
+   * @param accountEvents An observable that will be used to publish account events
    * @param bookDatabases    A provider of book databases
    * @param accountProviders The available account providers
    * @param directory         The directory
@@ -20,6 +21,7 @@ interface AccountsDatabaseFactoryType {
   @Throws(AccountsDatabaseException::class)
   fun openDatabase(
     context: Context,
+    accountEvents: ObservableType<AccountEvent>,
     bookDatabases: BookDatabaseFactoryType,
     accountProviders: AccountProviderCollectionType,
     directory: File): AccountsDatabaseType
@@ -27,6 +29,7 @@ interface AccountsDatabaseFactoryType {
   /**
    * Open an accounts database from the given directory, creating a new database if one does not exist.
    *
+   * @param accountEvents An observable that will be used to publish account events
    * @param accountProviders The available account providers
    * @param directory         The directory
    * @return A profile database
@@ -36,6 +39,7 @@ interface AccountsDatabaseFactoryType {
   @Throws(AccountsDatabaseException::class)
   fun openDatabase(
     context: Context,
+    accountEvents: ObservableType<AccountEvent>,
     accountProviders: AccountProviderCollectionType,
     directory: File): AccountsDatabaseType
 }

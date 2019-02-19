@@ -23,9 +23,9 @@ public abstract class AccountEventLogin extends AccountEvent {
    */
 
   public abstract <A, E extends Exception> A matchLogin(
-      PartialFunctionType<AccountLoginSucceeded, A, E> on_success,
-      PartialFunctionType<AccountLoginFailed, A, E> on_failure)
-      throws E;
+    PartialFunctionType<AccountLoginSucceeded, A, E> on_success,
+    PartialFunctionType<AccountLoginFailed, A, E> on_failure)
+    throws E;
 
   /**
    * Logging in succeeded.
@@ -35,6 +35,12 @@ public abstract class AccountEventLogin extends AccountEvent {
   public abstract static class AccountLoginSucceeded extends AccountEventLogin {
 
     /**
+     * @return The ID of the account
+     */
+
+    public abstract AccountID id();
+
+    /**
      * @return The accepted credentials
      */
 
@@ -42,9 +48,9 @@ public abstract class AccountEventLogin extends AccountEvent {
 
     @Override
     public final <A, E extends Exception> A matchLogin(
-        final PartialFunctionType<AccountLoginSucceeded, A, E> on_success,
-        final PartialFunctionType<AccountLoginFailed, A, E> on_failure)
-        throws E {
+      final PartialFunctionType<AccountLoginSucceeded, A, E> on_success,
+      final PartialFunctionType<AccountLoginFailed, A, E> on_failure)
+      throws E {
       return on_success.call(this);
     }
 
@@ -53,8 +59,9 @@ public abstract class AccountEventLogin extends AccountEvent {
      */
 
     public static AccountLoginSucceeded of(
-        final AccountAuthenticationCredentials credentials) {
-      return new AutoValue_AccountEventLogin_AccountLoginSucceeded(credentials);
+      final AccountID id,
+      final AccountAuthenticationCredentials credentials) {
+      return new AutoValue_AccountEventLogin_AccountLoginSucceeded(id, credentials);
     }
   }
 
@@ -124,33 +131,35 @@ public abstract class AccountEventLogin extends AccountEvent {
 
     @Override
     public final <A, E extends Exception> A matchLogin(
-        final PartialFunctionType<AccountLoginSucceeded, A, E> on_success,
-        final PartialFunctionType<AccountLoginFailed, A, E> on_failure)
-        throws E {
+      final PartialFunctionType<AccountLoginSucceeded, A, E> on_success,
+      final PartialFunctionType<AccountLoginFailed, A, E> on_failure)
+      throws E {
       return on_failure.call(this);
     }
 
     /**
+     *
      * @param code      The error code
      * @param exception The exception raised, if any
      * @return An event
      */
 
     public static AccountLoginFailed of(
-        final AccountLoginFailed.ErrorCode code,
-        final OptionType<Exception> exception) {
+      final AccountLoginFailed.ErrorCode code,
+      final OptionType<Exception> exception) {
       return new AutoValue_AccountEventLogin_AccountLoginFailed(code, exception);
     }
 
     /*
+     *
      * @param exception The exception raised
      * @return An event
      */
 
     public static AccountLoginFailed ofException(
-        final Exception exception) {
+      final Exception exception) {
       return new AutoValue_AccountEventLogin_AccountLoginFailed(
-          ErrorCode.ERROR_GENERAL, Option.some(exception));
+        ErrorCode.ERROR_GENERAL, Option.some(exception));
     }
   }
 }

@@ -21,6 +21,7 @@ import org.nypl.simplified.books.book_database.BookEvent
 import org.nypl.simplified.books.book_database.BookFormat
 import org.nypl.simplified.books.book_database.BookFormats
 import org.nypl.simplified.books.book_database.BookID
+import org.nypl.simplified.books.book_database.BookIDs
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.bundled_content.BundledContentResolverType
@@ -31,6 +32,8 @@ import org.nypl.simplified.books.feeds.FeedLoader
 import org.nypl.simplified.books.feeds.FeedLoaderType
 import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.books.reader.ReaderBookmark
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.*
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.files.DirectoryUtilities
@@ -104,36 +107,42 @@ open class BookmarksUpdateTaskContract {
       Mockito.mock(AccountType::class.java)
 
     val bookID =
-      BookID.create("x")
+      BookIDs.newFromText("x")
 
     val bookmark0 =
       ReaderBookmark(
-        book = bookID,
+        opdsId = "x",
         location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
+        kind = ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.5,
         bookProgress = 0.25,
+        uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmark1 =
       ReaderBookmark(
-        book = bookID,
+        opdsId = "x",
         location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
+        kind = ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.6,
         bookProgress = 0.25,
+        uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmark2 =
       ReaderBookmark(
-        book = bookID,
+        opdsId = "x",
         location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
         time = LocalDateTime.now(),
+        kind = ReaderBookmarkExplicit,
         chapterTitle = "A title",
         chapterProgress = 0.7,
         bookProgress = 0.25,
+        uri = null,
         deviceID = "3475fa24-25ca-4ddb-9d7b-762358d5f83a")
 
     val bookmarks0 =

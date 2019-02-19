@@ -41,6 +41,12 @@ public interface AccountReadableType {
   OptionType<AccountAuthenticationCredentials> credentials();
 
   /**
+   * @return The account preferences
+   */
+
+  AccountPreferences preferences();
+
+  /**
    * @return {@code true} if the account requires credentials to perform operations
    */
 

@@ -10,6 +10,7 @@ import org.nypl.simplified.books.accounts.AccountEventCreation.AccountCreationFa
 import org.nypl.simplified.books.accounts.AccountEventCreation.AccountCreationSucceeded;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
+import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseException;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfileNonexistentAccountProviderException;
@@ -28,19 +29,19 @@ final class ProfileAccountCreateTask implements Callable<AccountEventCreation> {
   private final ObservableType<AccountEvent> account_events;
 
   ProfileAccountCreateTask(
-      final ProfilesDatabaseType profiles,
-      final ObservableType<AccountEvent> account_events,
-      final FunctionType<Unit, AccountProviderCollection> account_providers,
-      final URI provider) {
+    final ProfilesDatabaseType profiles,
+    final ObservableType<AccountEvent> account_events,
+    final FunctionType<Unit, AccountProviderCollection> account_providers,
+    final URI provider) {
 
     this.profiles =
-        NullCheck.notNull(profiles, "Profiles");
+      NullCheck.notNull(profiles, "Profiles");
     this.account_events =
-        NullCheck.notNull(account_events, "Account events");
+      NullCheck.notNull(account_events, "Account events");
     this.account_providers =
-        NullCheck.notNull(account_providers, "Account providers");
+      NullCheck.notNull(account_providers, "Account providers");
     this.provider_id =
-        NullCheck.notNull(provider, "Provider");
+      NullCheck.notNull(provider, "Provider");
   }
 
   private AccountEventCreation execute() {
@@ -50,8 +51,8 @@ final class ProfileAccountCreateTask implements Callable<AccountEventCreation> {
 
       if (provider != null) {
         final ProfileType profile = this.profiles.currentProfileUnsafe();
-        profile.createAccount(provider);
-        return AccountCreationSucceeded.of(provider);
+        final AccountType account = profile.createAccount(provider);
+        return AccountCreationSucceeded.of(account.id(), provider);
       }
 
       throw new ProfileNonexistentAccountProviderException("Unrecognized provider: " + this.provider_id);

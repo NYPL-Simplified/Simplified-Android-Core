@@ -66,6 +66,8 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
 
   /**
    * @return {@code true} iff the SimplyE synchronization is supported
+   * @see #annotationsURI()
+   * @see #patronSettingsURI()
    */
 
   public abstract boolean supportsSimplyESynchronization();
@@ -157,6 +159,24 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
    */
 
   public abstract OptionType<String> styleNameOverride();
+
+  /**
+   * The patron settings URI. This is the URI used to get and set patron settings.
+   *
+   * @return The patron settings URI
+   */
+
+  public abstract OptionType<URI> patronSettingsURI();
+
+  /**
+   * The annotations URI. This is the URI used to get and set annotations for bookmark
+   * syncing.
+   *
+   * @return The annotations URI
+   * @see #supportsSimplyESynchronization()
+   */
+
+  public abstract OptionType<URI> annotationsURI();
 
   /**
    * Determine the correct catalog URI to use for readers of a given age.
@@ -382,6 +402,24 @@ public abstract class AccountProvider implements Comparable<AccountProvider> {
 
     public abstract Builder setStyleNameOverride(
       OptionType<String> style);
+
+    /**
+     * @param uri The URI
+     * @return The current builder
+     * @see #patronSettingsURI()
+     */
+
+    public abstract Builder setPatronSettingsURI(
+      OptionType<URI> uri);
+
+    /**
+     * @param uri The URI
+     * @return The current builder
+     * @see #annotationsURI()
+     */
+
+    public abstract Builder setAnnotationsURI(
+      OptionType<URI> uri);
 
     /**
      * @return The constructed account provider

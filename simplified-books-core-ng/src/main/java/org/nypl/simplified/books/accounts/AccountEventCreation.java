@@ -35,6 +35,12 @@ public abstract class AccountEventCreation extends AccountEvent {
   public abstract static class AccountCreationSucceeded extends AccountEventCreation {
 
     /**
+     * @return The ID of the created account
+     */
+
+    public abstract AccountID id();
+
+    /**
      * @return The account provider
      */
 
@@ -52,8 +58,10 @@ public abstract class AccountEventCreation extends AccountEvent {
      * @return An event
      */
 
-    public static AccountCreationSucceeded of(final AccountProvider provider) {
-      return new AutoValue_AccountEventCreation_AccountCreationSucceeded(provider);
+    public static AccountCreationSucceeded of(
+      final AccountID id,
+      final AccountProvider provider) {
+      return new AutoValue_AccountEventCreation_AccountCreationSucceeded(id, provider);
     }
   }
 

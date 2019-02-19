@@ -7,6 +7,8 @@ import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.Boo
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.books.reader.ReaderBookmarkJSON
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.*
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -187,7 +189,12 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     private fun loadBookmarks(fileBookmarks: File): List<ReaderBookmark> {
       val tree = this.objectMapper.readTree(fileBookmarks)
       val array = JSONParserUtilities.checkArray(null, tree)
-      return array.map { node -> ReaderBookmarkJSON.deserializeFromJSON(this.objectMapper, node) }
+      return array.map { node ->
+        ReaderBookmarkJSON.deserializeFromJSON(
+          objectMapper = this.objectMapper,
+          kind = ReaderBookmarkExplicit,
+          node = node)
+      }
     }
 
     @Throws(IOException::class)
@@ -203,7 +210,8 @@ internal class DatabaseFormatHandleEPUB internal constructor(
     @Throws(IOException::class)
     private fun loadLastReadLocation(fileLastRead: File): ReaderBookmark {
       val serialized = FileUtilities.fileReadUTF8(fileLastRead)
-      return ReaderBookmarkJSON.deserializeFromString(this.objectMapper, serialized)
+      return ReaderBookmarkJSON.deserializeFromString(
+        this.objectMapper, ReaderBookmarkLastReadLocation, serialized)
     }
 
     @Throws(IOException::class)

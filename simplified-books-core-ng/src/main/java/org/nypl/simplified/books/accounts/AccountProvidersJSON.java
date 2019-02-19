@@ -49,6 +49,8 @@ public final class AccountProvidersJSON {
 
       final URI catalogUrl = JSONParserUtilities.getURI(obj, "catalogUrl");
       b.setCatalogURI(catalogUrl);
+      b.setPatronSettingsURI(Option.some(applyPatronSettingHack(catalogUrl)));
+      b.setAnnotationsURI(Option.some(applyAnnotationsHack(catalogUrl)));
 
       b.setCatalogURIForUnder13s(
         JSONParserUtilities.getURIOptional(obj, "catalogUrlUnder13"));
@@ -109,6 +111,14 @@ public final class AccountProvidersJSON {
     } catch (JSONParseException e) {
       throw new JSONParseException("Unable to parse provider " + id_uuid, e);
     }
+  }
+
+  private static URI applyAnnotationsHack(URI catalogUrl) {
+    return URI.create(catalogUrl.toString() + "/annotations");
+  }
+
+  private static URI applyPatronSettingHack(URI catalogUrl) {
+    return URI.create(catalogUrl.toString() + "/patrons/me");
   }
 
   private static URI applyLoansHack(URI catalogUrl) {
