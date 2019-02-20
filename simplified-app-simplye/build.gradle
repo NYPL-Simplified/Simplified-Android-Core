@@ -40,8 +40,8 @@ description = 'simplified-app-simplye'
 
 preBuild.doFirst {
   def adobeDRMRequested =
-    (project.hasProperty("org.nypl.simplified.with_drm_adobe")
-        && project.property("org.nypl.simplified.with_drm_adobe") == "true")
+    (project.hasProperty("org.librarysimplified.with_drm_adobe")
+        && project.property("org.librarysimplified.with_drm_adobe") == "true")
 
   if (adobeDRMRequested) {
     if (!file("${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig").exists()) {
@@ -68,8 +68,8 @@ dependencies {
    * If building with Adobe DRM, add the required native dependencies.
    */
 
-  if (project.hasProperty("org.nypl.simplified.with_drm_adobe")) {
-    if (project.property("org.nypl.simplified.with_drm_adobe") == "true") {
+  if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
+    if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
       implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
       implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
       implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
@@ -83,8 +83,8 @@ dependencies {
  * If building with Adobe DRM, add and process the required native dependencies.
  */
 
-if (project.hasProperty("org.nypl.simplified.with_drm_adobe")) {
-  if (project.property("org.nypl.simplified.with_drm_adobe") == "true") {
+if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
+  if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
     apply plugin: 'android-native-dependencies'
 
     native_dependencies {

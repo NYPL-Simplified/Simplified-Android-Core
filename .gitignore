@@ -10,6 +10,7 @@
 .idea
 /captures
 /local.properties
+gradle.properties
 
 # Ignore .so files
 **/jniLibs
