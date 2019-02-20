@@ -60,6 +60,7 @@ import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.books.BooksContract
 import org.nypl.simplified.tests.books.MappedHTTP
+import org.nypl.simplified.tests.books.reader.bookmarks.NullReaderBookmarkService
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
 
@@ -201,7 +202,8 @@ abstract class BooksControllerContract {
       bundledContent = bundledContent,
       accountProviders = accountProviders,
       timerExecutor = timerExec,
-      adobeDrm = null)
+      adobeDrm = null,
+      readerBookmarkEvents = Observable.create())
   }
 
   @Before

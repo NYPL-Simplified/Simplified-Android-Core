@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDexApplication;
 import android.util.DisplayMetrics;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.OptionType;
@@ -46,7 +47,6 @@ import org.nypl.simplified.books.bundled_content.BundledContentResolverType;
 import org.nypl.simplified.books.clock.Clock;
 import org.nypl.simplified.books.clock.ClockType;
 import org.nypl.simplified.books.controller.AnalyticsControllerType;
-import org.nypl.simplified.books.controller.BookmarksControllerType;
 import org.nypl.simplified.books.controller.BooksControllerType;
 import org.nypl.simplified.books.controller.Controller;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
@@ -65,6 +65,12 @@ import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileType;
 import org.nypl.simplified.books.profiles.ProfilesDatabase;
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceUsableType;
 import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.cardcreator.CardCreator;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
@@ -116,6 +122,7 @@ public final class Simplified extends MultiDexApplication {
   private ListeningScheduledExecutorService exec_epub;
   private ListeningScheduledExecutorService exec_background;
   private ListeningScheduledExecutorService exec_profile_timer;
+  private ListeningScheduledExecutorService exec_reader_bookmarks;
   private ScreenSizeInformation screen;
   private File directory_base;
   private File directory_documents;
@@ -146,6 +153,7 @@ public final class Simplified extends MultiDexApplication {
   private BundledContentResolverType bundled_content_resolver;
   private ApplicationColorScheme color_scheme_fallback;
   private BookCoverBadgeLookupType cover_badges;
+  private ReaderBookmarkServiceType readerBookmarksService;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -273,12 +281,12 @@ public final class Simplified extends MultiDexApplication {
   }
 
   /**
-   * @return The books controller
+   * @return The reader bookmarks service
    */
 
-  public static BookmarksControllerType getBookmarksController() {
+  public static ReaderBookmarkServiceUsableType getReaderBookmarksService() {
     final Simplified i = Simplified.checkInitialized();
-    return i.book_controller;
+    return i.readerBookmarksService;
   }
 
   /**
@@ -375,7 +383,17 @@ public final class Simplified extends MultiDexApplication {
 
     final ThreadFactory tf = Executors.defaultThreadFactory();
 
-    final ThreadFactory named = new ThreadFactory() {
+    final ThreadFactory named = createNamedThreadFactory(base, priority, tf);
+
+    return MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(count, named));
+  }
+
+  @NonNull
+  private static ThreadFactory createNamedThreadFactory(
+    final String name,
+    final int priority,
+    final ThreadFactory base) {
+    return new ThreadFactory() {
       private int id;
 
       @Override
@@ -387,18 +405,16 @@ public final class Simplified extends MultiDexApplication {
          * functions.
          */
 
-        final Thread thread = tf.newThread(
+        final Thread thread = base.newThread(
           () -> {
             android.os.Process.setThreadPriority(priority);
             NullCheck.notNull(runnable).run();
           });
-        thread.setName(String.format("simplified-%s-tasks-%d", base, this.id));
+        thread.setName(String.format("simplified-%s-tasks-%d", name, this.id));
         ++this.id;
         return thread;
       }
     };
-
-    return MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(count, named));
   }
 
   public static DocumentStoreType getDocumentStore() {
@@ -601,6 +617,8 @@ public final class Simplified extends MultiDexApplication {
       Simplified.createNamedThreadPool(4, "downloader", 19);
     this.exec_books =
       Simplified.createNamedThreadPool(1, "books", 19);
+    this.exec_reader_bookmarks =
+      Simplified.createNamedThreadPool(1, "reader-bookmarks", 19);
     this.exec_epub =
       Simplified.createNamedThreadPool(1, "epub", 19);
     this.exec_background =
@@ -708,6 +726,7 @@ public final class Simplified extends MultiDexApplication {
 
     final ObservableType<AccountEvent> account_events = Observable.create();
     final ObservableType<ProfileEvent> profile_events = Observable.create();
+    final ObservableType<ReaderBookmarkEvent> reader_bookmark_events = Observable.create();
 
     try {
       LOG.debug("initializing profiles and accounts");
@@ -762,6 +781,7 @@ public final class Simplified extends MultiDexApplication {
         this.exec_books,
         account_events,
         profile_events,
+        reader_bookmark_events,
         this.http,
         this.feed_parser,
         this.feed_loader,
@@ -773,6 +793,16 @@ public final class Simplified extends MultiDexApplication {
         ignored -> this.account_providers,
         this.exec_profile_timer,
         null);
+
+    LOG.debug("initializing reader bookmark service");
+    this.readerBookmarksService =
+      ReaderBookmarkService.Companion.createService(
+        new ReaderBookmarkServiceProviderType.Requirements(
+          (runnable) -> createNamedThreadFactory("reader-bookmarks", 19, Executors.defaultThreadFactory()).newThread(runnable),
+          reader_bookmark_events,
+          new ReaderBookmarkHTTPCalls(new ObjectMapper(), this.http),
+          this.book_controller
+        ));
 
     /*
      * Log out the current profile after ten minutes, warning one minute before this happens.

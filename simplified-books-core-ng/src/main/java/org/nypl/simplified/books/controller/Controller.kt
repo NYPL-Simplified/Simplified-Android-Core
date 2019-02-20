@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.ListenableFuture
@@ -15,7 +16,6 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnimplementedCodeException
-
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
@@ -51,10 +51,13 @@ import org.nypl.simplified.books.profiles.ProfileSelected
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled
 import org.nypl.simplified.books.reader.ReaderBookLocation
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.http.core.HTTPType
-import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableReadableType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.observable.ObservableType
@@ -62,7 +65,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.slf4j.LoggerFactory
-
 import java.net.URI
 import java.util.ArrayList
 import java.util.SortedMap
@@ -76,6 +78,7 @@ import java.util.concurrent.ExecutorService
 class Controller private constructor(
   private val profileEvents: ObservableType<ProfileEvent>,
   private val accountEvents: ObservableType<AccountEvent>,
+  private val readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
   private val taskExecutor: ListeningExecutorService,
   private val profiles: ProfilesDatabaseType,
   private val analyticsLogger: AnalyticsLogger?,
@@ -87,19 +90,16 @@ class Controller private constructor(
   private val feedLoader: FeedLoaderType,
   private val downloader: DownloaderType,
   private val timerExecutor: ExecutorService,
-  private val adobeDrm: AdobeAdeptExecutorType?) 
+  private val adobeDrm: AdobeAdeptExecutorType?)
   : BooksControllerType,
-  BookmarksControllerType,
   ProfilesControllerType,
   AnalyticsControllerType {
 
   private val profileEventSubscription: ObservableSubscriptionType<ProfileEvent>
-  private val timer: ProfileIdleTimerType
-  private val downloads: ConcurrentHashMap<BookID, DownloadType>
+  private val timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
+  private val downloads: ConcurrentHashMap<BookID, DownloadType> = ConcurrentHashMap(32)
 
   init {
-    this.downloads = ConcurrentHashMap(32)
-    this.timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
     this.profileEventSubscription = this.profileEvents.subscribe { this.onProfileEvent(it) }
   }
 
@@ -390,19 +390,6 @@ class Controller private constructor(
     }
   }
 
-  override fun bookmarksUpdate(
-    account: AccountType,
-    id: BookID,
-    bookmarks: (BookmarksControllerType.Bookmarks) -> BookmarksControllerType.Bookmarks): FluentFuture<BookmarksControllerType.Bookmarks> {
-    return FluentFuture.from(this.taskExecutor.submit(BookmarksUpdateTask(account, id, bookmarks)))
-  }
-
-  override fun bookmarksLoad(
-    account: AccountType,
-    id: BookID): FluentFuture<BookmarksControllerType.Bookmarks> {
-    return FluentFuture.from(this.taskExecutor.submit(BookmarksLoadTask(account, id)))
-  }
-
   override fun bookReport(
     feedEntry: FeedEntry.FeedEntryOPDS,
     reportType: String): ListenableFuture<Unit> {
@@ -455,6 +442,7 @@ class Controller private constructor(
       exec: ExecutorService,
       accountEvents: ObservableType<AccountEvent>,
       profileEvents: ObservableType<ProfileEvent>,
+      readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
       http: HTTPType,
       feedParser: OPDSFeedParserType,
       feedLoader: FeedLoaderType,
@@ -471,6 +459,7 @@ class Controller private constructor(
         taskExecutor = MoreExecutors.listeningDecorator(exec),
         accountEvents = accountEvents,
         profileEvents = profileEvents,
+        readerBookmarkEvents = readerBookmarkEvents,
         profiles = profiles,
         analyticsLogger = analyticsLogger,
         bookRegistry = bookRegistry,

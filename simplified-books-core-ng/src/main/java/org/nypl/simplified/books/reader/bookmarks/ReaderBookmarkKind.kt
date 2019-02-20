@@ -14,15 +14,22 @@ sealed class ReaderBookmarkKind(
    */
 
   object ReaderBookmarkLastReadLocation :
-    ReaderBookmarkKind("http://librarysimplified.org/terms/annotation/idling")
+    ReaderBookmarkKind("http://librarysimplified.org/terms/annotation/idling") {
+    override fun toString(): String {
+      return "ReaderBookmarkLastReadLocation"
+    }
+  }
 
   /**
    * The bookmark represents an explicitly created bookmark.
    */
 
   object ReaderBookmarkExplicit :
-    ReaderBookmarkKind("http://www.w3.org/ns/oa#bookmarking")
-
+    ReaderBookmarkKind("http://www.w3.org/ns/oa#bookmarking") {
+    override fun toString(): String {
+      return "ReaderBookmarkExplicit"
+    }
+  }
 
   companion object {
 

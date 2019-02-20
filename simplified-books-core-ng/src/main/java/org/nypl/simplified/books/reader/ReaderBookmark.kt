@@ -88,6 +88,22 @@ data class ReaderBookmark(
 
   val bookmarkId: ReaderBookmarkID = createBookmarkID(this.book, this.location)
 
+  /**
+   * Convenience function to convert a bookmark to a last-read-location kind.
+   */
+
+  fun toLastReadLocation(): ReaderBookmark {
+    return this.copy(kind = ReaderBookmarkKind.ReaderBookmarkLastReadLocation)
+  }
+
+  /**
+   * Convenience function to convert a bookmark to an explicit kind.
+   */
+
+  fun toExplicit(): ReaderBookmark {
+    return this.copy(kind = ReaderBookmarkKind.ReaderBookmarkExplicit)
+  }
+
   companion object {
 
     /**

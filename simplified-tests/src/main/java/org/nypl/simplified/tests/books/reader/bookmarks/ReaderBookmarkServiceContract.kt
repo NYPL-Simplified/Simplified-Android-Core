@@ -26,7 +26,7 @@ import org.nypl.simplified.books.profiles.ProfileID
 import org.nypl.simplified.books.profiles.ProfileType
 import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.books.reader.ReaderBookmark
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkControllerType
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCallsType
@@ -43,18 +43,18 @@ import java.io.InputStream
 import java.net.URI
 import java.nio.charset.Charset
 
-abstract class ReaderBookmarkControllerContract {
+abstract class ReaderBookmarkServiceContract {
 
   protected abstract val logger: Logger
 
-  protected abstract fun bookmarkController(
+  protected abstract fun bookmarkService(
     threads: (Runnable) -> Thread,
     events: ObservableType<ReaderBookmarkEvent>,
     httpCalls: ReaderBookmarkHTTPCallsType,
-    profilesController: ProfilesControllerType): ReaderBookmarkControllerType
+    profilesController: ProfilesControllerType): ReaderBookmarkServiceType
 
   private val objectMapper = ObjectMapper()
-  private var readerBookmarkController: ReaderBookmarkControllerType? = null
+  private var readerBookmarkService: ReaderBookmarkServiceType? = null
 
   private val accountCredentials =
     AccountAuthenticationCredentials.builder(
@@ -75,7 +75,7 @@ abstract class ReaderBookmarkControllerContract {
 
   @After
   fun tearDown() {
-    this.readerBookmarkController?.close()
+    this.readerBookmarkService?.close()
   }
 
   /**
@@ -180,8 +180,8 @@ abstract class ReaderBookmarkControllerContract {
     Mockito.`when`(profiles.profileCurrent())
       .thenReturn(profile)
 
-    this.readerBookmarkController =
-      this.bookmarkController(::Thread, bookmarkEvents.events, httpCalls, profiles)
+    this.readerBookmarkService =
+      this.bookmarkService(::Thread, bookmarkEvents.events, httpCalls, profiles)
 
     bookmarkEvents.latch.await()
 
@@ -239,7 +239,7 @@ abstract class ReaderBookmarkControllerContract {
                 },
                 "id" : "http://www.example.com/annotations/100000",
                 "type" : "Annotation",
-                "motivation" : "http://librarysimplified.org/terms/annotation/idling",
+                "motivation" : "http://www.w3.org/ns/oa#bookmarking",
                 "target" : {
                    "selector" : {
                       "value" : "{\"idref\":\"n-1\",\"contentCFI\":\"/4/14,/1:0,/1:1\"}",
@@ -352,8 +352,8 @@ abstract class ReaderBookmarkControllerContract {
     Mockito.`when`(profiles.profileCurrent())
       .thenReturn(profile)
 
-    this.readerBookmarkController =
-      this.bookmarkController(::Thread, bookmarkEvents.events, httpCalls, profiles)
+    this.readerBookmarkService =
+      this.bookmarkService(::Thread, bookmarkEvents.events, httpCalls, profiles)
 
     bookmarkEvents.latch.await()
 
@@ -547,8 +547,8 @@ abstract class ReaderBookmarkControllerContract {
     Mockito.`when`(profiles.profileCurrent())
       .thenReturn(profile)
 
-    this.readerBookmarkController =
-      this.bookmarkController(::Thread, bookmarkEvents.events, httpCalls, profiles)
+    this.readerBookmarkService =
+      this.bookmarkService(::Thread, bookmarkEvents.events, httpCalls, profiles)
 
     bookmarkEvents.latch.await()
 

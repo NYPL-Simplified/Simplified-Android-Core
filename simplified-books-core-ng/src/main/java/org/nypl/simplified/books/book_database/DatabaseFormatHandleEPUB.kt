@@ -3,6 +3,7 @@ package org.nypl.simplified.books.book_database
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
+import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.reader.ReaderBookmark
@@ -130,6 +131,10 @@ internal class DatabaseFormatHandleEPUB internal constructor(
   override fun setLastReadLocation(bookmark: ReaderBookmark?) {
     val newFormat = synchronized(this.formatLock) {
       if (bookmark != null) {
+        Assertions.checkPrecondition(
+          bookmark.kind == ReaderBookmarkLastReadLocation,
+          "Must use a last-read-location bookmark")
+
         FileUtilities.fileWriteUTF8Atomically(
           this.fileLastRead,
           this.fileLastReadTmp,

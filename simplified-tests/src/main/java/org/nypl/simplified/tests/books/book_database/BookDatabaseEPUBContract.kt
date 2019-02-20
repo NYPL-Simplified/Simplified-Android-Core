@@ -65,7 +65,7 @@ abstract class BookDatabaseEPUBContract {
           location = ReaderBookLocation.create(Option.some("xyz"), "abc"),
           time = LocalDateTime.now(),
           chapterTitle = "A title",
-          kind = ReaderBookmarkExplicit,
+          kind = ReaderBookmarkLastReadLocation,
           chapterProgress = 0.5,
           bookProgress = 0.25,
           uri = null,

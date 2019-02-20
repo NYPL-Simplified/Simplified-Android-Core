@@ -47,9 +47,11 @@ import org.nypl.simplified.books.profiles.ProfileSelected
 import org.nypl.simplified.books.profiles.ProfilesDatabase
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType
 import org.nypl.simplified.books.reader.ReaderBookLocation
+import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.books.reader.ReaderColorScheme
 import org.nypl.simplified.books.reader.ReaderFontSelection
 import org.nypl.simplified.books.reader.ReaderPreferences
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
 import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.files.DirectoryUtilities
@@ -63,6 +65,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.books.reader.bookmarks.NullReaderBookmarkService
 import org.nypl.simplified.tests.http.MockingHTTP
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -93,6 +96,7 @@ abstract class ProfilesControllerContract {
   private lateinit var profileEventsReceived: MutableList<ProfileEvent>
   private lateinit var accountEventsReceived: MutableList<AccountEvent>
   private lateinit var accountEvents: ObservableType<AccountEvent>
+  private lateinit var readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>
   private lateinit var downloader: DownloaderType
   private lateinit var bookRegistry: BookRegistryType
 
@@ -145,20 +149,21 @@ abstract class ProfilesControllerContract {
       AnalyticsLogger.create(analyticsDirectory)
 
     return Controller.create(
-      taskExecutor,
-      this.accountEvents,
-      this.profileEvents,
-      http,
-      parser,
-      feedLoader,
-      downloader,
-      profiles,
-      analyticsLogger,
-      books,
-      bundledContent,
-      accountProviders,
-      timerExecutor,
-      null)
+      exec = taskExecutor,
+      accountEvents = this.accountEvents,
+      profileEvents = this.profileEvents,
+      readerBookmarkEvents = this.readerBookmarkEvents,
+      http = http,
+      feedParser = parser,
+      feedLoader = feedLoader,
+      downloader = downloader,
+      profiles = profiles,
+      analyticsLogger = analyticsLogger,
+      bookRegistry = books,
+      bundledContent = bundledContent,
+      accountProviders = accountProviders,
+      timerExecutor = timerExecutor,
+      adobeDrm = null)
   }
 
   @Before
@@ -175,6 +180,7 @@ abstract class ProfilesControllerContract {
     this.profileEventsReceived = Collections.synchronizedList(ArrayList())
     this.accountEvents = Observable.create<AccountEvent>()
     this.accountEventsReceived = Collections.synchronizedList(ArrayList())
+    this.readerBookmarkEvents = Observable.create()
     this.bookRegistry = BookRegistry.create()
     this.downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
   }

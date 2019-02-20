@@ -66,11 +66,18 @@ class ReaderTOCBookmarksFragment : Fragment(), ListAdapter {
     this.bookmarksTOCListView =
       this.bookmarksTOCLayout.findViewById(R.id.bookmarks_list) as ListView
 
+    val accumulatedBookmarks =
+      if (this.parameters.bookmarks.lastRead != null) {
+        this.parameters.bookmarks.bookmarks.plus(this.parameters.bookmarks.lastRead!!)
+      } else {
+        this.parameters.bookmarks.bookmarks
+      }
+
     this.adapter =
       ArrayAdapter(
         this.context,
         0,
-        this.parameters.bookmarks.sortedBy { bookmark -> bookmark.bookProgress }.reversed())
+        accumulatedBookmarks.sortedBy { bookmark -> bookmark.bookProgress }.reversed())
 
     this.bookmarksTOCListView.adapter = this
     return this.bookmarksTOCLayout

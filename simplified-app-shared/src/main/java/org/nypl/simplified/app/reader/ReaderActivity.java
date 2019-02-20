@@ -52,7 +52,6 @@ import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.Boo
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookFormat;
 import org.nypl.simplified.books.book_database.BookID;
-import org.nypl.simplified.books.controller.BookmarksControllerType;
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
@@ -62,6 +61,7 @@ import org.nypl.simplified.books.reader.ReaderBookmark;
 import org.nypl.simplified.books.reader.ReaderColorScheme;
 import org.nypl.simplified.books.reader.ReaderPreferences;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind;
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarks;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.readium.sdk.android.Container;
@@ -539,26 +539,15 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     this.current_location = bookmark;
 
-    Simplified.getBookmarksController()
-      .bookmarksUpdate(
-        this.current_account,
-        this.book_id,
-        bookmarks -> new BookmarksControllerType.Bookmarks(bookmark, bookmarks.getBookmarks()));
+    Simplified.getReaderBookmarksService().bookmarkCreate(this.current_account.id(), bookmark);
   }
 
   @Override
   protected void onPause() {
     super.onPause();
 
-    Simplified.getBookmarksController()
-      .bookmarksUpdate(this.current_account, this.book_id, bookmarks -> {
-        ReaderBookmark current = this.current_location;
-        if (current != null) {
-          return new BookmarksControllerType.Bookmarks(current, bookmarks.getBookmarks());
-        } else {
-          return bookmarks;
-        }
-      });
+    Simplified.getReaderBookmarksService()
+      .bookmarkCreate(this.current_account.id(), this.current_location);
   }
 
   @Override
@@ -600,7 +589,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     UIThread.runOnUIThread(() -> {
       this.view_toc.setOnClickListener(v -> {
-        final List<ReaderBookmark> bookmarks = loadBookmarks();
+        final ReaderBookmarks bookmarks = loadBookmarks();
 
         final ReaderTOC toc =
           ReaderTOC.Companion.fromPackage(p);
@@ -612,16 +601,8 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
       });
 
       this.view_bookmark.setOnClickListener(v -> {
-        Simplified.getBookmarksController()
-          .bookmarksUpdate(
-            this.current_account,
-            this.book_id,
-            currentBookmarks -> {
-              final ArrayList<ReaderBookmark> newBookmarks =
-                new ArrayList<>(currentBookmarks.getBookmarks());
-              newBookmarks.add(this.current_location);
-              return currentBookmarks.copy(this.current_location, newBookmarks);
-            });
+        Simplified.getReaderBookmarksService()
+          .bookmarkCreate(this.current_account.id(), this.current_location.toExplicit());
       });
     });
 
@@ -634,22 +615,20 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     server.startIfNecessaryForPackage(p, this);
   }
 
-  private List<ReaderBookmark> loadBookmarks() {
+  private ReaderBookmarks loadBookmarks() {
     try {
-      final BookmarksControllerType.Bookmarks bookmarks =
-        Simplified.getBookmarksController()
-          .bookmarksLoad(this.current_account, this.book_id)
-          .get(10L, TimeUnit.SECONDS);
-      return bookmarks.getBookmarks();
+      return Simplified.getReaderBookmarksService()
+        .bookmarkLoad(this.current_account.id(), this.book_id)
+        .get(10L, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       LOG.error("could not load bookmarks: ", e);
-      return Collections.emptyList();
+      return new ReaderBookmarks(null, Collections.emptyList());
     } catch (ExecutionException e) {
       LOG.error("could not load bookmarks: ", e);
-      return Collections.emptyList();
+      return new ReaderBookmarks(null, Collections.emptyList());
     } catch (TimeoutException e) {
       LOG.error("could not load bookmarks: ", e);
-      return Collections.emptyList();
+      return new ReaderBookmarks(null, Collections.emptyList());
     }
   }
 
