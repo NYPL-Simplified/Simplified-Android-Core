@@ -34,25 +34,69 @@ android {
 
 description = 'simplified-app-simplye'
 
+/*
+ * If building with Adobe DRM, check that the required certificate file exists.
+ */
+
+preBuild.doFirst {
+  def adobeDRMRequested =
+    (project.hasProperty("org.librarysimplified.with_drm_adobe")
+        && project.property("org.librarysimplified.with_drm_adobe") == "true")
+
+  if (adobeDRMRequested) {
+    if (!file("${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig").exists()) {
+      throw new IllegalStateException("""
+You are attempting to build with Adobe DRM but have not added the required
+certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig
+""")
+    }
+  } else {
+    if (file("${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig").exists()) {
+      throw new IllegalStateException("""
+You are attempting to build without Adobe DRM but have accidentally left the
+certificate file at ${project.rootDir}/simplified-app-simplye/src/main/assets/ReaderClientCert.sig.
+Remove this file!
+""")
+    }
+  }
+}
+
 dependencies {
   implementation project(':simplified-app-shared')
-  implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
-  implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
-  implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+
+  /*
+   * If building with Adobe DRM, add the required native dependencies.
+   */
+
+  if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
+    if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
+      implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
+      implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
+      implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'
+    }
+  }
 
   implementation "com.android.support:support-v4:27.1.1"
 }
 
-apply plugin: 'android-native-dependencies'
+/*
+ * If building with Adobe DRM, add and process the required native dependencies.
+ */
 
-native_dependencies {
-  artifact (group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0',
-      classifier: 'armeabi-v7a') {
-    addLibPrefixToArtifact=false
-  }
+if (project.hasProperty("org.librarysimplified.with_drm_adobe")) {
+  if (project.property("org.librarysimplified.with_drm_adobe") == "true") {
+    apply plugin: 'android-native-dependencies'
 
-  artifact (group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0',
-      classifier: 'armeabi-v7a') {
-    addLibPrefixToArtifact=false
+    native_dependencies {
+      artifact (group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0',
+          classifier: 'armeabi-v7a') {
+        addLibPrefixToArtifact=false
+      }
+
+      artifact (group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0',
+          classifier: 'armeabi-v7a') {
+        addLibPrefixToArtifact=false
+      }
+    }
   }
 }

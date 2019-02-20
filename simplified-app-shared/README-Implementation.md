@@ -1,3 +1,9 @@
+Note
+====
+
+This document is out-of-date but may still be useful as a starting point. Please
+consult with NYPL for further assistance with branding.
+
 Implementation
 ==============
 
