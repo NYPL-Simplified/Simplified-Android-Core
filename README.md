@@ -19,7 +19,7 @@ The latest version of Android Studio is strongly recommended. Versions older tha
 
 ## Nexus Setup
 
-Our application currently needs packages that are only available from our Nexus server in order to build correctly. (This will be changed in the future when non-DRM-enabled variants of the app are officially supported.) Nexus credentials can be obtained by emailing `nypl@winniequinn.com` or by asking in the `#simplified-android` channel of [librarysimplified.slack.com](https://librarysimplified.slack.com).
+Our application currently needs packages that are only available from our Nexus server in order to build correctly. Nexus credentials can be obtained by emailing `leonardrichardson@nypl.org` or by asking in the `#simplified-android` channel of [librarysimplified.slack.com](https://librarysimplified.slack.com).
 
 Once you have your credentials, the following lines must be added to `~/.gradle/gradle.properties`:
 
@@ -49,16 +49,6 @@ helpstack.zendesk.staff_email = ...
 helpstack.zendesk.api_token = ...
 ```
 
-For Salesforce Desk, use the following instead:
-
-```
-helpstack.gear = desk
-helpstack.desk.instance_url = ...
-helpstack.desk.to_help_email = ...
-helpstack.desk.staff_login_email = ...
-helpstack.desk.staff_login_password =  ...
-```
-
 ## Generating Signed APKs
 
 If you wish to generate a signed APK for publishing the application, you will need to set the following values correctly in `~/.gradle/gradle.properties`:
@@ -80,6 +70,6 @@ for documentation on how to customize branding of the application.
 
 # Building
 
-**NOTE:** Due to an unknown issue, you must execute `./gradlew assembleDebug` one time before opening the project in Android Studio. This will pull in all dependencies that, for whatever reason, are not fetched if Gradle is executed via Android Studio.
+**NOTE:** Due to an unknown issue, you may need to execute `./gradlew assembleDebug` one time before opening the project in Android Studio. This will pull in all dependencies that, for whatever reason, are not fetched if Gradle is executed via Android Studio.
 
 After setup is complete, the project can be opened in Android Studio and built as normal.
