@@ -32,8 +32,8 @@ public class Account implements Serializable, Comparable<Account> {
   private String catalog_url_under_13;
   private String catalog_url_13_and_over;
   private Integer pin_length;
-  private boolean pin_allows_letters;
-  private boolean pin_required;
+  private KeyboardType login_keyboard;
+  private KeyboardType pin_keyboard;
 
   public String getPrivacyPolicy() {
     return privacy_policy;
@@ -48,8 +48,9 @@ public class Account implements Serializable, Comparable<Account> {
     return eula;
   }
   public Integer getPinLength() { return pin_length; }
-  public boolean pinAllowsLetters() { return pin_allows_letters; }
-  public boolean pinRequired() { return pin_required; }
+  public boolean pinRequired() { return this.pin_keyboard != KeyboardType.NONE; }
+  public KeyboardType getLoginKeyboard() { return login_keyboard; }
+  public KeyboardType getPinKeyboard() { return pin_keyboard; }
 
   public void setContentLicense(String in_contentLicense) {
     this.content_license = in_contentLicense;
@@ -346,21 +347,66 @@ public class Account implements Serializable, Comparable<Account> {
       } else {
         this.pin_length = 0;
       }
-      if (!account.isNull("authPasscodeAllowsLetters")) {
-        this.pin_allows_letters = account.getBoolean("authPasscodeAllowsLetters");
+      if (!account.isNull("loginKeyboard")) {
+        switch (account.getString("loginKeyboard")) {
+          case "Default":
+            this.login_keyboard = KeyboardType.STANDARD;
+            break;
+          case "Email address":
+            this.login_keyboard = KeyboardType.EMAIL;
+            break;
+          case "Number pad":
+            this.login_keyboard = KeyboardType.NUMERIC;
+            break;
+          case "No input":
+            this.login_keyboard = KeyboardType.NONE;
+            break;
+          default:
+            throw new JSONException("Invalid login keyboard type.");
+        }
       } else {
-        this.pin_allows_letters = true;
+        this.login_keyboard = KeyboardType.STANDARD;
       }
-      if (!account.isNull("pinRequired")) {
-        this.pin_required = account.getBoolean("pinRequired");
+      if (!account.isNull("pinKeyboard")) {
+        switch (account.getString("pinKeyboard")) {
+          case "Default":
+            this.pin_keyboard = KeyboardType.STANDARD;
+            break;
+          case "Email address":
+            this.pin_keyboard = KeyboardType.EMAIL;
+            break;
+          case "Number pad":
+            this.pin_keyboard = KeyboardType.NUMERIC;
+            break;
+          case "No input":
+            this.pin_keyboard = KeyboardType.NONE;
+            break;
+          default:
+            throw new JSONException("Invalid pin keyboard type.");
+        }
       } else {
-        this.pin_required = true;
+        this.pin_keyboard = KeyboardType.NONE;
       }
 
     } catch (JSONException e) {
       throw new UnreachableCodeException(e);
     }
+  }
 
+  public enum KeyboardType {
+    STANDARD("Default"),
+    EMAIL("Email address"),
+    NUMERIC("Number pad"),
+    NONE("No input");
+
+    private String value;
+    public String getValue() {
+      return this.value;
+    }
+
+    KeyboardType(String value) {
+      this.value = value;
+    }
   }
 
   /**
@@ -390,9 +436,9 @@ public class Account implements Serializable, Comparable<Account> {
       object.put("supportsBarcodeScanner", this.supports_barcode_scanner);
       object.put("supportsBarcodeDisplay", this.supports_barcode_display);
       object.put("authPasscodeLength", this.pin_length);
-      object.put("authPasscodeAllowsLetters", this.pin_allows_letters);
       object.put("mainColor", this.main_color);
-      object.put("pinRequired", this.pin_required);
+      object.put("loginKeyboard", this.login_keyboard.getValue());
+      object.put("pinKeyboard", this.pin_keyboard.getValue());
     } catch (JSONException e) {
       e.printStackTrace();
     }
