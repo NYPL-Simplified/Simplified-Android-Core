@@ -64,9 +64,10 @@ public final class LoginDialog extends DialogFragment
   private static final String PIN_ID;
   private static final String TEXT_ID;
   private static final String ACCOUNT_ID;
-  private static final String PIN_ALLOWS_LETTERS;
   private static final String PIN_LENGTH;
   private static final String PIN_REQUIRED;
+  private static final String PIN_KEYBOARD;
+  private static final String LOGIN_KEYBOARD;
 
   static {
     LOG = LogUtilities.getLog(LoginDialog.class);
@@ -76,10 +77,11 @@ public final class LoginDialog extends DialogFragment
     BARCODE_ID = "org.nypl.simplified.app.LoginDialog.barcode";
     PIN_ID = "org.nypl.simplified.app.LoginDialog.pin";
     TEXT_ID = "org.nypl.simplified.app.LoginDialog.text";
-    ACCOUNT_ID = "org.nypl.simplified.app.LoginDialog.accountid";
-    PIN_ALLOWS_LETTERS = "org.nypl.simplified.app.LoginDialog.pinAllowsLetters";
+    ACCOUNT_ID = "org.nypl.simplified.app.LoginDialog.accountID";
     PIN_LENGTH = "org.nypl.simplified.app.LoginDialog.pinLength";
     PIN_REQUIRED = "org.nypl.simplified.app.LoginDialog.pinRequired";
+    LOGIN_KEYBOARD = "org.nypl.simplified.app.LoginDialog.loginKeyboard";
+    PIN_KEYBOARD = "org.nypl.simplified.app.LoginDialog.pinKeyboard";
   }
 
   private @Nullable EditText          barcode_edit;
@@ -172,9 +174,10 @@ public final class LoginDialog extends DialogFragment
     b.putSerializable(LoginDialog.PIN_ID, pin);
     b.putSerializable(LoginDialog.BARCODE_ID, barcode);
     b.putSerializable(LoginDialog.ACCOUNT_ID, account.getPathComponent());
-    b.putSerializable(LoginDialog.PIN_ALLOWS_LETTERS, account.pinAllowsLetters());
     b.putSerializable(LoginDialog.PIN_LENGTH, account.getPinLength());
     b.putSerializable(LoginDialog.PIN_REQUIRED, account.pinRequired());
+    b.putSerializable(LoginDialog.LOGIN_KEYBOARD, account.getLoginKeyboard().getValue());
+    b.putSerializable(LoginDialog.PIN_KEYBOARD, account.getPinKeyboard().getValue());
 
     final LoginDialog d = new LoginDialog();
     d.setArguments(b);
@@ -323,17 +326,21 @@ public final class LoginDialog extends DialogFragment
   {
     final LayoutInflater inflater = Objects.requireNonNull(inflater_mn);
     final Bundle b = this.getArguments();
-    final AccountPIN initial_pin =
-      Objects.requireNonNull((AccountPIN) b.getSerializable(LoginDialog.PIN_ID));
+    final AccountPIN initial_pin = Objects.requireNonNull(
+        (AccountPIN) b.getSerializable(LoginDialog.PIN_ID));
     final AccountBarcode initial_bar = Objects.requireNonNull(
-      (AccountBarcode) b.getSerializable(LoginDialog.BARCODE_ID));
-    final String initial_txt =
-      Objects.requireNonNull(b.getString(LoginDialog.TEXT_ID));
+        (AccountBarcode) b.getSerializable(LoginDialog.BARCODE_ID));
+    final String initial_txt = Objects.requireNonNull(
+        b.getString(LoginDialog.TEXT_ID));
 
     final String account_id = b.getString(LoginDialog.ACCOUNT_ID);
     final int pin_length = b.getInt(LoginDialog.PIN_LENGTH);
-    final boolean pin_allows_letters = b.getBoolean(LoginDialog.PIN_ALLOWS_LETTERS);
-    final boolean pin_required = b.getBoolean(LoginDialog.PIN_REQUIRED);
+    final boolean pin_required = Objects.requireNonNull(
+        b.getBoolean(LoginDialog.PIN_REQUIRED));
+    final String login_keyboard = Objects.requireNonNull(
+        b.getString(LoginDialog.LOGIN_KEYBOARD));
+    final String pin_keyboard = Objects.requireNonNull(
+        b.getString(LoginDialog.PIN_KEYBOARD));
 
     final ViewGroup in_layout = Objects.requireNonNull(
       (ViewGroup) inflater.inflate(
@@ -345,6 +352,9 @@ public final class LoginDialog extends DialogFragment
         in_layout.findViewById(R.id.login_dialog_barcode_text_view));
     final EditText in_barcode_edit = Objects.requireNonNull(
       in_layout.findViewById(R.id.login_dialog_barcode_text_edit));
+    if (login_keyboard.equals("Number pad")) {
+      in_barcode_edit.setInputType(InputType.TYPE_CLASS_NUMBER);
+    }
 
     final ImageButton in_barcode_scan_button = Objects.requireNonNull(
         in_layout.findViewById(R.id.login_dialog_barcode_scan_button));
@@ -353,17 +363,16 @@ public final class LoginDialog extends DialogFragment
 
     final EditText in_pin_edit = Objects.requireNonNull(
       in_layout.findViewById(R.id.login_dialog_pin_text_edit));
-    if (!pin_allows_letters) {
+    if (!pin_required) {
+      in_pin_label.setVisibility(View.INVISIBLE);
+      in_pin_edit.setVisibility(View.INVISIBLE);
+    } else if (pin_keyboard.equals("Number pad")) {
       in_pin_edit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
     }
     if (pin_length != 0) {
       in_pin_edit.setFilters(new InputFilter[] {
           new InputFilter.LengthFilter(pin_length)
       });
-    }
-    if (!pin_required) {
-      in_pin_label.setVisibility(View.INVISIBLE);
-      in_pin_edit.setVisibility(View.INVISIBLE);
     }
 
     final Button in_login_button = Objects.requireNonNull(
