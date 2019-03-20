@@ -27,6 +27,8 @@ import org.nypl.simplified.http.core.HTTPAuthOAuth
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.mime.MIMEParser
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
@@ -199,7 +201,8 @@ internal class BooksControllerBorrowTask(
       }
 
       if (user is Some<AdobeUserID>) {
-        connector.fulfillACSM(AdobeFulfillmentListener(this, contentType), acsm, user.get())
+        connector.fulfillACSM(AdobeFulfillmentListener(
+          this, MIMEParser.parseRaisingException(contentType)), acsm, user.get())
         return@execute
       }
     }
@@ -699,7 +702,7 @@ internal class BooksControllerBorrowTask(
             task.saveFinalContent(
               file = file,
               expectedContentTypes = acquisition.availableFinalContentTypes(),
-              receivedContentType = contentType)
+              receivedContentType = MIMEParser.parseRaisingException(contentType))
           }
         } catch (e: Exception) {
           LOG.error("onDownloadCompleted: exception: ", e)
@@ -711,8 +714,8 @@ internal class BooksControllerBorrowTask(
 
   private fun saveFinalContent(
     file: File,
-    expectedContentTypes: Set<String>,
-    receivedContentType: String) {
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType) {
 
     LOG.debug(
       "[{}]: saving content      {} (expected one of {}, received {})",
@@ -727,7 +730,7 @@ internal class BooksControllerBorrowTask(
     val handleContentType =
       checkExpectedContentType(expectedContentTypes, receivedContentType)
     val formatHandleOpt: OptionType<BookDatabaseEntryFormatHandle> =
-      this.databaseEntry.entryFindFormatHandleForContentType(handleContentType)
+      this.databaseEntry.entryFindFormatHandleForContentType(handleContentType.fullType)
 
     fun updateStatus() {
       val downloadedSnap = this.databaseEntry.entryGetSnapshot()
@@ -756,8 +759,8 @@ internal class BooksControllerBorrowTask(
       }
     } else {
       LOG.error("[{}]: database entry does not have a format handle for {}",
-        this.shortID, handleContentType)
-      throw BookUnsupportedTypeException(handleContentType)
+        this.shortID, handleContentType.fullType)
+      throw BookUnsupportedTypeException(handleContentType.fullType)
     }
   }
 
@@ -768,14 +771,17 @@ internal class BooksControllerBorrowTask(
    */
 
   private fun checkExpectedContentType(
-    expectedContentTypes: Set<String>,
-    receivedContentType: String): String {
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType): MIMEType {
 
     Preconditions.checkArgument(
       !expectedContentTypes.isEmpty(),
       "At least one expected content type")
 
-    return when (receivedContentType) {
+    val expectedNames = expectedContentTypes.map { type -> type.fullType }.toSet()
+    val receivedName = receivedContentType.fullType
+
+    return when (receivedName) {
       "application/octet-stream" -> {
         LOG.debug("[{}]: expected one of {} but received {} (acceptable)",
           this.shortID,
@@ -785,7 +791,7 @@ internal class BooksControllerBorrowTask(
       }
 
       else -> {
-        if (expectedContentTypes.contains(receivedContentType)) {
+        if (expectedNames.contains(receivedName)) {
           return receivedContentType
         }
 
@@ -802,8 +808,8 @@ internal class BooksControllerBorrowTask(
             .append(receivedContentType)
             .append('\n')
             .toString(),
-          expected = expectedContentTypes,
-          received = receivedContentType)
+          expected = expectedNames,
+          received = receivedName)
       }
     }
   }
@@ -840,7 +846,7 @@ internal class BooksControllerBorrowTask(
 
   private class AdobeFulfillmentListener internal constructor(
     private val task: BooksControllerBorrowTask,
-    private val contentType: String) : AdobeAdeptFulfillmentListenerType {
+    private val contentType: MIMEType) : AdobeAdeptFulfillmentListenerType {
 
     override fun onFulfillmentFailure(message: String) {
       val error: OptionType<Throwable>

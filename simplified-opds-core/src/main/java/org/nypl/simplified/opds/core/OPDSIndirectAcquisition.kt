@@ -2,6 +2,7 @@ package org.nypl.simplified.opds.core
 
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
+import org.nypl.simplified.mime.MIMEType
 import java.io.Serializable
 
 /**
@@ -14,7 +15,7 @@ data class OPDSIndirectAcquisition(
    * The MIME type of the indirectly obtainable content.
    */
 
-  val type: String,
+  val type: MIMEType,
 
   /**
    * Zero or more nested indirect acquisitions.
@@ -29,7 +30,7 @@ data class OPDSIndirectAcquisition(
    */
 
   fun findType(wantType: String): OPDSIndirectAcquisition? {
-    if (type == wantType) {
+    if (type.fullType == wantType) {
       return this
     }
     for (child in indirectAcquisitions) {
@@ -82,8 +83,8 @@ data class OPDSIndirectAcquisition(
      * if all acquisitions are followed to their conclusions
      */
 
-    fun availableFinalContentTypesIn(indirects: List<OPDSIndirectAcquisition>): Collection<String> {
-      val types = mutableSetOf<String>()
+    fun availableFinalContentTypesIn(indirects: List<OPDSIndirectAcquisition>): Collection<MIMEType> {
+      val types = mutableSetOf<MIMEType>()
 
       for (indirect in indirects) {
         if (indirect.indirectAcquisitions.isEmpty()) {

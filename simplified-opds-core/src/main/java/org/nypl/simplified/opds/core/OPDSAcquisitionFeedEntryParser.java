@@ -5,6 +5,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
+import org.nypl.simplified.mime.MIMEParser;
+import org.nypl.simplified.mime.MIMEType;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -98,7 +99,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
 
   private OPDSAcquisitionFeedEntry parseAcquisitionEntry(
     final Element element)
-    throws OPDSParseException, ParseException, URISyntaxException {
+      throws Exception {
 
     final String id = OPDSAtom.findID(element);
     final String title = OPDSAtom.findTitle(element);
@@ -218,14 +219,17 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
   }
 
   private OPDSIndirectAcquisition parseIndirectAcquisition(
-    final Element acquisition) {
-    final String type = acquisition.getAttribute("type");
+    final Element acquisition)
+      throws Exception {
+    final MIMEType type =
+      MIMEParser.Companion.parseRaisingException(acquisition.getAttribute("type"));
     final List<OPDSIndirectAcquisition> next_acquisitions = parseIndirectAcquisitions(acquisition);
     return new OPDSIndirectAcquisition(type, next_acquisitions);
   }
 
   private List<OPDSIndirectAcquisition> parseIndirectAcquisitions(
-    final Element element) {
+    final Element element)
+      throws Exception {
     final List<Element> indirect_elements =
       OPDSXML.getChildElementsWithName(element, OPDS_URI, "indirectAcquisition");
     final List<OPDSIndirectAcquisition> indirects =
@@ -242,7 +246,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     final OptionType<URI> revoke,
     final Element link,
     final String rel_text)
-    throws URISyntaxException, OPDSParseException {
+      throws Exception {
 
     if (rel_text.startsWith(ACQUISITION_URI_PREFIX_TEXT)) {
       for (final Relation v : Relation.values()) {
@@ -251,7 +255,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
           final URI href = new URI(link.getAttribute("href"));
 
           final List<OPDSIndirectAcquisition> indirects = parseIndirectAcquisitions(link);
-          final OptionType<String> type = typeAttributeWithSupportedValue(link);
+          final OptionType<MIMEType> type = typeAttributeWithSupportedValue(link);
 
           if (type.isSome() || hasSupportedIndirectAcquisition(indirects)) {
             final OPDSAcquisition acquisition = new OPDSAcquisition(v, href, type, indirects);
@@ -474,10 +478,11 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     return Option.none();
   }
 
-  private OptionType<String> typeAttributeWithSupportedValue(final Element acquisition) {
+  private OptionType<MIMEType> typeAttributeWithSupportedValue(
+      final Element acquisition) throws Exception {
     for (String format : this.supported_book_formats) {
       if (hasTypeAttributeWithValue(acquisition, format)) {
-        return Option.some(format);
+        return Option.some(MIMEParser.Companion.parseRaisingException(format));
       }
     }
     return Option.none();
@@ -579,7 +584,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
     NullCheck.notNull(element, "Element");
     try {
       return parseAcquisitionEntry(element);
-    } catch (final ParseException | URISyntaxException ex) {
+    } catch (final Exception ex) {
       throw new OPDSParseException(ex);
     }
   }

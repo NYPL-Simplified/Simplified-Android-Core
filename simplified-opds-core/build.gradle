@@ -4,8 +4,8 @@ apply plugin: 'kotlin-android'
 android {
   compileSdkVersion 27
   compileOptions {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
   }
   defaultConfig {
     minSdkVersion 21
@@ -23,6 +23,7 @@ dependencies {
   implementation project(':simplified-assert')
   implementation project(':simplified-json-core')
   implementation project(':simplified-rfc3339-core')
+  implementation project(':simplified-mime')
 
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 

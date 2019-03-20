@@ -2,6 +2,7 @@ package org.nypl.simplified.opds.core
 
 import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.assertions.Assertions
+import org.nypl.simplified.mime.MIMEType
 import java.io.Serializable
 import java.net.URI
 
@@ -29,7 +30,7 @@ data class OPDSAcquisition(
    * The MIME type of immediately retrievable content, if any.
    */
 
-  val type: OptionType<String>,
+  val type: OptionType<MIMEType>,
 
   /**
    * The set of indirect acquisitions
@@ -50,11 +51,19 @@ data class OPDSAcquisition(
    * if all (possibly indirect) acquisitions are followed to their conclusions
    */
 
-  fun availableFinalContentTypes(): Set<String> {
-    val set = mutableSetOf<String>()
+  fun availableFinalContentTypes(): Set<MIMEType> {
+    val set = mutableSetOf<MIMEType>()
     this.type.map { t -> set.add(t) }
     set.addAll(OPDSIndirectAcquisition.availableFinalContentTypesIn(this.indirectAcquisitions))
     return set
+  }
+
+  /**
+   * The set of final content types as plain RFC2045 names.
+   */
+
+  fun availableFinalContentTypeNames(): Set<String> {
+    return this.availableFinalContentTypes().map { type -> type.fullType }.toSet()
   }
 
   /**

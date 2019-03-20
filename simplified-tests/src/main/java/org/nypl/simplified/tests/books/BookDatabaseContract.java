@@ -10,10 +10,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.nypl.simplified.books.core.BookDatabase;
-import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle;
 import org.nypl.simplified.books.core.BookDatabaseEntryType;
 import org.nypl.simplified.books.core.BookDatabaseType;
 import org.nypl.simplified.books.core.BookID;
+import org.nypl.simplified.mime.MIMEParser;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -130,7 +130,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/epub+zip"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/epub+zip")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -193,7 +193,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/epub+zip"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/epub+zip")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -251,7 +251,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/audiobook+json"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/audiobook+json")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -309,7 +309,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/audiobook+json"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/audiobook+json")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -364,7 +364,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/audiobook+json"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/audiobook+json")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -417,7 +417,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/epub+zip"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/epub+zip")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -484,7 +484,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/epub+zip"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/epub+zip")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -570,7 +570,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/audiobook+json"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/audiobook+json")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -627,7 +627,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/epub+zip"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/epub+zip")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -671,7 +671,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/epub+zip"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/epub+zip")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }
@@ -740,7 +740,7 @@ public abstract class BookDatabaseContract {
         new OPDSAcquisition(
           Relation.ACQUISITION_BORROW,
           URI.create("http://example.com"),
-          Option.some("application/epub+zip"),
+          Option.some(MIMEParser.Companion.parseRaisingException("application/epub+zip")),
           Collections.<OPDSIndirectAcquisition>emptyList()));
       ee = eb.build();
     }

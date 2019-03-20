@@ -64,6 +64,7 @@ import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
@@ -1848,9 +1849,9 @@ abstract class BooksContract {
         URI.create("http://example.com/borrow/0"),
         Option.none(),
         listOf(OPDSIndirectAcquisition(
-          "application/audiobook+json",
+          MIMEParser.parseRaisingException("application/audiobook+json"),
           listOf(OPDSIndirectAcquisition(
-            "audio/mpeg",
+            MIMEParser.parseRaisingException("audio/mpeg"),
             listOf())))))
 
     opdsEntryBuilder.addAcquisition(opdsAcquisition)
@@ -1874,7 +1875,7 @@ abstract class BooksContract {
         URI.create("http://example.com/borrow/0"),
         Option.none(),
         listOf(OPDSIndirectAcquisition(
-          "application/epub+zip",
+          MIMEParser.parseRaisingException("application/epub+zip"),
           listOf())))
 
     opdsEntryBuilder.addAcquisition(opdsAcquisition)
@@ -1899,7 +1900,7 @@ abstract class BooksContract {
         URI.create("http://example.com/borrow/0"),
         Option.none(),
         listOf(OPDSIndirectAcquisition(
-          "application/epub+zip",
+          MIMEParser.parseRaisingException("application/epub+zip"),
           listOf())))
 
     opdsEntryBuilder.addAcquisition(opdsAcquisition)

@@ -31,7 +31,7 @@ object BookAcquisitionSelection {
 
     for (acquisition in onlySupportedRelations) {
       val supportedContentTypes = BookFormats.supportedBookMimeTypes()
-      val availableContentTypes = acquisition.availableFinalContentTypes()
+      val availableContentTypes = acquisition.availableFinalContentTypeNames()
       for (contentType in supportedContentTypes) {
         if (availableContentTypes.contains(contentType)) {
           return Option.some(acquisition)

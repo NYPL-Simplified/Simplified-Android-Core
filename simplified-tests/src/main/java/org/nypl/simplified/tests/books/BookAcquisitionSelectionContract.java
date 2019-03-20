@@ -57,7 +57,7 @@ public abstract class BookAcquisitionSelectionContract {
 
     Assert.assertEquals("https://example.com/Open-Access", acquisition.getUri().toString());
     Assert.assertEquals(1, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypes().contains("application/epub+zip"));
+    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
   }
 
   @Test
@@ -79,7 +79,7 @@ public abstract class BookAcquisitionSelectionContract {
       "https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/1",
       acquisition.getUri().toString());
     Assert.assertEquals(1, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypes().contains("application/epub+zip"));
+    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
   }
 
   @Test
@@ -101,7 +101,7 @@ public abstract class BookAcquisitionSelectionContract {
       "http://qa.circulation.librarysimplified.org/NYNYPL/works/198679/fulfill/2",
       acquisition.getUri().toString());
     Assert.assertEquals(1, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypes().contains("application/epub+zip"));
+    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
   }
 
   @Test
@@ -123,7 +123,7 @@ public abstract class BookAcquisitionSelectionContract {
       "http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/1ac5cc2a-cdc9-46e0-90a4-2de9ada35237/borrow",
       acquisition.getUri().toString());
     Assert.assertEquals(3, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypes().contains("application/epub+zip"));
+    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
   }
 
   @Test

@@ -6,7 +6,9 @@ import com.io7m.jfunctional.Some;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.nypl.simplified.books.core.BookAcquisitionSelection;
 import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.mime.MIMEType;
 import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -29,6 +31,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -95,7 +98,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -131,15 +134,15 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     LOG.debug("available: {}", available_content_types);
     Assert.assertEquals(2, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
       available_content_types.contains("application/epub+zip"));
     Assert.assertTrue(
-      "text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media is available",
-      available_content_types.contains("text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media"));
+      "text/html is available",
+      available_content_types.contains("text/html"));
   }
 
   @Test
@@ -163,7 +166,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -199,7 +202,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -236,7 +239,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -272,7 +275,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -309,7 +312,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -342,7 +345,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -376,7 +379,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -404,9 +407,10 @@ public abstract class OPDSFeedEntryParserContract {
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
     Assert.assertEquals(0, acquisition.getIndirectAcquisitions().size());
     Assert.assertTrue(acquisition.getType().isSome());
-    Assert.assertEquals("application/epub+zip", ((Some<String>) acquisition.getType()).get());
+    Assert.assertEquals(
+        "application/epub+zip", ((Some<MIMEType>) acquisition.getType()).get().getFullType());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -440,7 +444,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -473,7 +477,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     Assert.assertEquals(1, available_content_types.size());
     Assert.assertTrue(
       "application/epub+zip is available",
@@ -496,7 +500,7 @@ public abstract class OPDSFeedEntryParserContract {
         "application/epub+zip",
         acquisition.getIndirectAcquisitions()).isSome());
 
-    final Set<String> available_content_types = acquisition.availableFinalContentTypes();
+    final Set<String> available_content_types = acquisition.availableFinalContentTypeNames();
     LOG.debug("available: {}", available_content_types);
     Assert.assertEquals(3, available_content_types.size());
     Assert.assertTrue(
@@ -506,8 +510,8 @@ public abstract class OPDSFeedEntryParserContract {
       "application/pdf is available",
       available_content_types.contains("application/pdf"));
     Assert.assertTrue(
-      "text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media is available",
-      available_content_types.contains("text/html;profile=http://librarysimplified.org/terms/profiles/streaming-media"));
+      "text/html is available",
+      available_content_types.contains("text/html"));
   }
 
   @Test
@@ -530,6 +534,39 @@ public abstract class OPDSFeedEntryParserContract {
     Assert.assertEquals(
       Option.some("http://qa.circulation.librarysimplified.org/NYNYPL/AdobeAuth/devices"),
       licensor.getDeviceManager());
+  }
+
+
+  @Test
+  public void testEntry20190315MobyDick()
+      throws Exception {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
+        OPDSFeedEntryParserContract.getResource("2019-03-15-test-case-moby-dick.xml"));
+
+    List<OPDSAcquisition> acquisitions = e.getAcquisitions();
+    for (final OPDSAcquisition acquisition : acquisitions) {
+      LOG.debug("types: {}", acquisition.availableFinalContentTypes());
+    }
+
+    OptionType<OPDSAcquisition> preferred =
+        BookAcquisitionSelection.INSTANCE.preferredAcquisition(acquisitions);
+  }
+
+  @Test
+  public void testEntry20190315TimeMachine()
+      throws Exception {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(
+        OPDSFeedEntryParserContract.getResource("2019-03-15-test-case-time_machine.xml"));
+
+    List<OPDSAcquisition> acquisitions = e.getAcquisitions();
+    for (final OPDSAcquisition acquisition : acquisitions) {
+      LOG.debug("types: {}", acquisition.availableFinalContentTypes());
+    }
+
+    OptionType<OPDSAcquisition> preferred =
+        BookAcquisitionSelection.INSTANCE.preferredAcquisition(acquisitions);
   }
 
   private OPDSAcquisitionFeedEntryParserType getParser() {

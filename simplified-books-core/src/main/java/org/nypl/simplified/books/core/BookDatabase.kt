@@ -677,7 +677,7 @@ class BookDatabase private constructor(
         this.owner.createFormatHandleIfRequired(
           owner = this,
           existingFormats = this.formatsHandles,
-          contentTypes = acquisition.availableFinalContentTypes())
+          contentTypes = acquisition.availableFinalContentTypeNames())
       }
     }
 
