@@ -1,9 +1,7 @@
 package org.nypl.simplified.mime
 
-import org.nypl.simplified.mime.MIMEToken.*
-import org.nypl.simplified.mime.MIMEToken.MIMETextToken.*
-import java.lang.IllegalStateException
-import kotlin.reflect.KClass
+import org.nypl.simplified.mime.MIMEToken.MIMETextToken.Quoted
+import org.nypl.simplified.mime.MIMEToken.MIMETextToken.Text
 
 /**
  * The type of tokens that can be lexed from RFC2045 MIME types.

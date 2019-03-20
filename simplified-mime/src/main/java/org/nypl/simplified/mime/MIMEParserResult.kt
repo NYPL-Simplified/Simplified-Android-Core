@@ -1,7 +1,5 @@
 package org.nypl.simplified.mime
 
-import java.lang.Exception
-
 /**
  * The result of parsing a MIME type from a stream.
  */

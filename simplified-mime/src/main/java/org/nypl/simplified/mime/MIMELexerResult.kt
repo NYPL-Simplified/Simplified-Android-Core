@@ -1,7 +1,5 @@
 package org.nypl.simplified.mime
 
-import java.lang.Exception
-
 /**
  * The result of lexing a token from a stream.
  */
