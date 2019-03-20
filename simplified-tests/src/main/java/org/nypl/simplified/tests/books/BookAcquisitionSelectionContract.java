@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books;
 
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 
@@ -7,16 +8,20 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.nypl.simplified.books.core.BookAcquisitionSelection;
 import org.nypl.simplified.books.core.BookFormats;
+import org.nypl.simplified.mime.MIMEParser;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath;
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation;
 import org.nypl.simplified.tests.opds.OPDSFeedEntryParserContract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 public abstract class BookAcquisitionSelectionContract {
@@ -25,7 +30,7 @@ public abstract class BookAcquisitionSelectionContract {
     LoggerFactory.getLogger(BookAcquisitionSelectionContract.class);
 
   private OPDSAcquisitionFeedEntryParserType getParser() {
-    return OPDSAcquisitionFeedEntryParser.newParser(BookFormats.Companion.supportedBookMimeTypes());
+    return OPDSAcquisitionFeedEntryParser.newParser();
   }
 
   private static InputStream getResource(
@@ -47,17 +52,18 @@ public abstract class BookAcquisitionSelectionContract {
     final OPDSAcquisitionFeedEntry entry = parser.parseEntryStream(
       BookAcquisitionSelectionContract.getResource("entry-availability-open-access.xml"));
 
-    final OptionType<OPDSAcquisition> acquisition_opt =
-      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
+    final OptionType<OPDSAcquisitionPath> acquisition_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitionPaths());
 
     Assert.assertTrue(acquisition_opt.isSome());
 
-    final OPDSAcquisition acquisition =
-      ((Some<OPDSAcquisition>) acquisition_opt).get();
+    final OPDSAcquisitionPath acquisition =
+      ((Some<OPDSAcquisitionPath>) acquisition_opt).get();
 
-    Assert.assertEquals("https://example.com/Open-Access", acquisition.getUri().toString());
-    Assert.assertEquals(1, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
+    Assert.assertEquals(
+      "https://example.com/Open-Access", acquisition.getNext().getUri().toString());
+    Assert.assertEquals(
+      "application/epub+zip", acquisition.finalContentType().getFullType());
   }
 
   @Test
@@ -67,19 +73,19 @@ public abstract class BookAcquisitionSelectionContract {
     final OPDSAcquisitionFeedEntry entry = parser.parseEntryStream(
       BookAcquisitionSelectionContract.getResource("entry-classics-0.xml"));
 
-    final OptionType<OPDSAcquisition> acquisition_opt =
-      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
+    final OptionType<OPDSAcquisitionPath> acquisition_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitionPaths());
 
     Assert.assertTrue(acquisition_opt.isSome());
 
-    final OPDSAcquisition acquisition =
-      ((Some<OPDSAcquisition>) acquisition_opt).get();
+    final OPDSAcquisitionPath acquisition =
+      ((Some<OPDSAcquisitionPath>) acquisition_opt).get();
 
     Assert.assertEquals(
       "https://circulation.librarysimplified.org/CLASSICS/works/313322/fulfill/1",
-      acquisition.getUri().toString());
-    Assert.assertEquals(1, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
+      acquisition.getNext().getUri().toString());
+    Assert.assertEquals(
+      "application/epub+zip", acquisition.finalContentType().getFullType());
   }
 
   @Test
@@ -89,19 +95,19 @@ public abstract class BookAcquisitionSelectionContract {
     final OPDSAcquisitionFeedEntry entry = parser.parseEntryStream(
       BookAcquisitionSelectionContract.getResource("entry-with-formats-0.xml"));
 
-    final OptionType<OPDSAcquisition> acquisition_opt =
-      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
+    final OptionType<OPDSAcquisitionPath> acquisition_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitionPaths());
 
     Assert.assertTrue(acquisition_opt.isSome());
 
-    final OPDSAcquisition acquisition =
-      ((Some<OPDSAcquisition>) acquisition_opt).get();
+    final OPDSAcquisitionPath acquisition =
+      ((Some<OPDSAcquisitionPath>) acquisition_opt).get();
 
     Assert.assertEquals(
       "http://qa.circulation.librarysimplified.org/NYNYPL/works/198679/fulfill/2",
-      acquisition.getUri().toString());
-    Assert.assertEquals(1, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
+      acquisition.getNext().getUri().toString());
+    Assert.assertEquals(
+      "application/epub+zip", acquisition.finalContentType().getFullType());
   }
 
   @Test
@@ -111,19 +117,41 @@ public abstract class BookAcquisitionSelectionContract {
     final OPDSAcquisitionFeedEntry entry = parser.parseEntryStream(
       BookAcquisitionSelectionContract.getResource("entry-with-formats-1.xml"));
 
-    final OptionType<OPDSAcquisition> acquisition_opt =
-      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
+    final OptionType<OPDSAcquisitionPath> acquisition_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitionPaths());
 
     Assert.assertTrue(acquisition_opt.isSome());
 
-    final OPDSAcquisition acquisition =
-      ((Some<OPDSAcquisition>) acquisition_opt).get();
+    final OPDSAcquisitionPath acquisition =
+      ((Some<OPDSAcquisitionPath>) acquisition_opt).get();
 
     Assert.assertEquals(
       "http://qa.circulation.librarysimplified.org/NYNYPL/works/Overdrive%20ID/1ac5cc2a-cdc9-46e0-90a4-2de9ada35237/borrow",
-      acquisition.getUri().toString());
-    Assert.assertEquals(3, acquisition.availableFinalContentTypes().size());
-    Assert.assertTrue(acquisition.availableFinalContentTypeNames().contains("application/epub+zip"));
+      acquisition.getNext().getUri().toString());
+    Assert.assertEquals(
+      "application/epub+zip", acquisition.finalContentType().getFullType());
+  }
+
+  @Test
+  public void testBearerTokenPath()
+    throws Exception {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry entry = parser.parseEntryStream(
+      BookAcquisitionSelectionContract.getResource("entry-with-bearer-token.xml"));
+
+    final OptionType<OPDSAcquisitionPath> acquisition_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitionPaths());
+
+    Assert.assertTrue(acquisition_opt.isSome());
+
+    final OPDSAcquisitionPath acquisition =
+      ((Some<OPDSAcquisitionPath>) acquisition_opt).get();
+
+    Assert.assertEquals(
+      "https://circulation.librarysimplified.org/CLASSICS/works/315343/fulfill/17",
+      acquisition.getNext().getUri().toString());
+    Assert.assertEquals(
+      "application/epub+zip", acquisition.finalContentType().getFullType());
   }
 
   @Test
@@ -133,8 +161,8 @@ public abstract class BookAcquisitionSelectionContract {
     final OPDSAcquisitionFeedEntry entry = parser.parseEntryStream(
       BookAcquisitionSelectionContract.getResource("entry-no-supported-format.xml"));
 
-    final OptionType<OPDSAcquisition> acquisition_opt =
-      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
+    final OptionType<OPDSAcquisitionPath> acquisition_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitionPaths());
 
     Assert.assertFalse(acquisition_opt.isSome());
   }
@@ -146,8 +174,8 @@ public abstract class BookAcquisitionSelectionContract {
     final OPDSAcquisitionFeedEntry entry = parser.parseEntryStream(
       BookAcquisitionSelectionContract.getResource("entry-no-supported-relations.xml"));
 
-    final OptionType<OPDSAcquisition> acquisition_opt =
-      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitions());
+    final OptionType<OPDSAcquisitionPath> acquisition_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(entry.getAcquisitionPaths());
 
     Assert.assertFalse(acquisition_opt.isSome());
   }

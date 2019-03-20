@@ -5,7 +5,6 @@ import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import org.nypl.simplified.books.core.BookDatabaseEntrySnapshot
 import org.nypl.simplified.books.core.BookDatabaseReadableType
-import org.nypl.simplified.books.core.BookFormats
 import org.nypl.simplified.books.core.BookID
 import org.nypl.simplified.books.core.FeedLoader
 import org.nypl.simplified.books.core.FeedLoaderType
@@ -31,7 +30,7 @@ class FeedLoaderTest : FeedLoaderContract() {
     }
 
     val entryParser =
-      OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes())
+      OPDSAcquisitionFeedEntryParser.newParser()
     val parser =
       OPDSFeedParser.newParser(entryParser)
     val transport = OPDSFeedTransportType<OptionType<HTTPAuthType>> {

@@ -15,7 +15,6 @@ import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 import org.nypl.simplified.mime.MIMEParser;
 import org.nypl.simplified.mime.MIMEType;
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,8 +61,8 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
        * versions of the on-disk data.
        */
 
-      final Relation relation =
-        Relation.valueOf(JSONParserUtilities.getString(o, "type"));
+      final OPDSAcquisitionRelation relation =
+        OPDSAcquisitionRelation.valueOf(JSONParserUtilities.getString(o, "type"));
 
       final URI uri =
         JSONParserUtilities.getURI(o, "uri");

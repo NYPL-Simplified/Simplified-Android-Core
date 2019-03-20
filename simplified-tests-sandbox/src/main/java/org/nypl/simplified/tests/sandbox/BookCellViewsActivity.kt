@@ -17,10 +17,9 @@ import org.nypl.simplified.books.core.FeedEntryOPDS
 import org.nypl.simplified.books.core.FeedEntryType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.mime.MIMEParser
-import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import java.net.URI

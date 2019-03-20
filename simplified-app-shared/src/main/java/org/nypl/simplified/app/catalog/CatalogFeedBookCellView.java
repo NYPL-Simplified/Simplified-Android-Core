@@ -63,6 +63,7 @@ import org.nypl.simplified.books.covers.BookCoverProviderType;
 import org.nypl.simplified.multilibrary.Account;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -372,8 +373,8 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
      * Manually construct an acquisition controller for the retry button.
      */
 
-    final OptionType<OPDSAcquisition> a_opt =
-      BookAcquisitionSelection.INSTANCE.preferredAcquisition(oe.getAcquisitions());
+    final OptionType<OPDSAcquisitionPath> a_opt =
+      BookAcquisitionSelection.INSTANCE.preferredAcquisition(oe.getAcquisitionPaths());
 
     /*
      * Theoretically, if the book has ever been downloaded, then the
@@ -384,7 +385,7 @@ public final class CatalogFeedBookCellView extends FrameLayout implements
       throw new UnreachableCodeException();
     }
 
-    final OPDSAcquisition a = ((Some<OPDSAcquisition>) a_opt).get();
+    final OPDSAcquisitionPath a = ((Some<OPDSAcquisitionPath>) a_opt).get();
     final CatalogAcquisitionButtonController retry_ctl =
       new CatalogAcquisitionButtonController(
         this.activity, this.books, fe.getBookID(), a, fe);
