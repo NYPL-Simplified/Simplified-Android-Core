@@ -32,6 +32,18 @@ open class ReaderBookmarkPolicyContract {
       uri = null,
       deviceID = "urn:uuid:28cad755-2a0e-48bc-b5c8-1d43d57ac3e9")
 
+  val bookmark0Idle =
+    ReaderBookmark(
+      opdsId = "opdsid",
+      location = ReaderBookLocation.create(Option.none(), "id"),
+      time = LocalDateTime.now(),
+      kind = ReaderBookmarkKind.ReaderBookmarkLastReadLocation,
+      chapterTitle = "A Title",
+      chapterProgress = 0.5,
+      bookProgress = 0.25,
+      uri = null,
+      deviceID = "urn:uuid:28cad755-2a0e-48bc-b5c8-1d43d57ac3e9")
+
   val bookmark1 =
     ReaderBookmark(
       opdsId = "opdsid-x",
@@ -221,6 +233,32 @@ open class ReaderBookmarkPolicyContract {
     Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
     Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
     Assert.assertEquals(Event.LocalBookmarkAlreadyExists(accountID, bookmark0), result.outputs[1])
+  }
+
+  /**
+   * If an idle bookmark exists, then creating an explicit bookmark for the same location
+   * succeeds.
+   */
+
+  @Test
+  fun testBookmarkLocalCreatedIdleExplicit()
+  {
+    val accountID = AccountID.create(23)
+
+    val state =
+      ReaderBookmarkPolicyState.create(
+        locallySaved = mapOf(),
+        initialAccounts = setOf())
+
+    val result =
+      ReaderBookmarkPolicy.evaluatePolicy(
+        ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0))
+          .flatMap { ReaderBookmarkPolicy.evaluateInput(BookmarkCreated(accountID, bookmark0Idle)) },
+        state)
+
+    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0Idle), result.outputs[1])
   }
 
   /**

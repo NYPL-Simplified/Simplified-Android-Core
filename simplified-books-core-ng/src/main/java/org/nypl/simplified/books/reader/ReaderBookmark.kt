@@ -2,7 +2,6 @@ package org.nypl.simplified.books.reader
 
 import com.io7m.jfunctional.Some
 import org.joda.time.LocalDateTime
-import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.book_database.BookIDs
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
@@ -86,7 +85,7 @@ data class ReaderBookmark(
    * The unique ID of the bookmark.
    */
 
-  val bookmarkId: ReaderBookmarkID = createBookmarkID(this.book, this.location)
+  val bookmarkId: ReaderBookmarkID = createBookmarkID(this.book, this.location, this.kind)
 
   /**
    * Convenience function to convert a bookmark to a last-read-location kind.
@@ -107,12 +106,13 @@ data class ReaderBookmark(
   companion object {
 
     /**
-     * Create a bookmark ID from the given account ID, book ID, and location.
+     * Create a bookmark ID from the given book ID, location, and kind.
      */
 
     fun createBookmarkID(
       book: BookID,
-      location: ReaderBookLocation): ReaderBookmarkID {
+      location: ReaderBookLocation,
+      kind: ReaderBookmarkKind): ReaderBookmarkID {
       try {
         val messageDigest = MessageDigest.getInstance("SHA-256")
         val utf8 = Charset.forName("UTF-8")
@@ -122,6 +122,7 @@ data class ReaderBookmark(
           messageDigest.update(cfiOpt.get().toByteArray(utf8))
         }
         messageDigest.update(location.idRef().toByteArray(utf8))
+        messageDigest.update(kind.motivationURI.toByteArray(utf8))
 
         val digestResult = messageDigest.digest()
         val builder = StringBuilder(64)
