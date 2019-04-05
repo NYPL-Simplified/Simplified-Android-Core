@@ -69,7 +69,7 @@ public final class EULA implements EULAType
     throws IOException
   {
     final SyncedDocumentType sd =
-      SyncedDocument.newDocument(clock, http, exec, base, "eula", initial);
+      SyncedDocument.newDocument(clock, http, exec, base, "eula.html", initial);
     final File agree = new File(base, "eula_agreed.dat");
     return new EULA(exec, sd, agree);
   }
