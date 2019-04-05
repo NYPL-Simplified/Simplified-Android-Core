@@ -1,13 +1,18 @@
 package org.nypl.simplified.books.reader.bookmarks
 
+import java.io.Serializable
 import java.lang.IllegalArgumentException
 
 /**
  * The kind of bookmarks.
+ *
+ * <p>Note: The type is {@link Serializable} purely because the Android API requires this
+ * in order pass values of this type between activities. We make absolutely no guarantees
+ * that serialized values of this class will be compatible with future releases.</p>
  */
 
 sealed class ReaderBookmarkKind(
-  val motivationURI: String) {
+  val motivationURI: String): Serializable {
 
   /**
    * The bookmark represents a last-read location.
