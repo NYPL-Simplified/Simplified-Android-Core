@@ -1,4 +1,4 @@
-package org.nypl.simplified.books.reader.bookmarks
+package org.nypl.simplified.futures
 
 import com.google.common.base.Function
 import com.google.common.util.concurrent.AsyncFunction
@@ -10,7 +10,7 @@ import com.google.common.util.concurrent.MoreExecutors
  * Extension functions to get around the lack of SAM conversion in Kotlin.
  */
 
-internal object FluentFutureExtensions {
+object FluentFutureExtensions {
 
   /**
    * Apply a function `f` to the value of the current future.
@@ -33,6 +33,16 @@ internal object FluentFutureExtensions {
    */
 
   fun <E : Throwable, A> FluentFuture<A>.onError(
+    clazz: Class<E>,
+    f: (E) -> A): FluentFuture<A> {
+    return this.catching(clazz, Function<E, A> { x -> f.invoke(x!!) }, MoreExecutors.directExecutor())
+  }
+
+  /**
+   * Apply a function `f` to an exception raised by the current future (if any).
+   */
+
+  fun <E : Exception, A> FluentFuture<A>.onException(
     clazz: Class<E>,
     f: (E) -> A): FluentFuture<A> {
     return this.catching(clazz, Function<E, A> { x -> f.invoke(x!!) }, MoreExecutors.directExecutor())

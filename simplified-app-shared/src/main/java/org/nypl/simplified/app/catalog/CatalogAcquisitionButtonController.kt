@@ -88,7 +88,6 @@ class CatalogAcquisitionButtonController(
       this.profiles,
       this.backgroundExecutor,
       this.documents,
-      "Login Required",
       account,
       LoginSucceededType { creds -> this.onLoginSuccess(account) },
       LoginCancelledType { this.onLoginCancelled() },

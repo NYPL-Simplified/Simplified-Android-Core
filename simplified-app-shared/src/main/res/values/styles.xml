@@ -40,6 +40,7 @@
     <item name="windowNoTitle">true</item>
     <item name="android:colorPrimary">@color/app_primary_color</item>
     <item name="android:colorPrimaryDark">@color/app_primary_color</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
   </style>
 
   <style
@@ -49,6 +50,7 @@
     <item name="android:actionBarStyle">@style/ActionBar</item>
     <item name="android:colorPrimary">@color/app_primary_color</item>
     <item name="android:colorPrimaryDark">@color/app_primary_color</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
   </style>
 
   <!-- Material Design Color Palette w/ Action Bar -->
