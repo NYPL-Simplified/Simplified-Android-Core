@@ -107,7 +107,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       final Activity activity) {
 
     final ImmutableList.Builder<NavigationDrawerItemType> drawer_items = ImmutableList.builder();
-    // drawer_items.add(new NavigationDrawerItemAccountCurrent(activity));
+    drawer_items.add(new NavigationDrawerItemAccountCurrent(activity));
     drawer_items.add(new NavigationDrawerItemCatalog(activity));
     drawer_items.add(new NavigationDrawerItemBooks(activity));
     if (activity.getResources().getBoolean(R.bool.feature_holds_enabled)) {
