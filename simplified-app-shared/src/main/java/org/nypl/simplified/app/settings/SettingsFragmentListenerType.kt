@@ -1,7 +1,7 @@
 package org.nypl.simplified.app.settings
 
 import com.io7m.jfunctional.OptionType
-import org.nypl.simplified.app.HelpstackType
+import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.books.document_store.DocumentStoreType
 
 /**

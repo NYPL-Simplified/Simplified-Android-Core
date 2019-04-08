@@ -24,6 +24,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
+import org.nypl.simplified.app.helpstack.Helpstack;
+import org.nypl.simplified.app.helpstack.HelpstackType;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;

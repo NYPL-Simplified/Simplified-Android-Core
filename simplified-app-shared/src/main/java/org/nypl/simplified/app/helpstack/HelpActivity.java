@@ -1,10 +1,14 @@
-package org.nypl.simplified.app;
+package org.nypl.simplified.app.helpstack;
 
 import android.content.res.Resources;
 import android.os.Bundle;
 
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.Nullable;
+
+import org.nypl.simplified.app.NavigationDrawerActivity;
+import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.Simplified;
 
 /**
  * The activity that shows Helpstack's main activity

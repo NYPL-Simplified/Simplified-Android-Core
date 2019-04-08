@@ -1,4 +1,4 @@
-package org.nypl.simplified.app;
+package org.nypl.simplified.app.helpstack;
 
 import android.app.Activity;
 

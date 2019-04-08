@@ -93,7 +93,7 @@
       android:label="@string/settings_accounts" />
 
     <activity
-      android:name="org.nypl.simplified.app.HelpActivity"
+      android:name="org.nypl.simplified.app.helpstack.HelpActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/help"
       android:exported="false"
