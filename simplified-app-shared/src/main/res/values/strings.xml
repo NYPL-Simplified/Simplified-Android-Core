@@ -183,7 +183,7 @@
   <string name="settings_bookmarks_switch">Sync Bookmarks</string>
   <string name="advanced_sync_switch_title">Delete All Bookmarks</string>
   <string name="advanced_sync_switch_description">Delete all the bookmarks you have saved in the cloud.</string>
-  <string name="settings_account_delete">Are you sure you want to delete your "%s" account?</string>
+  <string name="settings_account_delete">Are you sure you want to remove your \"%s\" account from this device?</string>
   <string name="settings_account_delete_button">Delete</string>
 
   <string name="login_needed">You need to login to access the collection.</string>
