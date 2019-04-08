@@ -3,18 +3,17 @@ package org.nypl.simplified.books.accounts;
 import android.content.Context;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.io7m.jfunctional.FunctionType;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookDatabaseFactoryType;
 import org.nypl.simplified.books.book_database.BookDatabaseType;
 import org.nypl.simplified.files.DirectoryUtilities;
 import org.nypl.simplified.files.FileLocking;
 import org.nypl.simplified.files.FileUtilities;
-import org.nypl.simplified.observable.Observable;
 import org.nypl.simplified.observable.ObservableType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -277,7 +276,7 @@ public final class AccountsDatabase implements AccountsDatabaseType {
 
       LOG.debug("creating account {} (provider {})", next.id(), account_provider.id());
 
-      Assertions.checkInvariant(
+      Preconditions.checkArgument(
         !this.accounts.containsKey(next),
         "Account ID %s cannot have been used", next);
     }

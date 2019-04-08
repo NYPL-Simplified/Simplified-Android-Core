@@ -16,7 +16,6 @@ import org.nypl.drm.core.AdobeAdeptFulfillmentToken
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeUserID
 import org.nypl.drm.core.DRMUnsupportedException
-import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.core.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.downloader.core.DownloadListenerType
@@ -734,7 +733,7 @@ internal class BooksControllerBorrowTask(
       val downloadedSnap = this.databaseEntry.entryGetSnapshot()
       val downloadedStatus = BookStatus.fromSnapshot(this.bookID, downloadedSnap)
 
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         downloadedStatus is BookStatusDownloaded,
         "Downloaded book status must be Downloaded (is %s)",
         downloadedStatus)

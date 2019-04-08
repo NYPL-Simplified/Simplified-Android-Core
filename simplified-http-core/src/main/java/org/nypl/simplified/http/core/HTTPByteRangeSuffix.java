@@ -1,8 +1,8 @@
 package org.nypl.simplified.http.core;
 
+import com.google.common.base.Preconditions;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.assertions.Assertions;
 
 /**
  * The byte range of an HTTP Range request.
@@ -21,7 +21,7 @@ public final class HTTPByteRangeSuffix implements HTTPRangeType
   public HTTPByteRangeSuffix(
     final long in_byte_from_end)
   {
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_byte_from_end >= 0L,
       "byte_from_end %d >= 0",
       Long.valueOf(in_byte_from_end));

@@ -1,9 +1,10 @@
 package org.nypl.simplified.http.core;
 
+import com.google.common.base.Preconditions;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.assertions.Assertions;
+
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -80,7 +81,7 @@ public final class HTTPRedirectFollower
   public HTTPResultOKType<InputStream> runExceptional()
     throws Exception
   {
-    Assertions.checkPrecondition(this.used == false, "Follower already used");
+    Preconditions.checkArgument(this.used == false, "Follower already used");
 
     try {
       final HTTPResultType<InputStream> r = this.processURI();
@@ -104,7 +105,7 @@ public final class HTTPRedirectFollower
 
   public HTTPResultType<InputStream> run()
   {
-    Assertions.checkPrecondition(this.used == false, "Follower already used");
+    Preconditions.checkArgument(this.used == false, "Follower already used");
 
     try {
       try {

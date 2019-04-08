@@ -5,10 +5,10 @@ import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 
+import com.google.common.base.Preconditions;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.app.R;
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.feeds.FeedFacetType;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public final class CatalogFacetButton extends AppCompatButton {
     NullCheck.notNull(in_group_name);
     NullCheck.notNull(in_listener);
 
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_group.isEmpty() == false, "Facet group is not empty");
 
     FeedFacetType active_maybe = NullCheck.notNull(in_group.get(0));

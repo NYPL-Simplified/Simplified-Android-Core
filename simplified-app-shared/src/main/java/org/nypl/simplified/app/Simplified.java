@@ -13,6 +13,7 @@ import android.support.multidex.MultiDexApplication;
 import android.util.DisplayMetrics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.io7m.jfunctional.OptionType;
@@ -32,7 +33,6 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.accounts.AccountEvent;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
@@ -361,7 +361,7 @@ public final class Simplified extends MultiDexApplication {
       if (!Environment.isExternalStorageRemovable()) {
         final File r = context.getExternalFilesDir(null);
         LOG.debug("external storage is not removable, using it ({})", r);
-        Assertions.checkPrecondition(r.isDirectory(), "Data directory {} is a directory", r);
+        Preconditions.checkArgument(r.isDirectory(), "Data directory {} is a directory", r);
         return NullCheck.notNull(r);
       }
     }
@@ -372,7 +372,7 @@ public final class Simplified extends MultiDexApplication {
 
     final File r = context.getFilesDir();
     LOG.debug("no non-removable external storage, using internal storage ({})", r);
-    Assertions.checkPrecondition(r.isDirectory(), "Data directory {} is a directory", r);
+    Preconditions.checkArgument(r.isDirectory(), "Data directory {} is a directory", r);
     return NullCheck.notNull(r);
   }
 

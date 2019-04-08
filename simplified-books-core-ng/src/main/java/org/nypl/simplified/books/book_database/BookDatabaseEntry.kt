@@ -1,7 +1,7 @@
 package org.nypl.simplified.books.book_database
 
 import android.content.Context
-import org.nypl.simplified.assertions.Assertions
+import com.google.common.base.Preconditions
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -39,13 +39,13 @@ internal class BookDatabaseEntry internal constructor(
 
   override val book: Book
     get() = synchronized(this.bookLock) {
-      Assertions.checkPrecondition(!this.deleted, "Entry must not have been deleted")
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
       return this.bookRef
     }
 
   override val formatHandles: List<BookDatabaseEntryFormatHandle>
     get() = synchronized(this.bookLock) {
-      Assertions.checkPrecondition(!this.deleted, "Entry must not have been deleted")
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
       return this.formatHandlesRef.values.toList()
     }
 
@@ -116,7 +116,7 @@ internal class BookDatabaseEntry internal constructor(
   override fun writeOPDSEntry(opdsEntry: OPDSAcquisitionFeedEntry) {
 
     synchronized(this.bookLock) {
-      Assertions.checkPrecondition(!this.deleted, "Entry must not have been deleted")
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
       val fileMeta = File(this.bookDir, "meta.json")
       val fileMetaTmp = File(this.bookDir, "meta.json.tmp")
@@ -146,7 +146,7 @@ internal class BookDatabaseEntry internal constructor(
   @Throws(BookDatabaseException::class)
   override fun delete() {
     synchronized(this.bookLock) {
-      Assertions.checkPrecondition(!this.deleted, "Entry must not have been deleted")
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
       /*
        * Delete all of the format handles individually.
@@ -181,7 +181,7 @@ internal class BookDatabaseEntry internal constructor(
   @Throws(IOException::class)
   override fun setCover(file: File) {
     synchronized(this.bookLock) {
-      Assertions.checkPrecondition(!this.deleted, "Entry must not have been deleted")
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
       val fileCover = File(this.bookDir, "cover.jpg")
       val fileCoverTmp = File(this.bookDir, "cover.jpg.tmp")
@@ -196,7 +196,7 @@ internal class BookDatabaseEntry internal constructor(
   @Throws(IOException::class)
   override fun temporaryFile(): File {
     synchronized(this.bookLock) {
-      Assertions.checkPrecondition(!this.deleted, "Entry must not have been deleted")
+      Preconditions.checkArgument(!this.deleted, "Entry must not have been deleted")
 
       for (index in 0 until Integer.MAX_VALUE) {
         val file = File(this.bookDir, "temporary_$index")

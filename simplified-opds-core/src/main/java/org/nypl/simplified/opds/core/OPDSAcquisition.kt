@@ -1,7 +1,7 @@
 package org.nypl.simplified.opds.core
 
+import com.google.common.base.Preconditions
 import com.io7m.jfunctional.OptionType
-import org.nypl.simplified.assertions.Assertions
 import java.io.Serializable
 import java.net.URI
 
@@ -39,7 +39,7 @@ data class OPDSAcquisition(
 
   init {
     if (this.type.isNone) {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         !this.indirectAcquisitions.isEmpty(),
         "If no acquisition type is provided, a set of indirect acquisitions must be provided")
     }

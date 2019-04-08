@@ -1,11 +1,11 @@
 package org.nypl.simplified.opds.core;
 
+import com.google.common.base.Preconditions;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
-import org.nypl.simplified.assertions.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -33,7 +33,6 @@ import static org.nypl.simplified.opds.core.OPDSFeedConstants.ATOM_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.DRM_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.FACET_URI_TEXT;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.OPDS_URI_TEXT;
-import static org.nypl.simplified.opds.core.OPDSFeedConstants.SIMPLIFIED_URI;
 import static org.nypl.simplified.opds.core.OPDSFeedConstants.SIMPLIFIED_URI_TEXT;
 
 /**
@@ -75,7 +74,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final boolean has_name =
       OPDSXML.nodeHasName(NullCheck.notNull(e), ATOM_URI, "link");
 
-    Assertions.checkPrecondition(has_name, "Node has name 'link'");
+    Preconditions.checkArgument(has_name, "Node has name 'link'");
 
     boolean has_everything = e.hasAttribute("title");
     has_everything = has_everything && e.hasAttribute("href");
@@ -121,7 +120,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
   private static OptionType<URI> parseNextLink(
     final Element e)
     throws URISyntaxException {
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       "link".equals(e.getLocalName()),
       "localname %s == %s",
       e.getLocalName(),
@@ -144,7 +143,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final boolean has_name = OPDSXML.nodeHasName(
       NullCheck.notNull(e), ATOM_URI, "link");
 
-    Assertions.checkPrecondition(has_name, "Node has name 'link'");
+    Preconditions.checkArgument(has_name, "Node has name 'link'");
 
     final boolean has_everything =
       e.hasAttribute("type") && e.hasAttribute("rel") && e.hasAttribute("href");
@@ -180,7 +179,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final boolean has_name = OPDSXML.nodeHasName(
       NullCheck.notNull(e), ATOM_URI, "link");
 
-    Assertions.checkPrecondition(has_name, "Node has name 'link'");
+    Preconditions.checkArgument(has_name, "Node has name 'link'");
 
     final boolean has_everything =
       e.hasAttribute("rel") && e.hasAttribute("href");
@@ -204,7 +203,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final boolean has_name = OPDSXML.nodeHasName(
       NullCheck.notNull(e), ATOM_URI, "link");
 
-    Assertions.checkPrecondition(has_name, "Node has name 'link'");
+    Preconditions.checkArgument(has_name, "Node has name 'link'");
 
     final boolean has_everything =
       e.hasAttribute("rel") && e.hasAttribute("href");
@@ -228,7 +227,7 @@ public final class OPDSFeedParser implements OPDSFeedParserType {
     final boolean has_name = OPDSXML.nodeHasName(
       NullCheck.notNull(e), ATOM_URI, "link");
 
-    Assertions.checkPrecondition(has_name, "Node has name 'link'");
+    Preconditions.checkArgument(has_name, "Node has name 'link'");
 
     final boolean has_everything =
       e.hasAttribute("rel") && e.hasAttribute("href");

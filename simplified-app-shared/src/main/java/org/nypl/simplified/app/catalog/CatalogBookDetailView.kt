@@ -16,6 +16,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
+import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListeningExecutorService
@@ -31,7 +32,6 @@ import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
@@ -854,7 +854,7 @@ class CatalogBookDetailView(
       for (index in 0 until buttonCount) {
         val v = layout.getChildAt(index)
 
-        Assertions.checkPrecondition(
+        Preconditions.checkArgument(
           v is CatalogBookButtonType,
           "view %s is an instance of CatalogBookButtonType",
           v)

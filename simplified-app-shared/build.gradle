@@ -24,7 +24,6 @@ repositories {
 
 dependencies {
   api project(':simplified-accessibility')
-  api project(':simplified-assert')
   api project(':simplified-books-core')
   api project(':simplified-books-core-ng')
   api project(':simplified-books-covers')

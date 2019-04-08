@@ -1,7 +1,7 @@
 package org.nypl.simplified.tenprint;
 
+import com.google.common.base.Preconditions;
 import com.io7m.jnull.NullCheck;
-import org.nypl.simplified.assertions.Assertions;
 
 /**
  * An immutable set of parameters to the 10 PRINT algorithm.
@@ -36,54 +36,54 @@ public final class TenPrintInput
     final float in_grid_scale,
     final boolean in_debug_art)
   {
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_shape_thickness >= 1,
       "Shape thickness %d must be >= 1",
       in_shape_thickness);
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_shape_thickness <= 30,
       "Shape thickness %d must be <= 30",
       in_shape_thickness);
     this.shape_thickness = in_shape_thickness;
 
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_margin >= 1, "Margin %d must be >= 1", in_margin);
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_margin <= 10, "Margin %d must be <= 10", in_margin);
     this.margin = in_margin;
 
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       (double) in_base_saturation >= 0.0,
       "Saturation %f must be >= 0.0",
       in_base_saturation);
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       (double) in_base_saturation <= 1.0,
       "Saturation %f must be <= 1.0",
       in_base_saturation);
     this.base_saturation = in_base_saturation;
 
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       (double) in_base_brightness >= 0.0,
       "Brightness %f must be >= 0.0",
       in_base_brightness);
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       (double) in_base_brightness <= 1.0,
       "Brightness %f must be <= 1.0",
       in_base_brightness);
     this.base_brightness = in_base_brightness;
 
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       (double) in_color_distance >= 0.0,
       "Color distance %f must be >= 0.0",
       in_color_distance);
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       (double) in_color_distance <= 360.0,
       "Color distance %f must be <= %f",
       in_color_distance,
       360.0);
     this.color_distance = in_color_distance;
 
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_cover_height >= 10, "Cover height %d must be >= 10", in_cover_height);
     this.cover_height = in_cover_height;
     this.cover_width = (int) ((double) in_cover_height / 1.5);
@@ -92,7 +92,7 @@ public final class TenPrintInput
     this.title = NullCheck.notNull(in_title);
     this.author = NullCheck.notNull(in_author);
 
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       (double) in_grid_scale > 0.1, "Grid scale %f must be > %f", in_grid_scale, 0.1);
     this.grid_scale = in_grid_scale;
     this.debug_art = in_debug_art;
@@ -269,11 +269,11 @@ public final class TenPrintInput
     @Override public void setBaseBrightness(
       final float in_base_brightness)
     {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         (double) in_base_brightness >= 0.0,
         "Brightness %f must be >= 0.0",
         in_base_brightness);
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         (double) in_base_brightness <= 1.0,
         "Brightness %f must be <= 1.0",
         in_base_brightness);
@@ -283,11 +283,11 @@ public final class TenPrintInput
     @Override public void setBaseSaturation(
       final float in_base_saturation)
     {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         (double) in_base_saturation >= 0.0,
         "Saturation %f must be >= 0.0",
         in_base_saturation);
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         (double) in_base_saturation <= 1.0,
         "Saturation %f must be <= 1.0",
         in_base_saturation);
@@ -297,11 +297,11 @@ public final class TenPrintInput
     @Override public void setColorDistance(
       final float in_color_distance)
     {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         (double) in_color_distance >= 0.0,
         "Color distance %f must be >= 0.0",
         in_color_distance);
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         (double) in_color_distance <= 360.0,
         "Color distance %f must be <= %f",
         in_color_distance,
@@ -312,7 +312,7 @@ public final class TenPrintInput
     @Override public void setCoverHeight(
       final int in_cover_height)
     {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         in_cover_height >= 10,
         "Cover height %d must be >= 10",
         in_cover_height);
@@ -328,7 +328,7 @@ public final class TenPrintInput
     @Override public void setGridScale(
       final float in_grid_scale)
     {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         (double) in_grid_scale > 0.1, "Grid scale %f must be > %f", in_grid_scale, 0.1);
       this.grid_scale = in_grid_scale;
     }
@@ -342,9 +342,9 @@ public final class TenPrintInput
     @Override public void setMargin(
       final int in_margin)
     {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         in_margin >= 1, "Margin %d must be >= 1", in_margin);
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         in_margin <= 10, "Margin %d must be <= 10", in_margin);
       this.margin = in_margin;
     }
@@ -352,11 +352,11 @@ public final class TenPrintInput
     @Override public void setShapeThickness(
       final int in_shape_thickness)
     {
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         in_shape_thickness >= 1,
         "Shape thickness %d must be >= 1",
         in_shape_thickness);
-      Assertions.checkPrecondition(
+      Preconditions.checkArgument(
         in_shape_thickness <= 30,
         "Shape thickness %d must be <= 30",
         in_shape_thickness);

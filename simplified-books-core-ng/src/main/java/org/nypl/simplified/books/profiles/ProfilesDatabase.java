@@ -3,13 +3,13 @@ package org.nypl.simplified.books.profiles;
 import android.content.Context;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
-import org.nypl.simplified.assertions.Assertions;
 import org.nypl.simplified.books.accounts.AccountEvent;
 import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountProvider;
@@ -384,7 +384,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       next = ProfileID.create(1);
     }
 
-    Assertions.checkInvariant(
+    Preconditions.checkArgument(
       !this.profiles.containsKey(next),
       "Profile ID %s cannot have been used", next);
 
