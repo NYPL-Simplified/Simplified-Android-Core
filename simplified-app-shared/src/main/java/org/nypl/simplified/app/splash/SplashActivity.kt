@@ -10,6 +10,7 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.catalog.MainCatalogActivity
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity
+import org.nypl.simplified.app.settings.SettingsAccountsActivity
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.eula.EULAType
@@ -49,7 +50,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
 
   override fun onSplashOpenCatalog(account: AccountType) {
     val intent = Intent()
-    intent.setClass(this, MainCatalogActivity::class.java)
+    intent.setClass(this, SettingsAccountsActivity::class.java)
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

@@ -112,6 +112,8 @@ final class ProfileAccountLoginTask implements Callable<AccountEventLogin> {
     final AccountType account,
     final AccountProviderAuthenticationDescription auth) {
 
+    LOG.debug("hitting login URI: {}", auth.loginURI());
+
     final HTTPAuthType http_auth =
       AccountAuthenticatedHTTP.createAuthenticatedHTTP(this.credentials);
     final HTTPResultType<InputStream> result =

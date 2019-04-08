@@ -481,7 +481,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
     availableAccountProviders.removeAll(usedAccountProviders)
     availableAccountProviders.sortWith(Comparator { provider0, provider1 ->
-      provider0.displayName().compareTo(provider1.displayName())
+      val name0 = provider0.displayName().removePrefix("The ")
+      val name1 = provider1.displayName().removePrefix("The ")
+      name0.toUpperCase().compareTo(name1.toUpperCase())
     })
 
     this.logger.debug("returning {} available providers", availableAccountProviders.size)

@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TableLayout
 import android.widget.TableRow
@@ -65,8 +66,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private lateinit var accountNameText: TextView
   private lateinit var accountSubtitleText: TextView
   private lateinit var accountIcon: ImageView
-  private lateinit var barcodeText: TextView
-  private lateinit var pinText: TextView
+  private lateinit var barcodeText: EditText
+  private lateinit var pinText: EditText
   private lateinit var tableWithCode: TableLayout
   private lateinit var tableSignup: TableLayout
   private lateinit var login: Button
@@ -375,6 +376,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       LoginDialog.loginErrorCodeToLocalizedMessage(this.resources, failed.errorCode()), null)
     { this.login.isEnabled = true }
 
+    UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
   }
 
@@ -394,6 +396,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.resources.getString(R.string.settings_logout_failed), null
     ) { this.login.isEnabled = true }
 
+    UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
   }
 
@@ -409,31 +412,38 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     if (credentialsOpt is Some<AccountAuthenticationCredentials>) {
       val credentials = credentialsOpt.get()
 
-      this.pinText.text = credentials.pin().value()
+      this.pinText.setText(credentials.pin().value())
       this.pinText.isEnabled = false
 
-      this.barcodeText.text = credentials.barcode().value()
+      this.barcodeText.setText(credentials.barcode().value())
       this.barcodeText.isEnabled = false
 
       this.login.isEnabled = true
       this.login.setText(R.string.settings_log_out)
-      this.login.setOnClickListener { this.tryLogout() }
+      this.login.setOnClickListener {
+        this.configureDisableLoginForm()
+        this.tryLogout()
+      }
     } else {
-      this.pinText.text = ""
       this.pinText.isEnabled = true
-
-      this.barcodeText.text = ""
       this.barcodeText.isEnabled = true
 
       this.login.isEnabled = true
       this.login.setText(R.string.settings_log_in)
-      this.login.setOnClickListener { this.tryLogin() }
+      this.login.setOnClickListener {
+        this.configureDisableLoginForm()
+        this.tryLogin()
+      }
     }
   }
 
-  private fun tryLogout(): Unit {
+  private fun configureDisableLoginForm() {
     this.login.isEnabled = false
+    this.pinText.isEnabled = false
+    this.barcodeText.isEnabled = false
+  }
 
+  private fun tryLogout(): Unit {
     FluentFuture
       .from(Simplified.getProfilesController().profileAccountLogout(this.account.id()))
       .onException(Exception::class.java) { event -> AccountLogoutFailed.ofException(event) }
@@ -443,8 +453,6 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   }
 
   private fun tryLogin(): Unit {
-    this.login.isEnabled = false
-
     val credentials =
       AccountAuthenticationCredentials.builder(
         AccountPIN.create(this.pinText.text.toString()),

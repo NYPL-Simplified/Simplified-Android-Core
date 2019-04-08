@@ -114,15 +114,18 @@ public final class AccountProvidersJSON {
   }
 
   private static URI applyAnnotationsHack(URI catalogUrl) {
-    return URI.create(catalogUrl.toString() + "/annotations");
+    final String text = catalogUrl.toString().replaceAll("/+$", "");
+    return URI.create(text + "/annotations");
   }
 
   private static URI applyPatronSettingHack(URI catalogUrl) {
-    return URI.create(catalogUrl.toString() + "/patrons/me");
+    final String text = catalogUrl.toString().replaceAll("/+$", "");
+    return URI.create(text + "/patrons/me");
   }
 
   private static URI applyLoansHack(URI catalogUrl) {
-    return URI.create(catalogUrl.toString() + "/loans");
+    final String text = catalogUrl.toString().replaceAll("/+$", "");
+    return URI.create(text + "/loans");
   }
 
   /**
