@@ -16,6 +16,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -81,6 +82,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private lateinit var privacy: TableRow
   private lateinit var license: TableRow
   private lateinit var account: AccountType
+  private lateinit var syncSwitch: Switch
 
   private val accountEventSubscription: ObservableSubscriptionType<AccountEvent>? = null
 
@@ -187,6 +189,8 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.findViewById(R.id.link_privacy)
     this.license =
       this.findViewById(R.id.link_license)
+    this.syncSwitch =
+      this.findViewById(R.id.sync_switch)
 
     val bar = this.supportActionBar
     if (bar != null) {
@@ -337,6 +341,15 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       }
     } else {
       this.logger.debug("EULA: unavailable")
+    }
+
+    /*
+     * Configure the syncing switch.
+     */
+
+    this.syncSwitch.setOnCheckedChangeListener { _, isEnabled ->
+      this.account.setPreferences(
+        this.account.preferences().copy(bookmarkSyncingPermitted = isEnabled))
     }
   }
 
