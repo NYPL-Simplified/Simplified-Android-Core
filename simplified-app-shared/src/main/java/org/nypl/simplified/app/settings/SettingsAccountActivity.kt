@@ -347,9 +347,16 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Configure the syncing switch.
      */
 
-    this.syncSwitch.setOnCheckedChangeListener { _, isEnabled ->
-      this.account.setPreferences(
-        this.account.preferences().copy(bookmarkSyncingPermitted = isEnabled))
+    if (this.account.provider().supportsSimplyESynchronization()) {
+      this.syncSwitch.isEnabled = true
+      this.syncSwitch.isChecked = this.account.preferences().bookmarkSyncingPermitted
+      this.syncSwitch.setOnCheckedChangeListener { _, isEnabled ->
+        this.account.setPreferences(
+          this.account.preferences().copy(bookmarkSyncingPermitted = isEnabled))
+      }
+    } else {
+      this.syncSwitch.isEnabled = false
+      this.syncSwitch.isChecked = false
     }
   }
 
