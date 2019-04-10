@@ -113,7 +113,12 @@ public final class AccountDescriptionJSON {
     NullCheck.notNull(description, "Description");
 
     final ObjectNode jo = jom.createObjectNode();
-    jo.put("provider", description.provider().toString());
+    jo.put(
+      "provider",
+      description.provider().toString());
+    jo.put(
+      "preferences",
+      AccountPreferencesJSON.INSTANCE.serializeToJSON(jom, description.preferences()));
 
     description.credentials().map_(
       creds -> jo.set("credentials", AccountAuthenticationCredentialsJSON.serializeToJSON(creds)));
