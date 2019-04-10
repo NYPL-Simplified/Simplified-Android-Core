@@ -17,9 +17,11 @@ import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.controller.ProfilesControllerType
+import org.nypl.simplified.books.profiles.ProfileCreationEvent
 import org.nypl.simplified.books.profiles.ProfileEvent
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
 import org.nypl.simplified.books.profiles.ProfileReadableType
+import org.nypl.simplified.books.profiles.ProfileSelected
 import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent.ReaderBookmarkSaved
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent.ReaderBookmarkSyncFinished
@@ -471,16 +473,24 @@ class ReaderBookmarkService private constructor(
     val credentials: AccountAuthenticationCredentials)
 
   private fun reconfigureForProfile(profile: ProfileReadableType) {
-    this.logger.debug("[{}]: configuring bookmark controller for profile", profile.id().id())
+    this.logger.debug("[{}]: reconfiguring bookmark controller for profile", profile.id().id())
     this.policyState = setupPolicyForProfile(this.logger, profile)
+    this.executor.submit(OpCheckSyncStatusForProfile(
+      logger = this.logger,
+      httpCalls = this.httpCalls,
+      profile = profile,
+      evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) }))
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    try {
-      val currentProfile = this.profilesController.profileCurrent()
-      this.executor.execute { this.reconfigureForProfile(currentProfile) }
-    } catch (e: ProfileNoneCurrentException) {
-      this.logger.error("onProfileEvent: no profile is current")
+    if (event is ProfileSelected) {
+      try {
+        val currentProfile = this.profilesController.profileCurrent()
+        this.logger.debug("[{}]: a new profile was selected", currentProfile.id().id())
+        this.executor.execute { this.reconfigureForProfile(currentProfile) }
+      } catch (e: ProfileNoneCurrentException) {
+        this.logger.error("onProfileEvent: no profile is current")
+      }
     }
   }
 
