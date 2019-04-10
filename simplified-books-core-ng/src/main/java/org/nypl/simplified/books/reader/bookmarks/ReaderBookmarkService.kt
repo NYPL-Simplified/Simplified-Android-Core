@@ -221,8 +221,7 @@ class ReaderBookmarkService private constructor(
   }
 
   /**
-   * An operation that checks the sync status of all accounts that support syncing
-   * in a given profile.
+   * An operation that synchronizes bookmarks for all accounts that want it.
    */
 
   private class OpSyncAccountInProfile(
