@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   package="org.nypl.simplified.simplye"
-  android:versionCode="1208"
+  android:versionCode="1210"
   android:versionName="3.0.4">
 
   <uses-sdk
@@ -72,28 +72,28 @@
       android:label="@string/holds"></activity>
 
     <activity
-      android:name="org.nypl.simplified.app.MainSettingsActivity"
+      android:name="org.nypl.simplified.app.settings.SettingsActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/settings"
       android:exported="false"
-      android:label="@string/settings"></activity>
+      android:label="@string/settings" />
 
     <activity
-      android:name="org.nypl.simplified.app.MainSettingsAccountActivity"
+      android:name="org.nypl.simplified.app.settings.SettingsAccountActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/settings_account"
       android:exported="false"
-      android:label="@string/settings_account"></activity>
+      android:label="@string/settings_account" />
 
     <activity
-      android:name="org.nypl.simplified.app.MainSettingsAccountsActivity"
+      android:name="org.nypl.simplified.app.settings.SettingsAccountsActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/settings_accounts"
       android:exported="false"
-      android:label="@string/settings_accounts"></activity>
+      android:label="@string/settings_accounts" />
 
     <activity
-      android:name="org.nypl.simplified.app.HelpActivity"
+      android:name="org.nypl.simplified.app.helpstack.HelpActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/help"
       android:exported="false"
@@ -142,12 +142,6 @@
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/audio_book_player"
       android:label="@string/audio_book_player"></activity>
-
-    <!-- Testing -->
-    <activity
-      android:name="org.nypl.simplified.app.testing.AlternateFeedURIsActivity"
-      android:configChanges="orientation|screenSize"
-      android:exported="true"></activity>
 
     <!-- HelpStack -->
     <activity

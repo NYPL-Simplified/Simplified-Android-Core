@@ -43,6 +43,7 @@ import org.nypl.simplified.app.catalog.MainHoldsActivity;
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity;
 import org.nypl.simplified.app.profiles.ProfileSwitchDialog;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
+import org.nypl.simplified.app.settings.SettingsActivity;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
@@ -106,7 +107,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       final Activity activity) {
 
     final ImmutableList.Builder<NavigationDrawerItemType> drawer_items = ImmutableList.builder();
-    // drawer_items.add(new NavigationDrawerItemAccountCurrent(activity));
+    drawer_items.add(new NavigationDrawerItemAccountCurrent(activity));
     drawer_items.add(new NavigationDrawerItemCatalog(activity));
     drawer_items.add(new NavigationDrawerItemBooks(activity));
     if (activity.getResources().getBoolean(R.bool.feature_holds_enabled)) {
@@ -527,7 +528,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         if (account.logo().isSome()) {
           URI logoURI = ((Some<URI>) account.logo()).get();
           icon_view.setVisibility(View.VISIBLE);
-          SimplifiedIconViews.configureIconViewFromURI(
+          SimplifiedIconViews.INSTANCE.configureIconViewFromURI(
             this.activity.getAssets(), icon_view, logoURI);
         } else {
           icon_view.setVisibility(View.INVISIBLE);
@@ -595,7 +596,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       drawer.closeDrawer(GravityCompat.START);
 
       UIThread.runOnUIThreadDelayed(() -> {
-        startActivityWithoutHistory(this.activity, new Bundle(), MainSettingsActivity.class);
+        startActivityWithoutHistory(this.activity, new Bundle(), SettingsActivity.class);
       }, 500L);
     }
   }
@@ -801,7 +802,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       drawer.closeDrawer(GravityCompat.START);
 
       UIThread.runOnUIThreadDelayed(() -> {
-        startActivityWithoutHistory(this.activity, new Bundle(), MainSettingsActivity.class);
+        startActivityWithoutHistory(this.activity, new Bundle(), SettingsActivity.class);
       }, 500L);
     }
   }
@@ -873,7 +874,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
       if (this.account.logo().isSome()) {
         URI logoURI = ((Some<URI>) this.account.logo()).get();
-        SimplifiedIconViews.configureIconViewFromURI(this.activity.getAssets(), icon_view, logoURI);
+        SimplifiedIconViews.INSTANCE.configureIconViewFromURI(this.activity.getAssets(), icon_view, logoURI);
         icon_view.setVisibility(View.VISIBLE);
       } else {
         icon_view.setVisibility(View.INVISIBLE);

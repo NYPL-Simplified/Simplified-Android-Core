@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout
-    android:id="@+id/settings_account_container"
+<FrameLayout xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/settings_account_container"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -127,13 +127,14 @@
               android:labelFor="@+id/settings_barcode_edit"
               android:text="@string/settings_barcode"/>
 
-          <TextView
+          <EditText
               android:id="@+id/settings_barcode_text"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginStart="20dp"
               android:layout_weight="1"
               android:background="@drawable/textview_underline"
+              android:inputType="text"
               android:maxLines="1"/>
         </TableRow>
 
@@ -149,14 +150,16 @@
               android:labelFor="@+id/settings_pin_edit"
               android:text="@string/settings_pin"/>
 
-          <TextView
-              android:id="@+id/settings_pin_text"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginStart="20dp"
-              android:layout_weight="1"
-              android:background="@drawable/textview_underline"
-              android:maxLines="1"/>
+          <EditText
+            android:id="@+id/settings_pin_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_weight="1"
+            android:background="@drawable/textview_underline"
+            android:inputType="textPassword"
+            android:maxLines="1"
+            tools:password="true" />
 
           <CheckBox
               android:id="@+id/settings_reveal_password"

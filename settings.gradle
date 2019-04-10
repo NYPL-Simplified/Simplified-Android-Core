@@ -6,18 +6,17 @@ rootProject.name = 'simplified'
 include ':simplified-accessibility'
 include ':simplified-app-shared'
 include ':simplified-app-simplye'
-include ':simplified-assert'
 include ':simplified-books-core'
 include ':simplified-books-core-ng'
 include ':simplified-books-covers'
 include ':simplified-bugsnag'
 include ':simplified-cardcreator'
-include ':simplified-checkstyle'
 include ':simplified-circ-analytics'
 include ':simplified-datepicker'
 include ':simplified-datepicker-demo'
 include ':simplified-downloader-core'
 include ':simplified-files'
+include ':simplified-futures'
 include ':simplified-http-core'
 include ':simplified-json-core'
 include ':simplified-multilibrary'
@@ -39,13 +38,11 @@ include ':simplified-volley'
 project(':simplified-accessibility').projectDir = "$rootDir/simplified-accessibility" as File
 project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" as File
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
-project(':simplified-assert').projectDir = "$rootDir/simplified-assert" as File
 project(':simplified-books-core').projectDir = "$rootDir/simplified-books-core" as File
 project(':simplified-books-core-ng').projectDir = "$rootDir/simplified-books-core-ng" as File
 project(':simplified-books-covers').projectDir = "$rootDir/simplified-books-covers" as File
 project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
 project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
-project(':simplified-checkstyle').projectDir = "$rootDir/simplified-checkstyle" as File
 project(':simplified-circ-analytics').projectDir = "$rootDir/simplified-circ-analytics" as File
 project(':simplified-datepicker').projectDir = "$rootDir/simplified-datepicker" as File
 project(':simplified-datepicker-demo').projectDir = "$rootDir/simplified-datepicker-demo" as File

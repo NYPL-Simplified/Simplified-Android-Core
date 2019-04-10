@@ -23,28 +23,28 @@ repositories {
 }
 
 dependencies {
-  implementation project(':simplified-accessibility')
-  implementation project(':simplified-assert')
-  implementation project(':simplified-books-core')
-  implementation project(':simplified-books-core-ng')
-  implementation project(':simplified-books-covers')
-  implementation project(':simplified-bugsnag')
-  implementation project(':simplified-cardcreator')
-  implementation project(':simplified-circ-analytics')
-  implementation project(':simplified-datepicker')
-  implementation project(':simplified-downloader-core')
-  implementation project(':simplified-files')
-  implementation project(':simplified-http-core')
-  implementation project(':simplified-json-core')
-  implementation project(':simplified-multilibrary')
-  implementation project(':simplified-observable')
-  implementation project(':simplified-opds-core')
-  implementation project(':simplified-prefs')
-  implementation project(':simplified-splash')
-  implementation project(':simplified-rfc3339-core')
-  implementation project(':simplified-stack')
-  implementation project(':simplified-tenprint')
-  implementation project(':simplified-volley')
+  api project(':simplified-accessibility')
+  api project(':simplified-books-core')
+  api project(':simplified-books-core-ng')
+  api project(':simplified-books-covers')
+  api project(':simplified-bugsnag')
+  api project(':simplified-cardcreator')
+  api project(':simplified-circ-analytics')
+  api project(':simplified-datepicker')
+  api project(':simplified-downloader-core')
+  api project(':simplified-files')
+  api project(':simplified-futures')
+  api project(':simplified-http-core')
+  api project(':simplified-json-core')
+  api project(':simplified-multilibrary')
+  api project(':simplified-observable')
+  api project(':simplified-opds-core')
+  api project(':simplified-prefs')
+  api project(':simplified-splash')
+  api project(':simplified-rfc3339-core')
+  api project(':simplified-stack')
+  api project(':simplified-tenprint')
+  api project(':simplified-volley')
 
   annotationProcessor "com.google.auto.value:auto-value:1.3"
 
@@ -78,7 +78,7 @@ dependencies {
   implementation 'com.android.support.constraint:constraint-layout:1.0.2'
   implementation 'com.android.support:design:27.1.1'
   implementation 'com.android.support:multidex:1.0.2'
-  implementation 'com.android.support:preference-v7:27.1.1'
+  implementation 'com.android.support:preference-v14:27.1.1'
 
   implementation 'com.google.zxing:core:3.2.1'
   implementation 'com.journeyapps:zxing-android-embedded:3.2.0@aar'

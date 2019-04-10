@@ -1,8 +1,8 @@
 package org.nypl.simplified.http.core;
 
+import com.google.common.base.Preconditions;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import org.nypl.simplified.assertions.Assertions;
 
 /**
  * The byte range of an HTTP Range request.
@@ -25,7 +25,7 @@ import org.nypl.simplified.assertions.Assertions;
     final long in_byte_start,
     final long in_byte_end)
   {
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       in_byte_start >= 0L, "byte_start %d >= 0", in_byte_start);
     this.byte_start = in_byte_start;
     this.byte_end = in_byte_end;

@@ -22,6 +22,7 @@ import android.widget.RadioGroup
 import android.widget.SearchView
 import android.widget.SearchView.OnQueryTextListener
 import android.widget.TextView
+import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.FutureCallback
 import com.io7m.jfunctional.Option
@@ -38,7 +39,6 @@ import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.login.LoginActivity
 import org.nypl.simplified.app.utilities.UIThread
-import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.controller.ProfileFeedRequest
 import org.nypl.simplified.books.eula.EULAType
@@ -386,8 +386,8 @@ abstract class CatalogFeedActivity : CatalogActivity() {
 
     val a = this.intent.extras
     if (a != null) {
-      val args = a.getSerializable(
-        CATALOG_ARGS) as CatalogFeedArgumentsType
+      val args =
+        a.getSerializable(CATALOG_ARGS) as CatalogFeedArgumentsType?
       if (args != null) {
         return args
       }
@@ -602,7 +602,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     LOG.debug("received feed without blocks (empty): {}", feed.feedURI)
 
     UIThread.checkIsUIThread()
-    Assertions.checkPrecondition(feed.entriesInOrder.isEmpty(), "Feed is empty")
+    Preconditions.checkArgument(feed.entriesInOrder.isEmpty(), "Feed is empty")
 
     this.invalidateOptionsMenu()
 
@@ -632,7 +632,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     LOG.debug("received feed without blocks (non-empty): {}", feedWithoutGroups.feedURI)
 
     UIThread.checkIsUIThread()
-    Assertions.checkPrecondition(
+    Preconditions.checkArgument(
       !feedWithoutGroups.entriesInOrder.isEmpty(), "Feed is non-empty")
 
     this.invalidateOptionsMenu()

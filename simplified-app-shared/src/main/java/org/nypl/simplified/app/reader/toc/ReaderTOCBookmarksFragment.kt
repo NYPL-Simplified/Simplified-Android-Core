@@ -15,7 +15,7 @@ import org.joda.time.format.DateTimeFormat
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.reader.ReaderColorSchemes
-import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.*
+import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.ReaderSelectedBookmark
 import org.nypl.simplified.books.reader.ReaderBookmark
 import org.slf4j.LoggerFactory
 

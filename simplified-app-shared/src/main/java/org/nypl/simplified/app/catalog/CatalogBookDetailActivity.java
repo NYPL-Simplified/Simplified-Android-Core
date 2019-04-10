@@ -13,7 +13,6 @@ import com.io7m.jnull.Nullable;
 import org.nypl.simplified.app.NavigationDrawerActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
-import org.nypl.simplified.app.SimplifiedPart;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
@@ -37,7 +36,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity {
       "org.nypl.simplified.app.CatalogBookDetailActivity.feed_entry";
   }
 
-  private SimplifiedPart part;
   private CatalogBookDetailView view;
   private ObservableSubscriptionType<BookStatusEvent> bookSubscription;
 

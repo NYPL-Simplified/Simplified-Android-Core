@@ -253,13 +253,18 @@ class Controller private constructor(
   override fun profileAccountCurrentLogout(): FluentFuture<AccountEventLogout> {
     return FluentFuture.from(this.taskExecutor.submit(
       ProfileAccountLogoutTask(
-        this.profiles,
-        this.bookRegistry,
-        this.accountEvents)))
+        profiles = this.profiles,
+        bookRegistry = this.bookRegistry,
+        accountEvents = this.accountEvents)))
   }
 
   override fun profileAccountLogout(account: AccountID): FluentFuture<AccountEventLogout> {
-    throw UnimplementedCodeException()
+    return FluentFuture.from(this.taskExecutor.submit(
+      ProfileAccountLogoutSpecificTask(
+        profiles = this.profiles,
+        bookRegistry = this.bookRegistry,
+        accountID = account,
+        accountEvents = this.accountEvents)))
   }
 
   @Throws(ProfileNoneCurrentException::class)

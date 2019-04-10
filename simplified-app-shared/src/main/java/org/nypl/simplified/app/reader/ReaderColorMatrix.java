@@ -4,7 +4,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 
-import org.nypl.simplified.assertions.Assertions;
+import com.google.common.base.Preconditions;
 
 /**
  * Functions for producing specific color filter matrices.
@@ -35,10 +35,10 @@ public final class ReaderColorMatrix extends ColorMatrix
     final float[] row_2,
     final float[] row_3)
   {
-    Assertions.checkPrecondition(row_0.length == 5, "Row 0 has 5 elements");
-    Assertions.checkPrecondition(row_1.length == 5, "Row 1 has 5 elements");
-    Assertions.checkPrecondition(row_2.length == 5, "Row 2 has 5 elements");
-    Assertions.checkPrecondition(row_3.length == 5, "Row 3 has 5 elements");
+    Preconditions.checkArgument(row_0.length == 5, "Row 0 has 5 elements");
+    Preconditions.checkArgument(row_1.length == 5, "Row 1 has 5 elements");
+    Preconditions.checkArgument(row_2.length == 5, "Row 2 has 5 elements");
+    Preconditions.checkArgument(row_3.length == 5, "Row 3 has 5 elements");
 
     final float[] actual = new float[4 * 5];
     int actual_index = 0;
@@ -59,7 +59,7 @@ public final class ReaderColorMatrix extends ColorMatrix
       actual_index = actual_index + 1;
     }
 
-    Assertions.checkInvariant(
+    Preconditions.checkArgument(
       actual_index == (4 * 5),
       "%d == %d",
       Integer.valueOf(actual_index),

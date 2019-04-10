@@ -15,7 +15,7 @@ import android.widget.TextView
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.reader.ReaderColorSchemes
-import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.*
+import org.nypl.simplified.app.reader.toc.ReaderTOCSelection.ReaderSelectedTOCElement
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.profiles.ProfileEvent
 import org.nypl.simplified.books.profiles.ProfilePreferencesChanged

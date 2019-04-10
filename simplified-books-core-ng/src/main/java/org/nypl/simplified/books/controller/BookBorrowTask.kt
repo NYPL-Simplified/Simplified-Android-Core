@@ -153,7 +153,7 @@ class BookBorrowTask(
         }
         ACQUISITION_GENERIC -> {
           LOG.debug("[{}]: acquisition type is {}, performing generic procedure", this.bookId.brief(), type)
-          this.runAcquisitionGeneric()
+          this.runAcquisitionFulfill(this.entry)
         }
         ACQUISITION_OPEN_ACCESS -> {
           LOG.debug("[{}]: acquisition type is {}, performing fulfillment", this.bookId.brief(), type)
@@ -171,10 +171,6 @@ class BookBorrowTask(
     } finally {
       LOG.debug("[{}]: finished", this.bookId.brief())
     }
-  }
-
-  private fun runAcquisitionGeneric(): Unit {
-    throw UnimplementedCodeException()
   }
 
   /**

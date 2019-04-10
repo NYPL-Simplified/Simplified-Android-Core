@@ -1,15 +1,15 @@
 package org.nypl.simplified.books.book_database
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.base.Preconditions
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
-import org.nypl.simplified.assertions.Assertions
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.books.reader.ReaderBookmarkJSON
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.*
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.ReaderBookmarkExplicit
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.ReaderBookmarkLastReadLocation
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -131,7 +131,7 @@ internal class DatabaseFormatHandleEPUB internal constructor(
   override fun setLastReadLocation(bookmark: ReaderBookmark?) {
     val newFormat = synchronized(this.formatLock) {
       if (bookmark != null) {
-        Assertions.checkPrecondition(
+        Preconditions.checkArgument(
           bookmark.kind == ReaderBookmarkLastReadLocation,
           "Must use a last-read-location bookmark")
 
