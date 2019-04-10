@@ -50,7 +50,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
 
   override fun onSplashOpenCatalog(account: AccountType) {
     val intent = Intent()
-    intent.setClass(this, SettingsAccountsActivity::class.java)
+    intent.setClass(this, MainCatalogActivity::class.java)
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
