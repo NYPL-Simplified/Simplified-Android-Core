@@ -47,7 +47,10 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.accounts.AccountAuthenticationAdobePostActivationCredentials;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
+import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountType;
+import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
+import org.nypl.simplified.books.book_database.Book;
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookFormat;
@@ -97,20 +100,15 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   ReaderCurrentPageListenerType,
   ReaderTOCSelectionListenerType,
   ReaderMediaOverlayAvailabilityListenerType {
-  private static final String BOOK_ID;
-  private static final String FILE_ID;
-  private static final String ENTRY;
-  private static final Logger LOG;
 
-  static {
-    LOG = LoggerFactory.getLogger(ReaderActivity.class);
-  }
-
-  static {
-    BOOK_ID = "org.nypl.simplified.app.ReaderActivity.book";
-    FILE_ID = "org.nypl.simplified.app.ReaderActivity.file";
-    ENTRY = "org.nypl.simplified.app.ReaderActivity.entry";
-  }
+  private static final String BOOK_ID =
+    "org.nypl.simplified.app.ReaderActivity.book";
+  private static final String FILE_ID =
+    "org.nypl.simplified.app.ReaderActivity.file";
+  private static final String ENTRY =
+    "org.nypl.simplified.app.ReaderActivity.entry";
+  private static final Logger  LOG =
+    LoggerFactory.getLogger(ReaderActivity.class);
 
   private BookID book_id;
   private OPDSAcquisitionFeedEntry feed_entry;
@@ -153,19 +151,19 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
    * Start a new reader for the given book.
    *
    * @param from  The parent activity
-   * @param book  The unique ID of the book
+   * @param book_id  The unique ID of the book
    * @param file  The actual EPUB file
    * @param entry The OPD feed entry
    */
 
   public static void startActivity(
     final Activity from,
-    final BookID book,
+    final BookID book_id,
     final File file,
     final FeedEntryOPDS entry) {
     Objects.requireNonNull(file);
     final Bundle b = new Bundle();
-    b.putSerializable(ReaderActivity.BOOK_ID, book);
+    b.putSerializable(ReaderActivity.BOOK_ID, book_id);
     b.putSerializable(ReaderActivity.FILE_ID, file);
     b.putSerializable(ReaderActivity.ENTRY, entry);
     final Intent i = new Intent(from, ReaderActivity.class);
@@ -299,9 +297,11 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     try {
       this.current_account =
         Simplified.getProfilesController()
-          .profileAccountCurrent();
-    } catch (ProfileNoneCurrentException e) {
-      throw new IllegalStateException(e);
+          .profileAccountForBook(this.book_id);
+    } catch (ProfileNoneCurrentException | AccountsDatabaseNonexistentException e) {
+      this.onEPUBLoadFailed(e);
+      this.finish();
+      return;
     }
 
     this.profile_subscription =
@@ -318,7 +318,9 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
           .preferences()
           .readerPreferences();
     } catch (final ProfileNoneCurrentException e) {
-      throw new IllegalStateException(e);
+      this.onEPUBLoadFailed(e);
+      this.finish();
+      return;
     }
 
     this.viewer_settings =
@@ -441,13 +443,13 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     try {
       this.formatHandle =
-        Simplified.getProfilesController()
-          .profileAccountCurrent()
-          .bookDatabase()
+        this.current_account.bookDatabase()
           .entry(this.book_id)
           .findFormatHandle(BookDatabaseEntryFormatHandleEPUB.class);
-    } catch (BookDatabaseException | ProfileNoneCurrentException e) {
-      throw new IllegalStateException(e);
+    } catch (BookDatabaseException e) {
+      this.onEPUBLoadFailed(e);
+      this.finish();
+      return;
     }
 
     Objects.requireNonNull(this.formatHandle, "formatHandle");
