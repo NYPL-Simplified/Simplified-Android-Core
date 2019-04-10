@@ -4,6 +4,7 @@ import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.reader.ReaderBookmarkID
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyInput.Event
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command.LocallySaveBookmark
+import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command.RemotelyDeleteBookmark
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command.RemotelyFetchBookmarks
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Command.RemotelySendBookmark
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Event.LocalBookmarkAlreadyExists
@@ -173,7 +174,7 @@ data class ReaderBookmarkPolicy<T>(
     private fun remoteDeleteBookmark(
       accountID: AccountID,
       bookmark: ReaderBookmarkState): ReaderBookmarkPolicy<Unit> {
-      return this.emitOutput(RemotelySendBookmark(accountID, bookmark.bookmark))
+      return this.emitOutput(RemotelyDeleteBookmark(accountID, bookmark.bookmark))
     }
 
     private fun remoteDeleteBookmarkIfPossible(
