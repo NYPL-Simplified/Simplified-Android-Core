@@ -386,8 +386,8 @@ abstract class CatalogFeedActivity : CatalogActivity() {
 
     val a = this.intent.extras
     if (a != null) {
-      val args = a.getSerializable(
-        CATALOG_ARGS) as CatalogFeedArgumentsType
+      val args =
+        a.getSerializable(CATALOG_ARGS) as CatalogFeedArgumentsType?
       if (args != null) {
         return args
       }
