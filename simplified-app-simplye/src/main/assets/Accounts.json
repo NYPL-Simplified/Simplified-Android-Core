@@ -2015,6 +2015,27 @@
         "supportsSimplyESync": true
     },
     {
+        "authPasscodeAllowsLetters": true,
+        "authPasscodeLength": 0,
+        "catalogUrl": "http://circ.mls.minitex.net/NML/",
+        "id_numeric": 53,
+        "id_uuid": "urn:uuid:d223e533-0283-4020-9cf5-ec85d4988436",
+        "inProduction": false,
+        "loginKeyboard": "Number pad",
+        "logo": null,
+        "mainColor": "red",
+        "name": "Nevins Memorial Library",
+        "needsAuth": true,
+        "pinKeyboard": "No input",
+        "subtitle": "Growing Community",
+        "supportsBarcodeDisplay": false,
+        "supportsBarcodeScanner": false,
+        "supportsCardCreator": false,
+        "supportsReservations": true,
+        "supportsSimplyESync": true
+        "supportsCardCreator": false
+    },
+    {
         "cardCreatorUrl": "https://library.mountainview.gov/selfreg",
         "catalogUrl": "http://califa102.simplye-ca.org/CAMVPL/",
         "eulaUrl": "http://www.librarysimplified.org/EULA.html",
