@@ -30,6 +30,7 @@ include ':simplified-tenprint'
 include ':simplified-tests'
 include ':simplified-tests-android'
 include ':simplified-tests-sandbox'
+include ':simplified-theme'
 include ':simplified-volley'
 
 // FIXME: These should be re-enabled once they are working

@@ -1,6 +1,7 @@
 package org.nypl.simplified.app.catalog
 
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.AppCompatButton
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jnull.NullCheck
 import org.nypl.simplified.app.NetworkConnectivityType
@@ -34,29 +35,28 @@ class CatalogAcquisitionButton(
   entry: FeedEntryOPDS,
   networkConnectivity: NetworkConnectivityType,
   backgroundExecutor: ListeningExecutorService,
-  documents: DocumentStoreType) : CatalogLeftPaddedButton(activity), CatalogBookButtonType {
+  documents: DocumentStoreType)
+  : AppCompatButton(activity), CatalogBookButtonType {
 
   init {
     val resources = NullCheck.notNull(activity.resources)
 
     val availability = entry.feedEntry.availability
-    this.textView.textSize = 12.0f
-
     if (bookRegistry.book(bookId).isSome) {
-      this.textView.text = resources.getString(R.string.catalog_book_download)
+      this.text = resources.getString(R.string.catalog_book_download)
       this.contentDescription = resources.getString(R.string.catalog_accessibility_book_download)
     } else {
       when (acquisition.relation) {
         ACQUISITION_OPEN_ACCESS -> {
-          this.textView.text = resources.getString(R.string.catalog_book_download)
+          this.text = resources.getString(R.string.catalog_book_download)
           this.contentDescription = resources.getString(R.string.catalog_accessibility_book_download)
         }
         ACQUISITION_BORROW -> {
           if (availability is OPDSAvailabilityHoldable) {
-            this.textView.text = resources.getString(R.string.catalog_book_reserve)
+            this.text = resources.getString(R.string.catalog_book_reserve)
             this.contentDescription = resources.getString(R.string.catalog_accessibility_book_reserve)
           } else {
-            this.textView.text =  resources.getString(R.string.catalog_book_borrow)
+            this.text =  resources.getString(R.string.catalog_book_borrow)
             this.contentDescription = resources.getString(R.string.catalog_accessibility_book_borrow)
           }
         }
@@ -64,7 +64,7 @@ class CatalogAcquisitionButton(
         ACQUISITION_GENERIC,
         ACQUISITION_SAMPLE,
         ACQUISITION_SUBSCRIBE -> {
-          this.textView.text = resources.getString(R.string.catalog_book_download)
+          this.text = resources.getString(R.string.catalog_book_download)
           this.contentDescription = resources.getString(R.string.catalog_accessibility_book_download)
         }
       }

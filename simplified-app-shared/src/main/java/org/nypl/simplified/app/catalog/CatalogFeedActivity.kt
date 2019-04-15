@@ -307,7 +307,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       val facetListener =
         CatalogFacetSelectionListenerType { selected -> selected.matchFeedFacet(facetFeedListener) }
       val facetButton =
-        CatalogFacetButton(this, groupName, groupCopy, facetListener)
+        CatalogFacetButton(this,, groupName, groupCopy, facetListener)
 
       facetButton.layoutParams = tvp
       facetsView.addView(facetButton)

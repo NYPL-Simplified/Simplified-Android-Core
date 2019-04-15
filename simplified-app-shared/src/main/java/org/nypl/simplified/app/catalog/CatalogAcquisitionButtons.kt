@@ -52,7 +52,8 @@ class CatalogAcquisitionButtons private constructor() {
       val bookID = entry.bookID
       val opdsEntry = entry.feedEntry
 
-      val acquisitionOpt = BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitions)
+      val acquisitionOpt =
+        BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitions)
       if (acquisitionOpt is Some<OPDSAcquisition>) {
         val acquisition = acquisitionOpt.get()
         viewGroup.addView(
