@@ -27,7 +27,6 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
@@ -90,7 +89,6 @@ class CatalogBookDetailView(
   private val booksController: BooksControllerType,
   private val screenSizeInformation: ScreenSizeInformationType,
   private val networkConnectivity: NetworkConnectivityType,
-  private val applicationColorScheme: ApplicationColorScheme,
   private val backgroundExecutor: ListeningExecutorService,
   private val documentStore: DocumentStoreType,
   entryInitial: FeedEntryOPDS)
@@ -202,20 +200,17 @@ class CatalogBookDetailView(
       summary.findViewById<View>(R.id.book_summary_text) as WebView
     val headerMeta =
       summary.findViewById<View>(R.id.book_header_meta) as TextView
-
-    val readMoreButton = summary.findViewById<Button>(R.id.book_summary_read_more_button)
-    readMoreButton.setTextColor(this.applicationColorScheme.colorRGBA)
+    val readMoreButton =
+      summary.findViewById<Button>(R.id.book_summary_read_more_button)
 
     readMoreButton.setOnClickListener { view ->
-      CatalogBookDetailView.configureSummaryWebViewHeight(summaryText)
+      configureSummaryWebViewHeight(summaryText)
       readMoreButton.visibility = View.INVISIBLE
     }
 
     this.relatedLayout = layout.findViewById(R.id.book_related_layout)
     this.relatedBooksButton = this.relatedLayout.findViewById(R.id.related_books_button)
-    this.relatedBooksButton.setTextColor(this.applicationColorScheme.colorRGBA)
     this.bookDownloadReportButton = layout.findViewById(R.id.book_dialog_report_button)
-    this.bookDownloadReportButton.setTextColor(this.applicationColorScheme.colorRGBA)
 
     /*
      * Assuming a roughly fixed height for cover images, assume a 4:3 aspect
@@ -229,16 +224,16 @@ class CatalogBookDetailView(
     /* Configure detail texts. */
     val entryNow = this.entry.get()
     val opdsEntry = entryNow.feedEntry
-    CatalogBookDetailView.configureSummarySectionTitle(summarySectionTitle)
+    configureSummarySectionTitle(summarySectionTitle)
 
     val bookID = entryNow.bookID
     this.onStatus(entryInitial, this.booksRegistry.bookStatus(bookID))
 
-    CatalogBookDetailView.configureSummaryWebView(opdsEntry, summaryText)
+    configureSummaryWebView(opdsEntry, summaryText)
     this.bookHeaderTitle.text = opdsEntry.title
-    CatalogBookDetailView.configureViewTextFormat(this.activity.resources, entryInitial, this.bookHeaderFormat)
-    CatalogBookDetailView.configureViewTextAuthor(opdsEntry, this.bookHeaderAuthors)
-    CatalogBookDetailView.configureViewTextMeta(this.activity.resources, opdsEntry, headerMeta)
+    configureViewTextFormat(this.activity.resources, entryInitial, this.bookHeaderFormat)
+    configureViewTextAuthor(opdsEntry, this.bookHeaderAuthors)
+    configureViewTextMeta(this.activity.resources, opdsEntry, headerMeta)
 
     val future =
       this.coverProvider.loadCoverInto(
@@ -273,8 +268,7 @@ class CatalogBookDetailView(
         this.activity,
         this.account,
         downloaded.id,
-        this.entry.get(),
-        this.applicationColorScheme),
+        this.entry.get()),
       0)
 
     if (downloaded.isReturnable) {
@@ -293,7 +287,7 @@ class CatalogBookDetailView(
     }
 
     this.bookDownloadButtons.visibility = View.VISIBLE
-    CatalogBookDetailView.configureButtonsHeight(
+    configureButtonsHeight(
       this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
@@ -431,7 +425,7 @@ class CatalogBookDetailView(
       this.bookDownloadButtons.addView(revoke, 0)
     }
 
-    CatalogBookDetailView.configureButtonsHeight(
+    configureButtonsHeight(
       this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
@@ -482,7 +476,7 @@ class CatalogBookDetailView(
       this.bookDownloadButtons.addView(revoke, 0)
     }
 
-    CatalogBookDetailView.configureButtonsHeight(
+    configureButtonsHeight(
       this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
@@ -517,7 +511,7 @@ class CatalogBookDetailView(
       backgroundExecutor = this.backgroundExecutor,
       documents = this.documentStore)
 
-    CatalogBookDetailView.configureButtonsHeight(
+    configureButtonsHeight(
       this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
@@ -583,7 +577,7 @@ class CatalogBookDetailView(
 
     this.bookDownloadButtons.addView(revoke, 0)
 
-    CatalogBookDetailView.configureButtonsHeight(
+    configureButtonsHeight(
       this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
@@ -630,7 +624,7 @@ class CatalogBookDetailView(
       this.bookDownloadButtons.addView(revoke, 1)
     }
 
-    CatalogBookDetailView.configureButtonsHeight(
+    configureButtonsHeight(
       this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
@@ -674,7 +668,7 @@ class CatalogBookDetailView(
       backgroundExecutor = this.backgroundExecutor,
       documents = this.documentStore)
 
-    CatalogBookDetailView.configureButtonsHeight(
+    configureButtonsHeight(
       this.screenSizeInformation,
       this.activity.resources,
       this.bookDownloadButtons)
@@ -933,10 +927,10 @@ class CatalogBookDetailView(
       entry: OPDSAcquisitionFeedEntry,
       meta: TextView) {
       val buffer = StringBuilder()
-      CatalogBookDetailView.createViewTextPublicationDate(resources, entry, buffer)
-      CatalogBookDetailView.createViewTextPublisher(resources, entry, buffer)
-      CatalogBookDetailView.createViewTextCategories(resources, entry, buffer)
-      CatalogBookDetailView.createViewTextDistributor(resources, entry, buffer)
+      createViewTextPublicationDate(resources, entry, buffer)
+      createViewTextPublisher(resources, entry, buffer)
+      createViewTextCategories(resources, entry, buffer)
+      createViewTextDistributor(resources, entry, buffer)
       meta.text = buffer.toString()
     }
 
@@ -949,7 +943,7 @@ class CatalogBookDetailView(
       var hasGenres = false
       for (index in cats.indices) {
         val c = cats[index]
-        if (CatalogBookDetailView.GENRES_URI_TEXT == c.scheme) {
+        if (GENRES_URI_TEXT == c.scheme) {
           hasGenres = true
         }
       }
@@ -964,7 +958,7 @@ class CatalogBookDetailView(
 
         for (index in cats.indices) {
           val c = cats[index]
-          if (CatalogBookDetailView.GENRES_URI_TEXT == c.scheme) {
+          if (GENRES_URI_TEXT == c.scheme) {
             buffer.append(c.effectiveLabel)
             if (index + 1 < cats.size) {
               buffer.append(", ")

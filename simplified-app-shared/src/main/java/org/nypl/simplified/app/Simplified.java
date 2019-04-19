@@ -10,18 +10,17 @@ import android.net.NetworkInfo;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDexApplication;
-import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
 import com.squareup.picasso.Picasso;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
@@ -75,6 +74,7 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceUsableType;
+import org.nypl.simplified.branding.BrandingThemeOverrideServiceType;
 import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.cardcreator.CardCreator;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
@@ -96,6 +96,7 @@ import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.tenprint.TenPrintGenerator;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
 import org.nypl.simplified.theme.ThemeControl;
+import org.nypl.simplified.theme.ThemeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,6 +106,8 @@ import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.SortedMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -156,10 +159,10 @@ public final class Simplified extends MultiDexApplication {
   private BookRegistryType book_registry;
   private Controller book_controller;
   private BundledContentResolverType bundled_content_resolver;
-  private ApplicationColorScheme color_scheme_fallback;
   private BookCoverBadgeLookupType cover_badges;
   private ReaderBookmarkServiceType readerBookmarksService;
   private Picasso local_image_loader;
+  private OptionType<ThemeValue> branding_theme_override;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -212,15 +215,6 @@ public final class Simplified extends MultiDexApplication {
   public static HTTPType getHTTP() {
     final Simplified i = Simplified.checkInitialized();
     return i.http;
-  }
-
-  /**
-   * @return The main application color scheme
-   */
-
-  public static ApplicationColorScheme getMainColorScheme() {
-    final Simplified i = Simplified.checkInitialized();
-    return i.getActualMainColorScheme();
   }
 
   /**
@@ -435,6 +429,29 @@ public final class Simplified extends MultiDexApplication {
   public static DocumentStoreType getDocumentStore() {
     final Simplified i = Simplified.checkInitialized();
     return i.documents;
+  }
+
+  public static ThemeValue getCurrentTheme() {
+    final Simplified i = Simplified.checkInitialized();
+
+    if (i.branding_theme_override.isSome()) {
+      return ((Some<ThemeValue>) i.branding_theme_override).get();
+    }
+
+    final OptionType<ProfileType> currentProfileOpt = i.profiles.currentProfile();
+    if (currentProfileOpt.isSome()) {
+      final ProfileType currentProfile =
+        ((Some<ProfileType>) currentProfileOpt).get();
+      final AccountType accountCurrent =
+        currentProfile.accountCurrent();
+      final ThemeValue theme =
+        ThemeControl.getThemesByName().get(accountCurrent.provider().mainColor());
+      if (theme != null) {
+        return theme;
+      }
+    }
+
+    return ThemeControl.getThemeFallback();
   }
 
   private static int fetchUnusedHTTPPort() {
@@ -675,13 +692,8 @@ public final class Simplified extends MultiDexApplication {
     LOG.debug("initializing book registry");
     this.book_registry = BookRegistry.create();
 
-    LOG.debug("initializing color scheme");
-    this.color_scheme_fallback =
-      new ApplicationColorScheme(
-        ThemeControl.getThemeFallback().getName(),
-        ContextCompat.getColor(this, ThemeControl.getThemeFallback().getColor()),
-        ThemeControl.getThemeFallback().getThemeWithActionBar(),
-        ThemeControl.getThemeFallback().getThemeWithNoActionBar());
+    LOG.debug("initializing optional branding services");
+    this.branding_theme_override = loadOptionalBrandingThemeOverride();
 
     LOG.debug("initializing cover generator");
     final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
@@ -689,8 +701,9 @@ public final class Simplified extends MultiDexApplication {
     this.cover_badges =
       CatalogCoverBadgeImages.Companion.create(
         resources,
-        this.color_scheme_fallback.getColorRGBA(),
+        ThemeControl.resolveColorAttribute(this.getTheme(), R.attr.colorPrimary),
         this.screen);
+
     this.cover_provider =
       BookCoverProvider.Companion.newCoverProvider(
         this,
@@ -838,20 +851,17 @@ public final class Simplified extends MultiDexApplication {
     Simplified.INSTANCE = this;
   }
 
-  private ApplicationColorScheme getActualMainColorScheme() {
-    OptionType<ProfileType> currentProfileOpt = this.profiles.currentProfile();
-    if (currentProfileOpt.isSome()) {
-      ProfileType currentProfile = ((Some<ProfileType>) currentProfileOpt).get();
-      AccountType account = currentProfile.accountCurrent();
-      String name = account.provider().mainColor();
-      return new ApplicationColorScheme(
-        name,
-        ContextCompat.getColor(this, ThemeControl.Companion.color(name)),
-        ThemeControl.Companion.actionBarStyle(name),
-        ThemeControl.Companion.noActionBarStyle(name));
-    } else {
-      throw new UnimplementedCodeException();
+  private OptionType<ThemeValue> loadOptionalBrandingThemeOverride() {
+    final Iterator<BrandingThemeOverrideServiceType> iter =
+      ServiceLoader.load(BrandingThemeOverrideServiceType.class)
+        .iterator();
+
+    if (iter.hasNext()) {
+      final BrandingThemeOverrideServiceType service = iter.next();
+      return Option.some(service.overrideTheme());
     }
+
+    return Option.none();
   }
 
   private static final class NetworkConnectivity implements NetworkConnectivityType {

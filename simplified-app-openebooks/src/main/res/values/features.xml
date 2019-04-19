@@ -7,9 +7,6 @@
   <!-- The configurable application icon -->
   <drawable name="feature_app_icon">@drawable/oei</drawable>
 
-  <!-- The configurable splash screen image -->
-  <drawable name="feature_app_splash">@drawable/oei_splash</drawable>
-
   <!-- The configurable main color, used for branding. -->
   <color name="feature_main_color">#8cc63e</color>
 

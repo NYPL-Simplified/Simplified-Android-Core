@@ -3,7 +3,6 @@ package org.nypl.simplified.app.player
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.ImageView
@@ -38,7 +37,6 @@ import org.nypl.audiobook.android.views.PlayerPlaybackRateFragment
 import org.nypl.audiobook.android.views.PlayerSleepTimerFragment
 import org.nypl.audiobook.android.views.PlayerTOCFragment
 import org.nypl.audiobook.android.views.PlayerTOCFragmentParameters
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities

@@ -13,6 +13,7 @@ import org.nypl.simplified.app.profiles.ProfileSelectionActivity
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.eula.EULAType
+import org.nypl.simplified.branding.BrandingSplashServiceType
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.observable.ObservableType
@@ -28,6 +29,7 @@ import org.nypl.simplified.splash.SplashParameters
 import org.nypl.simplified.theme.ThemeControl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.ServiceLoader
 
 class SplashActivity : AppCompatActivity(), SplashListenerType {
 
@@ -111,7 +113,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
     this.log.debug("onCreate")
     super.onCreate(null)
 
-    this.setTheme(ThemeControl.themeFallback.themeWithNoActionBar)
+    this.setTheme(Simplified.getCurrentTheme().themeWithNoActionBar)
     this.setContentView(R.layout.splash_base)
 
     this.splashEventSubscription =
@@ -123,11 +125,24 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
         }
       }
 
+    /*
+     * Look up and use the first available splash service.
+     */
+
+    val splashService =
+      ServiceLoader.load(BrandingSplashServiceType::class.java)
+        .toList()
+        .firstOrNull()
+        ?: throw IllegalStateException(
+          "Application is misconfigured: No available services of type ${BrandingSplashServiceType::class.java.canonicalName}")
+
+    this.log.debug("using splash service: ${splashService.javaClass.canonicalName}")
+
     this.parameters =
       SplashParameters(
         textColor = resources.getColor(ThemeControl.themeFallback.color),
         background = Color.WHITE,
-        splashImageResource = R.drawable.feature_app_splash,
+        splashImageResource = splashService.splashImageResource(),
         splashImageSeconds = 2L)
 
     this.splashMainFragment =

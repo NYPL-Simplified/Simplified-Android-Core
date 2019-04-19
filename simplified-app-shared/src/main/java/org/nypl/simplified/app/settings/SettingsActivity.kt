@@ -4,10 +4,10 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import com.io7m.jfunctional.OptionType
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.books.document_store.DocumentStoreType
 
 /**

@@ -7,9 +7,9 @@ import android.support.v7.preference.PreferenceFragmentCompat
 import com.io7m.jfunctional.Some
 import com.tenmiles.helpstack.HSHelpStack
 import com.tenmiles.helpstack.gears.HSDeskGear
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.WebViewActivity
+import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.books.synced_document.SyncedDocumentType
 
 /**

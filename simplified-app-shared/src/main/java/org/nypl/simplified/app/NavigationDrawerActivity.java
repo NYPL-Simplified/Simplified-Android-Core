@@ -207,7 +207,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithActionBar());
+    this.setTheme(Simplified.getCurrentTheme().getThemeWithActionBar());
     super.onCreate(state);
 
     LOG.debug("onCreate: {}", this);

@@ -24,7 +24,6 @@ import com.squareup.picasso.Picasso
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.app.images.ImageAccountIcons
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
@@ -49,7 +48,6 @@ import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.slf4j.LoggerFactory
-import java.net.URI
 import java.util.ArrayList
 
 /**

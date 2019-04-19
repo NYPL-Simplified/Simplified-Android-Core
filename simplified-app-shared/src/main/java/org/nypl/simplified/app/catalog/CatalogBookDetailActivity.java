@@ -135,7 +135,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity {
         Simplified.getBooksController(),
         Simplified.getScreenSizeInformation(),
         Simplified.getNetworkConnectivity(),
-        Simplified.getMainColorScheme(),
         Simplified.getBackgroundTaskExecutor(),
         Simplified.getDocumentStore(),
         entry);

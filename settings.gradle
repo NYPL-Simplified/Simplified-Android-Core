@@ -2,13 +2,14 @@ rootProject.name = 'simplified'
 
 // FIXME: These should be re-enabled once they are working.
 // include ':simplified-app-openebooks'
-// include ':simplified-app-vanilla'
 include ':simplified-accessibility'
 include ':simplified-app-shared'
 include ':simplified-app-simplye'
+include ':simplified-app-vanilla'
 include ':simplified-books-core'
 include ':simplified-books-core-ng'
 include ':simplified-books-covers'
+include ':simplified-branding'
 include ':simplified-bugsnag'
 include ':simplified-cardcreator'
 include ':simplified-circ-analytics'
@@ -39,10 +40,12 @@ include ':simplified-volley'
 project(':simplified-accessibility').projectDir = "$rootDir/simplified-accessibility" as File
 project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" as File
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
+project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
 project(':simplified-books-core').projectDir = "$rootDir/simplified-books-core" as File
 project(':simplified-books-core-ng').projectDir = "$rootDir/simplified-books-core-ng" as File
 project(':simplified-books-covers').projectDir = "$rootDir/simplified-books-covers" as File
 project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
+project(':simplified-branding').projectDir = "$rootDir/simplified-branding" as File
 project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
 project(':simplified-circ-analytics').projectDir = "$rootDir/simplified-circ-analytics" as File
 project(':simplified-datepicker').projectDir = "$rootDir/simplified-datepicker" as File

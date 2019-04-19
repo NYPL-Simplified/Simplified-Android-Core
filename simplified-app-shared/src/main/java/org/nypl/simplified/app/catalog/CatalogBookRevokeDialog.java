@@ -1,7 +1,6 @@
 package org.nypl.simplified.app.catalog;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;

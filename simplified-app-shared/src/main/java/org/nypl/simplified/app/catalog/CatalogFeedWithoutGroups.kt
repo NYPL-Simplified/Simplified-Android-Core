@@ -19,7 +19,6 @@ import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountAuthenticatedHTTP
@@ -63,8 +62,7 @@ class CatalogFeedWithoutGroups(
   private val feed: FeedWithoutGroups,
   private val documents: DocumentStoreType,
   private val networkConnectivity: NetworkConnectivityType,
-  private val executor: ListeningExecutorService,
-  private val colorScheme: ApplicationColorScheme) : ListAdapter, OnScrollListener {
+  private val executor: ListeningExecutorService) : ListAdapter, OnScrollListener {
 
   private val adapter: ArrayAdapter<FeedEntry> =
     ArrayAdapter(this.activity, 0, this.feed.entriesInOrder)
@@ -136,7 +134,6 @@ class CatalogFeedWithoutGroups(
         booksRegistry = this.bookRegistry,
         networkConnectivity = this.networkConnectivity,
         backgroundExecutor = this.executor,
-        colorScheme = this.colorScheme,
         documentStore = this.documents)
     }
 

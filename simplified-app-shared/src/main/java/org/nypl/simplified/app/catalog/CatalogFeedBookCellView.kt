@@ -19,7 +19,6 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.utilities.UIThread
@@ -74,7 +73,6 @@ class CatalogFeedBookCellView(
   private val booksRegistry: BookRegistryReadableType,
   private val networkConnectivity: NetworkConnectivityType,
   private val backgroundExecutor: ListeningExecutorService,
-  private val colorScheme: ApplicationColorScheme,
   val documentStore: DocumentStoreType) :
   FrameLayout(activity),
   BookStatusMatcherType<Unit, UnreachableCodeException>,
@@ -251,8 +249,7 @@ class CatalogFeedBookCellView(
         this.activity,
         this.account(feedEntry.bookID),
         bookId,
-        feedEntry,
-        this.colorScheme),
+        feedEntry),
       0)
 
     return Unit.unit()

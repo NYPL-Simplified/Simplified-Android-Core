@@ -6,7 +6,6 @@ import android.view.View.OnClickListener
 import com.io7m.jfunctional.Some
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.player.AudioBookPlayerActivity
 import org.nypl.simplified.app.player.AudioBookPlayerParameters
@@ -31,8 +30,7 @@ class CatalogBookReadController(
   val activity: AppCompatActivity,
   val account: AccountType,
   val id: BookID,
-  val entry: FeedEntryOPDS,
-  val colorScheme: ApplicationColorScheme) : OnClickListener {
+  val entry: FeedEntryOPDS) : OnClickListener {
 
   companion object {
     private val LOG = LoggerFactory.getLogger(CatalogBookReadController::class.java)
@@ -92,7 +90,7 @@ class CatalogBookReadController(
           manifestFile = manifest.manifestFile,
           manifestURI = manifest.manifestURI,
           opdsEntry = this.entry.feedEntry,
-          theme = Simplified.getMainColorScheme().activityThemeResourceWithActionBar,
+          theme = Simplified.getCurrentTheme().themeWithActionBar,
           bookID = this.id))
     } else {
       ErrorDialogUtilities.showError(

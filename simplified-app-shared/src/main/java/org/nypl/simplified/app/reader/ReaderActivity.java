@@ -32,7 +32,6 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
-import org.nypl.simplified.app.ApplicationColorScheme;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
@@ -47,10 +46,8 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.accounts.AccountAuthenticationAdobePostActivationCredentials;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
-import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
-import org.nypl.simplified.books.book_database.Book;
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookFormat;
@@ -274,7 +271,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   @SuppressLint("SetJavaScriptEnabled")
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithoutActionBar());
+    this.setTheme(Simplified.getCurrentTheme().getThemeWithNoActionBar());
 
     super.onCreate(state);
     this.setContentView(R.layout.reader);

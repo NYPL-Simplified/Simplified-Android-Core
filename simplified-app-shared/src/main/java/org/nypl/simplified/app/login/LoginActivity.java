@@ -31,7 +31,7 @@ public final class LoginActivity extends Activity {
 
   @Override
   protected void onCreate(final Bundle state) {
-    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithoutActionBar());
+    this.setTheme(Simplified.getCurrentTheme().getThemeWithNoActionBar());
     super.onCreate(state);
     this.setContentView(R.layout.login_view);
 

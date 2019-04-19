@@ -27,6 +27,7 @@ dependencies {
   api project(':simplified-books-core')
   api project(':simplified-books-core-ng')
   api project(':simplified-books-covers')
+  api project(':simplified-branding')
   api project(':simplified-bugsnag')
   api project(':simplified-cardcreator')
   api project(':simplified-circ-analytics')

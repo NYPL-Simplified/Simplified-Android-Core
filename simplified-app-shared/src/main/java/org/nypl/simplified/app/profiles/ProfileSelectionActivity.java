@@ -58,7 +58,7 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
 
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithoutActionBar());
+    this.setTheme(Simplified.getCurrentTheme().getThemeWithActionBar());
     super.onCreate(state);
 
     this.setContentView(R.layout.profiles_selection);

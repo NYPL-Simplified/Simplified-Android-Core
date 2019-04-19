@@ -62,7 +62,7 @@ public final class ProfileCreationActivity extends SimplifiedActivity implements
     // This activity is too tall for many phones in landscape mode.
     this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithoutActionBar());
+    this.setTheme(Simplified.getCurrentTheme().getThemeWithNoActionBar());
     super.onCreate(state);
     this.setContentView(R.layout.profiles_creation);
 

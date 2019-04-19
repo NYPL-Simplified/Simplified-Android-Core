@@ -1,0 +1,23 @@
+[
+  {
+    "authPasscodeAllowsLetters": false,
+    "catalogUrl": "https://circulation.librarysimplified.org/CLASSICS/",
+    "catalogUrl13": "http://simplye-collection-redirects.librarysimplified.org/all-books.xml",
+    "catalogUrlUnder13": "http://simplye-collection-redirects.librarysimplified.org/childrens-books.xml",
+    "id_numeric": 2,
+    "id_uuid": "urn:uuid:56906f26-2c9a-4ae9-bd02-552557720b99",
+    "inProduction": true,
+    "licenseUrl": "http://www.librarysimplified.org/iclicenses.html",
+    "logo": null,
+    "mainColor": "teal",
+    "name": "The SimplyE Collection",
+    "needsAuth": false,
+    "pinRequired": true,
+    "subtitle": "A selection of classics and modern material available to anyone, with no library card necessary.",
+    "supportsBarcodeDisplay": false,
+    "supportsBarcodeScanner": false,
+    "supportsCardCreator": false,
+    "supportsReservations": false,
+    "supportsSimplyESync": false
+  }
+]
