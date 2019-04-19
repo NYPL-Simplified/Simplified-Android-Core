@@ -1,10 +1,9 @@
-package org.nypl.simplified.app.settings
+package org.nypl.simplified.app.images
 
 import com.squareup.picasso.Picasso.LoadedFrom.DISK
 import com.squareup.picasso.Picasso.LoadedFrom.NETWORK
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
-import org.nypl.simplified.app.SimplifiedIconViews
 import java.io.ByteArrayInputStream
 import java.net.URL
 
@@ -14,13 +13,13 @@ import java.net.URL
  * Most account icons are using a `data:` URI scheme with a Base64 encoded PNG as the payload.
  */
 
-class SettingsAccountIconRequestHandler : RequestHandler() {
+class ImageAccountIconRequestHandler : RequestHandler() {
 
   override fun canHandleRequest(data: Request): Boolean = true
 
   override fun load(request: Request, networkPolicy: Int): Result {
     return if (request.uri.scheme == "data") {
-      val bitmap = SimplifiedIconViews.imageFromBase64URI(request.uri.toString())
+      val bitmap = ImageIconViews.imageFromBase64URI(request.uri.toString())
       if (bitmap != null) {
         Result(bitmap, DISK)
       } else {

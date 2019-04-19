@@ -4,12 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:layout_margin="16dp">
-
-  <FrameLayout
-    android:id="@+id/test_cover_container"
+  <FrameLayout android:id="@+id/test_cover_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-  </FrameLayout>
-
+    android:layout_height="match_parent" />
 </RelativeLayout>

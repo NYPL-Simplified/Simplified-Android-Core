@@ -5,7 +5,6 @@
   android:layout_width="@dimen/book_delete_dialog_width"
   android:layout_height="@dimen/book_delete_dialog_height"
   android:gravity="center"
-  android:background="@color/normal_background"
   android:padding="16dp">
 
   <TextView

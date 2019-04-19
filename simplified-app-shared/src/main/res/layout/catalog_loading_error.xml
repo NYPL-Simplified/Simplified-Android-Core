@@ -1,34 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <LinearLayout
-    android:layout_width="240dp"
+  <LinearLayout android:layout_width="240dp"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
     android:orientation="vertical">
 
-    <TextView
-      android:id="@+id/catalog_error"
+    <TextView android:id="@+id/catalog_error"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:gravity="center"
       android:text="@string/catalog_load_error_text"
-      android:textColor="@color/normal_text_major"
       android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <Button
-      android:id="@+id/catalog_error_retry"
+    <Button android:id="@+id/catalog_error_retry"
       android:layout_width="wrap_content"
       android:layout_height="@dimen/button_standard_height"
       android:layout_gravity="center_horizontal"
       android:layout_marginTop="16dp"
       android:background="@drawable/simplified_button"
+      android:text="@string/catalog_book_error_retry"
       android:textColor="@drawable/simplified_button_text"
-      android:textSize="12sp"
-      android:text="@string/catalog_book_error_retry" />
+      android:textSize="12sp" />
   </LinearLayout>
 
 </RelativeLayout>

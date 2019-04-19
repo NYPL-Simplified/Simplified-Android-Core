@@ -4,7 +4,11 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.os.Bundle
+import android.support.annotation.AttrRes
+import android.support.annotation.ColorInt
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -32,7 +36,6 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
@@ -70,6 +73,7 @@ import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import org.nypl.simplified.stack.ImmutableStack
+import org.nypl.simplified.theme.ThemeControl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.MalformedURLException
@@ -154,14 +158,12 @@ abstract class CatalogFeedActivity : CatalogActivity() {
    * @param feed        The feed
    * @param layout      The view group that will contain facet elements
    * @param resources   The app resources
-   * @param colorScheme The current app color scheme
    */
 
   private fun configureFacetEntryPointButtons(
     feed: Feed?,
     layout: ViewGroup,
-    resources: Resources,
-    colorScheme: ApplicationColorScheme) {
+    resources: Resources) {
 
     UIThread.checkIsUIThread()
 
@@ -185,7 +187,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
      */
 
     val facetGroup = (facetGroupOpt as Some<List<FeedFacetType>>).get()
-    val textColor = createTextColorForRadioButton(resources, colorScheme)
 
     val size = facetGroup.size
     for (index in 0 until size) {
@@ -195,7 +196,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
         LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT, 1.0f / size.toFloat())
 
       button.layoutParams = buttonLayout
-      button.setTextColor(textColor)
       button.gravity = Gravity.CENTER
 
       /*
@@ -217,6 +217,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       }
 
       button.text = facet.facetGetTitle()
+      button.setTextColor(colorStateListForFacetTabs())
 
       val launcher =
         CatalogFeedFacetLauncher(this, feed, resources, this.retrieveLocalSearchTerms())
@@ -245,6 +246,21 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       }
     }
   }
+
+  private fun colorStateListForFacetTabs(): ColorStateList {
+    val states =
+      arrayOf(
+        intArrayOf(android.R.attr.state_checked),
+        intArrayOf(-android.R.attr.state_checked))
+
+    val colors =
+      intArrayOf(
+        ContextCompat.getColor(this, R.color.simplifiedColorBackground),
+        ThemeControl.resolveColorAttribute(this.theme, R.attr.colorPrimary))
+
+    return ColorStateList(states, colors)
+  }
+
 
   /**
    * Configure the facets layout. This is what causes facets to be shown or not
@@ -293,7 +309,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       tvp.rightMargin = screen.screenDPToPixels(8).toInt()
 
       val tv = TextView(this)
-      tv.setTextColor(resources.getColor(R.color.normal_text_major))
       tv.textSize = 12.0f
       tv.setText(groupName + ":")
       tv.layoutParams = tvp
@@ -307,7 +322,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       val facetListener =
         CatalogFacetSelectionListenerType { selected -> selected.matchFeedFacet(facetFeedListener) }
       val facetButton =
-        CatalogFacetButton(this,, groupName, groupCopy, facetListener)
+        CatalogFacetButton(this, groupName, groupCopy, facetListener)
 
       facetButton.layoutParams = tvp
       facetsView.addView(facetButton)
@@ -546,8 +561,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     this.configureFacetEntryPointButtons(
       this.feed,
       layout,
-      this.resources,
-      Simplified.getMainColorScheme())
+      this.resources)
 
     val args = this.retrieveArguments()
     val newUpStack = this.newUpStack(args)
@@ -656,7 +670,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     this.swipeRefreshLayout.setOnRefreshListener({ this.retryFeed() })
 
     this.configureFacetEntryPointButtons(
-      feedWithoutGroups, layout, this.resources, Simplified.getMainColorScheme())
+      feedWithoutGroups, layout, this.resources)
     this.configureFacets(
       Simplified.getScreenSizeInformation(), feedWithoutGroups, layout, this.resources)
 
@@ -1050,14 +1064,14 @@ abstract class CatalogFeedActivity : CatalogActivity() {
 
     val request =
       ProfileFeedRequest.builder(
-      booksUri,
-      resources.getString(R.string.books),
-      resources.getString(R.string.books_sort_by),
-      CatalogFacetPseudoTitleProvider(resources))
-      .setFeedSelection(c.selection)
-      .setSearch(c.searchTerms)
-      .setFacetActive(c.facetType)
-      .build()
+        booksUri,
+        resources.getString(R.string.books),
+        resources.getString(R.string.books_sort_by),
+        CatalogFacetPseudoTitleProvider(resources))
+        .setFeedSelection(c.selection)
+        .setSearch(c.searchTerms)
+        .setFacetActive(c.facetType)
+        .build()
 
     try {
       val exec =
@@ -1065,10 +1079,11 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       val future =
         Simplified.getProfilesController().profileFeed(request)
 
-      future.addCallback(object: FutureCallback<FeedWithoutGroups> {
+      future.addCallback(object : FutureCallback<FeedWithoutGroups> {
         override fun onSuccess(result: FeedWithoutGroups?) {
           onFeedResult(booksUri, FeedLoaderSuccess(result!!))
         }
+
         override fun onFailure(ex: Throwable) {
           LOG.error("error in feed result handler: ", ex)
           onFeedResultFailedException(booksUri, ex)
@@ -1256,23 +1271,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
           }
         }
       }
-    }
-
-    /**
-     * Create a color state list that will return the correct text color for a radio button.
-     */
-
-    private fun createTextColorForRadioButton(
-      resources: Resources,
-      colorScheme: ApplicationColorScheme): ColorStateList {
-
-      val mainColor = colorScheme.colorRGBA
-      val states = arrayOf(intArrayOf(android.R.attr.state_checked), // Checked
-        intArrayOf(-android.R.attr.state_checked))// Unchecked
-
-      val colors = intArrayOf(resources.getColor(R.color.button_background), mainColor)
-
-      return ColorStateList(states, colors)
     }
   }
 }

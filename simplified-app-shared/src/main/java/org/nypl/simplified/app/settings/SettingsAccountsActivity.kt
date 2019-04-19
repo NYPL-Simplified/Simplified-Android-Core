@@ -24,6 +24,8 @@ import com.squareup.picasso.Picasso
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.images.ImageAccountIconRequestHandler
+import org.nypl.simplified.app.images.ImageAccountIcons
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountEvent
@@ -62,7 +64,6 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   private lateinit var adapterAccountsArray: ArrayList<AccountProvider>
   private lateinit var accountListView: ListView
   private lateinit var accountCurrentView: LinearLayout
-  private lateinit var picasso: Picasso
 
   private var accountsSubscription: ObservableSubscriptionType<AccountEvent>? = null
   private var profilesSubscription: ObservableSubscriptionType<ProfileEvent>? = null
@@ -86,13 +87,10 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
         itemSubtitleView.visibility = View.INVISIBLE
       }
 
-      val logoOpt = accountProvider.logo()
-      if (logoOpt is Some<URI>) {
-        iconView.visibility = View.VISIBLE
-        picasso.load(logoOpt.get().toString()).into(iconView)
-      } else {
-        iconView.visibility = View.INVISIBLE
-      }
+      ImageAccountIcons.loadAccountLogoIntoView(
+        loader = picasso,
+        account = accountProvider,
+        iconView = iconView)
 
       return Unit.unit()
     }
@@ -109,17 +107,9 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
   public override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    this.picasso =
-      Picasso.Builder(this)
-        .indicatorsEnabled(false)
-        .loggingEnabled(false)
-        .addRequestHandler(SettingsAccountIconRequestHandler())
-        .build()
-
     val contentArea = this.contentFrame
     val inflater = this.layoutInflater
-    val layout =
-      inflater.inflate(R.layout.accounts, contentArea, false) as ViewGroup
+    val layout = inflater.inflate(R.layout.accounts, contentArea, false) as ViewGroup
 
     contentArea.addView(layout)
     contentArea.requestLayout()
@@ -133,7 +123,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     this.adapterAccounts =
       AccountsArrayAdapter(
         targetContext = this,
-        picasso = this.picasso,
+        picasso = Simplified.getLocalImageLoader(),
         adapterAccountsArray = this.adapterAccountsArray,
         inflater = inflater)
 
@@ -276,9 +266,11 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
         currentAccountView.findViewById<TextView>(android.R.id.text2)
       val iconView =
         currentAccountView.findViewById<ImageView>(R.id.cellIcon)
+      val localImageLoader =
+        Simplified.getLocalImageLoader()
 
       configureAccountListCellViews(
-        picasso = this.picasso,
+        picasso = localImageLoader,
         accountProvider = accountProvider,
         itemTitleView = titleText,
         itemSubtitleView = subtitleText,
@@ -305,7 +297,6 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
 
   override fun onDestroy() {
     super.onDestroy()
-    this.picasso.shutdown()
     this.profilesSubscription?.unsubscribe()
     this.accountsSubscription?.unsubscribe()
   }
@@ -448,7 +439,7 @@ class SettingsAccountsActivity : NavigationDrawerActivity() {
     val adapter =
       AccountsArrayAdapter(
         targetContext = this,
-        picasso = this.picasso,
+        picasso = Simplified.getLocalImageLoader(),
         adapterAccountsArray = availableAccountProviders,
         inflater = this.layoutInflater)
 

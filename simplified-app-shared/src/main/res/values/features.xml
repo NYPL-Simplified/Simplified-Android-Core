@@ -10,58 +10,6 @@
   <!-- If true, the application presents selectable profiles. -->
   <bool name="feature_profiles_enabled">false</bool>
 
-  <color name="app_primary_color">#000000</color>
-
-  <!-- Material Design Color Palette -->
-  <color name="red_primary">#f44336</color>
-  <color name="red_primary_light">#ff7961</color>
-  <color name="red_primary_dark">#b9000d</color>
-  <color name="pink_primary">#e91e63</color>
-  <color name="pink_primary_light">#ff6090</color>
-  <color name="pink_primary_dark">#b0003a</color>
-  <color name="purple_primary">#9c27b0</color>
-  <color name="purple_primary_light">#d05ce3</color>
-  <color name="purple_primary_dark">#6a0080</color>
-  <color name="deep_purple_primary">#673ab7</color>
-  <color name="deep_purple_primary_light">#9a67ea</color>
-  <color name="deep_purple_primary_dark">#320b86</color>
-  <color name="indigo_primary">#3f51b5</color>
-  <color name="indigo_primary_light">#757de8</color>
-  <color name="indigo_primary_dark">#002984</color>
-  <color name="blue_primary">#2196f3</color>
-  <color name="blue_primary_light">#6ec6ff</color>
-  <color name="blue_primary_dark">#0069c0</color>
-  <color name="light_blue_primary">#03a9f4</color>
-  <color name="light_blue_primary_light">#67daff</color>
-  <color name="light_blue_primary_dark">#007ac1</color>
-  <color name="cyan_primary">#00bcd4</color>
-  <color name="cyan_primary_light">#62efff</color>
-  <color name="cyan_primary_dark">#008ba3</color>
-  <color name="teal_primary">#009688</color>
-  <color name="teal_primary_light">#52c7b8</color>
-  <color name="teal_primary_dark">#00675b</color>
-  <color name="green_primary">#4caf50</color>
-  <color name="green_primary_light">#80e27e</color>
-  <color name="green_primary_dark">#087f23</color>
-  <color name="amber_primary">#ffc107</color>
-  <color name="amber_primary_light">#fff350</color>
-  <color name="amber_primary_dark">#c79100</color>
-  <color name="orange_primary">#ff9800</color>
-  <color name="orange_primary_light">#ffc947</color>
-  <color name="orange_primary_dark">#c66900</color>
-  <color name="deep_orange_primary">#ff5722</color>
-  <color name="deep_orange_primary_light">#ff8a50</color>
-  <color name="deep_orange_primary_dark">#c41c00</color>
-  <color name="brown_primary">#795548</color>
-  <color name="brown_primary_light">#a98274</color>
-  <color name="brown_primary_dark">#4b2c20</color>
-  <color name="grey_primary">#9e9e9e</color>
-  <color name="grey_primary_light">#cfcfcf</color>
-  <color name="grey_primary_dark">#707070</color>
-  <color name="blue_grey_primary">#607d8b</color>
-  <color name="blue_grey_primary_light">#8eacbb</color>
-  <color name="blue_grey_primary_dark">#34515e</color>
-
   <!-- If true, a Holds tab is shown. -->
   <!-- This can be disabled for book collections that do not have holds. -->
   <bool name="feature_holds_enabled">true</bool>

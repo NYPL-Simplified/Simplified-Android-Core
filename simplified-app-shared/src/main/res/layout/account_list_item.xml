@@ -4,16 +4,15 @@
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
   android:orientation="horizontal"
-  android:weightSum="1"
-  android:background="@color/normal_background">
+  android:weightSum="1">
+
   <ImageView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/cellIcon"
     android:src="@drawable/librarylogomagic"
     android:paddingLeft="10dp"
-    android:layout_weight="0.88"
-    />
+    android:layout_weight="0.88" />
 
   <LinearLayout
     android:orientation="vertical"
@@ -21,36 +20,30 @@
     android:layout_height="wrap_content"
     android:layout_weight="0.12"
     android:layout_marginTop="10dp"
-    android:layout_margin="10dp"
+    android:layout_margin="10dp">
 
-    >
     <TextView
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:id="@android:id/text1"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceListItem"
       android:textSize="18sp"
       android:textStyle="bold"
       android:gravity="center_vertical"
       android:paddingLeft="11dp"
       android:paddingRight="11dp"
-      android:textColor="@drawable/drawer_list_text"
-      android:text="Item"
-      />
+      android:text="Item" />
+
     <TextView
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:id="@android:id/text2"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceListItemSmall"
       android:textSize="14sp"
       android:gravity="center_vertical"
       android:paddingLeft="11dp"
       android:paddingRight="11dp"
-      android:textColor="@drawable/drawer_list_text"
-      android:text="Item"
-      />
+      android:text="Item" />
   </LinearLayout>
 
 

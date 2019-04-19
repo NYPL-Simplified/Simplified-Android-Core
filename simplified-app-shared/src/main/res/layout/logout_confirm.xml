@@ -6,55 +6,44 @@
   the layout in the GUI editor, but the actual width and height of the dialog must 
   be set at run-time. See org.nypl.simplified.app.LogoutDialog. -->
 
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/logout_dialog"
   android:layout_width="@dimen/login_dialog_width"
   android:layout_height="@dimen/login_dialog_height"
   android:gravity="center"
-  android:background="@color/normal_background"
   android:padding="16dp">
 
-  <TextView
-    android:id="@+id/logout_text"
+  <TextView android:id="@+id/logout_text"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
     android:layout_centerHorizontal="true"
     android:layout_marginBottom="16dp"
     android:gravity="center"
-    android:textAlignment="center"
-    android:text="@string/settings_logout_confirm" />
+    android:text="@string/settings_logout_confirm"
+    android:textAlignment="center" />
 
-  <RelativeLayout
-    android:layout_width="wrap_content"
+  <RelativeLayout android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
+    android:layout_below="@id/logout_text"
     android:layout_centerHorizontal="true"
-    android:layout_below="@id/logout_text">
+    android:layout_gravity="center_horizontal">
 
-    <Button
-      android:id="@+id/logout_cancel"
+    <Button android:id="@+id/logout_cancel"
       style="?android:attr/buttonStyleSmall"
       android:layout_width="wrap_content"
       android:layout_height="@dimen/button_standard_height"
-      android:background="@drawable/simplified_button"
       android:contentDescription="@string/settings_accessibility_log_out_cancel"
-      android:text="@string/settings_log_out_cancel"
-      android:textColor="@drawable/simplified_button_text" />
+      android:text="@string/settings_log_out_cancel" />
 
-    <Button
-      android:id="@+id/logout_confirm"
+    <Button android:id="@+id/logout_confirm"
       style="?android:attr/buttonStyleSmall"
-      android:layout_marginStart="16dp"
       android:layout_width="wrap_content"
       android:layout_height="@dimen/button_standard_height"
+      android:layout_marginStart="16dp"
       android:layout_toEndOf="@id/logout_cancel"
-      android:background="@drawable/simplified_button"
       android:contentDescription="@string/settings_accessibility_log_out"
-      android:text="@string/settings_log_out"
-      android:textColor="@drawable/simplified_button_text" />
-
+      android:text="@string/settings_log_out" />
   </RelativeLayout>
 
 </RelativeLayout>

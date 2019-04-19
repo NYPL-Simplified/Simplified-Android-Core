@@ -15,7 +15,6 @@
     android:layout_height="wrap_content"
     android:maxLines="1"
     android:ellipsize="end"
-    android:textColor="@color/downloading_foreground"
     android:text="@string/placeholder_long_title"
     android:textStyle="bold" />
 
@@ -26,7 +25,6 @@
     android:layout_below="@id/cell_downloading_title"
     android:maxLines="1"
     android:ellipsize="end"
-    android:textColor="@color/downloading_foreground"
     android:text="@string/placeholder_long_author"
     android:textSize="12sp" />
 
@@ -42,7 +40,6 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:textColor="@color/downloading_foreground"
       android:text="@string/catalog_downloading"
       android:textSize="12sp" />
 
@@ -51,8 +48,7 @@
       style="?android:attr/progressBarStyleHorizontal"
       android:layout_width="wrap_content"
       android:layout_height="3dp"
-      android:layout_weight="10"
-      android:progressDrawable="@drawable/simplified_progress_inverse" />
+      android:layout_weight="10" />
 
     <TextView
       android:id="@+id/cell_downloading_percent_text"
@@ -62,7 +58,6 @@
       android:gravity="end"
       android:paddingStart="16dp"
       android:text="0%"
-      android:textColor="@color/downloading_foreground"
       android:textAlignment="gravity"
       android:textSize="12sp" />
   </LinearLayout>

@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.player
 
-import android.support.annotation.ColorInt
 import java.io.Serializable
 
 /**
@@ -10,7 +9,7 @@ import java.io.Serializable
 data class AudioBookLoadingFragmentParameters(
 
   /**
-   * The primary color used to tint various views.
+   * Reserved for future use.
    */
 
-  @ColorInt val primaryColor: Int) : Serializable
+  val unused: Float? = null) : Serializable

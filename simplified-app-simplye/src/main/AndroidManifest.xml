@@ -25,6 +25,7 @@
     android:icon="@mipmap/ic_launcher"
     android:label="@string/feature_app_name"
     android:largeHeap="true"
+    android:theme="@style/SimplifiedBlank"
     android:usesCleartextTraffic="true">
 
     <!-- Main entry point for the application. -->
@@ -124,12 +125,10 @@
       android:label="@string/catalog_book_report"></activity>
 
     <!-- Reader -->
-    <activity
-      android:name="org.nypl.simplified.app.reader.ReaderActivity"
+    <activity android:name="org.nypl.simplified.app.reader.ReaderActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/reader"
-      android:label="@string/reader"
-      android:theme="@style/SimplifiedTheme_NoActionBar"></activity>
+      android:label="@string/reader" />
     <activity
       android:name="org.nypl.simplified.app.reader.toc.ReaderTOCActivity"
       android:configChanges="orientation|screenSize"

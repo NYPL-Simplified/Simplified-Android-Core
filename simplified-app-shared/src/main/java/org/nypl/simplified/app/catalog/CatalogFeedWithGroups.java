@@ -100,8 +100,8 @@ public final class CatalogFeedWithGroups implements ListAdapter, OnScrollListene
         this.activity,
         this.book_cover_provider,
         this.screen,
-        this.lane_listener,
-        this.colorScheme);
+        this.lane_listener
+      );
     }
 
     view.configureForGroup(group);

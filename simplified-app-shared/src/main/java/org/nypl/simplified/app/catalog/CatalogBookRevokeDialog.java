@@ -67,7 +67,6 @@ public final class CatalogBookRevokeDialog extends AppCompatDialogFragment {
   public void onCreate(
     final @Nullable Bundle state) {
     super.onCreate(state);
-    this.setStyle(DialogFragment.STYLE_NORMAL, R.style.SimplifiedLoginDialog);
     this.type = NullCheck.notNull(
       (CatalogBookRevokeType) this.getArguments()
         .getSerializable(CatalogBookRevokeDialog.TYPE_KEY));

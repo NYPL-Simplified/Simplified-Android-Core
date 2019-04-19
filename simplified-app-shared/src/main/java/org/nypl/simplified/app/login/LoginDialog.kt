@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.login
 
-import android.app.DialogFragment
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Resources
@@ -77,12 +76,12 @@ class LoginDialog : AppCompatDialogFragment() {
   private lateinit var controller: ProfilesControllerType
   private lateinit var account: AccountType
   private lateinit var executor: ListeningExecutorService
-  private lateinit var loginTask: FluentFuture<Unit>
   private lateinit var onLoginSuccess: LoginSucceededType
   private lateinit var onLoginFailure: LoginFailedType
   private lateinit var onLoginCancelled: LoginCancelledType
   private lateinit var authentication: AccountProviderAuthenticationDescription
   private lateinit var documents: DocumentStoreType
+  private var loginTask: FluentFuture<Unit>? = null
 
   private fun setRequiredArguments(
     controller: ProfilesControllerType,
@@ -129,13 +128,8 @@ class LoginDialog : AppCompatDialogFragment() {
   override fun onResume() {
     super.onResume()
 
-    val rr = this.resources
-    val h = rr.getDimension(R.dimen.login_dialog_height).toInt()
-    val w = rr.getDimension(R.dimen.login_dialog_width).toInt()
-
     val dialog = this.dialog
     val window = dialog.window!!
-    window.setLayout(w, h)
     window.setGravity(Gravity.CENTER)
   }
 
@@ -154,12 +148,6 @@ class LoginDialog : AppCompatDialogFragment() {
         this.logger.error("ignored exception in cancelled callback: ", e)
       }
     }
-  }
-
-  override fun onCreate(
-    @Nullable state: Bundle?) {
-    super.onCreate(state)
-    this.setStyle(DialogFragment.STYLE_NORMAL, R.style.SimplifiedLoginDialog)
   }
 
   override fun onCreateView(
@@ -395,7 +383,10 @@ class LoginDialog : AppCompatDialogFragment() {
   private fun onAccountEvent(event: AccountEventLogin): Unit {
     return event.matchLogin<Unit, RuntimeException>(
       { event -> this.onAccountEventLoginSuccess(event) },
-      { event -> this.onAccountLoginFailure(event.exception(), loginErrorCodeToLocalizedMessage(this.resources, event.errorCode())) })
+      { event ->
+        this.onAccountLoginFailure(event.exception(),
+          loginErrorCodeToLocalizedMessage(this.resources, event.errorCode()))
+      })
   }
 
   private fun onAccountEventLoginSuccess(

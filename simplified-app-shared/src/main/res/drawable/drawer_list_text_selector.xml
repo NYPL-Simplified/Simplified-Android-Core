@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
+
   <item
     android:state_pressed="true"
-    android:color="@color/list_item_text_normal" />
+    android:color="?attr/simplifiedColorPrimary" />
 
   <item
     android:state_activated="true"
-    android:color="@color/list_item_text_selected" />
+    android:color="?attr/simplifiedColorBackground" />
 
-  <item android:color="@color/list_item_text_normal" />
+  <item android:color="?android:attr/textColorPrimaryNoDisable" />
+
 </selector>

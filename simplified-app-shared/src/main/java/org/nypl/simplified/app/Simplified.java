@@ -10,6 +10,7 @@ import android.net.NetworkInfo;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDexApplication;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,12 +22,13 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnimplementedCodeException;
-import com.io7m.junreachable.UnreachableCodeException;
+import com.squareup.picasso.Picasso;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.helpstack.Helpstack;
 import org.nypl.simplified.app.helpstack.HelpstackType;
+import org.nypl.simplified.app.images.ImageAccountIconRequestHandler;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
@@ -93,6 +95,7 @@ import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.tenprint.TenPrintGenerator;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
+import org.nypl.simplified.theme.ThemeControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,6 +159,7 @@ public final class Simplified extends MultiDexApplication {
   private ApplicationColorScheme color_scheme_fallback;
   private BookCoverBadgeLookupType cover_badges;
   private ReaderBookmarkServiceType readerBookmarksService;
+  private Picasso local_image_loader;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -190,6 +194,15 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("Application is not yet initialized");
     }
     return i;
+  }
+
+  /**
+   * @return The local image loader
+   */
+
+  public static Picasso getLocalImageLoader() {
+    final Simplified i = Simplified.checkInitialized();
+    return i.local_image_loader;
   }
 
   /**
@@ -575,19 +588,6 @@ public final class Simplified extends MultiDexApplication {
     return documents_builder.build();
   }
 
-  private int currentTheme(final WantActionBar bar) {
-    NullCheck.notNull(bar, "Bar");
-
-    switch (bar) {
-      case WANT_ACTION_BAR:
-        return R.style.Simplified_RedTheme;
-      case WANT_NO_ACTION_BAR:
-        return R.style.Simplified_RedTheme_NoActionBar;
-    }
-
-    throw new UnreachableCodeException();
-  }
-
   private void initBugsnag(
     final OptionType<String> api_token_opt) {
     if (api_token_opt.isSome()) {
@@ -678,10 +678,10 @@ public final class Simplified extends MultiDexApplication {
     LOG.debug("initializing color scheme");
     this.color_scheme_fallback =
       new ApplicationColorScheme(
-        "red",
-        resources.getColor(R.color.red_primary),
-        R.style.Simplified_RedTheme,
-        R.style.Simplified_RedTheme_NoActionBar);
+        ThemeControl.getThemeFallback().getName(),
+        ContextCompat.getColor(this, ThemeControl.getThemeFallback().getColor()),
+        ThemeControl.getThemeFallback().getThemeWithActionBar(),
+        ThemeControl.getThemeFallback().getThemeWithNoActionBar());
 
     LOG.debug("initializing cover generator");
     final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
@@ -700,6 +700,14 @@ public final class Simplified extends MultiDexApplication {
         this.exec_covers,
         true,
         false);
+
+    LOG.debug("initializing local image loader");
+    this.local_image_loader =
+      new Picasso.Builder(this)
+        .indicatorsEnabled(false)
+        .loggingEnabled(false)
+        .addRequestHandler(new ImageAccountIconRequestHandler())
+        .build();
 
     LOG.debug("initializing EPUB loader and HTTP server");
     this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
@@ -838,9 +846,9 @@ public final class Simplified extends MultiDexApplication {
       String name = account.provider().mainColor();
       return new ApplicationColorScheme(
         name,
-        ThemeMatcher.Companion.color(name),
-        ThemeMatcher.Companion.actionBarStyle(name),
-        ThemeMatcher.Companion.noActionBarStyle(name));
+        ContextCompat.getColor(this, ThemeControl.Companion.color(name)),
+        ThemeControl.Companion.actionBarStyle(name),
+        ThemeControl.Companion.noActionBarStyle(name));
     } else {
       throw new UnimplementedCodeException();
     }

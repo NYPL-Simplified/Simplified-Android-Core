@@ -79,7 +79,6 @@ public final class CatalogFacetDialog extends DialogFragment
     final @Nullable Bundle state)
   {
     super.onCreate(state);
-    this.setStyle(DialogFragment.STYLE_NORMAL, R.style.SimplifiedBookDialog);
 
     final Bundle b = NullCheck.notNull(this.getArguments());
 

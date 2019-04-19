@@ -1,4 +1,4 @@
-package org.nypl.simplified.app
+package org.nypl.simplified.app.images
 
 import android.content.res.AssetManager
 import android.graphics.Bitmap
@@ -22,9 +22,9 @@ import java.net.URI
  * @see [https://stackoverflow.com/a/7533725](https://stackoverflow.com/a/7533725)
  */
 
-object SimplifiedIconViews {
+object ImageIconViews {
 
-  private val LOG = LoggerFactory.getLogger(SimplifiedIconViews::class.java)
+  private val LOG = LoggerFactory.getLogger(ImageIconViews::class.java)
 
   /**
    * Load the image at the given URI into the given icon view.
@@ -40,7 +40,7 @@ object SimplifiedIconViews {
     image: URI) {
 
     return if ("simplified-asset" == image.scheme) {
-      this.configureFromAsset(image, assets, iconView)
+      configureFromAsset(image, assets, iconView)
     } else {
       iconView.setImageURI(Uri.parse(image.toString()))
     }
@@ -71,13 +71,13 @@ object SimplifiedIconViews {
     assets: AssetManager,
     iconView: ImageView) {
     val path = image.schemeSpecificPart
-    this.LOG.debug("opening image asset: {}", path)
+    LOG.debug("opening image asset: {}", path)
     try {
       assets.open(path).use { stream ->
         iconView.setImageDrawable(Drawable.createFromStream(stream, path))
       }
     } catch (e: IOException) {
-      this.LOG.error("could not open image asset: {}: ", image, e)
+      LOG.error("could not open image asset: {}: ", image, e)
     }
   }
 }

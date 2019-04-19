@@ -3,6 +3,7 @@ package org.nypl.simplified.app.catalog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatButton
 import org.nypl.simplified.app.ApplicationColorScheme
+import org.nypl.simplified.app.R
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
@@ -20,6 +21,7 @@ class CatalogBookReadButton(
   : AppCompatButton(activity), CatalogBookButtonType {
 
   init {
+    this.text = resources.getString(R.string.catalog_book_read)
     this.setOnClickListener(CatalogBookReadController(
       this.activity,
       this.account,

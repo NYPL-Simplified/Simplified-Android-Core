@@ -28,7 +28,6 @@ import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -40,6 +39,7 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
+import org.nypl.simplified.app.images.ImageAccountIcons;
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity;
 import org.nypl.simplified.app.profiles.ProfileSwitchDialog;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
@@ -56,7 +56,6 @@ import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -284,10 +283,11 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     final ActionBar bar = NullCheck.notNull(this.getSupportActionBar(), "Action bar");
     if (this.navigationDrawerShouldShowIndicator()) {
       LOG.debug("setting navigation drawer indicator");
-      if (android.os.Build.VERSION.SDK_INT < 21) {
-        bar.setDisplayHomeAsUpEnabled(false);
-        bar.setHomeButtonEnabled(true);
-      }
+      bar.setDisplayOptions(
+        ActionBar.DISPLAY_SHOW_TITLE
+          | ActionBar.DISPLAY_HOME_AS_UP
+          | ActionBar.DISPLAY_SHOW_HOME);
+      bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
     }
 
     /*
@@ -524,16 +524,10 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
                 .provider();
 
         text_view.setText(account.displayName());
-
-        if (account.logo().isSome()) {
-          URI logoURI = ((Some<URI>) account.logo()).get();
-          icon_view.setVisibility(View.VISIBLE);
-          SimplifiedIconViews.INSTANCE.configureIconViewFromURI(
-            this.activity.getAssets(), icon_view, logoURI);
-        } else {
-          icon_view.setVisibility(View.INVISIBLE);
-        }
-
+        ImageAccountIcons.loadAccountLogoIntoView(
+          Simplified.getLocalImageLoader(),
+          account,
+          icon_view);
       } catch (final ProfileNoneCurrentException e) {
         throw new IllegalStateException(e);
       }
@@ -562,7 +556,6 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         view = inflater.inflate(R.layout.drawer_item_current_account, parent, false);
       }
 
-      view.setBackgroundResource(R.drawable.textview_underline);
       return view;
     }
   }
@@ -871,14 +864,10 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         final boolean checked) {
 
       text_view.setText(this.account.displayName());
-
-      if (this.account.logo().isSome()) {
-        URI logoURI = ((Some<URI>) this.account.logo()).get();
-        SimplifiedIconViews.INSTANCE.configureIconViewFromURI(this.activity.getAssets(), icon_view, logoURI);
-        icon_view.setVisibility(View.VISIBLE);
-      } else {
-        icon_view.setVisibility(View.INVISIBLE);
-      }
+      ImageAccountIcons.loadAccountLogoIntoView(
+        Simplified.getLocalImageLoader(),
+        this.account,
+        icon_view);
     }
 
     @Override

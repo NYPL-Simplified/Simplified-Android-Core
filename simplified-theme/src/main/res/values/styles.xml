@@ -57,6 +57,7 @@
 
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
+    <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
 
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
@@ -84,6 +85,7 @@
     <item name="android:actionBarStyle">@style/SimplifiedActionBar</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
+    <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
   </style>
 
   <style name="SimplifiedActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">

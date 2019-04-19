@@ -40,10 +40,11 @@ dependencies {
   api project(':simplified-observable')
   api project(':simplified-opds-core')
   api project(':simplified-prefs')
-  api project(':simplified-splash')
   api project(':simplified-rfc3339-core')
+  api project(':simplified-splash')
   api project(':simplified-stack')
   api project(':simplified-tenprint')
+  api project(':simplified-theme')
   api project(':simplified-volley')
 
   annotationProcessor "com.google.auto.value:auto-value:1.3"

@@ -84,14 +84,15 @@ class CatalogAcquisitionButtonController(
     LOG.debug("trying login")
 
     // XXX: Untranslated string!
-    val dialog = LoginDialog.newDialog(
-      this.profiles,
-      this.backgroundExecutor,
-      this.documents,
-      account,
-      LoginSucceededType { creds -> this.onLoginSuccess(account) },
-      LoginCancelledType { this.onLoginCancelled() },
-      LoginFailedType { error, message -> this.onLoginFailure(error, message) })
+    val dialog =
+      LoginDialog.newDialog(
+        this.profiles,
+        this.backgroundExecutor,
+        this.documents,
+        account,
+        LoginSucceededType { creds -> this.onLoginSuccess(account) },
+        LoginCancelledType { this.onLoginCancelled() },
+        LoginFailedType { error, message -> this.onLoginFailure(error, message) })
 
     dialog.show(this.activity.supportFragmentManager, "login-dialog")
   }

@@ -67,6 +67,7 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarks;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.theme.ThemeControl;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -183,9 +184,10 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final ImageView in_media_next = Objects.requireNonNull(this.view_media_next);
     final ImageView in_media_prev = Objects.requireNonNull(this.view_media_prev);
 
-    final ApplicationColorScheme scheme = Simplified.getMainColorScheme();
-    final int mainColor = scheme.getColorRGBA();
-    final ColorMatrixColorFilter filter = ReaderColorMatrix.getImageFilterMatrix(mainColor);
+    final int mainColor =
+      ThemeControl.resolveColorAttribute(this.getTheme(), R.attr.colorPrimary);
+    final ColorMatrixColorFilter filter =
+      ReaderColorMatrix.getImageFilterMatrix(mainColor);
 
     UIThread.runOnUIThread(() -> {
       in_progress_text.setTextColor(mainColor);

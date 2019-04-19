@@ -5,16 +5,16 @@
     <inset android:insetRight="-2dp">
       <shape android:shape="rectangle">
         <padding android:bottom="@dimen/catalog_facet_tab_padding_bottom"
-                 android:left="@dimen/catalog_facet_tab_padding_left"
-                 android:right="@dimen/catalog_facet_tab_padding_right"
-                 android:top="@dimen/catalog_facet_tab_padding_top" />
+          android:left="@dimen/catalog_facet_tab_padding_left"
+          android:right="@dimen/catalog_facet_tab_padding_right"
+          android:top="@dimen/catalog_facet_tab_padding_top" />
         <corners android:bottomLeftRadius="3dp"
-                 android:bottomRightRadius="0dp"
-                 android:topLeftRadius="3dp"
-                 android:topRightRadius="0dp" />
-        <solid android:color="@color/button_background" />
+          android:bottomRightRadius="0dp"
+          android:topLeftRadius="3dp"
+          android:topRightRadius="0dp" />
+        <solid android:color="?attr/simplifiedColorBackground" />
         <stroke android:width="@dimen/catalog_facet_tab_stroke"
-                android:color="?button_foreground" />
+          android:color="?attr/colorPrimary" />
       </shape>
     </inset>
   </item>
@@ -23,16 +23,16 @@
     <inset android:insetRight="-2dp">
       <shape android:shape="rectangle">
         <padding android:bottom="@dimen/catalog_facet_tab_padding_bottom"
-                 android:left="@dimen/catalog_facet_tab_padding_left"
-                 android:right="@dimen/catalog_facet_tab_padding_right"
-                 android:top="@dimen/catalog_facet_tab_padding_top" />
+          android:left="@dimen/catalog_facet_tab_padding_left"
+          android:right="@dimen/catalog_facet_tab_padding_right"
+          android:top="@dimen/catalog_facet_tab_padding_top" />
         <corners android:bottomLeftRadius="3dp"
-                 android:bottomRightRadius="0dp"
-                 android:topLeftRadius="3dp"
-                 android:topRightRadius="0dp" />
-        <solid android:color="?button_foreground" />
+          android:bottomRightRadius="0dp"
+          android:topLeftRadius="3dp"
+          android:topRightRadius="0dp" />
+        <solid android:color="?attr/colorPrimary" />
         <stroke android:width="@dimen/catalog_facet_tab_stroke"
-                android:color="?button_foreground" />
+          android:color="?attr/colorPrimary" />
       </shape>
     </inset>
   </item>

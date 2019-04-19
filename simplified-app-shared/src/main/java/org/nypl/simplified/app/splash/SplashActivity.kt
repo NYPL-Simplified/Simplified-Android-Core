@@ -10,7 +10,6 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.catalog.MainCatalogActivity
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity
-import org.nypl.simplified.app.settings.SettingsAccountsActivity
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.eula.EULAType
@@ -26,6 +25,7 @@ import org.nypl.simplified.splash.SplashImageFragment
 import org.nypl.simplified.splash.SplashListenerType
 import org.nypl.simplified.splash.SplashMainFragment
 import org.nypl.simplified.splash.SplashParameters
+import org.nypl.simplified.theme.ThemeControl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -111,7 +111,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
     this.log.debug("onCreate")
     super.onCreate(null)
 
-    this.setTheme(R.style.Simplified_RedTheme_NoActionBar)
+    this.setTheme(ThemeControl.themeFallback.themeWithNoActionBar)
     this.setContentView(R.layout.splash_base)
 
     this.splashEventSubscription =
@@ -125,7 +125,7 @@ class SplashActivity : AppCompatActivity(), SplashListenerType {
 
     this.parameters =
       SplashParameters(
-        textColor = resources.getColor(R.color.red_primary),
+        textColor = resources.getColor(ThemeControl.themeFallback.color),
         background = Color.WHITE,
         splashImageResource = R.drawable.feature_app_splash,
         splashImageSeconds = 2L)

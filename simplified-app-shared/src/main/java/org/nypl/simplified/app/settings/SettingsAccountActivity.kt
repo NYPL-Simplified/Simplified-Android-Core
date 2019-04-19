@@ -27,7 +27,6 @@ import com.io7m.jfunctional.Unit
 import com.tenmiles.helpstack.HSHelpStack
 import com.tenmiles.helpstack.gears.HSDeskGear
 import org.nypl.simplified.app.CardCreatorActivity
-import org.nypl.simplified.app.MainEULAActivity
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ReportIssueActivity
@@ -120,10 +119,13 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     if (item.itemId == R.id.show_eula) {
-      val eulaIntent = Intent(this, MainEULAActivity::class.java)
+      val eulaIntent = Intent(this, WebViewActivity::class.java)
       this.account.provider().eula().map_ { eula_uri ->
         val argumentBundle = Bundle()
-        MainEULAActivity.setActivityArguments(argumentBundle, eula_uri.toString())
+        WebViewActivity.setActivityArguments(
+          arguments = argumentBundle,
+          uri = eula_uri.toString(),
+          title = resources.getString(R.string.settings_eula))
         eulaIntent.putExtras(argumentBundle)
         this.startActivity(eulaIntent)
       }
@@ -347,7 +349,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
      * Configure the syncing switch.
      */
 
-    if (this.account.provider().supportsSimplyESynchronization()) {
+    if (accountProvider.supportsSimplyESynchronization()) {
       this.syncSwitch.isEnabled = true
       this.syncSwitch.isChecked = this.account.preferences().bookmarkSyncingPermitted
       this.syncSwitch.setOnCheckedChangeListener { _, isEnabled ->
@@ -357,6 +359,17 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     } else {
       this.syncSwitch.isEnabled = false
       this.syncSwitch.isChecked = false
+    }
+
+    /*
+     * Configure the logo.
+     */
+
+    val logo = accountProvider.logo()
+    if (logo is Some<URI>) {
+      Simplified.getLocalImageLoader()
+        .load(logo.get().toString())
+        .into(this.accountIcon)
     }
   }
 

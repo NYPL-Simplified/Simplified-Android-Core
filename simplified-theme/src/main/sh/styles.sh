@@ -1,23 +1,6 @@
 #!/bin/sh
 
-COLORS="
-amber
-blue
-blue_grey
-brown
-cyan
-deep_orange
-deep_purple
-green
-grey
-indigo
-light_blue
-orange
-pink
-purple
-red
-teal
-"
+COLORS=$(cat colors.txt) || exit 1
 
 cat <<EOF
   <!-- Automatically generated, see styles.sh -->

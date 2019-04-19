@@ -7,6 +7,7 @@ import com.io7m.jfunctional.Some
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.simplified.app.ApplicationColorScheme
+import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.player.AudioBookPlayerActivity
 import org.nypl.simplified.app.player.AudioBookPlayerParameters
 import org.nypl.simplified.app.reader.ReaderActivity
@@ -91,7 +92,7 @@ class CatalogBookReadController(
           manifestFile = manifest.manifestFile,
           manifestURI = manifest.manifestURI,
           opdsEntry = this.entry.feedEntry,
-          applicationColorScheme = this.colorScheme,
+          theme = Simplified.getMainColorScheme().activityThemeResourceWithActionBar,
           bookID = this.id))
     } else {
       ErrorDialogUtilities.showError(
