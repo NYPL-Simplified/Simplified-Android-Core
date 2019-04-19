@@ -67,8 +67,10 @@
       android:layout_height="match_parent"
       android:layout_weight="1"
       android:contentDescription="@string/reader_accessibility_settings_black_on_white_text"
+      android:background="@drawable/reader_settings_black_on_white"
       android:gravity="center"
       android:text="A a"
+      android:textColor="#000000"
       android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <FrameLayout android:layout_width="1dp"
@@ -80,8 +82,10 @@
       android:layout_height="match_parent"
       android:layout_weight="1"
       android:contentDescription="@string/reader_accessibility_settings_white_on_black_text"
+      android:background="@drawable/reader_settings_white_on_black"
       android:gravity="center"
       android:text="A a"
+      android:textColor="#ffffff"
       android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <FrameLayout android:layout_width="1dp"
@@ -93,8 +97,10 @@
       android:layout_height="match_parent"
       android:layout_weight="1"
       android:contentDescription="@string/reader_accessibility_settings_black_on_sepia_text"
+      android:background="@drawable/reader_settings_black_on_beige"
       android:gravity="center"
       android:text="A a"
+      android:textColor="#000000"
       android:textAppearance="?android:attr/textAppearanceLarge" />
   </LinearLayout>
 

@@ -33,6 +33,7 @@ import com.io7m.junreachable.UnreachableCodeException;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
@@ -52,6 +53,7 @@ import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.Boo
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookFormat;
 import org.nypl.simplified.books.book_database.BookID;
+import org.nypl.simplified.books.controller.ProfilesControllerType;
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
@@ -91,6 +93,7 @@ import static org.nypl.simplified.app.utilities.FadeUtilities.fadeOut;
  */
 
 public final class ReaderActivity extends ProfileTimeOutActivity implements
+  ReaderSettingsListenerType,
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,
   ReaderReadiumFeedbackListenerType,
@@ -371,7 +374,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     in_settings.setOnClickListener(view -> {
       final FragmentManager fm = this.getFragmentManager();
-      final ReaderSettingsDialog d = new ReaderSettingsDialog();
+      final ReaderSettingsDialog d = ReaderSettingsDialog.Companion.create();
       d.show(fm, "settings-dialog");
     });
 
@@ -1024,5 +1027,15 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     } else {
       throw new UnreachableCodeException();
     }
+  }
+
+  @Override
+  public ProfilesControllerType profilesController() {
+    return Simplified.getProfilesController();
+  }
+
+  @Override
+  public ScreenSizeInformationType screenSize() {
+    return Simplified.getScreenSizeInformation();
   }
 }
