@@ -61,9 +61,9 @@ class ReaderSettingsDialog : DialogFragment() {
     state: Bundle?): View {
 
     this.profiles =
-      (this.activity as ReaderSettingsListenerType).profilesController()
+      (this.activity as ReaderSettingsListenerType).onReaderSettingsDialogWantsProfilesController()
     this.screen =
-      (this.activity as ReaderSettingsListenerType).screenSize()
+      (this.activity as ReaderSettingsListenerType).onReaderSettingsDialogWantsScreenSize()
 
     val layout =
       inflater.inflate(R.layout.reader_settings, container, false) as LinearLayout

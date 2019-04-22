@@ -13,12 +13,12 @@ interface ReaderSettingsListenerType {
    * Get a reference to the current profiles controller.
    */
 
-  fun profilesController(): ProfilesControllerType
+  fun onReaderSettingsDialogWantsProfilesController(): ProfilesControllerType
 
   /**
    * Get a reference to the current screen size information.
    */
 
-  fun screenSize(): ScreenSizeInformationType
+  fun onReaderSettingsDialogWantsScreenSize(): ScreenSizeInformationType
 
 }

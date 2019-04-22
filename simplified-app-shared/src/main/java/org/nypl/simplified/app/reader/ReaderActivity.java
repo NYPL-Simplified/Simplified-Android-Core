@@ -1030,12 +1030,12 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   @Override
-  public ProfilesControllerType profilesController() {
+  public ProfilesControllerType onReaderSettingsDialogWantsProfilesController() {
     return Simplified.getProfilesController();
   }
 
   @Override
-  public ScreenSizeInformationType screenSize() {
+  public ScreenSizeInformationType onReaderSettingsDialogWantsScreenSize() {
     return Simplified.getScreenSizeInformation();
   }
 }
