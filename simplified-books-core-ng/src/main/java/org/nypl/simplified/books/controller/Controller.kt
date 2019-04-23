@@ -50,6 +50,7 @@ import org.nypl.simplified.books.profiles.ProfileReadableType
 import org.nypl.simplified.books.profiles.ProfileSelected
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled
+import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.*
 import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
@@ -70,6 +71,7 @@ import java.util.ArrayList
 import java.util.SortedMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.TimeUnit
 
 /**
  * The default controller implementation.
@@ -101,6 +103,16 @@ class Controller private constructor(
 
   init {
     this.profileEventSubscription = this.profileEvents.subscribe { this.onProfileEvent(it) }
+
+    /*
+     * If the anonymous profile is enabled, then ensure that it is "selected" and will
+     * therefore very shortly have all of its books loaded.
+     */
+
+    if (this.profiles.anonymousProfileEnabled() == ANONYMOUS_PROFILE_ENABLED) {
+      LOG.debug("initializing anonymous profile")
+      this.profileSelect(this.profileCurrent().id())
+    }
   }
 
   private fun onProfileEvent(e: ProfileEvent) {
@@ -121,7 +133,6 @@ class Controller private constructor(
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
-
   }
 
   override fun logToAnalytics(message: String) {
@@ -438,6 +449,9 @@ class Controller private constructor(
       this.bookRegistry,
       bookId))
   }
+
+  override fun profileAnyIsCurrent(): Boolean =
+    this.profiles.currentProfile().isSome
 
   companion object {
 

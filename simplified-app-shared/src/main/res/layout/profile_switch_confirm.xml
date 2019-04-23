@@ -15,7 +15,6 @@
     android:text="@string/profiles_switch_confirm" />
 
   <Button android:id="@+id/profile_switch_confirm"
-    style="?android:attr/buttonStyleSmall"
     android:layout_width="wrap_content"
     android:layout_height="@dimen/button_standard_height"
     android:layout_below="@id/profile_switch_confirm_text"

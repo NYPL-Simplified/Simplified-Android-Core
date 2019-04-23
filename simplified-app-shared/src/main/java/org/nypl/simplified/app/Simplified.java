@@ -68,9 +68,11 @@ import org.nypl.simplified.books.feeds.FeedLoader;
 import org.nypl.simplified.books.feeds.FeedLoaderType;
 import org.nypl.simplified.books.profiles.ProfileDatabaseException;
 import org.nypl.simplified.books.profiles.ProfileEvent;
+import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfileType;
 import org.nypl.simplified.books.profiles.ProfilesDatabase;
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType;
+import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService;
@@ -116,6 +118,8 @@ import java.util.SortedMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import static org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.*;
 
 /**
  * Global application state.

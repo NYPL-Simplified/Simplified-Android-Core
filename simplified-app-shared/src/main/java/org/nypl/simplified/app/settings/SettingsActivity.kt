@@ -16,6 +16,12 @@ import org.nypl.simplified.books.document_store.DocumentStoreType
 
 class SettingsActivity : NavigationDrawerActivity(), SettingsFragmentListenerType {
 
+  override fun openVersion(developerOptions: Boolean) {
+    val intent = Intent()
+    intent.setClass(this, SettingsVersionActivity::class.java)
+    this.startActivity(intent)
+  }
+
   override fun helpstack(): OptionType<HelpstackType> =
     Simplified.getHelpStack()
 
