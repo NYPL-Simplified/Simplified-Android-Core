@@ -111,7 +111,7 @@ internal class BookRevokeTask(
           if (revokeOpt is Some<URI>) {
             return revokeLoaned(databaseEntry, revokeOpt.get())
           }
-          return Unit.unit()
+          return failBecauseNotRevocable(book, availability)
         }
 
         override fun onRevoked(availability: OPDSAvailabilityRevoked): Unit {
