@@ -19,6 +19,7 @@ import org.nypl.simplified.books.synced_document.SyncedDocumentType
 class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private lateinit var listener: SettingsFragmentListenerType
+  private var versionClickCount = 0
 
   override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
     this.setPreferencesFromResource(R.xml.preferences, rootKey)
@@ -41,12 +42,22 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       this.findPreference(this.getString(R.string.help))
     val licenses =
       this.findPreference(this.getString(R.string.settings_licence_software))
+    val version =
+      this.findPreference(this.getString(R.string.versions_version))
 
     this.configureAccounts(accounts)
     this.configureAbout(about)
     this.configureEULA(eula)
     this.configureFAQ(faq)
     this.configureLicenses(licenses)
+    this.configureVersion(version)
+  }
+
+  private fun configureVersion(version: Preference) {
+    version.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+      this.listener.openVersion(false)
+      true
+    }
   }
 
   private fun configureAccounts(accounts: Preference) {

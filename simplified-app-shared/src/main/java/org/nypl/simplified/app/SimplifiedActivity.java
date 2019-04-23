@@ -30,6 +30,9 @@ public abstract class SimplifiedActivity extends AppCompatActivity {
   @Override
   protected void onCreate(final @Nullable Bundle state) {
     super.onCreate(state);
+
+    LOG.debug("onCreate: {}", state);
+
     this.overridePendingTransition(R.anim.activity_open, R.anim.activity_close);
     ACTIVITY_COUNT += 1;
     LOG.debug("activity count: {}", ACTIVITY_COUNT);

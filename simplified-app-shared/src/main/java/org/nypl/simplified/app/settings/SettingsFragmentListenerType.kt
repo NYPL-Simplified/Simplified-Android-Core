@@ -28,4 +28,12 @@ interface SettingsFragmentListenerType {
 
   fun openAccounts()
 
+  /**
+   * Open the version activity.
+   *
+   * @param developerOptions `true` If the developer options should be shown
+   */
+
+  fun openVersion(developerOptions: Boolean)
+
 }

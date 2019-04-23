@@ -1,0 +1,25 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+android {
+  compileSdkVersion 27
+  buildToolsVersion "28.0.2"
+  packagingOptions {
+    exclude 'META-INF/LICENSE'
+  }
+  defaultConfig {
+    multiDexEnabled true
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+}
+
+description = 'simplified-app-vanilla-with-profiles'
+
+dependencies {
+  implementation project(':simplified-app-shared')
+
+  implementation 'com.android.support:appcompat-v7:27.1.1'
+}

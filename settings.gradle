@@ -6,6 +6,7 @@ include ':simplified-accessibility'
 include ':simplified-app-shared'
 include ':simplified-app-simplye'
 include ':simplified-app-vanilla'
+include ':simplified-app-vanilla-with-profiles'
 include ':simplified-books-core'
 include ':simplified-books-core-ng'
 include ':simplified-books-covers'
@@ -41,6 +42,7 @@ project(':simplified-accessibility').projectDir = "$rootDir/simplified-accessibi
 project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" as File
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
 project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
+project(':simplified-app-vanilla-with-profiles').projectDir = "$rootDir/simplified-app-vanilla-with-profiles" as File
 project(':simplified-books-core').projectDir = "$rootDir/simplified-books-core" as File
 project(':simplified-books-core-ng').projectDir = "$rootDir/simplified-books-core-ng" as File
 project(':simplified-books-covers').projectDir = "$rootDir/simplified-books-covers" as File

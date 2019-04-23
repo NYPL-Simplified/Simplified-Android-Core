@@ -63,6 +63,12 @@ public interface ProfilesControllerType {
     throws ProfileNoneCurrentException;
 
   /**
+   * @return {@code true} if an account has been selected
+   */
+
+  boolean profileAnyIsCurrent();
+
+  /**
    * @return An observable that publishes profile events
    */
 

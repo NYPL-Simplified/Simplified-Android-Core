@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
+import com.io7m.junreachable.UnreachableCodeException;
+
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
 import org.nypl.simplified.app.utilities.UIThread;
@@ -16,8 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An activity that handles profile inactivity timeouts. Does nothing if the anonymous
- * profile is enabled.
+ * An activity that handles profile inactivity timeouts. Timeouts are not processed if the
+ * anonymous profile is active.
+ *
+ * Additionally, the activity checks to see if the profile system has been properly initialized
+ * and redirects the user back to the profile selection screen if it hasn't. The reason for this
+ * check is due to the awful Android architecture: When an app crashes, the app is restarted with
+ * the activity stack intact, minus the activity that caused the crash. This means that if the
+ * user restarts the app, they will never even see the profile selection screen and the profile
+ * system will not be initialized.
  */
 
 public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
@@ -45,6 +54,39 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
     super.onCreate(state);
 
     /*
+     * If the profile system appears not to be initialized, then send the user back to the
+     * profile screen.
+     */
+
+    final ProfilesControllerType profiles = Simplified.getProfilesController();
+    if (!profiles.profileAnyIsCurrent()) {
+      switch (profiles.profileAnonymousEnabled()) {
+        case ANONYMOUS_PROFILE_ENABLED: {
+          LOG.debug("no profile is current and the anonymous profile is enabled");
+          throw new UnreachableCodeException();
+        }
+
+        /*
+         * If no profile is selected, then we are presumably recovering from a crash
+         * and have been shoved back into the middle of the application without having
+         * gone via the splash screen. Go back to the profile selection screen.
+         */
+
+        case ANONYMOUS_PROFILE_DISABLED: {
+          LOG.debug("no profile is current, opening selection screen");
+          this.openProfileSelection();
+          this.finish();
+          return;
+        }
+      }
+    }
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+
+    /*
      * If profiles are enabled (ie, the anonymous profile is disabled), then subscribe to
      * profile timeout events.
      */
@@ -61,10 +103,20 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
     }
   }
 
+  @Override
+  protected void onStop() {
+    super.onStop();
+
+    if (this.profile_event_sub != null) {
+      this.profile_event_sub.unsubscribe();
+      this.profile_event_sub = null;
+    }
+  }
+
   private void onProfileEvent(final ProfileEvent event) {
     if (event instanceof ProfileIdleTimedOut) {
       LOG.debug("profile idle timer: timed out");
-      UIThread.runOnUIThread(this::timedOut);
+      UIThread.runOnUIThread(this::goToProfileSelection);
     }
     if (event instanceof ProfileIdleTimeOutSoon) {
       LOG.debug("profile idle timer: time out warning");
@@ -85,7 +137,7 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
     }
   }
 
-  private void timedOut() {
+  private void goToProfileSelection() {
 
     /*
      * Dismiss any warning dialog that might be onscreen.
@@ -135,21 +187,5 @@ public abstract class ProfileTimeOutActivity extends SimplifiedActivity {
     Simplified.getProfilesController()
         .profileIdleTimer()
         .reset();
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-
-    final ProfilesControllerType profiles = Simplified.getProfilesController();
-    switch (profiles.profileAnonymousEnabled()) {
-      case ANONYMOUS_PROFILE_ENABLED: {
-        break;
-      }
-      case ANONYMOUS_PROFILE_DISABLED: {
-        this.profile_event_sub.unsubscribe();
-        break;
-      }
-    }
   }
 }

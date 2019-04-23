@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
-  package="org.nypl.simplified.vanilla"
+  package="org.nypl.simplified.vanilla.with_profiles"
   android:versionCode="1"
   android:versionName="1.0.0">
 
@@ -21,9 +21,9 @@
   <application
     android:name="org.nypl.simplified.app.Simplified"
     android:allowBackup="true"
-    android:contentDescription="@string/feature_app_name"
+    android:contentDescription="VanillaProfiles"
     android:icon="@drawable/vanilla_icon"
-    android:label="@string/feature_app_name"
+    android:label="VanillaProfiles"
     android:largeHeap="true"
     android:theme="@style/SimplifiedBlank"
     android:usesCleartextTraffic="true">
@@ -32,8 +32,8 @@
     <activity
       android:name="org.nypl.simplified.app.splash.SplashActivity"
       android:configChanges="orientation|screenSize"
-      android:contentDescription="Simplified Vanilla"
       android:exported="true"
+      android:contentDescription="Simplified Vanilla"
       android:label="Simplified Vanilla">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -42,44 +42,36 @@
     </activity>
 
     <!-- Main application parts -->
-    <activity
-      android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
+    <activity android:name="org.nypl.simplified.app.catalog.MainCatalogActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/catalog"
       android:exported="false"
       android:label="@string/catalog" />
-    <activity
-      android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
+    <activity android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/catalog"
       android:exported="false"
       android:label="@string/catalog" />
-    <activity
-      android:name="org.nypl.simplified.app.catalog.MainHoldsActivity"
+    <activity android:name="org.nypl.simplified.app.catalog.MainHoldsActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/holds"
       android:exported="false"
       android:label="@string/holds" />
 
-    <activity
-      android:name="org.nypl.simplified.app.CardCreatorActivity"
+    <activity android:name="org.nypl.simplified.app.CardCreatorActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="Card Creator"
       android:exported="false"
       android:label="Card Creator" />
 
-    <activity
-      android:name="org.nypl.simplified.app.login.LoginActivity"
+    <activity android:name="org.nypl.simplified.app.login.LoginActivity"
       android:configChanges="orientation|screenSize"
       android:exported="false" />
 
-    <activity
-      android:name="org.nypl.simplified.app.profiles.ProfileCreationActivity"
+    <activity android:name="org.nypl.simplified.app.profiles.ProfileCreationActivity"
       android:configChanges="orientation|screenSize"
       android:exported="false" />
-
-    <activity
-      android:name="org.nypl.simplified.app.profiles.ProfileSelectionActivity"
+    <activity android:name="org.nypl.simplified.app.profiles.ProfileSelectionActivity"
       android:configChanges="orientation|screenSize"
       android:exported="false" />
 
@@ -102,55 +94,47 @@
       android:contentDescription="@string/settings_accounts"
       android:exported="false"
       android:label="@string/settings_accounts" />
-    <activity
-      android:name="org.nypl.simplified.app.settings.SettingsVersionActivity"
+    <activity android:name="org.nypl.simplified.app.settings.SettingsVersionActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/versions_version"
-      android:exported="false"
-      android:label="@string/versions_version" />
+      android:label="@string/versions_version"
+      android:exported="false" />
 
-    <activity
-      android:name="org.nypl.simplified.app.helpstack.HelpActivity"
+    <activity android:name="org.nypl.simplified.app.helpstack.HelpActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/help"
       android:exported="false"
       android:label="@string/help" />
 
     <!-- General components -->
-    <activity
-      android:name="org.nypl.simplified.app.WebViewActivity"
+    <activity android:name="org.nypl.simplified.app.WebViewActivity"
       android:configChanges="orientation|screenSize"
       android:exported="false" />
 
     <!-- Catalog -->
-    <activity
-      android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
+    <activity android:name="org.nypl.simplified.app.catalog.CatalogBookDetailActivity"
       android:contentDescription="@string/catalog_book_detail"
       android:exported="false"
       android:label="@string/catalog_book_detail" />
-    <activity
-      android:name="org.nypl.simplified.app.catalog.CatalogBookReportActivity"
+    <activity android:name="org.nypl.simplified.app.catalog.CatalogBookReportActivity"
       android:contentDescription="@string/catalog_book_report"
       android:exported="false"
       android:label="@string/catalog_book_report" />
 
     <!-- Reader -->
-    <activity
-      android:name="org.nypl.simplified.app.reader.ReaderActivity"
+    <activity android:name="org.nypl.simplified.app.reader.ReaderActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/reader"
       android:exported="false"
       android:label="@string/reader" />
-    <activity
-      android:name="org.nypl.simplified.app.reader.toc.ReaderTOCActivity"
+    <activity android:name="org.nypl.simplified.app.reader.toc.ReaderTOCActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/reader_toc"
       android:exported="false"
       android:label="@string/reader_toc" />
 
     <!-- Audio book player -->
-    <activity
-      android:name="org.nypl.simplified.app.player.AudioBookPlayerActivity"
+    <activity android:name="org.nypl.simplified.app.player.AudioBookPlayerActivity"
       android:configChanges="orientation|screenSize"
       android:contentDescription="@string/audio_book_player"
       android:exported="false"
@@ -167,26 +151,21 @@
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>
-    <activity
-      android:name="com.tenmiles.helpstack.activities.NewIssueActivity"
+    <activity android:name="com.tenmiles.helpstack.activities.NewIssueActivity"
       android:contentDescription="@string/hs_issuebutton_title"
       android:label="@string/hs_issuebutton_title"
       android:windowSoftInputMode="adjustResize" />
-    <activity
-      android:name="com.tenmiles.helpstack.activities.NewUserActivity"
+    <activity android:name="com.tenmiles.helpstack.activities.NewUserActivity"
       android:windowSoftInputMode="adjustResize" />
-    <activity
-      android:name="com.tenmiles.helpstack.activities.IssueDetailActivity"
+    <activity android:name="com.tenmiles.helpstack.activities.IssueDetailActivity"
       android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
     <activity android:name="com.tenmiles.helpstack.activities.ArticleActivity" />
     <activity android:name="com.tenmiles.helpstack.activities.SectionActivity" />
     <activity android:name="com.tenmiles.helpstack.activities.ImageAttachmentDisplayActivity" />
-    <activity
-      android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
+    <activity android:name="com.tenmiles.helpstack.activities.EditAttachmentActivity"
       android:screenOrientation="portrait" />
 
-    <activity
-      android:name="org.nypl.simplified.app.ReportIssueActivity"
+    <activity android:name="org.nypl.simplified.app.ReportIssueActivity"
       android:contentDescription="@string/hs_issuebutton_title"
       android:label="@string/hs_issuebutton_title"
       android:windowSoftInputMode="adjustResize" />
@@ -197,7 +176,6 @@
       <intent-filter>
         <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
         <action android:name="android.intent.action.DOWNLOAD_NOTIFICATION_CLICKED" />
-
         <category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </receiver>

@@ -1,38 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:padding="32dp"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:orientation="vertical"
+  android:padding="16dp">
 
   <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:padding="8dp"
-      android:text="@string/versions_revision"
-      android:textStyle="bold"/>
+    android:id="@+id/settings_version_build_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:text="@string/versions_revision"
+    android:textSize="24sp"
+    android:textStyle="bold" />
 
   <TextView
-      android:id="@+id/settings_version_revision"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:padding="8dp"
-      android:text=""/>
+    android:id="@+id/settings_version_build"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/settings_version_build_title"
+    android:layout_marginBottom="16dp"
+    android:text="abcd" />
 
   <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:padding="8dp"
-      android:text="@string/versions_version"
-      android:textStyle="bold"/>
+    android:id="@+id/settings_version_version_title"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/settings_version_build"
+    android:layout_marginBottom="16dp"
+    android:text="@string/versions_version"
+    android:textSize="24sp"
+    android:textStyle="bold" />
 
   <TextView
-      android:id="@+id/settings_version_version"
+    android:id="@+id/settings_version_version"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/settings_version_version_title"
+    android:layout_marginBottom="16dp"
+    android:text="abcd" />
+
+  <RelativeLayout
+    android:id="@+id/settings_version_dev"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/settings_version_version">
+
+    <TextView
+      android:id="@+id/settings_version_dev_title"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:padding="8dp"
-      android:text=""/>
+      android:layout_marginBottom="16dp"
+      android:text="Developer Options"
+      android:textSize="24sp"
+      android:textStyle="bold" />
 
-</LinearLayout>
+    <Button
+      android:id="@+id/settings_version_dev_crash"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/settings_version_dev_title"
+      android:text="Crash" />
+
+  </RelativeLayout>
+
+</RelativeLayout>
