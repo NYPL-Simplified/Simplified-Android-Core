@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountBarcode
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
 import org.nypl.simplified.books.accounts.AccountEvent
 import org.nypl.simplified.books.accounts.AccountEventCreation.AccountCreationSucceeded
 import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed
@@ -47,7 +48,6 @@ import org.nypl.simplified.books.profiles.ProfileSelected
 import org.nypl.simplified.books.profiles.ProfilesDatabase
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType
 import org.nypl.simplified.books.reader.ReaderBookLocation
-import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.books.reader.ReaderColorScheme
 import org.nypl.simplified.books.reader.ReaderFontSelection
 import org.nypl.simplified.books.reader.ReaderPreferences
@@ -65,7 +65,6 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.tests.EventAssertions
-import org.nypl.simplified.tests.books.reader.bookmarks.NullReaderBookmarkService
 import org.nypl.simplified.tests.http.MockingHTTP
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -656,10 +655,11 @@ abstract class ProfilesControllerContract {
   @Throws(ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(
     dir_profiles: File): ProfilesDatabaseType {
-    return ProfilesDatabase.openWithAnonymousAccountDisabled(
+    return ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(Unit.unit()),
+      AccountBundledCredentialsEmpty.getInstance(),
       AccountsDatabases,
       dir_profiles)
   }

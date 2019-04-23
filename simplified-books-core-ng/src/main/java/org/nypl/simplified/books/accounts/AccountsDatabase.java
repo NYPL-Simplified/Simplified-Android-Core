@@ -159,7 +159,8 @@ public final class AccountsDatabase implements AccountsDatabaseType {
 
     final String[] account_dirs = directory.list();
     if (account_dirs != null) {
-      for (final String account_id_name : account_dirs) {
+      for (int index = 0; index < account_dirs.length; ++index) {
+        final String account_id_name = account_dirs[index];
         LOG.debug("opening account: {}/{}", directory, account_id_name);
 
         final Account account =
@@ -174,9 +175,31 @@ public final class AccountsDatabase implements AccountsDatabaseType {
             account_id_name);
 
         if (account != null) {
-          if (accounts_by_provider.containsKey(account.provider().id())) {
-            errors.add(new AccountsDatabaseDuplicateProviderException(
-              "Multiple accounts using the same provider: " + account.provider()));
+          final Account existing_account = accounts_by_provider.get(account.provider.id());
+          if (existing_account != null) {
+            final String message =
+              new StringBuilder(128)
+                .append("Multiple accounts using the same provider.")
+                .append("\n")
+                .append("  Provider: ")
+                .append(account.provider.id())
+                .append("\n")
+                .append("  Existing Account: ")
+                .append(existing_account.id.id())
+                .append("\n")
+                .append("  Opening Account: ")
+                .append(account.id.id())
+                .append("\n")
+                .toString();
+            LOG.error("{}", message);
+
+            try {
+              account.delete();
+            } catch (final AccountsDatabaseIOException e) {
+              LOG.error("could not delete broken account: ", e);
+            }
+
+            continue;
           }
 
           accounts.put(account.id, account);
@@ -214,18 +237,17 @@ public final class AccountsDatabase implements AccountsDatabaseType {
         book_databases.openDatabase(context, account_id, books_dir);
       final AccountDescription desc =
         AccountDescriptionJSON.deserializeFromFile(jom, account_file);
+      final AccountProvider provider =
+        account_providers.provider(desc.provider());
 
-      return new Account(
-        account_id,
-        account_dir,
-        account_events,
-        desc,
-        account_providers.provider(desc.provider()),
-        book_database);
+      return new Account(account_id, account_dir, account_events, desc, provider, book_database);
     } catch (final IOException e) {
       errors.add(new IOException("Could not parse account: " + account_file, e));
       return null;
-    } catch (final BookDatabaseException | AccountsDatabaseNonexistentProviderException e) {
+    } catch (final AccountsDatabaseNonexistentProviderException e) {
+      LOG.error("could not open account: {}: ", account_file, e);
+      return null;
+    } catch (final BookDatabaseException e) {
       errors.add(e);
       return null;
     }
@@ -482,6 +504,18 @@ public final class AccountsDatabase implements AccountsDatabaseType {
         this.account_events.send(new AccountEventUpdated(this.id));
       } catch (final IOException e) {
         throw new AccountsDatabaseIOException("Could not write account data", e);
+      }
+    }
+
+    public void delete() throws AccountsDatabaseIOException {
+      try {
+        LOG.debug("account [{}]: delete: {}", this.id.id(), this.directory);
+        this.book_database.delete();
+        DirectoryUtilities.directoryDelete(this.directory);
+      } catch (final IOException e) {
+        throw new AccountsDatabaseIOException(e.getMessage(), e);
+      } catch (BookDatabaseException e) {
+        throw new AccountsDatabaseIOException(e.getMessage(), new IOException(e));
       }
     }
   }

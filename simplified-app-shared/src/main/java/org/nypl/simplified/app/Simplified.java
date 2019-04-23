@@ -34,6 +34,9 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty;
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsJSON;
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsType;
 import org.nypl.simplified.books.accounts.AccountEvent;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
@@ -101,6 +104,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -163,6 +167,7 @@ public final class Simplified extends MultiDexApplication {
   private ReaderBookmarkServiceType readerBookmarksService;
   private Picasso local_image_loader;
   private OptionType<ThemeValue> branding_theme_override;
+  private AccountBundledCredentialsType bundled_credentials;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -512,6 +517,7 @@ public final class Simplified extends MultiDexApplication {
     final ObservableType<AccountEvent> account_events,
     final ObservableType<ProfileEvent> profile_events,
     final AccountProviderCollection account_providers,
+    final AccountBundledCredentialsType account_bundled_credentials,
     final File directory)
     throws ProfileDatabaseException {
 
@@ -523,20 +529,22 @@ public final class Simplified extends MultiDexApplication {
 
     if (anonymous) {
       LOG.debug("opening profile database with anonymous profile");
-      return ProfilesDatabase.openWithAnonymousAccountEnabled(
+      return ProfilesDatabase.openWithAnonymousProfileEnabled(
         context,
         account_events,
         account_providers,
+        account_bundled_credentials,
         AccountsDatabases.INSTANCE,
         account_providers.providerDefault(),
         directory);
     }
 
     LOG.debug("opening profile database without anonymous profile");
-    return ProfilesDatabase.openWithAnonymousAccountDisabled(
+    return ProfilesDatabase.openWithAnonymousProfileDisabled(
       context,
       account_events,
       account_providers,
+      account_bundled_credentials,
       AccountsDatabases.INSTANCE,
       directory);
   }
@@ -747,6 +755,17 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("Could not initialize account providers", e);
     }
 
+    try {
+      LOG.debug("initializing bundled credentials");
+      this.bundled_credentials = createBundledCredentials(asset_manager);
+    } catch (final FileNotFoundException e) {
+      LOG.debug("could not initialize bundled credentials: ", e);
+      this.bundled_credentials = AccountBundledCredentialsEmpty.getInstance();
+    } catch (final IOException e) {
+      LOG.debug("could not initialize bundled credentials: ", e);
+      throw new IllegalStateException("could not initialize bundled credentials", e);
+    }
+
     final ObservableType<AccountEvent> account_events = Observable.create();
     final ObservableType<ProfileEvent> profile_events = Observable.create();
     final ObservableType<ReaderBookmarkEvent> reader_bookmark_events = Observable.create();
@@ -760,6 +779,7 @@ public final class Simplified extends MultiDexApplication {
           account_events,
           profile_events,
           this.account_providers,
+          this.bundled_credentials,
           this.directory_profiles);
     } catch (final ProfileDatabaseException e) {
       throw new IllegalStateException("Could not initialize profile database", e);
@@ -862,6 +882,14 @@ public final class Simplified extends MultiDexApplication {
     }
 
     return Option.none();
+  }
+
+  private AccountBundledCredentialsType createBundledCredentials(
+    final AssetManager asset_manager) throws IOException {
+
+    try (final InputStream stream = asset_manager.open("account_bundled_credentials.json")) {
+      return AccountBundledCredentialsJSON.deserializeFromStream(new ObjectMapper(), stream);
+    }
   }
 
   private static final class NetworkConnectivity implements NetworkConnectivityType {

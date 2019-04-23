@@ -11,6 +11,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
 import org.nypl.simplified.books.accounts.AccountEvent
 import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountProviderCollection
@@ -48,7 +49,7 @@ abstract class ProfilesDatabaseContract {
   protected abstract fun context(): Context
 
   @Before
-  fun setup() {
+  open fun setup() {
     this.accountEvents = Observable.create()
     this.profileEvents = Observable.create()
   }
@@ -92,10 +93,11 @@ abstract class ProfilesDatabaseContract {
 
     this.expected.expect(ProfileDatabaseException::class.java)
     this.expected.expect(CausesContains(IOException::class.java, "Not a directory"))
-    ProfilesDatabase.openWithAnonymousAccountDisabled(
+    ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
   }
@@ -113,10 +115,11 @@ abstract class ProfilesDatabaseContract {
     this.expected.expect(ProfileDatabaseException::class.java)
     this.expected.expect(CausesContains(
       IOException::class.java, "Could not parse directory name as profile ID"))
-    ProfilesDatabase.openWithAnonymousAccountDisabled(
+    ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
   }
@@ -135,12 +138,11 @@ abstract class ProfilesDatabaseContract {
     val f_0 = File(f_pro, "0")
     f_0.mkdirs()
 
-    this.expected.expect(ProfileDatabaseException::class.java)
-    this.expected.expect(CausesContains(IOException::class.java, "Could not parse profile: "))
-    ProfilesDatabase.openWithAnonymousAccountDisabled(
+    ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
   }
@@ -159,10 +161,11 @@ abstract class ProfilesDatabaseContract {
 
     this.expected.expect(ProfileDatabaseException::class.java)
     this.expected.expect(CausesContains(IOException::class.java, "Could not parse profile: "))
-    ProfilesDatabase.openWithAnonymousAccountDisabled(
+    ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
   }
@@ -173,10 +176,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -193,10 +197,11 @@ abstract class ProfilesDatabaseContract {
 
     val account_providers = this.accountProviders()
 
-    val db = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers,
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -267,10 +272,11 @@ abstract class ProfilesDatabaseContract {
 
     val account_providers = this.accountProviders()
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers,
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -280,10 +286,11 @@ abstract class ProfilesDatabaseContract {
     val p1 = db0.createProfile(acc, "Gonzo")
     val p2 = db0.createProfile(acc, "Beaker")
 
-    val db1 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db1 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       account_providers,
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -310,10 +317,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -337,10 +345,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -359,10 +368,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -379,10 +389,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -402,10 +413,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -424,10 +436,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountEnabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileEnabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       exampleAccountProvider(),
       f_pro)
@@ -445,10 +458,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountEnabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileEnabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       exampleAccountProvider(),
       f_pro)
@@ -463,10 +477,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -488,10 +503,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -511,10 +527,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -533,10 +550,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -558,10 +576,11 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
@@ -581,16 +600,150 @@ abstract class ProfilesDatabaseContract {
     val f_tmp = DirectoryUtilities.directoryCreateTemporary()
     val f_pro = File(f_tmp, "profiles")
 
-    val db0 = ProfilesDatabase.openWithAnonymousAccountDisabled(
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(),
+      AccountBundledCredentialsEmpty.getInstance(),
       this.accountsDatabases(),
       f_pro)
 
     this.expected.expect(ProfileAnonymousDisabledException::class.java)
     this.expected.expectMessage(StringContains.containsString("The anonymous profile is not enabled"))
     db0.anonymousProfile()
+  }
+
+  /**
+   * If an account provider disappears, the profile database opens but the missing account
+   * is not present.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testOpenCreateReopenMissingAccountProvider() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val account_providers = accountProviders()
+
+    val db0 = ProfilesDatabase.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.accountEvents,
+      account_providers,
+      AccountBundledCredentialsEmpty.getInstance(),
+      accountsDatabases(),
+      f_pro)
+
+    val acc = fakeProvider("http://www.example.com/accounts0/")
+
+    val p0 = db0.createProfile(acc, "Kermit")
+    p0.createAccount(account_providers.provider(URI.create("http://www.example.com/accounts1/")))
+
+    ProfilesDatabase.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.accountEvents,
+      accountProvidersMissingOne(),
+      AccountBundledCredentialsEmpty.getInstance(),
+      accountsDatabases(),
+      f_pro)
+  }
+
+  /**
+   * If an account provider disappears, and the profile only contained a single account that
+   * has now disappeared, a new account is created.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testOpenCreateReopenMissingAccountProviderNew() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val account_providers_no_zero = accountProvidersMissingZero()
+
+    val db0 =
+      ProfilesDatabase.openWithAnonymousProfileDisabled(
+        this.context(),
+        this.accountEvents,
+        account_providers_no_zero,
+        AccountBundledCredentialsEmpty.getInstance(),
+        accountsDatabases(),
+        f_pro)
+
+    val p0 = db0.createProfile(account_providers_no_zero.providerDefault(), "Kermit")
+
+    val account_providers_no_one = accountProvidersMissingOne()
+
+    ProfilesDatabase.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.accountEvents,
+      account_providers_no_one,
+      AccountBundledCredentialsEmpty.getInstance(),
+      accountsDatabases(),
+      f_pro)
+  }
+
+  /**
+   * Repeatedly reopening a database in anonymous/non-anonymous mode doesn't cause any damage.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testOpenAnonymousNonAnonymousAlternating() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val account_providers = accountProviders()
+
+    val db0 =
+      ProfilesDatabase.openWithAnonymousProfileDisabled(
+      this.context(),
+      this.accountEvents,
+      account_providers,
+      AccountBundledCredentialsEmpty.getInstance(),
+      accountsDatabases(),
+      f_pro)
+
+    val acc = fakeProvider("http://www.example.com/accounts0/")
+    val p0 = db0.createProfile(acc, "Kermit")
+    val acc0 =
+      p0.createAccount(account_providers.provider(URI.create("http://www.example.com/accounts1/")))
+
+    val db1 =
+      ProfilesDatabase.openWithAnonymousProfileEnabled(
+        this.context(),
+        this.accountEvents,
+        account_providers,
+        AccountBundledCredentialsEmpty.getInstance(),
+        accountsDatabases(),
+        acc,
+        f_pro)
+
+    val p1 = db1.anonymousProfile()
+
+    Assert.assertTrue(p0.accounts().containsKey(acc0.id()))
+    Assert.assertTrue(p0.accounts().containsKey(acc0.id()))
+  }
+
+
+  private fun accountProvidersMissingZero(): AccountProviderCollectionType {
+    val p1 = fakeProvider("http://www.example.com/accounts1/")
+    val providers = TreeMap<URI, AccountProvider>()
+    providers[p1.id()] = p1
+    return AccountProviderCollection.create(p1, providers)
+  }
+
+  private fun accountProvidersMissingOne(): AccountProviderCollectionType {
+    val p0 = fakeProvider("http://www.example.com/accounts0/")
+    val providers = TreeMap<URI, AccountProvider>()
+    providers[p0.id()] = p0
+    return AccountProviderCollection.create(p0, providers)
   }
 
   private fun accountProviders(): AccountProviderCollectionType {

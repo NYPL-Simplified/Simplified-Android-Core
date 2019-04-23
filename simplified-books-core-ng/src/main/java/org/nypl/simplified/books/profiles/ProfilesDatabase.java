@@ -10,6 +10,8 @@ import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.Nullable;
 import com.io7m.junreachable.UnreachableCodeException;
 
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsType;
 import org.nypl.simplified.books.accounts.AccountEvent;
 import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountProvider;
@@ -107,7 +109,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   /**
    * Open a profile database from the given directory, creating a new database if one does not
-   * exist. The anonymous account will not be enabled, and will be ignored even if one is present
+   * exist. The anonymous profile will not be enabled, and will be ignored even if one is present
    * in the on-disk database.
    *
    * @param context           The Android context
@@ -117,10 +119,11 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
    * @throws ProfileDatabaseException If any errors occurred whilst trying to open the database
    */
 
-  public static ProfilesDatabaseType openWithAnonymousAccountDisabled(
+  public static ProfilesDatabaseType openWithAnonymousProfileDisabled(
     final Context context,
     final ObservableType<AccountEvent> account_events,
     final AccountProviderCollectionType account_providers,
+    final AccountBundledCredentialsType account_bundled_credentials,
     final AccountsDatabaseFactoryType accounts_databases,
     final File directory)
     throws ProfileDatabaseException {
@@ -140,6 +143,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       context,
       account_events,
       account_providers,
+      account_bundled_credentials,
       accounts_databases,
       directory,
       profiles,
@@ -171,6 +175,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final Context context,
     final ObservableType<AccountEvent> account_events,
     final AccountProviderCollectionType account_providers,
+    final AccountBundledCredentialsType account_bundled_credentials,
     final AccountsDatabaseFactoryType accounts_databases,
     final File directory,
     final SortedMap<ProfileID, Profile> profiles,
@@ -195,6 +200,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
             account_events,
             account_providers,
             accounts_databases,
+            account_bundled_credentials,
             jom,
             directory,
             errors,
@@ -210,20 +216,21 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   /**
    * Open a profile database from the given directory, creating a new database if one does not exist.
-   * The anonymous account will be enabled and will use the given account provider as the default
+   * The anonymous profile will be enabled and will use the given account provider as the default
    * account.
    *
    * @param account_providers The available account providers
-   * @param account_provider  The account provider that will be used for the anonymous account
+   * @param account_provider  The account provider that will be used for the anonymous profile
    * @param directory         The directory
    * @return A profile database
    * @throws ProfileDatabaseException If any errors occurred whilst trying to open the database
    */
 
-  public static ProfilesDatabaseType openWithAnonymousAccountEnabled(
+  public static ProfilesDatabaseType openWithAnonymousProfileEnabled(
     final Context context,
     final ObservableType<AccountEvent> account_events,
     final AccountProviderCollectionType account_providers,
+    final AccountBundledCredentialsType account_bundled_credentials,
     final AccountsDatabaseFactoryType accounts_databases,
     final AccountProvider account_provider,
     final File directory)
@@ -232,6 +239,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     Objects.requireNonNull(context, "Context");
     Objects.requireNonNull(account_events, "account_events");
     Objects.requireNonNull(account_providers, "Account providers");
+    Objects.requireNonNull(account_bundled_credentials, "Account bundled credentials");
     Objects.requireNonNull(accounts_databases, "Accounts databases");
     Objects.requireNonNull(account_provider, "Account provider");
     Objects.requireNonNull(directory, "Directory");
@@ -246,6 +254,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       context,
       account_events,
       account_providers,
+      account_bundled_credentials,
       accounts_databases,
       directory,
       profiles,
@@ -291,6 +300,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final ObservableType<AccountEvent> account_events,
     final AccountProviderCollectionType account_providers,
     final AccountsDatabaseFactoryType accounts_databases,
+    final AccountBundledCredentialsType account_bundled_credentials,
     final ObjectMapper jom,
     final File directory,
     final List<Exception> errors,
@@ -306,8 +316,12 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     final File profile_dir = new File(directory, profile_id_name);
     final File profile_file = new File(profile_dir, "profile.json");
-    final ProfileDescription desc;
+    if (!profile_file.isFile()) {
+      LOG.error("[{}]: {} is not a file", id, profile_file);
+      return null;
+    }
 
+    final ProfileDescription desc;
     try {
       desc = ProfileDescriptionJSON.deserializeFromFile(jom, profile_file);
     } catch (final IOException e) {
@@ -321,11 +335,23 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     try {
       final AccountsDatabaseType accounts =
         accounts_databases.openDatabase(
-          context, account_events, account_providers, profile_accounts_dir);
+          context,
+          account_events,
+          account_providers,
+          profile_accounts_dir);
 
-      final AccountType account =
-        accounts.accounts().get(accounts.accounts().firstKey());
+      createAutomaticAccounts(profile_id, account_providers, account_bundled_credentials, accounts);
 
+      if (accounts.accounts().isEmpty()) {
+        LOG.debug("profile is empty, creating a default account");
+        accounts.createAccount(account_providers.providerDefault());
+      }
+
+      Preconditions.checkArgument(
+        !accounts.accounts().isEmpty(),
+        "Accounts database must not be empty");
+
+      final AccountType account = accounts.accounts().get(accounts.accounts().firstKey());
       return new Profile(null, profile_id, profile_dir, desc, accounts, account);
     } catch (final AccountsDatabaseException e) {
       errors.add(e);
@@ -458,6 +484,49 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       }
     } catch (final IOException e) {
       throw new ProfileDatabaseIOException("Could not write profile data", e);
+    }
+  }
+
+  /**
+   * Create an account for all of the providers that are marked as "add automatically".
+   */
+
+  private static void createAutomaticAccounts(
+    final ProfileID profile,
+    final AccountProviderCollectionType account_providers,
+    final AccountBundledCredentialsType account_bundled_credentials,
+    final AccountsDatabaseType accounts) throws AccountsDatabaseException {
+
+    LOG.debug("[{}]: creating automatic accounts", profile.id());
+
+    for (final AccountProvider auto_provider : account_providers.providers().values()) {
+      if (auto_provider.addAutomatically()) {
+        final URI auto_provider_id = auto_provider.id();
+        LOG.debug(
+          "[{}]: account provider {} should be added automatically",
+          profile.id(),
+          auto_provider_id);
+
+        AccountType auto_account = accounts.accountsByProvider().get(auto_provider_id);
+        if (auto_account != null) {
+          LOG.debug("[{}]: automatic account {} already exists", profile.id(), auto_provider_id);
+        } else {
+          LOG.debug("[{}]: adding automatic account {}", profile.id(), auto_provider_id);
+          auto_account = accounts.createAccount(auto_provider);
+        }
+
+        final OptionType<AccountAuthenticationCredentials> credentials_opt =
+          account_bundled_credentials.bundledCredentialsFor(auto_provider.id());
+        if (credentials_opt.isSome()) {
+          LOG.debug("[{}]: credentials for automatic account {} were provided",
+            profile.id(), auto_provider_id);
+        } else {
+          LOG.debug("[{}]: credentials for automatic account {} were not provided",
+            profile.id(), auto_provider_id);
+        }
+
+        auto_account.setCredentials(credentials_opt);
+      }
     }
   }
 

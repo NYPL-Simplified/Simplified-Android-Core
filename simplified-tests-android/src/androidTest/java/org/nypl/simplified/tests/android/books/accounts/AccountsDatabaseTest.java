@@ -17,6 +17,7 @@ public final class AccountsDatabaseTest extends AccountsDatabaseContract {
 
   @Before
   public void setup() {
+    super.setup();
     this.instrumentationContext = InstrumentationRegistry.getContext();
   }
 
