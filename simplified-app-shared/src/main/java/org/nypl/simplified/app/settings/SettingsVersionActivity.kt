@@ -1,19 +1,17 @@
 package org.nypl.simplified.app.settings
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import org.nypl.simplified.app.BuildConfig
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity
 
 class SettingsVersionActivity : ProfileTimeOutActivity() {
-
-  companion object {
-    const val developerKey = "org.nypl.simplified.app.settings.SettingsVersionActivity.developer"
-  }
 
   private var buildClicks = 0
   private lateinit var crashButton: Button
@@ -58,6 +56,15 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
   override fun onStart() {
     super.onStart()
 
+    try {
+      val pkgManager = this.getPackageManager()
+      val pkgInfo = pkgManager.getPackageInfo(packageName, 0)
+      this.versionText.text = "${pkgInfo.versionName} (${pkgInfo.versionCode})"
+    } catch (e: PackageManager.NameNotFoundException) {
+      this.versionText.text = "Unavailable"
+    }
+
     this.developerOptions.visibility = View.GONE
+    this.buildText.text = BuildConfig.GIT_COMMIT
   }
 }

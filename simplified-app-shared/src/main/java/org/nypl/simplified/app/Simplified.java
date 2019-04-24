@@ -637,7 +637,7 @@ public final class Simplified extends MultiDexApplication {
     final Resources resources = this.getResources();
     final AssetManager asset_manager = this.getAssets();
 
-    LOG.debug("build: {}", BuildRevision.revision(asset_manager));
+    LOG.debug("build: {}", BuildConfig.GIT_COMMIT);
 
     LOG.debug("creating thread pools");
     this.exec_catalog_feeds =

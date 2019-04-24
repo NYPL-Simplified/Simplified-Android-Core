@@ -21,7 +21,8 @@
     android:layout_height="wrap_content"
     android:layout_below="@id/settings_version_build_title"
     android:layout_marginBottom="16dp"
-    android:text="abcd" />
+    android:fontFamily="monospace"
+    android:text="0c40e0a2c5936a90a29989252eb34c67cdf3876e" />
 
   <TextView
     android:id="@+id/settings_version_version_title"
@@ -39,7 +40,8 @@
     android:layout_height="wrap_content"
     android:layout_below="@id/settings_version_version_title"
     android:layout_marginBottom="16dp"
-    android:text="abcd" />
+    android:fontFamily="monospace"
+    android:text="1.0.0 (2000)" />
 
   <RelativeLayout
     android:id="@+id/settings_version_dev"

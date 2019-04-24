@@ -3,10 +3,23 @@ description = 'simplified-app-shared'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+def getGitHash = { ->
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine 'git', 'rev-parse', 'HEAD'
+    standardOutput = stdout
+  }
+  return stdout.toString().trim()
+}
+
 android {
   compileSdkVersion 27
   buildToolsVersion "28.0.2"
   useLibrary 'org.apache.http.legacy'
+
+  defaultConfig {
+    buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
+  }
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
