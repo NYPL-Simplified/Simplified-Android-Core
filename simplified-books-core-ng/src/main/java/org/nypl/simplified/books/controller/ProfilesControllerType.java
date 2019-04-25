@@ -10,8 +10,6 @@ import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.accounts.AccountEvent;
 import org.nypl.simplified.books.accounts.AccountEventCreation;
 import org.nypl.simplified.books.accounts.AccountEventDeletion;
-import org.nypl.simplified.books.accounts.AccountEventLogin;
-import org.nypl.simplified.books.accounts.AccountEventLogout;
 import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountType;
@@ -112,17 +110,6 @@ public interface ProfilesControllerType {
     throws ProfileNoneCurrentException;
 
   /**
-   * Attempt to login using the current account of the current profile. The login is attempted
-   * using the given credentials.
-   *
-   * @param credentials The credentials
-   * @return A future that returns a login event
-   */
-
-  FluentFuture<AccountEventLogin> profileAccountCurrentLogin(
-    AccountAuthenticationCredentials credentials);
-
-  /**
    * Attempt to login using the given account of the current profile. The login is attempted
    * using the given credentials.
    *
@@ -131,7 +118,7 @@ public interface ProfilesControllerType {
    * @return A future that returns a login event
    */
 
-  FluentFuture<AccountEventLogin> profileAccountLogin(
+  FluentFuture<Unit> profileAccountLogin(
     AccountID account,
     AccountAuthenticationCredentials credentials);
 
@@ -199,20 +186,12 @@ public interface ProfilesControllerType {
     throws ProfileNoneCurrentException, ProfileNonexistentAccountProviderException;
 
   /**
-   * Attempt to log out using the current account of the current profile.
-   *
-   * @return A future that returns a logout event
-   */
-
-  FluentFuture<AccountEventLogout> profileAccountCurrentLogout();
-
-  /**
    * Attempt to log out of the given account of the current profile.
    *
    * @return A future that returns a logout event
    */
 
-  FluentFuture<AccountEventLogout> profileAccountLogout(AccountID account);
+  FluentFuture<Unit> profileAccountLogout(AccountID account);
 
   /**
    * Determine the root URI of the catalog based on the current account of the current profile,

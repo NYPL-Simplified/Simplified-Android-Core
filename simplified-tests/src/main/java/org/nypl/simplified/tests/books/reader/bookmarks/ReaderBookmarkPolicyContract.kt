@@ -17,9 +17,13 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Com
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyOutput.Event
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkPolicyState
 import java.util.Random
+import java.util.UUID
 
 open class ReaderBookmarkPolicyContract {
 
+  val accountID =
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+  
   val bookmark0 =
     ReaderBookmark(
       opdsId = "opdsid",
@@ -64,8 +68,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkLocalCreatedRemoteNotEnabled()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -94,8 +96,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkLocalCreatedRemoteNotPermitted()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -124,8 +124,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkLocalCreatedRemoteNotSupported()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -154,8 +152,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkLocalCreatedRemoteOK()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -186,8 +182,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkRemoteReceivedSyncMissing()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(Pair(accountID, setOf(bookmark1))),
@@ -217,8 +211,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkLocalCreatedTwice()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -243,8 +235,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkLocalCreatedIdleExplicit()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),
@@ -269,8 +259,6 @@ open class ReaderBookmarkPolicyContract {
   @Test
   fun testBookmarkSyncingRemotelyEnabled()
   {
-    val accountID = AccountID.create(23)
-
     val state =
       ReaderBookmarkPolicyState.create(
         locallySaved = mapOf(),

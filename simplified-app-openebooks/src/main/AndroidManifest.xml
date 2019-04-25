@@ -58,12 +58,7 @@
       </intent-filter>
 
     </activity>
-    <activity
-      android:name="org.nypl.simplified.app.login.LoginActivity"
-      android:configChanges="orientation|screenSize"
-      android:theme="@style/SimplifiedTheme_NoActionBar"
-      >
-    </activity>
+
     <activity
       android:name="org.nypl.simplified.app.catalog.MainBooksActivity"
       android:configChanges="orientation|screenSize"

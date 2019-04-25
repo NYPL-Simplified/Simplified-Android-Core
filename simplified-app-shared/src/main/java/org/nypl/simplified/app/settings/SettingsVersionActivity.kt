@@ -2,6 +2,7 @@ package org.nypl.simplified.app.settings
 
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -53,8 +54,26 @@ class SettingsVersionActivity : ProfileTimeOutActivity() {
     }
   }
 
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      android.R.id.home -> {
+        this.finish()
+        true
+      }
+      else ->
+        super.onOptionsItemSelected(item)
+    }
+  }
+
   override fun onStart() {
     super.onStart()
+
+    val bar = this.supportActionBar
+    if (bar != null) {
+      bar.setHomeAsUpIndicator(R.drawable.ic_arrow_back_white_24dp)
+      bar.setDisplayHomeAsUpEnabled(true)
+      bar.setHomeButtonEnabled(false)
+    }
 
     try {
       val pkgManager = this.getPackageManager()

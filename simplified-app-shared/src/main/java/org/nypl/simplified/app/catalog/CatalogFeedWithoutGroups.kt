@@ -71,12 +71,12 @@ class CatalogFeedWithoutGroups(
   private val uriNext: AtomicReference<URI> =
     AtomicReference<URI>(feed.feedNext)
   private val httpAuth: OptionType<HTTPAuthType> =
-    createHttpAuth(this.account.credentials())
+    createHttpAuth(this.account.loginState().credentials)
 
   private fun createHttpAuth(
-    credentials: OptionType<AccountAuthenticationCredentials>?): OptionType<HTTPAuthType> {
-    return if (credentials is Some<AccountAuthenticationCredentials>) {
-      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials.get()))
+    credentials: AccountAuthenticationCredentials?): OptionType<HTTPAuthType> {
+    return if (credentials != null) {
+      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
     } else {
       Option.none<HTTPAuthType>()
     }

@@ -64,10 +64,6 @@
       android:exported="false"
       android:label="Card Creator" />
 
-    <activity android:name="org.nypl.simplified.app.login.LoginActivity"
-      android:configChanges="orientation|screenSize"
-      android:exported="false" />
-
     <activity android:name="org.nypl.simplified.app.profiles.ProfileCreationActivity"
       android:configChanges="orientation|screenSize"
       android:exported="false" />

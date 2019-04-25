@@ -27,11 +27,15 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
 import java.util.Calendar
+import java.util.UUID
 
 abstract class BookDatabaseContract {
 
-  private val logger = LoggerFactory.getLogger(BookDatabaseContract::class.java)
-
+  private val logger =
+    LoggerFactory.getLogger(BookDatabaseContract::class.java)
+  private val accountID =
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+  
   protected abstract fun context(): Context
 
   /**
@@ -45,7 +49,7 @@ abstract class BookDatabaseContract {
 
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
     Assert.assertEquals(0L, database.books().size.toLong())
   }
 
@@ -59,7 +63,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val entry0 =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -93,7 +97,7 @@ abstract class BookDatabaseContract {
     database0.createOrUpdate(id2, entry2)
 
     val database1 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     Assert.assertEquals(3, database1.books().size.toLong())
     Assert.assertTrue(database1.books().contains(id0))
@@ -116,7 +120,7 @@ abstract class BookDatabaseContract {
 
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val db0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val entry0 =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -143,7 +147,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookID.create("abcd")
@@ -171,7 +175,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookID.create("abcd")
@@ -206,7 +210,7 @@ abstract class BookDatabaseContract {
     }
 
     val database1 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
     val databaseEntry1 = database1.entry(bookID)
 
     val book1: Book = this.run {
@@ -253,7 +257,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
     val bookID = BookID.create("abcd")
@@ -287,7 +291,7 @@ abstract class BookDatabaseContract {
     }
 
     val database1 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
     val databaseEntry1 = database1.entry(bookID)
 
     val book1: Book = this.run {
@@ -333,7 +337,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
     val bookID = BookID.create("abcd")
@@ -367,7 +371,7 @@ abstract class BookDatabaseContract {
     }
 
     val database1 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
     val databaseEntry1 = database1.entry(bookID)
 
     val book1: Book = this.run {
@@ -413,7 +417,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
     val bookID = BookID.create("abcd")
@@ -446,7 +450,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
     val bookID = BookID.create("abcd")
@@ -473,7 +477,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookID.create("abcd")
@@ -506,7 +510,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookID.create("abcd")
@@ -533,7 +537,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
     val bookID = BookID.create("abcd")
@@ -566,7 +570,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
     val bookID = BookID.create("abcd")
@@ -593,7 +597,7 @@ abstract class BookDatabaseContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
     val bookID = BookID.create("abcd")

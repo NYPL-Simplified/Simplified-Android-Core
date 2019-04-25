@@ -36,15 +36,13 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountAuthenticationProvider
 import org.nypl.simplified.books.accounts.AccountBarcode
-import org.nypl.simplified.books.accounts.AccountEventLogin
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed.ErrorCode.ERROR_ACCOUNT_NONEXISTENT
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed.ErrorCode.ERROR_CREDENTIALS_INCORRECT
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed.ErrorCode.ERROR_GENERAL
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed.ErrorCode.ERROR_NETWORK_EXCEPTION
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed.ErrorCode.ERROR_PROFILE_CONFIGURATION
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed.ErrorCode.ERROR_SERVER_ERROR
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginSucceeded
+import org.nypl.simplified.books.accounts.AccountLoginState
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_ACCOUNT_NONEXISTENT
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_CREDENTIALS_INCORRECT
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_GENERAL
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_NETWORK_EXCEPTION
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_PROFILE_CONFIGURATION
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_SERVER_ERROR
 import org.nypl.simplified.books.accounts.AccountPIN
 import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription
 import org.nypl.simplified.books.accounts.AccountType
@@ -57,10 +55,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A reusable login dialog.
- */
-
-/**
- * Construct a new dialog.
  */
 
 class LoginDialog : AppCompatDialogFragment() {
@@ -81,7 +75,6 @@ class LoginDialog : AppCompatDialogFragment() {
   private lateinit var onLoginCancelled: LoginCancelledType
   private lateinit var authentication: AccountProviderAuthenticationDescription
   private lateinit var documents: DocumentStoreType
-  private var loginTask: FluentFuture<Unit>? = null
 
   private fun setRequiredArguments(
     controller: ProfilesControllerType,
@@ -135,11 +128,6 @@ class LoginDialog : AppCompatDialogFragment() {
 
   override fun onCancel(@Nullable dialog: DialogInterface?) {
     this.logger.debug("login aborted")
-
-    val task = this.loginTask
-    if (task != null) {
-      task.cancel(true)
-    }
 
     UIThread.runOnUIThread {
       try {
@@ -254,9 +242,7 @@ class LoginDialog : AppCompatDialogFragment() {
         .setAuthenticationProvider(provider)
         .build()
 
-      this.loginTask = this.controller.profileAccountLogin(this.account.id(), accountCreds)
-        .catching(Exception::class.java, com.google.common.base.Function<Exception, AccountEventLogin> { event -> this.onLoginFailed(event!!) }, this.executor)
-        .transform(com.google.common.base.Function<AccountEventLogin, Unit> { event -> this.onAccountEvent(event!!) }, this.executor)
+      this.controller.profileAccountLogin(this.account.id(), accountCreds)
     }
 
     loginCancelButton.setOnClickListener { view ->
@@ -380,35 +366,6 @@ class LoginDialog : AppCompatDialogFragment() {
     return layout
   }
 
-  private fun onAccountEvent(event: AccountEventLogin): Unit {
-    return event.matchLogin<Unit, RuntimeException>(
-      { event -> this.onAccountEventLoginSuccess(event) },
-      { event ->
-        this.onAccountLoginFailure(event.exception(),
-          loginErrorCodeToLocalizedMessage(this.resources, event.errorCode()))
-      })
-  }
-
-  private fun onAccountEventLoginSuccess(
-    success: AccountLoginSucceeded): Unit {
-    this.logger.debug("login succeeded")
-
-    UIThread.runOnUIThread {
-      try {
-        this.onLoginSuccess.onLoginSucceeded(success.credentials())
-      } catch (e: Exception) {
-        this.logger.error("ignored exception in succeeded callback: ", e)
-      }
-
-      this.dismiss()
-    }
-    return Unit.unit()
-  }
-
-  private fun onLoginFailed(exception: Exception): AccountEventLogin {
-    return AccountLoginFailed.of(ERROR_GENERAL, Option.of(exception))
-  }
-
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
     if (result == null) {
@@ -436,7 +393,7 @@ class LoginDialog : AppCompatDialogFragment() {
 
     fun loginErrorCodeToLocalizedMessage(
       resources: Resources,
-      error: AccountLoginFailed.ErrorCode): String {
+      error: AccountLoginState.AccountLoginErrorCode): String {
 
       return when (error) {
         ERROR_PROFILE_CONFIGURATION ->

@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import org.nypl.audiobook.android.tests.sandbox.R
 
 class StyledActivity : AppCompatActivity() {
@@ -89,11 +90,20 @@ class StyledActivity : AppCompatActivity() {
       this.finish()
     }
 
+    val div2 = View(this)
+    div2.layoutParams = LinearLayout.LayoutParams(16, 16)
+
+    val progress = ProgressBar(this, null, android.R.attr.progressBarStyleLarge)
+    progress.isIndeterminate = true
+    progress.layoutParams = LinearLayout.LayoutParams(64, 64)
+
     layout.addView(button0)
     layout.addView(div0)
     layout.addView(button1)
     layout.addView(div1)
     layout.addView(button2)
+    layout.addView(div2)
+    layout.addView(progress)
   }
 
 }

@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.controller
 
-import com.io7m.jfunctional.None
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
@@ -194,12 +193,13 @@ internal class BookRevokeTask(
    */
 
   private fun getRequiredAccountCredentials(): AccountAuthenticationCredentials {
-    val accountCredentialsOpt = this.account.credentials()
-    return if (accountCredentialsOpt is None) {
+    val loginState = this.account.loginState()
+    val credentials = loginState.credentials
+    if (credentials != null) {
+      return credentials
+    } else {
       LOG.error("[{}] revocation requires credentials, but none are available", this.bookID.brief())
       throw BookRevokeExceptionNoCredentials()
-    } else {
-      (accountCredentialsOpt as Some<AccountAuthenticationCredentials>).get()
     }
   }
 

@@ -23,11 +23,16 @@ import org.nypl.simplified.opds.core.OPDSJSONSerializer
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.Calendar
+import java.util.UUID
 
 abstract class BookDatabaseEPUBContract {
 
-  private val logger = LoggerFactory.getLogger(BookDatabaseEPUBContract::class.java)
+  private val logger = 
+    LoggerFactory.getLogger(BookDatabaseEPUBContract::class.java)
 
+  private val accountID =
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+  
   protected abstract fun context(): Context
 
   /**
@@ -43,7 +48,7 @@ abstract class BookDatabaseEPUBContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookIDs.newFromText("abcd")
@@ -91,7 +96,7 @@ abstract class BookDatabaseEPUBContract {
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
     val database0 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
     val bookID = BookIDs.newFromText("abcd")
@@ -154,7 +159,7 @@ abstract class BookDatabaseEPUBContract {
     }
 
     val database1 =
-      BookDatabase.open(context(), parser, serializer, AccountID.create(1), directory)
+      BookDatabase.open(context(), parser, serializer, accountID, directory)
     val databaseEntry1 =
       database1.createOrUpdate(bookID, feedEntry)
 

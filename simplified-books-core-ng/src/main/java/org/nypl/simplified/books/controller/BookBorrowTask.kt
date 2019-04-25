@@ -694,12 +694,13 @@ class BookBorrowTask(
    */
 
   private fun getRequiredAccountCredentials(): AccountAuthenticationCredentials {
-    val accountCredentialsOpt = this.account.credentials()
-    return if (accountCredentialsOpt is None) {
+    val loginState = this.account.loginState()
+    val credentials = loginState.credentials
+    if (credentials != null) {
+      return credentials
+    } else {
       LOG.error("[{}] borrowing requires credentials, but none are available", this.bookId.brief())
       throw BookBorrowExceptionNoCredentials()
-    } else {
-      (accountCredentialsOpt as Some<AccountAuthenticationCredentials>).get()
     }
   }
 

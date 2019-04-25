@@ -63,10 +63,6 @@
       android:exported="false"
       android:label="Card Creator" />
 
-    <activity android:name="org.nypl.simplified.app.login.LoginActivity"
-      android:configChanges="orientation|screenSize"
-      android:exported="false" />
-
     <!-- Settings -->
     <activity
       android:name="org.nypl.simplified.app.settings.SettingsActivity"
@@ -86,6 +82,11 @@
       android:contentDescription="@string/settings_accounts"
       android:exported="false"
       android:label="@string/settings_accounts" />
+    <activity android:name="org.nypl.simplified.app.settings.SettingsVersionActivity"
+      android:configChanges="orientation|screenSize"
+      android:contentDescription="@string/versions_version"
+      android:label="@string/versions_version"
+      android:exported="false" />
 
     <activity android:name="org.nypl.simplified.app.helpstack.HelpActivity"
       android:configChanges="orientation|screenSize"

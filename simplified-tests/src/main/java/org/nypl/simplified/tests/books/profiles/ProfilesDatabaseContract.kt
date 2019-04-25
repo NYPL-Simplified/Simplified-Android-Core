@@ -31,6 +31,7 @@ import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.observable.Observable
 import org.nypl.simplified.observable.ObservableType
+import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -39,6 +40,7 @@ import java.util.TreeMap
 
 abstract class ProfilesDatabaseContract {
 
+  private lateinit var credentialStore: FakeAccountCredentialStorage
   private lateinit var accountEvents: ObservableType<AccountEvent>
   private lateinit var profileEvents: ObservableType<ProfileEvent>
 
@@ -50,6 +52,7 @@ abstract class ProfilesDatabaseContract {
 
   @Before
   open fun setup() {
+    this.credentialStore = FakeAccountCredentialStorage()
     this.accountEvents = Observable.create()
     this.profileEvents = Observable.create()
   }
@@ -98,6 +101,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
   }
@@ -120,6 +124,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
   }
@@ -143,6 +148,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
   }
@@ -166,6 +172,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
   }
@@ -181,6 +188,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -202,6 +210,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       account_providers,
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -277,6 +286,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       account_providers,
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -291,6 +301,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       account_providers,
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -322,6 +333,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -350,6 +362,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -373,6 +386,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -394,6 +408,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -418,6 +433,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -441,6 +457,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       exampleAccountProvider(),
       f_pro)
@@ -463,6 +480,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       exampleAccountProvider(),
       f_pro)
@@ -482,6 +500,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -508,6 +527,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -532,6 +552,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -555,6 +576,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -581,6 +603,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -605,6 +628,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       this.accountProviders(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       this.accountsDatabases(),
       f_pro)
 
@@ -633,6 +657,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       account_providers,
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       accountsDatabases(),
       f_pro)
 
@@ -646,6 +671,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       accountProvidersMissingOne(),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       accountsDatabases(),
       f_pro)
   }
@@ -671,6 +697,7 @@ abstract class ProfilesDatabaseContract {
         this.accountEvents,
         account_providers_no_zero,
         AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
         accountsDatabases(),
         f_pro)
 
@@ -683,6 +710,7 @@ abstract class ProfilesDatabaseContract {
       this.accountEvents,
       account_providers_no_one,
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialStore,
       accountsDatabases(),
       f_pro)
   }
@@ -703,12 +731,13 @@ abstract class ProfilesDatabaseContract {
 
     val db0 =
       ProfilesDatabase.openWithAnonymousProfileDisabled(
-      this.context(),
-      this.accountEvents,
-      account_providers,
-      AccountBundledCredentialsEmpty.getInstance(),
-      accountsDatabases(),
-      f_pro)
+        this.context(),
+        this.accountEvents,
+        account_providers,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        accountsDatabases(),
+        f_pro)
 
     val acc = fakeProvider("http://www.example.com/accounts0/")
     val p0 = db0.createProfile(acc, "Kermit")
@@ -721,6 +750,7 @@ abstract class ProfilesDatabaseContract {
         this.accountEvents,
         account_providers,
         AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
         accountsDatabases(),
         acc,
         f_pro)

@@ -16,12 +16,12 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Switch
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
-import com.google.common.util.concurrent.FluentFuture
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.tenmiles.helpstack.HSHelpStack
@@ -38,18 +38,18 @@ import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountBarcode
 import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountEventLogin
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginSucceeded
-import org.nypl.simplified.books.accounts.AccountEventLogout
-import org.nypl.simplified.books.accounts.AccountEventLogout.AccountLogoutFailed
-import org.nypl.simplified.books.accounts.AccountEventLogout.AccountLogoutSucceeded
+import org.nypl.simplified.books.accounts.AccountEventLoginStateChanged
 import org.nypl.simplified.books.accounts.AccountID
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggingOut
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginFailed
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLogoutFailed
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.books.accounts.AccountPIN
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.eula.EULAType
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
-import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onException
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.slf4j.LoggerFactory
@@ -60,6 +60,7 @@ import java.net.URI
  */
 
 class SettingsAccountActivity : NavigationDrawerActivity() {
+
 
   private val logger = LoggerFactory.getLogger(SettingsAccountActivity::class.java)
 
@@ -82,8 +83,11 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   private lateinit var license: TableRow
   private lateinit var account: AccountType
   private lateinit var syncSwitch: Switch
+  private lateinit var actionLayout: ViewGroup
+  private lateinit var actionText: TextView
+  private lateinit var actionProgress: ProgressBar
 
-  private val accountEventSubscription: ObservableSubscriptionType<AccountEvent>? = null
+  private var accountEventSubscription: ObservableSubscriptionType<AccountEvent>? = null
 
   override fun navigationDrawerGetActivityTitle(resources: Resources): String {
     return resources.getString(R.string.settings)
@@ -125,7 +129,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         WebViewActivity.setActivityArguments(
           arguments = argumentBundle,
           uri = eula_uri.toString(),
-          title = resources.getString(R.string.settings_eula))
+          title = this.resources.getString(R.string.settings_eula))
         eulaIntent.putExtras(argumentBundle)
         this.startActivity(eulaIntent)
       }
@@ -193,6 +197,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.findViewById(R.id.link_license)
     this.syncSwitch =
       this.findViewById(R.id.sync_switch)
+    this.actionLayout =
+      this.findViewById(R.id.settings_action_layout)
+    this.actionText =
+      this.actionLayout.findViewById(R.id.settings_action_text)
+    this.actionProgress =
+      this.actionLayout.findViewById(R.id.settings_action_progress)
 
     val bar = this.supportActionBar
     if (bar != null) {
@@ -220,7 +230,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
       this.reportIssue.setOnClickListener {
         val intent = Intent(this, ReportIssueActivity::class.java)
         val argumentBundle = Bundle()
-        argumentBundle.putSerializable("selected_account", this.account.id())
+        argumentBundle.putSerializable("selected_account", this.account.id().uuid.toString())
         intent.putExtras(argumentBundle)
         this.startActivity(intent)
       }
@@ -373,55 +383,77 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     }
   }
 
-  override fun onDestroy() {
-    super.onDestroy()
+  override fun onStart() {
+    super.onStart()
+
+    this.accountEventSubscription =
+      Simplified.getProfilesController()
+        .accountEvents()
+        .subscribe { event -> this.onAccountEvent(event) }
+
+    this.configureLoginFieldVisibilityAndContents()
+  }
+
+  override fun onStop() {
+    super.onStop()
+
     this.accountEventSubscription?.unsubscribe()
   }
 
   private fun onAccountEvent(event: AccountEvent): Unit {
-    this.logger.debug("onAccountEvent: {}", event)
-
-    if (event is AccountEventLogin) {
-      if (event is AccountLoginSucceeded) {
-        return this.onAccountEventLoginSucceeded(event)
-      } else if (event is AccountLoginFailed) {
-        return this.onAccountEventLoginFailed(event)
+    return if (event is AccountEventLoginStateChanged) {
+      if (event.accountID != this.account.id()) {
+        return Unit.unit()
       }
-    }
 
-    if (event is AccountEventLogout) {
-      if (event is AccountLogoutSucceeded) {
-        return this.onAccountEventLogoutSucceeded(event)
-      } else if (event is AccountLogoutFailed) {
-        return this.onAccountEventLogoutFailed(event)
+      when (val state = event.state) {
+        AccountNotLoggedIn ->
+          this.onAccountEventNotLoggedIn()
+        AccountLoggingIn ->
+          this.onAccountEventLoggingIn()
+        is AccountLoginFailed ->
+          this.onAccountEventLoginFailed(state)
+        is AccountLoggedIn ->
+          this.onAccountEventLoginSucceeded()
+        AccountLoggingOut ->
+          this.onAccountEventLoggingOut()
+        is AccountLogoutFailed ->
+          this.onAccountEventLogoutFailed(state)
       }
+    } else {
+      Unit.unit()
     }
-
-    return Unit.unit()
   }
 
   private fun onAccountEventLoginFailed(failed: AccountLoginFailed): Unit {
-    this.logger.debug("onLoginFailed: {}", failed)
+    this.logger.debug("onAccountEventLoginFailed: {}", failed)
 
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      LoginDialog.loginErrorCodeToLocalizedMessage(this.resources, failed.errorCode()), null)
+      LoginDialog.loginErrorCodeToLocalizedMessage(this.resources, failed.errorCode), null)
     { this.login.isEnabled = true }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
   }
 
-  private fun onAccountEventLoginSucceeded(succeeded: AccountLoginSucceeded): Unit {
-    this.logger.debug("onLoginSucceeded: {}", succeeded)
+  private fun onAccountEventLoggingIn(): Unit {
+    this.logger.debug("onAccountEventLoggingIn")
+
+    UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
+    return Unit.unit()
+  }
+
+  private fun onAccountEventLoginSucceeded(): Unit {
+    this.logger.debug("onAccountEventLoginSucceeded")
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
   }
 
   private fun onAccountEventLogoutFailed(failed: AccountLogoutFailed): Unit {
-    this.logger.debug("onLogoutFailed: {}", failed)
+    this.logger.debug("onAccountEventLogoutFailed: {}", failed)
 
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
@@ -433,40 +465,92 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     return Unit.unit()
   }
 
-  private fun onAccountEventLogoutSucceeded(succeeded: AccountLogoutSucceeded): Unit {
-    this.logger.debug("onLogoutSucceeded: {}", succeeded)
+  private fun onAccountEventLoggingOut(): Unit {
+    this.logger.debug("onAccountEventLoggingOut")
+
+    UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
+    return Unit.unit()
+  }
+
+  private fun onAccountEventNotLoggedIn(): Unit {
+    this.logger.debug("onAccountEventNotLoggedIn")
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }
     return Unit.unit()
   }
 
   private fun configureLoginFieldVisibilityAndContents() {
-    val credentialsOpt = this.account.credentials()
-    if (credentialsOpt is Some<AccountAuthenticationCredentials>) {
-      val credentials = credentialsOpt.get()
-
-      this.pinText.setText(credentials.pin().value())
-      this.pinText.isEnabled = false
-
-      this.barcodeText.setText(credentials.barcode().value())
-      this.barcodeText.isEnabled = false
-
-      this.login.isEnabled = true
-      this.login.setText(R.string.settings_log_out)
-      this.login.setOnClickListener {
-        this.configureDisableLoginForm()
-        this.tryLogout()
+    val state = this.account.loginState()
+    return when (state) {
+      AccountNotLoggedIn -> {
+        this.actionLayout.visibility = View.INVISIBLE
+        this.configureEnableLoginForm()
       }
-    } else {
-      this.pinText.isEnabled = true
-      this.barcodeText.isEnabled = true
 
-      this.login.isEnabled = true
-      this.login.setText(R.string.settings_log_in)
-      this.login.setOnClickListener {
-        this.configureDisableLoginForm()
-        this.tryLogin()
+      is AccountLoggedIn -> {
+        val credentials = state.credentials
+
+        this.actionLayout.visibility = View.INVISIBLE
+
+        this.pinText.setText(credentials.pin().value())
+        this.pinText.isEnabled = false
+
+        this.barcodeText.setText(credentials.barcode().value())
+        this.barcodeText.isEnabled = false
+
+        this.login.isEnabled = true
+        this.login.setText(R.string.settings_log_out)
+        this.login.setOnClickListener {
+          this.configureDisableLoginForm()
+          this.tryLogout()
+        }
       }
+
+      AccountLoggingOut -> {
+        this.actionLayout.visibility = View.VISIBLE
+        this.actionProgress.visibility = View.VISIBLE
+        this.actionText.setText(R.string.settings_logout_in_progress)
+        this.configureDisableLoginForm()
+      }
+
+      AccountLoggingIn -> {
+        this.actionLayout.visibility = View.VISIBLE
+        this.actionProgress.visibility = View.VISIBLE
+        this.actionText.setText(R.string.settings_login_in_progress)
+        this.configureDisableLoginForm()
+      }
+
+      is AccountLoginFailed -> {
+        this.actionLayout.visibility = View.VISIBLE
+        this.actionProgress.visibility = View.INVISIBLE
+        this.actionText.setText(R.string.settings_login_failed)
+        this.configureEnableLoginForm()
+      }
+
+      is AccountLogoutFailed -> {
+        this.actionLayout.visibility = View.VISIBLE
+        this.actionProgress.visibility = View.INVISIBLE
+        this.actionText.setText(R.string.settings_logout_failed)
+
+        this.login.isEnabled = true
+        this.login.setText(R.string.settings_log_out)
+        this.login.setOnClickListener {
+          this.configureDisableLoginForm()
+          this.tryLogout()
+        }
+      }
+    }
+  }
+
+  private fun configureEnableLoginForm() {
+    this.pinText.isEnabled = true
+    this.barcodeText.isEnabled = true
+
+    this.login.isEnabled = true
+    this.login.setText(R.string.settings_log_in)
+    this.login.setOnClickListener {
+      this.configureDisableLoginForm()
+      this.tryLogin()
     }
   }
 
@@ -477,10 +561,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
   }
 
   private fun tryLogout(): Unit {
-    FluentFuture
-      .from(Simplified.getProfilesController().profileAccountLogout(this.account.id()))
-      .onException(Exception::class.java) { event -> AccountLogoutFailed.ofException(event) }
-      .map { event -> this.onAccountEvent(event) }
+    Simplified.getProfilesController()
+      .profileAccountLogout(this.account.id())
+      .onException(Exception::class.java) { exception ->
+        this.logger.error("error during logout: ", exception)
+        Unit.unit()
+      }
 
     return Unit.unit()
   }
@@ -492,11 +578,12 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
         AccountBarcode.create(this.barcodeText.text.toString()))
         .build()
 
-    FluentFuture
-      .from(Simplified.getProfilesController().profileAccountLogin(this.account.id(), credentials))
-      .onException(Exception::class.java) { event -> AccountLoginFailed.ofException(event) }
-      .map { event -> this.onAccountEvent(event) }
-
+    Simplified.getProfilesController()
+      .profileAccountLogin(this.account.id(), credentials)
+      .onException(Exception::class.java) { exception ->
+        this.logger.error("error during login: ", exception)
+        Unit.unit()
+      }
     return Unit.unit()
   }
 

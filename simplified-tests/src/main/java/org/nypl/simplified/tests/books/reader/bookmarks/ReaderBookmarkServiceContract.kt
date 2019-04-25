@@ -11,6 +11,7 @@ import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountBarcode
 import org.nypl.simplified.books.accounts.AccountEvent
 import org.nypl.simplified.books.accounts.AccountID
+import org.nypl.simplified.books.accounts.AccountLoginState
 import org.nypl.simplified.books.accounts.AccountPIN
 import org.nypl.simplified.books.accounts.AccountPreferences
 import org.nypl.simplified.books.accounts.AccountProvider
@@ -42,11 +43,15 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.net.URI
 import java.nio.charset.Charset
+import java.util.UUID
 
 abstract class ReaderBookmarkServiceContract {
 
+  val fakeAccountID =
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+  
   protected abstract val logger: Logger
-
+  
   protected abstract fun bookmarkService(
     threads: (Runnable) -> Thread,
     events: ObservableType<ReaderBookmarkEvent>,
@@ -149,10 +154,10 @@ abstract class ReaderBookmarkServiceContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.credentials())
-      .thenReturn(Option.some(this.accountCredentials))
+    Mockito.`when`(account.loginState())
+      .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(2323))
+      .thenReturn(fakeAccountID)
     Mockito.`when`(account.provider())
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase())
@@ -163,10 +168,10 @@ abstract class ReaderBookmarkServiceContract {
     val profile =
       Mockito.mock(ProfileType::class.java)
 
-    Mockito.`when`(profile.account(AccountID.create(2323)))
+    Mockito.`when`(profile.account(fakeAccountID))
       .thenReturn(account)
     Mockito.`when`(profile.accounts())
-      .thenReturn(sortedMapOf(Pair(AccountID.create(2323), account)))
+      .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
       .thenReturn(ProfileID.create(23))
 
@@ -189,13 +194,13 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
   }
 
   /**
@@ -321,10 +326,10 @@ abstract class ReaderBookmarkServiceContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.credentials())
-      .thenReturn(Option.some(this.accountCredentials))
+    Mockito.`when`(account.loginState())
+      .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(2323))
+      .thenReturn(fakeAccountID)
     Mockito.`when`(account.provider())
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase())
@@ -336,10 +341,10 @@ abstract class ReaderBookmarkServiceContract {
       Mockito.mock(ProfileType::class.java)
 
     Mockito.`when`(profile.accounts())
-      .thenReturn(sortedMapOf(Pair(AccountID.create(2323), account)))
+      .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
       .thenReturn(ProfileID.create(23))
-    Mockito.`when`(profile.account(AccountID.create(2323)))
+    Mockito.`when`(profile.account(fakeAccountID))
       .thenReturn(account)
 
     val profiles =
@@ -361,19 +366,19 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
 
     Assert.assertEquals(1, receivedBookmarks.size)
     Assert.assertEquals(
@@ -516,10 +521,10 @@ abstract class ReaderBookmarkServiceContract {
     val account =
       Mockito.mock(AccountType::class.java)
 
-    Mockito.`when`(account.credentials())
-      .thenReturn(Option.some(this.accountCredentials))
+    Mockito.`when`(account.loginState())
+      .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(2323))
+      .thenReturn(fakeAccountID)
     Mockito.`when`(account.provider())
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase())
@@ -531,10 +536,10 @@ abstract class ReaderBookmarkServiceContract {
       Mockito.mock(ProfileType::class.java)
 
     Mockito.`when`(profile.accounts())
-      .thenReturn(sortedMapOf(Pair(AccountID.create(2323), account)))
+      .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
       .thenReturn(ProfileID.create(23))
-    Mockito.`when`(profile.account(AccountID.create(2323)))
+    Mockito.`when`(profile.account(fakeAccountID))
       .thenReturn(account)
 
     val profiles =
@@ -556,19 +561,19 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assert.assertEquals(2323, event.accountID.id()) })
+      { event -> Assert.assertEquals(fakeAccountID, event.accountID) })
 
     Assert.assertEquals(2, receivedBookmarks.size)
     Assert.assertEquals(

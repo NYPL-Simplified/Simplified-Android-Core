@@ -3,12 +3,9 @@ package org.nypl.simplified.tests.books.controller
 import android.content.Context
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-
 import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Unit
-
 import org.hamcrest.core.IsInstanceOf
 import org.junit.After
 import org.junit.Assert
@@ -20,6 +17,8 @@ import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountBarcode
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
 import org.nypl.simplified.books.accounts.AccountEvent
+import org.nypl.simplified.books.accounts.AccountLoginState
+import org.nypl.simplified.books.accounts.AccountLoginState.*
 import org.nypl.simplified.books.accounts.AccountPIN
 import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription
@@ -61,9 +60,9 @@ import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.books.BooksContract
 import org.nypl.simplified.tests.books.MappedHTTP
+import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
-
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -86,6 +85,7 @@ abstract class BooksControllerContract {
   @Rule
   val expected = ExpectedException.none()
 
+  private lateinit var credentialsStore: FakeAccountCredentialStorage
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorDownloads: ListeningExecutorService
   private lateinit var executorBooks: ListeningExecutorService
@@ -147,11 +147,10 @@ abstract class BooksControllerContract {
       .build()
   }
 
-  private fun correctCredentials(): OptionType<AccountAuthenticationCredentials> {
-    return Option.of(
-      AccountAuthenticationCredentials.builder(
-        AccountPIN.create("1234"), AccountBarcode.create("abcd"))
-        .build())
+  private fun correctCredentials(): AccountAuthenticationCredentials {
+    return AccountAuthenticationCredentials.builder(
+      AccountPIN.create("1234"), AccountBarcode.create("abcd"))
+      .build()
   }
 
   private fun createController(
@@ -209,6 +208,7 @@ abstract class BooksControllerContract {
   @Before
   @Throws(Exception::class)
   fun setUp() {
+    this.credentialsStore = FakeAccountCredentialStorage()
     this.http = MockingHTTP()
     this.executorDownloads = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
     this.executorBooks = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
@@ -262,7 +262,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -307,9 +307,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
-
-    Assert.assertTrue(account.credentials().isSome)
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -323,8 +321,7 @@ abstract class BooksControllerContract {
         Option.none<HTTPProblemReport>()))
 
     controller.booksSync(account).get()
-
-    Assert.assertTrue(account.credentials().isNone)
+    Assert.assertEquals(AccountNotLoggedIn, account.loginState())
   }
 
   /**
@@ -354,11 +351,11 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
-    Assert.assertTrue(account.credentials().isSome)
+    Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState())
     controller.booksSync(account).get()
-    Assert.assertTrue(account.credentials().isSome)
+    Assert.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState())
   }
 
   /**
@@ -389,9 +386,9 @@ abstract class BooksControllerContract {
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
 
-    Assert.assertTrue(account.credentials().isNone)
+    Assert.assertEquals(AccountNotLoggedIn, account.loginState())
     controller.booksSync(account).get()
-    Assert.assertTrue(account.credentials().isNone)
+    Assert.assertEquals(AccountNotLoggedIn, account.loginState())
   }
 
   /**
@@ -421,7 +418,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -465,7 +462,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -534,7 +531,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     /*
      * Populate the database by syncing against a feed that contains books.
@@ -638,7 +635,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -706,7 +703,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -729,7 +726,7 @@ abstract class BooksControllerContract {
         0L))
 
     controller.booksSync(account).get()
-    account.setCredentials(Option.none())
+    account.setLoginState(AccountNotLoggedIn)
 
     val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
@@ -772,7 +769,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -823,7 +820,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -888,7 +885,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -953,7 +950,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -1034,7 +1031,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -1110,7 +1107,7 @@ abstract class BooksControllerContract {
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id())
     val account = profile.createAccount(provider)
-    account.setCredentials(correctCredentials())
+    account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.http.addResponse(
       "urn:fake-auth:0",
@@ -1164,6 +1161,7 @@ abstract class BooksControllerContract {
       accountEvents,
       accountProviders(Unit.unit()),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialsStore,
       AccountsDatabases,
       dirProfiles)
   }

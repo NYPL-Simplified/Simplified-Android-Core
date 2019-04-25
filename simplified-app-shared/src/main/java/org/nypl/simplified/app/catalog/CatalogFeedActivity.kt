@@ -37,7 +37,6 @@ import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.login.LoginActivity
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.controller.ProfileFeedRequest
@@ -491,15 +490,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     feedURI: URI,
     exception: java.lang.Exception) {
 
-    /*
-     * Redirect the user to a login screen.
-     */
-
-    UIThread.runOnUIThread {
-      val i = Intent(this@CatalogFeedActivity, LoginActivity::class.java)
-      this.startActivity(i)
-      this.finish()
-    }
+    // XXX: ?
   }
 
   private fun onFeedResultSuccess(uri: URI, feed: Feed) {

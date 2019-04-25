@@ -53,7 +53,6 @@ class CatalogAcquisitionButtonController(
   private val documents: DocumentStoreType) : OnClickListener {
 
   override fun onClick(@Nullable v: View) {
-
     if (!this.networkConnectivity.isNetworkAvailable) {
       Toast.makeText(
         this.activity.applicationContext,
@@ -62,12 +61,14 @@ class CatalogAcquisitionButtonController(
         .show()
     }
 
-    val account = accountForBook(this.profiles, this.bookRegistry, this.id)
+    val account =
+      accountForBook(this.profiles, this.bookRegistry, this.id)
 
-    val authentication_required = account.provider().authentication().isSome && this.acquisition.relation !== OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
+    val authenticationRequired =
+      account.provider().authentication().isSome && this.acquisition.relation !== OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
 
-    val authentication_provided = account.credentials().isSome
-    if (authentication_required && !authentication_provided) {
+    val authenticationProvided = account.loginState().credentials != null
+    if (authenticationRequired && !authenticationProvided) {
       this.tryLogin(account)
       return
     }
@@ -105,9 +106,7 @@ class CatalogAcquisitionButtonController(
     LOG.debug("login cancelled")
   }
 
-  private fun onLoginSuccess(
-    account: AccountType) {
-
+  private fun onLoginSuccess(account: AccountType) {
     LOG.debug("login succeeded")
     this.tryBorrow(account)
   }
@@ -135,8 +134,8 @@ class CatalogAcquisitionButtonController(
           override fun some(some: Some<BookWithStatus>): AccountType {
             try {
               val profile = profiles.profileCurrent()
-              val account_id = some.get().book().account
-              return profile.account(account_id)
+              val accountID = some.get().book().account
+              return profile.account(accountID)
             } catch (e: ProfileNoneCurrentException) {
               throw IllegalStateException(e)
             } catch (e: AccountsDatabaseNonexistentException) {

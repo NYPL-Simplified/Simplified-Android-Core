@@ -37,9 +37,8 @@ class CatalogBookReadController(
   }
 
   override fun onClick(@Nullable v: View) {
-    val credentialsOpt = this.account.credentials()
-    if (credentialsOpt is Some<AccountAuthenticationCredentials>) {
-      val credentials = credentialsOpt.get();
+    val credentials = this.account.loginState().credentials
+    if (credentials != null) {
       CirculationAnalytics.postEvent(credentials, this.activity, this.entry, "open_book")
     }
 

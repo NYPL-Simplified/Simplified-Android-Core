@@ -1,43 +1,54 @@
 package org.nypl.simplified.books.controller
 
-import com.io7m.jfunctional.Option
-import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountEventLogout
-import org.nypl.simplified.books.accounts.AccountEventLogout.AccountLogoutFailed
-import org.nypl.simplified.books.accounts.AccountEventLogout.AccountLogoutFailed.ErrorCode.ERROR_ACCOUNTS_DATABASE
-import org.nypl.simplified.books.accounts.AccountEventLogout.AccountLogoutFailed.ErrorCode.ERROR_GENERAL
-import org.nypl.simplified.books.accounts.AccountEventLogout.AccountLogoutFailed.ErrorCode.ERROR_PROFILE_CONFIGURATION
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggingOut
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLogoutErrorCode.ERROR_ACCOUNTS_DATABASE
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLogoutErrorCode.ERROR_GENERAL
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLogoutFailed
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountNotLoggedIn
+import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.accounts.AccountsDatabaseException
+import org.nypl.simplified.books.book_database.BookDatabaseException
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType
-import org.nypl.simplified.observable.ObservableType
-import java.io.IOException
+import org.nypl.simplified.books.profiles.ProfileReadableType
+import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
 
 internal class ProfileAccountLogoutTask(
-  private val profiles: ProfilesDatabaseType,
   private val bookRegistry: BookRegistryType,
-  private val accountEvents: ObservableType<AccountEvent>) : Callable<AccountEventLogout> {
+  private val profile: ProfileReadableType,
+  private val account: AccountType) : Callable<Unit> {
 
-  override fun call(): AccountEventLogout =
-    this.run()
+  private val logger =
+    LoggerFactory.getLogger(ProfileAccountLogoutTask::class.java)
 
-  private fun run(): AccountEventLogout =
+  private fun debug(message: String, vararg arguments: Any?) =
+    this.logger.debug("[{}][{}] ${message}", this.profile.id().id(), this.account.id(), *arguments)
+
+  private fun error(message: String, vararg arguments: Any?) =
+    this.logger.error("[{}][{}] ${message}", this.profile.id().id(), this.account.id(), *arguments)
+
+  override fun call() {
+    this.account.setLoginState(AccountLoggingOut)
     try {
-      val profile = this.profiles.currentProfileUnsafe()
-      val account = profile.accountCurrent()
-      ProfileAccountLogoutSpecificTask(
-        profiles = this.profiles,
-        bookRegistry = this.bookRegistry,
-        accountID = account.id(),
-        accountEvents = this.accountEvents
-      ).call()
-    } catch (e: ProfileNoneCurrentException) {
-      AccountLogoutFailed.of(ERROR_PROFILE_CONFIGURATION, Option.some(e))
+      val accountBooks =
+        this.account.bookDatabase().books()
+
+      try {
+        this.debug("deleting book database")
+        this.account.bookDatabase().delete()
+        this.account.setLoginState(AccountNotLoggedIn)
+      } catch (e: BookDatabaseException) {
+        this.error("deleting book database: ", e)
+      } finally {
+        this.debug("clearing books from book registry")
+        for (book in accountBooks) {
+          this.bookRegistry.clearFor(book)
+        }
+      }
     } catch (e: AccountsDatabaseException) {
-      AccountLogoutFailed.of(ERROR_ACCOUNTS_DATABASE, Option.some(e))
-    } catch (e: IOException) {
-      AccountLogoutFailed.of(ERROR_GENERAL, Option.some(e))
+      this.account.setLoginState(AccountLogoutFailed(ERROR_ACCOUNTS_DATABASE, e))
+    } catch (e: Exception) {
+      this.account.setLoginState(AccountLogoutFailed(ERROR_GENERAL, e))
     }
+  }
 }

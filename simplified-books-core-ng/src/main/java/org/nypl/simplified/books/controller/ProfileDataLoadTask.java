@@ -43,7 +43,7 @@ final class ProfileDataLoadTask implements Runnable {
 
     final SortedMap<AccountID, AccountType> accounts = this.profile.accounts();
     for (final AccountType account : accounts.values()) {
-      LOG.debug("load: profile {} / account {}", this.profile.displayName(), account.id().id());
+      LOG.debug("load: profile {} / account {}", this.profile.displayName(), account.id());
       final BookDatabaseType books = account.bookDatabase();
       final Collection<BookID> book_ids = books.books();
       LOG.debug("load: updating {} books", book_ids.size());

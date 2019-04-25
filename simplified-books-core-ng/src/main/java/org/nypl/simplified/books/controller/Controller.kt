@@ -1,6 +1,5 @@
 package org.nypl.simplified.books.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.ListenableFuture
@@ -11,7 +10,6 @@ import com.io7m.jfunctional.None
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.OptionVisitorType
-import com.io7m.jfunctional.PartialFunctionType
 import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
@@ -22,8 +20,6 @@ import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountEvent
 import org.nypl.simplified.books.accounts.AccountEventCreation
 import org.nypl.simplified.books.accounts.AccountEventDeletion
-import org.nypl.simplified.books.accounts.AccountEventLogin
-import org.nypl.simplified.books.accounts.AccountEventLogout
 import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountProviderCollection
@@ -50,12 +46,9 @@ import org.nypl.simplified.books.profiles.ProfileReadableType
 import org.nypl.simplified.books.profiles.ProfileSelected
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.*
+import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType
 import org.nypl.simplified.downloader.core.DownloadType
 import org.nypl.simplified.downloader.core.DownloaderType
 import org.nypl.simplified.http.core.HTTPType
@@ -69,9 +62,9 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.ArrayList
 import java.util.SortedMap
+import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.TimeUnit
 
 /**
  * The default controller implementation.
@@ -180,29 +173,17 @@ class Controller private constructor(
     return profile.accountCurrent()
   }
 
-  override fun profileAccountCurrentLogin(
-    credentials: AccountAuthenticationCredentials): FluentFuture<AccountEventLogin> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountLoginTask(
-        this,
-        this.http,
-        this.profiles,
-        this.accountEvents,
-        PartialFunctionType<ProfileReadableType, AccountType, AccountsDatabaseNonexistentException> { it.accountCurrent() },
-        credentials)))
-  }
-
   override fun profileAccountLogin(
     account: AccountID,
-    credentials: AccountAuthenticationCredentials): FluentFuture<AccountEventLogin> {
+    credentials: AccountAuthenticationCredentials): FluentFuture<Unit> {
+
     return FluentFuture.from(
-      this.taskExecutor.submit(ProfileAccountLoginTask(
-        this,
-        this.http,
-        this.profiles,
-        this.accountEvents,
-        { p -> p.account(account) },
-        credentials)))
+      this.taskExecutor.submit(Callable {
+        val profile = this.profileCurrent()
+        val account = profile.account(account)
+        ProfileAccountLoginTask(this, this.http, profile, account, credentials).call()
+        Unit.unit()
+      }))
   }
 
   override fun profileAccountCreate(provider: URI): FluentFuture<AccountEventCreation> {
@@ -261,21 +242,14 @@ class Controller private constructor(
     return ImmutableList.sortedCopyOf(accounts)
   }
 
-  override fun profileAccountCurrentLogout(): FluentFuture<AccountEventLogout> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountLogoutTask(
-        profiles = this.profiles,
-        bookRegistry = this.bookRegistry,
-        accountEvents = this.accountEvents)))
-  }
-
-  override fun profileAccountLogout(account: AccountID): FluentFuture<AccountEventLogout> {
-    return FluentFuture.from(this.taskExecutor.submit(
-      ProfileAccountLogoutSpecificTask(
-        profiles = this.profiles,
-        bookRegistry = this.bookRegistry,
-        accountID = account,
-        accountEvents = this.accountEvents)))
+  override fun profileAccountLogout(account: AccountID): FluentFuture<Unit> {
+    return FluentFuture.from(
+      this.taskExecutor.submit(Callable {
+        val profile = this.profileCurrent()
+        val account = profile.account(account)
+        ProfileAccountLogoutTask(this.bookRegistry, profile, account).call()
+        Unit.unit()
+      }))
   }
 
   @Throws(ProfileNoneCurrentException::class)

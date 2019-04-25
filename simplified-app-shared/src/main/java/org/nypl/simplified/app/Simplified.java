@@ -34,10 +34,14 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStore;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStoreType;
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty;
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsJSON;
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsType;
 import org.nypl.simplified.books.accounts.AccountEvent;
+import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
 import org.nypl.simplified.books.accounts.AccountProvidersJSON;
@@ -68,11 +72,9 @@ import org.nypl.simplified.books.feeds.FeedLoader;
 import org.nypl.simplified.books.feeds.FeedLoaderType;
 import org.nypl.simplified.books.profiles.ProfileDatabaseException;
 import org.nypl.simplified.books.profiles.ProfileEvent;
-import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
 import org.nypl.simplified.books.profiles.ProfileType;
 import org.nypl.simplified.books.profiles.ProfilesDatabase;
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType;
-import org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkEvent;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService;
@@ -118,8 +120,6 @@ import java.util.SortedMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
-import static org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousProfileEnabled.*;
 
 /**
  * Global application state.
@@ -172,6 +172,7 @@ public final class Simplified extends MultiDexApplication {
   private Picasso local_image_loader;
   private OptionType<ThemeValue> branding_theme_override;
   private AccountBundledCredentialsType bundled_credentials;
+  private AccountAuthenticationCredentialsStoreType account_credentials_store;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -522,6 +523,7 @@ public final class Simplified extends MultiDexApplication {
     final ObservableType<ProfileEvent> profile_events,
     final AccountProviderCollection account_providers,
     final AccountBundledCredentialsType account_bundled_credentials,
+    final AccountAuthenticationCredentialsStoreType account_credentials_store,
     final File directory)
     throws ProfileDatabaseException {
 
@@ -538,6 +540,7 @@ public final class Simplified extends MultiDexApplication {
         account_events,
         account_providers,
         account_bundled_credentials,
+        account_credentials_store,
         AccountsDatabases.INSTANCE,
         account_providers.providerDefault(),
         directory);
@@ -549,6 +552,7 @@ public final class Simplified extends MultiDexApplication {
       account_events,
       account_providers,
       account_bundled_credentials,
+      account_credentials_store,
       AccountsDatabases.INSTANCE,
       directory);
   }
@@ -770,6 +774,25 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("could not initialize bundled credentials", e);
     }
 
+    try {
+      LOG.debug("initializing credentials store");
+
+      final File privateDirectory =
+        this.getApplicationContext().getFilesDir();
+      final File credentials =
+        new File(privateDirectory, "credentials.json");
+      final File credentialsTemp =
+        new File(privateDirectory, "credentials.json.tmp");
+
+      LOG.debug("credentials store path: {}", credentials);
+      this.account_credentials_store =
+        AccountAuthenticationCredentialsStore.Companion.open(credentials, credentialsTemp);
+      LOG.debug("credentials loaded: {}", this.account_credentials_store.size());
+    } catch (final Exception e) {
+      LOG.debug("could not initialize credentials store: ", e);
+      throw new IllegalStateException("could not initialize credentials store", e);
+    }
+
     final ObservableType<AccountEvent> account_events = Observable.create();
     final ObservableType<ProfileEvent> profile_events = Observable.create();
     final ObservableType<ReaderBookmarkEvent> reader_bookmark_events = Observable.create();
@@ -784,6 +807,7 @@ public final class Simplified extends MultiDexApplication {
           profile_events,
           this.account_providers,
           this.bundled_credentials,
+          this.account_credentials_store,
           this.directory_profiles);
     } catch (final ProfileDatabaseException e) {
       throw new IllegalStateException("Could not initialize profile database", e);

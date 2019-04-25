@@ -18,9 +18,11 @@ import org.nypl.simplified.books.accounts.AccountBarcode
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
 import org.nypl.simplified.books.accounts.AccountEvent
 import org.nypl.simplified.books.accounts.AccountEventCreation.AccountCreationSucceeded
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginFailed
-import org.nypl.simplified.books.accounts.AccountEventLogin.AccountLoginSucceeded
-import org.nypl.simplified.books.accounts.AccountEventUpdated
+import org.nypl.simplified.books.accounts.AccountEventLoginStateChanged
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggingIn
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginErrorCode.ERROR_CREDENTIALS_INCORRECT
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.books.accounts.AccountPIN
 import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription
@@ -65,6 +67,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -84,6 +87,7 @@ abstract class ProfilesControllerContract {
   @Rule
   var expected = ExpectedException.none()
 
+  private lateinit var credentialsStore: FakeAccountCredentialStorage
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorDownloads: ExecutorService
   private lateinit var executorBooks: ExecutorService
@@ -129,8 +133,8 @@ abstract class ProfilesControllerContract {
         OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()))
     val transport =
       FeedHTTPTransport.newTransport(http)
-    val bundledContent = BundledContentResolverType {
-      uri -> throw FileNotFoundException(uri.toString())
+    val bundledContent = BundledContentResolverType { uri ->
+      throw FileNotFoundException(uri.toString())
     }
 
     val feedLoader =
@@ -168,6 +172,7 @@ abstract class ProfilesControllerContract {
   @Before
   @Throws(Exception::class)
   fun setUp() {
+    this.credentialsStore = FakeAccountCredentialStorage()
     this.http = MockingHTTP()
     this.executorDownloads = Executors.newCachedThreadPool()
     this.executorFeeds = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool())
@@ -209,14 +214,14 @@ abstract class ProfilesControllerContract {
       DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
     val controller =
       this.controller(
-        this.executorBooks,
-        this.executorFeeds,
-        this.http,
-        this.bookRegistry,
-        profiles,
-        downloader,
-        FunctionType { this.accountProviders(it) },
-        this.executorTimer)
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer)
 
     this.expected.expect(ProfileNoneCurrentException::class.java)
     controller.profileCurrent()
@@ -234,15 +239,16 @@ abstract class ProfilesControllerContract {
 
     val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
     val downloader = DownloaderHTTP.newDownloader(this.executorDownloads, this.directoryDownloads, this.http)
-    val controller = this.controller(
-      this.executorBooks,
-      this.executorFeeds,
-      this.http,
-      this.bookRegistry,
-      profiles,
-      downloader,
-      FunctionType { this.accountProviders(it) },
-      this.executorTimer)
+    val controller =
+      this.controller(
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer)
 
     val account_provider = this.accountProviders().providerDefault()
     controller.profileCreate(account_provider, "Kermit", "Female", LocalDate.now()).get()
@@ -263,7 +269,17 @@ abstract class ProfilesControllerContract {
   fun testProfilesCreateDuplicate() {
 
     val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(this.executorBooks, this.executorFeeds, this.http, this.bookRegistry, profiles, this.downloader, FunctionType { this.accountProviders(it) }, this.executorTimer)
+    val controller =
+      this.controller(
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer
+      )
 
     controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
 
@@ -273,7 +289,7 @@ abstract class ProfilesControllerContract {
     controller.profileCreate(provider, "Kermit", "Female", date).get()
 
     EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
-    EventAssertions.isTypeAndMatches(ProfileCreationFailed::class.java, this.profileEventsReceived!!, 1) { e -> Assert.assertEquals(ERROR_DISPLAY_NAME_ALREADY_USED, e.errorCode()) }
+    EventAssertions.isTypeAndMatches(ProfileCreationFailed::class.java, this.profileEventsReceived, 1) { e -> Assert.assertEquals(ERROR_DISPLAY_NAME_ALREADY_USED, e.errorCode()) }
   }
 
   /**
@@ -287,7 +303,17 @@ abstract class ProfilesControllerContract {
   fun testProfilesAccountLoginFailed() {
 
     val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(this.executorBooks, this.executorFeeds, this.http, this.bookRegistry, profiles, this.downloader, FunctionType { this.accountProviders(it) }, this.executorTimer)
+    val controller =
+      this.controller(
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer
+      )
 
     controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
     controller.accountEvents().subscribe({ this.accountEventsReceived.add(it) })
@@ -308,22 +334,35 @@ abstract class ProfilesControllerContract {
         ByteArrayInputStream(ByteArray(0)),
         Option.none<HTTPProblemReport>()))
 
-    val credentials = AccountAuthenticationCredentials.builder(
-      AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-      .build()
+    val credentials =
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .build()
 
-    controller.profileAccountLogin(
-      profiles.currentProfileUnsafe().accounts().firstKey(), credentials).get()
+    val accountID =
+      profiles.currentProfileUnsafe().accounts().firstKey()
+
+    controller.profileAccountLogin(accountID, credentials).get()
 
     EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
     EventAssertions.isType(ProfileSelected::class.java, this.profileEventsReceived, 1)
 
-    EventAssertions.isType(AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
-    EventAssertions.isType(AccountLoginFailed::class.java, this.accountEventsReceived, 1)
+    EventAssertions.isType(
+      AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
 
-    Assert.assertTrue(
-      "Credentials must not be saved",
-      controller.profileAccountCurrent().credentials().isNone)
+    EventAssertions.isTypeAndMatches(
+      AccountEventLoginStateChanged::class.java,
+      this.accountEventsReceived,
+      1,
+      { event -> Assert.assertEquals(event.state, AccountLoggingIn) })
+
+    EventAssertions.isTypeAndMatches(
+      AccountEventLoginStateChanged::class.java,
+      this.accountEventsReceived,
+      2,
+      { event -> Assert.assertEquals(event.state, AccountLoginFailed(ERROR_CREDENTIALS_INCORRECT, null)) })
+
+    Assert.assertEquals(3, this.accountEventsReceived.size)
   }
 
   /**
@@ -336,8 +375,18 @@ abstract class ProfilesControllerContract {
   @Throws(Exception::class)
   fun testProfilesAccountLoginSucceeded() {
 
-    val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(this.executorBooks, this.executorFeeds, this.http, this.bookRegistry, profiles, this.downloader, FunctionType { this.accountProviders(it) }, this.executorTimer)
+    val profiles =
+      this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
+    val controller =
+      this.controller(
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer)
 
     controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
     controller.accountEvents().subscribe({ this.accountEventsReceived.add(it) })
@@ -357,9 +406,10 @@ abstract class ProfilesControllerContract {
         HashMap(),
         0L))
 
-    val credentials = AccountAuthenticationCredentials.builder(
-      AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-      .build()
+    val credentials =
+      AccountAuthenticationCredentials.builder(
+        AccountPIN.create("abcd"), AccountBarcode.create("1234"))
+        .build()
 
     controller.profileAccountLogin(
       profiles.currentProfileUnsafe().accounts().firstKey(), credentials).get()
@@ -368,150 +418,20 @@ abstract class ProfilesControllerContract {
     EventAssertions.isType(ProfileSelected::class.java, this.profileEventsReceived, 1)
 
     EventAssertions.isType(AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
-    EventAssertions.isType(AccountEventUpdated::class.java, this.accountEventsReceived, 1)
-    EventAssertions.isType(AccountLoginSucceeded::class.java, this.accountEventsReceived, 2)
 
-    Assert.assertEquals(
-      "Credentials must be saved",
-      Option.some(credentials),
-      controller.profileAccountCurrent().credentials())
-  }
+    EventAssertions.isTypeAndMatches(
+      AccountEventLoginStateChanged::class.java,
+      this.accountEventsReceived,
+      1,
+      { event -> Assert.assertEquals(event.state, AccountLoggingIn) })
 
-  /**
-   * Trying to log in to an account with the wrong credentials should fail.
-   *
-   * @throws Exception On errors
-   */
+    EventAssertions.isTypeAndMatches(
+      AccountEventLoginStateChanged::class.java,
+      this.accountEventsReceived,
+      2,
+      { event -> Assert.assertEquals(event.state, AccountLoggedIn(credentials)) })
 
-  @Test(timeout = 3_000L)
-  @Throws(Exception::class)
-  fun testProfilesAccountCurrentLoginFailed() {
-
-    val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(this.executorBooks, this.executorFeeds, this.http, this.bookRegistry, profiles, this.downloader, FunctionType { this.accountProviders(it) }, this.executorTimer)
-
-    controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
-    controller.accountEvents().subscribe({ this.accountEventsReceived.add(it) })
-
-    val provider = this.fakeAuthProvider("urn:fake-auth:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
-    controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
-
-    this.http.addResponse(
-      "urn:fake-auth:0",
-      HTTPResultError<InputStream>(
-        401,
-        "UNAUTHORIZED",
-        0L,
-        HashMap(),
-        0L,
-        ByteArrayInputStream(ByteArray(0)),
-        Option.none<HTTPProblemReport>()))
-
-    val credentials = AccountAuthenticationCredentials.builder(
-      AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-      .build()
-
-    controller.profileAccountCurrentLogin(credentials).get()
-
-    EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
-    EventAssertions.isType(ProfileSelected::class.java, this.profileEventsReceived, 1)
-
-    EventAssertions.isType(AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
-    EventAssertions.isType(AccountLoginFailed::class.java, this.accountEventsReceived, 1)
-
-    Assert.assertTrue(
-      "Credentials must not be saved",
-      controller.profileAccountCurrent().credentials().isNone)
-  }
-
-  /**
-   * Trying to log in to an account with the right credentials should succeed.
-   *
-   * @throws Exception On errors
-   */
-
-  @Test(timeout = 3_000L)
-  @Throws(Exception::class)
-  fun testProfilesAccountCurrentLoginSucceeded() {
-
-    val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(this.executorBooks, this.executorFeeds, this.http, this.bookRegistry, profiles, this.downloader, FunctionType { this.accountProviders(it) }, this.executorTimer)
-
-    controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
-    controller.accountEvents().subscribe({ this.accountEventsReceived.add(it) })
-
-    val provider = this.fakeAuthProvider("urn:fake-auth:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
-    controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
-
-    this.http.addResponse(
-      "urn:fake-auth:0",
-      HTTPResultOK<InputStream>(
-        "OK",
-        200,
-        ByteArrayInputStream(ByteArray(0)),
-        0L,
-        HashMap(),
-        0L))
-
-    val credentials = AccountAuthenticationCredentials.builder(
-      AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-      .build()
-
-    controller.profileAccountCurrentLogin(credentials).get()
-
-    EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
-    EventAssertions.isType(ProfileSelected::class.java, this.profileEventsReceived, 1)
-
-    EventAssertions.isType(AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
-    EventAssertions.isType(AccountEventUpdated::class.java, this.accountEventsReceived, 1)
-    EventAssertions.isType(AccountLoginSucceeded::class.java, this.accountEventsReceived, 2)
-
-    Assert.assertEquals(
-      "Credentials must be saved",
-      Option.some(credentials),
-      controller.profileAccountCurrent().credentials())
-  }
-
-  /**
-   * Trying to log in to an account that doesn't require authentication should trivially succeed.
-   *
-   * @throws Exception On errors
-   */
-
-  @Test(timeout = 3_000L)
-  @Throws(Exception::class)
-  fun testProfilesAccountCurrentLoginNoAuthSucceeded() {
-
-    val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(this.executorBooks, this.executorFeeds, this.http, this.bookRegistry, profiles, this.downloader, FunctionType { this.accountProviders(it) }, this.executorTimer)
-
-    controller.profileEvents().subscribe({ this.profileEventsReceived.add(it) })
-    controller.accountEvents().subscribe({ this.accountEventsReceived.add(it) })
-
-    val provider = this.fakeProvider("urn:fake:0")
-    controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
-    controller.profileSelect(profiles.profiles().firstKey()).get()
-    controller.profileAccountCreate(provider.id()).get()
-
-    val credentials = AccountAuthenticationCredentials.builder(
-      AccountPIN.create("abcd"), AccountBarcode.create("1234"))
-      .build()
-
-    controller.profileAccountCurrentLogin(credentials).get()
-
-    EventAssertions.isType(ProfileCreationSucceeded::class.java, this.profileEventsReceived, 0)
-    EventAssertions.isType(ProfileSelected::class.java, this.profileEventsReceived, 1)
-
-    EventAssertions.isType(AccountCreationSucceeded::class.java, this.accountEventsReceived, 0)
-    EventAssertions.isType(AccountLoginSucceeded::class.java, this.accountEventsReceived, 1)
-
-    Assert.assertTrue(
-      "Credentials must not be saved",
-      controller.profileAccountCurrent().credentials().isNone)
+    Assert.assertEquals(3, this.accountEventsReceived.size)
   }
 
   /**
@@ -525,15 +445,16 @@ abstract class ProfilesControllerContract {
   fun testProfilesBookmarks() {
 
     val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(
-      this.executorBooks,
-      this.executorFeeds,
-      this.http,
-      this.bookRegistry,
-      profiles,
-      this.downloader,
-      FunctionType { this.accountProviders(it) },
-      this.executorTimer)
+    val controller =
+      this.controller(
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer)
 
     val provider = this.fakeProvider("urn:fake:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
@@ -559,12 +480,12 @@ abstract class ProfilesControllerContract {
       Option.some(ReaderBookLocation.create(Option.none(), "2")),
       controller.profileBookmarkGet(BookID.create("aaaa")))
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived!!, 0) { e ->
+    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
       Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
       Assert.assertTrue("Bookmarks must have changed", e.changedReaderBookmarks())
     }
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived!!, 1) { e ->
+    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 1) { e ->
       Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
       Assert.assertTrue("Bookmarks must have changed", e.changedReaderBookmarks())
     }
@@ -581,14 +502,16 @@ abstract class ProfilesControllerContract {
   fun testProfilesPreferences() {
 
     val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(
-      this.executorBooks,
-      this.executorFeeds,
-      this.http,
-      this.bookRegistry,
-      profiles,
-      this.downloader,
-      FunctionType { this.accountProviders(it) }, this.executorTimer)
+    val controller =
+      this.controller(
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer)
 
     val provider = this.fakeProvider("urn:fake:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
@@ -598,7 +521,7 @@ abstract class ProfilesControllerContract {
 
     controller.profilePreferencesUpdate(profiles.currentProfileUnsafe().preferences()).get()
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived!!, 0) { e ->
+    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
       Assert.assertTrue("Preferences must not have changed", !e.changedReaderPreferences())
       Assert.assertTrue("Bookmarks must not have changed", !e.changedReaderBookmarks())
     }
@@ -618,7 +541,7 @@ abstract class ProfilesControllerContract {
         .build())
       .get()
 
-    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived!!, 0) { e ->
+    EventAssertions.isTypeAndMatches(ProfilePreferencesChanged::class.java, this.profileEventsReceived, 0) { e ->
       Assert.assertTrue("Preferences must have changed", e.changedReaderPreferences())
       Assert.assertTrue("Bookmarks must not have changed", !e.changedReaderBookmarks())
     }
@@ -635,7 +558,17 @@ abstract class ProfilesControllerContract {
   fun testProfilesFeed() {
 
     val profiles = this.profilesDatabaseWithoutAnonymous(this.directoryProfiles)
-    val controller = this.controller(this.executorBooks, this.executorFeeds, this.http, this.bookRegistry, profiles, this.downloader, FunctionType { this.accountProviders(it) }, this.executorTimer)
+    val controller =
+      this.controller(
+        taskExecutor = this.executorBooks,
+        feedsExecutor = this.executorFeeds,
+        http = this.http,
+        books = this.bookRegistry,
+        profiles = profiles,
+        downloader = this.downloader,
+        accountProviders = FunctionType { this.accountProviders(it) },
+        timerExecutor = this.executorTimer
+      )
 
     val provider = this.fakeProvider("urn:fake:0")
     controller.profileCreate(provider, "Kermit", "Female", LocalDate.now()).get()
@@ -653,13 +586,13 @@ abstract class ProfilesControllerContract {
   }
 
   @Throws(ProfileDatabaseException::class)
-  private fun profilesDatabaseWithoutAnonymous(
-    dir_profiles: File): ProfilesDatabaseType {
+  private fun profilesDatabaseWithoutAnonymous(dir_profiles: File): ProfilesDatabaseType {
     return ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
       this.accountProviders(Unit.unit()),
       AccountBundledCredentialsEmpty.getInstance(),
+      this.credentialsStore,
       AccountsDatabases,
       dir_profiles)
   }

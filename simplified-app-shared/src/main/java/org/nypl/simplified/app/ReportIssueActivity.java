@@ -28,6 +28,8 @@ import org.nypl.simplified.books.profiles.ProfileReadableType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 public class ReportIssueActivity extends AppCompatActivity {
 
   private static final Logger LOG = LoggerFactory.getLogger(ReportIssueActivity.class);
@@ -54,7 +56,7 @@ public class ReportIssueActivity extends AppCompatActivity {
       final Bundle extras = getIntent().getExtras();
       final AccountID accountId;
       if (extras != null) {
-        accountId = AccountID.create(extras.getInt("selectedAccount"));
+        accountId = new AccountID(UUID.fromString(extras.getString("selectedAccount")));
       } else {
         accountId = profile.accountCurrent().id();
       }

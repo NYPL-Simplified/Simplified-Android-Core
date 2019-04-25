@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.mockito.Mockito
 import org.nypl.simplified.books.accounts.AccountID
+import org.nypl.simplified.books.accounts.AccountLoginState
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_database.Book
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
@@ -63,6 +64,7 @@ import java.util.ArrayList
 import java.util.Calendar
 import java.util.Collections
 import java.util.HashMap
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
@@ -72,6 +74,9 @@ open class BookBorrowTaskContract {
   @Rule
   val expected = ExpectedException.none()
 
+  val accountID =
+    AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+  
   private lateinit var executorFeeds: ListeningExecutorService
   private lateinit var executorDownloads: ListeningExecutorService
   private lateinit var executorBooks: ListeningExecutorService
@@ -182,7 +187,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -274,7 +279,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -364,7 +369,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -450,7 +455,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -540,7 +545,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -642,7 +647,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -745,7 +750,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -835,7 +840,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -923,7 +928,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -1025,7 +1030,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -1126,7 +1131,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -1134,8 +1139,8 @@ open class BookBorrowTaskContract {
 
     Mockito.`when`(account.requiresCredentials())
       .thenReturn(true)
-    Mockito.`when`(account.credentials())
-      .thenReturn(Option.none())
+    Mockito.`when`(account.loginState())
+      .thenReturn(AccountLoginState.AccountNotLoggedIn)
     Mockito.`when`(account.bookDatabase())
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.createOrUpdate(bookId, opdsEntry))
@@ -1234,7 +1239,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -1335,7 +1340,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -1440,7 +1445,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,
@@ -1544,7 +1549,7 @@ open class BookBorrowTaskContract {
     val book =
       Book(
         id = bookId,
-        account = AccountID.create(1),
+        account = accountID,
         cover = null,
         thumbnail = null,
         entry = opdsEntry,

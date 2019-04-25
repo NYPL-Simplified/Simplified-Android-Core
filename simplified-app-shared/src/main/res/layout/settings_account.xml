@@ -6,7 +6,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  <ScrollView
     android:id="@+id/settings_account_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -45,7 +45,7 @@
               android:layout_weight="1"
               android:orientation="vertical">
 
-              <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+              <TextView
                 android:id="@android:id/text1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-              <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+              <TextView
                 android:id="@android:id/text2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -165,11 +165,35 @@
           android:text="@string/age_verification_13_checkbox"
           android:textAppearance="?android:attr/textAppearanceListItem" />
 
+        <LinearLayout
+          android:id="@+id/settings_action_layout"
+          android:layout_marginTop="16dp"
+          android:layout_marginBottom="16dp"
+          android:orientation="horizontal"
+          android:gravity="center"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">
+
+          <ProgressBar
+            android:id="@+id/settings_action_progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginRight="16dp"
+            android:indeterminate="true" />
+
+          <TextView
+            android:id="@+id/settings_action_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logging in... "/>
+
+        </LinearLayout>
+
         <Button android:id="@+id/settings_login"
           android:layout_width="match_parent"
           android:layout_height="@dimen/button_standard_height"
           android:layout_gravity="center"
-          android:layout_marginTop="30dp"
           android:paddingLeft="30dp"
           android:paddingRight="30dp"
           android:text="@string/settings_log_in"

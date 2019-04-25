@@ -95,13 +95,13 @@ class AudioBookLoadingFragment : Fragment() {
 
     val fragment = this
     if (this.listener.onLoadingFragmentIsNetworkConnectivityAvailable()) {
-      val credentialsOpt =
+      val credentials =
         Simplified.getProfilesController()
           .profileAccountForBook(this.playerParameters.bookID)
-          .credentials()
+          .loginState()
+          .credentials
 
-      if (credentialsOpt is Some<AccountAuthenticationCredentials>) {
-        val credentials = credentialsOpt.get()
+      if (credentials != null) {
         fragment.tryFetchNewManifest(
           credentials,
           fragment.playerParameters.manifestURI,

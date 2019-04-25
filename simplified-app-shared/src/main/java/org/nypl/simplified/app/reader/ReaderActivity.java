@@ -47,6 +47,7 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.accounts.AccountAuthenticationAdobePostActivationCredentials;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
+import org.nypl.simplified.books.accounts.AccountLoginState;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
@@ -648,29 +649,23 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   private String getDeviceIDString() {
-    return this.current_account.credentials().accept(
-      new OptionVisitorType<AccountAuthenticationCredentials, String>() {
-        @Override
-        public String none(final None<AccountAuthenticationCredentials> n) {
-          return "null";
-        }
+    final AccountLoginState state = this.current_account.loginState();
+    final AccountAuthenticationCredentials credentials = state.getCredentials();
 
-        @Override
-        public String some(final Some<AccountAuthenticationCredentials> someCredentials) {
-          return someCredentials.get().adobePostActivationCredentials().accept(
-            new OptionVisitorType<AccountAuthenticationAdobePostActivationCredentials, String>() {
-              @Override
-              public String none(final None<AccountAuthenticationAdobePostActivationCredentials> none) {
-                return "null";
-              }
-
-              @Override
-              public String some(final Some<AccountAuthenticationAdobePostActivationCredentials> someCredentials) {
-                return someCredentials.get().deviceID().getValue();
-              }
-            });
-        }
-      });
+    if (credentials != null) {
+      final OptionType<AccountAuthenticationAdobePostActivationCredentials> postActivation =
+        credentials.adobePostActivationCredentials();
+      if (postActivation.isSome()) {
+        return ((Some<AccountAuthenticationAdobePostActivationCredentials>) postActivation)
+          .get()
+          .deviceID()
+          .getValue();
+      } else {
+        return "null";
+      }
+    } else {
+      return "null";
+    }
   }
 
   @Override
