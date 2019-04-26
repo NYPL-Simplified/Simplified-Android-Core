@@ -38,12 +38,12 @@
 
     <RelativeLayout android:id="@+id/book_header_right"
       android:layout_width="wrap_content"
-      android:layout_height="match_parent">
+      android:layout_height="match_parent"
+      android:layout_marginLeft="8dp">
 
       <TextView android:id="@+id/book_header_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
         android:ellipsize="end"
         android:maxLines="3"
         android:text="@string/placeholder_long_title"
@@ -54,7 +54,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/book_header_title"
-        android:layout_marginStart="12dp"
         android:ellipsize="end"
         android:maxLines="3"
         android:text="FORMAT FORMAT FORMAT FORMAT" />
@@ -63,7 +62,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/book_header_format"
-        android:layout_marginStart="12dp"
         android:ellipsize="end"
         android:inputType="textMultiLine|textNoSuggestions"
         android:maxLines="2"
@@ -74,48 +72,50 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="12dp"
         android:gravity="left"
         android:orientation="horizontal">
 
-        <Button android:id="@+id/book_dialog_downloading_failed_retry"
+        <!-- Removed at runtime, only present here to check in the layout editor -->
+        <Button
           android:layout_width="wrap_content"
-          android:layout_height="@dimen/button_standard_height"
-          android:layout_weight="1"
-          android:text="@string/catalog_book_error_retry"
+          android:layout_height="wrap_content"
+          android:text="Dismiss"
           android:textSize="12sp" />
 
-        <Button android:id="@+id/book_dialog_downloading_failed_dismiss"
+        <!-- Removed at runtime, only present here to check in the layout editor -->
+        <Button
           android:layout_width="wrap_content"
-          android:layout_height="@dimen/button_standard_height"
-          android:layout_marginLeft="12dp"
-          android:layout_weight="1"
-          android:text="@string/catalog_book_error_dismiss"
+          android:layout_height="wrap_content"
+          android:text="Dismiss"
+          android:textSize="12sp" />
+
+        <!-- Removed at runtime, only present here to check in the layout editor -->
+        <Button
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Dismiss"
           android:textSize="12sp" />
       </LinearLayout>
 
       <Button android:id="@+id/book_dialog_downloading_cancel"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/button_standard_height"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="12dp"
-        android:layout_marginBottom="8dp"
         android:text="@string/catalog_cancel_downloading"
         android:textSize="12sp" />
 
       <LinearLayout android:id="@+id/book_dialog_download_buttons"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="8dp"
-        android:gravity="center"
+        android:gravity="left"
         android:orientation="horizontal">
 
-        <!-- This button will actually be removed at run-time, it is here -->
-        <!-- for the purposes of checking the layout in the GUI editor. -->
-        <Button android:layout_width="wrap_content"
-          android:layout_height="@dimen/button_standard_height"
-          android:text="@string/catalog_book_borrow"
+        <!-- Removed at runtime, only present here to check in the layout editor -->
+        <Button
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Download"
           android:textSize="12sp" />
       </LinearLayout>
     </RelativeLayout>
@@ -160,7 +160,7 @@
 
     <Button android:id="@+id/book_summary_read_more_button"
       android:layout_width="match_parent"
-      android:layout_height="@dimen/button_standard_height"
+      android:layout_height="wrap_content"
       android:background="@android:color/transparent"
       android:gravity="end|center_vertical"
       android:paddingEnd="6dp"

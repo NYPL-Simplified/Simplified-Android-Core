@@ -37,9 +37,11 @@ import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.login.LoginDialogListenerType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.controller.ProfileFeedRequest
+import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.eula.EULAType
 import org.nypl.simplified.books.feeds.Feed
 import org.nypl.simplified.books.feeds.Feed.FeedWithGroups
@@ -86,7 +88,7 @@ import java.util.Objects
  * Construct an activity.
  */
 
-abstract class CatalogFeedActivity : CatalogActivity() {
+abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType {
 
   private var feed: Feed? = null
   private var listView: AbsListView? = null
@@ -98,6 +100,9 @@ abstract class CatalogFeedActivity : CatalogActivity() {
   private var searchView: SearchView? = null
   private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
   private var bookEventSubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+
+  override fun onLoginDialogWantsProfilesController(): ProfilesControllerType =
+    Simplified.getProfilesController()
 
   /**
    * @return The specific logger instance provided by subclasses
@@ -674,18 +679,18 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     val without: CatalogFeedWithoutGroups
     try {
       without = CatalogFeedWithoutGroups(
-        this,
-        Simplified.getProfilesController().profileAccountCurrent(),
-        Simplified.getCoverProvider(),
-        bookSelectListener,
-        Simplified.getBooksRegistry(),
-        Simplified.getBooksController(),
-        Simplified.getProfilesController(),
-        Simplified.getFeedLoader(),
-        feedWithoutGroups,
-        Simplified.getDocumentStore(),
-        Simplified.getNetworkConnectivity(),
-        Simplified.getBackgroundTaskExecutor())
+        activity = this,
+        account = Simplified.getProfilesController().profileAccountCurrent(),
+        bookCoverProvider = Simplified.getCoverProvider(),
+        bookSelectionListener = bookSelectListener,
+        bookRegistry = Simplified.getBooksRegistry(),
+        bookController = Simplified.getBooksController(),
+        profilesController = Simplified.getProfilesController(),
+        feedLoader = Simplified.getFeedLoader(),
+        feed = feedWithoutGroups,
+        networkConnectivity = Simplified.getNetworkConnectivity(),
+        executor = Simplified.getBackgroundTaskExecutor(),
+        screenSizeInformation = Simplified.getScreenSizeInformation())
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }

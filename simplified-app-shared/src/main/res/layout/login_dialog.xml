@@ -90,28 +90,41 @@
     </TableRow>
   </TableLayout>
 
+  <LinearLayout
+    android:id="@+id/login_action_layout"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="16dp"
+    android:layout_below="@id/login_dialog_table"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ProgressBar
+      android:id="@+id/login_action_progress"
+      style="?android:attr/progressBarStyleLarge"
+      android:layout_width="32dp"
+      android:layout_height="32dp"
+      android:layout_marginRight="16dp"
+      android:indeterminate="true" />
+
+    <TextView
+      android:id="@+id/login_action_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Logging in... "/>
+  </LinearLayout>
+
   <RelativeLayout android:id="@+id/login_buttons"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@id/login_dialog_table"
+    android:layout_below="@id/login_action_layout"
     android:layout_centerHorizontal="true"
-    android:layout_gravity="center_horizontal"
-    android:layout_marginTop="16dp">
-
-    <Button android:id="@+id/login_dialog_cancel"
-      android:layout_width="110dp"
-      android:layout_height="@dimen/button_standard_height"
-      android:layout_marginTop="16dp"
-      android:layout_marginEnd="8dp"
-      android:contentDescription="@string/settings_accessibility_log_in_cancel"
-      android:text="@string/settings_log_in_cancel" />
+    android:layout_gravity="center_horizontal">
 
     <Button android:id="@+id/login_dialog_ok"
       android:layout_width="110dp"
-      android:layout_height="@dimen/button_standard_height"
+      android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
-      android:layout_marginTop="16dp"
-      android:layout_toEndOf="@id/login_dialog_cancel"
       android:contentDescription="@string/settings_accessibility_log_in"
       android:text="@string/settings_log_in" />
   </RelativeLayout>
@@ -126,7 +139,7 @@
     <Button android:id="@+id/request_new_codes"
       style="?android:attr/borderlessButtonStyle"
       android:layout_width="wrap_content"
-      android:layout_height="@dimen/button_standard_height"
+      android:layout_height="wrap_content"
       android:layout_gravity="center_horizontal"
       android:text="@string/request_new_codes" />
   </RelativeLayout>

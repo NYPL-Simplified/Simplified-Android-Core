@@ -9,6 +9,7 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.ImageView
@@ -16,10 +17,8 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
-import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.io7m.jfunctional.None
 import com.io7m.jfunctional.OptionType
@@ -30,6 +29,7 @@ import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
+import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_database.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
@@ -62,7 +62,6 @@ import org.nypl.simplified.books.controller.BooksControllerType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.core.BookAcquisitionSelection
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.document_store.DocumentStoreType
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -89,8 +88,6 @@ class CatalogBookDetailView(
   private val booksController: BooksControllerType,
   private val screenSizeInformation: ScreenSizeInformationType,
   private val networkConnectivity: NetworkConnectivityType,
-  private val backgroundExecutor: ListeningExecutorService,
-  private val documentStore: DocumentStoreType,
   entryInitial: FeedEntryOPDS)
   : BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -106,8 +103,6 @@ class CatalogBookDetailView(
   private val bookDownloadingCancel: Button
   private val bookDownloadingFailed: ViewGroup
   private val bookDownloadingFailedButtons: LinearLayout
-  private val bookDownloadingFailedDismiss: Button
-  private val bookDownloadingFailedRetry: Button
   private val bookDownloadingPercentText: TextView
   private val bookDownloadingProgress: ProgressBar
   private val entry: AtomicReference<FeedEntryOPDS> = AtomicReference(entryInitial)
@@ -168,10 +163,6 @@ class CatalogBookDetailView(
       this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_cancel) as Button
     this.bookDownloadingFailedButtons =
       this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_buttons) as LinearLayout
-    this.bookDownloadingFailedDismiss =
-      this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_dismiss) as Button
-    this.bookDownloadingFailedRetry =
-      this.bookHeader.findViewById<View>(R.id.book_dialog_downloading_failed_retry) as Button
 
     this.bookDownloading =
       layout.findViewById<View>(R.id.book_dialog_downloading) as ViewGroup
@@ -248,7 +239,7 @@ class CatalogBookDetailView(
       }
 
       override fun onFailure(exception: Throwable) {
-        org.nypl.simplified.app.catalog.CatalogBookDetailView.Companion.LOG.error("could not load cover: ", exception)
+        LOG.error("could not load cover: ", exception)
       }
     }, directExecutor())
   }
@@ -287,10 +278,7 @@ class CatalogBookDetailView(
     }
 
     this.bookDownloadButtons.visibility = View.VISIBLE
-    configureButtonsHeight(
-      this.screenSizeInformation,
-      this.activity.resources,
-      this.bookDownloadButtons)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadButtons)
 
     this.bookDownload.visibility = View.VISIBLE
     this.bookDownloadButtons.visibility = View.VISIBLE
@@ -327,15 +315,21 @@ class CatalogBookDetailView(
     val failed = this.bookDownloadingFailedText
     failed.text = CatalogBookErrorStrings.getFailureString(this.activity.resources, status)
 
-    val dismiss = this.bookDownloadingFailedDismiss
-    val retry = this.bookDownloadingFailedRetry
+    /*
+     * Manually construct a dismiss button.
+     */
 
+    val dismiss = Button(this.activity)
+    dismiss.text =
+      this.activity.resources.getString(R.string.catalog_book_error_dismiss)
+    dismiss.contentDescription =
+      this.activity.resources.getString(R.string.catalog_accessibility_book_error_dismiss)
     dismiss.setOnClickListener {
       this.booksController.bookBorrowFailedDismiss(this.account, status.id)
     }
 
     /*
-     * Manually construct an acquisition controller for the retry button.
+     * Manually construct a retry button.
      */
 
     val opdsEntry =
@@ -352,23 +346,21 @@ class CatalogBookDetailView(
       throw UnreachableCodeException()
     }
 
-    val acquisition = acquisitionOpt.get()
-    val acquisitionController =
-      CatalogAcquisitionButtonController(
-        acquisition = acquisition,
-        activity = this.activity,
+    val retry =
+      CatalogAcquisitionButton.retryButton(
+        acquisition = acquisitionOpt.get(),
+        context = this.activity,
         books = this.booksController,
         entry = currentEntry,
-        id = currentEntry.bookID,
         profiles = this.profilesController,
         bookRegistry = this.booksRegistry,
-        networkConnectivity = this.networkConnectivity,
-        backgroundExecutor = this.backgroundExecutor,
-        documents = this.documentStore)
+        account = this.account,
+        onWantOpenLoginDialog = this::showLoginDialog)
 
-    retry.isEnabled = true
-    retry.visibility = View.VISIBLE
-    retry.setOnClickListener(acquisitionController)
+    this.bookDownloadingFailedButtons.removeAllViews()
+    this.bookDownloadingFailedButtons.addView(dismiss)
+    this.bookDownloadingFailedButtons.addView(retry)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadingFailedButtons)
     return Unit.unit()
   }
 
@@ -425,15 +417,10 @@ class CatalogBookDetailView(
       this.bookDownloadButtons.addView(revoke, 0)
     }
 
-    configureButtonsHeight(
-      this.screenSizeInformation,
-      this.activity.resources,
-      this.bookDownloadButtons)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadingFailedButtons)
 
-    val text =
-      CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
-
-    this.bookDownloadText.text = text
+    this.bookDownloadText.text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(activity.resources, status)
     return Unit.unit()
   }
 
@@ -454,16 +441,15 @@ class CatalogBookDetailView(
       CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
     this.bookDownloadText.text = text
 
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.bookDownloadButtons,
-      bookRegistry = this.booksRegistry,
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = this.account,
       entry = this.entry.get(),
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      viewGroup = this.bookDownloadButtons,
+      onWantOpenLoginDialog = this::showLoginDialog)
 
     if (status.isRevocable) {
       val revoke =
@@ -476,10 +462,7 @@ class CatalogBookDetailView(
       this.bookDownloadButtons.addView(revoke, 0)
     }
 
-    configureButtonsHeight(
-      this.screenSizeInformation,
-      this.activity.resources,
-      this.bookDownloadButtons)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadButtons)
     return Unit.unit()
   }
 
@@ -500,21 +483,17 @@ class CatalogBookDetailView(
       CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
     this.bookDownloadText.text = text
 
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.bookDownloadButtons,
-      bookRegistry = this.booksRegistry,
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = this.account,
       entry = this.entry.get(),
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      viewGroup = this.bookDownloadButtons,
+      onWantOpenLoginDialog = this::showLoginDialog)
 
-    configureButtonsHeight(
-      this.screenSizeInformation,
-      this.activity.resources,
-      this.bookDownloadButtons)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadButtons)
     return Unit.unit()
   }
 
@@ -539,15 +518,18 @@ class CatalogBookDetailView(
     val failed = this.bookDownloadingFailedText
     failed.setText(R.string.catalog_revoke_failed)
 
-    val dismiss = this.bookDownloadingFailedDismiss
-    val retry = this.bookDownloadingFailedRetry
-
+    val dismiss = Button(this.activity)
+    dismiss.text =
+      this.activity.resources.getString(R.string.catalog_book_error_dismiss)
+    dismiss.contentDescription =
+      this.activity.resources.getString(R.string.catalog_accessibility_book_error_dismiss)
     dismiss.setOnClickListener {
       this.booksController.bookBorrowFailedDismiss(this.account, status.id)
     }
 
-    retry.isEnabled = false
-    retry.visibility = View.GONE
+    this.bookDownloadingFailedButtons.removeAllViews()
+    this.bookDownloadingFailedButtons.addView(dismiss)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadingFailedButtons)
     return Unit.unit()
   }
 
@@ -556,41 +538,6 @@ class CatalogBookDetailView(
 
     this.bookDebugStatus.text = "revoked"
 
-    this.bookDownloadButtons.removeAllViews()
-    this.bookDownloadButtons.visibility = View.VISIBLE
-    this.bookDownload.visibility = View.VISIBLE
-    this.bookDownloading.visibility = View.INVISIBLE
-    this.bookDownloadingCancel.visibility = View.INVISIBLE
-    this.bookDownloadingFailed.visibility = View.INVISIBLE
-    this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
-
-    val text = CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
-    this.bookDownloadText.text = text
-
-    val revoke =
-      CatalogBookRevokeButton(
-        this.activity,
-        this.booksController,
-        this.account,
-        status.id,
-        CatalogBookRevokeType.REVOKE_LOAN)
-
-    this.bookDownloadButtons.addView(revoke, 0)
-
-    configureButtonsHeight(
-      this.screenSizeInformation,
-      this.activity.resources,
-      this.bookDownloadButtons)
-
-    return Unit.unit()
-  }
-
-  override fun onBookStatusLoaned(status: BookStatusLoaned): Unit {
-    UIThread.checkIsUIThread()
-
-    this.bookDebugStatus.text = "loaned"
-
-    this.bookDownloadButtons.removeAllViews()
     this.bookDownloadButtons.visibility = View.VISIBLE
     this.bookDownload.visibility = View.VISIBLE
     this.bookDownloading.visibility = View.INVISIBLE
@@ -602,16 +549,46 @@ class CatalogBookDetailView(
       CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
     this.bookDownloadText.text = text
 
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.bookDownloadButtons,
-      bookRegistry = this.booksRegistry,
+    val revoke =
+      CatalogBookRevokeButton(
+        this.activity,
+        this.booksController,
+        this.account,
+        status.id,
+        CatalogBookRevokeType.REVOKE_LOAN)
+
+    this.bookDownloadButtons.removeAllViews()
+    this.bookDownloadButtons.addView(revoke, 0)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadButtons)
+    return Unit.unit()
+  }
+
+  override fun onBookStatusLoaned(status: BookStatusLoaned): Unit {
+    UIThread.checkIsUIThread()
+
+    this.bookDebugStatus.text = "loaned"
+
+    this.bookDownloadButtons.visibility = View.VISIBLE
+    this.bookDownload.visibility = View.VISIBLE
+    this.bookDownloading.visibility = View.INVISIBLE
+    this.bookDownloadingCancel.visibility = View.INVISIBLE
+    this.bookDownloadingFailed.visibility = View.INVISIBLE
+    this.bookDownloadingFailedButtons.visibility = View.INVISIBLE
+
+    val text =
+      CatalogBookAvailabilityStrings.getAvailabilityString(this.activity.resources, status)
+    this.bookDownloadText.text = text
+
+    this.bookDownloadButtons.removeAllViews()
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = this.account,
       entry = this.entry.get(),
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      viewGroup = this.bookDownloadButtons,
+      onWantOpenLoginDialog = this::showLoginDialog)
 
     if (status.isReturnable) {
       val revoke =
@@ -624,11 +601,7 @@ class CatalogBookDetailView(
       this.bookDownloadButtons.addView(revoke, 1)
     }
 
-    configureButtonsHeight(
-      this.screenSizeInformation,
-      this.activity.resources,
-      this.bookDownloadButtons)
-
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadButtons)
     return Unit.unit()
   }
 
@@ -641,7 +614,6 @@ class CatalogBookDetailView(
 
     this.bookDebugStatus.text = "none"
 
-    this.bookDownloadButtons.removeAllViews()
     this.bookDownloadButtons.visibility = View.VISIBLE
     this.bookDownload.visibility = View.VISIBLE
     this.bookDownloading.visibility = View.INVISIBLE
@@ -657,21 +629,23 @@ class CatalogBookDetailView(
         availability)
     this.bookDownloadText.text = text
 
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.bookDownloadButtons,
-      bookRegistry = this.booksRegistry,
+    this.bookDownloadButtons.removeAllViews()
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = this.account,
       entry = this.entry.get(),
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      viewGroup = this.bookDownloadButtons,
+      onWantOpenLoginDialog = this::showLoginDialog)
 
-    configureButtonsHeight(
-      this.screenSizeInformation,
-      this.activity.resources,
-      this.bookDownloadButtons)
+    configureButtonMargins(this.screenSizeInformation, this.bookDownloadButtons)
+  }
+
+  private fun showLoginDialog() {
+    val dialog = LoginDialog()
+    dialog.show(this.activity.supportFragmentManager, "login-dialog")
   }
 
   override fun onBookStatusRequestingDownload(status: BookStatusRequestingDownload): Unit {
@@ -836,29 +810,6 @@ class CatalogBookDetailView(
     private val LOG: Logger =
       LoggerFactory.getLogger(CatalogBookDetailView::class.java)
 
-    private fun configureButtonsHeight(
-      screen: ScreenSizeInformationType,
-      resources: Resources,
-      layout: LinearLayout) {
-
-      val dp35 = resources.getDimension(R.dimen.button_standard_height).toInt()
-      val dp8 = screen.screenDPToPixels(8).toInt()
-      val buttonCount = layout.childCount
-
-      for (index in 0 until buttonCount) {
-        val v = layout.getChildAt(index)
-
-        Preconditions.checkArgument(
-          v is CatalogBookButtonType,
-          "view %s is an instance of CatalogBookButtonType",
-          v)
-
-        val lp = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, dp35)
-        lp.leftMargin = dp8
-        v.layoutParams = lp
-      }
-    }
-
     private fun configureSummarySectionTitle(summarySectionTitle: TextView) {
       summarySectionTitle.text = "Description"
     }
@@ -927,10 +878,10 @@ class CatalogBookDetailView(
       entry: OPDSAcquisitionFeedEntry,
       meta: TextView) {
       val buffer = StringBuilder()
-      createViewTextPublicationDate(resources, entry, buffer)
-      createViewTextPublisher(resources, entry, buffer)
-      createViewTextCategories(resources, entry, buffer)
-      createViewTextDistributor(resources, entry, buffer)
+      this.createViewTextPublicationDate(resources, entry, buffer)
+      this.createViewTextPublisher(resources, entry, buffer)
+      this.createViewTextCategories(resources, entry, buffer)
+      this.createViewTextDistributor(resources, entry, buffer)
       meta.text = buffer.toString()
     }
 
@@ -943,7 +894,7 @@ class CatalogBookDetailView(
       var hasGenres = false
       for (index in cats.indices) {
         val c = cats[index]
-        if (GENRES_URI_TEXT == c.scheme) {
+        if (this.GENRES_URI_TEXT == c.scheme) {
           hasGenres = true
         }
       }
@@ -958,7 +909,7 @@ class CatalogBookDetailView(
 
         for (index in cats.indices) {
           val c = cats[index]
-          if (GENRES_URI_TEXT == c.scheme) {
+          if (this.GENRES_URI_TEXT == c.scheme) {
             buffer.append(c.effectiveLabel)
             if (index + 1 < cats.size) {
               buffer.append(", ")
@@ -1013,9 +964,20 @@ class CatalogBookDetailView(
         buffer.append("\n")
       }
 
-      buffer.append(
-        String.format(resources.getString(R.string.catalog_book_distribution),
-          entry.distribution))
+      buffer.append(String.format(resources.getString(R.string.catalog_book_distribution), entry.distribution))
+    }
+
+    fun configureButtonMargins(
+      screenSizeInformation: ScreenSizeInformationType,
+      viewGroup: ViewGroup) {
+
+      val marginRight = screenSizeInformation.screenDPToPixels(8).toInt()
+      for (i in 0 until viewGroup.childCount) {
+        val view = viewGroup.getChildAt(i)
+        val layout = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        layout.setMargins(0, 0, marginRight, 0)
+        view.layoutParams = layout
+      }
     }
 
     fun configureViewTextFormat(

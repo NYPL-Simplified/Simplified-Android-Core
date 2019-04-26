@@ -182,7 +182,7 @@
 
     <Button android:id="@+id/reader_settings_close"
       android:layout_width="wrap_content"
-      android:layout_height="@dimen/button_standard_height"
+      android:layout_height="wrap_content"
       android:contentDescription="@string/reader_accessibility_settings_close"
       android:text="@string/reader_settings_close"
       android:textSize="12sp" />

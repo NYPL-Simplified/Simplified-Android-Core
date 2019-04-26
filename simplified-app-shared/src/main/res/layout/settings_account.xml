@@ -192,7 +192,7 @@
 
         <Button android:id="@+id/settings_login"
           android:layout_width="match_parent"
-          android:layout_height="@dimen/button_standard_height"
+          android:layout_height="wrap_content"
           android:layout_gravity="center"
           android:paddingLeft="30dp"
           android:paddingRight="30dp"
@@ -217,7 +217,7 @@
 
             <Button android:id="@+id/settings_signup"
               android:layout_width="wrap_content"
-              android:layout_height="@dimen/button_standard_height"
+              android:layout_height="wrap_content"
               android:paddingLeft="30dp"
               android:paddingRight="30dp"
               android:text="@string/need_card_button"

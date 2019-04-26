@@ -11,7 +11,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.io7m.jfunctional.None
 import com.io7m.jfunctional.OptionType
@@ -21,6 +20,8 @@ import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.app.NetworkConnectivityType
 import org.nypl.simplified.app.R
+import org.nypl.simplified.app.ScreenSizeInformationType
+import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException
@@ -49,7 +50,6 @@ import org.nypl.simplified.books.controller.BooksControllerType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.core.BookAcquisitionSelection
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.document_store.DocumentStoreType
 import org.nypl.simplified.books.feeds.FeedEntry
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
@@ -68,12 +68,10 @@ class CatalogFeedBookCellView(
   private val activity: AppCompatActivity,
   private val coverProvider: BookCoverProviderType,
   private val booksController: BooksControllerType,
-  private val documents: DocumentStoreType,
   private val profilesController: ProfilesControllerType,
   private val booksRegistry: BookRegistryReadableType,
   private val networkConnectivity: NetworkConnectivityType,
-  private val backgroundExecutor: ListeningExecutorService,
-  val documentStore: DocumentStoreType) :
+  private val screenSizeInformation: ScreenSizeInformationType) :
   FrameLayout(activity),
   BookStatusMatcherType<Unit, UnreachableCodeException>,
   BookStatusLoanedMatcherType<Unit, UnreachableCodeException>,
@@ -92,12 +90,11 @@ class CatalogFeedBookCellView(
   private val cellDownloadingAuthors: TextView
   private val cellDownloadingCancel: Button
   private val cellDownloadingFailed: ViewGroup
-  private val cellDownloadingFailedDismiss: Button
-  private val cellDownloadingFailedRetry: Button
   private val cellDownloadingFailedTitle: TextView
   private val cellDownloadingPercentText: TextView
   private val cellDownloadingProgress: ProgressBar
   private val cellDownloadingTitle: TextView
+  private val cellDownloadingFailedButtons: ViewGroup
   private val cellTextLayout: ViewGroup
   private val cellTitle: TextView
   private val debugCellState: Boolean
@@ -140,10 +137,8 @@ class CatalogFeedBookCellView(
       this.cellDownloadingFailed.findViewById(R.id.cell_downloading_failed_title)
     this.cellDownloadingFailedLabel =
       this.cellDownloadingFailed.findViewById(R.id.cell_downloading_failed_static_text)
-    this.cellDownloadingFailedDismiss =
-      this.cellDownloadingFailed.findViewById(R.id.cell_downloading_failed_dismiss)
-    this.cellDownloadingFailedRetry =
-      this.cellDownloadingFailed.findViewById(R.id.cell_downloading_failed_retry)
+    this.cellDownloadingFailedButtons =
+      this.cellDownloadingFailed.findViewById(R.id.cell_downloading_failed_buttons)
 
     this.cellCorrupt =
       this.findViewById(R.id.cell_corrupt)
@@ -252,6 +247,7 @@ class CatalogFeedBookCellView(
         feedEntry),
       0)
 
+    CatalogBookDetailView.configureButtonMargins(this.screenSizeInformation, this.cellButtons)
     return Unit.unit()
   }
 
@@ -263,11 +259,10 @@ class CatalogFeedBookCellView(
     } catch (e: AccountsDatabaseNonexistentException) {
       throw IllegalStateException(e)
     }
-
   }
 
-  override fun onBookStatusDownloadFailed(f: BookStatusDownloadFailed): Unit {
-    LOG.debug("{}: download failed", f.id)
+  override fun onBookStatusDownloadFailed(status: BookStatusDownloadFailed): Unit {
+    LOG.debug("{}: download failed", status.id)
 
     /*
      * If the download failed because there is no wifi, then mark the book as being
@@ -275,7 +270,7 @@ class CatalogFeedBookCellView(
      */
 
     if (!this.networkConnectivity.isWifiAvailable) {
-      this.onBookStatusLoaned(BookStatusLoaned(f.id, None.none<Calendar>(), false))
+      this.onBookStatusLoaned(BookStatusLoaned(status.id, None.none<Calendar>(), false))
       return Unit.unit()
     }
 
@@ -295,47 +290,59 @@ class CatalogFeedBookCellView(
     val oe = feedEntry.feedEntry
 
     val rr = this.activity.resources
-    this.cellDownloadingFailedLabel.text = CatalogBookErrorStrings.getFailureString(rr, f)
-
+    this.cellDownloadingFailedLabel.text = CatalogBookErrorStrings.getFailureString(rr, status)
     this.cellDownloadingFailedTitle.text = oe.title
-    this.cellDownloadingFailedDismiss.setOnClickListener { view ->
-      this.booksController.bookBorrowFailedDismiss(
-        this.account(feedEntry.bookID), f.id)
+
+    val account =
+      this.profilesController.profileAccountForBook(feedEntry.bookID)
+
+    /*
+     * Manually construct a dismiss button.
+     */
+
+    val dismiss = Button(this.activity)
+    dismiss.text =
+      this.activity.resources.getString(R.string.catalog_book_error_dismiss)
+    dismiss.contentDescription =
+      this.activity.resources.getString(R.string.catalog_accessibility_book_error_dismiss)
+    dismiss.setOnClickListener {
+      this.booksController.bookBorrowFailedDismiss(account, status.id)
     }
 
     /*
-     * Manually construct an acquisition controller for the retry button.
+     * Manually construct a retry button.
      */
 
-    val aOpt = BookAcquisitionSelection.preferredAcquisition(oe.acquisitions)
+    val acquisitionOpt =
+      BookAcquisitionSelection.preferredAcquisition(feedEntry.feedEntry.acquisitions)
 
     /*
      * Theoretically, if the book has ever been downloaded, then the
      * acquisition list must have contained one usable acquisition relation...
      */
 
-    if (aOpt.isNone) {
+    if (!(acquisitionOpt is Some<OPDSAcquisition>)) {
       throw UnreachableCodeException()
     }
 
-    val acquisition = (aOpt as Some<OPDSAcquisition>).get()
-    val retryCtl =
-      CatalogAcquisitionButtonController(
-        acquisition = acquisition,
-        activity = this.activity,
+    val retry =
+      CatalogAcquisitionButton.retryButton(
+        acquisition = acquisitionOpt.get(),
+        context = this.activity,
         books = this.booksController,
         entry = feedEntry,
-        id = feedEntry.bookID,
         profiles = this.profilesController,
         bookRegistry = this.booksRegistry,
-        networkConnectivity = this.networkConnectivity,
-        backgroundExecutor = this.backgroundExecutor,
-        documents = this.documents)
+        account = account,
+        onWantOpenLoginDialog = this::showLoginDialog)
 
-    this.cellDownloadingFailedRetry.visibility = View.VISIBLE
-    this.cellDownloadingFailedRetry.isEnabled = true
-    this.cellDownloadingFailedRetry.setOnClickListener(retryCtl)
+    this.cellDownloadingFailedButtons.visibility = View.VISIBLE
+    this.cellDownloadingFailedButtons.removeAllViews()
+    this.cellDownloadingFailedButtons.addView(dismiss)
+    this.cellDownloadingFailedButtons.addView(retry)
 
+    CatalogBookDetailView.configureButtonMargins(
+      this.screenSizeInformation, this.cellDownloadingFailedButtons)
     return Unit.unit()
   }
 
@@ -358,7 +365,7 @@ class CatalogFeedBookCellView(
     val oe = fe.feedEntry
     this.cellDownloadingLabel.setText(R.string.catalog_downloading)
     this.cellDownloadingTitle.text = oe.title
-    this.cellDownloadingAuthors.text = CatalogFeedBookCellView.makeAuthorText(oe)
+    this.cellDownloadingAuthors.text = makeAuthorText(oe)
 
     CatalogDownloadProgressBar.setProgressBar(
       d.currentTotalBytes,
@@ -398,11 +405,11 @@ class CatalogFeedBookCellView(
       this.cellButtons.addView(revoke, 0)
     }
 
+    CatalogBookDetailView.configureButtonMargins(this.screenSizeInformation, this.cellButtons)
     return Unit.unit()
   }
 
   override fun onBookStatusHeldReady(s: BookStatusHeldReady): Unit {
-
     LOG.debug("{}: reserved", s.id)
     this.cellBook.visibility = View.VISIBLE
     this.cellCorrupt.visibility = View.INVISIBLE
@@ -412,17 +419,19 @@ class CatalogFeedBookCellView(
 
     val feedEntry = this.entry.get()
     this.loadImageAndSetVisibility(feedEntry)
+    val account = this.profilesController.profileAccountForBook(feedEntry.bookID)
 
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.cellButtons,
-      bookRegistry = this.booksRegistry,
+    this.cellButtons.visibility = View.VISIBLE
+    this.cellButtons.removeAllViews()
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
+      viewGroup = this.cellButtons,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = account,
       entry = feedEntry,
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      onWantOpenLoginDialog = this@CatalogFeedBookCellView::showLoginDialog)
 
     if (s.isRevocable) {
       val revoke = CatalogBookRevokeButton(
@@ -434,7 +443,13 @@ class CatalogFeedBookCellView(
       this.cellButtons.addView(revoke, 0)
     }
 
+    CatalogBookDetailView.configureButtonMargins(this.screenSizeInformation, this.cellButtons)
     return Unit.unit()
+  }
+
+  private fun showLoginDialog() {
+    val loginDialog = LoginDialog()
+    loginDialog.show(this.activity.supportFragmentManager, "login-dialog")
   }
 
   override fun onBookStatusHoldable(s: BookStatusHoldable): Unit {
@@ -448,21 +463,21 @@ class CatalogFeedBookCellView(
 
     val feedEntry = this.entry.get()
     this.loadImageAndSetVisibility(feedEntry)
+    val account = this.profilesController.profileAccountForBook(feedEntry.bookID)
 
     this.cellButtons.visibility = View.VISIBLE
     this.cellButtons.removeAllViews()
-
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.cellButtons,
-      bookRegistry = this.booksRegistry,
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
+      viewGroup = this.cellButtons,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = account,
       entry = feedEntry,
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      onWantOpenLoginDialog = this@CatalogFeedBookCellView::showLoginDialog)
 
+    CatalogBookDetailView.configureButtonMargins(this.screenSizeInformation, this.cellButtons)
     return Unit.unit()
   }
 
@@ -472,8 +487,8 @@ class CatalogFeedBookCellView(
     return Unit.unit()
   }
 
-  override fun onBookStatusRevokeFailed(s: BookStatusRevokeFailed): Unit {
-    LOG.debug("{}: revoke failed", s.id)
+  override fun onBookStatusRevokeFailed(status: BookStatusRevokeFailed): Unit {
+    LOG.debug("{}: revoke failed", status.id)
 
     /*
      * Unset the content description so that the screen reader reads the error message.
@@ -487,14 +502,33 @@ class CatalogFeedBookCellView(
     this.cellDownloadingFailed.visibility = View.VISIBLE
     this.setDebugCellText("revoke-failed")
 
-    val (oe) = this.entry.get()
+    val feedEntry = this.entry.get()
 
     this.cellDownloadingFailedLabel.setText(R.string.catalog_revoke_failed)
-    this.cellDownloadingFailedTitle.text = oe.title
-    this.cellDownloadingFailedDismiss.setOnClickListener { view -> booksController.bookRevokeFailedDismiss(account(s.id), s.id) }
+    this.cellDownloadingFailedTitle.text = feedEntry.feedEntry.title
 
-    this.cellDownloadingFailedRetry.visibility = View.GONE
-    this.cellDownloadingFailedRetry.isEnabled = false
+    val account =
+      this.profilesController.profileAccountForBook(feedEntry.bookID)
+
+    /*
+     * Manually construct a dismiss button.
+     */
+
+    val dismiss = Button(this.activity)
+    dismiss.text =
+      this.activity.resources.getString(R.string.catalog_book_error_dismiss)
+    dismiss.contentDescription =
+      this.activity.resources.getString(R.string.catalog_accessibility_book_error_dismiss)
+    dismiss.setOnClickListener {
+      this.booksController.bookBorrowFailedDismiss(account, status.id)
+    }
+
+    this.cellDownloadingFailedButtons.visibility = View.VISIBLE
+    this.cellDownloadingFailedButtons.removeAllViews()
+    this.cellDownloadingFailedButtons.addView(dismiss)
+
+    CatalogBookDetailView.configureButtonMargins(
+      this.screenSizeInformation, this.cellDownloadingFailedButtons)
     return Unit.unit()
   }
 
@@ -519,23 +553,23 @@ class CatalogFeedBookCellView(
     this.cellDownloadingFailed.visibility = View.INVISIBLE
     this.setDebugCellText("loaned")
 
-    this.cellButtons.visibility = View.VISIBLE
-    this.cellButtons.removeAllViews()
-
     val feedEntry = this.entry.get()
     this.loadImageAndSetVisibility(feedEntry)
+    val account = this.profilesController.profileAccountForBook(feedEntry.bookID)
 
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.cellButtons,
-      bookRegistry = this.booksRegistry,
+    this.cellButtons.visibility = View.VISIBLE
+    this.cellButtons.removeAllViews()
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
+      viewGroup = this.cellButtons,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = account,
       entry = feedEntry,
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      onWantOpenLoginDialog = this@CatalogFeedBookCellView::showLoginDialog)
 
+    CatalogBookDetailView.configureButtonMargins(this.screenSizeInformation, this.cellButtons)
     return Unit.unit()
   }
 
@@ -554,20 +588,21 @@ class CatalogFeedBookCellView(
     this.setDebugCellText("none")
 
     this.loadImageAndSetVisibility(newEntry)
+    val account = this.profilesController.profileAccountForBook(newEntry.bookID)
 
     this.cellButtons.visibility = View.VISIBLE
     this.cellButtons.removeAllViews()
-
-    CatalogAcquisitionButtons.addButtons(
-      activity = this.activity,
-      viewGroup = this.cellButtons,
-      bookRegistry = this.booksRegistry,
+    CatalogAcquisitionButton.addButtonsToViewGroup(
+      context = this.activity,
       books = this.booksController,
+      viewGroup = this.cellButtons,
       profiles = this.profilesController,
+      bookRegistry = this.booksRegistry,
+      account = account,
       entry = newEntry,
-      networkConnectivity = this.networkConnectivity,
-      backgroundExecutor = this.backgroundExecutor,
-      documents = this.documentStore)
+      onWantOpenLoginDialog = this@CatalogFeedBookCellView::showLoginDialog)
+
+    CatalogBookDetailView.configureButtonMargins(this.screenSizeInformation, this.cellButtons)
   }
 
   override fun onBookStatusRequestingDownload(d: BookStatusRequestingDownload): Unit {
@@ -599,7 +634,7 @@ class CatalogFeedBookCellView(
 
     this.cellDownloadingLabel.setText(R.string.catalog_requesting_loan)
     this.cellDownloadingTitle.text = oe.title
-    this.cellDownloadingAuthors.text = CatalogFeedBookCellView.makeAuthorText(oe)
+    this.cellDownloadingAuthors.text = makeAuthorText(oe)
 
     CatalogDownloadProgressBar.setProgressBar(
       0,
@@ -625,7 +660,7 @@ class CatalogFeedBookCellView(
 
     this.cellDownloadingLabel.setText(R.string.catalog_requesting_revoke)
     this.cellDownloadingTitle.text = oe.title
-    this.cellDownloadingAuthors.text = CatalogFeedBookCellView.makeAuthorText(oe)
+    this.cellDownloadingAuthors.text = makeAuthorText(oe)
 
     CatalogDownloadProgressBar.setProgressBar(
       0,
@@ -657,7 +692,7 @@ class CatalogFeedBookCellView(
   fun onFeedEntryOPDS(feedE: FeedEntryOPDS): Unit {
     val oe = feedE.feedEntry
     this.cellTitle.text = oe.title
-    this.cellAuthors.text = CatalogFeedBookCellView.makeAuthorText(oe)
+    this.cellAuthors.text = makeAuthorText(oe)
 
     this.contentDescription = CatalogBookFormats.contentDescriptionOfEntry(this.resources, feedE)
 

@@ -32,7 +32,7 @@ import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ReportIssueActivity
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.WebViewActivity
-import org.nypl.simplified.app.login.LoginDialog
+import org.nypl.simplified.app.login.LoginErrorCodeStrings
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
@@ -431,7 +431,7 @@ class SettingsAccountActivity : NavigationDrawerActivity() {
     ErrorDialogUtilities.showErrorWithRunnable(
       this,
       this.logger,
-      LoginDialog.loginErrorCodeToLocalizedMessage(this.resources, failed.errorCode), null)
+      LoginErrorCodeStrings.stringOfLoginError(this.resources, failed.errorCode), null)
     { this.login.isEnabled = true }
 
     UIThread.runOnUIThread { this.configureLoginFieldVisibilityAndContents() }

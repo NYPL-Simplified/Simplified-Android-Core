@@ -150,7 +150,7 @@
                 android:background="@drawable/simplified_button"
                 android:layout_gravity="start"
                 android:layout_width="wrap_content"
-                android:layout_height="@dimen/button_standard_height"
+                android:layout_height="wrap_content"
                 android:textColor="@drawable/simplified_button_text"
                 android:textSize="12sp"
                 android:text="@string/catalog_book_report_submit"/>

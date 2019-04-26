@@ -16,7 +16,7 @@
 
   <Button android:id="@+id/profile_switch_confirm"
     android:layout_width="wrap_content"
-    android:layout_height="@dimen/button_standard_height"
+    android:layout_height="wrap_content"
     android:layout_below="@id/profile_switch_confirm_text"
     android:layout_centerHorizontal="true"
     android:text="@string/profiles_switch" />

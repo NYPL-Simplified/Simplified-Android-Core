@@ -32,14 +32,14 @@
     <Button android:id="@+id/logout_cancel"
       style="?android:attr/buttonStyleSmall"
       android:layout_width="wrap_content"
-      android:layout_height="@dimen/button_standard_height"
+      android:layout_height="wrap_content"
       android:contentDescription="@string/settings_accessibility_log_out_cancel"
       android:text="@string/settings_log_out_cancel" />
 
     <Button android:id="@+id/logout_confirm"
       style="?android:attr/buttonStyleSmall"
       android:layout_width="wrap_content"
-      android:layout_height="@dimen/button_standard_height"
+      android:layout_height="wrap_content"
       android:layout_marginStart="16dp"
       android:layout_toEndOf="@id/logout_cancel"
       android:contentDescription="@string/settings_accessibility_log_out"
