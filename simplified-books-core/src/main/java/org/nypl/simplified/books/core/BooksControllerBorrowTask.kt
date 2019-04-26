@@ -27,14 +27,17 @@ import org.nypl.simplified.http.core.HTTPAuthOAuth
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPProblemReport
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.mime.MIMEParser
+import org.nypl.simplified.mime.MIMEType
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BORROW
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_BUY
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_GENERIC
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SAMPLE
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_SUBSCRIBE
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BORROW
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_BUY
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_GENERIC
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SAMPLE
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_SUBSCRIBE
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
@@ -82,7 +85,7 @@ internal class BooksControllerBorrowTask(
   private lateinit var databaseEntry: BookDatabaseEntryType
 
   @Volatile
-  private lateinit var acquisition: OPDSAcquisition
+  private lateinit var acquisitionPath: OPDSAcquisitionPath
 
   @Volatile
   private lateinit var fulfillURI: URI
@@ -199,7 +202,8 @@ internal class BooksControllerBorrowTask(
       }
 
       if (user is Some<AdobeUserID>) {
-        connector.fulfillACSM(AdobeFulfillmentListener(this, contentType), acsm, user.get())
+        connector.fulfillACSM(AdobeFulfillmentListener(
+          this, MIMEParser.parseRaisingException(contentType)), acsm, user.get())
         return@execute
       }
     }
@@ -207,8 +211,8 @@ internal class BooksControllerBorrowTask(
 
   @Throws(IOException::class)
   private fun runFulfillSimplifiedBearerToken(
-    acquisition: OPDSAcquisition,
-    file: File) {
+    acquisitionPath: OPDSAcquisitionPath,
+    file: File): Unit {
     LOG.debug("[{}]: fulfilling Simplified bearer token file", this.shortID)
 
     /*
@@ -225,24 +229,30 @@ internal class BooksControllerBorrowTask(
       jsonObject = JSONObject(FileUtilities.fileReadUTF8(file))
     } catch (ex: JSONException) {
       this.downloadFailed(Option.some(ex))
-      return
+      return Unit.unit()
     }
 
     val token = SimplifiedBearerToken.withJSONObject(jsonObject)
     if (token == null) {
       this.downloadFailed(Option.some(Throwable("failed to parse Simplified bearer token")))
-      return
+      return Unit.unit()
     }
 
     val nextAcquisition =
       OPDSAcquisition(
-        ACQUISITION_GENERIC,
-        token.location,
-        acquisition.type,
-        acquisition.indirectAcquisitions)
+        relation = acquisitionPath.next.relation,
+        uri = token.location,
+        type = acquisitionPath.next.type,
+        indirectAcquisitions = acquisitionPath.next.indirectAcquisitions)
+
+    val nextAcquisitionPath =
+      OPDSAcquisitionPath(
+        next = nextAcquisition,
+        sequence = acquisitionPath.sequence.drop(1))
 
     val auth = HTTPAuthOAuth(token.accessToken)
-    this.runAcquisitionFulfillDoDownload(nextAcquisition, Option.some(auth))
+    this.runAcquisitionFulfillDoDownload(nextAcquisitionPath, Option.some(auth))
+    return Unit.unit()
   }
 
   private fun downloadDataReceived(
@@ -290,10 +300,10 @@ internal class BooksControllerBorrowTask(
        * in the feed.
        */
 
-      val preferredAcquisitionOpt =
-        BookAcquisitionSelection.preferredAcquisition(this.feedEntry.acquisitions)
-      if (preferredAcquisitionOpt is Some<OPDSAcquisition>) {
-        this.acquisition = preferredAcquisitionOpt.get()
+      val preferredAcquisitionPathOpt =
+        BookAcquisitionSelection.preferredAcquisition(this.feedEntry.acquisitionPaths)
+      if (preferredAcquisitionPathOpt is Some<OPDSAcquisitionPath>) {
+        this.acquisitionPath = preferredAcquisitionPathOpt.get()
       } else {
         throw UnsupportedOperationException("No usable acquisition!")
       }
@@ -302,16 +312,16 @@ internal class BooksControllerBorrowTask(
        * Then, run the appropriate acquisition type for the book.
        */
 
-      when (this.acquisition.relation) {
+      when (this.acquisitionPath.next.relation) {
         ACQUISITION_BORROW -> {
           LOG.debug("[{}]: acquisition type is {}, performing borrow",
-            this.shortID, this.acquisition.relation)
+            this.shortID, this.acquisitionPath.next.relation)
           this.runAcquisitionBorrow()
         }
 
         ACQUISITION_OPEN_ACCESS -> {
           LOG.debug("[{}]: acquisition type is {}, performing fulfillment",
-            this.shortID, this.acquisition.relation)
+            this.shortID, this.acquisitionPath.next.relation)
           this.runAcquisitionFulfill(this.feedEntry)
         }
 
@@ -324,7 +334,7 @@ internal class BooksControllerBorrowTask(
               val adobeUserID = adobeCredentials.adobeUserID
               if (adobeUserID is Some<AdobeUserID>) {
                 LOG.debug("[{}]: acquisition type is {}, performing fulfillment",
-                  this.shortID, this.acquisition.relation)
+                  this.shortID, this.acquisitionPath.next.relation)
                 this.runAcquisitionFulfill(this.feedEntry)
               } else {
                 val activationTask = BooksControllerDeviceActivationTask(
@@ -354,7 +364,7 @@ internal class BooksControllerBorrowTask(
             }
           } else {
             LOG.debug("[{}]: acquisition type is {}, performing fulfillment",
-              this.shortID, this.acquisition.relation)
+              this.shortID, this.acquisitionPath.next.relation)
             this.runAcquisitionFulfill(this.feedEntry)
           }
         }
@@ -363,7 +373,7 @@ internal class BooksControllerBorrowTask(
         ACQUISITION_SAMPLE,
         ACQUISITION_SUBSCRIBE -> {
           LOG.debug("[{}]: acquisition type is {}, cannot continue!",
-            this.shortID, this.acquisition.relation)
+            this.shortID, this.acquisitionPath.next.relation)
           throw UnsupportedOperationException()
         }
       }
@@ -395,7 +405,7 @@ internal class BooksControllerBorrowTask(
      * Grab the feed for the borrow link.
      */
 
-    LOG.debug("[{}]: fetching item feed: {}", this.shortID, this.acquisition.uri)
+    LOG.debug("[{}]: fetching item feed: {}", this.shortID, this.acquisitionPath.next.uri)
 
     val task = this
     val feedEntryMatcher = object : FeedEntryMatcherType<Unit, UnreachableCodeException> {
@@ -431,7 +441,7 @@ internal class BooksControllerBorrowTask(
     }
 
     this.feedLoader.fromURIRefreshing(
-      this.acquisition.uri, Option.some(auth), "PUT",
+      this.acquisitionPath.next.uri, Option.some(auth), "PUT",
       object : FeedLoaderListenerType {
         override fun onFeedLoadSuccess(u: URI, f: FeedType) {
           try {
@@ -613,7 +623,7 @@ internal class BooksControllerBorrowTask(
   }
 
   private fun runAcquisitionFulfillDoDownload(
-    acquisition: OPDSAcquisition,
+    acquisitionPath: OPDSAcquisitionPath,
     predeterminedAuth: OptionType<HTTPAuthType>): DownloadType {
 
     /*
@@ -626,9 +636,9 @@ internal class BooksControllerBorrowTask(
     }
 
     val sid = this.shortID
-    this.fulfillURI = acquisition.uri
-    LOG.debug("[{}]: starting download {}", sid, acquisition.uri)
-    LOG.debug("[{}]: expecting content type {}", sid, acquisition.type)
+    this.fulfillURI = acquisitionPath.next.uri
+    LOG.debug("[{}]: starting download {}", sid, acquisitionPath.next.uri)
+    LOG.debug("[{}]: expecting content type {}", sid, acquisitionPath.next.type)
 
     /*
      * Point the downloader at the acquisition link. The result will be an
@@ -639,7 +649,7 @@ internal class BooksControllerBorrowTask(
      */
 
     val task = this
-    return this.downloader.download(acquisition.uri, auth, object : DownloadListenerType {
+    return this.downloader.download(acquisitionPath.next.uri, auth, object : DownloadListenerType {
       override fun onDownloadStarted(
         download: DownloadType,
         expectedTotal: Long) {
@@ -694,12 +704,12 @@ internal class BooksControllerBorrowTask(
           if (BooksControllerBorrowTask.ACSM_CONTENT_TYPE == contentType) {
             task.runFulfillACSM(file)
           } else if (BooksControllerBorrowTask.SIMPLIFIED_BEARER_TOKEN_CONTENT_TYPE == contentType) {
-            task.runFulfillSimplifiedBearerToken(acquisition, file)
+            task.runFulfillSimplifiedBearerToken(acquisitionPath, file)
           } else {
             task.saveFinalContent(
               file = file,
-              expectedContentTypes = acquisition.availableFinalContentTypes(),
-              receivedContentType = contentType)
+              expectedContentTypes = setOf(acquisitionPath.finalContentType()),
+              receivedContentType = MIMEParser.parseRaisingException(contentType))
           }
         } catch (e: Exception) {
           LOG.error("onDownloadCompleted: exception: ", e)
@@ -711,8 +721,8 @@ internal class BooksControllerBorrowTask(
 
   private fun saveFinalContent(
     file: File,
-    expectedContentTypes: Set<String>,
-    receivedContentType: String) {
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType) {
 
     LOG.debug(
       "[{}]: saving content      {} (expected one of {}, received {})",
@@ -727,7 +737,7 @@ internal class BooksControllerBorrowTask(
     val handleContentType =
       checkExpectedContentType(expectedContentTypes, receivedContentType)
     val formatHandleOpt: OptionType<BookDatabaseEntryFormatHandle> =
-      this.databaseEntry.entryFindFormatHandleForContentType(handleContentType)
+      this.databaseEntry.entryFindFormatHandleForContentType(handleContentType.fullType)
 
     fun updateStatus() {
       val downloadedSnap = this.databaseEntry.entryGetSnapshot()
@@ -756,8 +766,8 @@ internal class BooksControllerBorrowTask(
       }
     } else {
       LOG.error("[{}]: database entry does not have a format handle for {}",
-        this.shortID, handleContentType)
-      throw BookUnsupportedTypeException(handleContentType)
+        this.shortID, handleContentType.fullType)
+      throw BookUnsupportedTypeException(handleContentType.fullType)
     }
   }
 
@@ -768,14 +778,17 @@ internal class BooksControllerBorrowTask(
    */
 
   private fun checkExpectedContentType(
-    expectedContentTypes: Set<String>,
-    receivedContentType: String): String {
+    expectedContentTypes: Set<MIMEType>,
+    receivedContentType: MIMEType): MIMEType {
 
     Preconditions.checkArgument(
       !expectedContentTypes.isEmpty(),
       "At least one expected content type")
 
-    return when (receivedContentType) {
+    val expectedNames = expectedContentTypes.map { type -> type.fullType }.toSet()
+    val receivedName = receivedContentType.fullType
+
+    return when (receivedName) {
       "application/octet-stream" -> {
         LOG.debug("[{}]: expected one of {} but received {} (acceptable)",
           this.shortID,
@@ -785,7 +798,7 @@ internal class BooksControllerBorrowTask(
       }
 
       else -> {
-        if (expectedContentTypes.contains(receivedContentType)) {
+        if (expectedNames.contains(receivedName)) {
           return receivedContentType
         }
 
@@ -802,8 +815,8 @@ internal class BooksControllerBorrowTask(
             .append(receivedContentType)
             .append('\n')
             .toString(),
-          expected = expectedContentTypes,
-          received = receivedContentType)
+          expected = expectedNames,
+          received = receivedName)
       }
     }
   }
@@ -816,11 +829,11 @@ internal class BooksControllerBorrowTask(
   private fun runAcquisitionFulfill(ee: OPDSAcquisitionFeedEntry): DownloadType {
     LOG.debug("[{}]: fulfilling book", this.shortID)
 
-    for (ea in ee.acquisitions) {
-      when (ea.relation) {
+    for (acquisitionPath in ee.acquisitionPaths) {
+      when (acquisitionPath.next.relation) {
         ACQUISITION_GENERIC,
         ACQUISITION_OPEN_ACCESS -> {
-          return this.runAcquisitionFulfillDoDownload(ea, Option.none())
+          return this.runAcquisitionFulfillDoDownload(acquisitionPath, Option.none())
         }
         ACQUISITION_BORROW,
         ACQUISITION_BUY,
@@ -840,7 +853,7 @@ internal class BooksControllerBorrowTask(
 
   private class AdobeFulfillmentListener internal constructor(
     private val task: BooksControllerBorrowTask,
-    private val contentType: String) : AdobeAdeptFulfillmentListenerType {
+    private val contentType: MIMEType) : AdobeAdeptFulfillmentListenerType {
 
     override fun onFulfillmentFailure(message: String) {
       val error: OptionType<Throwable>

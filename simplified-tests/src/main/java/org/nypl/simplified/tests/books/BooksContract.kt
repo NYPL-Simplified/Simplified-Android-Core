@@ -64,9 +64,11 @@ import org.nypl.simplified.downloader.core.DownloaderHTTP
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.http.core.HTTP
 import org.nypl.simplified.http.core.HTTPType
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSIndirectAcquisition
@@ -1844,13 +1846,13 @@ abstract class BooksContract {
         OPDSAvailabilityLoanable.get())
 
     val opdsAcquisition =
-      OPDSAcquisition(OPDSAcquisition.Relation.ACQUISITION_BORROW,
+      OPDSAcquisition(OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://example.com/borrow/0"),
         Option.none(),
         listOf(OPDSIndirectAcquisition(
-          "application/audiobook+json",
+          MIMEParser.parseRaisingException("application/audiobook+json"),
           listOf(OPDSIndirectAcquisition(
-            "audio/mpeg",
+            MIMEParser.parseRaisingException("audio/mpeg"),
             listOf())))))
 
     opdsEntryBuilder.addAcquisition(opdsAcquisition)
@@ -1870,11 +1872,11 @@ abstract class BooksContract {
         OPDSAvailabilityLoanable.get())
 
     val opdsAcquisition =
-      OPDSAcquisition(OPDSAcquisition.Relation.ACQUISITION_BORROW,
+      OPDSAcquisition(OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://example.com/borrow/0"),
         Option.none(),
         listOf(OPDSIndirectAcquisition(
-          "application/epub+zip",
+          MIMEParser.parseRaisingException("application/epub+zip"),
           listOf())))
 
     opdsEntryBuilder.addAcquisition(opdsAcquisition)
@@ -1895,11 +1897,11 @@ abstract class BooksContract {
         OPDSAvailabilityLoanable.get())
 
     val opdsAcquisition =
-      OPDSAcquisition(OPDSAcquisition.Relation.ACQUISITION_BORROW,
+      OPDSAcquisition(OPDSAcquisitionRelation.ACQUISITION_BORROW,
         URI.create("http://example.com/borrow/0"),
         Option.none(),
         listOf(OPDSIndirectAcquisition(
-          "application/epub+zip",
+          MIMEParser.parseRaisingException("application/epub+zip"),
           listOf())))
 
     opdsEntryBuilder.addAcquisition(opdsAcquisition)
@@ -1954,7 +1956,7 @@ abstract class BooksContract {
       db: BookDatabaseReadableType,
       http: HTTPType = HTTP.newHTTP()): FeedLoaderType {
       val parser =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser(BookFormats.supportedBookMimeTypes()))
+        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser())
       val exec = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor())
       val transport = FeedHTTPTransport.newTransport(http)
       val searchParser = OPDSSearchParser.newParser()

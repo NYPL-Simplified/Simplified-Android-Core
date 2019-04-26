@@ -12,6 +12,7 @@ import org.nypl.simplified.books.core.BookID;
 import org.nypl.simplified.books.core.BooksType;
 import org.nypl.simplified.books.core.FeedEntryOPDS;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 
@@ -37,7 +38,7 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
     final Activity in_activity,
     final BooksType in_books,
     final BookID in_book_id,
-    final OPDSAcquisition in_acq,
+    final OPDSAcquisitionPath in_acq,
     final FeedEntryOPDS in_entry)
   {
     super(in_activity);
@@ -51,7 +52,7 @@ public final class CatalogAcquisitionButton extends CatalogLeftPaddedButton
     final int mainColor = ContextCompat.getColor(this.getContext(), resID);
     this.getTextView().setTextColor(mainColor);
 
-    switch (in_acq.getRelation()) {
+    switch (in_acq.getNext().getRelation()) {
       case ACQUISITION_OPEN_ACCESS:
         this.getTextView().setText(
           NullCheck.notNull(

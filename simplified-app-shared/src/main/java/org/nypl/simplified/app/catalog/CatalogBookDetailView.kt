@@ -67,6 +67,7 @@ import org.nypl.simplified.books.core.FeedEntryType
 import org.nypl.simplified.books.core.LogUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.stack.ImmutableStack
 import org.slf4j.Logger
@@ -323,14 +324,14 @@ class CatalogBookDetailView(
     val opdsEntry =
       currentEntry.feedEntry
     val acquisitionOpt =
-      BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitions)
+      BookAcquisitionSelection.preferredAcquisition(opdsEntry.acquisitionPaths)
 
     /*
      * Theoretically, if the book has ever been downloaded, then the
      * acquisition list must have contained one usable acquisition relation...
      */
 
-    if (!(acquisitionOpt is Some<OPDSAcquisition>)) {
+    if (!(acquisitionOpt is Some<OPDSAcquisitionPath>)) {
       throw UnreachableCodeException()
     }
 

@@ -16,9 +16,10 @@ import org.nypl.simplified.books.core.BooksType
 import org.nypl.simplified.books.core.FeedEntryOPDS
 import org.nypl.simplified.books.core.FeedEntryType
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.mime.MIMEParser
 import org.nypl.simplified.multilibrary.Account
 import org.nypl.simplified.opds.core.OPDSAcquisition
-import org.nypl.simplified.opds.core.OPDSAcquisition.Relation.ACQUISITION_OPEN_ACCESS
+import org.nypl.simplified.opds.core.OPDSAcquisitionRelation.ACQUISITION_OPEN_ACCESS
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import java.net.URI
@@ -71,7 +72,7 @@ class BookCellViewsActivity : FragmentActivity() {
     entry1Builder.addAcquisition(OPDSAcquisition(
       ACQUISITION_OPEN_ACCESS,
       URI.create("http://www.example.com"),
-      Option.some("application/epub+zip"),
+      Option.some(MIMEParser.parseRaisingException("application/epub+zip")),
       ArrayList()))
 
     val entry1 =
@@ -87,7 +88,7 @@ class BookCellViewsActivity : FragmentActivity() {
     entry2Builder.addAcquisition(OPDSAcquisition(
       ACQUISITION_OPEN_ACCESS,
       URI.create("http://www.example.com"),
-      Option.some("application/epub+zip"),
+      Option.some(MIMEParser.parseRaisingException("application/epub+zip")),
       ArrayList()))
 
     val entry2 =

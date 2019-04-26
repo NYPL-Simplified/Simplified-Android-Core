@@ -15,6 +15,7 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
 import org.nypl.simplified.json.core.JSONSerializerUtilities;
+import org.nypl.simplified.mime.MIMEType;
 import org.nypl.simplified.rfc3339.core.RFC3339Formatter;
 
 import java.io.IOException;
@@ -53,12 +54,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
     node.put("type", a.getRelation().toString());
     node.put("uri", a.getUri().toString());
 
-    a.getType().map_(new ProcedureType<String>() {
-      @Override
-      public void call(final String type) {
-        node.put("content_type", type);
-      }
-    });
+    a.getType().map_(type -> node.put("content_type", type.getFullType()));
 
     node.set("indirect_acquisitions", serializeIndirectAcquisitions(a.getIndirectAcquisitions()));
     return node;
@@ -88,7 +84,7 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
     final ObjectMapper jom = new ObjectMapper();
     final ObjectNode node = jom.createObjectNode();
 
-    node.put("type", indirect.getType());
+    node.put("type", indirect.getType().getFullType());
     node.set("indirect_acquisitions",
       serializeIndirectAcquisitions(indirect.getIndirectAcquisitions()));
     return node;

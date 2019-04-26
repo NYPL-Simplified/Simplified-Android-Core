@@ -15,6 +15,7 @@ include ':simplified-checkstyle'
 include ':simplified-circ-analytics'
 include ':simplified-downloader-core'
 include ':simplified-files'
+include ':simplified-mime'
 include ':simplified-http-core'
 include ':simplified-json-core'
 include ':simplified-multilibrary'
@@ -45,6 +46,7 @@ project(':simplified-downloader-core').projectDir = "$rootDir/simplified-downloa
 project(':simplified-files').projectDir = "$rootDir/simplified-files" as File
 project(':simplified-http-core').projectDir = "$rootDir/simplified-http-core" as File
 project(':simplified-json-core').projectDir = "$rootDir/simplified-json-core" as File
+project(':simplified-mime').projectDir = "$rootDir/simplified-mime" as File
 project(':simplified-multilibrary').projectDir = "$rootDir/simplified-multilibrary" as File
 project(':simplified-opds-core').projectDir = "$rootDir/simplified-opds-core" as File
 project(':simplified-prefs').projectDir = "$rootDir/simplified-prefs" as File

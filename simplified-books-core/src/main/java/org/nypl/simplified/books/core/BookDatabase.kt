@@ -673,11 +673,11 @@ class BookDatabase private constructor(
     }
 
     private fun lockedConfigureForEntry(entry: OPDSAcquisitionFeedEntry) {
-      entry.acquisitions.forEach { acquisition ->
+      entry.acquisitionPaths.forEach { path ->
         this.owner.createFormatHandleIfRequired(
           owner = this,
           existingFormats = this.formatsHandles,
-          contentTypes = acquisition.availableFinalContentTypes())
+          contentTypes = setOf(path.finalContentType().fullType))
       }
     }
 

@@ -71,9 +71,16 @@ public final class TenPrintGenerator implements TenPrintGeneratorType
     final Set<Character> c64_set = TenPrintGenerator.C64_CHARACTER_SET;
     final List<Character> c64_seq = TenPrintGenerator.C64_CHARACTER_LIST;
 
-    final StringBuilder sb = new StringBuilder(s.length());
-    for (int index = 0; index < s.length(); ++index) {
-      final char c = s.charAt(index);
+    final String text;
+    if (s.isEmpty()) {
+      text = "default";
+    } else {
+      text = s;
+    }
+
+    final StringBuilder sb = new StringBuilder(text.length());
+    for (int index = 0; index < text.length(); ++index) {
+      final char c = text.charAt(index);
       final Character cc = Character.valueOf(c);
       if (c64_set.contains(cc)) {
         sb.append(c);

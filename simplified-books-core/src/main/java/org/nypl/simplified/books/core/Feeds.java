@@ -1,21 +1,20 @@
 package org.nypl.simplified.books.core;
 
-import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 import com.io7m.junreachable.UnreachableCodeException;
 
-import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath;
 import org.nypl.simplified.opds.core.OPDSFacet;
-import org.nypl.simplified.opds.core.OPDSGroup;
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Functions for constructing feeds.
@@ -76,7 +75,7 @@ public final class Feeds {
     final List<FeedFacetType> facets_order = constructFacetsOrdered(f);
     final OptionType<FeedSearchType> actual_search = search.map(FeedSearchOpen1_1::new);
 
-    final FeedWithoutGroups rf =
+    final FeedWithoutGroups resultFeed =
       FeedWithoutGroups.newEmptyFeed(
         f.getFeedURI(),
         f.getFeedID(),
@@ -93,24 +92,17 @@ public final class Feeds {
 
     final List<OPDSAcquisitionFeedEntry> in_entries = f.getFeedEntries();
     for (int index = 0; index < in_entries.size(); ++index) {
-      final OPDSAcquisitionFeedEntry fe =
-        NullCheck.notNull(in_entries.get(index));
-      if (!fe.getAcquisitions().isEmpty()) {
-        OPDSAcquisition best = NullCheck.notNull(fe.getAcquisitions().get(0));
-        for (final OPDSAcquisition current : fe.getAcquisitions()) {
-          final OPDSAcquisition nn_current = NullCheck.notNull(current);
-          if (Feeds.priority(nn_current) > Feeds.priority(best)) {
-            best = nn_current;
-          }
-        }
-        final OptionType<OPDSAcquisition> a_opt = Option.some(best);
-        if (a_opt.isSome()) {
-          rf.add(FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(fe));
-        }
+      final OPDSAcquisitionFeedEntry feedEntry =
+        Objects.requireNonNull(in_entries.get(index));
+      final OptionType<OPDSAcquisitionPath> acquisition =
+        BookAcquisitionSelection.INSTANCE.preferredAcquisition(feedEntry.getAcquisitionPaths());
+
+      if (acquisition.isSome()) {
+        resultFeed.add(FeedEntryOPDS.Companion.fromOPDSAcquisitionFeedEntry(feedEntry));
       }
     }
 
-    return rf;
+    return resultFeed;
   }
 
   private static List<FeedFacetType> constructFacetsOrdered(OPDSAcquisitionFeed f) {
@@ -133,25 +125,5 @@ public final class Feeds {
       facets_by_group.put(k, rs);
     }
     return facets_by_group;
-  }
-
-  private static int priority(
-    final OPDSAcquisition a) {
-    switch (a.getRelation()) {
-      case ACQUISITION_BORROW:
-        return 6;
-      case ACQUISITION_OPEN_ACCESS:
-        return 5;
-      case ACQUISITION_GENERIC:
-        return 4;
-      case ACQUISITION_SAMPLE:
-        return 3;
-      case ACQUISITION_BUY:
-        return 2;
-      case ACQUISITION_SUBSCRIBE:
-        return 1;
-    }
-
-    return 0;
   }
 }
