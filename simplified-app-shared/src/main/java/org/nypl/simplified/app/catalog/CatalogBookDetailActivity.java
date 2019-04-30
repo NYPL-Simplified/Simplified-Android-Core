@@ -10,9 +10,11 @@ import android.widget.FrameLayout;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 
+import org.jetbrains.annotations.NotNull;
 import org.nypl.simplified.app.NavigationDrawerActivity;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
+import org.nypl.simplified.app.login.LoginDialogListenerType;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType;
@@ -28,7 +30,7 @@ import static org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
  * An activity showing a full-screen book detail page.
  */
 
-public final class CatalogBookDetailActivity extends CatalogActivity {
+public final class CatalogBookDetailActivity extends CatalogActivity implements LoginDialogListenerType {
   private static final String CATALOG_BOOK_DETAIL_FEED_ENTRY_ID;
 
   static {
@@ -135,9 +137,6 @@ public final class CatalogBookDetailActivity extends CatalogActivity {
         Simplified.getBooksController(),
         Simplified.getScreenSizeInformation(),
         Simplified.getNetworkConnectivity(),
-        Simplified.getMainColorScheme(),
-        Simplified.getBackgroundTaskExecutor(),
-        Simplified.getDocumentStore(),
         entry);
 
     this.view = detailView;
@@ -160,5 +159,11 @@ public final class CatalogBookDetailActivity extends CatalogActivity {
   protected void onDestroy() {
     super.onDestroy();
     this.bookSubscription.unsubscribe();
+  }
+
+  @NotNull
+  @Override
+  public ProfilesControllerType onLoginDialogWantsProfilesController() {
+    return Simplified.getProfilesController();
   }
 }

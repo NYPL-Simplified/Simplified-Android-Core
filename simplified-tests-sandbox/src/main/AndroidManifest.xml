@@ -14,8 +14,8 @@
     android:icon="@drawable/sandbox">
 
     <activity
-      android:name="org.nypl.simplified.tests.sandbox.TestSplashActivity"
-      android:theme="@style/Theme.AppCompat.Light"
+      android:name="org.nypl.simplified.tests.sandbox.StyledActivity"
+      android:theme="@style/SimplifiedBlank"
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
@@ -23,6 +23,10 @@
       </intent-filter>
     </activity>
 
+    <activity
+      android:name="org.nypl.simplified.tests.sandbox.LoginActivity"
+      android:theme="@style/SimplifiedTheme_ActionBar_Blue"
+      android:exported="true"/>
   </application>
 
 </manifest>

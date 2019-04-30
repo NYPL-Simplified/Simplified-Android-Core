@@ -182,7 +182,7 @@ class ReaderBookmarkService private constructor(
       this.logger.debug(
         "[{}]: checking sync status for account {}",
         this.profile.id().id(),
-        this.syncableAccount.account.id().id())
+        this.syncableAccount.account.id())
 
       val syncable =
         this.checkSyncingIsEnabledForAccount(this.profile, this.syncableAccount)
@@ -200,19 +200,19 @@ class ReaderBookmarkService private constructor(
         this.logger.debug(
           "[{}]: checking account {} has syncing enabled",
           profile.id().id(),
-          account.account.id().id())
+          account.account.id())
 
         if (this.httpCalls.syncingIsEnabled(account.settingsURI, account.credentials)) {
           this.logger.debug(
             "[{}]: account {} has syncing enabled",
             profile.id().id(),
-            account.account.id().id())
+            account.account.id())
           account
         } else {
           this.logger.debug(
             "[{}]: account {} has does not have syncing enabled",
             profile.id().id(),
-            account.account.id().id())
+            account.account.id())
           null
         }
       } catch (e: Exception) {
@@ -239,7 +239,7 @@ class ReaderBookmarkService private constructor(
     override fun runActual() {
       this.logger.debug("[{}]: syncing account {}",
         profile.id().id(),
-        accountID.id())
+        accountID)
 
       val syncable =
         accountSupportsSyncing(this.profile.account(this.accountID))
@@ -259,7 +259,7 @@ class ReaderBookmarkService private constructor(
         } catch (e: Exception) {
           this.logger.error("[{}]: could not receive bookmarks for account {}: ",
             this.profile.id().id(),
-            syncable.account.id().id(),
+            syncable.account.id(),
             e)
           listOf()
         }
@@ -754,15 +754,13 @@ class ReaderBookmarkService private constructor(
       return if (account.provider().supportsSimplyESynchronization()) {
         val settingsOpt = account.provider().patronSettingsURI()
         val annotationsOpt = account.provider().annotationsURI()
-        val credentialsOpt = account.credentials()
-        if (credentialsOpt is Some<AccountAuthenticationCredentials>
-          && settingsOpt is Some<URI>
-          && annotationsOpt is Some<URI>) {
+        val credentials = account.loginState().credentials
+        if (credentials != null && settingsOpt is Some<URI> && annotationsOpt is Some<URI>) {
           return SyncableAccount(
             account = account,
             settingsURI = settingsOpt.get(),
             annotationsURI = annotationsOpt.get(),
-            credentials = credentialsOpt.get())
+            credentials = credentials)
         } else {
           null
         }

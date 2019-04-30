@@ -28,7 +28,6 @@ import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
 import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
-import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
@@ -40,6 +39,7 @@ import org.nypl.simplified.app.catalog.CatalogFeedArgumentsType;
 import org.nypl.simplified.app.catalog.MainBooksActivity;
 import org.nypl.simplified.app.catalog.MainCatalogActivity;
 import org.nypl.simplified.app.catalog.MainHoldsActivity;
+import org.nypl.simplified.app.images.ImageAccountIcons;
 import org.nypl.simplified.app.profiles.ProfileSelectionActivity;
 import org.nypl.simplified.app.profiles.ProfileSwitchDialog;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
@@ -56,7 +56,6 @@ import org.nypl.simplified.stack.ImmutableStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +69,7 @@ import static org.nypl.simplified.books.profiles.ProfilesDatabaseType.AnonymousP
  */
 
 public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
-    implements DrawerListener, OnItemClickListener {
+  implements DrawerListener, OnItemClickListener {
 
   private static final Logger LOG;
   private static final String NAVIGATION_DRAWER_OPEN_ID;
@@ -81,13 +80,14 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   }
 
   private FrameLayout content_frame;
-  private DrawerLayout drawer;
   private List<NavigationDrawerItemType> drawer_items_initial;
   private NavigationDrawerArrayAdapter drawer_adapter;
   private ListView drawer_list_view;
   private SharedPreferences drawer_settings;
   private boolean finishing;
   private ObservableSubscriptionType<ProfileEvent> profile_event_subscription;
+  private DrawerLayout drawer_layout;
+  private boolean open_drawer;
 
   /**
    * Set the arguments for the activity that will be created.
@@ -97,14 +97,14 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
    */
 
   public static void setActivityArguments(
-      final Bundle b,
-      final boolean open_drawer) {
+    final Bundle b,
+    final boolean open_drawer) {
     NullCheck.notNull(b);
     b.putBoolean(NAVIGATION_DRAWER_OPEN_ID, open_drawer);
   }
 
   private static ImmutableList<NavigationDrawerItemType> calculateDrawerItemsInitial(
-      final Activity activity) {
+    final Activity activity) {
 
     final ImmutableList.Builder<NavigationDrawerItemType> drawer_items = ImmutableList.builder();
     drawer_items.add(new NavigationDrawerItemAccountCurrent(activity));
@@ -114,22 +114,24 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
       drawer_items.add(new NavigationDrawerItemHolds(activity));
     }
     drawer_items.add(new NavigationDrawerItemSettings(activity));
-    if (Simplified.getProfilesController().profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED) {
+
+    final ProfilesControllerType profiles = Simplified.getProfilesController();
+    if (profiles.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED) {
       drawer_items.add(new NavigationDrawerItemSwitchProfile(activity));
     }
     return drawer_items.build();
   }
 
   private static ImmutableList<NavigationDrawerItemType> calculateDrawerItemsAccounts(
-      final Activity activity) {
+    final Activity activity) {
 
     try {
       UIThread.checkIsUIThread();
 
       final ImmutableList.Builder<NavigationDrawerItemType> drawer_items =
-          ImmutableList.builder();
+        ImmutableList.builder();
       final ImmutableList<AccountProvider> drawer_item_accounts =
-          Simplified.getProfilesController().profileCurrentlyUsedAccountProviders();
+        Simplified.getProfilesController().profileCurrentlyUsedAccountProviders();
 
       for (final AccountProvider account : drawer_item_accounts) {
         drawer_items.add(new NavigationDrawerItemAccountSelectSpecific(activity, account));
@@ -163,9 +165,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     final View view = this.getCurrentFocus();
     if (view != null) {
       final InputMethodManager im = (InputMethodManager) this.getSystemService(
-          Context.INPUT_METHOD_SERVICE);
+        Context.INPUT_METHOD_SERVICE);
       im.hideSoftInputFromWindow(
-          view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
   }
 
@@ -187,17 +189,17 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     final ActionBar bar = this.getSupportActionBar();
     final Resources resources = this.getResources();
-    if (this.drawer.isDrawerOpen(GravityCompat.START)) {
+    if (this.drawer_layout.isDrawerOpen(GravityCompat.START)) {
       LOG.debug("drawer is open: closing drawer and finishing activity");
       this.finishing = true;
-      this.drawer.closeDrawer(GravityCompat.START);
+      this.drawer_layout.closeDrawer(GravityCompat.START);
       bar.setHomeActionContentDescription(resources.getString(R.string.navigation_accessibility_drawer_show));
       return;
     }
 
     if (isLastActivity()) {
       LOG.debug("drawer is closed: last activity; opening drawer");
-      this.drawer.openDrawer(GravityCompat.START);
+      this.drawer_layout.openDrawer(GravityCompat.START);
       bar.setHomeActionContentDescription(resources.getString(R.string.navigation_accessibility_drawer_hide));
       return;
     }
@@ -208,19 +210,19 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithActionBar());
+    this.setTheme(Simplified.getCurrentTheme().getThemeWithActionBar());
     super.onCreate(state);
 
     LOG.debug("onCreate: {}", this);
     this.setContentView(R.layout.main);
 
-    boolean open_drawer = true;
+    this.open_drawer = true;
     final Intent i = NullCheck.notNull(this.getIntent());
     LOG.debug("non-null intent");
     final Bundle a = i.getExtras();
     if (a != null) {
       LOG.debug("non-null intent extras");
-      open_drawer = a.getBoolean(NAVIGATION_DRAWER_OPEN_ID);
+      this.open_drawer = a.getBoolean(NAVIGATION_DRAWER_OPEN_ID);
       LOG.debug("drawer requested: {}", open_drawer);
     }
 
@@ -231,7 +233,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     if (state != null) {
       LOG.debug("reinitializing");
-      open_drawer = state.getBoolean(NAVIGATION_DRAWER_OPEN_ID, open_drawer);
+      this.open_drawer = state.getBoolean(NAVIGATION_DRAWER_OPEN_ID, open_drawer);
     }
 
     /*
@@ -244,38 +246,60 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
      */
 
     final SharedPreferences in_drawer_settings =
-        NullCheck.notNull(this.getSharedPreferences("drawer-settings", 0));
+      NullCheck.notNull(this.getSharedPreferences("drawer-settings", 0));
+
     if (in_drawer_settings.getBoolean("has-opened-manually", false)) {
       LOG.debug("user has manually opened drawer in the past, not opening it now!");
-      open_drawer = false;
+      this.open_drawer = false;
     }
     this.drawer_settings = in_drawer_settings;
-
-    final Resources resources = NullCheck.notNull(this.getResources());
 
     /*
      * Configure the navigation drawer.
      */
 
-    final DrawerLayout drawer_layout =
-        NullCheck.notNull(this.findViewById(R.id.drawer_layout));
-    final ListView drawer_list_view =
-        NullCheck.notNull(this.findViewById(R.id.left_drawer));
-    final FrameLayout frame_layout =
-        NullCheck.notNull(this.findViewById(R.id.content_frame));
+    this.drawer_layout =
+      NullCheck.notNull(this.findViewById(R.id.drawer_layout));
+    this.drawer_list_view =
+      NullCheck.notNull(this.findViewById(R.id.left_drawer));
+    this.content_frame =
+      NullCheck.notNull(this.findViewById(R.id.content_frame));
+  }
 
-    drawer_layout.addDrawerListener(this);
-    drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-    drawer_list_view.setOnItemClickListener(this);
-    drawer_layout.setDrawerTitle(Gravity.LEFT, resources.getString(R.string.navigation_accessibility));
+  @Override
+  protected void onStart() {
+    super.onStart();
+
+    /*
+     * If no profile is selected, then we are presumably recovering from a crash
+     * and have been shoved back into the middle of the application without having
+     * gone via the splash screen. The ProfileTimeOutActivity will take care of moving
+     * back to the profile selection screen, but we need to avoid doing anything with
+     * profiles here to ensure safe passage.
+     */
+
+    if (!Simplified.getProfilesController().profileAnyIsCurrent()) {
+      LOG.debug("no profile is enabled, aborting!");
+      return;
+    }
+
+    /*
+     * Configure the navigation drawer.
+     */
+
+    this.drawer_layout.addDrawerListener(this);
+    this.drawer_layout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+    this.drawer_list_view.setOnItemClickListener(this);
+    this.drawer_layout.setDrawerTitle(
+      Gravity.LEFT, this.getResources().getString(R.string.navigation_accessibility));
 
     this.drawer_items_initial =
-        calculateDrawerItemsInitial(this);
+      calculateDrawerItemsInitial(this);
     this.drawer_adapter =
-        NavigationDrawerArrayAdapter.create(this, drawer_list_view);
+      NavigationDrawerArrayAdapter.create(this, drawer_list_view);
     this.drawer_adapter.getDrawerItems().addAll(this.drawer_items_initial);
 
-    drawer_list_view.setAdapter(this.drawer_adapter);
+    this.drawer_list_view.setAdapter(this.drawer_adapter);
 
     /*
      * Show or hide the three dashes next to the home button.
@@ -284,10 +308,11 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     final ActionBar bar = NullCheck.notNull(this.getSupportActionBar(), "Action bar");
     if (this.navigationDrawerShouldShowIndicator()) {
       LOG.debug("setting navigation drawer indicator");
-      if (android.os.Build.VERSION.SDK_INT < 21) {
-        bar.setDisplayHomeAsUpEnabled(false);
-        bar.setHomeButtonEnabled(true);
-      }
+      bar.setDisplayOptions(
+        ActionBar.DISPLAY_SHOW_TITLE
+          | ActionBar.DISPLAY_HOME_AS_UP
+          | ActionBar.DISPLAY_SHOW_HOME);
+      bar.setHomeAsUpIndicator(R.drawable.ic_drawer);
     }
 
     /*
@@ -296,39 +321,40 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     if (open_drawer) {
       drawer_layout.openDrawer(GravityCompat.START);
-      bar.setHomeActionContentDescription(resources.getString(R.string.navigation_accessibility_drawer_hide));
+      bar.setHomeActionContentDescription(
+        this.getResources().getString(R.string.navigation_accessibility_drawer_hide));
     }
 
-    this.drawer = drawer_layout;
-    this.drawer_list_view = drawer_list_view;
-    this.content_frame = frame_layout;
-
     this.profile_event_subscription =
-        Simplified.getProfilesController()
-            .profileEvents()
-            .subscribe(this::onProfileEvent);
+      Simplified.getProfilesController()
+        .profileEvents()
+        .subscribe(this::onProfileEvent);
 
     this.setActionBarTitle();
   }
 
   @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    this.profile_event_subscription.unsubscribe();
+  protected void onStop() {
+    super.onStop();
+
+    final ObservableSubscriptionType<ProfileEvent> subscription = this.profile_event_subscription;
+    if (subscription != null) {
+      subscription.unsubscribe();
+    }
   }
 
   private void onProfileEvent(final ProfileEvent event) {
     if (event instanceof ProfileAccountSelectEvent) {
       final ProfileAccountSelectEvent event_select = (ProfileAccountSelectEvent) event;
       event_select.matchSelect(
-          this::onProfileAccountSelectSucceeded,
-          this::onProfileAccountSelectFailed);
+        this::onProfileAccountSelectSucceeded,
+        this::onProfileAccountSelectFailed);
       return;
     }
   }
 
   private Unit onProfileAccountSelectFailed(
-      final ProfileAccountSelectEvent.ProfileAccountSelectFailed event) {
+    final ProfileAccountSelectEvent.ProfileAccountSelectFailed event) {
 
     LOG.debug("onProfileAccountSelectFailed: {}", event);
     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -338,7 +364,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   }
 
   private Unit onProfileAccountSelectSucceeded(
-      final ProfileAccountSelectEvent.ProfileAccountSelectSucceeded event) {
+    final ProfileAccountSelectEvent.ProfileAccountSelectSucceeded event) {
 
     LOG.debug("onProfileAccountSelectSucceeded: {}", event);
     return Unit.unit();
@@ -375,8 +401,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
   @Override
   public final void onDrawerSlide(
-      final @Nullable View drawer_view,
-      final float slide_offset) {
+    final @Nullable View drawer_view,
+    final float slide_offset) {
     // Nothing
   }
 
@@ -387,25 +413,25 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
   @Override
   public void onItemClick(
-      final @Nullable AdapterView<?> parent,
-      final @Nullable View view,
-      final int position,
-      final long id) {
+    final @Nullable AdapterView<?> parent,
+    final @Nullable View view,
+    final int position,
+    final long id) {
 
     final NavigationDrawerItemType item = this.drawer_adapter.getItem(position);
     LOG.debug("onItemClick: {}", item);
-    item.onSelect(this.drawer, this.drawer_adapter);
+    item.onSelect(this.drawer_layout, this.drawer_adapter);
   }
 
   @Override
   public boolean onOptionsItemSelected(
-      final @Nullable MenuItem item_mn) {
+    final @Nullable MenuItem item_mn) {
     final MenuItem item = NullCheck.notNull(item_mn);
     final Resources rr = NullCheck.notNull(this.getResources());
 
     switch (item.getItemId()) {
       case android.R.id.home: {
-        final DrawerLayout d = NullCheck.notNull(this.drawer);
+        final DrawerLayout d = NullCheck.notNull(this.drawer_layout);
         final ActionBar bar = this.getSupportActionBar();
         if (d.isDrawerOpen(GravityCompat.START)) {
           d.closeDrawer(GravityCompat.START);
@@ -437,7 +463,7 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
      */
 
     final Bundle state_nn = NullCheck.notNull(state);
-    final DrawerLayout d = NullCheck.notNull(this.drawer);
+    final DrawerLayout d = NullCheck.notNull(this.drawer_layout);
     state_nn.putBoolean(NAVIGATION_DRAWER_OPEN_ID, d.isDrawerOpen(GravityCompat.START));
   }
 
@@ -453,9 +479,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
      */
 
     void onConfigureIconAndText(
-        TextView text_view,
-        ImageView icon_view,
-        boolean checked);
+      TextView text_view,
+      ImageView icon_view,
+      boolean checked);
 
     /**
      * Called when an item is selected. This is where any action such as spawning a new activity
@@ -463,8 +489,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
      */
 
     void onSelect(
-        DrawerLayout drawer,
-        NavigationDrawerArrayAdapter array_adapter);
+      DrawerLayout drawer,
+      NavigationDrawerArrayAdapter array_adapter);
 
     /**
      * Called when a view should be created. This function is expected to behave in the manner
@@ -488,8 +514,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public View onCreateView(
-        final ViewGroup parent,
-        final View reuse) {
+      final ViewGroup parent,
+      final View reuse) {
       if (reuse != null && reuse.getId() == R.id.drawer_item_plain) {
         return reuse;
       } else {
@@ -513,27 +539,21 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
 
       try {
         final AccountProvider account =
-            Simplified.getProfilesController()
-                .profileAccountCurrent()
-                .provider();
+          Simplified.getProfilesController()
+            .profileAccountCurrent()
+            .provider();
 
         text_view.setText(account.displayName());
-
-        if (account.logo().isSome()) {
-          URI logoURI = ((Some<URI>) account.logo()).get();
-          icon_view.setVisibility(View.VISIBLE);
-          SimplifiedIconViews.INSTANCE.configureIconViewFromURI(
-            this.activity.getAssets(), icon_view, logoURI);
-        } else {
-          icon_view.setVisibility(View.INVISIBLE);
-        }
-
+        ImageAccountIcons.loadAccountLogoIntoView(
+          Simplified.getLocalImageLoader(),
+          account,
+          icon_view);
       } catch (final ProfileNoneCurrentException e) {
         throw new IllegalStateException(e);
       }
@@ -541,8 +561,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
 
       final List<NavigationDrawerItemType> items = array_adapter.getDrawerItems();
       items.clear();
@@ -552,8 +572,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public View onCreateView(
-        final ViewGroup parent,
-        final View reuse) {
+      final ViewGroup parent,
+      final View reuse) {
       final View view;
       if (reuse != null && reuse.getId() == R.id.drawer_item_current_account) {
         view = reuse;
@@ -562,7 +582,6 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         view = inflater.inflate(R.layout.drawer_item_current_account, parent, false);
       }
 
-      view.setBackgroundResource(R.drawable.textview_underline);
       return view;
     }
   }
@@ -579,17 +598,17 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
       text_view.setText(R.string.settings_manage_accounts);
       icon_view.setImageResource(R.drawable.menu_icon_settings);
     }
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
 
       UIThread.checkIsUIThread();
 
@@ -613,9 +632,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
 
       text_view.setText(R.string.books);
       if (checked) {
@@ -627,8 +646,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
       UIThread.checkIsUIThread();
 
       drawer.closeDrawer(GravityCompat.START);
@@ -638,12 +657,12 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         final OptionType<String> no_search = Option.none();
         final ImmutableStack<CatalogFeedArgumentsType> empty_stack = ImmutableStack.empty();
         final CatalogFeedArgumentsLocalBooks local =
-            new CatalogFeedArgumentsLocalBooks(
-                empty_stack,
-                this.activity.getResources().getString(R.string.books),
-                SORT_BY_TITLE,
-                no_search,
-                BOOKS_FEED_LOANED);
+          new CatalogFeedArgumentsLocalBooks(
+            empty_stack,
+            this.activity.getResources().getString(R.string.books),
+            SORT_BY_TITLE,
+            no_search,
+            BOOKS_FEED_LOANED);
         CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
         startActivityWithoutHistory(this.activity, bundle, MainBooksActivity.class);
       }, 500L);
@@ -662,9 +681,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
 
       text_view.setText(R.string.holds);
       if (checked) {
@@ -676,8 +695,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
       UIThread.checkIsUIThread();
 
       drawer.closeDrawer(GravityCompat.START);
@@ -687,14 +706,14 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
         final Bundle bundle = new Bundle();
         final OptionType<String> no_search = Option.none();
         final ImmutableStack<CatalogFeedArgumentsType> empty_stack =
-            ImmutableStack.empty();
+          ImmutableStack.empty();
         final CatalogFeedArgumentsLocalBooks local =
-            new CatalogFeedArgumentsLocalBooks(
-                empty_stack,
-                this.activity.getResources().getString(R.string.holds),
-                SORT_BY_TITLE,
-                no_search,
-                BOOKS_FEED_HOLDS);
+          new CatalogFeedArgumentsLocalBooks(
+            empty_stack,
+            this.activity.getResources().getString(R.string.holds),
+            SORT_BY_TITLE,
+            no_search,
+            BOOKS_FEED_HOLDS);
         CatalogFeedActivity.Companion.setActivityArguments(bundle, local);
         startActivityWithoutHistory(this.activity, bundle, MainHoldsActivity.class);
       }, 500L);
@@ -704,9 +723,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
   }
 
   private static void startActivityWithoutHistory(
-      final Activity source,
-      final Bundle bundle,
-      final Class<? extends Activity> target) {
+    final Activity source,
+    final Bundle bundle,
+    final Class<? extends Activity> target) {
 
     bundle.putBoolean(NAVIGATION_DRAWER_OPEN_ID, false);
     final Intent intent = new Intent();
@@ -726,9 +745,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
 
       text_view.setText(R.string.catalog);
       if (checked) {
@@ -740,8 +759,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
       UIThread.checkIsUIThread();
 
       drawer.closeDrawer(GravityCompat.START);
@@ -751,14 +770,14 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
           final Bundle bundle = new Bundle();
           final ProfilesControllerType profiles = Simplified.getProfilesController();
           final ImmutableStack<CatalogFeedArgumentsType> empty =
-              ImmutableStack.empty();
+            ImmutableStack.empty();
           final CatalogFeedArgumentsRemote remote =
-              new CatalogFeedArgumentsRemote(
-                  false,
-                  NullCheck.notNull(empty),
-                  NullCheck.notNull(this.activity.getResources().getString(R.string.feature_app_name)),
-                  profiles.profileAccountCurrentCatalogRootURI(),
-                  false);
+            new CatalogFeedArgumentsRemote(
+              false,
+              NullCheck.notNull(empty),
+              NullCheck.notNull(this.activity.getResources().getString(R.string.feature_app_name)),
+              profiles.profileAccountCurrentCatalogRootURI(),
+              false);
           CatalogFeedActivity.Companion.setActivityArguments(bundle, remote);
           startActivityWithoutHistory(this.activity, bundle, MainCatalogActivity.class);
         } catch (final ProfileNoneCurrentException e) {
@@ -781,9 +800,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
 
       text_view.setText(R.string.settings);
       if (checked) {
@@ -795,8 +814,8 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
       UIThread.checkIsUIThread();
 
       drawer.closeDrawer(GravityCompat.START);
@@ -820,9 +839,9 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
 
       text_view.setText(R.string.profiles_switch);
       icon_view.setImageResource(R.drawable.menu_icon_profile_logout);
@@ -830,18 +849,18 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
       UIThread.checkIsUIThread();
 
       final ProfileSwitchDialog dialog =
-          ProfileSwitchDialog.newDialog(() -> {
-            drawer.closeDrawer(GravityCompat.START);
+        ProfileSwitchDialog.newDialog(() -> {
+          drawer.closeDrawer(GravityCompat.START);
 
-            UIThread.runOnUIThreadDelayed(() -> {
-              startActivityWithoutHistory(this.activity, new Bundle(), ProfileSelectionActivity.class);
-            }, 500L);
-          });
+          UIThread.runOnUIThreadDelayed(() -> {
+            startActivityWithoutHistory(this.activity, new Bundle(), ProfileSelectionActivity.class);
+          }, 500L);
+        });
 
       dialog.show(this.activity.getFragmentManager(), "profile-switch-dialog");
     }
@@ -858,33 +877,29 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
     private final AccountProvider account;
 
     NavigationDrawerItemAccountSelectSpecific(
-        final Activity activity,
-        final AccountProvider account) {
+      final Activity activity,
+      final AccountProvider account) {
       super(activity);
       this.account = NullCheck.notNull(account, "account");
     }
 
     @Override
     public void onConfigureIconAndText(
-        final TextView text_view,
-        final ImageView icon_view,
-        final boolean checked) {
+      final TextView text_view,
+      final ImageView icon_view,
+      final boolean checked) {
 
       text_view.setText(this.account.displayName());
-
-      if (this.account.logo().isSome()) {
-        URI logoURI = ((Some<URI>) this.account.logo()).get();
-        SimplifiedIconViews.INSTANCE.configureIconViewFromURI(this.activity.getAssets(), icon_view, logoURI);
-        icon_view.setVisibility(View.VISIBLE);
-      } else {
-        icon_view.setVisibility(View.INVISIBLE);
-      }
+      ImageAccountIcons.loadAccountLogoIntoView(
+        Simplified.getLocalImageLoader(),
+        this.account,
+        icon_view);
     }
 
     @Override
     public void onSelect(
-        final DrawerLayout drawer,
-        final NavigationDrawerArrayAdapter array_adapter) {
+      final DrawerLayout drawer,
+      final NavigationDrawerArrayAdapter array_adapter) {
       UIThread.checkIsUIThread();
 
       drawer.closeDrawer(GravityCompat.START);
@@ -905,27 +920,27 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
    */
 
   private static final class NavigationDrawerArrayAdapter
-      extends ArrayAdapter<NavigationDrawerItemType> {
+    extends ArrayAdapter<NavigationDrawerItemType> {
 
     private final ArrayList<NavigationDrawerItemType> drawer_items;
     private final ListView drawer_list_view;
 
     private NavigationDrawerArrayAdapter(
-        final NavigationDrawerActivity activity,
-        final ArrayList<NavigationDrawerItemType> drawer_items,
-        final ListView drawer_list_view) {
+      final NavigationDrawerActivity activity,
+      final ArrayList<NavigationDrawerItemType> drawer_items,
+      final ListView drawer_list_view) {
 
       super(activity, R.layout.drawer_item, drawer_items);
 
       this.drawer_items =
-          NullCheck.notNull(drawer_items, "drawer_items");
+        NullCheck.notNull(drawer_items, "drawer_items");
       this.drawer_list_view =
-          NullCheck.notNull(drawer_list_view, "drawer_list_view");
+        NullCheck.notNull(drawer_list_view, "drawer_list_view");
     }
 
     static NavigationDrawerArrayAdapter create(
-        final NavigationDrawerActivity activity,
-        final ListView drawer_list_view) {
+      final NavigationDrawerActivity activity,
+      final ListView drawer_list_view) {
       final ArrayList<NavigationDrawerItemType> drawer_items = new ArrayList<>(32);
       return new NavigationDrawerArrayAdapter(activity, drawer_items, drawer_list_view);
     }
@@ -936,22 +951,22 @@ public abstract class NavigationDrawerActivity extends ProfileTimeOutActivity
 
     @Override
     public View getView(
-        final int position,
-        final @Nullable View reuse,
-        final @Nullable ViewGroup parent) {
+      final int position,
+      final @Nullable View reuse,
+      final @Nullable ViewGroup parent) {
 
       final NavigationDrawerItemType item = this.drawer_items.get(position);
       final View view = item.onCreateView(parent, reuse);
 
       final TextView text_view =
-          NullCheck.notNull(view.findViewById(android.R.id.text1));
+        NullCheck.notNull(view.findViewById(android.R.id.text1));
       final ImageView icon_view =
-          NullCheck.notNull(view.findViewById(R.id.cellIcon));
+        NullCheck.notNull(view.findViewById(R.id.cellIcon));
 
       item.onConfigureIconAndText(
-          text_view,
-          icon_view,
-          this.drawer_list_view.getCheckedItemPosition() == position);
+        text_view,
+        icon_view,
+        this.drawer_list_view.getCheckedItemPosition() == position);
 
       return view;
     }

@@ -1,66 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   android:id="@+id/settings_account_container"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-<ScrollView
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:id="@+id/settings_account_scroll_view"
   android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:background="@color/light_background">
+  android:layout_height="match_parent">
 
-  <LinearLayout
-    android:orientation="vertical"
+  <ScrollView
+    android:id="@+id/settings_account_scroll_view"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/light_background">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <LinearLayout android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+      <LinearLayout android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/normal_background"
         android:elevation="1dp"
         android:orientation="vertical"
         android:padding="16dp">
 
-      <TableLayout
-          android:id="@+id/settings_login_table_provider"
+        <TableLayout android:id="@+id/settings_login_table_provider"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_marginBottom="16dp"
           android:layout_marginTop="8dp"
-          android:background="@color/normal_background">
+          android:layout_marginBottom="16dp">
 
-        <TableRow
-            android:id="@+id/tableRowProvider"
+          <TableRow android:id="@+id/tableRowProvider"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-          <ImageView
-              android:id="@+id/account_icon"
+            <ImageView android:id="@+id/account_icon"
               android:layout_width="80dp"
               android:layout_height="80dp"
               android:layout_weight="0"
               android:paddingLeft="10dp"
               android:paddingRight="0dp"
-              android:src="@mipmap/ic_launcher"
-              />
+              android:src="@mipmap/ic_launcher" />
 
-          <LinearLayout
-              android:layout_width="match_parent"
+            <LinearLayout android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_margin="10dp"
               android:layout_weight="1"
-              android:orientation="vertical"
+              android:orientation="vertical">
 
-              >
-
-            <TextView
-                xmlns:android="http://schemas.android.com/apk/res/android"
+              <TextView
                 android:id="@android:id/text1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -68,13 +53,11 @@
                 android:paddingLeft="11dp"
                 android:paddingRight="11dp"
                 android:textAppearance="?android:attr/textAppearanceListItem"
-                android:textColor="@drawable/drawer_list_text"
+                android:textColor="@drawable/drawer_list_text_selector"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                />
+                android:textStyle="bold" />
 
-            <TextView
-                xmlns:android="http://schemas.android.com/apk/res/android"
+              <TextView
                 android:id="@android:id/text2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -82,104 +65,86 @@
                 android:paddingLeft="11dp"
                 android:paddingRight="11dp"
                 android:textAppearance="?android:attr/textAppearanceListItemSmall"
-                android:textColor="@drawable/drawer_list_text"
-                android:textSize="14sp"
-                />
-          </LinearLayout>
-        </TableRow>
+                android:textColor="@drawable/drawer_list_text_selector"
+                android:textSize="14sp" />
+            </LinearLayout>
+          </TableRow>
 
-      </TableLayout>
+        </TableLayout>
 
-      <ImageView
-          android:id="@+id/settings_barcode_image"
+        <ImageView android:id="@+id/settings_barcode_image"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:visibility="gone"/>
+          android:visibility="gone" />
 
-      <TextView
-          android:id="@+id/settings_barcode_toggle_barcode"
+        <TextView android:id="@+id/settings_barcode_toggle_barcode"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_gravity="center"
           android:maxLines="1"
-          android:textSize="18sp"
           android:text="@string/settings_toggle_barcode_show"
-          android:visibility="gone"
-          />
+          android:textSize="18sp"
+          android:visibility="gone" />
 
-      <TableLayout
-          android:id="@+id/settings_login_table_with_code"
+        <TableLayout android:id="@+id/settings_login_table_with_code"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_marginBottom="16dp"
           android:layout_marginTop="8dp"
-          android:background="@color/normal_background">
+          android:layout_marginBottom="16dp">
 
-        <TableRow
-            android:id="@+id/tableRow1"
+          <TableRow android:id="@+id/tableRow1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-          <TextView
-              android:id="@+id/settings_barcode_label"
+            <TextView android:id="@+id/settings_barcode_label"
               android:layout_width="60dp"
               android:layout_height="wrap_content"
               android:labelFor="@+id/settings_barcode_edit"
-              android:text="@string/settings_barcode"/>
+              android:text="@string/settings_barcode" />
 
-          <EditText
-              android:id="@+id/settings_barcode_text"
+            <EditText android:id="@+id/settings_barcode_text"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginStart="20dp"
               android:layout_weight="1"
-              android:background="@drawable/textview_underline"
               android:inputType="text"
-              android:maxLines="1"/>
-        </TableRow>
+              android:maxLines="1" />
+          </TableRow>
 
-        <TableRow
-            android:id="@+id/tableRow2"
+          <TableRow android:id="@+id/tableRow2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-          <TextView
-              android:id="@+id/settings_pin_label"
+            <TextView android:id="@+id/settings_pin_label"
               android:layout_width="60dp"
               android:layout_height="wrap_content"
               android:labelFor="@+id/settings_pin_edit"
-              android:text="@string/settings_pin"/>
+              android:text="@string/settings_pin" />
 
-          <EditText
-            android:id="@+id/settings_pin_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_weight="1"
-            android:background="@drawable/textview_underline"
-            android:inputType="textPassword"
-            android:maxLines="1"
-            tools:password="true" />
+            <EditText android:id="@+id/settings_pin_text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginStart="20dp"
+              android:layout_weight="1"
+              android:inputType="textPassword"
+              android:maxLines="1"
+              tools:password="true" />
 
-          <CheckBox
-              android:id="@+id/settings_reveal_password"
+            <CheckBox android:id="@+id/settings_reveal_password"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_gravity="center_vertical"
               android:checked="false"
               android:text="@string/settings_reveal_password"
-              android:textSize="12sp"/>
-        </TableRow>
+              android:textSize="12sp" />
+          </TableRow>
 
-        <TableRow
-            android:id="@+id/tableRow3"
+          <TableRow android:id="@+id/tableRow3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            >
+            android:layout_marginTop="10dp">
 
-          <CheckBox
-              android:id="@+id/eula_checkbox"
+            <CheckBox android:id="@+id/eula_checkbox"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_gravity="center_vertical"
@@ -187,188 +152,162 @@
               android:layout_weight="1"
               android:checked="false"
               android:text="@string/eula_checkbox"
-              android:textSize="12sp"/>
+              android:textSize="12sp" />
+          </TableRow>
+        </TableLayout>
 
-        </TableRow>
-      </TableLayout>
-
-      <CheckBox
-          android:id="@+id/age13_checkbox"
+        <CheckBox android:id="@+id/age13_checkbox"
           android:layout_width="wrap_content"
           android:layout_height="0dp"
           android:layout_gravity="center_vertical"
           android:layout_weight="1"
           android:checked="false"
           android:text="@string/age_verification_13_checkbox"
-          android:textAppearance="?android:attr/textAppearanceListItem"
-          />
+          android:textAppearance="?android:attr/textAppearanceListItem" />
 
-      <Button
-          android:id="@+id/settings_login"
+        <LinearLayout
+          android:id="@+id/settings_action_layout"
+          android:layout_marginTop="16dp"
+          android:layout_marginBottom="16dp"
+          android:orientation="horizontal"
+          android:gravity="center"
           android:layout_width="match_parent"
-          android:layout_height="@dimen/button_standard_height"
+          android:layout_height="wrap_content">
+
+          <ProgressBar
+            android:id="@+id/settings_action_progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginRight="16dp"
+            android:indeterminate="true" />
+
+          <TextView
+            android:id="@+id/settings_action_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logging in... "/>
+
+        </LinearLayout>
+
+        <Button android:id="@+id/settings_login"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
           android:layout_gravity="center"
-          android:layout_marginTop="30dp"
-          android:background="@drawable/simplified_button"
           android:paddingLeft="30dp"
           android:paddingRight="30dp"
           android:text="@string/settings_log_in"
-          android:textColor="@drawable/simplified_button_text"
-          android:textSize="12sp"/>
+          android:textSize="12sp" />
 
-      <TableLayout
-          android:id="@+id/settings_signup_table"
+        <TableLayout android:id="@+id/settings_signup_table"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:layout_marginBottom="16dp"
           android:layout_marginTop="22dp"
-          android:background="@color/normal_background">
+          android:layout_marginBottom="16dp">
 
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
+          <TableRow android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
-          <TextView
-              android:layout_width="wrap_content"
+            <TextView android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_weight="1"
               android:labelFor="@+id/settings_barcode_edit"
               android:text="@string/need_card_question"
-              android:textAppearance="?android:attr/textAppearanceListItem"
+              android:textAppearance="?android:attr/textAppearanceListItem" />
 
-              />
-
-
-          <Button
-              android:id="@+id/settings_signup"
+            <Button android:id="@+id/settings_signup"
               android:layout_width="wrap_content"
-              android:layout_height="@dimen/button_standard_height"
-              android:background="@drawable/simplified_button"
+              android:layout_height="wrap_content"
               android:paddingLeft="30dp"
               android:paddingRight="30dp"
               android:text="@string/need_card_button"
-              android:textColor="@drawable/simplified_button_text"
-              android:textSize="12sp"/>
+              android:textSize="12sp" />
+          </TableRow>
+        </TableLayout>
+      </LinearLayout>
 
-
-        </TableRow>
-
-      </TableLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/sync_table_row"
+      <LinearLayout android:id="@+id/sync_table_row"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/normal_background"
+        android:layout_marginTop="10dp"
         android:elevation="1dp"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginTop="10dp"
         android:visibility="visible">
 
-
-      <Switch
-          android:id="@+id/sync_switch"
+        <Switch android:id="@+id/sync_switch"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:layout_weight="1"
-          android:background="@color/normal_background"
           android:text="@string/settings_bookmarks_switch"
           android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
+      </LinearLayout>
 
-    <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:background="@color/light_background"
-      android:paddingTop="10dp">
+      <LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="10dp">
 
-      <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        <TableLayout android:layout_width="match_parent"
+          android:layout_height="wrap_content">
 
-        <TableRow
-            android:id="@+id/support_center"
+          <TableRow android:id="@+id/support_center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
-            android:background="@color/normal_background"
             android:elevation="1dp"
             android:padding="015dp">
-
-          <TextView
-              android:layout_width="match_parent"
+            <TextView android:layout_width="match_parent"
               android:text="Support Center"
               android:textAppearance="?android:attr/textAppearanceMedium" />
-        </TableRow>
+          </TableRow>
 
-
-        <TableRow
-          android:id="@+id/report_issue"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:background="@color/normal_background"
-          android:padding="015dp"
-          android:layout_marginBottom="5dp"
-          android:elevation="1dp">
-
-          <TextView
-            android:text="@string/settings_report_issue"
-            android:layout_width="match_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-        </TableRow>
-
-        <TableRow
-          android:id="@+id/link_privacy"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:background="@color/normal_background"
-          android:padding="015dp"
-          android:layout_marginBottom="5dp"
-          android:elevation="1dp">
-
-          <TextView
-            android:text="@string/settings_privacy"
-            android:layout_width="match_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-        </TableRow>
-
-        <TableRow
-          android:id="@+id/link_license"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:background="@color/normal_background"
-          android:padding="015dp"
-          android:layout_marginBottom="5dp"
-          android:elevation="1dp">
-
-          <TextView
-            android:text="@string/settings_licence_content"
-            android:layout_width="match_parent"
-            android:textAppearance="?android:attr/textAppearanceMedium"/>
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/link_advanced"
+          <TableRow android:id="@+id/report_issue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/normal_background"
-            android:padding="015dp"
+            android:layout_marginBottom="5dp"
+            android:elevation="1dp"
+            android:padding="015dp">
+            <TextView android:layout_width="match_parent"
+              android:text="@string/settings_report_issue"
+              android:textAppearance="?android:attr/textAppearanceMedium" />
+          </TableRow>
+
+          <TableRow android:id="@+id/link_privacy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:elevation="1dp"
+            android:padding="015dp">
+            <TextView android:layout_width="match_parent"
+              android:text="@string/settings_privacy"
+              android:textAppearance="?android:attr/textAppearanceMedium" />
+          </TableRow>
+
+          <TableRow android:id="@+id/link_license"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:elevation="1dp"
+            android:padding="015dp">
+            <TextView android:layout_width="match_parent"
+              android:text="@string/settings_licence_content"
+              android:textAppearance="?android:attr/textAppearanceMedium" />
+          </TableRow>
+
+          <TableRow android:id="@+id/link_advanced"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:elevation="1dp">
-
-          <TextView
+            android:elevation="1dp"
+            android:padding="015dp">
+            <TextView android:layout_width="match_parent"
               android:text="@string/settings_advanced_menu"
-              android:layout_width="match_parent"
-              android:textAppearance="?android:attr/textAppearanceMedium"/>
-        </TableRow>
-      </TableLayout>
+              android:textAppearance="?android:attr/textAppearanceMedium" />
+          </TableRow>
+        </TableLayout>
+      </LinearLayout>
     </LinearLayout>
-  </LinearLayout>
-</ScrollView>
+  </ScrollView>
 </FrameLayout>

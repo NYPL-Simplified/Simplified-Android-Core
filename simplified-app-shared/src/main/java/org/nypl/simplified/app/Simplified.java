@@ -16,24 +16,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.io7m.jfunctional.Option;
 import com.io7m.jfunctional.OptionType;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
-import com.io7m.junreachable.UnimplementedCodeException;
-import com.io7m.junreachable.UnreachableCodeException;
+import com.squareup.picasso.Picasso;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.helpstack.Helpstack;
 import org.nypl.simplified.app.helpstack.HelpstackType;
+import org.nypl.simplified.app.images.ImageAccountIconRequestHandler;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMap;
 import org.nypl.simplified.app.reader.ReaderHTTPMimeMapType;
 import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStore;
+import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStoreType;
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty;
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsJSON;
+import org.nypl.simplified.books.accounts.AccountBundledCredentialsType;
 import org.nypl.simplified.books.accounts.AccountEvent;
+import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
 import org.nypl.simplified.books.accounts.AccountProvidersJSON;
@@ -73,6 +81,7 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkService;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceProviderType;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceType;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkServiceUsableType;
+import org.nypl.simplified.branding.BrandingThemeOverrideServiceType;
 import org.nypl.simplified.bugsnag.IfBugsnag;
 import org.nypl.simplified.cardcreator.CardCreator;
 import org.nypl.simplified.downloader.core.DownloaderHTTP;
@@ -93,15 +102,20 @@ import org.nypl.simplified.opds.core.OPDSSearchParser;
 import org.nypl.simplified.opds.core.OPDSSearchParserType;
 import org.nypl.simplified.tenprint.TenPrintGenerator;
 import org.nypl.simplified.tenprint.TenPrintGeneratorType;
+import org.nypl.simplified.theme.ThemeControl;
+import org.nypl.simplified.theme.ThemeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.SortedMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -153,9 +167,12 @@ public final class Simplified extends MultiDexApplication {
   private BookRegistryType book_registry;
   private Controller book_controller;
   private BundledContentResolverType bundled_content_resolver;
-  private ApplicationColorScheme color_scheme_fallback;
   private BookCoverBadgeLookupType cover_badges;
   private ReaderBookmarkServiceType readerBookmarksService;
+  private Picasso local_image_loader;
+  private OptionType<ThemeValue> branding_theme_override;
+  private AccountBundledCredentialsType bundled_credentials;
+  private AccountAuthenticationCredentialsStoreType account_credentials_store;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -193,21 +210,21 @@ public final class Simplified extends MultiDexApplication {
   }
 
   /**
+   * @return The local image loader
+   */
+
+  public static Picasso getLocalImageLoader() {
+    final Simplified i = Simplified.checkInitialized();
+    return i.local_image_loader;
+  }
+
+  /**
    * @return The HTTP interface
    */
 
   public static HTTPType getHTTP() {
     final Simplified i = Simplified.checkInitialized();
     return i.http;
-  }
-
-  /**
-   * @return The main application color scheme
-   */
-
-  public static ApplicationColorScheme getMainColorScheme() {
-    final Simplified i = Simplified.checkInitialized();
-    return i.getActualMainColorScheme();
   }
 
   /**
@@ -424,6 +441,29 @@ public final class Simplified extends MultiDexApplication {
     return i.documents;
   }
 
+  public static ThemeValue getCurrentTheme() {
+    final Simplified i = Simplified.checkInitialized();
+
+    if (i.branding_theme_override.isSome()) {
+      return ((Some<ThemeValue>) i.branding_theme_override).get();
+    }
+
+    final OptionType<ProfileType> currentProfileOpt = i.profiles.currentProfile();
+    if (currentProfileOpt.isSome()) {
+      final ProfileType currentProfile =
+        ((Some<ProfileType>) currentProfileOpt).get();
+      final AccountType accountCurrent =
+        currentProfile.accountCurrent();
+      final ThemeValue theme =
+        ThemeControl.getThemesByName().get(accountCurrent.provider().mainColor());
+      if (theme != null) {
+        return theme;
+      }
+    }
+
+    return ThemeControl.getThemeFallback();
+  }
+
   private static int fetchUnusedHTTPPort() {
     // Fallback port
     Integer port = 8080;
@@ -482,6 +522,8 @@ public final class Simplified extends MultiDexApplication {
     final ObservableType<AccountEvent> account_events,
     final ObservableType<ProfileEvent> profile_events,
     final AccountProviderCollection account_providers,
+    final AccountBundledCredentialsType account_bundled_credentials,
+    final AccountAuthenticationCredentialsStoreType account_credentials_store,
     final File directory)
     throws ProfileDatabaseException {
 
@@ -493,20 +535,24 @@ public final class Simplified extends MultiDexApplication {
 
     if (anonymous) {
       LOG.debug("opening profile database with anonymous profile");
-      return ProfilesDatabase.openWithAnonymousAccountEnabled(
+      return ProfilesDatabase.openWithAnonymousProfileEnabled(
         context,
         account_events,
         account_providers,
+        account_bundled_credentials,
+        account_credentials_store,
         AccountsDatabases.INSTANCE,
         account_providers.providerDefault(),
         directory);
     }
 
     LOG.debug("opening profile database without anonymous profile");
-    return ProfilesDatabase.openWithAnonymousAccountDisabled(
+    return ProfilesDatabase.openWithAnonymousProfileDisabled(
       context,
       account_events,
       account_providers,
+      account_bundled_credentials,
+      account_credentials_store,
       AccountsDatabases.INSTANCE,
       directory);
   }
@@ -575,19 +621,6 @@ public final class Simplified extends MultiDexApplication {
     return documents_builder.build();
   }
 
-  private int currentTheme(final WantActionBar bar) {
-    NullCheck.notNull(bar, "Bar");
-
-    switch (bar) {
-      case WANT_ACTION_BAR:
-        return R.style.Simplified_RedTheme;
-      case WANT_NO_ACTION_BAR:
-        return R.style.Simplified_RedTheme_NoActionBar;
-    }
-
-    throw new UnreachableCodeException();
-  }
-
   private void initBugsnag(
     final OptionType<String> api_token_opt) {
     if (api_token_opt.isSome()) {
@@ -608,7 +641,7 @@ public final class Simplified extends MultiDexApplication {
     final Resources resources = this.getResources();
     final AssetManager asset_manager = this.getAssets();
 
-    LOG.debug("build: {}", BuildRevision.revision(asset_manager));
+    LOG.debug("build: {}", BuildConfig.GIT_COMMIT);
 
     LOG.debug("creating thread pools");
     this.exec_catalog_feeds =
@@ -675,13 +708,8 @@ public final class Simplified extends MultiDexApplication {
     LOG.debug("initializing book registry");
     this.book_registry = BookRegistry.create();
 
-    LOG.debug("initializing color scheme");
-    this.color_scheme_fallback =
-      new ApplicationColorScheme(
-        "red",
-        resources.getColor(R.color.red_primary),
-        R.style.Simplified_RedTheme,
-        R.style.Simplified_RedTheme_NoActionBar);
+    LOG.debug("initializing optional branding services");
+    this.branding_theme_override = loadOptionalBrandingThemeOverride();
 
     LOG.debug("initializing cover generator");
     final TenPrintGeneratorType ten_print = TenPrintGenerator.newGenerator();
@@ -689,8 +717,9 @@ public final class Simplified extends MultiDexApplication {
     this.cover_badges =
       CatalogCoverBadgeImages.Companion.create(
         resources,
-        this.color_scheme_fallback.getColorRGBA(),
+        ThemeControl.resolveColorAttribute(this.getTheme(), R.attr.colorPrimary),
         this.screen);
+
     this.cover_provider =
       BookCoverProvider.Companion.newCoverProvider(
         this,
@@ -700,6 +729,14 @@ public final class Simplified extends MultiDexApplication {
         this.exec_covers,
         true,
         false);
+
+    LOG.debug("initializing local image loader");
+    this.local_image_loader =
+      new Picasso.Builder(this)
+        .indicatorsEnabled(false)
+        .loggingEnabled(false)
+        .addRequestHandler(new ImageAccountIconRequestHandler())
+        .build();
 
     LOG.debug("initializing EPUB loader and HTTP server");
     this.mime = ReaderHTTPMimeMap.newMap("application/octet-stream");
@@ -726,6 +763,36 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("Could not initialize account providers", e);
     }
 
+    try {
+      LOG.debug("initializing bundled credentials");
+      this.bundled_credentials = createBundledCredentials(asset_manager);
+    } catch (final FileNotFoundException e) {
+      LOG.debug("could not initialize bundled credentials: ", e);
+      this.bundled_credentials = AccountBundledCredentialsEmpty.getInstance();
+    } catch (final IOException e) {
+      LOG.debug("could not initialize bundled credentials: ", e);
+      throw new IllegalStateException("could not initialize bundled credentials", e);
+    }
+
+    try {
+      LOG.debug("initializing credentials store");
+
+      final File privateDirectory =
+        this.getApplicationContext().getFilesDir();
+      final File credentials =
+        new File(privateDirectory, "credentials.json");
+      final File credentialsTemp =
+        new File(privateDirectory, "credentials.json.tmp");
+
+      LOG.debug("credentials store path: {}", credentials);
+      this.account_credentials_store =
+        AccountAuthenticationCredentialsStore.Companion.open(credentials, credentialsTemp);
+      LOG.debug("credentials loaded: {}", this.account_credentials_store.size());
+    } catch (final Exception e) {
+      LOG.debug("could not initialize credentials store: ", e);
+      throw new IllegalStateException("could not initialize credentials store", e);
+    }
+
     final ObservableType<AccountEvent> account_events = Observable.create();
     final ObservableType<ProfileEvent> profile_events = Observable.create();
     final ObservableType<ReaderBookmarkEvent> reader_bookmark_events = Observable.create();
@@ -739,6 +806,8 @@ public final class Simplified extends MultiDexApplication {
           account_events,
           profile_events,
           this.account_providers,
+          this.bundled_credentials,
+          this.account_credentials_store,
           this.directory_profiles);
     } catch (final ProfileDatabaseException e) {
       throw new IllegalStateException("Could not initialize profile database", e);
@@ -830,19 +899,24 @@ public final class Simplified extends MultiDexApplication {
     Simplified.INSTANCE = this;
   }
 
-  private ApplicationColorScheme getActualMainColorScheme() {
-    OptionType<ProfileType> currentProfileOpt = this.profiles.currentProfile();
-    if (currentProfileOpt.isSome()) {
-      ProfileType currentProfile = ((Some<ProfileType>) currentProfileOpt).get();
-      AccountType account = currentProfile.accountCurrent();
-      String name = account.provider().mainColor();
-      return new ApplicationColorScheme(
-        name,
-        ThemeMatcher.Companion.color(name),
-        ThemeMatcher.Companion.actionBarStyle(name),
-        ThemeMatcher.Companion.noActionBarStyle(name));
-    } else {
-      throw new UnimplementedCodeException();
+  private OptionType<ThemeValue> loadOptionalBrandingThemeOverride() {
+    final Iterator<BrandingThemeOverrideServiceType> iter =
+      ServiceLoader.load(BrandingThemeOverrideServiceType.class)
+        .iterator();
+
+    if (iter.hasNext()) {
+      final BrandingThemeOverrideServiceType service = iter.next();
+      return Option.some(service.overrideTheme());
+    }
+
+    return Option.none();
+  }
+
+  private AccountBundledCredentialsType createBundledCredentials(
+    final AssetManager asset_manager) throws IOException {
+
+    try (final InputStream stream = asset_manager.open("account_bundled_credentials.json")) {
+      return AccountBundledCredentialsJSON.deserializeFromStream(new ObjectMapper(), stream);
     }
   }
 

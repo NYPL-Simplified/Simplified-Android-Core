@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <color name="vanilla_orange_primary">#f57c00</color>
+  <color name="vanilla_orange_primary_light">#ffad42</color>
+  <color name="vanilla_orange_primary_dark">#bb4d00</color>
+
+  <style name="VanillaTheme_NoActionBar_Orange" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/vanilla_orange_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/vanilla_orange_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/vanilla_orange_primary_dark</item>
+  </style>
+  <style name="VanillaTheme_ActionBar_Orange" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/vanilla_orange_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/vanilla_orange_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/vanilla_orange_primary_dark</item>
+  </style>
+
+</resources>

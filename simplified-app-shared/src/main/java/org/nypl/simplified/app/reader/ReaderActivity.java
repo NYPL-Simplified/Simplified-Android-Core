@@ -32,8 +32,8 @@ import com.io7m.junreachable.UnreachableCodeException;
 
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.LocalDateTime;
-import org.nypl.simplified.app.ApplicationColorScheme;
 import org.nypl.simplified.app.R;
+import org.nypl.simplified.app.ScreenSizeInformationType;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.profiles.ProfileTimeOutActivity;
 import org.nypl.simplified.app.reader.ReaderPaginationChangedEvent.OpenPage;
@@ -47,14 +47,14 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.accounts.AccountAuthenticationAdobePostActivationCredentials;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
-import org.nypl.simplified.books.accounts.AccountID;
+import org.nypl.simplified.books.accounts.AccountLoginState;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;
-import org.nypl.simplified.books.book_database.Book;
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB;
 import org.nypl.simplified.books.book_database.BookDatabaseException;
 import org.nypl.simplified.books.book_database.BookFormat;
 import org.nypl.simplified.books.book_database.BookID;
+import org.nypl.simplified.books.controller.ProfilesControllerType;
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS;
 import org.nypl.simplified.books.profiles.ProfileEvent;
 import org.nypl.simplified.books.profiles.ProfileNoneCurrentException;
@@ -67,6 +67,7 @@ import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind;
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarks;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
+import org.nypl.simplified.theme.ThemeControl;
 import org.readium.sdk.android.Container;
 import org.readium.sdk.android.Package;
 import org.slf4j.Logger;
@@ -93,6 +94,7 @@ import static org.nypl.simplified.app.utilities.FadeUtilities.fadeOut;
  */
 
 public final class ReaderActivity extends ProfileTimeOutActivity implements
+  ReaderSettingsListenerType,
   ReaderHTTPServerStartListenerType,
   ReaderSimplifiedFeedbackListenerType,
   ReaderReadiumFeedbackListenerType,
@@ -183,9 +185,10 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     final ImageView in_media_next = Objects.requireNonNull(this.view_media_next);
     final ImageView in_media_prev = Objects.requireNonNull(this.view_media_prev);
 
-    final ApplicationColorScheme scheme = Simplified.getMainColorScheme();
-    final int mainColor = scheme.getColorRGBA();
-    final ColorMatrixColorFilter filter = ReaderColorMatrix.getImageFilterMatrix(mainColor);
+    final int mainColor =
+      ThemeControl.resolveColorAttribute(this.getTheme(), R.attr.colorPrimary);
+    final ColorMatrixColorFilter filter =
+      ReaderColorMatrix.getImageFilterMatrix(mainColor);
 
     UIThread.runOnUIThread(() -> {
       in_progress_text.setTextColor(mainColor);
@@ -272,7 +275,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   @SuppressLint("SetJavaScriptEnabled")
   @Override
   protected void onCreate(final @Nullable Bundle state) {
-    this.setTheme(Simplified.getMainColorScheme().getActivityThemeResourceWithoutActionBar());
+    this.setTheme(Simplified.getCurrentTheme().getThemeWithNoActionBar());
 
     super.onCreate(state);
     this.setContentView(R.layout.reader);
@@ -372,7 +375,7 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
 
     in_settings.setOnClickListener(view -> {
       final FragmentManager fm = this.getFragmentManager();
-      final ReaderSettingsDialog d = new ReaderSettingsDialog();
+      final ReaderSettingsDialog d = ReaderSettingsDialog.Companion.create();
       d.show(fm, "settings-dialog");
     });
 
@@ -646,29 +649,23 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
   }
 
   private String getDeviceIDString() {
-    return this.current_account.credentials().accept(
-      new OptionVisitorType<AccountAuthenticationCredentials, String>() {
-        @Override
-        public String none(final None<AccountAuthenticationCredentials> n) {
-          return "null";
-        }
+    final AccountLoginState state = this.current_account.loginState();
+    final AccountAuthenticationCredentials credentials = state.getCredentials();
 
-        @Override
-        public String some(final Some<AccountAuthenticationCredentials> someCredentials) {
-          return someCredentials.get().adobePostActivationCredentials().accept(
-            new OptionVisitorType<AccountAuthenticationAdobePostActivationCredentials, String>() {
-              @Override
-              public String none(final None<AccountAuthenticationAdobePostActivationCredentials> none) {
-                return "null";
-              }
-
-              @Override
-              public String some(final Some<AccountAuthenticationAdobePostActivationCredentials> someCredentials) {
-                return someCredentials.get().deviceID().getValue();
-              }
-            });
-        }
-      });
+    if (credentials != null) {
+      final OptionType<AccountAuthenticationAdobePostActivationCredentials> postActivation =
+        credentials.adobePostActivationCredentials();
+      if (postActivation.isSome()) {
+        return ((Some<AccountAuthenticationAdobePostActivationCredentials>) postActivation)
+          .get()
+          .deviceID()
+          .getValue();
+      } else {
+        return "null";
+      }
+    } else {
+      return "null";
+    }
   }
 
   @Override
@@ -1025,5 +1022,15 @@ public final class ReaderActivity extends ProfileTimeOutActivity implements
     } else {
       throw new UnreachableCodeException();
     }
+  }
+
+  @Override
+  public ProfilesControllerType onReaderSettingsDialogWantsProfilesController() {
+    return Simplified.getProfilesController();
+  }
+
+  @Override
+  public ScreenSizeInformationType onReaderSettingsDialogWantsScreenSize() {
+    return Simplified.getScreenSizeInformation();
   }
 }

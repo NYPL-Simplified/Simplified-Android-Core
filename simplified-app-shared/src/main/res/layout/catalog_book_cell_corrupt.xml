@@ -19,7 +19,6 @@
     android:layout_marginStart="8dp"
     android:layout_marginTop="8dp"
     android:text="@string/catalog_meta_corrupt_title"
-    android:textColor="@color/normal_text_major"
     android:textStyle="bold" />
 
   <TextView
@@ -31,7 +30,6 @@
     android:layout_marginTop="8dp"
     android:ellipsize="end"
     android:maxLines="3"
-    android:textColor="@color/normal_text_major"
     android:text="@string/placeholder_lorem"
     android:textSize="10sp" />
 

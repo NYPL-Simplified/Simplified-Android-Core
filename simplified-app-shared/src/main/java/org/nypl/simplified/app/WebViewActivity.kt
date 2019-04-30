@@ -44,13 +44,12 @@ class WebViewActivity : NavigationDrawerActivity() {
   }
 
   override fun onCreate(state: Bundle?) {
-    this.uri = intent.getStringExtra(WebViewActivity.URI_KEY)
-    this.title = intent.getStringExtra(WebViewActivity.TITLE_KEY)
+    this.uri = intent.getStringExtra(URI_KEY)
+    this.title = intent.getStringExtra(TITLE_KEY)
 
     super.onCreate(state)
 
     this.setContentView(R.layout.webview)
-    this.setTheme(Simplified.getMainColorScheme().activityThemeResourceWithActionBar)
 
     this.setTitle(this.title)
     this.logger.debug("uri: {}", uri)
@@ -101,8 +100,8 @@ class WebViewActivity : NavigationDrawerActivity() {
       arguments: Bundle,
       uri: String,
       title: String) {
-      arguments.putString(WebViewActivity.URI_KEY, uri)
-      arguments.putString(WebViewActivity.TITLE_KEY, title)
+      arguments.putString(URI_KEY, uri)
+      arguments.putString(TITLE_KEY, title)
     }
   }
 }

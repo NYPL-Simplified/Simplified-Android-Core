@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
 
-
-
-  <ImageView
-    android:id="@+id/book_cover_badge"
+  <ImageView android:id="@+id/book_cover_badge"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
-    android:background="?button_foreground"
+    android:background="?attr/simplifiedColorBackground"
     android:clickable="false"
     android:focusable="false"
     android:src="@drawable/audiobook_icon" />

@@ -1,7 +1,5 @@
 package org.nypl.simplified.books.accounts;
 
-import com.io7m.jfunctional.OptionType;
-
 import org.nypl.simplified.books.book_database.BookDatabaseType;
 
 /**
@@ -23,13 +21,13 @@ public interface AccountType extends AccountReadableType {
   BookDatabaseType bookDatabase();
 
   /**
-   * Update the account credentials.
+   * Set the current login state for the account.
    *
-   * @param credentials The new credentials
+   * @param state The login state
    * @throws AccountsDatabaseException On database errors
    */
 
-  void setCredentials(OptionType<AccountAuthenticationCredentials> credentials)
+  void setLoginState(AccountLoginState state)
     throws AccountsDatabaseException;
 
   /**

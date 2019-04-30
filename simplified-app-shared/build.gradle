@@ -3,10 +3,23 @@ description = 'simplified-app-shared'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+def getGitHash = { ->
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine 'git', 'rev-parse', 'HEAD'
+    standardOutput = stdout
+  }
+  return stdout.toString().trim()
+}
+
 android {
   compileSdkVersion 27
   buildToolsVersion "28.0.2"
   useLibrary 'org.apache.http.legacy'
+
+  defaultConfig {
+    buildConfigField "String", "GIT_COMMIT", "\"${getGitHash()}\""
+  }
 
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
@@ -27,6 +40,7 @@ dependencies {
   api project(':simplified-books-core')
   api project(':simplified-books-core-ng')
   api project(':simplified-books-covers')
+  api project(':simplified-branding')
   api project(':simplified-bugsnag')
   api project(':simplified-cardcreator')
   api project(':simplified-circ-analytics')
@@ -40,10 +54,11 @@ dependencies {
   api project(':simplified-observable')
   api project(':simplified-opds-core')
   api project(':simplified-prefs')
-  api project(':simplified-splash')
   api project(':simplified-rfc3339-core')
+  api project(':simplified-splash')
   api project(':simplified-stack')
   api project(':simplified-tenprint')
+  api project(':simplified-theme')
   api project(':simplified-volley')
 
   annotationProcessor "com.google.auto.value:auto-value:1.3"

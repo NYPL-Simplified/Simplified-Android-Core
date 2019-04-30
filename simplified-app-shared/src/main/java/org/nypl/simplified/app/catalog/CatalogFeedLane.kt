@@ -14,7 +14,6 @@ import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import com.io7m.jfunctional.Unit
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.FadeUtilities
@@ -34,8 +33,7 @@ class CatalogFeedLane(
   context: Context,
   private val covers: BookCoverProviderType,
   private val screen: ScreenSizeInformationType,
-  private val listener: CatalogFeedLaneListenerType,
-  private val colorScheme: ApplicationColorScheme) : LinearLayout(context) {
+  private val listener: CatalogFeedLaneListenerType) : LinearLayout(context) {
 
   private val imageHeight: Int
   private val progress: ProgressBar
@@ -52,12 +50,6 @@ class CatalogFeedLane(
     this.inflater.inflate(R.layout.catalog_feed_groups_lane, this, true)
 
     this.header = this.findViewById(R.id.feed_header)
-
-    (this.header.findViewById<View>(R.id.feed_title) as TextView)
-      .setTextColor(this.colorScheme.colorRGBA)
-    (this.header.findViewById<View>(R.id.feed_more) as TextView)
-      .setTextColor(this.colorScheme.colorRGBA)
-
     this.title = this.findViewById(R.id.feed_title)
     this.progress = this.findViewById(R.id.feed_progress)
     this.scroller = this.findViewById(R.id.feed_scroller)

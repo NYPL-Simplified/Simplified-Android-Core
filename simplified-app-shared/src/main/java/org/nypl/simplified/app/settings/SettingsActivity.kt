@@ -4,10 +4,10 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import com.io7m.jfunctional.OptionType
-import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
+import org.nypl.simplified.app.helpstack.HelpstackType
 import org.nypl.simplified.books.document_store.DocumentStoreType
 
 /**
@@ -15,6 +15,12 @@ import org.nypl.simplified.books.document_store.DocumentStoreType
  */
 
 class SettingsActivity : NavigationDrawerActivity(), SettingsFragmentListenerType {
+
+  override fun openVersion(developerOptions: Boolean) {
+    val intent = Intent()
+    intent.setClass(this, SettingsVersionActivity::class.java)
+    this.startActivity(intent)
+  }
 
   override fun helpstack(): OptionType<HelpstackType> =
     Simplified.getHelpStack()

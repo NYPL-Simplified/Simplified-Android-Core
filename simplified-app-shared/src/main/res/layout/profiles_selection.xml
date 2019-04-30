@@ -1,62 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:orientation="vertical">
+
+  <LinearLayout android:id="@+id/profileSelectionTextLayout"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:layout_height="0dp"
+    android:layout_weight="15"
+    android:orientation="vertical"
+    android:padding="15dp">
 
-  <LinearLayout
-      android:id="@+id/profileSelectionTextLayout"
-      android:layout_width="fill_parent"
-      android:layout_height="0dp"
-      android:layout_weight="15"
-      android:orientation="vertical"
-      android:padding="15dp">
-
-    <TextView
-        android:id="@+id/profileSelectionTextTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingBottom="5dp"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="@string/profiles_title"/>
-
-    <TextView
-        android:id="@+id/profileSelectionTextSubtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/profiles_select"/>
+    <TextView android:id="@+id/profileSelectionTextTitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:paddingBottom="5dp"
+      android:text="@string/profiles_title"
+      android:textAppearance="?android:attr/textAppearanceMedium" />
+    <TextView android:id="@+id/profileSelectionTextSubtitle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:text="@string/profiles_select"
+      android:textAppearance="?android:attr/textAppearanceSmall" />
   </LinearLayout>
 
-  <ListView
-      android:id="@+id/profileSelectionList"
-      android:background="@drawable/profile_list_border"
+  <ListView android:id="@+id/profileSelectionList"
+    android:layout_width="wrap_content"
+    android:layout_height="0dp"
+    android:layout_margin="15dp"
+    android:layout_weight="70"
+    android:background="@drawable/profile_list_border" />
+
+  <LinearLayout android:id="@+id/profileSelectionButtonLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="10"
+    android:orientation="vertical"
+    android:padding="15dp">
+    <Button android:id="@+id/profileSelectionCreate"
       android:layout_width="wrap_content"
-      android:layout_height="0dp"
-      android:layout_weight="70"
-      android:layout_margin="15dp">
-  </ListView>
-
-  <LinearLayout
-      android:id="@+id/profileSelectionButtonLayout"
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:layout_weight="10"
-      android:orientation="vertical"
-      android:padding="15dp">
-
-    <Button
-        android:id="@+id/profileSelectionCreate"
-        android:layout_width="wrap_content"
-        android:layout_height="35dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/simplified_welcome_button"
-        android:textColor="@drawable/simplified_welcome_button_text"
-        android:text="@string/profiles_create"/>
+      android:layout_height="35dp"
+      android:layout_gravity="center_horizontal"
+      android:text="@string/profiles_create" />
   </LinearLayout>
 
 </LinearLayout>

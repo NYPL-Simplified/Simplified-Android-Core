@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.Gravity
 import android.view.Menu
@@ -32,15 +33,15 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnreachableCodeException
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.Simplified
-import org.nypl.simplified.app.login.LoginActivity
+import org.nypl.simplified.app.login.LoginDialogListenerType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.controller.ProfileFeedRequest
+import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.eula.EULAType
 import org.nypl.simplified.books.feeds.Feed
 import org.nypl.simplified.books.feeds.Feed.FeedWithGroups
@@ -70,6 +71,7 @@ import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.observable.ObservableSubscriptionType
 import org.nypl.simplified.opds.core.OPDSOpenSearch1_1
 import org.nypl.simplified.stack.ImmutableStack
+import org.nypl.simplified.theme.ThemeControl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.MalformedURLException
@@ -86,7 +88,7 @@ import java.util.Objects
  * Construct an activity.
  */
 
-abstract class CatalogFeedActivity : CatalogActivity() {
+abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType {
 
   private var feed: Feed? = null
   private var listView: AbsListView? = null
@@ -98,6 +100,9 @@ abstract class CatalogFeedActivity : CatalogActivity() {
   private var searchView: SearchView? = null
   private var profileEventSubscription: ObservableSubscriptionType<ProfileEvent>? = null
   private var bookEventSubscription: ObservableSubscriptionType<BookStatusEvent>? = null
+
+  override fun onLoginDialogWantsProfilesController(): ProfilesControllerType =
+    Simplified.getProfilesController()
 
   /**
    * @return The specific logger instance provided by subclasses
@@ -154,14 +159,12 @@ abstract class CatalogFeedActivity : CatalogActivity() {
    * @param feed        The feed
    * @param layout      The view group that will contain facet elements
    * @param resources   The app resources
-   * @param colorScheme The current app color scheme
    */
 
   private fun configureFacetEntryPointButtons(
     feed: Feed?,
     layout: ViewGroup,
-    resources: Resources,
-    colorScheme: ApplicationColorScheme) {
+    resources: Resources) {
 
     UIThread.checkIsUIThread()
 
@@ -185,7 +188,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
      */
 
     val facetGroup = (facetGroupOpt as Some<List<FeedFacetType>>).get()
-    val textColor = createTextColorForRadioButton(resources, colorScheme)
 
     val size = facetGroup.size
     for (index in 0 until size) {
@@ -195,7 +197,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
         LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT, 1.0f / size.toFloat())
 
       button.layoutParams = buttonLayout
-      button.setTextColor(textColor)
       button.gravity = Gravity.CENTER
 
       /*
@@ -217,6 +218,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       }
 
       button.text = facet.facetGetTitle()
+      button.setTextColor(colorStateListForFacetTabs())
 
       val launcher =
         CatalogFeedFacetLauncher(this, feed, resources, this.retrieveLocalSearchTerms())
@@ -245,6 +247,21 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       }
     }
   }
+
+  private fun colorStateListForFacetTabs(): ColorStateList {
+    val states =
+      arrayOf(
+        intArrayOf(android.R.attr.state_checked),
+        intArrayOf(-android.R.attr.state_checked))
+
+    val colors =
+      intArrayOf(
+        ContextCompat.getColor(this, R.color.simplifiedColorBackground),
+        ThemeControl.resolveColorAttribute(this.theme, R.attr.colorPrimary))
+
+    return ColorStateList(states, colors)
+  }
+
 
   /**
    * Configure the facets layout. This is what causes facets to be shown or not
@@ -293,7 +310,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       tvp.rightMargin = screen.screenDPToPixels(8).toInt()
 
       val tv = TextView(this)
-      tv.setTextColor(resources.getColor(R.color.normal_text_major))
       tv.textSize = 12.0f
       tv.setText(groupName + ":")
       tv.layoutParams = tvp
@@ -479,15 +495,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     feedURI: URI,
     exception: java.lang.Exception) {
 
-    /*
-     * Redirect the user to a login screen.
-     */
-
-    UIThread.runOnUIThread {
-      val i = Intent(this@CatalogFeedActivity, LoginActivity::class.java)
-      this.startActivity(i)
-      this.finish()
-    }
+    // XXX: ?
   }
 
   private fun onFeedResultSuccess(uri: URI, feed: Feed) {
@@ -546,8 +554,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     this.configureFacetEntryPointButtons(
       this.feed,
       layout,
-      this.resources,
-      Simplified.getMainColorScheme())
+      this.resources)
 
     val args = this.retrieveArguments()
     val newUpStack = this.newUpStack(args)
@@ -570,8 +577,8 @@ abstract class CatalogFeedActivity : CatalogActivity() {
         Simplified.getScreenSizeInformation(),
         Simplified.getCoverProvider(),
         laneListener,
-        feed,
-        Simplified.getMainColorScheme())
+        feed
+      )
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
@@ -656,7 +663,7 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     this.swipeRefreshLayout.setOnRefreshListener({ this.retryFeed() })
 
     this.configureFacetEntryPointButtons(
-      feedWithoutGroups, layout, this.resources, Simplified.getMainColorScheme())
+      feedWithoutGroups, layout, this.resources)
     this.configureFacets(
       Simplified.getScreenSizeInformation(), feedWithoutGroups, layout, this.resources)
 
@@ -672,19 +679,18 @@ abstract class CatalogFeedActivity : CatalogActivity() {
     val without: CatalogFeedWithoutGroups
     try {
       without = CatalogFeedWithoutGroups(
-        this,
-        Simplified.getProfilesController().profileAccountCurrent(),
-        Simplified.getCoverProvider(),
-        bookSelectListener,
-        Simplified.getBooksRegistry(),
-        Simplified.getBooksController(),
-        Simplified.getProfilesController(),
-        Simplified.getFeedLoader(),
-        feedWithoutGroups,
-        Simplified.getDocumentStore(),
-        Simplified.getNetworkConnectivity(),
-        Simplified.getBackgroundTaskExecutor(),
-        Simplified.getMainColorScheme())
+        activity = this,
+        account = Simplified.getProfilesController().profileAccountCurrent(),
+        bookCoverProvider = Simplified.getCoverProvider(),
+        bookSelectionListener = bookSelectListener,
+        bookRegistry = Simplified.getBooksRegistry(),
+        bookController = Simplified.getBooksController(),
+        profilesController = Simplified.getProfilesController(),
+        feedLoader = Simplified.getFeedLoader(),
+        feed = feedWithoutGroups,
+        networkConnectivity = Simplified.getNetworkConnectivity(),
+        executor = Simplified.getBackgroundTaskExecutor(),
+        screenSizeInformation = Simplified.getScreenSizeInformation())
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
@@ -1050,14 +1056,14 @@ abstract class CatalogFeedActivity : CatalogActivity() {
 
     val request =
       ProfileFeedRequest.builder(
-      booksUri,
-      resources.getString(R.string.books),
-      resources.getString(R.string.books_sort_by),
-      CatalogFacetPseudoTitleProvider(resources))
-      .setFeedSelection(c.selection)
-      .setSearch(c.searchTerms)
-      .setFacetActive(c.facetType)
-      .build()
+        booksUri,
+        resources.getString(R.string.books),
+        resources.getString(R.string.books_sort_by),
+        CatalogFacetPseudoTitleProvider(resources))
+        .setFeedSelection(c.selection)
+        .setSearch(c.searchTerms)
+        .setFacetActive(c.facetType)
+        .build()
 
     try {
       val exec =
@@ -1065,10 +1071,11 @@ abstract class CatalogFeedActivity : CatalogActivity() {
       val future =
         Simplified.getProfilesController().profileFeed(request)
 
-      future.addCallback(object: FutureCallback<FeedWithoutGroups> {
+      future.addCallback(object : FutureCallback<FeedWithoutGroups> {
         override fun onSuccess(result: FeedWithoutGroups?) {
           onFeedResult(booksUri, FeedLoaderSuccess(result!!))
         }
+
         override fun onFailure(ex: Throwable) {
           LOG.error("error in feed result handler: ", ex)
           onFeedResultFailedException(booksUri, ex)
@@ -1256,23 +1263,6 @@ abstract class CatalogFeedActivity : CatalogActivity() {
           }
         }
       }
-    }
-
-    /**
-     * Create a color state list that will return the correct text color for a radio button.
-     */
-
-    private fun createTextColorForRadioButton(
-      resources: Resources,
-      colorScheme: ApplicationColorScheme): ColorStateList {
-
-      val mainColor = colorScheme.colorRGBA
-      val states = arrayOf(intArrayOf(android.R.attr.state_checked), // Checked
-        intArrayOf(-android.R.attr.state_checked))// Unchecked
-
-      val colors = intArrayOf(resources.getColor(R.color.button_background), mainColor)
-
-      return ColorStateList(states, colors)
     }
   }
 }

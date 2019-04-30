@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 
 final class BookRevokeFailedDismissTask implements Callable<Unit> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(BookRevokeTask.class);
+  private static final Logger LOG = LoggerFactory.getLogger(BookRevokeFailedDismissTask.class);
 
   private final BookDatabaseType book_database;
   private final BookRegistryType book_registry;
@@ -53,7 +53,9 @@ final class BookRevokeFailedDismissTask implements Callable<Unit> {
         if (status instanceof BookStatusRevokeFailed) {
           final BookDatabaseEntryType entry = this.book_database.entry(this.book_id);
           final Book book = entry.getBook();
-          this.book_registry.update(BookWithStatus.create(book, BookStatus.fromBook(book)));
+          final BookStatusType new_status = BookStatus.fromBook(book);
+          this.book_registry.update(BookWithStatus.create(book, new_status));
+          LOG.debug("[{}] status of book is now {}", this.book_id.brief(), new_status);
         }
       });
     } finally {

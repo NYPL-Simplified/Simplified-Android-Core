@@ -266,6 +266,10 @@ class SplashTest {
 
   class MockSplashActivity : AppCompatActivity(), SplashListenerType {
 
+    override fun onSplashOpenProfileAnonymous() {
+
+    }
+
     override val profileController: ProfilesControllerType
       get() = testProfilesController!!
 

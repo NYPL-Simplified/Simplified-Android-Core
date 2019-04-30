@@ -92,10 +92,6 @@ public final class AccountDescriptionJSON {
         JSONParserUtilities.getURI(obj, "provider"),
         preferences);
 
-    builder.setCredentials(
-      JSONParserUtilities.getObjectOptional(obj, "credentials")
-        .mapPartial(AccountAuthenticationCredentialsJSON::deserializeFromJSON));
-
     return builder.build();
   }
 
@@ -120,8 +116,6 @@ public final class AccountDescriptionJSON {
       "preferences",
       AccountPreferencesJSON.INSTANCE.serializeToJSON(jom, description.preferences()));
 
-    description.credentials().map_(
-      creds -> jo.set("credentials", AccountAuthenticationCredentialsJSON.serializeToJSON(creds)));
     return jo;
   }
 

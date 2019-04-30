@@ -9,7 +9,6 @@
 <RelativeLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/facet_dialog"
-  android:background="@color/normal_background"
   android:layout_width="@dimen/facet_dialog_width"
   android:layout_height="@dimen/facet_dialog_height">
 
@@ -24,7 +23,6 @@
 
   <View
     android:id="@+id/facet_divider"
-    android:background="@color/divider_color"
     android:layout_below="@id/facet_title"
     android:layout_width="match_parent"
     android:layout_height="1dp" />

@@ -1,40 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:background="@color/normal_background"
-  android:padding="16dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  android:padding="16dp">
 
-  <Button
-    android:id="@+id/eula_agree"
-    android:text="@string/eula_agree"
-    android:layout_alignParentBottom="true"
+  <Button android:id="@+id/eula_agree"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_alignParentEnd="true"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:minWidth="100dp"
-    android:background="@drawable/simplified_button"
-    android:textColor="@drawable/simplified_button_text" />
-
-  <Button
-    android:id="@+id/eula_disagree"
-    android:text="@string/eula_disagree"
     android:layout_alignParentBottom="true"
-    android:layout_alignParentStart="true"
     android:minWidth="100dp"
+    android:text="@string/eula_agree" />
+
+  <Button android:id="@+id/eula_disagree"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/simplified_button"
-    android:textColor="@drawable/simplified_button_text" />
+    android:layout_alignParentStart="true"
+    android:layout_alignParentBottom="true"
+    android:minWidth="100dp"
+    android:text="@string/eula_disagree" />
 
-  <WebView
+  <WebView android:id="@+id/eula_web_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/eula_web_view"
     android:layout_above="@id/eula_agree"
-    android:layout_marginBottom="16dp"
+    android:layout_alignParentStart="true"
     android:layout_alignParentTop="true"
-    android:layout_alignParentStart="true"/>
+    android:layout_marginBottom="16dp" />
 
 </RelativeLayout>

@@ -6,163 +6,142 @@
   the layout in the GUI editor, but the actual width and height of the dialog must 
   be set at run-time. See org.nypl.simplified.app.login.LoginDialog. -->
 
-<RelativeLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/login_dialog"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
   android:gravity="center"
-  android:background="@color/normal_background"
   android:padding="16dp">
 
-  <TextView
-    android:id="@+id/login_dialog_text"
+  <TextView android:id="@+id/login_dialog_text"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentTop="true"
     android:layout_centerHorizontal="true"
     android:layout_marginBottom="16dp"
-    android:maxLines="3"
     android:ellipsize="end"
     android:gravity="center"
+    android:maxLines="3"
     android:text="@string/settings_login_title" />
 
-  <TableLayout
-    android:id="@+id/login_dialog_table"
+  <TableLayout android:id="@+id/login_dialog_table"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_centerHorizontal="true"
     android:layout_below="@id/login_dialog_text"
+    android:layout_centerHorizontal="true"
     android:layout_gravity="center">
 
-    <TableRow
-      android:layout_width="wrap_content"
+    <TableRow android:layout_width="wrap_content"
       android:layout_height="wrap_content">
 
-      <TextView
-        android:id="@+id/login_dialog_barcode_text_view"
-        android:labelFor="@+id/login_dialog_barcode_text_edit"
+      <TextView android:id="@+id/login_dialog_barcode_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:labelFor="@+id/login_dialog_barcode_text_edit"
         android:text="@string/settings_barcode" />
 
-      <EditText
-        android:id="@+id/login_dialog_barcode_text_edit"
+      <EditText android:id="@+id/login_dialog_barcode_text_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:inputType="textNoSuggestions"
-        android:layout_marginStart="16dp"
-        android:maxLines="1">
-      </EditText>
+        android:maxLines="1" />
 
-      <ImageButton
-          android:id="@+id/login_dialog_barcode_scan_button"
-          style="?android:attr/buttonStyleSmall"
-          android:background="#0000"
-          android:src="@android:drawable/ic_menu_camera"
-          android:visibility="gone"
-        />
+      <ImageButton android:id="@+id/login_dialog_barcode_scan_button"
+        style="?android:attr/buttonStyleSmall"
+        android:background="#0000"
+        android:src="@android:drawable/ic_menu_camera"
+        android:visibility="gone" />
     </TableRow>
 
-    <TableRow
-      android:layout_width="wrap_content"
+    <TableRow android:layout_width="wrap_content"
       android:layout_height="wrap_content">
 
-      <TextView
-        android:labelFor="@+id/login_dialog_pin_text_edit"
-        android:id="@+id/login_dialog_pin_text_view"
+      <TextView android:id="@+id/login_dialog_pin_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:labelFor="@+id/login_dialog_pin_text_edit"
         android:text="@string/settings_pin" />
 
-      <EditText
-        android:id="@+id/login_dialog_pin_text_edit"
+      <EditText android:id="@+id/login_dialog_pin_text_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:inputType="textPassword"
-        android:minWidth="160dp"
-        android:maxLines="1">
-      </EditText>
+        android:maxLines="1"
+        android:minWidth="160dp" />
     </TableRow>
 
-
-    <TableRow
-      android:layout_width="wrap_content"
+    <TableRow android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
-      >
+      android:layout_marginTop="10dp">
 
-      <CheckBox
+      <CheckBox android:id="@+id/eula_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:textSize="12sp"
-        android:text="@string/eula_checkbox"
-        android:id="@+id/eula_checkbox"
-        android:checked="false"
         android:layout_span="2"
-        android:layout_weight="1"/>
-
+        android:layout_weight="1"
+        android:checked="false"
+        android:text="@string/eula_checkbox"
+        android:textSize="12sp" />
     </TableRow>
-
   </TableLayout>
 
-  <RelativeLayout
-    android:id="@+id/login_buttons"
+  <LinearLayout
+    android:id="@+id/login_action_layout"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="16dp"
+    android:layout_below="@id/login_dialog_table"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ProgressBar
+      android:id="@+id/login_action_progress"
+      style="?android:attr/progressBarStyleLarge"
+      android:layout_width="32dp"
+      android:layout_height="32dp"
+      android:layout_marginRight="16dp"
+      android:indeterminate="true" />
+
+    <TextView
+      android:id="@+id/login_action_text"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Logging in... "/>
+  </LinearLayout>
+
+  <RelativeLayout android:id="@+id/login_buttons"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
+    android:layout_below="@id/login_action_layout"
     android:layout_centerHorizontal="true"
-    android:layout_marginTop="16dp"
-    android:layout_below="@id/login_dialog_table">
+    android:layout_gravity="center_horizontal">
 
-    <Button
-      android:id="@+id/login_dialog_cancel"
-      style="?android:attr/buttonStyleSmall"
-      android:layout_marginTop="16dp"
-      android:layout_marginEnd="8dp"
+    <Button android:id="@+id/login_dialog_ok"
       android:layout_width="110dp"
-      android:layout_height="@dimen/button_standard_height"
-      android:background="@drawable/simplified_button"
-      android:contentDescription="@string/settings_accessibility_log_in_cancel"
-      android:text="@string/settings_log_in_cancel"
-      android:textColor="@drawable/simplified_button_text" />
-
-    <Button
-      android:id="@+id/login_dialog_ok"
-      android:layout_toEndOf="@id/login_dialog_cancel"
+      android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
-      style="?android:attr/buttonStyleSmall"
-      android:layout_marginTop="16dp"
-      android:layout_width="110dp"
-      android:layout_height="@dimen/button_standard_height"
-      android:background="@drawable/simplified_button"
       android:contentDescription="@string/settings_accessibility_log_in"
-      android:text="@string/settings_log_in"
-      android:textColor="@drawable/simplified_button_text" />
-
+      android:text="@string/settings_log_in" />
   </RelativeLayout>
 
-  <RelativeLayout
-    android:layout_width="wrap_content"
+  <RelativeLayout android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center_horizontal"
+    android:layout_below="@id/login_buttons"
     android:layout_centerHorizontal="true"
-    android:layout_marginTop="16dp"
-    android:layout_below="@id/login_buttons">
-
-  <Button
-    android:layout_width="wrap_content"
-    android:layout_height="@dimen/button_standard_height"
-    android:text="@string/request_new_codes"
-    android:id="@+id/request_new_codes"
     android:layout_gravity="center_horizontal"
-    style="?android:attr/borderlessButtonStyle"
-    android:background="@drawable/simplified_button"
-    android:textColor="@drawable/simplified_button_text"/>
-</RelativeLayout>
+    android:layout_marginTop="16dp">
+
+    <Button android:id="@+id/request_new_codes"
+      style="?android:attr/borderlessButtonStyle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center_horizontal"
+      android:text="@string/request_new_codes" />
+  </RelativeLayout>
 
 </RelativeLayout>

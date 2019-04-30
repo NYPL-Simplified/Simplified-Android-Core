@@ -5,12 +5,12 @@
     <inset android:insetRight="-2dp">
       <shape android:shape="rectangle">
         <padding android:bottom="@dimen/catalog_facet_tab_padding_bottom"
-                 android:left="@dimen/catalog_facet_tab_padding_left"
-                 android:right="@dimen/catalog_facet_tab_padding_right"
-                 android:top="@dimen/catalog_facet_tab_padding_top" />
-        <solid android:color="@color/button_background" />
+          android:left="@dimen/catalog_facet_tab_padding_left"
+          android:right="@dimen/catalog_facet_tab_padding_right"
+          android:top="@dimen/catalog_facet_tab_padding_top" />
+        <solid android:color="?attr/simplifiedColorBackground" />
         <stroke android:width="@dimen/catalog_facet_tab_stroke"
-                android:color="?button_foreground" />
+          android:color="?attr/colorPrimary" />
       </shape>
     </inset>
   </item>
@@ -19,12 +19,12 @@
     <inset android:insetRight="-2dp">
       <shape android:shape="rectangle">
         <padding android:bottom="@dimen/catalog_facet_tab_padding_bottom"
-                 android:left="@dimen/catalog_facet_tab_padding_left"
-                 android:right="@dimen/catalog_facet_tab_padding_right"
-                 android:top="@dimen/catalog_facet_tab_padding_top" />
-        <solid android:color="?button_foreground" />
+          android:left="@dimen/catalog_facet_tab_padding_left"
+          android:right="@dimen/catalog_facet_tab_padding_right"
+          android:top="@dimen/catalog_facet_tab_padding_top" />
+        <solid android:color="?attr/colorPrimary" />
         <stroke android:width="@dimen/catalog_facet_tab_stroke"
-                android:color="?button_foreground" />
+          android:color="?attr/colorPrimary" />
       </shape>
     </inset>
   </item>

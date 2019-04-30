@@ -14,6 +14,7 @@ import org.junit.rules.ExpectedException;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.accounts.AccountBarcode;
 import org.nypl.simplified.books.accounts.AccountEvent;
+import org.nypl.simplified.books.accounts.AccountLoginState;
 import org.nypl.simplified.books.accounts.AccountPIN;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
@@ -43,6 +44,7 @@ public abstract class AccountsDatabaseContract {
 
   private ObservableType<AccountEvent> accountEvents;
   private ObservableType<ProfileEvent> profileEvents;
+  private FakeAccountCredentialStorage credentialStore;
 
   protected abstract Context context();
 
@@ -52,6 +54,7 @@ public abstract class AccountsDatabaseContract {
   @Before
   public void setup()
   {
+    this.credentialStore = new FakeAccountCredentialStorage();
     this.accountEvents = Observable.create();
     this.profileEvents = Observable.create();
   }
@@ -117,12 +120,17 @@ public abstract class AccountsDatabaseContract {
       this.accountEvents,
       bookDatabases(),
       accountProviders(),
+      this.credentialStore,
       f_acc);
   }
 
   private BookDatabases bookDatabases() {
     return BookDatabases.INSTANCE;
   }
+
+  /**
+   * A bad subdirectory will be migrated but will still fail to open.
+   */
 
   @Test
   public final void testOpenExistingBadSubdirectory()
@@ -139,13 +147,14 @@ public abstract class AccountsDatabaseContract {
     f_a.mkdirs();
 
     expected.expect(AccountsDatabaseException.class);
-    expected.expect(new CausesContains<>(
-      IOException.class, "Could not parse directory name as an account ID"));
-    AccountsDatabase.open(
+    expected.expect(new CausesContains<>(IOException.class, "Could not parse account: "));
+    AccountsDatabaseType database =
+      AccountsDatabase.open(
       context(),
       this.accountEvents,
       bookDatabases(),
       accountProviders(),
+      this.credentialStore,
       f_acc);
   }
 
@@ -160,7 +169,7 @@ public abstract class AccountsDatabaseContract {
     f_p.mkdirs();
     final File f_acc = new File(f_p, "accounts");
     f_acc.mkdirs();
-    final File f_a = new File(f_acc, "0");
+    final File f_a = new File(f_acc, "64e606e8-e242-4c5f-9bfb-63df11b187bd");
     f_a.mkdirs();
 
     expected.expect(AccountsDatabaseException.class);
@@ -170,6 +179,7 @@ public abstract class AccountsDatabaseContract {
       this.accountEvents,
       bookDatabases(),
       accountProviders(),
+      this.credentialStore,
       f_acc);
   }
 
@@ -197,6 +207,7 @@ public abstract class AccountsDatabaseContract {
       this.accountEvents,
       bookDatabases(),
       accountProviders(),
+      this.credentialStore,
       f_acc);
   }
 
@@ -217,6 +228,7 @@ public abstract class AccountsDatabaseContract {
         this.accountEvents,
         bookDatabases(),
         accountProviders(),
+        this.credentialStore,
         f_acc);
 
     Assert.assertEquals(0, db.accounts().size());
@@ -242,6 +254,7 @@ public abstract class AccountsDatabaseContract {
         this.accountEvents,
         bookDatabases(),
         account_providers,
+        this.credentialStore,
         f_acc);
 
     final AccountProvider provider0 =
@@ -272,8 +285,8 @@ public abstract class AccountsDatabaseContract {
     Assert.assertNotEquals(acc0.id(), acc1.id());
     Assert.assertNotEquals(acc0.directory(), acc1.directory());
 
-    Assert.assertEquals(Option.none(), acc0.credentials());
-    Assert.assertEquals(Option.none(), acc1.credentials());
+    Assert.assertEquals(AccountLoginState.AccountNotLoggedIn.INSTANCE, acc0.loginState());
+    Assert.assertEquals(AccountLoginState.AccountNotLoggedIn.INSTANCE, acc1.loginState());
   }
 
   @Test
@@ -293,6 +306,7 @@ public abstract class AccountsDatabaseContract {
         this.accountEvents,
         bookDatabases(),
         accountProviders(),
+        this.credentialStore,
         f_acc);
 
     final AccountProvider provider0 =
@@ -309,6 +323,7 @@ public abstract class AccountsDatabaseContract {
         this.accountEvents,
         bookDatabases(),
         accountProviders(),
+        this.credentialStore,
         f_acc);
 
     final AccountType acr0 = db1.accounts().get(acc0.id());
@@ -339,6 +354,7 @@ public abstract class AccountsDatabaseContract {
         this.accountEvents,
         bookDatabases(),
         accountProviders(),
+        this.credentialStore,
         f_acc);
 
     final AccountProvider provider0 = fakeProvider("http://www.example.com/accounts0/");
@@ -350,8 +366,8 @@ public abstract class AccountsDatabaseContract {
         AccountBarcode.create("1234"))
         .build();
 
-    acc0.setCredentials(Option.some(creds));
-    Assert.assertEquals(Option.some(creds), acc0.credentials());
+    acc0.setLoginState(new AccountLoginState.AccountLoggedIn(creds));
+    Assert.assertEquals(new AccountLoginState.AccountLoggedIn(creds), acc0.loginState());
   }
 
   private AccountProviderCollectionType accountProviders() {

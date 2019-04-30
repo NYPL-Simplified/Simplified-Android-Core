@@ -32,4 +32,11 @@
       android:title="@string/settings_licence_software" />
   </PreferenceCategory>
 
+  <PreferenceCategory>
+    <Preference
+      android:icon="@null"
+      android:key="@string/versions_version"
+      android:title="@string/versions_version" />
+  </PreferenceCategory>
+
 </PreferenceScreen>

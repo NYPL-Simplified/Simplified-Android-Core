@@ -6,8 +6,7 @@
   android:orientation="horizontal"
   android:weightSum="1">
 
-  <ImageView
-    android:id="@+id/cellIcon"
+  <ImageView android:id="@+id/cellIcon"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_weight="0.88"
@@ -15,8 +14,7 @@
     android:paddingLeft="10dp"
     android:src="@mipmap/ic_launcher" />
 
-  <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1"
+  <TextView android:id="@android:id/text1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="0.12"
@@ -25,8 +23,6 @@
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:paddingLeft="11dp"
     android:paddingRight="11dp"
-    android:text="Item"
-    android:textAppearance="?android:attr/textAppearanceListItemSmall"
-    android:textColor="@drawable/drawer_list_text" />
+    android:text="Item" />
 
 </LinearLayout>

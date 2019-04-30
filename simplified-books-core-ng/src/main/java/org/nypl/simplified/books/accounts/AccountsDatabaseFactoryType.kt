@@ -13,6 +13,7 @@ interface AccountsDatabaseFactoryType {
    * @param accountEvents An observable that will be used to publish account events
    * @param bookDatabases    A provider of book databases
    * @param accountProviders The available account providers
+   * @param accountAuthenticationCredentialsStore The credentials store
    * @param directory         The directory
    * @return A profile database
    * @throws AccountsDatabaseException If any errors occurred whilst trying to open the database
@@ -24,6 +25,7 @@ interface AccountsDatabaseFactoryType {
     accountEvents: ObservableType<AccountEvent>,
     bookDatabases: BookDatabaseFactoryType,
     accountProviders: AccountProviderCollectionType,
+    accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     directory: File): AccountsDatabaseType
 
   /**
@@ -31,6 +33,7 @@ interface AccountsDatabaseFactoryType {
    *
    * @param accountEvents An observable that will be used to publish account events
    * @param accountProviders The available account providers
+   * @param accountAuthenticationCredentialsStore The credentials store
    * @param directory         The directory
    * @return A profile database
    * @throws AccountsDatabaseException If any errors occurred whilst trying to open the database
@@ -41,5 +44,6 @@ interface AccountsDatabaseFactoryType {
     context: Context,
     accountEvents: ObservableType<AccountEvent>,
     accountProviders: AccountProviderCollectionType,
+    accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     directory: File): AccountsDatabaseType
 }

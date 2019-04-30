@@ -1,7 +1,5 @@
 package org.nypl.simplified.books.accounts;
 
-import com.io7m.jfunctional.OptionType;
-
 import java.io.File;
 
 /**
@@ -35,10 +33,10 @@ public interface AccountReadableType {
   AccountProvider provider();
 
   /**
-   * @return The current account credentials
+   * @return The current state of the account with respect to logging in/out
    */
 
-  OptionType<AccountAuthenticationCredentials> credentials();
+  AccountLoginState loginState();
 
   /**
    * @return The account preferences

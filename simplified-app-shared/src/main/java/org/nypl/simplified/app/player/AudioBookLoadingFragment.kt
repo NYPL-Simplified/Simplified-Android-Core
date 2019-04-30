@@ -1,6 +1,5 @@
 package org.nypl.simplified.app.player
 
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -71,10 +70,6 @@ class AudioBookLoadingFragment : Fragment() {
     this.progress = view.findViewById(R.id.audio_book_loading_progress)
     this.progress.isIndeterminate = true
     this.progress.max = 100
-    this.progress.progressTintList =
-      ColorStateList.valueOf(this.loadingParameters.primaryColor)
-    this.progress.indeterminateTintList =
-      ColorStateList.valueOf(this.loadingParameters.primaryColor)
   }
 
   override fun onCreate(state: Bundle?) {
@@ -100,13 +95,13 @@ class AudioBookLoadingFragment : Fragment() {
 
     val fragment = this
     if (this.listener.onLoadingFragmentIsNetworkConnectivityAvailable()) {
-      val credentialsOpt =
+      val credentials =
         Simplified.getProfilesController()
-          .profileAccountCurrent()
-          .credentials()
+          .profileAccountForBook(this.playerParameters.bookID)
+          .loginState()
+          .credentials
 
-      if (credentialsOpt is Some<AccountAuthenticationCredentials>) {
-        val credentials = credentialsOpt.get()
+      if (credentials != null) {
         fragment.tryFetchNewManifest(
           credentials,
           fragment.playerParameters.manifestURI,
@@ -182,7 +177,7 @@ class AudioBookLoadingFragment : Fragment() {
 
     val handle =
       Simplified.getProfilesController()
-        .profileAccountCurrent()
+        .profileAccountForBook(this.playerParameters.bookID)
         .bookDatabase()
         .entry(this.playerParameters.bookID)
         .findFormatHandle(BookDatabaseEntryFormatHandleAudioBook::class.java)

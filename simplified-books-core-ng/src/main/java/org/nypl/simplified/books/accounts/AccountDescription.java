@@ -29,7 +29,6 @@ public abstract class AccountDescription {
     final URI provider,
     final AccountPreferences preferences) {
     return new AutoValue_AccountDescription.Builder()
-      .setCredentials(Option.none())
       .setPreferences(preferences)
       .setProvider(provider);
   }
@@ -39,12 +38,6 @@ public abstract class AccountDescription {
    */
 
   public abstract URI provider();
-
-  /**
-   * @return The account credentials
-   */
-
-  public abstract OptionType<AccountAuthenticationCredentials> credentials();
 
   /**
    * @return The account preferences
@@ -77,17 +70,6 @@ public abstract class AccountDescription {
       URI provider);
 
     /**
-     * Set the credentials.
-     *
-     * @param credentials The credentials
-     * @return The current builder
-     * @see #credentials()
-     */
-
-    public abstract Builder setCredentials(
-      OptionType<AccountAuthenticationCredentials> credentials);
-
-    /**
      * Set the preferences.
      *
      * @param preferences The preferences
@@ -97,19 +79,6 @@ public abstract class AccountDescription {
 
     public abstract Builder setPreferences(
       AccountPreferences preferences);
-
-    /**
-     * Set the credentials.
-     *
-     * @param credentials The credentials
-     * @return The current builder
-     * @see #credentials()
-     */
-
-    public final Builder setCredentials(
-      final AccountAuthenticationCredentials credentials) {
-      return setCredentials(Option.some(credentials));
-    }
 
     /**
      * @return A constructed account description

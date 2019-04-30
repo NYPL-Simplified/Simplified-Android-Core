@@ -18,8 +18,15 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
     accountEvents: ObservableType<AccountEvent>,
     bookDatabases: BookDatabaseFactoryType,
     accountProviders: AccountProviderCollectionType,
+    authenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     directory: File): AccountsDatabaseType {
-    return AccountsDatabase.open(context, accountEvents, bookDatabases, accountProviders, directory)
+    return AccountsDatabase.open(
+      context,
+      accountEvents,
+      bookDatabases,
+      accountProviders,
+      authenticationCredentialsStore,
+      directory)
   }
 
   @Throws(AccountsDatabaseException::class)
@@ -27,7 +34,14 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
     context: Context,
     accountEvents: ObservableType<AccountEvent>,
     accountProviders: AccountProviderCollectionType,
+    authenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     directory: File): AccountsDatabaseType {
-    return AccountsDatabase.open(context, accountEvents, BookDatabases, accountProviders, directory)
+    return AccountsDatabase.open(
+      context,
+      accountEvents,
+      BookDatabases,
+      accountProviders,
+      authenticationCredentialsStore,
+      directory)
   }
 }

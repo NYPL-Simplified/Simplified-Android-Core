@@ -14,13 +14,12 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Pair
-import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.NullCheck
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
-import org.nypl.simplified.app.ApplicationColorScheme
 import org.nypl.simplified.app.NetworkConnectivityType
+import org.nypl.simplified.app.ScreenSizeInformationType
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.accounts.AccountAuthenticatedHTTP
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
@@ -30,7 +29,6 @@ import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.controller.BooksControllerType
 import org.nypl.simplified.books.controller.ProfilesControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.books.document_store.DocumentStoreType
 import org.nypl.simplified.books.feeds.Feed
 import org.nypl.simplified.books.feeds.Feed.FeedWithGroups
 import org.nypl.simplified.books.feeds.Feed.FeedWithoutGroups
@@ -61,10 +59,9 @@ class CatalogFeedWithoutGroups(
   private val profilesController: ProfilesControllerType,
   private val feedLoader: FeedLoaderType,
   private val feed: FeedWithoutGroups,
-  private val documents: DocumentStoreType,
   private val networkConnectivity: NetworkConnectivityType,
   private val executor: ListeningExecutorService,
-  private val colorScheme: ApplicationColorScheme) : ListAdapter, OnScrollListener {
+  private val screenSizeInformation: ScreenSizeInformationType) : ListAdapter, OnScrollListener {
 
   private val adapter: ArrayAdapter<FeedEntry> =
     ArrayAdapter(this.activity, 0, this.feed.entriesInOrder)
@@ -73,12 +70,12 @@ class CatalogFeedWithoutGroups(
   private val uriNext: AtomicReference<URI> =
     AtomicReference<URI>(feed.feedNext)
   private val httpAuth: OptionType<HTTPAuthType> =
-    createHttpAuth(this.account.credentials())
+    createHttpAuth(this.account.loginState().credentials)
 
   private fun createHttpAuth(
-    credentials: OptionType<AccountAuthenticationCredentials>?): OptionType<HTTPAuthType> {
-    return if (credentials is Some<AccountAuthenticationCredentials>) {
-      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials.get()))
+    credentials: AccountAuthenticationCredentials?): OptionType<HTTPAuthType> {
+    return if (credentials != null) {
+      Option.some(AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials))
     } else {
       Option.none<HTTPAuthType>()
     }
@@ -131,13 +128,10 @@ class CatalogFeedWithoutGroups(
         activity = this.activity,
         coverProvider = this.bookCoverProvider,
         booksController = this.bookController,
-        documents = this.documents,
         profilesController = this.profilesController,
         booksRegistry = this.bookRegistry,
         networkConnectivity = this.networkConnectivity,
-        backgroundExecutor = this.executor,
-        colorScheme = this.colorScheme,
-        documentStore = this.documents)
+        screenSizeInformation = this.screenSizeInformation)
     }
 
     cv.viewConfigure(e, this.bookSelectionListener)

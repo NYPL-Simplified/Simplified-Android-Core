@@ -1,6 +1,6 @@
 package org.nypl.simplified.app.player
 
-import org.nypl.simplified.app.ApplicationColorScheme
+import android.support.annotation.StyleRes
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File
@@ -38,8 +38,8 @@ data class AudioBookPlayerParameters(
   val opdsEntry: OPDSAcquisitionFeedEntry,
 
   /**
-   * The account color string, used to look up tint colors and to configure the color of the
-   * action bar.
+   * The theme to use for the activity.
    */
 
-  val applicationColorScheme: ApplicationColorScheme) : Serializable
+  @StyleRes
+  val theme: Int) : Serializable

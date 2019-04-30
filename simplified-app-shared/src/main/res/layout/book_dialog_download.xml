@@ -12,7 +12,7 @@
     android:paddingStart="16dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
-    android:background="?attr/notification_background"
+    android:background="?attr/simplifiedColorPrimary"
     android:orientation="vertical">
 
     <TextView
@@ -24,6 +24,6 @@
       android:ellipsize="end"
       android:text="@string/catalog_book_availability_open_access"
       android:textSize="16sp"
-      android:textColor="@color/notification_foreground" />
+      android:textColor="#fff" />
   </LinearLayout>
 </RelativeLayout>

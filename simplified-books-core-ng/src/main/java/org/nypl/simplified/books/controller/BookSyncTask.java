@@ -8,6 +8,7 @@ import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.books.accounts.AccountAuthenticatedHTTP;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
+import org.nypl.simplified.books.accounts.AccountLoginState;
 import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.book_database.Book;
@@ -75,10 +76,10 @@ final class BookSyncTask implements Callable<Unit> {
   @Override
   public Unit call() throws Exception {
     try {
-      LOG.debug("syncing account {}", this.account.id().id());
+      LOG.debug("syncing account {}", this.account.id());
       return execute();
     } finally {
-      LOG.debug("finished syncing account {}", this.account.id().id());
+      LOG.debug("finished syncing account {}", this.account.id());
     }
   }
 
@@ -94,16 +95,14 @@ final class BookSyncTask implements Callable<Unit> {
     final AccountProviderAuthenticationDescription provider_auth =
         ((Some<AccountProviderAuthenticationDescription>) provider_auth_opt).get();
 
-    final OptionType<AccountAuthenticationCredentials> credentials_opt =
-        this.account.credentials();
+    final AccountAuthenticationCredentials credentials =
+      this.account.loginState().getCredentials();
 
-    if (credentials_opt.isNone()) {
+    if (credentials == null) {
       LOG.debug("no credentials, aborting!");
       return Unit.unit();
     }
 
-    final AccountAuthenticationCredentials credentials =
-        ((Some<AccountAuthenticationCredentials>) credentials_opt).get();
     final HTTPAuthType auth =
         AccountAuthenticatedHTTP.createAuthenticatedHTTP(credentials);
 
@@ -221,17 +220,13 @@ final class BookSyncTask implements Callable<Unit> {
       final HTTPResultError<InputStream> result,
       final AccountProviderAuthenticationDescription provider_auth) throws Exception {
 
-    final String message =
-        String.format("%s: %d: %s", provider_auth.loginURI(), result.getStatus(), result.getMessage());
-
-    switch (result.getStatus()) {
-      case HttpURLConnection.HTTP_UNAUTHORIZED: {
-        this.account.setCredentials(Option.none());
-        return Unit.unit();
-      }
-      default: {
-        throw new IOException(message);
-      }
+    if (result.getStatus() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+      LOG.debug("removing credentials due to 401 server response");
+      this.account.setLoginState(AccountLoginState.AccountNotLoggedIn.INSTANCE);
+      return Unit.unit();
     }
+
+    throw new IOException(String.format(
+      "%s: %d: %s", provider_auth.loginURI(), result.getStatus(), result.getMessage()));
   }
 }
