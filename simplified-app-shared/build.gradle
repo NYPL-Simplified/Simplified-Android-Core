@@ -37,13 +37,13 @@ repositories {
 
 dependencies {
   api project(':simplified-accessibility')
+  api project(':simplified-analytics-api')
   api project(':simplified-books-core')
   api project(':simplified-books-core-ng')
   api project(':simplified-books-covers')
   api project(':simplified-branding')
   api project(':simplified-bugsnag')
   api project(':simplified-cardcreator')
-  api project(':simplified-circ-analytics')
   api project(':simplified-datepicker')
   api project(':simplified-downloader-core')
   api project(':simplified-files')
@@ -59,6 +59,7 @@ dependencies {
   api project(':simplified-stack')
   api project(':simplified-tenprint')
   api project(':simplified-theme')
+  api project(':simplified-threads')
   api project(':simplified-volley')
 
   annotationProcessor "com.google.auto.value:auto-value:1.3"

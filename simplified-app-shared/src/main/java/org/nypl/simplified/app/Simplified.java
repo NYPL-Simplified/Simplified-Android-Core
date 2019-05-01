@@ -24,6 +24,8 @@ import com.io7m.jnull.Nullable;
 import com.squareup.picasso.Picasso;
 
 import org.nypl.drm.core.AdobeAdeptExecutorType;
+import org.nypl.simplified.analytics.api.Analytics;
+import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.helpstack.Helpstack;
 import org.nypl.simplified.app.helpstack.HelpstackType;
@@ -34,14 +36,12 @@ import org.nypl.simplified.app.reader.ReaderHTTPServerAAsync;
 import org.nypl.simplified.app.reader.ReaderHTTPServerType;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoader;
 import org.nypl.simplified.app.reader.ReaderReadiumEPUBLoaderType;
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStore;
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentialsStoreType;
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty;
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsJSON;
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsType;
 import org.nypl.simplified.books.accounts.AccountEvent;
-import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountProvider;
 import org.nypl.simplified.books.accounts.AccountProviderCollection;
 import org.nypl.simplified.books.accounts.AccountProvidersJSON;
@@ -138,7 +138,6 @@ public final class Simplified extends MultiDexApplication {
   private ListeningScheduledExecutorService exec_epub;
   private ListeningScheduledExecutorService exec_background;
   private ListeningScheduledExecutorService exec_profile_timer;
-  private ListeningScheduledExecutorService exec_reader_bookmarks;
   private ScreenSizeInformation screen;
   private File directory_base;
   private File directory_documents;
@@ -173,6 +172,7 @@ public final class Simplified extends MultiDexApplication {
   private OptionType<ThemeValue> branding_theme_override;
   private AccountBundledCredentialsType bundled_credentials;
   private AccountAuthenticationCredentialsStoreType account_credentials_store;
+  private AnalyticsType analytics;
 
   /**
    * A specification of whether or not an action bar is wanted in an activity.
@@ -360,6 +360,15 @@ public final class Simplified extends MultiDexApplication {
   public static ReaderHTTPServerType getReaderHTTPServer() {
     final Simplified i = Simplified.checkInitialized();
     return i.httpd;
+  }
+
+  /**
+   * @return The HTTP server for the reader
+   */
+
+  public static AnalyticsType getAnalytics() {
+    final Simplified i = Simplified.checkInitialized();
+    return i.analytics;
   }
 
   @NonNull
@@ -652,8 +661,6 @@ public final class Simplified extends MultiDexApplication {
       Simplified.createNamedThreadPool(4, "downloader", 19);
     this.exec_books =
       Simplified.createNamedThreadPool(1, "books", 19);
-    this.exec_reader_bookmarks =
-      Simplified.createNamedThreadPool(1, "reader-bookmarks", 19);
     this.exec_epub =
       Simplified.createNamedThreadPool(1, "epub", 19);
     this.exec_background =
@@ -894,6 +901,9 @@ public final class Simplified extends MultiDexApplication {
 
     LOG.debug("initializing HelpStack");
     this.helpstack = Helpstack.get(this, asset_manager);
+
+    LOG.debug("initializing analytics");
+    this.analytics = Analytics.Companion.create(this);
 
     LOG.debug("finished booting");
     Simplified.INSTANCE = this;

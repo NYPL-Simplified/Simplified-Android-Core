@@ -40,7 +40,7 @@ import org.nypl.audiobook.android.views.PlayerTOCFragmentParameters
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.Simplified
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
-import org.nypl.simplified.app.utilities.NamedThreadPools
+import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.app.utilities.UIThread
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.feeds.FeedEntry
@@ -170,7 +170,7 @@ class AudioBookPlayerActivity : AppCompatActivity(),
 
     this.downloadExecutor =
       MoreExecutors.listeningDecorator(
-        NamedThreadPools.namedThreadPool(1, "audiobook-player", 19))
+        org.nypl.simplified.threads.NamedThreadPools.namedThreadPool(1, "audiobook-player", 19))
 
     this.downloaderDir =
       File(this.filesDir, "audiobook-player-downloads")

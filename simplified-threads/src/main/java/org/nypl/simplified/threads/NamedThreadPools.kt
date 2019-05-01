@@ -1,4 +1,4 @@
-package org.nypl.simplified.app.utilities
+package org.nypl.simplified.threads
 
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

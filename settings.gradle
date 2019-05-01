@@ -3,6 +3,9 @@ rootProject.name = 'simplified'
 // FIXME: These should be re-enabled once they are working.
 // include ':simplified-app-openebooks'
 include ':simplified-accessibility'
+include ':simplified-analytics-api'
+include ':simplified-analytics-circulation'
+include ':simplified-analytics-lfa'
 include ':simplified-app-shared'
 include ':simplified-app-simplye'
 include ':simplified-app-vanilla'
@@ -13,7 +16,6 @@ include ':simplified-books-covers'
 include ':simplified-branding'
 include ':simplified-bugsnag'
 include ':simplified-cardcreator'
-include ':simplified-circ-analytics'
 include ':simplified-datepicker'
 include ':simplified-datepicker-demo'
 include ':simplified-downloader-core'
@@ -33,12 +35,16 @@ include ':simplified-tests'
 include ':simplified-tests-android'
 include ':simplified-tests-sandbox'
 include ':simplified-theme'
+include ':simplified-threads'
 include ':simplified-volley'
 
 // FIXME: These should be re-enabled once they are working
 // project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
 // project(':simplified-app-openebooks').projectDir = "$rootDir/simplified-app-openebooks" as File
 project(':simplified-accessibility').projectDir = "$rootDir/simplified-accessibility" as File
+project(':simplified-analytics-api').projectDir = "$rootDir/simplified-analytics-api" as File
+project(':simplified-analytics-circulation').projectDir = "$rootDir/simplified-analytics-circulation" as File
+project(':simplified-analytics-lfa').projectDir = "$rootDir/simplified-analytics-lfa" as File
 project(':simplified-app-shared').projectDir = "$rootDir/simplified-app-shared" as File
 project(':simplified-app-simplye').projectDir = "$rootDir/simplified-app-simplye" as File
 project(':simplified-app-vanilla').projectDir = "$rootDir/simplified-app-vanilla" as File
@@ -49,7 +55,6 @@ project(':simplified-books-covers').projectDir = "$rootDir/simplified-books-cove
 project(':simplified-bugsnag').projectDir = "$rootDir/simplified-bugsnag" as File
 project(':simplified-branding').projectDir = "$rootDir/simplified-branding" as File
 project(':simplified-cardcreator').projectDir = "$rootDir/simplified-cardcreator" as File
-project(':simplified-circ-analytics').projectDir = "$rootDir/simplified-circ-analytics" as File
 project(':simplified-datepicker').projectDir = "$rootDir/simplified-datepicker" as File
 project(':simplified-datepicker-demo').projectDir = "$rootDir/simplified-datepicker-demo" as File
 project(':simplified-downloader-core').projectDir = "$rootDir/simplified-downloader-core" as File
@@ -67,4 +72,5 @@ project(':simplified-tenprint').projectDir = "$rootDir/simplified-tenprint" as F
 project(':simplified-tests').projectDir = "$rootDir/simplified-tests" as File
 project(':simplified-tests-android').projectDir = "$rootDir/simplified-tests-android" as File
 project(':simplified-tests-sandbox').projectDir = "$rootDir/simplified-tests-sandbox" as File
+project(':simplified-threads').projectDir = "$rootDir/simplified-threads" as File
 project(':simplified-volley').projectDir = "$rootDir/simplified-volley" as File

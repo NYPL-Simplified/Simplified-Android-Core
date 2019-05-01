@@ -3,7 +3,6 @@ package org.nypl.simplified.app.catalog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.View.OnClickListener
-import com.io7m.jfunctional.Some
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnimplementedCodeException
 import org.nypl.simplified.app.Simplified
@@ -11,7 +10,6 @@ import org.nypl.simplified.app.player.AudioBookPlayerActivity
 import org.nypl.simplified.app.player.AudioBookPlayerParameters
 import org.nypl.simplified.app.reader.ReaderActivity
 import org.nypl.simplified.app.utilities.ErrorDialogUtilities
-import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.book_database.Book
 import org.nypl.simplified.books.book_database.BookFormat.BookFormatAudioBook
@@ -19,7 +17,6 @@ import org.nypl.simplified.books.book_database.BookFormat.BookFormatEPUB
 import org.nypl.simplified.books.book_database.BookFormat.BookFormatPDF
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.feeds.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.circanalytics.CirculationAnalytics
 import org.slf4j.LoggerFactory
 
 /**
@@ -37,11 +34,6 @@ class CatalogBookReadController(
   }
 
   override fun onClick(@Nullable v: View) {
-    val credentials = this.account.loginState().credentials
-    if (credentials != null) {
-      CirculationAnalytics.postEvent(credentials, this.activity, this.entry, "open_book")
-    }
-
     val database = this.account.bookDatabase()
     val entry = database.entry(this.id)
     val format = entry.book.findPreferredFormat()
