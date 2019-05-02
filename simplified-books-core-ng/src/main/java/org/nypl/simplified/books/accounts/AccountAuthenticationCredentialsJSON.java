@@ -14,8 +14,6 @@ import org.nypl.simplified.http.core.HTTPOAuthToken;
 import org.nypl.simplified.json.core.JSONParseException;
 import org.nypl.simplified.json.core.JSONParserUtilities;
 
-import java.io.IOException;
-
 /**
  * Functions for serializing/deserializing account credentials.
  */

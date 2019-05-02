@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.MoreExecutors
 import com.io7m.jfunctional.FunctionType
 import com.io7m.jfunctional.OptionType
 import org.nypl.audiobook.android.tests.sandbox.R
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.app.BundledContentResolver
 import org.nypl.simplified.app.login.LoginDialog
 import org.nypl.simplified.app.login.LoginDialogListenerType
@@ -30,7 +31,6 @@ import org.nypl.simplified.books.accounts.AccountProviderCollection
 import org.nypl.simplified.books.accounts.AccountProvidersJSON
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.accounts.AccountsDatabases
-import org.nypl.simplified.books.analytics.AnalyticsLogger
 import org.nypl.simplified.books.book_database.BookFormats
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
 
   private lateinit var profiles: Controller
   private lateinit var timerExecutor: ListeningExecutorService
-  private lateinit var analyticsLogger: AnalyticsLogger
+  private lateinit var analyticsLogger: AnalyticsType
   private lateinit var accountCredentials: AccountAuthenticationCredentialsStoreType
   private lateinit var accountBundledCredentials: AccountBundledCredentialsType
   private lateinit var accountProviders: AccountProviderCollection
@@ -162,7 +162,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         File(this.filesDir, "profiles"))
 
     this.analyticsLogger =
-      AnalyticsLogger.create(File(this.filesDir, "analytics"))
+      MockAnalytics()
 
     this.profiles =
       Controller.create(
@@ -175,7 +175,7 @@ class LoginActivity : AppCompatActivity(), LoginDialogListenerType {
         feedLoader = this.feedLoader,
         downloader = this.downloader,
         profiles = this.profilesDatabase,
-        analyticsLogger = this.analyticsLogger,
+        analytics = this.analyticsLogger,
         bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent,
         accountProviders = FunctionType { this.getAccountProviders() },

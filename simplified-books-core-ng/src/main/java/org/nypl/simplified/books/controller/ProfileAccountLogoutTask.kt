@@ -22,10 +22,10 @@ internal class ProfileAccountLogoutTask(
     LoggerFactory.getLogger(ProfileAccountLogoutTask::class.java)
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}][{}] ${message}", this.profile.id().id(), this.account.id(), *arguments)
+    this.logger.debug("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
 
   private fun error(message: String, vararg arguments: Any?) =
-    this.logger.error("[{}][{}] ${message}", this.profile.id().id(), this.account.id(), *arguments)
+    this.logger.error("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
 
   override fun call() {
     this.account.setLoginState(AccountLoggingOut)

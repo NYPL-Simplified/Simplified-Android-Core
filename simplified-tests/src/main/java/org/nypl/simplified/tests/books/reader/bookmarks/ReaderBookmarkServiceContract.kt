@@ -173,7 +173,7 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(profile.accounts())
       .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
-      .thenReturn(ProfileID.create(23))
+      .thenReturn(ProfileID.generate())
 
     val profiles =
       Mockito.mock(ProfilesControllerType::class.java)
@@ -343,7 +343,7 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(profile.accounts())
       .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
-      .thenReturn(ProfileID.create(23))
+      .thenReturn(ProfileID.generate())
     Mockito.`when`(profile.account(fakeAccountID))
       .thenReturn(account)
 
@@ -538,7 +538,7 @@ abstract class ReaderBookmarkServiceContract {
     Mockito.`when`(profile.accounts())
       .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
     Mockito.`when`(profile.id())
-      .thenReturn(ProfileID.create(23))
+      .thenReturn(ProfileID.generate())
     Mockito.`when`(profile.account(fakeAccountID))
       .thenReturn(account)
 

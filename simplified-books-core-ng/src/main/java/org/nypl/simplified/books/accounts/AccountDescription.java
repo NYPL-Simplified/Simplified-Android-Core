@@ -1,8 +1,6 @@
 package org.nypl.simplified.books.accounts;
 
 import com.google.auto.value.AutoValue;
-import com.io7m.jfunctional.Option;
-import com.io7m.jfunctional.OptionType;
 
 import java.net.URI;
 

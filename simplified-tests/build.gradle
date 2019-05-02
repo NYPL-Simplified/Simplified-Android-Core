@@ -18,6 +18,9 @@ repositories {
 }
 
 dependencies {
+  implementation project(':simplified-analytics-api')
+  implementation project(':simplified-analytics-lfa')
+  implementation project(':simplified-analytics-circulation')
   implementation project(':simplified-books-core')
   implementation project(':simplified-books-core-ng')
   implementation project(':simplified-downloader-core')

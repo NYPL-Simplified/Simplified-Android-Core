@@ -1,19 +1,14 @@
 package org.nypl.simplified.tests.http
 
 import com.io7m.jfunctional.OptionType
-import com.io7m.jnull.NullCheck
-
 import org.nypl.simplified.http.core.HTTPAuthType
 import org.nypl.simplified.http.core.HTTPResultType
 import org.nypl.simplified.http.core.HTTPType
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
 import java.io.InputStream
 import java.net.URI
 import java.util.ArrayList
 import java.util.HashMap
-import java.util.HashSet
 
 /**
  * A trivial implementation of the [HTTPType] that simply returns preconfigured responses
@@ -27,6 +22,11 @@ class MockingHTTP : HTTPType {
   init {
     this.responses = HashMap()
   }
+
+  fun responsesNow(): Map<URI, List<HTTPResultType<InputStream>>> =
+    synchronized(this.responses) {
+      this.responses.toMap()
+    }
 
   /**
    * Set that the next request made for `uri` will receive `result`.

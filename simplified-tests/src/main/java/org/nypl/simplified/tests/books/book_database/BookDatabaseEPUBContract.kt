@@ -8,11 +8,9 @@ import org.junit.Test
 import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.book_database.BookDatabase
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.book_database.BookIDs
 import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.books.reader.ReaderBookmark
-import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkKind.*
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.opds.core.OPDSAcquisition

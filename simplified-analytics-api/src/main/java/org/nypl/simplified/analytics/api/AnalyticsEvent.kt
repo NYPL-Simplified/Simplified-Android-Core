@@ -11,12 +11,6 @@ import java.util.UUID
 sealed class AnalyticsEvent {
 
   /**
-   * The UUID of the profile that triggered the event.
-   */
-
-  abstract val profileUUID: UUID
-
-  /**
    * The timestamp of the event.
    */
 
@@ -26,15 +20,53 @@ sealed class AnalyticsEvent {
    * A user logged in to their profile.
    */
 
+  data class ApplicationOpened(
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
+
+    /**
+     * The name of the application package.
+     */
+
+    val packageName: String,
+
+    /**
+     * The application version string.
+     */
+
+    val packageVersion: String,
+
+    /**
+     * The application version code.
+     */
+
+    val packageVersionCode: Int)
+    : AnalyticsEvent()
+
+  /**
+   * A user logged in to their profile.
+   */
+
   data class ProfileLoggedIn(
-    override val profileUUID: UUID,
-    override val timestamp: LocalDateTime,
+    val profileUUID: UUID,
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
 
     /**
      * The current display name of the profile.
      */
 
-    val displayName: String)
+    val displayName: String?,
+
+    /**
+     * The gender of the profile owner.
+     */
+
+    val gender: String?,
+
+    /**
+     * The birth date of the profile owner.
+     */
+
+    val birthDate: String?)
     : AnalyticsEvent()
 
   /**
@@ -42,8 +74,8 @@ sealed class AnalyticsEvent {
    */
 
   data class ProfileLoggedOut(
-    override val profileUUID: UUID,
-    override val timestamp: LocalDateTime,
+    val profileUUID: UUID,
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
 
     /**
      * The current display name of the profile.
@@ -57,8 +89,8 @@ sealed class AnalyticsEvent {
    */
 
   data class CatalogSearched(
-    override val profileUUID: UUID,
-    override val timestamp: LocalDateTime,
+    val profileUUID: UUID,
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
 
     /**
      * The URI of the account provider (typically a UUID).
@@ -84,8 +116,14 @@ sealed class AnalyticsEvent {
    */
 
   data class BookOpened(
-    override val profileUUID: UUID,
-    override val timestamp: LocalDateTime,
+    val profileUUID: UUID,
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
+
+    /**
+     * The display name of the profile
+     */
+
+    val profileDisplayName: String,
 
     /**
      * The URI of the account provider (typically a UUID).
@@ -117,8 +155,8 @@ sealed class AnalyticsEvent {
    */
 
   data class BookPageTurned(
-    override val profileUUID: UUID,
-    override val timestamp: LocalDateTime,
+    val profileUUID: UUID,
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
 
     /**
      * The URI of the account provider (typically a UUID).
@@ -148,7 +186,19 @@ sealed class AnalyticsEvent {
      * The current page of the book.
      */
 
-    val bookPage: Int)
+    val bookPage: Int,
+
+    /**
+     * The number of pages in the book.
+     */
+
+    val bookPagesTotal: Int,
+
+    /**
+     * The title of the page.
+     */
+
+    val bookPageTitle: String)
     : AnalyticsEvent()
 
   /**
@@ -156,8 +206,8 @@ sealed class AnalyticsEvent {
    */
 
   data class BookClosed(
-    override val profileUUID: UUID,
-    override val timestamp: LocalDateTime,
+    val profileUUID: UUID,
+    override val timestamp: LocalDateTime = LocalDateTime.now(),
 
     /**
      * The URI of the account provider (typically a UUID).

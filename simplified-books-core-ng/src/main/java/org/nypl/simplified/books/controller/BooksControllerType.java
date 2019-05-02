@@ -6,11 +6,8 @@ import com.io7m.jfunctional.Unit;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.book_database.BookID;
 import org.nypl.simplified.books.feeds.FeedEntry;
-import org.nypl.simplified.books.reader.ReaderBookmark;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
-
-import java.util.List;
 
 /**
  * The books controller.

@@ -1,7 +1,5 @@
 package org.nypl.simplified.books.profiles;
 
-import com.io7m.jnull.NullCheck;
-
 import org.nypl.simplified.books.accounts.AccountID;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException;

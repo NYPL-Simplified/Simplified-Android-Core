@@ -138,7 +138,7 @@ class ReaderBookmarkService private constructor(
     : ReaderBookmarkControllerOp<Unit>(logger) {
 
     override fun runActual() {
-      this.logger.debug("[{}]: syncing all accounts", this.profile.id().id())
+      this.logger.debug("[{}]: syncing all accounts", this.profile.id().uuid)
 
       return this.getPossiblySyncableAccounts(this.profile)
         .forEach(this::checkSyncingIsEnabledForEntry)
@@ -161,7 +161,7 @@ class ReaderBookmarkService private constructor(
 
     private fun getPossiblySyncableAccounts(
       profile: ProfileReadableType): Map<AccountID, SyncableAccount?> {
-      this.logger.debug("[{}]: querying accounts for syncing", profile.id().id())
+      this.logger.debug("[{}]: querying accounts for syncing", profile.id().uuid)
       return profile.accounts().mapValues { entry -> accountSupportsSyncing(entry.value) }
     }
   }
@@ -181,7 +181,7 @@ class ReaderBookmarkService private constructor(
     override fun runActual() {
       this.logger.debug(
         "[{}]: checking sync status for account {}",
-        this.profile.id().id(),
+        this.profile.id().uuid,
         this.syncableAccount.account.id())
 
       val syncable =
@@ -199,19 +199,19 @@ class ReaderBookmarkService private constructor(
       return try {
         this.logger.debug(
           "[{}]: checking account {} has syncing enabled",
-          profile.id().id(),
+          profile.id().uuid,
           account.account.id())
 
         if (this.httpCalls.syncingIsEnabled(account.settingsURI, account.credentials)) {
           this.logger.debug(
             "[{}]: account {} has syncing enabled",
-            profile.id().id(),
+            profile.id().uuid,
             account.account.id())
           account
         } else {
           this.logger.debug(
             "[{}]: account {} has does not have syncing enabled",
-            profile.id().id(),
+            profile.id().uuid,
             account.account.id())
           null
         }
@@ -238,7 +238,7 @@ class ReaderBookmarkService private constructor(
 
     override fun runActual() {
       this.logger.debug("[{}]: syncing account {}",
-        profile.id().id(),
+        profile.id().uuid,
         accountID)
 
       val syncable =
@@ -258,13 +258,13 @@ class ReaderBookmarkService private constructor(
             .filterNotNull()
         } catch (e: Exception) {
           this.logger.error("[{}]: could not receive bookmarks for account {}: ",
-            this.profile.id().id(),
+            this.profile.id().uuid,
             syncable.account.id(),
             e)
           listOf()
         }
 
-      this.logger.debug("[{}]: received {} bookmarks", profile.id().id(), bookmarks.size)
+      this.logger.debug("[{}]: received {} bookmarks", profile.id().uuid, bookmarks.size)
       for (bookmark in bookmarks) {
         this.evaluatePolicyInput(BookmarkReceived(syncable.account.id(), bookmark))
       }
@@ -289,13 +289,13 @@ class ReaderBookmarkService private constructor(
       try {
         this.logger.debug(
           "[{}]: remote deleting bookmark {}",
-          this.profile.id().id(),
+          this.profile.id().uuid,
           this.bookmark.bookmarkId.value)
 
         if (this.bookmark.uri == null) {
           this.logger.debug(
             "[{}]: cannot remotely delete bookmark {} because it has no URI",
-            this.profile.id().id(),
+            this.profile.id().uuid,
             this.bookmark.bookmarkId.value)
           return
         }
@@ -304,7 +304,7 @@ class ReaderBookmarkService private constructor(
         if (syncInfo == null) {
           this.logger.debug(
             "[{}]: cannot remotely delete bookmark {} because the account is not syncable",
-            this.profile.id().id(),
+            this.profile.id().uuid,
             this.bookmark.bookmarkId.value)
           return
         }
@@ -336,14 +336,14 @@ class ReaderBookmarkService private constructor(
     override fun runActual() {
       try {
         this.logger.debug("[{}]: remote sending bookmark {}",
-          this.profile.id().id(),
+          this.profile.id().uuid,
           this.bookmark.bookmarkId.value)
 
         val syncInfo = accountSupportsSyncing(this.profile.account(this.accountID))
         if (syncInfo == null) {
           this.logger.debug(
             "[{}]: cannot remotely send bookmark {} because the account is not syncable",
-            this.profile.id().id(),
+            this.profile.id().uuid,
             this.bookmark.bookmarkId.value)
           return
         }
@@ -376,7 +376,7 @@ class ReaderBookmarkService private constructor(
       try {
         this.logger.debug(
           "[{}]: locally saving bookmark {}",
-          this.profile.id().id(),
+          this.profile.id().uuid,
           this.bookmark.bookmarkId.value)
 
         val account = this.profile.account(this.accountID)
@@ -393,7 +393,7 @@ class ReaderBookmarkService private constructor(
 
           this.bookmarkEventsOut.send(ReaderBookmarkSaved(this.accountID, this.bookmark))
         } else {
-          this.logger.debug("[{}]: unable to save bookmark; no format handle", this.profile.id().id())
+          this.logger.debug("[{}]: unable to save bookmark; no format handle", this.profile.id().uuid)
         }
       } catch (e: Exception) {
         this.logger.error("error saving bookmark locally: ", e)
@@ -446,7 +446,7 @@ class ReaderBookmarkService private constructor(
 
     override fun runActual(): ReaderBookmarks {
       try {
-        this.logger.debug("[{}]: loading bookmarks", this.profile.id().id())
+        this.logger.debug("[{}]: loading bookmarks", this.profile.id().uuid)
 
         val account = this.profile.account(this.accountID)
         val books = account.bookDatabase()
@@ -461,7 +461,7 @@ class ReaderBookmarkService private constructor(
         this.logger.error("error saving bookmark locally: ", e)
       }
 
-      this.logger.debug("[{}]: returning empty bookmarks", this.profile.id().id())
+      this.logger.debug("[{}]: returning empty bookmarks", this.profile.id().uuid)
       return ReaderBookmarks(null, listOf())
     }
   }
@@ -473,7 +473,7 @@ class ReaderBookmarkService private constructor(
     val credentials: AccountAuthenticationCredentials)
 
   private fun reconfigureForProfile(profile: ProfileReadableType) {
-    this.logger.debug("[{}]: reconfiguring bookmark controller for profile", profile.id().id())
+    this.logger.debug("[{}]: reconfiguring bookmark controller for profile", profile.id().uuid)
     this.policyState = setupPolicyForProfile(this.logger, profile)
     this.executor.submit(OpCheckSyncStatusForProfile(
       logger = this.logger,
@@ -486,7 +486,7 @@ class ReaderBookmarkService private constructor(
     if (event is ProfileSelected) {
       try {
         val currentProfile = this.profilesController.profileCurrent()
-        this.logger.debug("[{}]: a new profile was selected", currentProfile.id().id())
+        this.logger.debug("[{}]: a new profile was selected", currentProfile.id().uuid)
         this.executor.execute { this.reconfigureForProfile(currentProfile) }
       } catch (e: ProfileNoneCurrentException) {
         this.logger.error("onProfileEvent: no profile is current")
@@ -511,7 +511,7 @@ class ReaderBookmarkService private constructor(
   private fun onEventAccountUpdated(
     profile: ProfileReadableType,
     event: AccountEventUpdated) {
-    this.logger.debug("[{}]: account updated", profile.id().id())
+    this.logger.debug("[{}]: account updated", profile.id().uuid)
 
     val account =
       profile.account(event.accountID)
@@ -535,7 +535,7 @@ class ReaderBookmarkService private constructor(
     profile: ProfileReadableType,
     event: AccountDeletionSucceeded) {
     checkServiceThread()
-    this.logger.debug("[{}]: account deleted", profile.id().id())
+    this.logger.debug("[{}]: account deleted", profile.id().uuid)
     this.evaluatePolicyInput(profile, AccountDeleted(event.id()))
   }
 
@@ -543,7 +543,7 @@ class ReaderBookmarkService private constructor(
     profile: ProfileReadableType,
     event: AccountCreationSucceeded) {
     checkServiceThread()
-    this.logger.debug("[{}]: account created", profile.id().id())
+    this.logger.debug("[{}]: account created", profile.id().uuid)
 
     val account =
       profile.account(event.id())
@@ -577,7 +577,7 @@ class ReaderBookmarkService private constructor(
     output: ReaderBookmarkPolicyOutput) {
     checkServiceThread()
 
-    this.logger.debug("[{}]: evaluatePolicyOutput: {}", profile.id().id(), output)
+    this.logger.debug("[{}]: evaluatePolicyOutput: {}", profile.id().uuid, output)
 
     return when (output) {
       is Command.LocallySaveBookmark ->
@@ -684,7 +684,7 @@ class ReaderBookmarkService private constructor(
     private fun setupPolicyForProfile(
       logger: Logger,
       profile: ProfileReadableType): ReaderBookmarkPolicyState {
-      logger.debug("[{}]: configuring bookmark policy state", profile.id().id())
+      logger.debug("[{}]: configuring bookmark policy state", profile.id().uuid)
       return ReaderBookmarkPolicyState.create(
         initialAccounts = this.accountStatesForProfile(profile),
         locallySaved = this.bookmarksForProfile(logger, profile))
@@ -713,7 +713,7 @@ class ReaderBookmarkService private constructor(
       for (account in accounts) {
         books.put(account.id(), this.bookmarksForAccount(account))
       }
-      logger.debug("[{}]: collected {} bookmarks for profile", profile.id().id(), books.size)
+      logger.debug("[{}]: collected {} bookmarks for profile", profile.id().uuid, books.size)
       return books
     }
 

@@ -1,12 +1,12 @@
 package org.nypl.simplified.analytics.circulation
 
-import android.content.Context
+import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsSystem
 import java.util.concurrent.ExecutorService
 
 class CirculationAnalyticsSystem(
-  private val context: Context,
+  private val configuration: AnalyticsConfiguration,
   private val executor: ExecutorService) : AnalyticsSystem {
 
   override fun onAnalyticsEvent(event: AnalyticsEvent): Unit =
@@ -30,6 +30,9 @@ class CirculationAnalyticsSystem(
 
       }
       is AnalyticsEvent.BookClosed -> {
+
+      }
+      is AnalyticsEvent.ApplicationOpened -> {
 
       }
     }

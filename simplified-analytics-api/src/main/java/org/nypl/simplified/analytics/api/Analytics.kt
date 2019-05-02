@@ -1,6 +1,5 @@
 package org.nypl.simplified.analytics.api
 
-import android.content.Context
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
@@ -13,6 +12,10 @@ class Analytics private constructor(
   private val logger: Logger,
   private val consumers: List<AnalyticsSystem>) : AnalyticsType {
 
+  init {
+    this.logger.debug("initialized {} analytics systems", this.consumers.size)
+  }
+
   companion object {
 
     private val LOG = LoggerFactory.getLogger(Analytics::class.java)
@@ -21,11 +24,11 @@ class Analytics private constructor(
      * Create a new analytics API, loading all available systems from [ServiceLoader].
      */
 
-    fun create(context: Context): AnalyticsType {
+    fun create(configuration: AnalyticsConfiguration): AnalyticsType {
       return Analytics(LOG,
         ServiceLoader.load(AnalyticsSystemProvider::class.java)
           .toList()
-          .map { provider -> provider.create(context) }
+          .map { provider -> provider.create(configuration) }
           .map { system ->
             LOG.debug("created analytics system: ${system::class.java.canonicalName}")
             system

@@ -5,7 +5,6 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 import org.nypl.simplified.books.book_database.BookID;
-import org.nypl.simplified.books.logging.LogUtilities;
 import org.nypl.simplified.observable.Observable;
 import org.nypl.simplified.observable.ObservableReadableType;
 import org.nypl.simplified.observable.ObservableType;

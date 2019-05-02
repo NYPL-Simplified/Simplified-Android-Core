@@ -3,7 +3,6 @@ package org.nypl.simplified.books.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.SettableFuture
-import com.io7m.jfunctional.None
 import com.io7m.jfunctional.Option
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some

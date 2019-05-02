@@ -23,8 +23,11 @@ import com.io7m.jnull.NullCheck;
 import com.io7m.jnull.Nullable;
 import com.squareup.picasso.Picasso;
 
+import org.joda.time.LocalDateTime;
 import org.nypl.drm.core.AdobeAdeptExecutorType;
 import org.nypl.simplified.analytics.api.Analytics;
+import org.nypl.simplified.analytics.api.AnalyticsConfiguration;
+import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.analytics.api.AnalyticsType;
 import org.nypl.simplified.app.catalog.CatalogCoverBadgeImages;
 import org.nypl.simplified.app.helpstack.Helpstack;
@@ -47,7 +50,6 @@ import org.nypl.simplified.books.accounts.AccountProviderCollection;
 import org.nypl.simplified.books.accounts.AccountProvidersJSON;
 import org.nypl.simplified.books.accounts.AccountType;
 import org.nypl.simplified.books.accounts.AccountsDatabases;
-import org.nypl.simplified.books.analytics.AnalyticsLogger;
 import org.nypl.simplified.books.authentication_document.AuthenticationDocumentValuesType;
 import org.nypl.simplified.books.book_database.BookFormats;
 import org.nypl.simplified.books.book_registry.BookRegistry;
@@ -56,7 +58,6 @@ import org.nypl.simplified.books.book_registry.BookRegistryType;
 import org.nypl.simplified.books.bundled_content.BundledContentResolverType;
 import org.nypl.simplified.books.clock.Clock;
 import org.nypl.simplified.books.clock.ClockType;
-import org.nypl.simplified.books.controller.AnalyticsControllerType;
 import org.nypl.simplified.books.controller.BooksControllerType;
 import org.nypl.simplified.books.controller.Controller;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
@@ -143,8 +144,6 @@ public final class Simplified extends MultiDexApplication {
   private File directory_documents;
   private File directory_downloads;
   private File directory_profiles;
-  private File directory_analytics;
-  private AnalyticsLogger analytics_logger;
   private OptionType<AdobeAdeptExecutorType> adobe_drm;
   private BookCoverGenerator cover_generator;
   private HTTPType http;
@@ -277,15 +276,6 @@ public final class Simplified extends MultiDexApplication {
    */
 
   public static ProfilesControllerType getProfilesController() {
-    final Simplified i = Simplified.checkInitialized();
-    return i.book_controller;
-  }
-
-  /**
-   * @return The analytics controller
-   */
-
-  public static AnalyticsControllerType getAnalyticsController() {
     final Simplified i = Simplified.checkInitialized();
     return i.book_controller;
   }
@@ -683,13 +673,11 @@ public final class Simplified extends MultiDexApplication {
     this.directory_downloads = new File(this.directory_base, "downloads");
     this.directory_documents = new File(this.directory_base, "documents");
     this.directory_profiles = new File(this.directory_base, "profiles");
-    this.directory_analytics = new File(this.directory_base, "analytics");
 
     LOG.debug("directory_base:      {}", this.directory_base);
     LOG.debug("directory_downloads: {}", this.directory_downloads);
     LOG.debug("directory_documents: {}", this.directory_documents);
     LOG.debug("directory_profiles:  {}", this.directory_profiles);
-    LOG.debug("directory_analytics:  {}", this.directory_analytics);
 
     /*
      * Make sure the required directories exist. There is no sane way to
@@ -701,7 +689,6 @@ public final class Simplified extends MultiDexApplication {
       DirectoryUtilities.directoryCreate(this.directory_downloads);
       DirectoryUtilities.directoryCreate(this.directory_documents);
       DirectoryUtilities.directoryCreate(this.directory_profiles);
-      DirectoryUtilities.directoryCreate(this.directory_analytics);
     } catch (final IOException e) {
       LOG.error("could not create directories: {}", e.getMessage(), e);
       throw new IllegalStateException(e);
@@ -820,23 +807,6 @@ public final class Simplified extends MultiDexApplication {
       throw new IllegalStateException("Could not initialize profile database", e);
     }
 
-    try {
-      LOG.debug("initializing analytics log");
-      analytics_logger = AnalyticsLogger.create(this.directory_analytics);
-    } catch (Exception e) {
-      LOG.debug("Ignoring exception: AnalyticsLogger.create raised: ", e);
-    }
-
-    try {
-      final PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-      analytics_logger.logToAnalytics("app_open,"
-        + packageInfo.packageName + ","
-        + packageInfo.versionName + ","
-        + Integer.toString(packageInfo.versionCode));
-    } catch (PackageManager.NameNotFoundException e) {
-      LOG.warn("Could not get package info for analytics");
-    }
-
     LOG.debug("initializing bundled content");
     this.bundled_content_resolver = BundledContentResolver.create(this.getAssets());
 
@@ -853,6 +823,9 @@ public final class Simplified extends MultiDexApplication {
         this.book_registry,
         this.bundled_content_resolver);
 
+    LOG.debug("initializing analytics");
+    this.analytics = Analytics.Companion.create(new AnalyticsConfiguration(this, this.http));
+
     LOG.debug("initializing book controller");
     this.book_controller =
       Controller.Companion.create(
@@ -865,7 +838,7 @@ public final class Simplified extends MultiDexApplication {
         this.feed_loader,
         this.downloader,
         this.profiles,
-        this.analytics_logger,
+        this.analytics,
         this.book_registry,
         this.bundled_content_resolver,
         ignored -> this.account_providers,
@@ -902,8 +875,20 @@ public final class Simplified extends MultiDexApplication {
     LOG.debug("initializing HelpStack");
     this.helpstack = Helpstack.get(this, asset_manager);
 
-    LOG.debug("initializing analytics");
-    this.analytics = Analytics.Companion.create(this);
+    try {
+      final PackageInfo packageInfo =
+        getPackageManager().getPackageInfo(getPackageName(), 0);
+
+      this.analytics.publishEvent(
+        new AnalyticsEvent.ApplicationOpened(
+          LocalDateTime.now(),
+          packageInfo.packageName,
+          packageInfo.versionName,
+          packageInfo.versionCode
+        ));
+    } catch (PackageManager.NameNotFoundException e) {
+      LOG.debug("could not get package info for analytics: ", e);
+    }
 
     LOG.debug("finished booting");
     Simplified.INSTANCE = this;

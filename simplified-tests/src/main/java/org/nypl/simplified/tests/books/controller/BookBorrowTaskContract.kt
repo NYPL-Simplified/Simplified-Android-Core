@@ -26,14 +26,12 @@ import org.nypl.simplified.books.book_database.BookFormats
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusDownloadFailed
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled_content.BundledContentResolverType
 import org.nypl.simplified.books.controller.BookBorrowTask
 import org.nypl.simplified.books.exceptions.BookBorrowExceptionBadBorrowFeed
 import org.nypl.simplified.books.exceptions.BookBorrowExceptionNoCredentials
-import org.nypl.simplified.books.exceptions.BookBorrowExceptionNoUsableAcquisition
 import org.nypl.simplified.books.exceptions.BookUnexpectedTypeException
 import org.nypl.simplified.books.feeds.FeedHTTPTransport
 import org.nypl.simplified.books.feeds.FeedHTTPTransportException

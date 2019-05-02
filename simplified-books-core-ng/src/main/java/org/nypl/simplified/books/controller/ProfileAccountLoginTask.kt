@@ -39,7 +39,7 @@ internal class ProfileAccountLoginTask(
     this.run()
 
   private fun debug(message: String, vararg arguments: Any?) =
-    this.logger.debug("[{}][{}] ${message}", this.profile.id().id(), this.account.id(), *arguments)
+    this.logger.debug("[{}][{}] ${message}", this.profile.id().uuid, this.account.id(), *arguments)
 
   private fun run() {
     this.account.setLoginState(AccountLoggingIn)

@@ -21,6 +21,9 @@ import com.io7m.jfunctional.Some;
 import com.io7m.jfunctional.Unit;
 import com.io7m.jnull.NullCheck;
 
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.nypl.simplified.analytics.api.AnalyticsEvent;
 import org.nypl.simplified.app.R;
 import org.nypl.simplified.app.Simplified;
 import org.nypl.simplified.app.SimplifiedActivity;
@@ -29,6 +32,7 @@ import org.nypl.simplified.app.utilities.ErrorDialogUtilities;
 import org.nypl.simplified.app.utilities.UIThread;
 import org.nypl.simplified.books.controller.ProfilesControllerType;
 import org.nypl.simplified.books.profiles.ProfileEvent;
+import org.nypl.simplified.books.profiles.ProfilePreferences;
 import org.nypl.simplified.books.profiles.ProfileReadableType;
 import org.nypl.simplified.observable.ObservableSubscriptionType;
 import org.slf4j.Logger;
@@ -98,21 +102,21 @@ public final class ProfileSelectionActivity extends SimplifiedActivity {
     LOG.debug("selected profile: {} ({})", profile.id(), profile.displayName());
     final ProfilesControllerType profiles = Simplified.getProfilesController();
 
-    final String gender = getWithDefault(profile.preferences().gender(), "");
-    final String birthday = getWithDefault(
-      profile.preferences().dateOfBirth().map((d) -> d.toString()),
-      "");
+    final ProfilePreferences preferences =
+      profile.preferences();
+    final String gender =
+      getWithDefault(preferences.gender(), null);
+    final String birthday =
+      getWithDefault(preferences.dateOfBirth().map(LocalDate::toString), null);
 
-    final String message = "profile_selected," + profile.id().id()
-      + "," + profile.displayName()
-      + "," + gender
-      + "," + birthday;
-    Simplified.getAnalyticsController().logToAnalytics(message);
-
-    if (Simplified.getNetworkConnectivity().isNetworkAvailable()) {
-      String deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-      Simplified.getAnalyticsController().attemptToPushAnalytics(deviceId);
-    }
+    Simplified.getAnalytics()
+      .publishEvent(new AnalyticsEvent.ProfileLoggedIn(
+        profile.id().getUuid(),
+        LocalDateTime.now(),
+        profile.displayName(),
+        gender,
+        birthday
+      ));
 
     FluentFuture.from(
       profiles.profileSelect(profile.id()))

@@ -4,7 +4,6 @@ import org.nypl.audiobook.android.api.PlayerPosition
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.books.reader.ReaderBookmark
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.File

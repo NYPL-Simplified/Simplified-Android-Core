@@ -1,6 +1,6 @@
 package org.nypl.simplified.analytics.circulation
 
-import android.content.Context
+import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsSystem
 import org.nypl.simplified.analytics.api.AnalyticsSystemProvider
 import org.nypl.simplified.threads.NamedThreadPools
@@ -14,7 +14,7 @@ class CirculationAnalyticsSystems : AnalyticsSystemProvider {
   private val executor =
     NamedThreadPools.namedThreadPool(1, "circulation-analytics", 19)
 
-  override fun create(context: Context): AnalyticsSystem =
-    CirculationAnalyticsSystem(context, this.executor)
+  override fun create(configuration: AnalyticsConfiguration): AnalyticsSystem =
+    CirculationAnalyticsSystem(configuration, this.executor)
 
 }

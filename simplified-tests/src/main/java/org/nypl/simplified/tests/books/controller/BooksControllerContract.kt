@@ -17,14 +17,13 @@ import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountBarcode
 import org.nypl.simplified.books.accounts.AccountBundledCredentialsEmpty
 import org.nypl.simplified.books.accounts.AccountEvent
-import org.nypl.simplified.books.accounts.AccountLoginState
-import org.nypl.simplified.books.accounts.AccountLoginState.*
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountLoggedIn
+import org.nypl.simplified.books.accounts.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.books.accounts.AccountPIN
 import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription
 import org.nypl.simplified.books.accounts.AccountProviderCollection
 import org.nypl.simplified.books.accounts.AccountsDatabases
-import org.nypl.simplified.books.analytics.AnalyticsLogger
 import org.nypl.simplified.books.book_database.BookEvent
 import org.nypl.simplified.books.book_database.BookFormats
 import org.nypl.simplified.books.book_database.BookID
@@ -58,6 +57,7 @@ import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.books.BooksContract
 import org.nypl.simplified.tests.books.MappedHTTP
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
@@ -182,10 +182,8 @@ abstract class BooksControllerContract {
         bookRegistry = books,
         bundledContent = bundledContent)
 
-    val analyticsDirectory =
-      File("/tmp/simplye-android-tests")
     val analyticsLogger =
-      AnalyticsLogger.create(analyticsDirectory)
+      MockAnalytics()
 
     return Controller.create(
       exec = exec,
@@ -196,7 +194,7 @@ abstract class BooksControllerContract {
       feedLoader = feedLoader,
       downloader = downloader,
       profiles = profiles,
-      analyticsLogger = analyticsLogger,
+      analytics = analyticsLogger,
       bookRegistry = books,
       bundledContent = bundledContent,
       accountProviders = accountProviders,

@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.SortedMap;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import javax.annotation.concurrent.GuardedBy;
@@ -53,7 +54,8 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProfilesDatabase.class);
 
-  private static final ProfileID ANONYMOUS_PROFILE_ID = ProfileID.create(0);
+  private static final ProfileID ANONYMOUS_PROFILE_ID =
+    new ProfileID(new UUID(0L, 0L));
 
   private final Context context;
   private final File directory;
@@ -309,6 +311,84 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     return database;
   }
 
+  private static ProfileID openOneProfileDirectory(
+    final List<Exception> errors,
+    final File directory,
+    final String profile_id_name) {
+
+    /*
+     * If the profile directory is not a directory, then give up.
+     */
+
+    final File profile_dir_old = new File(directory, profile_id_name);
+    if (!profile_dir_old.isDirectory()) {
+      errors.add(new IOException("Not a directory: " + profile_dir_old));
+      return null;
+    }
+
+    /*
+     * Try to parse the existing directory name as a UUID. If it cannot be parsed
+     * as a UUID, attempt to rename it to a new UUID value. The reason for this is because
+     * profile IDs used to be plain integers, and we have existing deployed clients that are
+     * still using those IDs.
+     */
+
+    UUID profileUUid;
+    try {
+      profileUUid = UUID.fromString(profile_id_name);
+      return new ProfileID(profileUUid);
+    } catch (Exception e) {
+      LOG.warn("could not parse {} as a UUID", profile_id_name);
+      return openOneProfileDirectoryDoMigration(directory, profile_dir_old, profile_id_name);
+    }
+  }
+
+  /**
+   * Migrate a non-UUID profile directory to a new UUID one.
+   */
+
+  @Nullable
+  private static ProfileID openOneProfileDirectoryDoMigration(
+    final File owner_directory,
+    final File existing_directory, 
+    final String profile_id_name) {
+
+    LOG.debug("attempting to migrate {} directory", existing_directory);
+
+    if (Objects.equals(profile_id_name, "0")) {
+      final File profile_dir_new = new File(owner_directory, ANONYMOUS_PROFILE_ID.toString());
+
+      try {
+        FileUtilities.fileRename(existing_directory, profile_dir_new);
+        LOG.debug("migrated {} to {}", existing_directory, profile_dir_new);
+        return ANONYMOUS_PROFILE_ID;
+      } catch (IOException ex) {
+        LOG.error("could not migrate directory {} -> {}", existing_directory, profile_dir_new);
+        return null;
+      }
+    }
+
+    for (int index = 0; index < 100; ++index) {
+      final UUID profileUUid = UUID.randomUUID();
+      final File profile_dir_new = new File(owner_directory, profileUUid.toString());
+      if (profile_dir_new.exists()) {
+        continue;
+      }
+
+      try {
+        FileUtilities.fileRename(existing_directory, profile_dir_new);
+        LOG.debug("migrated {} to {}", existing_directory, profile_dir_new);
+        return new ProfileID(profileUUid);
+      } catch (IOException ex) {
+        LOG.error("could not migrate directory {} -> {}", existing_directory, profile_dir_new);
+        return null;
+      }
+    }
+
+    LOG.error("could not migrate directory {} after multiple attempts, aborting!", existing_directory);
+    return null;
+  }
+
   private static @Nullable
   Profile openOneProfile(
     final Context context,
@@ -322,18 +402,15 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final List<Exception> errors,
     final String profile_id_name) {
 
-    final int id;
-    try {
-      id = Integer.parseInt(profile_id_name);
-    } catch (final NumberFormatException e) {
-      errors.add(new IOException("Could not parse directory name as profile ID", e));
+    final ProfileID profile_id = openOneProfileDirectory(errors, directory, profile_id_name);
+    if (profile_id == null) {
       return null;
     }
 
-    final File profile_dir = new File(directory, profile_id_name);
+    final File profile_dir = new File(directory, profile_id.getUuid().toString());
     final File profile_file = new File(profile_dir, "profile.json");
     if (!profile_file.isFile()) {
-      LOG.error("[{}]: {} is not a file", id, profile_file);
+      LOG.error("[{}]: {} is not a file", profile_id.getUuid(), profile_file);
       return null;
     }
 
@@ -345,8 +422,8 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       return null;
     }
 
-    final ProfileID profile_id = ProfileID.create(id);
-    final File profile_accounts_dir = new File(profile_dir, "accounts");
+    final File profile_accounts_dir =
+      new File(profile_dir, "accounts");
 
     try {
       final AccountsDatabaseType accounts =
@@ -420,12 +497,8 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
       throw new ProfileCreateDuplicateException("Display name is already used by an existing profile");
     }
 
-    final ProfileID next;
-    if (!this.profiles.isEmpty()) {
-      next = ProfileID.create(this.profiles.lastKey().id() + 1);
-    } else {
-      next = ProfileID.create(1);
-    }
+    final ProfileID next =
+      new ProfileID(UUID.randomUUID());
 
     Preconditions.checkArgument(
       !this.profiles.containsKey(next),
@@ -474,7 +547,7 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
 
     try {
       final File profile_dir =
-        new File(directory, Integer.toString(id.id()));
+        new File(directory, id.getUuid().toString());
       final File profile_accounts_dir =
         new File(profile_dir, "accounts");
 
@@ -521,21 +594,23 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
     final AccountBundledCredentialsType account_bundled_credentials,
     final AccountsDatabaseType accounts) throws AccountsDatabaseException {
 
-    LOG.debug("[{}]: creating automatic accounts", profile.id());
+    LOG.debug("[{}]: creating automatic accounts", profile.getUuid());
 
     for (final AccountProvider auto_provider : account_providers.providers().values()) {
       if (auto_provider.addAutomatically()) {
         final URI auto_provider_id = auto_provider.id();
         LOG.debug(
           "[{}]: account provider {} should be added automatically",
-          profile.id(),
+          profile.getUuid(),
           auto_provider_id);
 
         AccountType auto_account = accounts.accountsByProvider().get(auto_provider_id);
         if (auto_account != null) {
-          LOG.debug("[{}]: automatic account {} already exists", profile.id(), auto_provider_id);
+          LOG.debug("[{}]: automatic account {} already exists",
+            profile.getUuid(), auto_provider_id);
         } else {
-          LOG.debug("[{}]: adding automatic account {}", profile.id(), auto_provider_id);
+          LOG.debug("[{}]: adding automatic account {}",
+            profile.getUuid(), auto_provider_id);
           auto_account = accounts.createAccount(auto_provider);
         }
 
@@ -543,13 +618,13 @@ public final class ProfilesDatabase implements ProfilesDatabaseType {
           account_bundled_credentials.bundledCredentialsFor(auto_provider.id());
         if (credentials_opt.isSome()) {
           LOG.debug("[{}]: credentials for automatic account {} were provided",
-            profile.id(), auto_provider_id);
+            profile.getUuid(), auto_provider_id);
 
           auto_account.setLoginState(new AccountLoginState.AccountLoggedIn(
             ((Some<AccountAuthenticationCredentials>) credentials_opt).get()));
         } else {
           LOG.debug("[{}]: credentials for automatic account {} were not provided",
-            profile.id(), auto_provider_id);
+            profile.getUuid(), auto_provider_id);
         }
       }
     }

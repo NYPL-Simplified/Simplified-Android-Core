@@ -28,7 +28,6 @@ import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountProviderAuthenticationDescription
 import org.nypl.simplified.books.accounts.AccountProviderCollection
 import org.nypl.simplified.books.accounts.AccountsDatabases
-import org.nypl.simplified.books.analytics.AnalyticsLogger
 import org.nypl.simplified.books.book_database.BookFormats
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.book_registry.BookRegistry
@@ -67,6 +66,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MockAnalytics
 import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.http.MockingHTTP
 import java.io.ByteArrayInputStream
@@ -146,10 +146,8 @@ abstract class ProfilesControllerContract {
         books,
         bundledContent)
 
-    val analyticsDirectory =
-      File("/tmp/simplified-android-tests")
     val analyticsLogger =
-      AnalyticsLogger.create(analyticsDirectory)
+      MockAnalytics()
 
     return Controller.create(
       exec = taskExecutor,
@@ -161,7 +159,7 @@ abstract class ProfilesControllerContract {
       feedLoader = feedLoader,
       downloader = downloader,
       profiles = profiles,
-      analyticsLogger = analyticsLogger,
+      analytics = analyticsLogger,
       bookRegistry = books,
       bundledContent = bundledContent,
       accountProviders = accountProviders,

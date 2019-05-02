@@ -33,6 +33,8 @@ import com.io7m.jfunctional.Some
 import com.io7m.jfunctional.Unit
 import com.io7m.jnull.Nullable
 import com.io7m.junreachable.UnreachableCodeException
+import org.joda.time.LocalDateTime
+import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.app.NavigationDrawerActivity
 import org.nypl.simplified.app.R
 import org.nypl.simplified.app.ScreenSizeInformationType
@@ -1146,13 +1148,23 @@ abstract class CatalogFeedActivity : CatalogActivity(), LoginDialogListenerType 
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
-      val target = this.search.getQueryURIForTerms(query)
+      val profile =
+        Simplified.getProfilesController().profileCurrent()
+      val account =
+        profile.accountCurrent()
 
+      Simplified.getAnalytics()
+        .publishEvent(AnalyticsEvent.CatalogSearched(
+          profileUUID = profile.id().uuid,
+          timestamp = LocalDateTime.now(),
+          accountProvider = account.provider().id(),
+          accountUUID = account.id().uuid,
+          searchQuery = query))
+
+      val target = this.search.getQueryURIForTerms(query)
       val cfa = this@CatalogFeedActivity
       val us = cfa.newUpStack(this.args)
-
       val title = this.resources.getString(R.string.catalog_search) + ": " + query
-
       val newArgs = CatalogFeedArgumentsRemote(false, us, title, target, true)
 
       if ("Search" == this@CatalogFeedActivity.feed!!.feedTitle) {

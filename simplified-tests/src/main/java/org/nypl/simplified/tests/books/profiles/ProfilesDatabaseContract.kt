@@ -37,6 +37,7 @@ import java.io.File
 import java.io.IOException
 import java.net.URI
 import java.util.TreeMap
+import java.util.UUID
 
 abstract class ProfilesDatabaseContract {
 
@@ -106,6 +107,10 @@ abstract class ProfilesDatabaseContract {
       f_pro)
   }
 
+  /**
+   * A subdirectory that can't be parsed as a UUID will be migrated.
+   */
+
   @Test
   @Throws(Exception::class)
   fun testOpenExistingBadSubdirectory() {
@@ -116,9 +121,6 @@ abstract class ProfilesDatabaseContract {
     val f_bad = File(f_pro, "not-a-number")
     f_bad.mkdirs()
 
-    this.expected.expect(ProfileDatabaseException::class.java)
-    this.expected.expect(CausesContains(
-      IOException::class.java, "Could not parse directory name as profile ID"))
     ProfilesDatabase.openWithAnonymousProfileDisabled(
       this.context(),
       this.accountEvents,
@@ -443,7 +445,7 @@ abstract class ProfilesDatabaseContract {
 
     this.expected.expect(ProfileNonexistentException::class.java)
     this.expected.expectMessage(StringContains.containsString("Profile does not exist"))
-    db0.setProfileCurrent(ProfileID.create(23))
+    db0.setProfileCurrent(ProfileID(UUID.fromString("135dec78-b89b-4a6c-bf6a-294c1694d40b")))
   }
 
   @Test
@@ -486,7 +488,7 @@ abstract class ProfilesDatabaseContract {
       f_pro)
 
     this.expected.expect(ProfileAnonymousEnabledException::class.java)
-    db0.setProfileCurrent(ProfileID.create(23))
+    db0.setProfileCurrent(ProfileID.generate())
   }
 
   @Test

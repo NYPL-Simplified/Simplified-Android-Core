@@ -36,6 +36,8 @@ description = 'simplified-app-simplye'
 
 dependencies {
   implementation project(':simplified-app-shared')
+  implementation project(':simplified-analytics-circulation')
+
   implementation group: 'org.nypl.drm', name: 'nypl-drm-adobe-provider', version: '1.0.0'
   implementation group: 'org.nypl.drm', name: 'libnypl_adobe', version: '1.0.0'
   implementation group: 'org.nypl.drm', name: 'libnypl_adobe_filter', version: '1.0.0'

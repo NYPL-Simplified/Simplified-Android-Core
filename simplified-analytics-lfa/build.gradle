@@ -21,5 +21,9 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
   implementation project(":simplified-analytics-api")
+  implementation project(":simplified-files")
+  implementation project(":simplified-http-core")
   implementation project(":simplified-threads")
+
+  implementation 'org.slf4j:slf4j-api:1.7.25'
 }

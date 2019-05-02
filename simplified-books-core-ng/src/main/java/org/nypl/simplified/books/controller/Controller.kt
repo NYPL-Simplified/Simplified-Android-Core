@@ -16,6 +16,7 @@ import com.io7m.jnull.NullCheck
 import com.io7m.junreachable.UnimplementedCodeException
 import org.joda.time.LocalDate
 import org.nypl.drm.core.AdobeAdeptExecutorType
+import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountEvent
 import org.nypl.simplified.books.accounts.AccountEventCreation
@@ -25,7 +26,6 @@ import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountProviderCollection
 import org.nypl.simplified.books.accounts.AccountType
 import org.nypl.simplified.books.accounts.AccountsDatabaseNonexistentException
-import org.nypl.simplified.books.analytics.AnalyticsLogger
 import org.nypl.simplified.books.book_database.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -76,7 +76,6 @@ class Controller private constructor(
   private val readerBookmarkEvents: ObservableType<ReaderBookmarkEvent>,
   private val taskExecutor: ListeningExecutorService,
   private val profiles: ProfilesDatabaseType,
-  private val analyticsLogger: AnalyticsLogger?,
   private val bookRegistry: BookRegistryType,
   private val bundledContent: BundledContentResolverType,
   private val accountProviders: FunctionType<Unit, AccountProviderCollection>,
@@ -84,11 +83,11 @@ class Controller private constructor(
   private val feedParser: OPDSFeedParserType,
   private val feedLoader: FeedLoaderType,
   private val downloader: DownloaderType,
+  private val analytics: AnalyticsType,
   private val timerExecutor: ExecutorService,
   private val adobeDrm: AdobeAdeptExecutorType?)
   : BooksControllerType,
-  ProfilesControllerType,
-  AnalyticsControllerType {
+  ProfilesControllerType {
 
   private val profileEventSubscription: ObservableSubscriptionType<ProfileEvent>
   private val timer = ProfileIdleTimer.create(this.timerExecutor, this.profileEvents)
@@ -126,14 +125,6 @@ class Controller private constructor(
     } catch (e: ProfileNoneCurrentException) {
       throw IllegalStateException(e)
     }
-  }
-
-  override fun logToAnalytics(message: String) {
-    this.analyticsLogger?.logToAnalytics(message)
-  }
-
-  override fun attemptToPushAnalytics(deviceId: String) {
-    this.analyticsLogger?.attemptToPushAnalytics(deviceId)
   }
 
   override fun profiles(): SortedMap<ProfileID, ProfileReadableType> {
@@ -441,7 +432,7 @@ class Controller private constructor(
       feedLoader: FeedLoaderType,
       downloader: DownloaderType,
       profiles: ProfilesDatabaseType,
-      analyticsLogger: AnalyticsLogger,
+      analytics: AnalyticsType,
       bookRegistry: BookRegistryType,
       bundledContent: BundledContentResolverType,
       accountProviders: FunctionType<Unit, AccountProviderCollection>,
@@ -454,7 +445,7 @@ class Controller private constructor(
         profileEvents = profileEvents,
         readerBookmarkEvents = readerBookmarkEvents,
         profiles = profiles,
-        analyticsLogger = analyticsLogger,
+        analytics = analytics,
         bookRegistry = bookRegistry,
         bundledContent = bundledContent,
         accountProviders = accountProviders,
