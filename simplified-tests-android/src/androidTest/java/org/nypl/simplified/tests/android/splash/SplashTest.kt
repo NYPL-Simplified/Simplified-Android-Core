@@ -114,7 +114,7 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
       .thenReturn(ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())
@@ -155,7 +155,7 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
       .thenReturn(ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())
@@ -193,7 +193,7 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
       .thenReturn(ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())
@@ -226,7 +226,7 @@ class SplashTest {
       Mockito.mock(ProfilesControllerType::class.java)
 
     Mockito.`when`(account.id())
-      .thenReturn(AccountID.create(23))
+      .thenReturn(AccountID.generate())
     Mockito.`when`(profiles.profileAnonymousEnabled())
       .thenReturn(ANONYMOUS_PROFILE_ENABLED)
     Mockito.`when`(profiles.profileAccountCurrent())

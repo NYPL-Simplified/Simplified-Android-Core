@@ -1,8 +1,8 @@
 package org.nypl.simplified.tests.analytics.lfa
 
 import android.test.mock.MockContext
+import com.io7m.jfunctional.Option
 import junit.framework.Assert
-import org.joda.time.LocalDateTime
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -12,6 +12,7 @@ import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.lfa.LFAAnalyticsConfiguration
 import org.nypl.simplified.analytics.lfa.LFAAnalyticsSystem
+import org.nypl.simplified.http.core.HTTPResultError
 import org.nypl.simplified.http.core.HTTPResultOK
 import org.nypl.simplified.tests.http.MockingHTTP
 import org.slf4j.LoggerFactory
@@ -59,12 +60,27 @@ abstract class LFAAnalyticsContract {
     file.delete()
     file.mkdirs()
 
-    val http =
-      MockingHTTP()
+    val targetURI =
+      URI.create("http://www.example.com/analytics")
+
+    val http = MockingHTTP()
+    val error =
+      HTTPResultError<InputStream>(
+        400,
+        "OUCH!",
+        0L,
+        mutableMapOf(),
+        0L,
+        ByteArrayInputStream(ByteArray(0)),
+        Option.none())
+
+    for (i in 1..5) {
+      http.addResponse(targetURI, error)
+    }
 
     val lfaConfiguration =
       LFAAnalyticsConfiguration(
-        targetURI = URI.create("http://www.example.com/analytics"),
+        targetURI = targetURI,
         token = "abcd",
         deviceID = "eaf06952-141c-4f16-8516-1a2c01503e87",
         logFileSizeLimit = 100)
@@ -79,7 +95,7 @@ abstract class LFAAnalyticsContract {
         baseDirectory = file,
         executor = this.executor)
 
-    for (i in 1 .. 10) {
+    for (i in 1..10) {
       system.onAnalyticsEvent(
         AnalyticsEvent.ApplicationOpened(
           packageName = "com.example",
@@ -88,7 +104,7 @@ abstract class LFAAnalyticsContract {
     }
 
     Thread.sleep(1000)
-    this.executor.submit(Callable {  }).get()
+    this.executor.submit(Callable { }).get()
 
     Assert.assertTrue(File(file, "outbox").list().size == 2)
   }
@@ -141,7 +157,7 @@ abstract class LFAAnalyticsContract {
 
     Assert.assertTrue(!http.responsesNow().isEmpty())
 
-    for (i in 1 .. 5) {
+    for (i in 1..5) {
       system.onAnalyticsEvent(
         AnalyticsEvent.ApplicationOpened(
           packageName = "com.example",
@@ -150,7 +166,7 @@ abstract class LFAAnalyticsContract {
     }
 
     Thread.sleep(2000)
-    this.executor.submit(Callable {  }).get()
+    this.executor.submit(Callable { }).get()
 
     Assert.assertTrue(File(file, "outbox").list().size == 0)
     Assert.assertTrue(http.responsesNow()[analyticsURI]!!.isEmpty())

@@ -3,13 +3,12 @@ package org.nypl.simplified.tests.android.splash
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.FluentFuture
 import com.io7m.jfunctional.OptionType
+import com.io7m.jfunctional.Unit
 import org.joda.time.LocalDate
 import org.nypl.simplified.books.accounts.AccountAuthenticationCredentials
 import org.nypl.simplified.books.accounts.AccountEvent
 import org.nypl.simplified.books.accounts.AccountEventCreation
 import org.nypl.simplified.books.accounts.AccountEventDeletion
-import org.nypl.simplified.books.accounts.AccountEventLogin
-import org.nypl.simplified.books.accounts.AccountEventLogout
 import org.nypl.simplified.books.accounts.AccountID
 import org.nypl.simplified.books.accounts.AccountProvider
 import org.nypl.simplified.books.accounts.AccountType
@@ -27,11 +26,14 @@ import org.nypl.simplified.books.profiles.ProfileReadableType
 import org.nypl.simplified.books.profiles.ProfilesDatabaseType
 import org.nypl.simplified.books.reader.ReaderBookLocation
 import org.nypl.simplified.observable.ObservableReadableType
-import com.io7m.jfunctional.Unit
 import java.net.URI
 import java.util.SortedMap
 
 class MockProfileController : ProfilesControllerType {
+
+  override fun profileAnyIsCurrent(): Boolean {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
 
   var anonymous = ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 
@@ -63,11 +65,7 @@ class MockProfileController : ProfilesControllerType {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun profileAccountCurrentLogin(credentials: AccountAuthenticationCredentials?): FluentFuture<AccountEventLogin> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun profileAccountLogin(account: AccountID?, credentials: AccountAuthenticationCredentials?): FluentFuture<AccountEventLogin> {
+  override fun profileAccountLogin(account: AccountID?, credentials: AccountAuthenticationCredentials?): FluentFuture<Unit> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
@@ -95,11 +93,7 @@ class MockProfileController : ProfilesControllerType {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
-  override fun profileAccountCurrentLogout(): FluentFuture<AccountEventLogout> {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun profileAccountLogout(account: AccountID?): FluentFuture<AccountEventLogout> {
+  override fun profileAccountLogout(account: AccountID?): FluentFuture<Unit> {
     TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
